@@ -1764,9 +1764,11 @@ describe("ModelsTreeVisibilityHandler", () => {
       categoryId: Id64String;
       subModelCategoryId?: Id64String;
       subModelElementId?: Id64String;
+      parentElementId?: Id64String;
     }
 
     const testCases: Array<{
+      only?: boolean;
       describeName: string;
       createIModel: (context: Mocha.Context) => Promise<{ imodel: IModelConnection } & IModelWithSubModelIds>;
       cases: Array<{
@@ -1777,19 +1779,21 @@ describe("ModelsTreeVisibilityHandler", () => {
       }>;
     }> = [
       {
-        describeName: "with modeled elements",
+        describeName: "with child modeled elements",
         createIModel: async function createIModel(context: Mocha.Context): Promise<{ imodel: IModelConnection } & IModelWithSubModelIds> {
           return buildIModel(context, async (builder, testSchema) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
             const partition = insertPhysicalPartition({ builder, codeValue: "model", parentId: rootSubject.id });
             const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
             const category = insertSpatialCategory({ builder, codeValue: "category" });
+            const parentElement = insertPhysicalElement({ modelId: model.id, categoryId: category.id, builder, userLabel: "parent element" });
             const modeledElement = insertPhysicalElement({
               builder,
               userLabel: `element`,
               modelId: model.id,
               categoryId: category.id,
               classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+              parentId: parentElement.id,
             });
             const subModel = insertPhysicalSubModel({ builder, modeledElementId: modeledElement.id });
             const subModelCategory = insertSpatialCategory({ builder, codeValue: "category2" });
@@ -1801,6 +1805,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               categoryId: category.id,
               subModelCategoryId: subModelCategory.id,
               subModelElementId: subModelElement.id,
+              parentElementId: parentElement.id,
             };
           });
         },
@@ -1830,6 +1835,27 @@ describe("ModelsTreeVisibilityHandler", () => {
             expectations: () => "all-visible",
           },
           {
+            name: "modeled element's children display is turned on when its parent element class grouping node display is turned on",
+            getTargetNode: (ids: IModelWithSubModelIds) =>
+              createClassGroupingHierarchyNode({
+                modelId: ids.modelId,
+                categoryId: ids.categoryId,
+                elements: [ids.parentElementId!],
+              }),
+            expectations: () => "all-visible",
+          },
+          {
+            name: "modeled element's children display is turned on when its parent element display is turned on",
+            getTargetNode: (ids: IModelWithSubModelIds) =>
+              createElementHierarchyNode({
+                modelId: ids.modelId,
+                categoryId: ids.categoryId,
+                elementId: ids.parentElementId,
+                hasChildren: true,
+              }),
+            expectations: () => "all-visible",
+          },
+          {
             name: "modeled element's children display is turned on when its class grouping node display is turned on",
             getTargetNode: (ids: IModelWithSubModelIds) =>
               createClassGroupingHierarchyNode({
@@ -1837,7 +1863,16 @@ describe("ModelsTreeVisibilityHandler", () => {
                 categoryId: ids.categoryId,
                 elements: [ids.modeledElementId],
               }),
-            expectations: () => "all-visible",
+            // prettier-ignore
+            expectations: (ids: IModelWithSubModelIds) => ({
+              [ids.subjectId]: "partial",
+                [ids.modelId]: "partial",
+                  [`${ids.modelId}-${ids.categoryId}`]: "partial",
+                    [ids.parentElementId!]: "partial",
+                      [ids.modeledElementId]: "visible",
+                        [`${ids.modeledElementId}-${ids.subModelCategoryId}`]: "visible",
+                          [ids.subModelElementId!]: "visible",
+            }),
           },
           {
             name: "modeled element's children display is turned on when its display is turned on",
@@ -1848,7 +1883,16 @@ describe("ModelsTreeVisibilityHandler", () => {
                 elementId: ids.modeledElementId,
                 hasChildren: true,
               }),
-            expectations: () => "all-visible",
+            // prettier-ignore
+            expectations: (ids: IModelWithSubModelIds) => ({
+              [ids.subjectId]: "partial",
+                [ids.modelId]: "partial",
+                  [`${ids.modelId}-${ids.categoryId}`]: "partial",
+                    [ids.parentElementId!]: "partial",
+                      [ids.modeledElementId]: "visible",
+                        [`${ids.modeledElementId}-${ids.subModelCategoryId}`]: "visible",
+                          [ids.subModelElementId!]: "visible",
+            }),
           },
           {
             name: "modeled element's children display is turned on when its sub-model display is turned on",
@@ -1862,13 +1906,14 @@ describe("ModelsTreeVisibilityHandler", () => {
               [ids.subjectId]: "partial",
                 [ids.modelId]: "partial",
                   [`${ids.modelId}-${ids.categoryId}`]: "partial",
-                    [ids.modeledElementId]: "partial",
-                      [`${ids.modeledElementId}-${ids.subModelCategoryId}`]: "visible",
-                        [ids.subModelElementId!]: "visible",
+                    [ids.parentElementId!]: "partial",
+                      [ids.modeledElementId]: "partial",
+                        [`${ids.modeledElementId}-${ids.subModelCategoryId}`]: "visible",
+                          [ids.subModelElementId!]: "visible",
             }),
           },
           {
-            name: "modeled element, its model and category have partial visibility when its sub-model element's category display is turned on",
+            name: "parent element, modeled element, its model and category have partial visibility when its sub-model element's category display is turned on",
             getTargetNode: (ids: IModelWithSubModelIds) =>
               createCategoryHierarchyNode({
                 modelId: ids.modeledElementId,
@@ -1880,13 +1925,14 @@ describe("ModelsTreeVisibilityHandler", () => {
               [ids.subjectId]: "partial",
                 [ids.modelId]: "partial",
                   [`${ids.modelId}-${ids.categoryId}`]: "partial",
-                    [ids.modeledElementId]: "partial",
-                      [`${ids.modeledElementId}-${ids.subModelCategoryId}`]: "visible",
-                        [ids.subModelElementId!]: "visible",
+                    [ids.parentElementId!]: "partial",
+                      [ids.modeledElementId]: "partial",
+                        [`${ids.modeledElementId}-${ids.subModelCategoryId}`]: "visible",
+                          [ids.subModelElementId!]: "visible",
             }),
           },
           {
-            name: "modeled element, its model and category have partial visibility when its sub-model element's display is turned on",
+            name: "parent element,modeled element, its model and category have partial visibility when its sub-model element's display is turned on",
             getTargetNode: (ids: IModelWithSubModelIds) =>
               createElementHierarchyNode({
                 modelId: ids.modeledElementId,
@@ -1898,9 +1944,10 @@ describe("ModelsTreeVisibilityHandler", () => {
               [ids.subjectId]: "partial",
                 [ids.modelId]: "partial",
                   [`${ids.modelId}-${ids.categoryId}`]: "partial",
-                    [ids.modeledElementId]: "partial",
-                      [`${ids.modeledElementId}-${ids.subModelCategoryId}`]: "visible",
-                        [ids.subModelElementId!]: "visible",
+                    [ids.parentElementId!]: "partial",
+                      [ids.modeledElementId]: "partial",
+                        [`${ids.modeledElementId}-${ids.subModelCategoryId}`]: "visible",
+                          [ids.subModelElementId!]: "visible",
             }),
           },
         ],
@@ -2055,8 +2102,8 @@ describe("ModelsTreeVisibilityHandler", () => {
       },
     ];
 
-    testCases.forEach(({ describeName, createIModel, cases }) => {
-      describe(describeName, () => {
+    testCases.forEach(({ describeName, createIModel, cases, ...describeProps }) => {
+      (describeProps.only ? describe.only : describe)(describeName, () => {
         let iModel: IModelConnection;
         let createdIds: IModelWithSubModelIds;
 
@@ -2070,8 +2117,8 @@ describe("ModelsTreeVisibilityHandler", () => {
           await iModel.close();
         });
 
-        cases.forEach(({ name, getTargetNode, expectations, only }) => {
-          (only ? it.only : it)(name, async function () {
+        cases.forEach(({ name, getTargetNode, expectations, ...itProps }) => {
+          (itProps.only ? it.only : it)(name, async function () {
             using visibilityTestData = createVisibilityTestData({ imodel: iModel });
             const { handler, provider, viewport } = visibilityTestData;
 

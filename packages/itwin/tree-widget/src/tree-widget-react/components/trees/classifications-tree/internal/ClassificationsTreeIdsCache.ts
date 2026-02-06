@@ -127,8 +127,8 @@ export class ClassificationsTreeIdsCache implements Disposable {
     return this.#elementModelCategoriesCache.getAllCategoriesOfElements();
   }
 
-  public hasSubModel(elementId: Id64String): Observable<boolean> {
-    return this.#modeledElementsCache.hasSubModel(elementId);
+  public getSubModelsUnderElement(elementId: Id64String): Observable<Id64Array> {
+    return this.#modeledElementsCache.getSubModelsUnderElement(elementId);
   }
 
   public getCategoryElementsCount(props: { modelId: Id64String; categoryId: Id64String }): Observable<number> {

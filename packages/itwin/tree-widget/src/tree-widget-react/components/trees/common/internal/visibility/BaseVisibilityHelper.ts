@@ -72,7 +72,7 @@ export interface BaseTreeVisibilityHandlerOverrides {
 
 /** @internal */
 export interface BaseIdsCache {
-  hasSubModel: (elementId: Id64String) => Observable<boolean>;
+  getSubModelsUnderElement: (elementId: Id64String) => Observable<Id64Array>;
   getElementsCount: (props: { modelId: Id64String; categoryId: Id64String }) => Observable<number>;
   getSubCategories: (props: { categoryId: Id64String }) => Observable<Id64Array>;
   getModels: (props: { categoryIds: Id64Arg }) => Observable<{ id: Id64String; models: Id64Arg | undefined }>;
@@ -414,18 +414,17 @@ export class BaseVisibilityHelper implements Disposable {
     const result = defer(() => {
       const { elementIds, modelId, categoryId, parentElementsIdsPath, childrenCount, categoryOfTopMostParentElement } = props;
 
-      // TODO: check child elements that are subModels https://github.com/iTwin/viewer-components-react/issues/1564
       if (!this.#props.viewport.viewsModel(modelId)) {
         return fromWithRelease({ source: elementIds, releaseOnCount: 100 }).pipe(
           mergeMap((elementId) =>
-            this.#props.baseIdsCache.hasSubModel(elementId).pipe(
-              mergeMap((isSubModel) => {
-                if (isSubModel) {
+            this.#props.baseIdsCache.getSubModelsUnderElement(elementId).pipe(
+              mergeMap((subModelsUnderElement) => {
+                if (subModelsUnderElement.length > 0) {
                   return this.getModelsVisibilityStatus({
-                    modelIds: elementId,
+                    modelIds: subModelsUnderElement,
                   }).pipe(
-                    map((subModelVisibilityStatus) =>
-                      subModelVisibilityStatus.state !== "hidden" ? createVisibilityStatus("partial") : createVisibilityStatus("hidden"),
+                    map((subModelsVisibilityStatus) =>
+                      subModelsVisibilityStatus.state !== "hidden" ? createVisibilityStatus("partial") : createVisibilityStatus("hidden"),
                     ),
                   );
                 }
@@ -438,7 +437,6 @@ export class BaseVisibilityHelper implements Disposable {
       }
 
       // TODO: check child element categories https://github.com/iTwin/viewer-components-react/issues/1563
-      // TODO: check child elements that are subModels https://github.com/iTwin/viewer-components-react/issues/1564
       return this.getVisibilityFromAlwaysAndNeverDrawnElements({
         elements: elementIds,
         defaultStatus: () => this.getVisibleModelCategoriesDirectVisibilityStatus({ categoryIds: categoryId, modelId }),
@@ -448,16 +446,19 @@ export class BaseVisibilityHelper implements Disposable {
         childrenCount,
       }).pipe(
         mergeMap((visibilityStatusAlwaysAndNeverDraw) => {
+          if (visibilityStatusAlwaysAndNeverDraw.state === "partial") {
+            return of(visibilityStatusAlwaysAndNeverDraw);
+          }
           return from(Id64.iterable(elementIds)).pipe(
             mergeMap((elementId) =>
-              this.#props.baseIdsCache.hasSubModel(elementId).pipe(
-                mergeMap((isSubModel) => {
-                  if (isSubModel) {
+              this.#props.baseIdsCache.getSubModelsUnderElement(elementId).pipe(
+                mergeMap((subModelsUnderElement) => {
+                  if (subModelsUnderElement.length > 0) {
                     return this.getModelsVisibilityStatus({
-                      modelIds: elementId,
+                      modelIds: subModelsUnderElement,
                     }).pipe(
-                      map((subModelVisibilityStatus) =>
-                        subModelVisibilityStatus.state !== visibilityStatusAlwaysAndNeverDraw.state
+                      map((subModelsVisibilityStatus) =>
+                        subModelsVisibilityStatus.state !== visibilityStatusAlwaysAndNeverDraw.state
                           ? createVisibilityStatus("partial")
                           : visibilityStatusAlwaysAndNeverDraw,
                       ),
@@ -776,7 +777,6 @@ export class BaseVisibilityHelper implements Disposable {
       const { modelId, categoryId, elementIds, on, children } = props;
       const viewport = this.#props.viewport;
       // TODO: determine which child elements to change based on their categories https://github.com/iTwin/viewer-components-react/issues/1561
-      // TODO: change child subModels https://github.com/iTwin/viewer-components-react/issues/1562
       return concat(
         // Change elements state
         defer(() => {
@@ -814,10 +814,10 @@ export class BaseVisibilityHelper implements Disposable {
         // Change visibility of elements that are models
         fromWithRelease({ source: elementIds, releaseOnCount: 100 }).pipe(
           mergeMap((elementId) =>
-            this.#props.baseIdsCache.hasSubModel(elementId).pipe(
-              mergeMap((isSubModel) => {
-                if (isSubModel) {
-                  return this.changeModelsVisibilityStatus({ modelIds: elementId, on });
+            this.#props.baseIdsCache.getSubModelsUnderElement(elementId).pipe(
+              mergeMap((subModelsUnderElement) => {
+                if (subModelsUnderElement.length > 0) {
+                  return this.changeModelsVisibilityStatus({ modelIds: subModelsUnderElement, on });
                 }
                 return EMPTY;
               }),

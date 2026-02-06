@@ -29,7 +29,11 @@ export class ModeledElementsCache {
   #modelClassName: string;
   // ElementId here is also a ModelId, since those elements are sub models.
   #modeledElementsInfo:
-    | Observable<{ modelWithCategoryModeledElements: Map<ModelId, Map<CategoryId, Set<ElementId>>>; allSubModels: Set<ElementId> }>
+    | Observable<{
+        modelWithCategoryModeledElements: Map<ModelId, Map<CategoryId, Set<ElementId>>>;
+        allSubModels: Set<ElementId>;
+        childSubModels: Map<ElementId, Set<ElementId>>;
+      }>
     | undefined;
 
   constructor(props: ModeledElementsCacheProps) {
@@ -44,15 +48,33 @@ export class ModeledElementsCache {
     modelId: Id64String;
     modeledElementId: Id64String;
     categoryId: Id64String;
+    parentElements: Id64Array;
   }> {
     return defer(() => {
       const query = `
         SELECT
-          pe.ECInstanceId modeledElementId,
-          pe.Category.Id categoryId,
-          pe.Model.Id modelId
+          me.ECInstanceId modeledElementId,
+          me.Category.Id categoryId,
+          me.Model.Id modelId,
+          IIF(me.Parent.Id IS NULL,
+            '',
+            (
+              WITH RECURSIVE ModeledElementParents(parentId, parentPath) AS (
+                SELECT p.Parent.Id, CAST(IdToHex(p.ECInstanceId) AS TEXT)
+                FROM ${this.#elementsClassName} p
+                WHERE p.ECInstanceId = me.Parent.Id
+                UNION ALL
+                SELECT pOfp.Parent.Id, CAST(IdToHex(pOfp.ECInstanceId) AS TEXT) || ';' || c.parentPath
+                FROM ${this.#elementsClassName} pOfp
+                JOIN ModeledElementParents c ON c.parentId = pOfp.ECInstanceId
+              )
+              SELECT parentPath
+              FROM ModeledElementParents
+              WHERE parentId IS NULL
+            )
+          ) parentElements
         FROM ${this.#modelClassName} m
-        JOIN ${this.#elementsClassName} pe ON pe.ECInstanceId = m.ModeledElement.Id
+        JOIN ${this.#elementsClassName} me ON me.ECInstanceId = m.ModeledElement.Id
         WHERE
           m.IsPrivate = false
           AND m.ECInstanceId IN (SELECT Model.Id FROM ${this.#elementsClassName})
@@ -64,7 +86,7 @@ export class ModeledElementsCache {
     }).pipe(
       catchBeSQLiteInterrupts,
       map((row) => {
-        return { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId };
+        return { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId, parentElements: row.parentElements.split(";") };
       }),
     );
   }
@@ -72,7 +94,7 @@ export class ModeledElementsCache {
   public getModeledElementsInfo() {
     this.#modeledElementsInfo ??= this.queryModeledElements().pipe(
       reduce(
-        (acc, { modelId, categoryId, modeledElementId }) => {
+        (acc, { modelId, categoryId, modeledElementId, parentElements }) => {
           let modelEntry = acc.modelWithCategoryModeledElements.get(modelId);
           if (!modelEntry) {
             modelEntry = new Map();
@@ -85,17 +107,41 @@ export class ModeledElementsCache {
             categoryEntry.add(modeledElementId);
           }
           acc.allSubModels.add(modeledElementId);
+          parentElements.forEach((parentElementId) => {
+            const entry = acc.childSubModels.get(parentElementId);
+            if (!entry) {
+              acc.childSubModels.set(parentElementId, new Set([modeledElementId]));
+            } else {
+              entry.add(modeledElementId);
+            }
+          });
           return acc;
         },
-        { modelWithCategoryModeledElements: new Map<ModelId, Map<CategoryId, Set<ElementId>>>(), allSubModels: new Set<ElementId>() },
+        {
+          modelWithCategoryModeledElements: new Map<ModelId, Map<CategoryId, Set<ElementId>>>(),
+          allSubModels: new Set<ElementId>(),
+          childSubModels: new Map<ElementId, Set<ElementId>>(),
+        },
       ),
       shareReplay(),
     );
     return this.#modeledElementsInfo;
   }
 
-  public hasSubModel(elementId: Id64String): Observable<boolean> {
-    return this.getModeledElementsInfo().pipe(map(({ allSubModels }) => allSubModels.has(elementId)));
+  public getSubModelsUnderElement(elementId: Id64String): Observable<Id64Array> {
+    return this.getModeledElementsInfo().pipe(
+      map(({ allSubModels, childSubModels }) => {
+        const subModels = new Array<ElementId>();
+        if (allSubModels.has(elementId)) {
+          subModels.push(elementId);
+        }
+        const elementEntry = childSubModels.get(elementId);
+        elementEntry?.forEach((childSubModelId) => {
+          subModels.push(childSubModelId);
+        });
+        return subModels;
+      }),
+    );
   }
 
   public getCategoriesModeledElements({ modelId, categoryIds }: { modelId: Id64String; categoryIds: Id64Arg }): Observable<Id64Array> {

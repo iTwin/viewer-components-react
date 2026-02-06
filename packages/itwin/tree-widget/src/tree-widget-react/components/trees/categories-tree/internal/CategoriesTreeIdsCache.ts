@@ -413,8 +413,8 @@ export class CategoriesTreeIdsCache implements Disposable {
     return this.#elementModelCategoriesCache.getCategoriesOfModelsTopMostElements(modelIds);
   }
 
-  public hasSubModel(elementId: Id64String): Observable<boolean> {
-    return this.#modeledElementsCache.hasSubModel(elementId);
+  public getSubModelsUnderElement(elementId: Id64String): Observable<Id64Array> {
+    return this.#modeledElementsCache.getSubModelsUnderElement(elementId);
   }
 
   public getAllContainedCategories({
