@@ -22,6 +22,7 @@ import {
 import { useGuid } from "../common/internal/useGuid.js";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAll, toggleModels } from "../common/Utils.js";
 
+import type { ReactElement } from "react";
 import type { Id64String } from "@itwin/core-bentley";
 import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -118,7 +119,7 @@ async function queryModelsForHeaderActions(iModel: IModelConnection) {
 }
 
 /** @public */
-export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => React.ReactElement | null;
+export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => ReactElement | null;
 
 /** @public */
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {

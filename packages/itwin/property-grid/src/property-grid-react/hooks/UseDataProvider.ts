@@ -113,7 +113,7 @@ class PerformanceTrackingProvider implements IPresentationPropertyDataProvider {
 
   /* c8 ignore next 4 */
   public async getFieldByPropertyRecord(propertyRecord: PropertyRecord) {
-    // eslint-disable-next-line deprecation/deprecation
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     return this.#wrappedProvider.getFieldByPropertyRecord(propertyRecord);
   }
 
@@ -150,7 +150,7 @@ class PerformanceTrackingProvider implements IPresentationPropertyDataProvider {
  * considered as non-disposable and nothing is done with it.
  * @internal
  */
-export function safeDispose(disposable: {} | { [Symbol.dispose]: () => void } | { dispose: () => void }) {
+export function safeDispose(disposable: object | { [Symbol.dispose]: () => void } | { dispose: () => void }) {
   if ("dispose" in disposable) {
     disposable.dispose();
     /* c8 ignore next 3 */

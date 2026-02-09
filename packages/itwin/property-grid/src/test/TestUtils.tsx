@@ -32,13 +32,13 @@ export function createPropertyRecord(value: PropertyValue, description: Partial<
 
 export function stubSelectionManager(presentationSingleton?: typeof Presentation) {
   const selectionManagerStub = {
-    // eslint-disable-next-line deprecation/deprecation
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     selectionChange: new SelectionChangeEvent(),
-    // eslint-disable-next-line deprecation/deprecation
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     getSelectionLevels: createFunctionStub<SelectionManager["getSelectionLevels"]>().returns([0]),
-    // eslint-disable-next-line deprecation/deprecation
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     getSelection: createFunctionStub<SelectionManager["getSelection"]>().returns(new KeySet()),
-    // eslint-disable-next-line deprecation/deprecation
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     replaceSelection: createFunctionStub<SelectionManager["replaceSelection"]>(),
   };
   sinon.stub(presentationSingleton ?? Presentation, "selection").get(() => selectionManagerStub);

@@ -118,7 +118,7 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
       />
       <Flex justifyContent="flex-end" gap="xs">
         <Button size="small" styleType="default" onClick={handleClear} disabled={!saveEnabled}>
-          {translate("QuantityFormat:labels.clear")}
+          {translate("QuantityFormat:labels.revert")}
         </Button>
         <Button size="small" styleType="high-visibility" onClick={handleSave} disabled={!saveEnabled}>
           {translate("QuantityFormat:labels.apply")}

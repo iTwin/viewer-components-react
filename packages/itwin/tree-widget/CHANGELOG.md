@@ -1,8 +1,34 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Thu, 20 Nov 2025 11:23:22 GMT and should not be manually modified. -->
+<!-- This log was last generated on Mon, 09 Feb 2026 12:17:01 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.17.6
+
+Mon, 09 Feb 2026 12:17:01 GMT
+
+### Patches
+
+- Bump dependencies ([#1583](https://github.com/iTwin/viewer-components-react/pull/1583))
+- Models tree: use cached category ids to query model children. ([#1585](https://github.com/iTwin/viewer-components-react/pull/1585))
+
+## 3.17.5
+
+Wed, 21 Jan 2026 12:50:36 GMT
+
+### Patches
+
+- Fix enabling category display in categories tree making other categories also visible, when their elements are under hidden model. ([#1556](https://github.com/iTwin/viewer-components-react/pull/1556))
+
+## 3.17.4
+
+Thu, 15 Jan 2026 14:30:28 GMT
+
+### Patches
+
+- Models tree: Improve performance of loading element nodes ([#1544](https://github.com/iTwin/viewer-components-react/pull/1544))
+- Models tree: Remove unnecessary checks when ModelsTreeVisibilityHandlerOverrides are provided. ([#1546](https://github.com/iTwin/viewer-components-react/pull/1546))
 
 ## 3.17.3
 

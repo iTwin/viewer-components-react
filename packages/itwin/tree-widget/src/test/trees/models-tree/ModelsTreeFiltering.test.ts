@@ -54,7 +54,7 @@ interface TreeSearchTestCaseDefinition<TIModelSetupResult extends {}> {
 
 namespace TreeSearchTestCaseDefinition {
   // only need this to get generic type inferred using setupIModel return type
-  export function create<TIModelSetupResult extends {}>(
+  export function create<TIModelSetupResult extends object>(
     name: string,
     setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1],
     getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchySearchPath[],
@@ -74,7 +74,7 @@ namespace TreeSearchTestCaseDefinition {
     };
   }
 
-  export const only: typeof create = function <TIModelSetupResult extends {}>(
+  export const only: typeof create = function <TIModelSetupResult extends object>(
     ...args: Parameters<typeof create<TIModelSetupResult>>
   ): TreeSearchTestCaseDefinition<TIModelSetupResult> {
     return {
@@ -91,6 +91,7 @@ describe("Models tree", () => {
         backendProps: {
           caching: {
             hierarchies: {
+              // eslint-disable-next-line @typescript-eslint/no-deprecated
               mode: HierarchyCacheMode.Memory,
             },
           },

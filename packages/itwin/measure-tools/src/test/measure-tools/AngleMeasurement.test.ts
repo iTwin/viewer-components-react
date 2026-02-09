@@ -99,7 +99,7 @@ describe("AngleMeasurement tests", () => {
 
       // Verify that the KoQ lookup was attempted
       assert.isTrue(getSpecsByNameSpy.mock.calls.length > 0, "getSpecsByName should have been called during construction");
-      assert.strictEqual(getSpecsByNameSpy.mock.calls[0][0], "AecUnits.ANGLE", "Should lookup the default KoQ string");
+      assert.strictEqual(getSpecsByNameSpy.mock.calls[0][0], "DefaultToolsUnits.ANGLE", "Should lookup the default KoQ string");
 
       // Verify that the fallback method was called
       assert.isTrue(findFormatterSpecSpy.mock.calls.length > 0, "findFormatterSpecByQuantityType should have been called as fallback");
@@ -108,7 +108,7 @@ describe("AngleMeasurement tests", () => {
       // Verify the measurement was created successfully
       assert.isDefined(measurement);
       assert.isDefined(measurement.angle);
-      assert.strictEqual(measurement.angleKoQ, "AecUnits.ANGLE");
+      assert.strictEqual(measurement.angleKoQ, "DefaultToolsUnits.ANGLE");
     } finally {
       // Restore original methods
       IModelApp.quantityFormatter.getSpecsByName = originalGetSpecsByName;

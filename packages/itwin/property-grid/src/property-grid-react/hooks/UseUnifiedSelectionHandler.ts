@@ -28,13 +28,13 @@ export function useSelectionHandler({ selectionStorage }: { selectionStorage?: S
         selectionChange.raiseEvent({ ...args, getSelection: () => selectionStorage.getSelection(args) });
       });
     }
-    // eslint-disable-next-line deprecation/deprecation
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     return Presentation.selection.selectionChange.addListener((args) => {
       selectionChange.raiseEvent({
         level: args.level,
         imodelKey: createIModelKey(args.imodel),
         source: args.source,
-        // eslint-disable-next-line deprecation/deprecation
+        // eslint-disable-next-line @typescript-eslint/no-deprecated
         getSelection: () => createSelectablesFromKeySet(Presentation.selection.getSelection(args.imodel, args.level)),
       });
     });
@@ -44,7 +44,7 @@ export function useSelectionHandler({ selectionStorage }: { selectionStorage?: S
     (args: { imodel: IModelConnection; level: number }): Selectables => {
       return selectionStorage
         ? selectionStorage.getSelection({ imodelKey: createIModelKey(args.imodel), level: args.level })
-        : // eslint-disable-next-line deprecation/deprecation
+        : // eslint-disable-next-line @typescript-eslint/no-deprecated
           createSelectablesFromKeySet(Presentation.selection.getSelection(args.imodel, args.level));
     },
     [selectionStorage],
@@ -63,7 +63,7 @@ export function useSelectionHandler({ selectionStorage }: { selectionStorage?: S
       }
       void (async () => {
         const keys = await createKeysFromSelectablesArray(args.selectables);
-        // eslint-disable-next-line deprecation/deprecation
+        // eslint-disable-next-line @typescript-eslint/no-deprecated
         Presentation.selection.replaceSelection(args.source, args.imodel, keys, args.level);
       })();
     },
@@ -82,6 +82,7 @@ function createSelectablesFromKeySet(keySet: Readonly<KeySet>) {
   keySet.forEach((key) => {
     if (Key.isInstanceKey(key)) {
       Selectables.add(selectables, [key]);
+      // eslint-disable-next-line @typescript-eslint/no-deprecated
     } else if (NodeKey.isInstancesNodeKey(key)) {
       Selectables.add(selectables, key.instanceKeys);
     } else {
@@ -122,7 +123,9 @@ export async function createKeysFromSelectable(selectable: Selectable): Promise<
   assert(false, "Unexpected selectable type");
 }
 
+// eslint-disable-next-line @typescript-eslint/no-deprecated
 function isNodeKey(data: unknown): data is NodeKey {
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   const key = data as BaseNodeKey;
   return key.pathFromRoot !== undefined && key.type !== undefined;
 }

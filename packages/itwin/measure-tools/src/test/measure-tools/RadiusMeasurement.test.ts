@@ -99,7 +99,7 @@ describe("RadiusMeasurement tests", () => {
 
       // Verify that the KoQ lookup was attempted
       assert.isTrue(getSpecsByNameSpy.mock.calls.length > 0, "getSpecsByName should have been called during construction");
-      assert.strictEqual(getSpecsByNameSpy.mock.calls[0][0], "AecUnits.LENGTH", "Should lookup the default KoQ string");
+      assert.strictEqual(getSpecsByNameSpy.mock.calls[0][0], "DefaultToolsUnits.LENGTH", "Should lookup the default KoQ string");
 
       // Verify that the fallback method was called
       assert.isTrue(findFormatterSpecSpy.mock.calls.length > 0, "findFormatterSpecByQuantityType should have been called as fallback");
@@ -108,7 +108,7 @@ describe("RadiusMeasurement tests", () => {
       // Verify the measurement was created successfully
       assert.isDefined(measurement);
       assert.isDefined(measurement.arcRef);
-      assert.strictEqual(measurement.lengthKoQ, "AecUnits.LENGTH");
+      assert.strictEqual(measurement.lengthKoQ, "DefaultToolsUnits.LENGTH");
     } finally {
       // Restore original methods
       IModelApp.quantityFormatter.getSpecsByName = originalGetSpecsByName;

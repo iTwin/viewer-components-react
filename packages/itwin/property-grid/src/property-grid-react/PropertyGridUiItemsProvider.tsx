@@ -31,7 +31,7 @@ import type { PropertyGridComponentProps } from "./PropertyGridComponent.js";
  * @public
  */
 export function createPropertyGrid(propertyGridProps: PropertyGridWidgetProps): Widget {
-  // eslint-disable-next-line deprecation/deprecation
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   const { widgetId: widgetIdProp, selectionStorage, shouldShow, ...propertyGridComponentProps } = propertyGridProps;
   const widgetId = widgetIdProp ?? PropertyGridWidgetId;
   const widgetProps = {
@@ -86,10 +86,10 @@ export interface PropertyGridUiItemsProviderProps {
  */
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
   public readonly id = "PropertyGridUiItemsProvider";
-  // eslint-disable-next-line deprecation/deprecation
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   #props: PropertyGridUiItemsProviderProps = {};
 
-  // eslint-disable-next-line deprecation/deprecation
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   constructor(props: PropertyGridUiItemsProviderProps = {}) {
     this.#props = props;
   }
@@ -164,7 +164,7 @@ type PropertyWidgetInternalProps = PropertyGridWidgetOwnProps & {
 export function PropertyGridWidget({
   widgetId,
   widgetDef: widgetDefOverride,
-  // eslint-disable-next-line deprecation/deprecation
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   shouldShow,
   selectionStorage,
   propertyGridComponent,

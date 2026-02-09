@@ -38,11 +38,11 @@ export interface DistanceMeasurementProps extends MeasurementProps {
 
 /** Formatting properties for distance measurement. */
 export interface DistanceMeasurementFormattingProps {
-  /** Defaults to "AecUnits.LENGTH" and "Units.M" */
+  /** Defaults to "DefaultToolsUnits.LENGTH" and "Units.M" */
   length?: MeasurementFormattingProps;
-  /** Defaults to "RoadRailUnits.BEARING" and "Units.RAD" */
+  /** Defaults to "CivilUnits.BEARING" and "Units.RAD" */
   bearing? : MeasurementFormattingProps;
-  /** Defaults to "AecUnits.LENGTH_COORDINATE" and "Units.M" */
+  /** Defaults to "DefaultToolsUnits.LENGTH_COORDINATE" and "Units.M" */
   coordinate?: MeasurementFormattingProps;
 }
 
@@ -194,9 +194,9 @@ export class DistanceMeasurement extends Measurement {
     this._isDynamic = false;
     this._showAxes = MeasurementPreferences.current.displayMeasurementAxes;
     this._runRiseAxes = [];
-    this._lengthKoQ = "AecUnits.LENGTH";
+    this._lengthKoQ = "DefaultToolsUnits.LENGTH";
     this._lengthPersistenceUnitName = "Units.M";
-    this._coordinateKoQ = "AecUnits.LENGTH_COORDINATE";
+    this._coordinateKoQ = "DefaultToolsUnits.LENGTH_COORDINATE";
     this._coordinatePersistenceUnitName = "Units.M";
 
     if (props) this.readFromJSON(props);
@@ -503,9 +503,12 @@ export class DistanceMeasurement extends Measurement {
   private async createTextMarker(): Promise<void> {
     const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, QuantityType.LengthEngineering);
 
-    const distance = this._startPoint.distance(this._endPoint);
+    const adjustedStartPoint = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._startPoint));
+    const adjustedEndPoint = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._endPoint));
+
+    const distance = adjustedStartPoint.distance(adjustedEndPoint);
     const fDistance = await FormatterUtils.formatLength(
-      distance * this.worldScale,
+      distance,
       lengthSpec
     );
 
@@ -540,16 +543,19 @@ export class DistanceMeasurement extends Measurement {
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
 
-    const distance = this.worldScale * this._startPoint.distance(this._endPoint);
-    const run = this.drawingMetadata?.sheetToWorldTransformProps?.sheetScale !== undefined ? this.worldScale * Math.abs(this._endPoint.x - this._startPoint.x): this._startPoint.distanceXY(this._endPoint);
-    const rise = this.drawingMetadata?.sheetToWorldTransformProps?.sheetScale !== undefined ? this.worldScale * (this._endPoint.y - this._startPoint.y): this._endPoint.z - this._startPoint.z;
+    const adjustedStartPoint = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._startPoint));
+    const adjustedEndPoint = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._endPoint));
+
+    const distance = adjustedStartPoint.distance(adjustedEndPoint);
+    const run = adjustedStartPoint.distanceXY(adjustedEndPoint);
+    const rise = adjustedEndPoint.z - adjustedStartPoint.z;
     const slope = 0.0 < run ? (100 * rise) / run : 0.0;
 
-    const dx = Math.abs(this._endPoint.x - this._startPoint.x);
-    const dy = Math.abs(this._endPoint.y - this._startPoint.y);
-    const bearing = FormatterUtils.calculateBearing(this._endPoint.x - this._startPoint.x, this._endPoint.y - this._startPoint.y);
-    const adjustedStart = this.adjustPointForGlobalOrigin(this._startPoint);
-    const adjustedEnd = this.adjustPointForGlobalOrigin(this._endPoint);
+    const dx = Math.abs(adjustedEndPoint.x - adjustedStartPoint.x);
+    const dy = Math.abs(adjustedEndPoint.y - adjustedStartPoint.y);
+    const bearing = FormatterUtils.calculateBearing(adjustedEndPoint.x - adjustedStartPoint.x, adjustedEndPoint.y - adjustedStartPoint.y);
+    const adjustedStart = this.adjustPointForGlobalOrigin(adjustedStartPoint);
+    const adjustedEnd = this.adjustPointForGlobalOrigin(adjustedEndPoint);
     const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, QuantityType.LengthEngineering);
     const coordinateSpec = FormatterUtils.getFormatterSpecWithFallback(this._coordinateKoQ, QuantityType.Coordinate);
 

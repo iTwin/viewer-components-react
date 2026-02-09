@@ -50,19 +50,18 @@ export interface PropertyGridPropertyUpdatedArgs extends PropertyUpdatedArgs {
  * Base props for rendering `PropertyGridContent` component.
  * @public
  */
-export interface PropertyGridContentBaseProps
-  extends Omit<
-    FilteringPropertyGridProps,
-    | "dataProvider"
-    | "filterer"
-    | "isPropertyHoverEnabled"
-    | "isPropertySelectionEnabled"
-    | "onPropertyContextMenu"
-    | "width"
-    | "height"
-    | "onPropertyUpdated"
-    | "actionButtonRenderers"
-  > {
+export interface PropertyGridContentBaseProps extends Omit<
+  FilteringPropertyGridProps,
+  | "dataProvider"
+  | "filterer"
+  | "isPropertyHoverEnabled"
+  | "isPropertySelectionEnabled"
+  | "onPropertyContextMenu"
+  | "width"
+  | "height"
+  | "onPropertyUpdated"
+  | "actionButtonRenderers"
+> {
   imodel: IModelConnection;
   className?: string;
   onBackButton?: () => void;

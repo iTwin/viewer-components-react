@@ -40,11 +40,11 @@ export async function buildIModel(
   mochaContext: Mocha.Context,
   setup?: (builder: TestIModelBuilder, testSchema: TestSchemaDefinition, mochaContext: Mocha.Context) => Promise<void>,
 ): Promise<{ imodel: IModelConnection } & AsyncDisposable>;
-export async function buildIModel<TResult extends {}>(
+export async function buildIModel<TResult extends object>(
   mochaContext: Mocha.Context,
   setup: (builder: TestIModelBuilder, testSchema: TestSchemaDefinition, mochaContext: Mocha.Context) => Promise<TResult>,
 ): Promise<{ imodel: IModelConnection } & TResult & AsyncDisposable>;
-export async function buildIModel<TResult extends {} | undefined>(
+export async function buildIModel<TResult extends object | undefined>(
   mochaContext: Mocha.Context,
   setup?: (builder: TestIModelBuilder, testSchema: TestSchemaDefinition, mochaContext: Mocha.Context) => Promise<TResult>,
 ) {
@@ -350,7 +350,7 @@ export function insertSubCategory(
   return { className, id };
 }
 
-export function insertPhysicalElement<TAdditionalProps extends {}>(
+export function insertPhysicalElement<TAdditionalProps extends object>(
   props: BaseInstanceInsertProps & { modelId: Id64String; categoryId: Id64String; parentId?: Id64String } & Partial<
       Omit<PhysicalElementProps, "id" | "model" | "category" | "parent">
     > &
@@ -377,7 +377,7 @@ export function insertPhysicalElement<TAdditionalProps extends {}>(
   return { className, id };
 }
 
-export function insertDrawingGraphic<TAdditionalProps extends {}>(
+export function insertDrawingGraphic<TAdditionalProps extends object>(
   props: BaseInstanceInsertProps & { modelId: Id64String; categoryId: Id64String; parentId?: Id64String } & Partial<
       Omit<GeometricElement2dProps, "id" | "model" | "category" | "parent">
     > &
@@ -404,7 +404,7 @@ export function insertDrawingGraphic<TAdditionalProps extends {}>(
   return { className, id };
 }
 
-export function insertDrawingElement<TAdditionalProps extends {}>(
+export function insertDrawingElement<TAdditionalProps extends object>(
   props: BaseInstanceInsertProps & { modelId: Id64String; codeValue: string; parentId?: Id64String } & Partial<
       Omit<ElementProps, "id" | "model" | "parent" | "code">
     > &

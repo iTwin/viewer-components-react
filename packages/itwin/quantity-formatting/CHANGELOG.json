@@ -2,6 +2,21 @@
   "name": "@itwin/quantity-formatting-react",
   "entries": [
     {
+      "date": "Thu, 15 Jan 2026 14:30:28 GMT",
+      "version": "0.1.4",
+      "tag": "@itwin/quantity-formatting-react_v0.1.4",
+      "comments": {
+        "patch": [
+          {
+            "author": "50554904+hl662@users.noreply.github.com",
+            "package": "@itwin/quantity-formatting-react",
+            "commit": "7d2f422aab063ac1d644039c177472f0267ac865",
+            "comment": "Reword localized labels to accurately convey functionality"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 13 Nov 2025 09:36:43 GMT",
       "version": "0.1.3",
       "tag": "@itwin/quantity-formatting-react_v0.1.3",

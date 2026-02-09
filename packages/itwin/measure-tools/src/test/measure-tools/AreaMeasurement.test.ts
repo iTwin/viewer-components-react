@@ -94,7 +94,7 @@ describe("AreaMeasurement tests", () => {
 
       // Verify that the KoQ lookup was attempted (area KoQ is used first in widget data)
       assert.isTrue(getSpecsByNameSpy.mock.calls.length > 0, "getSpecsByName should have been called during construction");
-      assert.strictEqual(getSpecsByNameSpy.mock.calls[0][0], "AecUnits.AREA", "Should lookup the default area KoQ string");
+      assert.strictEqual(getSpecsByNameSpy.mock.calls[0][0], "DefaultToolsUnits.AREA", "Should lookup the default area KoQ string");
 
       // Verify that the fallback method was called
       assert.isTrue(findFormatterSpecSpy.mock.calls.length > 0, "findFormatterSpecByQuantityType should have been called as fallback");
@@ -103,7 +103,7 @@ describe("AreaMeasurement tests", () => {
       // Verify the measurement was created successfully
       assert.isDefined(measurement);
       assert.isDefined(measurement.polygonPoints);
-      assert.strictEqual(measurement.areaKoQ, "AecUnits.AREA");
+      assert.strictEqual(measurement.areaKoQ, "DefaultToolsUnits.AREA");
     } finally {
       // Restore original methods
       IModelApp.quantityFormatter.getSpecsByName = originalGetSpecsByName;
@@ -150,7 +150,7 @@ describe("AreaMeasurement tests", () => {
 
       // Verify that the KoQ lookup was attempted in setTextToMarker
       assert.isTrue(getSpecsByNameSpy.mock.calls.length > 0, "getSpecsByName should have been called in setTextToMarker");
-      assert.strictEqual(getSpecsByNameSpy.mock.calls[0][0], "AecUnits.AREA", "Should lookup the area KoQ string in setTextToMarker");
+      assert.strictEqual(getSpecsByNameSpy.mock.calls[0][0], "DefaultToolsUnits.AREA", "Should lookup the area KoQ string in setTextToMarker");
 
       // Verify that the fallback method was called
       assert.isTrue(findFormatterSpecSpy.mock.calls.length > 0, "findFormatterSpecByQuantityType should have been called as fallback in setTextToMarker");

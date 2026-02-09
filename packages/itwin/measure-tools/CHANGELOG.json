@@ -2,6 +2,44 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Thu, 15 Jan 2026 14:30:28 GMT",
+      "version": "0.32.0",
+      "tag": "@itwin/measure-tools-react_v0.32.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "50554904+hl662@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "c596ab153013f4f54b5541c647fa99b11e38a48f",
+            "comment": "Update default KoQs used by measuring tools"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Fri, 21 Nov 2025 16:14:12 GMT",
+      "version": "0.31.0",
+      "tag": "@itwin/measure-tools-react_v0.31.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "maxime.brassard@bentley.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "3deeb8b4492ee56e6b34e29b62cbb50d7d22390d",
+            "comment": "Fixed sheetToWorld transform displaying incorrect world values."
+          }
+        ],
+        "minor": [
+          {
+            "author": "maxime.brassard@bentley.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "dcf848505aca9a540ae753ec47c199edf219d768",
+            "comment": "Distance and Area tools working with vertical exaggeration"
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 19 Nov 2025 16:26:23 GMT",
       "version": "0.30.0",
       "tag": "@itwin/measure-tools-react_v0.30.0",

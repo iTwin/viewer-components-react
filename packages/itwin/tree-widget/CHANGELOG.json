@@ -2,6 +2,63 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Mon, 09 Feb 2026 12:17:01 GMT",
+      "version": "3.17.6",
+      "tag": "@itwin/tree-widget-react_v3.17.6",
+      "comments": {
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "8bc403ccdd23103781e5c6ebde1eb039641752ff",
+            "comment": "Bump dependencies"
+          },
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "5b928bf2f22cee51c9a2c56efae821773310937c",
+            "comment": "Models tree: use cached category ids to query model children."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Wed, 21 Jan 2026 12:50:36 GMT",
+      "version": "3.17.5",
+      "tag": "@itwin/tree-widget-react_v3.17.5",
+      "comments": {
+        "patch": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "3922007f320b2b0c54f68fcec1fd7240ed510e7d",
+            "comment": "Fix enabling category display in categories tree making other categories also visible, when their elements are under hidden model."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Thu, 15 Jan 2026 14:30:28 GMT",
+      "version": "3.17.4",
+      "tag": "@itwin/tree-widget-react_v3.17.4",
+      "comments": {
+        "patch": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "fb63266c0640ef6be59aa3b53920b3a362534b31",
+            "comment": "Models tree: Improve performance of loading element nodes"
+          },
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "4b14e9b74e626792b50062e6d8046fc3cd60cd85",
+            "comment": "Models tree: Remove unnecessary checks when ModelsTreeVisibilityHandlerOverrides are provided."
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 20 Nov 2025 11:23:22 GMT",
       "version": "3.17.3",
       "tag": "@itwin/tree-widget-react_v3.17.3",

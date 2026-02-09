@@ -17,7 +17,7 @@ vi.mock("../../useTranslation.js", () => ({
     translate: (key: string) => {
       const translations: Record<string, string> = {
         "QuantityFormat:labels.apply": "Apply",
-        "QuantityFormat:labels.clear": "Clear",
+        "QuantityFormat:labels.revert": "Revert",
       };
       return translations[key] || key;
     },
@@ -172,15 +172,15 @@ describe("QuantityFormatPanel", () => {
     );
 
     const applyButton = screen.getByRole("button", { name: "Apply" });
-    const clearButton = screen.getByRole("button", { name: "Clear" });
+    const revertButton = screen.getByRole("button", { name: "Revert" });
     const triggerChangeButton = screen.getByTestId("trigger-format-change");
 
     // Trigger format change
     await user.click(triggerChangeButton);
     expect(applyButton.getAttribute("aria-disabled")).toBeNull();
 
-    // Click Clear button
-    await user.click(clearButton);
+    // Click Revert button
+    await user.click(revertButton);
 
     // Apply button should be disabled and onFormatChange should not be called
     expect(applyButton.getAttribute("aria-disabled")).toEqual("true");
