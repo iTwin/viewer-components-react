@@ -2,6 +2,27 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Mon, 09 Feb 2026 12:17:01 GMT",
+      "version": "3.17.6",
+      "tag": "@itwin/tree-widget-react_v3.17.6",
+      "comments": {
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "8bc403ccdd23103781e5c6ebde1eb039641752ff",
+            "comment": "Bump dependencies"
+          },
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "5b928bf2f22cee51c9a2c56efae821773310937c",
+            "comment": "Models tree: use cached category ids to query model children."
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 21 Jan 2026 12:50:36 GMT",
       "version": "3.17.5",
       "tag": "@itwin/tree-widget-react_v3.17.5",
