@@ -28,6 +28,5 @@
     {
       "mode": "auto"
     }
-  ],
-  "editor.formatOnSaveMode": "modifications"
+  ]
 }

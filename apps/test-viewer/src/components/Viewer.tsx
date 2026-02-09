@@ -201,7 +201,7 @@ function useIModelInfo() {
       );
     }
 
-    navigate(
+    void navigate(
       `/?iTwinId=${import.meta.env.IMJS_ITWIN_ID}&iModelId=${import.meta.env.IMJS_IMODEL_ID}${import.meta.env.IMJS_IMODEL_CHANGESET_ID ? `&changesetId=${import.meta.env.IMJS_IMODEL_CHANGESET_ID}` : ""}`,
     );
   }, [searchParams, navigate]);
