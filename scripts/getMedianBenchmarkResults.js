@@ -45,7 +45,7 @@ for (let i = 0; i < NUM_RUNS; ++i) {
   }
 }
 
-const newEntries = [];
+const medianEntries = [];
 // Each test saves the total time of the test as one entry
 // And another entry for P95 thread blocks
 for (let i = 0; i < results[0].data.length; i += 2) {
@@ -54,12 +54,12 @@ for (let i = 0; i < results[0].data.length; i += 2) {
     singleTestResults.push({ totalTimeEntry: results[j].data[i], blocksEntry: results[j].data[i + 1] });
   }
   singleTestResults.sort((a, b) => a.totalTimeEntry.value - b.totalTimeEntry.value);
-  const middleEntry = singleTestResults[Math.floor(NUM_RUNS / 2)];
-  newEntries.push(middleEntry.totalTimeEntry);
-  newEntries.push(middleEntry.blocksEntry);
+  const medianEntry = singleTestResults[Math.floor(NUM_RUNS / 2)];
+  medianEntries.push(medianEntry.totalTimeEntry);
+  medianEntries.push(medianEntry.blocksEntry);
 }
 
 const finalPath = join(process.cwd(), BENCHMARK_FILE);
-writeFileSync(finalPath, JSON.stringify(newEntries, null, 2) + "\n");
+writeFileSync(finalPath, JSON.stringify(medianEntries, null, 2) + "\n");
 
 console.log("Done!");
