@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
 /* eslint-disable no-console */
-/* eslint-disable unused-imports/no-unused-vars */
 
 import { expect } from "chai";
 import sinon from "sinon";

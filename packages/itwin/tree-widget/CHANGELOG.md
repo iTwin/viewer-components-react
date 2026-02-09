@@ -1,8 +1,17 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Wed, 21 Jan 2026 12:50:36 GMT and should not be manually modified. -->
+<!-- This log was last generated on Mon, 09 Feb 2026 12:17:01 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.17.6
+
+Mon, 09 Feb 2026 12:17:01 GMT
+
+### Patches
+
+- Bump dependencies ([#1583](https://github.com/iTwin/viewer-components-react/pull/1583))
+- Models tree: use cached category ids to query model children. ([#1585](https://github.com/iTwin/viewer-components-react/pull/1585))
 
 ## 3.17.5
 

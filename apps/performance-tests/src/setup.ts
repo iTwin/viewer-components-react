@@ -10,5 +10,5 @@ import globalJsdom from "global-jsdom";
 import * as jsdom from "jsdom";
 
 globalJsdom(undefined, {
-  virtualConsole: new jsdom.VirtualConsole().sendTo(console, { omitJSDOMErrors: true }),
+  virtualConsole: new jsdom.VirtualConsole().forwardTo(console, { jsdomErrors: "none" }),
 });

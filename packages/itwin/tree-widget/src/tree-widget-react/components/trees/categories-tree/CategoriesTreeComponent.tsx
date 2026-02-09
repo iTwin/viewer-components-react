@@ -19,8 +19,10 @@ import type { CategoriesTreeProps } from "./CategoriesTree.js";
 import type { CategoriesTreeHeaderButtonProps, CategoriesTreeHeaderButtonType } from "./CategoriesTreeButtons.js";
 
 /** @public */
-interface CategoriesTreeComponentProps
-  extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "hierarchyConfig"> {
+interface CategoriesTreeComponentProps extends Pick<
+  CategoriesTreeProps,
+  "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "hierarchyConfig"
+> {
   /**
    * Renderers of header buttons. Defaults to:
    * ```ts

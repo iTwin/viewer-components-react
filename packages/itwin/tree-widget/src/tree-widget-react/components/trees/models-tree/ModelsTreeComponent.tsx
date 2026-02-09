@@ -28,20 +28,19 @@ import type { ModelsTreeProps } from "./ModelsTree.js";
 import type { ModelsTreeHeaderButtonProps, ModelsTreeHeaderButtonType } from "./ModelsTreeButtons.js";
 
 /** @public */
-interface ModelsTreeComponentProps
-  extends Pick<
-    ModelsTreeProps,
-    | "getSchemaContext"
-    | "selectionStorage"
-    | "density"
-    | "hierarchyLevelConfig"
-    | "selectionMode"
-    | "selectionPredicate"
-    | "hierarchyConfig"
-    | "visibilityHandlerOverrides"
-    | "getFilteredPaths"
-    | "getSubTreePaths"
-  > {
+interface ModelsTreeComponentProps extends Pick<
+  ModelsTreeProps,
+  | "getSchemaContext"
+  | "selectionStorage"
+  | "density"
+  | "hierarchyLevelConfig"
+  | "selectionMode"
+  | "selectionPredicate"
+  | "hierarchyConfig"
+  | "visibilityHandlerOverrides"
+  | "getFilteredPaths"
+  | "getSubTreePaths"
+> {
   /**
    * Renderers of header buttons. Defaults to:
    * ```ts

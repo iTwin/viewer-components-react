@@ -62,8 +62,7 @@ export default defineConfig(({ mode }) => {
     css: {
       preprocessorOptions: {
         scss: {
-          silenceDeprecations: ["legacy-js-api", "import", "global-builtin"],
-          quietDeps: true,
+          silenceDeprecations: ["if-function"],
         },
       },
     },

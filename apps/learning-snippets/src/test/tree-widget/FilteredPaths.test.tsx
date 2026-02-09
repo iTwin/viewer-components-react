@@ -2,8 +2,6 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-/* eslint-disable import/no-duplicates */
-/* eslint-disable @typescript-eslint/no-shadow */
 
 import { expect } from "chai";
 import { useCallback } from "react";
