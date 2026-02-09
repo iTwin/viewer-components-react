@@ -61,8 +61,13 @@ jobs:
           path: "./apps/performance-tests/datasets/*.bim"
           key: performance-test-dataset-${{ hashFiles('./apps/performance-tests/src/util/Datasets.ts') }}
 
-      - name: Run benchmark tests
+      - name: Run benchmark tests for PR
+        if: ${{ inputs.mode == 'pr' }}
         run: pnpm benchmark:tree-widget
+
+      - name: Run benchmark tests for push
+        if: ${{ inputs.mode == 'push' }}
+        run: pnpm benchmark:tree-widget-median
 
       - name: Save generated datasets
         uses: actions/cache/save@v4
