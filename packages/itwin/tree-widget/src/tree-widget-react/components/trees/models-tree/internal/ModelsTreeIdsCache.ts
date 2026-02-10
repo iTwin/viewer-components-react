@@ -361,20 +361,26 @@ export class ModelsTreeIdsCache implements Disposable {
     return this.#elementModelCategoriesCache.getCategoriesOfModelsTopMostElements(modelIds);
   }
 
-  public getModelCategoryIds(modelId: Id64String): Observable<Id64Set> {
-    return this.#elementModelCategoriesCache.getModelCategoryIds(modelId);
+  public getModelCategoryIds(props: { modelId: Id64String; includeOnlyIfCategoryOfTopMostElement?: boolean }): Observable<Id64Set> {
+    return this.#elementModelCategoriesCache.getModelCategoryIds(props);
   }
 
   public getSubModelsUnderElement(elementId: Id64String): Observable<Id64Array> {
     return this.#modeledElementsCache.getSubModelsUnderElement(elementId);
   }
 
-  public getCategoriesModeledElements(props: { modelId: Id64String; categoryIds: Id64Arg }): Observable<Id64Array> {
-    return this.#modeledElementsCache.getCategoriesModeledElements(props);
+  public getCategoryModeledElements(props: { modelId: Id64String; categoryId: Id64String }): Observable<Id64Array | Id64Set> {
+    return this.#modeledElementsCache.getCategoryModeledElements(props);
   }
 
-  public getCategoriesElementModels(categoryIds: Id64Arg): Observable<{ id: CategoryId; models: Array<ModelId> | undefined }> {
-    return this.#elementModelCategoriesCache.getCategoriesElementModels({ categoryIds });
+  public getCategoryElementModels({
+    categoryId,
+    includeOnlyIfCategoryOfTopMostElement,
+  }: {
+    categoryId: Id64String;
+    includeOnlyIfCategoryOfTopMostElement?: boolean;
+  }): Observable<Array<ModelId>> {
+    return this.#elementModelCategoriesCache.getCategoryElementModels({ categoryId, includeOnlyIfCategoryOfTopMostElement });
   }
 
   public createModelInstanceKeyPaths(modelId: Id64String): Observable<HierarchyNodeIdentifiersPath[]> {
@@ -402,16 +408,18 @@ export class ModelsTreeIdsCache implements Disposable {
   public createCategoryInstanceKeyPaths(categoryId: Id64String): Observable<HierarchyNodeIdentifiersPath[]> {
     let entry = this.#categoryKeyPaths.get(categoryId);
     if (!entry) {
-      entry = this.#elementModelCategoriesCache.getModelsOfTopMostElementCategory(categoryId).pipe(
-        mergeAll(),
-        mergeMap((categoryModelId) => this.createModelInstanceKeyPaths(categoryModelId)),
-        mergeAll(),
-        reduce((acc, modelPath) => {
-          acc.push([...modelPath, { className: CLASS_NAME_SpatialCategory, id: categoryId }]);
-          return acc;
-        }, new Array<HierarchyNodeIdentifiersPath>()),
-        shareReplay(),
-      );
+      entry = this.#elementModelCategoriesCache
+        .getCategoryElementModels({ categoryId, includeSubModels: true, includeOnlyIfCategoryOfTopMostElement: true })
+        .pipe(
+          mergeAll(),
+          mergeMap((categoryModelId) => this.createModelInstanceKeyPaths(categoryModelId)),
+          mergeAll(),
+          reduce((acc, modelPath) => {
+            acc.push([...modelPath, { className: CLASS_NAME_SpatialCategory, id: categoryId }]);
+            return acc;
+          }, new Array<HierarchyNodeIdentifiersPath>()),
+          shareReplay(),
+        );
       this.#categoryKeyPaths.set(categoryId, entry);
     }
     return entry;

@@ -103,9 +103,11 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
         toArray(),
       );
     }),
-    getModelCategoryIds: sinon.stub<[Id64String], Observable<Id64Set>>().callsFake((modelId) => {
-      return of(new Set(props?.modelCategories?.get(modelId) ?? []));
-    }),
+    getModelCategoryIds: sinon
+      .stub<[{ modelId: Id64String; includeOnlyIfCategoryOfTopMostElement?: boolean }], Observable<Id64Set>>()
+      .callsFake(({ modelId }) => {
+        return of(new Set(props?.modelCategories?.get(modelId) ?? []));
+      }),
     getAllCategoriesOfElements: sinon.stub<[], Observable<Id64Set>>().callsFake(() => {
       const result = new Set<Id64String>();
       props?.modelCategories?.forEach((categories) => categories.forEach((category) => result.add(category)));
@@ -121,7 +123,7 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       return of(new Map());
     }),
     getSubModelsUnderElement: sinon.stub<[Id64String], Observable<Id64Array>>().callsFake(() => of([])),
-    getCategoriesModeledElements: sinon.stub<[{ modelId: Id64String; categoryIds: Id64Arg }], Observable<Id64Array>>().callsFake(() => of([])),
+    getCategoryModeledElements: sinon.stub<[{ modelId: Id64String; categoryId: Id64String }], Observable<Id64Array | Id64Set>>().callsFake(() => of([])),
   });
 }
 

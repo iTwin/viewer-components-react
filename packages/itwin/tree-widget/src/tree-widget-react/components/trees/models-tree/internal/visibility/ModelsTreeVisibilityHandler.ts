@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, defer, EMPTY, from, map, merge, mergeAll, mergeMap, of } from "rxjs";
-import { assert, Guid, Id64 } from "@itwin/core-bentley";
+import { concat, defaultIfEmpty, defer, EMPTY, from, map, merge, mergeAll, mergeMap, of, reduce } from "rxjs";
+import { assert, Guid } from "@itwin/core-bentley";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
@@ -433,9 +433,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
   }
 
   private getCategories(props: Parameters<BaseIdsCache["getCategories"]>[0]): ReturnType<BaseIdsCache["getCategories"]> {
-    return from(Id64.iterable(props.modelIds)).pipe(
-      mergeMap((modelId) => this.#props.idsCache.getModelCategoryIds(modelId).pipe(map((categoryIds) => ({ id: modelId, categories: categoryIds })))),
-    );
+    return this.#props.idsCache.getModelCategoryIds(props);
   }
 
   private getChildElementsTree(props: Parameters<BaseIdsCache["getChildElementsTree"]>[0]): ReturnType<BaseIdsCache["getChildElementsTree"]> {
@@ -455,7 +453,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
   }
 
   private getModels(props: Parameters<BaseIdsCache["getModels"]>[0]): ReturnType<BaseIdsCache["getModels"]> {
-    return this.#props.idsCache.getCategoriesElementModels(props.categoryIds);
+    return this.#props.idsCache.getCategoryElementModels(props);
   }
 
   private getSubCategories(props: Parameters<BaseIdsCache["getSubCategories"]>[0]): ReturnType<BaseIdsCache["getSubCategories"]> {
@@ -463,42 +461,26 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
   }
 
   private getSubModels(props: Parameters<BaseIdsCache["getSubModels"]>[0]): ReturnType<BaseIdsCache["getSubModels"]> {
-    if ("modelIds" in props) {
-      return from(Id64.iterable(props.modelIds)).pipe(
-        mergeMap((modelId) => {
-          if (props.categoryId) {
-            return this.#props.idsCache
-              .getCategoriesModeledElements({ modelId, categoryIds: props.categoryId })
-              .pipe(map((subModels) => ({ id: modelId, subModels })));
-          }
-          return this.#props.idsCache.getModelCategoryIds(modelId).pipe(
-            mergeMap((categoryIds) => this.#props.idsCache.getCategoriesModeledElements({ modelId, categoryIds })),
-            map((subModels) => ({ id: modelId, subModels })),
-          );
-        }),
-      );
-    }
-
     if (props.modelId) {
-      return from(Id64.iterable(props.categoryIds)).pipe(
-        mergeMap((categoryId) =>
-          this.#props.idsCache
-            .getCategoriesModeledElements({ modelId: props.modelId!, categoryIds: categoryId })
-            .pipe(map((subModels) => ({ id: categoryId, subModels }))),
-        ),
+      if (props.categoryId) {
+        return this.#props.idsCache.getCategoryModeledElements({ modelId: props.modelId, categoryId: props.categoryId });
+      }
+
+      return this.#props.idsCache.getModelCategoryIds({ modelId: props.modelId }).pipe(
+        mergeAll(),
+        mergeMap((modelCategoryId) => this.#props.idsCache.getCategoryModeledElements({ modelId: props.modelId!, categoryId: modelCategoryId })),
+        defaultIfEmpty([]),
       );
     }
 
-    return this.#props.idsCache.getCategoriesElementModels(props.categoryIds).pipe(
-      mergeMap(({ id, models }) => {
-        if (!models) {
-          return of({ id, subModels: undefined });
-        }
-        return from(models).pipe(
-          mergeMap((modelId) => this.#props.idsCache.getCategoriesModeledElements({ modelId, categoryIds: id })),
-          map((subModels) => ({ id, subModels })),
-        );
-      }),
+    return this.#props.idsCache.getCategoryElementModels({ categoryId: props.categoryId! }).pipe(
+      mergeAll(),
+      mergeMap((modelId) => this.#props.idsCache.getCategoryModeledElements({ modelId, categoryId: props.categoryId! })),
+      reduce((acc, subModels) => {
+        subModels.forEach((subModel) => acc.push(subModel));
+        return acc;
+      }, new Array<string>()),
+      defaultIfEmpty([]),
     );
   }
 }

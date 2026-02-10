@@ -3,12 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, from, map, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
-import { Guid, Id64 } from "@itwin/core-bentley";
+import { defer, map, reduce, shareReplay } from "rxjs";
+import { Guid } from "@itwin/core-bentley";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
 
 import type { Observable } from "rxjs";
-import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { CategoryId, ElementId, ModelId } from "../Types.js";
 
@@ -144,22 +144,14 @@ export class ModeledElementsCache {
     );
   }
 
-  public getCategoriesModeledElements({ modelId, categoryIds }: { modelId: Id64String; categoryIds: Id64Arg }): Observable<Id64Array> {
-    if (Id64.sizeOf(categoryIds) === 0) {
-      return of([]);
-    }
+  public getCategoryModeledElements({ modelId, categoryId }: { modelId: Id64String; categoryId: Id64String }): Observable<Id64Array | Id64Set> {
     return this.getModeledElementsInfo().pipe(
-      mergeMap(({ modelWithCategoryModeledElements }) => {
-        const result = new Array<ElementId>();
+      map(({ modelWithCategoryModeledElements }) => {
         const categoryMap = modelWithCategoryModeledElements.get(modelId);
         if (!categoryMap) {
-          return of(result);
+          return [];
         }
-        return from(Id64.iterable(categoryIds)).pipe(
-          map((categoryId) => categoryMap.get(categoryId)),
-          mergeMap((elementsSet) => (elementsSet ? from(elementsSet) : EMPTY)),
-          toArray(),
-        );
+        return categoryMap.get(categoryId) ?? [];
       }),
     );
   }

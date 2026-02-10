@@ -148,11 +148,6 @@ export function joinId64Arg(arg: Id64Arg, separator: string): string {
   return joined;
 }
 
-/** @internal */
-export function getSetFromId64Arg(arg: Id64Arg): Set<Id64String> {
-  return typeof arg === "string" ? new Set([arg]) : Array.isArray(arg) ? new Set(arg) : arg;
-}
-
 /**
  * Creates an Observable from provided props. If `releaseOnCount` is provided, main thread will be released after processing specified number of items.
  * @internal

@@ -35,7 +35,7 @@ export class SubCategoriesCache {
 
   private querySubCategories(): Observable<{ id: SubCategoryId; parentId: CategoryId }> {
     return defer(() => {
-      const definitionsQuery = `
+      const ecsql = `
         SELECT
           sc.ECInstanceId id,
           sc.Parent.Id categoryId
@@ -45,7 +45,7 @@ export class SubCategoriesCache {
           NOT sc.IsPrivate
       `;
       return this.#queryExecutor.createQueryReader(
-        { ecsql: definitionsQuery },
+        { ecsql },
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/sub-categories` },
       );
     }).pipe(

@@ -139,7 +139,7 @@ export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(
 /** @internal */
 export interface GetVisibilityFromAlwaysAndNeverDrawnElementsProps {
   /** Status when always/never lists are empty and exclusive mode is off */
-  defaultStatus: (categoryId?: string) => VisibilityStatus;
+  defaultStatus: () => VisibilityStatus;
 }
 
 /**

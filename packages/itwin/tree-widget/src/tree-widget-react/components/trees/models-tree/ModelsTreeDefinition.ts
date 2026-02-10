@@ -496,10 +496,15 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     });
     const modeledElements = await firstValueFrom(
       from(modelIds).pipe(
-        mergeMap((modelId) => this.#idsCache.getCategoriesModeledElements({ modelId, categoryIds })),
-        reduce((acc, foundModeledElements) => {
-          return acc.concat(foundModeledElements);
-        }, new Array<ElementId>()),
+        mergeMap((modelId) =>
+          from(categoryIds).pipe(
+            mergeMap((categoryId) => this.#idsCache.getCategoryModeledElements({ modelId, categoryId })),
+            reduce((acc, foundModeledElements) => {
+              foundModeledElements.forEach((modeledElementId) => acc.push(modeledElementId));
+              return acc;
+            }, new Array<ElementId>()),
+          ),
+        ),
       ),
     );
     const bindings = new Array<ECSqlBinding>();

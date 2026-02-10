@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, EMPTY, from, map, mergeMap, toArray } from "rxjs";
+import { concat, EMPTY, from, map, mergeAll, mergeMap, toArray } from "rxjs";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { getIdsFromChildrenTree, getParentElementsIdsPath } from "../../../common/internal/Utils.js";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
@@ -138,13 +138,13 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
   /** Turns on category and its' related models. Does not turn on other categories contained in those models.*/
   private enableCategoryWithoutEnablingOtherCategories(categoryId: Id64String): Observable<void> {
     this.#props.viewport.changeCategoryDisplay({ categoryIds: categoryId, display: true });
-    return this.#props.idsCache.getCategoriesElementModels({ categoryIds: categoryId, includeSubModels: true }).pipe(
-      mergeMap(({ models }) => from(models ?? [])),
+    return this.#props.idsCache.getCategoryElementModels({ categoryId, includeSubModels: true }).pipe(
+      mergeAll(),
       mergeMap((modelId) => {
         this.#props.viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: categoryId, override: "none" });
         return this.#props.viewport.viewsModel(modelId)
           ? EMPTY
-          : this.#props.idsCache.getModelCategoryIds(modelId).pipe(
+          : this.#props.idsCache.getModelCategoryIds({ modelId }).pipe(
               map((allModelCategories) => {
                 // Add 'Hide' override to categories that were hidden before model is turned on
                 allModelCategories?.forEach((modelCategoryId) => {
