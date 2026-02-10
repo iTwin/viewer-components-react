@@ -7,6 +7,7 @@ import { IModelApp } from "@itwin/core-frontend";
 
 import type { Localization, TranslationOptions } from "@itwin/core-common";
 
+/** @public */
 export interface GroupingMappingWidgetConfig {
   localization?: Localization;
   /** Override specific translation keys at runtime. Keys correspond to those in GroupingMappingWidget.json. */

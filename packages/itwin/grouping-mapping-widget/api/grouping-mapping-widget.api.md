@@ -19,6 +19,7 @@ import type { IGroupsClient } from '@itwin/insights-client';
 import type { IMappingsClient } from '@itwin/insights-client';
 import type { IModelConnection } from '@itwin/core-frontend';
 import type { IPropertiesClient } from '@itwin/insights-client';
+import type { Localization } from '@itwin/core-common';
 import type { Mapping } from '@itwin/insights-client';
 import type { Property } from '@itwin/insights-client';
 import { QueryClient } from '@tanstack/react-query';
@@ -28,6 +29,7 @@ import type { ReactElement } from 'react';
 import { SetStateAction } from 'react';
 import { StagePanelLocation } from '@itwin/appui-react';
 import { StagePanelSection } from '@itwin/appui-react';
+import type { TranslationOptions } from '@itwin/core-common';
 import type { UiItemsProvider } from '@itwin/appui-react';
 import { UseMutateAsyncFunction } from '@tanstack/react-query';
 import type { Widget } from '@itwin/appui-react';
@@ -96,7 +98,7 @@ export const GroupAction: (props: GroupActionProps) => JSX.Element;
 // @public
 export interface GroupActionProps {
     // (undocumented)
-    displayStrings?: Partial<typeof defaultDisplayStrings_2>;
+    displayStrings?: Partial<ReturnType<typeof getDefaultDisplayStrings_2>>;
     // (undocumented)
     group?: GroupMinimal;
     // (undocumented)
@@ -216,6 +218,22 @@ export class GroupingMappingProvider implements UiItemsProvider {
     readonly id = "GroupingMappingProvider";
     // (undocumented)
     provideWidgets(_stageId: string, stageUsage: string, location: StagePanelLocation, section?: StagePanelSection): ReadonlyArray<Widget>;
+}
+
+// @public
+export class GroupingMappingWidget {
+    static get i18n(): Localization;
+    static get i18nNamespace(): string;
+    static initialize(config?: GroupingMappingWidgetConfig): Promise<void>;
+    static terminate(): void;
+    static translate(key: string | string[], options?: TranslationOptions): string;
+}
+
+// @public (undocumented)
+export interface GroupingMappingWidgetConfig {
+    // (undocumented)
+    localization?: Localization;
+    localizationOverrides?: Map<string, string>;
 }
 
 // @public
@@ -375,7 +393,7 @@ export const MappingAction: ({ mapping, onSaveSuccess, onClickCancel, displayStr
 // @public
 export interface MappingActionProps {
     // (undocumented)
-    displayStrings?: Partial<typeof defaultDisplayStrings>;
+    displayStrings?: Partial<ReturnType<typeof getDefaultDisplayStrings>>;
     // (undocumented)
     mapping?: Mapping;
     // (undocumented)
@@ -399,7 +417,7 @@ export interface MappingsOperationsProps extends GroupingMappingApiConfig {
 // @public
 export interface MappingsProps {
     // (undocumented)
-    displayStrings?: Partial<typeof mappingViewDefaultDisplayStrings>;
+    displayStrings?: Partial<ReturnType<typeof getMappingViewDefaultDisplayStrings>>;
     // (undocumented)
     hideRefreshIcon?: boolean;
     // (undocumented)
@@ -418,7 +436,7 @@ export interface MappingsViewProps {
     // (undocumented)
     alert?: React_3.ReactElement<typeof Alert>;
     // (undocumented)
-    displayStrings?: Partial<typeof mappingViewDefaultDisplayStrings>;
+    displayStrings?: Partial<ReturnType<typeof getMappingViewDefaultDisplayStrings>>;
     // (undocumented)
     extractionMessageData: ExtractionMessageData[];
     // (undocumented)
