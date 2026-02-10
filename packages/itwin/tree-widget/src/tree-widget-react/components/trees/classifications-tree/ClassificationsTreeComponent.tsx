@@ -16,22 +16,21 @@ import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { ClassificationsTreeProps } from "./ClassificationsTree.js";
 
 /** @alpha */
-interface ClassificationsTreeComponentProps
-  extends Pick<
-    ClassificationsTreeProps,
-    | "selectionStorage"
-    | "hierarchyLevelConfig"
-    | "selectionMode"
-    | "searchText"
-    | "emptyTreeContent"
-    | "getInlineActions"
-    | "getMenuActions"
-    | "getContextMenuActions"
-    | "getTreeItemProps"
-    | "hierarchyConfig"
-    | "getEditingProps"
-    | "treeLabel"
-  > {
+interface ClassificationsTreeComponentProps extends Pick<
+  ClassificationsTreeProps,
+  | "selectionStorage"
+  | "hierarchyLevelConfig"
+  | "selectionMode"
+  | "searchText"
+  | "emptyTreeContent"
+  | "getInlineActions"
+  | "getMenuActions"
+  | "getContextMenuActions"
+  | "getTreeItemProps"
+  | "hierarchyConfig"
+  | "getEditingProps"
+  | "treeLabel"
+> {
   /**
    * Viewport used for visibility controls.
    *
