@@ -28,25 +28,24 @@ import type { ModelsTreeProps } from "./ModelsTree.js";
 import type { ModelsTreeHeaderButtonProps, ModelsTreeHeaderButtonType } from "./ModelsTreeButtons.js";
 
 /** @public */
-interface ModelsTreeComponentProps
-  extends Pick<
-    ModelsTreeProps,
-    | "selectionStorage"
-    | "hierarchyLevelConfig"
-    | "selectionMode"
-    | "selectionPredicate"
-    | "hierarchyConfig"
-    | "visibilityHandlerOverrides"
-    | "getSearchPaths"
-    | "searchText"
-    | "emptyTreeContent"
-    | "getInlineActions"
-    | "getMenuActions"
-    | "getContextMenuActions"
-    | "getTreeItemProps"
-    | "getSubTreePaths"
-    | "treeLabel"
-  > {
+interface ModelsTreeComponentProps extends Pick<
+  ModelsTreeProps,
+  | "selectionStorage"
+  | "hierarchyLevelConfig"
+  | "selectionMode"
+  | "selectionPredicate"
+  | "hierarchyConfig"
+  | "visibilityHandlerOverrides"
+  | "getSearchPaths"
+  | "searchText"
+  | "emptyTreeContent"
+  | "getInlineActions"
+  | "getMenuActions"
+  | "getContextMenuActions"
+  | "getTreeItemProps"
+  | "getSubTreePaths"
+  | "treeLabel"
+> {
   /**
    * Renderers of header buttons. Defaults to:
    * ```ts

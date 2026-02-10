@@ -12,20 +12,19 @@ import { IModelContentTree } from "./IModelContentTree.js";
 import type { IModelContentTreeProps } from "./IModelContentTree.js";
 
 /** @beta */
-interface IModelContentTreeComponentProps
-  extends Pick<
-    IModelContentTreeProps,
-    | "selectionStorage"
-    | "hierarchyConfig"
-    | "hierarchyLevelConfig"
-    | "selectionMode"
-    | "emptyTreeContent"
-    | "getInlineActions"
-    | "getMenuActions"
-    | "getContextMenuActions"
-    | "getTreeItemProps"
-    | "treeLabel"
-  > {
+interface IModelContentTreeComponentProps extends Pick<
+  IModelContentTreeProps,
+  | "selectionStorage"
+  | "hierarchyConfig"
+  | "hierarchyLevelConfig"
+  | "selectionMode"
+  | "emptyTreeContent"
+  | "getInlineActions"
+  | "getMenuActions"
+  | "getContextMenuActions"
+  | "getTreeItemProps"
+  | "treeLabel"
+> {
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
