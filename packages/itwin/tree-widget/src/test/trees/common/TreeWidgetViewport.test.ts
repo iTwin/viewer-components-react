@@ -21,6 +21,7 @@ describe("TreeWidgetViewport", () => {
       backendProps: {
         caching: {
           hierarchies: {
+            // eslint-disable-next-line @typescript-eslint/no-deprecated
             mode: HierarchyCacheMode.Memory,
           },
         },

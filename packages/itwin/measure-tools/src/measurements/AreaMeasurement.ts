@@ -6,7 +6,7 @@
 import type { Id64String } from "@itwin/core-bentley";
 import type { XYZProps } from "@itwin/core-geometry";
 import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
-import { Geometry, IModelJson, Point3d, PointString3d, PolygonOps } from "@itwin/core-geometry";
+import { Geometry, IModelJson, Point3d, PointString3d, PolygonOps, Transform } from "@itwin/core-geometry";
 import { FormatterUtils } from "../api/FormatterUtils.js";
 import { StyleSet, WellKnownGraphicStyleType } from "../api/GraphicStyle.js";
 import { Measurement, MeasurementPickContext, MeasurementSerializer } from "../api/Measurement.js";
@@ -39,9 +39,9 @@ export interface AreaMeasurementProps extends MeasurementProps {
 
 /** Formatting properties for area measurement. */
 export interface AreaMeasurementFormattingProps {
-  /** Defaults to "AecUnits.LENGTH" and "Units.M" */
+  /** Defaults to "DefaultToolsUnits.LENGTH" and "Units.M" */
   length?: MeasurementFormattingProps;
-  /** Defaults to "AecUnits.AREA" and "Units.SQ_M" */
+  /** Defaults to "DefaultToolsUnits.AREA" and "Units.SQ_M" */
   area? : MeasurementFormattingProps;
 }
 
@@ -159,13 +159,13 @@ export class AreaMeasurement extends Measurement {
   constructor(props?: AreaMeasurementProps) {
     super(props);
 
-    this._polygon = new Polygon([], false, undefined, undefined, props?.formatting?.area);
+    this._polygon = new Polygon([], false, undefined, props?.formatting?.area);
     this._polygon.textMarker.setMouseButtonHandler(
       this.handleTextMarkerButtonEvent.bind(this)
     );
-    this._lengthKoQ = "AecUnits.LENGTH";
+    this._lengthKoQ = "DefaultToolsUnits.LENGTH";
     this._lengthPersistenceUnitName = "Units.M";
-    this._areaKoQ = "AecUnits.AREA";
+    this._areaKoQ = "DefaultToolsUnits.AREA";
     this._areaPersistenceUnitName = "Units.SQ_M";
     this._polygon.textMarker.transientHiliteId = this.transientId;
     this._polygon.makeSelectable(true);
@@ -364,7 +364,7 @@ export class AreaMeasurement extends Measurement {
   }
 
   public override onDrawingMetadataChanged(): void {
-    this.polygon.worldScale = this.worldScale;
+    this.polygon.sheetToWorldTransform = this.drawingMetadata?.sheetToWorldTransformv2 ?? Transform.createIdentity();
     this._polygon.recomputeFromPoints();
   }
 
@@ -466,11 +466,11 @@ export class AreaMeasurement extends Measurement {
     const areaSpec = FormatterUtils.getFormatterSpecWithFallback(this._areaKoQ, QuantityType.Area);
 
     const fPerimeter = await FormatterUtils.formatLength(
-      this.worldScale * this._polygon.perimeter,
+      this._polygon.perimeter,
       lengthSpec
     );
     const fArea = await FormatterUtils.formatArea(
-      this.worldScale * this.worldScale * this._polygon.area,
+      this._polygon.area,
       areaSpec
     );
     const fAreaXY = await FormatterUtils.formatArea(

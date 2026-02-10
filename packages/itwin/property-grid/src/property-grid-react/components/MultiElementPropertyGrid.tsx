@@ -172,10 +172,10 @@ export function AncestorsNavigationControls({ navigateUp, navigateDown, canNavig
 
   return (
     <>
-      <IconButton styleType="borderless" title={PropertyGridManager.translate("header.navigateUp")} onClick={navigateUp} disabled={!canNavigateUp}>
+      <IconButton styleType="borderless" label={PropertyGridManager.translate("header.navigateUp")} onClick={navigateUp} disabled={!canNavigateUp}>
         <SvgArrowUp />
       </IconButton>
-      <IconButton styleType="borderless" title={PropertyGridManager.translate("header.navigateDown")} onClick={navigateDown} disabled={!canNavigateDown}>
+      <IconButton styleType="borderless" label={PropertyGridManager.translate("header.navigateDown")} onClick={navigateDown} disabled={!canNavigateDown}>
         <SvgArrowDown />
       </IconButton>
     </>
@@ -199,7 +199,7 @@ function HeaderControls({ multipleElementsSelected, ancestorsNavigationProps, an
       className="property-grid-react-multi-select-icon"
       styleType="borderless"
       onClick={onElementListButtonClick}
-      title={PropertyGridManager.translate("element-list.title")}
+      label={PropertyGridManager.translate("element-list.title")}
     >
       <SvgPropertiesList />
     </IconButton>

@@ -61,5 +61,6 @@ function Loader() {
 }
 
 function ErrorState({ error }: FallbackProps) {
-  return <NonIdealState svg={<SvgError />} heading={"An error occurred"} description={error.message} />;
+  const message = error instanceof Error ? error.message : JSON.stringify(error);
+  return <NonIdealState svg={<SvgError />} heading={"An error occurred"} description={message} />;
 }

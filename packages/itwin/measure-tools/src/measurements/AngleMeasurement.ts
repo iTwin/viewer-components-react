@@ -31,7 +31,7 @@ export interface AngleMeasurementProps extends MeasurementProps {
 
 /** Formatting properties for angle measurement. */
 export interface AngleMeasurementFormattingProps {
-  /** Defaults to "AecUnits.ANGLE" and "Units.RAD" */
+  /** Defaults to "DefaultToolsUnits.ANGLE" and "Units.RAD" */
   angle?: MeasurementFormattingProps;
 }
 
@@ -79,7 +79,7 @@ export class AngleMeasurement extends Measurement {
     super();
 
     this._isDynamic = false;
-    this._angleKoQ = "AecUnits.ANGLE";
+    this._angleKoQ = "DefaultToolsUnits.ANGLE";
     this._anglePersistenceUnitName = "Units.RAD";
     if (props) this.readFromJSON(props);
 

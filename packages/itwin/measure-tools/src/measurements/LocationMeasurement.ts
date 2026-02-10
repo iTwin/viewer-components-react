@@ -42,13 +42,13 @@ export interface LocationMeasurementProps extends MeasurementProps {
 
 /** Formatting properties for location measurement. */
 export interface LocationMeasurementFormattingProps {
-  /** Defaults to "AecUnits.LENGTH_COORDINATE" and "Units.M" */
+  /** Defaults to "DefaultToolsUnits.LENGTH_COORDINATE" and "Units.M" */
   coordinate?: MeasurementFormattingProps;
-  /** Defaults to "AecUnits.LENGTH" and "Units.M" */
+  /** Defaults to "DefaultToolsUnits.LENGTH" and "Units.M" */
   length?: MeasurementFormattingProps;
-  /** Defaults to "RoadRailUnits.STATION" and "Units.M" */
+  /** Defaults to "CivilUnits.STATION" and "Units.M" */
   station?: MeasurementFormattingProps;
-  /** Defaults to "AecUnits.ANGLE" and "Units.RAD" */
+  /** Defaults to "DefaultToolsUnits.ANGLE" and "Units.RAD" */
   angle?: MeasurementFormattingProps;
 }
 /** Serializer for a [[LocationMeasurement]]. */
@@ -210,13 +210,13 @@ export class LocationMeasurement extends Measurement {
 
     this._location = Point3d.createZero();
     this._isDynamic = false;
-    this._coordinateKoQ = "AecUnits.LENGTH_COORDINATE";
+    this._coordinateKoQ = "DefaultToolsUnits.LENGTH_COORDINATE";
     this._coordinatePersistenceUnitName = "Units.M";
-    this._lengthKoQ = "AecUnits.LENGTH";
+    this._lengthKoQ = "DefaultToolsUnits.LENGTH";
     this._lengthPersistenceUnitName = "Units.M";
-    this._stationKoQ = "RoadRailUnits.STATION";
+    this._stationKoQ = "CivilUnits.STATION";
     this._stationPersistenceUnitName = "Units.M";
-    this._angleKoQ = "AecUnits.ANGLE";
+    this._angleKoQ = "DefaultToolsUnits.ANGLE";
     this._anglePersistenceUnitName = "Units.RAD";
     this.getSnapId(); // Preload transient ID"s since we normally don not have these as dynamic
 

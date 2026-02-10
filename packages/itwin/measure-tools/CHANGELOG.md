@@ -1,8 +1,28 @@
 # Change Log - @itwin/measure-tools-react
 
-<!-- This log was last generated on Wed, 19 Nov 2025 16:26:23 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 15 Jan 2026 14:30:28 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.32.0
+
+Thu, 15 Jan 2026 14:30:28 GMT
+
+### Minor changes
+
+- Update default KoQs used by measuring tools ([#1525](https://github.com/iTwin/viewer-components-react/pull/1525))
+
+## 0.31.0
+
+Fri, 21 Nov 2025 16:14:12 GMT
+
+### Minor changes
+
+- Distance and Area tools working with vertical exaggeration ([#1521](https://github.com/iTwin/viewer-components-react/pull/1521))
+
+### Patches
+
+- Fixed sheetToWorld transform displaying incorrect world values. ([#1520](https://github.com/iTwin/viewer-components-react/pull/1520))
 
 ## 0.30.0
 

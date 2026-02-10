@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 // WARNING: The order of imports in this file is important!
 
-/// setup chai
-import chai from "chai";
+// setup chai
+import * as chai from "chai";
 import sinonChai from "sinon-chai";
 chai.use(sinonChai);
 
@@ -14,7 +14,7 @@ import globalJsdom from "global-jsdom";
 import * as jsdom from "jsdom";
 
 globalJsdom(undefined, {
-  virtualConsole: new jsdom.VirtualConsole().sendTo(console, { omitJSDOMErrors: true }),
+  virtualConsole: new jsdom.VirtualConsole().forwardTo(console, { jsdomErrors: "none" }),
 });
 
 // polyfill ResizeObserver

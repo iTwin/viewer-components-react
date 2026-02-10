@@ -118,7 +118,7 @@ describe("<ElementList />", () => {
   describe("performance tracking", () => {
     const onPerformanceMeasuredStub = sinon.stub<[PerformanceTrackedFeatures, number], void>();
 
-    function Wrapper({ children }: PropsWithChildren<{}>) {
+    function Wrapper({ children }: PropsWithChildren<object>) {
       return <TelemetryContextProvider onPerformanceMeasured={onPerformanceMeasuredStub}>{children}</TelemetryContextProvider>;
     }
 

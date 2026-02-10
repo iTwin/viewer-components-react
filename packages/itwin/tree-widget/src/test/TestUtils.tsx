@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { createElement, Fragment, StrictMode } from "react";
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { EmptyLocalization } from "@itwin/core-common";
@@ -11,7 +10,7 @@ import { renderHook as renderHookRTL, render as renderRTL } from "@testing-libra
 import { userEvent } from "@testing-library/user-event";
 import { TreeWidget } from "../tree-widget-react/TreeWidget.js";
 
-import type { PropsWithChildren, ReactElement } from "react";
+import type { ReactElement } from "react";
 import type { RenderHookOptions, RenderHookResult, RenderOptions, RenderResult } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
 
@@ -93,35 +92,21 @@ export async function* createAsyncIterator<T>(values: T[]): AsyncIterableIterato
   }
 }
 
-function createWrapper(wrapper?: React.JSXElementConstructor<{ children: React.ReactElement }>, disableStrictMode?: boolean) {
-  // if `DISABLE_STRICT_MODE` is set do not wrap components into `StrictMode` component
-  const StrictModeWrapper = process.env.DISABLE_STRICT_MODE || disableStrictMode ? Fragment : StrictMode;
-
-  return wrapper
-    ? ({ children }: PropsWithChildren<unknown>) => <StrictModeWrapper>{createElement(wrapper, undefined, children)}</StrictModeWrapper>
-    : StrictModeWrapper;
-}
-
 /**
  * Custom render function that wraps around `render` function from `@testing-library/react` and additionally
  * setup `userEvent` from `@testing-library/user-event`.
  *
  * It should be used when test need to do interactions with rendered components.
  */
-function customRender(ui: ReactElement, options?: RenderOptions & { disableStrictMode?: boolean }): RenderResult & { user: UserEvent } {
-  const wrapper = createWrapper(options?.wrapper, options?.disableStrictMode);
+function customRender(ui: ReactElement, options?: RenderOptions): RenderResult & { user: UserEvent } {
   return {
-    ...renderRTL(ui, { ...options, wrapper }),
+    ...renderRTL(ui, options),
     user: userEvent.setup(),
   };
 }
 
-function customRenderHook<Result, Props>(
-  render: (initialProps: Props) => Result,
-  options?: RenderHookOptions<Props> & { disableStrictMode?: boolean },
-): RenderHookResult<Result, Props> {
-  const wrapper = createWrapper(options?.wrapper, options?.disableStrictMode);
-  return renderHookRTL(render, { ...options, wrapper });
+function customRenderHook<Result, Props>(render: (initialProps: Props) => Result, options?: RenderHookOptions<Props>): RenderHookResult<Result, Props> {
+  return renderHookRTL(render, options);
 }
 
 export * from "@testing-library/react";

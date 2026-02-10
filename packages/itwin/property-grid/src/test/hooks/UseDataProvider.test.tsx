@@ -47,7 +47,7 @@ describe("useDataProvider", () => {
     let getDataStub: sinon.SinonStub<Parameters<PresentationPropertyDataProvider["getData"]>, ReturnType<PresentationPropertyDataProvider["getData"]>>;
     const onPerformanceMeasuredStub = sinon.stub<[PerformanceTrackedFeatures, number], void>();
 
-    function Wrapper({ children }: PropsWithChildren<{}>) {
+    function Wrapper({ children }: PropsWithChildren<object>) {
       return <TelemetryContextProvider onPerformanceMeasured={onPerformanceMeasuredStub}>{children}</TelemetryContextProvider>;
     }
 

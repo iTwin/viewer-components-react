@@ -193,6 +193,10 @@
   border-bottom: none;
 }
 
+.quantityFormat--formatSetSelector-badge {
+  flex-shrink: 0; /* Prevents badge from shrinking */
+}
+
 /* Format Set Panel Styles */
 .quantityFormat--formatSetPanel-container {
   flex-direction: column;

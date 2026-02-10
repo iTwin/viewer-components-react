@@ -10,9 +10,9 @@ export {
   PropertyGridWidgetId,
   PropertyGridWidgetProps,
   createPropertyGrid,
-  // eslint-disable-next-line deprecation/deprecation
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   PropertyGridUiItemsProvider,
-  // eslint-disable-next-line deprecation/deprecation
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   PropertyGridUiItemsProviderProps,
 } from "./property-grid-react/PropertyGridUiItemsProvider.js";
 

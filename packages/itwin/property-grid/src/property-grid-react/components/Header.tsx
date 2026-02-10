@@ -55,7 +55,7 @@ function DebouncedSearchBox({ onSearchStringChange, onClose, onOpen, className }
   return (
     <SearchBox expandable onCollapse={onClose} onExpand={onOpen} className={className}>
       <SearchBox.CollapsedState>
-        <SearchBox.ExpandButton title={PropertyGridManager.translate("search-bar.open")} styleType="borderless" />
+        <SearchBox.ExpandButton label={PropertyGridManager.translate("search-bar.open")} styleType="borderless" />
       </SearchBox.CollapsedState>
       <SearchBox.ExpandedState>
         <SearchBox.Input
@@ -64,7 +64,7 @@ function DebouncedSearchBox({ onSearchStringChange, onClose, onOpen, className }
           onChange={(e) => setInputValue(e.currentTarget.value)}
         />
         <SearchBox.CollapseButton
-          title={PropertyGridManager.translate("search-bar.close")}
+          label={PropertyGridManager.translate("search-bar.close")}
           onClick={() => {
             setInputValue("");
           }}
@@ -85,7 +85,7 @@ export function Header({ className, onBackButtonClick, headerTools, title, onSea
           <IconButton
             styleType="borderless"
             onClick={onBackButtonClick}
-            title={PropertyGridManager.translate("header.back")}
+            label={PropertyGridManager.translate("header.back")}
             className="property-grid-react-header-back-button"
           >
             <SvgProgressBackwardCircular />

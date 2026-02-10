@@ -56,5 +56,12 @@ module.exports = [
       curly: ["error", "all"],
     },
   },
+  {
+    files: ["**/{test,e2e-tests}/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-non-null-assertion": "off",
+      "@typescript-eslint/unbound-method": "off",
+    },
+  },
   eslintConfigPrettier,
 ];

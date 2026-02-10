@@ -24,6 +24,7 @@ import type { Localization } from '@itwin/core-common';
 import { NamedExoticComponent } from 'react';
 import type { NonGroupingHierarchyNode } from '@itwin/presentation-hierarchies';
 import type { PropsWithChildren } from 'react';
+import type { ReactElement } from 'react';
 import type { ReactNode } from 'react';
 import type { SelectionStorage } from '@itwin/presentation-hierarchies-react';
 import { StrataKitTreeRenderer } from '@itwin/presentation-hierarchies-react';
@@ -412,7 +413,7 @@ interface ModelsTreeHeaderButtonProps extends TreeToolbarButtonProps {
 }
 
 // @public (undocumented)
-type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => React.ReactElement | null;
+type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => ReactElement | null;
 
 // @beta
 interface ModelsTreeHierarchyConfiguration {
