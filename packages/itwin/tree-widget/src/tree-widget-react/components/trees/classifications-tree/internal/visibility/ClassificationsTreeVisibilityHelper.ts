@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { mergeMap } from "rxjs";
+import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 
 import type { Observable } from "rxjs";
@@ -41,6 +42,7 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
         this.getCategoriesVisibilityStatus({
           modelId: undefined,
           categoryIds: categories,
+          returnOnEmpty: createVisibilityStatus("disabled"),
         }),
       ),
     );
@@ -57,6 +59,7 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
         this.getCategoriesVisibilityStatus({
           modelId: undefined,
           categoryIds: categories,
+          returnOnEmpty: createVisibilityStatus("disabled"),
         }),
       ),
     );
