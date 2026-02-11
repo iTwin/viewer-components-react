@@ -77,7 +77,6 @@ import type {
   IInstanceLabelSelectClauseFactory,
   InstanceKey,
 } from "@itwin/presentation-shared";
-import type { ElementId } from "../common/internal/Types.js";
 import type { NormalizedHierarchySearchPath } from "../common/Utils.js";
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 
@@ -496,15 +495,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     });
     const modeledElements = await firstValueFrom(
       from(modelIds).pipe(
-        mergeMap((modelId) =>
-          from(categoryIds).pipe(
-            mergeMap((categoryId) => this.#idsCache.getCategoryModeledElements({ modelId, categoryId })),
-            reduce((acc, foundModeledElements) => {
-              foundModeledElements.forEach((modeledElementId) => acc.push(modeledElementId));
-              return acc;
-            }, new Array<ElementId>()),
-          ),
-        ),
+        mergeMap((modelId) => from(categoryIds).pipe(mergeMap((categoryId) => this.#idsCache.getCategoryModeledElements({ modelId, categoryId })))),
+        toArray(),
       ),
     );
     const bindings = new Array<ECSqlBinding>();

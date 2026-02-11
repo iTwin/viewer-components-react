@@ -3,12 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, map, reduce, shareReplay } from "rxjs";
+import { defer, map, mergeMap, reduce, shareReplay } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
 
 import type { Observable } from "rxjs";
-import type { GuidString, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { CategoryId, ElementId, ModelId } from "../Types.js";
 
@@ -144,9 +144,9 @@ export class ModeledElementsCache {
     );
   }
 
-  public getCategoryModeledElements({ modelId, categoryId }: { modelId: Id64String; categoryId: Id64String }): Observable<Id64Array | Id64Set> {
+  public getCategoryModeledElements({ modelId, categoryId }: { modelId: Id64String; categoryId: Id64String }): Observable<Id64String> {
     return this.getModeledElementsInfo().pipe(
-      map(({ modelWithCategoryModeledElements }) => {
+      mergeMap(({ modelWithCategoryModeledElements }) => {
         const categoryMap = modelWithCategoryModeledElements.get(modelId);
         if (!categoryMap) {
           return [];

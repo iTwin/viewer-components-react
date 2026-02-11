@@ -575,10 +575,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     const modeledElements = await firstValueFrom(
       from(modelIds).pipe(
         mergeMap((modelId) => from(categoryIds).pipe(mergeMap((categoryId) => this.#idsCache.getCategoryModeledElements({ modelId, categoryId })))),
-        reduce((acc, foundModeledElements) => {
-          foundModeledElements.forEach((modeledElementId) => acc.push(modeledElementId));
-          return acc;
-        }, new Array<ElementId>()),
+        toArray(),
       ),
     );
     const bindings = new Array<ECSqlBinding>();

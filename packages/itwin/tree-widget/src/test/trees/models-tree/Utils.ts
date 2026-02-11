@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concatMap, EMPTY, expand, from, of, toArray } from "rxjs";
+import { concatMap, EMPTY, expand, from, mergeAll, of, toArray } from "rxjs";
 import sinon from "sinon";
 import { Id64 } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
@@ -123,7 +123,9 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       return of(new Map());
     }),
     getSubModelsUnderElement: sinon.stub<[Id64String], Observable<Id64Array>>().callsFake(() => of([])),
-    getCategoryModeledElements: sinon.stub<[{ modelId: Id64String; categoryId: Id64String }], Observable<Id64Array | Id64Set>>().callsFake(() => of([])),
+    getCategoryModeledElements: sinon
+      .stub<[{ modelId: Id64String; categoryId: Id64String }], Observable<Id64String>>()
+      .callsFake(() => of([]).pipe(mergeAll())),
   });
 }
 

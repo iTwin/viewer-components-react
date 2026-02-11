@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, defaultIfEmpty, defer, EMPTY, from, map, merge, mergeAll, mergeMap, of, reduce } from "rxjs";
+import { concat, defer, EMPTY, from, map, merge, mergeAll, mergeMap, of, toArray } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
@@ -487,24 +487,20 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
   private getSubModels(props: Parameters<BaseIdsCache["getSubModels"]>[0]): ReturnType<BaseIdsCache["getSubModels"]> {
     if (props.modelId) {
       if (props.categoryId) {
-        return this.#props.idsCache.getCategoryModeledElements({ modelId: props.modelId, categoryId: props.categoryId });
+        return this.#props.idsCache.getCategoryModeledElements({ modelId: props.modelId, categoryId: props.categoryId }).pipe(toArray());
       }
 
       return this.#props.idsCache.getModelCategoryIds({ modelId: props.modelId }).pipe(
         mergeAll(),
         mergeMap((modelCategoryId) => this.#props.idsCache.getCategoryModeledElements({ modelId: props.modelId!, categoryId: modelCategoryId })),
-        defaultIfEmpty([]),
+        toArray(),
       );
     }
 
     return this.#props.idsCache.getCategoryElementModels({ categoryId: props.categoryId! }).pipe(
       mergeAll(),
       mergeMap((modelId) => this.#props.idsCache.getCategoryModeledElements({ modelId, categoryId: props.categoryId! })),
-      reduce((acc, subModels) => {
-        subModels.forEach((subModel) => acc.push(subModel));
-        return acc;
-      }, new Array<string>()),
-      defaultIfEmpty([]),
+      toArray(),
     );
   }
 }

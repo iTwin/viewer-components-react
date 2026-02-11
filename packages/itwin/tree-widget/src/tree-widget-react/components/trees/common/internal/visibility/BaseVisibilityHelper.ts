@@ -77,7 +77,9 @@ export interface BaseIdsCache {
   getSubCategories: (props: { categoryId: Id64String }) => Observable<Id64Array>;
   getModels: (props: { categoryId: Id64String; includeOnlyIfCategoryOfTopMostElement?: boolean }) => Observable<Id64Arg>;
   getCategories: (props: { modelId: Id64String; includeOnlyIfCategoryOfTopMostElement?: boolean }) => Observable<Id64Arg>;
-  getSubModels: (props: { modelId: Id64String; categoryId?: Id64String } | { categoryId: Id64String; modelId: Id64String | undefined }) => Observable<Id64Arg>;
+  getSubModels: (
+    props: { modelId: Id64String; categoryId?: Id64String } | { categoryId: Id64String; modelId: Id64String | undefined },
+  ) => Observable<Id64Array>;
   getAllCategoriesOfElements: () => Observable<Id64Set>;
   getChildElementsTree: (props: { elementIds: Id64Arg }) => Observable<ChildrenTree>;
   getAllChildElementsCount: (props: { elementIds: Id64Arg }) => Observable<Map<Id64String, number>>;
