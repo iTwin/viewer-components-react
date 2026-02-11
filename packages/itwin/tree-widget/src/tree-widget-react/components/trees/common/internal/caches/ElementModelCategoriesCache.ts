@@ -121,9 +121,8 @@ export class ElementModelCategoriesCache {
         const categoryModels = new Array<ModelId>();
         modelCategories.forEach(({ allCategories, categoriesOfTopMostElements, isSubModel }, modelId) => {
           if (
-            (includeSubModels || !isSubModel) && props.includeOnlyIfCategoryOfTopMostElement
-              ? categoriesOfTopMostElements.has(categoryId)
-              : allCategories.has(categoryId)
+            (includeSubModels || !isSubModel) &&
+            (props.includeOnlyIfCategoryOfTopMostElement ? categoriesOfTopMostElements.has(categoryId) : allCategories.has(categoryId))
           ) {
             categoryModels.push(modelId);
           }
