@@ -264,7 +264,7 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
   private queryAlwaysOrNeverDrawnElementInfo(set: ReadonlySet<Id64String> | undefined, setType: SetType): Observable<CachedNodesMap> {
     const elementInfo = set?.size
       ? set.size > 5000
-        ? // Buffer only when set is larger to not block main thread for long periods of time
+        ? // When set is larger, buffer helps to not block main thread for long periods of time
           from(set).pipe(
             bufferCount(getOptimalBatchSize({ totalSize: set.size, maximumBatchSize: 5000 })),
             releaseMainThreadOnItemsCount(2),
