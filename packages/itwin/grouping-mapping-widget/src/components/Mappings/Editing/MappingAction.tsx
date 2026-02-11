@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { Fieldset, LabeledInput, Text, ToggleSwitch } from "@itwin/itwinui-react";
 import React, { useState } from "react";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 import ActionPanel from "../../SharedComponents/ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../../Properties/hooks/useValidator";
 import "./MappingAction.scss";
@@ -13,9 +14,9 @@ import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigCont
 import { handleInputChange } from "../../../common/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const defaultDisplayStrings = {
-  mappingDetails: "Mapping Details",
-};
+const getDefaultDisplayStrings = () => ({
+  mappingDetails: GroupingMappingWidget.translate("mappings.mappingDetails"),
+});
 
 /**
  * Props for the {@link MappingAction} component.
@@ -25,7 +26,7 @@ export interface MappingActionProps {
   mapping?: Mapping;
   onSaveSuccess: () => void;
   onClickCancel?: () => void;
-  displayStrings?: Partial<typeof defaultDisplayStrings>;
+  displayStrings?: Partial<ReturnType<typeof getDefaultDisplayStrings>>;
 }
 
 /**
@@ -43,7 +44,7 @@ export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displaySt
   const [validator, showValidationMessage] = useValidator();
   const queryClient = useQueryClient();
 
-  const displayStrings = React.useMemo(() => ({ ...defaultDisplayStrings, ...userDisplayStrings }), [userDisplayStrings]);
+  const displayStrings = React.useMemo(() => ({ ...getDefaultDisplayStrings(), ...userDisplayStrings }), [userDisplayStrings]);
 
   const { mutate: saveMutation, isLoading } = useMutation({
     mutationFn: async (newMapping: MappingCreate) => {
@@ -74,12 +75,12 @@ export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displaySt
       <div className="gmw-details-form-container">
         <Fieldset legend={displayStrings.mappingDetails} className="gmw-details-form">
           <Text variant="small" as="small" className="gmw-field-legend">
-            Asterisk * indicates mandatory fields.
+            {GroupingMappingWidget.translate("common.mandatoryFields")}
           </Text>
           <LabeledInput
             id="name"
             name="name"
-            label="Name"
+            label={GroupingMappingWidget.translate("common.name")}
             value={values.name}
             required
             onChange={(event) => {
@@ -99,7 +100,7 @@ export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displaySt
           <LabeledInput
             id="description"
             name="description"
-            label="Description"
+            label={GroupingMappingWidget.translate("common.description")}
             value={values.description}
             onChange={(event) => {
               handleInputChange(event, values, setValues);
@@ -108,7 +109,7 @@ export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displaySt
           <ToggleSwitch
             id="extractionEnabled"
             name="extractionEnabled"
-            label="Extract data from iModel"
+            label={GroupingMappingWidget.translate("mappings.extractDataFromIModel")}
             labelPosition="right"
             checked={values.extractionEnabled}
             onChange={(event) => {

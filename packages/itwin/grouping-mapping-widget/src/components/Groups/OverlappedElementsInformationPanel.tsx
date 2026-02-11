@@ -12,6 +12,7 @@ import type { OverlappedInfo } from "../context/GroupHilitedElementsContext";
 import type { CellProps, Column } from "react-table";
 import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsContext";
 import { clearEmphasizedOverriddenElements, clearHiddenElements, visualizeElements, zoomToElements } from "../../common/viewerUtils";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 
 export interface OverlappedElementsInformationPanelProps {
   group?: GroupMinimal;
@@ -36,12 +37,12 @@ export const OverlappedElementsInformationPanel = ({ group, onClose, overlappedE
     (): Column<OverlappedTyped>[] => [
       {
         id: "number",
-        Header: "Overlapped elements",
+        Header: GroupingMappingWidget.translate("groups.overlappedElements"),
         accessor: "overlappedElements",
       },
       {
         id: "groups",
-        Header: "Groups",
+        Header: GroupingMappingWidget.translate("groups.overlappedGroups"),
         accessor: "groups",
         Cell: (value: CellProps<OverlappedTyped>) => {
           return (
@@ -99,7 +100,7 @@ export const OverlappedElementsInformationPanel = ({ group, onClose, overlappedE
         await zoomToElements(selectedData[0].elementsIds);
       }
     } catch (error) {
-      toaster.negative("There was an error visualizing overlapped elements.");
+      toaster.negative(GroupingMappingWidget.translate("groups.visualizingOverlappedError"));
       /* eslint-disable no-console */
       console.error(error);
     } finally {
@@ -110,13 +111,13 @@ export const OverlappedElementsInformationPanel = ({ group, onClose, overlappedE
   return (
     <InformationPanel isOpen={!!group} className="gmw-overlap-information">
       <InformationPanelHeader onClose={handleClose}>
-        <Text variant="leading">{`Overlap Info of ${group?.groupName}`}</Text>
+        <Text variant="leading">{GroupingMappingWidget.translate("groups.overlapInfoOf", { groupName: group?.groupName ?? "" })}</Text>
       </InformationPanelHeader>
       <InformationPanelBody className="gmw-information-body">
         <Table<OverlappedTyped>
           columns={columns}
           data={arr}
-          emptyTableContent="No Overlaps."
+          emptyTableContent={GroupingMappingWidget.translate("groups.noOverlaps")}
           isLoading={isOverlappedInfoLoading}
           isSortable={true}
           isSelectable

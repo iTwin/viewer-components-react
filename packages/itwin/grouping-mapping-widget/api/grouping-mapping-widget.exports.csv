@@ -28,6 +28,8 @@ public;GroupingMappingContextProps
 public;GroupingMappingCustomUI = GroupingCustomUI | ContextCustomUI
 public;GroupingMappingCustomUIType
 public;GroupingMappingProvider 
+public;GroupingMappingWidget
+public;GroupingMappingWidgetConfig
 public;GroupPropertyAction: ({ mappingId, group, groupProperty, onSaveSuccess, onClickCancel }: GroupPropertyActionProps) => JSX.Element
 public;GroupPropertyActionProps
 public;GroupQueryBuilderCustomUI: ({ updateQuery, isUpdating, resetView }: GroupingCustomUIProps) => JSX.Element

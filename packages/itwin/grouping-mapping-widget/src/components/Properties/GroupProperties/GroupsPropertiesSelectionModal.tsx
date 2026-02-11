@@ -17,6 +17,7 @@ import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { GroupPropertyListItem } from "./GroupPropertyListItem";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 
 export interface GroupPropertiesSelectionModalProps {
   showModal: boolean;
@@ -101,7 +102,7 @@ export const GroupsPropertiesSelectionModal = ({
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <Modal
-        title="Properties Selection"
+        title={GroupingMappingWidget.translate("properties.selectionModalTitle")}
         isOpen={showModal}
         onClose={() => {
           setShowModal(false);
@@ -130,14 +131,14 @@ export const GroupsPropertiesSelectionModal = ({
         >
           <Surface className="gmw-available-properties" elevation={1}>
             <div className="gmw-available-properties-header">
-              <Label as="span">Available Properties</Label>
+              <Label as="span">{GroupingMappingWidget.translate("properties.available")}</Label>
               <LabeledInput
                 displayStyle="inline"
                 iconDisplayStyle="inline"
                 className="gmw-available-prop-search"
                 value={searchInput}
                 size="small"
-                placeholder="Search...."
+                placeholder={GroupingMappingWidget.translate("common.search")}
                 onChange={(event) => {
                   const {
                     target: { value },
@@ -151,11 +152,11 @@ export const GroupsPropertiesSelectionModal = ({
                 }}
                 svgIcon={
                   searched ? (
-                    <IconButton onClick={clearSearch} styleType="borderless" title="Clear Search">
+                    <IconButton onClick={clearSearch} styleType="borderless" title={GroupingMappingWidget.translate("properties.clearSearch")}>
                       <SvgClose />
                     </IconButton>
                   ) : (
-                    <IconButton onClick={startSearch} styleType="borderless" title="Search">
+                    <IconButton onClick={startSearch} styleType="borderless" title={GroupingMappingWidget.translate("properties.searchButton")}>
                       <SvgSearch />
                     </IconButton>
                   )
@@ -164,7 +165,7 @@ export const GroupsPropertiesSelectionModal = ({
             </div>
             {filteredProperties.length === 0 ? (
               <div className="gmw-empty-selection">
-                <Text>No properties available. </Text>
+                <Text>{GroupingMappingWidget.translate("properties.noAvailable")}</Text>
               </div>
             ) : (
               <div className="gmw-properties-list">
@@ -184,11 +185,11 @@ export const GroupsPropertiesSelectionModal = ({
             )}
           </Surface>
           <Surface className="gmw-selected-properties" elevation={1}>
-            <Label as="span">Selected Properties</Label>
+            <Label as="span">{GroupingMappingWidget.translate("properties.selected")}</Label>
             {selectedProperties.length === 0 ? (
               <div className="gmw-empty-selection">
-                <Text>No properties selected.</Text>
-                <Text>Add some by clicking on the properties shown left.</Text>
+                <Text>{GroupingMappingWidget.translate("properties.noSelected")}</Text>
+                <Text>{GroupingMappingWidget.translate("properties.addHint")}</Text>
               </div>
             ) : (
               <div className="gmw-properties-list">
@@ -204,7 +205,7 @@ export const GroupsPropertiesSelectionModal = ({
                         <div>
                           <IconButton
                             styleType="borderless"
-                            title="Remove"
+                            title={GroupingMappingWidget.translate("common.remove")}
                             onClick={() => {
                               setSelectedProperties((sp) => sp.filter((p) => property.key !== p.key));
                             }}
@@ -228,7 +229,7 @@ export const GroupsPropertiesSelectionModal = ({
             }}
             styleType="high-visibility"
           >
-            Close
+            {GroupingMappingWidget.translate("common.close")}
           </Button>
         </ModalButtonBar>
       </Modal>

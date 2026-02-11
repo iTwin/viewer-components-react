@@ -5,6 +5,7 @@
 import type { TablePaginatorRendererProps } from "@itwin/itwinui-react";
 import { Button, Table, tableFilters, TablePaginator } from "@itwin/itwinui-react";
 import React, { useCallback, useMemo, useState } from "react";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 import { useMappingClient } from "../../context/MappingClientContext";
 import type { IMappingTyped } from "../Mappings";
 import "./SelectMapping.scss";
@@ -12,16 +13,16 @@ import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigCont
 import { useFetchMappings } from "../hooks/useFetchMappings";
 import type { Column } from "react-table";
 
-const defaultDisplayStrings = {
-  mappings: "Mappings",
-};
+const getDefaultDisplayStrings = () => ({
+  mappings: GroupingMappingWidget.translate("mappings.mappings"),
+});
 
 interface SelectMappingsProps {
   iModelId: string;
   onSelect: (selectedMappings: IMappingTyped[]) => void;
   onCancel: () => void;
   backFn: () => void;
-  displayStrings?: Partial<typeof defaultDisplayStrings>;
+  displayStrings?: Partial<ReturnType<typeof getDefaultDisplayStrings>>;
 }
 
 const SelectMappings = ({ iModelId, onSelect, onCancel, backFn, displayStrings: userDisplayStrings }: SelectMappingsProps) => {
@@ -31,7 +32,7 @@ const SelectMappings = ({ iModelId, onSelect, onCancel, backFn, displayStrings: 
 
   const { data: mappings, isFetching: isLoading } = useFetchMappings(iModelId, getAccessToken, mappingClient);
 
-  const displayStrings = React.useMemo(() => ({ ...defaultDisplayStrings, ...userDisplayStrings }), [userDisplayStrings]);
+  const displayStrings = React.useMemo(() => ({ ...getDefaultDisplayStrings(), ...userDisplayStrings }), [userDisplayStrings]);
 
   const mappingsColumns = useMemo<Column<IMappingTyped>[]>(
     () => [
@@ -43,7 +44,7 @@ const SelectMappings = ({ iModelId, onSelect, onCancel, backFn, displayStrings: 
       },
       {
         id: "description",
-        Header: "Description",
+        Header: GroupingMappingWidget.translate("common.description"),
         accessor: "description",
         Filter: tableFilters.TextFilter(),
       },
@@ -60,7 +61,7 @@ const SelectMappings = ({ iModelId, onSelect, onCancel, backFn, displayStrings: 
         data={mappings ?? []}
         columns={mappingsColumns}
         className="gmw-select-mapping-table"
-        emptyTableContent={`No ${displayStrings.mappings} available.`}
+        emptyTableContent={GroupingMappingWidget.translate("import.noMappings", { mappings: displayStrings.mappings })}
         isSortable
         isSelectable
         isLoading={isLoading}
@@ -70,7 +71,7 @@ const SelectMappings = ({ iModelId, onSelect, onCancel, backFn, displayStrings: 
         paginatorRenderer={paginator}
       />
       <div className="gmw-import-action-panel">
-        <Button onClick={backFn}>Back</Button>
+        <Button onClick={backFn}>{GroupingMappingWidget.translate("common.back")}</Button>
         <Button
           styleType="high-visibility"
           onClick={() => {
@@ -78,9 +79,9 @@ const SelectMappings = ({ iModelId, onSelect, onCancel, backFn, displayStrings: 
           }}
           disabled={isLoading || selectedMappings.length === 0}
         >
-          Next
+          {GroupingMappingWidget.translate("common.next")}
         </Button>
-        <Button onClick={onCancel}>Cancel</Button>
+        <Button onClick={onCancel}>{GroupingMappingWidget.translate("common.cancel")}</Button>
       </div>
     </div>
   );

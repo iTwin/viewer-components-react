@@ -7,6 +7,7 @@ import { Alert, Button, LabeledTextarea } from "@itwin/itwinui-react";
 import type { GroupingCustomUIProps } from "./GroupingMappingCustomUI";
 import { LoadingSpinner } from "../SharedComponents/LoadingSpinner";
 import "./SearchGroupingCustomUI.scss";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 
 /**
  * A default group query builder for the Grouping Mapping Widget that uses a generic query template to search for elements.
@@ -89,14 +90,14 @@ export const SearchGroupingCustomUI = ({ updateQuery, isUpdating, resetView }: G
 
   return (
     <div className="gmw-search-form">
-      <Alert type="informational">Generate a query by keywords. Keywords wrapped in double quotes will be considered a required criteria.</Alert>
+      <Alert type="informational">{GroupingMappingWidget.translate("customUI.searchQueryAlert")}</Alert>
       <LabeledTextarea
-        label="Query Keywords"
+        label={GroupingMappingWidget.translate("customUI.searchQueryLabel")}
         required
         value={searchInput}
         onChange={(event) => setSearchInput(event.target.value)}
         disabled={isUpdating}
-        placeholder={`E.g. "red" chair`}
+        placeholder={GroupingMappingWidget.translate("customUI.searchQueryPlaceholder")}
       />
       <div className="gmw-search-actions">
         {isUpdating && <LoadingSpinner />}
@@ -113,7 +114,7 @@ export const SearchGroupingCustomUI = ({ updateQuery, isUpdating, resetView }: G
             )
           }
         >
-          Apply
+          {GroupingMappingWidget.translate("common.apply")}
         </Button>
         <Button
           disabled={isUpdating}
@@ -125,7 +126,7 @@ export const SearchGroupingCustomUI = ({ updateQuery, isUpdating, resetView }: G
             }
           }}
         >
-          Clear
+          {GroupingMappingWidget.translate("common.clear")}
         </Button>
       </div>
     </div>

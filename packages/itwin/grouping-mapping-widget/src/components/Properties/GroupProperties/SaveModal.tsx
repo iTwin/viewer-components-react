@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { Button, Modal, ModalButtonBar, Text } from "@itwin/itwinui-react";
 import React from "react";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 
 export interface SaveModalProps {
   onSave: () => void;
@@ -14,16 +15,16 @@ export interface SaveModalProps {
 export const SaveModal = ({ onSave, onClose, showSaveModal }: SaveModalProps) => {
   return (
     <>
-      <Modal title="Confirm" modalRootId="grouping-mapping-widget" isOpen={showSaveModal} onClose={onClose}>
+      <Modal title={GroupingMappingWidget.translate("common.confirm")} modalRootId="grouping-mapping-widget" isOpen={showSaveModal} onClose={onClose}>
         <Text variant="leading" as="h3">
-          Are you sure you want to save this property with a new name? You may need to update this name in Custom Calculation formulas.
+          {GroupingMappingWidget.translate("shared.saveConfirm")}
         </Text>
         <ModalButtonBar>
           <Button styleType="high-visibility" onClick={onSave}>
-            Save
+            {GroupingMappingWidget.translate("common.save")}
           </Button>
           <Button onClick={onClose} styleType="default">
-            Cancel
+            {GroupingMappingWidget.translate("common.cancel")}
           </Button>
         </ModalButtonBar>
       </Modal>

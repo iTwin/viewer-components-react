@@ -7,7 +7,7 @@ import { useMappingClient } from "../context/MappingClientContext";
 import type { Mapping } from "@itwin/insights-client";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
 import type { CreateTypeFromInterface } from "../../common/utils";
-import type { mappingViewDefaultDisplayStrings } from "./MappingsView";
+import type { getMappingViewDefaultDisplayStrings } from "./MappingsView";
 import { MappingsView } from "./MappingsView";
 import { useMappingsOperations } from "./hooks/useMappingsOperations";
 
@@ -21,7 +21,7 @@ export interface MappingsProps {
   onClickAddMapping?: () => void;
   onClickMappingTitle?: (mapping: Mapping) => void;
   onClickMappingModify?: (mapping: Mapping) => void;
-  displayStrings?: Partial<typeof mappingViewDefaultDisplayStrings>;
+  displayStrings?: Partial<ReturnType<typeof getMappingViewDefaultDisplayStrings>>;
   hideRefreshIcon?: boolean;
 }
 

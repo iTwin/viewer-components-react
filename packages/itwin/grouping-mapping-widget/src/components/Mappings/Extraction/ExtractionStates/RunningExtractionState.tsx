@@ -4,9 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import { ProgressRadial } from "@itwin/itwinui-react";
+import { GroupingMappingWidget } from "../../../../GroupingMappingWidget";
 
 export const RunningExtractionState = () => (
-  <div title="Running" className="gmw-extraction-status-running">
+  <div title={GroupingMappingWidget.translate("extraction.running")} className="gmw-extraction-status-running">
     <ProgressRadial size="x-small" indeterminate />
   </div>
 );

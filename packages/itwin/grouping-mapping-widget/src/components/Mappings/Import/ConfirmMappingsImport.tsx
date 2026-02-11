@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { Button, LabeledInput, MiddleTextTruncation, ProgressLinear, Text } from "@itwin/itwinui-react";
 import React, { useEffect, useState } from "react";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 import type { IMappingTyped } from "../Mappings";
 import "./ConfirmMappingsImport.scss";
 import { SvgStatusSuccessHollow } from "@itwin/itwinui-icons-react";
@@ -12,9 +13,9 @@ import { useMappingClient } from "../../context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { useMutation } from "@tanstack/react-query";
 
-const defaultDisplayStrings = {
-  mappings: "Mappings",
-};
+const getDefaultDisplayStrings = () => ({
+  mappings: GroupingMappingWidget.translate("mappings.mappings"),
+});
 
 interface ConfirmMappingImportProps {
   selectedMappings: IMappingTyped[];
@@ -24,7 +25,7 @@ interface ConfirmMappingImportProps {
   backFn: () => void;
   onCancel: () => void;
   onFinish: () => void;
-  displayStrings?: Partial<typeof defaultDisplayStrings>;
+  displayStrings?: Partial<ReturnType<typeof getDefaultDisplayStrings>>;
 }
 
 const ConfirmMappingImport = ({
@@ -44,13 +45,13 @@ const ConfirmMappingImport = ({
   const [validator, showValidationMessage] = useValidator();
   const [errored, setErrored] = useState<boolean>(false);
 
-  const displayStrings = React.useMemo(() => ({ ...defaultDisplayStrings, ...userDisplayStrings }), [userDisplayStrings]);
+  const displayStrings = React.useMemo(() => ({ ...getDefaultDisplayStrings(), ...userDisplayStrings }), [userDisplayStrings]);
 
   useEffect(() => {
     setSelectedMappings((selectedMappings) =>
       selectedMappings.map((mapping) => ({
         ...mapping,
-        mappingName: `${mapping.mappingName}_Copy`,
+        mappingName: GroupingMappingWidget.translate("import.copySuffix", { name: mapping.mappingName }),
       })),
     );
   }, [setSelectedMappings]);
@@ -105,19 +106,19 @@ const ConfirmMappingImport = ({
               {!errored ? (
                 importCount !== selectedMappings.length ? (
                   <>
-                    <Text variant="title">Importing</Text>
-                    <Text>{`We are currently importing the ${displayStrings.mappings.toLocaleLowerCase()}.`}</Text>
+                    <Text variant="title">{GroupingMappingWidget.translate("import.importing")}</Text>
+                    <Text>{GroupingMappingWidget.translate("import.currentlyImporting", { mappings: displayStrings.mappings.toLocaleLowerCase() })}</Text>
                   </>
                 ) : (
                   <>
-                    <Text variant="title">Done!</Text>
-                    <Text>{`Your imported ${displayStrings.mappings.toLocaleLowerCase()} are ready.`}</Text>
+                    <Text variant="title">{GroupingMappingWidget.translate("import.done")}</Text>
+                    <Text>{GroupingMappingWidget.translate("import.importedReady", { mappings: displayStrings.mappings.toLocaleLowerCase() })}</Text>
                   </>
                 )
               ) : (
                 <>
-                  <Text variant="title">Error!</Text>
-                  <Text>{`Sorry, there was an error importing some or all ${displayStrings.mappings}.`}</Text>
+                  <Text variant="title">{GroupingMappingWidget.translate("import.error")}</Text>
+                  <Text>{GroupingMappingWidget.translate("import.importError", { mappings: displayStrings.mappings })}</Text>
                 </>
               )}
             </div>
@@ -125,10 +126,10 @@ const ConfirmMappingImport = ({
               value={(importCount / selectedMappings.length) * 100}
               labels={
                 importCount === selectedMappings.length
-                  ? ["Import done!", <SvgStatusSuccessHollow key="0" />]
+                  ? [GroupingMappingWidget.translate("import.importDone"), <SvgStatusSuccessHollow key="0" />]
                   : [
                       <>
-                        <Text>Copying</Text>
+                        <Text>{GroupingMappingWidget.translate("import.copying")}</Text>
                         <MiddleTextTruncation text={currentlyImporting} />
                       </>,
                       `${importCount}/${selectedMappings.length}`,
@@ -147,10 +148,10 @@ const ConfirmMappingImport = ({
                 setErrored(false);
               }}
             >
-              Back
+              {GroupingMappingWidget.translate("common.back")}
             </Button>
             <Button styleType="high-visibility" disabled={!errored && importCount !== selectedMappings.length} onClick={onFinish}>
-              Close
+              {GroupingMappingWidget.translate("common.close")}
             </Button>
           </div>
         </div>
@@ -160,7 +161,7 @@ const ConfirmMappingImport = ({
             <div className="gmw-mapping-row-header-container">
               <div className="gmw-mapping-row">
                 <Text variant="leading">{displayStrings.mappings}</Text>
-                <Text variant="leading">Description</Text>
+                <Text variant="leading">{GroupingMappingWidget.translate("common.description")}</Text>
               </div>
             </div>
             <div className="gmw-mapping-row-body">
@@ -193,11 +194,11 @@ const ConfirmMappingImport = ({
             </div>
           </div>
           <div className="gmw-import-action-panel">
-            <Button onClick={backFn}>Back</Button>
+            <Button onClick={backFn}>{GroupingMappingWidget.translate("common.back")}</Button>
             <Button styleType="high-visibility" onClick={async () => onImport()}>
-              Import
+              {GroupingMappingWidget.translate("common.import")}
             </Button>
-            <Button onClick={onCancel}>Cancel</Button>
+            <Button onClick={onCancel}>{GroupingMappingWidget.translate("common.cancel")}</Button>
           </div>
         </div>
       )}
