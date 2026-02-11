@@ -231,12 +231,12 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
   }
 
   public getSearchTargetsVisibilityStatus(targets: ClassificationsTreeSearchTargets): Observable<VisibilityStatus> {
+    if (this.#props.viewport.viewType !== "3d") {
+      return of(createVisibilityStatus("disabled"));
+    }
     return defer(() => {
       const { classificationIds, classificationTableIds, elements } = targets;
       const observables = new Array<Observable<VisibilityStatus>>();
-      if (this.#props.viewport.viewType !== "3d") {
-        return of(createVisibilityStatus("disabled"));
-      }
       if (classificationTableIds?.size) {
         observables.push(this.#visibilityHelper.getClassificationTablesVisibilityStatus({ classificationTableIds }));
       }
@@ -248,7 +248,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
         observables.push(this.getSearchTargetElementsVisibilityStatus({ elements }));
       }
 
-      return from(observables).pipe(mergeAll(), mergeVisibilityStatuses);
+      return from(observables).pipe(mergeAll(), mergeVisibilityStatuses());
     });
   }
 
@@ -313,7 +313,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
                     categoryOfTopMostParentElement,
                   })
                 : EMPTY,
-            ).pipe(mergeVisibilityStatuses);
+            ).pipe(mergeVisibilityStatuses());
           }),
         ),
       ),

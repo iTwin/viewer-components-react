@@ -82,7 +82,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
           categoryOfTopMostParentElement,
         }),
       ),
-      mergeVisibilityStatuses,
+      mergeVisibilityStatuses(),
     );
   }
 

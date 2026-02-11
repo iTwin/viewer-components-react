@@ -47,7 +47,7 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
 
       return this.#props.idsCache.getSubjectModelIds(subjectIds).pipe(
         mergeMap((modelIds) => this.getModelsVisibilityStatus({ modelIds })),
-        mergeVisibilityStatuses,
+        mergeVisibilityStatuses(),
       );
     });
     return this.#props.overrideHandler

@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, map, mergeMap, reduce } from "rxjs";
+import { bufferCount, EMPTY, map, mergeMap, of, reduce } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { QueryRowFormat } from "@itwin/core-common";
 import { reduceWhile, toVoidPromise } from "./Rxjs.js";
@@ -40,12 +40,22 @@ function mergeVisibilities(obs: Observable<Visibility>): Observable<Visibility |
 }
 
 /** @internal */
-export function mergeVisibilityStatuses(obs: Observable<VisibilityStatus>): Observable<VisibilityStatus> {
-  return obs.pipe(
-    map((visibilityStatus) => visibilityStatus.state),
-    mergeVisibilities,
-    map((visibility) => createVisibilityStatus(visibility === "empty" ? "disabled" : visibility)),
-  );
+export function mergeVisibilityStatuses(props?: { returnOnEmpty?: VisibilityStatus | "empty" }): OperatorFunction<VisibilityStatus, VisibilityStatus> {
+  return (obs: Observable<VisibilityStatus>) => {
+    return obs.pipe(
+      map((visibilityStatus) => visibilityStatus.state),
+      mergeVisibilities,
+      mergeMap((visibility) => {
+        if (visibility !== "empty") {
+          return of(createVisibilityStatus(visibility));
+        }
+        if (props?.returnOnEmpty !== "empty") {
+          return of(props?.returnOnEmpty ? props.returnOnEmpty : createVisibilityStatus("disabled"));
+        }
+        return EMPTY;
+      }),
+    );
+  };
 }
 
 /** @internal */

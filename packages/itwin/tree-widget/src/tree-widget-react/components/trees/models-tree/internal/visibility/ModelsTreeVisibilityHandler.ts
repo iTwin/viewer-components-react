@@ -316,12 +316,12 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       key: ClassGroupingNodeKey | InstancesNodeKey;
     },
   ): Observable<VisibilityStatus> {
+    if (this.#props.viewport.viewType !== "3d") {
+      return of(createVisibilityStatus("disabled"));
+    }
     return defer(() => {
       const { subjectIds, modelIds, categories, elements } = targets;
       const observables = new Array<Observable<VisibilityStatus>>();
-      if (this.#props.viewport.viewType !== "3d") {
-        return of(createVisibilityStatus("disabled"));
-      }
       if (subjectIds?.size) {
         observables.push(this.#visibilityHelper.getSubjectsVisibilityStatus({ subjectIds }));
       }
@@ -420,7 +420,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
                           categoryOfTopMostParentElement: categoryId,
                         })
                       : EMPTY,
-                  ).pipe(mergeVisibilityStatuses);
+                  ).pipe(mergeVisibilityStatuses());
                 }),
               ),
             ),
@@ -428,7 +428,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
         );
       }
 
-      return from(observables).pipe(mergeAll(), mergeVisibilityStatuses);
+      return from(observables).pipe(mergeAll(), mergeVisibilityStatuses());
     });
   }
 
