@@ -179,6 +179,8 @@ export class BaseVisibilityHelper implements Disposable {
               );
           }
           // For visible models we need to check all categories
+          // Take top most element categories when always drawn exclusive mode is on, because only top most categories are used to get always/never drawn elements.
+          // This means that non top most categories should not affect visibility in any way.
           return this.#props.baseIdsCache.getCategories({ modelId, includeOnlyIfCategoryOfTopMostElement: this.#props.viewport.isAlwaysDrawnExclusive }).pipe(
             mergeMap((categories) => merge(Id64.sizeOf(categories) === 0 ? EMPTY : this.getCategoriesVisibilityStatus({ modelId, categoryIds: categories }))),
             defaultIfEmpty(createVisibilityStatus("visible")),
