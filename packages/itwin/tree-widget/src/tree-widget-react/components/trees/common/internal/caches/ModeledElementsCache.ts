@@ -8,7 +8,7 @@ import { Guid } from "@itwin/core-bentley";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
 
 import type { Observable } from "rxjs";
-import { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { CategoryId, ElementId, ModelId } from "../Types.js";
 
