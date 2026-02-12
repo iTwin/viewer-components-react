@@ -8,7 +8,7 @@ import { Guid } from "@itwin/core-bentley";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
 
 import type { Observable } from "rxjs";
-import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
+import { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { CategoryId, ElementId, ModelId } from "../Types.js";
 
@@ -146,13 +146,7 @@ export class ModeledElementsCache {
 
   public getCategoryModeledElements({ modelId, categoryId }: { modelId: Id64String; categoryId: Id64String }): Observable<Id64String> {
     return this.getModeledElementsInfo().pipe(
-      mergeMap(({ modelWithCategoryModeledElements }) => {
-        const categoryMap = modelWithCategoryModeledElements.get(modelId);
-        if (!categoryMap) {
-          return [];
-        }
-        return categoryMap.get(categoryId) ?? [];
-      }),
+      mergeMap(({ modelWithCategoryModeledElements }) => modelWithCategoryModeledElements.get(modelId)?.get(categoryId) ?? new Set<Id64String>()),
     );
   }
 }
