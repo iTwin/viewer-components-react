@@ -414,4 +414,85 @@ describe("models tree", () => {
       });
     },
   });
+
+  run<{
+    iModel: SnapshotDb;
+    idsCache: ModelsTreeIdsCache;
+    imodelAccess: IModelAccess;
+    viewport: TreeWidgetTestingViewport;
+    handler: HierarchyVisibilityHandler & Disposable;
+    provider: HierarchyProvider & Disposable;
+    node: { modelId: Id64String; categoryId: Id64String; elementId: Id64String; subjectId: Id64String };
+    iModelConnection: IModelConnection;
+    hierarchyNodes: HierarchyNode[];
+  }>({
+    testName: "changing element visibility changes only parent nodes visibility with 50k child elements with different categories",
+    setup: async () => {
+      const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k 3D child elements with different categories"));
+      const imodelAccess = StatelessHierarchyProvider.createIModelAccess(iModel, "unbounded");
+      const visibilityTargets = await getVisibilityTargets(imodelAccess);
+      const testData = createTestDataForInitialDisplay({ visibilityTargets, visible: false });
+
+      const viewport = await createViewport({
+        iModelConnection,
+        testData,
+      });
+      setupInitialDisplayState({
+        viewport,
+        ...testData,
+        // lets child categories visible in selector except top most elements category
+        categories: testData.categories.map((category, index) => ({ ...category, visible: index !== 0 })),
+      });
+      const idsCache = new ModelsTreeIdsCache(imodelAccess, defaultModelsTreeHierarchyConfiguration);
+      const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
+      const provider = createIModelHierarchyProvider({
+        hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
+        imodelAccess,
+      });
+      const hierarchyNodes = await collectNodes({ provider });
+
+      const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
+      expect(visibilityTargets.categories.length).to.be.eq(3);
+      const elementsCategory = visibilityTargets.categories[0];
+      const node = { modelId: elementsModel, elementId: visibilityTargets.elements[0], categoryId: elementsCategory, subjectId: "0x1" };
+      await validateHierarchyVisibility({
+        hierarchyNodes,
+        handler,
+        viewport,
+        expectations: "all-hidden",
+      });
+
+      return { iModel, imodelAccess, viewport, provider, handler, node, idsCache, iModelConnection, hierarchyNodes };
+    },
+    cleanup: async (props) => {
+      props.iModel.close();
+      props.viewport[Symbol.dispose]();
+      props.handler[Symbol.dispose]();
+      props.provider[Symbol.dispose]();
+      props.idsCache[Symbol.dispose]();
+      if (!props.iModelConnection.isClosed) {
+        await props.iModelConnection.close();
+      }
+    },
+    test: async ({ viewport, handler, hierarchyNodes, node }) => {
+      await handler.changeVisibility(createElementHierarchyNode(node), true);
+      await validateHierarchyVisibility({
+        hierarchyNodes,
+        handler,
+        viewport,
+        expectations: {
+          default: "all-hidden",
+          instances: {
+            [node.modelId]: "partial",
+            [node.subjectId]: "partial",
+            [node.categoryId]: "partial",
+            [node.elementId]: "visible",
+          },
+          parentIds: {
+            [node.elementId]: "visible",
+          },
+        },
+      });
+    },
+  });
 });
