@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, map, mergeMap, reduce } from "rxjs";
+import { bufferCount, EMPTY, map, mergeMap, of, reduce } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { QueryRowFormat } from "@itwin/core-common";
 import { reduceWhile, toVoidPromise } from "./Rxjs.js";
@@ -40,12 +40,14 @@ function mergeVisibilities(obs: Observable<Visibility>): Observable<Visibility |
 }
 
 /** @internal */
-export function mergeVisibilityStatuses(obs: Observable<VisibilityStatus>): Observable<VisibilityStatus> {
-  return obs.pipe(
-    map((visibilityStatus) => visibilityStatus.state),
-    mergeVisibilities,
-    map((visibility) => createVisibilityStatus(visibility === "empty" ? "disabled" : visibility)),
-  );
+export function mergeVisibilityStatuses(): OperatorFunction<VisibilityStatus, VisibilityStatus> {
+  return (obs: Observable<VisibilityStatus>) => {
+    return obs.pipe(
+      map((visibilityStatus) => visibilityStatus.state),
+      mergeVisibilities,
+      mergeMap((visibility) => (visibility === "empty" ? EMPTY : of(createVisibilityStatus(visibility)))),
+    );
+  };
 }
 
 /** @internal */
@@ -139,7 +141,7 @@ export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(
 /** @internal */
 export interface GetVisibilityFromAlwaysAndNeverDrawnElementsProps {
   /** Status when always/never lists are empty and exclusive mode is off */
-  defaultStatus: (categoryId?: string) => VisibilityStatus;
+  defaultStatus: () => VisibilityStatus;
 }
 
 /**

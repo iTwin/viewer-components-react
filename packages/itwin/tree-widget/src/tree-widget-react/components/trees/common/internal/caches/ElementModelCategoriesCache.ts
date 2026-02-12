@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { defer, forkJoin, from, map, mergeMap, reduce, shareReplay } from "rxjs";
-import { Guid, Id64 } from "@itwin/core-bentley";
+import { Guid } from "@itwin/core-bentley";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
 
 import type { Observable } from "rxjs";
-import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { CategoryId, ModelId } from "../Types.js";
 import type { ModeledElementsCache } from "./ModeledElementsCache.js";
@@ -75,7 +75,7 @@ export class ElementModelCategoriesCache {
     );
   }
 
-  private getElementModelCategories() {
+  private getModelsCategoriesInfo() {
     this.#modelsCategoriesInfo ??= forkJoin({
       modelCategories: this.queryElementModelCategories().pipe(
         reduce((acc, queriedCategory) => {
@@ -110,46 +110,46 @@ export class ElementModelCategoriesCache {
     return this.#modelsCategoriesInfo;
   }
 
-  public getCategoriesElementModels(props: {
-    categoryIds: Id64Arg;
+  public getCategoryElementModels(props: {
+    categoryId: Id64String;
     includeSubModels?: boolean;
-  }): Observable<{ id: CategoryId; models: Array<ModelId> | undefined }> {
-    const { categoryIds, includeSubModels } = props;
-    return this.getElementModelCategories().pipe(
-      mergeMap((modelCategories) =>
-        from(Id64.iterable(categoryIds)).pipe(
-          map((categoryId) => {
-            const categoryModels = new Array<ModelId>();
-            modelCategories.forEach(({ allCategories, isSubModel }, modelId) => {
-              if ((includeSubModels || !isSubModel) && allCategories.has(categoryId)) {
-                categoryModels.push(modelId);
-              }
-            });
-            return { id: categoryId, models: categoryModels.length > 0 ? categoryModels : undefined };
-          }),
-        ),
+    includeOnlyIfCategoryOfTopMostElement?: boolean;
+  }): Observable<Array<ModelId>> {
+    const { categoryId, includeSubModels } = props;
+    return this.getModelsCategoriesInfo().pipe(
+      map((modelCategories) => {
+        const categoryModels = new Array<ModelId>();
+        modelCategories.forEach(({ allCategories, categoriesOfTopMostElements, isSubModel }, modelId) => {
+          if (
+            (includeSubModels || !isSubModel) &&
+            (props.includeOnlyIfCategoryOfTopMostElement ? categoriesOfTopMostElements.has(categoryId) : allCategories.has(categoryId))
+          ) {
+            categoryModels.push(modelId);
+          }
+        });
+        return categoryModels;
+      }),
+    );
+  }
+
+  public getModelCategoryIds({
+    modelId,
+    includeOnlyIfCategoryOfTopMostElement,
+  }: {
+    modelId: Id64String;
+    includeOnlyIfCategoryOfTopMostElement?: boolean;
+  }): Observable<Id64Set> {
+    return this.getModelsCategoriesInfo().pipe(
+      map(
+        (modelCategories) =>
+          (includeOnlyIfCategoryOfTopMostElement ? modelCategories.get(modelId)?.categoriesOfTopMostElements : modelCategories.get(modelId)?.allCategories) ??
+          new Set(),
       ),
     );
   }
 
-  public getModelCategoryIds(modelId: Id64String): Observable<Id64Set> {
-    return this.getElementModelCategories().pipe(map((modelCategories) => modelCategories.get(modelId)?.allCategories ?? new Set()));
-  }
-
-  public getModelsOfTopMostElementCategory(categoryId: Id64String): Observable<Id64Array> {
-    return this.getElementModelCategories().pipe(
-      mergeMap((modelCategories) => modelCategories.entries()),
-      reduce((acc, [modelId, { categoriesOfTopMostElements, isSubModel }]) => {
-        if (!isSubModel && categoriesOfTopMostElements.has(categoryId)) {
-          acc.push(modelId);
-        }
-        return acc;
-      }, new Array<ModelId>()),
-    );
-  }
-
   public getCategoriesOfModelsTopMostElements(modelIds: Id64Array): Observable<Id64Set> {
-    return this.getElementModelCategories().pipe(
+    return this.getModelsCategoriesInfo().pipe(
       mergeMap((modelCategories) => from(modelIds).pipe(mergeMap((modelId) => modelCategories.get(modelId)?.categoriesOfTopMostElements ?? []))),
       reduce((acc, categoryId) => {
         acc.add(categoryId);
@@ -159,7 +159,7 @@ export class ElementModelCategoriesCache {
   }
 
   public getAllCategoriesOfElements(): Observable<Id64Set> {
-    return this.getElementModelCategories().pipe(
+    return this.getModelsCategoriesInfo().pipe(
       mergeMap((modelCategories) => modelCategories.values()),
       reduce((acc, { allCategories }) => {
         allCategories.forEach((categoryId) => acc.add(categoryId));

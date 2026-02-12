@@ -41,6 +41,7 @@ import type { ChildrenTree } from "../Utils.js";
 
 /** @internal */
 export const SET_CHANGE_DEBOUNCE_TIME = 20;
+const ALWAYS_NEVER_BUFFER_THRESHOLD = 5000;
 
 type SetType = "always" | "never";
 
@@ -263,11 +264,14 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
 
   private queryAlwaysOrNeverDrawnElementInfo(set: ReadonlySet<Id64String> | undefined, setType: SetType): Observable<CachedNodesMap> {
     const elementInfo = set?.size
-      ? from(set).pipe(
-          bufferCount(getOptimalBatchSize({ totalSize: set.size, maximumBatchSize: 5000 })),
-          releaseMainThreadOnItemsCount(2),
-          mergeMap((block, index) => this.queryElementInfo(block, `${setType}-${index}`), 10),
-        )
+      ? set.size > ALWAYS_NEVER_BUFFER_THRESHOLD
+        ? // When set is larger, buffer helps to not block main thread for long periods of time
+          from(set).pipe(
+            bufferCount(getOptimalBatchSize({ totalSize: set.size, maximumBatchSize: ALWAYS_NEVER_BUFFER_THRESHOLD })),
+            releaseMainThreadOnItemsCount(2),
+            mergeMap((block, index) => this.queryElementInfo(block, `${setType}-${index}`), 10),
+          )
+        : this.queryElementInfo([...set], `${setType}-0`)
       : EMPTY;
     return elementInfo.pipe(
       releaseMainThreadOnItemsCount(500),
@@ -353,8 +357,12 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
 
   public clearAlwaysAndNeverDrawnElements(props: { categoryIds: Id64Arg; modelId: Id64String | undefined }) {
     return forkJoin({
-      alwaysDrawn: this.getAlwaysOrNeverDrawnElements({ modelIds: props.modelId, categoryIds: props.categoryIds, setType: "always" }),
-      neverDrawn: this.getAlwaysOrNeverDrawnElements({ modelIds: props.modelId, categoryIds: props.categoryIds, setType: "never" }),
+      alwaysDrawn: this.#viewport.alwaysDrawn?.size
+        ? this.getAlwaysOrNeverDrawnElements({ modelIds: props.modelId, categoryIds: props.categoryIds, setType: "always" })
+        : of(new Set<Id64String>()),
+      neverDrawn: this.#viewport.neverDrawn?.size
+        ? this.getAlwaysOrNeverDrawnElements({ modelIds: props.modelId, categoryIds: props.categoryIds, setType: "never" })
+        : of(new Set<Id64String>()),
     }).pipe(
       map(({ alwaysDrawn, neverDrawn }) => {
         const viewport = this.#viewport;

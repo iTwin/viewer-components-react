@@ -320,8 +320,8 @@ export class CategoriesTreeIdsCache implements Disposable {
     return this.#modelsCategoriesInfo;
   }
 
-  public getCategoriesModeledElements(props: { modelId: Id64String; categoryIds: Id64Arg }): Observable<Id64Array> {
-    return this.#modeledElementsCache.getCategoriesModeledElements(props);
+  public getCategoryModeledElements(props: { modelId: Id64String; categoryId: Id64String }): Observable<Id64String> {
+    return this.#modeledElementsCache.getCategoryModeledElements(props);
   }
 
   private getDefinitionContainersInfo() {
@@ -394,15 +394,16 @@ export class CategoriesTreeIdsCache implements Disposable {
     );
   }
 
-  public getCategoriesElementModels(props: {
-    categoryIds: Id64Arg;
+  public getCategoryElementModels(props: {
+    categoryId: Id64String;
     includeSubModels?: boolean;
-  }): Observable<{ id: CategoryId; models: Array<ModelId> | undefined }> {
-    return this.#elementModelCategoriesCache.getCategoriesElementModels(props);
+    includeOnlyIfCategoryOfTopMostElement?: boolean;
+  }): Observable<Array<ModelId>> {
+    return this.#elementModelCategoriesCache.getCategoryElementModels(props);
   }
 
-  public getModelCategoryIds(modelId: Id64String): Observable<Id64Set> {
-    return this.#elementModelCategoriesCache.getModelCategoryIds(modelId);
+  public getModelCategoryIds(props: { modelId: Id64String; includeOnlyIfCategoryOfTopMostElement?: boolean }): Observable<Id64Set> {
+    return this.#elementModelCategoriesCache.getModelCategoryIds(props);
   }
 
   public getAllCategoriesOfElements(): Observable<Id64Set> {

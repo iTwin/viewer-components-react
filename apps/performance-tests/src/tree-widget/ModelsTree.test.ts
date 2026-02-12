@@ -83,8 +83,6 @@ describe("models tree", () => {
     iModelConnection: IModelConnection;
     hierarchyNodes: HierarchyNode[];
   }>({
-    // TODO: https://github.com/iTwin/viewer-components-react/issues/1512
-    skip: true,
     testName: "validates categories visibility for imodel with 50k categories",
     setup: async () => {
       const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k categories"));
@@ -349,7 +347,6 @@ describe("models tree", () => {
     iModelConnection: IModelConnection;
     hierarchyNodes: HierarchyNode[];
   }>({
-    skip: true,
     testName: "changing element visibility changes only parent nodes visibility with 50k elements",
     setup: async () => {
       const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k 3D elements"));
