@@ -123,9 +123,7 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       return of(new Map());
     }),
     getSubModelsUnderElement: sinon.stub<[Id64String], Observable<Id64Array>>().callsFake(() => of([])),
-    getCategoryModeledElements: sinon
-      .stub<[{ modelId: Id64String; categoryId: Id64String }], Observable<Id64String>>()
-      .callsFake(() => EMPTY),
+    getCategoryModeledElements: sinon.stub<[{ modelId: Id64String; categoryId: Id64String }], Observable<Id64String>>().callsFake(() => EMPTY),
   });
 }
 
