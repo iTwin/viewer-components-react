@@ -40,20 +40,12 @@ function mergeVisibilities(obs: Observable<Visibility>): Observable<Visibility |
 }
 
 /** @internal */
-export function mergeVisibilityStatuses(props?: { returnOnEmpty?: VisibilityStatus | "empty" }): OperatorFunction<VisibilityStatus, VisibilityStatus> {
+export function mergeVisibilityStatuses(): OperatorFunction<VisibilityStatus, VisibilityStatus> {
   return (obs: Observable<VisibilityStatus>) => {
     return obs.pipe(
       map((visibilityStatus) => visibilityStatus.state),
       mergeVisibilities,
-      mergeMap((visibility) => {
-        if (visibility !== "empty") {
-          return of(createVisibilityStatus(visibility));
-        }
-        if (props?.returnOnEmpty !== "empty") {
-          return of(props?.returnOnEmpty ? props.returnOnEmpty : createVisibilityStatus("disabled"));
-        }
-        return EMPTY;
-      }),
+      mergeMap((visibility) => (visibility === "empty" ? EMPTY : of(createVisibilityStatus(visibility)))),
     );
   };
 }

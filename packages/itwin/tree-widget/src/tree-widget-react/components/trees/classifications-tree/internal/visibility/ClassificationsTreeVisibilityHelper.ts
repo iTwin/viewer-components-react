@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { mergeMap } from "rxjs";
+import { defaultIfEmpty, mergeMap } from "rxjs";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 
@@ -42,9 +42,9 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
         this.getCategoriesVisibilityStatus({
           modelId: undefined,
           categoryIds: categories,
-          returnOnEmpty: createVisibilityStatus("disabled"),
         }),
       ),
+      defaultIfEmpty(createVisibilityStatus("disabled")),
     );
   }
 
@@ -59,9 +59,9 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
         this.getCategoriesVisibilityStatus({
           modelId: undefined,
           categoryIds: categories,
-          returnOnEmpty: createVisibilityStatus("disabled"),
         }),
       ),
+      defaultIfEmpty(createVisibilityStatus("disabled")),
     );
   }
 

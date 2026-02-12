@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, map, mergeMap } from "rxjs";
+import { defaultIfEmpty, defer, map, mergeMap } from "rxjs";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { getIdsFromChildrenTree, getParentElementsIdsPath } from "../../../common/internal/Utils.js";
@@ -47,8 +47,9 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
       const { subjectIds } = props;
 
       return this.#props.idsCache.getSubjectModelIds(subjectIds).pipe(
-        mergeMap((modelIds) => this.getModelsVisibilityStatus({ modelIds, returnOnEmpty: "empty" })),
-        mergeVisibilityStatuses({ returnOnEmpty: createVisibilityStatus("disabled") }),
+        mergeMap((modelIds) => this.getModelsVisibilityStatus({ modelIds })),
+        mergeVisibilityStatuses(),
+        defaultIfEmpty(createVisibilityStatus("disabled")),
       );
     });
     return this.#props.overrideHandler

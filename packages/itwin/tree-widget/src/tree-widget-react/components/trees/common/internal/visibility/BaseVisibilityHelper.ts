@@ -27,7 +27,7 @@ import {
   takeUntil,
   tap,
 } from "rxjs";
-import { Id64 } from "@itwin/core-bentley";
+import { assert, Id64 } from "@itwin/core-bentley";
 import { createVisibilityStatus } from "../Tooltip.js";
 import { fromWithRelease, getMergedSet, releaseMainThreadOnItemsCount, setDifference, setIntersection } from "../Utils.js";
 import {
@@ -161,38 +161,34 @@ export class BaseVisibilityHelper implements Disposable {
    * - Models' subModels visibility (if elements' modelId is in the provided modelIds, and element is itself a model, then it is considered a subModel);
    * - Categories visibility in the viewport (if elements' modelId is in the provided modelIds, then its' category gets checked).
    */
-  public getModelsVisibilityStatus(props: { modelIds: Id64Arg; returnOnEmpty?: VisibilityStatus | "empty" }): Observable<VisibilityStatus> {
+  public getModelsVisibilityStatus(props: { modelIds: Id64Arg }): Observable<VisibilityStatus> {
     const result = defer(() => {
       const { modelIds } = props;
       return from(Id64.iterable(modelIds)).pipe(
         mergeMap((modelId) => {
           // For hidden models we only need to check subModels
           if (!this.#props.viewport.viewsModel(modelId)) {
-            return this.#props.baseIdsCache
-              .getSubModels({ modelId })
-              .pipe(
-                mergeMap((subModels) =>
-                  this.getModelsVisibilityStatus({ modelIds: subModels, returnOnEmpty: createVisibilityStatus("hidden") }).pipe(
-                    map((subModelsVisibilityStatus) =>
-                      subModelsVisibilityStatus.state !== "hidden" ? createVisibilityStatus("partial") : subModelsVisibilityStatus,
-                    ),
+            return this.#props.baseIdsCache.getSubModels({ modelId }).pipe(
+              mergeMap((subModels) =>
+                this.getModelsVisibilityStatus({ modelIds: subModels }).pipe(
+                  map((subModelsVisibilityStatus) =>
+                    subModelsVisibilityStatus.state !== "hidden" ? createVisibilityStatus("partial") : subModelsVisibilityStatus,
                   ),
                 ),
-              );
+              ),
+              defaultIfEmpty(createVisibilityStatus("hidden")),
+            );
           }
           // For visible models we need to check all categories.
           // getCategoriesVisibilityStatus already checks subModels, no need to do that
           // Take top most element categories when always drawn exclusive mode is on, because only top most categories are used to get always/never drawn elements.
           // This means that non top most categories should not affect visibility in any way until https://github.com/iTwin/viewer-components-react/issues/1100 is resolved.
-          return this.#props.baseIdsCache
-            .getCategories({ modelId, includeOnlyIfCategoryOfTopMostElement: this.#props.viewport.isAlwaysDrawnExclusive })
-            .pipe(
-              mergeMap((categories) =>
-                this.getCategoriesVisibilityStatus({ modelId, categoryIds: categories, returnOnEmpty: createVisibilityStatus("visible") }),
-              ),
-            );
+          return this.#props.baseIdsCache.getCategories({ modelId, includeOnlyIfCategoryOfTopMostElement: this.#props.viewport.isAlwaysDrawnExclusive }).pipe(
+            mergeMap((categories) => this.getCategoriesVisibilityStatus({ modelId, categoryIds: categories })),
+            defaultIfEmpty(createVisibilityStatus("visible")),
+          );
         }),
-        mergeVisibilityStatuses({ returnOnEmpty: props.returnOnEmpty }),
+        mergeVisibilityStatuses(),
       );
     });
     return this.#props.overrideHandler
@@ -216,8 +212,8 @@ export class BaseVisibilityHelper implements Disposable {
     categoryId: Id64String;
     returnOnEmpty?: VisibilityStatus | "empty";
   }): Observable<VisibilityStatus> {
-    if (Id64.sizeOf(props.subCategoryIds) === 0 && props.returnOnEmpty !== undefined) {
-      return props.returnOnEmpty === "empty" ? EMPTY : of(props.returnOnEmpty);
+    if (Id64.sizeOf(props.subCategoryIds) === 0) {
+      return EMPTY;
     }
     if (!this.#props.viewport.viewsCategory(props.categoryId)) {
       return of(createVisibilityStatus("hidden"));
@@ -234,9 +230,8 @@ export class BaseVisibilityHelper implements Disposable {
       }
       subCategoryVisibility = isSubCategoryVisible ? "visible" : "hidden";
     }
-    // If visibility is unknown, no subCategories were provided,
-    // Since category is visible we return visible
-    return of(createVisibilityStatus(subCategoryVisibility === "unknown" ? "visible" : subCategoryVisibility));
+    assert(subCategoryVisibility !== "unknown");
+    return of(createVisibilityStatus(subCategoryVisibility));
   }
 
   /**
@@ -247,17 +242,13 @@ export class BaseVisibilityHelper implements Disposable {
    * - Visibility of models that are related to the categories;
    * - sub-categories visibility.
    */
-  public getCategoriesVisibilityStatus(props: {
-    categoryIds: Id64Arg;
-    modelId: Id64String | undefined;
-    returnOnEmpty?: VisibilityStatus | "empty";
-  }): Observable<VisibilityStatus> {
+  public getCategoriesVisibilityStatus(props: { categoryIds: Id64Arg; modelId: Id64String | undefined }): Observable<VisibilityStatus> {
     const result = defer(() => {
       const { categoryIds, modelId: modelIdFromProps } = props;
       if (modelIdFromProps) {
         return fromWithRelease({ source: categoryIds, releaseOnCount: 100 }).pipe(
           mergeMap((categoryId) => this.getModelWithCategoryVisibilityStatus({ modelId: modelIdFromProps, categoryId })),
-          mergeVisibilityStatuses({ returnOnEmpty: props.returnOnEmpty }),
+          mergeVisibilityStatuses(),
         );
       }
 
@@ -271,12 +262,12 @@ export class BaseVisibilityHelper implements Disposable {
               merge(
                 from(Id64.iterable(models)).pipe(
                   mergeMap((modelId) => this.getModelWithCategoryVisibilityStatus({ modelId, categoryId })),
-                  mergeVisibilityStatuses({ returnOnEmpty: "empty" }),
+                  mergeVisibilityStatuses(),
                 ),
                 // For category not under specific model, need to check subCategories as well
                 this.#props.baseIdsCache
                   .getSubCategories({ categoryId })
-                  .pipe(mergeMap((subCategoryIds) => this.getSubCategoriesVisibilityStatus({ categoryId, subCategoryIds, returnOnEmpty: "empty" }))),
+                  .pipe(mergeMap((subCategoryIds) => this.getSubCategoriesVisibilityStatus({ categoryId, subCategoryIds }))),
               ).pipe(
                 // This can happen when category does not have any geometric elements or sub-categories
                 defaultIfEmpty(
@@ -286,7 +277,7 @@ export class BaseVisibilityHelper implements Disposable {
             ),
           ),
         ),
-        mergeVisibilityStatuses({ returnOnEmpty: props.returnOnEmpty }),
+        mergeVisibilityStatuses(),
       );
     });
 
@@ -318,7 +309,7 @@ export class BaseVisibilityHelper implements Disposable {
 
     const subModelsVisibilityStatus = this.#props.baseIdsCache
       .getSubModels({ modelId, categoryId })
-      .pipe(mergeMap((subModels) => this.getModelsVisibilityStatus({ modelIds: subModels, returnOnEmpty: "empty" })));
+      .pipe(mergeMap((subModels) => this.getModelsVisibilityStatus({ modelIds: subModels })));
 
     return merge(modelVisibilityStatus, subModelsVisibilityStatus).pipe(mergeVisibilityStatuses());
   }
@@ -370,7 +361,7 @@ export class BaseVisibilityHelper implements Disposable {
 
       const subModelsVisibilityStatus = fromWithRelease({ source: elementIds, releaseOnCount: 100 }).pipe(
         mergeMap((elementId) => this.#props.baseIdsCache.getSubModelsUnderElement(elementId)),
-        mergeMap((subModelsUnderElement) => this.getModelsVisibilityStatus({ modelIds: subModelsUnderElement, returnOnEmpty: "empty" })),
+        mergeMap((subModelsUnderElement) => this.getModelsVisibilityStatus({ modelIds: subModelsUnderElement })),
       );
 
       return merge(elementsVisibilityStatus, subModelsVisibilityStatus).pipe(mergeVisibilityStatuses());
