@@ -4,9 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 import type { QueryClient } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
-import type { ExtractionStatus, IExtractionClient } from "@itwin/insights-client";
+import type { ExtractionStatus, IExtractionClient , Mapping } from "@itwin/insights-client";
 import { ExtractionState } from "@itwin/insights-client";
-import type { Mapping } from "@itwin/insights-client";
 import { STATUS_CHECK_INTERVAL } from "../../Constants";
 import { ExtractionStates } from "../Extraction/ExtractionStatus";
 import type { GetAccessTokenFn, GroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";

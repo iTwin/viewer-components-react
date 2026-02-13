@@ -34,29 +34,12 @@
     "cover": "npm test -- --coverage",
     "dual-build": "npm run -s build:cjs && npm run -s build:esm",
     "extract-api": "betools extract-api --entry=reports-config-widget-react --apiReportFolder=./api --apiReportTempFolder=./api/temp --apiSummaryFolder=./api",
-    "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
+    "lint": "eslint \"./src/**/*.{ts,tsx}\" 1>&2",
     "lint:fix": "npm run lint -- --fix",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./public/locales/en-PSEUDO",
     "rebuild": "npm run clean && npm run build",
     "test": "vitest run",
     "test:watch": "vitest"
-  },
-  "eslintConfig": {
-    "plugins": [
-      "@itwin"
-    ],
-    "extends": [
-      "plugin:@itwin/ui",
-      "prettier"
-    ],
-    "rules": {
-      "no-duplicate-imports": "off",
-      "@typescript-eslint/consistent-type-imports": "error",
-      "deprecation/deprecation": "error",
-      "jsx-a11y/no-static-element-interactions": "off",
-      "jsx-a11y/click-events-have-key-events": "off",
-      "jsx-a11y/anchor-is-valid": "off"
-    }
   },
   "dependencies": {
     "@itwin/imodels-access-common": "^4.1.4",
@@ -84,7 +67,7 @@
     "@itwin/core-quantity": "^5.6.0",
     "@itwin/core-react": "^5.6.0",
     "@itwin/ecschema-metadata": "^5.6.0",
-    "@itwin/eslint-plugin": "^3.7.8",
+    "@itwin/eslint-plugin": "^6.0.0",
     "@itwin/imodel-components-react": "^5.6.0",
     "@itwin/presentation-common": "^5.6.0",
     "@itwin/presentation-frontend": "^5.6.0",
@@ -99,15 +82,13 @@
     "@types/react": "^17.0.19",
     "@types/react-dom": "^17.0.9",
     "@types/react-table": "^7.7.0",
-    "@typescript-eslint/eslint-plugin": "^5.3.1",
-    "@typescript-eslint/parser": "^5.10.1",
     "chai": "^4.2.0",
     "cpx2": "^3.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-react-hooks": "^4.2.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-unused-imports": "^4.3.0",
     "jsdom": "^25.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
