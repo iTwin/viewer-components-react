@@ -5,8 +5,7 @@
 import type { IModelsClient } from "@itwin/imodels-client-management";
 import type { ITwinsAccessClient } from "@itwin/itwins-client";
 import type { StepProperties } from "@itwin/itwinui-react";
-import { Stepper } from "@itwin/itwinui-react";
-import { Modal } from "@itwin/itwinui-react";
+import { Modal , Stepper } from "@itwin/itwinui-react";
 import React, { useEffect, useRef, useState } from "react";
 import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 import ConfirmMappingImport from "./ConfirmMappingsImport";

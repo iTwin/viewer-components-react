@@ -2,6 +2,7 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
+import { vi } from "vitest";
 import { BulkExtractor } from "../widget/components/BulkExtractor";
 import { ExtractionStates } from "../widget/components/ExtractionStatus";
 import { assert } from "chai";
@@ -10,25 +11,25 @@ import { ExtractionClient, ExtractionState, ReportsClient } from "@itwin/insight
 import type { AccessToken } from "@itwin/core-bentley";
 import type { ExtractionRequestDetails } from "@itwin/insights-client";
 
-jest.mock("../widget/components/Constants.ts", () => ({
+vi.mock("../widget/components/Constants.ts", () => ({
   STATUS_CHECK_INTERVAL: -1,
 }));
 
-jest.mock("../widget/components/ExtractionToast.tsx", () => ({
-  FailedExtractionToast: jest.fn(),
-  SuccessfulExtractionToast: jest.fn(),
+vi.mock("../widget/components/ExtractionToast.tsx", () => ({
+  FailedExtractionToast: vi.fn(),
+  SuccessfulExtractionToast: vi.fn(),
 }));
 
 const mockRunExtraction = moq.Mock.ofType<(accessToken: AccessToken, extractionRequest: ExtractionRequestDetails) => Promise<{ id: string }>>();
 const mockGetStatus = moq.Mock.ofType<(accessToken: AccessToken, jobId: string) => Promise<{ state: ExtractionState }>>();
 const mockGetReportMappings = moq.Mock.ofType<(accessToken: AccessToken, reportId: string) => Promise<{ imodelId: string; mappingId: string }[]>>();
 
-jest.mock("@itwin/insights-client", () => ({
-  ...jest.requireActual("@itwin/insights-client"),
-  ReportsClient: jest.fn().mockImplementation(() => ({
+vi.mock("@itwin/insights-client", async () => ({
+  ...(await vi.importActual("@itwin/insights-client")),
+  ReportsClient: vi.fn().mockImplementation(() => ({
     getReportMappings: mockGetReportMappings.object,
   })),
-  ExtractionClient: jest.fn().mockImplementation(() => ({
+  ExtractionClient: vi.fn().mockImplementation(() => ({
     runExtraction: mockRunExtraction.object,
     getExtractionStatus: mockGetStatus.object,
   })),
@@ -39,7 +40,7 @@ afterEach(() => {
   mockGetStatus.reset();
 });
 
-const mockToastCallback = jest.fn();
+const mockToastCallback = vi.fn();
 
 const mockGetAccessToken = async () => "mockAccessToken";
 

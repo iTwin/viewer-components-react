@@ -58,7 +58,7 @@ export const GroupAction = (props: GroupActionProps) => {
   const groupsClient = useGroupsClient();
   const groupUIs: GroupingCustomUI[] = useGroupingMappingCustomUI().customUIs.filter(
     (p) => p.type === GroupingMappingCustomUIType.Grouping,
-  ) as GroupingCustomUI[];
+  );
   const [details, setDetails] = useState({
     groupName: props.group?.groupName ?? "",
     description: props.group?.description ?? "",

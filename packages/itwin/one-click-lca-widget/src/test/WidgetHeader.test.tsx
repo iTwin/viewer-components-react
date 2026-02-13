@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import "@testing-library/jest-dom";
+import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { WidgetHeader } from "../components/utils";
 
@@ -28,7 +28,7 @@ describe("Widget Header Component", function () {
   });
 
   it("with mocked return function", function () {
-    const mockReturnFn = jest.fn();
+    const mockReturnFn = vi.fn();
     const { container } = render(<WidgetHeader title="hello" returnFn={mockReturnFn} />);
 
     const toTestElement = container.querySelector("SvgChevronLeft");

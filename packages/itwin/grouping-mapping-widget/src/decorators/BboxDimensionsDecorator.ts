@@ -21,7 +21,7 @@ import {
   Transform,
   YawPitchRollAngles,
 } from "@itwin/core-geometry";
-import { ColorByName, ColorDef, LinePixels, Placement3d, QueryBinder, QueryRowFormat } from "@itwin/core-common";
+import { ColorByName, ColorDef, LinePixels, Placement3d, QueryBinder } from "@itwin/core-common";
 import type { DecorateContext, Decorator, GraphicBuilder, RenderGraphic } from "@itwin/core-frontend";
 import { GraphicBranch, GraphicType, IModelApp, Marker } from "@itwin/core-frontend";
 
@@ -107,11 +107,11 @@ export class BboxDimensionsDecorator implements Decorator {
     }
 
     const params = new QueryBinder().bindId(1, instanceId);
-    const queryIterable = IModelApp.viewManager.selectedView?.iModel.query(query, params, { rowFormat: QueryRowFormat.UseJsPropertyNames });
+    const reader = IModelApp.viewManager.selectedView?.iModel.createQueryReader(query, params);
 
     const results: SpatialElementQueryResult[] = [];
-    for await (const row of queryIterable) {
-      results.push(row);
+    for await (const row of reader) {
+      results.push(row.toRow() as SpatialElementQueryResult);
     }
     // if no results or more than one abort
     if (results.length !== 1) {
@@ -400,7 +400,7 @@ export class BboxDimensionsDecorator implements Decorator {
    */
   private createGraphics(context: DecorateContext): RenderGraphic | undefined {
     // Specifying an Id for the graphics tells the display system that all of the geometry belongs to the same entity, so that it knows to make sure the edges draw on top of the surfaces.
-    const builder = context.createGraphicBuilder(GraphicType.Scene, undefined, context.viewport.iModel.transientIds.next);
+    const builder = context.createGraphicBuilder(GraphicType.Scene, undefined, context.viewport.iModel.transientIds.getNext());
     // Read-only now
     // builder.wantNormals = true;
     this.points.forEach((styledPoint) => {

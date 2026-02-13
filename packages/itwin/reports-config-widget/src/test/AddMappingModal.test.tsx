@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import React from "react";
+import { vi } from "vitest";
 import faker from "@faker-js/faker";
-import "@testing-library/jest-dom";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import { mockIModelId1, mockIModelId2, mockIModelsResponse, mockITwinId, mockReportId, render, screen, waitFor, within } from "./test-utils";
 import * as moq from "typemoq";
@@ -134,15 +134,15 @@ const mockReportMappingsAndMappingsFactory = (mockMappings: MappingContainer[], 
   return reportMappingsAndMapping;
 };
 
-jest.mock("@itwin/imodels-client-management", () => ({
-  ...jest.requireActual("@itwin/imodels-client-management"),
-  toArray: jest.fn().mockImplementation(async () => {
+vi.mock("@itwin/imodels-client-management", async () => ({
+  ...(await vi.importActual("@itwin/imodels-client-management")),
+  toArray: vi.fn().mockImplementation(async () => {
     return mockProjectIModels.iModels;
   }),
 }));
 
-const mockGetMappings = jest.fn();
-const mockCreateReportMapping = jest.fn();
+const mockGetMappings = vi.fn();
+const mockCreateReportMapping = vi.fn();
 
 const mockIModelsClient = moq.Mock.ofType<IModelsClient>();
 const mockIModelsClientOperations = moq.Mock.ofType<IModelOperations<OperationOptions>>();
@@ -181,7 +181,7 @@ describe("Add Mapping Modal", () => {
         show={true}
         reportId={mockReportId}
         existingMappings={mockReportMappingsAndMappings}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
         defaultIModelId={mockIModelId1}
       />,
       { iTwinId: mockITwinId, reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object },
