@@ -87,10 +87,10 @@
     "vitest": "^3.0.0"
   },
   "peerDependencies": {
-    "@itwin/appui-abstract": "^5.6.0",
-    "@itwin/appui-react": "^5.6.0",
-    "@itwin/core-frontend": "^5.6.0",
-    "@itwin/core-react": "^5.6.0",
+    "@itwin/appui-abstract": "^5.0.0",
+    "@itwin/appui-react": "^5.0.0",
+    "@itwin/core-frontend": "^5.0.0",
+    "@itwin/core-react": "^5.0.0",
     "react": "^17.0.2 || ^18.0.0",
     "react-dom": "^17.0.2 || ^18.0.0"
   }
