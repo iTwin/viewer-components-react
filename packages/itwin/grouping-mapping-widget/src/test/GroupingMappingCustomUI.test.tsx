@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import "@testing-library/jest-dom";
+import { vi } from "vitest";
 import { faker } from "@faker-js/faker";
 import { GroupingMappingCustomUIType, Groups } from "../grouping-mapping-widget";
 import type { GroupMinimalList, IGroupsClient, IMappingsClient, Mapping } from "@itwin/insights-client";
@@ -60,38 +60,47 @@ const viewManagerMock = moq.Mock.ofType<ViewManager>();
 const mappingClientMock = moq.Mock.ofType<IMappingsClient>();
 const groupsClientMock = moq.Mock.ofType<IGroupsClient>();
 
-jest.mock("@itwin/appui-react", () => ({
-  ...jest.requireActual("@itwin/appui-react"),
-  useActiveIModelConnection: () => connectionMock.object,
-}));
-
-jest.mock("@itwin/core-frontend", () => ({
-  ...jest.requireActual("@itwin/core-frontend"),
-  IModelApp: {
-    viewManager: {},
-  },
-}));
-
-jest.mock("../components/context/MappingClientContext", () => {
-  const actualMappingContextModule = jest.requireActual("../components/context/MappingClientContext");
+vi.mock("@itwin/appui-react", async () => {
+  const actual = await vi.importActual<Record<string, unknown>>("@itwin/appui-react");
   return {
-    ...actualMappingContextModule,
+    ...actual,
+    useActiveIModelConnection: () => connectionMock.object,
+  };
+});
+
+vi.mock("@itwin/core-frontend", async () => {
+  const actual = await vi.importActual<Record<string, unknown>>("@itwin/core-frontend");
+  return {
+    ...actual,
+    IModelApp: {
+      viewManager: {},
+    },
+  };
+});
+
+vi.mock("../components/context/MappingClientContext", async () => {
+  const actual = await vi.importActual<Record<string, unknown>>("../components/context/MappingClientContext");
+  return {
+    ...actual,
     useMappingClient: () => mappingClientMock.object,
   };
 });
 
-jest.mock("../components/context/GroupsClientContext", () => {
-  const actualGroupsContextModule = jest.requireActual("../components/context/GroupsClientContext");
+vi.mock("../components/context/GroupsClientContext", async () => {
+  const actual = await vi.importActual<Record<string, unknown>>("../components/context/GroupsClientContext");
   return {
-    ...actualGroupsContextModule,
+    ...actual,
     useGroupsClient: () => groupsClientMock.object,
   };
 });
 
-jest.mock("../common/utils", () => ({
-  ...jest.requireActual("../common/utils"),
-  enableExperimentalFeatures: jest.fn,
-}));
+vi.mock("../common/utils", async () => {
+  const actual = await vi.importActual<Record<string, unknown>>("../common/utils");
+  return {
+    ...actual,
+    enableExperimentalFeatures: vi.fn,
+  };
+});
 
 const mockGroups = groupsFactory();
 
@@ -117,10 +126,10 @@ describe("Groups View", () => {
     render(
       <Groups
         mapping={mockMapping}
-        onClickAddGroup={jest.fn()}
-        onClickGroupModify={jest.fn()}
-        onClickGroupTitle={jest.fn}
-        onClickRenderContextCustomUI={jest.fn()}
+        onClickAddGroup={vi.fn()}
+        onClickGroupModify={vi.fn()}
+        onClickGroupTitle={vi.fn}
+        onClickRenderContextCustomUI={vi.fn()}
       />,
     );
 
@@ -166,10 +175,10 @@ describe("Groups View", () => {
     const { user } = render(
       <Groups
         mapping={mockMapping}
-        onClickAddGroup={jest.fn()}
-        onClickGroupModify={jest.fn()}
-        onClickGroupTitle={jest.fn}
-        onClickRenderContextCustomUI={jest.fn()}
+        onClickAddGroup={vi.fn()}
+        onClickGroupModify={vi.fn()}
+        onClickGroupTitle={vi.fn}
+        onClickRenderContextCustomUI={vi.fn()}
       />,
       groupingMappingCustomUIMock,
     );
@@ -227,15 +236,15 @@ describe("Groups View", () => {
     };
 
     const groupingMappingCustomUIMock = [mockContextUI];
-    const onClickRenderContextCustomUIMock = jest.fn();
+    const onClickRenderContextCustomUIMock = vi.fn();
 
     // Act
     const { user } = render(
       <Groups
         mapping={mockMapping}
-        onClickAddGroup={jest.fn()}
-        onClickGroupModify={jest.fn()}
-        onClickGroupTitle={jest.fn}
+        onClickAddGroup={vi.fn()}
+        onClickGroupModify={vi.fn()}
+        onClickGroupTitle={vi.fn}
         onClickRenderContextCustomUI={onClickRenderContextCustomUIMock}
       />,
       groupingMappingCustomUIMock,
@@ -286,16 +295,16 @@ describe("Groups View", () => {
     };
 
     const groupingMappingCustomUIMock = [mockContextUI, mockGroupingUI];
-    const onClickAddGroup = jest.fn();
-    const onClickRenderContextCustomUIMock = jest.fn();
+    const onClickAddGroup = vi.fn();
+    const onClickRenderContextCustomUIMock = vi.fn();
 
     // Act
     const { user } = render(
       <Groups
         mapping={mockMapping}
         onClickAddGroup={onClickAddGroup}
-        onClickGroupModify={jest.fn()}
-        onClickGroupTitle={jest.fn}
+        onClickGroupModify={vi.fn()}
+        onClickGroupTitle={vi.fn}
         onClickRenderContextCustomUI={onClickRenderContextCustomUIMock}
       />,
       groupingMappingCustomUIMock,

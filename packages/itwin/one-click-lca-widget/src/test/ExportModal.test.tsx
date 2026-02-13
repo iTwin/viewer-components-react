@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import "@testing-library/jest-dom";
+import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import ExportModal from "../components/ExportModal";
 

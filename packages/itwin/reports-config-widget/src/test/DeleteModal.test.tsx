@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import "@testing-library/jest-dom";
+import { vi } from "vitest";
 import { render, screen } from "./test-utils";
 import DeleteModal from "../widget/components/DeleteModal";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
@@ -16,13 +16,13 @@ beforeAll(async () => {
 
 describe("Delete modal", () => {
   it("should render", () => {
-    const { container } = render(<DeleteModal entityName="test" onDelete={jest.fn()} refresh={jest.fn()} onClose={jest.fn()} />);
+    const { container } = render(<DeleteModal entityName="test" onDelete={vi.fn()} refresh={vi.fn()} onClose={vi.fn()} />);
     expect(container).toBeTruthy();
   });
 
   it("should call onDelete when delete button is clicked", async () => {
-    const onDelete = jest.fn();
-    const { user } = render(<DeleteModal entityName="test" onDelete={onDelete} refresh={jest.fn()} onClose={jest.fn()} />);
+    const onDelete = vi.fn();
+    const { user } = render(<DeleteModal entityName="test" onDelete={onDelete} refresh={vi.fn()} onClose={vi.fn()} />);
     const deleteButton = screen.getByRole("button", {
       name: /delete/i,
     });

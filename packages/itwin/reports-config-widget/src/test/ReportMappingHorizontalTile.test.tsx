@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import React from "react";
+import { vi } from "vitest";
 import faker from "@faker-js/faker";
-import "@testing-library/jest-dom";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import { fireEvent, mockIModelId1, mockIModelsResponse, mockReportId, render, screen, waitFor, within } from "./test-utils";
 import * as moq from "typemoq";
@@ -120,8 +120,8 @@ const mockReportMappingsAndMappingsFactory = (): ReportMappingAndMapping[] => {
 const mockBulkExtractor = moq.Mock.ofType<BulkExtractor>();
 const mockIModelsClient = moq.Mock.ofType<IModelOperations<OperationOptions>>();
 
-jest.mock("../widget/components/Constants.ts", () => ({
-  ...jest.requireActual("../widget/components/Constants.ts"),
+vi.mock("../widget/components/Constants.ts", async () => ({
+  ...(await vi.importActual("../widget/components/Constants.ts")),
   STATUS_CHECK_INTERVAL: 10,
 }));
 
@@ -220,7 +220,7 @@ describe("Report Mapping Horizontal Tile", () => {
       .setup(async (x) => x.getIModelState(firstMockMapping.imodelId, firstMockMapping.iModelName, mockOdataFeedUrl))
       .returns(async () => ExtractionStates.None);
 
-    const mockOnClickDelete = jest.fn();
+    const mockOnClickDelete = vi.fn();
 
     const jobStartEvent = new BeEvent<(iModelId: string) => void>();
 
@@ -263,7 +263,7 @@ describe("Report Mapping Horizontal Tile", () => {
       .setup(async (x) => x.getIModelState(firstMockMapping.imodelId, firstMockMapping.iModelName, mockOdataFeedUrl))
       .returns(async () => ExtractionStates.None);
 
-    const mockOnClickDelete = jest.fn();
+    const mockOnClickDelete = vi.fn();
 
     const jobStartEvent = new BeEvent<(iModelId: string) => void>();
 

@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import "@testing-library/jest-dom";
+import { vi } from "vitest";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import {
   act,
@@ -127,12 +127,12 @@ const mockMappingsFactory = (mockReportMappings: ReportMappingCollection): Mappi
   return mockMappings;
 };
 
-jest.mock("../widget/components/Constants.ts", () => ({
-  ...jest.requireActual("../widget/components/Constants.ts"),
+vi.mock("../widget/components/Constants.ts", async () => ({
+  ...(await vi.importActual("../widget/components/Constants.ts")),
   STATUS_CHECK_INTERVAL: 10,
 }));
 
-jest.mock("../widget/components/ReportMappingHorizontalTile", () => ({
+vi.mock("../widget/components/ReportMappingHorizontalTile", () => ({
   ReportMappingHorizontalTile: (props: ReportMappingHorizontalTileProps) => {
     return (
       <div data-testid="horizontal-tile">
@@ -144,25 +144,25 @@ jest.mock("../widget/components/ReportMappingHorizontalTile", () => ({
 }));
 
 let onClose: () => Promise<void>;
-jest.mock("../widget/components/AddMappingsModal", () => ({
-  ...jest.requireActual("../widget/components/AddMappingsModal"),
+vi.mock("../widget/components/AddMappingsModal", async () => ({
+  ...(await vi.importActual("../widget/components/AddMappingsModal")),
   AddMappingsModal: (props: AddMappingsModalProps) => {
     onClose = props.onClose;
     return <div data-testid="add-mappings-modal" />;
   },
 }));
 
-jest.mock("@itwin/imodels-client-management", () => ({
-  ...jest.requireActual("@itwin/imodels-client-management"),
+vi.mock("@itwin/imodels-client-management", async () => ({
+  ...(await vi.importActual("@itwin/imodels-client-management")),
 
-  toArray: jest.fn().mockImplementation(async () => {
+  toArray: vi.fn().mockImplementation(async () => {
     return mockProjectIModels.iModels;
   }),
 }));
 
-const mockGetMapping = jest.fn();
-const mockGetMappings = jest.fn();
-const mockGetReportMappings = jest.fn();
+const mockGetMapping = vi.fn();
+const mockGetMappings = vi.fn();
+const mockGetReportMappings = vi.fn();
 
 const mockIModelsClient = moq.Mock.ofType<IModelsClient>();
 const mockIModelsClientOperations = moq.Mock.ofType<IModelOperations<OperationOptions>>();
@@ -198,7 +198,7 @@ describe("Report Mappings View", () => {
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, {
+    render(<ReportMappings report={mockReport} onClickClose={vi.fn()} />, {
       reportsClient: mockReportsClient.object,
       mappingsClient: mockMappingsClient.object,
       iModelsClient: mockIModelsClient.object,
@@ -217,7 +217,7 @@ describe("Report Mappings View", () => {
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, {
+    const { user } = render(<ReportMappings report={mockReport} onClickClose={vi.fn()} />, {
       reportsClient: mockReportsClient.object,
       mappingsClient: mockMappingsClient.object,
       iModelsClient: mockIModelsClient.object,
@@ -258,7 +258,7 @@ describe("Report Mappings View", () => {
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, {
+    const { user } = render(<ReportMappings report={mockReport} onClickClose={vi.fn()} />, {
       reportsClient: mockReportsClient.object,
       mappingsClient: mockMappingsClient.object,
       iModelsClient: mockIModelsClient.object,
@@ -288,7 +288,7 @@ describe("Report Mappings View", () => {
   });
 
   it("odata feed url", async () => {
-    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, {
+    const { user } = render(<ReportMappings report={mockReport} onClickClose={vi.fn()} />, {
       reportsClient: mockReportsClient.object,
       mappingsClient: mockMappingsClient.object,
       iModelsClient: mockIModelsClient.object,
@@ -317,11 +317,11 @@ describe("Report Mappings View", () => {
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    const bulkExtractor = new BulkExtractor(new ReportsClient(), new ExtractionClient(), jest.fn().mockResolvedValue("mockAccessToken"), jest.fn, jest.fn);
+    const bulkExtractor = new BulkExtractor(new ReportsClient(), new ExtractionClient(), vi.fn().mockResolvedValue("mockAccessToken"), vi.fn, vi.fn);
 
-    const runIModelExtractionsMock = jest.spyOn(bulkExtractor, "runIModelExtractions").mockImplementation(async () => Promise.resolve());
+    const runIModelExtractionsMock = vi.spyOn(bulkExtractor, "runIModelExtractions").mockImplementation(async () => Promise.resolve());
 
-    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, {
+    const { user } = render(<ReportMappings report={mockReport} onClickClose={vi.fn()} />, {
       reportsClient: mockReportsClient.object,
       mappingsClient: mockMappingsClient.object,
       iModelsClient: mockIModelsClient.object,

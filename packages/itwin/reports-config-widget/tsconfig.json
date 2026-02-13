@@ -4,7 +4,8 @@
     "skipLibCheck": true,
     "jsx": "react",
     "preserveSymlinks": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "types": ["vitest/globals"]
   },
   "include": ["./src/**/*.ts*"],
   "exclude": ["lib", "node_modules"]

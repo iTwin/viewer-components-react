@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import "@testing-library/jest-dom";
+import { vi } from "vitest";
 import { render, screen } from "../test/test-utils";
 import { WidgetHeader } from "../widget/components/utils";
 import { faker } from "@faker-js/faker";
@@ -26,7 +26,7 @@ describe("Widget Header Component", () => {
   });
 
   it("header allows return callback", async () => {
-    const mockReturnFn = jest.fn();
+    const mockReturnFn = vi.fn();
     const { user, container } = render(<WidgetHeader title="" returnFn={mockReturnFn} />);
 
     const returnBtn = container.getElementsByClassName("rcw-chevron")[0];
