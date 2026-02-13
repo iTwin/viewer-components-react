@@ -115,6 +115,7 @@
     "sinon": "^17.0.1",
     "typemoq": "^2.1.0",
     "typescript": "~5.6.0",
+    "@vitest/coverage-v8": "^3.0.0",
     "vitest": "^3.0.0"
   },
   "peerDependencies": {
