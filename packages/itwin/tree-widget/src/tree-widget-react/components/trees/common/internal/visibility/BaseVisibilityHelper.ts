@@ -503,7 +503,7 @@ export class BaseVisibilityHelper implements Disposable {
       this.#props.viewport.changeModelDisplay({ modelIds, display: true });
       return from(Id64.iterable(modelIds)).pipe(
         mergeMap((modelId) => forkJoin({ categoryIds: this.#props.baseIdsCache.getCategories({ modelId }), modelId: of(modelId) })),
-        mergeMap(({ categoryIds, modelId }) => this.changeCategoriesUnderModelVisibilityStatus({ categoryIds, modelId, on })),
+        mergeMap(({ categoryIds, modelId }) => this.changeCategoriesVisibilityStatus({ categoryIds, modelId, on })),
       );
     });
     return this.#props.overrideHandler
