@@ -46,8 +46,8 @@ const ALWAYS_NEVER_BUFFER_THRESHOLD = 5000;
 type SetType = "always" | "never";
 
 interface GetElementsTreeByModelProps {
-  /** Only always/never drawn elements that have the specified models will be returned. */
-  modelIds: Id64Arg;
+  /** Only always/never drawn elements that have the specified model will be returned. */
+  modelId: Id64String;
   /**
    * The type of set from which tree should be retrieved.
    * `always` - ChildrenTree will be created from `alwaysDrawn` set.
@@ -55,20 +55,13 @@ interface GetElementsTreeByModelProps {
    */
   setType: SetType;
 }
-interface GetElementsTreeByCategoryProps {
-  modelIds: Id64Arg | undefined;
+interface GetElementsTreeByCategoryProps extends GetElementsTreeByModelProps {
   /**
    * Categories of root elements.
    *
    * Elements are filtered by given categories. Children of those elements are also included, no matter their category.
    */
   categoryIds: Id64Arg;
-  /**
-   * The type of set from which tree should be retrieved.
-   * `always` - ChildrenTree will be created from `alwaysDrawn` set.
-   * `never` - ChildrenTree will be created from `neverDrawn` set.
-   */
-  setType: SetType;
 }
 
 interface GetElementsTreeByElementProps extends GetElementsTreeByCategoryProps {
@@ -131,13 +124,13 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
     this.#suppress.next(false);
   }
 
-  public getElementsTree({ setType, modelIds, ...props }: GetElementsTreeProps): Observable<CachedNodesMap> {
+  public getElementsTree({ setType, modelId, ...props }: GetElementsTreeProps): Observable<CachedNodesMap> {
     const cache = setType === "always" ? this.#alwaysDrawn : this.#neverDrawn;
     const getElements = (rootTreeNodes: CachedNodesMap | undefined): CachedNodesMap => {
       if (!rootTreeNodes) {
         return new Map();
       }
-      const pathToElements = [modelIds];
+      const pathToElements: Array<Id64Arg> = [modelId];
       if ("categoryIds" in props && props.categoryIds) {
         pathToElements.push(props.categoryIds);
         if ("parentElementIdsPath" in props && props.parentElementIdsPath) {
@@ -163,7 +156,7 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
     currentIdsIndex,
   }: {
     currentChildrenTree: ChildrenTree<MapEntry>;
-    pathToElements: Array<Id64Arg | undefined>;
+    pathToElements: Array<Id64Arg>;
     currentIdsIndex: number;
   }): ChildrenTree<MapEntry> {
     if (currentIdsIndex >= pathToElements.length) {
@@ -171,20 +164,6 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
     }
     const result: ChildrenTree<MapEntry> = new Map();
     const currentParentIds = pathToElements[currentIdsIndex];
-    // currentParentIds is undefined - it means that we are getting children for categories that don't have model as parent
-    if (!currentParentIds) {
-      for (const entry of currentChildrenTree.values()) {
-        if (entry.children) {
-          const childrenTreeOfChildren = this.getChildrenTree({
-            currentChildrenTree: entry.children,
-            pathToElements,
-            currentIdsIndex: currentIdsIndex + 1,
-          });
-          childrenTreeOfChildren.forEach((val, childId) => result.set(childId, val));
-        }
-      }
-      return result;
-    }
     for (const parentId of Id64.iterable(currentParentIds)) {
       const entry = currentChildrenTree.get(parentId);
       if (entry?.children) {
@@ -355,13 +334,13 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
     );
   }
 
-  public clearAlwaysAndNeverDrawnElements(props: { categoryIds: Id64Arg; modelId: Id64String | undefined }) {
+  public clearAlwaysAndNeverDrawnElements(props: { categoryIds: Id64Arg; modelId: Id64String }) {
     return forkJoin({
       alwaysDrawn: this.#viewport.alwaysDrawn?.size
-        ? this.getAlwaysOrNeverDrawnElements({ modelIds: props.modelId, categoryIds: props.categoryIds, setType: "always" })
+        ? this.getAlwaysOrNeverDrawnElements({ modelId: props.modelId, categoryIds: props.categoryIds, setType: "always" })
         : of(new Set<Id64String>()),
       neverDrawn: this.#viewport.neverDrawn?.size
-        ? this.getAlwaysOrNeverDrawnElements({ modelIds: props.modelId, categoryIds: props.categoryIds, setType: "never" })
+        ? this.getAlwaysOrNeverDrawnElements({ modelId: props.modelId, categoryIds: props.categoryIds, setType: "never" })
         : of(new Set<Id64String>()),
     }).pipe(
       map(({ alwaysDrawn, neverDrawn }) => {

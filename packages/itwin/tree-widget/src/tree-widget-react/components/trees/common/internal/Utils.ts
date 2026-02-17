@@ -33,10 +33,11 @@ export function setDifference<T>(lhs: Readonly<Iterable<T>>, rhs: ReadonlySet<T>
 }
 
 /** @internal */
-export function setIntersection<T>(lhs: Readonly<Iterable<T>>, rhs: ReadonlySet<T>): Set<T> {
+export function setIntersection<T>(lhs: ReadonlySet<T>, rhs: ReadonlySet<T>): Set<T> {
   const result = new Set<T>();
-  for (const x of lhs) {
-    if (rhs.has(x)) {
+  const { smallerSet, largerSet } = lhs.size < rhs.size ? { smallerSet: lhs, largerSet: rhs } : { smallerSet: rhs, largerSet: lhs };
+  for (const x of smallerSet) {
+    if (largerSet.has(x)) {
       result.add(x);
     }
   }
@@ -44,15 +45,17 @@ export function setIntersection<T>(lhs: Readonly<Iterable<T>>, rhs: ReadonlySet<
 }
 
 /** @internal */
-export function getMergedSet<T>(lhs: Readonly<Iterable<T>>, rhs: Readonly<Iterable<T>>): Set<T> {
-  const result = new Set<T>();
-  for (const x of lhs) {
-    result.add(x);
+export function countInSet(ids: Id64Arg, set: ReadonlySet<Id64String> | undefined): number {
+  if (!set?.size) {
+    return 0;
   }
-  for (const y of rhs) {
-    result.add(y);
+  let count = 0;
+  for (const id of Id64.iterable(ids)) {
+    if (set.has(id)) {
+      ++count;
+    }
   }
-  return result;
+  return count;
 }
 
 /** @internal */

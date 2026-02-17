@@ -39,7 +39,7 @@ type SearchResultsTreeNode = GenericSearchResultsTreeNode | CategorySearchResult
 export interface ModelsTreeSearchTargets {
   subjectIds?: Id64Set;
   modelIds?: Id64Set;
-  categories?: Array<{ modelId: Id64String | undefined; categoryIds: Id64Set }>;
+  categories?: Array<{ modelId: Id64String; categoryIds: Id64Set }>;
   elements?: Array<{
     pathToElements: InstanceKey[];
     modelId: Id64String;

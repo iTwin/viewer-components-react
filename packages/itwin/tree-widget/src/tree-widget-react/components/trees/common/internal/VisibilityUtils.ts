@@ -107,15 +107,14 @@ export function changeElementStateNoChildrenOperator(props: {
 }
 
 /** @internal */
-export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(
-  props: {
-    alwaysDrawnSize: number;
-    neverDrawnSize: number;
-    totalCount: number;
-    viewport: TreeWidgetViewport;
-  } & GetVisibilityFromAlwaysAndNeverDrawnElementsProps,
-): VisibilityStatus {
-  const { alwaysDrawnSize, neverDrawnSize, totalCount, viewport } = props;
+export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(props: {
+  alwaysDrawnSize: number;
+  neverDrawnSize: number;
+  totalCount: number;
+  isAlwaysDrawnExclusive: boolean;
+  defaultStatus: () => VisibilityStatus;
+}): VisibilityStatus {
+  const { alwaysDrawnSize, neverDrawnSize, totalCount, isAlwaysDrawnExclusive } = props;
   if (totalCount === 0) {
     return props.defaultStatus();
   }
@@ -127,7 +126,7 @@ export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(
     return createVisibilityStatus("visible");
   }
 
-  if (viewport.isAlwaysDrawnExclusive) {
+  if (isAlwaysDrawnExclusive) {
     return createVisibilityStatus(alwaysDrawnSize ? "partial" : "hidden");
   }
 
@@ -136,12 +135,6 @@ export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(
     return createVisibilityStatus("partial");
   }
   return status;
-}
-
-/** @internal */
-export interface GetVisibilityFromAlwaysAndNeverDrawnElementsProps {
-  /** Status when always/never lists are empty and exclusive mode is off */
-  defaultStatus: () => VisibilityStatus;
 }
 
 /**
