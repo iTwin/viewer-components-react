@@ -16,7 +16,13 @@ import {
 import { BisCodeSpec, IModel } from "@itwin/core-common";
 import { createIModel } from "./IModelUtilities.js";
 
-export const IMODEL_NAMES = ["50k 3D elements", "50k subcategories", "50k categories", "50k classifications"] as const;
+export const IMODEL_NAMES = [
+  "50k 3D elements",
+  "50k subcategories",
+  "50k categories",
+  "50k classifications",
+  "50k 3D child elements with different categories",
+] as const;
 export type IModelName = (typeof IMODEL_NAMES)[number];
 export type IModelPathsMap = { [_ in IModelName]?: string };
 
@@ -82,6 +88,8 @@ export class Datasets {
         return async (name: string, localPath: string) => this.createSubCategoryIModel(name, localPath, elementCount);
       case "50k 3D elements":
         return async (name: string, localPath: string) => this.create3dElementIModel(name, localPath, elementCount);
+      case "50k 3D child elements with different categories":
+        return async (name: string, localPath: string) => this.create3dChildElementsWithDifferentCategoriesIModel(name, localPath, elementCount);
       case "50k classifications":
         return async (name: string, localPath: string) => this.createClassificationsIModel(name, localPath, elementCount);
     }
@@ -168,8 +176,8 @@ export class Datasets {
 
   /**
    * Create an iModel with `numElements` 3D elements all belonging to the same spatial category and physical model.
-   * The elements are set up in a hierarchical manner, with 1000 top level 3D elements, each having 1 child element, which has 1 child element,
-   * and so on until the depth of `numElements` / 1000 elements is reached.
+   * The elements are set up in a hierarchical manner, with 1000 top level 3D elements, each having at least 2 indirect child elements, and some direct child elements.
+   * The number of top level 3D elements + indirect child elements + direct child elements equals `numElements`.
    */
   private static async create3dElementIModel(name: string, localPath: string, numElements: number) {
     console.log(`${numElements} physical elements: Creating...`);
@@ -219,6 +227,70 @@ export class Datasets {
               parentId: directChildId,
               modelId: physicalModelId,
               categoryId,
+              userLabel: `indirect child ${i}-${j}-missing`,
+            });
+            --numberOfMissingElements;
+          }
+        }
+      }
+    });
+    console.log(`${numElements} elements: Done.`);
+  }
+
+  /**
+   * Create an iModel the same hierarchy structure as `create3dElementIModel`,
+   * but where top level elements belong to one category, direct child elements belong to another category, and indirect child elements belong to a third category.
+   */
+  private static async create3dChildElementsWithDifferentCategoriesIModel(name: string, localPath: string, numElements: number) {
+    console.log(`${numElements} physical elements: Creating...`);
+    await createIModel(name, localPath, async (builder) => {
+      const { id: physicalModelId } = insertPhysicalModelWithPartition({ builder, codeValue: "test physical model" });
+      const { id: categoryId } = insertSpatialCategory({ builder, codeValue: "test category" });
+      const { id: directChildCategory } = insertSpatialCategory({ builder, codeValue: "direct child category" });
+      const { id: indirectChildCategory } = insertSpatialCategory({ builder, codeValue: "indirect child category" });
+
+      const numberOfRootElements = 1000;
+      // Number of children each direct child should have
+      const numberOfIndirectChildren = 2;
+      // Number of children each root element should have
+      const numberOfDirectChildren = Math.floor(numElements / (numberOfRootElements * (numberOfIndirectChildren + 1)));
+      // Due to rounding not enough elements would be inserted, calculate how many more nodes we need to add
+      let numberOfMissingElements =
+        numElements -
+        numberOfRootElements -
+        numberOfRootElements * numberOfDirectChildren -
+        numberOfRootElements * numberOfDirectChildren * numberOfIndirectChildren;
+      for (let i = 0; i < numberOfRootElements; ++i) {
+        const rootElementId = insertPhysicalElement({
+          builder,
+          parentId: undefined,
+          modelId: physicalModelId,
+          categoryId,
+          userLabel: `root element${i}`,
+        }).id;
+        for (let j = 0; j < numberOfDirectChildren; ++j) {
+          const directChildId = insertPhysicalElement({
+            builder,
+            parentId: rootElementId,
+            modelId: physicalModelId,
+            categoryId: directChildCategory,
+            userLabel: `direct child ${i}-${j}`,
+          }).id;
+          for (let z = 0; z < numberOfIndirectChildren; ++z) {
+            insertPhysicalElement({
+              builder,
+              parentId: directChildId,
+              modelId: physicalModelId,
+              categoryId: indirectChildCategory,
+              userLabel: `indirect child ${i}-${j}-${z}`,
+            });
+          }
+          if (numberOfMissingElements > 0) {
+            insertPhysicalElement({
+              builder,
+              parentId: directChildId,
+              modelId: physicalModelId,
+              categoryId: indirectChildCategory,
               userLabel: `indirect child ${i}-${j}-missing`,
             });
             --numberOfMissingElements;
