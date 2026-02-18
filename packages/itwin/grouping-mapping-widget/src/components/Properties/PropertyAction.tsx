@@ -69,7 +69,7 @@ const usePropertySelection = (property: PropertyRecord, currentPropertyList: Pro
 };
 
 export const PropertyAction = ({ property }: PropertyActionProps) => {
-  const { currentPropertyList, queryBuilder, setCurrentPropertyList, setQuery, isUpdating } = usePropertyGridWrapper();
+  const { currentPropertyList, queryBuilder, setCurrentPropertyList, setQuery, isUpdating, resetView } = usePropertyGridWrapper();
 
   const { isPropertySelected, addProperty, removeProperty, isCheckboxLoading, setIsCheckboxLoading } = usePropertySelection(
     property,
@@ -85,14 +85,18 @@ export const PropertyAction = ({ property }: PropertyActionProps) => {
     if (isPropertySelected) {
       await removeProperty(property);
       setCurrentPropertyList((prevList) => prevList.filter((x) => x !== property));
-      setQuery(await queryBuilder?.buildQueryString() ?? "");
+      const query = (await queryBuilder?.buildQueryString()) ?? "";
+      setQuery(query);
+      if (!query) {
+        await resetView?.();
+      }
     } else {
       if (await addProperty(property)) {
         setCurrentPropertyList((prevList) => prevList.concat(property));
         setQuery(await queryBuilder?.buildQueryString() ?? "");
       }
     }
-  }, [addProperty, isPropertySelected, property, removeProperty, queryBuilder, setCurrentPropertyList, setQuery]);
+  }, [addProperty, isPropertySelected, property, queryBuilder, removeProperty, resetView, setCurrentPropertyList, setQuery]);
 
   return (
     <div className="gmw-property-selection-checkbox">
