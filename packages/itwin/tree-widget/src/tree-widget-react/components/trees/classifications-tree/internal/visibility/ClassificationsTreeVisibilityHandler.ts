@@ -113,13 +113,13 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
         mapEntry = [];
         modelCategoryElementMap.set(key, mapEntry);
       }
-      elementsMap.forEach(({ isSearchTarget }, elementId) => {
+      for (const [elementId, { isSearchTarget }] of elementsMap) {
         mapEntry.push(elementId);
         elementIdsSet.add(elementId);
         if (isSearchTarget) {
           searchTargetElements.push(elementId);
         }
-      });
+      }
     });
     // Get children for search targets, since non search targets don't have all the children present in the hierarchy.
     return this.#props.idsCache.getChildElementsTree({ elementIds: searchTargetElements }).pipe(
@@ -138,7 +138,9 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
             elementsInSearchPathsGroupedByModelAndCategory.forEach((elementId) => {
               const elementChildrenTree: ChildrenTree | undefined = childrenTree.get(elementId)?.children;
               if (elementChildrenTree) {
-                getIdsFromChildrenTree({ tree: elementChildrenTree }).forEach((childId) => childrenIds.add(childId));
+                for (const childId of getIdsFromChildrenTree({ tree: elementChildrenTree })) {
+                  childrenIds.add(childId);
+                }
               }
             });
             return this.#visibilityHelper.changeElementsVisibilityStatus({
@@ -258,13 +260,13 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
     elements: Required<ClassificationsTreeSearchTargets>["elements"];
   }): Observable<VisibilityStatus> {
     const searchTargetElements = new Array<Id64String>();
-    elements.forEach(({ elements: elementsMap }) =>
-      elementsMap.forEach(({ isSearchTarget }, elementId) => {
+    elements.forEach(({ elements: elementsMap }) => {
+      for (const [elementId, { isSearchTarget }] of elementsMap) {
         if (isSearchTarget) {
           searchTargetElements.push(elementId);
         }
-      }),
-    );
+      }
+    });
     return this.#props.idsCache.getAllChildElementsCount({ elementIds: searchTargetElements }).pipe(
       mergeMap((elementsChildrenCountMap) =>
         fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
@@ -278,17 +280,17 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
             let totalSearchTargetsChildrenCount = 0;
             const nonSearchTargetIds = new Array<Id64String>();
             const searchTargetIds = new Array<Id64String>();
-            elementsMap.forEach(({ isSearchTarget }, elementId) => {
+            for (const [elementId, { isSearchTarget }] of elementsMap) {
               if (!isSearchTarget) {
                 nonSearchTargetIds.push(elementId);
-                return;
+                continue;
               }
               searchTargetIds.push(elementId);
               const childCount = elementsChildrenCountMap.get(elementId);
               if (childCount) {
                 totalSearchTargetsChildrenCount += childCount;
               }
-            });
+            }
             return merge(
               searchTargetIds.length > 0
                 ? this.#visibilityHelper.getElementsVisibilityStatus({

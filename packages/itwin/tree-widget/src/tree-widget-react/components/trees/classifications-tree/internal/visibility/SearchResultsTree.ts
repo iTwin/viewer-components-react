@@ -126,7 +126,7 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
         elementIds: [...searchResultsTemporaryElements.keys()],
       }),
     );
-    searchResultsTemporaryElements.forEach((element, id) => {
+    for (const [id, element] of searchResultsTemporaryElements) {
       const entry = searchResultsElementsModels.get(element.id);
       assert(entry !== undefined);
       result.searchResultsElements.set(id, {
@@ -135,7 +135,7 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
         categoryId: entry.categoryId,
         categoryOfTopMostParentElement: entry.categoryOfTopMostParentElement,
       });
-    });
+    }
     return result;
   }
 
@@ -156,10 +156,10 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
   ): Required<ClassificationsTreeSearchTargets>["elements"] {
     const result: Required<ClassificationsTreeSearchTargets>["elements"] = [];
     // Internal search target elements are stored in a tree structure, need to convert that to array structure.
-    searchTargetsInternalElements.forEach((entry, identifierAsString) => {
+    for (const [identifierAsString, entry] of searchTargetsInternalElements) {
       const identifier = this.convertSearchResultsNodeIdentifierStringToHierarchyNodeIdentifier(identifierAsString);
       if (entry.modelCategoryElements) {
-        entry.modelCategoryElements.forEach(({ elementsMap: elements, categoryOfTopMostParentElement }, modelCategoryKey) => {
+        for (const [modelCategoryKey, { elementsMap: elements, categoryOfTopMostParentElement }] of entry.modelCategoryElements) {
           const { modelId, categoryId } = this.parseModelCategoryKey(modelCategoryKey);
           result.push({
             pathToElements: [...currentPath, identifier],
@@ -169,12 +169,12 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
             categoryOfTopMostParentElement,
             topMostParentElementId: entry.topMostParentElementId,
           });
-        });
+        }
       }
       if (entry.children) {
         this.convertInternalSearchTargetElementsRecursively(entry.children, [...currentPath, identifier]).forEach((childValue) => result.push(childValue));
       }
-    });
+    }
     return result;
   }
 

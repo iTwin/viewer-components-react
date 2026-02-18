@@ -64,15 +64,6 @@ export function getOptimalBatchSize({ totalSize, maximumBatchSize }: { totalSize
 }
 
 /** @internal */
-export function getDistinctMapValues(map: Map<any, Array<string> | Set<string>>): Set<string> {
-  const result = new Set<string>();
-  for (const values of map.values()) {
-    values.forEach((value) => result.add(value));
-  }
-  return result;
-}
-
-/** @internal */
 export function createIdsSelector(ids: Id64Array): string {
   // Note: `json_array` function only accepts up to 127 arguments and we may have more `ids` than that. As a workaround,
   // we're creating an array of arrays
@@ -188,15 +179,17 @@ export function getIdsFromChildrenTree<T extends object = {}>({
 }): Set<string> {
   function getIdsInternal({ childrenTree, depth }: { childrenTree: ChildrenTree<T>; depth: number }): Set<string> {
     const result = new Set<string>();
-    childrenTree.forEach((entry, id) => {
+    for (const [id, entry] of childrenTree) {
       if (!predicate || predicate({ depth, treeEntry: entry })) {
         result.add(id);
       }
       if (entry.children) {
         const childrenIds = getIdsInternal({ childrenTree: entry.children, depth: depth + 1 });
-        childrenIds.forEach((childId) => result.add(childId));
+        for (const childId of childrenIds) {
+          result.add(childId);
+        }
       }
-    });
+    }
     return result;
   }
   return getIdsInternal({ childrenTree: tree, depth: 0 });

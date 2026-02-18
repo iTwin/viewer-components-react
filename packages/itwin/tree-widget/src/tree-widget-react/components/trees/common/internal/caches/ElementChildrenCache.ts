@@ -105,7 +105,9 @@ export class ElementChildrenCache {
       const entry = this.#childElementsMap.get(elementId);
       if (entry?.children) {
         let totalChildrenCount = entry.children.length;
-        this.getChildElementsCountMap({ elementIds: entry.children }).forEach((childrenOfChildCount) => (totalChildrenCount += childrenOfChildCount));
+        for (const childrenOfChildCount of this.getChildElementsCountMap({ elementIds: entry.children }).values()) {
+          totalChildrenCount += childrenOfChildCount;
+        }
         result.set(elementId, totalChildrenCount);
       }
     }

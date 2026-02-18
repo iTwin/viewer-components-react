@@ -144,13 +144,13 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
             mapEntry = [];
             modelCategoryElementMap.set(key, mapEntry);
           }
-          elementsMap.forEach(({ isSearchTarget }, elementId) => {
+          for (const [elementId, { isSearchTarget }] of elementsMap) {
             mapEntry.push(elementId);
             elementIdsSet.add(elementId);
             if (isSearchTarget) {
               searchTargetElements.push(elementId);
             }
-          });
+          }
         });
         observables.push(
           // Get children for search targets, since non search targets don't have all the children present in the hierarchy.
@@ -170,7 +170,9 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
                   elementsInSearchPathsGroupedByModelAndCategory.forEach((elementId) => {
                     const elementChildrenTree: ChildrenTree | undefined = childrenTree.get(elementId)?.children;
                     if (elementChildrenTree) {
-                      getIdsFromChildrenTree({ tree: elementChildrenTree }).forEach((childId) => childrenIds.add(childId));
+                      for (const childId of getIdsFromChildrenTree({ tree: elementChildrenTree })) {
+                        childrenIds.add(childId);
+                      }
                     }
                   });
                   return this.#visibilityHelper.changeElementsVisibilityStatus({
@@ -345,13 +347,13 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
 
       if (elements?.length) {
         const searchTargetElements = new Array<Id64String>();
-        elements.forEach(({ elements: elementsMap }) =>
-          elementsMap.forEach(({ isSearchTarget }, elementId) => {
+        elements.forEach(({ elements: elementsMap }) => {
+          for (const [elementId, { isSearchTarget }] of elementsMap) {
             if (isSearchTarget) {
               searchTargetElements.push(elementId);
             }
-          }),
-        );
+          }
+        });
         let childrenCountMapObs: Observable<Map<Id64String, number>>;
         if (ModelsTreeNodeInternal.isElementClassGroupingNode(node)) {
           const groupingNodesSearchTargets: Map<Id64String, { childrenCount: number }> | undefined = node.extendedData.searchTargets;
@@ -360,7 +362,9 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
           childrenCountMapObs = this.#props.idsCache.getAllChildElementsCount({ elementIds: nestedSearchTargetElements }).pipe(
             map((elementCountMap) => {
               // Direct children search targets already have children count stored in grouping nodes extended data.
-              node.extendedData.searchTargets?.forEach((value, key) => elementCountMap.set(key, value.childrenCount));
+              for (const [key, value] of node.extendedData.searchTargets ?? []) {
+                elementCountMap.set(key, value.childrenCount);
+              }
               return elementCountMap;
             }),
           );
@@ -381,17 +385,17 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
                   let totalSearchTargetsChildrenCount = 0;
                   const nonSearchTargetIds = new Array<Id64String>();
                   const searchTargetIds = new Array<Id64String>();
-                  elementsMap.forEach(({ isSearchTarget }, elementId) => {
+                  for (const [elementId, { isSearchTarget }] of elementsMap) {
                     if (!isSearchTarget) {
                       nonSearchTargetIds.push(elementId);
-                      return;
+                      continue;
                     }
                     searchTargetIds.push(elementId);
                     const childCount = elementsChildrenCountMap.get(elementId);
                     if (childCount) {
                       totalSearchTargetsChildrenCount += childCount;
                     }
-                  });
+                  }
                   return merge(
                     searchTargetIds.length > 0
                       ? this.#visibilityHelper.getElementsVisibilityStatus({

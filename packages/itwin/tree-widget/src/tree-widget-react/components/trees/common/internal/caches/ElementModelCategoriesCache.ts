@@ -95,14 +95,14 @@ export class ElementModelCategoriesCache {
     }).pipe(
       map(({ modelCategories, allSubModels }) => {
         const result = new Map<ModelId, { categoriesOfTopMostElements: Set<CategoryId>; allCategories: Set<CategoryId>; isSubModel: boolean }>();
-        modelCategories.forEach(({ categoriesOfTopMostElements, allCategories }, modelId) => {
+        for (const [modelId, { categoriesOfTopMostElements, allCategories }] of modelCategories) {
           const isSubModel = allSubModels.has(modelId);
           result.set(modelId, {
             categoriesOfTopMostElements,
             allCategories,
             isSubModel,
           });
-        });
+        }
         return result;
       }),
       shareReplay(),
@@ -119,14 +119,14 @@ export class ElementModelCategoriesCache {
     return this.getModelsCategoriesInfo().pipe(
       map((modelCategories) => {
         const categoryModels = new Array<ModelId>();
-        modelCategories.forEach(({ allCategories, categoriesOfTopMostElements, isSubModel }, modelId) => {
+        for (const [modelId, { allCategories, categoriesOfTopMostElements, isSubModel }] of modelCategories) {
           if (
             (includeSubModels || !isSubModel) &&
             (props.includeOnlyIfCategoryOfTopMostElement ? categoriesOfTopMostElements.has(categoryId) : allCategories.has(categoryId))
           ) {
             categoryModels.push(modelId);
           }
-        });
+        }
         return categoryModels;
       }),
     );
@@ -162,7 +162,9 @@ export class ElementModelCategoriesCache {
     return this.getModelsCategoriesInfo().pipe(
       mergeMap((modelCategories) => modelCategories.values()),
       reduce((acc, { allCategories }) => {
-        allCategories.forEach((categoryId) => acc.add(categoryId));
+        for (const categoryId of allCategories) {
+          acc.add(categoryId);
+        }
         return acc;
       }, new Set<CategoryId>()),
     );
