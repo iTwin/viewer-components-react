@@ -317,7 +317,7 @@ export class ModelsTreeIdsCache implements Disposable {
           const subjectInfo = subjectInfos.get(subjectId);
           if (subjectInfo) {
             for (const modelId of subjectInfo.childModelIds) {
-              addModelsForExistingSubject(modelId);
+              modelIds.push(modelId);
             }
           }
         };
@@ -442,7 +442,7 @@ function forEachChildSubject(
     for (const childSubjectId of parentSubjectInfo.childSubjectIds) {
       const childSubjectInfo = subjectInfos.get(childSubjectId)!;
       if (cb(childSubjectId, childSubjectInfo) === "break") {
-        return;
+        continue;
       }
       forEachChildSubject(subjectInfos, childSubjectInfo, cb);
     }

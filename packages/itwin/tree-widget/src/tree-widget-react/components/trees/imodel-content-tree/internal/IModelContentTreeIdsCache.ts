@@ -282,7 +282,7 @@ function forEachChildSubject(
     for (const childSubjectId of parentSubjectInfo.childSubjectIds) {
       const childSubjectInfo = subjectInfos.get(childSubjectId)!;
       if (cb(childSubjectId, childSubjectInfo) === "break") {
-        return;
+        continue;
       }
       forEachChildSubject(subjectInfos, childSubjectInfo, cb);
     }
