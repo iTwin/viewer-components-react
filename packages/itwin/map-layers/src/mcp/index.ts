@@ -7,7 +7,7 @@
  * @itwin/map-layers/mcp — public API surface.
  *
  * Import from `@itwin/map-layers/mcp` to get the MCP tool functions,
- * viewport accessor, and startServer for in-process usage.
+ * viewport accessor, and MCP server instance.
  */
 
 export {
@@ -25,4 +25,4 @@ export {
 export type { MapLayerInfo } from "./tools";
 
 export { setViewportAccessor } from "./viewport";
-export { startServer } from "./server";
+export { server } from "./server";

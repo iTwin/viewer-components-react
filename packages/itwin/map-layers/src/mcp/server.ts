@@ -9,12 +9,9 @@
  * Exposes iTwin.js map-layer operations as MCP tools over stdio transport.
  *
  * This module only **defines** the server and its tool registrations.
- * It does NOT auto-start. Call `startServer()` or use the CLI entry point
- * to start the stdio transport.
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { getViewportAccessor } from "./viewport";
 import {
@@ -33,7 +30,7 @@ import {
 // Server
 // ---------------------------------------------------------------------------
 
-const server = new McpServer({
+export const server = new McpServer({
   name: "map-layers-mcp",
   version: "1.0.0",
 });
@@ -207,15 +204,3 @@ server.tool(
     }
   },
 );
-
-// ---------------------------------------------------------------------------
-// Start
-// ---------------------------------------------------------------------------
-
-/** Start the MCP server on a stdio transport. */
-export async function startServer(): Promise<void> {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  // eslint-disable-next-line no-console
-  console.error("Map Layers MCP server running on stdio");
-}

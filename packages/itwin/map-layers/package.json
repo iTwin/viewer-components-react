@@ -17,9 +17,6 @@
       "types": "./lib/cjs/mcp/index.d.ts"
     }
   },
-  "bin": {
-    "map-layers-mcp": "lib/cjs/mcp/cli.js"
-  },
   "license": "MIT",
   "scripts": {
     "build": "npm run -s copy:locale && npm run -s build:cjs && npm run -s build:esm",
