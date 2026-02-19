@@ -148,11 +148,11 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
     const result: ProcessedSearchResultsNodes = {
       searchResultsElements: new Map(),
     };
-    this.searchResultsNodesArr.forEach((node) => {
+    for (const node of this.searchResultsNodesArr) {
       if (node.type === "element") {
         searchResultsTemporaryElements.set(node.id, node);
       }
-    });
+    }
 
     const searchResultsElementsModels = await firstValueFrom(this.#props.idsCache.getFilteredElementsModels([...searchResultsTemporaryElements.keys()]));
     for (const [id, element] of searchResultsTemporaryElements) {
@@ -188,8 +188,11 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
           result.push({ pathToElements: [...currentPath, identifier], modelId, categoryId, elements, topMostParentElementId: entry.topMostParentElementId });
         }
       }
-      if (entry.children) {
-        this.convertInternalSearchTargetElementsRecursively(entry.children, [...currentPath, identifier]).forEach((childValue) => result.push(childValue));
+      if (!entry.children) {
+        continue;
+      }
+      for (const childValue of this.convertInternalSearchTargetElementsRecursively(entry.children, [...currentPath, identifier])) {
+        result.push(childValue);
       }
     }
     return result;

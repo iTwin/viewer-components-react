@@ -171,8 +171,11 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
           });
         }
       }
-      if (entry.children) {
-        this.convertInternalSearchTargetElementsRecursively(entry.children, [...currentPath, identifier]).forEach((childValue) => result.push(childValue));
+      if (!entry.children) {
+        continue;
+      }
+      for (const childValue of this.convertInternalSearchTargetElementsRecursively(entry.children, [...currentPath, identifier])) {
+        result.push(childValue);
       }
     }
     return result;

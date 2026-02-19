@@ -106,7 +106,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
     // 2. Their modelId and categoryId
     // When changing visibility of elements, visibility handler does not care about the path.
     // So we can first get all elements and group them only by modelId and categoryId.
-    elements.forEach(({ elements: elementsMap, categoryId, modelId }) => {
+    for (const { elements: elementsMap, categoryId, modelId } of elements) {
       const key: `${ModelId}-${CategoryId}` = `${modelId}-${categoryId}`;
       let mapEntry = modelCategoryElementMap.get(key);
       if (!mapEntry) {
@@ -120,7 +120,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
           searchTargetElements.push(elementId);
         }
       }
-    });
+    }
     // Get children for search targets, since non search targets don't have all the children present in the hierarchy.
     return this.#props.idsCache.getChildElementsTree({ elementIds: searchTargetElements }).pipe(
       // Need to filter out and keep only those children ids that are not part of elements that are present in search paths.
@@ -135,14 +135,15 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
             const [modelId, categoryId] = key.split("-");
             const childrenIds = new Set<Id64String>();
             // A shared children tree was created, need to get the children for each element in the group.
-            elementsInSearchPathsGroupedByModelAndCategory.forEach((elementId) => {
+            for (const elementId of elementsInSearchPathsGroupedByModelAndCategory) {
               const elementChildrenTree: ChildrenTree | undefined = childrenTree.get(elementId)?.children;
-              if (elementChildrenTree) {
-                for (const childId of getIdsFromChildrenTree({ tree: elementChildrenTree })) {
-                  childrenIds.add(childId);
-                }
+              if (!elementChildrenTree) {
+                continue;
               }
-            });
+              for (const childId of getIdsFromChildrenTree({ tree: elementChildrenTree })) {
+                childrenIds.add(childId);
+              }
+            }
             return this.#visibilityHelper.changeElementsVisibilityStatus({
               modelId,
               categoryId,
@@ -260,13 +261,13 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
     elements: Required<ClassificationsTreeSearchTargets>["elements"];
   }): Observable<VisibilityStatus> {
     const searchTargetElements = new Array<Id64String>();
-    elements.forEach(({ elements: elementsMap }) => {
+    for (const { elements: elementsMap } of elements) {
       for (const [elementId, { isSearchTarget }] of elementsMap) {
         if (isSearchTarget) {
           searchTargetElements.push(elementId);
         }
       }
-    });
+    }
     return this.#props.idsCache.getAllChildElementsCount({ elementIds: searchTargetElements }).pipe(
       mergeMap((elementsChildrenCountMap) =>
         fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(

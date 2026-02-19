@@ -89,12 +89,12 @@ export class ElementChildrenCache {
       }
       const elementChildrenTree: ChildrenTree = new Map();
       result.set(elementId, { children: elementChildrenTree });
-      entry.children.forEach((childId) => {
+      for (const childId of entry.children) {
         const childrenTreeOfChild = this.getChildElementsTreeFromMap({ elementIds: childId });
         // Need to add children tree created from childId. This tree includes childId as root element
         // If child does not have children, children tree won't be created. Need to add childId with undefined children
         elementChildrenTree.set(childId, { children: childrenTreeOfChild.size > 0 ? childrenTreeOfChild : undefined });
-      });
+      }
     }
     return result;
   }

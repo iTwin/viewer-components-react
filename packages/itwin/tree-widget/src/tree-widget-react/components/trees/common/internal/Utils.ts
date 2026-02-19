@@ -263,7 +263,9 @@ export function groupingNodeDataFromChildren(children: ProcessedHierarchyNode[])
         hasDirectNonSearchTargets = true;
         if (!child.search.childrenTargetPaths?.length || child.search.isSearchTarget) {
           assert(HierarchyNodeKey.isInstances(child.key));
-          child.key.instanceKeys.forEach((key) => searchTargets.set(key.id, { childrenCount: child.extendedData?.childrenCount ?? 0 }));
+          for (const key of child.key.instanceKeys) {
+            searchTargets.set(key.id, { childrenCount: child.extendedData?.childrenCount ?? 0 });
+          }
         }
       }
     }
