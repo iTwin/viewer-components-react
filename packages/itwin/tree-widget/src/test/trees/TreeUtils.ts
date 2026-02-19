@@ -109,12 +109,12 @@ export function createTreeWidgetTestingViewport({
       onDisplayedModelsChanged.shouldFireOnRender = true;
     },
     changeSubCategoryDisplay: (props) => {
-      subCategories.forEach((subCategoryMap) => {
+      for (const subCategoryMap of subCategories.values()) {
         if (subCategoryMap.has(props.subCategoryId)) {
           subCategoryMap.set(props.subCategoryId, { isVisible: props.display });
           return;
         }
-      });
+      }
     },
     clearNeverDrawn: () => {
       neverDrawn = new Set();
@@ -154,13 +154,13 @@ export function createTreeWidgetTestingViewport({
       return "none";
     },
     clearPerModelCategoryOverrides: (props) => {
-      perModelCategoryOverrides.forEach((categoryMap, modelId) => {
+      for (const [modelId, categoryMap] of perModelCategoryOverrides) {
         if (props?.modelIds && !Id64.has(props.modelIds, modelId)) {
-          return;
+          continue;
         }
         const categoryIds = [...categoryMap.keys()];
         categoryIds.forEach((categoryId) => categoryMap.set(categoryId, { override: "none" }));
-      });
+      }
       onPerModelCategoriesOverridesChanged.shouldFireOnRender = true;
     },
     get onAlwaysDrawnChanged() {
