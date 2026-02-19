@@ -39,8 +39,10 @@ import type { ClassGroupingNodeKey, HierarchyNode, InstancesNodeKey } from "@itw
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
 import type { HierarchyVisibilityHandlerOverridableMethod, HierarchyVisibilityOverrideHandler, VisibilityStatus } from "../../UseHierarchyVisibility.js";
 import type { AlwaysAndNeverDrawnElementInfoCache } from "../caches/AlwaysAndNeverDrawnElementInfoCache.js";
+import type { NonPartialVisibilityStatus } from "../Tooltip.js";
 import type { CategoryId, ModelId } from "../Types.js";
 import type { ChildrenTree } from "../Utils.js";
+import type { IVisibilityChangeEventListener } from "../VisibilityChangeEventListener.js";
 
 /**
  * Functionality of tree visibility handler methods that can be overridden.
@@ -103,6 +105,7 @@ export interface BaseVisibilityHelperProps {
   overrideHandler?: HierarchyVisibilityOverrideHandler;
   overrides?: BaseTreeVisibilityHandlerOverrides;
   baseIdsCache: BaseIdsCache;
+  eventListener: IVisibilityChangeEventListener;
 }
 
 /**
@@ -116,15 +119,40 @@ export class BaseVisibilityHelper implements Disposable {
   readonly #alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfoCache;
   #elementChangeQueue = new Subject<Observable<void>>();
   #subscriptions: Subscription[] = [];
+  #idsCachedVisibility = {
+    directCategoryVisibilityStatus: new Map<ModelId, Map<CategoryId, NonPartialVisibilityStatus>>(),
+    modelWithCategoryVisibilityStatus: new Map<ModelId, Map<CategoryId, VisibilityStatus>>(),
+    modelVisibilityStatus: new Map<ModelId, VisibilityStatus>(),
+    categoryVisibilityStatus: new Map<CategoryId, VisibilityStatus>(),
+  };
+  #listeners = new Array<() => void>();
 
   constructor(props: BaseVisibilityHelperProps) {
     this.#props = props;
     this.#alwaysAndNeverDrawnElements = this.#props.alwaysAndNeverDrawnElementInfo;
     this.#subscriptions.push(this.#elementChangeQueue.pipe(concatAll()).subscribe());
+    this.#listeners.push(
+      this.#props.eventListener.onVisibilityChange.addListener(() => {
+        this.#idsCachedVisibility.modelVisibilityStatus = new Map();
+        this.#idsCachedVisibility.categoryVisibilityStatus = new Map();
+        this.#idsCachedVisibility.modelWithCategoryVisibilityStatus = new Map();
+      }),
+    );
+    this.#listeners.push(
+      this.#props.viewport.onDisplayedCategoriesChanged.addListener(() => {
+        this.#idsCachedVisibility.directCategoryVisibilityStatus = new Map();
+      }),
+    );
+    this.#listeners.push(
+      this.#props.viewport.onPerModelCategoriesOverridesChanged.addListener(() => {
+        this.#idsCachedVisibility.directCategoryVisibilityStatus = new Map();
+      }),
+    );
   }
 
   public [Symbol.dispose]() {
     this.#subscriptions.forEach((x) => x.unsubscribe());
+    this.#listeners.forEach((x) => x());
   }
 
   /**
@@ -161,6 +189,10 @@ export class BaseVisibilityHelper implements Disposable {
       const { modelIds } = props;
       return from(Id64.iterable(modelIds)).pipe(
         mergeMap((modelId) => {
+          const cachedValue = this.#idsCachedVisibility.modelVisibilityStatus.get(modelId);
+          if (cachedValue) {
+            return of(cachedValue);
+          }
           // For hidden models we only need to check subModels
           if (!this.#props.viewport.viewsModel(modelId)) {
             return this.#props.baseIdsCache.getSubModels({ modelId }).pipe(
@@ -172,6 +204,7 @@ export class BaseVisibilityHelper implements Disposable {
                 ),
               ),
               defaultIfEmpty(createVisibilityStatus("hidden")),
+              tap((status) => this.#idsCachedVisibility.modelVisibilityStatus.set(modelId, status)),
             );
           }
           // For visible models we need to check all categories.
@@ -181,6 +214,7 @@ export class BaseVisibilityHelper implements Disposable {
           return this.#props.baseIdsCache.getCategories({ modelId, includeOnlyIfCategoryOfTopMostElement: this.#props.viewport.isAlwaysDrawnExclusive }).pipe(
             mergeMap((categories) => this.getCategoriesVisibilityStatus({ modelId, categoryIds: categories })),
             defaultIfEmpty(createVisibilityStatus("visible")),
+            tap((status) => this.#idsCachedVisibility.modelVisibilityStatus.set(modelId, status)),
           );
         }),
         mergeVisibilityStatuses(),
@@ -248,11 +282,15 @@ export class BaseVisibilityHelper implements Disposable {
       }
 
       return fromWithRelease({ source: categoryIds, releaseOnCount: 100 }).pipe(
-        mergeMap((categoryId) =>
+        mergeMap((categoryId) => {
+          const cachedVisibilityStatus = this.#idsCachedVisibility.categoryVisibilityStatus.get(categoryId);
+          if (cachedVisibilityStatus) {
+            return of(cachedVisibilityStatus);
+          }
           // When always drawn exclusive mode is enabled need to get only models for which category has top most element.
           // This is because always/never drawn elements can be retrieved using top most category.
           // TODO fix with: https://github.com/iTwin/viewer-components-react/issues/1100
-          this.#props.baseIdsCache.getModels({ categoryId, includeOnlyIfCategoryOfTopMostElement: this.#props.viewport.isAlwaysDrawnExclusive }).pipe(
+          return this.#props.baseIdsCache.getModels({ categoryId, includeOnlyIfCategoryOfTopMostElement: this.#props.viewport.isAlwaysDrawnExclusive }).pipe(
             mergeMap((models) =>
               merge(
                 from(Id64.iterable(models)).pipe(
@@ -268,10 +306,14 @@ export class BaseVisibilityHelper implements Disposable {
                 defaultIfEmpty(
                   createVisibilityStatus(!this.#props.viewport.isAlwaysDrawnExclusive && this.#props.viewport.viewsCategory(categoryId) ? "visible" : "hidden"),
                 ),
+                mergeVisibilityStatuses(),
+                tap((status) => {
+                  this.#idsCachedVisibility.categoryVisibilityStatus.set(categoryId, status);
+                }),
               ),
             ),
-          ),
-        ),
+          );
+        }),
         mergeVisibilityStatuses(),
       );
     });
@@ -294,6 +336,10 @@ export class BaseVisibilityHelper implements Disposable {
    * - SubModels that are related to the modelId and categoryId.
    */
   private getModelWithCategoryVisibilityStatus({ modelId, categoryId }: { modelId: Id64String; categoryId: Id64String }): Observable<VisibilityStatus> {
+    const cachedVisibilityStatus = this.#idsCachedVisibility.modelWithCategoryVisibilityStatus.get(modelId)?.get(categoryId);
+    if (cachedVisibilityStatus) {
+      return of(cachedVisibilityStatus);
+    }
     const modelVisibilityStatus = this.#props.viewport.viewsModel(modelId)
       ? // For visible model need to check category and always/never drawn elements
         this.getVisibilityFromAlwaysAndNeverDrawnElements({
@@ -307,7 +353,17 @@ export class BaseVisibilityHelper implements Disposable {
       .getSubModels({ modelId, categoryId })
       .pipe(mergeMap((subModels) => this.getModelsVisibilityStatus({ modelIds: subModels })));
 
-    return merge(modelVisibilityStatus, subModelsVisibilityStatus).pipe(mergeVisibilityStatuses());
+    return merge(modelVisibilityStatus, subModelsVisibilityStatus).pipe(
+      mergeVisibilityStatuses(),
+      tap((status) => {
+        let modelEntry = this.#idsCachedVisibility.modelWithCategoryVisibilityStatus.get(modelId);
+        if (!modelEntry) {
+          modelEntry = new Map();
+          this.#idsCachedVisibility.modelWithCategoryVisibilityStatus.set(modelId, modelEntry);
+        }
+        modelEntry.set(categoryId, status);
+      }),
+    );
   }
 
   /**
@@ -318,11 +374,26 @@ export class BaseVisibilityHelper implements Disposable {
    * - Category selector visibility in the viewport.
    */
   public getVisibleModelCategoryDirectVisibilityStatus({ modelId, categoryId }: { categoryId: Id64String; modelId: Id64String }): VisibilityStatus {
+    let modelEntry = this.#idsCachedVisibility.directCategoryVisibilityStatus.get(modelId);
+    if (!modelEntry) {
+      modelEntry = new Map();
+      this.#idsCachedVisibility.directCategoryVisibilityStatus.set(modelId, modelEntry);
+    } else {
+      const cachedStatus = modelEntry.get(categoryId);
+      if (cachedStatus) {
+        return cachedStatus;
+      }
+    }
+
     const override = this.#props.viewport.getPerModelCategoryOverride({ modelId, categoryId });
     if (override === "show" || (override === "none" && this.#props.viewport.viewsCategory(categoryId))) {
-      return createVisibilityStatus("visible");
+      const visibleStatus = createVisibilityStatus("visible");
+      modelEntry.set(categoryId, visibleStatus);
+      return visibleStatus;
     }
-    return createVisibilityStatus("hidden");
+    const hiddenStatus = createVisibilityStatus("hidden");
+    modelEntry.set(categoryId, hiddenStatus);
+    return hiddenStatus;
   }
 
   /**

@@ -19,6 +19,7 @@ import type { AlwaysAndNeverDrawnElementInfoCache } from "../../../common/intern
 import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
 import type { ChildrenTree } from "../../../common/internal/Utils.js";
 import type { BaseIdsCache, TreeSpecificVisibilityHandler } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
+import type { IVisibilityChangeEventListener } from "../../../common/internal/VisibilityChangeEventListener.js";
 import type { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { ClassificationsTreeIdsCache } from "../ClassificationsTreeIdsCache.js";
@@ -29,6 +30,7 @@ export interface ClassificationsTreeVisibilityHandlerProps {
   idsCache: ClassificationsTreeIdsCache;
   viewport: TreeWidgetViewport;
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfoCache;
+  eventListener: IVisibilityChangeEventListener;
 }
 
 /**
@@ -61,6 +63,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       idsCache: this.#props.idsCache,
       alwaysAndNeverDrawnElementInfo: this.#props.alwaysAndNeverDrawnElementInfo,
       baseIdsCache,
+      eventListener: this.#props.eventListener,
     });
   }
 

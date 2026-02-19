@@ -220,12 +220,13 @@ function createTreeSpecificVisibilityHandler(
     hierarchyConfig: CategoriesTreeHierarchyConfiguration;
   },
 ) {
-  const { info, getCache, viewport, hierarchyConfig } = props;
+  const { info, getCache, viewport, hierarchyConfig, eventListener } = props;
   return new CategoriesTreeVisibilityHandler({
     alwaysAndNeverDrawnElementInfo: info,
     idsCache: getCache(),
     viewport,
     hierarchyConfig,
+    eventListener,
   });
 }
 
