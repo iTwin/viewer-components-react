@@ -1,21 +1,33 @@
 /*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
+/**
  * Map Layers MCP Server
  *
  * Exposes iTwin.js map-layer operations as MCP tools over stdio transport.
- * The server communicates with a host iTwin.js application that provides
- * viewport access — the host is expected to inject or relay viewport calls.
  *
  * This module only **defines** the server and its tool registrations.
- * It does NOT auto-start. Use `startServer()` or the CLI entry point
- * (`cli.ts` / `dist/cli.js`) to actually start the stdio transport.
- *--------------------------------------------------------------------------------------------*/
+ * It does NOT auto-start. Call `startServer()` or use the CLI entry point
+ * to start the stdio transport.
+ */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { getViewportAccessor } from "./viewport.js";
-
-const _getViewport = getViewportAccessor;
+import { getViewportAccessor } from "./viewport";
+import {
+  attachMapLayer,
+  detachMapLayer,
+  getMapLayerInfo,
+  openMapLayersWidget,
+  setBaseMapType,
+  setMapLayerVisibility,
+  setMapTransparency,
+  toggleBackgroundMap,
+  toggleTerrain,
+} from "./tools";
 
 // ---------------------------------------------------------------------------
 // Server
@@ -34,11 +46,10 @@ server.tool(
   {},
   async () => {
     try {
-      const { openMapLayersWidget } = await import("./tools.js");
-      const msg = await openMapLayersWidget();
-      return { content: [{ type: "text", text: msg }] };
+      const msg = openMapLayersWidget();
+      return { content: [{ type: "text" as const, text: msg }] };
     } catch (e: any) {
-      return { content: [{ type: "text", text: JSON.stringify({ action: "open_map_layers_widget" }) }] };
+      return { content: [{ type: "text" as const, text: JSON.stringify({ action: "open_map_layers_widget", error: e.message }) }], isError: true };
     }
   },
 );
@@ -53,11 +64,10 @@ server.tool(
   },
   async ({ enabled }) => {
     try {
-      const { toggleBackgroundMap } = await import("./tools.js");
-      const result = toggleBackgroundMap(_getViewport(), enabled);
-      return { content: [{ type: "text", text: JSON.stringify(result) }] };
+      const result = toggleBackgroundMap(getViewportAccessor(), enabled);
+      return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
     } catch (e: any) {
-      return { content: [{ type: "text", text: JSON.stringify({ action: "toggle_background_map", enabled }) }] };
+      return { content: [{ type: "text" as const, text: JSON.stringify({ action: "toggle_background_map", error: e.message }) }], isError: true };
     }
   },
 );
@@ -73,11 +83,10 @@ server.tool(
   },
   async ({ type, colorTbgr }) => {
     try {
-      const { setBaseMapType } = await import("./tools.js");
-      const result = await setBaseMapType(_getViewport(), type, colorTbgr);
-      return { content: [{ type: "text", text: JSON.stringify(result) }] };
+      const result = setBaseMapType(getViewportAccessor(), type, colorTbgr);
+      return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
     } catch (e: any) {
-      return { content: [{ type: "text", text: JSON.stringify({ action: "set_base_map_type", type, colorTbgr }) }] };
+      return { content: [{ type: "text" as const, text: JSON.stringify({ action: "set_base_map_type", error: e.message }) }], isError: true };
     }
   },
 );
@@ -92,11 +101,10 @@ server.tool(
   },
   async ({ transparency }) => {
     try {
-      const { setMapTransparency } = await import("./tools.js");
-      const result = setMapTransparency(_getViewport(), transparency);
-      return { content: [{ type: "text", text: JSON.stringify(result) }] };
+      const result = setMapTransparency(getViewportAccessor(), transparency);
+      return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
     } catch (e: any) {
-      return { content: [{ type: "text", text: JSON.stringify({ action: "set_map_transparency", transparency }) }] };
+      return { content: [{ type: "text" as const, text: JSON.stringify({ action: "set_map_transparency", error: e.message }) }], isError: true };
     }
   },
 );
@@ -111,11 +119,10 @@ server.tool(
   },
   async ({ enabled }) => {
     try {
-      const { toggleTerrain } = await import("./tools.js");
-      const result = toggleTerrain(_getViewport(), enabled);
-      return { content: [{ type: "text", text: JSON.stringify(result) }] };
+      const result = toggleTerrain(getViewportAccessor(), enabled);
+      return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
     } catch (e: any) {
-      return { content: [{ type: "text", text: JSON.stringify({ action: "toggle_terrain", enabled }) }] };
+      return { content: [{ type: "text" as const, text: JSON.stringify({ action: "toggle_terrain", error: e.message }) }], isError: true };
     }
   },
 );
@@ -128,11 +135,10 @@ server.tool(
   {},
   async () => {
     try {
-      const { getMapLayerInfo } = await import("./tools.js");
-      const result = getMapLayerInfo(_getViewport());
-      return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+      const result = getMapLayerInfo(getViewportAccessor());
+      return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
     } catch (e: any) {
-      return { content: [{ type: "text", text: JSON.stringify({ action: "get_map_layer_info" }) }] };
+      return { content: [{ type: "text" as const, text: JSON.stringify({ action: "get_map_layer_info", error: e.message }) }], isError: true };
     }
   },
 );
@@ -155,13 +161,10 @@ server.tool(
   },
   async ({ url, name, formatId, isOverlay, userName, password }) => {
     try {
-      const { attachMapLayer } = await import("./tools.js");
-      const result = await attachMapLayer(_getViewport(), url, name, formatId, isOverlay, userName, password);
-      return { content: [{ type: "text", text: JSON.stringify(result) }] };
+      const result = attachMapLayer(getViewportAccessor(), url, name, formatId, isOverlay, userName, password);
+      return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
     } catch (e: any) {
-      return {
-        content: [{ type: "text", text: JSON.stringify({ action: "attach_map_layer", url, name, formatId, isOverlay, error: e.message }) }],
-      };
+      return { content: [{ type: "text" as const, text: JSON.stringify({ action: "attach_map_layer", error: e.message }) }], isError: true };
     }
   },
 );
@@ -177,13 +180,10 @@ server.tool(
   },
   async ({ name, isOverlay }) => {
     try {
-      const { detachMapLayer } = await import("./tools.js");
-      const result = detachMapLayer(_getViewport(), name, isOverlay);
-      return { content: [{ type: "text", text: JSON.stringify(result) }] };
+      const result = detachMapLayer(getViewportAccessor(), name, isOverlay);
+      return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
     } catch (e: any) {
-      return {
-        content: [{ type: "text", text: JSON.stringify({ action: "detach_map_layer", name, isOverlay, error: e.message }) }],
-      };
+      return { content: [{ type: "text" as const, text: JSON.stringify({ action: "detach_map_layer", error: e.message }) }], isError: true };
     }
   },
 );
@@ -200,13 +200,10 @@ server.tool(
   },
   async ({ name, visible, isOverlay }) => {
     try {
-      const { setMapLayerVisibility } = await import("./tools.js");
-      const result = setMapLayerVisibility(_getViewport(), name, visible, isOverlay);
-      return { content: [{ type: "text", text: JSON.stringify(result) }] };
+      const result = setMapLayerVisibility(getViewportAccessor(), name, visible, isOverlay);
+      return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
     } catch (e: any) {
-      return {
-        content: [{ type: "text", text: JSON.stringify({ action: "set_map_layer_visibility", name, visible, isOverlay, error: e.message }) }],
-      };
+      return { content: [{ type: "text" as const, text: JSON.stringify({ action: "set_map_layer_visibility", error: e.message }) }], isError: true };
     }
   },
 );
@@ -216,7 +213,7 @@ server.tool(
 // ---------------------------------------------------------------------------
 
 /** Start the MCP server on a stdio transport. */
-export async function startServer() {
+export async function startServer(): Promise<void> {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("Map Layers MCP server running on stdio");

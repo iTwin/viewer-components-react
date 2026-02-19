@@ -1,19 +1,25 @@
 /*---------------------------------------------------------------------------------------------
- * Map Layers MCP Tool Functions
- *
- * These functions operate on an iTwin.js ScreenViewport. They are designed to
- * be called from within a running iTwin.js application where `IModelApp` is
- * initialized and a viewport is available.
- *
- * The functions accept a generic viewport reference (typed as `any` to avoid
- * hard dependency on @itwin/core-frontend in the MCP server package). The host
- * application is responsible for providing the correctly-typed ScreenViewport.
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-// We intentionally use `any` for viewport types so the MCP server package
-// does not require @itwin/core-frontend or @itwin/core-common as dependencies.
-// The host iTwin.js application that wires up the viewport accessor will have
-// these types available at runtime.
+/**
+ * MCP tool functions that operate on an iTwin.js ScreenViewport.
+ *
+ * These are pure functions designed to be called from the MCP server handlers
+ * or directly from an in-process consumer. Since this file lives inside the
+ * `@itwin/map-layers` package it has direct access to iTwin.js types.
+ */
+
+import type { ScreenViewport } from "@itwin/core-frontend";
+import {
+  BackgroundMapProvider,
+  BackgroundMapType,
+  BaseMapLayerSettings,
+  ColorDef,
+} from "@itwin/core-common";
+import { MapLayerSource } from "@itwin/core-frontend";
+import { UiFramework, WidgetState } from "@itwin/appui-react";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -24,31 +30,34 @@ export interface MapLayerInfo {
   transparency: number;
   isOverlay: boolean;
   layerIndex: number;
-  subLayers?: any[];
+  subLayers?: unknown[];
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function getViewport(vp: any): any {
+function requireViewport(vp: ScreenViewport | undefined): ScreenViewport {
   if (!vp) {
     throw new Error("No active viewport available.");
   }
   return vp;
 }
 
-function gatherLayers(vp: any, isOverlay: boolean): MapLayerInfo[] {
+function gatherLayers(vp: ScreenViewport, isOverlay: boolean): MapLayerInfo[] {
   const layers = isOverlay
     ? vp.displayStyle.settings.mapImagery.overlayLayers
     : vp.displayStyle.settings.mapImagery.backgroundLayers;
 
-  return layers.map((layer: any, idx: number) => ({
+  return layers.map((layer, idx) => ({
     name: layer.name,
-    source: layer.source ?? layer.modelId ?? "",
+    source: (layer as any).source ?? (layer as any).modelId ?? "",
     visible: layer.visible,
     transparency: layer.transparency,
     isOverlay,
     layerIndex: idx,
-    subLayers: layer.subLayers?.map((s: any) => (typeof s.toJSON === "function" ? s.toJSON() : s)) ?? undefined,
+    subLayers:
+      (layer as any).subLayers?.map((s: any) =>
+        typeof s.toJSON === "function" ? s.toJSON() : s,
+      ) ?? undefined,
   }));
 }
 
@@ -56,13 +65,12 @@ function gatherLayers(vp: any, isOverlay: boolean): MapLayerInfo[] {
 
 /**
  * Opens (activates) the Map Layers widget in the frontstage.
- * Must run in an iTwin.js environment where `@itwin/appui-react` is loaded.
  */
-export async function openMapLayersWidget(): Promise<string> {
-  // Dynamic import so this module is only required at runtime inside iTwin.js
-  const { UiFramework } = await import("@itwin/appui-react" as string);
+export function openMapLayersWidget(): string {
   const widgetId = "map-layers:mapLayersWidget";
-  UiFramework.frontstages.activeFrontstageDef?.findWidgetDef(widgetId)?.setWidgetState(1 /* WidgetState.Open */);
+  UiFramework.frontstages.activeFrontstageDef
+    ?.findWidgetDef(widgetId)
+    ?.setWidgetState(WidgetState.Open);
   return `Map Layers widget opened (id: ${widgetId}).`;
 }
 
@@ -72,10 +80,10 @@ export async function openMapLayersWidget(): Promise<string> {
  * Toggles background map visibility on/off, or sets it to a specific state.
  */
 export function toggleBackgroundMap(
-  vp: any,
+  vp: ScreenViewport | undefined,
   enabled?: boolean,
 ): { backgroundMapEnabled: boolean } {
-  const viewport = getViewport(vp);
+  const viewport = requireViewport(vp);
   const newState = enabled ?? !viewport.viewFlags.backgroundMap;
   viewport.viewFlags = viewport.viewFlags.with("backgroundMap", newState);
   return { backgroundMapEnabled: newState };
@@ -84,34 +92,35 @@ export function toggleBackgroundMap(
 // ── 3. set_base_map_type ─────────────────────────────────────────────────────
 
 /**
- * Sets the base map to one of the well-known Bing providers:
- *   "aerial" | "hybrid" | "street"
- * Or to a solid color fill when type is "color" + optional colorDef (TBGR integer).
+ * Sets the base map to one of the well-known Bing providers or a solid color.
  */
-export async function setBaseMapType(
-  vp: any,
+export function setBaseMapType(
+  vp: ScreenViewport | undefined,
   type: "aerial" | "hybrid" | "street" | "color",
   colorTbgr?: number,
-): Promise<{ baseMap: string }> {
-  const coreCommon = await import("@itwin/core-common" as string);
-  const { BackgroundMapProvider, BackgroundMapType, BaseLayerSettings, ColorDef } = coreCommon;
-
-  const viewport = getViewport(vp);
+): { baseMap: string } {
+  const viewport = requireViewport(vp);
 
   if (type === "color") {
-    const color = colorTbgr !== undefined ? ColorDef.fromJSON(colorTbgr) : ColorDef.fromJSON(0);
+    const color =
+      colorTbgr !== undefined
+        ? ColorDef.fromJSON(colorTbgr)
+        : ColorDef.fromJSON(0);
     viewport.displayStyle.backgroundMapBase = color;
     return { baseMap: `color (TBGR: ${color.toJSON()})` };
   }
 
-  const bgTypeMap: Record<string, number> = {
+  const bgTypeMap: Record<string, BackgroundMapType> = {
     aerial: BackgroundMapType.Aerial,
     hybrid: BackgroundMapType.Hybrid,
     street: BackgroundMapType.Street,
   };
   const bgType = bgTypeMap[type] ?? BackgroundMapType.Hybrid;
-  const provider = BackgroundMapProvider.fromJSON({ name: "BingProvider", type: bgType });
-  const settings = BaseLayerSettings.fromProvider(provider);
+  const provider = BackgroundMapProvider.fromJSON({
+    name: "BingProvider",
+    type: bgType,
+  });
+  const settings = BaseMapLayerSettings.fromProvider(provider);
   viewport.displayStyle.backgroundMapBase = settings;
   return { baseMap: type };
 }
@@ -122,10 +131,10 @@ export async function setBaseMapType(
  * Sets the background map transparency (0 = fully opaque, 1 = fully transparent).
  */
 export function setMapTransparency(
-  vp: any,
+  vp: ScreenViewport | undefined,
   transparency: number,
 ): { transparency: number } {
-  const viewport = getViewport(vp);
+  const viewport = requireViewport(vp);
   const clamped = Math.max(0, Math.min(1, transparency));
   viewport.changeBackgroundMapProps({ transparency: clamped });
   return { transparency: clamped };
@@ -137,11 +146,13 @@ export function setMapTransparency(
  * Toggles terrain display on/off, or sets it to a specific state.
  */
 export function toggleTerrain(
-  vp: any,
+  vp: ScreenViewport | undefined,
   enabled?: boolean,
 ): { terrainEnabled: boolean } {
-  const viewport = getViewport(vp);
-  const currentlyEnabled = viewport.view?.getDisplayStyle3d?.()?.settings?.backgroundMap?.applyTerrain ?? false;
+  const viewport = requireViewport(vp);
+  const currentlyEnabled =
+    (viewport.view as any)?.getDisplayStyle3d?.()?.settings?.backgroundMap
+      ?.applyTerrain ?? false;
   const newState = enabled ?? !currentlyEnabled;
   viewport.changeBackgroundMapProps({ applyTerrain: newState });
   return { terrainEnabled: newState };
@@ -152,10 +163,12 @@ export function toggleTerrain(
 /**
  * Returns information about all attached map layers (both background and overlay).
  */
-export function getMapLayerInfo(
-  vp: any,
-): { backgroundLayers: MapLayerInfo[]; overlayLayers: MapLayerInfo[]; backgroundMapEnabled: boolean } {
-  const viewport = getViewport(vp);
+export function getMapLayerInfo(vp: ScreenViewport | undefined): {
+  backgroundLayers: MapLayerInfo[];
+  overlayLayers: MapLayerInfo[];
+  backgroundMapEnabled: boolean;
+} {
+  const viewport = requireViewport(vp);
   const backgroundLayers = gatherLayers(viewport, false);
   const overlayLayers = gatherLayers(viewport, true);
   return {
@@ -169,26 +182,17 @@ export function getMapLayerInfo(
 
 /**
  * Attaches a new map layer to the viewport by URL.
- *
- * @param url        The layer service URL (WMS, WMTS, ArcGIS, TileURL, etc.)
- * @param name       Display name for the layer
- * @param formatId   Format identifier: "WMS", "WMTS", "ArcGIS", "ArcGISFeature", "TileURL"
- * @param isOverlay  If true the layer is added as an overlay; otherwise as a background layer
- * @param userName   Optional credentials
- * @param password   Optional credentials
  */
-export async function attachMapLayer(
-  vp: any,
+export function attachMapLayer(
+  vp: ScreenViewport | undefined,
   url: string,
   name: string,
   formatId?: string,
   isOverlay?: boolean,
   userName?: string,
   password?: string,
-): Promise<{ attached: boolean; name: string; isOverlay: boolean }> {
-  const { MapLayerSource } = await import("@itwin/core-frontend" as string);
-
-  const viewport = getViewport(vp);
+): { attached: boolean; name: string; isOverlay: boolean } {
+  const viewport = requireViewport(vp);
   const overlay = isOverlay ?? false;
 
   const source = MapLayerSource.fromJSON({
@@ -223,11 +227,11 @@ export async function attachMapLayer(
  * If multiple layers match, all are detached.
  */
 export function detachMapLayer(
-  vp: any,
+  vp: ScreenViewport | undefined,
   name: string,
   isOverlay?: boolean,
 ): { detached: string[] } {
-  const viewport = getViewport(vp);
+  const viewport = requireViewport(vp);
   const detached: string[] = [];
 
   const tryDetach = (overlay: boolean) => {
@@ -238,8 +242,13 @@ export function detachMapLayer(
     // Iterate in reverse so index removal is safe
     for (let i = layers.length - 1; i >= 0; i--) {
       if (layers[i].name === name) {
-        viewport.displayStyle.detachMapLayerByIndex({ index: i, isOverlay: overlay });
-        detached.push(`${name} (${overlay ? "overlay" : "background"}, index ${i})`);
+        viewport.displayStyle.detachMapLayerByIndex({
+          index: i,
+          isOverlay: overlay,
+        });
+        detached.push(
+          `${name} (${overlay ? "overlay" : "background"}, index ${i})`,
+        );
       }
     }
   };
@@ -263,12 +272,12 @@ export function detachMapLayer(
  * Sets the visibility of a specific map layer identified by name.
  */
 export function setMapLayerVisibility(
-  vp: any,
+  vp: ScreenViewport | undefined,
   name: string,
   visible: boolean,
   isOverlay?: boolean,
 ): { name: string; visible: boolean; updated: number } {
-  const viewport = getViewport(vp);
+  const viewport = requireViewport(vp);
   let updated = 0;
 
   const trySetVisibility = (overlay: boolean) => {
