@@ -387,11 +387,13 @@ export class BaseVisibilityHelper implements Disposable {
     | { categoryId: Id64String }
   )): Observable<VisibilityStatus> {
     const defaultStatus = this.#props.viewport.isAlwaysDrawnExclusive ? createVisibilityStatus("hidden") : props.defaultStatus;
-    const oppositeSetFromDefaultStatus = defaultStatus.state === "visible" ? this.#props.viewport.neverDrawn : this.#props.viewport.alwaysDrawn;
-    if (!oppositeSetFromDefaultStatus?.size) {
+    const { oppositeSet, setType } =
+      defaultStatus.state === "visible"
+        ? { oppositeSet: this.#props.viewport.neverDrawn, setType: "never" as const }
+        : { oppositeSet: this.#props.viewport.alwaysDrawn, setType: "always" as const };
+    if (!oppositeSet?.size) {
       return of(defaultStatus);
     }
-    const oppositeSetType = defaultStatus.state === "visible" ? "never" : "always";
 
     if ("elements" in props) {
       const { childrenCount } = props;
@@ -400,7 +402,7 @@ export class BaseVisibilityHelper implements Disposable {
         return of(
           getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
             defaultStatus,
-            numberOfElementsInOppositeSet: countInSet(props.elements, oppositeSetFromDefaultStatus),
+            numberOfElementsInOppositeSet: countInSet(props.elements, oppositeSet),
             totalCount: Id64.sizeOf(props.elements),
           }),
         );
@@ -412,14 +414,14 @@ export class BaseVisibilityHelper implements Disposable {
           modelId,
           categoryIds: props.categoryOfTopMostParentElement,
           parentElementIdsPath,
-          setType: oppositeSetType,
+          setType,
         })
         .pipe(
           map((childElementsInOppositeSet) =>
             // Combine child always/never drawn count with the props.elements count in always/never drawn sets.
             getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
               defaultStatus,
-              numberOfElementsInOppositeSet: countInSet(props.elements, oppositeSetFromDefaultStatus) + childElementsInOppositeSet.size,
+              numberOfElementsInOppositeSet: countInSet(props.elements, oppositeSet) + childElementsInOppositeSet.size,
               totalCount: childrenCount + Id64.sizeOf(props.elements),
             }),
           ),
@@ -431,7 +433,7 @@ export class BaseVisibilityHelper implements Disposable {
       relatedElementsInOppositeSet: this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({
         modelId,
         categoryIds: categoryId,
-        setType: oppositeSetType,
+        setType,
       }),
     }).pipe(
       // There is a known bug:
