@@ -268,7 +268,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
               this.ModeledElement.Id IN (${elementIds.map(() => "?").join(",")})
               AND NOT this.IsPrivate
           `,
-          bindings: [...elementIds.map((id): ECSqlBinding => ({ type: "id", value: id }))],
+          bindings: elementIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
         },
       },
     ];

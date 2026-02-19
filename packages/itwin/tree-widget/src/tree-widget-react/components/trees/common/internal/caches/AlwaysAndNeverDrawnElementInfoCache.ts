@@ -172,7 +172,9 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
           pathToElements,
           currentIdsIndex: currentIdsIndex + 1,
         });
-        childrenTreeOfChildren.forEach((val, childId) => result.set(childId, val));
+        for (const [childId, childEntry] of childrenTreeOfChildren) {
+          result.set(childId, childEntry);
+        }
       }
     }
     return result;

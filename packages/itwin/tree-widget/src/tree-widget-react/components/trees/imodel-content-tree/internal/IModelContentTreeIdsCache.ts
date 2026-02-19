@@ -128,7 +128,7 @@ export class IModelContentTreeIdsCache {
         })(),
       ]);
 
-      for (const [subjectId, { parentSubjectId }] of subjectInfos.entries()) {
+      for (const [subjectId, { parentSubjectId }] of subjectInfos) {
         if (parentSubjectId) {
           const parentSubjectInfo = subjectInfos.get(parentSubjectId);
           assert(!!parentSubjectInfo);
@@ -137,11 +137,11 @@ export class IModelContentTreeIdsCache {
       }
 
       for (const [partitionId, subjectIds] of targetPartitionSubjects) {
-        subjectIds.forEach((subjectId) => {
+        for (const subjectId of subjectIds) {
           const subjectInfo = subjectInfos.get(subjectId);
           assert(!!subjectInfo);
           subjectInfo.childModelIds.add(partitionId);
-        });
+        }
       }
 
       return subjectInfos;
@@ -154,9 +154,9 @@ export class IModelContentTreeIdsCache {
     this.#parentSubjectIds ??= (async () => {
       const subjectInfos = await this.getSubjectInfos();
       const parentSubjectIds = new Set<SubjectId>();
-      subjectInfos.forEach((subjectInfo, subjectId) => {
+      for (const [subjectId, subjectInfo] of subjectInfos) {
         if (subjectInfo.childModelIds.size === 0 && subjectInfo.childSubjectIds.size === 0) {
-          return;
+          continue;
         }
         parentSubjectIds.add(subjectId);
         let currParentId = subjectInfo.parentSubjectId;
@@ -164,7 +164,7 @@ export class IModelContentTreeIdsCache {
           parentSubjectIds.add(currParentId);
           currParentId = subjectInfos.get(currParentId)?.parentSubjectId;
         }
-      });
+      }
       return [...parentSubjectIds];
     })();
     return this.#parentSubjectIds;
@@ -194,7 +194,7 @@ export class IModelContentTreeIdsCache {
     const subjectInfos = await this.getSubjectInfos();
 
     const hiddenSubjectIds = new Array<SubjectId>();
-    parentSubjectIds.forEach((subjectId) => {
+    for (const subjectId of parentSubjectIds) {
       forEachChildSubject(subjectInfos, subjectId, (childSubjectId, childSubjectInfo) => {
         if (childSubjectInfo.hideInHierarchy) {
           hiddenSubjectIds.push(childSubjectId);
@@ -202,23 +202,26 @@ export class IModelContentTreeIdsCache {
         }
         return "break";
       });
-    });
+    }
 
     const modelIds = new Array<ModelId>();
     const addModelsForExistingSubject = (subjectId: Id64String) => {
       const subjectInfo = subjectInfos.get(subjectId);
-      if (subjectInfo) {
-        subjectInfo.childModelIds.forEach((modelId) => modelIds.push(modelId));
+      if (!subjectInfo) {
+        return;
+      }
+      for (const modelId of subjectInfo.childModelIds) {
+        modelIds.push(modelId);
       }
     };
 
-    parentSubjectIds.forEach((subjectId) => {
+    for (const subjectId of parentSubjectIds) {
       addModelsForExistingSubject(subjectId);
-    });
+    }
 
-    hiddenSubjectIds.forEach((subjectId) => {
+    for (const subjectId of hiddenSubjectIds) {
       addModelsForExistingSubject(subjectId);
-    });
+    }
     return modelIds;
   }
 
@@ -276,12 +279,14 @@ function forEachChildSubject(
   cb: (childSubjectId: Id64String, childSubjectInfo: SubjectInfo) => "break" | "continue",
 ) {
   const parentSubjectInfo = typeof parentSubject === "string" ? subjectInfos.get(parentSubject) : parentSubject;
-  parentSubjectInfo &&
-    parentSubjectInfo.childSubjectIds.forEach((childSubjectId) => {
-      const childSubjectInfo = subjectInfos.get(childSubjectId)!;
-      if (cb(childSubjectId, childSubjectInfo) === "break") {
-        return;
-      }
-      forEachChildSubject(subjectInfos, childSubjectInfo, cb);
-    });
+  if (!parentSubjectInfo) {
+    return;
+  }
+  for (const childSubjectId of parentSubjectInfo.childSubjectIds) {
+    const childSubjectInfo = subjectInfos.get(childSubjectId)!;
+    if (cb(childSubjectId, childSubjectInfo) === "break") {
+      continue;
+    }
+    forEachChildSubject(subjectInfos, childSubjectInfo, cb);
+  }
 }

@@ -106,18 +106,24 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<void
   ): Required<ModelsTreeSearchTargets>["elements"] {
     const result: Required<ModelsTreeSearchTargets>["elements"] = [];
     // Internal search target elements are stored in a tree structure, need to convert that to array structure.
-    searchTargetsInternalElements.forEach((entry, identifierAsString) => {
+    for (const [identifierAsString, entry] of searchTargetsInternalElements) {
       const identifier = this.convertSearchResultsNodeIdentifierStringToHierarchyNodeIdentifier(identifierAsString);
       if (entry.modelCategoryElements) {
-        entry.modelCategoryElements.forEach((elements, modelCategoryKey) => {
+        for (const [modelCategoryKey, elements] of entry.modelCategoryElements) {
           const { modelId, categoryId } = this.parseModelCategoryKey(modelCategoryKey);
-          result.push({ pathToElements: [...currentPath, identifier], modelId, categoryId, elements, topMostParentElementId: entry.topMostParentElementId });
-        });
+          result.push({
+            pathToElements: [...currentPath, identifier],
+            modelId,
+            categoryId,
+            elements,
+            topMostParentElementId: entry.topMostParentElementId,
+          });
+        }
       }
       if (entry.children) {
         this.convertInternalSearchTargetElementsRecursively(entry.children, [...currentPath, identifier]).forEach((childValue) => result.push(childValue));
       }
-    });
+    }
     return result;
   }
 

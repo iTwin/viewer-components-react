@@ -121,7 +121,9 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
   }): Observable<void> {
     const elementIds = new Array<ElementId>();
     for (const { elementIds: ids } of props.modelElementsMap.values()) {
-      ids.forEach((id) => elementIds.push(id));
+      for (const id of ids) {
+        elementIds.push(id);
+      }
     }
     return this.#props.idsCache.getChildElementsTree({ elementIds }).pipe(
       map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ depth }) => depth > 0 })),
@@ -147,11 +149,11 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
           : this.#props.idsCache.getModelCategoryIds({ modelId }).pipe(
               map((allModelCategories) => {
                 // Add 'Hide' override to categories that were hidden before model is turned on
-                allModelCategories?.forEach((modelCategoryId) => {
+                for (const modelCategoryId of allModelCategories) {
                   if (modelCategoryId !== categoryId) {
                     this.#props.viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: modelCategoryId, override: "hide" });
                   }
-                });
+                }
                 return modelId;
               }),
             );
