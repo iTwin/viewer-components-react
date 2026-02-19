@@ -19,7 +19,8 @@
 import { startServer } from "./server";
 
 startServer().catch((err: unknown) => {
+  // eslint-disable-next-line no-console
   console.error("Fatal error starting MCP server:", err);
-   
+
   throw err;
 });

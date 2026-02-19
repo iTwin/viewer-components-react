@@ -216,5 +216,6 @@ server.tool(
 export async function startServer(): Promise<void> {
   const transport = new StdioServerTransport();
   await server.connect(transport);
+  // eslint-disable-next-line no-console
   console.error("Map Layers MCP server running on stdio");
 }
