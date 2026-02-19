@@ -5,37 +5,17 @@
  * The server communicates with a host iTwin.js application that provides
  * viewport access — the host is expected to inject or relay viewport calls.
  *
- * Usage:
- *   node dist/server.js
- *
- * In practice the host application registers this as an MCP server (stdio)
- * and implements the viewport resolution on its side.
+ * This module only **defines** the server and its tool registrations.
+ * It does NOT auto-start. Use `startServer()` or the CLI entry point
+ * (`cli.ts` / `dist/cli.js`) to actually start the stdio transport.
  *--------------------------------------------------------------------------------------------*/
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { getViewportAccessor } from "./viewport.js";
 
-// ---------------------------------------------------------------------------
-// Viewport accessor
-// ---------------------------------------------------------------------------
-// The MCP server runs in its own process and cannot directly access the
-// iTwin.js ScreenViewport.  The host application must provide a viewport
-// accessor.  For stdio-based deployments the tools encode the *intent* and
-// the host application applies them.  When running **in-process** (e.g. via
-// an adapter) the host can set this accessor before starting the server.
-//
-// For the stdio transport case, each tool simply returns a structured JSON
-// payload that the host can interpret and apply to its viewport.
-// ---------------------------------------------------------------------------
-
-type ViewportAccessor = () => /* ScreenViewport | undefined */ any;
-let _getViewport: ViewportAccessor = () => undefined;
-
-/** Set the viewport accessor (for in-process usage). */
-export function setViewportAccessor(fn: ViewportAccessor) {
-  _getViewport = fn;
-}
+const _getViewport = getViewportAccessor;
 
 // ---------------------------------------------------------------------------
 // Server
@@ -235,13 +215,9 @@ server.tool(
 // Start
 // ---------------------------------------------------------------------------
 
-async function main() {
+/** Start the MCP server on a stdio transport. */
+export async function startServer() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("Map Layers MCP server running on stdio");
 }
-
-main().catch((err) => {
-  console.error("Fatal error starting MCP server:", err);
-  process.exit(1);
-});

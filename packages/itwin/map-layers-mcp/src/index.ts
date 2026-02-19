@@ -19,4 +19,5 @@ export {
 
 export type { MapLayerInfo } from "./tools.js";
 
-export { setViewportAccessor } from "./server.js";
+export { setViewportAccessor } from "./viewport.js";
+export { startServer } from "./server.js";

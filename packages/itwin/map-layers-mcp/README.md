@@ -22,7 +22,7 @@ MCP (Model Context Protocol) server that exposes iTwin.js map-layer operations a
 
 ```bash
 npm run build
-node dist/server.js
+node dist/cli.js
 ```
 
 Configure in your MCP client (e.g. VS Code `mcp.json`, Claude Desktop `claude_desktop_config.json`):
@@ -32,7 +32,7 @@ Configure in your MCP client (e.g. VS Code `mcp.json`, Claude Desktop `claude_de
   "mcpServers": {
     "map-layers": {
       "command": "node",
-      "args": ["path/to/packages/itwin/map-layers-mcp/dist/server.js"]
+      "args": ["path/to/packages/itwin/map-layers-mcp/dist/cli.js"]
     }
   }
 }
@@ -53,7 +53,9 @@ setViewportAccessor(() => IModelApp.viewManager.selectedView);
 The server uses the **MCP SDK** (`@modelcontextprotocol/sdk`) with a **stdio transport**.
 
 - **`src/tools.ts`** — Pure functions that operate on an iTwin.js `ScreenViewport`. They use `any` types to avoid hard dependencies on `@itwin/core-frontend` / `@itwin/core-common` — the host app provides these at runtime.
-- **`src/server.ts`** — MCP server that registers all 9 tools with zod schemas and wires them to the tool functions.
+- **`src/server.ts`** — MCP server that registers all 9 tools with zod schemas and wires them to the tool functions. Does **not** auto-start; call `startServer()` or use the CLI.
+- **`src/viewport.ts`** — Shared viewport accessor module (no side effects).
+- **`src/cli.ts`** — CLI entry point that starts the server on stdio.
 - **`src/index.ts`** — Public API barrel for in-process usage.
 
 When running standalone (stdio), the tool functions that need a viewport will return structured JSON payloads describing the intended action. The host iTwin.js application should use `setViewportAccessor()` to provide real viewport access.

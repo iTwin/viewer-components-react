@@ -2,11 +2,14 @@
   "name": "@itwin/map-layers-mcp",
   "version": "1.0.0",
   "description": "MCP server exposing map layer tools for iTwin.js viewer",
-  "main": "dist/server.js",
+  "main": "dist/index.js",
   "type": "module",
+  "bin": {
+    "map-layers-mcp": "dist/cli.js"
+  },
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/cli.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
