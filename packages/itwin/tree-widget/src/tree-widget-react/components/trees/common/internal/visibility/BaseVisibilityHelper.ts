@@ -39,6 +39,7 @@ import type { ClassGroupingNodeKey, HierarchyNode, InstancesNodeKey } from "@itw
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
 import type { HierarchyVisibilityHandlerOverridableMethod, HierarchyVisibilityOverrideHandler, VisibilityStatus } from "../../UseHierarchyVisibility.js";
 import type { AlwaysAndNeverDrawnElementInfoCache } from "../caches/AlwaysAndNeverDrawnElementInfoCache.js";
+import type { NonPartialVisibilityStatus } from "../Tooltip.js";
 import type { CategoryId, ModelId } from "../Types.js";
 import type { ChildrenTree } from "../Utils.js";
 
@@ -299,7 +300,7 @@ export class BaseVisibilityHelper implements Disposable {
         this.getVisibilityFromAlwaysAndNeverDrawnElements({
           modelId,
           categoryId,
-          defaultStatus: () => this.getVisibleModelCategoryDirectVisibilityStatus({ modelId, categoryId }),
+          defaultStatus: this.getVisibleModelCategoryDirectVisibilityStatus({ modelId, categoryId }),
         })
       : of(createVisibilityStatus("hidden"));
 
@@ -317,7 +318,7 @@ export class BaseVisibilityHelper implements Disposable {
    * - Per model category visibility overrides;
    * - Category selector visibility in the viewport.
    */
-  public getVisibleModelCategoryDirectVisibilityStatus({ modelId, categoryId }: { categoryId: Id64String; modelId: Id64String }): VisibilityStatus {
+  public getVisibleModelCategoryDirectVisibilityStatus({ modelId, categoryId }: { categoryId: Id64String; modelId: Id64String }): NonPartialVisibilityStatus {
     const override = this.#props.viewport.getPerModelCategoryOverride({ modelId, categoryId });
     if (override === "show" || (override === "none" && this.#props.viewport.viewsCategory(categoryId))) {
       return createVisibilityStatus("visible");
@@ -347,7 +348,7 @@ export class BaseVisibilityHelper implements Disposable {
         ? // For visible model need to check category and always/never drawn elements
           this.getVisibilityFromAlwaysAndNeverDrawnElements({
             elements: elementIds,
-            defaultStatus: () => this.getVisibleModelCategoryDirectVisibilityStatus({ categoryId, modelId }),
+            defaultStatus: this.getVisibleModelCategoryDirectVisibilityStatus({ categoryId, modelId }),
             parentElementsIdsPath,
             modelId,
             categoryOfTopMostParentElement,
@@ -374,10 +375,9 @@ export class BaseVisibilityHelper implements Disposable {
 
   /** Gets visibility status of elements based on viewport's always/never drawn elements and related categories and models. */
   private getVisibilityFromAlwaysAndNeverDrawnElements({
-    defaultStatus,
     modelId,
     ...props
-  }: { defaultStatus: () => VisibilityStatus; modelId: Id64String } & (
+  }: { defaultStatus: NonPartialVisibilityStatus; modelId: Id64String } & (
     | {
         elements: Id64Arg;
         parentElementsIdsPath: Array<Id64Arg>;
@@ -386,72 +386,55 @@ export class BaseVisibilityHelper implements Disposable {
       }
     | { categoryId: Id64String }
   )): Observable<VisibilityStatus> {
-    const alwaysDrawn = this.#props.viewport.alwaysDrawn;
-    const neverDrawn = this.#props.viewport.neverDrawn;
-    const isAlwaysDrawnExclusive = this.#props.viewport.isAlwaysDrawnExclusive;
-    if (isAlwaysDrawnExclusive) {
-      if (!alwaysDrawn?.size) {
-        return of(createVisibilityStatus("hidden"));
-      }
-    } else if (!neverDrawn?.size && !alwaysDrawn?.size) {
-      return of(defaultStatus());
+    const defaultStatus = this.#props.viewport.isAlwaysDrawnExclusive ? createVisibilityStatus("hidden") : props.defaultStatus;
+    const { oppositeSet, setType } =
+      defaultStatus.state === "visible"
+        ? { oppositeSet: this.#props.viewport.neverDrawn, setType: "never" as const }
+        : { oppositeSet: this.#props.viewport.alwaysDrawn, setType: "always" as const };
+    if (!oppositeSet?.size) {
+      return of(defaultStatus);
     }
 
     if ("elements" in props) {
       const { childrenCount } = props;
-      const parentElementIdsPath = [...props.parentElementsIdsPath, props.elements];
       // When elements children count is 0 or undefined, no need to query for child always/never drawn elements.
       if (!childrenCount) {
         return of(
           getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
             defaultStatus,
-            alwaysDrawnSize: countInSet(props.elements, alwaysDrawn),
-            neverDrawnSize: countInSet(props.elements, neverDrawn),
+            numberOfElementsInOppositeSet: countInSet(props.elements, oppositeSet),
             totalCount: Id64.sizeOf(props.elements),
-            isAlwaysDrawnExclusive,
           }),
         );
       }
+      const parentElementIdsPath = [...props.parentElementsIdsPath, props.elements];
       // Get child always/never drawn elements.
-      return forkJoin({
-        childAlwaysDrawn: this.#props.viewport.alwaysDrawn?.size
-          ? this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({
-              modelId,
-              categoryIds: props.categoryOfTopMostParentElement,
-              parentElementIdsPath,
-              setType: "always",
-            })
-          : of(new Set<Id64String>()),
-        childNeverDrawn: this.#props.viewport.neverDrawn?.size
-          ? this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({
-              modelId,
-              categoryIds: props.categoryOfTopMostParentElement,
-              parentElementIdsPath,
-              setType: "never",
-            })
-          : of(new Set<Id64String>()),
-      }).pipe(
-        map(({ childAlwaysDrawn, childNeverDrawn }) => {
-          // Combine child always/never drawn count with the props.elements count in always/never drawn sets.
-          return getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
-            defaultStatus,
-            alwaysDrawnSize: countInSet(props.elements, alwaysDrawn) + childAlwaysDrawn.size,
-            neverDrawnSize: countInSet(props.elements, neverDrawn) + childNeverDrawn.size,
-            totalCount: childrenCount + Id64.sizeOf(props.elements),
-            isAlwaysDrawnExclusive,
-          });
-        }),
-      );
+      return this.#alwaysAndNeverDrawnElements
+        .getAlwaysOrNeverDrawnElements({
+          modelId,
+          categoryIds: props.categoryOfTopMostParentElement,
+          parentElementIdsPath,
+          setType,
+        })
+        .pipe(
+          map((childElementsInOppositeSet) =>
+            // Combine child always/never drawn count with the props.elements count in always/never drawn sets.
+            getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
+              defaultStatus,
+              numberOfElementsInOppositeSet: countInSet(props.elements, oppositeSet) + childElementsInOppositeSet.size,
+              totalCount: childrenCount + Id64.sizeOf(props.elements),
+            }),
+          ),
+        );
     }
     const { categoryId } = props;
     return forkJoin({
       totalCount: this.#props.baseIdsCache.getElementsCount({ modelId, categoryId }),
-      alwaysDrawn: alwaysDrawn?.size
-        ? this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({ modelId, categoryIds: categoryId, setType: "always" })
-        : of(new Set<Id64String>()),
-      neverDrawn: neverDrawn?.size
-        ? this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({ modelId, categoryIds: categoryId, setType: "never" })
-        : of(new Set<Id64String>()),
+      relatedElementsInOppositeSet: this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({
+        modelId,
+        categoryIds: categoryId,
+        setType,
+      }),
     }).pipe(
       // There is a known bug:
       // Categories that don't have root elements will make visibility result incorrect
@@ -461,21 +444,13 @@ export class BaseVisibilityHelper implements Disposable {
       //    - ChildElementB (CategoryB is hidden) ChildElementB is in always drawn list
       // Result will be "partial" because CategoryB will return hidden visibility, even though all elements are visible
       // TODO fix with: https://github.com/iTwin/viewer-components-react/issues/1100
-      mergeMap((state) => {
-        if (this.#props.viewport.isAlwaysDrawnExclusive && state.totalCount === 0) {
-          return EMPTY;
-        }
-        return of(
-          getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
-            defaultStatus,
-            totalCount: state.totalCount,
-            isAlwaysDrawnExclusive,
-            alwaysDrawnSize: state.alwaysDrawn.size,
-            neverDrawnSize: state.neverDrawn.size,
-          }),
-        );
-      }),
-      defaultIfEmpty(createVisibilityStatus("hidden")),
+      map((state) =>
+        getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
+          defaultStatus,
+          totalCount: state.totalCount,
+          numberOfElementsInOppositeSet: state.relatedElementsInOppositeSet.size,
+        }),
+      ),
     );
   }
 

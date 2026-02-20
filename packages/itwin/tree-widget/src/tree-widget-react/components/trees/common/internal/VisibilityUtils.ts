@@ -16,7 +16,7 @@ import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-ben
 import type { CategoryInfo } from "../CategoriesVisibilityUtils.js";
 import type { TreeWidgetViewport } from "../TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
-import type { Visibility } from "./Tooltip.js";
+import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip.js";
 import type { ElementId } from "./Types.js";
 
 function mergeVisibilities(obs: Observable<Visibility>): Observable<Visibility | "empty"> {
@@ -108,33 +108,22 @@ export function changeElementStateNoChildrenOperator(props: {
 
 /** @internal */
 export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(props: {
-  alwaysDrawnSize: number;
-  neverDrawnSize: number;
+  numberOfElementsInOppositeSet: number;
   totalCount: number;
-  isAlwaysDrawnExclusive: boolean;
-  defaultStatus: () => VisibilityStatus;
+  defaultStatus: NonPartialVisibilityStatus;
 }): VisibilityStatus {
-  const { alwaysDrawnSize, neverDrawnSize, totalCount, isAlwaysDrawnExclusive } = props;
+  const { numberOfElementsInOppositeSet, totalCount, defaultStatus } = props;
   if (totalCount === 0) {
-    return props.defaultStatus();
+    return defaultStatus;
   }
-  if (neverDrawnSize === totalCount) {
-    return createVisibilityStatus("hidden");
-  }
-
-  if (alwaysDrawnSize === totalCount) {
-    return createVisibilityStatus("visible");
+  if (numberOfElementsInOppositeSet === totalCount) {
+    return defaultStatus.state === "hidden" ? createVisibilityStatus("visible") : createVisibilityStatus("hidden");
   }
 
-  if (isAlwaysDrawnExclusive) {
-    return createVisibilityStatus(alwaysDrawnSize ? "partial" : "hidden");
-  }
-
-  const status = props.defaultStatus();
-  if ((status.state === "visible" && neverDrawnSize) || (status.state === "hidden" && alwaysDrawnSize)) {
+  if (numberOfElementsInOppositeSet > 0) {
     return createVisibilityStatus("partial");
   }
-  return status;
+  return defaultStatus;
 }
 
 /**
