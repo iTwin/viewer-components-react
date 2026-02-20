@@ -37,6 +37,7 @@ export interface CreateTreeSpecificVisibilityHandlerProps<TCache> {
   getCache: () => TCache;
   viewport: TreeWidgetViewport;
   overrideHandler: HierarchyVisibilityOverrideHandler;
+  eventListener: IVisibilityChangeEventListener;
 }
 
 /** @internal */
@@ -100,12 +101,13 @@ function createVisibilityHandlerFactory<TCache, TSearchTargets>(
         }
         return undefined;
       },
-      getTreeSpecificVisibilityHandler: (info, overrideHandler) =>
+      getTreeSpecificVisibilityHandler: ({ info, overrideHandler, eventListener }) =>
         createTreeSpecificVisibilityHandler({
           info,
           getCache,
           viewport: activeView,
           overrideHandler,
+          eventListener,
         }),
     });
 }
@@ -113,10 +115,11 @@ function createVisibilityHandlerFactory<TCache, TSearchTargets>(
 /** @internal */
 export interface HierarchyVisibilityHandlerImplProps<TSearchTargets> {
   viewport: TreeWidgetViewport;
-  getTreeSpecificVisibilityHandler: (
-    info: AlwaysAndNeverDrawnElementInfoCache,
-    overrideHandler: HierarchyVisibilityOverrideHandler,
-  ) => TreeSpecificVisibilityHandler<TSearchTargets> & Disposable;
+  getTreeSpecificVisibilityHandler: (props: {
+    info: AlwaysAndNeverDrawnElementInfoCache;
+    overrideHandler: HierarchyVisibilityOverrideHandler;
+    eventListener: IVisibilityChangeEventListener;
+  }) => TreeSpecificVisibilityHandler<TSearchTargets> & Disposable;
   getSearchResultsTree: () => Promise<SearchResultsTree<TSearchTargets>> | undefined;
   componentId?: GuidString;
 }
@@ -153,10 +156,11 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
       viewport: this.#props.viewport,
       componentId: props.componentId,
     });
-    this.#treeSpecificVisibilityHandler = this.#props.getTreeSpecificVisibilityHandler(
-      this.#alwaysAndNeverDrawnElements,
-      new HierarchyVisibilityOverrideHandler(this),
-    );
+    this.#treeSpecificVisibilityHandler = this.#props.getTreeSpecificVisibilityHandler({
+      info: this.#alwaysAndNeverDrawnElements,
+      overrideHandler: new HierarchyVisibilityOverrideHandler(this),
+      eventListener: this.#eventListener,
+    });
   }
 
   public get onVisibilityChange() {
