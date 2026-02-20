@@ -105,7 +105,7 @@ export function joinHierarchySearchPaths(
   const result = new Array<NormalizedHierarchySearchPath>();
   const searchPathsToIncludeIndexes = new Set<number>();
 
-  subTreePaths.forEach((subTreePath) => {
+  for (const subTreePath of subTreePaths) {
     let options: HierarchySearchPathOptions | undefined;
     let addSubTreePathToResult = false;
 
@@ -147,7 +147,7 @@ export function joinHierarchySearchPaths(
         options,
       });
     }
-  });
+  }
   for (const index of searchPathsToIncludeIndexes) {
     result.push(searchPaths[index]);
   }

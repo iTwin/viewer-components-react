@@ -191,7 +191,7 @@ export class ModelsTreeIdsCache implements Disposable {
           return acc;
         }, new Map<SubjectId, SubjectInfo>()),
         map((subjectInfos) => {
-          for (const [subjectId, { parentSubjectId: parentSubjectId }] of subjectInfos.entries()) {
+          for (const [subjectId, { parentSubjectId: parentSubjectId }] of subjectInfos) {
             if (parentSubjectId) {
               const parentSubjectInfo = subjectInfos.get(parentSubjectId);
               assert(!!parentSubjectInfo);
@@ -210,11 +210,11 @@ export class ModelsTreeIdsCache implements Disposable {
     }).pipe(
       map(({ subjectInfos, targetPartitionSubjects }) => {
         for (const [partitionId, subjectIds] of targetPartitionSubjects) {
-          subjectIds.forEach((subjectId) => {
+          for (const subjectId of subjectIds) {
             const subjectInfo = subjectInfos.get(subjectId);
             assert(!!subjectInfo);
             subjectInfo.childModelIds.add(partitionId);
-          });
+          }
         }
         return subjectInfos;
       }),
@@ -228,7 +228,7 @@ export class ModelsTreeIdsCache implements Disposable {
     this.#parentSubjectIds ??= this.getSubjectInfos().pipe(
       map((subjectInfos) => {
         const parentSubjectIds = new Set<SubjectId>();
-        subjectInfos.forEach((subjectInfo, subjectId) => {
+        for (const [subjectId, subjectInfo] of subjectInfos) {
           if (subjectInfo.childModelIds.size > 0) {
             parentSubjectIds.add(subjectId);
             let currParentId = subjectInfo.parentSubjectId;
@@ -237,7 +237,7 @@ export class ModelsTreeIdsCache implements Disposable {
               currParentId = subjectInfos.get(currParentId)?.parentSubjectId;
             }
           }
-        });
+        }
         return [...parentSubjectIds];
       }),
       shareReplay(),
@@ -278,15 +278,21 @@ export class ModelsTreeIdsCache implements Disposable {
           if (!subjectInfo) {
             continue;
           }
-          subjectInfo.childModelIds.forEach((modelId) => result.push(modelId));
-          subjectInfo.childSubjectIds.forEach((childSubjectId) => childSubjects.push(childSubjectId));
+          for (const modelId of subjectInfo.childModelIds) {
+            result.push(modelId);
+          }
+          for (const childSubjectId of subjectInfo.childSubjectIds) {
+            childSubjects.push(childSubjectId);
+          }
         }
         if (childSubjects.length === 0) {
           return of(result);
         }
         return this.getSubjectModelIds(childSubjects).pipe(
           map((modelsOfChildSubjects) => {
-            modelsOfChildSubjects.forEach((modelId) => result.push(modelId));
+            for (const modelId of modelsOfChildSubjects) {
+              result.push(modelId);
+            }
             return result;
           }),
         );
@@ -311,17 +317,20 @@ export class ModelsTreeIdsCache implements Disposable {
         const modelIds = new Array<ModelId>();
         const addModelsForExistingSubject = (subjectId: Id64String) => {
           const subjectInfo = subjectInfos.get(subjectId);
-          if (subjectInfo) {
-            subjectInfo.childModelIds.forEach((modelId) => modelIds.push(modelId));
+          if (!subjectInfo) {
+            return;
+          }
+          for (const modelId of subjectInfo.childModelIds) {
+            modelIds.push(modelId);
           }
         };
         for (const subjectId of Id64.iterable(parentSubjectIds)) {
           addModelsForExistingSubject(subjectId);
         }
 
-        hiddenSubjectIds.forEach((subjectId) => {
+        for (const subjectId of hiddenSubjectIds) {
           addModelsForExistingSubject(subjectId);
-        });
+        }
         return modelIds;
       }),
     );
@@ -432,12 +441,14 @@ function forEachChildSubject(
   cb: (childSubjectId: SubjectId, childSubjectInfo: SubjectInfo) => "break" | "continue",
 ) {
   const parentSubjectInfo = typeof parentSubject === "string" ? subjectInfos.get(parentSubject) : parentSubject;
-  parentSubjectInfo &&
-    parentSubjectInfo.childSubjectIds.forEach((childSubjectId) => {
-      const childSubjectInfo = subjectInfos.get(childSubjectId)!;
-      if (cb(childSubjectId, childSubjectInfo) === "break") {
-        return;
-      }
-      forEachChildSubject(subjectInfos, childSubjectInfo, cb);
-    });
+  if (!parentSubjectInfo) {
+    return;
+  }
+  for (const childSubjectId of parentSubjectInfo.childSubjectIds) {
+    const childSubjectInfo = subjectInfos.get(childSubjectId)!;
+    if (cb(childSubjectId, childSubjectInfo) === "break") {
+      continue;
+    }
+    forEachChildSubject(subjectInfos, childSubjectInfo, cb);
+  }
 }

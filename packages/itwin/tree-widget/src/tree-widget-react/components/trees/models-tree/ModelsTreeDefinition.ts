@@ -408,7 +408,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
               AND NOT this.IsPrivate
               AND this.ECInstanceId IN (SELECT Model.Id FROM ${this.#hierarchyConfig.elementClassSpecification})
           `,
-          bindings: [...elementIds.map((id): ECSqlBinding => ({ type: "id", value: id }))],
+          bindings: elementIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
         },
       },
     ];

@@ -451,8 +451,12 @@ export class CategoriesTreeIdsCache implements Disposable {
             );
           }),
           reduce((acc, { directCategories, indirectCategories }) => {
-            directCategories?.forEach((categoryId) => acc.add(categoryId));
-            indirectCategories?.forEach((categoryId) => acc.add(categoryId));
+            for (const categoryId of directCategories ?? []) {
+              acc.add(categoryId);
+            }
+            for (const categoryId of indirectCategories ?? []) {
+              acc.add(categoryId);
+            }
             return acc;
           }, new Set<CategoryId>()),
         ),
