@@ -113,17 +113,14 @@ export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(props: {
   defaultStatus: NonPartialVisibilityStatus;
 }): VisibilityStatus {
   const { numberOfElementsInOppositeSet, totalCount, defaultStatus } = props;
-  if (totalCount === 0) {
+  if (totalCount === 0 || numberOfElementsInOppositeSet === 0) {
     return defaultStatus;
   }
   if (numberOfElementsInOppositeSet === totalCount) {
     return defaultStatus.state === "hidden" ? createVisibilityStatus("visible") : createVisibilityStatus("hidden");
   }
 
-  if (numberOfElementsInOppositeSet > 0) {
-    return createVisibilityStatus("partial");
-  }
-  return defaultStatus;
+  return createVisibilityStatus("partial");
 }
 
 /**
