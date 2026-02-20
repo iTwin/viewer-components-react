@@ -203,11 +203,7 @@ export class BaseVisibilityHelper implements Disposable {
    * - Category selector visibility in the viewport.
    * - Sub-categories visibility in the viewport.
    */
-  public getSubCategoriesVisibilityStatus(props: {
-    subCategoryIds: Id64Arg;
-    categoryId: Id64String;
-    returnOnEmpty?: VisibilityStatus | "empty";
-  }): Observable<VisibilityStatus> {
+  public getSubCategoriesVisibilityStatus(props: { subCategoryIds: Id64Arg; categoryId: Id64String }): Observable<VisibilityStatus> {
     if (Id64.sizeOf(props.subCategoryIds) === 0) {
       return EMPTY;
     }
