@@ -391,7 +391,7 @@ describe("CategoriesVisibilityHandler", () => {
         setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
         viewport.changeModelDisplay(keys.physicalModel.id, false);
-        viewport.changeCategoryDisplay(keys.otherCategory.id, true);
+        viewport.changeCategoryDisplay(keys.otherCategory.id, true, undefined, true);
         viewport.perModelCategoryVisibility.setOverride(keys.physicalModel.id, keys.categoryWithHideOverride.id, PerModelCategoryVisibility.Override.Hide);
         viewport.perModelCategoryVisibility.setOverride(keys.physicalModel.id, keys.categoryWithShowOverride.id, PerModelCategoryVisibility.Override.Show);
         viewport.renderFrame();
@@ -1645,7 +1645,7 @@ function setupInitialDisplayState(props: {
     viewport.changeSubCategoryDisplay(subCategoryInfo.id, subCategoryInfo.visible);
   }
   for (const categoryInfo of categories) {
-    viewport.changeCategoryDisplay(categoryInfo.id, categoryInfo.visible, false);
+    viewport.changeCategoryDisplay(categoryInfo.id, categoryInfo.visible, false, true);
   }
 
   for (const elementInfo of elements) {
