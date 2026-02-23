@@ -209,7 +209,7 @@ export function setupInitialDisplayState(props: {
     viewport.changeSubCategoryDisplay(subCategoryInfo.id, subCategoryInfo.visible);
   }
   for (const categoryInfo of categories) {
-    viewport.changeCategoryDisplay(categoryInfo.id, categoryInfo.visible, false);
+    viewport.changeCategoryDisplay(categoryInfo.id, categoryInfo.visible, false, true);
   }
 
   for (const elementInfo of elements) {
