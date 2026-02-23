@@ -135,8 +135,6 @@ export async function createViewport({
   iModelConnection: IModelConnection;
   testData: {
     categories: VisibilityInfo[];
-    subCategories: VisibilityInfo[];
-    elements: VisibilityInfo[];
     models: VisibilityInfo[];
   };
 }): Promise<TreeWidgetTestingViewport> {
@@ -281,8 +279,9 @@ export function setupInitialDisplayState(props: {
   if (neverDrawn.length > 0) {
     viewport.setNeverDrawn({ elementIds: new Set([...neverDrawn, ...(viewport.neverDrawn ?? [])]) });
   }
-  viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => visible).map(({ id }) => id), display: true });
-  viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => !visible).map(({ id }) => id), display: false });
+  for (const modelInfo of models) {
+    viewport.changeModelDisplay({ modelIds: modelInfo.id, display: modelInfo.visible });
+  }
   viewport.renderFrame();
 }
 
