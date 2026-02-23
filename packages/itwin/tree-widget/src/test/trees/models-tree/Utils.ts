@@ -110,7 +110,11 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       }),
     getAllCategoriesOfElements: sinon.stub<[], Observable<Id64Set>>().callsFake(() => {
       const result = new Set<Id64String>();
-      props?.modelCategories?.forEach((categories) => categories.forEach((category) => result.add(category)));
+      for (const categories of props?.modelCategories?.values() ?? []) {
+        categories.forEach((category) => {
+          result.add(category);
+        });
+      }
       return of(result);
     }),
     getCategoryElementsCount: sinon.stub<[{ modelId: Id64String; categoryId: Id64String }], Observable<number>>().callsFake(({ categoryId }) => {

@@ -46,7 +46,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId }));
+      const result = await firstValueFrom(info.getElementsTree({ setType, modelId }));
       expect(result).to.deep.eq(new Map());
       expect(vp.iModel.createQueryReader).to.not.be.called;
     });
@@ -60,7 +60,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId }));
+      const result = await firstValueFrom(info.getElementsTree({ setType, modelId }));
       expect(result).to.deep.eq(new Map());
       expect(vp.iModel.createQueryReader).to.not.be.called;
     });
@@ -81,7 +81,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId }));
+      const result = await firstValueFrom(info.getElementsTree({ setType, modelId }));
       const expectedResult: ChildrenTree<MapEntry> = new Map();
       expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInAlwaysOrNeverDrawnSet: true }]]), isInAlwaysOrNeverDrawnSet: false });
       expect(result).to.deep.eq(expectedResult);
@@ -103,13 +103,13 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId }));
+      const result = await firstValueFrom(info.getElementsTree({ setType, modelId }));
       const expectedResult: ChildrenTree<MapEntry> = new Map();
       expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInAlwaysOrNeverDrawnSet: true }]]), isInAlwaysOrNeverDrawnSet: false });
       expect(result).to.deep.eq(expectedResult);
 
       // second request is not delayed because value is cached
-      const result2 = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId }));
+      const result2 = await firstValueFrom(info.getElementsTree({ setType, modelId }));
       expect(result2).to.deep.eq(expectedResult);
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
     });
@@ -129,7 +129,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId }));
+      const result = await firstValueFrom(info.getElementsTree({ setType, modelId }));
       const expectedResult: ChildrenTree<MapEntry> = new Map();
       expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInAlwaysOrNeverDrawnSet: true }]]), isInAlwaysOrNeverDrawnSet: false });
       expect(result).to.deep.eq(expectedResult);
@@ -144,7 +144,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       };
       setterFunction(new Set(["0x4"]));
 
-      const resultPromise2 = firstValueFrom(info.getElementsTree({ setType, modelIds: modelId }));
+      const resultPromise2 = firstValueFrom(info.getElementsTree({ setType, modelId }));
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result2 = await resultPromise2;
       expect(result2).to.deep.eq(expectedResult);
@@ -160,9 +160,9 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-      await firstValueFrom(info.getElementsTree({ setType, modelIds: "0x2" }));
+      await firstValueFrom(info.getElementsTree({ setType, modelId: "0x2" }));
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
-      const resultPromise2 = firstValueFrom(info.getElementsTree({ setType, modelIds: "0x2" }));
+      const resultPromise2 = firstValueFrom(info.getElementsTree({ setType, modelId: "0x2" }));
       const setterFunction = (ids: Set<Id64String>) => {
         if (setType === "always") {
           vp.setAlwaysDrawn({ elementIds: ids });
@@ -192,14 +192,14 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result1 = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId }));
+      const result1 = await firstValueFrom(info.getElementsTree({ setType, modelId }));
       const expectedResult: ChildrenTree<MapEntry> = new Map();
       expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInAlwaysOrNeverDrawnSet: true }]]), isInAlwaysOrNeverDrawnSet: false });
       expect(result1).to.deep.eq(expectedResult);
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
       info.suppressChangeEvents();
       info.resumeChangeEvents();
-      const result2 = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId }));
+      const result2 = await firstValueFrom(info.getElementsTree({ setType, modelId }));
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
       expect(result2).to.deep.eq(expectedResult);
     });
@@ -219,7 +219,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       });
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result1 = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId }));
+      const result1 = await firstValueFrom(info.getElementsTree({ setType, modelId }));
       const expectedResult: ChildrenTree<MapEntry> = new Map();
       expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInAlwaysOrNeverDrawnSet: true }]]), isInAlwaysOrNeverDrawnSet: false });
       expect(result1).to.deep.eq(expectedResult);
@@ -234,7 +234,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       };
       setterFunction(new Set(["0x4"]));
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-      await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId }));
+      await firstValueFrom(info.getElementsTree({ setType, modelId }));
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
       expect(result1).to.deep.eq(expectedResult);
       info.resumeChangeEvents();
@@ -251,7 +251,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       });
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-      await firstValueFrom(info.getElementsTree({ setType, modelIds: "0x2" }));
+      await firstValueFrom(info.getElementsTree({ setType, modelId: "0x2" }));
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
       info.suppressChangeEvents();
       const setterFunction = (ids: Set<Id64String>) => {
@@ -263,7 +263,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       };
       setterFunction(new Set(["0x2"]));
       info.resumeChangeEvents();
-      const resultPromise2 = firstValueFrom(info.getElementsTree({ setType, modelIds: "0x2" }));
+      const resultPromise2 = firstValueFrom(info.getElementsTree({ setType, modelId: "0x2" }));
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       await resultPromise2;
       expect(vp.iModel.createQueryReader).to.be.calledTwice;
@@ -280,7 +280,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       });
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId }));
+      const result = await firstValueFrom(info.getElementsTree({ setType, modelId }));
       expect(result).to.deep.eq(new Map());
     });
 
@@ -302,7 +302,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       });
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId, categoryIds: categoryId }));
+      const result = await firstValueFrom(info.getElementsTree({ setType, modelId, categoryIds: categoryId }));
       const expectedResult: ChildrenTree<MapEntry> = new Map();
       expectedResult.set(elementId, { categoryId, isInAlwaysOrNeverDrawnSet: true });
       expect(result).to.deep.eq(expectedResult);
@@ -322,7 +322,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       });
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId, categoryIds: categoryId, parentElementIdsPath: [elementId] }));
+      const result = await firstValueFrom(info.getElementsTree({ setType, modelId, categoryIds: categoryId, parentElementIdsPath: [elementId] }));
       const expectedResult: ChildrenTree<MapEntry> = new Map();
       expectedResult.set(childElementId, { categoryId, isInAlwaysOrNeverDrawnSet: true });
       expect(result).to.deep.eq(expectedResult);
@@ -341,7 +341,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       });
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId, categoryIds: categoryId }));
+      const result = await firstValueFrom(info.getElementsTree({ setType, modelId, categoryIds: categoryId }));
       expect(result).to.deep.eq(new Map());
     });
   }

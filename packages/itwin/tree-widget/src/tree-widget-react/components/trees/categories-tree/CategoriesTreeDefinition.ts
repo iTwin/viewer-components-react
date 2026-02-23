@@ -156,7 +156,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
       const modelElementsMap = new Map<ModelId, { elementIds: Set<ElementId>; categoryOfTopMostParentElement: CategoryId }>();
-      node.children.forEach((child) => {
+      for (const child of node.children) {
         let modelEntry = modelElementsMap.get(child.extendedData?.modelId);
         if (!modelEntry) {
           modelEntry = {
@@ -169,7 +169,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         for (const { id } of child.key.instanceKeys) {
           modelEntry.elementIds.add(id);
         }
-      });
+      }
 
       const { hasSearchTargetAncestor, hasDirectNonSearchTargets, childrenCount, searchTargets } = groupingNodeDataFromChildren(node.children);
       const firstChild = node.children[0];

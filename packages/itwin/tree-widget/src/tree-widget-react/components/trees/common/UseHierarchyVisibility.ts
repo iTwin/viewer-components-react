@@ -65,9 +65,9 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
     };
 
     const resetCache = () => {
-      visibilityStatusMap.current.forEach((value) => {
+      for (const value of visibilityStatusMap.current.values()) {
         value.needsRefresh = true;
-      });
+      }
       visibilityChanged.next();
     };
 

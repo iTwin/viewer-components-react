@@ -33,10 +33,11 @@ export function setDifference<T>(lhs: Readonly<Iterable<T>>, rhs: ReadonlySet<T>
 }
 
 /** @internal */
-export function setIntersection<T>(lhs: Readonly<Iterable<T>>, rhs: ReadonlySet<T>): Set<T> {
+export function setIntersection<T>(lhs: ReadonlySet<T>, rhs: ReadonlySet<T>): Set<T> {
   const result = new Set<T>();
-  for (const x of lhs) {
-    if (rhs.has(x)) {
+  const { smallerSet, largerSet } = lhs.size < rhs.size ? { smallerSet: lhs, largerSet: rhs } : { smallerSet: rhs, largerSet: lhs };
+  for (const x of smallerSet) {
+    if (largerSet.has(x)) {
       result.add(x);
     }
   }
@@ -44,29 +45,22 @@ export function setIntersection<T>(lhs: Readonly<Iterable<T>>, rhs: ReadonlySet<
 }
 
 /** @internal */
-export function getMergedSet<T>(lhs: Readonly<Iterable<T>>, rhs: Readonly<Iterable<T>>): Set<T> {
-  const result = new Set<T>();
-  for (const x of lhs) {
-    result.add(x);
+export function countInSet(ids: Id64Arg, set: ReadonlySet<Id64String> | undefined): number {
+  if (!set?.size) {
+    return 0;
   }
-  for (const y of rhs) {
-    result.add(y);
+  let count = 0;
+  for (const id of Id64.iterable(ids)) {
+    if (set.has(id)) {
+      ++count;
+    }
   }
-  return result;
+  return count;
 }
 
 /** @internal */
 export function getOptimalBatchSize({ totalSize, maximumBatchSize }: { totalSize: number; maximumBatchSize: number }): number {
   return Math.ceil(totalSize / Math.ceil(totalSize / maximumBatchSize));
-}
-
-/** @internal */
-export function getDistinctMapValues(map: Map<any, Array<string> | Set<string>>): Set<string> {
-  const result = new Set<string>();
-  for (const values of map.values()) {
-    values.forEach((value) => result.add(value));
-  }
-  return result;
 }
 
 /** @internal */
@@ -185,15 +179,17 @@ export function getIdsFromChildrenTree<T extends object = {}>({
 }): Set<string> {
   function getIdsInternal({ childrenTree, depth }: { childrenTree: ChildrenTree<T>; depth: number }): Set<string> {
     const result = new Set<string>();
-    childrenTree.forEach((entry, id) => {
+    for (const [id, entry] of childrenTree) {
       if (!predicate || predicate({ depth, treeEntry: entry })) {
         result.add(id);
       }
       if (entry.children) {
         const childrenIds = getIdsInternal({ childrenTree: entry.children, depth: depth + 1 });
-        childrenIds.forEach((childId) => result.add(childId));
+        for (const childId of childrenIds) {
+          result.add(childId);
+        }
       }
-    });
+    }
     return result;
   }
   return getIdsInternal({ childrenTree: tree, depth: 0 });
@@ -267,7 +263,9 @@ export function groupingNodeDataFromChildren(children: ProcessedHierarchyNode[])
         hasDirectNonSearchTargets = true;
         if (!child.search.childrenTargetPaths?.length || child.search.isSearchTarget) {
           assert(HierarchyNodeKey.isInstances(child.key));
-          child.key.instanceKeys.forEach((key) => searchTargets.set(key.id, { childrenCount: child.extendedData?.childrenCount ?? 0 }));
+          for (const key of child.key.instanceKeys) {
+            searchTargets.set(key.id, { childrenCount: child.extendedData?.childrenCount ?? 0 });
+          }
         }
       }
     }

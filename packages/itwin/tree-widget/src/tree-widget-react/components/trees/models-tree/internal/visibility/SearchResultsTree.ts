@@ -39,7 +39,7 @@ type SearchResultsTreeNode = GenericSearchResultsTreeNode | CategorySearchResult
 export interface ModelsTreeSearchTargets {
   subjectIds?: Id64Set;
   modelIds?: Id64Set;
-  categories?: Array<{ modelId: Id64String | undefined; categoryIds: Id64Set }>;
+  categories?: Array<{ modelId: Id64String; categoryIds: Id64Set }>;
   elements?: Array<{
     pathToElements: InstanceKey[];
     modelId: Id64String;
@@ -106,18 +106,24 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<void
   ): Required<ModelsTreeSearchTargets>["elements"] {
     const result: Required<ModelsTreeSearchTargets>["elements"] = [];
     // Internal search target elements are stored in a tree structure, need to convert that to array structure.
-    searchTargetsInternalElements.forEach((entry, identifierAsString) => {
+    for (const [identifierAsString, entry] of searchTargetsInternalElements) {
       const identifier = this.convertSearchResultsNodeIdentifierStringToHierarchyNodeIdentifier(identifierAsString);
       if (entry.modelCategoryElements) {
-        entry.modelCategoryElements.forEach((elements, modelCategoryKey) => {
+        for (const [modelCategoryKey, elements] of entry.modelCategoryElements) {
           const { modelId, categoryId } = this.parseModelCategoryKey(modelCategoryKey);
-          result.push({ pathToElements: [...currentPath, identifier], modelId, categoryId, elements, topMostParentElementId: entry.topMostParentElementId });
-        });
+          result.push({
+            pathToElements: [...currentPath, identifier],
+            modelId,
+            categoryId,
+            elements,
+            topMostParentElementId: entry.topMostParentElementId,
+          });
+        }
       }
       if (entry.children) {
         this.convertInternalSearchTargetElementsRecursively(entry.children, [...currentPath, identifier]).forEach((childValue) => result.push(childValue));
       }
-    });
+    }
     return result;
   }
 

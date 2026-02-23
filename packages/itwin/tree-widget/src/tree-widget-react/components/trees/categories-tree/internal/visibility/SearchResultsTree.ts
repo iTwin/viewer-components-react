@@ -148,18 +148,18 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
     const result: ProcessedSearchResultsNodes = {
       searchResultsElements: new Map(),
     };
-    this.searchResultsNodesArr.forEach((node) => {
+    for (const node of this.searchResultsNodesArr) {
       if (node.type === "element") {
         searchResultsTemporaryElements.set(node.id, node);
       }
-    });
+    }
 
     const searchResultsElementsModels = await firstValueFrom(this.#props.idsCache.getFilteredElementsModels([...searchResultsTemporaryElements.keys()]));
-    searchResultsTemporaryElements.forEach((element, id) => {
+    for (const [id, element] of searchResultsTemporaryElements) {
       const modelId = searchResultsElementsModels.get(element.id);
       assert(modelId !== undefined);
       result.searchResultsElements.set(id, { ...element, modelId });
-    });
+    }
     return result;
   }
 
@@ -180,18 +180,21 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
   ): Required<CategoriesTreeSearchTargets>["elements"] {
     const result: Required<CategoriesTreeSearchTargets>["elements"] = [];
     // Internal search target elements are stored in a tree structure, need to convert that to array structure.
-    searchTargetsInternalElements.forEach((entry, identifierAsString) => {
+    for (const [identifierAsString, entry] of searchTargetsInternalElements) {
       const identifier = this.convertSearchResultsNodeIdentifierStringToHierarchyNodeIdentifier(identifierAsString);
       if (entry.modelCategoryElements) {
-        entry.modelCategoryElements.forEach((elements, modelCategoryKey) => {
+        for (const [modelCategoryKey, elements] of entry.modelCategoryElements) {
           const { modelId, categoryId } = this.parseModelCategoryKey(modelCategoryKey);
           result.push({ pathToElements: [...currentPath, identifier], modelId, categoryId, elements, topMostParentElementId: entry.topMostParentElementId });
-        });
+        }
       }
-      if (entry.children) {
-        this.convertInternalSearchTargetElementsRecursively(entry.children, [...currentPath, identifier]).forEach((childValue) => result.push(childValue));
+      if (!entry.children) {
+        continue;
       }
-    });
+      for (const childValue of this.convertInternalSearchTargetElementsRecursively(entry.children, [...currentPath, identifier])) {
+        result.push(childValue);
+      }
+    }
     return result;
   }
 

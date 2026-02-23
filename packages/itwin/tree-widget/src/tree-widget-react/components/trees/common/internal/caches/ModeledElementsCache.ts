@@ -136,9 +136,9 @@ export class ModeledElementsCache {
           subModels.push(elementId);
         }
         const elementEntry = childSubModels.get(elementId);
-        elementEntry?.forEach((childSubModelId) => {
+        for (const childSubModelId of elementEntry ?? []) {
           subModels.push(childSubModelId);
-        });
+        }
         return subModels;
       }),
     );

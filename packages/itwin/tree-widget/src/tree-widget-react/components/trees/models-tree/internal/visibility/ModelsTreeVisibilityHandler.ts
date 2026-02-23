@@ -20,7 +20,6 @@ import type { ClassGroupingNodeKey, GroupingHierarchyNode, HierarchyNode, Hierar
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfoCache } from "../../../common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
 import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
-import type { ChildrenTree } from "../../../common/internal/Utils.js";
 import type { SearchResultsTree } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 import type {
   BaseIdsCache,
@@ -137,21 +136,21 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
         // 2. Their modelId and categoryId
         // When changing visibility of elements, visibility handler does not care about the path.
         // So we can first get all elements and group them only by modelId and categoryId.
-        elements.forEach(({ elements: elementsMap, categoryId, modelId }) => {
+        for (const { elements: elementsMap, categoryId, modelId } of elements) {
           const key: `${ModelId}-${CategoryId}` = `${modelId}-${categoryId}`;
           let mapEntry = modelCategoryElementMap.get(key);
           if (!mapEntry) {
             mapEntry = [];
             modelCategoryElementMap.set(key, mapEntry);
           }
-          elementsMap.forEach(({ isSearchTarget }, elementId) => {
+          for (const [elementId, { isSearchTarget }] of elementsMap) {
             mapEntry.push(elementId);
             elementIdsSet.add(elementId);
             if (isSearchTarget) {
               searchTargetElements.push(elementId);
             }
-          });
-        });
+          }
+        }
         observables.push(
           // Get children for search targets, since non search targets don't have all the children present in the hierarchy.
           this.#props.idsCache.getChildElementsTree({ elementIds: searchTargetElements }).pipe(
@@ -167,12 +166,15 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
                   const [modelId, categoryId] = key.split("-");
                   const childrenIds = new Set<Id64String>();
                   // A shared children tree was created, need to get the children for each element in the group.
-                  elementsInSearchPathsGroupedByModelAndCategory.forEach((elementId) => {
-                    const elementChildrenTree: ChildrenTree | undefined = childrenTree.get(elementId)?.children;
-                    if (elementChildrenTree) {
-                      getIdsFromChildrenTree({ tree: elementChildrenTree }).forEach((childId) => childrenIds.add(childId));
+                  for (const elementId of elementsInSearchPathsGroupedByModelAndCategory) {
+                    const elementChildrenTree = childrenTree.get(elementId)?.children;
+                    if (!elementChildrenTree) {
+                      continue;
                     }
-                  });
+                    for (const childId of getIdsFromChildrenTree({ tree: elementChildrenTree })) {
+                      childrenIds.add(childId);
+                    }
+                  }
                   return this.#visibilityHelper.changeElementsVisibilityStatus({
                     modelId,
                     categoryId,
@@ -345,13 +347,13 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
 
       if (elements?.length) {
         const searchTargetElements = new Array<Id64String>();
-        elements.forEach(({ elements: elementsMap }) =>
-          elementsMap.forEach(({ isSearchTarget }, elementId) => {
+        for (const { elements: elementsMap } of elements) {
+          for (const [elementId, { isSearchTarget }] of elementsMap) {
             if (isSearchTarget) {
               searchTargetElements.push(elementId);
             }
-          }),
-        );
+          }
+        }
         let childrenCountMapObs: Observable<Map<Id64String, number>>;
         if (ModelsTreeNodeInternal.isElementClassGroupingNode(node)) {
           const groupingNodesSearchTargets: Map<Id64String, { childrenCount: number }> | undefined = node.extendedData.searchTargets;
@@ -360,7 +362,9 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
           childrenCountMapObs = this.#props.idsCache.getAllChildElementsCount({ elementIds: nestedSearchTargetElements }).pipe(
             map((elementCountMap) => {
               // Direct children search targets already have children count stored in grouping nodes extended data.
-              node.extendedData.searchTargets?.forEach((value, key) => elementCountMap.set(key, value.childrenCount));
+              for (const [key, value] of node.extendedData.searchTargets ?? []) {
+                elementCountMap.set(key, value.childrenCount);
+              }
               return elementCountMap;
             }),
           );
@@ -381,17 +385,17 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
                   let totalSearchTargetsChildrenCount = 0;
                   const nonSearchTargetIds = new Array<Id64String>();
                   const searchTargetIds = new Array<Id64String>();
-                  elementsMap.forEach(({ isSearchTarget }, elementId) => {
+                  for (const [elementId, { isSearchTarget }] of elementsMap) {
                     if (!isSearchTarget) {
                       nonSearchTargetIds.push(elementId);
-                      return;
+                      continue;
                     }
                     searchTargetIds.push(elementId);
                     const childCount = elementsChildrenCountMap.get(elementId);
                     if (childCount) {
                       totalSearchTargetsChildrenCount += childCount;
                     }
-                  });
+                  }
                   return merge(
                     searchTargetIds.length > 0
                       ? this.#visibilityHelper.getElementsVisibilityStatus({
