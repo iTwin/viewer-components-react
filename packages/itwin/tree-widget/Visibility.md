@@ -67,40 +67,649 @@ Note: Determining element -> sub-category relationships is not supported at the 
 
 #### getSubjectsVisibilityStatus
 
-![getSubjectsVisibilityStatus](./media/visibility/getSubjectsVisibilityStatus.png)
+<div style="background-color: white; padding: 20px; border-radius: 8px; display: inline-block;">
+
+```mermaid
+---
+config:
+  theme: 'base'
+  darkMode: false
+  flowchart:
+    wrappingWidth: 750
+    useMaxWidth: false
+  themeVariables:
+    primaryColor: '#ffffff'
+    primaryBorderColor: '#000000'
+    primaryTextColor: '#000000'
+    lineColor: '#000000'
+    secondaryColor: '#ffffff'
+    secondaryBorderColor: '#000000'
+---
+
+flowchart TD
+  R1[/partial/]
+  R2[/visible/]
+  R3[/hidden/]
+
+  %% Start
+  TITLE([getSubjectsVisibilityStatus]) --> A["Get models under Props.subjectIds from cache. These are related models and models of child subjects (can be nested)"]
+
+  PROPS[\"Props
+    <div style='text-align: left;'>- subjectIds: **Id64Arg**</div>
+  "\]
+
+  A -- modelIds --> B["**getModelsVisibilityStatus**({ modelIds })"]
+
+  %% Results
+  B -- partial --> R1
+  B -- visible --> R2
+  B -- hidden --> R3
+```
+
+</div>
 
 #### getClassificationTablesVisibilityStatus
 
-![getClassificationTablesVisibilityStatus](./media/visibility/getClassificationTablesVisibilityStatus.png)
+<div style="background-color: white; padding: 20px; border-radius: 8px; display: inline-block;">
+
+```mermaid
+---
+config:
+  theme: 'base'
+  darkMode: false
+  flowchart:
+    wrappingWidth: 750
+    useMaxWidth: false
+  themeVariables:
+    primaryColor: '#ffffff'
+    primaryBorderColor: '#000000'
+    primaryTextColor: '#000000'
+    lineColor: '#000000'
+    secondaryColor: '#ffffff'
+    secondaryBorderColor: '#000000'
+---
+
+flowchart TD
+  R1[/partial/]
+  R2[/visible/]
+  R3[/hidden/]
+
+
+  %% Start
+  TITLE([getClassificationTablesVisibilityStatus]) --> A["Get categories under Props.classificationTableIds from cache. These are categories of child classifications (can be nested)"]
+
+  PROPS[\"
+    Props
+    <div style='text-align: left;'>- classificationTableIds: **Id64Arg**</div>
+  "\]
+
+  A -- categoryIds --> B["**getCategoriesVisibilityStatus**({ categoryIds, modelId: undefined })"]
+
+  %% Results
+  B -- partial --> R1
+  B -- visible --> R2
+  B -- hidden --> R3
+```
+
+</div>
 
 #### getClassificationsVisibilityStatus
 
-![getClassificationsVisibilityStatus](./media/visibility/getClassificationsVisibilityStatus.png)
+<div style="background-color: white; padding: 20px; border-radius: 8px; display: inline-block;">
+
+```mermaid
+---
+config:
+  theme: 'base'
+  darkMode: false
+  flowchart:
+    wrappingWidth: 750
+    useMaxWidth: false
+  themeVariables:
+    primaryColor: '#ffffff'
+    primaryBorderColor: '#000000'
+    primaryTextColor: '#000000'
+    lineColor: '#000000'
+    secondaryColor: '#ffffff'
+    secondaryBorderColor: '#000000'
+---
+
+flowchart TD
+  R1[/partial/]
+  R2[/visible/]
+  R3[/hidden/]
+
+  %% Start
+  TITLE([getClassificationsVisibilityStatus]) --> A["Get categories under Props.classificationIds from cache. These are related categories and categories of child classifications (can be nested)"]
+
+  PROPS[\"
+    Props
+    <div style='text-align: left;'>- classificationIds: **Id64Arg**</div>
+  "\]
+
+  A -- categoryIds --> B["**getCategoriesVisibilityStatus**({ categoryIds, modelId: undefined })"]
+
+  %% Results
+  B -- partial --> R1
+  B -- visible --> R2
+  B -- hidden --> R3
+```
+
+</div>
 
 #### getDefinitionContainersVisibilityStatus
 
-![getDefinitionContainersVisibilityStatus](./media/visibility/getDefinitionContainersVisibilityStatus.png)
+<div style="background-color: white; padding: 20px; border-radius: 8px; display: inline-block;">
+
+```mermaid
+---
+config:
+  theme: 'base'
+  darkMode: false
+  flowchart:
+    wrappingWidth: 750
+    useMaxWidth: false
+  themeVariables:
+    primaryColor: '#ffffff'
+    primaryBorderColor: '#000000'
+    primaryTextColor: '#000000'
+    lineColor: '#000000'
+    secondaryColor: '#ffffff'
+    secondaryBorderColor: '#000000'
+---
+
+flowchart TD
+  R1[/partial/]
+  R2[/visible/]
+  R3[/hidden/]
+
+  %% Start
+  TITLE([getDefinitionContainersVisibilityStatus]) --> A["Get categories under Props.definitionContainerIds from cache. These are categories whose modelId is the same as definition container or categories of child definition containers (can be nested)"]
+
+  PROPS[\"
+    Props
+    <div style='text-align: left;'>- definitionContainerIds: **Id64Arg**</div>
+  "\]
+
+  A -- categoryIds --> B["**getCategoriesVisibilityStatus**({ categoryIds, modelId: undefined })"]
+
+  %% Results
+  B -- partial --> R1
+  B -- visible --> R2
+  B -- hidden --> R3
+```
+
+</div>
 
 #### getSubCategoriesVisibilityStatus
 
-![getSubCategoriesVisibilityStatus](./media/visibility/getSubCategoriesVisibilityStatus.png)
+<div style="background-color: white; padding: 20px; border-radius: 8px; display: inline-block;">
+
+```mermaid
+---
+config:
+  theme: 'base'
+  darkMode: false
+  flowchart:
+    wrappingWidth: 750
+    useMaxWidth: false
+  themeVariables:
+    primaryColor: '#ffffff'
+    primaryBorderColor: '#000000'
+    primaryTextColor: '#000000'
+    lineColor: '#000000'
+    secondaryColor: '#ffffff'
+    secondaryBorderColor: '#000000'
+---
+
+flowchart TD
+  R1[/partial/]
+  R2[/visible/]
+  R3[/hidden/]
+
+  %% Start
+  TITLE([getSubCategoriesVisibilityStatus]) --> A{"viewport.viewsCategory(Props.categoryId)"}
+
+  PROPS[\"
+    Props
+    <div style='text-align: left;'>- categoryId: **Id64String** <br/> - subCategoryIds: **Id64Arg** </div>
+  "\]
+
+  %% Branch No
+  A -- No --> R3
+
+  %% Branch Yes
+  A -- Yes --> B["Iterate through sub-categories"]
+  B -- subCategoryId --> C{"viewport.viewsSubCategory(subCategoryId)"}
+  C -- Yes -->  D1[visible]
+  C -- No -->  D2[hidden]
+
+  %% Merge
+  D1 --> M[Merge visibility statuses]
+  D2 --> M
+
+  M --> N[Some 'visible' && Some 'hidden' <br/> **OR** <br/> at least one is 'partial']
+
+  %% Results
+  N -- Yes --> R1
+
+  N -- No --> O[All are 'visible']
+
+  O -- Yes --> R2
+  O -- No --> R3
+```
+
+</div>
 
 #### getModelsVisibilityStatus
 
-![getModelsVisibilityStatus](./media/visibility/getModelsVisibilityStatus.png)
+<div style="background-color: white; padding: 20px; border-radius: 8px; display: inline-block;">
+
+```mermaid
+---
+config:
+  theme: 'base'
+  darkMode: false
+  flowchart:
+    wrappingWidth: 750
+    useMaxWidth: false
+  themeVariables:
+    primaryColor: '#ffffff'
+    primaryBorderColor: '#000000'
+    primaryTextColor: '#000000'
+    lineColor: '#000000'
+    secondaryColor: '#ffffff'
+    secondaryBorderColor: '#000000'
+---
+
+flowchart TD
+  R1[/partial/]
+  R2[/visible/]
+  R3[/hidden/]
+
+  %% Start
+  TITLE([getModelsVisibilityStatus]) --> A[Iterate through Props.modelIds]
+
+  PROPS[\"
+    Props
+    <div style='text-align: left;'>- modelIds: **Id64Arg**</div>
+  "\]
+
+  A -- modelId --> B{"viewport.viewsModel(modelId)"}
+
+  %% Branch Yes
+  B -- Yes --> C1[Get categories of elements which exist under modelId]
+  C1 -- categoryIds --> D1["**getCategoriesVisibilityStatus**({ modelId, categoryIds })"]
+
+  %% Branch No
+  B -- No --> C2[Get modelled elements under modelId]
+  C2 -- modelIds --> D2{"**getModelsVisibilityStatus**({ modelIds }) <br/> === 'hidden'/empty"}
+  D2 -- Yes --> E1[hidden]
+  D2 -- No --> E2[partial]
+
+  %% Merge
+  D1 --> M[Merge visibility statuses]
+  E1 --> M
+  E2 --> M
+
+  M --> N[Some 'visible' && Some 'hidden' <br/> **OR** <br/> at least one is 'partial']
+
+  N -- Yes --> R1
+
+  N -- No --> O[All are 'visible']
+
+  O -- Yes --> R2
+  O -- No --> R3
+```
+
+</div>
 
 #### getCategoriesVisibilityStatus
 
-![getCategoriesVisibilityStatus](./media/visibility/getCategoriesVisibilityStatus.png)
+<div style="background-color: white; padding: 20px; border-radius: 8px; display: inline-block;">
+
+```mermaid
+---
+config:
+  theme: 'base'
+  darkMode: false
+  flowchart:
+    wrappingWidth: 750
+    useMaxWidth: false
+  themeVariables:
+    primaryColor: '#ffffff'
+    primaryBorderColor: '#000000'
+    primaryTextColor: '#000000'
+    lineColor: '#000000'
+    secondaryColor: '#ffffff'
+    secondaryBorderColor: '#000000'
+---
+
+flowchart TD
+  R1[/partial/]
+  R2[/visible/]
+  R3[/hidden/]
+
+  %% Start
+  TITLE([getCategoriesVisibilityStatus]) --> A{Props.modelId <br/>=== undefined}
+
+  PROPS[\"
+    Props
+    <div style='text-align: left;'>- modelId: **Id64String | undefined** <br/> - categoryIds: **Id64Arg**</div>
+  "\]
+
+  %% Branch Yes
+  A -- Yes --> B[Iterate through categories]
+  B -- categoryId --> C1[Get sub-categories for specified category from cache]
+  B -- categoryId --> C2[Get models for specified category from cache]
+
+  C1 -- subCategoryIds --> D1["**getSubCategoriesVisibilityStatus**({ subCategoryIds, categoryId })"]
+
+  C2 --> D2[Iterate through models]
+  D2 -- modelId --> F["**getModelWithCategoryVisibilityStatus**({ modelId, categoryId })"]
+
+  %% Branch No
+  A -- No --> B2[Iterate through categories]
+  B2 -- categoryId --> F
+
+  %% Merge
+  D1 --> M[Merge visibility statuses]
+  F --> M
+
+  M --> N[Some 'visible' && Some 'hidden' <br/> **OR** <br/> at least one is 'partial']
+
+  %% Results
+  N -- Yes --> R1
+
+  N -- No --> O[All are 'visible']
+
+  O -- Yes --> R2
+  O -- No --> R3
+```
+
+</div>
 
 #### getModelWithCategoryVisibilityStatus
 
-![getModelWithCategoryVisibilityStatus](./media/visibility/getModelWithCategoryVisibilityStatus.png)
+<div style="background-color: white; padding: 20px; border-radius: 8px; display: inline-block;">
+
+```mermaid
+---
+config:
+  theme: 'base'
+  darkMode: false
+  flowchart:
+    wrappingWidth: 750
+    useMaxWidth: false
+  themeVariables:
+    primaryColor: '#ffffff'
+    primaryBorderColor: '#000000'
+    primaryTextColor: '#000000'
+    lineColor: '#000000'
+    secondaryColor: '#ffffff'
+    secondaryBorderColor: '#000000'
+---
+
+flowchart TD
+  R1[/partial/]
+  R2[/visible/]
+  R3[/hidden/]
+
+  %% Start
+  TITLE([getModelWithCategoryVisibilityStatus]) --> A1[Get modelled elements under category with model]
+  TITLE([getModelWithCategoryVisibilityStatus]) --> A2{"viewport.viewsModel(Props.modelId)"}
+
+  PROPS[\"
+    Props
+    <div style='text-align: left;'>- modelId: **Id64String** <br/> - categoryId: **Id64String**</div>
+  "\]
+
+  %% Branch A1
+    A1 -- modelIds --> B["**getModelsVisibilityStatus**({ modelIds })"]
+
+  %% Branch A2
+
+    %% Branch No
+    A2 -- No --> C[hidden]
+
+    %% Branch Yes
+
+    A2 -- Yes --> D{Is always drawn exclusive}
+
+      %% Branch Yes
+      D -- Yes --> E1["**defaultStatus**: 'hidden' <br/> **oppositeSet**: alwaysDrawn"]
+
+      %% Branch No
+      D -- No --> E2{"
+        <div style='padding: 20px'>
+          Per model category override === 'show' <br/>
+          <strong style='font-weight: bold;'>OR</strong>
+          <br/>
+          Per model category override === 'none'<br/> && viewport.viewsCategory(Props.categoryId)
+        </div>
+      "}
+
+
+        %% Branch No
+        E2 -- No --> E1
+
+        %% Branch Yes
+         E2 -- Yes --> E3["**defaultStatus**: 'visible' <br/> **oppositeSet**: neverDrawn"]
+
+    E1 -- Pass down --> F{"**oppositeSet**.size > 0"}
+    E3 -- Pass down --> F
+
+      %% Branch No
+      F -- No --> G1[defaultStatus]
+
+      %% Branch Yes
+      F -- Yes --> G2[From cache get total count of elements under category with model]
+
+      F -- Yes --> G3["Props
+    <div style='text-align: left;'>- For **oppositeSet** elements execute query (if set changed after last execution), to get their models, categories and parent elements path. <br/> - Find always/never drawn child elements (nested as well) where queried data matches Props.modelId & Props.categoryId. <br/> - Get count of elements under model with category in **oppositeSet**: numberOfElementsInOppositeSet </div>
+    "]
+
+      G2 -- totalCount --> H["**getAlwaysOrNeverDrawnVisibilityStatus**({ totalCount, numberOfElementsInOppositeSet, defaultStatus })"]
+      G3 -- Pass down --> H
+
+
+  %% Merge
+  B --> M[Merge visibility statuses]
+  C --> M
+  H --> M
+  G1 --> M
+
+  M --> N[Some 'visible' && Some 'hidden' <br/> **OR** <br/> at least one is 'partial']
+
+  %% Results
+  N -- Yes --> R1
+
+  N -- No --> O[All are 'visible']
+
+  O -- Yes --> R2
+  O -- No --> R3
+```
+
+</div>
 
 #### getElementsVisibilityStatus
 
-![getElementsVisibilityStatus](./media/visibility/getElementsVisibilityStatus.png)
+<div style="background-color: white; padding: 20px; border-radius: 8px; display: inline-block;">
+
+```mermaid
+---
+config:
+  theme: 'base'
+  darkMode: false
+  flowchart:
+    wrappingWidth: 750
+    useMaxWidth: false
+  themeVariables:
+    primaryColor: '#ffffff'
+    primaryBorderColor: '#000000'
+    primaryTextColor: '#000000'
+    lineColor: '#000000'
+    secondaryColor: '#ffffff'
+    secondaryBorderColor: '#000000'
+---
+
+flowchart TD
+  R1[/partial/]
+  R2[/visible/]
+  R3[/hidden/]
+
+  %% Start
+  TITLE([getElementsVisibilityStatus]) --> A1["<div style='text-align: left;'> Get modelIds from cache: <br/> 1. Props.elementIds which are sub-models <br/> 2. Children which are sub-models (nested as well) </div>"]
+  TITLE([getElementsVisibilityStatus]) --> A2{"viewport.viewsModel(Props.modelId)"}
+
+  PROPS[\"
+    Props
+    <div style='text-align: left;'>- elementIds: **Id64Arg** <br/> - modelId: **Id64String** <br/> - categoryId: **Id64String** <br/> - categoryOfTopMostParentElement: **Id64String** </br> - parentElementIdsPath: **Array<Id64Arg>** <br/> - childrenCount: **number | undefined**</div>
+  "\]
+
+  %% Branch A1
+    A1 -- modelIds --> B["**getModelsVisibilityStatus**({ modelIds })"]
+
+  %% Branch A2
+
+    %% Branch No
+    A2 -- No --> C[hidden]
+
+    %% Branch Yes
+
+    A2 -- Yes --> D{Is always drawn exclusive}
+
+      %% Branch Yes
+      D -- Yes --> E1["**defaultStatus**: 'hidden' <br/> **oppositeSet**: alwaysDrawn"]
+
+      %% Branch No
+      D -- No --> E2{"
+        <div style='padding: 20px'>
+          Per model category override === 'show' <br/>
+          <strong style='font-weight: bold;'>OR</strong>
+          <br/>
+          Per model category override === 'none'<br/> && viewport.viewsCategory(Props.categoryId)
+        </div>
+      "}
+
+        %% Branch No
+        E2 -- No --> E1
+
+        %% Branch Yes
+         E2 -- Yes --> E3["**defaultStatus**: 'visible' <br/> **oppositeSet**: neverDrawn"]
+
+    E1 -- Pass down --> F{"**oppositeSet**.size > 0"}
+    E3 -- Pass down --> F
+
+      %% Branch No
+      F -- No --> G1[defaultStatus]
+
+      %% Branch Yes
+      F -- Yes --> G2{"Props.childrenCount <br/> === 0 / undefined"}
+
+        %% Branch Yes
+        G2 -- Yes --> H1[Children count in oppositeSet === 0]
+
+        %% Branch No
+        G2 -- No --> H2["Props
+        <div style='text-align: left;'>- For **oppositeSet** elements execute query (if set changed after last execution), to get their models, categories and parent elements path. <br/> - Find always/never drawn child elements (nested as well) where queried data matches Props.modelId & Props.categoryId & Props.parentElementIdsPath. <br/> - Get count of children in **oppositeSet**: numberOfElementsInOppositeSet </div>
+        "]
+
+
+
+      H1 -- Pass down --> I["**numberOfElementsInOppositeSet**: Props.elementIds in oppositeSet and children count in oppositeSet <br/> **totalCount**: Props.elementIds + Props.childrenCount"]
+      H2 -- Pass down --> I
+
+      I -- Pass down --> J["**getAlwaysOrNeverDrawnVisibilityStatus**({ totalCount, numberOfElementsInOppositeSet, defaultStatus })"]
+
+
+  %% Merge
+  B --> M[Merge visibility statuses]
+  C --> M
+  G1 --> M
+  J --> M
+
+  M --> N[Some 'visible' && Some 'hidden' <br/> **OR** <br/> at least one is 'partial']
+
+  %% Results
+  N -- Yes --> R1
+
+  N -- No --> O[All are 'visible']
+
+  O -- Yes --> R2
+  O -- No --> R3
+```
+
+</div>
 
 #### getAlwaysOrNeverDrawnVisibilityStatus
 
-![getAlwaysOrNeverDrawnVisibilityStatus](./media/visibility/getAlwaysOrNeverDrawnVisibilityStatus.png)
+<div style="background-color: white; padding: 20px; border-radius: 8px; display: inline-block;">
+
+```mermaid
+---
+config:
+  theme: 'base'
+  darkMode: false
+  flowchart:
+    wrappingWidth: 750
+    useMaxWidth: false
+  themeVariables:
+    primaryColor: '#ffffff'
+    primaryBorderColor: '#000000'
+    primaryTextColor: '#000000'
+    lineColor: '#000000'
+    secondaryColor: '#ffffff'
+    secondaryBorderColor: '#000000'
+---
+
+flowchart TD
+  R1[/partial/]
+  R2[/visible/]
+  R3[/hidden/]
+
+  %% Start
+  TITLE([getAlwaysOrNeverDrawnVisibilityStatus]) --> A{"Props.totalCount <br/> === 0 <br/> **OR** <br/> Props.numberOfElementsInOppositeSet <br/> === 0"}
+
+  PROPS[\"
+    Props
+    <div style='text-align: left; line-height: 1.2'>
+      - totalCount: **number**
+      %% need !important on color since to not take the config color
+     <span style='color: #808080 !important; font-style: italic; margin-top: 4px; display: block; margin-left: 15px'>Number of elements that are under node <br/> (includes node itself and its nested child elements)
+     </span>
+      - numberOfElementsInOppositeSet: **number**
+      <span style='color: #808080 !important; font-style: italic; margin-top: 4px; display: block; margin-left: 15px'>Number of elements in the set that is opposite  <br/> to default status. If default status 'visible', it's  <br/> always drawn, otherwise it's never drawn set
+      </span>
+      - defaultStatus: **'visible' | 'hidden'**
+      <span style='color: #808080 !important; font-style: italic; margin-top: 4px; display: block; margin-left: 15px'>Elements visibility status when they are not <br/>in always/never drawn list
+      </span>
+    </div>
+  "\]
+
+  %% Branch Yes
+  A -- Yes --> B1{"Props.defaultStatus <br/> === 'visible'"}
+
+    %% Branch Yes
+    B1 -- Yes --> R2
+
+    %% Branch No
+    B1 -- No --> R3
+
+  %% Branch No
+  A -- No --> B2{"Props.numberOfElementsInOppositeSet <br/> === Props.totalCount"}
+
+    %% Branch No
+    B2 -- No --> R1
+
+    %% Branch Yes
+    B2 -- Yes --> C{"Props.defaultStatus <br/> === 'visible'"}
+
+      %% Branch Yes
+      C -- Yes --> R3
+
+      %% Branch No
+      C -- No --> R2
+```
+
+</div>
