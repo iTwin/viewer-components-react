@@ -67,23 +67,12 @@ Note: Determining element -> sub-category relationships is not supported at the 
 
 #### getSubjectsVisibilityStatus
 
-<div style="background-color: white; padding: 20px; border-radius: 8px; display: inline-block;">
-
 ```mermaid
 ---
 config:
-  theme: 'base'
-  darkMode: false
   flowchart:
     wrappingWidth: 750
     useMaxWidth: false
-  themeVariables:
-    primaryColor: '#ffffff'
-    primaryBorderColor: '#000000'
-    primaryTextColor: '#000000'
-    lineColor: '#000000'
-    secondaryColor: '#ffffff'
-    secondaryBorderColor: '#000000'
 ---
 
 flowchart TD
@@ -155,23 +144,12 @@ flowchart TD
 
 #### getClassificationsVisibilityStatus
 
-<div style="background-color: white; padding: 20px; border-radius: 8px; display: inline-block;">
-
 ```mermaid
 ---
 config:
-  theme: 'base'
-  darkMode: false
   flowchart:
     wrappingWidth: 750
     useMaxWidth: false
-  themeVariables:
-    primaryColor: '#ffffff'
-    primaryBorderColor: '#000000'
-    primaryTextColor: '#000000'
-    lineColor: '#000000'
-    secondaryColor: '#ffffff'
-    secondaryBorderColor: '#000000'
 ---
 
 flowchart TD
@@ -199,23 +177,12 @@ flowchart TD
 
 #### getDefinitionContainersVisibilityStatus
 
-<div style="background-color: white; padding: 20px; border-radius: 8px; display: inline-block;">
-
 ```mermaid
 ---
 config:
-  theme: 'base'
-  darkMode: false
   flowchart:
     wrappingWidth: 750
     useMaxWidth: false
-  themeVariables:
-    primaryColor: '#ffffff'
-    primaryBorderColor: '#000000'
-    primaryTextColor: '#000000'
-    lineColor: '#000000'
-    secondaryColor: '#ffffff'
-    secondaryBorderColor: '#000000'
 ---
 
 flowchart TD
@@ -243,23 +210,12 @@ flowchart TD
 
 #### getSubCategoriesVisibilityStatus
 
-<div style="background-color: white; padding: 20px; border-radius: 8px; display: inline-block;">
-
 ```mermaid
 ---
 config:
-  theme: 'base'
-  darkMode: false
   flowchart:
     wrappingWidth: 750
     useMaxWidth: false
-  themeVariables:
-    primaryColor: '#ffffff'
-    primaryBorderColor: '#000000'
-    primaryTextColor: '#000000'
-    lineColor: '#000000'
-    secondaryColor: '#ffffff'
-    secondaryBorderColor: '#000000'
 ---
 
 flowchart TD
@@ -303,23 +259,12 @@ flowchart TD
 
 #### getModelsVisibilityStatus
 
-<div style="background-color: white; padding: 20px; border-radius: 8px; display: inline-block;">
-
 ```mermaid
 ---
 config:
-  theme: 'base'
-  darkMode: false
   flowchart:
     wrappingWidth: 750
     useMaxWidth: false
-  themeVariables:
-    primaryColor: '#ffffff'
-    primaryBorderColor: '#000000'
-    primaryTextColor: '#000000'
-    lineColor: '#000000'
-    secondaryColor: '#ffffff'
-    secondaryBorderColor: '#000000'
 ---
 
 flowchart TD
@@ -366,23 +311,12 @@ flowchart TD
 
 #### getCategoriesVisibilityStatus
 
-<div style="background-color: white; padding: 20px; border-radius: 8px; display: inline-block;">
-
 ```mermaid
 ---
 config:
-  theme: 'base'
-  darkMode: false
   flowchart:
     wrappingWidth: 750
     useMaxWidth: false
-  themeVariables:
-    primaryColor: '#ffffff'
-    primaryBorderColor: '#000000'
-    primaryTextColor: '#000000'
-    lineColor: '#000000'
-    secondaryColor: '#ffffff'
-    secondaryBorderColor: '#000000'
 ---
 
 flowchart TD
@@ -431,23 +365,12 @@ flowchart TD
 
 #### getModelWithCategoryVisibilityStatus
 
-<div style="background-color: white; padding: 20px; border-radius: 8px; display: inline-block;">
-
 ```mermaid
 ---
 config:
-  theme: 'base'
-  darkMode: false
   flowchart:
     wrappingWidth: 750
     useMaxWidth: false
-  themeVariables:
-    primaryColor: '#ffffff'
-    primaryBorderColor: '#000000'
-    primaryTextColor: '#000000'
-    lineColor: '#000000'
-    secondaryColor: '#ffffff'
-    secondaryBorderColor: '#000000'
 ---
 
 flowchart TD
@@ -534,23 +457,12 @@ flowchart TD
 
 #### getElementsVisibilityStatus
 
-<div style="background-color: white; padding: 20px; border-radius: 8px; display: inline-block;">
-
 ```mermaid
 ---
 config:
-  theme: 'base'
-  darkMode: false
   flowchart:
     wrappingWidth: 750
     useMaxWidth: false
-  themeVariables:
-    primaryColor: '#ffffff'
-    primaryBorderColor: '#000000'
-    primaryTextColor: '#000000'
-    lineColor: '#000000'
-    secondaryColor: '#ffffff'
-    secondaryBorderColor: '#000000'
 ---
 
 flowchart TD
@@ -644,23 +556,12 @@ flowchart TD
 
 #### getAlwaysOrNeverDrawnVisibilityStatus
 
-<div style="background-color: white; padding: 20px; border-radius: 8px; display: inline-block;">
-
 ```mermaid
 ---
 config:
-  theme: 'base'
-  darkMode: false
   flowchart:
     wrappingWidth: 750
     useMaxWidth: false
-  themeVariables:
-    primaryColor: '#ffffff'
-    primaryBorderColor: '#000000'
-    primaryTextColor: '#000000'
-    lineColor: '#000000'
-    secondaryColor: '#ffffff'
-    secondaryBorderColor: '#000000'
 ---
 
 flowchart TD
