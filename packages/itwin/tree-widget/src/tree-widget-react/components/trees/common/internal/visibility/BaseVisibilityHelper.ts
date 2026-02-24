@@ -543,8 +543,8 @@ export class BaseVisibilityHelper implements Disposable {
         return this.changeCategoriesUnderModelVisibilityStatus({ categoryIds, modelId: props.modelId, on });
       }
 
-      const changeCategoriesObs = fromWithRelease({ source: categoryIds, releaseOnCount: 500 }).pipe(
-        bufferCount(getOptimalBatchSize({ totalSize: Id64.sizeOf(categoryIds), maximumBatchSize: 500 })),
+      const changeCategoriesObs = fromWithRelease({ source: categoryIds, releaseOnCount: 5000 }).pipe(
+        bufferCount(getOptimalBatchSize({ totalSize: Id64.sizeOf(categoryIds), maximumBatchSize: 5000 })),
         map((categoryIdsBatch) => this.#props.viewport.changeCategoryDisplay({ categoryIds: categoryIdsBatch, display: on, enableAllSubCategories: false })),
       );
       const categoryModelsObs = from(Id64.iterable(categoryIds)).pipe(

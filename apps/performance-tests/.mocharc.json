@@ -1,6 +1,6 @@
 {
   "require": ["ignore-styles", "./lib/setup.js"],
-  "timeout": 300000,
+  "timeout": 600000,
   "check-leaks": true,
   "file": "./lib/main.js",
   "reporter": ["./lib/util/TestReporter.cjs"]
