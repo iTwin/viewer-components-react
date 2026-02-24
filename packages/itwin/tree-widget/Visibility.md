@@ -99,23 +99,12 @@ flowchart TD
 
 #### getClassificationTablesVisibilityStatus
 
-<div style="background-color: white; padding: 20px; border-radius: 8px; display: inline-block;">
-
 ```mermaid
 ---
 config:
-  theme: 'base'
-  darkMode: false
   flowchart:
     wrappingWidth: 750
     useMaxWidth: false
-  themeVariables:
-    primaryColor: '#ffffff'
-    primaryBorderColor: '#000000'
-    primaryTextColor: '#000000'
-    lineColor: '#000000'
-    secondaryColor: '#ffffff'
-    secondaryBorderColor: '#000000'
 ---
 
 flowchart TD
