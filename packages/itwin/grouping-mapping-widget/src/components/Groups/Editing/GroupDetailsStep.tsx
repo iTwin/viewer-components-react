@@ -8,17 +8,18 @@ import "./GroupAction.scss";
 import type { GroupDetailsProps } from "./GroupDetails";
 import { GroupDetails } from "./GroupDetails";
 import "./GroupDetailsStep.scss";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 
-const defaultDisplayStrings = {
-  groupDetails: "Group Details",
-};
+const getDefaultDisplayStrings = () => ({
+  groupDetails: GroupingMappingWidget.translate("groups.groupDetails"),
+});
 
 export interface GroupDetailsStepProps extends GroupDetailsProps {
-  displayStrings?: Partial<typeof defaultDisplayStrings>;
+  displayStrings?: Partial<ReturnType<typeof getDefaultDisplayStrings>>;
 }
 
 export const GroupDetailsStep = ({ displayStrings: userDisplayStrings, ...rest }: GroupDetailsStepProps) => {
-  const displayStrings = React.useMemo(() => ({ ...defaultDisplayStrings, ...userDisplayStrings }), [userDisplayStrings]);
+  const displayStrings = React.useMemo(() => ({ ...getDefaultDisplayStrings(), ...userDisplayStrings }), [userDisplayStrings]);
 
   return (
     <Fieldset legend={displayStrings.groupDetails} className="gmw-group-details">

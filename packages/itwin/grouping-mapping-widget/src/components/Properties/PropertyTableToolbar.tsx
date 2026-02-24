@@ -6,6 +6,7 @@ import React from "react";
 import { SvgAdd, SvgRefresh } from "@itwin/itwinui-icons-react";
 import { Button, IconButton } from "@itwin/itwinui-react";
 import "./PropertyTableToolbar.scss";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 
 export interface PropertyTableToolbarProps {
   propertyType: string;
@@ -19,11 +20,11 @@ export const PropertyTableToolbar = ({ propertyType, onClickAddProperty, refresh
   <div className="gmw-property-table-toolbar">
     {onClickAddProperty && (
       <Button startIcon={<SvgAdd />} styleType="high-visibility" onClick={onClickAddProperty}>
-        Add {propertyType} Property
+        {GroupingMappingWidget.translate("properties.addProperty", { propertyType })}
       </Button>
     )}
     {!hideRefreshIcon && (
-      <IconButton title="Refresh" className="gmw-property-table-refresh-button" onClick={refreshProperties} disabled={isLoading} styleType="borderless">
+      <IconButton title={GroupingMappingWidget.translate("common.refresh")} className="gmw-property-table-refresh-button" onClick={refreshProperties} disabled={isLoading} styleType="borderless">
         <SvgRefresh />
       </IconButton>
     )}

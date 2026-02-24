@@ -12,6 +12,7 @@ import { PropertyTable } from "../PropertyTable";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { usePropertiesClient } from "../../context/PropertiesClientContext";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 
 export interface GroupPropertyTableProps {
   iModelId: string;
@@ -82,7 +83,7 @@ export const GroupPropertyTable = ({
                           }}
                           icon={<SvgEdit />}
                         >
-                          Modify
+                          {GroupingMappingWidget.translate("common.modify")}
                         </MenuItem>,
                       ]
                     : [],
@@ -94,12 +95,12 @@ export const GroupPropertyTable = ({
                     }}
                     icon={<SvgDelete />}
                   >
-                    Remove
+                    {GroupingMappingWidget.translate("common.remove")}
                   </MenuItem>,
                 ].flatMap((p) => p)
               }
             >
-              <IconButton styleType="borderless" title="Property Options">
+              <IconButton styleType="borderless" title={GroupingMappingWidget.translate("properties.propertyOptions")}>
                 <SvgMore />
               </IconButton>
             </DropdownMenu>
@@ -122,7 +123,7 @@ export const GroupPropertyTable = ({
 
   return (
     <PropertyTable
-      propertyType="Group"
+      propertyType={GroupingMappingWidget.translate("properties.group")}
       columnsFactory={columnsFactory}
       data={groupProperties}
       isLoading={isLoading}

@@ -6,6 +6,7 @@ import React from "react";
 import type { Alert } from "@itwin/itwinui-react";
 import { ButtonGroup, IconButton, InformationPanelWrapper, List, ProgressLinear } from "@itwin/itwinui-react";
 import { SvgRefresh } from "@itwin/itwinui-icons-react";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 import DeleteModal from "../SharedComponents/DeleteModal";
 import "./GroupsView.scss";
 import { EmptyMessage } from "../SharedComponents/EmptyMessage";
@@ -112,7 +113,7 @@ export const GroupsView = ({
           <ButtonGroup className="gmw-toolbar-buttons">
             {groupsAction}
             {!hideRefreshIcon && (
-              <IconButton title="Refresh" onClick={onRefresh} disabled={isLoading || disableActions} styleType="borderless">
+              <IconButton title={GroupingMappingWidget.translate("common.refresh")} onClick={onRefresh} disabled={isLoading || disableActions} styleType="borderless">
                 <SvgRefresh />
               </IconButton>
             )}
@@ -122,7 +123,7 @@ export const GroupsView = ({
       {alert}
       <div className="gmw-groups-border" />
       {!!hilitedGroupsProgress && (
-        <div className="gmw-group-progress-bar" title="Getting visualization ready">
+        <div className="gmw-group-progress-bar" title={GroupingMappingWidget.translate("groups.gettingVisualizationReady")}>
           <ProgressLinear
             value={baseProgress + (hilitedGroupsProgress.currentHilitedGroups / hilitedGroupsProgress.totalNumberOfGroups) * maxDynamicProgress}
           />
@@ -131,7 +132,7 @@ export const GroupsView = ({
       {isLoading ? (
         <LoadingOverlay />
       ) : groups.length === 0 ? (
-        <EmptyMessage message="No Groups available." />
+        <EmptyMessage message={GroupingMappingWidget.translate("groups.noGroups")} />
       ) : (
         <List className="gmw-group-list">
           {groups.map((group) => (

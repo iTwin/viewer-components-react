@@ -5,6 +5,7 @@
 import React from "react";
 import { InformationPanel, InformationPanelBody, InformationPanelHeader, LabeledTextarea, Text } from "@itwin/itwinui-react";
 import "./GroupInformationPanel.scss";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 
 export interface GroupInformationPanelProps {
   isOpen: boolean;
@@ -17,11 +18,11 @@ export const GroupInformationPanel = ({ isOpen, onClose, groupName, query }: Gro
   return (
     <InformationPanel isOpen={isOpen}>
       <InformationPanelHeader onClose={onClose}>
-        <Text variant="subheading">{`${groupName} Information`}</Text>
+        <Text variant="subheading">{GroupingMappingWidget.translate("properties.groupInformationTitle", { groupName })}</Text>
       </InformationPanelHeader>
       <InformationPanelBody>
         <div className="gmw-group-information-body">
-          <LabeledTextarea label="Query" rows={15} readOnly defaultValue={query} />
+          <LabeledTextarea label={GroupingMappingWidget.translate("properties.query")} rows={15} readOnly defaultValue={query} />
         </div>
       </InformationPanelBody>
     </InformationPanel>

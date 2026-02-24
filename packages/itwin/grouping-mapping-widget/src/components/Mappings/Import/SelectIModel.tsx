@@ -6,6 +6,7 @@ import type { IModel, IModelsClient } from "@itwin/imodels-client-management";
 import type { TablePaginatorRendererProps } from "@itwin/itwinui-react";
 import { Button, Table, tableFilters, TablePaginator } from "@itwin/itwinui-react";
 import React, { useCallback, useMemo } from "react";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 import type { CreateTypeFromInterface } from "../../../common/utils";
 import "./SelectIModel.scss";
 import type { GetAccessTokenFn } from "../../context/GroupingApiConfigContext";
@@ -17,11 +18,11 @@ import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 
 type IIModelTyped = CreateTypeFromInterface<IModel>;
 
-const defaultDisplayStrings = {
+const getDefaultDisplayStrings = () => ({
   iModels: "iModels",
-  iModelName: "Name",
-  iModelDescription: "Description",
-};
+  iModelName: GroupingMappingWidget.translate("common.name"),
+  iModelDescription: GroupingMappingWidget.translate("common.description"),
+});
 
 const fetchIModels = async (getAccessToken: GetAccessTokenFn, iTwinId: string, iModelsClient: IModelsClient) => {
   const accessToken = await getAccessToken();
@@ -45,7 +46,7 @@ interface SelectIModelProps {
   onSelect: (iModelId: string) => void;
   onCancel: () => void;
   backFn: () => void;
-  displayStrings?: Partial<typeof defaultDisplayStrings>;
+  displayStrings?: Partial<ReturnType<typeof getDefaultDisplayStrings>>;
 }
 const SelectIModel = ({ iTwinId: iTwinId, onSelect, onCancel, backFn, displayStrings: userDisplayStrings }: SelectIModelProps) => {
   const { getAccessToken } = useGroupingMappingApiConfig();
@@ -56,7 +57,7 @@ const SelectIModel = ({ iTwinId: iTwinId, onSelect, onCancel, backFn, displayStr
     queryFn: async () => fetchIModels(getAccessToken, iTwinId, iModelsClient),
   });
 
-  const displayStrings = React.useMemo(() => ({ ...defaultDisplayStrings, ...userDisplayStrings }), [userDisplayStrings]);
+  const displayStrings = React.useMemo(() => ({ ...getDefaultDisplayStrings(), ...userDisplayStrings }), [userDisplayStrings]);
 
   const iModelsColumns = useMemo<Column<IIModelTyped>[]>(
     () => [
@@ -85,7 +86,7 @@ const SelectIModel = ({ iTwinId: iTwinId, onSelect, onCancel, backFn, displayStr
         data={iModels ?? []}
         columns={iModelsColumns}
         className="gmw-select-imodel-table"
-        emptyTableContent={`No ${displayStrings.iModels} available.`}
+        emptyTableContent={GroupingMappingWidget.translate("import.noIModels", { iModels: displayStrings.iModels })}
         isSortable
         isLoading={isLoading}
         onRowClick={(_, row) => {
@@ -94,8 +95,8 @@ const SelectIModel = ({ iTwinId: iTwinId, onSelect, onCancel, backFn, displayStr
         paginatorRenderer={paginator}
       />
       <div className="gmw-import-action-panel">
-        <Button onClick={backFn}>Back</Button>
-        <Button onClick={onCancel}>Cancel</Button>
+        <Button onClick={backFn}>{GroupingMappingWidget.translate("common.back")}</Button>
+        <Button onClick={onCancel}>{GroupingMappingWidget.translate("common.cancel")}</Button>
       </div>
     </div>
   );

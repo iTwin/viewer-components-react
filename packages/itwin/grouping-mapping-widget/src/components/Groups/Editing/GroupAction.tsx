@@ -5,6 +5,7 @@
 import type { SelectOption } from "@itwin/itwinui-react";
 import { Button } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 import { LoadingSpinner } from "../../SharedComponents/LoadingSpinner";
 import "./GroupAction.scss";
 import useValidator from "../../Properties/hooks/useValidator";
@@ -21,10 +22,10 @@ import { useVisualization } from "../hooks/useVisualization";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useGroupsClient } from "../../context/GroupsClientContext";
 
-const defaultDisplayStrings = {
-  groupDetails: "Group Details",
-  groupBy: "Group By",
-};
+const getDefaultDisplayStrings = () => ({
+  groupDetails: GroupingMappingWidget.translate("groups.groupDetails"),
+  groupBy: GroupingMappingWidget.translate("groups.groupBy"),
+});
 
 enum GroupActionStep {
   QueryBuilder,
@@ -42,7 +43,7 @@ export interface GroupActionProps {
   queryGenerationType: string;
   onSaveSuccess: () => void;
   onClickCancel?: () => void;
-  displayStrings?: Partial<typeof defaultDisplayStrings>;
+  displayStrings?: Partial<ReturnType<typeof getDefaultDisplayStrings>>;
 }
 
 /**
@@ -52,7 +53,7 @@ export interface GroupActionProps {
 export const GroupAction = (props: GroupActionProps) => {
   const { getAccessToken, iModelConnection } = useGroupingMappingApiConfig();
   if (!iModelConnection) {
-    throw new Error("This component requires an active iModelConnection.");
+    throw new Error(GroupingMappingWidget.translate("errors.requiresIModelConnection"));
   }
   const groupsClient = useGroupsClient();
   const groupUIs: GroupingCustomUI[] = useGroupingMappingCustomUI().customUIs.filter(
@@ -78,7 +79,7 @@ export const GroupAction = (props: GroupActionProps) => {
 
   const [currentStep, setCurrentStep] = React.useState(GroupActionStep.QueryBuilder);
 
-  const displayStrings = React.useMemo(() => ({ ...defaultDisplayStrings, ...props.displayStrings }), [props.displayStrings]);
+  const displayStrings = React.useMemo(() => ({ ...getDefaultDisplayStrings(), ...props.displayStrings }), [props.displayStrings]);
 
   useEffect(() => setQueryGenerationType(props.queryGenerationType), [props.queryGenerationType]);
 
@@ -201,7 +202,7 @@ export const GroupAction = (props: GroupActionProps) => {
         {isGroupDetailsStep && <GroupDetailsActionPanel isSaveDisabled={isBlockingActions} onClickSave={onClickSave} onClickBack={onClickBack} />}
         {props.onClickCancel && (
           <Button type="button" id="cancel" onClick={onClickCancel}>
-            Cancel
+            {GroupingMappingWidget.translate("common.cancel")}
           </Button>
         )}
       </div>

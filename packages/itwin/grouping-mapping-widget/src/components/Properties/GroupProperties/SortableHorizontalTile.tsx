@@ -9,6 +9,7 @@ import { SvgDragHandleVertical } from "@itwin/itwinui-icons-react";
 import { Icon } from "@itwin/itwinui-react";
 import type { GroupPropertyListItemProps } from "./GroupPropertyListItem";
 import { GroupPropertyListItem } from "./GroupPropertyListItem";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 
 interface SortableHorizontalTileProps extends GroupPropertyListItemProps {
   id: string;
@@ -36,7 +37,7 @@ export const SortableHorizontalTile = ({ id, ...props }: SortableHorizontalTileP
     <div ref={setNodeRef} {...attributes} style={{ ...style, visibility: isDragging ? "hidden" : "visible" }}>
       <GroupPropertyListItem
         dragHandle={
-          <Icon className="gmw-drag-icon" size="large" style={{ cursor: "grab" }} title="Drag & Drop" {...listeners}>
+          <Icon className="gmw-drag-icon" size="large" style={{ cursor: "grab" }} title={GroupingMappingWidget.translate("properties.dragAndDrop")} {...listeners}>
             <SvgDragHandleVertical />
           </Icon>
         }

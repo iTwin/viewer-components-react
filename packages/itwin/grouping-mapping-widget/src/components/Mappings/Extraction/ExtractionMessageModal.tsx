@@ -18,6 +18,7 @@ import { useMemoizedCollectionPick } from "../../../common/hooks/useMemoizedColl
 import { fetchGroups } from "../../Groups/hooks/useFetchGroups";
 import { useFetchMappings } from "../hooks/useFetchMappings";
 import { useGroupsClient } from "../../context/GroupsClientContext";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 
 export interface ExtractionMessageData {
   date: string;
@@ -91,11 +92,11 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
 
           if (replacedMessage.includes("MappingId:")) {
             const mappingName = getMappingName(mappingId, mappings);
-            replacedMessage = replacedMessage.replace(/MappingId: [\w-]+/, `Mapping: ${mappingName}`);
+            replacedMessage = replacedMessage.replace(/MappingId: [\w-]+/, GroupingMappingWidget.translate("extraction.mappingLabel", { mappingName }));
           }
 
           if (replacedMessage.includes("GroupId:")) {
-            replacedMessage = replacedMessage.replace(/GroupId: [\w-]+/, `Group: ${groupName ? groupName : "<Not Found>"}`);
+            replacedMessage = replacedMessage.replace(/GroupId: [\w-]+/, GroupingMappingWidget.translate("extraction.groupLabel", { groupName: groupName ?? GroupingMappingWidget.translate("extraction.notFound") }));
           }
         }
 
@@ -120,8 +121,8 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
 
   const translatedLabels = useMemo(
     () => ({
-      filter: "Filter",
-      clear: "Clear",
+      filter: GroupingMappingWidget.translate("extraction.filter"),
+      clear: GroupingMappingWidget.translate("common.clear"),
     }),
     [],
   );
@@ -130,7 +131,7 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
     (): Column<CreateTypeFromInterface<ExtractionMessageData>>[] => [
       {
         id: "category",
-        Header: "Category",
+        Header: GroupingMappingWidget.translate("extraction.category"),
         accessor: "category",
         fieldType: "text",
         Filter: ExtractionLogCustomFilter,
@@ -138,7 +139,7 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
       },
       {
         id: "level",
-        Header: "Level",
+        Header: GroupingMappingWidget.translate("extraction.level"),
         accessor: "level",
         cellRenderer: ({ cellElementProps, cellProps }: CellRendererProps<CreateTypeFromInterface<ExtractionMessageData>>) => {
           const level = cellProps.row.original.level;
@@ -167,7 +168,7 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
       },
       {
         id: "message",
-        Header: "Message",
+        Header: GroupingMappingWidget.translate("extraction.message"),
         accessor: "message",
         width: "25vw",
         fieldType: "text",
@@ -179,10 +180,10 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
   const isLoading = pickedResult.some((query) => query.isLoading) || isMappingsLoading;
 
   return (
-    <Modal className="gmw-message-modal-container" title="Extraction Logs" isOpen={isOpen} onClose={onClose} closeOnExternalClick={false}>
+    <Modal className="gmw-message-modal-container" title={GroupingMappingWidget.translate("extraction.extractionLogs")} isOpen={isOpen} onClose={onClose} closeOnExternalClick={false}>
       <ModalContent>
         <div className="gmw-timestamp-icon">
-          <Icon title="Extraction Timestamp" size="medium">
+          <Icon title={GroupingMappingWidget.translate("extraction.extractionTimestamp")} size="medium">
             <SvgClock />
           </Icon>
           <Text>{formattedTimestamp}</Text>
@@ -191,14 +192,14 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
           columns={columns}
           data={formattedExtractionMessage ?? []}
           emptyTableContent={""}
-          emptyFilteredTableContent="No results match filters."
+          emptyFilteredTableContent={GroupingMappingWidget.translate("extraction.noResults")}
           className="gmw-extraction-message-table-container"
           isLoading={isLoading}
         />
       </ModalContent>
       <ModalButtonBar>
         <Button onClick={onClose} styleType="high-visibility">
-          Close
+          {GroupingMappingWidget.translate("common.close")}
         </Button>
       </ModalButtonBar>
     </Modal>

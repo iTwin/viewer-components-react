@@ -6,6 +6,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import type { Alert } from "@itwin/itwinui-react";
 import { Button, IconButton, List } from "@itwin/itwinui-react";
 import { SvgAdd, SvgImport, SvgPlay, SvgRefresh } from "@itwin/itwinui-icons-react";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 import { EmptyMessage } from "../SharedComponents/EmptyMessage";
 import { LoadingOverlay } from "../SharedComponents/LoadingOverlay";
 import "./MappingsView.scss";
@@ -23,16 +24,16 @@ import { useExtractionStateJobContext } from "../context/ExtractionStateJobConte
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
 import { useRunExtraction } from "./hooks/useRunExtraction";
 
-export const mappingViewDefaultDisplayStrings = {
-  mappings: "Mappings",
+export const getMappingViewDefaultDisplayStrings = () => ({
+  mappings: GroupingMappingWidget.translate("mappings.mappings"),
   iTwins: "iTwins",
-  iTwinNumber: "Number",
-  iTwinName: "Name",
-  iTwinStatus: "Status",
+  iTwinNumber: GroupingMappingWidget.translate("common.number"),
+  iTwinName: GroupingMappingWidget.translate("common.name"),
+  iTwinStatus: GroupingMappingWidget.translate("common.status"),
   iModels: "iModels",
-  iModelName: "Name",
-  iModelDescription: "Description",
-};
+  iModelName: GroupingMappingWidget.translate("common.name"),
+  iModelDescription: GroupingMappingWidget.translate("common.description"),
+});
 
 /**
  * @internal
@@ -51,7 +52,7 @@ export interface MappingsViewProps {
   onDelete: (mapping: Mapping) => Promise<void>;
   showDeleteModal: Mapping | undefined;
   setShowDeleteModal: (mapping?: Mapping) => void;
-  displayStrings?: Partial<typeof mappingViewDefaultDisplayStrings>;
+  displayStrings?: Partial<ReturnType<typeof getMappingViewDefaultDisplayStrings>>;
   showImportModal?: boolean;
   setShowImportModal?: (show: boolean) => void;
   onClickAddMapping?: () => void;
@@ -90,7 +91,7 @@ export const MappingsView = ({
   alert,
   hideRefreshIcon,
 }: MappingsViewProps) => {
-  const displayStrings = React.useMemo(() => ({ ...mappingViewDefaultDisplayStrings, ...userDisplayStrings }), [userDisplayStrings]);
+  const displayStrings = React.useMemo(() => ({ ...getMappingViewDefaultDisplayStrings(), ...userDisplayStrings }), [userDisplayStrings]);
   const [selectedMappings, setSelectedMappings] = useState<Mapping[]>([]);
   const groupingMappingApiConfig = useGroupingMappingApiConfig();
   const { mappingIdJobInfo } = useExtractionStateJobContext();
@@ -125,16 +126,16 @@ export const MappingsView = ({
         <div className="gmw-table-toolbar">
           <div className="gmw-button-spacing">
             {onClickAddMapping && (
-              <Button startIcon={<SvgAdd />} onClick={onClickAddMapping} styleType="high-visibility" title="New Mapping">
-                New
+              <Button startIcon={<SvgAdd />} onClick={onClickAddMapping} styleType="high-visibility" title={GroupingMappingWidget.translate("mappings.newMapping")}>
+                {GroupingMappingWidget.translate("common.new")}
               </Button>
             )}
             {showImportModal !== undefined && setShowImportModal && (
-              <IconButton title={`Import ${displayStrings.mappings}`} onClick={() => setShowImportModal(true)}>
+              <IconButton title={GroupingMappingWidget.translate("mappings.importMappings", { mappings: displayStrings.mappings })} onClick={() => setShowImportModal(true)}>
                 <SvgImport />
               </IconButton>
             )}
-            <IconButton title="Run extraction" onClick={onRunExtraction} disabled={selectedMappings.length === 0}>
+            <IconButton title={GroupingMappingWidget.translate("mappings.runExtraction")} onClick={onRunExtraction} disabled={selectedMappings.length === 0}>
               <SvgPlay />
             </IconButton>
           </div>
@@ -149,7 +150,7 @@ export const MappingsView = ({
               iconMessage={extractionStatusData.iconMessage}
             />
             {!hideRefreshIcon && (
-              <IconButton title="Refresh" onClick={refreshAll} disabled={isLoading} styleType="borderless">
+              <IconButton title={GroupingMappingWidget.translate("common.refresh")} onClick={refreshAll} disabled={isLoading} styleType="borderless">
                 <SvgRefresh />
               </IconButton>
             )}
@@ -160,7 +161,7 @@ export const MappingsView = ({
         {isLoading && !isTogglingExtraction ? (
           <LoadingOverlay />
         ) : mappings.length === 0 ? (
-          <EmptyMessage message={`No ${displayStrings.mappings} available.`} />
+          <EmptyMessage message={GroupingMappingWidget.translate("mappings.noMappings", { mappings: displayStrings.mappings })} />
         ) : (
           <List className="gmw-mappings-list">
             {mappings.map((mapping) => (

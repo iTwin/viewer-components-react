@@ -8,6 +8,7 @@ import { SvgCalendar, SvgList, SvgStarHollow } from "@itwin/itwinui-icons-react"
 import type { TablePaginatorRendererProps } from "@itwin/itwinui-react";
 import { Button, Tab, Table, tableFilters, TablePaginator, Tabs } from "@itwin/itwinui-react";
 import React, { useCallback, useMemo, useState } from "react";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 import type { CreateTypeFromInterface } from "../../../common/utils";
 import "./SelectITwin.scss";
 import type { GetAccessTokenFn } from "../../context/GroupingApiConfigContext";
@@ -18,12 +19,12 @@ import type { Column } from "react-table";
 
 type IITwinTyped = CreateTypeFromInterface<ITwin>;
 
-const defaultDisplayStrings = {
+const getDefaultDisplayStrings = () => ({
   iTwins: "iTwins",
-  iTwinNumber: "Number",
-  iTwinName: "Name",
-  iTwinStatus: "Status",
-};
+  iTwinNumber: GroupingMappingWidget.translate("common.number"),
+  iTwinName: GroupingMappingWidget.translate("common.name"),
+  iTwinStatus: GroupingMappingWidget.translate("common.status"),
+});
 
 export enum ITwinType {
   Favorite = 0,
@@ -31,10 +32,10 @@ export enum ITwinType {
   All = 2,
 }
 
-const tabsWithIcons = [
-  <Tab key="favorite" label="Favorite iTwins" startIcon={<SvgStarHollow />} />,
-  <Tab key="recents" label="Recent iTwins" startIcon={<SvgCalendar />} />,
-  <Tab key="all" label="My iTwins" startIcon={<SvgList />} />,
+const getTabsWithIcons = () => [
+  <Tab key="favorite" label={GroupingMappingWidget.translate("import.favoriteITwins")} startIcon={<SvgStarHollow />} />,
+  <Tab key="recents" label={GroupingMappingWidget.translate("import.recentITwins")} startIcon={<SvgCalendar />} />,
+  <Tab key="all" label={GroupingMappingWidget.translate("import.myITwins")} startIcon={<SvgList />} />,
 ];
 
 const fetchITwins = async (getAccessToken: GetAccessTokenFn, iTwinsClient: ITwinsAccessClient, iTwinType: ITwinType) => {
@@ -53,7 +54,7 @@ interface SelectITwinProps {
   onSelect: (iTwinId: string) => void;
   onCancel: () => void;
   onChangeITwinType: (iTwinType: number) => void;
-  displayStrings?: Partial<typeof defaultDisplayStrings>;
+  displayStrings?: Partial<ReturnType<typeof getDefaultDisplayStrings>>;
   defaultITwinType?: ITwinType;
 }
 
@@ -73,7 +74,7 @@ const SelectITwin = ({
     queryFn: async () => (await fetchITwins(getAccessToken, iTwinsClient, iTwinType)).data!,
   });
 
-  const displayStrings = React.useMemo(() => ({ ...defaultDisplayStrings, ...userDisplayStrings }), [userDisplayStrings]);
+  const displayStrings = React.useMemo(() => ({ ...getDefaultDisplayStrings(), ...userDisplayStrings }), [userDisplayStrings]);
 
   const iTwinsColumns = useMemo<Column<IITwinTyped>[]>(
     () => [
@@ -106,7 +107,7 @@ const SelectITwin = ({
     <div className="gmw-select-itwin-table-container">
       <Tabs
         orientation="horizontal"
-        labels={tabsWithIcons}
+        labels={getTabsWithIcons()}
         onTabSelected={(type) => {
           onChangeITwinType(type);
           setITwinType(type);
@@ -119,7 +120,7 @@ const SelectITwin = ({
         data={iTwins ?? []}
         columns={iTwinsColumns}
         className="gmw-select-itwin-table"
-        emptyTableContent={`No ${displayStrings.iTwins} available.`}
+        emptyTableContent={GroupingMappingWidget.translate("import.noITwins", { iTwins: displayStrings.iTwins })}
         isSortable
         isLoading={isLoading}
         onRowClick={(_, row) => {
@@ -128,7 +129,7 @@ const SelectITwin = ({
         paginatorRenderer={paginator}
       />
       <div className="gmw-import-action-panel">
-        <Button onClick={onCancel}>Cancel</Button>
+        <Button onClick={onCancel}>{GroupingMappingWidget.translate("common.cancel")}</Button>
       </div>
     </div>
   );

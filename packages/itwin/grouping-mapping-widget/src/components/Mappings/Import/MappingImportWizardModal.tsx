@@ -8,6 +8,7 @@ import type { StepProperties } from "@itwin/itwinui-react";
 import { Stepper } from "@itwin/itwinui-react";
 import { Modal } from "@itwin/itwinui-react";
 import React, { useEffect, useRef, useState } from "react";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 import ConfirmMappingImport from "./ConfirmMappingsImport";
 import type { IMappingTyped } from "../Mappings";
 import "./MappingImportWizardModal.scss";
@@ -18,21 +19,21 @@ import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigCont
 import { createIModelsClient, IModelsClientContext } from "../../context/IModelsClientContext";
 import { createITwinsClient, ITwinsClientContext } from "../../context/ITwinsClientContext";
 
-const defaultDisplayStrings = {
-  mappings: "Mappings",
+const getDefaultDisplayStrings = () => ({
+  mappings: GroupingMappingWidget.translate("mappings.mappings"),
   iTwins: "iTwins",
-  iTwinNumber: "Number",
-  iTwinName: "Name",
-  iTwinStatus: "Status",
+  iTwinNumber: GroupingMappingWidget.translate("common.number"),
+  iTwinName: GroupingMappingWidget.translate("common.name"),
+  iTwinStatus: GroupingMappingWidget.translate("common.status"),
   iModels: "iModels",
-  iModelName: "Name",
-  iModelDescription: "Description",
-};
+  iModelName: GroupingMappingWidget.translate("common.name"),
+  iModelDescription: GroupingMappingWidget.translate("common.description"),
+});
 interface MappingImportWizardModalProps {
   show: boolean;
   setShow: (show: boolean) => void;
   onFinish: () => Promise<void>;
-  displayStrings?: Partial<typeof defaultDisplayStrings>;
+  displayStrings?: Partial<ReturnType<typeof getDefaultDisplayStrings>>;
 }
 
 export const MappingImportWizardModal = ({ show, setShow, onFinish, displayStrings: userDisplayStrings }: MappingImportWizardModalProps) => {
@@ -51,24 +52,24 @@ export const MappingImportWizardModal = ({ show, setShow, onFinish, displayStrin
     setIModelsClient(createIModelsClient(prefix));
   }, [prefix]);
 
-  const displayStrings = React.useMemo(() => ({ ...defaultDisplayStrings, ...userDisplayStrings }), [userDisplayStrings]);
+  const displayStrings = React.useMemo(() => ({ ...getDefaultDisplayStrings(), ...userDisplayStrings }), [userDisplayStrings]);
 
   const steps = useRef<StepProperties[]>([
     {
-      name: "Select iTwin",
-      description: `Select the source iTwin to bring your ${displayStrings.mappings} from.`,
+      name: GroupingMappingWidget.translate("import.selectITwin"),
+      description: GroupingMappingWidget.translate("import.selectITwinDescription", { mappings: displayStrings.mappings }),
     },
     {
-      name: "Select iModel",
-      description: "Select an iModel within the iTwin you have selected.",
+      name: GroupingMappingWidget.translate("import.selectIModel"),
+      description: GroupingMappingWidget.translate("import.selectIModelDescription"),
     },
     {
-      name: `Select ${displayStrings.mappings}`,
-      description: `Select one or more ${displayStrings.mappings} to import.`,
+      name: GroupingMappingWidget.translate("import.selectMappings", { mappings: displayStrings.mappings }),
+      description: GroupingMappingWidget.translate("import.selectMappingsDescription", { mappings: displayStrings.mappings }),
     },
     {
-      name: "Rename & Confirm",
-      description: "Rename and confirm your selections. Click import when finished.",
+      name: GroupingMappingWidget.translate("import.renameAndConfirm"),
+      description: GroupingMappingWidget.translate("import.renameAndConfirmDescription"),
     },
   ]);
 
@@ -80,7 +81,7 @@ export const MappingImportWizardModal = ({ show, setShow, onFinish, displayStrin
 
   return (
     <Modal
-      title={`Import ${displayStrings.mappings}`}
+      title={GroupingMappingWidget.translate("mappings.importMappings", { mappings: displayStrings.mappings })}
       modalRootId="grouping-mapping-widget"
       isOpen={show}
       closeOnEsc={false}

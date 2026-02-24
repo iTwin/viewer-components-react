@@ -9,6 +9,7 @@ import type { CreateTypeFromInterface } from "../../common/utils";
 import DeleteModal from "../SharedComponents/DeleteModal";
 import { PropertyTableToolbar } from "./PropertyTableToolbar";
 import "./PropertyTable.scss";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 
 export interface PropertyTableItem {
   propertyName: string;
@@ -68,7 +69,7 @@ export const PropertyTable = <T extends PropertyTableItem>({
         data={isLoading ? [] : data}
         density="extra-condensed"
         columns={memoizedColumns}
-        emptyTableContent={`No ${propertyType} Properties`}
+        emptyTableContent={GroupingMappingWidget.translate("properties.noProperties", { propertyType })}
         isSortable
         isLoading={isLoading}
       />

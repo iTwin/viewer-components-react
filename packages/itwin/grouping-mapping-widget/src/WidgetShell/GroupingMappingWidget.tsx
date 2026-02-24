@@ -5,6 +5,7 @@
 import type { UiItemsProvider, Widget } from "@itwin/appui-react";
 import { StagePanelLocation, StagePanelSection, StageUsage } from "@itwin/appui-react";
 import React from "react";
+import { GroupingMappingWidget as GMWidget } from "../GroupingMappingWidget";
 import type { GroupingMappingProps } from "./GroupingMapping";
 import GroupingMapping from "./GroupingMapping";
 
@@ -22,7 +23,7 @@ export class GroupingMappingProvider implements UiItemsProvider {
     if (location === StagePanelLocation.Left && section === StagePanelSection.Start && stageUsage === StageUsage.General) {
       const GroupingMappingWidget: Widget = {
         id: "GroupingMappingWidget",
-        label: "Grouping & Mapping",
+        label: GMWidget.translate("widget.label"),
         content: <GroupingMapping {...this._props} />,
       };
 

@@ -6,6 +6,7 @@ import { QueryRowFormat } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
 import { toaster } from "@itwin/itwinui-react";
+import { GroupingMappingWidget } from "../GroupingMappingWidget";
 
 export type CreateTypeFromInterface<Interface> = {
   [Property in keyof Interface]: Interface[Property];
@@ -46,30 +47,30 @@ export const fetchIdsFromQuery = async (query: string, iModelConnection: IModelC
 export const getErrorMessage = (errorStatus: number): string => {
   switch (errorStatus) {
     case 401:
-      return "You are unauthorized to do this operation.";
+      return GroupingMappingWidget.translate("errors.unauthorized");
     case 403:
-      return "You don't have permission to access the requested resource.";
+      return GroupingMappingWidget.translate("errors.forbidden");
     case 404:
-      return "The requested resource was not found.";
+      return GroupingMappingWidget.translate("errors.notFound");
     case 409:
-      return "This property name is already being used.";
+      return GroupingMappingWidget.translate("errors.conflict");
     case 422:
-      return "Unable to process the request.";
+      return GroupingMappingWidget.translate("errors.unprocessable");
     case 429:
-      return "Too many requests.";
+      return GroupingMappingWidget.translate("errors.tooManyRequests");
     case 500:
-      return "Internal server error.";
+      return GroupingMappingWidget.translate("errors.internalServerError");
     case 502:
-      return "Bad gateway.";
+      return GroupingMappingWidget.translate("errors.badGateway");
     case 503:
-      return "Service unavailable.";
+      return GroupingMappingWidget.translate("errors.serviceUnavailable");
     default:
-      return "Something went wrong!";
+      return GroupingMappingWidget.translate("errors.generic");
   }
 };
 
 export const handleError = (errorStatus: number) => {
-  const baseErrorMessage = "Error!";
+  const baseErrorMessage = GroupingMappingWidget.translate("errors.errorPrefix");
   const specificErrorMessage = getErrorMessage(errorStatus);
   const fullErrorMessage = `${baseErrorMessage} ${specificErrorMessage}`;
 

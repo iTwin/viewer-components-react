@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { Button } from "@itwin/itwinui-react";
 import * as React from "react";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 import "./ActionPanel.scss";
 import { LoadingSpinner } from "./LoadingSpinner";
 
@@ -23,11 +24,11 @@ const ActionPanel = ({ onSave, onSaveCapture, onCancel, onCancelCapture, isCance
       <div className="gmw-action-panel">
         {isLoading && <LoadingSpinner />}
         <Button disabled={isSavingDisabled || isLoading} styleType="high-visibility" id="save-app" onClick={onSave} onClickCapture={onSaveCapture}>
-          Save
+          {GroupingMappingWidget.translate("common.save")}
         </Button>
         {onCancel && (
           <Button styleType="default" type="button" id="cancel" onClick={onCancel} disabled={isCancelDisabled || isLoading} onClickCapture={onCancelCapture}>
-            Cancel
+            {GroupingMappingWidget.translate("common.cancel")}
           </Button>
         )}
       </div>

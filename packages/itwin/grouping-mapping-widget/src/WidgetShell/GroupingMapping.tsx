@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import type { GroupMinimal, Mapping, Property } from "@itwin/insights-client";
 import React, { useCallback, useMemo, useState } from "react";
+import { GroupingMappingWidget } from "../GroupingMappingWidget";
 import type { GroupingMappingContextProps } from "../components/GroupingMappingContext";
 import { GroupingMappingContext } from "../components/GroupingMappingContext";
 import "./GroupingMapping.scss";
@@ -13,7 +14,7 @@ import { GroupingMappingCustomUIType } from "../components/customUI/GroupingMapp
 import { SvgList } from "@itwin/itwinui-icons-react";
 import { GroupingMappingContent } from "./GroupingMappingContent";
 import { GroupingMappingHeader } from "./GroupingMappingHeader";
-import { defaultGroupingUI } from "../components/customUI/DefaultGroupingUI";
+import { getDefaultGroupingUI } from "../components/customUI/DefaultGroupingUI";
 
 export type GroupingMappingProps = Omit<GroupingMappingContextProps, "iModelId" | "changesetId"> & {
   hideRefreshIcon?: boolean;
@@ -50,7 +51,7 @@ export interface GroupingRouteFields {
 }
 
 const GroupingMapping = (props: GroupingMappingProps) => {
-  const [routingHistory, setRoutingHistory] = useState<Route[]>([{ step: RouteStep.Mappings, title: "Mapping", groupingRouteFields: {} }]);
+  const [routingHistory, setRoutingHistory] = useState<Route[]>([{ step: RouteStep.Mappings, title: GroupingMappingWidget.translate("mappings.mappings"), groupingRouteFields: {} }]);
   const currentRoute = routingHistory[routingHistory.length - 1];
   const activeIModelConnection = useActiveIModelConnection();
   const iModelConnection = props.iModelConnection ?? activeIModelConnection;
@@ -70,7 +71,7 @@ const GroupingMapping = (props: GroupingMappingProps) => {
     () => [
       {
         name: "Properties",
-        displayLabel: "Properties",
+        displayLabel: GroupingMappingWidget.translate("customUI.properties"),
         type: GroupingMappingCustomUIType.Context,
         icon: <SvgList />,
         onClick: (group) =>
@@ -81,7 +82,7 @@ const GroupingMapping = (props: GroupingMappingProps) => {
           })),
       },
       // No group UI's provided means the widget provides its own
-      ...(props.customUIs ?? defaultGroupingUI),
+      ...(props.customUIs ?? getDefaultGroupingUI()),
     ],
     [props.customUIs, navigateTo],
   );

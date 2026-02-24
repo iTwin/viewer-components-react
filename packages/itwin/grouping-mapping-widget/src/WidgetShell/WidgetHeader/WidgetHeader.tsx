@@ -4,8 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 import { SvgChevronLeft } from "@itwin/itwinui-icons-react";
 import { Icon, Text } from "@itwin/itwinui-react";
-import "./WidgetHeader.scss";
 import React from "react";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
+import "./WidgetHeader.scss";
 
 export interface WidgetHeaderProps {
   title: string;
@@ -17,7 +18,7 @@ export const WidgetHeader = ({ title, disabled = false, returnFn }: WidgetHeader
   return (
     <div className="gmw-widget-header-container">
       {returnFn && (
-        <Icon className={`${disabled ? "gmw-chevron-disabled" : "gmw-chevron"}`} size="large" onClick={disabled ? undefined : returnFn} title="Back">
+        <Icon className={`${disabled ? "gmw-chevron-disabled" : "gmw-chevron"}`} size="large" onClick={disabled ? undefined : returnFn} title={GroupingMappingWidget.translate("common.back")}>
           <SvgChevronLeft />
         </Icon>
       )}

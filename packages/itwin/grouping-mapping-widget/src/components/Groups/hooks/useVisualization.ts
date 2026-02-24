@@ -7,6 +7,7 @@ import { toaster } from "@itwin/itwinui-react";
 import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
 import { useCallback, useEffect, useState } from "react";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 import { useGroupHilitedElementsContext } from "../../context/GroupHilitedElementsContext";
 import { visualizeGroupColors } from "../groupsHelpers";
 import {
@@ -61,7 +62,7 @@ export const useVisualization = (shouldVisualize: boolean, iModelConnection: IMo
         const resolvedHiliteIds = await visualizeElementsByQuery(query, "red", iModelConnection);
         await zoomToElements(resolvedHiliteIds);
       } catch {
-        toaster.negative("Sorry, we have failed to generate a valid query.");
+        toaster.negative(GroupingMappingWidget.translate("errors.invalidQuery"));
       } finally {
         setIsRendering(false);
       }

@@ -11,6 +11,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFetchMappings } from "./useFetchMappings";
 import { useFetchExtractionStatus } from "./useFetchExtractionStatus";
 import { useExtractionStateJobContext } from "../../context/ExtractionStateJobContext";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 
 /**
  * Props for the {@link useMappingsOperations} hook.
@@ -94,7 +95,7 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
       ? {
           extractionStatusIcon: {
             iconStatus: undefined,
-            iconMessage: "Loading...",
+            iconMessage: GroupingMappingWidget.translate("common.loading"),
           },
           extractionMessageData: [],
         }
