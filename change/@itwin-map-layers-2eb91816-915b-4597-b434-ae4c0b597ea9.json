@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Added MCP (Model Context Protocol) server exposing map-layer operations as MCP tools over stdio transport.",
+  "packageName": "@itwin/map-layers",
+  "email": "jean-luc.deziel@bentley.com",
+  "dependentChangeType": "patch"
+}
