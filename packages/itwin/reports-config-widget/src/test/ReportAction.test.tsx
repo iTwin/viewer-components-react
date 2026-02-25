@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import React from "react";
+import { vi } from "vitest";
 import faker from "@faker-js/faker";
-import "@testing-library/jest-dom";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import { render, screen, waitForElementToBeRemoved } from "./test-utils";
 import { ReportAction } from "../widget/components/ReportAction";
@@ -20,9 +20,9 @@ beforeAll(async () => {
 
 describe("Reports Action", () => {
   it("required fields should be filled out", async () => {
-    const mockReturnFn = jest.fn();
+    const mockReturnFn = vi.fn();
 
-    render(<ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />);
+    render(<ReportAction onClickCancel={vi.fn()} onSaveSuccess={mockReturnFn} />);
 
     const addButton = screen.getByRole("button", {
       name: /add/i,
@@ -36,7 +36,7 @@ describe("Reports Action", () => {
   });
 
   it("should be able to add report", async () => {
-    const mockReturnFn = jest.fn();
+    const mockReturnFn = vi.fn();
     const mockReport: Report = {
       id: faker.datatype.uuid(),
       displayName: "mOcKRePoRt1",
@@ -54,7 +54,7 @@ describe("Reports Action", () => {
 
     const reportsClient = new ReportsClient();
 
-    jest.spyOn(reportsClient, "createReport").mockImplementation(
+    vi.spyOn(reportsClient, "createReport").mockImplementation(
       async () =>
         new Promise((resolve) =>
           setTimeout(() => {
@@ -63,7 +63,7 @@ describe("Reports Action", () => {
         ),
     );
 
-    const { user } = render(<ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />, { reportsClient });
+    const { user } = render(<ReportAction onClickCancel={vi.fn()} onSaveSuccess={mockReturnFn} />, { reportsClient });
 
     const addButton = screen.getByRole("button", {
       name: /add/i,
@@ -95,9 +95,9 @@ describe("Reports Action", () => {
   });
 
   it("No duplicate underscores in the beginning of name", async () => {
-    const mockReturnFn = jest.fn();
+    const mockReturnFn = vi.fn();
 
-    const { user } = render(<ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />);
+    const { user } = render(<ReportAction onClickCancel={vi.fn()} onSaveSuccess={mockReturnFn} />);
 
     const addButton = screen.getByRole("button", {
       name: /add/i,
@@ -113,9 +113,9 @@ describe("Reports Action", () => {
   });
 
   it("Only begin with letters or underscores of name", async () => {
-    const mockReturnFn = jest.fn();
+    const mockReturnFn = vi.fn();
 
-    const { user } = render(<ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />);
+    const { user } = render(<ReportAction onClickCancel={vi.fn()} onSaveSuccess={mockReturnFn} />);
 
     const addButton = screen.getByRole("button", {
       name: /add/i,
@@ -131,9 +131,9 @@ describe("Reports Action", () => {
   });
 
   it("Only letters underscores and digits of name", async () => {
-    const mockReturnFn = jest.fn();
+    const mockReturnFn = vi.fn();
 
-    const { user } = render(<ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />);
+    const { user } = render(<ReportAction onClickCancel={vi.fn()} onSaveSuccess={mockReturnFn} />);
 
     const addButton = screen.getByRole("button", {
       name: /add/i,
@@ -149,9 +149,9 @@ describe("Reports Action", () => {
   });
 
   it("check for character limits of name", async () => {
-    const mockReturnFn = jest.fn();
+    const mockReturnFn = vi.fn();
 
-    const { user } = render(<ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />);
+    const { user } = render(<ReportAction onClickCancel={vi.fn()} onSaveSuccess={mockReturnFn} />);
 
     const addButton = screen.getByRole("button", {
       name: /add/i,

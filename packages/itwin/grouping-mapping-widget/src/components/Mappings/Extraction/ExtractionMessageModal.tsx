@@ -108,7 +108,17 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
   }, [extractionMessageData, mappings, extractionInfo, getMappingName, pickedResult]);
 
   useEffect(() => {
+    if (!timestamp || timestamp.trim().length === 0) {
+      setFormattedTimestamp("");
+      return;
+    }
+
     const newDateTime: Date = new Date(timestamp);
+    if (Number.isNaN(newDateTime.getTime())) {
+      setFormattedTimestamp("");
+      return;
+    }
+
     const options: Intl.DateTimeFormatOptions = {
       day: "numeric",
       month: "numeric",

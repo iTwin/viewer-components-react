@@ -4,8 +4,6 @@
 
 ```ts
 
-/// <reference types="react" />
-
 import type { AccessToken } from '@itwin/core-bentley';
 import type { ExtractionRequestDetails } from '@itwin/insights-client';
 import type { IExtractionClient } from '@itwin/insights-client';
@@ -14,7 +12,7 @@ import { IModelsClient } from '@itwin/imodels-client-management';
 import type { IReportsClient } from '@itwin/insights-client';
 import type { Localization } from '@itwin/core-common';
 import { default as React_2 } from 'react';
-import type { Report } from '@itwin/insights-client';
+import type { Report as Report_2 } from '@itwin/insights-client';
 import { StagePanelLocation } from '@itwin/appui-react';
 import { StagePanelSection } from '@itwin/appui-react';
 import type { UiItemsProvider } from '@itwin/appui-react';
@@ -47,7 +45,7 @@ export interface ReportActionProps {
     // (undocumented)
     onSaveSuccess: () => void;
     // (undocumented)
-    report?: Report;
+    report?: Report_2;
 }
 
 // @public
@@ -60,7 +58,7 @@ export interface ReportMappingsProps {
     // (undocumented)
     onClickClose: () => void;
     // (undocumented)
-    report: Report;
+    report: Report_2;
 }
 
 // @public
@@ -113,9 +111,9 @@ export interface ReportsProps {
     // (undocumented)
     onClickAddReport?: () => void;
     // (undocumented)
-    onClickReportModify?: (report: Report) => void;
+    onClickReportModify?: (report: Report_2) => void;
     // (undocumented)
-    onClickReportTitle?: (report: Report) => void;
+    onClickReportTitle?: (report: Report_2) => void;
 }
 
 

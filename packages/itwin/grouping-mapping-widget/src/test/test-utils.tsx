@@ -40,6 +40,15 @@ function render(ui: React.ReactElement, mockUIs: GroupingMappingCustomUI[] = [],
   };
 }
 
-export * from "@testing-library/react";
-// override React Testing Library's render with our own
+// Re-export everything from @testing-library/react EXCEPT render,
+// then export our custom render which wraps components in GroupingMappingContext.
+export {
+  act,
+  cleanup,
+  fireEvent,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+  within,
+} from "@testing-library/react";
 export { render };

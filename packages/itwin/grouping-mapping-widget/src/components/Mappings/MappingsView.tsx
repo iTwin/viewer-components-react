@@ -187,7 +187,7 @@ export const MappingsView = ({
           isOpen={showExtractionMessageModal}
           onClose={() => setShowExtractionMessageModal(false)}
           extractionMessageData={extractionMessageData}
-          timestamp={extractionMessageData.length === 0 ? "" : extractionMessageData[0].date}
+          timestamp={extractionMessageData.find((data) => data.date?.trim().length > 0)?.date ?? ""}
         />
       )}
       {showDeleteModal && (
