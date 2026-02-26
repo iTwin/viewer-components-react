@@ -121,7 +121,7 @@ interface UseModelsTreeResult {
 /**
  * Custom hook to create and manage state for the models tree.
  *
- * **NOTE**: To use this hook, wrap your app component with `SharedTreeContextProvider`.
+ * **Note:** Requires `SharedTreeContextProvider` to be present in components tree above.
  * @beta
  */
 export function useModelsTree({

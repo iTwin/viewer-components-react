@@ -58,7 +58,7 @@ export interface ModelsTreeHeaderButtonProps extends TreeToolbarButtonProps {
  *   <ModelsTree {...treeProps} onModelsFiltered={onModelsFiltered} />
  * </TreeWithHeader>
  * ```
- * **NOTE**: To use this hook, wrap your app component with `SharedTreeContextProvider`.
+ * **Note:** Requires `SharedTreeContextProvider` to be present in components tree above.
  *
  * @public
  */
@@ -101,7 +101,7 @@ function useAvailableModels(imodel: IModelConnection): ModelInfo[] {
 export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => ReactElement | null;
 
 /**
- * To use this button, wrap your app component with `SharedTreeContextProvider`.
+ * Requires `SharedTreeContextProvider` to be present in component tree above.
  * @public
  */
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {

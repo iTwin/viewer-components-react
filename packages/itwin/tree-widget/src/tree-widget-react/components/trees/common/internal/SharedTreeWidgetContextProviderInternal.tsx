@@ -25,7 +25,7 @@ const treeWidgetContextInternal = createContext<SharedTreeContextInternal | unde
 export function useSharedTreeContextInternal(): SharedTreeContextInternal {
   const context = useContext(treeWidgetContextInternal);
   if (!context) {
-    throw new Error("Please wrap your app component with `SharedTreeContextProvider`.");
+    throw new Error("Requires `SharedTreeContextProvider` to be present in components tree above.");
   }
   return context;
 }
@@ -45,7 +45,7 @@ function SharedTreeContextProviderInternalImpl({ children, showWarning }: PropsW
   useEffect(() => {
     if (showWarning) {
       // eslint-disable-next-line no-console
-      console.warn("Please wrap your app component with `SharedTreeContextProvider`.");
+      console.warn("Wrap tree components with a single `SharedTreeContextProvider` to improve trees' performance.");
     }
   }, [showWarning]);
   const getBaseIdsCache = useCallback(

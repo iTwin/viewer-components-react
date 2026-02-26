@@ -75,7 +75,7 @@ interface ModelsTreeComponentProps extends Pick<
  * A component that renders `ModelsTree` and a header with filtering capabilities
  * and header buttons.
  *
- * **NOTE**: To use this component, wrap your app component with `SharedTreeContextProvider`.
+ * **Note:** Wrap tree components with a single `SharedTreeContextProvider` to improve trees' performance.
  * @public
  */
 export const ModelsTreeComponent = (props: ModelsTreeComponentProps) => {

@@ -45,7 +45,7 @@ interface ClassificationsTreeComponentProps extends Pick<
 /**
  * A component that renders `ClassificationsTree` with active iModel and viewport.
  *
- * **NOTE**: To use this component, wrap your app component with `SharedTreeContextProvider`.
+ * **Note:** Wrap tree components with a single `SharedTreeContextProvider` to improve trees' performance.
  * @alpha
  */
 export const ClassificationsTreeComponent = (props: ClassificationsTreeComponentProps) => {

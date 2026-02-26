@@ -24,7 +24,7 @@ export type ModelsTreeProps = Pick<
   };
 
 /**
- * To use this component, wrap your app component with `SharedTreeContextProvider`.
+ * Requires `SharedTreeContextProvider` to be present in component above.
  * @beta
  */
 export function ModelsTree({
