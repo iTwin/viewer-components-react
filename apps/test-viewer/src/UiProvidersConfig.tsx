@@ -6,7 +6,7 @@
 import { StagePanelLocation, StagePanelSection } from "@itwin/appui-react";
 import { EC3Provider, EC3Widget } from "@itwin/ec3-widget-react";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
-import { GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
+import { GroupingMappingProvider, GroupingMappingWidget } from "@itwin/grouping-mapping-widget";
 import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
 import {
   createDefaultGoogleMapsBaseMaps,
@@ -296,7 +296,9 @@ const configuredUiItems = new Map<string, UiItem>([
   [
     "grouping-mapping-widget",
     {
-      initialize: async () => Promise.resolve(),
+      initialize: async () => {
+        await GroupingMappingWidget.initialize();
+      },
       createUiItemsProviders: () => [
         new GroupingMappingProvider({
           prefix: import.meta.env.IMJS_URL_PREFIX ? (`${import.meta.env.IMJS_URL_PREFIX}`.slice(0, -1) as ClientPrefix) : undefined,

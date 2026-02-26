@@ -6,6 +6,7 @@ import type { GroupMinimal } from "@itwin/insights-client";
 import { SvgDelete, SvgEdit, SvgInfo, SvgMore } from "@itwin/itwinui-icons-react";
 import { DropdownMenu, IconButton, MenuItem } from "@itwin/itwinui-react";
 import React, { useCallback } from "react";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 import type { ContextCustomUI, GroupingCustomUI } from "../customUI/GroupingMappingCustomUI";
 import type { GroupsProps } from "./Groups";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
@@ -67,7 +68,7 @@ export const GroupMenuActions = ({
                   </MenuItem>
                 ))}
               >
-                Edit
+                {GroupingMappingWidget.translate("common.edit")}
               </MenuItem>,
             ]
           : []),
@@ -100,7 +101,7 @@ export const GroupMenuActions = ({
           icon={<SvgDelete />}
           data-testid="gmw-context-menu-item"
         >
-          Remove
+          {GroupingMappingWidget.translate("common.remove")}
         </MenuItem>,
       ];
 
@@ -115,7 +116,7 @@ export const GroupMenuActions = ({
             icon={<SvgInfo />}
             data-testid="gmw-overlap-menu-item"
           >
-            Overlap Info
+            {GroupingMappingWidget.translate("groups.overlapInfo")}
           </MenuItem>,
         );
       }
@@ -142,7 +143,7 @@ export const GroupMenuActions = ({
     <div className="gmw-actions">
       {actionButtonRenderers && actionButtonRenderers.map((actionButton, index) => <React.Fragment key={index}>{actionButton({ group })}</React.Fragment>)}
       <DropdownMenu className="gmw-action-dropdown" disabled={disableActions} menuItems={createMenuItems}>
-        <IconButton disabled={disableActions} styleType="borderless" data-testid="gmw-more-button" title="Group Options">
+        <IconButton disabled={disableActions} styleType="borderless" data-testid="gmw-more-button" title={GroupingMappingWidget.translate("groups.groupOptions")}>
           <SvgMore />
         </IconButton>
       </DropdownMenu>

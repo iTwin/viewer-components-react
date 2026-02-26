@@ -6,6 +6,7 @@ import { CalculatedPropertyType } from "@itwin/insights-client";
 import React, { useCallback } from "react";
 import type { SelectOption } from "@itwin/itwinui-react";
 import { LabeledSelect } from "@itwin/itwinui-react";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 
 interface SharedCalculatedPropertyFormsProps {
   calculatedPropertyType: CalculatedPropertyType | undefined;
@@ -24,7 +25,7 @@ export const SharedCalculatedPropertyForms = ({
     const options: SelectOption<CalculatedPropertyType | undefined>[] = [];
     const indexableEnum = CalculatedPropertyType as unknown as { [key: string]: string };
     
-    options.push({value: undefined, label: "No Calculated Property Type"});
+    options.push({value: undefined, label: GroupingMappingWidget.translate("properties.noCalculatedPropertyType")});
     for (const key in indexableEnum) {
       if (typeof indexableEnum[key] === "string" && key !== "Undefined") {
         // Generate labels by adding space between capitals
@@ -41,13 +42,13 @@ export const SharedCalculatedPropertyForms = ({
   return (
     <>
       <LabeledSelect<CalculatedPropertyType | undefined>
-        label="Calculated Property Type"
+        label={GroupingMappingWidget.translate("properties.calculatedPropertyType")}
         options={generateOptionsFromCalculatedPropertyType()}
         value={calculatedPropertyType}
         onChange={setCalculatedPropertyType}
         itemRenderer={itemRenderer}
         selectedItemRenderer={selectedItemRenderer}
-        placeholder = 'No Calculated Property Type'
+        placeholder={GroupingMappingWidget.translate("properties.noCalculatedPropertyType")}
         onShow={() => { }}
         onHide={() => { }}
       />

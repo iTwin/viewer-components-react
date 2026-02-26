@@ -6,6 +6,7 @@ import type { GroupMinimal } from "@itwin/insights-client";
 import { SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
 import React, { useCallback, useMemo } from "react";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsContext";
 
 interface GroupsShowHideButtonsProps {
@@ -32,7 +33,7 @@ export const GroupsShowHideButtons = ({ group, isLoadingQuery, showGroup, hideGr
   }, [group, hiddenGroupsIds, hideGroup, isGroupHidden, setHiddenGroupsIds, showGroup]);
 
   return (
-    <IconButton disabled={isLoadingQuery} styleType="borderless" onClick={toggleGroupVisibility} title="Toggle Group Visibility">
+    <IconButton disabled={isLoadingQuery} styleType="borderless" onClick={toggleGroupVisibility} title={GroupingMappingWidget.translate("groups.toggleGroupVisibility")}>
       {isGroupHidden ? <SvgVisibilityHide /> : <SvgVisibilityShow />}
     </IconButton>
   );

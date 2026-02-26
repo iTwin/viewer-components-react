@@ -32,7 +32,7 @@ export function createTreeWidgetViewport(viewport: Viewport): TreeWidgetViewport
       viewport.changeModelDisplay(props.modelIds, false);
     },
     viewsCategory: (categoryId) => viewport.view.viewsCategory(categoryId),
-    changeCategoryDisplay: (props) => viewport.changeCategoryDisplay(props.categoryIds, props.display, props.enableAllSubCategories),
+    changeCategoryDisplay: (props) => viewport.changeCategoryDisplay(props.categoryIds, props.display, props.enableAllSubCategories, true),
     viewsSubCategory: (subCategoryId) => viewport.isSubCategoryVisible(subCategoryId),
     changeSubCategoryDisplay: (props) => viewport.changeSubCategoryDisplay(props.subCategoryId, props.display),
     get perModelCategoryOverrides() {

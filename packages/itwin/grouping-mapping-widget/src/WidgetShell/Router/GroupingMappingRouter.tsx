@@ -13,6 +13,7 @@ import { MappingAction } from "../../components/Mappings/Editing/MappingAction";
 import { PropertyMenuWithVisualization } from "../../components/Properties/PropertyMenuWithVisualization";
 import { GroupsVisualization } from "../../components/Groups/GroupsVisualization";
 import { useGroupHilitedElementsContext } from "../../components/context/GroupHilitedElementsContext";
+import { GroupingMappingWidget as GMWidget } from "../../GroupingMappingWidget";
 
 export const GroupingMappingRouter = ({
   currentRoute,
@@ -35,7 +36,7 @@ export const GroupingMappingRouter = ({
     case RouteStep.Mappings:
       return (
         <Mappings
-          onClickAddMapping={() => navigateTo(() => ({ step: RouteStep.MappingsAction, title: "Add Mapping", groupingRouteFields: {} }))}
+          onClickAddMapping={() => navigateTo(() => ({ step: RouteStep.MappingsAction, title: GMWidget.translate("mappings.addMapping"), groupingRouteFields: {} }))}
           onClickMappingTitle={(mapping) => {
             navigateTo(() => ({
               step: RouteStep.Groups,
@@ -64,7 +65,7 @@ export const GroupingMappingRouter = ({
               navigateTo((prev) => ({
                 step: RouteStep.GroupAction,
                 groupingRouteFields: { ...prev?.groupingRouteFields, queryGenerationType: qType },
-                title: "Add Group",
+                title: GMWidget.translate("groups.addGroup"),
               }))
             }
             onClickGroupTitle={(g) =>
@@ -127,7 +128,7 @@ export const GroupingMappingRouter = ({
             group={group}
             color={showGroupColor ? groupColors.get(group.id) ?? "red" : "red"}
             onClickAddGroupProperty={() =>
-              navigateTo((prev) => ({ step: RouteStep.PropertyAction, title: "Add Property", groupingRouteFields: { ...prev?.groupingRouteFields } }))
+              navigateTo((prev) => ({ step: RouteStep.PropertyAction, title: GMWidget.translate("properties.addPropertyTitle"), groupingRouteFields: { ...prev?.groupingRouteFields } }))
             }
             onClickModifyGroupProperty={(gp) =>
               navigateTo((prev) => ({
@@ -139,7 +140,7 @@ export const GroupingMappingRouter = ({
             onClickAddCalculatedProperty={() =>
               navigateTo((prev) => ({
                 step: RouteStep.CalculatedPropertyAction,
-                title: "Create Calculated Property",
+                title: GMWidget.translate("properties.createCalculatedProperty"),
                 groupingRouteFields: { ...prev?.groupingRouteFields },
               }))
             }
@@ -153,7 +154,7 @@ export const GroupingMappingRouter = ({
             onClickAddCustomCalculationProperty={() =>
               navigateTo((prev) => ({
                 step: RouteStep.CustomCalculationPropertyAction,
-                title: "Create Custom Calculation",
+                title: GMWidget.translate("properties.createCustomCalculation"),
                 groupingRouteFields: { ...prev?.groupingRouteFields },
               }))
             }

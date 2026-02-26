@@ -2,6 +2,10 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
+/** Localization */
+export { GroupingMappingWidget } from "./GroupingMappingWidget";
+export type { GroupingMappingWidgetConfig } from "./GroupingMappingWidget";
+
 /** UI Provider for iTwin Viewer Applications */
 export * from "./WidgetShell/GroupingMappingWidget";
 

@@ -23,6 +23,7 @@ import { useIsMounted } from "../../common/hooks/useIsMounted";
 import { useFetchGroups } from "./hooks/useFetchGroups";
 import { useKeySetHiliteQueries } from "./hooks/useKeySetHiliteQueries";
 import { useGroupsClient } from "../context/GroupsClientContext";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 
 /**
  * Props for the {@link GroupsVisualization} component.
@@ -285,18 +286,18 @@ export const GroupsVisualization = ({
       overlappedElementsMetadata.overlappedElementsInfo.size > 0 && isAlertClosed && showGroupColor ? (
         <Alert
           onClose={() => setIsAlertClosed(false)}
-          clickableText={isAlertExpanded ? "Less Details" : "More Details"}
+          clickableText={isAlertExpanded ? GroupingMappingWidget.translate("groups.lessDetails") : GroupingMappingWidget.translate("groups.moreDetails")}
           clickableTextProps={{ onClick: () => setIsAlertExpanded(!isAlertExpanded) }}
         >
-          Overlapping elements are colored <Text className="gmw-red-text">red</Text> in the viewer.
+          {GroupingMappingWidget.translate("groups.overlappingAlertPrefix")} <Text className="gmw-red-text">{GroupingMappingWidget.translate("groups.overlappingAlertRed")}</Text> {GroupingMappingWidget.translate("groups.overlappingAlertSuffix")}
           {isAlertExpanded ? (
             <>
               <br />
-              To get overlap info in detail, click the{" "}
+              {GroupingMappingWidget.translate("groups.overlapAlertDetailPrefix")}{" "}
               <Icon>
                 <SvgMore />
               </Icon>{" "}
-              button then &ldquo;Overlap Info&rdquo;
+              {GroupingMappingWidget.translate("groups.overlapAlertDetailSuffix")}
             </>
           ) : undefined}
         </Alert>

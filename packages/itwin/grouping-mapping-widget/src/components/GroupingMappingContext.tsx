@@ -24,6 +24,7 @@ import { TErrCodes } from "./Constants";
 import { ExtractionStatusJobContext } from "./context/ExtractionStateJobContext";
 import { createGroupsClient, GroupsClientContext } from "./context/GroupsClientContext";
 import { createPropertiesClient, PropertiesClientContext } from "./context/PropertiesClientContext";
+import { GroupingMappingWidget } from "../GroupingMappingWidget";
 
 /**
  * Props for the {@link GroupingMappingContext} component.
@@ -92,7 +93,7 @@ const defaultQueryClient = new QueryClient({
           break;
         default: {
           if (error.status) toaster.negative(getErrorMessage(error.status));
-          else toaster.negative("An error occurred while fetching data.");
+          else toaster.negative(GroupingMappingWidget.translate("errors.fetchError"));
         }
       }
     },
@@ -100,7 +101,7 @@ const defaultQueryClient = new QueryClient({
   mutationCache: new MutationCache({
     onError: (error: any) => {
       if (error.status) toaster.negative(getErrorMessage(error.status));
-      else toaster.negative("A network error occured while processing this action.");
+      else toaster.negative(GroupingMappingWidget.translate("errors.networkError"));
     },
   }),
 });

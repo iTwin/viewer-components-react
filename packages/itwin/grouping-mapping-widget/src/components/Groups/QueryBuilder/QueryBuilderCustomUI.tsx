@@ -6,6 +6,7 @@ import React from "react";
 import type { GroupingCustomUI } from "../../customUI/GroupingMappingCustomUI";
 import { EmptyMessage } from "../../SharedComponents/EmptyMessage";
 import type { GroupMinimal } from "@itwin/insights-client";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 
 export interface QueryBuilderCustomUIProps {
   queryGenerationType: string;
@@ -28,5 +29,5 @@ export const QueryBuilderCustomUI = ({ queryGenerationType, groupUIs, isUpdating
       });
     }
   }
-  return <EmptyMessage message="No query generation method selected. " />;
+  return <EmptyMessage message={GroupingMappingWidget.translate("customUI.noQueryMethod")} />;
 };
