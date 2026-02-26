@@ -67,12 +67,11 @@ export function useClassificationsTree({
   );
   const componentId = useGuid();
 
-  const getClassificationsTreeIdsCache = useClassificationsTreeIdsCache({
+  const idsCache = useClassificationsTreeIdsCache({
     imodel: activeView.iModel,
     hierarchyConfig,
     componentId,
   });
-  const idsCache = getClassificationsTreeIdsCache();
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useClassificationsCachedVisibility({
     activeView,
@@ -82,9 +81,9 @@ export function useClassificationsTree({
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     (props) => {
-      return new ClassificationsTreeDefinition({ ...props, getIdsCache: getClassificationsTreeIdsCache, hierarchyConfig });
+      return new ClassificationsTreeDefinition({ ...props, getIdsCache: () => idsCache, hierarchyConfig });
     },
-    [getClassificationsTreeIdsCache, hierarchyConfig],
+    [idsCache, hierarchyConfig],
   );
 
   const { getPaths, searchError } = useSearchPaths({
@@ -175,18 +174,14 @@ function useClassificationsTreeIdsCache({
   imodel: IModelConnection;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
   componentId: GuidString;
-}): () => ClassificationsTreeIdsCache {
+}): ClassificationsTreeIdsCache {
   const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
 
-  const baseIdsCache = useMemo(() => getBaseIdsCache({ type: "3d", elementClassName: getClassesByView("3d").elementClass, imodel }), [getBaseIdsCache, imodel]);
-  const getClassificationsTreeIdsCache = useCallback(
-    () =>
-      getCache({
-        imodel,
-        createCache: () => new ClassificationsTreeIdsCache({ baseIdsCache, componentId, hierarchyConfig, queryExecutor: createECSqlQueryExecutor(imodel) }),
-        cacheKey: `${hierarchyConfig.rootClassificationSystemCode}-ClassificationsTreeIdsCache`,
-      }),
-    [baseIdsCache, componentId, getCache, hierarchyConfig, imodel],
-  );
-  return getClassificationsTreeIdsCache;
+  const baseIdsCache = getBaseIdsCache({ type: "3d", elementClassName: getClassesByView("3d").elementClass, imodel });
+  const classificationsTreeIdsCache = getCache({
+    imodel,
+    createCache: () => new ClassificationsTreeIdsCache({ baseIdsCache, componentId, hierarchyConfig, queryExecutor: createECSqlQueryExecutor(imodel) }),
+    cacheKey: `${hierarchyConfig.rootClassificationSystemCode}-ClassificationsTreeIdsCache`,
+  });
+  return classificationsTreeIdsCache;
 }

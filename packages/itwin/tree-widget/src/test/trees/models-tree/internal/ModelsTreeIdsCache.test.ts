@@ -43,4 +43,28 @@ describe("ModelsTreeIdsCache", () => {
     await expect(firstValueFrom(cache.getElementsCount({ modelId, categoryId }))).to.eventually.eq(elementIds.length);
     expect(stub).to.have.callCount(1);
   });
+
+  it("runs only one query when multiple requests are made", async () => {
+    const modelId = "0x1";
+    const categoryId = "0x2";
+    const categoryId2 = "0x3";
+    const elementIds = ["0x10", "0x20", "0x30"];
+    const stub = sinon.fake((query: string) => {
+      if (query.includes(`WHERE Parent.Id IS NULL AND (Model.Id = ${modelId} AND Category.Id IN (${categoryId}, ${categoryId2}))`)) {
+        return [
+          { modelId, categoryId, elementsCount: elementIds.length },
+          { modelId, categoryId: categoryId2, elementsCount: elementIds.length + 1 },
+        ];
+      }
+      throw new Error(`Unexpected query: ${query}`);
+    });
+    using cache = createIdsCache(stub);
+    const obs1 = cache.getElementsCount({ modelId, categoryId });
+    const obs2 = cache.getElementsCount({ modelId, categoryId: categoryId2 });
+    await Promise.all([firstValueFrom(obs1), firstValueFrom(obs2)]).then(([count1, count2]) => {
+      expect(count1).to.eq(elementIds.length);
+      expect(count2).to.eq(elementIds.length + 1);
+    });
+    expect(stub).to.have.callCount(1);
+  });
 });

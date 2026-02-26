@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { registerTxnListeners } from "@itwin/presentation-core-interop";
 
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -22,44 +22,41 @@ export interface GetCacheProps<TCache> {
 export function useIdsCache(): {
   getCache: <TCache extends Disposable>(createCacheProps: GetCacheProps<TCache>) => TCache;
 } {
-  const [state, setState] = useState<Record<IModelKey, Record<CacheKey, Disposable>>>({});
-
+  const state = useRef<Record<IModelKey, Record<CacheKey, Disposable>>>({});
+  const [forceRerender, setForceRerender] = useState(0);
   const getCache = useCallback(
     <TCache extends Disposable>({ createCache, cacheKey, imodel }: GetCacheProps<TCache>) => {
-      const imodelCaches = state[imodel.key];
+      const imodelCaches = state.current[imodel.key];
       if (imodelCaches && imodelCaches[cacheKey]) {
         return imodelCaches[cacheKey] as TCache;
       }
 
       if (!imodelCaches) {
-        let listener: () => void;
+        let listener: undefined | (() => void);
         if (imodel.isBriefcaseConnection()) {
           listener = registerTxnListeners(imodel.txns, () => {
-            setState((prev) => {
-              for (const cacheToDispose of Object.values(prev[imodel.key])) {
-                cacheToDispose[Symbol.dispose]();
-              }
-              return { ...prev, [imodel.key]: {} };
-            });
+            for (const cacheToDispose of Object.values(state.current[imodel.key])) {
+              cacheToDispose[Symbol.dispose]();
+            }
+            state.current[imodel.key] = {};
+            setForceRerender((prev) => prev + 1);
           });
         }
         imodel.onClose.addOnce(() => {
-          listener();
-          setState((prev) => {
-            for (const cacheToDispose of Object.values(prev[imodel.key])) {
-              cacheToDispose[Symbol.dispose]();
-            }
-            const newState = { ...prev };
-            delete newState[imodel.key];
-            return newState;
-          });
+          for (const cacheToDispose of Object.values(state.current[imodel.key])) {
+            cacheToDispose[Symbol.dispose]();
+          }
+          delete state.current[imodel.key];
+          listener?.();
+          setForceRerender((prev) => prev + 1);
         });
       }
       const cache = createCache();
-      setState((prev) => ({ ...prev, [imodel.key]: { ...prev[imodel.key], [cacheKey]: cache } }));
+      state.current = { ...state.current, [imodel.key]: { ...state.current[imodel.key], [cacheKey]: cache } };
       return cache;
     },
-    [state],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [forceRerender],
   );
 
   return {

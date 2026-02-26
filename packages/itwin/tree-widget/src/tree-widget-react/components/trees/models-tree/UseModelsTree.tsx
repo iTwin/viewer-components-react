@@ -311,19 +311,13 @@ function useModelsTreeIdsCache({
   componentId: GuidString;
 }): ModelsTreeIdsCache {
   const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
+  const baseIdsCache = getBaseIdsCache({ type: "3d", elementClassName: hierarchyConfig.elementClassSpecification, imodel });
 
-  const baseIdsCache = useMemo(
-    () => getBaseIdsCache({ type: "3d", elementClassName: hierarchyConfig.elementClassSpecification, imodel }),
-    [getBaseIdsCache, imodel, hierarchyConfig.elementClassSpecification],
-  );
-  const modelsTreeIdsCache = useMemo(
-    () =>
-      getCache({
-        imodel,
-        createCache: () => new ModelsTreeIdsCache({ baseIdsCache, componentId, hierarchyConfig, queryExecutor: createECSqlQueryExecutor(imodel) }),
-        cacheKey: `${hierarchyConfig.elementClassSpecification}-ModelsTreeIdsCache`,
-      }),
-    [baseIdsCache, componentId, getCache, hierarchyConfig, imodel],
-  );
+  const modelsTreeIdsCache = getCache({
+    imodel,
+    createCache: () => new ModelsTreeIdsCache({ baseIdsCache, componentId, hierarchyConfig, queryExecutor: createECSqlQueryExecutor(imodel) }),
+    cacheKey: `${hierarchyConfig.elementClassSpecification}-ModelsTreeIdsCache`,
+  });
+
   return modelsTreeIdsCache;
 }

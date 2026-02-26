@@ -249,18 +249,11 @@ function useCategoriesTreeIdsCache({
 }): CategoriesTreeIdsCache {
   const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
 
-  const baseIdsCache = useMemo(
-    () => getBaseIdsCache({ type: activeViewType, elementClassName: getClassesByView(activeViewType).elementClass, imodel }),
-    [activeViewType, getBaseIdsCache, imodel],
-  );
-  const categoriesTreeIdsCache = useMemo(
-    () =>
-      getCache({
-        imodel,
-        createCache: () => new CategoriesTreeIdsCache({ baseIdsCache, componentId, type: activeViewType, queryExecutor: createECSqlQueryExecutor(imodel) }),
-        cacheKey: `${activeViewType}-CategoriesTreeIdsCache`,
-      }),
-    [baseIdsCache, componentId, activeViewType, getCache, imodel],
-  );
+  const baseIdsCache = getBaseIdsCache({ type: activeViewType, elementClassName: getClassesByView(activeViewType).elementClass, imodel });
+  const categoriesTreeIdsCache = getCache({
+    imodel,
+    createCache: () => new CategoriesTreeIdsCache({ baseIdsCache, componentId, type: activeViewType, queryExecutor: createECSqlQueryExecutor(imodel) }),
+    cacheKey: `${activeViewType}-CategoriesTreeIdsCache`,
+  });
   return categoriesTreeIdsCache;
 }
