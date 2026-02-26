@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { ButtonGroup, IconButton, ToggleSwitch } from "@itwin/itwinui-react";
 import React, { useCallback, useState } from "react";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 import { ToggleGroupVisibility } from "./ToggleGroupVisibility";
 import { SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import "./GroupsVisualizationActions.scss";
@@ -41,11 +42,11 @@ export const GroupVisualizationActions = ({
   return (
     <ButtonGroup className="gmw-visual-buttons">
       {!hideVisualizationToggle && (
-        <ToggleSwitch label="Visualization" labelPosition="left" checked={isVisualizationEnabled} onChange={onClickVisualizationButton} />
+        <ToggleSwitch label={GroupingMappingWidget.translate("groups.visualization")} labelPosition="left" checked={isVisualizationEnabled} onChange={onClickVisualizationButton} />
       )}
       <ButtonGroup>
         <ToggleGroupVisibility isLoadingQuery={disabled} showGroupColor={showGroupColor} setShowGroupColor={setShowGroupColor} />
-        <IconButton title={show ? "Show All" : "Hide All"} onClick={onVisibilityClick} disabled={disabled} styleType="borderless">
+        <IconButton title={show ? GroupingMappingWidget.translate("groups.showAll") : GroupingMappingWidget.translate("groups.hideAll")} onClick={onVisibilityClick} disabled={disabled} styleType="borderless">
           {show ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
         </IconButton>
       </ButtonGroup>

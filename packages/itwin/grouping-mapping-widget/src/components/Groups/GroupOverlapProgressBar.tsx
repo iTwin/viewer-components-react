@@ -6,6 +6,7 @@ import type { GroupMinimal } from "@itwin/insights-client";
 import { ProgressLinear } from "@itwin/itwinui-react";
 import React from "react";
 import type { OverlappedInfo } from "../context/GroupHilitedElementsContext";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 
 interface OverlapProgressProps {
   group: GroupMinimal;
@@ -22,7 +23,7 @@ export const OverlapProgress = ({ group, groupElementsInfo, overlappedElementsIn
 
   return (
     <ProgressLinear
-      title={`${overlappedElements} element${overlappedElements === 1 ? "" : "s"} overlapping out of ${totalElements} `}
+      title={GroupingMappingWidget.translate("groups.overlapProgressTitle", { overlappedElements: String(overlappedElements), totalElements: String(totalElements) })}
       value={overlapPercentage}
       isAnimated
       status="negative"

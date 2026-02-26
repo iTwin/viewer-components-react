@@ -13,6 +13,7 @@ import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigCont
 import type { CalculatedPropertyType, GroupMinimal } from "@itwin/insights-client";
 import { SharedCalculatedPropertyForms } from "./SharedCalculatedPropertyForms";
 import { useGroupKeySetQuery } from "../../Groups/hooks/useKeySetHiliteQueries";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 
 /**
  * Props for the {@link CalculatedPropertyActionWithVisuals} component.
@@ -101,7 +102,7 @@ export const CalculatedPropertyActionWithVisuals = ({
       <InputGroup className="gmw-details-form">
         <ToggleSwitch
           className="gmw-field-legend-container"
-          label="Visualize Dimensions"
+          label={GroupingMappingWidget.translate("properties.visualizeDimensions")}
           labelPosition="left"
           disabled={isLoading}
           checked={colorProperty}

@@ -13,6 +13,7 @@ import { SharedCalculatedPropertyForms } from "./SharedCalculatedPropertyForms";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { usePropertiesClient } from "../../context/PropertiesClientContext";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 
 /**
  * @deprecated in 0.27.0 The CalculatedPropertyActionProps has been superseded by the CalculatedPropertyActionWithVisualsProps and should not be used, use GroupPropertyActionProps and GroupPropertyAction component instead.
@@ -79,10 +80,10 @@ export const CalculatedPropertyAction = ({ mappingId, group, calculatedProperty,
   return (
     <>
       <div className="gmw-calculated-properties-action-container">
-        <Fieldset legend="Calculated Property Details" className="gmw-details-form">
+        <Fieldset legend={GroupingMappingWidget.translate("properties.calculatedPropertyDetails")} className="gmw-details-form">
           <div className="gmw-field-legend-container">
             <Text variant="small" as="small" className="gmw-field-legend">
-              Asterisk * indicates mandatory fields.
+              {GroupingMappingWidget.translate("common.mandatoryFields")}
             </Text>
           </div>
           <SharedCalculatedPropertyForms calculatedPropertyType={type} setCalculatedPropertyType={setType} />

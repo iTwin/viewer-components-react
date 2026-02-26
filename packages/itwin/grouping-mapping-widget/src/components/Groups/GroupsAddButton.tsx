@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { Button, DropdownMenu, MenuItem, Text } from "@itwin/itwinui-react";
 import React from "react";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 import type { GroupingCustomUI } from "../customUI/GroupingMappingCustomUI";
 import "./GroupsAddButton.scss";
 import { SvgCaretDownSmall } from "@itwin/itwinui-icons-react";
@@ -27,7 +28,7 @@ export const GroupsAddButton = ({ disabled, groupUIs, onClickAddGroup }: GroupsD
     }
   >
     <Button data-testid="gmw-add-group-button" styleType="high-visibility" disabled={disabled} endIcon={<SvgCaretDownSmall />}>
-      <Text>Add Group</Text>
+      <Text>{GroupingMappingWidget.translate("groups.addGroup")}</Text>
     </Button>
   </DropdownMenu>
 );

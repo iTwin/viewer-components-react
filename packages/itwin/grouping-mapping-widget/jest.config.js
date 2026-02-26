@@ -15,4 +15,5 @@ module.exports = {
     axios: require.resolve("axios"),
   },
   roots: ["./src/"],
+  setupFilesAfterEnv: ["<rootDir>/src/test/setup.ts"],
 };

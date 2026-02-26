@@ -1,6 +1,6 @@
 {
   "name": "@itwin/grouping-mapping-widget",
-  "version": "0.35.4",
+  "version": "0.36.0",
   "description": "An iTwin.js 3D Viewer Widget that interfaces with the iTwin Reporting Platform.",
   "keywords": [
     "Bentley",
@@ -27,8 +27,8 @@
     "build:esm": "tsc 1>&2 --module ES2020 --outDir lib/esm",
     "clean": "rimraf lib",
     "copy:assets": "npm run -s copy:public && npm run -s copy:cjs && npm run -s copy:esm",
-    "copy:cjs": "cpx \"./src/**/*.scss\" ./lib/cjs",
-    "copy:esm": "cpx \"./src/**/*.scss\" ./lib/esm",
+    "copy:cjs": "cpx \"./src/**/*.{scss,json}\" ./lib/cjs",
+    "copy:esm": "cpx \"./src/**/*.{scss,json}\" ./lib/esm",
     "copy:public": "cpx \"./public/**/*\" ./lib/public",
     "cover": "npm test -- --coverage",
     "dual-build": "npm run -s build:cjs && npm run -s build:esm",

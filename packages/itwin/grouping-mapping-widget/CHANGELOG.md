@@ -1,8 +1,16 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-<!-- This log was last generated on Wed, 13 Aug 2025 12:30:20 GMT and should not be manually modified. -->
+<!-- This log was last generated on Mon, 16 Feb 2026 15:24:45 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.36.0
+
+Mon, 16 Feb 2026 15:24:45 GMT
+
+### Minor changes
+
+- Added localization ([#1592](https://github.com/iTwin/viewer-components-react/pull/1592))
 
 ## 0.35.4
 

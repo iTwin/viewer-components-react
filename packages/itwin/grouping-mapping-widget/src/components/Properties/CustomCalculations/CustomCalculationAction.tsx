@@ -5,6 +5,7 @@
 import { Alert, InputGroup, LabeledTextarea } from "@itwin/itwinui-react";
 import React from "react";
 import "./CustomCalculationAction.scss";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 
 /**
  * Props for the {@link CustomCalculationAction} component.
@@ -27,20 +28,20 @@ export const CustomCalculationAction = ({ formula, setFormula, formulaErrorMessa
     <InputGroup className="gmw-custom-calculation-action-container">
       <Alert
         type="informational"
-        clickableText="Click here."
+        clickableText={GroupingMappingWidget.translate("properties.formulaDocLink")}
         clickableTextProps={{
           href: "https://developer.bentley.com/apis/grouping-and-mapping/operations/create-property/#customcalculations",
           target: "_blank",
           rel: "noreferrer",
         }}
       >
-        To learn more about creating custom calculation formulas, view the documentation.
+        {GroupingMappingWidget.translate("properties.formulaDocMessage")}
       </Alert>
       <LabeledTextarea
         className="gmw-details-form"
         value={formula}
         name="formula"
-        label="Formula"
+        label={GroupingMappingWidget.translate("properties.formula")}
         disabled={disabled}
         onChange={(event) => {
           setFormula(event.target.value);

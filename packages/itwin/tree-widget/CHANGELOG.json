@@ -2,6 +2,21 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Tue, 24 Feb 2026 07:54:06 GMT",
+      "version": "3.17.7",
+      "tag": "@itwin/tree-widget-react_v3.17.7",
+      "comments": {
+        "patch": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "c32b4dfa2668f154b1df232e8b673751e35a45b5",
+            "comment": "Consume the latest iTwin.js Core patch that improves performance of category display changes. Requires iTwin.js Core packages @ `5.7.0`."
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 09 Feb 2026 12:17:01 GMT",
       "version": "3.17.6",
       "tag": "@itwin/tree-widget-react_v3.17.6",

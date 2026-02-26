@@ -9,25 +9,26 @@ import { GroupingMappingCustomUIType } from "./GroupingMappingCustomUI";
 import { GroupQueryBuilderCustomUI } from "./GroupQueryBuilderCustomUI";
 import { ManualGroupingCustomUI } from "./ManualGroupingCustomUI";
 import { SearchGroupingCustomUI } from "./SearchGroupingCustomUI";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 
-export const defaultGroupingUI: GroupingMappingCustomUI[] = [
+export const getDefaultGroupingUI = (): GroupingMappingCustomUI[] => [
   {
     name: "Selection",
-    displayLabel: "Selection",
+    displayLabel: GroupingMappingWidget.translate("customUI.selection"),
     type: GroupingMappingCustomUIType.Grouping,
     icon: <SvgCursor />,
     uiComponent: GroupQueryBuilderCustomUI,
   },
   {
     name: "Query Keywords",
-    displayLabel: "Query Keywords",
+    displayLabel: GroupingMappingWidget.translate("customUI.queryKeywords"),
     type: GroupingMappingCustomUIType.Grouping,
     icon: <SvgSearch />,
     uiComponent: SearchGroupingCustomUI,
   },
   {
     name: "Manual",
-    displayLabel: "Manual",
+    displayLabel: GroupingMappingWidget.translate("customUI.manual"),
     type: GroupingMappingCustomUIType.Grouping,
     icon: <SvgDraw />,
     uiComponent: ManualGroupingCustomUI,

@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Mon, 09 Feb 2026 12:17:01 GMT and should not be manually modified. -->
+<!-- This log was last generated on Tue, 24 Feb 2026 07:54:06 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.17.7
+
+Tue, 24 Feb 2026 07:54:06 GMT
+
+### Patches
+
+- Consume the latest iTwin.js Core patch that improves performance of category display changes. Requires iTwin.js Core packages @ `5.7.0`. ([#1605](https://github.com/iTwin/viewer-components-react/pull/1605))
 
 ## 3.17.6
 

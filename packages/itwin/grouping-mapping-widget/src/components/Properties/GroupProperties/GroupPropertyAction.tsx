@@ -27,6 +27,7 @@ import { CustomCalculationAction } from "../CustomCalculations/CustomCalculation
 import { usePropertiesQuery } from "../hooks/usePropertiesQuery";
 import { useFormulaValidation } from "../hooks/useFormulaValidation";
 import { ScrollableExpandableBlock } from "../ScrollableExpandableBlock";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 
 /**
  * Props for the {@link GroupPropertyAction} component.
@@ -40,15 +41,15 @@ export interface GroupPropertyActionProps {
   onClickCancel?: () => void;
 }
 
-export const quantityTypesSelectionOptions: SelectOption<QuantityType | undefined>[] = [
-  { value: QuantityType.Area, label: "Area" },
-  { value: QuantityType.Distance, label: "Distance" },
-  { value: QuantityType.Force, label: "Force" },
-  { value: QuantityType.Mass, label: "Mass" },
-  { value: QuantityType.Monetary, label: "Monetary" },
-  { value: QuantityType.Time, label: "Time" },
-  { value: QuantityType.Volume, label: "Volume" },
-  { value: undefined, label: "No Quantity Type" },
+export const getQuantityTypesSelectionOptions = (): SelectOption<QuantityType | undefined>[] => [
+  { value: QuantityType.Area, label: GroupingMappingWidget.translate("properties.quantityArea") },
+  { value: QuantityType.Distance, label: GroupingMappingWidget.translate("properties.quantityDistance") },
+  { value: QuantityType.Force, label: GroupingMappingWidget.translate("properties.quantityForce") },
+  { value: QuantityType.Mass, label: GroupingMappingWidget.translate("properties.quantityMass") },
+  { value: QuantityType.Monetary, label: GroupingMappingWidget.translate("properties.quantityMonetary") },
+  { value: QuantityType.Time, label: GroupingMappingWidget.translate("properties.quantityTime") },
+  { value: QuantityType.Volume, label: GroupingMappingWidget.translate("properties.quantityVolume") },
+  { value: undefined, label: GroupingMappingWidget.translate("properties.noQuantityType") },
 ];
 
 /**
@@ -215,13 +216,13 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
   return (
     <>
       <div className="gmw-group-property-action-container" ref={actionContainerRef}>
-        <Fieldset disabled={isLoading} className="gmw-property-options" legend="Property Details">
+        <Fieldset disabled={isLoading} className="gmw-property-options" legend={GroupingMappingWidget.translate("properties.propertyDetails")}>
           <Text variant="small" as="small" className="gmw-field-legend">
-            Asterisk * indicates mandatory fields.
+            {GroupingMappingWidget.translate("common.mandatoryFields")}
           </Text>
           <LabeledInput
             id="propertyName"
-            label="Property Name"
+            label={GroupingMappingWidget.translate("properties.propertyName")}
             value={propertyName}
             required
             onChange={(event) => {
@@ -235,13 +236,13 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
             }}
           />
           <LabeledSelect<DataType>
-            label={"Data Type"}
+            label={GroupingMappingWidget.translate("properties.dataType")}
             id="dataType"
             options={[
-              { value: DataType.Boolean, label: "Boolean" },
-              { value: DataType.Integer, label: "Integer" },
-              { value: DataType.Double, label: "Double" },
-              { value: DataType.String, label: "String" },
+              { value: DataType.Boolean, label: GroupingMappingWidget.translate("properties.boolean") },
+              { value: DataType.Integer, label: GroupingMappingWidget.translate("properties.integer") },
+              { value: DataType.Double, label: GroupingMappingWidget.translate("properties.double") },
+              { value: DataType.String, label: GroupingMappingWidget.translate("properties.string") },
             ]}
             required
             value={calculatedPropertyType ? DataType.Double : dataType}
@@ -259,23 +260,22 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
             onHide={() => {}}
           />
           <LabeledSelect<QuantityType | undefined>
-            label="Quantity Type"
-            options={quantityTypesSelectionOptions}
+            label={GroupingMappingWidget.translate("properties.quantityType")}
+            options={getQuantityTypesSelectionOptions()}
             value={quantityType}
             onChange={setQuantityType}
             onShow={() => {}}
             onHide={() => {}}
-            placeholder="No Quantity Type"
+            placeholder={GroupingMappingWidget.translate("properties.noQuantityType")}
           />
         </Fieldset>
         {propertiesNotFoundAlert && (
           <Alert type="warning">
-            Warning: Could not match saved properties from the current generated list. It does not confirm or deny validity. Overwriting will occur if a new
-            selection is made and saved.
+            {GroupingMappingWidget.translate("properties.savedPropertiesWarning")}
           </Alert>
         )}
         <ScrollableExpandableBlock
-          title={"Mapped Properties"}
+          title={GroupingMappingWidget.translate("properties.mappedProperties")}
           endIcon={
             <Icon fill={selectedProperties.length > 0 ? "informational" : "default"}>
               <SvgLabel />
@@ -287,14 +287,14 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
           <div className="gmw-property-view-container">
             <div className="gmw-property-view-button">
               <Button onClick={async () => setShowPropertiesSelectionModal(true)} disabled={isLoading}>
-                Select Properties
+                {GroupingMappingWidget.translate("properties.selectProperties")}
               </Button>
             </div>
             <div className="gmw-properties-list">
               {selectedProperties.length === 0 && !isLoading ? (
                 <div className="gmw-empty-selection">
-                  <Text>No properties selected.</Text>
-                  <Text>Press the &quot;Select Properties&quot; button for options.</Text>
+                  <Text>{GroupingMappingWidget.translate("properties.noSelected")}</Text>
+                  <Text>{GroupingMappingWidget.translate("properties.selectPropertiesHint")}</Text>
                 </div>
               ) : (
                 selectedProperties.map((property) => (
@@ -312,7 +312,7 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
         <ScrollableExpandableBlock
           parentRef={actionContainerRef}
           ref={calculatedPropertyActionRef}
-          title={"Calculated Property"}
+          title={GroupingMappingWidget.translate("properties.calculatedProperty")}
           endIcon={
             <Icon fill={calculatedPropertyType ? "informational" : "default"}>
               <SvgMeasure />
@@ -330,7 +330,7 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
         <ScrollableExpandableBlock
           parentRef={actionContainerRef}
           ref={customCalculationActionRef}
-          title={"Custom Calculation"}
+          title={GroupingMappingWidget.translate("properties.customCalculation")}
           endIcon={
             <Icon fill={formula ? "informational" : "default"}>
               <SvgFunction />

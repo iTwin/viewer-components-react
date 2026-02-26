@@ -147,7 +147,7 @@ describe("Groups View", () => {
     // Should only have the permanent delete context item.
     const contextMenuItems = screen.getAllByTestId("gmw-context-menu-item");
     expect(contextMenuItems).toHaveLength(1);
-    expect(contextMenuItems[0]).toHaveTextContent("Remove");
+    expect(contextMenuItems[0]).toHaveTextContent("common.remove");
   });
 
   it("Set up grouping custom UI", async () => {
@@ -199,7 +199,7 @@ describe("Groups View", () => {
     // Should have 2 context menu items
     const contextMenuItems = screen.getAllByTestId("gmw-context-menu-item");
     expect(contextMenuItems).toHaveLength(2);
-    expect(contextMenuItems[0]).toHaveTextContent("Edit");
+    expect(contextMenuItems[0]).toHaveTextContent("common.edit");
 
     // Hover on 'Edit'
     await user.hover(contextMenuItems[0]);
@@ -259,7 +259,7 @@ describe("Groups View", () => {
     const contextMenuItems = screen.getAllByTestId("gmw-context-menu-item");
     expect(contextMenuItems).toHaveLength(2);
     expect(contextMenuItems[0]).toHaveTextContent(mockContextUI.displayLabel);
-    expect(contextMenuItems[1]).toHaveTextContent("Remove");
+    expect(contextMenuItems[1]).toHaveTextContent("common.remove");
 
     // Click on the context ui
     await user.click(contextMenuItems[0]);
@@ -334,9 +334,9 @@ describe("Groups View", () => {
     const contextMenuItems = screen.getAllByTestId("gmw-context-menu-item");
 
     expect(contextMenuItems).toHaveLength(3);
-    expect(contextMenuItems[0]).toHaveTextContent("Edit");
+    expect(contextMenuItems[0]).toHaveTextContent("common.edit");
     expect(contextMenuItems[1]).toHaveTextContent(mockContextUI.displayLabel);
-    expect(contextMenuItems[2]).toHaveTextContent("Remove");
+    expect(contextMenuItems[2]).toHaveTextContent("common.remove");
 
     // Click on the context ui
     await user.click(contextMenuItems[1]);

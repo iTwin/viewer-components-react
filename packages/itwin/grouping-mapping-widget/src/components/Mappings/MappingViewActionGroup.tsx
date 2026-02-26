@@ -6,6 +6,7 @@ import React from "react";
 import { DropdownMenu, IconButton, MenuItem } from "@itwin/itwinui-react";
 import { SvgDelete, SvgEdit, SvgMore, SvgProcess } from "@itwin/itwinui-icons-react";
 import type { Mapping } from "@itwin/insights-client";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 
 interface MappingUIActionGroupProps {
   mapping: Mapping;
@@ -29,7 +30,7 @@ export const MappingViewActionGroup = ({ mapping, onToggleExtraction, onClickMap
               }}
               icon={<SvgEdit />}
             >
-              Modify
+              {GroupingMappingWidget.translate("common.modify")}
             </MenuItem>
           ) : (
             []
@@ -42,7 +43,7 @@ export const MappingViewActionGroup = ({ mapping, onToggleExtraction, onClickMap
             }}
             icon={<SvgProcess />}
           >
-            {mapping.extractionEnabled ? "Disable extraction" : "Enable extraction"}
+            {mapping.extractionEnabled ? GroupingMappingWidget.translate("mappings.disableExtraction") : GroupingMappingWidget.translate("mappings.enableExtraction")}
           </MenuItem>,
           <MenuItem
             key={2}
@@ -52,12 +53,12 @@ export const MappingViewActionGroup = ({ mapping, onToggleExtraction, onClickMap
             }}
             icon={<SvgDelete />}
           >
-            Remove
+            {GroupingMappingWidget.translate("common.remove")}
           </MenuItem>,
         ].flat()
       }
     >
-      <IconButton styleType="borderless" title="Mapping Options">
+      <IconButton styleType="borderless" title={GroupingMappingWidget.translate("mappings.mappingOptions")}>
         <SvgMore />
       </IconButton>
     </DropdownMenu>

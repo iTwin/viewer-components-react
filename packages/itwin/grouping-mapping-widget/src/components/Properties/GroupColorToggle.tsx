@@ -15,6 +15,7 @@ import { usePropertiesGroupColorContext } from "../context/PropertiesGroupColorC
 import { useMutation } from "@tanstack/react-query";
 import { useIsMounted } from "../../common/hooks/useIsMounted";
 import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsContext";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 
 export type GroupColorToggleProps = Partial<ToggleSwitchProps> & {
   color: string;
@@ -42,7 +43,7 @@ export const GroupColorToggle = ({ color, group, disableZoom, ...rest }: GroupCo
       }
     },
     onError: (error) => {
-      toaster.negative("There was an error visualizing group.");
+      toaster.negative(GroupingMappingWidget.translate("errors.visualizingGroup"));
       // eslint-disable-next-line no-console
       console.error(error);
     },
@@ -69,5 +70,5 @@ export const GroupColorToggle = ({ color, group, disableZoom, ...rest }: GroupCo
 
   const isLoading = isFetching || isVisualizing;
 
-  return <ToggleSwitch label="Color Group" disabled={isLoading} checked={showGroupColor} onChange={handleToggleChange} {...rest}></ToggleSwitch>;
+  return <ToggleSwitch label={GroupingMappingWidget.translate("groups.colorGroup")} disabled={isLoading} checked={showGroupColor} onChange={handleToggleChange} {...rest}></ToggleSwitch>;
 };
