@@ -77,10 +77,9 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
     const idsCache = new ModelsTreeIdsCache({
       queryExecutor: createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"),
-      hierarchyConfig: {
-        ...defaultHierarchyConfiguration,
-        ...hierarchyConfig,
-      },
+      showEmptyModels: hierarchyConfig?.showEmptyModels ?? defaultHierarchyConfiguration.showEmptyModels,
+      hideRootSubject: hierarchyConfig?.hideRootSubject ?? defaultHierarchyConfiguration.hideRootSubject,
+      elementClassName: hierarchyConfig?.elementClassSpecification ?? defaultHierarchyConfiguration.elementClassSpecification,
       baseIdsCache,
     });
     const symbolDispose = idsCache[Symbol.dispose];
@@ -1735,7 +1734,13 @@ describe("ModelsTreeVisibilityHandler", () => {
       const imodelAccess = createIModelAccess(props.imodel);
       const viewport = createTreeWidgetTestingViewport({ iModel: props.imodel, viewType: "3d", visibleByDefault: props.visibleByDefault });
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
-      const idsCache = new ModelsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig, baseIdsCache });
+      const idsCache = new ModelsTreeIdsCache({
+        queryExecutor: imodelAccess,
+        elementClassName: hierarchyConfig.elementClassSpecification,
+        hideRootSubject: hierarchyConfig.hideRootSubject,
+        showEmptyModels: hierarchyConfig.showEmptyModels,
+        baseIdsCache,
+      });
       return {
         imodelAccess,
         viewport,

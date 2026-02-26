@@ -18,7 +18,13 @@ describe("ModelsTreeIdsCache", () => {
     const iModel = createIModelMock({ queryHandler });
     const queryExecutor = createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded");
     const baseIdsCache = new BaseIdsCache({ queryExecutor, elementClassName: defaultHierarchyConfiguration.elementClassSpecification, type: "3d" });
-    const idsCache = new ModelsTreeIdsCache({ queryExecutor, hierarchyConfig: defaultHierarchyConfiguration, baseIdsCache });
+    const idsCache = new ModelsTreeIdsCache({
+      queryExecutor,
+      elementClassName: defaultHierarchyConfiguration.elementClassSpecification,
+      hideRootSubject: defaultHierarchyConfiguration.hideRootSubject,
+      showEmptyModels: defaultHierarchyConfiguration.showEmptyModels,
+      baseIdsCache,
+    });
     const symbolDispose = idsCache[Symbol.dispose];
     idsCache[Symbol.dispose] = () => {
       symbolDispose();

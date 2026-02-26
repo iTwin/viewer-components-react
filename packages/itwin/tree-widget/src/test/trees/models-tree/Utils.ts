@@ -52,7 +52,15 @@ export function createModelsTreeProvider({
   const config = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...hierarchyConfig };
   const createdImodelAccess = imodelAccess ?? createIModelAccess(imodel);
   const baseIdsCache = new BaseIdsCache({ queryExecutor: createdImodelAccess, elementClassName: config.elementClassSpecification, type: "3d" });
-  const createdIdsCache = idsCache ?? new ModelsTreeIdsCache({ queryExecutor: createdImodelAccess, hierarchyConfig: config, baseIdsCache });
+  const createdIdsCache =
+    idsCache ??
+    new ModelsTreeIdsCache({
+      queryExecutor: createdImodelAccess,
+      elementClassName: config.elementClassSpecification,
+      showEmptyModels: config.showEmptyModels,
+      hideRootSubject: config.hideRootSubject,
+      baseIdsCache,
+    });
   const provider = createIModelHierarchyProvider({
     imodelAccess: createdImodelAccess,
     hierarchyDefinition: new ModelsTreeDefinition({

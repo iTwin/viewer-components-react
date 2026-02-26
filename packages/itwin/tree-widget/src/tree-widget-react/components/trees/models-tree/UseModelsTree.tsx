@@ -317,8 +317,16 @@ function useModelsTreeIdsCache({
 
   const modelsTreeIdsCache = getCache({
     imodel,
-    createCache: () => new ModelsTreeIdsCache({ baseIdsCache, componentId, hierarchyConfig, queryExecutor: createECSqlQueryExecutor(imodel) }),
-    cacheKey: `${hierarchyConfig.elementClassSpecification}-ModelsTreeIdsCache`,
+    createCache: () =>
+      new ModelsTreeIdsCache({
+        baseIdsCache,
+        componentId,
+        elementClassName: hierarchyConfig.elementClassSpecification,
+        hideRootSubject: hierarchyConfig.hideRootSubject,
+        showEmptyModels: hierarchyConfig.showEmptyModels,
+        queryExecutor: createECSqlQueryExecutor(imodel),
+      }),
+    cacheKey: `${hierarchyConfig.hideRootSubject ? "hideRootSubject" : "showRootSubject"}-${hierarchyConfig.showEmptyModels ? "showEmptyModels" : "hideEmptyModels"}-${hierarchyConfig.elementClassSpecification}-ModelsTreeIdsCache`,
   });
 
   return modelsTreeIdsCache;

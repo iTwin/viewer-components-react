@@ -31,6 +31,10 @@ export function useIdsCache(): {
         return imodelCaches[cacheKey] as TCache;
       }
 
+      // Create the cache before adding event listeners, to avoid race conditions
+      const cache = createCache();
+      state.current = { ...state.current, [imodel.key]: { ...state.current[imodel.key], [cacheKey]: cache } };
+
       if (!imodelCaches) {
         let listener: undefined | (() => void);
         if (imodel.isBriefcaseConnection()) {
@@ -51,8 +55,6 @@ export function useIdsCache(): {
           setForceRerender((prev) => prev + 1);
         });
       }
-      const cache = createCache();
-      state.current = { ...state.current, [imodel.key]: { ...state.current[imodel.key], [cacheKey]: cache } };
       return cache;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

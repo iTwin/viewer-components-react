@@ -21,11 +21,12 @@ import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@
 import type { InstanceKey, Props } from "@itwin/presentation-shared";
 import type { BaseIdsCache, IBaseIdsCache } from "../../common/internal/caches/BaseIdsCache.js";
 import type { CategoryId, ModelId, SubjectId } from "../../common/internal/Types.js";
-import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
 
 interface ModelsTreeIdsCacheProps {
   queryExecutor: LimitingECSqlQueryExecutor;
-  hierarchyConfig: ModelsTreeHierarchyConfiguration;
+  showEmptyModels: boolean;
+  hideRootSubject: boolean;
+  elementClassName: string;
   componentId?: GuidString;
   baseIdsCache: BaseIdsCache;
 }
@@ -37,8 +38,6 @@ interface SubjectInfo {
   childModelIds: Id64Set;
 }
 
-type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
-
 /** @internal */
 export class ModelsTreeIdsCache implements IBaseIdsCache, Disposable {
   #baseIdsCache: BaseIdsCache;
@@ -48,13 +47,17 @@ export class ModelsTreeIdsCache implements IBaseIdsCache, Disposable {
   #subjectKeyPaths: Map<SubjectId, Observable<HierarchyNodeIdentifiersPath>>;
   #categoryKeyPaths: Map<CategoryId, Observable<HierarchyNodeIdentifiersPath[]>>;
   #queryExecutor: LimitingECSqlQueryExecutor;
-  #hierarchyConfig: ModelsTreeHierarchyConfiguration;
+  #showEmptyModels: boolean;
+  #hideRootSubject: boolean;
+  #elementClassName: string;
   #componentId: GuidString;
   #componentName: string;
 
   constructor(props: ModelsTreeIdsCacheProps) {
     this.#queryExecutor = props.queryExecutor;
-    this.#hierarchyConfig = props.hierarchyConfig;
+    this.#showEmptyModels = props.showEmptyModels;
+    this.#hideRootSubject = props.hideRootSubject;
+    this.#elementClassName = props.elementClassName;
     this.#componentId = props.componentId ?? Guid.createValue();
     this.#componentName = "ModelsTreeIdsCache";
     this.#modelKeyPaths = new Map();
@@ -124,7 +127,7 @@ export class ModelsTreeIdsCache implements IBaseIdsCache, Disposable {
             FROM ${CLASS_NAME_GeometricModel3d} m
             WHERE m.ECInstanceId = HexToId(json_extract(s.JsonProperties, '$.Subject.Model.TargetPartition'))
               AND NOT m.IsPrivate
-              AND EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)
+              AND EXISTS (SELECT 1 FROM ${this.#elementClassName} WHERE Model.Id = m.ECInstanceId)
           ) targetPartitionId,
           CASE
             WHEN (
@@ -155,7 +158,7 @@ export class ModelsTreeIdsCache implements IBaseIdsCache, Disposable {
         INNER JOIN ${CLASS_NAME_GeometricModel3d} m ON m.ModeledElement.Id = p.ECInstanceId
         WHERE
           NOT m.IsPrivate
-          ${this.#hierarchyConfig.showEmptyModels ? "" : `AND EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`}
+          ${this.#showEmptyModels ? "" : `AND EXISTS (SELECT 1 FROM ${this.#elementClassName} WHERE Model.Id = m.ECInstanceId)`}
       `;
       return this.#queryExecutor.createQueryReader(
         { ecsql: modelsQuery },
@@ -339,7 +342,7 @@ export class ModelsTreeIdsCache implements IBaseIdsCache, Disposable {
           const result = new Array<InstanceKey>();
           let currParentId: SubjectId | undefined = targetSubjectId;
           while (currParentId) {
-            if (this.#hierarchyConfig.hideRootSubject && currParentId === IModel.rootSubjectId) {
+            if (this.#hideRootSubject && currParentId === IModel.rootSubjectId) {
               break;
             }
             const parentInfo = subjectInfos.get(currParentId);
