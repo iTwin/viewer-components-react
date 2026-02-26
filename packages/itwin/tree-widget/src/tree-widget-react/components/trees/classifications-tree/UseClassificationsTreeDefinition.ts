@@ -5,8 +5,8 @@
 
 import { useMemo } from "react";
 import { assert } from "@itwin/core-bentley";
-import { createIModelAccess } from "../../../../test/trees/Common.js";
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeWidgetContextProviderInternal.js";
+import { createIModelAccess } from "../common/internal/UseIModelAccess.js";
 import { getClassesByView } from "../common/internal/Utils.js";
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
@@ -66,7 +66,10 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
   const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
   const cacheKey = `${hierarchyConfig.rootClassificationSystemCode}-ClassificationsTreeIdsCache`;
 
-  const imodelsWithAccess = useMemo(() => imodels.map((entry) => ({ imodelAccess: createIModelAccess(entry.imodel), imodel: entry.imodel })), [imodels]);
+  const imodelsWithAccess = useMemo(
+    () => imodels.map((entry) => ({ imodelAccess: createIModelAccess({ imodel: entry.imodel, hierarchyLevelSizeLimit: "unbounded" }), imodel: entry.imodel })),
+    [imodels],
+  );
 
   const definition = useMemo(() => {
     return new ClassificationsTreeDefinition({
