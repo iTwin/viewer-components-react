@@ -26,6 +26,7 @@ import type {
   BaseTreeVisibilityHandlerOverrides,
   TreeSpecificVisibilityHandler,
 } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
+import type { IVisibilityChangeEventListener } from "../../../common/internal/VisibilityChangeEventListener.js";
 import type { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
 import type {
   HierarchyVisibilityHandlerOverridableMethod,
@@ -57,6 +58,7 @@ export interface ModelsTreeVisibilityHandlerProps {
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfoCache;
   overrideHandler: HierarchyVisibilityOverrideHandler;
   overrides?: ModelsTreeVisibilityHandlerOverrides;
+  eventListener: IVisibilityChangeEventListener;
 }
 
 /**
@@ -91,6 +93,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       overrideHandler: this.#props.overrideHandler,
       baseIdsCache,
       overrides: this.#props.overrides,
+      eventListener: this.#props.eventListener,
     });
   }
 
@@ -506,13 +509,14 @@ export function createModelsTreeVisibilityHandler(props: {
         imodelAccess: props.imodelAccess,
       });
     },
-    getTreeSpecificVisibilityHandler: (info, overrideHandler) => {
+    getTreeSpecificVisibilityHandler: ({ info, overrideHandler, eventListener }) => {
       return new ModelsTreeVisibilityHandler({
         alwaysAndNeverDrawnElementInfo: info,
         idsCache: props.idsCache,
         viewport: props.viewport,
         overrideHandler,
         overrides: props.overrides,
+        eventListener,
       });
     },
     viewport: props.viewport,

@@ -1142,11 +1142,12 @@ function createClassificationsTreeVisibilityHandler(props: {
         imodelAccess: props.imodelAccess,
       });
     },
-    getTreeSpecificVisibilityHandler: (info) => {
+    getTreeSpecificVisibilityHandler: ({ info, eventListener }) => {
       return new ClassificationsTreeVisibilityHandler({
         alwaysAndNeverDrawnElementInfo: info,
         idsCache: props.idsCache,
         viewport: props.viewport,
+        eventListener,
       });
     },
     viewport: props.viewport,

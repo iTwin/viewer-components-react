@@ -30,6 +30,7 @@ import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Ty
 import type { ChildrenTree } from "../../../common/internal/Utils.js";
 import type { SearchResultsTree } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 import type { BaseIdsCache, TreeSpecificVisibilityHandler } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
+import type { IVisibilityChangeEventListener } from "../../../common/internal/VisibilityChangeEventListener.js";
 import type { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { CategoriesTreeHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
@@ -42,6 +43,7 @@ export interface CategoriesTreeVisibilityHandlerProps {
   viewport: TreeWidgetViewport;
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfoCache;
   hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+  eventListener: IVisibilityChangeEventListener;
 }
 
 /**
@@ -77,6 +79,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       alwaysAndNeverDrawnElementInfo: this.#props.alwaysAndNeverDrawnElementInfo,
       baseIdsCache,
       hierarchyConfig: constructorProps.hierarchyConfig,
+      eventListener: this.#props.eventListener,
     });
     const { elementType, categoryType, modelType } =
       this.#props.viewport.viewType === "2d"
@@ -536,12 +539,13 @@ export function createCategoriesTreeVisibilityHandler(props: {
         categoryModelClassName: modelClass,
       });
     },
-    getTreeSpecificVisibilityHandler: (info) => {
+    getTreeSpecificVisibilityHandler: ({ info, eventListener }) => {
       return new CategoriesTreeVisibilityHandler({
         alwaysAndNeverDrawnElementInfo: info,
         idsCache: props.idsCache,
         viewport: props.viewport,
         hierarchyConfig: props.hierarchyConfig,
+        eventListener,
       });
     },
     viewport: props.viewport,
