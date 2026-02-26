@@ -719,7 +719,7 @@ interface UseCategoriesTreeResult {
 // @alpha
 export function useClassificationsTree({ activeView, emptyTreeContent, searchText, getTreeItemProps, ...rest }: UseClassificationsTreeProps): UseClassificationsTreeResult;
 
-// @alpha (undocumented)
+// @alpha
 export function useClassificationsTreeDefinition(props: UseClassificationsTreeDefinitionProps): UseClassificationsTreeDefinitionResult;
 
 // @alpha (undocumented)
@@ -727,7 +727,7 @@ interface UseClassificationsTreeDefinitionProps {
     // (undocumented)
     hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
     imodels: Array<{
-        imodelAccess: FunctionProps<typeof useIModelTree>["imodelAccess"];
+        imodel: IModelConnection;
     }>;
     search?: {
         searchText: string;
