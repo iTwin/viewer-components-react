@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { defer, map, mergeMap, reduce, shareReplay } from "rxjs";
-import { Guid } from "@itwin/core-bentley";
+import { CLASS_NAME_Model } from "../ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
 
 import type { Observable } from "rxjs";
@@ -14,10 +14,8 @@ import type { CategoryId, ElementId, ModelId } from "../Types.js";
 
 interface ModeledElementsCacheProps {
   queryExecutor: LimitingECSqlQueryExecutor;
-  componentId?: GuidString;
+  componentId: GuidString;
   elementClassName: string;
-  modelClassName: string;
-  viewType: "2d" | "3d";
 }
 
 /** @internal */
@@ -25,8 +23,7 @@ export class ModeledElementsCache {
   #queryExecutor: LimitingECSqlQueryExecutor;
   #componentId: GuidString;
   #componentName: string;
-  #elementsClassName: string;
-  #modelClassName: string;
+  #elementClassName: string;
   // ElementId here is also a ModelId, since those elements are sub models.
   #modeledElementsInfo:
     | Observable<{
@@ -38,10 +35,9 @@ export class ModeledElementsCache {
 
   constructor(props: ModeledElementsCacheProps) {
     this.#queryExecutor = props.queryExecutor;
-    this.#componentId = props.componentId ?? Guid.createValue();
-    this.#componentName = `ModeledElementsCache${props.viewType}`;
-    this.#elementsClassName = props.elementClassName;
-    this.#modelClassName = props.modelClassName;
+    this.#componentId = props.componentId;
+    this.#elementClassName = props.elementClassName;
+    this.#componentName = "ModeledElementsCache";
   }
 
   private queryModeledElements(): Observable<{
@@ -61,11 +57,11 @@ export class ModeledElementsCache {
             (
               WITH RECURSIVE ModeledElementParents(parentId, parentPath) AS (
                 SELECT p.Parent.Id, CAST(IdToHex(p.ECInstanceId) AS TEXT)
-                FROM ${this.#elementsClassName} p
+                FROM ${this.#elementClassName} p
                 WHERE p.ECInstanceId = me.Parent.Id
                 UNION ALL
                 SELECT pOfp.Parent.Id, CAST(IdToHex(pOfp.ECInstanceId) AS TEXT) || ';' || c.parentPath
-                FROM ${this.#elementsClassName} pOfp
+                FROM ${this.#elementClassName} pOfp
                 JOIN ModeledElementParents c ON c.parentId = pOfp.ECInstanceId
               )
               SELECT parentPath
@@ -73,11 +69,11 @@ export class ModeledElementsCache {
               WHERE parentId IS NULL
             )
           ) parentElements
-        FROM ${this.#modelClassName} m
-        JOIN ${this.#elementsClassName} me ON me.ECInstanceId = m.ModeledElement.Id
+        FROM ${CLASS_NAME_Model} m
+        JOIN ${this.#elementClassName} me ON me.ECInstanceId = m.ModeledElement.Id
         WHERE
           m.IsPrivate = false
-          AND m.ECInstanceId IN (SELECT Model.Id FROM ${this.#elementsClassName})
+          AND m.ECInstanceId IN (SELECT Model.Id FROM ${this.#elementClassName})
       `;
       return this.#queryExecutor.createQueryReader(
         { ecsql: query },

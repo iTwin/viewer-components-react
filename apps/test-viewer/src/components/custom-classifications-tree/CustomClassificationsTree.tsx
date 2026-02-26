@@ -86,8 +86,8 @@ function CustomClassificationTreeImpl({
       ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(checkpointIModel), 1000),
     };
   }, [checkpointIModel]);
-
-  const imodels = useMemo(() => [{ imodelAccess: checkpointAccess }, { imodelAccess: latestAccess }], [latestAccess, checkpointAccess]);
+  const imodelConnections = useMemo(() => [{ imodelAccess: checkpointAccess }, { imodelAccess: latestAccess }], [latestAccess, checkpointAccess]);
+  const imodels = useMemo(() => [{ imodel: checkpointIModel }, { imodel: latestIModel }], [latestIModel, checkpointIModel]);
   const { definition, getSearchPaths } = useClassificationsTreeDefinition({
     imodels,
     hierarchyConfig: useMemo(
@@ -102,9 +102,9 @@ function CustomClassificationTreeImpl({
     getHierarchyProvider: useCallback(() => {
       return createMergedIModelHierarchyProvider({
         hierarchyDefinition: definition,
-        imodels,
+        imodels: imodelConnections,
       });
-    }, [definition, imodels]),
+    }, [definition, imodelConnections]),
     getSearchPaths,
   });
 

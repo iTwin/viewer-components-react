@@ -509,6 +509,9 @@ export class SearchLimitExceededError extends Error {
 export function SelectableTree({ buttons, children }: PropsWithChildren<TreeHeaderProps>): JSX_2.Element;
 
 // @beta
+export function SharedTreeContextProvider({ children }: PropsWithChildren<{}>): JSX_2.Element;
+
+// @beta
 export function SkeletonTree(): JSX_2.Element;
 
 // @beta (undocumented)
@@ -716,7 +719,7 @@ interface UseCategoriesTreeResult {
 // @alpha
 export function useClassificationsTree({ activeView, emptyTreeContent, searchText, getTreeItemProps, ...rest }: UseClassificationsTreeProps): UseClassificationsTreeResult;
 
-// @alpha (undocumented)
+// @alpha
 export function useClassificationsTreeDefinition(props: UseClassificationsTreeDefinitionProps): UseClassificationsTreeDefinitionResult;
 
 // @alpha (undocumented)
@@ -724,7 +727,7 @@ interface UseClassificationsTreeDefinitionProps {
     // (undocumented)
     hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
     imodels: Array<{
-        imodelAccess: FunctionProps<typeof useIModelTree>["imodelAccess"];
+        imodel: IModelConnection;
     }>;
     search?: {
         searchText: string;

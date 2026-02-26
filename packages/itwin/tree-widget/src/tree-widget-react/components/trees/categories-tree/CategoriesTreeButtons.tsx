@@ -4,22 +4,21 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { firstValueFrom, forkJoin, mergeAll, mergeMap, of, toArray } from "rxjs";
 import { useAsyncValue } from "@itwin/components-react";
-import { QueryRowFormat } from "@itwin/core-common";
 import { IconButton } from "@stratakit/bricks";
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
 import visibilityInvertSvg from "@stratakit/icons/visibility-invert.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { hideAllCategories, invertAllCategories } from "../common/CategoriesVisibilityUtils.js";
-import { isBeSqliteInterruptError, useErrorState } from "../common/internal/UseErrorState.js";
+import { useSharedTreeContextInternal } from "../common/internal/SharedTreeWidgetContextProviderInternal.js";
+import { useErrorState } from "../common/internal/UseErrorState.js";
 import { useGuid } from "../common/internal/useGuid.js";
 import { getClassesByView } from "../common/internal/Utils.js";
-import { loadCategoriesFromViewport } from "../common/internal/VisibilityUtils.js";
 import { hideAllModels, showAll } from "../common/Utils.js";
 
-import type { GuidString, Id64Array } from "@itwin/core-bentley";
-import type { IModelConnection } from "@itwin/core-frontend";
+import type { Id64Array } from "@itwin/core-bentley";
 import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { ModelId } from "../common/internal/Types.js";
@@ -53,6 +52,7 @@ export interface CategoriesTreeHeaderButtonProps extends TreeToolbarButtonProps 
  * </TreeWithHeader>
  * ```
  *
+ * **Note:** Requires `SharedTreeContextProvider` to be present in components tree above.
  * @public
  */
 export function useCategoriesTreeButtonProps({ viewport }: { viewport: TreeWidgetViewport }): {
@@ -62,9 +62,8 @@ export function useCategoriesTreeButtonProps({ viewport }: { viewport: TreeWidge
   const [filteredCategories, setFilteredCategories] = useState<CategoryInfo[] | undefined>();
   const [filteredModels, setFilteredModels] = useState<Id64Array | undefined>();
 
-  const componentId = useGuid();
-  const categories = useCategories(viewport, componentId);
-  const models = useAvailableModels(viewport, componentId);
+  const categories = useCategories(viewport);
+  const models = useAvailableModels(viewport);
 
   return {
     buttonProps: {
@@ -141,62 +140,57 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
 
 const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
-function useCategories(viewport: TreeWidgetViewport, componentId: GuidString) {
+function useCategories(viewport: TreeWidgetViewport) {
   const setErrorState = useErrorState();
-
+  const { getBaseIdsCache } = useSharedTreeContextInternal();
+  const baseIdsCache =
+    viewport.viewType !== "other"
+      ? getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewport.viewType).elementClass, type: viewport.viewType })
+      : undefined;
   const categoriesPromise = useMemo(async () => {
     try {
-      return await loadCategoriesFromViewport(viewport, componentId);
+      if (baseIdsCache) {
+        return await firstValueFrom(
+          baseIdsCache.getAllCategoriesOfElements().pipe(
+            mergeAll(),
+            mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), subCategories: baseIdsCache.getSubCategories({ categoryId }) })),
+            toArray(),
+          ),
+        );
+      }
+      return [];
     } catch (error) {
       setErrorState(error);
       return [];
     }
-  }, [viewport, componentId, setErrorState]);
+  }, [baseIdsCache, setErrorState]);
   return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;
 }
 
-function useAvailableModels(viewport: TreeWidgetViewport, componentId: GuidString): Array<ModelId> {
+function useAvailableModels(viewport: TreeWidgetViewport): Array<ModelId> {
   const [availableModels, setAvailableModels] = useState<Array<ModelId>>([]);
   const setErrorState = useErrorState();
   const imodel = viewport.iModel;
-  const viewType = viewport.viewType === "2d" ? "2d" : "3d";
+  const { getBaseIdsCache } = useSharedTreeContextInternal();
+  const baseIdsCache =
+    viewport.viewType !== "other"
+      ? getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewport.viewType).elementClass, type: viewport.viewType })
+      : undefined;
   useEffect(() => {
-    queryModelsForHeaderActions(imodel, viewType, componentId)
-      .then((models) => {
-        setAvailableModels(models);
-      })
-      .catch((error) => {
+    const getModels = async () => {
+      try {
+        if (baseIdsCache) {
+          const models = await firstValueFrom(baseIdsCache.getAllModels());
+          setAvailableModels(models);
+        }
+        return;
+      } catch (error) {
         setErrorState(error);
         setAvailableModels([]);
-      });
-  }, [imodel, viewType, componentId, setErrorState]);
+      }
+    };
+    void getModels();
+  }, [imodel, baseIdsCache, setErrorState]);
 
   return availableModels;
-}
-
-async function queryModelsForHeaderActions(iModel: IModelConnection, viewType: "2d" | "3d", componentId: GuidString): Promise<Array<ModelId>> {
-  const { modelClass } = getClassesByView(viewType);
-  const models = new Array<ModelId>();
-  try {
-    const query = `
-      SELECT
-        m.ECInstanceId id
-      FROM
-        ${modelClass} m
-      WHERE
-        m.IsPrivate = false
-    `;
-    for await (const _row of iModel.createQueryReader(query, undefined, {
-      restartToken: `CategoriesTreeButtons/${componentId}/all-models`,
-      rowFormat: QueryRowFormat.UseECSqlPropertyNames,
-    })) {
-      models.push(_row.id);
-    }
-    return models;
-  } catch (error) {
-    if (isBeSqliteInterruptError(error)) {
-      return [];
-    }
-    throw error;
-  }
 }

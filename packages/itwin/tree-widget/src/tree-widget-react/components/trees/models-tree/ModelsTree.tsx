@@ -23,7 +23,10 @@ export type ModelsTreeProps = Pick<
     };
   };
 
-/** @beta */
+/**
+ * Requires `SharedTreeContextProvider` to be present in component above.
+ * @beta
+ */
 export function ModelsTree({
   imodel,
   selectionStorage,

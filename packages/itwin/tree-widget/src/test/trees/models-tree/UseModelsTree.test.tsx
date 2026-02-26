@@ -13,6 +13,7 @@ import { HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { createStorage } from "@itwin/unified-selection";
 import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../../tree-widget-react/components/trees/common/FocusedInstancesContext.js";
+import { SharedTreeContextProviderInternal } from "../../../tree-widget-react/components/trees/common/internal/SharedTreeWidgetContextProviderInternal.js";
 import { useModelsTree } from "../../../tree-widget-react/components/trees/models-tree/UseModelsTree.js";
 import { TreeWidget } from "../../../tree-widget-react/TreeWidget.js";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../IModelUtils.js";
@@ -66,6 +67,7 @@ describe("useModelsTree", () => {
         activeView: viewport,
         getSearchPaths: async () => [[{ id: keys.modelId, className: "BisCore.Model" }]],
       },
+      wrapper: ({ children }) => <SharedTreeContextProviderInternal>{children}</SharedTreeContextProviderInternal>,
     });
 
     let getSearchPaths = renderHookResult.current.treeProps.getSearchPaths;
@@ -170,13 +172,19 @@ describe("useModelsTree", () => {
       });
 
       it("getSearchPaths returns correct result when getSubTreePaths is not defined", async () => {
-        const { result: renderHookResult } = renderHook(useModelsTree, { initialProps });
+        const { result: renderHookResult } = renderHook(useModelsTree, {
+          initialProps,
+          wrapper: ({ children }) => <SharedTreeContextProviderInternal>{children}</SharedTreeContextProviderInternal>,
+        });
         const { getSearchPaths } = renderHookResult.current.treeProps;
         expect(getSearchPaths).to.be.undefined;
       });
 
       it("getSearchPaths returns correct result when getSubTreePaths is defined", async () => {
-        const { result: renderHookResult } = renderHook(useModelsTree, { initialProps: { ...initialProps, getSubTreePaths } });
+        const { result: renderHookResult } = renderHook(useModelsTree, {
+          initialProps: { ...initialProps, getSubTreePaths },
+          wrapper: ({ children }) => <SharedTreeContextProviderInternal>{children}</SharedTreeContextProviderInternal>,
+        });
         const { getSearchPaths } = renderHookResult.current.treeProps;
         const abortSignal = new AbortController().signal;
         await waitFor(async () => {
@@ -205,7 +213,10 @@ describe("useModelsTree", () => {
       });
 
       it("getSearchPaths returns correct result when getSubTreePaths and search text is defined", async () => {
-        const { result: renderHookResult } = renderHook(useModelsTree, { initialProps: { ...initialProps, getSubTreePaths, searchText: "element2" } });
+        const { result: renderHookResult } = renderHook(useModelsTree, {
+          initialProps: { ...initialProps, getSubTreePaths, searchText: "element2" },
+          wrapper: ({ children }) => <SharedTreeContextProviderInternal>{children}</SharedTreeContextProviderInternal>,
+        });
         const { getSearchPaths } = renderHookResult.current.treeProps;
         const abortSignal = new AbortController().signal;
         await waitFor(async () => {
@@ -242,6 +253,7 @@ describe("useModelsTree", () => {
         };
         const { result: renderHookResult } = renderHook(useModelsTree, {
           initialProps: { ...initialProps, getSubTreePaths, getSearchPaths: getSearchPathsForProps },
+          wrapper: ({ children }) => <SharedTreeContextProviderInternal>{children}</SharedTreeContextProviderInternal>,
         });
         const { getSearchPaths } = renderHookResult.current.treeProps;
         const abortSignal = new AbortController().signal;
@@ -277,7 +289,7 @@ describe("useModelsTree", () => {
             initialProps: { ...initialProps, getSubTreePaths },
             wrapper: ({ children }) => (
               <FocusedInstancesContextProvider selectionStorage={selectionStorage} imodelKey={imodel.key}>
-                {children}
+                <SharedTreeContextProviderInternal>{children}</SharedTreeContextProviderInternal>
               </FocusedInstancesContextProvider>
             ),
           },

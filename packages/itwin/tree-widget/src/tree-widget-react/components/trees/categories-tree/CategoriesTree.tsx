@@ -23,7 +23,10 @@ export type CategoriesTreeProps = Pick<
     };
   };
 
-/** @beta */
+/**
+ * Requires `SharedTreeContextProvider` to be present in component above.
+ * @beta
+ */
 export function CategoriesTree({
   imodel,
   selectionStorage,

@@ -52,9 +52,9 @@ import type {
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlQueryRow, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
-import type { ElementId } from "../common/internal/Types.js";
+import type { ClassificationId, ClassificationTableId, ElementId } from "../common/internal/Types.js";
 import type { NormalizedHierarchySearchPath } from "../common/Utils.js";
-import type { ClassificationId, ClassificationsTreeIdsCache, ClassificationTableId } from "./internal/ClassificationsTreeIdsCache.js";
+import type { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
 
 const MAX_SEARCH_INSTANCE_KEY_COUNT = 100;
 

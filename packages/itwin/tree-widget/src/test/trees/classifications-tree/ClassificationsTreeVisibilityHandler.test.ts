@@ -8,6 +8,8 @@ import { ClassificationsTreeDefinition } from "../../../tree-widget-react/compon
 import { ClassificationsTreeIdsCache } from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
 import { ClassificationsTreeVisibilityHandler } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHandler.js";
 import { createClassificationsSearchResultsTree } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/SearchResultsTree.js";
+import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
+import { CLASS_NAME_GeometricElement3d } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { HierarchyVisibilityHandlerImpl } from "../../../tree-widget-react/components/trees/common/internal/useTreeHooks/UseCachedVisibility.js";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../IModelUtils.js";
 import { initializeITwinJs, terminateITwinJs } from "../../Initialize.js";
@@ -59,7 +61,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
   async function createVisibilityTestData({ imodel, visibleByDefault }: { imodel: IModelConnection; visibleByDefault?: boolean }) {
     const imodelAccess = createIModelAccess(imodel);
-    const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode });
+    const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
+    const idsCache = new ClassificationsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig: { rootClassificationSystemCode }, baseIdsCache });
     const viewport = createTreeWidgetTestingViewport({
       iModel: imodel,
       visibleByDefault,
@@ -74,6 +77,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       imodelAccess,
       viewport,
       [Symbol.dispose]() {
+        baseIdsCache[Symbol.dispose]();
         idsCache[Symbol.dispose]();
         handler[Symbol.dispose]();
         provider[Symbol.dispose]();
@@ -682,7 +686,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       visibleByDefault?: boolean;
     }) {
       const imodelAccess = createIModelAccess(imodel);
-      const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
+      const idsCache = new ClassificationsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig: { rootClassificationSystemCode }, baseIdsCache });
       const viewport = createTreeWidgetTestingViewport({
         iModel: imodel,
         viewType: "3d",
@@ -701,6 +706,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         imodelAccess,
         viewport,
         [Symbol.dispose]() {
+          baseIdsCache[Symbol.dispose]();
           idsCache[Symbol.dispose]();
           defaultVisibilityHandler[Symbol.dispose]();
           visibilityHandlerWithSearchPaths[Symbol.dispose]();

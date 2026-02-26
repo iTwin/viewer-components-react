@@ -33,6 +33,7 @@ export function createIModelMock(props: { queryHandler?: QueryHandler; getCatego
     categories: {
       getCategoryInfo: props.getCategoryInfo,
     },
+    onClose: new BeEvent(),
   } as unknown as IModelConnection;
 }
 

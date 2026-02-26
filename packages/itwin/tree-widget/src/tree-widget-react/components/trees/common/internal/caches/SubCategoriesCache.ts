@@ -77,7 +77,7 @@ export class SubCategoriesCache {
     return this.#subCategoriesInfo;
   }
 
-  public getSubCategories(categoryId: Id64String): Observable<Array<SubCategoryId>> {
-    return this.getSubCategoriesInfo().pipe(map(({ categorySubCategories }) => categorySubCategories.get(categoryId) ?? []));
+  public getSubCategories(props: { categoryId: Id64String }): Observable<Array<SubCategoryId>> {
+    return this.getSubCategoriesInfo().pipe(map(({ categorySubCategories }) => categorySubCategories.get(props.categoryId) ?? []));
   }
 }

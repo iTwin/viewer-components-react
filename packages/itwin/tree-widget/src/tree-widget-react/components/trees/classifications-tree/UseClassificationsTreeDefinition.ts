@@ -3,14 +3,17 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { assert } from "@itwin/core-bentley";
+import { useSharedTreeContextInternal } from "../common/internal/SharedTreeWidgetContextProviderInternal.js";
+import { createIModelAccess } from "../common/internal/UseIModelAccess.js";
+import { getClassesByView } from "../common/internal/Utils.js";
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
 
-import type { MutableRefObject } from "react";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyDefinition } from "@itwin/presentation-hierarchies";
-import type { useIModelTree, useTree } from "@itwin/presentation-hierarchies-react";
+import type { useTree } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { FunctionProps } from "../common/Utils.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
@@ -25,9 +28,9 @@ interface UseClassificationsTreeDefinitionProps {
    */
   imodels: Array<{
     /**
-     * An object that provides access to iModel's data and metadata.
+     * iModel connection that should be used to pull data from.
      */
-    imodelAccess: FunctionProps<typeof useIModelTree>["imodelAccess"];
+    imodel: IModelConnection;
   }>;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
   /**
@@ -54,25 +57,40 @@ interface UseClassificationsTreeDefinitionResult {
   getSearchPaths?: FunctionProps<typeof useTree>["getSearchPaths"];
 }
 
-/** @alpha */
+/**
+ * Requires `SharedTreeContextProvider` to be present in components tree above.
+ * @alpha
+ */
 export function useClassificationsTreeDefinition(props: UseClassificationsTreeDefinitionProps): UseClassificationsTreeDefinitionResult {
   const { imodels, hierarchyConfig, search } = props;
+  const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
+  const cacheKey = `${hierarchyConfig.rootClassificationSystemCode}-ClassificationsTreeIdsCache`;
 
-  const idsCaches = useRef<Map<string, ClassificationsTreeIdsCache>>(new Map());
+  const imodelsWithAccess = useMemo(
+    () => imodels.map((entry) => ({ imodelAccess: createIModelAccess({ imodel: entry.imodel, hierarchyLevelSizeLimit: "unbounded" }), imodel: entry.imodel })),
+    [imodels],
+  );
 
   const definition = useMemo(() => {
     return new ClassificationsTreeDefinition({
-      imodelAccess: imodels[imodels.length - 1].imodelAccess,
-      getIdsCache: (imodelKey: string) =>
-        getOrCreateIdsCache({
-          imodelKey,
-          imodels,
-          idsCaches,
-          hierarchyConfig,
-        }),
+      imodelAccess: imodelsWithAccess[imodelsWithAccess.length - 1].imodelAccess,
+      getIdsCache: (imodelKey: string) => {
+        const entry = imodelsWithAccess.find(({ imodel }) => imodel.key === imodelKey);
+        assert(!!entry);
+        return getCache({
+          imodel: entry.imodel,
+          createCache: () =>
+            new ClassificationsTreeIdsCache({
+              baseIdsCache: getBaseIdsCache({ type: "3d", elementClassName: getClassesByView("3d").elementClass, imodel: entry.imodel }),
+              hierarchyConfig,
+              queryExecutor: entry.imodelAccess,
+            }),
+          cacheKey,
+        });
+      },
       hierarchyConfig,
     });
-  }, [imodels, hierarchyConfig]);
+  }, [imodelsWithAccess, hierarchyConfig, getBaseIdsCache, getCache, cacheKey]);
 
   const searchTerm = search ? ("searchText" in search ? search.searchText : search.targetItems) : undefined;
   const getSearchPaths = useMemo<FunctionProps<typeof useTree>["getSearchPaths"]>(() => {
@@ -82,52 +100,34 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
 
     return async ({ abortSignal }) => {
       const [first, ...rest] = await Promise.all(
-        imodels.map(async ({ imodelAccess }) =>
-          ClassificationsTreeDefinition.createInstanceKeyPaths({
+        imodelsWithAccess.map(async ({ imodelAccess, imodel }) => {
+          const idsCache = getCache({
+            imodel,
+            createCache: () =>
+              new ClassificationsTreeIdsCache({
+                baseIdsCache: getBaseIdsCache({ type: "3d", elementClassName: getClassesByView("3d").elementClass, imodel }),
+                hierarchyConfig,
+                queryExecutor: imodelAccess,
+              }),
+            cacheKey,
+          });
+          return ClassificationsTreeDefinition.createInstanceKeyPaths({
             hierarchyConfig,
-            idsCache: getOrCreateIdsCache({
-              imodelKey: imodelAccess.imodelKey,
-              imodels,
-              idsCaches,
-              hierarchyConfig,
-            }),
+            idsCache,
             imodelAccess,
             abortSignal,
             limit: typeof searchTerm !== "string" ? "unbounded" : undefined,
             ...(typeof searchTerm === "string" ? { label: searchTerm } : { targetItems: searchTerm }),
-          }),
-        ),
+          });
+        }),
       );
 
       return first.concat(...rest);
     };
-  }, [imodels, hierarchyConfig, searchTerm]);
+  }, [searchTerm, imodelsWithAccess, getBaseIdsCache, getCache, cacheKey, hierarchyConfig]);
 
   return {
     definition,
     getSearchPaths,
   };
-}
-
-function getOrCreateIdsCache({
-  imodelKey,
-  imodels,
-  hierarchyConfig,
-  idsCaches,
-}: {
-  imodelKey: string;
-  imodels: Array<{
-    imodelAccess: FunctionProps<typeof useIModelTree>["imodelAccess"];
-  }>;
-  hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
-  idsCaches: MutableRefObject<Map<string, ClassificationsTreeIdsCache>>;
-}) {
-  let idsCache = idsCaches.current.get(imodelKey);
-  if (!idsCache) {
-    const imodel = imodels.find((currImodel) => currImodel.imodelAccess.imodelKey === imodelKey);
-    assert(!!imodel);
-    idsCache = new ClassificationsTreeIdsCache(imodel.imodelAccess, hierarchyConfig);
-    idsCaches.current.set(imodelKey, idsCache);
-  }
-  return idsCache;
 }

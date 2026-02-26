@@ -7,6 +7,7 @@ import { Fragment } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
+import { SharedTreeContextProviderInternal } from "../common/internal/SharedTreeWidgetContextProviderInternal.js";
 import { useActiveTreeWidgetViewport } from "../common/internal/UseActiveTreeWidgetViewport.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { CategoriesTree } from "./CategoriesTree.js";
@@ -56,6 +57,8 @@ interface CategoriesTreeComponentProps extends Pick<
 
 /**
  * A component that renders `CategoriesTree` and a header with search capabilities and header buttons.
+ *
+ * **Note:** Wrap tree components with a single `SharedTreeContextProvider` to improve trees' performance.`
  * @public
  */
 export const CategoriesTreeComponent = (props: CategoriesTreeComponentProps) => {
@@ -66,7 +69,11 @@ export const CategoriesTreeComponent = (props: CategoriesTreeComponentProps) => 
     return null;
   }
 
-  return <CategoriesTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />;
+  return (
+    <SharedTreeContextProviderInternal showWarning={true}>
+      <CategoriesTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />
+    </SharedTreeContextProviderInternal>
+  );
 };
 
 /**

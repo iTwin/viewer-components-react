@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, defer, EMPTY, from, map, merge, mergeAll, mergeMap, of, toArray } from "rxjs";
+import { concat, defer, EMPTY, from, map, merge, mergeAll, mergeMap, of } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
@@ -29,7 +29,7 @@ import type { AlwaysAndNeverDrawnElementInfoCache } from "../../../common/intern
 import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
 import type { ChildrenTree } from "../../../common/internal/Utils.js";
 import type { SearchResultsTree } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
-import type { BaseIdsCache, TreeSpecificVisibilityHandler } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
+import type { TreeSpecificVisibilityHandler } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { CategoriesTreeHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
@@ -53,46 +53,15 @@ export interface CategoriesTreeVisibilityHandlerProps {
 export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecificVisibilityHandler<CategoriesTreeSearchTargets> {
   readonly #props: CategoriesTreeVisibilityHandlerProps;
   #visibilityHelper: CategoriesTreeVisibilityHelper;
-  #elementType: "GeometricElement3d" | "GeometricElement2d";
-  #categoryType: "DrawingCategory" | "SpatialCategory";
-  #modelType: "GeometricModel3d" | "GeometricModel2d";
   constructor(constructorProps: CategoriesTreeVisibilityHandlerProps) {
     this.#props = constructorProps;
-    // Remove after https://github.com/iTwin/viewer-components-react/issues/1421.
-    // We won't need to create a custom base ids cache.
-    const baseIdsCache: BaseIdsCache = {
-      getChildElementsTree: (props) => this.getChildElementsTree(props),
-      getAllChildElementsCount: (props) => this.getAllChildElementsCount(props),
-      getCategories: (props) => this.getCategories(props),
-      getAllCategoriesOfElements: () => this.getAllCategoriesOfElements(),
-      getElementsCount: (props) => this.getElementsCount(props),
-      getModels: (props) => this.getModels(props),
-      getSubCategories: (props) => this.getSubCategories(props),
-      getSubModels: (props) => this.getSubModels(props),
-      getSubModelsUnderElement: (props) => this.#props.idsCache.getSubModelsUnderElement(props),
-    };
     this.#visibilityHelper = new CategoriesTreeVisibilityHelper({
       viewport: this.#props.viewport,
       idsCache: this.#props.idsCache,
       alwaysAndNeverDrawnElementInfo: this.#props.alwaysAndNeverDrawnElementInfo,
-      baseIdsCache,
+      baseIdsCache: constructorProps.idsCache,
       hierarchyConfig: constructorProps.hierarchyConfig,
     });
-    const { elementType, categoryType, modelType } =
-      this.#props.viewport.viewType === "2d"
-        ? {
-            elementType: "GeometricElement2d" as const,
-            categoryType: "DrawingCategory" as const,
-            modelType: "GeometricModel2d" as const,
-          }
-        : {
-            elementType: "GeometricElement3d" as const,
-            categoryType: "SpatialCategory" as const,
-            modelType: "GeometricModel3d" as const,
-          };
-    this.#elementType = elementType;
-    this.#categoryType = categoryType;
-    this.#modelType = modelType;
   }
 
   public [Symbol.dispose]() {
@@ -452,61 +421,6 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
 
       return from(observables).pipe(mergeAll(), mergeVisibilityStatuses());
     });
-  }
-
-  private getCategories(props: Parameters<BaseIdsCache["getCategories"]>[0]): ReturnType<BaseIdsCache["getCategories"]> {
-    return this.#props.idsCache.getModelCategoryIds({
-      modelId: props.modelId,
-      includeOnlyIfCategoryOfTopMostElement: props.includeOnlyIfCategoryOfTopMostElement,
-    });
-  }
-
-  private getAllCategoriesOfElements(): ReturnType<BaseIdsCache["getAllCategoriesOfElements"]> {
-    return this.#props.idsCache.getAllCategoriesOfElements();
-  }
-
-  private getElementsCount(props: Parameters<BaseIdsCache["getElementsCount"]>[0]): ReturnType<BaseIdsCache["getElementsCount"]> {
-    return this.#props.idsCache.getCategoryElementsCount(props);
-  }
-
-  private getModels(props: Parameters<BaseIdsCache["getModels"]>[0]): ReturnType<BaseIdsCache["getModels"]> {
-    return this.#props.idsCache.getCategoryElementModels({
-      categoryId: props.categoryId,
-      includeSubModels: true,
-      includeOnlyIfCategoryOfTopMostElement: props.includeOnlyIfCategoryOfTopMostElement,
-    });
-  }
-
-  private getChildElementsTree(props: Parameters<BaseIdsCache["getChildElementsTree"]>[0]): ReturnType<BaseIdsCache["getChildElementsTree"]> {
-    return this.#props.idsCache.getChildElementsTree({ elementIds: props.elementIds });
-  }
-
-  private getAllChildElementsCount(props: Parameters<BaseIdsCache["getAllChildElementsCount"]>[0]): ReturnType<BaseIdsCache["getAllChildElementsCount"]> {
-    return this.#props.idsCache.getAllChildElementsCount({ elementIds: props.elementIds });
-  }
-
-  private getSubCategories(props: Parameters<BaseIdsCache["getSubCategories"]>[0]): ReturnType<BaseIdsCache["getSubCategories"]> {
-    return this.#props.idsCache.getSubCategories(props.categoryId);
-  }
-
-  private getSubModels(props: Parameters<BaseIdsCache["getSubModels"]>[0]): ReturnType<BaseIdsCache["getSubModels"]> {
-    if (props.modelId) {
-      if (props.categoryId) {
-        return this.#props.idsCache.getCategoryModeledElements({ modelId: props.modelId, categoryId: props.categoryId }).pipe(toArray());
-      }
-
-      return this.#props.idsCache.getModelCategoryIds({ modelId: props.modelId }).pipe(
-        mergeAll(),
-        mergeMap((modelCategoryId) => this.#props.idsCache.getCategoryModeledElements({ modelId: props.modelId!, categoryId: modelCategoryId })),
-        toArray(),
-      );
-    }
-
-    return this.#props.idsCache.getCategoryElementModels({ categoryId: props.categoryId! }).pipe(
-      mergeAll(),
-      mergeMap((modelId) => this.#props.idsCache.getCategoryModeledElements({ modelId, categoryId: props.categoryId! })),
-      toArray(),
-    );
   }
 }
 

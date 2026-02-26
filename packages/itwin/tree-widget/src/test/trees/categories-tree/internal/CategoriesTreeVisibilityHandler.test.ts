@@ -15,12 +15,14 @@ import {
 } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import { createCategoriesTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.js";
+import { BaseIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
 import {
   CLASS_NAME_DefinitionModel,
   CLASS_NAME_GeometricElement3d,
   CLASS_NAME_SubCategory,
   CLASS_NAME_Subject,
 } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { getClassesByView } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
 import {
   buildIModel,
   insertDefinitionContainer,
@@ -91,7 +93,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
     visibleByDefault?: boolean;
   }) {
     const imodelAccess = createIModelAccess(imodel);
-    const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
+    const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
+    const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
     const viewport = createTreeWidgetTestingViewport({ iModel: imodel, subCategoriesOfCategories, viewType: "3d", visibleByDefault });
 
     return {
@@ -99,6 +102,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       viewport,
       idsCache,
       hierarchyConfig,
+      baseIdsCache,
     };
   }
 
@@ -145,6 +149,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       provider,
       ...commonProps,
       [Symbol.dispose]() {
+        commonProps.baseIdsCache[Symbol.dispose]();
         commonProps.idsCache[Symbol.dispose]();
         handler[Symbol.dispose]();
         provider[Symbol.dispose]();
@@ -2991,7 +2996,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
     }) {
       const hierarchyConfig = { ...defaultHierarchyConfiguration, showElements: true, showEmptyCategories: true };
       const imodelAccess = createIModelAccess(imodel);
-      const idsCache = new CategoriesTreeIdsCache(imodelAccess, view);
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(view).elementClass, type: view });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: view, baseIdsCache });
       const viewport = createTreeWidgetTestingViewport({
         iModel: imodel,
         viewType: view,
@@ -3022,6 +3028,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         imodelAccess,
         viewport,
         [Symbol.dispose]() {
+          baseIdsCache[Symbol.dispose]();
           idsCache[Symbol.dispose]();
           defaultVisibilityHandler[Symbol.dispose]();
           visibilityHandlerWithSearchPaths[Symbol.dispose]();

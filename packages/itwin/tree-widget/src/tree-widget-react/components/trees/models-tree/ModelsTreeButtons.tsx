@@ -3,7 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { firstValueFrom, mergeAll, toArray } from "rxjs";
 import { IconButton } from "@stratakit/bricks";
 import toggle2DSvg from "@stratakit/icons/2d.svg";
 import toggle3DSvg from "@stratakit/icons/3d.svg";
@@ -13,18 +14,12 @@ import visibilityInvertSvg from "@stratakit/icons/visibility-invert.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
-import {
-  CLASS_NAME_Element,
-  CLASS_NAME_GeometricElement3d,
-  CLASS_NAME_GeometricModel3d,
-  CLASS_NAME_InformationPartitionElement,
-} from "../common/internal/ClassNameDefinitions.js";
-import { useGuid } from "../common/internal/useGuid.js";
+import { useSharedTreeContextInternal } from "../common/internal/SharedTreeWidgetContextProviderInternal.js";
+import { getClassesByView } from "../common/internal/Utils.js";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAll, toggleModels } from "../common/Utils.js";
 
 import type { ReactElement } from "react";
 import type { Id64String } from "@itwin/core-bentley";
-import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
@@ -63,7 +58,7 @@ export interface ModelsTreeHeaderButtonProps extends TreeToolbarButtonProps {
  *   <ModelsTree {...treeProps} onModelsFiltered={onModelsFiltered} />
  * </TreeWithHeader>
  * ```
- *
+ * **Note:** Requires `SharedTreeContextProvider` to be present in components tree above.
  *
  * @public
  */
@@ -72,7 +67,6 @@ export function useModelsTreeButtonProps({ imodel, viewport }: { imodel: IModelC
   onModelsFiltered: (models: Id64String[] | undefined) => void;
 } {
   const [filteredModels, setFilteredModels] = useState<Id64String[] | undefined>();
-
   const models = useAvailableModels(imodel);
   const availableModels = useMemo(() => (!filteredModels ? models : models.filter((model) => filteredModels.includes(model.id))), [models, filteredModels]);
   return {
@@ -86,44 +80,43 @@ export function useModelsTreeButtonProps({ imodel, viewport }: { imodel: IModelC
 
 function useAvailableModels(imodel: IModelConnection): ModelInfo[] {
   const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
-
+  const { getBaseIdsCache } = useSharedTreeContextInternal();
+  const baseIdsCache = getBaseIdsCache({ imodel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
   useEffect(() => {
-    queryModelsForHeaderActions(imodel)
-      .then((modelInfos: ModelInfo[]) => {
-        setAvailableModels(modelInfos);
-      })
-      .catch(() => {
+    const getModels = async () => {
+      try {
+        const models = await firstValueFrom(baseIdsCache.getAllModels());
+        setAvailableModels(models.map((id) => ({ id })));
+      } catch {
         setAvailableModels([]);
-      });
-  }, [imodel]);
+      }
+    };
+    void getModels();
+  }, [baseIdsCache]);
 
   return availableModels;
-}
-
-async function queryModelsForHeaderActions(iModel: IModelConnection) {
-  const queryParams: ModelQueryParams = {
-    from: CLASS_NAME_GeometricModel3d,
-    where: `
-        EXISTS (
-          SELECT 1
-          FROM ${CLASS_NAME_Element} e
-          WHERE e.ECClassId IS (${CLASS_NAME_GeometricElement3d}, ${CLASS_NAME_InformationPartitionElement})
-            AND e.ECInstanceId = GeometricModel3d.ModeledElement.Id
-        )
-      `,
-    wantPrivate: false,
-  };
-
-  const modelProps = await iModel.models.queryProps(queryParams);
-  return modelProps.map(({ id, isPlanProjection }: GeometricModel3dProps) => ({ id, isPlanProjection })).filter(({ id }) => id) as ModelInfo[];
 }
 
 /** @public */
 export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => ReactElement | null;
 
-/** @public */
+/**
+ * Requires `SharedTreeContextProvider` to be present in component tree above.
+ * @public
+ */
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
-  const componentId = useGuid();
+  const { getBaseIdsCache } = useSharedTreeContextInternal();
+  const baseIdsCache = getBaseIdsCache({ imodel: props.viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
+  const onClick = useCallback(async () => {
+    try {
+      const categories = await firstValueFrom(baseIdsCache.getAllCategoriesOfElements().pipe(mergeAll(), toArray()));
+      return await showAll({
+        models: props.models.map((model) => model.id),
+        categories,
+        viewport: props.viewport,
+      });
+    } catch {}
+  }, [baseIdsCache, props.viewport, props.models]);
   return (
     <IconButton
       variant={"ghost"}
@@ -131,11 +124,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
       onClick={() => {
         // cspell:disable-next-line
         props.onFeatureUsed?.("models-tree-showall");
-        void showAll({
-          models: props.models.map((model) => model.id),
-          viewport: props.viewport,
-          componentId,
-        }).catch(() => {});
+        void onClick();
       }}
       icon={visibilityShowSvg}
     />
