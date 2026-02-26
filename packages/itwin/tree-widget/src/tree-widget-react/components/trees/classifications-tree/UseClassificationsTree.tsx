@@ -51,6 +51,8 @@ interface UseClassificationsTreeResult {
 
 /**
  * Custom hook to create and manage state for the categories tree.
+ *
+ * **NOTE**: To use this hook, wrap your app component with `SharedTreeContextProvider`.
  * @alpha
  */
 export function useClassificationsTree({

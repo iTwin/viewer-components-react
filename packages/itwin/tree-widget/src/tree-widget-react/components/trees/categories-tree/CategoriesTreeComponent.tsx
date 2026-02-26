@@ -57,6 +57,8 @@ interface CategoriesTreeComponentProps extends Pick<
 
 /**
  * A component that renders `CategoriesTree` and a header with search capabilities and header buttons.
+ *
+ * **NOTE**: To use this component, wrap your app component with `SharedTreeContextProvider`.
  * @public
  */
 export const CategoriesTreeComponent = (props: CategoriesTreeComponentProps) => {

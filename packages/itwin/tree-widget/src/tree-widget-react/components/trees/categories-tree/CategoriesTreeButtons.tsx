@@ -52,6 +52,7 @@ export interface CategoriesTreeHeaderButtonProps extends TreeToolbarButtonProps 
  * </TreeWithHeader>
  * ```
  *
+ * **NOTE**: To use this hook, wrap your app component with `SharedTreeContextProvider`.
  * @public
  */
 export function useCategoriesTreeButtonProps({ viewport }: { viewport: TreeWidgetViewport }): {

@@ -58,7 +58,7 @@ export interface ModelsTreeHeaderButtonProps extends TreeToolbarButtonProps {
  *   <ModelsTree {...treeProps} onModelsFiltered={onModelsFiltered} />
  * </TreeWithHeader>
  * ```
- *
+ * **NOTE**: To use this hook, wrap your app component with `SharedTreeContextProvider`.
  *
  * @public
  */
@@ -100,7 +100,10 @@ function useAvailableModels(imodel: IModelConnection): ModelInfo[] {
 /** @public */
 export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => ReactElement | null;
 
-/** @public */
+/**
+ * To use this button, wrap your app component with `SharedTreeContextProvider`.
+ * @public
+ */
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   const { getBaseIdsCache } = useSharedTreeContextInternal();
   const baseIdsCache = getBaseIdsCache({ imodel: props.viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });

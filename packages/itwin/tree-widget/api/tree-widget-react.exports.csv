@@ -21,6 +21,7 @@ beta;namespace;ModelsTreeNode
 beta;interface;ModelsTreeVisibilityHandlerOverrides
 beta;class;SearchLimitExceededError
 beta;function;SelectableTree
+beta;function;SharedTreeContextProvider
 beta;function;SkeletonTree
 beta;function;TelemetryContextProvider
 beta;function;Tree

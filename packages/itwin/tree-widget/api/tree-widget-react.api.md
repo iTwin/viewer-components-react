@@ -509,6 +509,9 @@ export class SearchLimitExceededError extends Error {
 export function SelectableTree({ buttons, children }: PropsWithChildren<TreeHeaderProps>): JSX_2.Element;
 
 // @beta
+export function SharedTreeContextProvider({ children }: PropsWithChildren<{}>): JSX_2.Element;
+
+// @beta
 export function SkeletonTree(): JSX_2.Element;
 
 // @beta (undocumented)
