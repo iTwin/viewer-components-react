@@ -459,6 +459,7 @@ describe("models tree", () => {
   run<{
     iModel: SnapshotDb;
     idsCache: ModelsTreeIdsCache;
+    baseIdsCache: BaseIdsCache;
     imodelAccess: IModelAccess;
     viewport: TreeWidgetTestingViewport;
     handler: HierarchyVisibilityHandler & Disposable;
@@ -484,7 +485,13 @@ describe("models tree", () => {
         // lets child categories visible in selector except top most elements category
         categories: testData.categories.map((category, index) => ({ ...category, visible: index !== 0 })),
       });
-      const idsCache = new ModelsTreeIdsCache(imodelAccess, defaultModelsTreeHierarchyConfiguration);
+      const baseIdsCache = new BaseIdsCache({
+        elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
+        type: "3d",
+        queryExecutor: imodelAccess,
+      });
+      const baseIdsCache = new ModelsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration, baseIdsCache });
+      const idsCache = new ModelsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration, baseIdsCache });
       const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
@@ -503,7 +510,7 @@ describe("models tree", () => {
         expectations: "all-hidden",
       });
 
-      return { iModel, imodelAccess, viewport, provider, handler, node, idsCache, iModelConnection, hierarchyNodes };
+      return { iModel, imodelAccess, viewport, provider, handler, node, idsCache, baseIdsCache, iModelConnection, hierarchyNodes };
     },
     cleanup: async (props) => {
       props.iModel.close();
@@ -511,6 +518,7 @@ describe("models tree", () => {
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
       props.idsCache[Symbol.dispose]();
+      props.baseIdsCache[Symbol.dispose]();
       if (!props.iModelConnection.isClosed) {
         await props.iModelConnection.close();
       }
