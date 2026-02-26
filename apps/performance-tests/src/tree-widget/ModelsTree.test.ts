@@ -490,7 +490,6 @@ describe("models tree", () => {
         type: "3d",
         queryExecutor: imodelAccess,
       });
-      const baseIdsCache = new ModelsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration, baseIdsCache });
       const idsCache = new ModelsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration, baseIdsCache });
       const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
       const provider = createIModelHierarchyProvider({
