@@ -72,7 +72,6 @@ export function useClassificationsTree({
   const idsCache = useClassificationsTreeIdsCache({
     imodel: activeView.iModel,
     hierarchyConfig,
-    componentId,
   });
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useClassificationsCachedVisibility({
@@ -170,19 +169,17 @@ function createTreeSpecificVisibilityHandler(props: CreateTreeSpecificVisibility
 
 function useClassificationsTreeIdsCache({
   imodel,
-  componentId,
   hierarchyConfig,
 }: {
   imodel: IModelConnection;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
-  componentId: GuidString;
 }): ClassificationsTreeIdsCache {
   const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
 
   const baseIdsCache = getBaseIdsCache({ type: "3d", elementClassName: getClassesByView("3d").elementClass, imodel });
   const classificationsTreeIdsCache = getCache({
     imodel,
-    createCache: () => new ClassificationsTreeIdsCache({ baseIdsCache, componentId, hierarchyConfig, queryExecutor: createECSqlQueryExecutor(imodel) }),
+    createCache: () => new ClassificationsTreeIdsCache({ baseIdsCache, hierarchyConfig, queryExecutor: createECSqlQueryExecutor(imodel) }),
     cacheKey: `${hierarchyConfig.rootClassificationSystemCode}-ClassificationsTreeIdsCache`,
   });
   return classificationsTreeIdsCache;

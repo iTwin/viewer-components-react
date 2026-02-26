@@ -23,30 +23,8 @@ export interface BaseIdsCacheProps {
   type: "2d" | "3d";
 }
 
-/**
- * Core methods of base ids cache.
- *
- * BaseIdsCache exposes other methods which are not part of this interface, they are needed for other caches.
- * @internal
- */
-export interface IBaseIdsCache {
-  getSubModelsUnderElement(props: Props<ModeledElementsCache["getSubModelsUnderElement"]>): ReturnType<ModeledElementsCache["getSubModelsUnderElement"]>;
-  getElementsCount: (
-    props: Props<ModelCategoryElementsCountCache["getCategoryElementsCount"]>,
-  ) => ReturnType<ModelCategoryElementsCountCache["getCategoryElementsCount"]>;
-  getSubCategories(props: Props<SubCategoriesCache["getSubCategories"]>): ReturnType<SubCategoriesCache["getSubCategories"]>;
-  getModels: (props: Props<ElementModelCategoriesCache["getCategoryElementModels"]>) => ReturnType<ElementModelCategoriesCache["getCategoryElementModels"]>;
-  getCategories: (props: Props<ElementModelCategoriesCache["getModelCategoryIds"]>) => ReturnType<ElementModelCategoriesCache["getModelCategoryIds"]>;
-  getSubModels: (
-    props: { modelId: Id64String; categoryId?: Id64String } | { categoryId: Id64String; modelId: Id64String | undefined },
-  ) => Observable<Id64Array>;
-  getAllCategoriesOfElements: () => ReturnType<ElementModelCategoriesCache["getAllCategoriesOfElements"]>;
-  getChildElementsTree: (props: Props<ElementChildrenCache["getChildElementsTree"]>) => ReturnType<ElementChildrenCache["getChildElementsTree"]>;
-  getAllChildElementsCount: (props: Props<ElementChildrenCache["getAllChildElementsCount"]>) => ReturnType<ElementChildrenCache["getAllChildElementsCount"]>;
-}
-
 /** @internal */
-export class BaseIdsCache implements Disposable, IBaseIdsCache {
+export class BaseIdsCache implements Disposable {
   #queryExecutor: LimitingECSqlQueryExecutor;
   #componentId: GuidString;
   readonly #categoryElementCounts: ModelCategoryElementsCountCache;
@@ -62,13 +40,11 @@ export class BaseIdsCache implements Disposable, IBaseIdsCache {
       elementClassName: props.elementClassName,
       componentId: this.#componentId,
       queryExecutor: this.#queryExecutor,
-      type: props.type,
     });
     this.#elementChildrenCache = new ElementChildrenCache({
       queryExecutor: this.#queryExecutor,
       elementClassName: props.elementClassName,
       componentId: this.#componentId,
-      type: props.type,
     });
     this.#subCategoriesCache = new SubCategoriesCache({
       queryExecutor: this.#queryExecutor,
@@ -78,13 +54,11 @@ export class BaseIdsCache implements Disposable, IBaseIdsCache {
       queryExecutor: this.#queryExecutor,
       componentId: this.#componentId,
       elementClassName: props.elementClassName,
-      type: props.type,
     });
     this.#elementModelCategoriesCache = new ElementModelCategoriesCache({
       queryExecutor: this.#queryExecutor,
       componentId: this.#componentId,
       elementClassName: props.elementClassName,
-      type: props.type,
       modeledElementsCache: this.#modeledElementsCache,
     });
   }
@@ -95,7 +69,9 @@ export class BaseIdsCache implements Disposable, IBaseIdsCache {
 
   // Implement get sub-models method
 
-  public getSubModels(props: Props<IBaseIdsCache["getSubModels"]>): ReturnType<IBaseIdsCache["getSubModels"]> {
+  public getSubModels(
+    props: { modelId: Id64String; categoryId?: Id64String } | { categoryId: Id64String; modelId: Id64String | undefined },
+  ): Observable<Id64Array> {
     if (props.modelId) {
       if (props.categoryId) {
         return this.#modeledElementsCache.getCategoryModeledElements({ modelId: props.modelId, categoryId: props.categoryId }).pipe(toArray());
@@ -123,7 +99,7 @@ export class BaseIdsCache implements Disposable, IBaseIdsCache {
     return this.#elementModelCategoriesCache.getAllModels();
   }
 
-  public getCategories(props: Props<IBaseIdsCache["getCategories"]>): ReturnType<IBaseIdsCache["getCategories"]> {
+  public getCategories(props: Props<ElementModelCategoriesCache["getModelCategoryIds"]>): ReturnType<ElementModelCategoriesCache["getModelCategoryIds"]> {
     return this.#elementModelCategoriesCache.getModelCategoryIds(props);
   }
 
@@ -131,7 +107,7 @@ export class BaseIdsCache implements Disposable, IBaseIdsCache {
     return this.#elementModelCategoriesCache.getAllCategoriesOfElements();
   }
 
-  public getModels(props: Props<IBaseIdsCache["getModels"]>): ReturnType<IBaseIdsCache["getModels"]> {
+  public getModels(props: Props<ElementModelCategoriesCache["getCategoryElementModels"]>): ReturnType<ElementModelCategoriesCache["getCategoryElementModels"]> {
     return this.#elementModelCategoriesCache.getCategoryElementModels(props);
   }
 
@@ -143,23 +119,27 @@ export class BaseIdsCache implements Disposable, IBaseIdsCache {
 
   // ModelCategoryElementsCountCache methods
 
-  public getElementsCount(props: Props<IBaseIdsCache["getElementsCount"]>): ReturnType<IBaseIdsCache["getElementsCount"]> {
+  public getElementsCount(
+    props: Props<ModelCategoryElementsCountCache["getCategoryElementsCount"]>,
+  ): ReturnType<ModelCategoryElementsCountCache["getCategoryElementsCount"]> {
     return this.#categoryElementCounts.getCategoryElementsCount(props);
   }
 
   // ElementChildrenCache methods
 
-  public getChildElementsTree(props: Props<IBaseIdsCache["getChildElementsTree"]>): ReturnType<IBaseIdsCache["getChildElementsTree"]> {
+  public getChildElementsTree(props: Props<ElementChildrenCache["getChildElementsTree"]>): ReturnType<ElementChildrenCache["getChildElementsTree"]> {
     return this.#elementChildrenCache.getChildElementsTree(props);
   }
 
-  public getAllChildElementsCount(props: Props<IBaseIdsCache["getAllChildElementsCount"]>): ReturnType<IBaseIdsCache["getAllChildElementsCount"]> {
+  public getAllChildElementsCount(
+    props: Props<ElementChildrenCache["getAllChildElementsCount"]>,
+  ): ReturnType<ElementChildrenCache["getAllChildElementsCount"]> {
     return this.#elementChildrenCache.getAllChildElementsCount(props);
   }
 
   // SubCategoriesCache methods
 
-  public getSubCategories(props: Props<IBaseIdsCache["getSubCategories"]>): ReturnType<IBaseIdsCache["getSubCategories"]> {
+  public getSubCategories(props: Props<SubCategoriesCache["getSubCategories"]>): ReturnType<SubCategoriesCache["getSubCategories"]> {
     return this.#subCategoriesCache.getSubCategories(props);
   }
 
@@ -169,11 +149,82 @@ export class BaseIdsCache implements Disposable, IBaseIdsCache {
 
   // ModeledElementsCache methods
 
-  public getSubModelsUnderElement(props: Props<IBaseIdsCache["getSubModelsUnderElement"]>): ReturnType<IBaseIdsCache["getSubModelsUnderElement"]> {
+  public getSubModelsUnderElement(
+    props: Props<ModeledElementsCache["getSubModelsUnderElement"]>,
+  ): ReturnType<ModeledElementsCache["getSubModelsUnderElement"]> {
     return this.#modeledElementsCache.getSubModelsUnderElement(props);
   }
 
   public getModeledElementsInfo(): ReturnType<ModeledElementsCache["getModeledElementsInfo"]> {
     return this.#modeledElementsCache.getModeledElementsInfo();
+  }
+}
+
+/** @internal */
+export interface BaseIdsCacheImplProps {
+  baseIdsCache: BaseIdsCache;
+}
+
+/** @internal */
+export class BaseIdsCacheImpl implements Disposable {
+  #baseIdsCache: BaseIdsCache;
+  constructor(props: BaseIdsCacheImplProps) {
+    this.#baseIdsCache = props.baseIdsCache;
+  }
+
+  public [Symbol.dispose]() {}
+  // Implement IBaseIdsCache by re-exporting BaseIdsCache methods
+
+  public getChildElementsTree(props: Props<ElementChildrenCache["getChildElementsTree"]>): ReturnType<ElementChildrenCache["getChildElementsTree"]> {
+    return this.#baseIdsCache.getChildElementsTree(props);
+  }
+
+  public getAllChildElementsCount(
+    props: Props<ElementChildrenCache["getAllChildElementsCount"]>,
+  ): ReturnType<ElementChildrenCache["getAllChildElementsCount"]> {
+    return this.#baseIdsCache.getAllChildElementsCount(props);
+  }
+
+  public getSubCategories(props: Props<SubCategoriesCache["getSubCategories"]>): ReturnType<SubCategoriesCache["getSubCategories"]> {
+    return this.#baseIdsCache.getSubCategories(props);
+  }
+
+  public getSubModels(
+    props: { modelId: Id64String; categoryId?: Id64String } | { categoryId: Id64String; modelId: Id64String | undefined },
+  ): Observable<Id64Array> {
+    return this.#baseIdsCache.getSubModels(props);
+  }
+
+  public getSubModelsUnderElement(
+    props: Props<ModeledElementsCache["getSubModelsUnderElement"]>,
+  ): ReturnType<ModeledElementsCache["getSubModelsUnderElement"]> {
+    return this.#baseIdsCache.getSubModelsUnderElement(props);
+  }
+
+  public getElementsCount(
+    props: Props<ModelCategoryElementsCountCache["getCategoryElementsCount"]>,
+  ): ReturnType<ModelCategoryElementsCountCache["getCategoryElementsCount"]> {
+    return this.#baseIdsCache.getElementsCount(props);
+  }
+
+  public getCategories(props: Props<ElementModelCategoriesCache["getModelCategoryIds"]>): ReturnType<ElementModelCategoriesCache["getModelCategoryIds"]> {
+    return this.#baseIdsCache.getCategories(props);
+  }
+
+  public getModels(props: Props<ElementModelCategoriesCache["getCategoryElementModels"]>): ReturnType<ElementModelCategoriesCache["getCategoryElementModels"]> {
+    return this.#baseIdsCache.getModels(props);
+  }
+
+  public getAllCategoriesOfElements(): ReturnType<ElementModelCategoriesCache["getAllCategoriesOfElements"]> {
+    return this.#baseIdsCache.getAllCategoriesOfElements();
+  }
+
+  public getCategoriesOfModelsTopMostElements(
+    props: Props<BaseIdsCache["getCategoriesOfModelsTopMostElements"]>,
+  ): ReturnType<BaseIdsCache["getCategoriesOfModelsTopMostElements"]> {
+    return this.#baseIdsCache.getCategoriesOfModelsTopMostElements(props);
+  }
+  public getSubCategoriesInfo(): ReturnType<SubCategoriesCache["getSubCategoriesInfo"]> {
+    return this.#baseIdsCache.getSubCategoriesInfo();
   }
 }

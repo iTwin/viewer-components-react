@@ -31,7 +31,7 @@ import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTre
 import { ModelsTreeNode } from "./ModelsTreeNode.js";
 
 import type { ReactNode } from "react";
-import type { GuidString, Id64String } from "@itwin/core-bentley";
+import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import type { TreeNode } from "@itwin/presentation-hierarchies-react";
@@ -148,7 +148,6 @@ export function useModelsTree({
   const idsCache = useModelsTreeIdsCache({
     imodel: activeView.iModel,
     hierarchyConfig: hierarchyConfiguration,
-    componentId,
   });
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useCachedVisibility<ModelsTreeIdsCache, ModelsTreeSearchTargets>({
@@ -305,12 +304,10 @@ export function ModelsTreeIcon({ node }: { node: TreeNode }) {
 
 function useModelsTreeIdsCache({
   imodel,
-  componentId,
   hierarchyConfig,
 }: {
   imodel: IModelConnection;
   hierarchyConfig: ModelsTreeHierarchyConfiguration;
-  componentId: GuidString;
 }): ModelsTreeIdsCache {
   const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
   const baseIdsCache = getBaseIdsCache({ type: "3d", elementClassName: hierarchyConfig.elementClassSpecification, imodel });
@@ -320,7 +317,6 @@ function useModelsTreeIdsCache({
     createCache: () =>
       new ModelsTreeIdsCache({
         baseIdsCache,
-        componentId,
         elementClassName: hierarchyConfig.elementClassSpecification,
         hideRootSubject: hierarchyConfig.hideRootSubject,
         showEmptyModels: hierarchyConfig.showEmptyModels,

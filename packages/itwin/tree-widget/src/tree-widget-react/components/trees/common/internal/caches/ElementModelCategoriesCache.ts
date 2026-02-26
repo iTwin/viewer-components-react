@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { defer, forkJoin, from, map, mergeMap, reduce, shareReplay } from "rxjs";
-import { Guid } from "@itwin/core-bentley";
 import { CLASS_NAME_Model } from "../ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
 
@@ -16,9 +15,8 @@ import type { ModeledElementsCache } from "./ModeledElementsCache.js";
 
 interface ElementModelCategoriesCacheProps {
   queryExecutor: LimitingECSqlQueryExecutor;
-  componentId?: GuidString;
+  componentId: GuidString;
   elementClassName: string;
-  type: "2d" | "3d";
   modeledElementsCache: ModeledElementsCache;
 }
 
@@ -28,7 +26,6 @@ export class ElementModelCategoriesCache {
   #componentId: GuidString;
   #componentName: string;
   #elementClassName: string;
-  #type: "2d" | "3d";
   #modeledElementsCache: ModeledElementsCache;
   #modelsCategoriesInfo:
     | Observable<Map<ModelId, { categoriesOfTopMostElements: Set<CategoryId>; allCategories: Set<CategoryId>; isSubModel: boolean }>>
@@ -38,9 +35,8 @@ export class ElementModelCategoriesCache {
     this.#queryExecutor = props.queryExecutor;
     this.#elementClassName = props.elementClassName;
     this.#modeledElementsCache = props.modeledElementsCache;
-    this.#type = props.type;
-    this.#componentId = props.componentId ?? Guid.createValue();
-    this.#componentName = `ElementModelCategoriesCache${this.#type}`;
+    this.#componentId = props.componentId;
+    this.#componentName = "ElementModelCategoriesCache";
   }
 
   private queryElementModelCategories(): Observable<{

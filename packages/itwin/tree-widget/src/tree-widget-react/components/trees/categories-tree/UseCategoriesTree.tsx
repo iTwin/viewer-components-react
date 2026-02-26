@@ -87,7 +87,7 @@ export function useCategoriesTree({
     });
   }, [activeView]);
 
-  const idsCache = useCategoriesTreeIdsCache({ imodel: activeView.iModel, componentId, activeViewType: viewType });
+  const idsCache = useCategoriesTreeIdsCache({ imodel: activeView.iModel, activeViewType: viewType });
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useCategoriesCachedVisibility({
     activeView,
@@ -240,21 +240,13 @@ async function createSearchResultsTree(
   });
 }
 
-function useCategoriesTreeIdsCache({
-  imodel,
-  componentId,
-  activeViewType,
-}: {
-  imodel: IModelConnection;
-  activeViewType: "2d" | "3d";
-  componentId: GuidString;
-}): CategoriesTreeIdsCache {
+function useCategoriesTreeIdsCache({ imodel, activeViewType }: { imodel: IModelConnection; activeViewType: "2d" | "3d" }): CategoriesTreeIdsCache {
   const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
 
   const baseIdsCache = getBaseIdsCache({ type: activeViewType, elementClassName: getClassesByView(activeViewType).elementClass, imodel });
   const categoriesTreeIdsCache = getCache({
     imodel,
-    createCache: () => new CategoriesTreeIdsCache({ baseIdsCache, componentId, type: activeViewType, queryExecutor: createECSqlQueryExecutor(imodel) }),
+    createCache: () => new CategoriesTreeIdsCache({ baseIdsCache, type: activeViewType, queryExecutor: createECSqlQueryExecutor(imodel) }),
     cacheKey: `${activeViewType}-CategoriesTreeIdsCache`,
   });
   return categoriesTreeIdsCache;

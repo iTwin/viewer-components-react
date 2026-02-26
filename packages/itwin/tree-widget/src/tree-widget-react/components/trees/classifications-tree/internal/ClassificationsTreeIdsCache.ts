@@ -5,6 +5,7 @@
 
 import { defer, from, map, mergeMap, of, reduce, shareReplay } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
+import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
 import {
   CLASS_NAME_Classification,
   CLASS_NAME_ClassificationSystem,
@@ -19,8 +20,7 @@ import { joinId64Arg } from "../../common/internal/Utils.js";
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { Props } from "@itwin/presentation-shared";
-import type { BaseIdsCache, IBaseIdsCache } from "../../common/internal/caches/BaseIdsCache.js";
+import type { BaseIdsCacheImplProps } from "../../common/internal/caches/BaseIdsCache.js";
 import type { CategoryId, ClassificationId, ClassificationTableId, ElementId } from "../../common/internal/Types.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "../ClassificationsTreeDefinition.js";
 
@@ -30,71 +30,27 @@ interface ClassificationInfo {
   relatedCategories: CategoryId[];
 }
 
-interface ClassificationsTreeIdsCacheProps {
+interface ClassificationsTreeIdsCacheProps extends BaseIdsCacheImplProps {
   queryExecutor: LimitingECSqlQueryExecutor;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
-  componentId?: GuidString;
-  baseIdsCache: BaseIdsCache;
 }
 
 /** @internal */
-export class ClassificationsTreeIdsCache implements IBaseIdsCache, Disposable {
+export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
   #classificationInfos: Observable<Map<ClassificationId | ClassificationTableId, ClassificationInfo>> | undefined;
   #filteredElementsData: Observable<Map<ElementId, { modelId: Id64String; categoryId: Id64String; categoryOfTopMostParentElement: CategoryId }>> | undefined;
   #queryExecutor: LimitingECSqlQueryExecutor;
   #hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
   #componentId: GuidString;
   #componentName: string;
-  #baseIdsCache: BaseIdsCache;
 
   constructor(props: ClassificationsTreeIdsCacheProps) {
+    super(props);
     this.#queryExecutor = props.queryExecutor;
     this.#hierarchyConfig = props.hierarchyConfig;
-    this.#componentId = props.componentId ?? Guid.createValue();
+    this.#componentId = Guid.createValue();
     this.#componentName = "ClassificationsTreeIdsCache";
-    this.#baseIdsCache = props.baseIdsCache;
   }
-  public [Symbol.dispose]() {}
-
-  // Implement IBaseIdsCache by re-exporting BaseIdsCache methods
-
-  public getChildElementsTree(props: Props<IBaseIdsCache["getChildElementsTree"]>): ReturnType<IBaseIdsCache["getChildElementsTree"]> {
-    return this.#baseIdsCache.getChildElementsTree(props);
-  }
-
-  public getAllChildElementsCount(props: Props<IBaseIdsCache["getAllChildElementsCount"]>): ReturnType<IBaseIdsCache["getAllChildElementsCount"]> {
-    return this.#baseIdsCache.getAllChildElementsCount(props);
-  }
-
-  public getSubCategories(props: Props<IBaseIdsCache["getSubCategories"]>): ReturnType<IBaseIdsCache["getSubCategories"]> {
-    return this.#baseIdsCache.getSubCategories(props);
-  }
-
-  public getSubModels(props: Props<IBaseIdsCache["getSubModels"]>): ReturnType<IBaseIdsCache["getSubModels"]> {
-    return this.#baseIdsCache.getSubModels(props);
-  }
-
-  public getSubModelsUnderElement(props: Props<IBaseIdsCache["getSubModelsUnderElement"]>): ReturnType<IBaseIdsCache["getSubModelsUnderElement"]> {
-    return this.#baseIdsCache.getSubModelsUnderElement(props);
-  }
-
-  public getElementsCount(props: Props<IBaseIdsCache["getElementsCount"]>): ReturnType<IBaseIdsCache["getElementsCount"]> {
-    return this.#baseIdsCache.getElementsCount(props);
-  }
-
-  public getCategories(props: Props<IBaseIdsCache["getCategories"]>): ReturnType<IBaseIdsCache["getCategories"]> {
-    return this.#baseIdsCache.getCategories(props);
-  }
-
-  public getModels(props: Props<IBaseIdsCache["getModels"]>): ReturnType<IBaseIdsCache["getModels"]> {
-    return this.#baseIdsCache.getModels(props);
-  }
-
-  public getAllCategoriesOfElements(): ReturnType<BaseIdsCache["getAllCategoriesOfElements"]> {
-    return this.#baseIdsCache.getAllCategoriesOfElements();
-  }
-
-  // Implement classifications tree specific methods
 
   private queryClassifications(): Observable<
     {

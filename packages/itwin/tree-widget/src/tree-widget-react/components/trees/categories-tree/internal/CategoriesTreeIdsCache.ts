@@ -5,6 +5,7 @@
 
 import { defer, forkJoin, from, map, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
+import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
 import { getClassesByView, joinId64Arg } from "../../common/internal/Utils.js";
@@ -12,8 +13,8 @@ import { getClassesByView, joinId64Arg } from "../../common/internal/Utils.js";
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { InstanceKey, Props } from "@itwin/presentation-shared";
-import type { BaseIdsCache, IBaseIdsCache } from "../../common/internal/caches/BaseIdsCache.js";
+import type { InstanceKey } from "@itwin/presentation-shared";
+import type { BaseIdsCacheImplProps } from "../../common/internal/caches/BaseIdsCache.js";
 import type { CategoryId, DefinitionContainerId, ElementId, ModelId } from "../../common/internal/Types.js";
 
 interface DefinitionContainerInfo {
@@ -36,15 +37,13 @@ export interface CategoryInfo {
   hasElements: boolean;
 }
 
-interface CategoriesTreeIdsCacheProps {
+interface CategoriesTreeIdsCacheProps extends BaseIdsCacheImplProps {
   queryExecutor: LimitingECSqlQueryExecutor;
   type: "2d" | "3d";
-  componentId?: GuidString;
-  baseIdsCache: BaseIdsCache;
 }
 
 /** @internal */
-export class CategoriesTreeIdsCache implements IBaseIdsCache, Disposable {
+export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
   #definitionContainersInfo: Observable<Map<DefinitionContainerId, DefinitionContainerInfo>> | undefined;
   #modelsCategoriesInfo: Observable<Map<ModelId, CategoriesInfo>> | undefined;
   #categoryClass: string;
@@ -54,66 +53,16 @@ export class CategoriesTreeIdsCache implements IBaseIdsCache, Disposable {
   #queryExecutor: LimitingECSqlQueryExecutor;
   #componentId: GuidString;
   #componentName: string;
-  #baseIdsCache: BaseIdsCache;
 
   constructor(props: CategoriesTreeIdsCacheProps) {
+    super(props);
     this.#queryExecutor = props.queryExecutor;
     const { categoryClass, elementClass } = getClassesByView(props.type);
     this.#categoryClass = categoryClass;
     this.#categoryElementClass = elementClass;
-    this.#componentId = props.componentId ?? Guid.createValue();
-    this.#componentName = `CategoriesTreeIdsCache${props.type}`;
-    this.#baseIdsCache = props.baseIdsCache;
+    this.#componentId = Guid.createValue();
+    this.#componentName = "CategoriesTreeIdsCache";
   }
-  public [Symbol.dispose]() {}
-
-  // Implement IBaseIdsCache by re-exporting BaseIdsCache methods
-
-  public getChildElementsTree(props: Props<IBaseIdsCache["getChildElementsTree"]>): ReturnType<IBaseIdsCache["getChildElementsTree"]> {
-    return this.#baseIdsCache.getChildElementsTree(props);
-  }
-
-  public getAllChildElementsCount(props: Props<IBaseIdsCache["getAllChildElementsCount"]>): ReturnType<IBaseIdsCache["getAllChildElementsCount"]> {
-    return this.#baseIdsCache.getAllChildElementsCount(props);
-  }
-
-  public getSubCategories(props: Props<IBaseIdsCache["getSubCategories"]>): ReturnType<IBaseIdsCache["getSubCategories"]> {
-    return this.#baseIdsCache.getSubCategories(props);
-  }
-
-  public getSubModels(props: Props<IBaseIdsCache["getSubModels"]>): ReturnType<IBaseIdsCache["getSubModels"]> {
-    return this.#baseIdsCache.getSubModels(props);
-  }
-
-  public getSubModelsUnderElement(props: Props<IBaseIdsCache["getSubModelsUnderElement"]>): ReturnType<IBaseIdsCache["getSubModelsUnderElement"]> {
-    return this.#baseIdsCache.getSubModelsUnderElement(props);
-  }
-
-  public getElementsCount(props: Props<IBaseIdsCache["getElementsCount"]>): ReturnType<IBaseIdsCache["getElementsCount"]> {
-    return this.#baseIdsCache.getElementsCount(props);
-  }
-
-  public getCategories(props: Props<IBaseIdsCache["getCategories"]>): ReturnType<IBaseIdsCache["getCategories"]> {
-    return this.#baseIdsCache.getCategories(props);
-  }
-
-  public getModels(props: Props<IBaseIdsCache["getModels"]>): ReturnType<IBaseIdsCache["getModels"]> {
-    return this.#baseIdsCache.getModels(props);
-  }
-
-  public getAllCategoriesOfElements(): ReturnType<BaseIdsCache["getAllCategoriesOfElements"]> {
-    return this.#baseIdsCache.getAllCategoriesOfElements();
-  }
-
-  // Re-export BaseIdsCache methods that are needed for models tree specific functionality
-
-  public getCategoriesOfModelsTopMostElements(
-    props: Props<BaseIdsCache["getCategoriesOfModelsTopMostElements"]>,
-  ): ReturnType<BaseIdsCache["getCategoriesOfModelsTopMostElements"]> {
-    return this.#baseIdsCache.getCategoriesOfModelsTopMostElements(props);
-  }
-
-  // Implement categories tree specific methods
 
   private queryFilteredElementsModels(filteredElementIds: Id64Arg): Observable<{
     modelId: Id64String;
@@ -443,7 +392,7 @@ export class CategoriesTreeIdsCache implements IBaseIdsCache, Disposable {
     props: { categoryId: Id64String } | { definitionContainerId: Id64String } | { subCategoryId: Id64String },
   ): Observable<InstanceKey[]> {
     if ("subCategoryId" in props) {
-      return this.#baseIdsCache.getSubCategoriesInfo().pipe(
+      return this.getSubCategoriesInfo().pipe(
         mergeMap(({ subCategoryCategories, categorySubCategories }) => {
           const categoryOfSubCategory = subCategoryCategories.get(props.subCategoryId);
           if (categoryOfSubCategory === undefined) {

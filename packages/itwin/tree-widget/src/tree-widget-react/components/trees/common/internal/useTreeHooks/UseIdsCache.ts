@@ -23,7 +23,7 @@ export function useIdsCache(): {
   getCache: <TCache extends Disposable>(createCacheProps: GetCacheProps<TCache>) => TCache;
 } {
   const state = useRef<Record<IModelKey, Record<CacheKey, Disposable>>>({});
-  const [forceRerender, setForceRerender] = useState(0);
+  const [forceRerender, setForceRerender] = useState({});
   const getCache = useCallback(
     <TCache extends Disposable>({ createCache, cacheKey, imodel }: GetCacheProps<TCache>) => {
       const imodelCaches = state.current[imodel.key];
@@ -43,7 +43,7 @@ export function useIdsCache(): {
               cacheToDispose[Symbol.dispose]();
             }
             state.current[imodel.key] = {};
-            setForceRerender((prev) => prev + 1);
+            setForceRerender({});
           });
         }
         imodel.onClose.addOnce(() => {
@@ -52,7 +52,7 @@ export function useIdsCache(): {
           }
           delete state.current[imodel.key];
           listener?.();
-          setForceRerender((prev) => prev + 1);
+          setForceRerender({});
         });
       }
       return cache;

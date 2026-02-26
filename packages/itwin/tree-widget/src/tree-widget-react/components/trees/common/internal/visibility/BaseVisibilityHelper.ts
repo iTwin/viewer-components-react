@@ -39,7 +39,7 @@ import type { ClassGroupingNodeKey, HierarchyNode, InstancesNodeKey } from "@itw
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
 import type { HierarchyVisibilityHandlerOverridableMethod, HierarchyVisibilityOverrideHandler, VisibilityStatus } from "../../UseHierarchyVisibility.js";
 import type { AlwaysAndNeverDrawnElementInfoCache } from "../caches/AlwaysAndNeverDrawnElementInfoCache.js";
-import type { IBaseIdsCache } from "../caches/BaseIdsCache.js";
+import type { BaseIdsCacheImpl } from "../caches/BaseIdsCache.js";
 import type { NonPartialVisibilityStatus } from "../Tooltip.js";
 import type { CategoryId, ModelId } from "../Types.js";
 
@@ -88,7 +88,7 @@ export interface BaseVisibilityHelperProps {
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfoCache;
   overrideHandler?: HierarchyVisibilityOverrideHandler;
   overrides?: BaseTreeVisibilityHandlerOverrides;
-  baseIdsCache: IBaseIdsCache;
+  baseIdsCache: BaseIdsCacheImpl;
 }
 
 /**

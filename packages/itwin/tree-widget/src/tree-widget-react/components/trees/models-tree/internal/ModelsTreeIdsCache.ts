@@ -6,6 +6,7 @@
 import { defer, filter, forkJoin, map, mergeAll, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
+import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
 import {
   CLASS_NAME_GeometricModel3d,
   CLASS_NAME_InformationPartitionElement,
@@ -18,17 +19,15 @@ import { pushToMap } from "../../common/internal/Utils.js";
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { InstanceKey, Props } from "@itwin/presentation-shared";
-import type { BaseIdsCache, IBaseIdsCache } from "../../common/internal/caches/BaseIdsCache.js";
+import type { InstanceKey } from "@itwin/presentation-shared";
+import type { BaseIdsCacheImplProps } from "../../common/internal/caches/BaseIdsCache.js";
 import type { CategoryId, ModelId, SubjectId } from "../../common/internal/Types.js";
 
-interface ModelsTreeIdsCacheProps {
+interface ModelsTreeIdsCacheProps extends BaseIdsCacheImplProps {
   queryExecutor: LimitingECSqlQueryExecutor;
   showEmptyModels: boolean;
   hideRootSubject: boolean;
   elementClassName: string;
-  componentId?: GuidString;
-  baseIdsCache: BaseIdsCache;
 }
 
 interface SubjectInfo {
@@ -39,8 +38,7 @@ interface SubjectInfo {
 }
 
 /** @internal */
-export class ModelsTreeIdsCache implements IBaseIdsCache, Disposable {
-  #baseIdsCache: BaseIdsCache;
+export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
   #subjectInfos: Observable<Map<SubjectId, SubjectInfo>> | undefined;
   #parentSubjectIds: Observable<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   #modelKeyPaths: Map<ModelId, Observable<HierarchyNodeIdentifiersPath[]>>;
@@ -54,67 +52,17 @@ export class ModelsTreeIdsCache implements IBaseIdsCache, Disposable {
   #componentName: string;
 
   constructor(props: ModelsTreeIdsCacheProps) {
+    super(props);
     this.#queryExecutor = props.queryExecutor;
     this.#showEmptyModels = props.showEmptyModels;
     this.#hideRootSubject = props.hideRootSubject;
     this.#elementClassName = props.elementClassName;
-    this.#componentId = props.componentId ?? Guid.createValue();
+    this.#componentId = Guid.createValue();
     this.#componentName = "ModelsTreeIdsCache";
     this.#modelKeyPaths = new Map();
     this.#subjectKeyPaths = new Map();
     this.#categoryKeyPaths = new Map();
-    this.#baseIdsCache = props.baseIdsCache;
   }
-
-  public [Symbol.dispose]() {}
-
-  // Implement IBaseIdsCache by re-exporting BaseIdsCache methods
-
-  public getChildElementsTree(props: Props<IBaseIdsCache["getChildElementsTree"]>): ReturnType<IBaseIdsCache["getChildElementsTree"]> {
-    return this.#baseIdsCache.getChildElementsTree(props);
-  }
-
-  public getAllChildElementsCount(props: Props<IBaseIdsCache["getAllChildElementsCount"]>): ReturnType<IBaseIdsCache["getAllChildElementsCount"]> {
-    return this.#baseIdsCache.getAllChildElementsCount(props);
-  }
-
-  public getSubCategories(props: Props<IBaseIdsCache["getSubCategories"]>): ReturnType<IBaseIdsCache["getSubCategories"]> {
-    return this.#baseIdsCache.getSubCategories(props);
-  }
-
-  public getSubModels(props: Props<IBaseIdsCache["getSubModels"]>): ReturnType<IBaseIdsCache["getSubModels"]> {
-    return this.#baseIdsCache.getSubModels(props);
-  }
-
-  public getSubModelsUnderElement(props: Props<IBaseIdsCache["getSubModelsUnderElement"]>): ReturnType<IBaseIdsCache["getSubModelsUnderElement"]> {
-    return this.#baseIdsCache.getSubModelsUnderElement(props);
-  }
-
-  public getElementsCount(props: Props<IBaseIdsCache["getElementsCount"]>): ReturnType<IBaseIdsCache["getElementsCount"]> {
-    return this.#baseIdsCache.getElementsCount(props);
-  }
-
-  public getCategories(props: Props<IBaseIdsCache["getCategories"]>): ReturnType<IBaseIdsCache["getCategories"]> {
-    return this.#baseIdsCache.getCategories(props);
-  }
-
-  public getModels(props: Props<IBaseIdsCache["getModels"]>): ReturnType<IBaseIdsCache["getModels"]> {
-    return this.#baseIdsCache.getModels(props);
-  }
-
-  public getAllCategoriesOfElements(): ReturnType<BaseIdsCache["getAllCategoriesOfElements"]> {
-    return this.#baseIdsCache.getAllCategoriesOfElements();
-  }
-
-  // Re-export BaseIdsCache methods that are needed for models tree specific functionality
-
-  public getCategoriesOfModelsTopMostElements(
-    props: Props<BaseIdsCache["getCategoriesOfModelsTopMostElements"]>,
-  ): ReturnType<BaseIdsCache["getCategoriesOfModelsTopMostElements"]> {
-    return this.#baseIdsCache.getCategoriesOfModelsTopMostElements(props);
-  }
-
-  // Implement models tree specific methods
 
   private querySubjects(): Observable<{ id: SubjectId; parentId?: SubjectId; targetPartitionId?: ModelId; hideInHierarchy: boolean }> {
     return defer(() => {
@@ -381,7 +329,7 @@ export class ModelsTreeIdsCache implements IBaseIdsCache, Disposable {
   public createCategoryInstanceKeyPaths(categoryId: Id64String): Observable<HierarchyNodeIdentifiersPath[]> {
     let entry = this.#categoryKeyPaths.get(categoryId);
     if (!entry) {
-      entry = this.#baseIdsCache.getModels({ categoryId, includeSubModels: true, includeOnlyIfCategoryOfTopMostElement: true }).pipe(
+      entry = this.getModels({ categoryId, includeSubModels: true, includeOnlyIfCategoryOfTopMostElement: true }).pipe(
         mergeAll(),
         mergeMap((categoryModelId) => this.createModelInstanceKeyPaths(categoryModelId)),
         mergeAll(),

@@ -25,11 +25,11 @@ export class ModelCategoryElementsCountCache implements Disposable {
   #componentId: GuidString;
   #componentName: string;
 
-  public constructor(props: { queryExecutor: LimitingECSqlQueryExecutor; elementClassName: string; componentId: GuidString; type: "2d" | "3d" }) {
+  public constructor(props: { queryExecutor: LimitingECSqlQueryExecutor; elementClassName: string; componentId: GuidString }) {
     this.#componentId = props.componentId;
     this.#queryExecutor = props.queryExecutor;
     this.#elementClassName = props.elementClassName;
-    this.#componentName = `ModelCategoryElementsCountCache${props.type}`;
+    this.#componentName = "ModelCategoryElementsCountCache";
     this.#subscription = this.#requestsStream
       .pipe(
         bufferTime(20),
