@@ -7,6 +7,7 @@ import { expect } from "chai";
 import { SnapshotDb } from "@itwin/core-backend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import {
+  BaseIdsCache,
   createModelsTreeVisibilityHandler,
   defaultModelsTreeHierarchyConfiguration,
   ModelsTreeDefinition,
@@ -52,7 +53,12 @@ describe("models tree", () => {
     },
     cleanup: (props) => props.iModel.close(),
     test: async ({ imodelAccess, targetItems }) => {
-      using idsCache = new ModelsTreeIdsCache(imodelAccess, defaultModelsTreeHierarchyConfiguration);
+      using baseIdsCache = new BaseIdsCache({
+        elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
+        type: "3d",
+        queryExecutor: imodelAccess,
+      });
+      using idsCache = new ModelsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration, baseIdsCache });
       const search = {
         paths: await ModelsTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -75,6 +81,7 @@ describe("models tree", () => {
   run<{
     iModel: SnapshotDb;
     idsCache: ModelsTreeIdsCache;
+    baseIdsCache: BaseIdsCache;
     imodelAccess: IModelAccess;
     viewport: TreeWidgetTestingViewport;
     handler: HierarchyVisibilityHandler & Disposable;
@@ -98,7 +105,12 @@ describe("models tree", () => {
         viewport,
         ...testData,
       });
-      const idsCache = new ModelsTreeIdsCache(imodelAccess, defaultModelsTreeHierarchyConfiguration);
+      const baseIdsCache = new BaseIdsCache({
+        elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
+        type: "3d",
+        queryExecutor: imodelAccess,
+      });
+      const idsCache = new ModelsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration, baseIdsCache });
       const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
@@ -112,7 +124,7 @@ describe("models tree", () => {
         expectations: "all-hidden",
       });
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
-      return { iModel, imodelAccess, viewport, provider, handler, elementsModel, idsCache, iModelConnection, hierarchyNodes };
+      return { iModel, imodelAccess, viewport, provider, handler, elementsModel, idsCache, baseIdsCache, iModelConnection, hierarchyNodes };
     },
     cleanup: async (props) => {
       props.iModel.close();
@@ -120,6 +132,7 @@ describe("models tree", () => {
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
       props.idsCache[Symbol.dispose]();
+      props.baseIdsCache[Symbol.dispose]();
       if (!props.iModelConnection.isClosed) {
         await props.iModelConnection.close();
       }
@@ -141,6 +154,7 @@ describe("models tree", () => {
   run<{
     iModel: SnapshotDb;
     idsCache: ModelsTreeIdsCache;
+    baseIdsCache: BaseIdsCache;
     imodelAccess: IModelAccess;
     viewport: TreeWidgetTestingViewport;
     handler: HierarchyVisibilityHandler & Disposable;
@@ -164,7 +178,12 @@ describe("models tree", () => {
         viewport,
         ...testData,
       });
-      const idsCache = new ModelsTreeIdsCache(imodelAccess, defaultModelsTreeHierarchyConfiguration);
+      const baseIdsCache = new BaseIdsCache({
+        elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
+        type: "3d",
+        queryExecutor: imodelAccess,
+      });
+      const idsCache = new ModelsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration, baseIdsCache });
       const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
@@ -178,7 +197,7 @@ describe("models tree", () => {
         expectations: "all-hidden",
       });
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
-      return { iModel, imodelAccess, viewport, provider, handler, elementsModel, idsCache, iModelConnection, hierarchyNodes };
+      return { iModel, imodelAccess, viewport, provider, handler, elementsModel, idsCache, baseIdsCache, iModelConnection, hierarchyNodes };
     },
     cleanup: async (props) => {
       props.iModel.close();
@@ -186,6 +205,7 @@ describe("models tree", () => {
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
       props.idsCache[Symbol.dispose]();
+      props.baseIdsCache[Symbol.dispose]();
       if (!props.iModelConnection.isClosed) {
         await props.iModelConnection.close();
       }
@@ -204,6 +224,7 @@ describe("models tree", () => {
   run<{
     iModel: SnapshotDb;
     idsCache: ModelsTreeIdsCache;
+    baseIdsCache: BaseIdsCache;
     imodelAccess: IModelAccess;
     viewport: TreeWidgetTestingViewport;
     handler: HierarchyVisibilityHandler & Disposable;
@@ -228,7 +249,12 @@ describe("models tree", () => {
         viewport,
         ...testData,
       });
-      const idsCache = new ModelsTreeIdsCache(imodelAccess, defaultModelsTreeHierarchyConfiguration);
+      const baseIdsCache = new BaseIdsCache({
+        elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
+        type: "3d",
+        queryExecutor: imodelAccess,
+      });
+      const idsCache = new ModelsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration, baseIdsCache });
       const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
@@ -244,7 +270,7 @@ describe("models tree", () => {
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
       expect(visibilityTargets.categories.length).to.be.eq(1);
       const elementsCategory = visibilityTargets.categories[0];
-      return { iModel, imodelAccess, viewport, provider, handler, elementsCategory, elementsModel, idsCache, iModelConnection, hierarchyNodes };
+      return { iModel, imodelAccess, viewport, provider, handler, elementsCategory, elementsModel, idsCache, baseIdsCache, iModelConnection, hierarchyNodes };
     },
     cleanup: async (props) => {
       props.iModel.close();
@@ -252,6 +278,7 @@ describe("models tree", () => {
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
       props.idsCache[Symbol.dispose]();
+      props.baseIdsCache[Symbol.dispose]();
       if (!props.iModelConnection.isClosed) {
         await props.iModelConnection.close();
       }
@@ -270,6 +297,7 @@ describe("models tree", () => {
   run<{
     iModel: SnapshotDb;
     idsCache: ModelsTreeIdsCache;
+    baseIdsCache: BaseIdsCache;
     imodelAccess: IModelAccess;
     viewport: TreeWidgetTestingViewport;
     handler: HierarchyVisibilityHandler & Disposable;
@@ -294,7 +322,12 @@ describe("models tree", () => {
         viewport,
         ...testData,
       });
-      const idsCache = new ModelsTreeIdsCache(imodelAccess, defaultModelsTreeHierarchyConfiguration);
+      const baseIdsCache = new BaseIdsCache({
+        elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
+        type: "3d",
+        queryExecutor: imodelAccess,
+      });
+      const idsCache = new ModelsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration, baseIdsCache });
       const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
@@ -313,7 +346,7 @@ describe("models tree", () => {
         viewport,
         expectations: "all-visible",
       });
-      return { iModel, imodelAccess, viewport, provider, handler, elementsCategory, elementsModel, idsCache, iModelConnection, hierarchyNodes };
+      return { iModel, imodelAccess, viewport, provider, handler, elementsCategory, elementsModel, idsCache, baseIdsCache, iModelConnection, hierarchyNodes };
     },
     cleanup: async (props) => {
       props.iModel.close();
@@ -321,6 +354,7 @@ describe("models tree", () => {
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
       props.idsCache[Symbol.dispose]();
+      props.baseIdsCache[Symbol.dispose]();
       if (!props.iModelConnection.isClosed) {
         await props.iModelConnection.close();
       }
@@ -339,6 +373,7 @@ describe("models tree", () => {
   run<{
     iModel: SnapshotDb;
     idsCache: ModelsTreeIdsCache;
+    baseIdsCache: BaseIdsCache;
     imodelAccess: IModelAccess;
     viewport: TreeWidgetTestingViewport;
     handler: HierarchyVisibilityHandler & Disposable;
@@ -362,7 +397,12 @@ describe("models tree", () => {
         viewport,
         ...testData,
       });
-      const idsCache = new ModelsTreeIdsCache(imodelAccess, defaultModelsTreeHierarchyConfiguration);
+      const baseIdsCache = new BaseIdsCache({
+        elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
+        type: "3d",
+        queryExecutor: imodelAccess,
+      });
+      const idsCache = new ModelsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration, baseIdsCache });
       const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
@@ -381,7 +421,7 @@ describe("models tree", () => {
         expectations: "all-hidden",
       });
 
-      return { iModel, imodelAccess, viewport, provider, handler, node, idsCache, iModelConnection, hierarchyNodes };
+      return { iModel, imodelAccess, viewport, provider, handler, node, idsCache, baseIdsCache, iModelConnection, hierarchyNodes };
     },
     cleanup: async (props) => {
       props.iModel.close();
@@ -389,6 +429,7 @@ describe("models tree", () => {
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
       props.idsCache[Symbol.dispose]();
+      props.baseIdsCache[Symbol.dispose]();
       if (!props.iModelConnection.isClosed) {
         await props.iModelConnection.close();
       }

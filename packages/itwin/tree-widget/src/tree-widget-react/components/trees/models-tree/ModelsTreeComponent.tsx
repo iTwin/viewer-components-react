@@ -8,6 +8,7 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
+import { SharedTreeContextProviderInternal } from "../common/internal/SharedTreeWidgetContextProviderInternal.js";
 import { useActiveTreeWidgetViewport } from "../common/internal/UseActiveTreeWidgetViewport.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { ModelsTree } from "./ModelsTree.js";
@@ -86,7 +87,9 @@ export const ModelsTreeComponent = (props: ModelsTreeComponentProps) => {
 
   return (
     <FocusedInstancesContextProvider selectionStorage={props.selectionStorage} imodelKey={iModel.key}>
-      <ModelsTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />
+      <SharedTreeContextProviderInternal showWarning={true}>
+        <ModelsTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />
+      </SharedTreeContextProviderInternal>
     </FocusedInstancesContextProvider>
   );
 };

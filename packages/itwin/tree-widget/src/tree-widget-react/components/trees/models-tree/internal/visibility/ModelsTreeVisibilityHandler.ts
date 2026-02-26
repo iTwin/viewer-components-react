@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, defer, EMPTY, from, map, merge, mergeAll, mergeMap, of, toArray } from "rxjs";
+import { concat, defer, EMPTY, from, map, merge, mergeAll, mergeMap, of } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
@@ -21,11 +21,7 @@ import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfoCache } from "../../../common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
 import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
 import type { SearchResultsTree } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
-import type {
-  BaseIdsCache,
-  BaseTreeVisibilityHandlerOverrides,
-  TreeSpecificVisibilityHandler,
-} from "../../../common/internal/visibility/BaseVisibilityHelper.js";
+import type { BaseTreeVisibilityHandlerOverrides, TreeSpecificVisibilityHandler } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
 import type {
   HierarchyVisibilityHandlerOverridableMethod,
@@ -71,25 +67,12 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
 
   constructor(constructorProps: ModelsTreeVisibilityHandlerProps) {
     this.#props = constructorProps;
-    // Remove after https://github.com/iTwin/viewer-components-react/issues/1421.
-    // We won't need to create a custom base ids cache.
-    const baseIdsCache: BaseIdsCache = {
-      getAllChildElementsCount: (props) => this.getAllChildElementsCount(props),
-      getCategories: (props) => this.getCategories(props),
-      getChildElementsTree: (props) => this.getChildElementsTree(props),
-      getElementsCount: (props) => this.getElementsCount(props),
-      getModels: (props) => this.getModels(props),
-      getSubCategories: (props) => this.getSubCategories(props),
-      getSubModels: (props) => this.getSubModels(props),
-      getSubModelsUnderElement: (props) => this.#props.idsCache.getSubModelsUnderElement(props),
-      getAllCategoriesOfElements: () => this.getAllCategoriesOfElements(),
-    };
     this.#visibilityHelper = new ModelsTreeVisibilityHelper({
       viewport: this.#props.viewport,
       idsCache: this.#props.idsCache,
       alwaysAndNeverDrawnElementInfo: this.#props.alwaysAndNeverDrawnElementInfo,
       overrideHandler: this.#props.overrideHandler,
-      baseIdsCache,
+      baseIdsCache: this.#props.idsCache,
       overrides: this.#props.overrides,
     });
   }
@@ -434,54 +417,6 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
 
       return from(observables).pipe(mergeAll(), mergeVisibilityStatuses());
     });
-  }
-
-  private getCategories(props: Parameters<BaseIdsCache["getCategories"]>[0]): ReturnType<BaseIdsCache["getCategories"]> {
-    return this.#props.idsCache.getModelCategoryIds(props);
-  }
-
-  private getChildElementsTree(props: Parameters<BaseIdsCache["getChildElementsTree"]>[0]): ReturnType<BaseIdsCache["getChildElementsTree"]> {
-    return this.#props.idsCache.getChildElementsTree({ elementIds: props.elementIds });
-  }
-
-  private getAllCategoriesOfElements(): ReturnType<BaseIdsCache["getAllCategoriesOfElements"]> {
-    return this.#props.idsCache.getAllCategoriesOfElements();
-  }
-
-  private getAllChildElementsCount(props: Parameters<BaseIdsCache["getAllChildElementsCount"]>[0]): ReturnType<BaseIdsCache["getAllChildElementsCount"]> {
-    return this.#props.idsCache.getAllChildElementsCount({ elementIds: props.elementIds });
-  }
-
-  private getElementsCount(props: Parameters<BaseIdsCache["getElementsCount"]>[0]): ReturnType<BaseIdsCache["getElementsCount"]> {
-    return this.#props.idsCache.getCategoryElementsCount(props);
-  }
-
-  private getModels(props: Parameters<BaseIdsCache["getModels"]>[0]): ReturnType<BaseIdsCache["getModels"]> {
-    return this.#props.idsCache.getCategoryElementModels(props);
-  }
-
-  private getSubCategories(props: Parameters<BaseIdsCache["getSubCategories"]>[0]): ReturnType<BaseIdsCache["getSubCategories"]> {
-    return this.#props.idsCache.getSubCategories(props.categoryId);
-  }
-
-  private getSubModels(props: Parameters<BaseIdsCache["getSubModels"]>[0]): ReturnType<BaseIdsCache["getSubModels"]> {
-    if (props.modelId) {
-      if (props.categoryId) {
-        return this.#props.idsCache.getCategoryModeledElements({ modelId: props.modelId, categoryId: props.categoryId }).pipe(toArray());
-      }
-
-      return this.#props.idsCache.getModelCategoryIds({ modelId: props.modelId }).pipe(
-        mergeAll(),
-        mergeMap((modelCategoryId) => this.#props.idsCache.getCategoryModeledElements({ modelId: props.modelId!, categoryId: modelCategoryId })),
-        toArray(),
-      );
-    }
-
-    return this.#props.idsCache.getCategoryElementModels({ categoryId: props.categoryId! }).pipe(
-      mergeAll(),
-      mergeMap((modelId) => this.#props.idsCache.getCategoryModeledElements({ modelId, categoryId: props.categoryId! })),
-      toArray(),
-    );
   }
 }
 

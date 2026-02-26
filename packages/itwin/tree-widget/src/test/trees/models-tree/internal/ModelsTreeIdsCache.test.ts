@@ -8,6 +8,7 @@ import { firstValueFrom } from "rxjs";
 import sinon from "sinon";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import { BaseIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
 import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { defaultHierarchyConfiguration } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelMock } from "../../Common.js";
@@ -15,7 +16,15 @@ import { createIModelMock } from "../../Common.js";
 describe("ModelsTreeIdsCache", () => {
   function createIdsCache(queryHandler: (query: string) => any[]) {
     const iModel = createIModelMock({ queryHandler });
-    return new ModelsTreeIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"), defaultHierarchyConfiguration);
+    const queryExecutor = createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded");
+    const baseIdsCache = new BaseIdsCache({ queryExecutor, elementClassName: defaultHierarchyConfiguration.elementClassSpecification, type: "3d" });
+    const idsCache = new ModelsTreeIdsCache({ queryExecutor, hierarchyConfig: defaultHierarchyConfiguration, baseIdsCache });
+    const symbolDispose = idsCache[Symbol.dispose];
+    idsCache[Symbol.dispose] = () => {
+      symbolDispose();
+      baseIdsCache[Symbol.dispose]();
+    };
+    return idsCache;
   }
 
   it("caches category element count", async () => {
@@ -29,9 +38,9 @@ describe("ModelsTreeIdsCache", () => {
       throw new Error(`Unexpected query: ${query}`);
     });
     using cache = createIdsCache(stub);
-    await expect(firstValueFrom(cache.getCategoryElementsCount({ modelId, categoryId }))).to.eventually.eq(elementIds.length);
+    await expect(firstValueFrom(cache.getElementsCount({ modelId, categoryId }))).to.eventually.eq(elementIds.length);
     expect(stub).to.have.callCount(1);
-    await expect(firstValueFrom(cache.getCategoryElementsCount({ modelId, categoryId }))).to.eventually.eq(elementIds.length);
+    await expect(firstValueFrom(cache.getElementsCount({ modelId, categoryId }))).to.eventually.eq(elementIds.length);
     expect(stub).to.have.callCount(1);
   });
 });

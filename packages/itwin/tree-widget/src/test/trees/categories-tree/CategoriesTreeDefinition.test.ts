@@ -14,7 +14,9 @@ import {
   defaultHierarchyConfiguration,
 } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
+import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_DefinitionModel } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { getClassesByView } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
 import {
   buildIModel,
   insertDefinitionContainer,
@@ -632,7 +634,8 @@ function createCategoryTreeProvider(
   hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>,
 ): HierarchyProvider & Disposable {
   const imodelAccess = createIModelAccess(imodel);
-  const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+  const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+  const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
   const hierarchyProvider = createIModelHierarchyProvider({
     imodelAccess,
     hierarchyDefinition: new CategoriesTreeDefinition({
@@ -652,6 +655,7 @@ function createCategoryTreeProvider(
     setFormatter: (formatter) => hierarchyProvider.setFormatter(formatter),
     setHierarchySearch: (props) => hierarchyProvider.setHierarchySearch(props),
     [Symbol.dispose]() {
+      baseIdsCache[Symbol.dispose]();
       hierarchyProvider[Symbol.dispose]();
       idsCache[Symbol.dispose]();
     },

@@ -5,6 +5,7 @@
 
 import { defer, map, mergeMap, reduce, shareReplay } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
+import { CLASS_NAME_Model } from "../ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
 
 import type { Observable } from "rxjs";
@@ -16,8 +17,7 @@ interface ModeledElementsCacheProps {
   queryExecutor: LimitingECSqlQueryExecutor;
   componentId?: GuidString;
   elementClassName: string;
-  modelClassName: string;
-  viewType: "2d" | "3d";
+  type: "2d" | "3d";
 }
 
 /** @internal */
@@ -26,7 +26,6 @@ export class ModeledElementsCache {
   #componentId: GuidString;
   #componentName: string;
   #elementsClassName: string;
-  #modelClassName: string;
   // ElementId here is also a ModelId, since those elements are sub models.
   #modeledElementsInfo:
     | Observable<{
@@ -39,9 +38,8 @@ export class ModeledElementsCache {
   constructor(props: ModeledElementsCacheProps) {
     this.#queryExecutor = props.queryExecutor;
     this.#componentId = props.componentId ?? Guid.createValue();
-    this.#componentName = `ModeledElementsCache${props.viewType}`;
+    this.#componentName = `ModeledElementsCache${props.type}`;
     this.#elementsClassName = props.elementClassName;
-    this.#modelClassName = props.modelClassName;
   }
 
   private queryModeledElements(): Observable<{
@@ -73,7 +71,7 @@ export class ModeledElementsCache {
               WHERE parentId IS NULL
             )
           ) parentElements
-        FROM ${this.#modelClassName} m
+        FROM ${CLASS_NAME_Model} m
         JOIN ${this.#elementsClassName} me ON me.ECInstanceId = m.ModeledElement.Id
         WHERE
           m.IsPrivate = false

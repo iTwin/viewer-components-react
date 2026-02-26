@@ -14,7 +14,9 @@ import {
   defaultHierarchyConfiguration,
 } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
+import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_DefinitionModel } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { getClassesByView } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
 import {
   buildIModel,
   insertDefinitionContainer,
@@ -67,7 +69,8 @@ describe("Categories tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
-      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -91,7 +94,8 @@ describe("Categories tree", () => {
       const { imodel, ...ids } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
-      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
 
       const abortController1 = new AbortController();
       const pathsPromiseAborted = CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -139,7 +143,8 @@ describe("Categories tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
-      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -162,7 +167,8 @@ describe("Categories tree", () => {
       const { imodel } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
-      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -187,7 +193,8 @@ describe("Categories tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
-      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -213,7 +220,8 @@ describe("Categories tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
-      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -241,7 +249,8 @@ describe("Categories tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
-      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -280,7 +289,8 @@ describe("Categories tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
-      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -316,7 +326,8 @@ describe("Categories tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
-      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -356,7 +367,8 @@ describe("Categories tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
-      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -405,7 +417,8 @@ describe("Categories tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "2d";
-      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -444,7 +457,8 @@ describe("Categories tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "2d";
-      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({

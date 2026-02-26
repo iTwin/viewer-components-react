@@ -5,6 +5,8 @@
 
 import { useMemo, useRef } from "react";
 import { assert } from "@itwin/core-bentley";
+import { BaseIdsCache } from "../common/internal/caches/BaseIdsCache.js";
+import { getClassesByView } from "../common/internal/Utils.js";
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
 
@@ -126,7 +128,8 @@ function getOrCreateIdsCache({
   if (!idsCache) {
     const imodel = imodels.find((currImodel) => currImodel.imodelAccess.imodelKey === imodelKey);
     assert(!!imodel);
-    idsCache = new ClassificationsTreeIdsCache(imodel.imodelAccess, hierarchyConfig);
+    const baseIdsCache = new BaseIdsCache({ queryExecutor: imodel.imodelAccess, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
+    idsCache = new ClassificationsTreeIdsCache({ queryExecutor: imodel.imodelAccess, hierarchyConfig, baseIdsCache });
     idsCaches.current.set(imodelKey, idsCache);
   }
   return idsCache;

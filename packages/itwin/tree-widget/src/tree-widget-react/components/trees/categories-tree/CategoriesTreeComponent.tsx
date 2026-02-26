@@ -7,6 +7,7 @@ import { Fragment } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
+import { SharedTreeContextProviderInternal } from "../common/internal/SharedTreeWidgetContextProviderInternal.js";
 import { useActiveTreeWidgetViewport } from "../common/internal/UseActiveTreeWidgetViewport.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { CategoriesTree } from "./CategoriesTree.js";
@@ -66,7 +67,11 @@ export const CategoriesTreeComponent = (props: CategoriesTreeComponentProps) => 
     return null;
   }
 
-  return <CategoriesTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />;
+  return (
+    <SharedTreeContextProviderInternal showWarning={true}>
+      <CategoriesTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />
+    </SharedTreeContextProviderInternal>
+  );
 };
 
 /**

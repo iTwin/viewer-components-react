@@ -22,13 +22,13 @@ type HierarchySearchPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["ge
 export function useSearchPaths({
   searchText,
   hierarchyConfiguration,
-  getClassificationsTreeIdsCache,
+  idsCache,
   onSearchPathsChanged,
   componentId,
 }: {
   searchText?: string;
   hierarchyConfiguration: ClassificationsTreeHierarchyConfiguration;
-  getClassificationsTreeIdsCache: () => ClassificationsTreeIdsCache;
+  idsCache: ClassificationsTreeIdsCache;
   onSearchPathsChanged: (paths: HierarchySearchPaths | undefined) => void;
   componentId: GuidString;
 }): {
@@ -55,7 +55,7 @@ export function useSearchPaths({
         const paths = await ClassificationsTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
           label: searchText,
-          idsCache: getClassificationsTreeIdsCache(),
+          idsCache,
           hierarchyConfig: hierarchyConfiguration,
           componentId,
           abortSignal,
@@ -72,7 +72,7 @@ export function useSearchPaths({
         return [];
       }
     };
-  }, [searchText, onSearchPathsChanged, onFeatureUsed, getClassificationsTreeIdsCache, hierarchyConfiguration, componentId]);
+  }, [searchText, onSearchPathsChanged, onFeatureUsed, idsCache, hierarchyConfiguration, componentId]);
 
   return {
     getPaths: getSearchPaths,

@@ -12,9 +12,9 @@ import classSvg from "@stratakit/icons/bis-class.svg";
 import definitionContainerSvg from "@stratakit/icons/bis-definitions-container.svg";
 import elementSvg from "@stratakit/icons/bis-element.svg";
 import { EmptyTreeContent, NoSearchMatches, SearchUnknownError, TooManySearchMatches } from "../common/components/EmptyTree.js";
+import { useSharedTreeContextInternal } from "../common/internal/SharedTreeWidgetContextProviderInternal.js";
 import { useGuid } from "../common/internal/useGuid.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { getClassesByView } from "../common/internal/Utils.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
@@ -30,7 +30,6 @@ import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { ExtendedVisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
-import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import type { SearchResultsTree } from "../common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { CategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
@@ -86,16 +85,12 @@ export function useCategoriesTree({
     });
   }, [activeView]);
 
-  const { getCache: getCategoriesTreeIdsCache } = useCategoriesTreeIdsCache({
-    imodel: activeView.iModel,
-    componentId,
-    activeViewType: viewType,
-  });
+  const idsCache = useCategoriesTreeIdsCache({ imodel: activeView.iModel, componentId, activeViewType: viewType });
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useCategoriesCachedVisibility({
     activeView,
     viewType,
-    getCache: getCategoriesTreeIdsCache,
+    idsCache,
     componentId,
     hierarchyConfig: hierarchyConfiguration,
   });
@@ -105,17 +100,17 @@ export function useCategoriesTree({
       return new CategoriesTreeDefinition({
         ...props,
         viewType,
-        idsCache: getCategoriesTreeIdsCache(),
+        idsCache,
         hierarchyConfig: hierarchyConfiguration,
       });
     },
-    [viewType, getCategoriesTreeIdsCache, hierarchyConfiguration],
+    [viewType, idsCache, hierarchyConfiguration],
   );
 
   const { getPaths, searchError } = useSearchPaths({
     hierarchyConfiguration,
     searchText,
-    getCategoriesTreeIdsCache,
+    idsCache,
     onSearchPathsChanged,
     viewType,
     onCategoriesFiltered,
@@ -184,15 +179,15 @@ export function CategoriesTreeIcon({ node }: { node: TreeNode }) {
 
 function useCategoriesCachedVisibility(props: {
   activeView: TreeWidgetViewport;
-  getCache: () => CategoriesTreeIdsCache;
+  idsCache: CategoriesTreeIdsCache;
   viewType: "2d" | "3d";
   componentId: GuidString;
   hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 }) {
-  const { activeView, getCache, viewType, componentId } = props;
+  const { activeView, idsCache, viewType, componentId } = props;
   const { visibilityHandlerFactory, searchPaths, onSearchPathsChanged } = useCachedVisibility<CategoriesTreeIdsCache, CategoriesTreeSearchTargets>({
     activeView,
-    getCache,
+    idsCache,
     createSearchResultsTree: useCallback(
       async (filteredTreeProps: CreateSearchResultsTreeProps<CategoriesTreeIdsCache>) =>
         createSearchResultsTree({ ...filteredTreeProps, viewClasses: getClassesByView(viewType) }),
@@ -206,8 +201,8 @@ function useCategoriesCachedVisibility(props: {
   });
 
   useEffect(() => {
-    getCache().clearFilteredElementsModels();
-  }, [searchPaths, getCache]);
+    idsCache.clearFilteredElementsModels();
+  }, [searchPaths, idsCache]);
 
   return {
     visibilityHandlerFactory,
@@ -220,10 +215,10 @@ function createTreeSpecificVisibilityHandler(
     hierarchyConfig: CategoriesTreeHierarchyConfiguration;
   },
 ) {
-  const { info, getCache, viewport, hierarchyConfig } = props;
+  const { info, idsCache, viewport, hierarchyConfig } = props;
   return new CategoriesTreeVisibilityHandler({
     alwaysAndNeverDrawnElementInfo: info,
-    idsCache: getCache(),
+    idsCache,
     viewport,
     hierarchyConfig,
   });
@@ -232,19 +227,16 @@ function createTreeSpecificVisibilityHandler(
 async function createSearchResultsTree(
   props: CreateSearchResultsTreeProps<CategoriesTreeIdsCache> & { viewClasses: ReturnType<typeof getClassesByView> },
 ): Promise<SearchResultsTree<CategoriesTreeSearchTargets>> {
-  const { searchPaths, imodelAccess, getCache, viewClasses } = props;
+  const { searchPaths, imodelAccess, idsCache, viewClasses } = props;
   return createCategoriesSearchResultsTree({
     imodelAccess,
     searchPaths,
-    idsCache: getCache(),
+    idsCache,
     categoryClassName: viewClasses.categoryClass,
     categoryElementClassName: viewClasses.elementClass,
     categoryModelClassName: viewClasses.modelClass,
   });
 }
-
-const CACHE_PROPS_2D = { viewType: "2d" as const };
-const CACHE_PROPS_3D = { viewType: "3d" as const };
 
 function useCategoriesTreeIdsCache({
   imodel,
@@ -254,25 +246,21 @@ function useCategoriesTreeIdsCache({
   imodel: IModelConnection;
   activeViewType: "2d" | "3d";
   componentId: GuidString;
-}) {
-  const { getCache: get2dCache } = useIdsCache({
-    imodel,
-    cacheSpecificProps: CACHE_PROPS_2D,
-    componentId,
-    createCache,
-  });
-  const { getCache: get3dCache } = useIdsCache({
-    imodel,
-    cacheSpecificProps: CACHE_PROPS_3D,
-    componentId,
-    createCache,
-  });
+}): CategoriesTreeIdsCache {
+  const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
 
-  return {
-    getCache: activeViewType === "2d" ? get2dCache : get3dCache,
-  };
-}
-
-function createCache(props: CreateCacheProps<{ viewType: "2d" | "3d" }>) {
-  return new CategoriesTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.viewType, props.componentId);
+  const baseIdsCache = useMemo(
+    () => getBaseIdsCache({ type: activeViewType, elementClassName: getClassesByView(activeViewType).elementClass, imodel }),
+    [activeViewType, getBaseIdsCache, imodel],
+  );
+  const categoriesTreeIdsCache = useMemo(
+    () =>
+      getCache({
+        imodel,
+        createCache: () => new CategoriesTreeIdsCache({ baseIdsCache, componentId, type: activeViewType, queryExecutor: createECSqlQueryExecutor(imodel) }),
+        cacheKey: `${activeViewType}-CategoriesTreeIdsCache`,
+      }),
+    [baseIdsCache, componentId, activeViewType, getCache, imodel],
+  );
+  return categoriesTreeIdsCache;
 }

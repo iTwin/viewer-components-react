@@ -11,6 +11,7 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyNodeIdentifier, HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
+import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
 import {
   CLASS_NAME_GeometricElement3d,
   CLASS_NAME_GeometricModel3d,
@@ -135,7 +136,8 @@ describe("Models tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const config = { ...defaultHierarchyConfiguration, hideRootSubject: true, elementClassSpecification: keys.parentElement.className };
-      using idsCache = new ModelsTreeIdsCache(imodelAccess, config);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: config.elementClassSpecification, type: "3d" });
+      using idsCache = new ModelsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig: config, baseIdsCache });
       const [subTreePaths, searchPaths] = await Promise.all([
         ModelsTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -1612,6 +1614,7 @@ describe("Models tree", () => {
         let expectedHierarchy!: ExpectedHierarchyDef[];
 
         let modelsTreeIdsCache: ModelsTreeIdsCache;
+        let baseIdsCache: BaseIdsCache;
         let hierarchyProvider: ReturnType<typeof createModelsTreeProvider>;
         let hierarchyConfig: ModelsTreeHierarchyConfiguration;
 
@@ -1629,12 +1632,15 @@ describe("Models tree", () => {
         });
 
         beforeEach(() => {
-          modelsTreeIdsCache = new ModelsTreeIdsCache(createIModelAccess(imodel), hierarchyConfig);
+          const imodelAccess = createIModelAccess(imodel);
+          baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
+          modelsTreeIdsCache = new ModelsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig, baseIdsCache });
           hierarchyProvider = createModelsTreeProvider({ imodel, searchPaths: instanceKeyPaths, hierarchyConfig });
         });
 
         afterEach(() => {
           modelsTreeIdsCache[Symbol.dispose]();
+          baseIdsCache[Symbol.dispose]();
           hierarchyProvider.dispose();
         });
 
@@ -1696,7 +1702,9 @@ describe("Models tree", () => {
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
 
       const imodelAccess = createIModelAccess(imodel);
-      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
+
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
+      using idsCache = new ModelsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig, baseIdsCache });
       const actualInstanceKeyPaths = (
         await ModelsTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -1719,7 +1727,9 @@ describe("Models tree", () => {
       const { imodel, ...ids } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
-      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
+
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
+      using idsCache = new ModelsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig, baseIdsCache });
 
       const abortController1 = new AbortController();
       const pathsPromiseAborted = ModelsTreeDefinition.createInstanceKeyPaths({
@@ -1761,7 +1771,8 @@ describe("Models tree", () => {
       const { imodel, ...ids } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
-      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
+      using idsCache = new ModelsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig, baseIdsCache });
 
       const abortController1 = new AbortController();
       const pathsPromiseAborted = ModelsTreeDefinition.createInstanceKeyPaths({
@@ -1815,7 +1826,8 @@ describe("Models tree", () => {
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
 
       const imodelAccess = createIModelAccess(imodel);
-      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
+      using idsCache = new ModelsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig, baseIdsCache });
 
       expect(
         (

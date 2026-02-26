@@ -6,15 +6,9 @@
 import { defer, filter, forkJoin, map, mergeAll, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
-import { ElementChildrenCache } from "../../common/internal/caches/ElementChildrenCache.js";
-import { ElementModelCategoriesCache } from "../../common/internal/caches/ElementModelCategoriesCache.js";
-import { ModelCategoryElementsCountCache } from "../../common/internal/caches/ModelCategoryElementsCountCache.js";
-import { ModeledElementsCache } from "../../common/internal/caches/ModeledElementsCache.js";
-import { SubCategoriesCache } from "../../common/internal/caches/SubCategoriesCache.js";
 import {
   CLASS_NAME_GeometricModel3d,
   CLASS_NAME_InformationPartitionElement,
-  CLASS_NAME_Model,
   CLASS_NAME_SpatialCategory,
   CLASS_NAME_Subject,
 } from "../../common/internal/ClassNameDefinitions.js";
@@ -24,10 +18,17 @@ import { pushToMap } from "../../common/internal/Utils.js";
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { InstanceKey } from "@itwin/presentation-shared";
-import type { CategoryId, ModelId, SubCategoryId, SubjectId } from "../../common/internal/Types.js";
-import type { ChildrenTree } from "../../common/internal/Utils.js";
+import type { InstanceKey, Props } from "@itwin/presentation-shared";
+import type { BaseIdsCache, IBaseIdsCache } from "../../common/internal/caches/BaseIdsCache.js";
+import type { CategoryId, ModelId, SubjectId } from "../../common/internal/Types.js";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
+
+interface ModelsTreeIdsCacheProps {
+  queryExecutor: LimitingECSqlQueryExecutor;
+  hierarchyConfig: ModelsTreeHierarchyConfiguration;
+  componentId?: GuidString;
+  baseIdsCache: BaseIdsCache;
+}
 
 interface SubjectInfo {
   parentSubjectId: Id64String | undefined;
@@ -36,87 +37,81 @@ interface SubjectInfo {
   childModelIds: Id64Set;
 }
 
-interface ModelInfo {
-  isModelPrivate: boolean;
-  categories: Map<CategoryId, { isRootElementCategory: boolean }>;
-}
-
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
 /** @internal */
-export class ModelsTreeIdsCache implements Disposable {
-  readonly #categoryElementCounts: ModelCategoryElementsCountCache;
+export class ModelsTreeIdsCache implements IBaseIdsCache, Disposable {
+  #baseIdsCache: BaseIdsCache;
   #subjectInfos: Observable<Map<SubjectId, SubjectInfo>> | undefined;
   #parentSubjectIds: Observable<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
-  #modelInfos: Observable<Map<ModelId, ModelInfo>> | undefined;
   #modelKeyPaths: Map<ModelId, Observable<HierarchyNodeIdentifiersPath[]>>;
   #subjectKeyPaths: Map<SubjectId, Observable<HierarchyNodeIdentifiersPath>>;
-  #elementChildrenCache: ElementChildrenCache;
-  #subCategoriesCache: SubCategoriesCache;
-  #modeledElementsCache: ModeledElementsCache;
-  #elementModelCategoriesCache: ElementModelCategoriesCache;
   #categoryKeyPaths: Map<CategoryId, Observable<HierarchyNodeIdentifiersPath[]>>;
   #queryExecutor: LimitingECSqlQueryExecutor;
   #hierarchyConfig: ModelsTreeHierarchyConfiguration;
   #componentId: GuidString;
   #componentName: string;
 
-  constructor(queryExecutor: LimitingECSqlQueryExecutor, hierarchyConfig: ModelsTreeHierarchyConfiguration, componentId?: GuidString) {
-    this.#queryExecutor = queryExecutor;
-    this.#hierarchyConfig = hierarchyConfig;
-    this.#componentId = componentId ?? Guid.createValue();
+  constructor(props: ModelsTreeIdsCacheProps) {
+    this.#queryExecutor = props.queryExecutor;
+    this.#hierarchyConfig = props.hierarchyConfig;
+    this.#componentId = props.componentId ?? Guid.createValue();
     this.#componentName = "ModelsTreeIdsCache";
-    this.#categoryElementCounts = new ModelCategoryElementsCountCache({
-      elementsClassName: this.#hierarchyConfig.elementClassSpecification,
-      componentId: this.#componentId,
-      queryExecutor: this.#queryExecutor,
-      viewType: "3d",
-    });
     this.#modelKeyPaths = new Map();
     this.#subjectKeyPaths = new Map();
-    this.#elementChildrenCache = new ElementChildrenCache({
-      queryExecutor: this.#queryExecutor,
-      elementClassName: this.#hierarchyConfig.elementClassSpecification,
-      componentId: this.#componentId,
-      viewType: "3d",
-    });
-    this.#subCategoriesCache = new SubCategoriesCache({
-      queryExecutor: this.#queryExecutor,
-      componentId: this.#componentId,
-    });
     this.#categoryKeyPaths = new Map();
-    this.#modeledElementsCache = new ModeledElementsCache({
-      queryExecutor: this.#queryExecutor,
-      componentId: this.#componentId,
-      elementClassName: this.#hierarchyConfig.elementClassSpecification,
-      modelClassName: CLASS_NAME_Model,
-      viewType: "3d",
-    });
-    this.#elementModelCategoriesCache = new ElementModelCategoriesCache({
-      queryExecutor: this.#queryExecutor,
-      componentId: this.#componentId,
-      elementClassName: this.#hierarchyConfig.elementClassSpecification,
-      modelClassName: CLASS_NAME_Model,
-      type: "3d",
-      modeledElementsCache: this.#modeledElementsCache,
-    });
+    this.#baseIdsCache = props.baseIdsCache;
   }
 
-  public [Symbol.dispose]() {
-    this.#categoryElementCounts[Symbol.dispose]();
+  public [Symbol.dispose]() {}
+
+  // Implement IBaseIdsCache by re-exporting BaseIdsCache methods
+
+  public getChildElementsTree(props: Props<IBaseIdsCache["getChildElementsTree"]>): ReturnType<IBaseIdsCache["getChildElementsTree"]> {
+    return this.#baseIdsCache.getChildElementsTree(props);
   }
 
-  public getChildElementsTree({ elementIds }: { elementIds: Id64Arg }): Observable<ChildrenTree> {
-    return this.#elementChildrenCache.getChildElementsTree({ elementIds });
+  public getAllChildElementsCount(props: Props<IBaseIdsCache["getAllChildElementsCount"]>): ReturnType<IBaseIdsCache["getAllChildElementsCount"]> {
+    return this.#baseIdsCache.getAllChildElementsCount(props);
   }
 
-  public getAllChildElementsCount({ elementIds }: { elementIds: Id64Arg }): Observable<Map<Id64String, number>> {
-    return this.#elementChildrenCache.getAllChildElementsCount({ elementIds });
+  public getSubCategories(props: Props<IBaseIdsCache["getSubCategories"]>): ReturnType<IBaseIdsCache["getSubCategories"]> {
+    return this.#baseIdsCache.getSubCategories(props);
   }
 
-  public getSubCategories(categoryId: Id64String): Observable<Array<SubCategoryId>> {
-    return this.#subCategoriesCache.getSubCategories(categoryId);
+  public getSubModels(props: Props<IBaseIdsCache["getSubModels"]>): ReturnType<IBaseIdsCache["getSubModels"]> {
+    return this.#baseIdsCache.getSubModels(props);
   }
+
+  public getSubModelsUnderElement(props: Props<IBaseIdsCache["getSubModelsUnderElement"]>): ReturnType<IBaseIdsCache["getSubModelsUnderElement"]> {
+    return this.#baseIdsCache.getSubModelsUnderElement(props);
+  }
+
+  public getElementsCount(props: Props<IBaseIdsCache["getElementsCount"]>): ReturnType<IBaseIdsCache["getElementsCount"]> {
+    return this.#baseIdsCache.getElementsCount(props);
+  }
+
+  public getCategories(props: Props<IBaseIdsCache["getCategories"]>): ReturnType<IBaseIdsCache["getCategories"]> {
+    return this.#baseIdsCache.getCategories(props);
+  }
+
+  public getModels(props: Props<IBaseIdsCache["getModels"]>): ReturnType<IBaseIdsCache["getModels"]> {
+    return this.#baseIdsCache.getModels(props);
+  }
+
+  public getAllCategoriesOfElements(): ReturnType<BaseIdsCache["getAllCategoriesOfElements"]> {
+    return this.#baseIdsCache.getAllCategoriesOfElements();
+  }
+
+  // Re-export BaseIdsCache methods that are needed for models tree specific functionality
+
+  public getCategoriesOfModelsTopMostElements(
+    props: Props<BaseIdsCache["getCategoriesOfModelsTopMostElements"]>,
+  ): ReturnType<BaseIdsCache["getCategoriesOfModelsTopMostElements"]> {
+    return this.#baseIdsCache.getCategoriesOfModelsTopMostElements(props);
+  }
+
+  // Implement models tree specific methods
 
   private querySubjects(): Observable<{ id: SubjectId; parentId?: SubjectId; targetPartitionId?: ModelId; hideInHierarchy: boolean }> {
     return defer(() => {
@@ -362,36 +357,6 @@ export class ModelsTreeIdsCache implements Disposable {
     return entry;
   }
 
-  public getAllCategoriesOfElements(): Observable<Id64Set> {
-    return this.#elementModelCategoriesCache.getAllCategoriesOfElements();
-  }
-
-  public getCategoriesOfModelsTopMostElements(modelIds: Id64Array): Observable<Id64Set> {
-    return this.#elementModelCategoriesCache.getCategoriesOfModelsTopMostElements(modelIds);
-  }
-
-  public getModelCategoryIds(props: { modelId: Id64String; includeOnlyIfCategoryOfTopMostElement?: boolean }): Observable<Id64Set> {
-    return this.#elementModelCategoriesCache.getModelCategoryIds(props);
-  }
-
-  public getSubModelsUnderElement(elementId: Id64String): Observable<Id64Array> {
-    return this.#modeledElementsCache.getSubModelsUnderElement(elementId);
-  }
-
-  public getCategoryModeledElements(props: { modelId: Id64String; categoryId: Id64String }): Observable<Id64String> {
-    return this.#modeledElementsCache.getCategoryModeledElements(props);
-  }
-
-  public getCategoryElementModels({
-    categoryId,
-    includeOnlyIfCategoryOfTopMostElement,
-  }: {
-    categoryId: Id64String;
-    includeOnlyIfCategoryOfTopMostElement?: boolean;
-  }): Observable<Array<ModelId>> {
-    return this.#elementModelCategoriesCache.getCategoryElementModels({ categoryId, includeOnlyIfCategoryOfTopMostElement });
-  }
-
   public createModelInstanceKeyPaths(modelId: Id64String): Observable<HierarchyNodeIdentifiersPath[]> {
     let entry = this.#modelKeyPaths.get(modelId);
     if (!entry) {
@@ -410,25 +375,19 @@ export class ModelsTreeIdsCache implements Disposable {
     return entry;
   }
 
-  public getCategoryElementsCount(props: { modelId: Id64String; categoryId: Id64String }): Observable<number> {
-    return this.#categoryElementCounts.getCategoryElementsCount(props);
-  }
-
   public createCategoryInstanceKeyPaths(categoryId: Id64String): Observable<HierarchyNodeIdentifiersPath[]> {
     let entry = this.#categoryKeyPaths.get(categoryId);
     if (!entry) {
-      entry = this.#elementModelCategoriesCache
-        .getCategoryElementModels({ categoryId, includeSubModels: true, includeOnlyIfCategoryOfTopMostElement: true })
-        .pipe(
-          mergeAll(),
-          mergeMap((categoryModelId) => this.createModelInstanceKeyPaths(categoryModelId)),
-          mergeAll(),
-          reduce((acc, modelPath) => {
-            acc.push([...modelPath, { className: CLASS_NAME_SpatialCategory, id: categoryId }]);
-            return acc;
-          }, new Array<HierarchyNodeIdentifiersPath>()),
-          shareReplay(),
-        );
+      entry = this.#baseIdsCache.getModels({ categoryId, includeSubModels: true, includeOnlyIfCategoryOfTopMostElement: true }).pipe(
+        mergeAll(),
+        mergeMap((categoryModelId) => this.createModelInstanceKeyPaths(categoryModelId)),
+        mergeAll(),
+        reduce((acc, modelPath) => {
+          acc.push([...modelPath, { className: CLASS_NAME_SpatialCategory, id: categoryId }]);
+          return acc;
+        }, new Array<HierarchyNodeIdentifiersPath>()),
+        shareReplay(),
+      );
       this.#categoryKeyPaths.set(categoryId, entry);
     }
     return entry;

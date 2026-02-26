@@ -562,7 +562,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       ? parseIdsSelectorResult(parentNode.extendedData?.modelIds)
       : await firstValueFrom(
           from(categoryIds).pipe(
-            mergeMap((categoryId) => this.#idsCache.getCategoryElementModels({ categoryId })),
+            mergeMap((categoryId) => this.#idsCache.getModels({ categoryId })),
             mergeAll(),
             distinct(),
             toArray(),
@@ -574,7 +574,12 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     }
     const modeledElements = await firstValueFrom(
       from(modelIds).pipe(
-        mergeMap((modelId) => from(categoryIds).pipe(mergeMap((categoryId) => this.#idsCache.getCategoryModeledElements({ modelId, categoryId })))),
+        mergeMap((modelId) =>
+          from(categoryIds).pipe(
+            mergeMap((categoryId) => this.#idsCache.getSubModels({ modelId, categoryId })),
+            mergeAll(),
+          ),
+        ),
         toArray(),
       ),
     );

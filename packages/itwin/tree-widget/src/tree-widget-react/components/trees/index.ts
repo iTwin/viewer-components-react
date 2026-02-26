@@ -36,6 +36,7 @@ export { TreeRenderer } from "./common/components/TreeRenderer.js";
 export { VisibilityTreeRenderer } from "./common/components/VisibilityTreeRenderer.js";
 export { SkeletonTree } from "./common/components/SkeletonTree.js";
 export { HierarchyVisibilityHandler, VisibilityStatus } from "./common/UseHierarchyVisibility.js";
+export { SharedTreeContextProvider } from "./common/SharedTreeWidgetContextProvider.js";
 export { TelemetryContextProvider } from "./common/UseTelemetryContext.js";
 export { SearchLimitExceededError } from "./common/TreeErrors.js";
 
