@@ -17,6 +17,7 @@ import {
 import type { SelectOption } from "@itwin/itwinui-react";
 import { LabeledSelect } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../../useTranslation.js";
+import { useTelemetryContext } from "../../../../hooks/UseTelemetryContext.js";
 
 /** Properties of [[FormatTypeSelector]] component.
  * @alpha
@@ -106,9 +107,11 @@ interface FormatTypeOptionProps {
  */
 export function FormatTypeOption(props: FormatTypeOptionProps) {
   const { formatProps, onChange } = props;
+  const { onFeatureUsed } = useTelemetryContext();
 
   const handleFormatTypeChange = React.useCallback(
     (type: FormatType) => {
+      onFeatureUsed("format-type-change");
       let precision: number | undefined;
       let stationOffsetSize: number | undefined;
       let scientificType: string | undefined;
@@ -169,7 +172,7 @@ export function FormatTypeOption(props: FormatTypeOptionProps) {
       };
       onChange(newFormatProps);
     },
-    [formatProps, onChange]
+    [formatProps, onChange, onFeatureUsed]
   );
 
   const formatType = parseFormatType(formatProps.type, "format");

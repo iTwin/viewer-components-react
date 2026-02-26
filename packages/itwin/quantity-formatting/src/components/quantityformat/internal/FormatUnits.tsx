@@ -9,6 +9,7 @@ import * as React from "react";
 import { SvgHelpCircularHollow } from "@itwin/itwinui-icons-react";
 import { IconButton, Input, Label, Select } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../useTranslation.js";
+import { useTelemetryContext } from "../../../hooks/UseTelemetryContext.js";
 import { getUnitName } from "./misc/UnitDescr.js";
 
 import type {
@@ -215,6 +216,7 @@ export function FormatUnits(props: FormatUnitsProps) {
   const { initialFormat, persistenceUnit, unitsProvider, onUnitsChange } =
     props;
   const { translate } = useTranslation();
+  const { onFeatureUsed } = useTelemetryContext();
   const initialFormatRef = React.useRef<FormatDefinition>(initialFormat);
   const [formatProps, setFormatProps] = React.useState(initialFormat);
   const compositeSpacerSelectorId = React.useId();
@@ -236,6 +238,7 @@ export function FormatUnits(props: FormatUnitsProps) {
 
   const handleUnitLabelChange = React.useCallback(
     (newLabel: string, index: number) => {
+      onFeatureUsed("unit-label-change");
       if (
         formatProps.composite &&
         formatProps.composite.units.length > index &&
@@ -251,11 +254,12 @@ export function FormatUnits(props: FormatUnitsProps) {
         handleSetFormatProps(newFormatProps);
       }
     },
-    [formatProps, handleSetFormatProps]
+    [formatProps, handleSetFormatProps, onFeatureUsed]
   );
 
   const handleUnitChange = React.useCallback(
     (newUnit: string, index: number) => {
+      onFeatureUsed("unit-change");
       const unitParts = newUnit.split(/:/);
       if (unitParts[0] === "REMOVEUNIT") {
         if (formatProps.composite && formatProps.composite.units.length > 1) {
@@ -299,7 +303,7 @@ export function FormatUnits(props: FormatUnitsProps) {
         }
       }
     },
-    [formatProps, handleSetFormatProps]
+    [formatProps, handleSetFormatProps, onFeatureUsed]
   );
 
   const handleOnSpacerChange = React.useCallback(

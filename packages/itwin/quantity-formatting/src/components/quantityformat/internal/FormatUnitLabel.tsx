@@ -10,6 +10,7 @@ import { Format, FormatTraits, getTraitString } from "@itwin/core-quantity";
 import type { SelectOption } from "@itwin/itwinui-react";
 import { Checkbox, Label, LabeledSelect } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../useTranslation.js";
+import { useTelemetryContext } from "../../../hooks/UseTelemetryContext.js";
 
 /** Properties of [[UomSeparatorSelector]] component.
  * @internal
@@ -25,6 +26,7 @@ interface UomSeparatorSelectorProps {
 export function UomSeparatorSelector(props: UomSeparatorSelectorProps) {
   const { formatProps, onFormatChange } = props;
   const { translate } = useTranslation();
+  const { onFeatureUsed } = useTelemetryContext();
 
   const separatorOptions: SelectOption<string>[] = React.useMemo(() => {
     const uomDefaultEntries: SelectOption<string>[] = [
@@ -54,7 +56,10 @@ export function UomSeparatorSelector(props: UomSeparatorSelectorProps) {
         label={translate("QuantityFormat:labels.labelSeparator")}
         options={separatorOptions}
         value={formatProps.uomSeparator ?? ""}
-        onChange={(value: string) => onFormatChange({ ...formatProps, uomSeparator: value })}
+        onChange={(value: string) => {
+          onFeatureUsed("uom-separator-change");
+          onFormatChange({ ...formatProps, uomSeparator: value });
+        }}
         size="small"
         displayStyle="inline"
       />
@@ -76,6 +81,7 @@ interface AppendUnitLabelProps {
 export function AppendUnitLabel(props: AppendUnitLabelProps) {
   const { formatProps, onFormatChange } = props;
   const { translate } = useTranslation();
+  const { onFeatureUsed } = useTelemetryContext();
   const appendUnitLabelId = React.useId();
 
   const setFormatTrait = React.useCallback(
@@ -121,7 +127,10 @@ export function AppendUnitLabel(props: AppendUnitLabelProps) {
       <Checkbox
         id={appendUnitLabelId}
         checked={isFormatTraitSet(FormatTraits.ShowUnitLabel)}
-        onChange={(e) => setFormatTrait(FormatTraits.ShowUnitLabel, e.target.checked)}
+        onChange={(e) => {
+          onFeatureUsed("append-unit-label-toggle");
+          setFormatTrait(FormatTraits.ShowUnitLabel, e.target.checked);
+        }}
       />
     </div>
   );
