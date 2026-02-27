@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Enhance FeatureInfoUiItemsProvider: Add toolbar orientation and item priority options; update widget integration",
+  "packageName": "@itwin/map-layers",
+  "email": "omar.halbouni@bentley.com",
+  "dependentChangeType": "patch"
+}
