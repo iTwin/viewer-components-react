@@ -3031,7 +3031,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       };
     }
 
-    it("checking node visibility when search paths are not present returns 'hidden'", async function () {
+    it("returns 'disabled' when node has search paths but visibility handler doesn't", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const category = insertSpatialCategory({ builder, codeValue: "category" });
         const subCategory = insertSubCategory({
@@ -3071,7 +3071,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         viewport,
         // prettier-ignore
         expectations: {
-            [keys.category.id]: "hidden",
+            [keys.category.id]: "disabled",
               [keys.subCategory.id]: "visible",
           },
       });

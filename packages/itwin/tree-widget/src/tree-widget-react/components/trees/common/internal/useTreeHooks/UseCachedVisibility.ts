@@ -178,7 +178,7 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
             },
           ),
         ),
-        defaultIfEmpty(createVisibilityStatus("hidden")),
+        defaultIfEmpty(createVisibilityStatus("disabled")),
       ),
     );
   }
