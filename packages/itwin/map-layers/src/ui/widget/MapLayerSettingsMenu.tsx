@@ -94,7 +94,7 @@ export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, ac
   return (
     <>
       <DropdownMenu as="div" placement="bottom-start" menuItems={dropdownMenuItems} aria-disabled={disabled}>
-        <IconButton size="small" styleType="borderless">
+        <IconButton size="small" styleType="borderless" aria-label="More options">
           <SvgMoreVertical />
         </IconButton>
       </DropdownMenu>

@@ -5,16 +5,12 @@
 
 import { ConditionalBooleanValue } from "@itwin/appui-abstract";
 import {
-  StagePanelLocation,
-  StagePanelSection,
-  ToolbarItemUtilities,
-  ToolbarOrientation,
-  ToolbarUsage,
-  WidgetState
+  StagePanelLocation, StagePanelSection, ToolbarItemUtilities, ToolbarOrientation, ToolbarUsage, WidgetState,
 } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { SvgMapInfo } from "@itwin/itwinui-icons-react";
 import { MapFeatureInfoTool } from "@itwin/map-layers-formats";
+
 import { MapLayersUI } from "../mapLayers";
 import { MapLayersSyncUiEventId } from "../MapLayersActionIds";
 import { MapFeatureInfoWidget } from "./widget/FeatureInfoWidget";
@@ -50,7 +46,7 @@ const isMapFeatureInfoSupported = (): boolean => {
   return false;
 };
 
-export const getMapFeatureInfoToolItemDef = (itemPriority: number): ToolbarActionItem => {
+export const getMapFeatureInfoToolItemDef = (itemPriority: number, toolbarOrientation = ToolbarOrientation.Vertical): ToolbarActionItem => {
   return ToolbarItemUtilities.createActionItem({
     id: MapFeatureInfoTool.toolId,
     icon: <SvgMapInfo />, // TODO: Update to iconNode when moving to 5.x appui-react
@@ -66,7 +62,7 @@ export const getMapFeatureInfoToolItemDef = (itemPriority: number): ToolbarActio
     }, [MapLayersSyncUiEventId.MapImageryChanged]),
     layouts: {
       standard: {
-        orientation: ToolbarOrientation.Vertical,
+        orientation: toolbarOrientation,
         usage: ToolbarUsage.ContentManipulation,
       }
     }
@@ -81,13 +77,16 @@ export class FeatureInfoUiItemsProvider implements UiItemsProvider {
 
   public getToolbarItems(): ReadonlyArray<ToolbarItem> {
     if (!this._featureInfoOpts?.disableDefaultFeatureInfoTool) {
-      return [getMapFeatureInfoToolItemDef(60)];
+      return [getMapFeatureInfoToolItemDef(this._featureInfoOpts?.itemPriority ?? 60, this._featureInfoOpts?.toolbarOrientation)];
     }
 
     return [];
   }
 
   public getWidgets(): Widget[] {
+    if (this._featureInfoOpts?.disableDefaultWidget)
+      return [];
+
     const widgets: Widget[] = [];
     widgets.push({
       id: FeatureInfoUiItemsProvider.widgetId,
