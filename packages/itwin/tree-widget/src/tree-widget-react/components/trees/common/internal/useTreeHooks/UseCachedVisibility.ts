@@ -5,7 +5,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { defaultIfEmpty, EMPTY, filter, firstValueFrom, from, fromEventPattern, map, mergeMap, Subject, takeUntil, tap } from "rxjs";
-import { assert } from "@itwin/core-bentley";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { HierarchyVisibilityOverrideHandler } from "../../UseHierarchyVisibility.js";
 import { AlwaysAndNeverDrawnElementInfoCache } from "../caches/AlwaysAndNeverDrawnElementInfoCache.js";
@@ -269,8 +268,8 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
       key: ClassGroupingNodeKey | InstancesNodeKey;
     };
   }): Observable<TSearchTargets | undefined> {
-    assert(this.#searchResultsTree !== undefined);
-    return from(this.#searchResultsTree).pipe(map((searchResultsTree) => searchResultsTree.getSearchTargets(node)));
+    // Search results tree might be undefined, in such cases node has not yet refreshed.
+    return this.#searchResultsTree ? from(this.#searchResultsTree).pipe(map((searchResultsTree) => searchResultsTree.getSearchTargets(node))) : EMPTY;
   }
 
   private changeSearchResultsNodeVisibility({
