@@ -84,7 +84,7 @@ export class FeatureInfoUiItemsProvider implements UiItemsProvider {
   }
 
   public getWidgets(): Widget[] {
-    if (this._featureInfoOpts?.disableDefaultWidget)
+    if (this._featureInfoOpts?.disableDefaultFeatureInfoWidget)
       return [];
 
     const widgets: Widget[] = [];
