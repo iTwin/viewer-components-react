@@ -28,9 +28,11 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
         ++visibleCount;
       } else if (expectations[elementId] === "hidden") {
         ++hiddenCount;
-      } else {
+      } else if (expectations[elementId] === "partial") {
         ++hiddenCount;
         ++visibleCount;
+      } else if (expectations[elementId] === "disabled") {
+        expect(actualVisibility.isDisabled).to.eq(true, `Node, ${JSON.stringify(node)}`);
       }
       if (visibleCount > 0 && hiddenCount > 0) {
         expect(actualVisibility.state).to.eq("partial", `Node, ${JSON.stringify(node)}`);
@@ -44,8 +46,10 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
   if (CategoriesTreeNode.isSubCategoryNode(node)) {
     const { id } = node.key.instanceKeys[0];
     // One subCategory gets added when category is inserted
-    if (expectations[id] !== undefined) {
-      expect(actualVisibility.state).to.eq(expectations[id]);
+    if (expectations[id] === "disabled") {
+      expect(actualVisibility.isDisabled).to.eq(true, `Node, ${JSON.stringify(node)}`);
+    } else {
+      expect(actualVisibility.state).to.eq(expectations[id], `Node, ${JSON.stringify(node)}`);
     }
     return;
   }
@@ -56,12 +60,20 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
     if (modelIds !== undefined) {
       idToUse = `${modelIds[0]}-${id}`;
     }
-    expect(actualVisibility.state).to.eq(expectations[idToUse], `Node, ${JSON.stringify(node)}`);
+    if (expectations[idToUse] === "disabled") {
+      expect(actualVisibility.isDisabled).to.eq(true, `Node, ${JSON.stringify(node)}`);
+    } else {
+      expect(actualVisibility.state).to.eq(expectations[idToUse], `Node, ${JSON.stringify(node)}`);
+    }
     return;
   }
   if (CategoriesTreeNode.isModelNode(node) || CategoriesTreeNode.isDefinitionContainerNode(node) || CategoriesTreeNode.isElementNode(node)) {
     const { id } = node.key.instanceKeys[0];
-    expect(actualVisibility.state).to.eq(expectations[id], `Node, ${JSON.stringify(node)}`);
+    if (expectations[id] === "disabled") {
+      expect(actualVisibility.isDisabled).to.eq(true, `Node, ${JSON.stringify(node)}`);
+    } else {
+      expect(actualVisibility.state).to.eq(expectations[id], `Node, ${JSON.stringify(node)}`);
+    }
     return;
   }
   throw new Error(`Expected hierarchy to contain only definitionContainers, categories, subcategories, models and elements got ${JSON.stringify(node)}`);

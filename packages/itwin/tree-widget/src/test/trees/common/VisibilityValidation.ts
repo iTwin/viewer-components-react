@@ -12,7 +12,7 @@ import type { Visibility } from "../../../tree-widget-react/components/trees/com
 import type { TreeWidgetTestingViewport } from "../TreeUtils.js";
 
 export interface VisibilityExpectations {
-  [id: string]: Visibility;
+  [id: string]: Visibility | "disabled";
 }
 
 export interface ValidateNodeProps {
