@@ -268,7 +268,9 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
       key: ClassGroupingNodeKey | InstancesNodeKey;
     };
   }): Observable<TSearchTargets | undefined> {
-    // Search results tree might be undefined, in such cases node has not yet refreshed.
+    // There can be cases where search paths used to exist and are removed, search results tree becomes undefined,
+    // but visibility is re-requested for old nodes (have search paths).
+    // In such cases return EMPTY.
     return this.#searchResultsTree ? from(this.#searchResultsTree).pipe(map((searchResultsTree) => searchResultsTree.getSearchTargets(node))) : EMPTY;
   }
 

@@ -3031,6 +3031,52 @@ describe("CategoriesTreeVisibilityHandler", () => {
       };
     }
 
+    it("checking node visibility when search paths are not present returns 'hidden'", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const category = insertSpatialCategory({ builder, codeValue: "category" });
+        const subCategory = insertSubCategory({
+          builder,
+          parentCategoryId: category.id,
+          codeValue: "subCategory",
+        });
+        return { category, subCategory };
+      });
+      const { imodel, ...keys } = buildIModelResult;
+      const hierarchyConfig = { ...defaultHierarchyConfiguration, showElements: true, showEmptyCategories: true };
+      const imodelAccess = createIModelAccess(imodel);
+      using idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
+      const viewport = createTreeWidgetTestingViewport({
+        iModel: imodel,
+        viewType: "3d",
+        visibleByDefault: true,
+        subCategoriesOfCategories: [
+          {
+            categoryId: keys.category.id,
+            subCategories: [keys.subCategory.id, getDefaultSubCategoryId(keys.category.id)],
+          },
+        ],
+      });
+      using visibilityHandlerWithoutSearchPaths = createCategoriesTreeVisibilityHandler({
+        idsCache,
+        searchPaths: undefined,
+        imodelAccess,
+        viewport,
+        hierarchyConfig,
+      });
+
+      using providerWithSearchPaths = createProvider({ idsCache, imodelAccess, searchPaths: [[keys.category, keys.subCategory]], hierarchyConfig });
+      await validateCategoriesTreeHierarchyVisibility({
+        provider: providerWithSearchPaths,
+        handler: visibilityHandlerWithoutSearchPaths,
+        viewport,
+        // prettier-ignore
+        expectations: {
+            [keys.category.id]: "hidden",
+              [keys.subCategory.id]: "visible",
+          },
+      });
+    });
+
     describe("category with sub-categories hierarchy", () => {
       let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
       let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
