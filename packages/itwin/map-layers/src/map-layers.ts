@@ -7,7 +7,6 @@ export * from "./MapLayersActionIds";
 export * from "./MapLayersPrefBrowserStorage";
 export * from "./ui/Interfaces";
 export * from "./ui/MapLayersUiItemsProvider";
-export * from "./ui/widget/FeatureInfoDataProvider";
 export * from "./ui/FeatureInfoUiItemsProvider";
 export * from "./ui/widget/MapLayersWidget";
 export * from "./BaseMapPresets";
