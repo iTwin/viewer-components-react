@@ -70,7 +70,7 @@ export interface MapFeatureInfoOptions {
    * When true, the default widget will not be created, allowing you to display
    * the feature info content in a custom widget.
    */
-  disableDefaultWidget?: boolean;
+  disableDefaultFeatureInfoWidget?: boolean;
 }
 
 export interface CustomParamItem {
