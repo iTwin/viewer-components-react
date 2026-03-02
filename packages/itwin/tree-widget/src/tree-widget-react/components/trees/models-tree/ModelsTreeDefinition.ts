@@ -495,7 +495,12 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     });
     const modeledElements = await firstValueFrom(
       from(modelIds).pipe(
-        mergeMap((modelId) => from(categoryIds).pipe(mergeMap((categoryId) => this.#idsCache.getCategoryModeledElements({ modelId, categoryId })))),
+        mergeMap((modelId) =>
+          from(categoryIds).pipe(
+            mergeMap((categoryId) => this.#idsCache.getSubModels({ modelId, categoryId })),
+            mergeAll(),
+          ),
+        ),
         toArray(),
       ),
     );

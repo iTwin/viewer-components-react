@@ -19,8 +19,7 @@ type ChildElementsLoadingMap = Map<Id64String, Promise<void>>;
 interface ElementChildrenCacheProps {
   queryExecutor: LimitingECSqlQueryExecutor;
   elementClassName: string;
-  componentId?: GuidString;
-  viewType: "2d" | "3d";
+  componentId: GuidString;
 }
 
 /** @internal */
@@ -36,8 +35,8 @@ export class ElementChildrenCache {
   constructor(props: ElementChildrenCacheProps) {
     this.#queryExecutor = props.queryExecutor;
     this.#elementClassName = props.elementClassName;
-    this.#componentId = props.componentId ?? Guid.createValue();
-    this.#componentName = `ElementChildrenCache${props.viewType}`;
+    this.#componentId = props.componentId;
+    this.#componentName = "ElementChildrenCache";
     this.#childElementsMap = new Map();
     this.#childElementsLoadingMap = new Map();
   }

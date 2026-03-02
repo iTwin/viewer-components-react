@@ -21,15 +21,15 @@ export class ModelCategoryElementsCountCache implements Disposable {
   #requestsStream = new Subject<{ modelId: Id64String; categoryId: Id64String }>();
   #subscription: Subscription;
   #queryExecutor: LimitingECSqlQueryExecutor;
-  #elementsClassName: string;
+  #elementClassName: string;
   #componentId: GuidString;
   #componentName: string;
 
-  public constructor(props: { queryExecutor: LimitingECSqlQueryExecutor; elementsClassName: string; componentId: GuidString; viewType: "2d" | "3d" }) {
+  public constructor(props: { queryExecutor: LimitingECSqlQueryExecutor; elementClassName: string; componentId: GuidString }) {
     this.#componentId = props.componentId;
     this.#queryExecutor = props.queryExecutor;
-    this.#elementsClassName = props.elementsClassName;
-    this.#componentName = `ModelCategoryElementsCountCache${props.viewType}`;
+    this.#elementClassName = props.elementClassName;
+    this.#componentName = "ModelCategoryElementsCountCache";
     this.#subscription = this.#requestsStream
       .pipe(
         bufferTime(20),
@@ -72,7 +72,7 @@ export class ModelCategoryElementsCountCache implements Disposable {
                 `
                   CategoryElements(id, modelId, categoryId) AS (
                     SELECT ECInstanceId, Model.Id, Category.Id
-                    FROM ${this.#elementsClassName}
+                    FROM ${this.#elementClassName}
                     WHERE
                       Parent.Id IS NULL
                       AND (
@@ -82,7 +82,7 @@ export class ModelCategoryElementsCountCache implements Disposable {
                     UNION ALL
 
                     SELECT c.ECInstanceId, p.modelId, p.categoryId
-                    FROM ${this.#elementsClassName} c
+                    FROM ${this.#elementClassName} c
                     JOIN CategoryElements p ON c.Parent.Id = p.id
                   )
                 `,

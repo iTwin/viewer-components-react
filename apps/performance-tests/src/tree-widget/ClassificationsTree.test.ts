@@ -5,7 +5,7 @@
 
 import { expect } from "chai";
 import { SnapshotDb } from "@itwin/core-backend";
-import { ClassificationsTreeDefinition, ClassificationsTreeIdsCache } from "@itwin/tree-widget-react/internal";
+import { BaseIdsCache, ClassificationsTreeDefinition, ClassificationsTreeIdsCache } from "@itwin/tree-widget-react/internal";
 import { Datasets } from "../util/Datasets.js";
 import { run } from "../util/TestUtilities.js";
 import { StatelessHierarchyProvider } from "./StatelessHierarchyProvider.js";
@@ -48,19 +48,27 @@ function runClassificationsPerformanceTest({
   validateResult?: (result: number) => Promise<void> | void;
   only?: boolean;
 }) {
-  return run<{ imodel: SnapshotDb; imodelAccess: IModelAccess; idsCache: ClassificationsTreeIdsCache; hierarchyDefinition: HierarchyDefinition }>({
+  return run<{
+    imodel: SnapshotDb;
+    imodelAccess: IModelAccess;
+    idsCache: ClassificationsTreeIdsCache;
+    baseIdsCache: BaseIdsCache;
+    hierarchyDefinition: HierarchyDefinition;
+  }>({
     testName,
     only,
     setup: async () => {
       const imodel = SnapshotDb.openFile(Datasets.getIModelPath("50k classifications"));
       const imodelAccess = StatelessHierarchyProvider.createIModelAccess(imodel, "unbounded");
-      const idsCache = new ClassificationsTreeIdsCache(imodelAccess, hierarchyConfig);
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: "BisCore:GeometricElement3d", type: "3d" });
+      const idsCache = new ClassificationsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig, baseIdsCache });
       const hierarchyDefinition = new ClassificationsTreeDefinition({ imodelAccess, getIdsCache: () => idsCache, hierarchyConfig });
-      return { imodel, imodelAccess, idsCache, hierarchyDefinition };
+      return { imodel, imodelAccess, idsCache, baseIdsCache, hierarchyDefinition };
     },
     cleanup: (props) => {
       props.imodel.close();
       props.idsCache[Symbol.dispose]();
+      props.baseIdsCache[Symbol.dispose]();
     },
     test: async ({ imodelAccess, hierarchyDefinition }) => {
       using provider = new StatelessHierarchyProvider({

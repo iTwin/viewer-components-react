@@ -34,14 +34,14 @@ import { countInSet, fromWithRelease, getOptimalBatchSize, releaseMainThreadOnIt
 import { changeElementStateNoChildrenOperator, getVisibilityFromAlwaysAndNeverDrawnElementsImpl, mergeVisibilityStatuses } from "../VisibilityUtils.js";
 
 import type { Observable, Subscription } from "rxjs";
-import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, HierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
 import type { HierarchyVisibilityHandlerOverridableMethod, HierarchyVisibilityOverrideHandler, VisibilityStatus } from "../../UseHierarchyVisibility.js";
 import type { AlwaysAndNeverDrawnElementInfoCache } from "../caches/AlwaysAndNeverDrawnElementInfoCache.js";
+import type { BaseIdsCacheImpl } from "../caches/BaseIdsCache.js";
 import type { NonPartialVisibilityStatus } from "../Tooltip.js";
 import type { CategoryId, ModelId } from "../Types.js";
-import type { ChildrenTree } from "../Utils.js";
 
 /**
  * Functionality of tree visibility handler methods that can be overridden.
@@ -66,21 +66,6 @@ export interface BaseTreeVisibilityHandlerOverrides {
   >;
 }
 
-/** @internal */
-export interface BaseIdsCache {
-  getSubModelsUnderElement: (elementId: Id64String) => Observable<Id64Array>;
-  getElementsCount: (props: { modelId: Id64String; categoryId: Id64String }) => Observable<number>;
-  getSubCategories: (props: { categoryId: Id64String }) => Observable<Id64Array>;
-  getModels: (props: { categoryId: Id64String; includeOnlyIfCategoryOfTopMostElement?: boolean }) => Observable<Id64Arg>;
-  getCategories: (props: { modelId: Id64String; includeOnlyIfCategoryOfTopMostElement?: boolean }) => Observable<Id64Arg>;
-  getSubModels: (
-    props: { modelId: Id64String; categoryId?: Id64String } | { categoryId: Id64String; modelId: Id64String | undefined },
-  ) => Observable<Id64Array>;
-  getAllCategoriesOfElements: () => Observable<Id64Set>;
-  getChildElementsTree: (props: { elementIds: Id64Arg }) => Observable<ChildrenTree>;
-  getAllChildElementsCount: (props: { elementIds: Id64Arg }) => Observable<Map<Id64String, number>>;
-}
-
 /**
  * Interface for a tree visibility handler that provides methods to get and change visibility status of hierarchy nodes.
  * @internal
@@ -103,7 +88,7 @@ export interface BaseVisibilityHelperProps {
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfoCache;
   overrideHandler?: HierarchyVisibilityOverrideHandler;
   overrides?: BaseTreeVisibilityHandlerOverrides;
-  baseIdsCache: BaseIdsCache;
+  baseIdsCache: BaseIdsCacheImpl;
 }
 
 /**
@@ -249,25 +234,29 @@ export class BaseVisibilityHelper implements Disposable {
           // When always drawn exclusive mode is enabled need to get only models for which category has top most element.
           // This is because always/never drawn elements can be retrieved using top most category.
           // TODO fix with: https://github.com/iTwin/viewer-components-react/issues/1100
-          this.#props.baseIdsCache.getModels({ categoryId, includeOnlyIfCategoryOfTopMostElement: this.#props.viewport.isAlwaysDrawnExclusive }).pipe(
-            mergeMap((models) =>
-              merge(
-                from(Id64.iterable(models)).pipe(
-                  mergeMap((modelId) => this.getModelWithCategoryVisibilityStatus({ modelId, categoryId })),
-                  mergeVisibilityStatuses(),
-                ),
-                // For category not under specific model, need to check subCategories as well
-                this.#props.baseIdsCache
-                  .getSubCategories({ categoryId })
-                  .pipe(mergeMap((subCategoryIds) => this.getSubCategoriesVisibilityStatus({ categoryId, subCategoryIds }))),
-              ).pipe(
-                // This can happen when category does not have any geometric elements or sub-categories
-                defaultIfEmpty(
-                  createVisibilityStatus(!this.#props.viewport.isAlwaysDrawnExclusive && this.#props.viewport.viewsCategory(categoryId) ? "visible" : "hidden"),
+          this.#props.baseIdsCache
+            .getModels({ categoryId, includeOnlyIfCategoryOfTopMostElement: this.#props.viewport.isAlwaysDrawnExclusive, includeSubModels: true })
+            .pipe(
+              mergeMap((models) =>
+                merge(
+                  from(Id64.iterable(models)).pipe(
+                    mergeMap((modelId) => this.getModelWithCategoryVisibilityStatus({ modelId, categoryId })),
+                    mergeVisibilityStatuses(),
+                  ),
+                  // For category not under specific model, need to check subCategories as well
+                  this.#props.baseIdsCache
+                    .getSubCategories({ categoryId })
+                    .pipe(mergeMap((subCategoryIds) => this.getSubCategoriesVisibilityStatus({ categoryId, subCategoryIds }))),
+                ).pipe(
+                  // This can happen when category does not have any geometric elements or sub-categories
+                  defaultIfEmpty(
+                    createVisibilityStatus(
+                      !this.#props.viewport.isAlwaysDrawnExclusive && this.#props.viewport.viewsCategory(categoryId) ? "visible" : "hidden",
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
         ),
         mergeVisibilityStatuses(),
       );
@@ -548,7 +537,7 @@ export class BaseVisibilityHelper implements Disposable {
         map((categoryIdsBatch) => this.#props.viewport.changeCategoryDisplay({ categoryIds: categoryIdsBatch, display: on, enableAllSubCategories: false })),
       );
       const categoryModelsObs = from(Id64.iterable(categoryIds)).pipe(
-        mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), models: this.#props.baseIdsCache.getModels({ categoryId }) })),
+        mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), models: this.#props.baseIdsCache.getModels({ categoryId, includeSubModels: true }) })),
         reduce((acc, { models, categoryId }) => {
           for (const modelId of Id64.iterable(models)) {
             let entry = acc.get(modelId);

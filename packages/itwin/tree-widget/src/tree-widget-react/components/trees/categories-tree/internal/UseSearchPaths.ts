@@ -30,7 +30,7 @@ export function useSearchPaths({
   searchText,
   viewType,
   hierarchyConfiguration,
-  getCategoriesTreeIdsCache,
+  idsCache,
   onCategoriesFiltered,
   onSearchPathsChanged,
   componentId,
@@ -38,7 +38,7 @@ export function useSearchPaths({
   viewType: "2d" | "3d";
   searchText?: string;
   hierarchyConfiguration: CategoriesTreeHierarchyConfiguration;
-  getCategoriesTreeIdsCache: () => CategoriesTreeIdsCache;
+  idsCache: CategoriesTreeIdsCache;
   onCategoriesFiltered?: (categories: { categories: CategoryInfo[] | undefined; models?: Array<ModelId> }) => void;
   onSearchPathsChanged: (paths: HierarchySearchPaths | undefined) => void;
   componentId: GuidString;
@@ -70,13 +70,13 @@ export function useSearchPaths({
           abortSignal,
           label: searchText,
           viewType,
-          idsCache: getCategoriesTreeIdsCache(),
+          idsCache,
           hierarchyConfig: hierarchyConfiguration,
           componentId,
         });
         onSearchPathsChanged(paths);
         const { elementClass, modelClass } = getClassesByView(viewType);
-        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, getCategoriesTreeIdsCache(), elementClass, modelClass, hierarchyConfiguration));
+        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, idsCache, elementClass, modelClass, hierarchyConfiguration));
         return paths;
       } catch (e) {
         const newError = e instanceof SearchLimitExceededError ? "tooManySearchMatches" : "unknownSearchError";
@@ -88,7 +88,7 @@ export function useSearchPaths({
         return [];
       }
     };
-  }, [onCategoriesFiltered, searchText, onSearchPathsChanged, onFeatureUsed, viewType, getCategoriesTreeIdsCache, hierarchyConfiguration, componentId]);
+  }, [onCategoriesFiltered, searchText, onSearchPathsChanged, onFeatureUsed, viewType, idsCache, hierarchyConfiguration, componentId]);
 
   return {
     getPaths: getSearchPaths,

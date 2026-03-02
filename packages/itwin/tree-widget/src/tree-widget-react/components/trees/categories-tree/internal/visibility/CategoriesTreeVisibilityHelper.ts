@@ -140,13 +140,13 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
   /** Turns on category and its' related models. Does not turn on other categories contained in those models.*/
   private enableCategoryWithoutEnablingOtherCategories(categoryId: Id64String): Observable<void> {
     this.#props.viewport.changeCategoryDisplay({ categoryIds: categoryId, display: true });
-    return this.#props.idsCache.getCategoryElementModels({ categoryId, includeSubModels: true }).pipe(
+    return this.#props.idsCache.getModels({ categoryId, includeSubModels: true }).pipe(
       mergeAll(),
       mergeMap((modelId) => {
         this.#props.viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: categoryId, override: "none" });
         return this.#props.viewport.viewsModel(modelId)
           ? EMPTY
-          : this.#props.idsCache.getModelCategoryIds({ modelId }).pipe(
+          : this.#props.idsCache.getCategories({ modelId }).pipe(
               map((allModelCategories) => {
                 // Add 'Hide' override to categories that were hidden before model is turned on
                 for (const modelCategoryId of allModelCategories) {
