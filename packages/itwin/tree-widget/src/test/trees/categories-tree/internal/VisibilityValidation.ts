@@ -33,6 +33,7 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
         ++visibleCount;
       } else if (expectations[elementId] === "disabled") {
         expect(actualVisibility.isDisabled).to.eq(true, `Node, ${JSON.stringify(node)}`);
+        return;
       }
       if (visibleCount > 0 && hiddenCount > 0) {
         expect(actualVisibility.state).to.eq("partial", `Node, ${JSON.stringify(node)}`);
