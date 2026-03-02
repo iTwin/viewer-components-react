@@ -3105,7 +3105,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
       const { imodel, ...keys } = buildIModelResult;
       const hierarchyConfig = { ...defaultHierarchyConfiguration, showElements: true, showEmptyCategories: true };
       const imodelAccess = createIModelAccess(imodel);
-      using idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       const viewport = createTreeWidgetTestingViewport({
         iModel: imodel,
         viewType: "3d",
