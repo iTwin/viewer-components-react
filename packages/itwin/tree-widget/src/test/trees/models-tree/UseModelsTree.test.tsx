@@ -13,7 +13,7 @@ import { HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { createStorage } from "@itwin/unified-selection";
 import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../../tree-widget-react/components/trees/common/FocusedInstancesContext.js";
-import { SharedTreeContextProviderInternal } from "../../../tree-widget-react/components/trees/common/internal/SharedTreeWidgetContextProviderInternal.js";
+import { SharedTreeContextProviderInternal } from "../../../tree-widget-react/components/trees/common/internal/SharedTreeContextProviderInternal.js";
 import { useModelsTree } from "../../../tree-widget-react/components/trees/models-tree/UseModelsTree.js";
 import { TreeWidget } from "../../../tree-widget-react/TreeWidget.js";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../IModelUtils.js";

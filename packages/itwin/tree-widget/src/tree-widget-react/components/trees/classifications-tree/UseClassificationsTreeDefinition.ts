@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useMemo } from "react";
-import { useSharedTreeContextInternal } from "../common/internal/SharedTreeWidgetContextProviderInternal.js";
+import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { createIModelAccess } from "../common/internal/UseIModelAccess.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";

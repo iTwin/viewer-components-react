@@ -20,7 +20,7 @@ import {
   TooManySearchMatches,
   UnknownInstanceFocusError,
 } from "../common/components/EmptyTree.js";
-import { useSharedTreeContextInternal } from "../common/internal/SharedTreeWidgetContextProviderInternal.js";
+import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { useGuid } from "../common/internal/useGuid.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";

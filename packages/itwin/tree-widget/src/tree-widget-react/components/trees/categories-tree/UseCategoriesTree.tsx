@@ -12,7 +12,7 @@ import classSvg from "@stratakit/icons/bis-class.svg";
 import definitionContainerSvg from "@stratakit/icons/bis-definitions-container.svg";
 import elementSvg from "@stratakit/icons/bis-element.svg";
 import { EmptyTreeContent, NoSearchMatches, SearchUnknownError, TooManySearchMatches } from "../common/components/EmptyTree.js";
-import { useSharedTreeContextInternal } from "../common/internal/SharedTreeWidgetContextProviderInternal.js";
+import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { useGuid } from "../common/internal/useGuid.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { getClassesByView } from "../common/internal/Utils.js";

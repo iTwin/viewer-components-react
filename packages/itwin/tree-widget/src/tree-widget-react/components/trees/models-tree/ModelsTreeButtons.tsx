@@ -14,7 +14,7 @@ import visibilityInvertSvg from "@stratakit/icons/visibility-invert.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
-import { useSharedTreeContextInternal } from "../common/internal/SharedTreeWidgetContextProviderInternal.js";
+import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { getClassesByView } from "../common/internal/Utils.js";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAll, toggleModels } from "../common/Utils.js";
 

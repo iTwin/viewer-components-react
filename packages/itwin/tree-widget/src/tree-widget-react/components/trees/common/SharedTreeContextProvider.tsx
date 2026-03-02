@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { SharedTreeContextProviderInternal } from "./internal/SharedTreeWidgetContextProviderInternal.js";
+import { SharedTreeContextProviderInternal } from "./internal/SharedTreeContextProviderInternal.js";
 
 import type { PropsWithChildren } from "react";
 
