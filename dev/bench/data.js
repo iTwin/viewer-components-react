@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1771920177054,
+  "lastUpdate": 1772435521457,
   "repoUrl": "https://github.com/iTwin/viewer-components-react",
   "entries": {
     "Tree-Widget benchmark": [
@@ -10398,6 +10398,129 @@ window.BENCHMARK_DATA = {
             "value": 80,
             "unit": "ms",
             "extra": "count: 7\nmax: 80\np95: 80\nmedian: 65"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "660f2442b1d33958f963d09c05268de60d61fe83",
+          "message": "Bump fast-xml-parser from 5.3.6 to 5.3.8 in /packages/itwin/tree-widget (#1614)\n\nBumps [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser) from 5.3.6 to 5.3.8.\n- [Release notes](https://github.com/NaturalIntelligence/fast-xml-parser/releases)\n- [Changelog](https://github.com/NaturalIntelligence/fast-xml-parser/blob/master/CHANGELOG.md)\n- [Commits](https://github.com/NaturalIntelligence/fast-xml-parser/compare/v5.3.6...v5.3.8)\n\n---\nupdated-dependencies:\n- dependency-name: fast-xml-parser\n  dependency-version: 5.3.8\n  dependency-type: direct:development\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2026-03-02T09:02:15+02:00",
+          "tree_id": "6db93eb71f382c7e9a22c219f4d138e12576d43e",
+          "url": "https://github.com/iTwin/viewer-components-react/commit/660f2442b1d33958f963d09c05268de60d61fe83"
+        },
+        "date": 1772435518625,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "categories tree creates initial filtered view for 50k items",
+            "value": 1713.55,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree creates initial filtered view for 50k items (P95 of main thread blocks)",
+            "value": 317,
+            "unit": "ms",
+            "extra": "count: 6\nmax: 317\np95: 317\nmedian: 31.5"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k subCategories",
+            "value": 7764.96,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k subCategories (P95 of main thread blocks)",
+            "value": 63,
+            "unit": "ms",
+            "extra": "count: 1\nmax: 63\np95: 63\nmedian: 63"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k categories",
+            "value": 11718.66,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k categories (P95 of main thread blocks)",
+            "value": 163,
+            "unit": "ms",
+            "extra": "count: 49\nmax: 243\np95: 163\nmedian: 46"
+          },
+          {
+            "name": "models tree creates initial filtered view for 50k target items",
+            "value": 1100.89,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree creates initial filtered view for 50k target items (P95 of main thread blocks)",
+            "value": 82,
+            "unit": "ms",
+            "extra": "count: 12\nmax: 82\np95: 82\nmedian: 37"
+          },
+          {
+            "name": "models tree validates categories visibility for imodel with 50k categories",
+            "value": 12250.55,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree validates categories visibility for imodel with 50k categories (P95 of main thread blocks)",
+            "value": 81,
+            "unit": "ms",
+            "extra": "count: 10\nmax: 81\np95: 81\nmedian: 47"
+          },
+          {
+            "name": "models tree changing model visibility changes visibility for 50k elements",
+            "value": 4077.63,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing model visibility changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 99,
+            "unit": "ms",
+            "extra": "count: 3\nmax: 99\np95: 99\nmedian: 48"
+          },
+          {
+            "name": "models tree changing category visibility changes visibility for 50k elements",
+            "value": 4021.28,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing category visibility changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 65,
+            "unit": "ms",
+            "extra": "count: 4\nmax: 65\np95: 65\nmedian: 35.5"
+          },
+          {
+            "name": "models tree changing per-model-category override changes visibility for 50k elements",
+            "value": 3853.83,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing per-model-category override changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 94,
+            "unit": "ms",
+            "extra": "count: 2\nmax: 94\np95: 94\nmedian: 65.5"
+          },
+          {
+            "name": "models tree changing element visibility changes only parent nodes visibility with 50k elements",
+            "value": 7368.33,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing element visibility changes only parent nodes visibility with 50k elements (P95 of main thread blocks)",
+            "value": 152,
+            "unit": "ms",
+            "extra": "count: 10\nmax: 152\np95: 152\nmedian: 80.5"
           }
         ]
       }
