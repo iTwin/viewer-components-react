@@ -5,7 +5,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { defaultIfEmpty, EMPTY, filter, firstValueFrom, from, fromEventPattern, map, mergeMap, Subject, takeUntil, tap } from "rxjs";
-import { assert } from "@itwin/core-bentley";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { HierarchyVisibilityOverrideHandler } from "../../UseHierarchyVisibility.js";
 import { AlwaysAndNeverDrawnElementInfoCache } from "../caches/AlwaysAndNeverDrawnElementInfoCache.js";
@@ -179,7 +178,7 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
             },
           ),
         ),
-        defaultIfEmpty(createVisibilityStatus("hidden")),
+        defaultIfEmpty(createVisibilityStatus("disabled")),
       ),
     );
   }
@@ -269,8 +268,10 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
       key: ClassGroupingNodeKey | InstancesNodeKey;
     };
   }): Observable<TSearchTargets | undefined> {
-    assert(this.#searchResultsTree !== undefined);
-    return from(this.#searchResultsTree).pipe(map((searchResultsTree) => searchResultsTree.getSearchTargets(node)));
+    // There can be cases where search paths used to exist and are removed, search results tree becomes undefined,
+    // but visibility is re-requested for old nodes (have search paths).
+    // In such cases return EMPTY.
+    return this.#searchResultsTree ? from(this.#searchResultsTree).pipe(map((searchResultsTree) => searchResultsTree.getSearchTargets(node))) : EMPTY;
   }
 
   private changeSearchResultsNodeVisibility({

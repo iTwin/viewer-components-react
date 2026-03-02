@@ -106,6 +106,7 @@ export function useClassificationsTree({
       highlightText: searchText,
     },
     getTreeItemProps: (node, rendererProps) => ({
+      ...rendererProps.getTreeItemProps?.(node),
       decorations: <ClassificationsTreeIcon node={node} />,
       ...getTreeItemProps?.(node, rendererProps),
     }),
