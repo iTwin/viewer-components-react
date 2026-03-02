@@ -282,10 +282,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
               [keys.definitionContainerChild.id]: "visible",
                 [keys.indirectCategory.id]: "visible",
                   [keys.indirectSubCategory.id]: "visible",
+                  [getDefaultSubCategoryId(keys.indirectCategory.id)]: "visible",
 
             [keys.definitionContainerRoot2.id]: "hidden",
               [keys.category2.id]: "hidden",
                 [keys.subCategory2.id]: "hidden",
+                [getDefaultSubCategoryId(keys.category2.id)]: "hidden",
           },
         });
       });
@@ -522,9 +524,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [keys.category.id]: "visible",
+              [getDefaultSubCategoryId(keys.category.id)]: "visible",
               [keys.subCategory.id]: "visible",
 
             [keys.category2.id]: "hidden",
+              [getDefaultSubCategoryId(keys.category2.id)]: "hidden",
               [keys.subCategory2.id]: "hidden",
           },
         });
@@ -574,10 +578,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [keys.category.id]: "visible",
+              [getDefaultSubCategoryId(keys.category.id)]: "visible",
               [keys.subCategory.id]: "visible",
 
             [keys.definitionContainer.id]: "hidden",
               [keys.category2.id]: "hidden",
+                [getDefaultSubCategoryId(keys.category2.id)]: "hidden",
                 [keys.subCategory2.id]: "hidden",
           },
         });
@@ -628,9 +634,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
           expectations: {
             [keys.definitionContainerRoot.id]: "partial",
               [keys.category.id]: "visible",
+                [getDefaultSubCategoryId(keys.category.id)]: "visible",
                 [keys.subCategory.id]: "visible",
 
               [keys.category2.id]: "hidden",
+                [getDefaultSubCategoryId(keys.category2.id)]: "hidden",
                 [keys.subCategory2.id]: "hidden",
           },
         });
@@ -676,9 +684,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
             [keys.definitionContainerRoot.id]: "partial",
               [keys.category.id]: "visible",
                 [keys.subCategory.id]: "visible",
+                [getDefaultSubCategoryId(keys.category.id)]: "visible",
 
               [keys.definitionContainerChild.id]: "hidden",
                 [keys.indirectCategory.id]: "hidden",
+                  [getDefaultSubCategoryId(keys.indirectCategory.id)]: "hidden",
           },
         });
       });
@@ -772,6 +782,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [keys.category.id]: "partial",
+              [getDefaultSubCategoryId(keys.category.id)]: "hidden",
               [keys.subCategory.id]: "visible",
               [keys.subCategory2.id]: "hidden",
           },
@@ -810,9 +821,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [keys.category.id]: "partial",
+              [getDefaultSubCategoryId(keys.category.id)]: "hidden",
               [keys.subCategory.id]: "visible",
 
             [keys.category2.id]: "hidden",
+              [getDefaultSubCategoryId(keys.category2.id)]: "hidden",
           },
         });
       });
@@ -852,6 +865,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             [keys.definitionContainerRoot.id]: "partial",
               [keys.category.id]: "partial",
                 [keys.subCategory.id]: "visible",
+                [getDefaultSubCategoryId(keys.category.id)]: "hidden",
           },
         });
       });
@@ -901,9 +915,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
             [keys.definitionContainerRoot.id]: "hidden",
               [keys.categoryOfDefinitionContainer.id]: "hidden",
                 [keys.subCategoryOfDefinitionContainer.id]: "hidden",
+                [getDefaultSubCategoryId(keys.categoryOfDefinitionContainer.id)]: "hidden",
 
             [keys.category.id]: "partial",
               [keys.subCategory.id]: "visible",
+              [getDefaultSubCategoryId(keys.category.id)]: "hidden",
           },
         });
       });
@@ -1009,11 +1025,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
               [keys.definitionContainerRoot.id]: "visible",
                 [keys.definitionContainerChild.id]: "visible",
                   [keys.indirectCategory.id]: "visible",
+                    [getDefaultSubCategoryId(keys.indirectCategory.id)]: "visible",
                     [keys.indirectElement.id]: "visible",
                     [keys.indirectSubCategory.id]: "visible",
 
               [keys.definitionContainerRoot2.id]: "hidden",
                 [keys.category2.id]: "hidden",
+                  [getDefaultSubCategoryId(keys.category2.id)]: "hidden",
                   [keys.element2.id]: "hidden",
                   [keys.subCategory2.id]: "hidden",
             },
@@ -1232,10 +1250,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
             // prettier-ignore
             expectations: {
               [keys.category.id]: "visible",
+                [getDefaultSubCategoryId(keys.category.id)]: "visible",
                 [keys.element.id]: "visible",
                 [keys.subCategory.id]: "visible",
 
               [keys.category2.id]: "hidden",
+                [getDefaultSubCategoryId(keys.category2.id)]: "hidden",
                 [keys.element2.id]: "hidden",
                 [keys.subCategory2.id]: "hidden",
             },
@@ -1287,11 +1307,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
             // prettier-ignore
             expectations: {
               [keys.category.id]: "visible",
+                [getDefaultSubCategoryId(keys.category.id)]: "visible",
                 [keys.subCategory.id]: "visible",
                 [keys.element.id]: "visible",
 
               [keys.definitionContainer.id]: "hidden",
                 [keys.category2.id]: "hidden",
+                  [getDefaultSubCategoryId(keys.category2.id)]: "hidden",
                   [keys.subCategory2.id]: "hidden",
                   [keys.element2.id]: "hidden",
             },
@@ -1344,10 +1366,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
             expectations: {
               [keys.definitionContainerRoot.id]: "partial",
                 [keys.category.id]: "visible",
+                  [getDefaultSubCategoryId(keys.category.id)]: "visible",
                   [keys.subCategory.id]: "visible",
                   [keys.element.id]: "visible",
 
                 [keys.category2.id]: "hidden",
+                  [getDefaultSubCategoryId(keys.category2.id)]: "hidden",
                   [keys.subCategory2.id]: "hidden",
                   [keys.element2.id]: "hidden",
             },
@@ -1395,9 +1419,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
               [keys.definitionContainerRoot.id]: "partial",
                 [keys.definitionContainerChild.id]: "hidden",
                   [keys.indirectCategory.id]: "hidden",
+                    [getDefaultSubCategoryId(keys.indirectCategory.id)]: "hidden",
                     [keys.indirectElement.id]: "hidden",
 
                 [keys.category.id]: "visible",
+                  [getDefaultSubCategoryId(keys.category.id)]: "visible",
                   [keys.subCategory.id]: "visible",
                   [keys.element.id]: "visible",
             },
@@ -1443,6 +1469,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             // prettier-ignore
             expectations: {
               [keys.category.id]: "partial",
+                [getDefaultSubCategoryId(keys.category.id)]: "hidden",
                 [keys.subCategory.id]: "visible",
                 [keys.subCategory2.id]: "hidden",
                 [keys.element.id]: "hidden",
@@ -1490,10 +1517,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
             // prettier-ignore
             expectations: {
               [keys.category.id]: "partial",
+                [getDefaultSubCategoryId(keys.category.id)]: "hidden",
                 [keys.subCategory.id]: "visible",
                 [keys.element.id]: "hidden",
 
               [keys.category2.id]: "hidden",
+                [getDefaultSubCategoryId(keys.category2.id)]: "hidden",
                 [keys.element2.id]: "hidden",
             },
           });
@@ -1535,6 +1564,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             expectations: {
               [keys.definitionContainerRoot.id]: "partial",
                 [keys.category.id]: "partial",
+                  [getDefaultSubCategoryId(keys.category.id)]: "hidden",
                   [keys.subCategory.id]: "visible",
                   [keys.element.id]: "hidden",
             },
@@ -1602,10 +1632,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
             expectations: {
               [keys.definitionContainerRoot.id]: "hidden",
                 [keys.categoryOfDefinitionContainer.id]: "hidden",
+                  [getDefaultSubCategoryId(keys.categoryOfDefinitionContainer.id)]: "hidden",
                   [keys.subCategoryOfDefinitionContainer.id]: "hidden",
                   [keys.elementOfDefinitionContainer.id]: "hidden",
 
               [keys.category.id]: "partial",
+                [getDefaultSubCategoryId(keys.category.id)]: "hidden",
                 [keys.subCategory.id]: "visible",
                 [keys.element.id]: "hidden",
             },
@@ -1655,6 +1687,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             // prettier-ignore
             expectations: {
               [keys.category.id]: "partial",
+                [getDefaultSubCategoryId(keys.category.id)]: "hidden",
                 [keys.subCategory.id]: "hidden",
                 [keys.subCategory2.id]: "hidden",
                 [keys.element.id]: "visible",
@@ -1699,10 +1732,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
             // prettier-ignore
             expectations: {
               [keys.category.id]: "partial",
+                [getDefaultSubCategoryId(keys.category.id)]: "hidden",
                 [keys.subCategory.id]: "hidden",
                 [keys.element.id]: "visible",
 
               [keys.category2.id]: "hidden",
+                [getDefaultSubCategoryId(keys.category2.id)]: "hidden",
                 [keys.element2.id]: "hidden",
             },
           });
@@ -1747,6 +1782,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             expectations: {
               [keys.definitionContainerRoot.id]: "partial",
                 [keys.category.id]: "partial",
+                  [getDefaultSubCategoryId(keys.category.id)]: "hidden",
                   [keys.subCategory.id]: "hidden",
                   [keys.element.id]: "visible",
                     [keys.childElement.id]: "visible",
@@ -1816,10 +1852,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
             expectations: {
               [keys.definitionContainerRoot.id]: "hidden",
                 [keys.categoryOfDefinitionContainer.id]: "hidden",
+                  [getDefaultSubCategoryId(keys.categoryOfDefinitionContainer.id)]: "hidden",
                   [keys.subCategoryOfDefinitionContainer.id]: "hidden",
                   [keys.elementOfDefinitionContainer.id]: "hidden",
 
               [keys.category.id]: "partial",
+                [getDefaultSubCategoryId(keys.category.id)]: "hidden",
                 [keys.subCategory.id]: "visible",
                 [keys.element.id]: "hidden",
             },
@@ -2389,10 +2427,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
               [keys.definitionContainerChild.id]: "hidden",
                 [keys.indirectCategory.id]: "hidden",
                   [keys.indirectSubCategory.id]: "hidden",
+                  [getDefaultSubCategoryId(keys.indirectCategory.id)]: "hidden",
 
             [keys.definitionContainerRoot2.id]: "visible",
               [keys.category2.id]: "visible",
                 [keys.subCategory2.id]: "visible",
+                [getDefaultSubCategoryId(keys.category2.id)]: "visible",
           },
         });
       });
@@ -2582,9 +2622,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
           expectations: {
             [keys.category.id]: "hidden",
               [keys.subCategory.id]: "hidden",
+              [getDefaultSubCategoryId(keys.category.id)]: "hidden",
 
             [keys.category2.id]: "visible",
               [keys.subCategory2.id]: "visible",
+              [getDefaultSubCategoryId(keys.category2.id)]: "visible",
           },
         });
       });
@@ -2634,10 +2676,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
           expectations: {
             [keys.category.id]: "hidden",
               [keys.subCategory.id]: "hidden",
+              [getDefaultSubCategoryId(keys.category.id)]: "hidden",
 
             [keys.definitionContainer.id]: "visible",
               [keys.category2.id]: "visible",
                 [keys.subCategory2.id]: "visible",
+                [getDefaultSubCategoryId(keys.category2.id)]: "visible",
           },
         });
       });
@@ -2688,9 +2732,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
             [keys.definitionContainerRoot.id]: "partial",
               [keys.category.id]: "hidden",
                 [keys.subCategory.id]: "hidden",
+                [getDefaultSubCategoryId(keys.category.id)]: "hidden",
 
               [keys.category2.id]: "visible",
                 [keys.subCategory2.id]: "visible",
+                [getDefaultSubCategoryId(keys.category2.id)]: "visible",
           },
         });
       });
@@ -2735,9 +2781,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
             [keys.definitionContainerRoot.id]: "partial",
               [keys.category.id]: "hidden",
                 [keys.subCategory.id]: "hidden",
+                [getDefaultSubCategoryId(keys.category.id)]: "hidden",
 
               [keys.definitionContainerChild.id]: "visible",
                 [keys.indirectCategory.id]: "visible",
+                  [getDefaultSubCategoryId(keys.indirectCategory.id)]: "visible",
           },
         });
       });
@@ -2779,6 +2827,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [keys.category.id]: "partial",
+              [getDefaultSubCategoryId(keys.category.id)]: "visible",
               [keys.subCategory.id]: "hidden",
               [keys.subCategory2.id]: "visible",
           },
@@ -2818,8 +2867,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
           expectations: {
             [keys.category.id]: "partial",
               [keys.subCategory.id]: "hidden",
+              [getDefaultSubCategoryId(keys.category.id)]: "visible",
 
             [keys.category2.id]: "visible",
+              [getDefaultSubCategoryId(keys.category2.id)]: "visible",
           },
         });
       });
@@ -2859,6 +2910,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             [keys.definitionContainerRoot.id]: "partial",
               [keys.category.id]: "partial",
                 [keys.subCategory.id]: "hidden",
+                [getDefaultSubCategoryId(keys.category.id)]: "visible",
           },
         });
       });
@@ -2908,9 +2960,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
             [keys.definitionContainerRoot.id]: "visible",
               [keys.categoryOfDefinitionContainer.id]: "visible",
                 [keys.subCategoryOfDefinitionContainer.id]: "visible",
+                [getDefaultSubCategoryId(keys.categoryOfDefinitionContainer.id)]: "visible",
 
             [keys.category.id]: "partial",
               [keys.subCategory.id]: "hidden",
+              [getDefaultSubCategoryId(keys.category.id)]: "visible",
           },
         });
       });
@@ -3037,6 +3091,52 @@ describe("CategoriesTreeVisibilityHandler", () => {
         },
       };
     }
+
+    it("returns 'disabled' when node has search paths but visibility handler doesn't", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const category = insertSpatialCategory({ builder, codeValue: "category" });
+        const subCategory = insertSubCategory({
+          builder,
+          parentCategoryId: category.id,
+          codeValue: "subCategory",
+        });
+        return { category, subCategory };
+      });
+      const { imodel, ...keys } = buildIModelResult;
+      const hierarchyConfig = { ...defaultHierarchyConfiguration, showElements: true, showEmptyCategories: true };
+      const imodelAccess = createIModelAccess(imodel);
+      using idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
+      const viewport = createTreeWidgetTestingViewport({
+        iModel: imodel,
+        viewType: "3d",
+        visibleByDefault: true,
+        subCategoriesOfCategories: [
+          {
+            categoryId: keys.category.id,
+            subCategories: [keys.subCategory.id, getDefaultSubCategoryId(keys.category.id)],
+          },
+        ],
+      });
+      using visibilityHandlerWithoutSearchPaths = createCategoriesTreeVisibilityHandler({
+        idsCache,
+        searchPaths: undefined,
+        imodelAccess,
+        viewport,
+        hierarchyConfig,
+      });
+
+      using providerWithSearchPaths = createProvider({ idsCache, imodelAccess, searchPaths: [[keys.category, keys.subCategory]], hierarchyConfig });
+      await validateCategoriesTreeHierarchyVisibility({
+        provider: providerWithSearchPaths,
+        handler: visibilityHandlerWithoutSearchPaths,
+        viewport,
+        // prettier-ignore
+        expectations: {
+            [keys.category.id]: "disabled",
+              [keys.subCategory.id]: "visible",
+          },
+      });
+    });
 
     describe("category with sub-categories hierarchy", () => {
       let createIModelResult: Awaited<ReturnType<typeof createIModel>>;

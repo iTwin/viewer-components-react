@@ -23,7 +23,11 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
     ClassificationsTreeNode.isGeometricElementNode(node)
   ) {
     const { id } = node.key.instanceKeys[0];
-    expect(actualVisibility.state).to.eq(expectations[id], `Node, ${JSON.stringify(node)}`);
+    if (expectations[id] === "disabled") {
+      expect(actualVisibility.isDisabled).to.eq(true, `Node, ${JSON.stringify(node)}`);
+    } else {
+      expect(actualVisibility.state).to.eq(expectations[id], `Node, ${JSON.stringify(node)}`);
+    }
     return;
   }
   throw new Error(`Expected hierarchy to contain only classification tables, classifications and elements got ${JSON.stringify(node)}`);

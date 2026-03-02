@@ -78,7 +78,7 @@ export function WidgetHeader({ defaultSelectedContentId, trees, onSelect, onSear
         </Select.Root>
       )}
       {selectedContent.isSearchable && (
-        <DebouncedSearchBox className={"tw-content-header-search"} isOpened={isSearchOpen} setIsOpened={setIsSearchOpen} onSearch={onSearch} delay={20} />
+        <DebouncedSearchBox className={"tw-content-header-search"} isOpened={isSearchOpen} setIsOpened={setIsSearchOpen} onSearch={onSearch} delay={300} />
       )}
     </div>
   );
