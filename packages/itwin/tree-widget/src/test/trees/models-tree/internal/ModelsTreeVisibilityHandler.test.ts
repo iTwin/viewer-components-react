@@ -14,6 +14,7 @@ import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
+import { BaseIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
 import {
   CLASS_NAME_GeometricModel3d,
   CLASS_NAME_SpatialCategory,
@@ -68,10 +69,25 @@ type ModelsTreeHierarchyConfiguration = Partial<ConstructorParameters<typeof Mod
 
 describe("ModelsTreeVisibilityHandler", () => {
   function createIdsCache(iModel: IModelConnection, hierarchyConfig?: ModelsTreeHierarchyConfiguration) {
-    return new ModelsTreeIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"), {
-      ...defaultHierarchyConfiguration,
-      ...hierarchyConfig,
+    const queryExecutor = createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded");
+    const baseIdsCache = new BaseIdsCache({
+      queryExecutor,
+      elementClassName: hierarchyConfig?.elementClassSpecification ?? defaultHierarchyConfiguration.elementClassSpecification,
+      type: "3d",
     });
+    const idsCache = new ModelsTreeIdsCache({
+      queryExecutor: createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"),
+      showEmptyModels: hierarchyConfig?.showEmptyModels ?? defaultHierarchyConfiguration.showEmptyModels,
+      hideRootSubject: hierarchyConfig?.hideRootSubject ?? defaultHierarchyConfiguration.hideRootSubject,
+      elementClassName: hierarchyConfig?.elementClassSpecification ?? defaultHierarchyConfiguration.elementClassSpecification,
+      baseIdsCache,
+    });
+    const symbolDispose = idsCache[Symbol.dispose];
+    idsCache[Symbol.dispose] = () => {
+      symbolDispose();
+      baseIdsCache[Symbol.dispose]();
+    };
+    return idsCache;
   }
 
   before(async () => {
@@ -1717,12 +1733,20 @@ describe("ModelsTreeVisibilityHandler", () => {
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...props.hierarchyConfig };
       const imodelAccess = createIModelAccess(props.imodel);
       const viewport = createTreeWidgetTestingViewport({ iModel: props.imodel, viewType: "3d", visibleByDefault: props.visibleByDefault });
-      const idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
+      const idsCache = new ModelsTreeIdsCache({
+        queryExecutor: imodelAccess,
+        elementClassName: hierarchyConfig.elementClassSpecification,
+        hideRootSubject: hierarchyConfig.hideRootSubject,
+        showEmptyModels: hierarchyConfig.showEmptyModels,
+        baseIdsCache,
+      });
       return {
         imodelAccess,
         viewport,
         idsCache,
         hierarchyConfig,
+        baseIdsCache,
       };
     }
 
@@ -1754,6 +1778,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           commonProps.idsCache[Symbol.dispose]();
           handler[Symbol.dispose]();
           provider[Symbol.dispose]();
+          commonProps.baseIdsCache[Symbol.dispose]();
         },
       };
     }
@@ -3678,6 +3703,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           visibilityHandlerWithSearchPaths,
           [Symbol.dispose]() {
             commonProps.idsCache[Symbol.dispose]();
+            commonProps.baseIdsCache[Symbol.dispose]();
             defaultVisibilityHandler[Symbol.dispose]();
             visibilityHandlerWithSearchPaths[Symbol.dispose]();
             defaultProvider[Symbol.dispose]();

@@ -5,7 +5,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { defaultIfEmpty, EMPTY, filter, firstValueFrom, from, fromEventPattern, map, mergeMap, Subject, takeUntil, tap } from "rxjs";
-import { assert } from "@itwin/core-bentley";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { HierarchyVisibilityOverrideHandler } from "../../UseHierarchyVisibility.js";
 import { AlwaysAndNeverDrawnElementInfoCache } from "../caches/AlwaysAndNeverDrawnElementInfoCache.js";
@@ -26,7 +25,7 @@ import type { IVisibilityChangeEventListener } from "../VisibilityChangeEventLis
 
 /** @internal */
 export interface CreateSearchResultsTreeProps<TCache> {
-  getCache: () => TCache;
+  idsCache: TCache;
   imodelAccess: ECClassHierarchyInspector;
   searchPaths: HierarchySearchPath[];
 }
@@ -34,7 +33,7 @@ export interface CreateSearchResultsTreeProps<TCache> {
 /** @internal */
 export interface CreateTreeSpecificVisibilityHandlerProps<TCache> {
   info: AlwaysAndNeverDrawnElementInfoCache;
-  getCache: () => TCache;
+  idsCache: TCache;
   viewport: TreeWidgetViewport;
   overrideHandler: HierarchyVisibilityOverrideHandler;
 }
@@ -43,7 +42,7 @@ export interface CreateTreeSpecificVisibilityHandlerProps<TCache> {
 export interface UseCachedVisibilityProps<TCache, TSearchTargets> {
   componentId: GuidString;
   activeView: TreeWidgetViewport;
-  getCache: () => TCache;
+  idsCache: TCache;
   createSearchResultsTree: (props: CreateSearchResultsTreeProps<TCache>) => Promise<SearchResultsTree<TSearchTargets>>;
   createTreeSpecificVisibilityHandler: (props: CreateTreeSpecificVisibilityHandlerProps<TCache>) => TreeSpecificVisibilityHandler<TSearchTargets> & Disposable;
 }
@@ -51,12 +50,12 @@ export interface UseCachedVisibilityProps<TCache, TSearchTargets> {
 /** @internal */
 export function useCachedVisibility<TCache, TSearchTargets>(props: UseCachedVisibilityProps<TCache, TSearchTargets>) {
   const [searchPaths, setSearchPaths] = useState<HierarchySearchPath[] | undefined>(undefined);
-  const { activeView, getCache, createSearchResultsTree, createTreeSpecificVisibilityHandler, componentId } = props;
+  const { activeView, idsCache, createSearchResultsTree, createTreeSpecificVisibilityHandler, componentId } = props;
 
   const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState<VisibilityTreeProps["visibilityHandlerFactory"]>(() =>
     createVisibilityHandlerFactory({
       activeView,
-      getCache,
+      idsCache,
       createSearchResultsTree,
       createTreeSpecificVisibilityHandler,
       searchPaths,
@@ -68,14 +67,14 @@ export function useCachedVisibility<TCache, TSearchTargets>(props: UseCachedVisi
     setVisibilityHandlerFactory(() =>
       createVisibilityHandlerFactory({
         activeView,
-        getCache,
+        idsCache,
         createSearchResultsTree,
         createTreeSpecificVisibilityHandler,
         searchPaths,
         componentId,
       }),
     );
-  }, [activeView, getCache, searchPaths, createSearchResultsTree, createTreeSpecificVisibilityHandler, componentId]);
+  }, [activeView, idsCache, searchPaths, createSearchResultsTree, createTreeSpecificVisibilityHandler, componentId]);
 
   return {
     visibilityHandlerFactory,
@@ -89,21 +88,21 @@ function createVisibilityHandlerFactory<TCache, TSearchTargets>(
     searchPaths: HierarchySearchPath[] | undefined;
   },
 ): VisibilityTreeProps["visibilityHandlerFactory"] {
-  const { activeView, createSearchResultsTree, createTreeSpecificVisibilityHandler, getCache, searchPaths, componentId } = props;
+  const { activeView, createSearchResultsTree, createTreeSpecificVisibilityHandler, idsCache, searchPaths, componentId } = props;
   return ({ imodelAccess }) =>
     new HierarchyVisibilityHandlerImpl<TSearchTargets>({
       componentId,
       viewport: activeView,
       getSearchResultsTree: (): Promise<SearchResultsTree<TSearchTargets>> | undefined => {
         if (searchPaths) {
-          return createSearchResultsTree({ imodelAccess, searchPaths, getCache });
+          return createSearchResultsTree({ imodelAccess, searchPaths, idsCache });
         }
         return undefined;
       },
       getTreeSpecificVisibilityHandler: (info, overrideHandler) =>
         createTreeSpecificVisibilityHandler({
           info,
-          getCache,
+          idsCache,
           viewport: activeView,
           overrideHandler,
         }),
@@ -179,7 +178,7 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
             },
           ),
         ),
-        defaultIfEmpty(createVisibilityStatus("hidden")),
+        defaultIfEmpty(createVisibilityStatus("disabled")),
       ),
     );
   }
@@ -269,8 +268,10 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
       key: ClassGroupingNodeKey | InstancesNodeKey;
     };
   }): Observable<TSearchTargets | undefined> {
-    assert(this.#searchResultsTree !== undefined);
-    return from(this.#searchResultsTree).pipe(map((searchResultsTree) => searchResultsTree.getSearchTargets(node)));
+    // There can be cases where search paths used to exist and are removed, search results tree becomes undefined,
+    // but visibility is re-requested for old nodes (have search paths).
+    // In such cases return EMPTY.
+    return this.#searchResultsTree ? from(this.#searchResultsTree).pipe(map((searchResultsTree) => searchResultsTree.getSearchTargets(node))) : EMPTY;
   }
 
   private changeSearchResultsNodeVisibility({

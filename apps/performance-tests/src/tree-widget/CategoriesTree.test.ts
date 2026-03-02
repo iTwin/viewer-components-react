@@ -8,6 +8,7 @@ import { SnapshotDb } from "@itwin/core-backend";
 import { assert } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import {
+  BaseIdsCache,
   CategoriesTreeDefinition,
   CategoriesTreeIdsCache,
   createCategoriesTreeVisibilityHandler,
@@ -43,7 +44,8 @@ describe("categories tree", () => {
     },
     cleanup: (props) => props.iModel.close(),
     test: async ({ imodelAccess }) => {
-      using idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
+      using baseIdsCache = new BaseIdsCache({ elementClassName: "BisCore:GeometricElement3d", type: "3d", queryExecutor: imodelAccess });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       const search = {
         paths: await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -71,6 +73,7 @@ describe("categories tree", () => {
     imodelAccess: IModelAccess;
     viewport: TreeWidgetTestingViewport;
     idsCache: CategoriesTreeIdsCache;
+    baseIdsCache: BaseIdsCache;
     handler: HierarchyVisibilityHandler & Disposable;
     provider: HierarchyProvider & Disposable;
     definitionContainer: Id64String;
@@ -92,7 +95,8 @@ describe("categories tree", () => {
         viewport,
         ...testData,
       });
-      const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
+      const baseIdsCache = new BaseIdsCache({ elementClassName: "BisCore:GeometricElement3d", type: "3d", queryExecutor: imodelAccess });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       const handler = createCategoriesTreeVisibilityHandler({ imodelAccess, idsCache, viewport, hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration });
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new CategoriesTreeDefinition({
@@ -118,6 +122,7 @@ describe("categories tree", () => {
         viewport,
         provider,
         idsCache,
+        baseIdsCache,
         handler,
         definitionContainer: visibilityTargets.definitionContainers[0],
         iModelConnection,
@@ -130,6 +135,7 @@ describe("categories tree", () => {
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
       props.idsCache[Symbol.dispose]();
+      props.baseIdsCache[Symbol.dispose]();
       if (!props.iModelConnection.isClosed) {
         await props.iModelConnection.close();
       }
@@ -155,6 +161,7 @@ describe("categories tree", () => {
     rootDefinitionContainer: Id64String;
     iModelConnection: IModelConnection;
     hierarchyNodes: HierarchyNode[];
+    baseIdsCache: BaseIdsCache;
   }>({
     testName: "changing definition container visibility changes visibility for 50k categories",
     setup: async () => {
@@ -171,7 +178,8 @@ describe("categories tree", () => {
         viewport,
         ...testData,
       });
-      const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
+      const baseIdsCache = new BaseIdsCache({ elementClassName: "BisCore:GeometricElement3d", type: "3d", queryExecutor: imodelAccess });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       const handler = createCategoriesTreeVisibilityHandler({ imodelAccess, idsCache, viewport, hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration });
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new CategoriesTreeDefinition({
@@ -198,7 +206,7 @@ describe("categories tree", () => {
       );
       expect(rootDefinitionContainer).to.not.be.undefined;
       assert(rootDefinitionContainer !== undefined);
-      return { iModel, imodelAccess, viewport, idsCache, provider, handler, rootDefinitionContainer, iModelConnection, hierarchyNodes };
+      return { iModel, imodelAccess, viewport, idsCache, baseIdsCache, provider, handler, rootDefinitionContainer, iModelConnection, hierarchyNodes };
     },
     cleanup: async (props) => {
       props.iModel.close();
@@ -206,6 +214,7 @@ describe("categories tree", () => {
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
       props.idsCache[Symbol.dispose]();
+      props.baseIdsCache[Symbol.dispose]();
       if (!props.iModelConnection.isClosed) {
         await props.iModelConnection.close();
       }

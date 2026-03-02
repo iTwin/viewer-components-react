@@ -12,6 +12,7 @@ import { Icon } from "@stratakit/foundations";
 import hierarchyTreeSvg from "@stratakit/icons/hierarchy-tree.svg";
 import { TreeWidget } from "../TreeWidget.js";
 import { ErrorState } from "./tree-header/ErrorState.js";
+import { SharedTreeContextProvider } from "./trees/index.js";
 import { TreeWidgetComponentImpl } from "./TreeWidgetComponentImpl.js";
 
 import type { Ref } from "react";
@@ -65,7 +66,9 @@ export function TreeWidgetComponent(props: TreeWidgetProps) {
   return (
     <div ref={ref} className="tree-widget">
       <ErrorBoundary FallbackComponent={ErrorState}>
-        <TreeWidgetComponentImpl {...props} />
+        <SharedTreeContextProvider>
+          <TreeWidgetComponentImpl {...props} />
+        </SharedTreeContextProvider>
       </ErrorBoundary>
     </div>
   );

@@ -25,3 +25,5 @@ export { createCategoriesTreeVisibilityHandler } from "./tree-widget-react/compo
 export { ClassificationsTreeDefinition } from "./tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
 export { ClassificationsTreeIdsCache } from "./tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
 export { releaseMainThreadOnItemsCount } from "./tree-widget-react/components/trees/common/internal/Utils.js";
+
+export { BaseIdsCache } from "./tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";

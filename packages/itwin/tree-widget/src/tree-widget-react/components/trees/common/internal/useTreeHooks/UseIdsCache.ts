@@ -3,69 +3,63 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useIModelChangeListener } from "../UseIModelChangeListener.js";
+import { useCallback, useRef, useState } from "react";
+import { registerTxnListeners } from "@itwin/presentation-core-interop";
 
-import type { GuidString } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 
+type IModelKey = string;
+type CacheKey = string;
+
 /** @internal */
-export interface CreateCacheProps<TCacheSpecificProps extends object = {}> {
+export interface GetCacheProps<TCache> {
+  createCache: () => TCache;
+  cacheKey: CacheKey;
   imodel: IModelConnection;
-  specificProps: TCacheSpecificProps;
-  componentId: GuidString;
 }
 
 /** @internal */
-export interface UseIdsCacheProps<TCache, TCacheSpecificProps extends object = {}> {
-  imodel: IModelConnection;
-  createCache: (props: CreateCacheProps<TCacheSpecificProps>) => TCache;
-  cacheSpecificProps: TCacheSpecificProps;
-  componentId: GuidString;
-}
-
-/** @internal */
-export function useIdsCache<TCache extends Disposable, TCacheSpecificProps extends object = {}>(
-  props: UseIdsCacheProps<TCache, TCacheSpecificProps>,
-): { getCache: () => TCache } {
-  const cacheRef = useRef<TCache | undefined>(undefined);
-  const clearCacheRef = useRef(() => {
-    cacheRef.current?.[Symbol.dispose]?.();
-    cacheRef.current = undefined;
-  });
-  const { imodel, createCache, cacheSpecificProps } = props;
-
-  const createCacheGetterRef = useRef((currImodel: IModelConnection, specificProps: TCacheSpecificProps, componentId: GuidString) => {
-    return () => {
-      if (cacheRef.current === undefined) {
-        cacheRef.current = createCache({ imodel: currImodel, specificProps, componentId });
+export function useIdsCache(): {
+  getCache: <TCache extends Disposable>(createCacheProps: GetCacheProps<TCache>) => TCache;
+} {
+  const state = useRef<Record<IModelKey, Record<CacheKey, Disposable>>>({});
+  const [forceRerender, setForceRerender] = useState({});
+  const getCache = useCallback(
+    <TCache extends Disposable>({ createCache, cacheKey, imodel }: GetCacheProps<TCache>) => {
+      const imodelCaches = state.current[imodel.key];
+      if (imodelCaches && imodelCaches[cacheKey]) {
+        return imodelCaches[cacheKey] as TCache;
       }
-      return cacheRef.current;
-    };
-  });
 
-  const [getCache, setCacheGetter] = useState<() => TCache>(() => createCacheGetterRef.current(imodel, cacheSpecificProps, props.componentId));
+      // Create the cache before adding event listeners, to avoid race conditions
+      const cache = createCache();
+      state.current = { ...state.current, [imodel.key]: { ...state.current[imodel.key], [cacheKey]: cache } };
 
-  useEffect(() => {
-    // clear cache in case it was created before `useEffect` was run first time
-    clearCacheRef.current();
-
-    // make sure all cache users rerender
-    setCacheGetter(() => createCacheGetterRef.current(imodel, cacheSpecificProps, props.componentId));
-    return () => {
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      clearCacheRef.current();
-    };
-  }, [imodel, cacheSpecificProps, props.componentId]);
-
-  useIModelChangeListener({
-    imodel,
-    action: useCallback(() => {
-      clearCacheRef.current();
-      // make sure all cache users rerender
-      setCacheGetter(() => createCacheGetterRef.current(imodel, cacheSpecificProps, props.componentId));
-    }, [imodel, cacheSpecificProps, props.componentId]),
-  });
+      if (!imodelCaches) {
+        let listener: undefined | (() => void);
+        if (imodel.isBriefcaseConnection()) {
+          listener = registerTxnListeners(imodel.txns, () => {
+            for (const cacheToDispose of Object.values(state.current[imodel.key])) {
+              cacheToDispose[Symbol.dispose]();
+            }
+            state.current[imodel.key] = {};
+            setForceRerender({});
+          });
+        }
+        imodel.onClose.addOnce(() => {
+          for (const cacheToDispose of Object.values(state.current[imodel.key])) {
+            cacheToDispose[Symbol.dispose]();
+          }
+          delete state.current[imodel.key];
+          listener?.();
+          setForceRerender({});
+        });
+      }
+      return cache;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [forceRerender],
+  );
 
   return {
     getCache,

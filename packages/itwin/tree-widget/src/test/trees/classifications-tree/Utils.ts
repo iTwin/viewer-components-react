@@ -8,6 +8,8 @@ import { BisCodeSpec, Code, IModel } from "@itwin/core-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ClassificationsTreeIdsCache } from "../../../tree-widget-react-internal.js";
 import { ClassificationsTreeDefinition } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
+import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
+import { CLASS_NAME_GeometricElement3d } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { insertDefinitionSubModel } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 
@@ -23,7 +25,8 @@ export function createClassificationsTreeProvider(
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration,
 ): HierarchyProvider & Disposable {
   const imodelAccess = createIModelAccess(imodel);
-  const idsCache = new ClassificationsTreeIdsCache(imodelAccess, hierarchyConfig);
+  const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
+  const idsCache = new ClassificationsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig, baseIdsCache });
   const hierarchyProvider = createIModelHierarchyProvider({
     imodelAccess,
     hierarchyDefinition: new ClassificationsTreeDefinition({
@@ -41,6 +44,7 @@ export function createClassificationsTreeProvider(
     [Symbol.dispose]() {
       hierarchyProvider[Symbol.dispose]();
       idsCache[Symbol.dispose]();
+      baseIdsCache[Symbol.dispose]();
     },
   };
 }

@@ -7,6 +7,7 @@ import { concatMap, EMPTY, expand, from, of, toArray } from "rxjs";
 import sinon from "sinon";
 import { Id64 } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
+import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
 import {
   CLASS_NAME_Element,
   CLASS_NAME_GeometricElement3d,
@@ -50,7 +51,16 @@ export function createModelsTreeProvider({
 }: CreateModelsTreeProviderProps): HierarchyProvider & { dispose: () => void; [Symbol.dispose]: () => void } {
   const config = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...hierarchyConfig };
   const createdImodelAccess = imodelAccess ?? createIModelAccess(imodel);
-  const createdIdsCache = idsCache ?? new ModelsTreeIdsCache(createdImodelAccess, config);
+  const baseIdsCache = new BaseIdsCache({ queryExecutor: createdImodelAccess, elementClassName: config.elementClassSpecification, type: "3d" });
+  const createdIdsCache =
+    idsCache ??
+    new ModelsTreeIdsCache({
+      queryExecutor: createdImodelAccess,
+      elementClassName: config.elementClassSpecification,
+      showEmptyModels: config.showEmptyModels,
+      hideRootSubject: config.hideRootSubject,
+      baseIdsCache,
+    });
   const provider = createIModelHierarchyProvider({
     imodelAccess: createdImodelAccess,
     hierarchyDefinition: new ModelsTreeDefinition({
@@ -65,6 +75,7 @@ export function createModelsTreeProvider({
     if (!idsCache) {
       createdIdsCache[Symbol.dispose]();
     }
+    baseIdsCache[Symbol.dispose]();
   };
   return {
     hierarchyChanged: provider.hierarchyChanged,
@@ -103,11 +114,9 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
         toArray(),
       );
     }),
-    getModelCategoryIds: sinon
-      .stub<[{ modelId: Id64String; includeOnlyIfCategoryOfTopMostElement?: boolean }], Observable<Id64Set>>()
-      .callsFake(({ modelId }) => {
-        return of(new Set(props?.modelCategories?.get(modelId) ?? []));
-      }),
+    getCategories: sinon.stub<[{ modelId: Id64String; includeOnlyIfCategoryOfTopMostElement?: boolean }], Observable<Id64Set>>().callsFake(({ modelId }) => {
+      return of(new Set(props?.modelCategories?.get(modelId) ?? []));
+    }),
     getAllCategoriesOfElements: sinon.stub<[], Observable<Id64Set>>().callsFake(() => {
       const result = new Set<Id64String>();
       for (const categories of props?.modelCategories?.values() ?? []) {
@@ -117,7 +126,7 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       }
       return of(result);
     }),
-    getCategoryElementsCount: sinon.stub<[{ modelId: Id64String; categoryId: Id64String }], Observable<number>>().callsFake(({ categoryId }) => {
+    getElementsCount: sinon.stub<[{ modelId: Id64String; categoryId: Id64String }], Observable<number>>().callsFake(({ categoryId }) => {
       return of(props?.categoryElements?.get(categoryId)?.length ?? 0);
     }),
     getChildElementsTree: sinon.stub<[{ elementIds: Id64Arg }], Observable<ChildrenTree>>().callsFake(() => {
@@ -127,7 +136,9 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       return of(new Map());
     }),
     getSubModelsUnderElement: sinon.stub<[Id64String], Observable<Id64Array>>().callsFake(() => of([])),
-    getCategoryModeledElements: sinon.stub<[{ modelId: Id64String; categoryId: Id64String }], Observable<Id64String>>().callsFake(() => EMPTY),
+    getSubModels: sinon
+      .stub<[{ modelId: Id64String; categoryId?: Id64String } | { categoryId: Id64String; modelId: Id64String | undefined }], Observable<Id64Array>>()
+      .callsFake(() => EMPTY),
   });
 }
 

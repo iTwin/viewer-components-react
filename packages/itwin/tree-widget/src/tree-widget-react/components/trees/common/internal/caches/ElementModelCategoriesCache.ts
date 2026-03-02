@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { defer, forkJoin, from, map, mergeMap, reduce, shareReplay } from "rxjs";
-import { Guid } from "@itwin/core-bentley";
+import { CLASS_NAME_Model } from "../ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
 
 import type { Observable } from "rxjs";
@@ -15,10 +15,8 @@ import type { ModeledElementsCache } from "./ModeledElementsCache.js";
 
 interface ElementModelCategoriesCacheProps {
   queryExecutor: LimitingECSqlQueryExecutor;
-  componentId?: GuidString;
+  componentId: GuidString;
   elementClassName: string;
-  type: "2d" | "3d";
-  modelClassName: string;
   modeledElementsCache: ModeledElementsCache;
 }
 
@@ -28,8 +26,6 @@ export class ElementModelCategoriesCache {
   #componentId: GuidString;
   #componentName: string;
   #elementClassName: string;
-  #type: "2d" | "3d";
-  #modelClassName: string;
   #modeledElementsCache: ModeledElementsCache;
   #modelsCategoriesInfo:
     | Observable<Map<ModelId, { categoriesOfTopMostElements: Set<CategoryId>; allCategories: Set<CategoryId>; isSubModel: boolean }>>
@@ -38,11 +34,9 @@ export class ElementModelCategoriesCache {
   constructor(props: ElementModelCategoriesCacheProps) {
     this.#queryExecutor = props.queryExecutor;
     this.#elementClassName = props.elementClassName;
-    this.#modelClassName = props.modelClassName;
     this.#modeledElementsCache = props.modeledElementsCache;
-    this.#type = props.type;
-    this.#componentId = props.componentId ?? Guid.createValue();
-    this.#componentName = `ElementModelCategoriesCache${this.#type}`;
+    this.#componentId = props.componentId;
+    this.#componentName = "ElementModelCategoriesCache";
   }
 
   private queryElementModelCategories(): Observable<{
@@ -57,7 +51,7 @@ export class ElementModelCategoriesCache {
               this.Model.Id modelId,
               this.Category.Id categoryId,
               MAX(IIF(this.Parent.Id IS NULL, 1, 0)) isTopMostElementCategory
-            FROM ${this.#modelClassName} m
+            FROM ${CLASS_NAME_Model} m
             JOIN ${this.#elementClassName} this ON m.ECInstanceId = this.Model.Id
             WHERE m.IsPrivate = false
             GROUP BY modelId, categoryId
@@ -168,5 +162,9 @@ export class ElementModelCategoriesCache {
         return acc;
       }, new Set<CategoryId>()),
     );
+  }
+
+  public getAllModels(): Observable<Array<ModelId>> {
+    return this.getModelsCategoriesInfo().pipe(map((modelCategories) => [...modelCategories.keys()]));
   }
 }

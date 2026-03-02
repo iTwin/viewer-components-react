@@ -43,7 +43,8 @@ export function useIModelAccess({ imodel, treeName, imodelAccess: providedIModel
   };
 }
 
-function createIModelAccess({ imodel, hierarchyLevelSizeLimit }: { imodel: IModelConnection; hierarchyLevelSizeLimit: number }) {
+/** @internal */
+export function createIModelAccess({ imodel, hierarchyLevelSizeLimit }: { imodel: IModelConnection; hierarchyLevelSizeLimit: number | "unbounded" }) {
   const schemaProvider = createECSchemaProvider(imodel.schemaContext);
   return {
     imodelKey: imodel.key,

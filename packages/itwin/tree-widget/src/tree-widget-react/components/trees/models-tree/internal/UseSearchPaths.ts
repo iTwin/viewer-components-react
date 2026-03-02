@@ -32,7 +32,7 @@ export function useSearchPaths({
   searchText,
   getSearchPaths,
   getSubTreePaths,
-  getModelsTreeIdsCache,
+  idsCache,
   onModelsFiltered,
   onSearchPathsChanged,
   componentId,
@@ -49,7 +49,7 @@ export function useSearchPaths({
     /** A function that creates search paths based on provided target instance keys. */
     createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> }) => Promise<NormalizedHierarchySearchPath[]>;
   }) => Promise<HierarchySearchPath[]>;
-  getModelsTreeIdsCache: () => ModelsTreeIdsCache;
+  idsCache: ModelsTreeIdsCache;
   onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
   onSearchPathsChanged: (paths: HierarchySearchPath[] | undefined) => void;
   componentId: GuidString;
@@ -88,7 +88,7 @@ export function useSearchPaths({
             ModelsTreeDefinition.createInstanceKeyPaths({
               imodelAccess,
               targetItems,
-              idsCache: getModelsTreeIdsCache(),
+              idsCache,
               hierarchyConfig: hierarchyConfiguration,
               limit: "unbounded",
               abortSignal,
@@ -102,7 +102,7 @@ export function useSearchPaths({
         return [];
       }
     };
-  }, [getModelsTreeIdsCache, hierarchyConfiguration, getSubTreePaths, componentId]);
+  }, [idsCache, hierarchyConfiguration, getSubTreePaths, componentId]);
 
   const getPaths = useMemo<VisibilityTreeProps["getSearchPaths"] | undefined>(() => {
     const handlePaths = async (searchPaths: HierarchySearchPath[] | undefined, classInspector: ECClassHierarchyInspector) => {
@@ -111,7 +111,7 @@ export function useSearchPaths({
         return;
       }
 
-      const modelIds = searchPaths ? await getModels(searchPaths, getModelsTreeIdsCache(), classInspector) : undefined;
+      const modelIds = searchPaths ? await getModels(searchPaths, idsCache, classInspector) : undefined;
       onModelsFiltered(modelIds);
     };
 
@@ -123,7 +123,7 @@ export function useSearchPaths({
             getSearchPaths: async () => {
               const paths = await ModelsTreeDefinition.createInstanceKeyPaths({
                 imodelAccess,
-                idsCache: getModelsTreeIdsCache(),
+                idsCache,
                 targetItems: focusedItems,
                 hierarchyConfig: hierarchyConfiguration,
                 abortSignal,
@@ -156,7 +156,7 @@ export function useSearchPaths({
                   ModelsTreeDefinition.createInstanceKeyPaths({
                     ...props,
                     imodelAccess,
-                    idsCache: getModelsTreeIdsCache(),
+                    idsCache,
                     hierarchyConfig: hierarchyConfiguration,
                     limit: "unbounded",
                     abortSignal,
@@ -190,7 +190,7 @@ export function useSearchPaths({
               const paths = await ModelsTreeDefinition.createInstanceKeyPaths({
                 imodelAccess,
                 label: searchText,
-                idsCache: getModelsTreeIdsCache(),
+                idsCache,
                 hierarchyConfig: hierarchyConfiguration,
                 abortSignal,
                 componentId,
@@ -215,7 +215,7 @@ export function useSearchPaths({
   }, [
     searchText,
     loadFocusedItems,
-    getModelsTreeIdsCache,
+    idsCache,
     onFeatureUsed,
     getSearchPaths,
     hierarchyConfiguration,
