@@ -726,9 +726,8 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
 interface UseClassificationsTreeDefinitionProps {
     // (undocumented)
     hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
-    imodels: Array<{
-        imodel: IModelConnection;
-    }>;
+    imodels: Array<IModelConnection>;
+    onSearchPathsChanged?: (paths: HierarchySearchPath[] | undefined) => void;
     search?: {
         searchText: string;
     } | {

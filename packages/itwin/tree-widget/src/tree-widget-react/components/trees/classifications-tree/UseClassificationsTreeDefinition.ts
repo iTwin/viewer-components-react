@@ -3,16 +3,15 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useMemo } from "react";
-import { assert } from "@itwin/core-bentley";
+import { useEffect, useMemo } from "react";
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeWidgetContextProviderInternal.js";
 import { createIModelAccess } from "../common/internal/UseIModelAccess.js";
-import { getClassesByView } from "../common/internal/Utils.js";
+import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
-import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
+import { getClassificationsTreeIdsCache } from "./UseClassificationsTree.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { HierarchyDefinition } from "@itwin/presentation-hierarchies";
+import type { HierarchyDefinition, HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import type { useTree } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { FunctionProps } from "../common/Utils.js";
@@ -26,12 +25,7 @@ interface UseClassificationsTreeDefinitionProps {
    * **Warning:** These **must** all be different versions of the same iModel, ordered from the earliest to the
    * latest version. Not obeying this rule may result in undefined behavior.
    */
-  imodels: Array<{
-    /**
-     * iModel connection that should be used to pull data from.
-     */
-    imodel: IModelConnection;
-  }>;
+  imodels: Array<IModelConnection>;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
   /**
    * Optional parameters to search for tree nodes.
@@ -49,6 +43,10 @@ interface UseClassificationsTreeDefinitionProps {
          */
         targetItems: Array<InstanceKey>;
       };
+  /**
+   * Action to perform when search paths change.
+   */
+  onSearchPathsChanged?: (paths: HierarchySearchPath[] | undefined) => void;
 }
 
 /** @alpha */
@@ -62,58 +60,47 @@ interface UseClassificationsTreeDefinitionResult {
  * @alpha
  */
 export function useClassificationsTreeDefinition(props: UseClassificationsTreeDefinitionProps): UseClassificationsTreeDefinitionResult {
-  const { imodels, hierarchyConfig, search } = props;
+  const { imodels, hierarchyConfig, search, onSearchPathsChanged } = props;
   const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
-  const cacheKey = `${hierarchyConfig.rootClassificationSystemCode}-ClassificationsTreeIdsCache`;
+  const { onFeatureUsed } = useTelemetryContext();
 
-  const imodelsWithAccess = useMemo(
-    () => imodels.map((entry) => ({ imodelAccess: createIModelAccess({ imodel: entry.imodel, hierarchyLevelSizeLimit: "unbounded" }), imodel: entry.imodel })),
-    [imodels],
-  );
+  const imodelsWithCaches = useMemo(() => {
+    return imodels.map((imodel) => {
+      return {
+        imodelAccess: createIModelAccess({ imodel, hierarchyLevelSizeLimit: 1000 }),
+        cache: getClassificationsTreeIdsCache({ getBaseIdsCache, getCache, imodel, hierarchyConfig }),
+      };
+    });
+  }, [imodels, getBaseIdsCache, getCache, hierarchyConfig]);
 
   const definition = useMemo(() => {
     return new ClassificationsTreeDefinition({
-      imodelAccess: imodelsWithAccess[imodelsWithAccess.length - 1].imodelAccess,
-      getIdsCache: (imodelKey: string) => {
-        const entry = imodelsWithAccess.find(({ imodel }) => imodel.key === imodelKey);
-        assert(!!entry);
-        return getCache({
-          imodel: entry.imodel,
-          createCache: () =>
-            new ClassificationsTreeIdsCache({
-              baseIdsCache: getBaseIdsCache({ type: "3d", elementClassName: getClassesByView("3d").elementClass, imodel: entry.imodel }),
-              hierarchyConfig,
-              queryExecutor: entry.imodelAccess,
-            }),
-          cacheKey,
-        });
-      },
+      imodelAccess: imodelsWithCaches[imodelsWithCaches.length - 1].imodelAccess,
+      getIdsCache: (imodelKey: string) => imodelsWithCaches.find(({ imodelAccess }) => imodelAccess.imodelKey === imodelKey)!.cache,
       hierarchyConfig,
     });
-  }, [imodelsWithAccess, hierarchyConfig, getBaseIdsCache, getCache, cacheKey]);
+  }, [hierarchyConfig, imodelsWithCaches]);
 
   const searchTerm = search ? ("searchText" in search ? search.searchText : search.targetItems) : undefined;
+
+  useEffect(() => {
+    if (!searchTerm) {
+      onSearchPathsChanged?.(undefined);
+    }
+  }, [onSearchPathsChanged, searchTerm]);
+
   const getSearchPaths = useMemo<FunctionProps<typeof useTree>["getSearchPaths"]>(() => {
     if (!searchTerm) {
       return undefined;
     }
 
     return async ({ abortSignal }) => {
+      onFeatureUsed({ featureId: "search", reportInteraction: true });
       const [first, ...rest] = await Promise.all(
-        imodelsWithAccess.map(async ({ imodelAccess, imodel }) => {
-          const idsCache = getCache({
-            imodel,
-            createCache: () =>
-              new ClassificationsTreeIdsCache({
-                baseIdsCache: getBaseIdsCache({ type: "3d", elementClassName: getClassesByView("3d").elementClass, imodel }),
-                hierarchyConfig,
-                queryExecutor: imodelAccess,
-              }),
-            cacheKey,
-          });
+        imodelsWithCaches.map(async ({ imodelAccess, cache }) => {
           return ClassificationsTreeDefinition.createInstanceKeyPaths({
             hierarchyConfig,
-            idsCache,
+            idsCache: cache,
             imodelAccess,
             abortSignal,
             limit: typeof searchTerm !== "string" ? "unbounded" : undefined,
@@ -122,9 +109,11 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
         }),
       );
 
-      return first.concat(...rest);
+      const joinedPaths = first.concat(...rest);
+      onSearchPathsChanged?.(joinedPaths);
+      return joinedPaths;
     };
-  }, [searchTerm, imodelsWithAccess, getBaseIdsCache, getCache, cacheKey, hierarchyConfig]);
+  }, [searchTerm, onFeatureUsed, imodelsWithCaches, onSearchPathsChanged, hierarchyConfig]);
 
   return {
     definition,

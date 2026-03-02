@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import iconBisCategory3d from "@stratakit/icons/bis-category-3d.svg";
 import { EmptyTreeContent, NoSearchMatches, SearchUnknownError, TooManySearchMatches } from "../common/components/EmptyTree.js";
@@ -11,24 +11,26 @@ import { useSharedTreeContextInternal } from "../common/internal/SharedTreeWidge
 import { useGuid } from "../common/internal/useGuid.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { getClassesByView } from "../common/internal/Utils.js";
+import { SearchLimitExceededError } from "../common/TreeErrors.js";
+import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { ClassificationsTreeComponent } from "./ClassificationsTreeComponent.js";
-import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIcon } from "./ClassificationsTreeIcon.js";
 import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
-import { useSearchPaths } from "./internal/UseSearchPaths.js";
 import { ClassificationsTreeVisibilityHandler } from "./internal/visibility/ClassificationsTreeVisibilityHandler.js";
 import { createClassificationsSearchResultsTree } from "./internal/visibility/SearchResultsTree.js";
+import { useClassificationsTreeDefinition } from "./UseClassificationsTreeDefinition.js";
 
 import type { ReactNode } from "react";
 import type { GuidString } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { useTree } from "@itwin/presentation-hierarchies-react";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { ExtendedVisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { SearchResultsTree } from "../common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
+import type { FunctionProps } from "../common/Utils.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
-import type { ClassificationsTreeSearchError } from "./internal/UseSearchPaths.js";
 import type { ClassificationsTreeSearchTargets } from "./internal/visibility/SearchResultsTree.js";
 
 /** @alpha */
@@ -39,6 +41,8 @@ export interface UseClassificationsTreeProps {
   searchText?: string;
   getTreeItemProps?: ExtendedVisibilityTreeRendererProps["getTreeItemProps"];
 }
+
+type ClassificationsTreeSearchError = "tooManySearchMatches" | "unknownSearchError";
 
 /** @alpha */
 interface UseClassificationsTreeResult {
@@ -62,6 +66,11 @@ export function useClassificationsTree({
   getTreeItemProps,
   ...rest
 }: UseClassificationsTreeProps): UseClassificationsTreeResult {
+  const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
+  const { onFeatureUsed } = useTelemetryContext();
+
+  const [searchError, setSearchError] = useState<ClassificationsTreeSearchError | undefined>();
+
   const hierarchyConfig = useMemo(
     () => ({ ...rest.hierarchyConfig }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -69,10 +78,7 @@ export function useClassificationsTree({
   );
   const componentId = useGuid();
 
-  const idsCache = useClassificationsTreeIdsCache({
-    imodel: activeView.iModel,
-    hierarchyConfig,
-  });
+  const idsCache = getClassificationsTreeIdsCache({ getCache, getBaseIdsCache, imodel: activeView.iModel, hierarchyConfig });
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useClassificationsCachedVisibility({
     activeView,
@@ -80,25 +86,40 @@ export function useClassificationsTree({
     componentId,
   });
 
-  const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
-    (props) => {
-      return new ClassificationsTreeDefinition({ ...props, getIdsCache: () => idsCache, hierarchyConfig });
-    },
-    [idsCache, hierarchyConfig],
-  );
-
-  const { getPaths, searchError } = useSearchPaths({
-    hierarchyConfiguration: hierarchyConfig,
-    searchText,
-    idsCache,
+  const { getSearchPaths, definition } = useClassificationsTreeDefinition({
+    imodels: useMemo(() => [activeView.iModel], [activeView.iModel]),
+    hierarchyConfig,
+    search: useMemo(() => (searchText ? { searchText } : undefined), [searchText]),
     onSearchPathsChanged,
-    componentId,
   });
+
+  useEffect(() => {
+    setSearchError(undefined);
+  }, [searchText]);
+
+  const getPaths = useMemo<FunctionProps<typeof useTree>["getSearchPaths"]>(() => {
+    if (!searchText || !getSearchPaths) {
+      return undefined;
+    }
+    return async (props) => {
+      try {
+        return await getSearchPaths(props);
+      } catch (e) {
+        const newError = e instanceof SearchLimitExceededError ? "tooManySearchMatches" : "unknownSearchError";
+        if (newError !== "tooManySearchMatches") {
+          const feature = e instanceof Error && e.message.includes("query too long to execute or server is too busy") ? "error-timeout" : "error-unknown";
+          onFeatureUsed({ featureId: feature, reportInteraction: false });
+        }
+        setSearchError(newError);
+        return [];
+      }
+    };
+  }, [searchText, getSearchPaths, onFeatureUsed]);
 
   return {
     treeProps: {
       treeName: ClassificationsTreeComponent.id,
-      getHierarchyDefinition,
+      getHierarchyDefinition: useCallback(() => definition, [definition]),
       visibilityHandlerFactory,
       getSearchPaths: getPaths,
       emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(searchText, searchError, emptyTreeContent), [searchText, searchError, emptyTreeContent]),
@@ -167,20 +188,26 @@ function createTreeSpecificVisibilityHandler(props: CreateTreeSpecificVisibility
   });
 }
 
-function useClassificationsTreeIdsCache({
+/** @internal */
+export function getClassificationsTreeIdsCache({
+  getBaseIdsCache,
+  getCache,
   imodel,
   hierarchyConfig,
 }: {
+  getCache: ReturnType<typeof useSharedTreeContextInternal>["getCache"];
+  getBaseIdsCache: ReturnType<typeof useSharedTreeContextInternal>["getBaseIdsCache"];
   imodel: IModelConnection;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
-}): ClassificationsTreeIdsCache {
-  const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
-
-  const baseIdsCache = getBaseIdsCache({ type: "3d", elementClassName: getClassesByView("3d").elementClass, imodel });
-  const classificationsTreeIdsCache = getCache({
+}) {
+  return getCache({
     imodel,
-    createCache: () => new ClassificationsTreeIdsCache({ baseIdsCache, hierarchyConfig, queryExecutor: createECSqlQueryExecutor(imodel) }),
+    createCache: () =>
+      new ClassificationsTreeIdsCache({
+        baseIdsCache: getBaseIdsCache({ type: "3d", elementClassName: getClassesByView("3d").elementClass, imodel }),
+        hierarchyConfig,
+        queryExecutor: createECSqlQueryExecutor(imodel),
+      }),
     cacheKey: `${hierarchyConfig.rootClassificationSystemCode}-ClassificationsTreeIdsCache`,
   });
-  return classificationsTreeIdsCache;
 }

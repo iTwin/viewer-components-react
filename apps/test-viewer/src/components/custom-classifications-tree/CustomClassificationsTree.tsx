@@ -87,7 +87,7 @@ function CustomClassificationTreeImpl({
     };
   }, [checkpointIModel]);
   const imodelConnections = useMemo(() => [{ imodelAccess: checkpointAccess }, { imodelAccess: latestAccess }], [latestAccess, checkpointAccess]);
-  const imodels = useMemo(() => [{ imodel: checkpointIModel }, { imodel: latestIModel }], [latestIModel, checkpointIModel]);
+  const imodels = useMemo(() => [checkpointIModel, latestIModel], [latestIModel, checkpointIModel]);
   const { definition, getSearchPaths } = useClassificationsTreeDefinition({
     imodels,
     hierarchyConfig: useMemo(
