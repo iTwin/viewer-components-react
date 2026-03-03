@@ -8,7 +8,7 @@ This document explains the shared parts of visibility handling in models, catego
 
 ### getSubCategoriesVisibilityStatus
 
-Visibility of sub-category is `hidden` if its' category is `hidden` **Or** the sub-category itself is hidden, otherwise it is `visible`. When determining visibility of multiple sub-categories, need to check if some are `visible` and some are `hidden`, in such case `partial` visibility is returned.
+Visibility of sub-category is `hidden` if its category is `hidden` **Or** the sub-category itself is hidden, otherwise it is `visible`. When determining visibility of multiple sub-categories, need to check if some are `visible` and some are `hidden`, in such case `partial` visibility is returned.
 
 ```mermaid
 ---
