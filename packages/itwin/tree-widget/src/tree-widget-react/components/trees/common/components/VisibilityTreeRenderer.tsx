@@ -4,17 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback } from "react";
-import { TreeNodeFilterAction } from "@itwin/presentation-hierarchies-react";
-import { BaseTreeRenderer } from "./BaseTreeRenderer.js";
+import { StrataKitTreeRenderer, TreeNodeFilterAction } from "@itwin/presentation-hierarchies-react";
 import { VisibilityAction, VisibilityContextProvider } from "./TreeNodeVisibilityButton.js";
 import { useVisibilityButtonHandler } from "./UseVisibilityButtonHandler.js";
 
-import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
+import type { ComponentProps } from "react";
 import type { CallbacksWithCommonTreeRendererProps } from "./Tree.js";
 import type { VisibilityContext } from "./TreeNodeVisibilityButton.js";
 
 /** @beta */
-export type VisibilityTreeRendererProps = BaseTreeRendererProps & VisibilityContext;
+export type VisibilityTreeRendererProps = ComponentProps<typeof StrataKitTreeRenderer> & VisibilityContext;
 
 /** @beta */
 export type ExtendedVisibilityTreeRendererProps = CallbacksWithCommonTreeRendererProps<
@@ -30,7 +29,7 @@ export function VisibilityTreeRenderer(props: VisibilityTreeRendererProps) {
   const { getVisibilityButtonState, onVisibilityButtonClick: onClick, getInlineActions, filterHierarchyLevel, getHierarchyLevelDetails, ...restProps } = props;
   const { onVisibilityButtonClick } = useVisibilityButtonHandler({ rootNodes: props.rootNodes, isNodeSelected: props.isNodeSelected, onClick });
 
-  const nodeInlineActions = useCallback<Required<BaseTreeRendererProps>["getInlineActions"]>(
+  const nodeInlineActions = useCallback<Required<VisibilityTreeRendererProps>["getInlineActions"]>(
     (actionsProps) => {
       return getInlineActions
         ? getInlineActions(actionsProps)
@@ -49,7 +48,7 @@ export function VisibilityTreeRenderer(props: VisibilityTreeRendererProps) {
 
   return (
     <VisibilityContextProvider onVisibilityButtonClick={onVisibilityButtonClick} getVisibilityButtonState={getVisibilityButtonState}>
-      <BaseTreeRenderer
+      <StrataKitTreeRenderer
         {...restProps}
         filterHierarchyLevel={filterHierarchyLevel}
         getHierarchyLevelDetails={getHierarchyLevelDetails}

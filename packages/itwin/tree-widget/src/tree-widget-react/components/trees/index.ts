@@ -25,7 +25,6 @@ export { IModelContentTreeIcon } from "./imodel-content-tree/IModelContentTree.j
 export { ExternalSourcesTreeComponent } from "./external-sources-tree/ExternalSourcesTreeComponent.js";
 export { ExternalSourcesTreeIcon } from "./external-sources-tree/ExternalSourcesTree.js";
 
-export { BaseTreeRendererProps } from "./common/components/BaseTreeRenderer.js";
 export { FocusedInstancesContextProvider, useFocusedInstancesContext } from "./common/FocusedInstancesContext.js";
 
 export { Tree } from "./common/components/Tree.js";

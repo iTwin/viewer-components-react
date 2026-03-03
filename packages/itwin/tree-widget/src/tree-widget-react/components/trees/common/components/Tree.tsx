@@ -10,7 +10,6 @@ import { BeEvent } from "@itwin/core-bentley";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
 import { StrataKitRootErrorRenderer, useIModelUnifiedSelectionTree, useNodeHighlighting } from "@itwin/presentation-hierarchies-react";
 import { TreeWidget } from "../../../../TreeWidget.js";
-import { useHierarchiesLocalization } from "../internal/UseHierarchiesLocalization.js";
 import { useHierarchyLevelFiltering } from "../internal/UseHierarchyFiltering.js";
 import { useIModelAccess } from "../internal/UseIModelAccess.js";
 import { useIModelChangeListener } from "../internal/UseIModelChangeListener.js";
@@ -21,11 +20,12 @@ import { EmptyTreeContent } from "./EmptyTree.js";
 import { ProgressOverlay } from "./ProgressOverlay.js";
 import { SkeletonTree } from "./SkeletonTree.js";
 
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { SelectionStorage, TreeNode, TreeRendererProps, useIModelTree, useTree } from "@itwin/presentation-hierarchies-react";
+import type { SelectionStorage, StrataKitTreeRenderer, TreeNode, TreeRendererProps, useIModelTree, useTree } from "@itwin/presentation-hierarchies-react";
 import type { FunctionProps } from "../Utils.js";
-import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
+
+type BaseTreeRendererProps = ComponentProps<typeof StrataKitTreeRenderer>;
 
 /** @beta */
 export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPaths" | "getHierarchyDefinition"> &
@@ -81,7 +81,6 @@ export function Tree({
 }: TreeProps) {
   const { onFeatureUsed, onPerformanceMeasured } = useTelemetryContext();
   const [imodelChanged] = useState(new BeEvent<() => void>());
-  const localizedStrings = useHierarchiesLocalization();
 
   const { imodelAccess, currentHierarchyLevelSizeLimit } = useIModelAccess({
     imodel: props.imodel,
@@ -101,7 +100,6 @@ export function Tree({
     getHierarchyDefinition,
     getSearchPaths,
     sourceName: treeName,
-    localizedStrings,
     selectionStorage,
     onPerformanceMeasured: (action, duration) => {
       if (action === "reload") {

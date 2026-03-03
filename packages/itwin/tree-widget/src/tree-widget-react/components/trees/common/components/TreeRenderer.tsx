@@ -4,14 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback } from "react";
-import { TreeNodeFilterAction } from "@itwin/presentation-hierarchies-react";
-import { BaseTreeRenderer } from "./BaseTreeRenderer.js";
+import { StrataKitTreeRenderer, TreeNodeFilterAction } from "@itwin/presentation-hierarchies-react";
 
-import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
+import type { ComponentProps } from "react";
 import type { CallbacksWithCommonTreeRendererProps } from "./Tree.js";
 
 /** @beta */
-export type TreeRendererProps = BaseTreeRendererProps;
+export type TreeRendererProps = ComponentProps<typeof StrataKitTreeRenderer>;
 
 /** @beta */
 export type ExtendedTreeRendererProps = CallbacksWithCommonTreeRendererProps<
@@ -26,7 +25,7 @@ export type ExtendedTreeRendererProps = CallbacksWithCommonTreeRendererProps<
 export function TreeRenderer(props: TreeRendererProps) {
   const { getInlineActions, getHierarchyLevelDetails, filterHierarchyLevel, ...restProps } = props;
 
-  const nodeInlineActions = useCallback<Required<BaseTreeRendererProps>["getInlineActions"]>(
+  const nodeInlineActions = useCallback<Required<TreeRendererProps>["getInlineActions"]>(
     (actionsProps) => {
       return getInlineActions
         ? getInlineActions(actionsProps)
@@ -43,7 +42,7 @@ export function TreeRenderer(props: TreeRendererProps) {
   );
 
   return (
-    <BaseTreeRenderer
+    <StrataKitTreeRenderer
       {...restProps}
       filterHierarchyLevel={filterHierarchyLevel}
       getHierarchyLevelDetails={getHierarchyLevelDetails}
