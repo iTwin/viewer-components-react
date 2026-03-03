@@ -55,7 +55,7 @@ The viewport only renders elements. Element visibility is resolved in the follow
    - `show`: shows all elements of that category within the model.
 5. **Category selector**: hidden categories hide their elements.
 6. **Sub-categories**: hidden sub-categories hide their elements.
-   - **Note**: Determining element -> sub-category relationships is not supported at the moment. So sub-category checks are only performed when the Categories tree calls `getVisibilityStatus()` for categories or sub-categories.
+   - **Note**: Determining element -> sub-category relationship is not supported at the moment. So sub-category checks are only performed when the Categories tree calls `getVisibilityStatus()` for categories or sub-categories.
 
 ## Architecture
 
