@@ -49,7 +49,7 @@ The viewport only renders elements. Element visibility is resolved in the follow
 
 1. **Model selector**: if a model is hidden, its elements are never visible.
 2. **Always/Never drawn sets**: elements in these sets are forced to be visible/hidden.
-3. **Always drawn exclusive flag**: Only elements in the `alwaysDrawn` set are visible.
+3. **Always drawn exclusive flag**: If flag is on, then only elements in the `alwaysDrawn` set are visible, otherwise rules below apply.
 4. **Per model-category overrides**: a category can be overridden per model with `hide`, `show`, or `none`.
    - `hide`: hides all elements of that category within the model.
    - `show`: shows all elements of that category within the model.
