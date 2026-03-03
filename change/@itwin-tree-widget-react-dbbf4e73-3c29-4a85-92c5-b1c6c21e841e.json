@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Hide visibility checkbox tooltip and hover effect on touch devices.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "email not defined",
+  "dependentChangeType": "patch"
+}
