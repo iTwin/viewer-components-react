@@ -3,18 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-.twr-tree-node-checkbox {
-  @media (hover: none) {
-    &:hover {
-      background-color: transparent;
-    }
+@media (hover: none) {
+  .tw-tree-node-checkbox:hover {
+    background-color: transparent;
   }
-}
 
-.twr-tree-node-checkbox-tooltip {
-  @media (hover: none) {
-    & {
-      display: none;
-    }
+  .tw-tree-node-checkbox-tooltip {
+    display: none;
   }
 }

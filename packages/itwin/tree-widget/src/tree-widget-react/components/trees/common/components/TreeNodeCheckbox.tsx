@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeNodeCheckbox.scss";
-
+import cx from "classnames"
 import { Checkbox, Tooltip } from "@itwin/itwinui-react";
 import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
@@ -68,14 +68,14 @@ export function TreeNodeCheckbox({ node, onCheckboxClicked, getCheckboxState, ..
   }
   return (
     <TooltipWrapper content={checkboxState.tooltip}>
-      <Checkbox {...checkboxProps} className="twr-tree-node-checkbox" />
+      <Checkbox {...checkboxProps} className={cx("tw-tree-node-checkbox", checkboxProps.className)} />
     </TooltipWrapper>
   );
 }
 
 function TooltipWrapper({ content, children }: { content?: string; children?: React.ReactNode }) {
   return !!content ? (
-    <Tooltip content={content} placement="left" className="twr-tree-node-checkbox-tooltip">
+    <Tooltip content={content} placement="left" className="tw-tree-node-checkbox-tooltip">
       {children}
     </Tooltip>
   ) : (
