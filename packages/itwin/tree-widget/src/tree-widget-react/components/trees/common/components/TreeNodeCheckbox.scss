@@ -1,0 +1,20 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+.twr-tree-node-checkbox {
+  @media (hover: none) {
+    &:hover {
+      background-color: transparent;
+    }
+  }
+}
+
+.twr-tree-node-checkbox-tooltip {
+  @media (hover: none) {
+    & {
+      display: none;
+    }
+  }
+}
