@@ -6,36 +6,6 @@ The `@itwin/tree-widget-react` package provides React components to build a widg
 
 ![Widget example](./media/widget.png)
 
-## 3.0 highlights
-
-The new `3.0` version of the package contains a few notable changes, compared to the previous `2.x` generation.
-
-- To allow easier customization of widget placement, the package now delivers a `createTreeWidget()` function that creates a tree widget definition, instead of a full `UiItemsProvider` implementation. See [Usage](#usage) section for details on how to use the new function.
-
-- The underlying engine for building hierarchies has been changed from `@itwin/presentation-components` to `@itwin/presentation-hierarchies-react`. This is a significant change as the new library runs plain ECSQL queries and handles hierarchy creation on the frontend, as opposed to the previous version that relied on the backend to provide hierarchy data. This change allows this package to use more optimal queries and to be more flexible in terms of hierarchy creation. As a result, we're seeing 30-40% performance improvement for loading nodes in the Models tree when using a web backend and orders of magnitude improvement when using a local backend (desktop & mobile case).
-
-  This change adds a requirement for all tree components in this package to access iModels' metadata, which is achieved through a required `getSchemaContext` prop. See [Creating schema context](#creating-schema-context) section for an example implementation of this function. This also adds an `@itwin/ecschema-metadata` peer dependency on version `^4.0.0`.
-
-  In addition, the new tree components don't rely on the global selection manager provided by `@itwin/presentation-frontend` package. Instead, they require a unified selection storage object created using `createStorage()` function from `@itwin/unified-selection` package. See sections of individual tree components for how to supply it to them, and [Creating unified selection storage](#creating-unified-selection-storage) section for an example for how to create the storage.
-
-- The tree components delivered with the package have been updated to use the [`Tree` component from `@itwin/itwinui-react` package](https://itwinui.bentley.com/docs/tree) instead of [`ControlledTree` from `@itwin/components-react`](https://www.itwinjs.org/reference/components-react/tree/controlledtree/). The new component is a little less dense, provides better accessibility and customization options.
-
-  | 2.x                                             | 3.0                                             |
-  | ----------------------------------------------- | ----------------------------------------------- |
-  | ![Tree widget 2.x](./media/tree-widget-2.x.png) | ![Tree widget 3.0](./media/tree-widget-3.0.png) |
-
-  This change introduces an `@itwin/itwinui-react` peer dependency on version `^3.11.0`.
-
-- The tree components now have hierarchy level size limiting and filtering features always turned on. The features were already available in `2.x` versions, but were not enabled by default. See [Hierarchy level size limiting](#hierarchy-level-size-limiting) and [Hierarchy level filtering](#hierarchy-level-filtering) sections for more details.
-
-- Behavior of header buttons like "Show all", "Hide all", etc. has been changed in filtered hierarchies' case. Previously they applied the visibility change on everything, no matter if the hierarchy is filtered or not. Now, when a hierarchy is filtered, only the nodes in the filtered hierarchy are affected.
-
-- Models tree:
-  - The label filtering feature has been expanded to filter not only up to Models, but the whole hierarchy. This allows filtering the hierarchy to additionally find Category or Element nodes.
-  - [Focus mode](#focus-mode) feature has been added to allow automatic hierarchy filtering as the application selection changes.
-  - In addition to the two filtering-related improvements above, we now allow displaying a subset of the tree by providing a `getFilteredPaths` function. See [Displaying a subset of the tree](#displaying-a-subset-of-the-tree) section for more details.
-  - Display states' control has been modified to be hierarchy based. This means that changing display state of something deep in the hierarchy affects checkbox state of all its ancestors. And vice versa - changing display state of an ancestor affects all its descendants.
-
 ## Usage
 
 Typically, the package is used with an [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) based application, but the building blocks may as well be used with any other iTwin.js React app.
@@ -46,7 +16,7 @@ In any case, **before** using any APIs or components delivered with the package,
 import { TreeWidget } from "@itwin/tree-widget-react";
 import { IModelApp } from "@itwin/core-frontend";
 
-await TreeWidget.initialize(IModelApp.localization);
+await TreeWidget.initialize();
 ```
 
 In [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) based applications widgets are typically provided using `UiItemsProvider` implementations. The `@itwin/tree-widget-react` package delivers `createTreeWidget` function that can be used to add the tree widget to UI through a `UiItemsProvider`:
@@ -60,13 +30,14 @@ UiItemsManager.register({
   getWidgets: () =>
     [
       createTreeWidget({
+        localization: IModelApp.localization,
         trees: [
           // add a custom component
           { id: "my-tree-id", startIcon: <svg />, getLabel: () => "My Custom Tree", render: () => <>This is my custom tree.</> },
           // add the Models tree component delivered with the package
           {
             id: ModelsTreeComponent.id,
-            getLabel: () => ModelsTreeComponent.getLabel(),
+            getLabel: ModelsTreeComponent.getLabel,
             render: (props) => (
               <ModelsTreeComponent
                 // see "Creating unified selection storage" section for example implementation
@@ -81,6 +52,51 @@ UiItemsManager.register({
 ```
 
 As seen in the above code snippet, `createTreeWidget` takes a list of trees that are displayed in the widget. This package delivers a number of tree components for everyone's use (see below), but providing custom trees is also an option.
+
+## Localization
+
+This package delivers a locale JSON file with English strings that follows the [`i18next JSON format`](https://www.i18next.com/misc/json-format). To enable localization, register `LOCALIZATION_NAMESPACES` during initialization and wrap components in `LocalizationContextProvider`:
+
+```tsx
+import { LocalizationContextProvider, LOCALIZATION_NAMESPACES, createTreeWidget, ModelsTreeComponent } from "@itwin/tree-widget-react";
+
+// Register localization namespaces with `i18next` based localization provider.
+for (const namespace of LOCALIZATION_NAMESPACES) {
+  await localization.registerNamespace(namespace);
+}
+
+// When using `createTreeWidget` pass `localization` object and `LocalizationContextProvider` will be added at the widget scope automatically.
+UiItemsManager.register({
+  id: "tree-widget-provider",
+  getWidgets: () =>
+    [
+      createTreeWidget({
+        localization: localization,
+        trees: [
+          // tree definitions
+        ],
+      }),
+    ] as readonly Widget[],
+});
+
+// When using lower level components directly they will need to be wrapped inside `LocalizationContextProvider`
+function TreeComponent() {
+  return (
+    <LocalizationContextProvider localization={localization}>
+      <ModelsTreeComponent
+        // see "Creating unified selection storage" section for example implementation
+        selectionStorage={unifiedSelectionStorage}
+        headerButtons={[
+          (props) => <ModelsTreeComponent.ShowAllButton {...props} key={"ShowAllButton"} />,
+          (props) => <ModelsTreeComponent.HideAllButton {...props} key={"HideAllButton"} />,
+        ]}
+      />
+    </LocalizationContextProvider>
+  );
+}
+```
+
+`LocalizationContextProvider` accepts a `localization` prop — an object with a `getLocalizedString(key: string): string` method. It is designed to work with the `Localization` interface from `@itwin/core-common`, but a custom implementation can be used as well by providing an object with a custom `getLocalizedString` function.
 
 ## Components
 
@@ -321,9 +337,9 @@ Use `getFilteredPaths` when you need more control over filtering behaviour. Here
                 e.ECInstanceId Id,
                 COALESCE(e.UserLabel, e.CodeValue) Label
               FROM BisCore.Subject e
-  
+
               UNION ALL
-  
+
               SELECT
                 ec_classname(m.ECClassId, 's.c') ClassName,
                 m.ECInstanceId Id,
