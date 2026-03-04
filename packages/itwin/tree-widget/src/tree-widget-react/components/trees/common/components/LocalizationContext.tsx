@@ -8,7 +8,7 @@ import {
   LocalizationContextProvider as HierarchiesLocalizationContext,
   LOCALIZATION_NAMESPACES as HierarchiesReactLocalizationNamespaces,
 } from "@itwin/presentation-hierarchies-react";
-import { LOCALIZATION_NAMESPACE } from "../../../shared/LocalizedStrings.js";
+import { getLocalizationKey, LOCALIZATION_NAMESPACE } from "../../../shared/LocalizedStrings.js";
 
 import type { JSX, PropsWithChildren } from "react";
 import type { Localization } from "@itwin/core-common";
@@ -40,7 +40,7 @@ interface LocalizationContextProviderProps {
  */
 export function LocalizationContextProvider({ localization, children }: PropsWithChildren<LocalizationContextProviderProps>): JSX.Element {
   const translate = useMemo<TranslateFunc>(() => {
-    return (key, options) => localization.getLocalizedString(`${LOCALIZATION_NAMESPACE}:${key}`, options);
+    return (key, options) => localization.getLocalizedString(getLocalizationKey(key), options);
   }, [localization]);
   return (
     <localizationContext.Provider value={translate}>

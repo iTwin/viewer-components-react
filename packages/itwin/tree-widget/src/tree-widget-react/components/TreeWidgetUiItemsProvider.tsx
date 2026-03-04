@@ -10,8 +10,9 @@ import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, useTransientState } from "@itwin/appui-react";
 import { Icon } from "@stratakit/foundations";
 import hierarchyTreeSvg from "@stratakit/icons/hierarchy-tree.svg";
-import { LocalizationContextProvider } from "../../tree-widget-react.js";
+import { getLocalizationKey } from "./shared/LocalizedStrings.js";
 import { ErrorState } from "./tree-header/ErrorState.js";
+import { LocalizationContextProvider } from "./trees/common/components/LocalizationContext.js";
 import { SharedTreeContextProvider } from "./trees/index.js";
 import { TreeWidgetComponentImpl } from "./TreeWidgetComponentImpl.js";
 
@@ -48,7 +49,7 @@ interface TreeWidgetProps {
 export function createTreeWidget(props: TreeWidgetProps): Widget {
   return {
     id: "tree-widget-react:trees",
-    label: props.localization.getLocalizedString("widget.label"),
+    label: props.localization.getLocalizedString(getLocalizationKey("widget.label")),
     icon: <Icon href={hierarchyTreeSvg} />,
     layouts: {
       standard: {

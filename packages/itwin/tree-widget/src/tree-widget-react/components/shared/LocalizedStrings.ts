@@ -165,3 +165,8 @@ export type LocalizationKey = ObjectKeys<typeof LOCALIZED_STRINGS>;
 
 /** @internal */
 export const LOCALIZATION_NAMESPACE = "TreeWidget";
+
+/** @internal */
+export function getLocalizationKey(key: LocalizationKey): string {
+  return `${LOCALIZATION_NAMESPACE}:${key}`;
+}
