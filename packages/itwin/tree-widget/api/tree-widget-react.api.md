@@ -638,7 +638,7 @@ interface TreeToolbarButtonProps {
 
 // @public
 export class TreeWidget {
-    static initialize(_i18n?: Localization, logger?: ILogger): Promise<void>;
+    static initialize(logger?: ILogger): Promise<void>;
     static get logger(): ILogger;
     static terminate(): void;
 }
