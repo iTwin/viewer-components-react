@@ -34,10 +34,10 @@ export const useGroupsOperations = ({ mappingId }: GroupsOperationsProps) => {
   const groupsClient = useGroupsClient();
   const groupUIs: GroupingCustomUI[] = useGroupingMappingCustomUI().customUIs.filter(
     (p) => p.type === GroupingMappingCustomUIType.Grouping,
-  ) as GroupingCustomUI[];
+  );
   const contextUIs: ContextCustomUI[] = useGroupingMappingCustomUI().customUIs.filter(
     (p) => p.type === GroupingMappingCustomUIType.Context,
-  ) as ContextCustomUI[];
+  );
   const [showDeleteModal, setShowDeleteModal] = useState<GroupMinimal | undefined>(undefined);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const [activeOverlapInfoPanelGroup, setActiveOverlapInfoPanelGroup] = useState<GroupMinimal | undefined>(undefined);

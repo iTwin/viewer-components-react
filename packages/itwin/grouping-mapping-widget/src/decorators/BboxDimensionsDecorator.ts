@@ -99,28 +99,43 @@ export class BboxDimensionsDecorator implements Decorator {
 
   /** Set the active instance used by the decorator. */
   public async setContext(instanceId: string): Promise<boolean> {
-    // get locating info on the requested instance
-    const query = `SELECT bBoxHigh,bBoxLow,yaw,pitch,roll,origin FROM BisCore.SpatialElement WHERE ECInstanceId = ?`;
+    // Read spatial extents from SpatialIndex. Some element classes don't expose placement fields through ECSQL.
+    const query = `SELECT minX,minY,minZ,maxX,maxY,maxZ FROM BisCore.SpatialIndex WHERE ECInstanceId = ?`;
 
     if (!IModelApp.viewManager.selectedView || !IModelApp.viewManager.selectedView.iModel) {
       return false;
     }
 
     const params = new QueryBinder().bindId(1, instanceId);
-    const queryIterable = IModelApp.viewManager.selectedView?.iModel.query(query, params, { rowFormat: QueryRowFormat.UseJsPropertyNames });
-
-    const results: SpatialElementQueryResult[] = [];
-    for await (const row of queryIterable) {
-      results.push(row);
-    }
-    // if no results or more than one abort
-    if (results.length !== 1) {
+    const reader = IModelApp.viewManager.selectedView.iModel.createQueryReader(query, params, { rowFormat: QueryRowFormat.UseECSqlPropertyIndexes });
+    const rows = await reader.toArray();
+    if (rows.length !== 1) {
       // TODO: maybe report a warning or something
       return false;
     }
 
-    // validate result
-    const elem = results[0];
+    const row = rows[0] as unknown;
+    const minX = this.readNumber(row, 0, "minX");
+    const minY = this.readNumber(row, 1, "minY");
+    const minZ = this.readNumber(row, 2, "minZ");
+    const maxX = this.readNumber(row, 3, "maxX");
+    const maxY = this.readNumber(row, 4, "maxY");
+    const maxZ = this.readNumber(row, 5, "maxZ");
+
+    if (minX === undefined || minY === undefined || minZ === undefined || maxX === undefined || maxY === undefined || maxZ === undefined) {
+      return false;
+    }
+
+    const elem: SpatialElementQueryResult = {
+      bBoxHigh: Point3d.create(maxX, maxY, maxZ),
+      bBoxLow: Point3d.create(minX, minY, minZ),
+      // SpatialIndex stores world-aligned extents only. Build an axis-aligned placement.
+      yaw: 0,
+      pitch: 0,
+      roll: 0,
+      origin: Point3d.createZero(),
+    };
+
     if (!this.validateQueryResult(elem)) {
       return false;
     } else {
@@ -286,6 +301,47 @@ export class BboxDimensionsDecorator implements Decorator {
     return false;
   }
 
+  private readNumber(row: unknown, index: number, key: string): number | undefined {
+    if (Array.isArray(row)) {
+      return this.asNumber(row[index]);
+    }
+    if (!row || typeof row !== "object") {
+      return undefined;
+    }
+    const valueByIndex = (row as Record<number, unknown>)[index];
+    if (valueByIndex !== undefined) {
+      return this.asNumber(valueByIndex);
+    }
+    const valueByStringIndex = (row as Record<string, unknown>)[String(index)];
+    if (valueByStringIndex !== undefined) {
+      return this.asNumber(valueByStringIndex);
+    }
+    const value = (row as Record<string, unknown>)[key];
+    if (value !== undefined) {
+      return this.asNumber(value);
+    }
+    const keyLower = key.toLowerCase();
+    for (const [rowKey, rowValue] of Object.entries(row)) {
+      if (rowKey.toLowerCase() === keyLower) {
+        return this.asNumber(rowValue);
+      }
+    }
+    return undefined;
+  }
+
+  private asNumber(value: unknown): number | undefined {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value;
+    }
+    if (typeof value === "string") {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+    return undefined;
+  }
+
   /**
    * Takes a Bounding Box and builds a rectangular polyface.
    * @param bbox The desired Bounding Box.
@@ -400,7 +456,7 @@ export class BboxDimensionsDecorator implements Decorator {
    */
   private createGraphics(context: DecorateContext): RenderGraphic | undefined {
     // Specifying an Id for the graphics tells the display system that all of the geometry belongs to the same entity, so that it knows to make sure the edges draw on top of the surfaces.
-    const builder = context.createGraphicBuilder(GraphicType.Scene, undefined, context.viewport.iModel.transientIds.next);
+    const builder = context.createGraphicBuilder(GraphicType.Scene, undefined, context.viewport.iModel.transientIds.getNext());
     // Read-only now
     // builder.wantNormals = true;
     this.points.forEach((styledPoint) => {
