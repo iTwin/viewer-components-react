@@ -12,7 +12,7 @@ import focusModeSvg from "@stratakit/icons/cursor-click.svg";
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
 import visibilityInvertSvg from "@stratakit/icons/visibility-invert.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
-import { TreeWidget } from "../../../TreeWidget.js";
+import { useTranslation } from "../common/components/LocalizationContext.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { getClassesByView } from "../common/internal/Utils.js";
@@ -107,6 +107,7 @@ export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) =>
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   const { getBaseIdsCache } = useSharedTreeContextInternal();
   const baseIdsCache = getBaseIdsCache({ imodel: props.viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
+  const translate = useTranslation();
   const onClick = useCallback(async () => {
     try {
       const categories = await firstValueFrom(baseIdsCache.getAllCategoriesOfElements().pipe(mergeAll(), toArray()));
@@ -120,7 +121,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
       variant={"ghost"}
-      label={TreeWidget.translate("modelsTree.buttons.showAll.tooltip")}
+      label={translate("modelsTree.buttons.showAll.tooltip")}
       onClick={() => {
         // cspell:disable-next-line
         props.onFeatureUsed?.("models-tree-showall");
@@ -133,10 +134,11 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
 
 /** @public */
 export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
+  const translate = useTranslation();
   return (
     <IconButton
       variant={"ghost"}
-      label={TreeWidget.translate("modelsTree.buttons.hideAll.tooltip")}
+      label={translate("modelsTree.buttons.hideAll.tooltip")}
       onClick={() => {
         // cspell:disable-next-line
         props.onFeatureUsed?.("models-tree-hideall");
@@ -152,10 +154,11 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
 
 /** @public */
 export function InvertButton(props: ModelsTreeHeaderButtonProps) {
+  const translate = useTranslation();
   return (
     <IconButton
       variant={"ghost"}
-      label={TreeWidget.translate("modelsTree.buttons.invert.tooltip")}
+      label={translate("modelsTree.buttons.invert.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-invert");
         invertAllModels(
@@ -170,6 +173,7 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
 
 /** @public */
 export function View2DButton(props: ModelsTreeHeaderButtonProps) {
+  const translate = useTranslation();
   const models2d = useMemo(() => {
     return props.models.filter((model) => model.isPlanProjection).map((model) => model.id);
   }, [props.models]);
@@ -184,7 +188,7 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
       variant={"ghost"}
-      label={TreeWidget.translate("modelsTree.buttons.toggle2d.tooltip")}
+      label={translate("modelsTree.buttons.toggle2d.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-view2d");
         toggleModels(models2d, is2dToggleActive, props.viewport);
@@ -198,6 +202,7 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
 
 /** @public */
 export function View3DButton(props: ModelsTreeHeaderButtonProps) {
+  const translate = useTranslation();
   const models3d = useMemo(() => {
     return props.models.filter((model) => !model.isPlanProjection).map((model) => model.id);
   }, [props.models]);
@@ -212,7 +217,7 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
       variant={"ghost"}
-      label={TreeWidget.translate("modelsTree.buttons.toggle3d.tooltip")}
+      label={translate("modelsTree.buttons.toggle3d.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-view3d");
         toggleModels(models3d, is3dToggleActive, props.viewport);
@@ -227,11 +232,12 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
 /** @public */
 export function ToggleInstancesFocusButton({ onFeatureUsed, disabled }: { onFeatureUsed?: (feature: string) => void; disabled?: boolean }) {
   const { enabled, toggle } = useFocusedInstancesContext();
+  const translate = useTranslation();
   const label = disabled
-    ? TreeWidget.translate("modelsTree.buttons.toggleFocusMode.disabled.tooltip")
+    ? translate("modelsTree.buttons.toggleFocusMode.disabled.tooltip")
     : enabled
-      ? TreeWidget.translate("modelsTree.buttons.toggleFocusMode.disable.tooltip")
-      : TreeWidget.translate("modelsTree.buttons.toggleFocusMode.enable.tooltip");
+      ? translate("modelsTree.buttons.toggleFocusMode.disable.tooltip")
+      : translate("modelsTree.buttons.toggleFocusMode.enable.tooltip");
   return (
     <IconButton
       variant={"ghost"}

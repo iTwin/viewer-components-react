@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { IconButton, TextBox } from "@stratakit/bricks";
 import dismissSvg from "@stratakit/icons/dismiss.svg";
 import searchSvg from "@stratakit/icons/search.svg";
-import { TreeWidget } from "../../TreeWidget.js";
+import { useTranslation } from "../trees/common/components/LocalizationContext.js";
 
 interface DebouncedSearchBoxProps {
   isOpened: boolean;
@@ -19,6 +19,7 @@ interface DebouncedSearchBoxProps {
 
 /** @internal */
 export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, className }: DebouncedSearchBoxProps) {
+  const translate = useTranslation();
   const [inputValue, setInputValue] = useState<string | undefined>(undefined);
   const onChangeRef = useRef(onSearch);
   // save latest `onChange` reference into `useRef` to avoid restarting timeout when `onChange` reference changes.
@@ -38,7 +39,7 @@ export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, cla
     <IconButton
       className={"tw-search-box-button"}
       variant={"ghost"}
-      label={TreeWidget.translate("header.searchBox.searchForSomething")}
+      label={translate("header.searchBox.searchForSomething")}
       icon={searchSvg}
       onClick={() => {
         setIsOpened(true);
@@ -48,12 +49,12 @@ export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, cla
   ) : (
     <>
       <TextBox.Root className={className}>
-        <TextBox.Input type={"text"} onChange={(e) => setInputValue(e.currentTarget.value)} placeholder={TreeWidget.translate("header.searchBox.search")} />
+        <TextBox.Input type={"text"} onChange={(e) => setInputValue(e.currentTarget.value)} placeholder={translate("header.searchBox.search")} />
       </TextBox.Root>
       <IconButton
         className={"tw-search-box-button"}
         variant={"ghost"}
-        label={TreeWidget.translate("header.searchBox.close")}
+        label={translate("header.searchBox.close")}
         icon={dismissSvg}
         onClick={() => {
           setIsOpened(false);

@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { TreeWidget } from "../../../../TreeWidget.js";
-
+import type { TranslateFunc } from "../components/LocalizationContext.js";
 import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
 
 /** @internal */
@@ -24,8 +23,6 @@ export function createVisibilityStatus(status: Visibility | "disabled"): Visibil
 }
 
 /** @internal */
-export function createTooltip(status: Visibility | "disabled" | "determining"): string {
-  const statusStringId = `visibilityTooltips.status.${status}`;
-  const statusString = TreeWidget.translate(statusStringId);
-  return statusString;
+export function createTooltip(status: Visibility | "disabled" | "determining", translate: TranslateFunc): string {
+  return translate(`visibilityTooltips.status.${status}`);
 }

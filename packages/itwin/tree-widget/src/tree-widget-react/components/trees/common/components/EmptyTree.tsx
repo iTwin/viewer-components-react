@@ -7,48 +7,56 @@ import "./EmptyTree.css";
 
 import { Anchor, Text } from "@stratakit/bricks";
 import { Icon } from "@stratakit/foundations";
-import { TreeWidget } from "../../../../TreeWidget.js";
 import { useFocusedInstancesContext } from "../FocusedInstancesContext.js";
+import { useTranslation } from "./LocalizationContext.js";
 
 interface SearchEmptyTreeProps {
-  base: string;
+  base: "categoriesTree" | "modelsTree" | "classificationsTree";
 }
 
 /** @internal */
 export function TooManySearchMatches({ base }: SearchEmptyTreeProps) {
+  const translate = useTranslation();
   return (
     <div className={"tw-search-empty-tree-container"}>
-      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.search.tooManySearchMatches`)}</Text>
-      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.search.tooManySearchMatchesRetry`)}</Text>
+      <Text variant={"body-sm"}>{translate(`${base}.search.tooManySearchMatches`)}</Text>
+      <Text variant={"body-sm"}>{translate(`${base}.search.tooManySearchMatchesRetry`)}</Text>
     </div>
   );
 }
 
 /** @internal */
 export function NoSearchMatches({ base }: SearchEmptyTreeProps) {
+  const translate = useTranslation();
   return (
     <div className={"tw-search-empty-tree-container"}>
-      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.search.noMatches`)}</Text>
-      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.search.noMatchesRetry`)}</Text>
+      <Text variant={"body-sm"}>{translate(`${base}.search.noMatches`)}</Text>
+      <Text variant={"body-sm"}>{translate(`${base}.search.noMatchesRetry`)}</Text>
     </div>
   );
 }
 
 /** @internal */
 export function SearchUnknownError({ base }: SearchEmptyTreeProps) {
+  const translate = useTranslation();
   return (
     <div className={"tw-search-empty-tree-container"}>
-      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.search.unknownSearchError`)}</Text>
+      <Text variant={"body-sm"}>{translate(`${base}.search.unknownSearchError`)}</Text>
     </div>
   );
 }
 
+interface FocusedInstancesErrorProps {
+  base: "modelsTree";
+}
+
 /** @internal */
-export function TooManyInstancesFocused({ base }: SearchEmptyTreeProps) {
+export function TooManyInstancesFocused({ base }: FocusedInstancesErrorProps) {
+  const translate = useTranslation();
   const { toggle } = useFocusedInstancesContext();
   return (
     <Text variant="body-sm" className={"tw-search-empty-tree-container"}>
-      {TreeWidget.translate(`${base}.search.tooManyInstancesFocused`)}
+      {translate(`${base}.search.tooManyInstancesFocused`)}
       <Anchor
         onClick={(e) => {
           e.stopPropagation();
@@ -56,18 +64,19 @@ export function TooManyInstancesFocused({ base }: SearchEmptyTreeProps) {
         }}
         render={<button />}
       >
-        {TreeWidget.translate(`${base}.search.disableInstanceFocusMode`)}
+        {translate(`${base}.search.disableInstanceFocusMode`)}
       </Anchor>
     </Text>
   );
 }
 
 /** @internal */
-export function UnknownInstanceFocusError({ base }: SearchEmptyTreeProps) {
+export function UnknownInstanceFocusError({ base }: FocusedInstancesErrorProps) {
+  const translate = useTranslation();
   const { toggle } = useFocusedInstancesContext();
   return (
     <Text variant="body-sm" className={"tw-search-empty-tree-container"}>
-      {TreeWidget.translate(`${base}.search.unknownInstanceFocusError`)}
+      {translate(`${base}.search.unknownInstanceFocusError`)}
       <Anchor
         onClick={(e) => {
           e.stopPropagation();
@@ -75,22 +84,23 @@ export function UnknownInstanceFocusError({ base }: SearchEmptyTreeProps) {
         }}
         render={<button />}
       >
-        {TreeWidget.translate(`${base}.search.disableInstanceFocusMode`)}
+        {translate(`${base}.search.disableInstanceFocusMode`)}
       </Anchor>
     </Text>
   );
 }
 
 interface SubTreeErrorProps {
-  base: string;
-  error: string;
+  base: "modelsTree";
+  error: "unknownSubTreeError";
 }
 
 /** @internal */
 export function SubTreeError({ base, error }: SubTreeErrorProps) {
+  const translate = useTranslation();
   return (
     <div className={"tw-search-empty-tree-container"}>
-      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.subTree.${error}`)}</Text>
+      <Text variant={"body-sm"}>{translate(`${base}.subTree.${error}`)}</Text>
     </div>
   );
 }
@@ -101,11 +111,12 @@ interface EmptyTreeContentProps {
 
 /** @internal */
 export function EmptyTreeContent({ icon }: EmptyTreeContentProps) {
+  const translate = useTranslation();
   return (
     <div className={"tw-empty-tree-container"}>
       {icon ? <Icon size="large" href={icon} /> : null}
       <Text variant={"body-sm"} style={{ textAlign: "center" }}>
-        {TreeWidget.translate("baseTree.dataIsNotAvailable")}
+        {translate("baseTree.dataIsNotAvailable")}
       </Text>
     </div>
   );

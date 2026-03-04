@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { TreeWidget } from "../../../TreeWidget.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { ExternalSourcesTree } from "./ExternalSourcesTree.js";
 
+import type { StandardTreeLabels } from "../../TreeWidgetComponentImpl.js";
 import type { ExternalSourcesTreeProps } from "./ExternalSourcesTree.js";
 
 /** @beta */
@@ -59,4 +59,4 @@ ExternalSourcesTreeComponent.id = "external-sources-tree-v2";
  * Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
  * @beta
  */
-ExternalSourcesTreeComponent.getLabel = () => TreeWidget.translate("externalSourcesTree.label");
+ExternalSourcesTreeComponent.getLabel = ({ standardLabels }: { standardLabels: StandardTreeLabels }) => standardLabels.externalSources;

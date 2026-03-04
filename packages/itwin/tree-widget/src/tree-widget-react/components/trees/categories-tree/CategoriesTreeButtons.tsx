@@ -10,8 +10,8 @@ import { IconButton } from "@stratakit/bricks";
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
 import visibilityInvertSvg from "@stratakit/icons/visibility-invert.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
-import { TreeWidget } from "../../../TreeWidget.js";
 import { hideAllCategories, invertAllCategories } from "../common/CategoriesVisibilityUtils.js";
+import { useTranslation } from "../common/components/LocalizationContext.js";
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { useErrorState } from "../common/internal/UseErrorState.js";
 import { useGuid } from "../common/internal/useGuid.js";
@@ -84,10 +84,11 @@ export type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonP
 /** @public */
 export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   const componentId = useGuid();
+  const translate = useTranslation();
   return (
     <IconButton
       variant={"ghost"}
-      label={TreeWidget.translate("categoriesTree.buttons.showAll.tooltip")}
+      label={translate("categoriesTree.buttons.showAll.tooltip")}
       onClick={() => {
         // cspell:disable-next-line
         props.onFeatureUsed?.(`categories-tree-showall`);
@@ -105,10 +106,11 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
 
 /** @public */
 export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
+  const translate = useTranslation();
   return (
     <IconButton
       variant={"ghost"}
-      label={TreeWidget.translate("categoriesTree.buttons.hideAll.tooltip")}
+      label={translate("categoriesTree.buttons.hideAll.tooltip")}
       onClick={() => {
         // cspell:disable-next-line
         props.onFeatureUsed?.(`categories-tree-hideall`);
@@ -125,10 +127,11 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
 
 /** @public */
 export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
+  const translate = useTranslation();
   return (
     <IconButton
       variant={"ghost"}
-      label={TreeWidget.translate("categoriesTree.buttons.invert.tooltip")}
+      label={translate("categoriesTree.buttons.invert.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.(`categories-tree-invert`);
         void invertAllCategories(props.categories, props.viewport);

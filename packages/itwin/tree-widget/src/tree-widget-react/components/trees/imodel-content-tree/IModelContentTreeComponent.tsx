@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { TreeWidget } from "../../../TreeWidget.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { IModelContentTree } from "./IModelContentTree.js";
 
+import type { StandardTreeLabels } from "../../TreeWidgetComponentImpl.js";
 import type { IModelContentTreeProps } from "./IModelContentTree.js";
 
 /** @beta */
@@ -59,4 +59,4 @@ IModelContentTreeComponent.id = "imodel-content-tree-v2";
  * Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
  * @beta
  */
-IModelContentTreeComponent.getLabel = () => TreeWidget.translate("imodelContentTree.label");
+IModelContentTreeComponent.getLabel = ({ standardLabels }: { standardLabels: StandardTreeLabels }) => standardLabels.imodelContent;

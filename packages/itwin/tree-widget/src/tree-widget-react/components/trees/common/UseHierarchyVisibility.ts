@@ -5,6 +5,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { asyncScheduler, catchError, defer, distinct, EMPTY, from, lastValueFrom, mergeMap, observeOn, Subject, takeUntil, tap, throttleTime } from "rxjs";
+import { useTranslation } from "./components/LocalizationContext.js";
 import { createTooltip } from "./internal/Tooltip.js";
 import { useErrorState } from "./internal/UseErrorState.js";
 import { useTelemetryContext } from "./UseTelemetryContext.js";
@@ -53,6 +54,7 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
   });
   const { onFeatureUsed } = useTelemetryContext();
   const setErrorState = useErrorState();
+  const translate = useTranslation();
 
   useEffect(() => {
     visibilityStatusMap.current.clear();
@@ -90,7 +92,7 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
                   node,
                   status: {
                     ...status,
-                    tooltip: createTooltip(status.state),
+                    tooltip: createTooltip(status.state, translate),
                   },
                   needsRefresh: false,
                 });
@@ -127,7 +129,7 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
       entry.status = {
         ...entry.status,
         state: visibilityState,
-        tooltip: createTooltip("determining"),
+        tooltip: createTooltip("determining", translate),
       };
       triggerCheckboxUpdate();
     };
@@ -151,7 +153,7 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
       removeListener();
       handler[Symbol.dispose]();
     };
-  }, [visibilityHandlerFactory, onFeatureUsed, setErrorState]);
+  }, [visibilityHandlerFactory, onFeatureUsed, setErrorState, translate]);
 
   return state;
 }

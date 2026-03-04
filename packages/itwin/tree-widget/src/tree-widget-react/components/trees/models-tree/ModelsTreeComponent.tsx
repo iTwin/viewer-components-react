@@ -5,7 +5,6 @@
 
 import { Fragment, useEffect } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { TreeWidget } from "../../../TreeWidget.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import { SharedTreeContextProviderInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
@@ -24,6 +23,7 @@ import {
 
 import type { ReactNode } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { StandardTreeLabels } from "../../TreeWidgetComponentImpl.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { ModelsTreeProps } from "./ModelsTree.js";
 import type { ModelsTreeHeaderButtonProps, ModelsTreeHeaderButtonType } from "./ModelsTreeButtons.js";
@@ -146,7 +146,7 @@ ModelsTreeComponent.id = "models-tree-v2";
  * Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
  * @public
  */
-ModelsTreeComponent.getLabel = () => TreeWidget.translate("modelsTree.label");
+ModelsTreeComponent.getLabel = ({ standardLabels }: { standardLabels: StandardTreeLabels }) => standardLabels.models;
 
 function ModelsTreeComponentImpl({
   iModel,

@@ -8,13 +8,23 @@ import "./TreeWidgetComponentImpl.css";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Skeleton } from "@stratakit/bricks";
-import { TreeWidget } from "../TreeWidget.js";
 import { SelectableTree } from "./tree-header/SelectableTree.js";
 import { WidgetHeader } from "./tree-header/WidgetHeader.js";
+import { useTranslation } from "./trees/common/components/LocalizationContext.js";
 import { SkeletonTree } from "./trees/common/components/SkeletonTree.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeContentDefinition, TreeSelectionProps } from "./tree-header/WidgetHeader.js";
+import type { TranslateFunc } from "./trees/common/components/LocalizationContext.js";
+
+/** @beta */
+export interface StandardTreeLabels {
+  models: string;
+  categories: string;
+  imodelContent: string;
+  externalSources: string;
+  classifications: string;
+}
 
 /**
  * Props for rendering trees
@@ -36,7 +46,7 @@ export interface TreeDefinition {
   /** Id of the tree */
   id: string;
   /** Callback that is used to get tree label */
-  getLabel: () => string;
+  getLabel: (props: { standardLabels: StandardTreeLabels }) => string;
   /** Callback that is used to render tree component */
   render: (props: TreeRenderProps) => React.ReactNode;
   /**
@@ -83,7 +93,8 @@ function SelectableTreeContent({
   imodel,
 }: TreeWidgetComponentImplProps & { imodel: IModelConnection }) {
   const activeTrees = useActiveTrees(treeDefinitions, imodel);
-  const { trees, defaultSelectedContentId } = useMemo(() => getWidgetWithHeaderProps(activeTrees), [activeTrees]);
+  const translate = useTranslation();
+  const { trees, defaultSelectedContentId } = useMemo(() => getWidgetWithHeaderProps(translate, activeTrees), [activeTrees, translate]);
   const [searchValue, setSearchValue] = useState<string | undefined>(undefined);
   const [selectedContentId, setSelectedContentId] = useState<string | undefined>(defaultSelectedContentId);
   const selectedContent = useMemo(() => trees.find((c) => c.id === selectedContentId) ?? trees[0], [selectedContentId, trees]);
@@ -116,11 +127,22 @@ function SelectableTreeContent({
 
 function useActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelConnection) {
   const [trees, setTrees] = useState<TreeContentDefinition[]>();
+  const translate = useTranslation();
+  const standardTreeLabels = useMemo<StandardTreeLabels>(
+    () => ({
+      models: translate("modelsTree.label"),
+      categories: translate("categoriesTree.label"),
+      imodelContent: translate("imodelContentTree.label"),
+      classifications: translate("classificationsTree.label"),
+      externalSources: translate("externalSourcesTree.label"),
+    }),
+    [translate],
+  );
 
   useEffect(() => {
     let disposed = false;
     void (async () => {
-      const visibleTrees = await getActiveTrees(treeDefinitions, imodel);
+      const visibleTrees = await getActiveTrees(treeDefinitions, imodel, standardTreeLabels);
       if (!disposed) {
         setTrees(visibleTrees);
       }
@@ -129,12 +151,16 @@ function useActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelConnect
     return () => {
       disposed = true;
     };
-  }, [treeDefinitions, imodel]);
+  }, [treeDefinitions, imodel, standardTreeLabels]);
 
   return trees;
 }
 
-async function getActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelConnection): Promise<TreeContentDefinition[]> {
+async function getActiveTrees(
+  treeDefinitions: TreeDefinition[],
+  imodel: IModelConnection,
+  standardTreeLabels: StandardTreeLabels,
+): Promise<TreeContentDefinition[]> {
   const handleDefinition = async (treeDef: TreeDefinition) => {
     if (treeDef.shouldShow !== undefined && !(await treeDef.shouldShow(imodel))) {
       return undefined;
@@ -142,7 +168,7 @@ async function getActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelC
     return {
       id: treeDef.id,
       isSearchable: treeDef.isSearchable,
-      label: treeDef.getLabel(),
+      label: treeDef.getLabel({ standardLabels: standardTreeLabels }),
       render: treeDef.render,
       startIcon: treeDef.startIcon,
     };
@@ -151,7 +177,7 @@ async function getActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelC
   return (await Promise.all(treeDefinitions.map(handleDefinition))).filter((tree) => tree !== undefined) as TreeContentDefinition[];
 }
 
-function getWidgetWithHeaderProps(trees?: TreeContentDefinition[]): TreeSelectionProps {
+function getWidgetWithHeaderProps(translate: TranslateFunc, trees?: TreeContentDefinition[]): TreeSelectionProps {
   if (trees === undefined) {
     return {
       defaultSelectedContentId: "loading",
@@ -176,7 +202,7 @@ function getWidgetWithHeaderProps(trees?: TreeContentDefinition[]): TreeSelectio
           label: "",
           render: () => (
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }} className="tree-widget-no-trees-container">
-              {TreeWidget.translate("selectableTree.noTrees")}
+              {translate("selectableTree.noTrees")}
             </div>
           ),
         },

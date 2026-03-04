@@ -10,13 +10,14 @@ import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, useTransientState } from "@itwin/appui-react";
 import { Icon } from "@stratakit/foundations";
 import hierarchyTreeSvg from "@stratakit/icons/hierarchy-tree.svg";
-import { TreeWidget } from "../TreeWidget.js";
+import { LocalizationContextProvider } from "../../tree-widget-react.js";
 import { ErrorState } from "./tree-header/ErrorState.js";
 import { SharedTreeContextProvider } from "./trees/index.js";
 import { TreeWidgetComponentImpl } from "./TreeWidgetComponentImpl.js";
 
 import type { Ref } from "react";
 import type { Widget } from "@itwin/appui-react";
+import type { Localization } from "@itwin/core-common";
 import type { TreeDefinition } from "./TreeWidgetComponentImpl.js";
 
 /**
@@ -32,6 +33,8 @@ interface TreeWidgetProps {
    * @see IModelContentTreeComponent
    */
   trees: TreeDefinition[];
+  /** Localization object for localizing widget components. */
+  localization: Pick<Localization, "getLocalizedString">;
   /** Callback that is invoked when performance of tracked feature is measured. */
   onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
   /** Callback that is invoked when a tracked feature is used. */
@@ -45,7 +48,7 @@ interface TreeWidgetProps {
 export function createTreeWidget(props: TreeWidgetProps): Widget {
   return {
     id: "tree-widget-react:trees",
-    label: TreeWidget.translate("widget.label"),
+    label: props.localization.getLocalizedString("widget.label"),
     icon: <Icon href={hierarchyTreeSvg} />,
     layouts: {
       standard: {
@@ -53,7 +56,14 @@ export function createTreeWidget(props: TreeWidgetProps): Widget {
         location: StagePanelLocation.Right,
       },
     },
-    content: <TreeWidgetComponent trees={props.trees} onPerformanceMeasured={props.onPerformanceMeasured} onFeatureUsed={props.onFeatureUsed} />,
+    content: (
+      <TreeWidgetComponent
+        localization={props.localization}
+        trees={props.trees}
+        onPerformanceMeasured={props.onPerformanceMeasured}
+        onFeatureUsed={props.onFeatureUsed}
+      />
+    ),
   };
 }
 
@@ -61,15 +71,17 @@ export function createTreeWidget(props: TreeWidgetProps): Widget {
  * Tree widget component which allows selecting which tree to render.
  * @public
  */
-export function TreeWidgetComponent(props: TreeWidgetProps) {
+export function TreeWidgetComponent({ localization, ...props }: TreeWidgetProps) {
   const ref = useTreeWidgetTransientState();
   return (
     <div ref={ref} className="tree-widget">
-      <ErrorBoundary FallbackComponent={ErrorState}>
-        <SharedTreeContextProvider>
-          <TreeWidgetComponentImpl {...props} />
-        </SharedTreeContextProvider>
-      </ErrorBoundary>
+      <LocalizationContextProvider localization={localization}>
+        <ErrorBoundary FallbackComponent={ErrorState}>
+          <SharedTreeContextProvider>
+            <TreeWidgetComponentImpl {...props} />
+          </SharedTreeContextProvider>
+        </ErrorBoundary>
+      </LocalizationContextProvider>
     </div>
   );
 }

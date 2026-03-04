@@ -14,19 +14,20 @@ import type { JSX, PropsWithChildren } from "react";
 import type { Localization } from "@itwin/core-common";
 import type { LocalizationKey } from "../../../shared/LocalizedStrings.js";
 
-type TranslateFunc = (key: LocalizationKey) => string;
+/** @internal */
+export type TranslateFunc = (key: LocalizationKey, options?: Parameters<Localization["getLocalizedString"]>[1]) => string;
 
 const localizationContext = createContext<TranslateFunc>((key) => key);
 
 /**
  * Namespaces used for localization of presentation hierarchies components.
- * @alpha
+ * @beta
  */
 export const LOCALIZATION_NAMESPACES = [LOCALIZATION_NAMESPACE, ...HierarchiesReactLocalizationNamespaces];
 
 /**
  * Properties for `LocalizationContextProvider`.
- * @public
+ * @beta
  */
 interface LocalizationContextProviderProps {
   /** Localization object compatible with `@itwin/core-common` */
@@ -35,11 +36,11 @@ interface LocalizationContextProviderProps {
 
 /**
  * Context provider for localizing components.
- * @public
+ * @beta
  */
 export function LocalizationContextProvider({ localization, children }: PropsWithChildren<LocalizationContextProviderProps>): JSX.Element {
   const translate = useMemo<TranslateFunc>(() => {
-    return (key: LocalizationKey) => localization.getLocalizedString(`${LOCALIZATION_NAMESPACE}:${key}`);
+    return (key, options) => localization.getLocalizedString(`${LOCALIZATION_NAMESPACE}:${key}`, options);
   }, [localization]);
   return (
     <localizationContext.Provider value={translate}>
