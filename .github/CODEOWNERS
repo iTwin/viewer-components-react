@@ -10,6 +10,8 @@
 # review when someone opens a pull request.
 *  @itwin/viewer-components-reviewers
 
+/packages/itwin/test-utilities  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
+
 /apps/test-viewer  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
 /apps/learning-snippets  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
 /apps/performance-tests  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation

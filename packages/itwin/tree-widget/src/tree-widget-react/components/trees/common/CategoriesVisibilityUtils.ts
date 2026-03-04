@@ -47,7 +47,7 @@ export async function enableCategoryDisplay(viewport: Viewport, categoryIds: Id6
       releaseMainThreadOnItemsCount(500),
       bufferCount(getOptimalBatchSize({ totalSize: categoryIds.length, maximumBatchSize: 500 })),
       mergeMap(async (bufferedCategories) => {
-        viewport.changeCategoryDisplay(bufferedCategories, enabled, enableAllSubCategories);
+        viewport.changeCategoryDisplay(bufferedCategories, enabled, enableAllSubCategories, true);
         removeOverrides(bufferedCategories);
         if (!enabled) {
           await disableSubCategories(bufferedCategories);

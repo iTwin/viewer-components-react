@@ -90,17 +90,17 @@ describe("CategoryVisibilityUtils", () => {
   describe("enableCategoryDisplay", () => {
     it("enables category", async () => {
       await enableCategoryDisplay(viewportMock.object, ["CategoryId"], true, false);
-      viewportMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], true, false), moq.Times.once());
+      viewportMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], true, false, true), moq.Times.once());
     });
 
     it("disables category", async () => {
       await enableCategoryDisplay(viewportMock.object, ["CategoryId"], false, false);
-      viewportMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], false, false), moq.Times.once());
+      viewportMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], false, false, true), moq.Times.once());
     });
 
     it("disables category and subcategories", async () => {
       await enableCategoryDisplay(viewportMock.object, ["CategoryId"], false, true);
-      viewportMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], false, true), moq.Times.once());
+      viewportMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], false, true, true), moq.Times.once());
       viewportMock.verify((x) => x.changeSubCategoryDisplay(moq.It.isAny(), moq.It.isAny()), moq.Times.once());
     });
 
@@ -109,7 +109,7 @@ describe("CategoryVisibilityUtils", () => {
       perModelCategoryVisibilityMock.reset();
       perModelCategoryVisibilityMock.setup((x) => x[Symbol.iterator]()).returns(() => overrides[Symbol.iterator]());
       await enableCategoryDisplay(viewportMock.object, ["CategoryId"], true, false);
-      viewportMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], true, false), moq.Times.once());
+      viewportMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], true, false, true), moq.Times.once());
       perModelCategoryVisibilityMock.verify((x) => x.setOverride(["ModelId"], ["CategoryId"], PerModelCategoryVisibility.Override.None), moq.Times.once());
     });
   });
@@ -203,8 +203,8 @@ describe("CategoryVisibilityUtils", () => {
     });
 
     it("inverts visible and hidden categories", async () => {
-      viewport.changeCategoryDisplay([categoryIds[0]], false, true);
-      viewport.changeCategoryDisplay([categoryIds[1], categoryIds[2]], true, true);
+      viewport.changeCategoryDisplay([categoryIds[0]], false, true, true);
+      viewport.changeCategoryDisplay([categoryIds[1], categoryIds[2]], true, true, true);
       for (let i = 0; i < categoryIds.length; ++i) {
         expect(viewport.view.viewsCategory(categoryIds[i])).to.eq(i > 0);
       }
@@ -218,8 +218,8 @@ describe("CategoryVisibilityUtils", () => {
     });
 
     it("enables categories when they are in partial state due to subcategories", async () => {
-      viewport.changeCategoryDisplay(categoryIds[0], true, true);
-      viewport.changeCategoryDisplay(categoryIds[1], false, true);
+      viewport.changeCategoryDisplay(categoryIds[0], true, true, true);
+      viewport.changeCategoryDisplay(categoryIds[1], false, true, true);
       viewport.changeSubCategoryDisplay(subCategoryIds[0], false);
       viewport.changeSubCategoryDisplay(subCategoryIds[1], true);
       for (let i = 0; i < categoryIds.length; ++i) {
@@ -241,8 +241,8 @@ describe("CategoryVisibilityUtils", () => {
     });
 
     it("enables categories when they are in partial state due to per model overrides", async () => {
-      viewport.changeCategoryDisplay(categoryIds[0], true, true);
-      viewport.changeCategoryDisplay(categoryIds[1], false, true);
+      viewport.changeCategoryDisplay(categoryIds[0], true, true, true);
+      viewport.changeCategoryDisplay(categoryIds[1], false, true, true);
       for (let i = 0; i < categoryIds.length; ++i) {
         expect(viewport.view.viewsCategory(categoryIds[i])).to.eq(i === 0);
       }
@@ -260,8 +260,8 @@ describe("CategoryVisibilityUtils", () => {
     });
 
     it("inverts visible and hidden categories when they have overrides", async () => {
-      viewport.changeCategoryDisplay(categoryIds[0], true, true);
-      viewport.changeCategoryDisplay(categoryIds[1], false, true);
+      viewport.changeCategoryDisplay(categoryIds[0], true, true, true);
+      viewport.changeCategoryDisplay(categoryIds[1], false, true, true);
 
       for (let i = 0; i < categoryIds.length; ++i) {
         expect(viewport.view.viewsCategory(categoryIds[i])).to.eq(i === 0);

@@ -747,7 +747,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   private removeAlwaysDrawnExclusive(): Observable<void> {
     return this.#idsCache.getAllCategories().pipe(
       map((categoryIds) => {
-        this.#props.viewport.changeCategoryDisplay(categoryIds, false, false);
+        this.#props.viewport.changeCategoryDisplay(categoryIds, false, false, true);
         this.#props.viewport.clearNeverDrawn();
         this.#props.viewport.perModelCategoryVisibility.clearOverrides();
         this.#props.viewport.setAlwaysDrawn(this.#props.viewport.alwaysDrawn ?? new Set());
@@ -840,7 +840,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     if (override === PerModelCategoryVisibility.Override.None && on) {
       // we took off the override which means the category is displayed in selector, but
       // doesn't mean all its subcategories are displayed - this call ensures that
-      viewport.changeCategoryDisplay(categoryId, true, true);
+      viewport.changeCategoryDisplay(categoryId, true, true, true);
     }
   }
 

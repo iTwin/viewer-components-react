@@ -1,8 +1,16 @@
 # Change Log - @itwin/map-layers
 
-<!-- This log was last generated on Mon, 03 Nov 2025 14:36:22 GMT and should not be manually modified. -->
+<!-- This log was last generated on Tue, 03 Mar 2026 14:55:51 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 6.1.0
+
+Tue, 03 Mar 2026 14:55:51 GMT
+
+### Minor changes
+
+- Enhance FeatureInfoUiItemsProvider: Add toolbar orientation and item priority options; update widget integration ([#1613](https://github.com/iTwin/viewer-components-react/pull/1613))
 
 ## 6.0.9
 
