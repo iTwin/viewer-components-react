@@ -3,14 +3,9 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "outDir": "lib/esm",
     "jsx": "react-jsx",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "noImplicitOverride": false,
-    "resolveJsonModule": true,
-    "lib": ["DOM"]
+    "lib": ["DOM"],
+    "noEmit": true
   },
-  "include": ["src", "types.d.ts"],
-  "exclude": ["src/e2e-tests/**/*"]
+  "include": ["src/**/*", "types.d.ts"]
 }

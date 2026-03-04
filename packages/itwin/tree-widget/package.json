@@ -30,7 +30,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json && npm run -s build:locale && npm run -s copy",
+    "build": "tsc -p tsconfig.lib.json && npm run -s build:locale && npm run -s copy",
     "build:locale": "tsc -p tsconfig.utils.json && node ./lib/build/utils/BuildLocale.js",
     "copy": "npm run -s copy:public && npm run -s copy:assets",
     "copy:public": "cpx \"./public/**/*\" ./lib/public",
