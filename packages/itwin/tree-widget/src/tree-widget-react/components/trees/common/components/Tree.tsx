@@ -25,6 +25,7 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { SelectionStorage, StrataKitTreeRenderer, TreeNode, TreeRendererProps, useIModelTree, useTree } from "@itwin/presentation-hierarchies-react";
 import type { FunctionProps } from "../Utils.js";
 
+/** @beta */
 type BaseTreeRendererProps = ComponentProps<typeof StrataKitTreeRenderer>;
 
 /** @beta */

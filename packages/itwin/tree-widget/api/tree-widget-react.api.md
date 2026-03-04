@@ -6,6 +6,7 @@
 
 import type { BeEvent } from '@itwin/core-bentley';
 import type { ClassGroupingNodeKey } from '@itwin/presentation-hierarchies';
+import type { ComponentProps } from 'react';
 import type { ECClassHierarchyInspector } from '@itwin/presentation-shared';
 import type { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
 import type { HierarchyDefinition } from '@itwin/presentation-hierarchies';
@@ -20,6 +21,7 @@ import type { IModelConnection } from '@itwin/core-frontend';
 import type { InstanceKey } from '@itwin/presentation-shared';
 import type { InstancesNodeKey } from '@itwin/presentation-hierarchies';
 import { JSX as JSX_2 } from 'react/jsx-runtime';
+import type { JSX as JSX_3 } from 'react';
 import type { Localization } from '@itwin/core-common';
 import { NamedExoticComponent } from 'react';
 import type { NonGroupingHierarchyNode } from '@itwin/presentation-hierarchies';
@@ -28,7 +30,6 @@ import type { ReactElement } from 'react';
 import type { ReactNode } from 'react';
 import type { SelectionStorage } from '@itwin/presentation-hierarchies-react';
 import { StrataKitTreeRenderer } from '@itwin/presentation-hierarchies-react';
-import type { TranslationOptions } from '@itwin/core-common';
 import { TreeActionBase } from '@itwin/presentation-hierarchies-react';
 import { TreeActionBaseAttributes } from '@itwin/presentation-hierarchies-react';
 import type { TreeNode } from '@itwin/presentation-hierarchies-react';
@@ -41,7 +42,7 @@ import type { Viewport } from '@itwin/core-frontend';
 import type { Widget } from '@itwin/appui-react';
 
 // @beta (undocumented)
-export type BaseTreeRendererProps = React.ComponentPropsWithoutRef<typeof StrataKitTreeRenderer>;
+type BaseTreeRendererProps = ComponentProps<typeof StrataKitTreeRenderer>;
 
 // @beta
 interface BaseTreeVisibilityHandlerOverrides {
@@ -92,7 +93,9 @@ export const CategoriesTreeComponent: {
     HideAllButton: CategoriesTreeHeaderButtonType;
     InvertAllButton: CategoriesTreeHeaderButtonType;
     id: string;
-    getLabel(): string;
+    getLabel({ standardLabels }: {
+        standardLabels: StandardTreeLabels;
+    }): string;
 };
 
 // @public (undocumented)
@@ -198,7 +201,9 @@ type ClassGroupingHierarchyNode = GroupingHierarchyNode & {
 export const ClassificationsTreeComponent: {
     (props: ClassificationsTreeComponentProps): JSX_2.Element | null;
     id: string;
-    getLabel(): string;
+    getLabel({ standardLabels }: {
+        standardLabels: StandardTreeLabels;
+    }): string;
     isSupportedByIModel(imodel: IModelConnection): Promise<boolean>;
 };
 
@@ -280,7 +285,9 @@ type ExtendedVisibilityTreeRendererProps = CallbacksWithCommonTreeRendererProps<
 export const ExternalSourcesTreeComponent: {
     ({ onFeatureUsed, onPerformanceMeasured, treeLabel, ...props }: ExternalSourcesTreeComponentProps): JSX_2.Element | null;
     id: string;
-    getLabel(): string;
+    getLabel({ standardLabels }: {
+        standardLabels: StandardTreeLabels;
+    }): string;
 };
 
 // @beta (undocumented)
@@ -339,7 +346,9 @@ type HierarchyVisibilityHandlerOverridableMethodProps<TFunc> = TFunc extends (pr
 export const IModelContentTreeComponent: {
     ({ onFeatureUsed, onPerformanceMeasured, treeLabel, ...props }: IModelContentTreeComponentProps): JSX_2.Element | null;
     id: string;
-    getLabel(): string;
+    getLabel({ standardLabels }: {
+        standardLabels: StandardTreeLabels;
+    }): string;
 };
 
 // @beta (undocumented)
@@ -376,6 +385,17 @@ interface LoadedTreeItemVisibilityButtonState {
     state: "visible" | "hidden" | "partial";
 }
 
+// @beta
+export const LOCALIZATION_NAMESPACES: string[];
+
+// @beta
+export function LocalizationContextProvider({ localization, children }: PropsWithChildren<LocalizationContextProviderProps>): JSX_3.Element;
+
+// @beta
+interface LocalizationContextProviderProps {
+    localization: Pick<Localization, "getLocalizedString">;
+}
+
 // @public
 interface ModelInfo {
     // (undocumented)
@@ -394,7 +414,9 @@ export const ModelsTreeComponent: {
     View3DButton: ModelsTreeHeaderButtonType;
     ToggleInstancesFocusButton: ModelsTreeHeaderButtonType;
     id: string;
-    getLabel(): string;
+    getLabel({ standardLabels }: {
+        standardLabels: StandardTreeLabels;
+    }): string;
 };
 
 // @public (undocumented)
@@ -515,6 +537,20 @@ export function SharedTreeContextProvider({ children }: PropsWithChildren<{}>): 
 export function SkeletonTree(): JSX_2.Element;
 
 // @beta (undocumented)
+interface StandardTreeLabels {
+    // (undocumented)
+    categories: string;
+    // (undocumented)
+    classifications: string;
+    // (undocumented)
+    externalSources: string;
+    // (undocumented)
+    imodelContent: string;
+    // (undocumented)
+    models: string;
+}
+
+// @beta (undocumented)
 export function TelemetryContextProvider({ children, onPerformanceMeasured, onFeatureUsed, componentIdentifier, }: PropsWithChildren<TelemetryContextProviderProps>): JSX_2.Element;
 
 // @beta (undocumented)
@@ -533,7 +569,9 @@ export { TreeActionBaseAttributes }
 
 // @public
 export interface TreeDefinition {
-    getLabel: () => string;
+    getLabel: (props: {
+        standardLabels: StandardTreeLabels;
+    }) => string;
     id: string;
     isSearchable?: boolean;
     render: (props: TreeRenderProps) => React.ReactNode;
@@ -576,7 +614,7 @@ type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPaths" | "g
 export function TreeRenderer(props: TreeRendererProps_2): JSX_2.Element;
 
 // @beta (undocumented)
-type TreeRendererProps_2 = BaseTreeRendererProps;
+type TreeRendererProps_2 = ComponentProps<typeof StrataKitTreeRenderer>;
 
 // @public
 interface TreeRenderProps {
@@ -600,19 +638,17 @@ interface TreeToolbarButtonProps {
 
 // @public
 export class TreeWidget {
-    static get i18n(): Localization;
-    static get i18nNamespace(): string;
-    static initialize(i18n?: Localization, logger?: ILogger): Promise<void>;
+    static initialize(_i18n?: Localization, logger?: ILogger): Promise<void>;
     static get logger(): ILogger;
     static terminate(): void;
-    static translate(key: string, options?: TranslationOptions): string;
 }
 
 // @public
-export function TreeWidgetComponent(props: TreeWidgetProps): JSX_2.Element;
+export function TreeWidgetComponent({ localization, ...props }: TreeWidgetProps): JSX_2.Element;
 
 // @public
 interface TreeWidgetProps {
+    localization: Pick<Localization, "getLocalizedString">;
     onFeatureUsed?: (feature: string) => void;
     onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
     trees: TreeDefinition[];
@@ -854,7 +890,7 @@ type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess"> & {
 export function VisibilityTreeRenderer(props: VisibilityTreeRendererProps): JSX_2.Element;
 
 // @beta (undocumented)
-type VisibilityTreeRendererProps = BaseTreeRendererProps & VisibilityContext;
+type VisibilityTreeRendererProps = ComponentProps<typeof StrataKitTreeRenderer> & VisibilityContext;
 
 // (No @packageDocumentation comment for this package)
 
