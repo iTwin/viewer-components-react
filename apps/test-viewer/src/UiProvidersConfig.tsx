@@ -109,6 +109,7 @@ const configuredUiItems = new Map<string, UiItem>([
             const trees: TreeDefinition[] = [
               {
                 id: ModelsTreeComponent.id,
+                // eslint-disable-next-line @typescript-eslint/unbound-method
                 getLabel: ModelsTreeComponent.getLabel,
                 isSearchable: true,
                 render: (props) => (
@@ -127,6 +128,7 @@ const configuredUiItems = new Map<string, UiItem>([
               },
               {
                 id: CategoriesTreeComponent.id,
+                // eslint-disable-next-line @typescript-eslint/unbound-method
                 getLabel: CategoriesTreeComponent.getLabel,
                 isSearchable: true,
                 render: (props) => (
@@ -141,6 +143,7 @@ const configuredUiItems = new Map<string, UiItem>([
               },
               {
                 id: IModelContentTreeComponent.id,
+                // eslint-disable-next-line @typescript-eslint/unbound-method
                 getLabel: IModelContentTreeComponent.getLabel,
                 render: (props) => (
                   <IModelContentTreeComponent
@@ -156,6 +159,7 @@ const configuredUiItems = new Map<string, UiItem>([
               },
               {
                 id: ExternalSourcesTreeComponent.id,
+                // eslint-disable-next-line @typescript-eslint/unbound-method
                 getLabel: ExternalSourcesTreeComponent.getLabel,
                 render: (props) => (
                   <ExternalSourcesTreeComponent
