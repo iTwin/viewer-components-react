@@ -13,6 +13,7 @@ export function Delayed({ show, children }: PropsWithChildren<{ show: boolean }>
 
   useLayoutEffect(() => {
     if (!show) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVisible(false);
       return;
     }

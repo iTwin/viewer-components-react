@@ -6,13 +6,20 @@ const iTwinPlugin = require("@itwin/eslint-plugin");
 const reactPlugin = require("eslint-plugin-react");
 const eslintConfigPrettier = require("eslint-config-prettier");
 const unusedImports = require("eslint-plugin-unused-imports");
+const reactHooksPlugin = require("eslint-plugin-react-hooks");
 
 module.exports = [
   {
     files: ["**/*.{ts,tsx}"],
     ...iTwinPlugin.configs.uiConfig,
+    // Override the react-hooks plugin with the newer version
+    plugins: {
+      ...iTwinPlugin.configs.uiConfig.plugins,
+      "react-hooks": reactHooksPlugin,
+    },
     rules: {
       ...iTwinPlugin.configs.uiConfig.rules,
+      ...reactHooksPlugin.configs.flat.recommended.rules,
       "@itwin/no-internal": [
         "error",
         {

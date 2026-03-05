@@ -65,6 +65,7 @@ export function useSearchPaths({
   const { loadFocusedItems } = useFocusedInstancesContext();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSearchError(undefined);
     setSubTreeError(undefined);
     onModelsFiltered?.(undefined);
