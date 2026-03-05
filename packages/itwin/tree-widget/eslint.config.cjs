@@ -53,6 +53,8 @@ module.exports = [
           allowObjectTypes: "always",
         },
       ],
+      "@typescript-eslint/consistent-type-imports": "error",
+      "@typescript-eslint/consistent-type-exports": "error",
       curly: ["error", "all"],
     },
   },
