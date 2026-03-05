@@ -51,6 +51,7 @@ export interface GroupActionProps {
  * @public
  */
 export const GroupAction = (props: GroupActionProps) => {
+  const { onClickCancel: onCancel } = props;
   const { getAccessToken, iModelConnection } = useGroupingMappingApiConfig();
   if (!iModelConnection) {
     throw new Error(GroupingMappingWidget.translate("errors.requiresIModelConnection"));
@@ -58,7 +59,7 @@ export const GroupAction = (props: GroupActionProps) => {
   const groupsClient = useGroupsClient();
   const groupUIs: GroupingCustomUI[] = useGroupingMappingCustomUI().customUIs.filter(
     (p) => p.type === GroupingMappingCustomUIType.Grouping,
-  ) as GroupingCustomUI[];
+  );
   const [details, setDetails] = useState({
     groupName: props.group?.groupName ?? "",
     description: props.group?.description ?? "",
@@ -167,12 +168,14 @@ export const GroupAction = (props: GroupActionProps) => {
     setCurrentStep(GroupActionStep.QueryBuilder);
   }, []);
 
-  const onClickCancel = useCallback(() => {
+  const onClickCancel = useCallback(async () => {
     clearPresentationSelection();
-    if (props.onClickCancel) {
-      props.onClickCancel();
+    try {
+      await resetView();
+    } finally {
+      onCancel?.();
     }
-  }, [clearPresentationSelection, props]);
+  }, [clearPresentationSelection, onCancel, resetView]);
 
   const onClickNext = useCallback(() => {
     setCurrentStep(GroupActionStep.GroupDetails);
@@ -200,7 +203,7 @@ export const GroupAction = (props: GroupActionProps) => {
         {isLoading && <LoadingSpinner />}
         {isQueryBuilderStep && <QueryBuilderActionPanel onClickNext={onClickNext} isNextDisabled={!(simpleSelectionQuery || query)} />}
         {isGroupDetailsStep && <GroupDetailsActionPanel isSaveDisabled={isBlockingActions} onClickSave={onClickSave} onClickBack={onClickBack} />}
-        {props.onClickCancel && (
+        {onCancel && (
           <Button type="button" id="cancel" onClick={onClickCancel}>
             {GroupingMappingWidget.translate("common.cancel")}
           </Button>

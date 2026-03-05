@@ -18,9 +18,9 @@
     "./package.json": "./package.json"
   },
   "devDependencies": {
-    "@itwin/core-bentley": "^5.5.2",
-    "@itwin/core-common": "^5.5.2",
-    "@itwin/core-geometry": "^5.5.2",
+    "@itwin/core-bentley": "^5.7.0-dev.14",
+    "@itwin/core-common": "^5.7.0-dev.14",
+    "@itwin/core-geometry": "^5.7.0-dev.14",
     "@itwin/eslint-plugin": "^6.0.0",
     "@types/node": "^22.19.8",
     "eslint": "^9.39.2",

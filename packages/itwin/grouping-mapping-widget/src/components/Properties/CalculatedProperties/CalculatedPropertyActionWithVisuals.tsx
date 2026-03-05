@@ -15,6 +15,8 @@ import { SharedCalculatedPropertyForms } from "./SharedCalculatedPropertyForms";
 import { useGroupKeySetQuery } from "../../Groups/hooks/useKeySetHiliteQueries";
 import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 
+const MAX_CONTEXT_CANDIDATES = 25;
+
 /**
  * Props for the {@link CalculatedPropertyActionWithVisuals} component.
  * @internal
@@ -69,16 +71,28 @@ export const CalculatedPropertyActionWithVisuals = ({
   }, [colorProperty, resolvedHiliteIds]);
 
   useEffect(() => {
-    if (!colorProperty || resolvedHiliteIds.length === 0) {
+    if (!colorProperty || resolvedHiliteIds.length === 0 || !bboxDecorator) {
+      setInferredSpatialData(undefined);
       return;
     }
+    let disposed = false;
     const setContext = async () => {
-      if (bboxDecorator) {
-        await bboxDecorator.setContext(resolvedHiliteIds[0]);
-        setInferredSpatialData(bboxDecorator.getInferredSpatialData());
+      const candidateIds = resolvedHiliteIds.slice(0, MAX_CONTEXT_CANDIDATES);
+      let contextSet = false;
+      for (const instanceId of candidateIds) {
+        contextSet = await bboxDecorator.setContext(instanceId);
+        if (contextSet) {
+          break;
+        }
+      }
+      if (!disposed) {
+        setInferredSpatialData(contextSet ? bboxDecorator.getInferredSpatialData() : undefined);
       }
     };
     void setContext();
+    return () => {
+      disposed = true;
+    };
   }, [bboxDecorator, colorProperty, resolvedHiliteIds]);
 
   useEffect(() => {

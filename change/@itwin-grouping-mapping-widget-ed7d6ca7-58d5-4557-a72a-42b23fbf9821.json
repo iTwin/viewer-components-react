@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Dropped support for iTwin.js 4.x. Minimum required version is now ^5.0.0.",
+  "packageName": "@itwin/grouping-mapping-widget",
+  "email": "Guillar1@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

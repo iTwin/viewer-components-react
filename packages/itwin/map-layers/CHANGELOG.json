@@ -2,6 +2,21 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "date": "Tue, 03 Mar 2026 14:55:51 GMT",
+      "version": "6.1.0",
+      "tag": "@itwin/map-layers_v6.1.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "omar.halbouni@bentley.com",
+            "package": "@itwin/map-layers",
+            "commit": "24467bf921e2c47fc37b1fb1c7874e65757541de",
+            "comment": "Enhance FeatureInfoUiItemsProvider: Add toolbar orientation and item priority options; update widget integration"
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 03 Nov 2025 14:36:22 GMT",
       "version": "6.0.9",
       "tag": "@itwin/map-layers_v6.0.9",

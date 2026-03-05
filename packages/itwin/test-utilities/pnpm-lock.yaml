@@ -10,14 +10,14 @@ importers:
   .:
     devDependencies:
       '@itwin/core-bentley':
-        specifier: ^5.5.2
-        version: 5.5.2
+        specifier: ^5.7.0-dev.14
+        version: 5.7.0-dev.14
       '@itwin/core-common':
-        specifier: ^5.5.2
-        version: 5.5.2(@itwin/core-bentley@5.5.2)(@itwin/core-geometry@5.5.2)
+        specifier: ^5.7.0-dev.14
+        version: 5.7.0-dev.14(@itwin/core-bentley@5.7.0-dev.14)(@itwin/core-geometry@5.7.0-dev.14)
       '@itwin/core-geometry':
-        specifier: ^5.5.2
-        version: 5.5.2
+        specifier: ^5.7.0-dev.14
+        version: 5.7.0-dev.14
       '@itwin/eslint-plugin':
         specifier: ^6.0.0
         version: 6.0.0(eslint@9.39.2)(typescript@5.9.3)
@@ -111,17 +111,17 @@ packages:
     resolution: {integrity: sha512-WMz71T1JS624nWj2n2fnYAuPovhv7EUhk69R6i9dsVyzxt5eM3bjwvgk9L+APE1TRscGysAVMANkB0jh0LQZrQ==}
     engines: {node: 20 || >=22}
 
-  '@itwin/core-bentley@5.5.2':
-    resolution: {integrity: sha512-qkVUKnRwvavJel7gyWmTFjZMKDFF2EXh9LH4VrCTGOgvw8XobDxxiw/yxjXfZpKp+qFp9iJ5OWVeZpRYGUeoUg==}
+  '@itwin/core-bentley@5.7.0-dev.14':
+    resolution: {integrity: sha512-5Z8N0MZZIKBNle7byv7fye7nOC4BnjCp7onBL/a4U6QFYwTouSB58zKlOfkKK6V18jlEJVBo9iHHSD/cWidamQ==}
 
-  '@itwin/core-common@5.5.2':
-    resolution: {integrity: sha512-+yNLP5ezFPQly0cYsOGY9JSa/aVO5+ghEN5myFy2MvlY3h70bsprpgrz+xsTFpTHJgGgnxBaqKpKDupiYQmlSA==}
+  '@itwin/core-common@5.7.0-dev.14':
+    resolution: {integrity: sha512-fVMUeAH6bqcKgEPrZTmoX7RvNJeIDrseBY35omqQZgftE+wHQW4aP17fu323W622g6iydy2FHVw70oj+IyCHFA==}
     peerDependencies:
-      '@itwin/core-bentley': 5.5.2
-      '@itwin/core-geometry': 5.5.2
+      '@itwin/core-bentley': 5.7.0-dev.14
+      '@itwin/core-geometry': 5.7.0-dev.14
 
-  '@itwin/core-geometry@5.5.2':
-    resolution: {integrity: sha512-BsnaZ5ltOkshK88vzjJf/lpHNS8lsrZeLu8mtXV0mBgfVVv+i9rhL603L3dYVBOQ46pYqQvptmDjE+PqYXXPhg==}
+  '@itwin/core-geometry@5.7.0-dev.14':
+    resolution: {integrity: sha512-V8GInOMe8raGPqNPOxKma9R4xxQAdTul2kPR+AlH+suM+MNDgO63PgzSBT5YSo2EEujIPiTxCrttje10Vc0l8A==}
 
   '@itwin/eslint-plugin@6.0.0':
     resolution: {integrity: sha512-xe+d54x4UQatW5ErwkO+X2InQzIkIfnnSQQ+nfZcbzGRLppjAECW9zEDLLwdEKfo1uoJp9Eqq90Vqs0C4h3HSQ==}
@@ -1385,18 +1385,18 @@ snapshots:
     dependencies:
       '@isaacs/balanced-match': 4.0.1
 
-  '@itwin/core-bentley@5.5.2': {}
+  '@itwin/core-bentley@5.7.0-dev.14': {}
 
-  '@itwin/core-common@5.5.2(@itwin/core-bentley@5.5.2)(@itwin/core-geometry@5.5.2)':
+  '@itwin/core-common@5.7.0-dev.14(@itwin/core-bentley@5.7.0-dev.14)(@itwin/core-geometry@5.7.0-dev.14)':
     dependencies:
-      '@itwin/core-bentley': 5.5.2
-      '@itwin/core-geometry': 5.5.2
+      '@itwin/core-bentley': 5.7.0-dev.14
+      '@itwin/core-geometry': 5.7.0-dev.14
       flatbuffers: 1.12.0
       js-base64: 3.7.8
 
-  '@itwin/core-geometry@5.5.2':
+  '@itwin/core-geometry@5.7.0-dev.14':
     dependencies:
-      '@itwin/core-bentley': 5.5.2
+      '@itwin/core-bentley': 5.7.0-dev.14
       flatbuffers: 1.12.0
 
   '@itwin/eslint-plugin@6.0.0(eslint@9.39.2)(typescript@5.9.3)':
