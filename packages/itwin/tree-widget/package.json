@@ -18,13 +18,13 @@
     "url": "http://www.bentley.com"
   },
   "type": "module",
-  "types": "lib/esm/tree-widget-react.d.ts",
+  "types": "lib/tree-widget-react.d.ts",
   "exports": {
     ".": {
-      "import": "./lib/esm/tree-widget-react.js"
+      "import": "./lib/tree-widget-react.js"
     },
     "./internal": {
-      "import": "./lib/esm/tree-widget-react-internal.js"
+      "import": "./lib/tree-widget-react-internal.js"
     },
     "./package.json": "./package.json"
   },
@@ -32,9 +32,9 @@
     "build": "tsc -p tsconfig.lib.json && npm run -s copy",
     "copy": "npm run -s copy:public && npm run -s copy:assets",
     "copy:public": "cpx \"./public/**/*\" ./lib/public",
-    "copy:assets": "cpx \"./src/**/*.{css,scss,json}\" ./lib/esm",
+    "copy:assets": "cpx \"./src/**/*.{css,scss,json}\" ./lib",
     "cover": "c8 npm run test",
-    "extract-api": "betools extract-api --entry=lib/esm/tree-widget-react --apiReportFolder=./api --apiReportTempFolder=./api/temp --apiSummaryFolder=./api --includeUnexportedApis",
+    "extract-api": "betools extract-api --entry=lib/tree-widget-react --apiReportFolder=./api --apiReportTempFolder=./api/temp --apiSummaryFolder=./api --includeUnexportedApis",
     "check-internal": "node ../../../scripts/checkInternal.js --apiSummary ./api/tree-widget-react.api.md",
     "lint": "npm run lint:eslint && npm run lint:stylelint",
     "lint:eslint": "eslint \"./src/**/*.{ts,tsx}\"",

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { Localization } from "@itwin/core-common";
-import type localeJson from "../../../../public/locales/en/TreeWidget.json";
+import type localeJson from "@public/locales/en/TreeWidget.json";
 
 type AddPrefix<TPrefix extends string, TPath extends string> = [TPrefix] extends [never] ? `${TPath}` : `${TPrefix}.${TPath}`;
 
