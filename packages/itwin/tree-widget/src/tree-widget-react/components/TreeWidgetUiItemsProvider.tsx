@@ -10,7 +10,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, useTransientState } from "@itwin/appui-react";
 import { Icon } from "@stratakit/foundations";
 import hierarchyTreeSvg from "@stratakit/icons/hierarchy-tree.svg";
-import { getLocalizationKey } from "./shared/LocalizedStrings.js";
+import { getLocalizationKey } from "./shared/LocalizationHelpers.js";
 import { ErrorState } from "./tree-header/ErrorState.js";
 import { LocalizationContextProvider } from "./trees/common/components/LocalizationContext.js";
 import { SharedTreeContextProvider } from "./trees/index.js";

@@ -8,19 +8,16 @@ import {
   LocalizationContextProvider as HierarchiesLocalizationContext,
   LOCALIZATION_NAMESPACES as HierarchiesReactLocalizationNamespaces,
 } from "@itwin/presentation-hierarchies-react";
-import { getLocalizationKey, LOCALIZATION_NAMESPACE } from "../../../shared/LocalizedStrings.js";
+import { getLocalizationKey, LOCALIZATION_NAMESPACE } from "../../../shared/LocalizationHelpers.js";
 
 import type { JSX, PropsWithChildren } from "react";
 import type { Localization } from "@itwin/core-common";
-import type { LocalizationKey } from "../../../shared/LocalizedStrings.js";
-
-/** @internal */
-export type TranslateFunc = (key: LocalizationKey, options?: Parameters<Localization["getLocalizedString"]>[1]) => string;
+import type { TranslateFunc } from "../../../shared/LocalizationHelpers.js";
 
 const localizationContext = createContext<TranslateFunc>((key) => key);
 
 /**
- * Namespaces used for localization of presentation hierarchies components.
+ * Namespaces used for localization of tree-widget components.
  * @beta
  */
 export const LOCALIZATION_NAMESPACES = [LOCALIZATION_NAMESPACE, ...HierarchiesReactLocalizationNamespaces];

@@ -1,8 +1,0 @@
-{
-  "extends": "./tsconfig.lib.json",
-  "compilerOptions": {
-    "rootDirs": ["src/utils", "src/tree-widget-react/components/shared"],
-    "outDir": "./lib/build"
-  },
-  "include": ["src/utils", "src/tree-widget-react/components/shared/LocalizedStrings.ts"]
-}

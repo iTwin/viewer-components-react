@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { TranslateFunc } from "../components/LocalizationContext.js";
+import type { TranslateFunc } from "../../../shared/LocalizationHelpers.js";
 import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
 
 /** @internal */

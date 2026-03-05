@@ -14,8 +14,8 @@ import { useTranslation } from "./trees/common/components/LocalizationContext.js
 import { SkeletonTree } from "./trees/common/components/SkeletonTree.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { TranslateFunc } from "./shared/LocalizationHelpers.js";
 import type { TreeContentDefinition, TreeSelectionProps } from "./tree-header/WidgetHeader.js";
-import type { TranslateFunc } from "./trees/common/components/LocalizationContext.js";
 
 /** @beta */
 export interface StandardTreeLabels {
