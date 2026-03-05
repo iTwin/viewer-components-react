@@ -5,6 +5,18 @@
   "main": "lib/cjs/map-layers.js",
   "module": "lib/esm/map-layers.js",
   "typings": "lib/cjs/map-layers",
+  "exports": {
+    ".": {
+      "import": "./lib/esm/map-layers.js",
+      "require": "./lib/cjs/map-layers.js",
+      "types": "./lib/cjs/map-layers.d.ts"
+    },
+    "./mcp": {
+      "import": "./lib/esm/mcp/index.js",
+      "require": "./lib/cjs/mcp/index.js",
+      "types": "./lib/cjs/mcp/index.d.ts"
+    }
+  },
   "license": "MIT",
   "scripts": {
     "build": "npm run -s copy:locale && npm run -s build:cjs && npm run -s build:esm",
@@ -39,7 +51,9 @@
   "dependencies": {
     "@itwin/itwinui-icons-color-react": "^2.1.0",
     "@itwin/itwinui-icons-react": "^2.10.0",
-    "react-beautiful-dnd": "^13.1.1"
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "react-beautiful-dnd": "^13.1.1",
+    "zod": "~3.24.0"
   },
   "devDependencies": {
     "@itwin/appui-abstract": "^5.0.0",
