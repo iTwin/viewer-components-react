@@ -61,7 +61,7 @@ import { LocalizationContextProvider, LOCALIZATION_NAMESPACES, createTreeWidget,
 
 // Register localization namespaces with `i18next` based localization provider.
 for (const namespace of LOCALIZATION_NAMESPACES) {
-  await localization.registerNamespace(namespace);
+  await IModelApp.localization.registerNamespace(namespace);
 }
 
 // When using `createTreeWidget` pass `localization` object and `LocalizationContextProvider` will be added at the widget scope automatically.
@@ -70,7 +70,7 @@ UiItemsManager.register({
   getWidgets: () =>
     [
       createTreeWidget({
-        localization: localization,
+        localization: IModelApp.localization,
         trees: [
           // tree definitions
         ],
@@ -81,7 +81,7 @@ UiItemsManager.register({
 // When using lower level components directly they will need to be wrapped inside `LocalizationContextProvider`
 function TreeComponent() {
   return (
-    <LocalizationContextProvider localization={localization}>
+    <LocalizationContextProvider localization={IModelApp.localization}>
       <ModelsTreeComponent
         // see "Creating unified selection storage" section for example implementation
         selectionStorage={unifiedSelectionStorage}
