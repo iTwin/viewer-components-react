@@ -31,7 +31,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.lib.json && npm run -s copy",
     "copy": "npm run -s copy:public && npm run -s copy:assets",
-    "copy:public": "cpx \"./public/**/*\" ./lib/public",
+    "copy:public": "cpx \"./src/public/**/*\" ./lib/public",
     "copy:assets": "cpx \"./src/**/*.{css,scss,json}\" ./lib",
     "cover": "c8 npm run test",
     "extract-api": "betools extract-api --entry=lib/tree-widget-react --apiReportFolder=./api --apiReportTempFolder=./api/temp --apiSummaryFolder=./api --includeUnexportedApis",

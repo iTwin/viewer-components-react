@@ -4,17 +4,13 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "rootDir": "src",
-    "outDir": "lib",
     "jsx": "react-jsx",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noImplicitOverride": false,
     "resolveJsonModule": true,
     "lib": ["DOM"],
-    "noEmit": true,
-    "paths": {
-      "@public/*": ["./public/*"]
-    }
+    "noEmit": true
   },
   "include": ["src/**/*", "types.d.ts"]
 }
