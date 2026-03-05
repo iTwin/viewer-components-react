@@ -24,8 +24,7 @@
       "import": "./lib/esm/tree-widget-react.js"
     },
     "./internal": {
-      "import": "./lib/esm/tree-widget-react-internal.js",
-      "require": "./lib/cjs/tree-widget-react-internal.js"
+      "import": "./lib/esm/tree-widget-react-internal.js"
     },
     "./package.json": "./package.json"
   },
