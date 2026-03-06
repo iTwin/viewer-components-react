@@ -104,7 +104,7 @@ describe("useModelsTree", () => {
       const elementClass = "BisCore.GeometricElement3d";
       const modelClass = "BisCore.GeometricModel3d";
       const subjectClass = "BisCore.Subject";
-      let buildIModelResult: Awaited<ReturnType<typeof createIModel>>;
+      let buildIModelResult: Awaited<ReturnType<typeof createIModel>> | undefined;
       let imodel: IModelConnection;
       let imodelAccess: ReturnType<typeof createIModelAccess>;
       let categoryIds: Id64Array;
@@ -174,7 +174,7 @@ describe("useModelsTree", () => {
       });
 
       after(async function () {
-        await buildIModelResult[Symbol.asyncDispose]();
+        await buildIModelResult?.[Symbol.asyncDispose]();
         await terminatePresentationTesting();
         TreeWidget.terminate();
       });
