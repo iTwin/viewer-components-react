@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Tue, 24 Feb 2026 07:54:06 GMT and should not be manually modified. -->
+<!-- This log was last generated on Fri, 06 Mar 2026 19:28:38 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.17.8
+
+Fri, 06 Mar 2026 19:28:38 GMT
+
+### Patches
+
+- Hide visibility checkbox tooltip and hover effect on touch devices. ([#1615](https://github.com/iTwin/viewer-components-react/pull/1615))
 
 ## 3.17.7
 

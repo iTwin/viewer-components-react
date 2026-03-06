@@ -1,8 +1,16 @@
 # Change Log - @itwin/one-click-lca-react
 
-<!-- This log was last generated on Wed, 13 Aug 2025 12:30:20 GMT and should not be manually modified. -->
+<!-- This log was last generated on Fri, 06 Mar 2026 19:28:38 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.8.0
+
+Fri, 06 Mar 2026 19:28:38 GMT
+
+### Minor changes
+
+- Dropped support for iTwin.js 4.x. Minimum required version is now ^5.0.0. ([#1596](https://github.com/iTwin/viewer-components-react/pull/1596))
 
 ## 0.7.1
 

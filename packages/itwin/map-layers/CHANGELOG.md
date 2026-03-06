@@ -1,8 +1,16 @@
 # Change Log - @itwin/map-layers
 
-<!-- This log was last generated on Tue, 03 Mar 2026 14:55:51 GMT and should not be manually modified. -->
+<!-- This log was last generated on Fri, 06 Mar 2026 19:28:38 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 6.2.0
+
+Fri, 06 Mar 2026 19:28:38 GMT
+
+### Minor changes
+
+- Export FeatureInfoWidget, localize strings, and update copy button ([#1622](https://github.com/iTwin/viewer-components-react/pull/1622))
 
 ## 6.1.0
 

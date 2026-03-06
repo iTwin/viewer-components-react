@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Export FeatureInfoWidget, localize strings, and update copy button",
-  "packageName": "@itwin/map-layers",
-  "email": "omar.halbouni@bentley.com",
-  "dependentChangeType": "patch"
-}
