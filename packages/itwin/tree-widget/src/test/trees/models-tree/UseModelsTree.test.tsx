@@ -60,35 +60,42 @@ describe("useModelsTree", () => {
     });
     const { imodel, ...keys } = buildIModelResult;
     const queryHandler = sinon.fake(() => []);
-    const viewport = createFakeSinonViewport({ queryHandler });
+    using viewport = createFakeSinonViewport({ queryHandler });
     const imodelAccess = createIModelAccess(imodel);
-    const { result: renderHookResult, rerender } = renderHook(useModelsTree, {
+    const {
+      result: renderHookResult,
+      rerender,
+      unmount,
+    } = renderHook(useModelsTree, {
       initialProps: {
         activeView: viewport,
         getSearchPaths: async () => [[{ id: keys.modelId, className: "BisCore.Model" }]],
       },
       wrapper: ({ children }) => <SharedTreeContextProviderInternal>{children}</SharedTreeContextProviderInternal>,
     });
-
-    let getSearchPaths = renderHookResult.current.treeProps.getSearchPaths;
-    let visibilityHandler = renderHookResult.current.treeProps.visibilityHandlerFactory({ imodelAccess });
-    await waitFor(async () => {
-      expect(getSearchPaths).to.not.be.undefined;
-      await getSearchPaths!({ imodelAccess, abortSignal: new AbortController().signal });
-      await visibilityHandler.getVisibilityStatus(createModelHierarchyNode({ modelId: keys.modelId }));
-      expect(viewport.iModel.createQueryReader).to.be.called;
-      sinon.reset();
-      rerender({
-        activeView: viewport,
-        getSearchPaths: async () => [],
+    try {
+      let getSearchPaths = renderHookResult.current.treeProps.getSearchPaths;
+      using visibilityHandler1 = renderHookResult.current.treeProps.visibilityHandlerFactory({ imodelAccess });
+      await waitFor(async () => {
+        expect(getSearchPaths).to.not.be.undefined;
+        await getSearchPaths!({ imodelAccess, abortSignal: new AbortController().signal });
+        await visibilityHandler1.getVisibilityStatus(createModelHierarchyNode({ modelId: keys.modelId }));
+        expect(viewport.iModel.createQueryReader).to.be.called;
+        sinon.reset();
+        rerender({
+          activeView: viewport,
+          getSearchPaths: async () => [],
+        });
+        getSearchPaths = renderHookResult.current.treeProps.getSearchPaths;
+        using visibilityHandler2 = renderHookResult.current.treeProps.visibilityHandlerFactory({ imodelAccess });
+        expect(getSearchPaths).to.not.be.undefined;
+        await getSearchPaths!({ imodelAccess, abortSignal: new AbortController().signal });
+        await visibilityHandler2.getVisibilityStatus(createModelHierarchyNode({ modelId: keys.modelId }));
+        expect(viewport.iModel.createQueryReader).not.to.be.called;
       });
-      getSearchPaths = renderHookResult.current.treeProps.getSearchPaths;
-      visibilityHandler = renderHookResult.current.treeProps.visibilityHandlerFactory({ imodelAccess });
-      expect(getSearchPaths).to.not.be.undefined;
-      await getSearchPaths!({ imodelAccess, abortSignal: new AbortController().signal });
-      await visibilityHandler.getVisibilityStatus(createModelHierarchyNode({ modelId: keys.modelId }));
-      expect(viewport.iModel.createQueryReader).not.to.be.called;
-    });
+    } finally {
+      unmount();
+    }
   });
 
   describe("getSearchPaths", () => {
@@ -97,6 +104,7 @@ describe("useModelsTree", () => {
       const elementClass = "BisCore.GeometricElement3d";
       const modelClass = "BisCore.GeometricModel3d";
       const subjectClass = "BisCore.Subject";
+      let buildIModelResult: Awaited<ReturnType<typeof createIModel>> | undefined;
       let imodel: IModelConnection;
       let imodelAccess: ReturnType<typeof createIModelAccess>;
       let categoryIds: Id64Array;
@@ -109,7 +117,7 @@ describe("useModelsTree", () => {
 
       async function createIModel(
         context: Mocha.Context,
-      ): Promise<{ imodel: IModelConnection } & { models: Id64Array; categories: Id64Array; elements: Id64Array }> {
+      ): Promise<{ imodel: IModelConnection } & { models: Id64Array; categories: Id64Array; elements: Id64Array } & AsyncDisposable> {
         return buildIModel(context, async (builder) => {
           const physicalModel1 = insertPhysicalModelWithPartition({ builder, codeValue: "Model1" }).id;
           const physicalModel2 = insertPhysicalModelWithPartition({ builder, codeValue: "Model2" }).id;
@@ -142,7 +150,7 @@ describe("useModelsTree", () => {
         // eslint-disable-next-line @itwin/no-internal
         ECSchemaRpcImpl.register();
         await TreeWidget.initialize();
-        const buildIModelResult = await createIModel(this);
+        buildIModelResult = await createIModel(this);
         imodel = buildIModelResult.imodel;
         categoryIds = buildIModelResult.categories;
         modelIds = buildIModelResult.models;
@@ -166,7 +174,7 @@ describe("useModelsTree", () => {
       });
 
       after(async function () {
-        await imodel.close();
+        await buildIModelResult?.[Symbol.asyncDispose]();
         await terminatePresentationTesting();
         TreeWidget.terminate();
       });

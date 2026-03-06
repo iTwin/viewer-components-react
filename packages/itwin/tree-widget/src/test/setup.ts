@@ -45,30 +45,48 @@ global.CSS = {
   supports: (_k: string, _v: string) => false,
 } as any;
 
+// flag to indicate if act warning happened.
+let actWarningHappened = false;
+// eslint-disable-next-line no-console
+const originalConsoleError = console.error;
+
 // supply mocha hooks
 import path from "path";
 const { cleanup, configure } = await import("@testing-library/react");
 import v8 from "node:v8";
 export const mochaHooks = {
   beforeAll() {
+    // eslint-disable-next-line no-console
+    console.error = (...args: unknown[]) => {
+      if (args.length > 0 && typeof args[0] === "string" && args[0].includes("was not wrapped in act")) {
+        actWarningHappened = true;
+      }
+      originalConsoleError(...args);
+    };
     chaiJestSnapshot.resetSnapshotRegistry();
     getGlobalThis().IS_REACT_ACT_ENVIRONMENT = true;
   },
-  beforeEach() {
+  beforeEach(this: Mocha.Context) {
     // enable strict mode for each test by default
     configure({ reactStrictMode: !process.env.DISABLE_STRICT_MODE });
 
     // set up snapshot name
-    const currentTest = (this as unknown as Mocha.Context).currentTest!;
+    const currentTest = this.currentTest!;
     const sourceFilePath = currentTest.file?.replace(`lib${path.sep}esm${path.sep}test`, `src${path.sep}test`).replace(/\.(jsx?|tsx?)$/, "");
     const snapPath = `${sourceFilePath}.snap`;
     chaiJestSnapshot.setFilename(snapPath);
     chaiJestSnapshot.setTestName(currentTest.fullTitle());
+
+    failTestsOnActWarnings(currentTest);
   },
   afterEach() {
     cleanup();
+    // Fail tests if React act warnings occurred during or after cleanup.
+    throwIfActWarningHappened("afterEach cleanup()");
   },
   afterAll() {
+    // eslint-disable-next-line no-console
+    console.error = originalConsoleError;
     delete getGlobalThis().IS_REACT_ACT_ENVIRONMENT;
     v8.takeCoverage();
   },
@@ -88,4 +106,43 @@ function getGlobalThis(): typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boole
     return global;
   }
   throw new Error("unable to locate global object");
+}
+
+function throwIfActWarningHappened(location: "Test" | "afterEach cleanup()") {
+  if (actWarningHappened) {
+    actWarningHappened = false;
+    throw new Error(`${location} triggered 'not wrapped in act' warning`);
+  }
+}
+
+function failTestsOnActWarnings(currentTest: Mocha.Test) {
+  if (!currentTest.fn) {
+    return;
+  }
+  // wrap the test fn to check for act warnings after it completes
+  actWarningHappened = false;
+  const originalFn = currentTest.fn;
+
+  // If test function has 1 or more argument assume it's using done callback
+  if (originalFn.length > 0) {
+    currentTest.fn = function (this: Mocha.Context, done: (err?: unknown) => void) {
+      (originalFn as Mocha.Func).call(this, (err?: unknown) => {
+        if (err) {
+          return done(err);
+        }
+        try {
+          throwIfActWarningHappened("Test");
+          done();
+        } catch (e) {
+          done(e);
+        }
+      });
+    };
+  } else {
+    // sync or async test
+    currentTest.fn = async function (this: Mocha.Context) {
+      await (originalFn as Mocha.AsyncFunc).call(this);
+      throwIfActWarningHappened("Test");
+    };
+  }
 }

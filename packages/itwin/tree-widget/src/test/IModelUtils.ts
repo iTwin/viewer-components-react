@@ -73,6 +73,8 @@ export async function buildIModel<TResult extends object | undefined>(
     imodel,
     [Symbol.asyncDispose]: async () => {
       await imodel.close();
+      // imodel created by `buildTestIModel` does not raise onClose event when close is called. Do it here.
+      imodel.onClose.raiseEvent(imodel);
     },
   };
 }
