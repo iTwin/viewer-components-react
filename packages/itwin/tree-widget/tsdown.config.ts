@@ -12,7 +12,7 @@ export default defineConfig({
   format: ["esm"],
   copy: [
     { from: "./public", to: "./lib", flatten: false },
-    { from: "./src/**/*.{css,scss}", to: "./lib", flatten: false },
+    { from: "./src/**/*.{css}", to: "./lib", flatten: false },
   ],
   fixedExtension: false,
   unbundle: true,
