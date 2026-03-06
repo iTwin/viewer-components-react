@@ -16,7 +16,11 @@ export default defineConfig({
   clean: false,
   deps: {
     neverBundle: (id) => {
-      return !id.startsWith("src/test");
+      if (id.match(/\/tree-widget-react\//i)) {
+        return true;
+      }
+
+      return !id.match(/src\/test/i);
     },
   },
 });
