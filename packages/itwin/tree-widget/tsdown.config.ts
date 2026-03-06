@@ -10,6 +10,10 @@ export default defineConfig({
   entry: ["./src/tree-widget-react.ts", "./src/tree-widget-react-internal.ts"],
   outDir: "./lib",
   format: ["esm"],
+  copy: [
+    { from: "./public", to: "./lib/public", flatten: false },
+    { from: "./src/**/*.{css,scss}", to: "./lib", flatten: false },
+  ],
   fixedExtension: false,
   unbundle: true,
   deps: {

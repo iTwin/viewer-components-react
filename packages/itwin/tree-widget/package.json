@@ -29,11 +29,8 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "tsdown && npm run -s copy && npm run -s build:test",
+    "build": "tsdown && npm run -s build:test",
     "build:test": "tsdown --config tsdown.test.config.ts",
-    "copy": "npm run -s copy:public && npm run -s copy:assets",
-    "copy:public": "cpx \"./public/**/*\" ./lib/public",
-    "copy:assets": "cpx \"./src/**/*.{css,scss,json}\" ./lib",
     "cover": "c8 npm run test",
     "extract-api": "betools extract-api --entry=lib/tree-widget-react --apiReportFolder=./api --apiReportTempFolder=./api/temp --apiSummaryFolder=./api --includeUnexportedApis",
     "check-internal": "node ../../../scripts/checkInternal.js --apiSummary ./api/tree-widget-react.api.md",
