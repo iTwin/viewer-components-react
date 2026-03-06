@@ -97,7 +97,7 @@ export function createFakeSinonViewport(
       }
     }),
     iModel: createIModelMock({ queryHandler: props?.queryHandler, getCategoryInfo: props?.getCategoryInfo }),
-    renderFrame: sinon.fake,
+    renderFrame: sinon.fake(),
     [Symbol.dispose]() {
       this.iModel.onClose.raiseEvent(this.iModel);
     },
