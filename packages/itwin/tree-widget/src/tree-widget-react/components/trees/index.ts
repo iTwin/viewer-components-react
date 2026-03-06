@@ -25,23 +25,25 @@ export { IModelContentTreeIcon } from "./imodel-content-tree/IModelContentTree.j
 export { ExternalSourcesTreeComponent } from "./external-sources-tree/ExternalSourcesTreeComponent.js";
 export { ExternalSourcesTreeIcon } from "./external-sources-tree/ExternalSourcesTree.js";
 
-export { BaseTreeRendererProps } from "./common/components/BaseTreeRenderer.js";
+export type { BaseTreeRendererProps } from "./common/components/BaseTreeRenderer.js";
 export { FocusedInstancesContextProvider, useFocusedInstancesContext } from "./common/FocusedInstancesContext.js";
 
 export { Tree } from "./common/components/Tree.js";
-export { TreeWidgetViewport, createTreeWidgetViewport } from "./common/TreeWidgetViewport.js";
+export type { TreeWidgetViewport } from "./common/TreeWidgetViewport.js";
+export { createTreeWidgetViewport } from "./common/TreeWidgetViewport.js";
 export { VisibilityTree } from "./common/components/VisibilityTree.js";
 export { VisibilityAction } from "./common/components/TreeNodeVisibilityButton.js";
 export { TreeRenderer } from "./common/components/TreeRenderer.js";
 export { VisibilityTreeRenderer } from "./common/components/VisibilityTreeRenderer.js";
 export { SkeletonTree } from "./common/components/SkeletonTree.js";
-export { HierarchyVisibilityHandler, VisibilityStatus } from "./common/UseHierarchyVisibility.js";
+export type { HierarchyVisibilityHandler, VisibilityStatus } from "./common/UseHierarchyVisibility.js";
 export { SharedTreeContextProvider } from "./common/SharedTreeContextProvider.js";
 export { TelemetryContextProvider } from "./common/UseTelemetryContext.js";
 export { SearchLimitExceededError } from "./common/TreeErrors.js";
 
-export { ModelsTreeVisibilityHandlerOverrides } from "./models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
+export type { ModelsTreeVisibilityHandlerOverrides } from "./models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 
 // reexport actions from presentation-hierarchies-react to keep naming consistent
 // reexport TreeActionBase to allow consumers defining custom actions without @itwin/presentation-hierarchies-react dependency
-export { TreeNodeRenameAction, TreeNodeFilterAction, TreeActionBase, TreeActionBaseAttributes } from "@itwin/presentation-hierarchies-react";
+export type { TreeActionBaseAttributes } from "@itwin/presentation-hierarchies-react";
+export { TreeNodeRenameAction, TreeNodeFilterAction, TreeActionBase } from "@itwin/presentation-hierarchies-react";

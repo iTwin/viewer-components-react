@@ -16,6 +16,7 @@ type UseHierarchiesLocalizationResult = UseTreeLocalizedStrings & TreeRendererLo
 /** @internal */
 export function useHierarchiesLocalization(): UseHierarchiesLocalizationResult {
   const stringValues = Object.values(getLocalizedStrings());
+  // eslint-disable-next-line react-hooks/use-memo
   const localizedStrings = useMemo(getLocalizedStrings, stringValues);
   return localizedStrings;
 }
