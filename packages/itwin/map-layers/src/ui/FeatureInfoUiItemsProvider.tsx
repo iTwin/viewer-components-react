@@ -92,7 +92,8 @@ export class FeatureInfoUiItemsProvider implements UiItemsProvider {
       id: FeatureInfoUiItemsProvider.widgetId,
       label: MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Label"),
       icon: <SvgMapInfo />,
-      content: <MapFeatureInfoWidget featureInfoOpts={this._featureInfoOpts} />,
+      content: <MapFeatureInfoWidget widgetId={FeatureInfoUiItemsProvider.widgetId}
+      isPropertySelectionEnabled={this._featureInfoOpts.propertyGridOptions?.isPropertySelectionEnabled} />,
       defaultState: WidgetState.Hidden,
       layouts: {
         standard: {

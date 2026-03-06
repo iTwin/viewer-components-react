@@ -4,15 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 
+const getWindow = () => {
+  return typeof window === "undefined" ? undefined : window;
+};
+
 /** Hook that will observe Window Resize
  * @internal
  * Reference: https://github.com/iTwin/iTwinUI/blob/87bbc99316c17bd2b763a730135fbb45c84b0e82/packages/itwinui-react/src/utils/hooks/useResizeObserver.tsx
  * Copied from: https://github.com/iTwin/appui/blob/master/ui/core-react/src/core-react/utils/hooks/useResizeObserver.tsx
  */
-const getWindow = () => {
-  return typeof window === "undefined" ? undefined : window;
-};
-
 export const useResizeObserver = <T extends HTMLElement>(
   onResize: (size: DOMRectReadOnly) => void,
 ) => {
