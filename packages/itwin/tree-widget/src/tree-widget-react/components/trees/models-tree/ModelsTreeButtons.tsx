@@ -177,6 +177,8 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
   const [is2dToggleActive, setIs2dToggleActive] = useState(() => areAllModelsVisible(models2d, props.viewport));
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIs2dToggleActive(areAllModelsVisible(models2d, props.viewport));
     return props.viewport.onDisplayedModelsChanged.addListener(() => setIs2dToggleActive(areAllModelsVisible(models2d, props.viewport)));
   }, [models2d, props.viewport]);
 
@@ -204,6 +206,8 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
   const [is3dToggleActive, setIs3dToggleActive] = useState(() => areAllModelsVisible(models3d, props.viewport));
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIs3dToggleActive(areAllModelsVisible(models3d, props.viewport));
     return props.viewport.onDisplayedModelsChanged.addListener(() => setIs3dToggleActive(areAllModelsVisible(models3d, props.viewport)));
   }, [models3d, props.viewport]);
 
