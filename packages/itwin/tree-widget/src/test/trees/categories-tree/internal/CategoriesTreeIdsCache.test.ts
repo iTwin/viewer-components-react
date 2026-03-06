@@ -12,7 +12,6 @@ import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import { BaseIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
-import { CLASS_NAME_DefinitionModel } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { getClassesByView } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
 import {
   buildIModel,
@@ -25,7 +24,7 @@ import {
   insertSubModel,
 } from "../../../IModelUtils.js";
 import { createIModelAccess } from "../../Common.js";
-import { getDefaultSubCategoryId } from "../../TreeUtils.js";
+import { CLASS_NAME_DefinitionModel, getDefaultSubCategoryId } from "../../TreeUtils.js";
 
 describe("CategoriesTreeIdsCache", () => {
   before(async function () {

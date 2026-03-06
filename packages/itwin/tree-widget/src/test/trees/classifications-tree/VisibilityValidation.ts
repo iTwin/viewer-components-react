@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { ClassificationsTreeNode } from "../../../tree-widget-react.js";
+import { ClassificationsTreeNode } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeNode.js";
 
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ValidateNodeProps } from "../common/VisibilityValidation.js";
