@@ -55,16 +55,19 @@ interface TreeSearchTestCaseDefinition<TIModelSetupResult extends {}> {
 
 namespace TreeSearchTestCaseDefinition {
   // only need this to get generic type inferred using setupIModel return type
-  export function create<TIModelSetupResult extends object>(
-    name: string,
-    setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1],
-    getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchySearchPath[],
-    getTargetItems: (setupResult: TIModelSetupResult) => Array<InstanceKey | ElementsGroupInfo>,
-    getTargetInstanceLabel: ((setupResult: TIModelSetupResult) => string) | undefined,
-    getExpectedHierarchy: (setupResult: TIModelSetupResult) => ExpectedHierarchyDef[],
-    getHierarchyConfig?: (setupResult: TIModelSetupResult) => Partial<ModelsTreeHierarchyConfiguration>,
-  ): TreeSearchTestCaseDefinition<TIModelSetupResult> {
+  export function create<TIModelSetupResult extends object>(props: {
+    only?: boolean;
+    name: string;
+    setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1];
+    getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchySearchPath[];
+    getTargetItems: (setupResult: TIModelSetupResult) => Array<InstanceKey | ElementsGroupInfo>;
+    getTargetInstanceLabel?: (setupResult: TIModelSetupResult) => string;
+    getExpectedHierarchy: (setupResult: TIModelSetupResult) => ExpectedHierarchyDef[];
+    getHierarchyConfig?: (setupResult: TIModelSetupResult) => Partial<ModelsTreeHierarchyConfiguration>;
+  }): TreeSearchTestCaseDefinition<TIModelSetupResult> {
+    const { only, name, setupIModel, getTargetInstancePaths, getTargetItems, getTargetInstanceLabel, getExpectedHierarchy, getHierarchyConfig } = props;
     return {
+      only,
       name,
       setupIModel,
       getTargetInstancePaths,
@@ -74,15 +77,6 @@ namespace TreeSearchTestCaseDefinition {
       getHierarchyConfig,
     };
   }
-
-  export const only: typeof create = function <TIModelSetupResult extends object>(
-    ...args: Parameters<typeof create<TIModelSetupResult>>
-  ): TreeSearchTestCaseDefinition<TIModelSetupResult> {
-    return {
-      ...create(...args),
-      only: true,
-    };
-  };
 }
 
 describe("Models tree", () => {
@@ -211,9 +205,9 @@ describe("Models tree", () => {
     });
 
     runTestCases(
-      TreeSearchTestCaseDefinition.create(
-        "immediate Subject nodes",
-        async (builder) => {
+      TreeSearchTestCaseDefinition.create({
+        name: "immediate Subject nodes",
+        setupIModel: async (builder) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
           const category = insertSpatialCategory({ builder, codeValue: "category" });
           const childSubject1 = insertSubject({ builder, codeValue: "matching subject 1", parentId: rootSubject.id });
@@ -224,10 +218,10 @@ describe("Models tree", () => {
           insertModelWithElements(builder, 3, category.id, childSubject3.id);
           return { rootSubject, childSubject1, childSubject2, childSubject3 };
         },
-        (x) => [[x.childSubject1], [x.childSubject3]],
-        (x) => [x.childSubject1, x.childSubject3],
-        (_x) => "matching",
-        (x) => [
+        getTargetInstancePaths: (x) => [[x.childSubject1], [x.childSubject3]],
+        getTargetItems: (x) => [x.childSubject1, x.childSubject3],
+        getTargetInstanceLabel: (_x) => "matching",
+        getExpectedHierarchy: (x) => [
           NodeValidators.createForInstanceNode({
             instanceKeys: [x.childSubject1],
             label: "matching subject 1",
@@ -271,10 +265,10 @@ describe("Models tree", () => {
             ],
           }),
         ],
-      ),
-      TreeSearchTestCaseDefinition.create(
-        "nested Subject nodes",
-        async (builder) => {
+      }),
+      TreeSearchTestCaseDefinition.create({
+        name: "nested Subject nodes",
+        setupIModel: async (builder) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
           const category = insertSpatialCategory({ builder, codeValue: "category" });
           const intermediateSubject = insertSubject({ builder, codeValue: `subject-x` });
@@ -286,13 +280,13 @@ describe("Models tree", () => {
           insertModelWithElements(builder, 3, category.id, childSubject3.id);
           return { rootSubject, intermediateSubject, childSubject1, childSubject2, childSubject3 };
         },
-        (x) => [
+        getTargetInstancePaths: (x) => [
           [x.intermediateSubject, x.childSubject1],
           [x.intermediateSubject, x.childSubject3],
         ],
-        (x) => [x.childSubject1, x.childSubject3],
-        (_x) => "matching",
-        (x) => [
+        getTargetItems: (x) => [x.childSubject1, x.childSubject3],
+        getTargetInstanceLabel: (_x) => "matching",
+        getExpectedHierarchy: (x) => [
           NodeValidators.createForInstanceNode({
             instanceKeys: [x.intermediateSubject],
             label: "subject-x",
@@ -341,10 +335,10 @@ describe("Models tree", () => {
             ],
           }),
         ],
-      ),
-      TreeSearchTestCaseDefinition.create(
-        "two levels of Subject nodes",
-        async (builder) => {
+      }),
+      TreeSearchTestCaseDefinition.create({
+        name: "two levels of Subject nodes",
+        setupIModel: async (builder) => {
           const category = insertSpatialCategory({ builder, codeValue: "category" });
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
           const intermediateSubject1 = insertSubject({ builder, codeValue: `matching intermediate subject 1`, parentId: rootSubject.id });
@@ -356,10 +350,10 @@ describe("Models tree", () => {
           insertModelWithElements(builder, 2, category.id, childSubject2.id);
           return { rootSubject, intermediateSubject1, intermediateSubject2, childSubject1, childSubject2 };
         },
-        (x) => [[x.intermediateSubject1], [x.intermediateSubject1, x.childSubject1]],
-        (x) => [x.intermediateSubject1, x.childSubject1],
-        (_x) => "matching",
-        (x) => [
+        getTargetInstancePaths: (x) => [[x.intermediateSubject1], [x.intermediateSubject1, x.childSubject1]],
+        getTargetItems: (x) => [x.intermediateSubject1, x.childSubject1],
+        getTargetInstanceLabel: (_x) => "matching",
+        getExpectedHierarchy: (x) => [
           NodeValidators.createForInstanceNode({
             instanceKeys: [x.intermediateSubject1],
             label: "matching intermediate subject 1",
@@ -410,10 +404,10 @@ describe("Models tree", () => {
             ],
           }),
         ],
-      ),
-      TreeSearchTestCaseDefinition.create(
-        "Model nodes",
-        async (builder) => {
+      }),
+      TreeSearchTestCaseDefinition.create({
+        name: "Model nodes",
+        setupIModel: async (builder) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
           const category = insertSpatialCategory({ builder, codeValue: "category" });
           const model1 = insertPhysicalModelWithPartition({ builder, codeValue: `matching model 1`, partitionParentId: rootSubject.id });
@@ -424,10 +418,10 @@ describe("Models tree", () => {
           insertPhysicalElement({ builder, userLabel: `element-3`, modelId: model3.id, categoryId: category.id });
           return { rootSubject, model1, model2, model3 };
         },
-        (x) => [[adjustedModelKey(x.model1)], [adjustedModelKey(x.model3)]],
-        (x) => [x.model1, x.model3],
-        (_x) => "matching",
-        (x) => [
+        getTargetInstancePaths: (x) => [[adjustedModelKey(x.model1)], [adjustedModelKey(x.model3)]],
+        getTargetItems: (x) => [x.model1, x.model3],
+        getTargetInstanceLabel: (_x) => "matching",
+        getExpectedHierarchy: (x) => [
           NodeValidators.createForInstanceNode({
             instanceKeys: [x.model1],
             label: "matching model 1",
@@ -461,20 +455,20 @@ describe("Models tree", () => {
             ],
           }),
         ],
-      ),
-      TreeSearchTestCaseDefinition.create(
-        "Empty model nodes",
-        async (builder) => {
+      }),
+      TreeSearchTestCaseDefinition.create({
+        name: "Empty model nodes",
+        setupIModel: async (builder) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
           const model1 = insertPhysicalModelWithPartition({ builder, codeValue: `matching model 1`, partitionParentId: rootSubject.id });
           const model2 = insertPhysicalModelWithPartition({ builder, codeValue: `model 2`, partitionParentId: rootSubject.id });
           const model3 = insertPhysicalModelWithPartition({ builder, codeValue: `matching model 3`, partitionParentId: rootSubject.id });
           return { rootSubject, model1, model2, model3 };
         },
-        (x) => [[adjustedModelKey(x.model1)], [adjustedModelKey(x.model3)]],
-        (x) => [x.model1, x.model3],
-        (_x) => "matching",
-        (x) => [
+        getTargetInstancePaths: (x) => [[adjustedModelKey(x.model1)], [adjustedModelKey(x.model3)]],
+        getTargetItems: (x) => [x.model1, x.model3],
+        getTargetInstanceLabel: (_x) => "matching",
+        getExpectedHierarchy: (x) => [
           NodeValidators.createForInstanceNode({
             instanceKeys: [x.model1],
             label: "matching model 1",
@@ -488,11 +482,11 @@ describe("Models tree", () => {
             children: false,
           }),
         ],
-        () => ({ showEmptyModels: true }),
-      ),
-      TreeSearchTestCaseDefinition.create(
-        "Subject with hidden child Model node",
-        async (builder) => {
+        getHierarchyConfig: () => ({ showEmptyModels: true }),
+      }),
+      TreeSearchTestCaseDefinition.create({
+        name: "Subject with hidden child Model node",
+        setupIModel: async (builder) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
           const childSubject = insertSubject({ builder, codeValue: "matching child subject", parentId: rootSubject.id });
           const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -508,10 +502,10 @@ describe("Models tree", () => {
           insertPhysicalElement({ builder, userLabel: `element-2`, modelId: model2.id, categoryId: category.id });
           return { rootSubject, childSubject, model1, model2, category };
         },
-        (x) => [[x.childSubject]],
-        (x) => [x.childSubject],
-        (_x) => "matching",
-        (x) => [
+        getTargetInstancePaths: (x) => [[x.childSubject]],
+        getTargetItems: (x) => [x.childSubject],
+        getTargetInstanceLabel: (_x) => "matching",
+        getExpectedHierarchy: (x) => [
           NodeValidators.createForInstanceNode({
             instanceKeys: [x.childSubject],
             label: "matching child subject",
@@ -545,10 +539,10 @@ describe("Models tree", () => {
             ],
           }),
         ],
-      ),
-      TreeSearchTestCaseDefinition.create(
-        "Category nodes",
-        async (builder) => {
+      }),
+      TreeSearchTestCaseDefinition.create({
+        name: "Category nodes",
+        setupIModel: async (builder) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
           const model1 = insertPhysicalModelWithPartition({ builder, codeValue: `model-1`, partitionParentId: rootSubject.id });
           const model2 = insertPhysicalModelWithPartition({ builder, codeValue: `model-2`, partitionParentId: rootSubject.id });
@@ -563,13 +557,13 @@ describe("Models tree", () => {
 
           return { rootSubject, model1, model2, category1, category2, category3 };
         },
-        (x) => [
+        getTargetInstancePaths: (x) => [
           [adjustedModelKey(x.model1), x.category1],
           [adjustedModelKey(x.model2), x.category3],
         ],
-        (x) => [x.category1, x.category3],
-        (_x) => "matching",
-        (x) => [
+        getTargetItems: (x) => [x.category1, x.category3],
+        getTargetInstanceLabel: (_x) => "matching",
+        getExpectedHierarchy: (x) => [
           NodeValidators.createForInstanceNode({
             instanceKeys: [x.model1],
             label: "model-1",
@@ -607,10 +601,10 @@ describe("Models tree", () => {
             ],
           }),
         ],
-      ),
-      TreeSearchTestCaseDefinition.create(
-        "root Element nodes",
-        async (builder) => {
+      }),
+      TreeSearchTestCaseDefinition.create({
+        name: "root Element nodes",
+        setupIModel: async (builder) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
           const model1 = insertPhysicalModelWithPartition({ builder, codeValue: `model-1`, partitionParentId: rootSubject.id });
           const model2 = insertPhysicalModelWithPartition({ builder, codeValue: `model-2`, partitionParentId: rootSubject.id });
@@ -626,13 +620,13 @@ describe("Models tree", () => {
 
           return { rootSubject, model1, model2, category1, category2, element11, element12, element21, element22 };
         },
-        (x) => [
+        getTargetInstancePaths: (x) => [
           [adjustedModelKey(x.model1), x.category1, adjustedElementKey(x.element11)],
           [adjustedModelKey(x.model2), x.category2, adjustedElementKey(x.element22)],
         ],
-        (x) => [x.element11, x.element22],
-        (_x) => "matching",
-        (_x) => [
+        getTargetItems: (x) => [x.element11, x.element22],
+        getTargetInstanceLabel: (_x) => "matching",
+        getExpectedHierarchy: (_x) => [
           NodeValidators.createForInstanceNode({
             label: "model-1",
             autoExpand: true,
@@ -668,10 +662,10 @@ describe("Models tree", () => {
             ],
           }),
         ],
-      ),
-      TreeSearchTestCaseDefinition.create(
-        "category and element nodes",
-        async (builder) => {
+      }),
+      TreeSearchTestCaseDefinition.create({
+        name: "category and element nodes",
+        setupIModel: async (builder) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
           const model1 = insertPhysicalModelWithPartition({ builder, codeValue: `model-1`, partitionParentId: rootSubject.id });
           const model2 = insertPhysicalModelWithPartition({ builder, codeValue: `model-2`, partitionParentId: rootSubject.id });
@@ -687,13 +681,13 @@ describe("Models tree", () => {
 
           return { rootSubject, model1, model2, category1, category2, element11, element12, element21, element22 };
         },
-        (x) => [
+        getTargetInstancePaths: (x) => [
           [adjustedModelKey(x.model1), x.category1],
           [adjustedModelKey(x.model1), x.category1, adjustedElementKey(x.element11)],
         ],
-        (x) => [x.category1, x.element11],
-        (_x) => "matching",
-        (_x) => [
+        getTargetItems: (x) => [x.category1, x.element11],
+        getTargetInstanceLabel: (_x) => "matching",
+        getExpectedHierarchy: (_x) => [
           NodeValidators.createForInstanceNode({
             label: "model-1",
             autoExpand: true,
@@ -715,10 +709,10 @@ describe("Models tree", () => {
             ],
           }),
         ],
-      ),
-      TreeSearchTestCaseDefinition.create(
-        "child Element nodes",
-        async (builder) => {
+      }),
+      TreeSearchTestCaseDefinition.create({
+        name: "child Element nodes",
+        setupIModel: async (builder) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
           const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
           const category = insertSpatialCategory({ builder, codeValue: "category-x" });
@@ -746,13 +740,13 @@ describe("Models tree", () => {
           });
           return { rootSubject, model, category, rootElement, childElement1, childElement2, childElement3 };
         },
-        (x) => [
+        getTargetInstancePaths: (x) => [
           [adjustedModelKey(x.model), x.category, adjustedElementKey(x.rootElement), adjustedElementKey(x.childElement1)],
           [adjustedModelKey(x.model), x.category, adjustedElementKey(x.rootElement), adjustedElementKey(x.childElement3)],
         ],
-        (x) => [x.childElement1, x.childElement3],
-        (_x) => "matching",
-        (x) => [
+        getTargetItems: (x) => [x.childElement1, x.childElement3],
+        getTargetInstanceLabel: (_x) => "matching",
+        getExpectedHierarchy: (x) => [
           NodeValidators.createForInstanceNode({
             instanceKeys: [x.model],
             label: "model-x",
@@ -799,10 +793,10 @@ describe("Models tree", () => {
             ],
           }),
         ],
-      ),
-      TreeSearchTestCaseDefinition.create(
-        "child Element nodes when custom element specification class is used",
-        async (builder, testSchema) => {
+      }),
+      TreeSearchTestCaseDefinition.create({
+        name: "child Element nodes when custom element specification class is used",
+        setupIModel: async (builder, testSchema) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
           const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
           const category = insertSpatialCategory({ builder, codeValue: "category-x" });
@@ -828,13 +822,13 @@ describe("Models tree", () => {
           });
           return { rootSubject, model, category, rootElement1, rootElement2, rootElement3 };
         },
-        (x) => [
+        getTargetInstancePaths: (x) => [
           [adjustedModelKey(x.model), x.category, { ...x.rootElement1, className: "TestSchema.SubModelablePhysicalObject" }],
           [adjustedModelKey(x.model), x.category, { ...x.rootElement3, className: "TestSchema.SubModelablePhysicalObject" }],
         ],
-        (x) => [x.rootElement1, x.rootElement3],
-        (_x) => "matching",
-        (x) => [
+        getTargetItems: (x) => [x.rootElement1, x.rootElement3],
+        getTargetInstanceLabel: (_x) => "matching",
+        getExpectedHierarchy: (x) => [
           NodeValidators.createForInstanceNode({
             instanceKeys: [x.model],
             label: "model-x",
@@ -868,11 +862,11 @@ describe("Models tree", () => {
             ],
           }),
         ],
-        (x) => ({ elementClassSpecification: x.rootElement1.className }),
-      ),
-      TreeSearchTestCaseDefinition.create(
-        "sub-modeled Element nodes",
-        async (builder, testSchema) => {
+        getHierarchyConfig: (x) => ({ elementClassSpecification: x.rootElement1.className }),
+      }),
+      TreeSearchTestCaseDefinition.create({
+        name: "sub-modeled Element nodes",
+        setupIModel: async (builder, testSchema) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
           const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
           const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -889,7 +883,7 @@ describe("Models tree", () => {
           const subModeledElement3 = insertPhysicalElement({ builder, userLabel: `matching element 3`, modelId: subModel.id, categoryId: category.id });
           return { rootSubject, model, category, rootElement, subModel, subModeledElement1, subModeledElement2, subModeledElement3 };
         },
-        (x) => [
+        getTargetInstancePaths: (x) => [
           [
             adjustedModelKey(x.model),
             x.category,
@@ -907,9 +901,9 @@ describe("Models tree", () => {
             adjustedElementKey(x.subModeledElement3),
           ],
         ],
-        (x) => [x.subModeledElement1, x.subModeledElement3],
-        (_x) => "matching",
-        (x) => [
+        getTargetItems: (x) => [x.subModeledElement1, x.subModeledElement3],
+        getTargetInstanceLabel: (_x) => "matching",
+        getExpectedHierarchy: (x) => [
           NodeValidators.createForInstanceNode({
             instanceKeys: [x.model],
             label: "model",
@@ -963,10 +957,89 @@ describe("Models tree", () => {
             ],
           }),
         ],
-      ),
-      TreeSearchTestCaseDefinition.create(
-        "Element node through hidden ancestors",
-        async (builder) => {
+      }),
+      TreeSearchTestCaseDefinition.create({
+        name: "categories under sub-modeled Elements",
+        setupIModel: async (builder, testSchema) => {
+          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
+          const category = insertSpatialCategory({ builder, codeValue: "category" });
+          const rootElement = insertPhysicalElement({
+            builder,
+            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+            userLabel: `root element`,
+            modelId: model.id,
+            categoryId: category.id,
+          });
+          const subModelElementCategory = insertSpatialCategory({ builder, codeValue: "sub-model category", userLabel: "sub-model category" });
+          const otherCategory = insertSpatialCategory({ builder, codeValue: "other category", userLabel: "other category" });
+          const subModel = insertPhysicalSubModel({ builder, modeledElementId: rootElement.id });
+          const subModeledElement1 = insertPhysicalElement({
+            builder,
+            userLabel: `matching element 1`,
+            modelId: subModel.id,
+            categoryId: subModelElementCategory.id,
+          });
+          const subModeledElement2 = insertPhysicalElement({ builder, userLabel: `element 2`, modelId: subModel.id, categoryId: otherCategory.id });
+          return { rootSubject, model, category, rootElement, subModel, subModeledElement1, subModeledElement2, subModelElementCategory };
+        },
+        getTargetInstancePaths: (x) => [
+          [adjustedModelKey(x.model), x.category, adjustedElementKey(x.rootElement), adjustedModelKey(x.subModel), x.subModelElementCategory],
+        ],
+        getTargetItems: (x) => [x.subModelElementCategory],
+        getTargetInstanceLabel: (_x) => "sub-model category",
+        getExpectedHierarchy: (x) => [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [x.model],
+            label: "model",
+            autoExpand: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [x.category],
+                label: "category",
+                autoExpand: true,
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    label: "Test Physical Object",
+                    autoExpand: true,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [x.rootElement],
+                        label: /^root element/,
+                        autoExpand: true,
+                        children: [
+                          NodeValidators.createForInstanceNode({
+                            instanceKeys: [x.subModelElementCategory],
+                            label: "sub-model category",
+                            autoExpand: false,
+                            children: [
+                              NodeValidators.createForClassGroupingNode({
+                                label: "Physical Object",
+                                autoExpand: false,
+                                children: [
+                                  NodeValidators.createForInstanceNode({
+                                    instanceKeys: [x.subModeledElement1],
+                                    label: /^matching element 1/,
+                                    autoExpand: false,
+                                    children: false,
+                                  }),
+                                ],
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      }),
+      TreeSearchTestCaseDefinition.create({
+        name: "Element node through hidden ancestors",
+        setupIModel: async (builder) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
           const hiddenChildSubject = insertSubject({
             builder,
@@ -986,10 +1059,10 @@ describe("Models tree", () => {
           const element2 = insertPhysicalElement({ builder, userLabel: `element 2`, modelId: model.id, categoryId: category.id });
           return { rootSubject, model, category, element1, element2 };
         },
-        (x) => [[adjustedModelKey(x.model), x.category, adjustedElementKey(x.element1)]],
-        (x) => [x.element1],
-        (_x) => "matching",
-        (_x) => [
+        getTargetInstancePaths: (x) => [[adjustedModelKey(x.model), x.category, adjustedElementKey(x.element1)]],
+        getTargetItems: (x) => [x.element1],
+        getTargetInstanceLabel: (_x) => "matching",
+        getExpectedHierarchy: (_x) => [
           NodeValidators.createForInstanceNode({
             label: "category",
             autoExpand: true,
@@ -1002,14 +1075,14 @@ describe("Models tree", () => {
             ],
           }),
         ],
-      ),
+      }),
     );
 
     describe("when expanding up to element class grouping nodes", () => {
       runTestCases(
-        TreeSearchTestCaseDefinition.create(
-          "grouped root element",
-          async (builder) => {
+        TreeSearchTestCaseDefinition.create({
+          name: "grouped root element",
+          setupIModel: async (builder) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
             const model1 = insertPhysicalModelWithPartition({ builder, codeValue: `model-1`, partitionParentId: rootSubject.id });
             const model2 = insertPhysicalModelWithPartition({ builder, codeValue: `model-2`, partitionParentId: rootSubject.id });
@@ -1038,19 +1111,19 @@ describe("Models tree", () => {
             });
             return { rootSubject, model2, category, physicalElement21, physicalElement22, pathUntilTargetElement, groupingNode };
           },
-          (x) =>
+          getTargetInstancePaths: (x) =>
             x.groupingNode.groupedInstanceKeys.map((elementKey) => ({
               path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
               options: { reveal: { depthInHierarchy: x.groupingNode.parentKeys.length } },
             })),
-          (x) => [
+          getTargetItems: (x) => [
             {
               parent: { type: "category", ids: [x.category.id], modelIds: [x.model2.id] },
               groupingNode: x.groupingNode,
             },
           ],
-          undefined,
-          (x) => [
+          getTargetInstanceLabel: undefined,
+          getExpectedHierarchy: (x) => [
             NodeValidators.createForInstanceNode({
               instanceKeys: [x.model2],
               label: "model-2",
@@ -1074,10 +1147,10 @@ describe("Models tree", () => {
               ],
             }),
           ],
-        ),
-        TreeSearchTestCaseDefinition.create(
-          "grouped child element",
-          async (builder, testSchema) => {
+        }),
+        TreeSearchTestCaseDefinition.create({
+          name: "grouped child element",
+          setupIModel: async (builder, testSchema) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
             const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
             const category = insertSpatialCategory({ builder, codeValue: "category-x" });
@@ -1129,19 +1202,19 @@ describe("Models tree", () => {
             });
             return { rootSubject, model, category, rootElement, testElement1, testElement2, pathUntilTargetElement, targetGroupingNode };
           },
-          (x) =>
+          getTargetInstancePaths: (x) =>
             x.targetGroupingNode.groupedInstanceKeys.map((elementKey) => ({
               path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
               options: { reveal: { depthInHierarchy: x.targetGroupingNode.parentKeys.length } },
             })),
-          (x) => [
+          getTargetItems: (x) => [
             {
               parent: { type: "element", ids: [x.rootElement.id] },
               groupingNode: x.targetGroupingNode,
             },
           ],
-          undefined,
-          (x) => [
+          getTargetInstanceLabel: undefined,
+          getExpectedHierarchy: (x) => [
             NodeValidators.createForInstanceNode({
               instanceKeys: [x.model],
               label: "model-x",
@@ -1184,10 +1257,10 @@ describe("Models tree", () => {
               ],
             }),
           ],
-        ),
-        TreeSearchTestCaseDefinition.create(
-          "grouped child elements of different classes",
-          async (builder, testSchema) => {
+        }),
+        TreeSearchTestCaseDefinition.create({
+          name: "grouped child elements of different classes",
+          setupIModel: async (builder, testSchema) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
             const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
             const category = insertSpatialCategory({ builder, codeValue: "category-x" });
@@ -1260,7 +1333,7 @@ describe("Models tree", () => {
               testElementGroupingNode,
             };
           },
-          (x) => [
+          getTargetInstancePaths: (x) => [
             ...x.physicalElementGroupingNode.groupedInstanceKeys.map((elementKey) => ({
               path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
               options: { reveal: { depthInHierarchy: x.physicalElementGroupingNode.parentKeys.length } },
@@ -1270,7 +1343,7 @@ describe("Models tree", () => {
               options: { reveal: { depthInHierarchy: x.testElementGroupingNode.parentKeys.length } },
             })),
           ],
-          (x) => [
+          getTargetItems: (x) => [
             {
               parent: { type: "element", ids: [x.rootElement.id] },
               groupingNode: x.physicalElementGroupingNode,
@@ -1280,8 +1353,8 @@ describe("Models tree", () => {
               groupingNode: x.testElementGroupingNode,
             },
           ],
-          undefined,
-          (x) => [
+          getTargetInstanceLabel: undefined,
+          getExpectedHierarchy: (x) => [
             NodeValidators.createForInstanceNode({
               instanceKeys: [x.model],
               label: "model-x",
@@ -1325,10 +1398,10 @@ describe("Models tree", () => {
               ],
             }),
           ],
-        ),
-        TreeSearchTestCaseDefinition.create(
-          "hierarchy of grouped elements",
-          async (builder) => {
+        }),
+        TreeSearchTestCaseDefinition.create({
+          name: "hierarchy of grouped elements",
+          setupIModel: async (builder) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
             const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
             const category = insertSpatialCategory({ builder, codeValue: "category-x" });
@@ -1382,7 +1455,7 @@ describe("Models tree", () => {
               childElementGroupingNode,
             };
           },
-          (x) => [
+          getTargetInstancePaths: (x) => [
             {
               path: [...x.pathUntilParentElement, adjustedElementKey(x.parentElement)],
               options: { reveal: { depthInHierarchy: x.parentElementGroupingNode.parentKeys.length } },
@@ -1396,7 +1469,7 @@ describe("Models tree", () => {
               options: { reveal: { depthInHierarchy: x.childElementGroupingNode.parentKeys.length } },
             },
           ],
-          (x) => [
+          getTargetItems: (x) => [
             {
               parent: { type: "category", ids: [x.category.id], modelIds: [x.model.id] },
               groupingNode: x.parentElementGroupingNode,
@@ -1410,8 +1483,8 @@ describe("Models tree", () => {
               groupingNode: x.childElementGroupingNode,
             },
           ],
-          undefined,
-          (x) => [
+          getTargetInstanceLabel: undefined,
+          getExpectedHierarchy: (x) => [
             NodeValidators.createForInstanceNode({
               instanceKeys: [x.model],
               label: "model-x",
@@ -1458,10 +1531,10 @@ describe("Models tree", () => {
               ],
             }),
           ],
-        ),
-        TreeSearchTestCaseDefinition.create(
-          "grouped element with auto expansion to the grouping node and to the element",
-          async (builder) => {
+        }),
+        TreeSearchTestCaseDefinition.create({
+          name: "grouped element with auto expansion to the grouping node and to the element",
+          setupIModel: async (builder) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
             const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
             const category = insertSpatialCategory({ builder, codeValue: "category-x" });
@@ -1476,22 +1549,22 @@ describe("Models tree", () => {
             });
             return { rootSubject, model, category, element, pathUntilTargetElement, groupingNode };
           },
-          (x) => [
+          getTargetInstancePaths: (x) => [
             [...x.pathUntilTargetElement, adjustedElementKey(x.element)],
             {
               path: [...x.pathUntilTargetElement, adjustedElementKey(x.element)],
               options: { reveal: { depthInHierarchy: x.groupingNode.parentKeys.length } },
             },
           ],
-          (x) => [
+          getTargetItems: (x) => [
             x.element,
             {
               parent: { type: "category", ids: [x.category.id], modelIds: [x.model.id] },
               groupingNode: x.groupingNode,
             },
           ],
-          undefined,
-          (x) => [
+          getTargetInstanceLabel: undefined,
+          getExpectedHierarchy: (x) => [
             NodeValidators.createForInstanceNode({
               instanceKeys: [x.model],
               label: "model-x",
@@ -1516,10 +1589,10 @@ describe("Models tree", () => {
               ],
             }),
           ],
-        ),
-        TreeSearchTestCaseDefinition.create(
-          "grouped elements under different categories",
-          async (builder) => {
+        }),
+        TreeSearchTestCaseDefinition.create({
+          name: "grouped elements under different categories",
+          setupIModel: async (builder) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
             const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
             const category1 = insertSpatialCategory({ builder, codeValue: "category-1" });
@@ -1551,7 +1624,7 @@ describe("Models tree", () => {
               groupingNode2,
             };
           },
-          (x) => [
+          getTargetInstancePaths: (x) => [
             {
               path: [adjustedModelKey(x.model), x.category1, adjustedElementKey(x.element1)],
               options: { reveal: { depthInHierarchy: x.groupingNode1.parentKeys.length } },
@@ -1561,7 +1634,7 @@ describe("Models tree", () => {
               options: { reveal: { depthInHierarchy: x.groupingNode2.parentKeys.length } },
             },
           ],
-          (x) => [
+          getTargetItems: (x) => [
             {
               parent: { type: "category", ids: [x.category1.id], modelIds: [x.model.id] },
               groupingNode: x.groupingNode1,
@@ -1571,8 +1644,8 @@ describe("Models tree", () => {
               groupingNode: x.groupingNode2,
             },
           ],
-          undefined,
-          (x) => [
+          getTargetInstanceLabel: undefined,
+          getExpectedHierarchy: (x) => [
             NodeValidators.createForInstanceNode({
               instanceKeys: [x.model],
               label: "model-x",
@@ -1605,7 +1678,7 @@ describe("Models tree", () => {
               ],
             }),
           ],
-        ),
+        }),
       );
     });
   });

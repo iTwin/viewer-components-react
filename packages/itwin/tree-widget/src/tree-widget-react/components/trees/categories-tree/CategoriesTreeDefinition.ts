@@ -55,6 +55,7 @@ import type {
   GenericInstanceFilter,
   HierarchyDefinition,
   HierarchyLevelDefinition,
+  HierarchyNodeIdentifiersPath,
   HierarchyNodesDefinition,
   LimitingECSqlQueryExecutor,
   NodePostProcessor,
@@ -563,7 +564,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       ? parseIdsSelectorResult(parentNode.extendedData?.modelIds)
       : await firstValueFrom(
           from(categoryIds).pipe(
-            mergeMap((categoryId) => this.#idsCache.getModels({ categoryId })),
+            mergeMap((categoryId) => this.#idsCache.getModels({ categoryId, subModels: "exclude" })),
             mergeAll(),
             distinct(),
             toArray(),
@@ -968,55 +969,47 @@ function createInstanceKeyPathsFromTargetItems({
     mergeMap((ids) => {
       const elementsLength = ids.elementIds.length;
       return merge(
-        fromWithRelease({ source: ids.definitionContainerIds, releaseOnCount: 200 }).pipe(
-          mergeMap((id) => idsCache.getInstanceKeyPaths({ definitionContainerId: id })),
-          map((path) => ({ path, options: { reveal: true } })),
-        ),
-        fromWithRelease({ source: ids.categoryIds, releaseOnCount: 200 }).pipe(
-          mergeMap((id) => idsCache.getInstanceKeyPaths({ categoryId: id })),
-          map((path) => ({ path, options: { reveal: true } })),
-        ),
-        fromWithRelease({ source: ids.subCategoryIds, releaseOnCount: 200 }).pipe(
-          mergeMap((id) => idsCache.getInstanceKeyPaths({ subCategoryId: id })),
-          map((path) => ({ path, options: { reveal: true } })),
-        ),
-        from(ids.elementIds).pipe(
-          bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),
-          releaseMainThreadOnItemsCount(1),
-          mergeMap(
-            (block, chunkIndex) =>
-              createGeometricElementInstanceKeyPaths({
-                imodelAccess,
-                idsCache,
-                hierarchyConfig,
-                viewType,
-                targetItems: block,
-                chunkIndex,
-                componentId,
-                componentName,
-              }),
-            10,
-          ),
-        ),
-      );
+        idsCache.getDefinitionContainersSearchPaths({ definitionContainerIds: ids.definitionContainerIds }),
+        idsCache.getCategoriesSearchPaths({ categoryIds: ids.categoryIds, includePathsWithSubModels: hierarchyConfig.showElements }),
+        idsCache.getSubCategoriesSearchPaths({ subCategoryIds: ids.subCategoryIds }),
+        hierarchyConfig.showElements
+          ? from(ids.elementIds).pipe(
+              bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),
+              releaseMainThreadOnItemsCount(1),
+              mergeMap(
+                (block, chunkIndex) =>
+                  createGeometricElementInstanceKeyPaths({
+                    queryExecutor: imodelAccess,
+                    idsCache,
+                    viewType,
+                    targetItems: block,
+                    chunkIndex,
+                    componentId,
+                    componentName,
+                  }),
+                10,
+              ),
+            )
+          : EMPTY,
+      ).pipe(map((path) => ({ path, options: { reveal: true } })));
     }),
   );
 }
 
-function createGeometricElementInstanceKeyPaths(props: {
-  imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
+/** @internal */
+export function createGeometricElementInstanceKeyPaths(props: {
+  queryExecutor: LimitingECSqlQueryExecutor;
   idsCache: CategoriesTreeIdsCache;
-  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
   viewType: "2d" | "3d";
   targetItems: Id64Array;
   componentId: GuidString;
   componentName: string;
   chunkIndex: number;
-}): Observable<NormalizedHierarchySearchPath> {
+}): Observable<HierarchyNodeIdentifiersPath> {
   const separator = ";";
-  const { targetItems, chunkIndex, componentId, componentName, hierarchyConfig, idsCache, imodelAccess, viewType } = props;
+  const { targetItems, chunkIndex, componentId, componentName, idsCache, queryExecutor, viewType } = props;
   const { categoryClass, elementClass, modelClass } = getClassesByView(viewType);
-  if (targetItems.length === 0 || !hierarchyConfig.showElements) {
+  if (targetItems.length === 0) {
     return EMPTY;
   }
 
@@ -1058,7 +1051,7 @@ function createGeometricElementInstanceKeyPaths(props: {
       WHERE mce.ParentId IS NULL
     `;
 
-    return imodelAccess.createQueryReader(
+    return queryExecutor.createQueryReader(
       { ctes, ecsql },
       { rowFormat: "Indexes", limit: "unbounded", restartToken: `${componentName}/${componentId}/element-paths/${chunkIndex}` },
     );
@@ -1067,12 +1060,15 @@ function createGeometricElementInstanceKeyPaths(props: {
     releaseMainThreadOnItemsCount(300),
     map((row) => parseQueryRow(row, separator, elementClass, categoryClass, modelClass)),
     mergeMap((elementHierarchyPath) =>
-      forkJoin({ elementHierarchyPath: of(elementHierarchyPath), pathToCategory: idsCache.getInstanceKeyPaths({ categoryId: elementHierarchyPath[0].id }) }),
+      forkJoin({
+        elementHierarchyPath: of(elementHierarchyPath),
+        pathToCategory: idsCache.getCategoriesSearchPaths({ categoryIds: elementHierarchyPath[0].id, includePathsWithSubModels: false }),
+      }),
     ),
     map(({ elementHierarchyPath, pathToCategory }) => {
       pathToCategory.pop(); // category is already included in the element hierarchy path
       const path = [...pathToCategory, ...elementHierarchyPath];
-      return { path, options: { reveal: true } };
+      return path;
     }),
   );
 }
