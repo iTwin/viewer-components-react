@@ -14,7 +14,7 @@ import { FeatureInfoDataProvider } from "./FeatureInfoDataProvider";
 import type { PrimitiveValue } from "@itwin/appui-abstract";
 import type { ActionButtonRendererProps } from "@itwin/components-react";
 
-export function useSpecificWidgetDef(id: string) {
+function useSpecificWidgetDef(id: string) {
   const frontstageDef = useActiveFrontstageDef();
   return frontstageDef?.findWidgetDef(id);
 }
