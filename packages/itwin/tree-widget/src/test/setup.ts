@@ -118,24 +118,17 @@ function failTestsOnActWarnings(currentTest: Mocha.Test) {
   // wrap the test fn to check for act warnings after it completes
   actWarningHappened = false;
   const originalFn = currentTest.fn;
-  if (currentTest.sync) {
-    currentTest.fn = function (this: Mocha.Context, done: (err?: unknown) => void) {
-      (originalFn as Mocha.Func).call(this, (err?: unknown) => {
-        if (err) {
-          return done(err);
-        }
-        try {
-          checkActWarnings();
-          done();
-        } catch (e) {
-          done(e);
-        }
-      });
-    };
-  } else {
-    currentTest.fn = async function (this: Mocha.Context) {
-      await (originalFn as Mocha.AsyncFunc).call(this);
-      checkActWarnings();
-    };
-  }
+  currentTest.fn = function (this: Mocha.Context, done: (err?: unknown) => void) {
+    (originalFn as Mocha.Func).call(this, (err?: unknown) => {
+      if (err) {
+        return done(err);
+      }
+      try {
+        checkActWarnings();
+        done();
+      } catch (e) {
+        done(e);
+      }
+    });
+  };
 }
