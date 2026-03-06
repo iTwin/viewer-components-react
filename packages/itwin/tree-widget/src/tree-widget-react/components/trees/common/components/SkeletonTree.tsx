@@ -6,19 +6,20 @@
 import "./SkeletonTree.css";
 
 import { Skeleton, VisuallyHidden } from "@stratakit/bricks";
-import { TreeWidget } from "../../../../TreeWidget.js";
+import { useTranslation } from "./LocalizationContext.js";
 
 /**
  * Represents the loaded tree content before it finishes loading.
  * @beta
  */
 export function SkeletonTree() {
+  const translate = useTranslation();
   return (
     <div className="tw-skeleton-container">
       {Array.from({ length: 20 }, (_, index) => (
         <SkeletonRow key={index} />
       ))}
-      <VisuallyHidden id={"tw-progress-bar"}>{TreeWidget.translate("loading.skeleton")}</VisuallyHidden>
+      <VisuallyHidden id={"tw-progress-bar"}>{translate("loading.skeleton")}</VisuallyHidden>
     </div>
   );
 }

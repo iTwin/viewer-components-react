@@ -2,13 +2,15 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-const iTwinPlugin = require("@itwin/eslint-plugin");
-const reactPlugin = require("eslint-plugin-react");
-const eslintConfigPrettier = require("eslint-config-prettier");
-const unusedImports = require("eslint-plugin-unused-imports");
-const reactHooksPlugin = require("eslint-plugin-react-hooks");
 
-module.exports = [
+import eslintConfigPrettier from "eslint-config-prettier";
+import reactPlugin from "eslint-plugin-react";
+import reactHooksPlugin from "eslint-plugin-react-hooks";
+import unusedImports from "eslint-plugin-unused-imports";
+import { defineConfig } from "eslint/config";
+import iTwinPlugin from "@itwin/eslint-plugin";
+
+export default defineConfig([
   {
     files: ["**/*.{ts,tsx}"],
     ...iTwinPlugin.configs.uiConfig,
@@ -74,5 +76,10 @@ module.exports = [
       "@typescript-eslint/unbound-method": "off",
     },
   },
-  eslintConfigPrettier,
-];
+  {
+    files: ["**/*.{ts,tsx}"],
+    rules: {
+      ...eslintConfigPrettier.rules,
+    },
+  },
+]);

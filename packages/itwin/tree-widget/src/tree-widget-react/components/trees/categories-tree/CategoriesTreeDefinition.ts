@@ -57,6 +57,7 @@ import type {
   HierarchyLevelDefinition,
   HierarchyNodesDefinition,
   LimitingECSqlQueryExecutor,
+  NodePostProcessor,
   NodePreProcessor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
@@ -140,7 +141,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     this.#categoryModelClass = modelClass;
   }
 
-  public preProcessNode: NodePreProcessor = async (node) => {
+  public preProcessNode: NodePreProcessor = async ({ node }) => {
     if (node.extendedData?.isCategory) {
       return {
         ...node,
@@ -153,7 +154,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     return node;
   };
 
-  public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
+  public postProcessNode: NodePostProcessor = async ({ node }) => {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
       const modelElementsMap = new Map<ModelId, { elementIds: Set<ElementId>; categoryOfTopMostParentElement: CategoryId }>();
       for (const child of node.children) {
@@ -196,7 +197,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       };
     }
     return node;
-  }
+  };
 
   private async getHierarchyDefinition(): Promise<HierarchyDefinition> {
     this.#impl ??= (async () => {

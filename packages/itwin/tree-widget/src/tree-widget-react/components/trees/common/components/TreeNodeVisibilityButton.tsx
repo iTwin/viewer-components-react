@@ -10,8 +10,8 @@ import { TreeActionBase } from "@itwin/presentation-hierarchies-react";
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
 import visibilityPartialSvg from "@stratakit/icons/visibility-partial.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
-import { TreeWidget } from "../../../../TreeWidget.js";
 import { createTooltip } from "../internal/Tooltip.js";
+import { useTranslation } from "./LocalizationContext.js";
 
 import type { PropsWithChildren } from "react";
 import type { TreeActionBaseAttributes, TreeNode } from "@itwin/presentation-hierarchies-react";
@@ -42,16 +42,11 @@ export type TreeItemVisibilityButtonState = (
 export const VisibilityAction = memo(function VisibilityAction({ node, ...actionAttributes }: { node: TreeNode } & TreeActionBaseAttributes) {
   const context = useVisibilityContext();
   const state = context?.getVisibilityButtonState(node);
+  const translate = useTranslation();
 
   if (!context || !state || ("isDisabled" in state && state.isDisabled) || "isLoading" in state) {
     return (
-      <TreeActionBase
-        {...actionAttributes}
-        label={TreeWidget.translate(`visibilityTooltips.status.disabled`)}
-        visible={false}
-        icon={visibilityShowSvg}
-        hide={true}
-      />
+      <TreeActionBase {...actionAttributes} label={translate("visibilityTooltips.status.disabled")} visible={false} icon={visibilityShowSvg} hide={true} />
     );
   }
 
@@ -69,7 +64,7 @@ export const VisibilityAction = memo(function VisibilityAction({ node, ...action
   return (
     <TreeActionBase
       {...actionAttributes}
-      label={state.tooltip ?? createTooltip(state.state)}
+      label={state.tooltip ?? createTooltip(state.state, translate)}
       onClick={() => context.onVisibilityButtonClick(node, state.state)}
       visible={state.state !== "visible" ? true : undefined}
       icon={getIcon()}

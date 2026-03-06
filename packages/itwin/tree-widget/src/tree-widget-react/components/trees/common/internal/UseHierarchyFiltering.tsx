@@ -11,8 +11,8 @@ import { PresentationInstanceFilter, PresentationInstanceFilterDialog } from "@i
 import { Presentation } from "@itwin/presentation-frontend";
 import { GenericInstanceFilter, RowsLimitExceededError } from "@itwin/presentation-hierarchies";
 import { Spinner } from "@stratakit/bricks";
-import { TreeWidget } from "../../../../TreeWidget.js";
 import { Delayed } from "../components/Delayed.js";
+import { useTranslation } from "../components/LocalizationContext.js";
 import { useTelemetryContext } from "../UseTelemetryContext.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
@@ -120,6 +120,7 @@ interface MatchingInstancesCountProps {
 }
 
 function MatchingInstancesCount({ filter, defaultHierarchyLevelSizeLimit, hierarchyLevelDetails }: MatchingInstancesCountProps) {
+  const translate = useTranslation();
   const { value, inProgress } = useDebouncedAsyncValue(
     useCallback(async () => {
       const instanceFilter = toGenericFilter(filter);
@@ -130,22 +131,22 @@ function MatchingInstancesCount({ filter, defaultHierarchyLevelSizeLimit, hierar
             hierarchyLevelSizeLimit: hierarchyLevelDetails.sizeLimit ?? defaultHierarchyLevelSizeLimit,
           }),
         );
-        return TreeWidget.translate("filteringDialog.matchingInstancesCount", {
+        return translate("filteringDialog.matchingInstancesCount", {
           instanceCount: instanceCount.toLocaleString(undefined, { useGrouping: true }),
         });
       } catch (e) {
         if (e instanceof RowsLimitExceededError) {
-          return TreeWidget.translate("filteringDialog.filterExceedsLimit", { limit: e.limit.toLocaleString(undefined, { useGrouping: true }) });
+          return translate("filteringDialog.filterExceedsLimit", { limit: e.limit.toLocaleString(undefined, { useGrouping: true }) });
         }
-        return TreeWidget.translate("filteringDialog.failedToCalculateMatchingInstancesCount");
+        return translate("filteringDialog.failedToCalculateMatchingInstancesCount");
       }
-    }, [filter, hierarchyLevelDetails, defaultHierarchyLevelSizeLimit]),
+    }, [filter, hierarchyLevelDetails, defaultHierarchyLevelSizeLimit, translate]),
   );
 
   if (inProgress) {
     return (
       <Delayed show={true}>
-        {TreeWidget.translate("filteringDialog.matchingInstancesCount", { instanceCount: "" })}
+        {translate("filteringDialog.matchingInstancesCount", { instanceCount: "" })}
         <Spinner size="small" />
       </Delayed>
     );
