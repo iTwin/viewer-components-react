@@ -45,6 +45,18 @@ global.CSS = {
   supports: (_k: string, _v: string) => false,
 } as any;
 
+// flag to indicate if act warning happened.
+let actWarningHappened = false;
+// eslint-disable-next-line no-console
+const originalConsoleError = console.error;
+// eslint-disable-next-line no-console
+console.error = (...args: unknown[]) => {
+  if (args.length > 0 && typeof args[0] === "string" && args[0].includes("was not wrapped in act")) {
+    actWarningHappened = true;
+  }
+  originalConsoleError(...args);
+};
+
 // supply mocha hooks
 import path from "path";
 const { cleanup, configure } = await import("@testing-library/react");
@@ -54,16 +66,18 @@ export const mochaHooks = {
     chaiJestSnapshot.resetSnapshotRegistry();
     getGlobalThis().IS_REACT_ACT_ENVIRONMENT = true;
   },
-  beforeEach() {
+  beforeEach(this: Mocha.Context) {
     // enable strict mode for each test by default
     configure({ reactStrictMode: !process.env.DISABLE_STRICT_MODE });
 
     // set up snapshot name
-    const currentTest = (this as unknown as Mocha.Context).currentTest!;
+    const currentTest = this.currentTest!;
     const sourceFilePath = currentTest.file?.replace(`lib${path.sep}esm${path.sep}test`, `src${path.sep}test`).replace(/\.(jsx?|tsx?)$/, "");
     const snapPath = `${sourceFilePath}.snap`;
     chaiJestSnapshot.setFilename(snapPath);
     chaiJestSnapshot.setTestName(currentTest.fullTitle());
+
+    failTestsOnActWarnings(currentTest);
   },
   afterEach() {
     cleanup();
@@ -88,4 +102,40 @@ function getGlobalThis(): typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boole
     return global;
   }
   throw new Error("unable to locate global object");
+}
+
+function checkActWarnings() {
+  if (actWarningHappened) {
+    actWarningHappened = false;
+    throw new Error("Test triggered 'not wrapped in act' warning");
+  }
+}
+
+function failTestsOnActWarnings(currentTest: Mocha.Test) {
+  if (!currentTest.fn) {
+    return;
+  }
+  // wrap the test fn to check for act warnings after it completes
+  actWarningHappened = false;
+  const originalFn = currentTest.fn;
+  if (currentTest.sync) {
+    currentTest.fn = function (this: Mocha.Context, done: (err?: unknown) => void) {
+      (originalFn as Mocha.Func).call(this, (err?: unknown) => {
+        if (err) {
+          return done(err);
+        }
+        try {
+          checkActWarnings();
+          done();
+        } catch (e) {
+          done(e);
+        }
+      });
+    };
+  } else {
+    currentTest.fn = async function (this: Mocha.Context) {
+      await (originalFn as Mocha.AsyncFunc).call(this);
+      checkActWarnings();
+    };
+  }
 }

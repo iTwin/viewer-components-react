@@ -7,7 +7,7 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { BeEvent } from "@itwin/core-bentley";
 import { useIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/useTreeHooks/UseIdsCache.js";
-import { renderHook } from "../../../TestUtils.js";
+import { act, renderHook } from "../../../TestUtils.js";
 
 import type { BriefcaseConnection } from "@itwin/core-frontend";
 
@@ -126,7 +126,10 @@ describe("useIdsCache", () => {
     expect(createCacheSpy).to.be.calledTwice;
     expect(cache1).to.equal(cache2);
 
-    imodel.onClose.raiseEvent(imodel);
+    act(() => {
+      imodel.onClose.raiseEvent(imodel);
+    });
+
     expect(disposeSpy).to.be.calledTwice;
 
     cache1 = result.current.getCache({
@@ -158,8 +161,10 @@ describe("useIdsCache", () => {
     expect(createCacheSpy).to.be.calledTwice;
     expect(cache1).to.equal(cache2);
 
-    imodel.txns.onCommit.raiseEvent();
-    imodel.txns.onCommitted.raiseEvent(false, 1);
+    act(() => {
+      imodel.txns.onCommit.raiseEvent();
+      imodel.txns.onCommitted.raiseEvent(false, 1);
+    });
     expect(disposeSpy).to.be.calledTwice;
 
     cache1 = result.current.getCache({
@@ -190,8 +195,9 @@ describe("useIdsCache", () => {
     });
     expect(createCacheSpy).to.be.calledTwice;
     expect(cache1).to.equal(cache2);
-
-    imodel.txns.onChangesApplied.raiseEvent();
+    act(() => {
+      imodel.txns.onChangesApplied.raiseEvent();
+    });
     expect(disposeSpy).to.be.calledTwice;
 
     cache1 = result.current.getCache({
