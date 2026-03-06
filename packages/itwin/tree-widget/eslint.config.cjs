@@ -20,6 +20,9 @@ module.exports = [
     rules: {
       ...iTwinPlugin.configs.uiConfig.rules,
       ...reactHooksPlugin.configs.flat.recommended.rules,
+      "react-hooks/exhaustive-deps": "error",
+      "react-hooks/unsupported-syntax": "error",
+      "react-hooks/incompatible-library": "error",
       "@itwin/no-internal": [
         "error",
         {
