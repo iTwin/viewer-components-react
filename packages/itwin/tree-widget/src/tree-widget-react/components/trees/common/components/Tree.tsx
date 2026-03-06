@@ -30,28 +30,46 @@ import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
 /** @beta */
 export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPaths" | "getHierarchyDefinition"> &
   Pick<BaseTreeRendererProps, "selectionMode"> & {
-    /** iModel connection that should be used to pull data from. */
+    /**
+     * iModel connection that should be used to pull data from.
+     */
     imodel: IModelConnection;
-    /** Unique tree component name that will be used as unified selection change event source when selecting node. */
+    /**
+     * Unique tree component name that will be used as unified selection change event source when selecting node.
+     */
     treeName: string;
-    /** Unified selection storage that should be used by tree to handle tree selection changes. */
+    /**
+     * Unified selection storage that should be used by tree to handle tree selection changes.
+     */
     selectionStorage: SelectionStorage;
     /**
      * An optional predicate to allow or prohibit selection of a node.
      * When not supplied, all nodes are selectable.
      */
     selectionPredicate?: (node: TreeNode) => boolean;
-    /** Tree renderer that should be used to render tree data. */
+    /**
+     * Tree renderer that should be used to render tree data.
+     */
     treeRenderer: (treeProps: Required<CommonTreeRendererProps & Pick<BaseTreeRendererProps, "getTreeItemProps">>) => ReactNode;
-    /** Custom iModel access that is stored outside tree component. If not provided it new iModel access will be created using `imodel` prop. */
+    /**
+     * Custom iModel access that is stored outside tree component. If not provided it new iModel access will be created using `imodel` prop.
+     */
     imodelAccess?: FunctionProps<typeof useIModelTree>["imodelAccess"];
-    /** Size limit that should be applied on each hierarchy level. Default to `1000`. */
+    /**
+     * Size limit that should be applied on each hierarchy level. Default to `1000`.
+     */
     hierarchyLevelSizeLimit?: number;
-    /** Component that should be renderer if there are no tree nodes. */
+    /**
+     * Component that should be renderer if there are no tree nodes.
+     */
     emptyTreeContent?: ReactNode;
-    /** Callback that this invoked when tree reloads. */
+    /**
+     * Callback that this invoked when tree reloads.
+     */
     onReload?: () => void;
-    /** Text that should be highlighted in node labels. */
+    /**
+     * Text that should be highlighted in node labels.
+     */
     highlightText?: string;
   };
 

@@ -601,15 +601,15 @@ export { TreeNodeRenameAction }
 
 // @beta (undocumented)
 type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPaths" | "getHierarchyDefinition"> & Pick<BaseTreeRendererProps, "selectionMode"> & {
-    imodel: IModelConnection; /** Unique tree component name that will be used as unified selection change event source when selecting node. */
-    treeName: string; /** Unified selection storage that should be used by tree to handle tree selection changes. */
+    imodel: IModelConnection;
+    treeName: string;
     selectionStorage: SelectionStorage;
-    selectionPredicate?: (node: TreeNode) => boolean; /** Tree renderer that should be used to render tree data. */
-    treeRenderer: (treeProps: Required<CommonTreeRendererProps & Pick<BaseTreeRendererProps, "getTreeItemProps">>) => ReactNode; /** Custom iModel access that is stored outside tree component. If not provided it new iModel access will be created using `imodel` prop. */
-    imodelAccess?: FunctionProps<typeof useIModelTree>["imodelAccess"]; /** Size limit that should be applied on each hierarchy level. Default to `1000`. */
-    hierarchyLevelSizeLimit?: number; /** Component that should be renderer if there are no tree nodes. */
-    emptyTreeContent?: ReactNode; /** Callback that this invoked when tree reloads. */
-    onReload?: () => void; /** Text that should be highlighted in node labels. */
+    selectionPredicate?: (node: TreeNode) => boolean;
+    treeRenderer: (treeProps: Required<CommonTreeRendererProps & Pick<BaseTreeRendererProps, "getTreeItemProps">>) => ReactNode;
+    imodelAccess?: FunctionProps<typeof useIModelTree>["imodelAccess"];
+    hierarchyLevelSizeLimit?: number;
+    emptyTreeContent?: ReactNode;
+    onReload?: () => void;
     highlightText?: string;
 };
 
@@ -861,7 +861,7 @@ interface UseModelsTreeProps {
             targetItems: Array<InstanceKey | ElementsGroupInfo>;
         } | {
             label: string;
-        }) => Promise<NormalizedHierarchySearchPath[]>; /** Search text which would be used to create search paths if `getSearchPaths` wouldn't be provided. */
+        }) => Promise<NormalizedHierarchySearchPath[]>;
         searchText?: string;
     }) => Promise<HierarchySearchPath[] | undefined>;
     getSubTreePaths?: (props: {
@@ -921,7 +921,7 @@ export function VisibilityTree({
 type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess"> & {
     visibilityHandlerFactory: (props: {
         imodelAccess: ECClassHierarchyInspector;
-    }) => HierarchyVisibilityHandler; /** Tree renderer that should be used to render tree data. */
+    }) => HierarchyVisibilityHandler;
     treeRenderer: (treeProps: FunctionProps<TreeProps["treeRenderer"]> & Pick<VisibilityContext, "getVisibilityButtonState" | "onVisibilityButtonClick">) => ReactNode;
 };
 

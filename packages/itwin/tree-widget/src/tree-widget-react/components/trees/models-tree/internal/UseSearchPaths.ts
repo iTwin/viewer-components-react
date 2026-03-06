@@ -40,13 +40,19 @@ export function useSearchPaths({
   hierarchyConfiguration: ModelsTreeHierarchyConfiguration;
   searchText?: string;
   getSearchPaths?: (props: {
-    /** A function that creates search paths based on provided target instance keys or node label. */
+    /**
+     * A function that creates search paths based on provided target instance keys or node label.
+     */
     createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<NormalizedHierarchySearchPath[]>;
-    /** Search text which would be used to create search paths if `getSearchPaths` wouldn't be provided. */
+    /**
+     * Search text which would be used to create search paths if `getSearchPaths` wouldn't be provided.
+     */
     searchText?: string;
   }) => Promise<HierarchySearchPath[] | undefined>;
   getSubTreePaths?: (props: {
-    /** A function that creates search paths based on provided target instance keys. */
+    /**
+     * A function that creates search paths based on provided target instance keys.
+     */
     createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> }) => Promise<NormalizedHierarchySearchPath[]>;
   }) => Promise<HierarchySearchPath[]>;
   idsCache: ModelsTreeIdsCache;
