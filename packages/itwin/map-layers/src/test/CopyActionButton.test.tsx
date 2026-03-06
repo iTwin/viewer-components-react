@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { IModelApp, NoRenderApp, NotificationManager, OutputMessagePriority } from "@itwin/core-frontend";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 
 import { MapLayersUI } from "../mapLayers";
 import { CopyActionButton } from "../ui/widget/CopyActionButton";
@@ -25,8 +25,6 @@ describe("CopyActionButton", () => {
   });
 
   it("toggles to copied state and disables the button temporarily on success", async () => {
-    vi.useFakeTimers();
-
     const onCopy = vi.fn().mockResolvedValue(undefined);
     const copyLabel = MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Copy");
     const copiedLabel = MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Copied");
@@ -34,7 +32,7 @@ describe("CopyActionButton", () => {
     render(<CopyActionButton value="test-value" onCopy={onCopy} />);
 
     const copyButton = screen.getByRole("button", { name: copyLabel });
-    expect((copyButton as HTMLButtonElement).disabled).toBe(false);
+    expect(onCopy).toHaveBeenCalledTimes(0);
 
     await act(async () => {
       fireEvent.click(copyButton);
@@ -42,20 +40,26 @@ describe("CopyActionButton", () => {
     });
 
     expect(onCopy).toHaveBeenCalledWith("test-value");
+    expect(onCopy).toHaveBeenCalledTimes(1);
 
-    await waitFor(() => {
-      expect(screen.getByRole("button", { name: copiedLabel })).toBeDefined();
+    const copiedButton = await screen.findByRole("button", { name: copiedLabel });
+
+    await act(async () => {
+      fireEvent.click(copiedButton);
+      await Promise.resolve();
     });
+    expect(onCopy).toHaveBeenCalledTimes(1);
 
-    const copiedButton = screen.getByRole("button", { name: copiedLabel });
-    expect((copiedButton as HTMLButtonElement).disabled).toBe(true);
-
-    act(() => {
-      vi.advanceTimersByTime(1200);
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 1300));
     });
 
     const resetButton = screen.getByRole("button", { name: copyLabel });
-    expect((resetButton as HTMLButtonElement).disabled).toBe(false);
+    await act(async () => {
+      fireEvent.click(resetButton);
+      await Promise.resolve();
+    });
+    expect(onCopy).toHaveBeenCalledTimes(2);
   });
 
   it("notifies user when copy fails", async () => {
