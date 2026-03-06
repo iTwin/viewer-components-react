@@ -34,10 +34,11 @@ export const CopyActionButton: React.FC<CopyActionButtonProps> = ({value, onCopy
       label={isCopied ? MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Copied") : MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Copy")}
       onClick={async () => {
         try {
-          if(onCopy)
+          if (onCopy) {
             await onCopy(value);
-          else
+          } else {
             await navigator.clipboard.writeText(value);
+          }
           setIsCopied(true);
 
           if (timeoutRef.current !== undefined) {
