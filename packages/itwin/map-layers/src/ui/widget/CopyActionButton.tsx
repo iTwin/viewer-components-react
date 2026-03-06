@@ -16,7 +16,7 @@ interface CopyActionButtonProps {
  *
  * After a click, the icon and label briefly switch to a copied state.
  */
-export const CopyActionButton: React.FC<CopyActionButtonProps> = ({ value, onCopy }) => {
+export function CopyActionButton({ value, onCopy }: CopyActionButtonProps) {
   const [isCopied, setIsCopied] = useState(false);
   const timeoutRef = useRef<number | undefined>(undefined);
 
