@@ -150,6 +150,7 @@ function useCategories(viewport: TreeWidgetViewport) {
     viewport.viewType !== "other"
       ? getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewport.viewType).elementClass, type: viewport.viewType })
       : undefined;
+  // eslint-disable-next-line react-hooks/use-memo
   const categoriesPromise = useMemo(async () => {
     try {
       if (baseIdsCache) {

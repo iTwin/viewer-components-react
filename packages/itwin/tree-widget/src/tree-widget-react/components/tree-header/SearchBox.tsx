@@ -3,11 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { IconButton, TextBox } from "@stratakit/bricks";
 import dismissSvg from "@stratakit/icons/dismiss.svg";
 import searchSvg from "@stratakit/icons/search.svg";
 import { useTranslation } from "../trees/common/components/LocalizationContext.js";
+import { useLatest } from "../trees/common/internal/Utils.js";
 
 interface DebouncedSearchBoxProps {
   isOpened: boolean;
@@ -21,9 +22,8 @@ interface DebouncedSearchBoxProps {
 export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, className }: DebouncedSearchBoxProps) {
   const translate = useTranslation();
   const [inputValue, setInputValue] = useState<string | undefined>(undefined);
-  const onChangeRef = useRef(onSearch);
   // save latest `onChange` reference into `useRef` to avoid restarting timeout when `onChange` reference changes.
-  onChangeRef.current = onSearch;
+  const onChangeRef = useLatest(onSearch);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -33,7 +33,7 @@ export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, cla
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [inputValue, delay]);
+  }, [inputValue, delay, onChangeRef]);
 
   return !isOpened ? (
     <IconButton
