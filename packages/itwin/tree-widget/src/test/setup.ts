@@ -81,6 +81,8 @@ export const mochaHooks = {
   },
   afterEach() {
     cleanup();
+    // Fail tests if React act warnings occurred during or after cleanup.
+    throwIfActWarningHappened("afterEach cleanup()");
   },
   afterAll() {
     // eslint-disable-next-line no-console
@@ -106,10 +108,10 @@ function getGlobalThis(): typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boole
   throw new Error("unable to locate global object");
 }
 
-function checkActWarnings() {
+function throwIfActWarningHappened(location: "Test" | "afterEach cleanup()") {
   if (actWarningHappened) {
     actWarningHappened = false;
-    throw new Error("Test triggered 'not wrapped in act' warning");
+    throw new Error(`${location} triggered 'not wrapped in act' warning`);
   }
 }
 
@@ -129,7 +131,7 @@ function failTestsOnActWarnings(currentTest: Mocha.Test) {
           return done(err);
         }
         try {
-          checkActWarnings();
+          throwIfActWarningHappened("Test");
           done();
         } catch (e) {
           done(e);
@@ -140,7 +142,7 @@ function failTestsOnActWarnings(currentTest: Mocha.Test) {
     // sync or async test
     currentTest.fn = async function (this: Mocha.Context) {
       await (originalFn as Mocha.AsyncFunc).call(this);
-      checkActWarnings();
+      throwIfActWarningHappened("Test");
     };
   }
 }

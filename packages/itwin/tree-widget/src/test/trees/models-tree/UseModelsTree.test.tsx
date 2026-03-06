@@ -82,12 +82,12 @@ describe("useModelsTree", () => {
         await visibilityHandler1.getVisibilityStatus(createModelHierarchyNode({ modelId: keys.modelId }));
         expect(viewport.iModel.createQueryReader).to.be.called;
         sinon.reset();
-        using visibilityHandler2 = renderHookResult.current.treeProps.visibilityHandlerFactory({ imodelAccess });
         rerender({
           activeView: viewport,
           getSearchPaths: async () => [],
         });
         getSearchPaths = renderHookResult.current.treeProps.getSearchPaths;
+        using visibilityHandler2 = renderHookResult.current.treeProps.visibilityHandlerFactory({ imodelAccess });
         expect(getSearchPaths).to.not.be.undefined;
         await getSearchPaths!({ imodelAccess, abortSignal: new AbortController().signal });
         await visibilityHandler2.getVisibilityStatus(createModelHierarchyNode({ modelId: keys.modelId }));
