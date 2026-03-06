@@ -11,7 +11,7 @@ export default defineConfig({
   outDir: "./lib",
   format: ["esm"],
   copy: [
-    { from: "./public", to: "./lib", flatten: false },
+    { from: "./src/public", to: "./lib", flatten: false },
     { from: "./src/**/*.css", to: "./lib", flatten: false },
   ],
   fixedExtension: false,

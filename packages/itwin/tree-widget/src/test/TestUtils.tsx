@@ -5,7 +5,6 @@
 
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
-import { EmptyLocalization } from "@itwin/core-common";
 import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { TreeWidget } from "../tree-widget-react/TreeWidget.js";
@@ -23,7 +22,7 @@ export class TestUtils {
     }
 
     await UiFramework.initialize();
-    await TreeWidget.initialize(new EmptyLocalization());
+    await TreeWidget.initialize();
     TestUtils._initialized = true;
   }
 

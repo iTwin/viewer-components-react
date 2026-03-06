@@ -31,6 +31,7 @@ import type {
   HierarchyDefinition,
   HierarchyLevelDefinition,
   HierarchyNodesDefinition,
+  NodePostProcessor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlBinding, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
@@ -133,13 +134,13 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
     });
   }
 
-  public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
+  public postProcessNode: NodePostProcessor = async ({ node }) => {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
       const label = node.children.length ? `${node.label} (${node.children.length})` : node.label;
       return { ...node, label, extendedData: { ...node.extendedData, imageId: "icon-ec-class" } };
     }
     return node;
-  }
+  };
 
   public async defineHierarchyLevel(props: DefineHierarchyLevelProps) {
     return this.#impl.defineHierarchyLevel(props);

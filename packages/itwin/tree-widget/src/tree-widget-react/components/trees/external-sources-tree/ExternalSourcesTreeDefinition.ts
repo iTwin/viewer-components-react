@@ -16,8 +16,8 @@ import type {
   HierarchyDefinition,
   HierarchyLevelDefinition,
   LimitingECSqlQueryExecutor,
+  NodePostProcessor,
   NodesQueryClauseFactory,
-  ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, ECSchemaProvider, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 
@@ -67,13 +67,13 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
     this.#componentName = "ExternalSourcesTreeDefinition";
   }
 
-  public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
+  public postProcessNode: NodePostProcessor = async ({ node }) => {
     if (HierarchyNode.isClassGroupingNode(node)) {
       // `imageId` is assigned to instance nodes at query time, but grouping ones need to be handled during post-processing
       return { ...node, extendedData: { ...node.extendedData, imageId: "icon-ec-class" } };
     }
     return node;
-  }
+  };
 
   public async defineHierarchyLevel(props: DefineHierarchyLevelProps) {
     if (this.#isSupported === undefined) {

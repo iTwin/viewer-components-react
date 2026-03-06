@@ -2,7 +2,6 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-/* eslint-disable import/no-duplicates */
 
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
@@ -12,7 +11,6 @@ import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 // __PUBLISH_EXTRACT_START__ TreeWidget.TreeWidgetInitializeImports
 import { TreeWidget } from "@itwin/tree-widget-react";
-import { IModelApp } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_END__
 
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -26,7 +24,7 @@ export class TreeWidgetTestUtils {
 
     await UiFramework.initialize();
     // __PUBLISH_EXTRACT_START__ TreeWidget.TreeWidgetInitialize
-    await TreeWidget.initialize(IModelApp.localization);
+    await TreeWidget.initialize();
     // __PUBLISH_EXTRACT_END__
     TreeWidgetTestUtils._initialized = true;
   }

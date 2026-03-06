@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { UiFramework } from "@itwin/appui-react";
-import { EmptyLocalization, IModelReadRpcInterface } from "@itwin/core-common";
+import { IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
@@ -33,7 +33,7 @@ before(async () => {
   ECSchemaRpcImpl.register();
   await Datasets.initialize("./datasets");
   await UiFramework.initialize();
-  await TreeWidget.initialize(new EmptyLocalization());
+  await TreeWidget.initialize();
 });
 
 after(async () => {

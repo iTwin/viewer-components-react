@@ -3,11 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { StagePanelLocation, StagePanelSection } from "@itwin/appui-react";
+import { IModelApp } from "@itwin/core-frontend";
 import { EC3Provider, EC3Widget } from "@itwin/ec3-widget-react";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
 import { GroupingMappingProvider, GroupingMappingWidget } from "@itwin/grouping-mapping-widget";
-import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
 import {
   createDefaultGoogleMapsBaseMaps,
   FeatureInfoUiItemsProvider,
@@ -31,12 +30,13 @@ import { REPORTS_CONFIG_BASE_URL, ReportsConfigProvider, ReportsConfigWidget } f
 import {
   CategoriesTreeComponent,
   ClassificationsTreeComponent,
+  createTreeWidget,
   ExternalSourcesTreeComponent,
   IModelContentTreeComponent,
   ModelsTreeComponent,
   TreeNodeRenameAction,
   TreeWidget,
-  TreeWidgetComponent,
+  LOCALIZATION_NAMESPACES as TreeWidgetLocalizationNamespaces,
 } from "@itwin/tree-widget-react";
 import { CustomClassificationsTree } from "./components/custom-classifications-tree/CustomClassificationsTree";
 import { createLayersUiProvider, initializeLayers } from "./components/LayersWidget";
@@ -100,6 +100,7 @@ const configuredUiItems = new Map<string, UiItem>([
     {
       initialize: async () => {
         await TreeWidget.initialize();
+        await Promise.all(TreeWidgetLocalizationNamespaces.map(async (ns) => IModelApp.localization.registerNamespace(ns)));
       },
       createUiItemsProviders: () => [
         {
@@ -108,7 +109,8 @@ const configuredUiItems = new Map<string, UiItem>([
             const trees: TreeDefinition[] = [
               {
                 id: ModelsTreeComponent.id,
-                getLabel: () => ModelsTreeComponent.getLabel(),
+                // eslint-disable-next-line @typescript-eslint/unbound-method
+                getLabel: ModelsTreeComponent.getLabel,
                 isSearchable: true,
                 render: (props) => (
                   <ModelsTreeWithOptions
@@ -126,7 +128,8 @@ const configuredUiItems = new Map<string, UiItem>([
               },
               {
                 id: CategoriesTreeComponent.id,
-                getLabel: () => CategoriesTreeComponent.getLabel(),
+                // eslint-disable-next-line @typescript-eslint/unbound-method
+                getLabel: CategoriesTreeComponent.getLabel,
                 isSearchable: true,
                 render: (props) => (
                   <CategoriesTreeComponent
@@ -140,7 +143,8 @@ const configuredUiItems = new Map<string, UiItem>([
               },
               {
                 id: IModelContentTreeComponent.id,
-                getLabel: () => IModelContentTreeComponent.getLabel(),
+                // eslint-disable-next-line @typescript-eslint/unbound-method
+                getLabel: IModelContentTreeComponent.getLabel,
                 render: (props) => (
                   <IModelContentTreeComponent
                     hierarchyConfig={{
@@ -155,7 +159,8 @@ const configuredUiItems = new Map<string, UiItem>([
               },
               {
                 id: ExternalSourcesTreeComponent.id,
-                getLabel: () => ExternalSourcesTreeComponent.getLabel(),
+                // eslint-disable-next-line @typescript-eslint/unbound-method
+                getLabel: ExternalSourcesTreeComponent.getLabel,
                 render: (props) => (
                   <ExternalSourcesTreeComponent
                     selectionStorage={unifiedSelectionStorage}
@@ -193,18 +198,16 @@ const configuredUiItems = new Map<string, UiItem>([
               },
             ];
             return [
-              {
-                id: "tree-widget",
-                label: TreeWidget.translate("widget.label"),
-                icon: <SvgHierarchyTree />,
-                layouts: {
-                  standard: {
-                    section: StagePanelSection.Start,
-                    location: StagePanelLocation.Right,
-                  },
+              createTreeWidget({
+                localization: IModelApp.localization,
+                trees,
+                onPerformanceMeasured: (feature: string, elapsedTime: number) => {
+                  console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
                 },
-                content: <TreeWidgetWithOptions trees={trees} />,
-              },
+                onFeatureUsed: (feature: string) => {
+                  console.log(`TreeWidget [${feature}] used`);
+                },
+              }),
             ];
           },
         },
@@ -351,20 +354,6 @@ const configuredUiItems = new Map<string, UiItem>([
 function ModelsTreeWithOptions(props: ComponentProps<typeof ModelsTreeComponent>) {
   const { disableNodesSelection } = useViewerOptionsContext();
   return <ModelsTreeComponent {...props} selectionPredicate={disableNodesSelection ? disabledSelectionPredicate : undefined} />;
-}
-
-function TreeWidgetWithOptions(props: { trees: TreeDefinition[] }) {
-  return (
-    <TreeWidgetComponent
-      trees={props.trees}
-      onPerformanceMeasured={(feature: string, elapsedTime: number) => {
-        console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
-      }}
-      onFeatureUsed={(feature: string) => {
-        console.log(`TreeWidget [${feature}] used`);
-      }}
-    />
-  );
 }
 
 function disabledSelectionPredicate() {

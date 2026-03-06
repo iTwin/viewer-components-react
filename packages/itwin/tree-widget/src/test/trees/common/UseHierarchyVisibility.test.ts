@@ -6,7 +6,6 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import { BeEvent } from "@itwin/core-bentley";
-import { EmptyLocalization } from "@itwin/core-common";
 import { useHierarchyVisibility } from "../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 import { TreeWidget } from "../../../tree-widget-react/TreeWidget.js";
 import { act, renderHook, waitFor } from "../../TestUtils.js";
@@ -33,7 +32,7 @@ describe("useHierarchyVisibility", () => {
     visibilityHandlerFactory: () => visibilityHandler,
   };
   before(async () => {
-    await TreeWidget.initialize(new EmptyLocalization());
+    await TreeWidget.initialize();
   });
 
   beforeEach(() => {

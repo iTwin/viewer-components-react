@@ -1,6 +1,5 @@
 sep=;
 Release Tag;API Item Type;API Item Name
-beta;type;BaseTreeRendererProps
 public;const;CategoriesTreeComponent
 beta;function;CategoriesTreeIcon
 beta;namespace;CategoriesTreeNode
@@ -15,6 +14,8 @@ public;function;FocusedInstancesContextProvider
 beta;interface;HierarchyVisibilityHandler
 beta;const;IModelContentTreeComponent
 beta;function;IModelContentTreeIcon
+beta;const;LOCALIZATION_NAMESPACES
+beta;function;LocalizationContextProvider
 public;const;ModelsTreeComponent
 beta;function;ModelsTreeIcon
 beta;namespace;ModelsTreeNode

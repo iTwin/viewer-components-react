@@ -5,7 +5,6 @@
 
 import { useState } from "react";
 import { StagePanelLocation, StagePanelSection, useActiveViewport, WidgetState } from "@itwin/appui-react";
-import { IModelApp } from "@itwin/core-frontend";
 import { ExpandableBlock } from "@itwin/itwinui-react";
 import { MapLayersPrefBrowserStorage, MapLayersUI, MapLayersWidget } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
@@ -24,7 +23,7 @@ const element3dIcon = new URL("@stratakit/icons/3d.svg", import.meta.url).href;
 export async function initializeLayers() {
   await MapLayersFormats.initialize();
   await MapLayersUI.initialize({ iTwinConfig: new MapLayersPrefBrowserStorage() });
-  await TreeWidget.initialize(IModelApp.localization);
+  await TreeWidget.initialize();
 }
 
 export function createLayersUiProvider(): UiItemsProvider {

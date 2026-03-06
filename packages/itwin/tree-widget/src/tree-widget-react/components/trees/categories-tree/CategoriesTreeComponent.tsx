@@ -5,7 +5,6 @@
 
 import { Fragment } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { TreeWidget } from "../../../TreeWidget.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { SharedTreeContextProviderInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { useActiveTreeWidgetViewport } from "../common/internal/UseActiveTreeWidgetViewport.js";
@@ -15,6 +14,7 @@ import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonP
 
 import type { ReactNode } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { StandardTreeLabels } from "../../TreeWidgetComponentImpl.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { CategoriesTreeProps } from "./CategoriesTree.js";
 import type { CategoriesTreeHeaderButtonProps, CategoriesTreeHeaderButtonType } from "./CategoriesTreeButtons.js";
@@ -104,7 +104,7 @@ CategoriesTreeComponent.id = "categories-tree-v2";
  * Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
  * @public
  */
-CategoriesTreeComponent.getLabel = () => TreeWidget.translate("categoriesTree.label");
+CategoriesTreeComponent.getLabel = ({ standardLabels }: { standardLabels: StandardTreeLabels }) => standardLabels.categories;
 
 function CategoriesTreeComponentImpl({
   iModel,
