@@ -49,13 +49,6 @@ global.CSS = {
 let actWarningHappened = false;
 // eslint-disable-next-line no-console
 const originalConsoleError = console.error;
-// eslint-disable-next-line no-console
-console.error = (...args: unknown[]) => {
-  if (args.length > 0 && typeof args[0] === "string" && args[0].includes("was not wrapped in act")) {
-    actWarningHappened = true;
-  }
-  originalConsoleError(...args);
-};
 
 // supply mocha hooks
 import path from "path";
@@ -63,6 +56,13 @@ const { cleanup, configure } = await import("@testing-library/react");
 import v8 from "node:v8";
 export const mochaHooks = {
   beforeAll() {
+    // eslint-disable-next-line no-console
+    console.error = (...args: unknown[]) => {
+      if (args.length > 0 && typeof args[0] === "string" && args[0].includes("was not wrapped in act")) {
+        actWarningHappened = true;
+      }
+      originalConsoleError(...args);
+    };
     chaiJestSnapshot.resetSnapshotRegistry();
     getGlobalThis().IS_REACT_ACT_ENVIRONMENT = true;
   },
@@ -83,6 +83,8 @@ export const mochaHooks = {
     cleanup();
   },
   afterAll() {
+    // eslint-disable-next-line no-console
+    console.error = originalConsoleError;
     delete getGlobalThis().IS_REACT_ACT_ENVIRONMENT;
     v8.takeCoverage();
   },
@@ -118,17 +120,27 @@ function failTestsOnActWarnings(currentTest: Mocha.Test) {
   // wrap the test fn to check for act warnings after it completes
   actWarningHappened = false;
   const originalFn = currentTest.fn;
-  currentTest.fn = function (this: Mocha.Context, done: (err?: unknown) => void) {
-    (originalFn as Mocha.Func).call(this, (err?: unknown) => {
-      if (err) {
-        return done(err);
-      }
-      try {
-        checkActWarnings();
-        done();
-      } catch (e) {
-        done(e);
-      }
-    });
-  };
+
+  // If test function has 1 or more argument assume it's using done callback
+  if (originalFn.length > 0) {
+    currentTest.fn = function (this: Mocha.Context, done: (err?: unknown) => void) {
+      (originalFn as Mocha.Func).call(this, (err?: unknown) => {
+        if (err) {
+          return done(err);
+        }
+        try {
+          checkActWarnings();
+          done();
+        } catch (e) {
+          done(e);
+        }
+      });
+    };
+  } else {
+    // sync or async test
+    currentTest.fn = async function (this: Mocha.Context) {
+      await (originalFn as Mocha.AsyncFunc).call(this);
+      checkActWarnings();
+    };
+  }
 }
