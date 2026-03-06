@@ -64,6 +64,7 @@ import type {
   HierarchyLevelDefinition,
   HierarchyNodesDefinition,
   LimitingECSqlQueryExecutor,
+  NodePostProcessor,
   NodePreProcessor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
@@ -212,7 +213,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     });
   }
 
-  public preProcessNode: NodePreProcessor = async (node) => {
+  public preProcessNode: NodePreProcessor = async ({ node }) => {
     if (node.extendedData?.isCategory) {
       return {
         ...node,
@@ -225,7 +226,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     return node;
   };
 
-  public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
+  public postProcessNode: NodePostProcessor = async ({ node }) => {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
       const { hasSearchTargetAncestor, hasDirectNonSearchTargets, childrenCount, searchTargets } = groupingNodeDataFromChildren(node.children);
       return {
@@ -249,7 +250,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       };
     }
     return node;
-  }
+  };
 
   public async defineHierarchyLevel(props: DefineHierarchyLevelProps) {
     if (this.#isSupported === undefined) {

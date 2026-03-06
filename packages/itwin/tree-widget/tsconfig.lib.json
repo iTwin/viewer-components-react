@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "lib/lib.tsbuildinfo",
+    "outDir": "lib",
+    "noEmit": false
+  },
+  "include": ["src/tree-widget-react", "src/test", "tree-widget-react.ts", "tree-widget-react-internal.ts", "types.d.ts"]
+}

@@ -3,12 +3,14 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "rootDir": "src",
     "jsx": "react-jsx",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noImplicitOverride": false,
     "resolveJsonModule": true,
-    "lib": ["DOM"]
+    "lib": ["DOM"],
+    "noEmit": true
   },
-  "include": ["src", "types.d.ts"]
+  "include": ["src/**/*", "types.d.ts"]
 }

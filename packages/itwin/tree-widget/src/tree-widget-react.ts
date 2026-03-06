@@ -8,3 +8,5 @@ export { createTreeWidget, TreeWidgetComponent } from "./tree-widget-react/compo
 export type { TreeDefinition } from "./tree-widget-react/components/TreeWidgetComponentImpl.js";
 export { SelectableTree } from "./tree-widget-react/components/tree-header/SelectableTree.js";
 export * from "./tree-widget-react/components/trees/index.js";
+
+export { LocalizationContextProvider, LOCALIZATION_NAMESPACES } from "./tree-widget-react/components/trees/common/components/LocalizationContext.js";

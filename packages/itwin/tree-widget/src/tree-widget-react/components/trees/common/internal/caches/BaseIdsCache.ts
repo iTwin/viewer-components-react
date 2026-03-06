@@ -150,7 +150,7 @@ export class BaseIdsCache implements Disposable {
   // ModeledElementsCache methods
 
   public getSubModelsUnderElement(
-    props: Props<ModeledElementsCache["getSubModelsUnderElement"]>,
+    props: Parameters<ModeledElementsCache["getSubModelsUnderElement"]>[0],
   ): ReturnType<ModeledElementsCache["getSubModelsUnderElement"]> {
     return this.#modeledElementsCache.getSubModelsUnderElement(props);
   }
@@ -196,7 +196,7 @@ export class BaseIdsCacheImpl implements Disposable {
   }
 
   public getSubModelsUnderElement(
-    props: Props<ModeledElementsCache["getSubModelsUnderElement"]>,
+    props: Parameters<ModeledElementsCache["getSubModelsUnderElement"]>[0],
   ): ReturnType<ModeledElementsCache["getSubModelsUnderElement"]> {
     return this.#baseIdsCache.getSubModelsUnderElement(props);
   }
