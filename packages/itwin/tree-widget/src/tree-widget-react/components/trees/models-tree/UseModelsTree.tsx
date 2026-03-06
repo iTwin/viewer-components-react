@@ -78,9 +78,13 @@ export interface UseModelsTreeProps {
    * set `reveal: true` manually.
    */
   getSearchPaths?: (props: {
-    /** A function that creates search paths based on provided target instance keys or node label. */
+    /**
+     * A function that creates search paths based on provided target instance keys or node label.
+     */
     createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<NormalizedHierarchySearchPath[]>;
-    /** Search text which would be used to create search paths if `getSearchPaths` wouldn't be provided. */
+    /**
+     * Search text which would be used to create search paths if `getSearchPaths` wouldn't be provided.
+     */
     searchText?: string;
   }) => Promise<HierarchySearchPath[] | undefined>;
   /**
@@ -96,7 +100,9 @@ export interface UseModelsTreeProps {
    * - `getSubTreePaths` restricts the hierarchy to a sub-tree, but does not override the search logic — search is still applied within the restricted sub-tree.
    */
   getSubTreePaths?: (props: {
-    /** A function that creates search paths based on provided target instance keys. */
+    /**
+     * A function that creates search paths based on provided target instance keys.
+     */
     createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> }) => Promise<NormalizedHierarchySearchPath[]>;
   }) => Promise<HierarchySearchPath[]>;
   onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;

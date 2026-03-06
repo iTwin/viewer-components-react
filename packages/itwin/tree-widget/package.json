@@ -18,25 +18,21 @@
     "url": "http://www.bentley.com"
   },
   "type": "module",
-  "types": "lib/esm/tree-widget-react.d.ts",
+  "types": "lib/tree-widget-react.d.ts",
   "exports": {
     ".": {
-      "import": "./lib/esm/tree-widget-react.js"
+      "import": "./lib/tree-widget-react.js"
     },
     "./internal": {
-      "import": "./lib/esm/tree-widget-react-internal.js",
-      "require": "./lib/cjs/tree-widget-react-internal.js"
+      "import": "./lib/tree-widget-react-internal.js"
     },
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "npm run -s build:esm && npm run -s copy:assets",
-    "build:esm": "tsc 1>&2 -p tsconfig.esm.json",
-    "copy:assets": "npm run -s copy:public && npm run -s copy:esm",
-    "copy:public": "cpx \"./public/**/*\" ./lib/public",
-    "copy:esm": "cpx \"./src/**/*.{css,scss,json}\" ./lib/esm",
+    "build": "tsdown && npm run -s build:test",
+    "build:test": "tsdown --config tsdown.test.config.ts",
     "cover": "c8 npm run test",
-    "extract-api": "betools extract-api --entry=lib/esm/tree-widget-react --apiReportFolder=./api --apiReportTempFolder=./api/temp --apiSummaryFolder=./api --includeUnexportedApis",
+    "extract-api": "betools extract-api --entry=lib/tree-widget-react --apiReportFolder=./api --apiReportTempFolder=./api/temp --apiSummaryFolder=./api --includeUnexportedApis",
     "check-internal": "node ../../../scripts/checkInternal.js --apiSummary ./api/tree-widget-react.api.md",
     "lint": "npm run lint:eslint && npm run lint:stylelint",
     "lint:eslint": "eslint \"./src/**/*.{ts,tsx}\"",
@@ -77,6 +73,7 @@
     "@itwin/presentation-shared": "^2.0.0-alpha.6",
     "@itwin/unified-selection": "^1.6.2",
     "classnames": "^2.5.1",
+    "react-compiler-runtime": "^1.0.0",
     "react-error-boundary": "^6.1.0",
     "rxjs": "^7.8.2"
   },
@@ -108,6 +105,7 @@
     "@itwin/presentation-frontend": "^5.7.0-dev.14",
     "@itwin/presentation-testing": "^5.4.14",
     "@itwin/webgl-compatibility": "^5.7.0-dev.14",
+    "@rollup/plugin-babel": "^7.0.0",
     "@stratakit/foundations": "^0.4.5",
     "@stratakit/bricks": "^0.5.4",
     "@stratakit/structures": "^0.5.4",
@@ -127,6 +125,7 @@
     "@types/react-dom": "^18.3.7",
     "@types/sinon": "^21.0.0",
     "@types/sinon-chai": "^4.0.0",
+    "babel-plugin-react-compiler": "^1.0.0",
     "c8": "^10.1.3",
     "chai": "^6.2.2",
     "chai-as-promised": "^8.0.2",
@@ -138,7 +137,9 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-unused-imports": "^4.3.0",
+    "fast-glob": "^3.3.3",
     "fast-xml-parser": "^5.3.4",
     "global-jsdom": "^28.0.0",
     "http-server": "^14.1.1",
@@ -156,6 +157,7 @@
     "sinon-chai": "^4.0.1",
     "stylelint": "^17.1.1",
     "stylelint-config-standard": "^40.0.0",
+    "tsdown": "^0.21.0",
     "typescript": "~5.8.3"
   }
 }

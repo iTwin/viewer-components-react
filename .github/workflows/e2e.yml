@@ -40,14 +40,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 10.6.5
+        uses: pnpm/action-setup@v4
 
-      - name: Use Node.js 22
+      - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -78,14 +76,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 10.6.5
+        uses: pnpm/action-setup@v4
 
-      - name: Use Node.js 22
+      - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -124,14 +120,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 10.6.5
+        uses: pnpm/action-setup@v4
 
-      - name: Use Node.js 22
+      - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: 'pnpm'
 
       - name: Install dependencies

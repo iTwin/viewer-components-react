@@ -17,9 +17,13 @@ import type { VisibilityContext } from "./TreeNodeVisibilityButton.js";
 
 /** @beta */
 export type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess"> & {
-  /** Callback for creating visibility handler used to control visibility of instances represented by tree nodes. */
+  /**
+   * Callback for creating visibility handler used to control visibility of instances represented by tree nodes.
+   */
   visibilityHandlerFactory: (props: { imodelAccess: ECClassHierarchyInspector }) => HierarchyVisibilityHandler;
-  /** Tree renderer that should be used to render tree data. */
+  /**
+   * Tree renderer that should be used to render tree data.
+   */
   treeRenderer: (
     treeProps: FunctionProps<TreeProps["treeRenderer"]> & Pick<VisibilityContext, "getVisibilityButtonState" | "onVisibilityButtonClick">,
   ) => ReactNode;
