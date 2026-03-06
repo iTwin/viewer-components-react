@@ -15,7 +15,6 @@ import {
 } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
-import { CLASS_NAME_DefinitionModel } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { getClassesByView } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
 import {
   buildIModel,
@@ -31,6 +30,7 @@ import {
 } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
+import { CLASS_NAME_DefinitionModel } from "../TreeUtils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";

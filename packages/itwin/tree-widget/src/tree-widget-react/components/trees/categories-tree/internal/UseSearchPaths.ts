@@ -50,6 +50,7 @@ export function useSearchPaths({
   const { onFeatureUsed } = useTelemetryContext();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSearchError(undefined);
     onCategoriesFiltered?.({ categories: undefined, models: undefined });
     if (!searchText) {

@@ -17,7 +17,6 @@ import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/components
 import { createCategoriesTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.js";
 import { BaseIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
 import {
-  CLASS_NAME_DefinitionModel,
   CLASS_NAME_GeometricElement3d,
   CLASS_NAME_SubCategory,
   CLASS_NAME_Subject,
@@ -37,7 +36,7 @@ import {
 import { TestUtils } from "../../../TestUtils.js";
 import { createIModelAccess } from "../../Common.js";
 import { validateHierarchyVisibility } from "../../common/VisibilityValidation.js";
-import { createTreeWidgetTestingViewport, getDefaultSubCategoryId } from "../../TreeUtils.js";
+import { CLASS_NAME_DefinitionModel, createTreeWidgetTestingViewport, getDefaultSubCategoryId } from "../../TreeUtils.js";
 import {
   createCategoryHierarchyNode,
   createClassGroupingHierarchyNode,

@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { defaultIfEmpty, EMPTY, filter, firstValueFrom, from, fromEventPattern, map, mergeMap, Subject, takeUntil, tap } from "rxjs";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { HierarchyVisibilityOverrideHandler } from "../../UseHierarchyVisibility.js";
@@ -52,19 +52,8 @@ export function useCachedVisibility<TCache, TSearchTargets>(props: UseCachedVisi
   const [searchPaths, setSearchPaths] = useState<HierarchySearchPath[] | undefined>(undefined);
   const { activeView, idsCache, createSearchResultsTree, createTreeSpecificVisibilityHandler, componentId } = props;
 
-  const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState<VisibilityTreeProps["visibilityHandlerFactory"]>(() =>
-    createVisibilityHandlerFactory({
-      activeView,
-      idsCache,
-      createSearchResultsTree,
-      createTreeSpecificVisibilityHandler,
-      searchPaths,
-      componentId,
-    }),
-  );
-
-  useEffect(() => {
-    setVisibilityHandlerFactory(() =>
+  const visibilityHandlerFactory = useMemo<VisibilityTreeProps["visibilityHandlerFactory"]>(
+    () =>
       createVisibilityHandlerFactory({
         activeView,
         idsCache,
@@ -73,8 +62,8 @@ export function useCachedVisibility<TCache, TSearchTargets>(props: UseCachedVisi
         searchPaths,
         componentId,
       }),
-    );
-  }, [activeView, idsCache, searchPaths, createSearchResultsTree, createTreeSpecificVisibilityHandler, componentId]);
+    [activeView, idsCache, searchPaths, createSearchResultsTree, createTreeSpecificVisibilityHandler, componentId],
+  );
 
   return {
     visibilityHandlerFactory,

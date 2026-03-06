@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-// WARNING: This barrel file exports internal APIs only for use by `@itwin/presentation-backend` and `@itwin/presentation-frontend` packages.
+// WARNING: This barrel file exports internal APIs only for use by packages in `https://github.com/iTwin/viewer-components-react` monorepo.
 // They should not be used outside of these packages. These APIs may be broken or removed at any time without notice.
 
 export { toVoidPromise, collect } from "./tree-widget-react/components/trees/common/internal/Rxjs.js";
@@ -27,3 +27,5 @@ export { ClassificationsTreeIdsCache } from "./tree-widget-react/components/tree
 export { releaseMainThreadOnItemsCount } from "./tree-widget-react/components/trees/common/internal/Utils.js";
 
 export { BaseIdsCache } from "./tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
+
+export { SET_CHANGE_DEBOUNCE_TIME } from "./tree-widget-react/components/trees/common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";

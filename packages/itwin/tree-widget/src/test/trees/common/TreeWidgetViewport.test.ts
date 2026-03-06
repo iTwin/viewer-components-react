@@ -8,7 +8,7 @@ import sinon from "sinon";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { createTreeWidgetViewport } from "../../../tree-widget-react.js";
+import { createTreeWidgetViewport } from "../../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubCategory } from "../../IModelUtils.js";
 
 import type { Id64Array } from "@itwin/core-bentley";

@@ -6,13 +6,23 @@ const iTwinPlugin = require("@itwin/eslint-plugin");
 const reactPlugin = require("eslint-plugin-react");
 const eslintConfigPrettier = require("eslint-config-prettier");
 const unusedImports = require("eslint-plugin-unused-imports");
+const reactHooksPlugin = require("eslint-plugin-react-hooks");
 
 module.exports = [
   {
     files: ["**/*.{ts,tsx}"],
     ...iTwinPlugin.configs.uiConfig,
+    // Override the react-hooks plugin with the newer version
+    plugins: {
+      ...iTwinPlugin.configs.uiConfig.plugins,
+      "react-hooks": reactHooksPlugin,
+    },
     rules: {
       ...iTwinPlugin.configs.uiConfig.rules,
+      ...reactHooksPlugin.configs.flat.recommended.rules,
+      "react-hooks/exhaustive-deps": "error",
+      "react-hooks/unsupported-syntax": "error",
+      "react-hooks/incompatible-library": "error",
       "@itwin/no-internal": [
         "error",
         {
@@ -42,7 +52,6 @@ module.exports = [
       "no-duplicate-imports": "off",
       "import/no-duplicates": "error",
       "object-curly-spacing": ["error", "always"],
-      "@typescript-eslint/consistent-type-imports": "error",
       "@typescript-eslint/no-non-null-assertion": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "unused-imports/no-unused-imports": "error",
@@ -53,6 +62,8 @@ module.exports = [
           allowObjectTypes: "always",
         },
       ],
+      "@typescript-eslint/consistent-type-imports": "error",
+      "@typescript-eslint/consistent-type-exports": "error",
       curly: ["error", "all"],
     },
   },
