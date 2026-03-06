@@ -95,10 +95,11 @@ export function createTreeWidgetViewport(viewport: Viewport): TreeWidgetViewport
  * 1. Model visibility - if model is not visible, elements from that model should never be displayed.
  * 2. `neverDrawn` set - elements in that set should never be displayed.
  * 3. `alwaysDrawn` set - elements in that set should always be displayed.
- * 4. Per-model category visibility overrides:
+ * 4. Always drawn exclusive flag: if this flag is set to true, only elements in the `alwaysDrawn` set should be displayed.
+ * 5. Per-model category visibility overrides:
  * -  if a per-model-category has `Hide` override, elements which have that category and model should not be displayed.
  * -  if a per-model-category has `Show` override, elements which have that category and model should be displayed.
- * 5. Category and sub-category visibility - if element's category or sub-category is turned off, it should not be displayed.
+ * 6. Category and sub-category visibility - if element's category or sub-category is turned off, it should not be displayed.
  *
  * Based on this order of precedence, element can only be displayed in these scenarios:
  * - Model is visible *AND* element is in `alwaysDrawn` set.
