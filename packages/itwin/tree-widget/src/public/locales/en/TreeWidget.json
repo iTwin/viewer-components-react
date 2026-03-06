@@ -124,21 +124,5 @@
     "failedToCalculateMatchingInstancesCount": "Failed to calculate matching instances count",
     "matchingInstancesCount": "Number of instances matching current filter: {{instanceCount}}",
     "filterExceedsLimit": "Number of instances matching current filter exceeds the limit of {{limit}}"
-  },
-  "presentation-hierarchies": {
-    "unspecified": "Unspecified",
-    "other": "Other",
-    "loading": "Loading...",
-    "filterHierarchyLevel": "Apply filter",
-    "filterHierarchyLevelActiveDescription": "Filter is applied",
-    "noFilteredChildrenChangeFilter": "Change filter",
-    "failedToCreateHierarchy": "Failed to create hierarchy for {{node}}.",
-    "clearHierarchyLevelFilter": "Clear active filter.",
-    "noFilteredChildren": "No matches for current filter for {{node}}.",
-    "resultLimitExceeded": "The hierarchy for {{node}} contains {{limit}}+ items. Try using filters or increase the limit.",
-    "issuesFound": "{{number_of_issues}} issue(s) found",
-    "increaseHierarchyLimit": "Increase limit to {{limit}}",
-    "increaseHierarchyLimitWithFiltering": "Add Filter",
-    "retry": "Retry"
   }
 }

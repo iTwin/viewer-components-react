@@ -5,7 +5,6 @@
 
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { SchemaKey, SchemaMatchType } from "@itwin/ecschema-metadata";
-import { TreeWidget } from "../../../TreeWidget.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { SharedTreeContextProviderInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { useActiveTreeWidgetViewport } from "../common/internal/UseActiveTreeWidgetViewport.js";
@@ -13,6 +12,7 @@ import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { ClassificationsTree } from "./ClassificationsTree.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { StandardTreeLabels } from "../../TreeWidgetComponentImpl.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { ClassificationsTreeProps } from "./ClassificationsTree.js";
 
@@ -73,7 +73,7 @@ ClassificationsTreeComponent.id = "classifications-tree";
  * Label of the component. May be used when a creating a `TreeDefinition`.
  * @alpha
  */
-ClassificationsTreeComponent.getLabel = () => TreeWidget.translate("classificationsTree.label");
+ClassificationsTreeComponent.getLabel = ({ standardLabels }: { standardLabels: StandardTreeLabels }) => standardLabels.classifications;
 
 /** @alpha */
 ClassificationsTreeComponent.isSupportedByIModel = async (imodel: IModelConnection) => {
