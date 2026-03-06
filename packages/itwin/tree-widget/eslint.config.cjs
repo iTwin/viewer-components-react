@@ -49,7 +49,6 @@ module.exports = [
       "no-duplicate-imports": "off",
       "import/no-duplicates": "error",
       "object-curly-spacing": ["error", "always"],
-      "@typescript-eslint/consistent-type-imports": "error",
       "@typescript-eslint/no-non-null-assertion": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "unused-imports/no-unused-imports": "error",
