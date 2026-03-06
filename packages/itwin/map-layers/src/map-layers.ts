@@ -10,4 +10,4 @@ export * from "./ui/MapLayersUiItemsProvider";
 export * from "./ui/FeatureInfoUiItemsProvider";
 export * from "./ui/widget/MapLayersWidget";
 export * from "./BaseMapPresets";
-export * from "./ui/widget/FeatureInfoWidget";
+export { MapFeatureInfoWidget } from "./ui/widget/FeatureInfoWidget";
