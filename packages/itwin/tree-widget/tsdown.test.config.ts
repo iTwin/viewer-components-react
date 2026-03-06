@@ -8,8 +8,8 @@ import { defineConfig } from "tsdown";
 
 const testFiles = await glob("src/test/**/*");
 export default defineConfig({
-  entry: [...testFiles, "./src/**/ClassNameDefinitions.ts", "./src/**/AlwaysAndNeverDrawnElementInfoCache.ts"],
-  outDir: "./lib",
+  entry: testFiles,
+  outDir: "./lib/test",
   format: ["esm"],
   fixedExtension: false,
   unbundle: true,
