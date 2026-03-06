@@ -18,14 +18,31 @@ export function useSpecificWidgetDef(id: string) {
   const frontstageDef = useActiveFrontstageDef();
   return frontstageDef?.findWidgetDef(id);
 }
-// MapFeatureInfoWidgetProps
+
+/**
+ * Props for {@link MapFeatureInfoWidget}.
+ */
 interface MapFeatureInfoWidgetProps {
+  /** The widget that will be shown/hidden based on feature info data availability. */
   widgetId: string;
+  /** Enables property selection support in the property grid when set. */
   isPropertySelectionEnabled?: boolean;
+  /** Invoked when feature info data availability changes. */
   onDataChanged?: (hasData: boolean) => void;
+  /**
+   * Optional copy handler used by the copy action button.
+   * When omitted, the component copies values using the browser clipboard API.
+   */
   onCopy?: (value: string) => Promise<void> | void;
 }
 
+/**
+ * Displays map feature info in a virtualized property grid and keeps the
+ * owning widget open/hidden based on whether records are available.
+ *
+ * @param props - Widget configuration and callbacks.
+ * @returns The feature info property grid UI, or `null` when no records are available.
+ */
 export function MapFeatureInfoWidget({ widgetId, isPropertySelectionEnabled, onDataChanged, onCopy }: MapFeatureInfoWidgetProps) {
   const dataProvider = React.useRef<FeatureInfoDataProvider | null>(null);
   const [hasData, setHasData] = React.useState(false);
