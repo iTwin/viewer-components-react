@@ -76,24 +76,31 @@ describe("useModelsTree", () => {
     try {
       let getSearchPaths = renderHookResult.current.treeProps.getSearchPaths;
       using visibilityHandler1 = renderHookResult.current.treeProps.visibilityHandlerFactory({ imodelAccess });
-      await waitFor(async () => {
-        expect(getSearchPaths).to.not.be.undefined;
+      await waitFor(() => expect(getSearchPaths).to.not.be.undefined);
+      await act(async () => {
         await getSearchPaths!({ imodelAccess, abortSignal: new AbortController().signal });
         await visibilityHandler1.getVisibilityStatus(createModelHierarchyNode({ modelId: keys.modelId }));
-        expect(viewport.iModel.createQueryReader).to.be.called;
-        sinon.reset();
-        rerender({
-          activeView: viewport,
-          getSearchPaths: async () => [],
-        });
-        getSearchPaths = renderHookResult.current.treeProps.getSearchPaths;
-        using visibilityHandler2 = renderHookResult.current.treeProps.visibilityHandlerFactory({ imodelAccess });
-        expect(getSearchPaths).to.not.be.undefined;
+      });
+      await waitFor(() => expect(viewport.iModel.createQueryReader).to.be.called);
+      sinon.reset();
+
+      rerender({
+        activeView: viewport,
+        getSearchPaths: async () => [],
+      });
+      getSearchPaths = renderHookResult.current.treeProps.getSearchPaths;
+      using visibilityHandler2 = renderHookResult.current.treeProps.visibilityHandlerFactory({ imodelAccess });
+      await waitFor(() => expect(getSearchPaths).to.not.be.undefined);
+      await act(async () => {
         await getSearchPaths!({ imodelAccess, abortSignal: new AbortController().signal });
         await visibilityHandler2.getVisibilityStatus(createModelHierarchyNode({ modelId: keys.modelId }));
-        expect(viewport.iModel.createQueryReader).not.to.be.called;
       });
+      await waitFor(() => expect(viewport.iModel.createQueryReader).not.to.be.called);
     } finally {
+      // Unmount before test ends because:
+      // 1. test ends -> `using` disposes the imodel -> `onClose` fires -> caches are disposed.
+      // 2. React re-renders the still-mounted hook -> new caches are created.
+      // 3. afterEach unmounts too late - newly created caches are never disposed of.
       unmount();
     }
   });
