@@ -426,6 +426,13 @@ function createClassificationHasChildrenSelector(classificationAlias: string) {
   `;
 }
 
+const CLASSIFICATION_TABLE_TYPE_AS_NUMBER = 0;
+const CLASSIFICATION_TABLE_CLASS_NAME_QUERY_ALIAS = "ct";
+const CLASSIFICATION_TYPE_AS_NUMBER = 1;
+const CLASSIFICATION_CLASS_NAME_QUERY_ALIAS = "c";
+const ELEMENT_TYPE_AS_NUMBER = 2;
+const ELEMENT_CLASS_NAME_QUERY_ALIAS = "e";
+
 function createInstanceKeyPathsFromInstanceLabelObs({
   label,
   ...props
@@ -450,7 +457,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
       `
           ${CLASSIFICATION_TABLES_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
             SELECT
-              'ct',
+              '${CLASSIFICATION_TABLE_CLASS_NAME_QUERY_ALIAS}',
               this.ECInstanceId,
               ${classificationTableLabelSelectClause}
             FROM
@@ -465,7 +472,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
         ? [
             `${CLASSIFICATIONS_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
             SELECT
-              'c',
+              '${CLASSIFICATION_CLASS_NAME_QUERY_ALIAS}',
               this.ECInstanceId,
               ${classificationLabelSelectClause}
             FROM
@@ -475,7 +482,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
           )`,
             `${ELEMENTS_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
             SELECT
-              'e',
+              '${ELEMENT_CLASS_NAME_QUERY_ALIAS}',
               this.ECInstanceId,
               ${elementLabelSelectClause}
             FROM
@@ -488,7 +495,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
             UNION ALL
 
             SELECT
-              'e',
+              '${ELEMENT_CLASS_NAME_QUERY_ALIAS}',
               this.ECInstanceId,
               ${elementLabelSelectClause}
             FROM
@@ -554,10 +561,10 @@ function createInstanceKeyPathsFromInstanceLabelObs({
     map((row): InstanceKey => {
       let className: string;
       switch (row.ClassName) {
-        case "ct":
+        case CLASSIFICATION_TABLE_CLASS_NAME_QUERY_ALIAS:
           className = CLASS_NAME_ClassificationTable;
           break;
-        case "c":
+        case CLASSIFICATION_CLASS_NAME_QUERY_ALIAS:
           className = CLASS_NAME_Classification;
           break;
         default:
@@ -592,26 +599,26 @@ function createInstanceKeyPathsFromTargetItemsObs({
   return fromWithRelease({ source: targetItems, releaseOnCount: 2000 }).pipe(
     mergeMap(async (key): Promise<{ id: Id64String; type: number }> => {
       if (await imodelAccess.classDerivesFrom(key.className, CLASS_NAME_ClassificationTable)) {
-        return { id: key.id, type: 0 };
+        return { id: key.id, type: CLASSIFICATION_TABLE_TYPE_AS_NUMBER };
       }
 
       if (await imodelAccess.classDerivesFrom(key.className, CLASS_NAME_Classification)) {
-        return { id: key.id, type: 1 };
+        return { id: key.id, type: CLASSIFICATION_TYPE_AS_NUMBER };
       }
 
-      return { id: key.id, type: 2 };
+      return { id: key.id, type: ELEMENT_TYPE_AS_NUMBER };
     }, 2),
 
     reduce(
       (acc, { id, type }) => {
         switch (type) {
-          case 0:
+          case CLASSIFICATION_TABLE_TYPE_AS_NUMBER:
             acc.classificationTableIds.push(id);
             break;
-          case 1:
+          case CLASSIFICATION_TYPE_AS_NUMBER:
             acc.classificationIds.push(id);
             break;
-          case 2:
+          case ELEMENT_TYPE_AS_NUMBER:
             acc.elementIds.push(id);
             break;
         }
@@ -670,7 +677,7 @@ function createGeometricElementInstanceKeyPaths(props: {
         SELECT
           e.ECInstanceId,
           e.Parent.Id,
-          'e${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT)
+          '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT)
         FROM  ${CLASS_NAME_Element} e
         WHERE e.ECInstanceId IN (${targetItems.join(",")})
 
@@ -679,7 +686,7 @@ function createGeometricElementInstanceKeyPaths(props: {
         SELECT
           pe.ECInstanceId,
           pe.Parent.Id,
-          'e${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || ce.Path
+          '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || ce.Path
         FROM ElementsHierarchy ce
         JOIN ${CLASS_NAME_Element} pe ON pe.ECInstanceId = ce.ParentId
       )`,
@@ -719,7 +726,7 @@ function parseQueryRow(row: ECSqlQueryRow, separator: string): { path: Hierarchy
   const path: HierarchyNodeIdentifiersPath = [];
   for (let i = 0; i < rowElements.length; i += 2) {
     switch (rowElements[i]) {
-      case "e":
+      case ELEMENT_CLASS_NAME_QUERY_ALIAS:
         path.push({ className: CLASS_NAME_GeometricElement3d, id: rowElements[i + 1] });
         break;
     }

@@ -235,7 +235,7 @@ export class BaseVisibilityHelper implements Disposable {
           // This is because always/never drawn elements can be retrieved using top most category.
           // TODO fix with: https://github.com/iTwin/viewer-components-react/issues/1100
           this.#props.baseIdsCache
-            .getModels({ categoryId, includeOnlyIfCategoryOfTopMostElement: this.#props.viewport.isAlwaysDrawnExclusive, includeSubModels: true })
+            .getModels({ categoryId, includeOnlyIfCategoryOfTopMostElement: this.#props.viewport.isAlwaysDrawnExclusive, subModels: "include" })
             .pipe(
               mergeMap((models) =>
                 merge(
@@ -537,7 +537,7 @@ export class BaseVisibilityHelper implements Disposable {
         map((categoryIdsBatch) => this.#props.viewport.changeCategoryDisplay({ categoryIds: categoryIdsBatch, display: on, enableAllSubCategories: false })),
       );
       const categoryModelsObs = from(Id64.iterable(categoryIds)).pipe(
-        mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), models: this.#props.baseIdsCache.getModels({ categoryId, includeSubModels: true }) })),
+        mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), models: this.#props.baseIdsCache.getModels({ categoryId, subModels: "include" }) })),
         reduce((acc, { models, categoryId }) => {
           for (const modelId of Id64.iterable(models)) {
             let entry = acc.get(modelId);
