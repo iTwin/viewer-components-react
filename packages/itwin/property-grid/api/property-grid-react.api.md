@@ -30,10 +30,10 @@ import { VirtualizedPropertyGridWithDataProvider } from '@itwin/components-react
 import type { Widget } from '@itwin/appui-react';
 
 // @public
-export function AddFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps): JSX_2.Element | null;
+export function AddFavoritePropertyContextMenuItem(input: FavoritePropertiesContextMenuItemProps): JSX_2.Element | null;
 
 // @public
-export function AncestorsNavigationControls({ navigateUp, navigateDown, canNavigateDown, canNavigateUp }: AncestorsNavigationControlsProps): JSX_2.Element | null;
+export function AncestorsNavigationControls(input: AncestorsNavigationControlsProps): JSX_2.Element | null;
 
 // @public
 export interface AncestorsNavigationControlsProps {
@@ -57,7 +57,7 @@ export interface ContextMenuProps {
 }
 
 // @public
-export function CopyPropertyTextContextMenuItem({ record, onSelect, onCopy }: DefaultContextMenuItemProps & {
+export function CopyPropertyTextContextMenuItem(input: DefaultContextMenuItemProps & {
     onCopy?: (text: string) => void;
 }): JSX_2.Element;
 
@@ -95,7 +95,7 @@ export class IModelAppUserPreferencesStorage implements PreferencesStorage {
 }
 
 // @public
-export function MultiElementPropertyGrid({ ancestorsNavigationControls, getParentInstanceKey, ...props }: MultiElementPropertyGridProps): JSX_2.Element;
+export function MultiElementPropertyGrid(input: MultiElementPropertyGridProps): JSX_2.Element;
 
 // @public
 export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "headerControls" | "onBackButton"> {
@@ -104,7 +104,7 @@ export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "
 }
 
 // @public
-export function NullValueSettingContext({ children }: PropsWithChildren<object>): JSX_2.Element;
+export function NullValueSettingContext(input: PropsWithChildren<object>): JSX_2.Element;
 
 // @public
 export type PerformanceTrackedFeatures = "properties-load" | "elements-list-load";
@@ -118,7 +118,7 @@ export interface PreferencesStorage {
 }
 
 // @public
-export function PropertyGrid({ createDataProvider, ...props }: PropertyGridProps): JSX_2.Element | null;
+export function PropertyGrid(input: PropertyGridProps): JSX_2.Element | null;
 
 // @public
 type PropertyGridActionButtonRenderer = (props: PropertyGridActionButtonRendererProps) => ReactNode;
@@ -129,7 +129,7 @@ interface PropertyGridActionButtonRendererProps extends ActionButtonRendererProp
 }
 
 // @public
-export function PropertyGridComponent({ preferencesStorage, onPerformanceMeasured, onFeatureUsed, ...props }: PropertyGridComponentProps): JSX_2.Element | null;
+export function PropertyGridComponent(input: PropertyGridComponentProps): JSX_2.Element | null;
 
 // @public
 export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGridProps, "imodel">, TelemetryContextProviderProps {
@@ -160,7 +160,7 @@ export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGrid
 export type PropertyGridContentProps = PropertyGridContentBaseProps & ContextMenuProps & SettingsMenuProps;
 
 // @public
-export function PropertyGridContextMenuItem({ id, children, title, onSelect }: PropsWithChildren<PropertyGridContextMenuItemProps>): JSX_2.Element;
+export function PropertyGridContextMenuItem(input: PropsWithChildren<PropertyGridContextMenuItemProps>): JSX_2.Element;
 
 // @public
 export interface PropertyGridContextMenuItemProps {
@@ -189,7 +189,7 @@ export type PropertyGridProps = Omit<PropertyGridContentProps, "dataProvider" | 
 };
 
 // @public
-export function PropertyGridSettingsMenuItem({ id, onClick, title, children }: PropsWithChildren<PropertyGridSettingsMenuItemProps>): JSX_2.Element;
+export function PropertyGridSettingsMenuItem(input: PropsWithChildren<PropertyGridSettingsMenuItemProps>): JSX_2.Element;
 
 // @public
 export interface PropertyGridSettingsMenuItemProps {
@@ -233,7 +233,7 @@ type PropertyGridWidgetOwnProps = {
 export type PropertyGridWidgetProps = PropertyGridComponentProps & PropertyGridWidgetOwnProps;
 
 // @public
-export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps): JSX_2.Element | null;
+export function RemoveFavoritePropertyContextMenuItem(input: FavoritePropertiesContextMenuItemProps): JSX_2.Element | null;
 
 // @public (undocumented)
 type SelectionStorage_2 = Pick<SelectionStorage, "getSelection" | "replaceSelection" | "selectionChangeEvent">;
@@ -250,7 +250,7 @@ export interface SettingsMenuProps {
 }
 
 // @public
-export function ShowHideNullValuesSettingsMenuItem({ close, persist }: ShowHideNullValuesSettingsMenuItemProps): JSX_2.Element;
+export function ShowHideNullValuesSettingsMenuItem(input: ShowHideNullValuesSettingsMenuItemProps): JSX_2.Element;
 
 // @public
 export interface ShowHideNullValuesSettingsMenuItemProps extends SettingsMenuItemProps {
@@ -263,13 +263,13 @@ export interface SingleElementDataProviderProps extends DataProviderProps {
 }
 
 // @public
-export function SingleElementPropertyGrid({ instanceKey, createDataProvider, ...props }: SingleElementPropertyGridProps): JSX_2.Element | null;
+export function SingleElementPropertyGrid(input: SingleElementPropertyGridProps): JSX_2.Element | null;
 
 // @public
 export type SingleElementPropertyGridProps = Omit<PropertyGridContentProps, "dataProvider" | "dataRenderer"> & SingleElementDataProviderProps;
 
 // @public
-export function TelemetryContextProvider({ onPerformanceMeasured, onFeatureUsed, children }: PropsWithChildren<TelemetryContextProviderProps>): JSX_2.Element;
+export function TelemetryContextProvider(input: PropsWithChildren<TelemetryContextProviderProps>): JSX_2.Element;
 
 // @public (undocumented)
 interface TelemetryContextProviderProps {
