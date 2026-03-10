@@ -28,7 +28,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
   function runTests(setType: "always" | "never") {
     it(`subscribes to ${setType}Drawn list changes and unsubscribes on dispose`, async () => {
-      const vp = createFakeSinonViewport();
+      using vp = createFakeSinonViewport();
       const event = setType === "always" ? vp.onAlwaysDrawnChanged : vp.onNeverDrawnChanged;
       (() => {
         using _ = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
@@ -40,7 +40,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
     it(`does not query when ${setType}Drawn set is empty`, async () => {
       const modelId = "0x1";
 
-      const vp = createFakeSinonViewport({
+      using vp = createFakeSinonViewport({
         [`${setType}Drawn`]: new Set(),
       });
 
@@ -54,7 +54,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
     it(`does not query when ${setType}Drawn set is undefined`, async () => {
       const modelId = "0x1";
 
-      const vp = createFakeSinonViewport({
+      using vp = createFakeSinonViewport({
         [`${setType}Drawn`]: undefined,
       });
 
@@ -74,7 +74,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
         return [{ rootCategoryId: categoryId, modelId, categoryId, elementsPath: elementId }];
       });
 
-      const vp = createFakeSinonViewport({
+      using vp = createFakeSinonViewport({
         [`${setType}Drawn`]: set,
         queryHandler,
       });
@@ -96,7 +96,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const queryHandler = sinon.fake(() => {
         return [{ rootCategoryId: categoryId, modelId, categoryId, elementsPath: elementId }];
       });
-      const vp = createFakeSinonViewport({
+      using vp = createFakeSinonViewport({
         [`${setType}Drawn`]: set,
         queryHandler,
       });
@@ -122,7 +122,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const queryHandler = sinon.fake(() => {
         return [{ rootCategoryId: categoryId, modelId, categoryId, elementsPath: elementId }];
       });
-      const vp = createFakeSinonViewport({
+      using vp = createFakeSinonViewport({
         [`${setType}Drawn`]: set,
         queryHandler,
       });
@@ -154,7 +154,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
     it(`requeries when ${setType}Drawn set changes while getElements is in progress`, async () => {
       const elementId = "0x1";
       const set = new Set([elementId]);
-      const vp = createFakeSinonViewport({
+      using vp = createFakeSinonViewport({
         [`${setType}Drawn`]: set,
       });
 
@@ -185,7 +185,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
         return [{ rootCategoryId: categoryId, modelId, categoryId, elementsPath: elementId }];
       });
 
-      const vp = createFakeSinonViewport({
+      using vp = createFakeSinonViewport({
         [`${setType}Drawn`]: set,
         queryHandler,
       });
@@ -213,7 +213,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
         return [{ rootCategoryId: categoryId, modelId, categoryId, elementsPath: elementId }];
       });
 
-      const vp = createFakeSinonViewport({
+      using vp = createFakeSinonViewport({
         [`${setType}Drawn`]: set,
         queryHandler,
       });
@@ -246,7 +246,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
     it(`requeries when suppression is removed and ${setType}Drawn changes`, async () => {
       const elementId = "0x1";
       const set = new Set([elementId]);
-      const vp = createFakeSinonViewport({
+      using vp = createFakeSinonViewport({
         [`${setType}Drawn`]: set,
       });
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
@@ -274,7 +274,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const queryHandler = sinon.fake(() => {
         return [{ rootCategoryId: "0x40", categoryId: "0x40", modelId: "0x50", elementsPath: "0x30" }];
       });
-      const viewport = createFakeSinonViewport({
+      using viewport = createFakeSinonViewport({
         [`${setType}Drawn`]: new Set(["0x30"]),
         queryHandler,
       });
@@ -296,7 +296,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
           { rootCategoryId: category2Id, modelId, categoryId: category2Id, elementsPath: element2Id },
         ];
       });
-      const viewport = createFakeSinonViewport({
+      using viewport = createFakeSinonViewport({
         [`${setType}Drawn`]: new Set([elementId]),
         queryHandler,
       });
@@ -316,7 +316,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const queryHandler = sinon.fake(() => {
         return [{ rootCategoryId: categoryId, modelId, categoryId, elementsPath: `${elementId};${childElementId}` }];
       });
-      const viewport = createFakeSinonViewport({
+      using viewport = createFakeSinonViewport({
         [`${setType}Drawn`]: new Set([elementId, childElementId]),
         queryHandler,
       });
@@ -335,7 +335,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const queryHandler = sinon.fake(() => {
         return [{ rootCategoryId: "0x15", categoryId: "0x15", modelId, elementsPath: elementId }];
       });
-      const viewport = createFakeSinonViewport({
+      using viewport = createFakeSinonViewport({
         [`${setType}Drawn`]: new Set([elementId]),
         queryHandler,
       });

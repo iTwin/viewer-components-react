@@ -44,13 +44,13 @@ export function createFakeSinonViewport(
     queryHandler?: QueryHandler;
     getCategoryInfo?: GetCategoryInfo;
   },
-): TreeWidgetTestingViewport {
+): TreeWidgetTestingViewport & Disposable {
   let alwaysDrawn = props?.alwaysDrawn;
   let neverDrawn = props?.neverDrawn;
 
   const onAlwaysDrawnChanged = new BeEvent();
   const onNeverDrawnChanged = new BeEvent();
-  const result: TreeWidgetTestingViewport = {
+  const result: TreeWidgetTestingViewport & Disposable = {
     changeCategoryDisplay: sinon.fake(),
     changeModelDisplay: sinon.fake(),
     isAlwaysDrawnExclusive: false,
@@ -97,7 +97,10 @@ export function createFakeSinonViewport(
       }
     }),
     iModel: createIModelMock({ queryHandler: props?.queryHandler, getCategoryInfo: props?.getCategoryInfo }),
-    renderFrame: sinon.fake,
+    renderFrame: sinon.fake(),
+    [Symbol.dispose]() {
+      this.iModel.onClose.raiseEvent(this.iModel);
+    },
   };
   return result;
 }
