@@ -721,6 +721,12 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   }
 }
 
+const DEFINITION_CONTAINER_CLASS_NAME_QUERY_ALIAS = "dc";
+const SUB_CATEGORY_CLASS_NAME_QUERY_ALIAS = "sc";
+const CATEGORY_CLASS_NAME_QUERY_ALIAS = "c";
+const MODEL_CLASS_NAME_QUERY_ALIAS = "m";
+const ELEMENT_CLASS_NAME_QUERY_ALIAS = "e";
+
 async function createInstanceKeyPathsFromInstanceLabel(
   props: MarkRequired<CategoriesTreeInstanceKeyPathsFromInstanceLabelProps, "componentId"> & {
     labelsFactory: IInstanceLabelSelectClauseFactory;
@@ -755,7 +761,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
           const ctes = [
             `${CATEGORIES_WITH_LABELS_CTE}(ClassName, ECInstanceId, ChildCount, DisplayLabel) AS (
             SELECT
-              'c',
+              '${CATEGORY_CLASS_NAME_QUERY_ALIAS}',
               this.ECInstanceId,
               COUNT(sc.ECInstanceId),
               ${categoryLabelSelectClause}
@@ -770,7 +776,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
               ? [
                   `${ELEMENTS_WITH_LABELS_CTE}(ClassName, ECInstanceId, ParentId, DisplayLabel) AS (
                   SELECT
-                    'e',
+                    '${ELEMENT_CLASS_NAME_QUERY_ALIAS}',
                     this.ECInstanceId,
                     this.Parent.Id,
                     ${elementLabelSelectClause}
@@ -788,7 +794,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
               : [
                   `${SUBCATEGORIES_WITH_LABELS_CTE}(ClassName, ECInstanceId, ParentId, DisplayLabel) AS (
                 SELECT
-                  'sc',
+                  '${SUB_CATEGORY_CLASS_NAME_QUERY_ALIAS}',
                   this.ECInstanceId,
                   this.Parent.Id,
                   ${subCategoryLabelSelectClause}
@@ -803,7 +809,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
               ? [
                   `${DEFINITION_CONTAINERS_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
                 SELECT
-                  'dc',
+                  '${DEFINITION_CONTAINER_CLASS_NAME_QUERY_ALIAS}',
                   this.ECInstanceId,
                   ${definitionContainerLabelSelectClause}
                 FROM
@@ -890,13 +896,13 @@ async function createInstanceKeyPathsFromInstanceLabel(
         map((row): InstanceKey => {
           let className: string;
           switch (row.ClassName) {
-            case "c":
+            case CATEGORY_CLASS_NAME_QUERY_ALIAS:
               className = categoryClass;
               break;
-            case "sc":
+            case SUB_CATEGORY_CLASS_NAME_QUERY_ALIAS:
               className = CLASS_NAME_SubCategory;
               break;
-            case "e":
+            case ELEMENT_CLASS_NAME_QUERY_ALIAS:
               className = elementClass;
               break;
             default:
@@ -1021,8 +1027,8 @@ export function createGeometricElementInstanceKeyPaths(props: {
           e.Parent.Id,
           e.Model.Id,
           IIF(e.Parent.Id IS NULL,
-            'm${separator}' || CAST(IdToHex([m].[ECInstanceId]) AS TEXT) || '${separator}c${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}e${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT),
-            'e${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT)
+            '${MODEL_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([m].[ECInstanceId]) AS TEXT) || '${separator}${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT),
+            '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT)
           )
         FROM ${elementClass} e
         LEFT JOIN ${modelClass} m ON (e.Parent.Id IS NULL AND m.ECInstanceId = e.Model.Id)
@@ -1036,8 +1042,8 @@ export function createGeometricElementInstanceKeyPaths(props: {
           pe.Parent.Id,
           pe.Model.Id,
           IIF(pe.Parent.Id IS NULL,
-            'm${separator}' || CAST(IdToHex([m].[ECInstanceId]) AS TEXT) || '${separator}c${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}e${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || ce.Path,
-            'e${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || ce.Path
+            '${MODEL_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([m].[ECInstanceId]) AS TEXT) || '${separator}${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || ce.Path,
+            '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || ce.Path
           )
         FROM CategoriesElementsHierarchy ce
         JOIN ${elementClass} pe ON (pe.ECInstanceId = ce.ParentId OR pe.ECInstanceId = ce.ModelId AND ce.ParentId IS NULL)
@@ -1078,13 +1084,13 @@ function parseQueryRow(row: ECSqlQueryRow, separator: string, elementClassName: 
   const path = new Array<InstanceKey>();
   for (let i = 0; i < rowElements.length; i += 2) {
     switch (rowElements[i]) {
-      case "e":
+      case ELEMENT_CLASS_NAME_QUERY_ALIAS:
         path.push({ className: elementClassName, id: rowElements[i + 1] });
         break;
-      case "c":
+      case CATEGORY_CLASS_NAME_QUERY_ALIAS:
         path.push({ className: categoryClassName, id: rowElements[i + 1] });
         break;
-      case "m":
+      case MODEL_CLASS_NAME_QUERY_ALIAS:
         // Ignore first model since it isn't in hierarchy
         if (i === 0) {
           break;
