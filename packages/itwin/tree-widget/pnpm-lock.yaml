@@ -538,7 +538,7 @@ packages:
       '@itwin/core-quantity': ^4.0.0 || ^5.0.0
       '@itwin/core-react': 5.24.1
       '@itwin/imodel-components-react': 5.24.1
-      '@itwin/itwinui-react': 3.20.1
+      '@itwin/itwinui-react': ^3.15.0
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
       react-redux: ^7.2.2 || ^8.0.0 || ^9.0.0
@@ -574,7 +574,7 @@ packages:
       '@itwin/appui-abstract': ^4.0.0 || ^5.0.0
       '@itwin/core-bentley': ^4.0.0 || ^5.0.0
       '@itwin/core-react': 5.24.1
-      '@itwin/itwinui-react': 3.20.1
+      '@itwin/itwinui-react': ^3.15.0
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
@@ -641,7 +641,7 @@ packages:
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0 || ^5.0.0
       '@itwin/core-bentley': ^4.0.0 || ^5.0.0
-      '@itwin/itwinui-react': 3.20.1
+      '@itwin/itwinui-react': ^3.15.0
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
@@ -688,7 +688,7 @@ packages:
       '@itwin/core-geometry': ^4.0.0 || ^5.0.0
       '@itwin/core-quantity': ^4.0.0 || ^5.0.0
       '@itwin/core-react': 5.24.1
-      '@itwin/itwinui-react': 3.20.1
+      '@itwin/itwinui-react': ^3.15.0
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
@@ -771,7 +771,7 @@ packages:
       '@itwin/core-react': ^4.9.0 || ^5.0.0
       '@itwin/ecschema-metadata': ^4.4.0 || ^5.0.0
       '@itwin/imodel-components-react': ^4.9.0 || ^5.0.0
-      '@itwin/itwinui-react': 3.20.1
+      '@itwin/itwinui-react': ^3.0.0
       '@itwin/presentation-common': ^4.4.0 || ^5.0.0
       '@itwin/presentation-frontend': ^4.4.0 || ^5.0.0
       '@itwin/unified-selection-react': ^1.0.0
@@ -803,7 +803,7 @@ packages:
   '@itwin/presentation-hierarchies-react@1.9.11':
     resolution: {integrity: sha512-ZMq4/jnqRzTiv1iSrBZRX7nfBouNUm6MMYcjZM8XEnHl/ZDUZ0+SuQac/YzE5xM3qeKU3NrL9Pw3LYFQJ1O73w==}
     peerDependencies:
-      '@itwin/itwinui-react': 3.20.1
+      '@itwin/itwinui-react': ^3.0.0
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
     peerDependenciesMeta:
