@@ -103,7 +103,7 @@
     "@itwin/presentation-common": "^5.7.0-dev.14",
     "@itwin/presentation-components": "^5.12.18",
     "@itwin/presentation-frontend": "^5.7.0-dev.14",
-    "@itwin/presentation-testing": "^5.4.14",
+    "@itwin/presentation-testing": "^5.4.16",
     "@itwin/webgl-compatibility": "^5.7.0-dev.14",
     "@rollup/plugin-babel": "^7.0.0",
     "@stratakit/foundations": "^0.4.5",
