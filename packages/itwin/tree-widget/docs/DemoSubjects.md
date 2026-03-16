@@ -29,10 +29,9 @@ flowchart TD
 
   %% Model is NOT viewed → check sub-models (recursive)
   M_VIEW -- No --> M_SUB["Get modelled elements under modelId"]
-  M_SUB -- modelIds --> M_MODELED_ZERO{"modelIds.length > 0"}
-  M_MODELED_ZERO -- Yes --> M_ITER
-  M_MODELED_ZERO -- Yes --> M_REC_H[hidden]
-  M_MODELED_ZERO -- No --> M_REC_H
+  M_SUB -- modelIds --> M_REC{"getModelsVisibilityStatus({ modelIds }) <br/> === 'hidden'/empty <br/> <em>(recursive — same flow as above)</em>"}
+  M_REC -- Yes --> M_REC_H[hidden]
+  M_REC -- No --> M_REC_P[partial]
 
   %% ===== getCategoriesVisibilityStatus (modelId defined) =====
   M_CATS -- "modelId, categoryIds" --> C_ITER["Iterate through categories"]
@@ -40,13 +39,12 @@ flowchart TD
   %% ===== getModelWithCategoryVisibilityStatus =====
   C_ITER -- "modelId, categoryId" --> W_A1["Get modelled elements under category with model"]
   C_ITER -- "modelId, categoryId" --> W_A2{"viewport.viewsModel(<code>Props.modelId</code>)"}
-  W_A1 -- modelIds --> M_MODELED_ZERO2{"modelIds.length > 0"}
 
   %% Sub-models path (recursive)
-  M_MODELED_ZERO2 -- Yes --> M_ITER
+  W_A1 -- modelIds --> W_B["getModelsVisibilityStatus({ modelIds }) <br/> <em>(recursive — same flow as above)</em>"]
 
   %% Model not viewed
-  W_A2 -- No --> M_REC_H
+  W_A2 -- No --> W_C[hidden]
 
   %% Model viewed → determine always/never drawn
   W_A2 -- Yes --> W_D{Is always drawn exclusive}
@@ -88,25 +86,32 @@ flowchart TD
     %% Branch Yes
     AN_A -- Yes --> AN_B1{"defaultStatus === 'visible'"}
       AN_B1 -- Yes --> AN_V1[visible]
-      AN_B1 -- No --> M_REC_H
+      AN_B1 -- No --> AN_H1[hidden]
 
     %% Branch No
     AN_A -- No --> AN_B2{"numberOfElementsInOppositeSet <br/> === totalCount"}
       %% Branch No
-      AN_B2 -- No --> M_REC_P[partial]
+      AN_B2 -- No --> AN_P1[partial]
 
       %% Branch Yes
       AN_B2 -- Yes --> AN_C{"defaultStatus === 'visible'"}
-        AN_C -- Yes --> M_REC_H
-        AN_C -- No --> AN_V1
+        AN_C -- Yes --> AN_H2[hidden]
+        AN_C -- No --> AN_V2[visible]
 
   %% ===== Merge (getModelWithCategoryVisibilityStatus) =====
-  W_G1 --> MOD_M["Merge visibility statuses"]
+  W_B --> MOD_M["Merge visibility statuses"]
+  W_C --> MOD_M
+  W_G1 --> MOD_M
+  AN_V1 --> MOD_M
+  AN_H1 --> MOD_M
+  AN_P1 --> MOD_M
+  AN_H2 --> MOD_M
+  AN_V2 --> MOD_M
+
 
   %% ===== Merge (getModelsVisibilityStatus) =====
   M_REC_H --> MOD_M
   M_REC_P --> MOD_M
-  AN_V1 --> MOD_M
 
   %% ===== Final result =====
   MOD_M --> N["Some 'visible' && Some 'hidden' <br/> **OR** <br/> at least one is 'partial'"]
