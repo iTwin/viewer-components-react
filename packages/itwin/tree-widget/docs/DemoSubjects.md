@@ -33,8 +33,6 @@ flowchart TD
   M_MODELED_ZERO -- Yes --> M_ITER
   M_MODELED_ZERO -- Yes --> M_REC_H[hidden]
   M_MODELED_ZERO -- No --> M_REC_H
-  M_REC -- Yes --> M_REC_H
-  M_REC -- No --> M_REC_P[partial]
 
   %% ===== getCategoriesVisibilityStatus (modelId defined) =====
   M_CATS -- "modelId, categoryIds" --> C_ITER["Iterate through categories"]
@@ -95,7 +93,7 @@ flowchart TD
     %% Branch No
     AN_A -- No --> AN_B2{"numberOfElementsInOppositeSet <br/> === totalCount"}
       %% Branch No
-      AN_B2 -- No --> M_REC_P
+      AN_B2 -- No --> M_REC_P[partial]
 
       %% Branch Yes
       AN_B2 -- Yes --> AN_C{"defaultStatus === 'visible'"}
@@ -103,8 +101,7 @@ flowchart TD
         AN_C -- No --> AN_V1
 
   %% ===== Merge (getModelWithCategoryVisibilityStatus) =====
-  W_B --> MOD_M["Merge visibility statuses"]
-  W_G1 --> MOD_M
+  W_G1 --> MOD_M["Merge visibility statuses"]
 
   %% ===== Merge (getModelsVisibilityStatus) =====
   M_REC_H --> MOD_M
