@@ -6,6 +6,7 @@
 import { Guid } from "@itwin/core-bentley";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
+import { CLASS_NAME_GeometricElement } from "../common/internal/ClassNameDefinitions.js";
 
 import type { GuidString } from "@itwin/core-bentley";
 import type {
@@ -150,15 +151,16 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                 },
                 supportsFiltering: { selector: this.createExternalSourceSupportsFilteringSelector("this") },
               })}
-            FROM ${instanceFilterClauses.from} this
+            FROM ${instanceFilterClauses.from} this, IdSet(?) idSetTable
             JOIN BisCore.ExternalSourceGroupGroupsSources esggs ON esggs.TargetECInstanceId = this.ECInstanceId
             LEFT JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
             ${instanceFilterClauses.joins}
             WHERE
-              esggs.SourceECInstanceId IN (${groupIds.map(() => "?").join(",")})
+              esggs.SourceECInstanceId = idSetTable.id
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
-          bindings: groupIds.map((id) => ({ type: "id", value: id })),
+          bindings: [{ type: "idset", value: groupIds }],
         },
       },
     ];
@@ -190,15 +192,16 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                 },
                 supportsFiltering: { selector: this.createExternalSourceSupportsFilteringSelector("this") },
               })}
-            FROM ${instanceFilterClauses.from} this
+            FROM ${instanceFilterClauses.from} this, IdSet(?) idSetTable
             JOIN BisCore.ExternalSourceAttachment esa ON esa.Attaches.Id = this.ECInstanceId
             LEFT JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
             ${instanceFilterClauses.joins}
             WHERE
-              esa.Parent.Id IN (${sourceIds.map(() => "?").join(",")})
+              esa.Parent.Id = idSetTable.id
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
-          bindings: sourceIds.map((id) => ({ type: "id", value: id })),
+          bindings: [{ type: "idset", value: sourceIds }],
         },
       },
       {
@@ -236,11 +239,11 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
     const sourceIds: string[] = parentNode.extendedData?.sourceIds;
     const instanceFilterClauses = await this.#selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
-      contentClass: { fullName: "BisCore.GeometricElement", alias: "this" },
+      contentClass: { fullName: CLASS_NAME_GeometricElement, alias: "this" },
     });
     return [
       {
-        fullClassName: "BisCore.GeometricElement",
+        fullClassName: CLASS_NAME_GeometricElement,
         query: {
           ecsql: `
             SELECT
@@ -250,7 +253,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                 nodeLabel: {
                   selector: await this.#nodeLabelSelectClauseFactory.createSelectClause({
                     classAlias: "this",
-                    className: "BisCore.GeometricElement",
+                    className: CLASS_NAME_GeometricElement,
                   }),
                 },
                 extendedData: {
@@ -259,14 +262,15 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                 grouping: { byClass: true },
                 hasChildren: false,
               })}
-            FROM ${instanceFilterClauses.from} this
+            FROM ${instanceFilterClauses.from} this, IdSet(?) idSetTable
             JOIN BisCore.ExternalSourceAspect esa ON esa.Element.Id = this.ECInstanceId
             ${instanceFilterClauses.joins}
             WHERE
-              esa.Source.Id IN (${sourceIds.map(() => "?").join(",")})
+              esa.Source.Id = idSetTable.id
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
-          bindings: sourceIds.map((id) => ({ type: "id", value: id })),
+          bindings: [{ type: "idset", value: sourceIds }],
         },
       },
     ];

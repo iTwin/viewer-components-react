@@ -15,7 +15,6 @@ import {
   CLASS_NAME_SpatialCategory,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
-import { joinId64Arg } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
@@ -229,7 +228,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
     return this.getClassificationsInfo().pipe(map((classificationsInfo) => [...classificationsInfo.keys()]));
   }
 
-  private queryFilteredElementsData({ elementIds }: { elementIds: Id64Arg }): Observable<{
+  private queryFilteredElementsData({ elementIds }: { elementIds: Id64Array }): Observable<{
     modelId: Id64String;
     id: ElementId;
     categoryId: Id64String;
@@ -256,11 +255,15 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
             FROM ParentWithCategory
             WHERE parentId IS NULL
           ) categoryOfTopMostParentElement
-        FROM ${CLASS_NAME_GeometricElement3d} this
-        WHERE ECInstanceId IN (${joinId64Arg(elementIds, ",")})
+        FROM ${CLASS_NAME_GeometricElement3d} this, IdSet(?) idSetTable
+        WHERE ECInstanceId = idSetTable.id
+        ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
       `;
       return this.#queryExecutor.createQueryReader(
-        { ecsql: query },
+        {
+          ecsql: query,
+          bindings: [{ type: "idset", value: elementIds }],
+        },
         {
           rowFormat: "ECSqlPropertyNames",
           limit: "unbounded",
@@ -283,7 +286,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
   public getFilteredElementsData({
     elementIds,
   }: {
-    elementIds: Id64Arg;
+    elementIds: Id64Array;
   }): Observable<Map<ElementId, { categoryId: Id64String; modelId: Id64String; categoryOfTopMostParentElement: CategoryId }>> {
     const result = new Map<ElementId, { categoryId: Id64String; modelId: Id64String; categoryOfTopMostParentElement: CategoryId }>();
     if (Id64.sizeOf(elementIds) === 0) {

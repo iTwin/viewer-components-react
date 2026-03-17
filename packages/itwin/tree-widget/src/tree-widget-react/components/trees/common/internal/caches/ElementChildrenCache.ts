@@ -51,8 +51,9 @@ export class ElementChildrenCache {
         `
           ElementChildren(id, parentId) AS (
             SELECT ECInstanceId id, Parent.Id parentId
-            FROM ${this.#elementClassName}
-            WHERE Parent.Id IN (${elementIds.join(", ")})
+            FROM ${this.#elementClassName}, IdSet(?) idSetTable
+            WHERE Parent.Id = idSetTable.id
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             UNION ALL
             SELECT c.ECInstanceId id, c.Parent.Id
             FROM ${this.#elementClassName} c
@@ -65,7 +66,7 @@ export class ElementChildrenCache {
         FROM ElementChildren
       `;
       return this.#queryExecutor.createQueryReader(
-        { ecsql, ctes },
+        { ecsql, ctes, bindings: [{ type: "idset", value: elementIds }] },
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/children/${Guid.createValue()}` },
       );
     }).pipe(

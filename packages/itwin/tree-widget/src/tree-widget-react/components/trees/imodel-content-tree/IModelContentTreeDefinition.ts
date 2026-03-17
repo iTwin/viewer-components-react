@@ -34,7 +34,7 @@ import type {
   NodePostProcessor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlBinding, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
+import type { ECClassHierarchyInspector, ECSchemaProvider, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 import type { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.js";
 
 /**
@@ -187,15 +187,16 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 autoExpand: { selector: `IIF(this.ECInstanceId = ${IModel.rootSubjectId}, true, false)` },
                 supportsFiltering: true,
               })}
-            FROM ${subjectFilterClauses.from} this
+            FROM ${subjectFilterClauses.from} this, IdSet(?) idSetTable
             ${subjectFilterClauses.joins}
             WHERE
-              this.ECInstanceId IN (${childSubjectIds.map(() => "?").join(",")})
+              this.ECInstanceId = idSetTable.id
               ${subjectFilterClauses.where ? `AND ${subjectFilterClauses.where}` : ""}
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [
             { type: "idset", value: await this.#idsCache.getParentSubjectIds() },
-            ...childSubjectIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
+            { type: "idset", value: childSubjectIds },
           ],
         },
       });
@@ -232,16 +233,16 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                   },
                   supportsFiltering: true,
                 })}
-              FROM ${CLASS_NAME_Model} m
+              FROM ${CLASS_NAME_Model} m, IdSet(?) idSetTable
               JOIN ${CLASS_NAME_InformationPartitionElement} [partition] ON [partition].ECInstanceId = m.ModeledElement.Id
-              WHERE
-                m.ECInstanceId IN (${childModelIds.map(() => "?").join(",")})
+              WHERE m.ECInstanceId = idSetTable.id
+              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             ) model
             JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = model.ECInstanceId
             ${modelFilterClauses.joins}
             ${modelFilterClauses.where ? `WHERE (model.${NodeSelectClauseColumnNames.HideNodeInHierarchy} OR ${modelFilterClauses.where})` : ""}
           `,
-          bindings: childModelIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
+          bindings: [{ type: "idset", value: childModelIds }],
         },
       });
     return defs;
@@ -264,12 +265,13 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 nodeLabel: "", // doesn't matter - the node is always hidden
                 hideNodeInHierarchy: true,
               })}
-            FROM ${CLASS_NAME_Model} this
+            FROM ${CLASS_NAME_Model} this, IdSet(?) idSetTable
             WHERE
-              this.ModeledElement.Id IN (${elementIds.map(() => "?").join(",")})
+              this.ModeledElement.Id = idSetTable.id
               AND NOT this.IsPrivate
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
-          bindings: elementIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
+          bindings: [{ type: "idset", value: elementIds }],
         },
       },
     ];
@@ -316,13 +318,14 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 hasChildren: true,
                 supportsFiltering: true,
               })}
-            FROM ${categoryFilterClauses.from} this
+            FROM ${categoryFilterClauses.from} this, IdSet(?) idSetTable
             ${categoryFilterClauses.joins}
             WHERE
-              this.ECInstanceId IN (${childCategoryIds.map(() => "?").join(",")})
+              this.ECInstanceId = idSetTable.id
               ${categoryFilterClauses.where ? `AND ${categoryFilterClauses.where}` : ""}
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
-          bindings: childCategoryIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
+          bindings: [{ type: "idset", value: childCategoryIds }],
         },
       });
     defs.push({
@@ -345,13 +348,14 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 },
                 supportsFiltering: true,
               })}
-            FROM ${informationContentElementFilterClauses.from} this
+            FROM ${informationContentElementFilterClauses.from} this, IdSet(?) idSetTable
             ${informationContentElementFilterClauses.joins}
             WHERE
-              this.Model.Id IN (${modelIds.map(() => "?").join(",")})
+              this.Model.Id = idSetTable.id
               ${informationContentElementFilterClauses.where ? `AND ${informationContentElementFilterClauses.where}` : ""}
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
-        bindings: modelIds.map((id) => ({ type: "id", value: id })),
+        bindings: [{ type: "idset", value: modelIds }],
       },
     });
     return defs;
@@ -397,16 +401,20 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                   hasChildren: selectProps.hasChildren,
                   supportsFiltering: selectProps.supportsFiltering,
                 })}
-              FROM ${instanceFilterClauses.from} this
+              FROM ${instanceFilterClauses.from} this, IdSet(?) categoryIdSetTable, IdSet(?) modelIdsSetTable
               ${instanceFilterClauses.joins}
               WHERE
-                this.Category.Id IN (${categoryIds.map(() => "?").join(",")})
-                AND this.Model.Id IN (${modelIds.map(() => "?").join(",")})
+                this.Category.Id = categoryIdSetTable.id
+                AND this.Model.Id = modelIdsSetTable.id
                 AND this.Parent.Id IS NULL
                 ${whereClause ? `AND ${whereClause}` : ""}
                 ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
-            bindings: [...categoryIds.map((id) => ({ type: "id", value: id })), ...modelIds.map((id) => ({ type: "id", value: id }))] as ECSqlBinding[],
+            bindings: [
+              { type: "idset", value: categoryIds },
+              { type: "idset", value: modelIds },
+            ],
           },
         };
       }),
@@ -427,34 +435,35 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
           fullClassName: classFullName,
           query: {
             ecsql: `
-            SELECT
-              ${await this.#selectQueryFactory.createSelectClause({
-                ecClassId: { selector: "this.ECClassId" },
-                ecInstanceId: { selector: "this.ECInstanceId" },
-                nodeLabel: {
-                  selector: await this.#nodeLabelSelectClauseFactory.createSelectClause({
-                    classAlias: "this",
-                    className: classFullName,
-                  }),
-                },
-                grouping: {
-                  byClass: true,
-                },
-                extendedData: {
-                  imageId: "icon-item",
-                },
-                hasChildren: selectProps?.hasChildren,
-                supportsFiltering: selectProps?.supportsFiltering,
-              })}
-            FROM ${instanceFilterClauses.from} this
-            ${instanceFilterClauses.joins}
-            WHERE
-              this.Parent.Id IS NULL
-              AND this.Model.Id IN (${modelIds.map(() => "?").join(",")})
-              ${whereClause ? `AND ${whereClause}` : ""}
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
-          `,
-            bindings: modelIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
+              SELECT
+                ${await this.#selectQueryFactory.createSelectClause({
+                  ecClassId: { selector: "this.ECClassId" },
+                  ecInstanceId: { selector: "this.ECInstanceId" },
+                  nodeLabel: {
+                    selector: await this.#nodeLabelSelectClauseFactory.createSelectClause({
+                      classAlias: "this",
+                      className: classFullName,
+                    }),
+                  },
+                  grouping: {
+                    byClass: true,
+                  },
+                  extendedData: {
+                    imageId: "icon-item",
+                  },
+                  hasChildren: selectProps?.hasChildren,
+                  supportsFiltering: selectProps?.supportsFiltering,
+                })}
+              FROM ${instanceFilterClauses.from} this, IdSet(?) idSetTable
+              ${instanceFilterClauses.joins}
+              WHERE
+                this.Parent.Id IS NULL
+                AND this.Model.Id = idSetTable.id
+                ${whereClause ? `AND ${whereClause}` : ""}
+                ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+            `,
+            bindings: [{ type: "idset", value: modelIds }],
           },
         };
       }),
@@ -525,14 +534,15 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                   hasChildren: selectProps.hasChildren,
                   supportsFiltering: selectProps.supportsFiltering,
                 })}
-              FROM ${instanceFilterClauses.from} this
+              FROM ${instanceFilterClauses.from} this, IdSet(?) idSetTable
               ${instanceFilterClauses.joins}
               WHERE
-                this.Parent.Id IN (${groupIds.map(() => "?").join(",")})
+                this.Parent.Id = idSetTable.id
                 ${whereClause ? `AND ${whereClause}` : ""}
                 ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
-            bindings: groupIds.map((id) => ({ type: "id", value: id })),
+            bindings: [{ type: "idset", value: groupIds }],
           },
         };
       }),
@@ -571,15 +581,16 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                   hasChildren: selectProps.hasChildren,
                   supportsFiltering: selectProps.supportsFiltering,
                 })}
-              FROM ${instanceFilterClauses.from} this
+              FROM ${instanceFilterClauses.from} this, IdSet(?) idSetTable
               JOIN BisCore.ElementGroupsMembers egm ON egm.TargetECInstanceId = this.ECInstanceId
               ${instanceFilterClauses.joins}
               WHERE
-                egm.SourceECInstanceId IN (${groupIds.map(() => "?").join(",")})
+                egm.SourceECInstanceId = idSetTable.id
                 ${whereClause ? `AND ${whereClause}` : ""}
                 ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
-            bindings: groupIds.map((id) => ({ type: "id", value: id })),
+            bindings: [{ type: "idset", value: groupIds }],
           },
         };
       }),
@@ -617,15 +628,16 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                   hasChildren: selectProps.hasChildren,
                   supportsFiltering: selectProps.supportsFiltering,
                 })}
-              FROM ${instanceFilterClauses.from} this
+              FROM ${instanceFilterClauses.from} this, IdSet(?) idSetTable
               JOIN BisCore.Element p ON p.ECInstanceId = this.Parent.Id
               ${instanceFilterClauses.joins}
               WHERE
-                p.ECInstanceId IN (${elementIds.map(() => "?").join(",")})
+                p.ECInstanceId = idSetTable.id
                 ${whereClause ? `AND ${whereClause}` : ""}
                 ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
-            bindings: elementIds.map((id) => ({ type: "id", value: id })),
+            bindings: [{ type: "idset", value: elementIds }],
           },
         };
       }),

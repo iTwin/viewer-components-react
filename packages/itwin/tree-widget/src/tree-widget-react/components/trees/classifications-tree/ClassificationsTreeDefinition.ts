@@ -218,13 +218,14 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                     },
                     supportsFiltering: true,
                   })}
-                FROM
-                  ${instanceFilterClauses.from} this
+                FROM ${instanceFilterClauses.from} this, IdSet(?) idSetTable
                 ${instanceFilterClauses.joins}
                 WHERE
-                  this.ECInstanceId IN (${classificationIds.join(",")})
+                  this.ECInstanceId = idSetTable.id
                   ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+                ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
               `,
+              bindings: [{ type: "idset", value: classificationIds }],
             },
           },
         ]
@@ -249,14 +250,16 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
         query: {
           ecsql: `
             SELECT ${await this.#createElementSelectClause({})}
-            FROM ${elementsInstanceFilterClauses.from} this
+            FROM ${elementsInstanceFilterClauses.from} this, IdSet(?) targetIdSetTable
             JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = this.ECInstanceId
             ${elementsInstanceFilterClauses.joins}
             WHERE
-              ehc.TargetECInstanceId IN (${parentClassificationIds.join(",")})
+              ehc.TargetECInstanceId = targetIdSetTable.id
               AND this.Parent.Id IS NULL
               ${elementsInstanceFilterClauses.where ? `AND ${elementsInstanceFilterClauses.where}` : ""}
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
+          bindings: [{ type: "idset", value: parentClassificationIds }],
         },
       },
       // load child classifications
@@ -290,12 +293,14 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                         supportsFiltering: true,
                       })}
                     FROM
-                      ${instanceFilterClauses.from} this
+                      ${instanceFilterClauses.from} this, IdSet(?) classificationIdSetTable
                     ${instanceFilterClauses.joins}
                     WHERE
-                      this.ECInstanceId IN (${classificationIds.join(",")})
+                      this.ECInstanceId = classificationIdSetTable.id
                       ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+                    ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
                   `,
+                  bindings: [{ type: "idset" as const, value: classificationIds }],
                 },
               };
             })(),
@@ -319,12 +324,14 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
         query: {
           ecsql: `
           SELECT ${await this.#createElementSelectClause({ categoryOfTopMostParentElement: parentNode.extendedData?.categoryOfTopMostParentElement, topMostParentElementId: parentNode.extendedData?.topMostParentElementId })}
-          FROM ${instanceFilterClauses.from} this
+          FROM ${instanceFilterClauses.from} this, IdSet(?) idSetTable
           ${instanceFilterClauses.joins}
           WHERE
-            this.Parent.Id IN (${parentElementIds.join(",")})
+            this.Parent.Id = idSetTable.id
             ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+          ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
+          bindings: [{ type: "idset", value: parentElementIds }],
         },
       },
     ];
@@ -471,37 +478,40 @@ function createInstanceKeyPathsFromInstanceLabelObs({
       ...(classificationIds.length > 0
         ? [
             `${CLASSIFICATIONS_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
-            SELECT
-              '${CLASSIFICATION_CLASS_NAME_QUERY_ALIAS}',
-              this.ECInstanceId,
-              ${classificationLabelSelectClause}
-            FROM
-              ${CLASS_NAME_Classification} this
-            WHERE
-              this.ECInstanceId IN (${classificationIds.join(",")})
-          )`,
+              SELECT
+                '${CLASSIFICATION_CLASS_NAME_QUERY_ALIAS}',
+                this.ECInstanceId,
+                ${classificationLabelSelectClause}
+              FROM
+                ${CLASS_NAME_Classification} this, IdSet(?) idSetTable
+              WHERE
+                this.ECInstanceId = idSetTable.id
+              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+            )`,
             `${ELEMENTS_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
-            SELECT
-              '${ELEMENT_CLASS_NAME_QUERY_ALIAS}',
-              this.ECInstanceId,
-              ${elementLabelSelectClause}
-            FROM
-              ${CLASS_NAME_GeometricElement3d} this
-              JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = this.ECInstanceId
-            WHERE
-              ehc.TargetECInstanceId IN (${classificationIds.join(",")})
-              AND this.Parent.Id IS NULL
+              SELECT
+                '${ELEMENT_CLASS_NAME_QUERY_ALIAS}',
+                this.ECInstanceId,
+                ${elementLabelSelectClause}
+              FROM
+                ${CLASS_NAME_GeometricElement3d} this, IdSet(?) targetIdSetTable
+                JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = this.ECInstanceId
+              WHERE
+                ehc.TargetECInstanceId = targetIdSetTable.id
+                AND this.Parent.Id IS NULL
 
-            UNION ALL
+              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
-            SELECT
-              '${ELEMENT_CLASS_NAME_QUERY_ALIAS}',
-              this.ECInstanceId,
-              ${elementLabelSelectClause}
-            FROM
-              ${CLASS_NAME_GeometricElement3d} this
-              JOIN ${ELEMENTS_WITH_LABELS_CTE} pe ON pe.ECInstanceId = this.Parent.Id
-          )`,
+              UNION ALL
+
+              SELECT
+                '${ELEMENT_CLASS_NAME_QUERY_ALIAS}',
+                this.ECInstanceId,
+                ${elementLabelSelectClause}
+              FROM
+                ${CLASS_NAME_GeometricElement3d} this
+                JOIN ${ELEMENTS_WITH_LABELS_CTE} pe ON pe.ECInstanceId = this.Parent.Id
+            )`,
           ]
         : []),
     ];
@@ -547,6 +557,8 @@ function createInstanceKeyPathsFromInstanceLabelObs({
       { type: "string" as const, value: adjustedLabel },
       ...(classificationIds.length > 0
         ? [
+            { type: "idset" as const, value: classificationIds },
+            { type: "idset" as const, value: classificationIds },
             { type: "string" as const, value: adjustedLabel },
             { type: "string" as const, value: adjustedLabel },
           ]
@@ -678,8 +690,9 @@ function createGeometricElementInstanceKeyPaths(props: {
           e.ECInstanceId,
           e.Parent.Id,
           '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT)
-        FROM  ${CLASS_NAME_Element} e
-        WHERE e.ECInstanceId IN (${targetItems.join(",")})
+        FROM  ${CLASS_NAME_Element} e, IdSet(?) idSetTable
+        WHERE e.ECInstanceId = idSetTable.id
+        ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
         UNION ALL
 
@@ -703,7 +716,7 @@ function createGeometricElementInstanceKeyPaths(props: {
     `;
 
     return imodelAccess.createQueryReader(
-      { ctes, ecsql },
+      { ctes, ecsql, bindings: [{ type: "idset", value: targetItems }] },
       { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${componentName}/${componentId}/elements-filter-paths/${chunkIndex}` },
     );
   }).pipe(
