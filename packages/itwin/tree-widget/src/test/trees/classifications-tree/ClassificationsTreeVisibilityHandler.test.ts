@@ -18,7 +18,10 @@ import { validateHierarchyVisibility } from "../common/VisibilityValidation.js";
 import { createTreeWidgetTestingViewport } from "../TreeUtils.js";
 import { createClassificationHierarchyNode, createClassificationTableHierarchyNode, createPhysicalElementHierarchyNode } from "./HierarchyNodeUtils.js";
 import {
+  CATEGORY_SYMBOLIZES_CLASSIFICATION_RELATIONSHIP_SCHEMA,
+  importCategorySymbolizesClassificationSchema,
   importClassificationSchema,
+  insertCategorySymbolizesClassificationRelationship,
   insertClassification,
   insertClassificationSystem,
   insertClassificationTable,
@@ -30,6 +33,7 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyNodeIdentifiersPath, HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, Props } from "@itwin/presentation-shared";
 import type { ClassificationsTreeSearchTargets } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/SearchResultsTree.js";
+import type { ClassificationHasCategoriesRelationship } from "../../../tree-widget-react/components/trees/classifications-tree/UseClassificationsTree.js";
 import type { SearchResultsTree } from "../../../tree-widget-react/components/trees/common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
 
@@ -59,10 +63,23 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
   }
 
-  async function createVisibilityTestData({ imodel, visibleByDefault }: { imodel: IModelConnection; visibleByDefault?: boolean }) {
+  async function createVisibilityTestData({
+    imodel,
+    visibleByDefault,
+    classificationHasCategoriesRelationship,
+  }: {
+    imodel: IModelConnection;
+    visibleByDefault?: boolean;
+    classificationHasCategoriesRelationship?: ClassificationHasCategoriesRelationship;
+  }) {
     const imodelAccess = createIModelAccess(imodel);
     const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-    const idsCache = new ClassificationsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig: { rootClassificationSystemCode }, baseIdsCache });
+    const idsCache = new ClassificationsTreeIdsCache({
+      queryExecutor: imodelAccess,
+      hierarchyConfig: { rootClassificationSystemCode },
+      baseIdsCache,
+      classificationHasCategoriesRelationship,
+    });
     const viewport = createTreeWidgetTestingViewport({
       iModel: imodel,
       visibleByDefault,
@@ -84,6 +101,160 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       },
     };
   }
+
+  describe("custom classification -> category relationship", () => {
+    let buildIModelResult: Awaited<ReturnType<typeof createIModel>>;
+    const classificationHasCategoriesRelationship: ClassificationHasCategoriesRelationship = {
+      fullClassName: `${CATEGORY_SYMBOLIZES_CLASSIFICATION_RELATIONSHIP_SCHEMA}.CategorySymbolizesClassification`,
+      source: "category",
+    };
+    const createIModel = async (mochaContext: Mocha.Context) => {
+      return buildIModel(mochaContext, async (builder) => {
+        await importClassificationSchema(builder);
+        await importCategorySymbolizesClassificationSchema(builder);
+
+        const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
+        const table = insertClassificationTable({ builder, parentId: system.id, codeValue: "TestClassificationTable" });
+        const classification = insertClassification({ builder, modelId: table.id, codeValue: "TestClassification" });
+
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "Test physical model" });
+        const spatialCategory = insertSpatialCategory({ builder, codeValue: "Test spatial category" });
+        const elementInHierarchy = insertPhysicalElement({
+          builder,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory.id,
+          codeValue: "Parent 3d element",
+        });
+        insertElementHasClassificationsRelationship({ builder, elementId: elementInHierarchy.id, classificationId: classification.id });
+        insertCategorySymbolizesClassificationRelationship({ builder, categoryId: spatialCategory.id, classificationId: classification.id });
+
+        const categoryFromCustomRelationship = insertSpatialCategory({ builder, codeValue: "Category from custom relationship" });
+        const elementNotInHierarchy = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: categoryFromCustomRelationship.id });
+        insertCategorySymbolizesClassificationRelationship({ builder, categoryId: categoryFromCustomRelationship.id, classificationId: classification.id });
+        return { table, classification, spatialCategory, elementInHierarchy, categoryFromCustomRelationship, elementNotInHierarchy, physicalModel };
+      });
+    };
+    before(async function () {
+      buildIModelResult = await createIModel(this);
+    });
+
+    after(async function () {
+      await buildIModelResult[Symbol.asyncDispose]();
+    });
+
+    it("does not turn on categories from custom classification -> category relationship when `classificationHasCategoriesRelationship` is not provided", async function () {
+      const { imodel, ...keys } = buildIModelResult;
+
+      using visibilityTestData = await createVisibilityTestData({
+        imodel,
+      });
+      const { handler, provider, viewport } = visibilityTestData;
+
+      await validateClassificationsTreeHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        expectations: "all-hidden",
+      });
+      await handler.changeVisibility(createClassificationHierarchyNode({ id: keys.classification.id }), true);
+      await validateClassificationsTreeHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        expectations: "all-visible",
+      });
+      await validateNodeVisibility({
+        handler,
+        node: createPhysicalElementHierarchyNode({
+          id: keys.elementNotInHierarchy.id,
+          categoryId: keys.categoryFromCustomRelationship.id,
+          modelId: keys.physicalModel.id,
+        }),
+        viewport,
+        expectations: "all-hidden",
+      });
+    });
+
+    it("turns on categories from custom classification -> category relationship", async function () {
+      const { imodel, ...keys } = buildIModelResult;
+
+      using visibilityTestData = await createVisibilityTestData({
+        imodel,
+        classificationHasCategoriesRelationship,
+      });
+      const { handler, provider, viewport } = visibilityTestData;
+
+      await validateClassificationsTreeHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        expectations: "all-hidden",
+      });
+      await handler.changeVisibility(createClassificationHierarchyNode({ id: keys.classification.id }), true);
+      await validateClassificationsTreeHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        expectations: "all-visible",
+      });
+      await validateNodeVisibility({
+        handler,
+        node: createPhysicalElementHierarchyNode({
+          id: keys.elementNotInHierarchy.id,
+          categoryId: keys.categoryFromCustomRelationship.id,
+          modelId: keys.physicalModel.id,
+        }),
+        viewport,
+        expectations: "all-visible",
+      });
+    });
+
+    it("classification visibility takes into account categories from custom classification -> category relationship", async function () {
+      const { imodel, ...keys } = buildIModelResult;
+
+      using visibilityTestData = await createVisibilityTestData({
+        imodel,
+        classificationHasCategoriesRelationship,
+      });
+      const { handler, provider, viewport } = visibilityTestData;
+
+      await validateClassificationsTreeHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        expectations: "all-hidden",
+      });
+      await handler.changeVisibility(createClassificationHierarchyNode({ id: keys.classification.id }), true);
+      await validateClassificationsTreeHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        expectations: "all-visible",
+      });
+      viewport.changeCategoryDisplay({ categoryIds: keys.categoryFromCustomRelationship.id, display: false });
+      await validateClassificationsTreeHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        // prettier-ignore
+        expectations: {
+          [keys.table.id]: "partial",
+            [keys.classification.id]: "partial",
+              [keys.elementInHierarchy.id]: "visible",
+        },
+      });
+      await validateNodeVisibility({
+        handler,
+        node: createPhysicalElementHierarchyNode({
+          id: keys.elementNotInHierarchy.id,
+          categoryId: keys.categoryFromCustomRelationship.id,
+          modelId: keys.physicalModel.id,
+        }),
+        viewport,
+        expectations: "all-hidden",
+      });
+    });
+  });
 
   describe("enabling visibility", () => {
     it("by default everything is hidden in 3d view with 3d elements' hierarchy", async function () {

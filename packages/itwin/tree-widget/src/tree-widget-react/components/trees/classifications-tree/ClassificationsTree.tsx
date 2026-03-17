@@ -39,6 +39,7 @@ export function ClassificationsTree({
   getEditingProps,
   searchText,
   treeLabel,
+  visibilityHandlerConfig,
 }: ClassificationsTreeProps) {
   const classificationsTree = useClassificationsTree({
     activeView,
@@ -46,6 +47,7 @@ export function ClassificationsTree({
     emptyTreeContent,
     searchText,
     getTreeItemProps,
+    visibilityHandlerConfig,
   });
 
   return (

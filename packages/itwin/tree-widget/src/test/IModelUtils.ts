@@ -133,7 +133,7 @@ export async function importSchema({
   };
 }
 
-function getFullSchemaXml(props: { schemaName: string; schemaAlias?: string; schemaContentXml: string }) {
+export function getFullSchemaXml(props: { schemaName: string; schemaAlias?: string; schemaContentXml: string }) {
   const schemaAlias = props.schemaAlias ?? `test`;
   return `
     <?xml version="1.0" encoding="UTF-8"?>

@@ -33,10 +33,39 @@ import type { FunctionProps } from "../common/Utils.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
 import type { ClassificationsTreeSearchTargets } from "./internal/visibility/SearchResultsTree.js";
 
+/**
+ * Relationship which can be used to determine related categories for classifications.
+ *
+ * By default, these categories will be determined based on `ElementHasClassifications` relationship.
+ *
+ * @alpha
+ */
+export interface ClassificationHasCategoriesRelationship {
+  /**
+   * Full class name of the relationship which links classifications to categories.
+   */
+  fullClassName: string;
+  /**
+   * Source type of the relationship which links classifications to categories. Source can either be category or classification.
+   */
+  source: "classification" | "category";
+}
+
 /** @alpha */
 export interface UseClassificationsTreeProps {
   activeView: TreeWidgetViewport;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+  /**
+   * Optional configuration for classifications tree visibility handler.
+   */
+  visibilityHandlerConfig?: {
+    /**
+     * Relationship which can be used to determine related categories for classifications.
+     *
+     * By default, these categories will be determined based on `ElementHasClassifications` relationship.
+     */
+    classificationHasCategoriesRelationship?: ClassificationHasCategoriesRelationship;
+  };
   emptyTreeContent?: ReactNode;
   searchText?: string;
   getTreeItemProps?: ExtendedVisibilityTreeRendererProps["getTreeItemProps"];
@@ -64,6 +93,7 @@ export function useClassificationsTree({
   emptyTreeContent,
   searchText,
   getTreeItemProps,
+  visibilityHandlerConfig,
   ...rest
 }: UseClassificationsTreeProps): UseClassificationsTreeResult {
   const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
@@ -78,7 +108,13 @@ export function useClassificationsTree({
   );
   const componentId = useGuid();
 
-  const idsCache = getClassificationsTreeIdsCache({ getCache, getBaseIdsCache, imodel: activeView.iModel, hierarchyConfig });
+  const idsCache = getClassificationsTreeIdsCache({
+    getCache,
+    getBaseIdsCache,
+    imodel: activeView.iModel,
+    hierarchyConfig,
+    classificationHasCategoriesRelationship: visibilityHandlerConfig?.classificationHasCategoriesRelationship,
+  });
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useClassificationsCachedVisibility({
     activeView,
@@ -195,11 +231,13 @@ export function getClassificationsTreeIdsCache({
   getCache,
   imodel,
   hierarchyConfig,
+  classificationHasCategoriesRelationship,
 }: {
   getCache: ReturnType<typeof useSharedTreeContextInternal>["getCache"];
   getBaseIdsCache: ReturnType<typeof useSharedTreeContextInternal>["getBaseIdsCache"];
   imodel: IModelConnection;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+  classificationHasCategoriesRelationship?: ClassificationHasCategoriesRelationship;
 }) {
   return getCache({
     imodel,
@@ -208,7 +246,8 @@ export function getClassificationsTreeIdsCache({
         baseIdsCache: getBaseIdsCache({ type: "3d", elementClassName: getClassesByView("3d").elementClass, imodel }),
         hierarchyConfig,
         queryExecutor: createECSqlQueryExecutor(imodel),
+        classificationHasCategoriesRelationship,
       }),
-    cacheKey: `${hierarchyConfig.rootClassificationSystemCode}-ClassificationsTreeIdsCache`,
+    cacheKey: `${hierarchyConfig.rootClassificationSystemCode}-${classificationHasCategoriesRelationship ? `${classificationHasCategoriesRelationship.fullClassName};${classificationHasCategoriesRelationship.source}` : "default"}-ClassificationsTreeIdsCache`,
   });
 }

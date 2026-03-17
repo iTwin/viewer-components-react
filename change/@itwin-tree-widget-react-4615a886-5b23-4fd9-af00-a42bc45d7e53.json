@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Classifications tree: add option to specify `classification` -> `category` relationship. This can be done by specifying `visibilityHandlerConfig.classificationHasCategoriesRelationship` property in `UseClassificationsTreeProps`.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
