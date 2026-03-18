@@ -200,12 +200,6 @@ type ClassGroupingHierarchyNode = GroupingHierarchyNode & {
 };
 
 // @alpha
-interface ClassificationHasCategoriesRelationship {
-    fullClassName: string;
-    source: "classification" | "category";
-}
-
-// @alpha
 export const ClassificationsTreeComponent: {
     (props: ClassificationsTreeComponentProps): react_jsx_runtime0.JSX.Element | null;
     id: string;
@@ -262,6 +256,12 @@ type ClassificationsTreeProps = Pick<ExtendedVisibilityTreeRendererProps, "getIn
         sizeLimit?: number;
     };
 };
+
+// @alpha
+interface ClassificationToCategoriesRelationshipSpecification {
+    fullClassName: string;
+    source: "classification" | "category";
+}
 
 // @beta (undocumented)
 type CommonTreeRendererProps = Pick<BaseTreeRendererProps, "filterHierarchyLevel" | "selectionMode" | "getTreeItemProps"> & TreeRendererProps;
@@ -871,7 +871,7 @@ interface UseClassificationsTreeProps {
     // (undocumented)
     searchText?: string;
     visibilityHandlerConfig?: {
-        classificationHasCategoriesRelationship?: ClassificationHasCategoriesRelationship;
+        classificationToCategoriesRelationshipSpecification?: ClassificationToCategoriesRelationshipSpecification;
     };
 }
 

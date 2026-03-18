@@ -34,19 +34,20 @@ import type { ClassificationsTreeHierarchyConfiguration } from "./Classification
 import type { ClassificationsTreeSearchTargets } from "./internal/visibility/SearchResultsTree.js";
 
 /**
- * Relationship which can be used to determine related categories for classifications.
+ * Relationship used to determine related categories for classifications.
  *
  * By default, categories are determined using `ClassificationSystems.ElementHasClassifications` and `BisCore.GeometricElement3dIsInCategory` relationships.
  *
  * @alpha
  */
-export interface ClassificationHasCategoriesRelationship {
+export interface ClassificationToCategoriesRelationshipSpecification {
   /**
    * Full class name of the relationship which links classifications to categories. Format: `{SchemaName}.{RelationshipClassName}`.
    */
   fullClassName: string;
   /**
-   * Source type of the relationship which links classifications to categories. Source can either be category or classification.
+   * Describes the relationship direction by specifying its source.
+   * E.g. whether it's a `classification` -> `categories` or `category` -> `classifications` relationship.
    */
   source: "classification" | "category";
 }
@@ -60,11 +61,11 @@ export interface UseClassificationsTreeProps {
    */
   visibilityHandlerConfig?: {
     /**
-     * Relationship which can be used to determine related categories for classifications.
+     * Relationship used to determine related categories for classifications.
      *
-     * By default, these categories will be determined based on `ElementHasClassifications` relationship.
+     * By default, categories are determined using `ClassificationSystems.ElementHasClassifications` and `BisCore.GeometricElement3dIsInCategory` relationships.
      */
-    classificationHasCategoriesRelationship?: ClassificationHasCategoriesRelationship;
+    classificationToCategoriesRelationshipSpecification?: ClassificationToCategoriesRelationshipSpecification;
   };
   emptyTreeContent?: ReactNode;
   searchText?: string;
@@ -113,7 +114,7 @@ export function useClassificationsTree({
     getBaseIdsCache,
     imodel: activeView.iModel,
     hierarchyConfig,
-    classificationHasCategoriesRelationship: visibilityHandlerConfig?.classificationHasCategoriesRelationship,
+    classificationToCategoriesRelationshipSpecification: visibilityHandlerConfig?.classificationToCategoriesRelationshipSpecification,
   });
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useClassificationsCachedVisibility({
@@ -231,14 +232,19 @@ export function getClassificationsTreeIdsCache({
   getCache,
   imodel,
   hierarchyConfig,
-  classificationHasCategoriesRelationship,
+  classificationToCategoriesRelationshipSpecification,
 }: {
   getCache: ReturnType<typeof useSharedTreeContextInternal>["getCache"];
   getBaseIdsCache: ReturnType<typeof useSharedTreeContextInternal>["getBaseIdsCache"];
   imodel: IModelConnection;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
-  classificationHasCategoriesRelationship?: ClassificationHasCategoriesRelationship;
+  classificationToCategoriesRelationshipSpecification?: ClassificationToCategoriesRelationshipSpecification;
 }) {
+  const hierarchyConfigKey = hierarchyConfig.rootClassificationSystemCode;
+  const visibilityHandlerConfigKey = classificationToCategoriesRelationshipSpecification
+    ? `${classificationToCategoriesRelationshipSpecification.fullClassName};${classificationToCategoriesRelationshipSpecification.source}`
+    : "default";
+  const cacheKey = `${hierarchyConfigKey}-${visibilityHandlerConfigKey}-ClassificationsTreeIdsCache`;
   return getCache({
     imodel,
     createCache: () =>
@@ -246,8 +252,8 @@ export function getClassificationsTreeIdsCache({
         baseIdsCache: getBaseIdsCache({ type: "3d", elementClassName: getClassesByView("3d").elementClass, imodel }),
         hierarchyConfig,
         queryExecutor: createECSqlQueryExecutor(imodel),
-        classificationHasCategoriesRelationship,
+        classificationToCategoriesRelationshipSpecification,
       }),
-    cacheKey: `${hierarchyConfig.rootClassificationSystemCode}-${classificationHasCategoriesRelationship ? `${classificationHasCategoriesRelationship.fullClassName};${classificationHasCategoriesRelationship.source}` : "default"}-ClassificationsTreeIdsCache`,
+    cacheKey,
   });
 }

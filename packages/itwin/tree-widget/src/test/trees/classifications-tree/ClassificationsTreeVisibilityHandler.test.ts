@@ -33,7 +33,7 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyNodeIdentifiersPath, HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, Props } from "@itwin/presentation-shared";
 import type { ClassificationsTreeSearchTargets } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/SearchResultsTree.js";
-import type { ClassificationHasCategoriesRelationship } from "../../../tree-widget-react/components/trees/classifications-tree/UseClassificationsTree.js";
+import type { ClassificationToCategoriesRelationshipSpecification } from "../../../tree-widget-react/components/trees/classifications-tree/UseClassificationsTree.js";
 import type { SearchResultsTree } from "../../../tree-widget-react/components/trees/common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
 
@@ -66,11 +66,11 @@ describe("ClassificationsTreeVisibilityHandler", () => {
   async function createVisibilityTestData({
     imodel,
     visibleByDefault,
-    classificationHasCategoriesRelationship,
+    classificationToCategoriesRelationshipSpecification,
   }: {
     imodel: IModelConnection;
     visibleByDefault?: boolean;
-    classificationHasCategoriesRelationship?: ClassificationHasCategoriesRelationship;
+    classificationToCategoriesRelationshipSpecification?: ClassificationToCategoriesRelationshipSpecification;
   }) {
     const imodelAccess = createIModelAccess(imodel);
     const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
@@ -78,7 +78,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       queryExecutor: imodelAccess,
       hierarchyConfig: { rootClassificationSystemCode },
       baseIdsCache,
-      classificationHasCategoriesRelationship,
+      classificationToCategoriesRelationshipSpecification,
     });
     const viewport = createTreeWidgetTestingViewport({
       iModel: imodel,
@@ -104,7 +104,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
   describe("custom classification -> category relationship", () => {
     let buildIModelResult: Awaited<ReturnType<typeof createIModel>>;
-    const classificationHasCategoriesRelationship: ClassificationHasCategoriesRelationship = {
+    const classificationToCategoriesRelationshipSpecification: ClassificationToCategoriesRelationshipSpecification = {
       fullClassName: `${CATEGORY_SYMBOLIZES_CLASSIFICATION_RELATIONSHIP_SCHEMA}.CategorySymbolizesClassification`,
       source: "category",
     };
@@ -142,7 +142,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       await buildIModelResult[Symbol.asyncDispose]();
     });
 
-    it("does not turn on categories from custom classification -> category relationship when `classificationHasCategoriesRelationship` is not provided", async function () {
+    it("does not turn on categories from custom classification -> category relationship when `classificationToCategoriesRelationshipSpecification` is not provided", async function () {
       const { imodel, ...keys } = buildIModelResult;
 
       using visibilityTestData = await createVisibilityTestData({
@@ -180,7 +180,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
       using visibilityTestData = await createVisibilityTestData({
         imodel,
-        classificationHasCategoriesRelationship,
+        classificationToCategoriesRelationshipSpecification,
       });
       const { handler, provider, viewport } = visibilityTestData;
 
@@ -214,7 +214,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
       using visibilityTestData = await createVisibilityTestData({
         imodel,
-        classificationHasCategoriesRelationship,
+        classificationToCategoriesRelationshipSpecification,
       });
       const { handler, provider, viewport } = visibilityTestData;
 

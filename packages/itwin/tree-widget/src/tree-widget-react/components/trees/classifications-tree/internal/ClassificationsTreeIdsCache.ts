@@ -23,7 +23,7 @@ import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@
 import type { BaseIdsCacheImplProps } from "../../common/internal/caches/BaseIdsCache.js";
 import type { CategoryId, ClassificationId, ClassificationTableId, ElementId } from "../../common/internal/Types.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "../ClassificationsTreeDefinition.js";
-import type { ClassificationHasCategoriesRelationship } from "../UseClassificationsTree.js";
+import type { ClassificationToCategoriesRelationshipSpecification } from "../UseClassificationsTree.js";
 
 interface ClassificationInfo {
   parentClassificationOrTableId: ClassificationId | ClassificationTableId | undefined;
@@ -34,7 +34,7 @@ interface ClassificationInfo {
 interface ClassificationsTreeIdsCacheProps extends BaseIdsCacheImplProps {
   queryExecutor: LimitingECSqlQueryExecutor;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
-  classificationHasCategoriesRelationship?: ClassificationHasCategoriesRelationship;
+  classificationToCategoriesRelationshipSpecification?: ClassificationToCategoriesRelationshipSpecification;
 }
 
 /** @internal */
@@ -91,10 +91,10 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
         `,
       ];
       let categoriesOfClassificationSelector: string;
-      if (this.#props.classificationHasCategoriesRelationship) {
-        const relationship = this.#props.classificationHasCategoriesRelationship.fullClassName;
+      if (this.#props.classificationToCategoriesRelationshipSpecification) {
+        const relationship = this.#props.classificationToCategoriesRelationshipSpecification.fullClassName;
         const { categoryAccessor, classificationAccessor } =
-          this.#props.classificationHasCategoriesRelationship.source === "classification"
+          this.#props.classificationToCategoriesRelationshipSpecification.source === "classification"
             ? { classificationAccessor: "SourceECInstanceId", categoryAccessor: "TargetECInstanceId" }
             : { classificationAccessor: "TargetECInstanceId", categoryAccessor: "SourceECInstanceId" };
         categoriesOfClassificationSelector = `
