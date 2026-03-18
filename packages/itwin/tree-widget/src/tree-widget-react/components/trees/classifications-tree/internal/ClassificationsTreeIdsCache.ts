@@ -33,7 +33,7 @@ interface ClassificationInfo {
 
 interface ClassificationsTreeIdsCacheProps extends BaseIdsCacheImplProps {
   queryExecutor: LimitingECSqlQueryExecutor;
-  hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+  rootClassificationSystemCode: ClassificationsTreeHierarchyConfiguration["rootClassificationSystemCode"];
   classificationToCategoriesRelationshipSpecification?: ClassificationToCategoriesRelationshipSpecification;
 }
 
@@ -71,7 +71,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
             JOIN ${CLASS_NAME_ClassificationTable} ct ON ct.ECInstanceId = cl.Model.Id
             JOIN ${CLASS_NAME_ClassificationSystem} cs ON cs.ECInstanceId = ct.Parent.Id
             WHERE
-              cs.CodeValue = '${this.#props.hierarchyConfig.rootClassificationSystemCode}'
+              cs.CodeValue = '${this.#props.rootClassificationSystemCode}'
               AND NOT ct.IsPrivate
               AND NOT cl.IsPrivate
               AND cl.Parent.Id IS NULL

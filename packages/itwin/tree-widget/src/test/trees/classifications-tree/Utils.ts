@@ -26,7 +26,11 @@ export function createClassificationsTreeProvider(
 ): HierarchyProvider & Disposable {
   const imodelAccess = createIModelAccess(imodel);
   const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-  const idsCache = new ClassificationsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig, baseIdsCache });
+  const idsCache = new ClassificationsTreeIdsCache({
+    queryExecutor: imodelAccess,
+    rootClassificationSystemCode: hierarchyConfig.rootClassificationSystemCode,
+    baseIdsCache,
+  });
   const hierarchyProvider = createIModelHierarchyProvider({
     imodelAccess,
     hierarchyDefinition: new ClassificationsTreeDefinition({

@@ -76,7 +76,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
     const idsCache = new ClassificationsTreeIdsCache({
       queryExecutor: imodelAccess,
-      hierarchyConfig: { rootClassificationSystemCode },
+      rootClassificationSystemCode,
       baseIdsCache,
       classificationToCategoriesRelationshipSpecification,
     });
@@ -858,7 +858,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     }) {
       const imodelAccess = createIModelAccess(imodel);
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-      const idsCache = new ClassificationsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig: { rootClassificationSystemCode }, baseIdsCache });
+      const idsCache = new ClassificationsTreeIdsCache({ queryExecutor: imodelAccess, rootClassificationSystemCode, baseIdsCache });
       const viewport = createTreeWidgetTestingViewport({
         iModel: imodel,
         viewType: "3d",

@@ -153,7 +153,7 @@ export function useModelsTree({
   const componentId = useGuid();
   const idsCache = useModelsTreeIdsCache({
     imodel: activeView.iModel,
-    hierarchyConfig: hierarchyConfiguration,
+    hierarchyConfigPropsThatAffectCache: hierarchyConfiguration,
   });
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useCachedVisibility<ModelsTreeIdsCache, ModelsTreeSearchTargets>({
@@ -310,25 +310,25 @@ export function ModelsTreeIcon({ node }: { node: TreeNode }) {
 
 function useModelsTreeIdsCache({
   imodel,
-  hierarchyConfig,
+  hierarchyConfigPropsThatAffectCache,
 }: {
   imodel: IModelConnection;
-  hierarchyConfig: ModelsTreeHierarchyConfiguration;
+  hierarchyConfigPropsThatAffectCache: Pick<ModelsTreeHierarchyConfiguration, "elementClassSpecification" | "hideRootSubject" | "showEmptyModels">;
 }): ModelsTreeIdsCache {
   const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
-  const baseIdsCache = getBaseIdsCache({ type: "3d", elementClassName: hierarchyConfig.elementClassSpecification, imodel });
+  const baseIdsCache = getBaseIdsCache({ type: "3d", elementClassName: hierarchyConfigPropsThatAffectCache.elementClassSpecification, imodel });
 
   const modelsTreeIdsCache = getCache({
     imodel,
     createCache: () =>
       new ModelsTreeIdsCache({
         baseIdsCache,
-        elementClassName: hierarchyConfig.elementClassSpecification,
-        hideRootSubject: hierarchyConfig.hideRootSubject,
-        showEmptyModels: hierarchyConfig.showEmptyModels,
+        elementClassName: hierarchyConfigPropsThatAffectCache.elementClassSpecification,
+        hideRootSubject: hierarchyConfigPropsThatAffectCache.hideRootSubject,
+        showEmptyModels: hierarchyConfigPropsThatAffectCache.showEmptyModels,
         queryExecutor: createECSqlQueryExecutor(imodel),
       }),
-    cacheKey: `${hierarchyConfig.hideRootSubject ? "hideRootSubject" : "showRootSubject"}-${hierarchyConfig.showEmptyModels ? "showEmptyModels" : "hideEmptyModels"}-${hierarchyConfig.elementClassSpecification}-ModelsTreeIdsCache`,
+    cacheKey: `${hierarchyConfigPropsThatAffectCache.hideRootSubject ? "hideRootSubject" : "showRootSubject"}-${hierarchyConfigPropsThatAffectCache.showEmptyModels ? "showEmptyModels" : "hideEmptyModels"}-${hierarchyConfigPropsThatAffectCache.elementClassSpecification}-ModelsTreeIdsCache`,
   });
 
   return modelsTreeIdsCache;

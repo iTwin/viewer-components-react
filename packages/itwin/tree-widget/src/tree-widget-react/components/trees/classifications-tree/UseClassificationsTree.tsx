@@ -113,8 +113,8 @@ export function useClassificationsTree({
     getCache,
     getBaseIdsCache,
     imodel: activeView.iModel,
-    hierarchyConfig,
-    classificationToCategoriesRelationshipSpecification: visibilityHandlerConfig?.classificationToCategoriesRelationshipSpecification,
+    hierarchyConfigPropsThatAffectCache: hierarchyConfig,
+    visibilityHandlerConfigPropsThatAffectCache: visibilityHandlerConfig,
   });
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useClassificationsCachedVisibility({
@@ -231,18 +231,21 @@ export function getClassificationsTreeIdsCache({
   getBaseIdsCache,
   getCache,
   imodel,
-  hierarchyConfig,
-  classificationToCategoriesRelationshipSpecification,
+  hierarchyConfigPropsThatAffectCache,
+  visibilityHandlerConfigPropsThatAffectCache,
 }: {
   getCache: ReturnType<typeof useSharedTreeContextInternal>["getCache"];
   getBaseIdsCache: ReturnType<typeof useSharedTreeContextInternal>["getBaseIdsCache"];
   imodel: IModelConnection;
-  hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
-  classificationToCategoriesRelationshipSpecification?: ClassificationToCategoriesRelationshipSpecification;
+  hierarchyConfigPropsThatAffectCache: Pick<ClassificationsTreeHierarchyConfiguration, "rootClassificationSystemCode">;
+  visibilityHandlerConfigPropsThatAffectCache?: Pick<
+    NonNullable<UseClassificationsTreeProps["visibilityHandlerConfig"]>,
+    "classificationToCategoriesRelationshipSpecification"
+  >;
 }) {
-  const hierarchyConfigKey = hierarchyConfig.rootClassificationSystemCode;
-  const visibilityHandlerConfigKey = classificationToCategoriesRelationshipSpecification
-    ? `${classificationToCategoriesRelationshipSpecification.fullClassName};${classificationToCategoriesRelationshipSpecification.source}`
+  const hierarchyConfigKey = hierarchyConfigPropsThatAffectCache.rootClassificationSystemCode;
+  const visibilityHandlerConfigKey = visibilityHandlerConfigPropsThatAffectCache?.classificationToCategoriesRelationshipSpecification
+    ? `${visibilityHandlerConfigPropsThatAffectCache.classificationToCategoriesRelationshipSpecification.fullClassName};${visibilityHandlerConfigPropsThatAffectCache.classificationToCategoriesRelationshipSpecification.source}`
     : "default";
   const cacheKey = `${hierarchyConfigKey}-${visibilityHandlerConfigKey}-ClassificationsTreeIdsCache`;
   return getCache({
@@ -250,9 +253,9 @@ export function getClassificationsTreeIdsCache({
     createCache: () =>
       new ClassificationsTreeIdsCache({
         baseIdsCache: getBaseIdsCache({ type: "3d", elementClassName: getClassesByView("3d").elementClass, imodel }),
-        hierarchyConfig,
+        rootClassificationSystemCode: hierarchyConfigPropsThatAffectCache.rootClassificationSystemCode,
         queryExecutor: createECSqlQueryExecutor(imodel),
-        classificationToCategoriesRelationshipSpecification,
+        classificationToCategoriesRelationshipSpecification: visibilityHandlerConfigPropsThatAffectCache?.classificationToCategoriesRelationshipSpecification,
       }),
     cacheKey,
   });

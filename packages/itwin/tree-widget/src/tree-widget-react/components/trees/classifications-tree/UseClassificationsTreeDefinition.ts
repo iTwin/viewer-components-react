@@ -68,7 +68,13 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
     return imodels.map((imodel) => {
       return {
         imodelAccess: createIModelAccess({ imodel, hierarchyLevelSizeLimit: 1000 }),
-        cache: getClassificationsTreeIdsCache({ getBaseIdsCache, getCache, imodel, hierarchyConfig }),
+        cache: getClassificationsTreeIdsCache({
+          getBaseIdsCache,
+          getCache,
+          imodel,
+          hierarchyConfigPropsThatAffectCache: hierarchyConfig,
+          visibilityHandlerConfigPropsThatAffectCache: undefined,
+        }),
       };
     });
   }, [imodels, getBaseIdsCache, getCache, hierarchyConfig]);
