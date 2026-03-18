@@ -6,7 +6,7 @@
 import { XMLParser } from "fast-xml-parser";
 import fs from "fs";
 import { SnapshotDb } from "@itwin/core-backend";
-import { Id64 } from "@itwin/core-bentley";
+import { assert, Id64 } from "@itwin/core-bentley";
 import { BisCodeSpec, Code, IModel } from "@itwin/core-common";
 import { buildTestIModel } from "@itwin/presentation-testing";
 
@@ -100,7 +100,10 @@ export async function importSchema({
   const parsedSchema = new XMLParser({
     ignoreAttributes: false,
     attributeNamePrefix: "",
-    isArray: (_, jpath) => jpath.startsWith("ECSchema."),
+    isArray: (_, jpath) => {
+      assert(typeof jpath === "string");
+      return jpath.startsWith("ECSchema.");
+    },
   }).parse(schemaXml);
   const schemaItems = Object.values(parsedSchema.ECSchema)
     .flatMap<any>((itemDef) => itemDef)
