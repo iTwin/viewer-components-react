@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1773165189369,
+  "lastUpdate": 1773815423821,
   "repoUrl": "https://github.com/iTwin/viewer-components-react",
   "entries": {
     "Tree-Widget benchmark": [
@@ -10890,6 +10890,129 @@ window.BENCHMARK_DATA = {
             "value": 114,
             "unit": "ms",
             "extra": "count: 11\nmax: 114\np95: 114\nmedian: 65"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d6e2bb9285459ddb36cc5befd0edd7b82acc2e40",
+          "message": "Bump fast-xml-parser from 5.3.8 to 5.5.6 in /packages/itwin/tree-widget (#1627)\n\n* Bump fast-xml-parser from 5.3.8 to 5.5.6 in /packages/itwin/tree-widget\n\nBumps [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser) from 5.3.8 to 5.5.6.\n- [Release notes](https://github.com/NaturalIntelligence/fast-xml-parser/releases)\n- [Changelog](https://github.com/NaturalIntelligence/fast-xml-parser/blob/master/CHANGELOG.md)\n- [Commits](https://github.com/NaturalIntelligence/fast-xml-parser/compare/v5.3.8...v5.5.6)\n\n---\nupdated-dependencies:\n- dependency-name: fast-xml-parser\n  dependency-version: 5.5.6\n  dependency-type: direct:development\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\n\n* react to breaking change\n\n---------\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>",
+          "timestamp": "2026-03-18T06:21:35Z",
+          "tree_id": "434cf5aee7ddcf13bc1521be46bd9c517df7ca69",
+          "url": "https://github.com/iTwin/viewer-components-react/commit/d6e2bb9285459ddb36cc5befd0edd7b82acc2e40"
+        },
+        "date": 1773815421436,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "categories tree creates initial filtered view for 50k items",
+            "value": 1443.12,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree creates initial filtered view for 50k items (P95 of main thread blocks)",
+            "value": 304,
+            "unit": "ms",
+            "extra": "count: 7\nmax: 304\np95: 304\nmedian: 32"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k subCategories",
+            "value": 2409.7,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k subCategories (P95 of main thread blocks)",
+            "value": 44,
+            "unit": "ms",
+            "extra": "count: 2\nmax: 44\np95: 44\nmedian: 32.5"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k categories",
+            "value": 5138.79,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k categories (P95 of main thread blocks)",
+            "value": 116,
+            "unit": "ms",
+            "extra": "count: 7\nmax: 116\np95: 116\nmedian: 63"
+          },
+          {
+            "name": "models tree creates initial filtered view for 50k target items",
+            "value": 847.52,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree creates initial filtered view for 50k target items (P95 of main thread blocks)",
+            "value": 91,
+            "unit": "ms",
+            "extra": "count: 8\nmax: 91\np95: 91\nmedian: 29"
+          },
+          {
+            "name": "models tree validates categories visibility for imodel with 50k categories",
+            "value": 8997.89,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree validates categories visibility for imodel with 50k categories (P95 of main thread blocks)",
+            "value": 211,
+            "unit": "ms",
+            "extra": "count: 7\nmax: 211\np95: 211\nmedian: 36"
+          },
+          {
+            "name": "models tree changing model visibility changes visibility for 50k elements",
+            "value": 2502.78,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing model visibility changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 0,
+            "unit": "ms",
+            "extra": "count: 0\nmax: N/A\np95: N/A\nmedian: N/A"
+          },
+          {
+            "name": "models tree changing category visibility changes visibility for 50k elements",
+            "value": 2678.81,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing category visibility changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 121,
+            "unit": "ms",
+            "extra": "count: 1\nmax: 121\np95: 121\nmedian: 121"
+          },
+          {
+            "name": "models tree changing per-model-category override changes visibility for 50k elements",
+            "value": 2642,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing per-model-category override changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 127,
+            "unit": "ms",
+            "extra": "count: 1\nmax: 127\np95: 127\nmedian: 127"
+          },
+          {
+            "name": "models tree changing element visibility changes only parent nodes visibility with 50k elements",
+            "value": 4982.59,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing element visibility changes only parent nodes visibility with 50k elements (P95 of main thread blocks)",
+            "value": 187,
+            "unit": "ms",
+            "extra": "count: 7\nmax: 187\np95: 187\nmedian: 82"
           }
         ]
       }
