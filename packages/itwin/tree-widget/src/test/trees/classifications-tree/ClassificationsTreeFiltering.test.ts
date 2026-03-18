@@ -63,7 +63,7 @@ describe("Classifications tree", () => {
         using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
         using idsCache = new ClassificationsTreeIdsCache({
           queryExecutor: imodelAccess,
-          rootClassificationSystemCode: defaultHierarchyConfiguration.rootClassificationSystemCode,
+          hierarchyConfig: defaultHierarchyConfiguration,
           baseIdsCache,
         });
         expect(
@@ -105,7 +105,7 @@ describe("Classifications tree", () => {
         using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
         using idsCache = new ClassificationsTreeIdsCache({
           queryExecutor: imodelAccess,
-          rootClassificationSystemCode: defaultHierarchyConfiguration.rootClassificationSystemCode,
+          hierarchyConfig: defaultHierarchyConfiguration,
           baseIdsCache,
         });
         expect(
@@ -151,7 +151,7 @@ describe("Classifications tree", () => {
         using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
         using idsCache = new ClassificationsTreeIdsCache({
           queryExecutor: imodelAccess,
-          rootClassificationSystemCode: defaultHierarchyConfiguration.rootClassificationSystemCode,
+          hierarchyConfig: defaultHierarchyConfiguration,
           baseIdsCache,
         });
         expect(
@@ -205,7 +205,7 @@ describe("Classifications tree", () => {
         using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
         using idsCache = new ClassificationsTreeIdsCache({
           queryExecutor: imodelAccess,
-          rootClassificationSystemCode: defaultHierarchyConfiguration.rootClassificationSystemCode,
+          hierarchyConfig: defaultHierarchyConfiguration,
           baseIdsCache,
         });
         expect(
@@ -266,7 +266,7 @@ describe("Classifications tree", () => {
         using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
         using idsCache = new ClassificationsTreeIdsCache({
           queryExecutor: imodelAccess,
-          rootClassificationSystemCode: defaultHierarchyConfiguration.rootClassificationSystemCode,
+          hierarchyConfig: defaultHierarchyConfiguration,
           baseIdsCache,
         });
         expect(
@@ -320,7 +320,7 @@ describe("Classifications tree", () => {
         using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
         using idsCache = new ClassificationsTreeIdsCache({
           queryExecutor: imodelAccess,
-          rootClassificationSystemCode: defaultHierarchyConfiguration.rootClassificationSystemCode,
+          hierarchyConfig: defaultHierarchyConfiguration,
           baseIdsCache,
         });
         expect(
@@ -377,7 +377,7 @@ describe("Classifications tree", () => {
         using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
         using idsCache = new ClassificationsTreeIdsCache({
           queryExecutor: imodelAccess,
-          rootClassificationSystemCode: defaultHierarchyConfiguration.rootClassificationSystemCode,
+          hierarchyConfig: defaultHierarchyConfiguration,
           baseIdsCache,
         });
         expect(
@@ -444,7 +444,7 @@ describe("Classifications tree", () => {
         using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
         using idsCache = new ClassificationsTreeIdsCache({
           queryExecutor: imodelAccess,
-          rootClassificationSystemCode: defaultHierarchyConfiguration.rootClassificationSystemCode,
+          hierarchyConfig: defaultHierarchyConfiguration,
           baseIdsCache,
         });
         expect(
@@ -490,7 +490,7 @@ describe("Classifications tree", () => {
       using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
       using idsCache = new ClassificationsTreeIdsCache({
         queryExecutor: imodelAccess,
-        rootClassificationSystemCode: defaultHierarchyConfiguration.rootClassificationSystemCode,
+        hierarchyConfig: defaultHierarchyConfiguration,
         baseIdsCache,
       });
       expect(
@@ -526,7 +526,7 @@ describe("Classifications tree", () => {
       using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
       using idsCache = new ClassificationsTreeIdsCache({
         queryExecutor: imodelAccess,
-        rootClassificationSystemCode: defaultHierarchyConfiguration.rootClassificationSystemCode,
+        hierarchyConfig: defaultHierarchyConfiguration,
         baseIdsCache,
       });
 

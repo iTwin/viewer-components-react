@@ -23,7 +23,22 @@ import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@
 import type { BaseIdsCacheImplProps } from "../../common/internal/caches/BaseIdsCache.js";
 import type { CategoryId, ClassificationId, ClassificationTableId, ElementId } from "../../common/internal/Types.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "../ClassificationsTreeDefinition.js";
-import type { ClassificationToCategoriesRelationshipSpecification } from "../UseClassificationsTree.js";
+import type { ClassificationsTreeVisibilityHandlerConfiguration } from "../UseClassificationsTree.js";
+
+/**
+ * Hierarchy config props needed for ids cache.
+ * @internal
+ */
+export type HierarchyConfigForClassificationsCache = Pick<ClassificationsTreeHierarchyConfiguration, "rootClassificationSystemCode">;
+
+/**
+ * Visibility handler config props needed for ids cache.
+ * @internal
+ */
+export type VisibilityHandlerConfigForClassificationsCache = Pick<
+  ClassificationsTreeVisibilityHandlerConfiguration,
+  "classificationToCategoriesRelationshipSpecification"
+>;
 
 interface ClassificationInfo {
   parentClassificationOrTableId: ClassificationId | ClassificationTableId | undefined;
@@ -33,8 +48,8 @@ interface ClassificationInfo {
 
 interface ClassificationsTreeIdsCacheProps extends BaseIdsCacheImplProps {
   queryExecutor: LimitingECSqlQueryExecutor;
-  rootClassificationSystemCode: ClassificationsTreeHierarchyConfiguration["rootClassificationSystemCode"];
-  classificationToCategoriesRelationshipSpecification?: ClassificationToCategoriesRelationshipSpecification;
+  hierarchyConfig: HierarchyConfigForClassificationsCache;
+  visibilityHandlerConfig?: VisibilityHandlerConfigForClassificationsCache;
 }
 
 /** @internal */
@@ -71,7 +86,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
             JOIN ${CLASS_NAME_ClassificationTable} ct ON ct.ECInstanceId = cl.Model.Id
             JOIN ${CLASS_NAME_ClassificationSystem} cs ON cs.ECInstanceId = ct.Parent.Id
             WHERE
-              cs.CodeValue = '${this.#props.rootClassificationSystemCode}'
+              cs.CodeValue = '${this.#props.hierarchyConfig.rootClassificationSystemCode}'
               AND NOT ct.IsPrivate
               AND NOT cl.IsPrivate
               AND cl.Parent.Id IS NULL
@@ -91,10 +106,10 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
         `,
       ];
       let categoriesOfClassificationSelector: string;
-      if (this.#props.classificationToCategoriesRelationshipSpecification) {
-        const relationship = this.#props.classificationToCategoriesRelationshipSpecification.fullClassName;
+      if (this.#props.visibilityHandlerConfig?.classificationToCategoriesRelationshipSpecification) {
+        const relationship = this.#props.visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.fullClassName;
         const { categoryAccessor, classificationAccessor } =
-          this.#props.classificationToCategoriesRelationshipSpecification.source === "classification"
+          this.#props.visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.source === "classification"
             ? { classificationAccessor: "SourceECInstanceId", categoryAccessor: "TargetECInstanceId" }
             : { classificationAccessor: "TargetECInstanceId", categoryAccessor: "SourceECInstanceId" };
         categoriesOfClassificationSelector = `

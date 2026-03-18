@@ -42,6 +42,7 @@ import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerP
 import type { SearchResultsTree } from "../common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { NormalizedHierarchySearchPath } from "../common/Utils.js";
+import type { HierarchyConfigForModelsCache } from "./internal/ModelsTreeIdsCache.js";
 import type { ModelsTreeSearchError, ModelsTreeSubTreeError } from "./internal/UseSearchPaths.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
 import type { ModelsTreeSearchTargets } from "./internal/visibility/SearchResultsTree.js";
@@ -153,7 +154,7 @@ export function useModelsTree({
   const componentId = useGuid();
   const idsCache = useModelsTreeIdsCache({
     imodel: activeView.iModel,
-    hierarchyConfigPropsThatAffectCache: hierarchyConfiguration,
+    hierarchyConfig: hierarchyConfiguration,
   });
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useCachedVisibility<ModelsTreeIdsCache, ModelsTreeSearchTargets>({
@@ -308,27 +309,19 @@ export function ModelsTreeIcon({ node }: { node: TreeNode }) {
   return <Icon href={getIcon()} />;
 }
 
-function useModelsTreeIdsCache({
-  imodel,
-  hierarchyConfigPropsThatAffectCache,
-}: {
-  imodel: IModelConnection;
-  hierarchyConfigPropsThatAffectCache: Pick<ModelsTreeHierarchyConfiguration, "elementClassSpecification" | "hideRootSubject" | "showEmptyModels">;
-}): ModelsTreeIdsCache {
+function useModelsTreeIdsCache({ imodel, hierarchyConfig }: { imodel: IModelConnection; hierarchyConfig: HierarchyConfigForModelsCache }): ModelsTreeIdsCache {
   const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
-  const baseIdsCache = getBaseIdsCache({ type: "3d", elementClassName: hierarchyConfigPropsThatAffectCache.elementClassSpecification, imodel });
+  const baseIdsCache = getBaseIdsCache({ type: "3d", elementClassName: hierarchyConfig.elementClassSpecification, imodel });
 
   const modelsTreeIdsCache = getCache({
     imodel,
     createCache: () =>
       new ModelsTreeIdsCache({
         baseIdsCache,
-        elementClassName: hierarchyConfigPropsThatAffectCache.elementClassSpecification,
-        hideRootSubject: hierarchyConfigPropsThatAffectCache.hideRootSubject,
-        showEmptyModels: hierarchyConfigPropsThatAffectCache.showEmptyModels,
+        hierarchyConfig,
         queryExecutor: createECSqlQueryExecutor(imodel),
       }),
-    cacheKey: `${hierarchyConfigPropsThatAffectCache.hideRootSubject ? "hideRootSubject" : "showRootSubject"}-${hierarchyConfigPropsThatAffectCache.showEmptyModels ? "showEmptyModels" : "hideEmptyModels"}-${hierarchyConfigPropsThatAffectCache.elementClassSpecification}-ModelsTreeIdsCache`,
+    cacheKey: `${hierarchyConfig.hideRootSubject ? "hideRootSubject" : "showRootSubject"}-${hierarchyConfig.showEmptyModels ? "showEmptyModels" : "hideEmptyModels"}-${hierarchyConfig.elementClassSpecification}-ModelsTreeIdsCache`,
   });
 
   return modelsTreeIdsCache;

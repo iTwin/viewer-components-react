@@ -258,6 +258,11 @@ type ClassificationsTreeProps = Pick<ExtendedVisibilityTreeRendererProps, "getIn
 };
 
 // @alpha
+interface ClassificationsTreeVisibilityHandlerConfiguration {
+    classificationToCategoriesRelationshipSpecification?: ClassificationToCategoriesRelationshipSpecification;
+}
+
+// @alpha
 interface ClassificationToCategoriesRelationshipSpecification {
     fullClassName: string;
     source: "classification" | "category";
@@ -870,9 +875,7 @@ interface UseClassificationsTreeProps {
     hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
     // (undocumented)
     searchText?: string;
-    visibilityHandlerConfig?: {
-        classificationToCategoriesRelationshipSpecification?: ClassificationToCategoriesRelationshipSpecification;
-    };
+    visibilityHandlerConfig?: ClassificationsTreeVisibilityHandlerConfiguration;
 }
 
 // @alpha (undocumented)

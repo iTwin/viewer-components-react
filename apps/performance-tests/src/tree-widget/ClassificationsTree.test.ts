@@ -63,7 +63,7 @@ function runClassificationsPerformanceTest({
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: "BisCore:GeometricElement3d", type: "3d" });
       const idsCache = new ClassificationsTreeIdsCache({
         queryExecutor: imodelAccess,
-        rootClassificationSystemCode: hierarchyConfig.rootClassificationSystemCode,
+        hierarchyConfig,
         baseIdsCache,
       });
       const hierarchyDefinition = new ClassificationsTreeDefinition({ imodelAccess, getIdsCache: () => idsCache, hierarchyConfig });
