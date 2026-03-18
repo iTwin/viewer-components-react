@@ -36,7 +36,7 @@ import type { ClassificationsTreeSearchTargets } from "./internal/visibility/Sea
 /**
  * Relationship which can be used to determine related categories for classifications.
  *
- * By default, these categories will be determined based on `ElementHasClassifications` relationship.
+ * By default, categories are determined using `ClassificationSystems.ElementHasClassifications` and `BisCore.GeometricElement3dIsInCategory` relationships.
  *
  * @alpha
  */
