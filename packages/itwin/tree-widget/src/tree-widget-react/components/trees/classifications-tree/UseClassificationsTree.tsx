@@ -42,7 +42,7 @@ import type { ClassificationsTreeSearchTargets } from "./internal/visibility/Sea
  */
 export interface ClassificationHasCategoriesRelationship {
   /**
-   * Full class name of the relationship which links classifications to categories.
+   * Full class name of the relationship which links classifications to categories. Format: `{SchemaName}.{RelationshipClassName}`.
    */
   fullClassName: string;
   /**
