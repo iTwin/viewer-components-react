@@ -5,6 +5,7 @@
 
 import { defer, from, map, mergeMap, of, reduce, shareReplay } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
+import { normalizeFullClassName } from "@itwin/presentation-shared";
 import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
 import {
   CLASS_NAME_Classification,
@@ -107,7 +108,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
       ];
       let categoriesOfClassificationSelector: string;
       if (this.#props.visibilityHandlerConfig?.classificationToCategoriesRelationshipSpecification) {
-        const relationship = this.#props.visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.fullClassName;
+        const relationship = normalizeFullClassName(this.#props.visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.fullClassName);
         const { categoryAccessor, classificationAccessor } =
           this.#props.visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.source === "classification"
             ? { classificationAccessor: "SourceECInstanceId", categoryAccessor: "TargetECInstanceId" }
