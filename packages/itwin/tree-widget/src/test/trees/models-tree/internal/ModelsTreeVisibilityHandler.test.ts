@@ -77,11 +77,7 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
     const idsCache = new ModelsTreeIdsCache({
       queryExecutor: createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"),
-      hierarchyConfig: {
-        showEmptyModels: hierarchyConfig?.showEmptyModels ?? defaultHierarchyConfiguration.showEmptyModels,
-        hideRootSubject: hierarchyConfig?.hideRootSubject ?? defaultHierarchyConfiguration.hideRootSubject,
-        elementClassSpecification: hierarchyConfig?.elementClassSpecification ?? defaultHierarchyConfiguration.elementClassSpecification,
-      },
+      hierarchyConfig: { ...defaultHierarchyConfiguration, ...hierarchyConfig },
       baseIdsCache,
     });
     const symbolDispose = idsCache[Symbol.dispose];
