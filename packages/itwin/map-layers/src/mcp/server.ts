@@ -3,6 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+declare const process: { env: Record<string, string | undefined> };
+
 /**
  * Map Layers MCP Server
  *
