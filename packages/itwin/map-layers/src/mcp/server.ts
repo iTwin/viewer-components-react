@@ -30,9 +30,14 @@ import {
 // Server
 // ---------------------------------------------------------------------------
 
+const SERVER_VERSION =
+  process.env.MAP_LAYERS_MCP_VERSION ??
+  process.env.npm_package_version ??
+  "0.0.0";
+
 export const server = new McpServer({
   name: "map-layers-mcp",
-  version: "1.0.0",
+  version: SERVER_VERSION,
 });
 
 // ── 1. open_map_layers_widget ────────────────────────────────────────────────
