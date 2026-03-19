@@ -23,12 +23,17 @@ import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { BaseIdsCacheImplProps } from "../../common/internal/caches/BaseIdsCache.js";
 import type { CategoryId, ModelId, SubjectId } from "../../common/internal/Types.js";
+import type { ModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
+
+/**
+ * Hierarchy config props needed for ids cache.
+ * @internal
+ */
+export type HierarchyConfigForModelsCache = Pick<ModelsTreeHierarchyConfiguration, "elementClassSpecification" | "hideRootSubject" | "showEmptyModels">;
 
 interface ModelsTreeIdsCacheProps extends BaseIdsCacheImplProps {
   queryExecutor: LimitingECSqlQueryExecutor;
-  showEmptyModels: boolean;
-  hideRootSubject: boolean;
-  elementClassName: string;
+  hierarchyConfig: HierarchyConfigForModelsCache;
 }
 
 interface SubjectInfo {
@@ -52,9 +57,9 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
   constructor(props: ModelsTreeIdsCacheProps) {
     super(props);
     this.#queryExecutor = props.queryExecutor;
-    this.#showEmptyModels = props.showEmptyModels;
-    this.#hideRootSubject = props.hideRootSubject;
-    this.#elementClassName = props.elementClassName;
+    this.#showEmptyModels = props.hierarchyConfig.showEmptyModels;
+    this.#hideRootSubject = props.hierarchyConfig.hideRootSubject;
+    this.#elementClassName = props.hierarchyConfig.elementClassSpecification;
     this.#componentId = Guid.createValue();
     this.#componentName = "ModelsTreeIdsCache";
   }

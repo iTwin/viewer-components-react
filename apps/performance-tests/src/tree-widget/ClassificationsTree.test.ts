@@ -61,7 +61,11 @@ function runClassificationsPerformanceTest({
       const imodel = SnapshotDb.openFile(Datasets.getIModelPath("50k classifications"));
       const imodelAccess = StatelessHierarchyProvider.createIModelAccess(imodel, "unbounded");
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: "BisCore:GeometricElement3d", type: "3d" });
-      const idsCache = new ClassificationsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig, baseIdsCache });
+      const idsCache = new ClassificationsTreeIdsCache({
+        queryExecutor: imodelAccess,
+        hierarchyConfig,
+        baseIdsCache,
+      });
       const hierarchyDefinition = new ClassificationsTreeDefinition({ imodelAccess, getIdsCache: () => idsCache, hierarchyConfig });
       return { imodel, imodelAccess, idsCache, baseIdsCache, hierarchyDefinition };
     },

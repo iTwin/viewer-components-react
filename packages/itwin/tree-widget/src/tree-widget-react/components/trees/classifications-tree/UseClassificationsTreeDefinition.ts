@@ -16,6 +16,7 @@ import type { useTree } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { FunctionProps } from "../common/Utils.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
+import type { ClassificationsTreeVisibilityHandlerConfiguration } from "./UseClassificationsTree.js";
 
 /** @alpha */
 interface UseClassificationsTreeDefinitionProps {
@@ -60,7 +61,14 @@ interface UseClassificationsTreeDefinitionResult {
  * @alpha
  */
 export function useClassificationsTreeDefinition(props: UseClassificationsTreeDefinitionProps): UseClassificationsTreeDefinitionResult {
-  const { imodels, hierarchyConfig, search, onSearchPathsChanged } = props;
+  return useClassificationsTreeDefinitionInternal(props);
+}
+
+/** @internal */
+export function useClassificationsTreeDefinitionInternal(
+  props: UseClassificationsTreeDefinitionProps & { visibilityHandlerConfig?: ClassificationsTreeVisibilityHandlerConfiguration },
+): UseClassificationsTreeDefinitionResult {
+  const { imodels, hierarchyConfig, search, onSearchPathsChanged, visibilityHandlerConfig } = props;
   const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
   const { onFeatureUsed } = useTelemetryContext();
 
@@ -68,10 +76,16 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
     return imodels.map((imodel) => {
       return {
         imodelAccess: createIModelAccess({ imodel, hierarchyLevelSizeLimit: 1000 }),
-        cache: getClassificationsTreeIdsCache({ getBaseIdsCache, getCache, imodel, hierarchyConfig }),
+        cache: getClassificationsTreeIdsCache({
+          getBaseIdsCache,
+          getCache,
+          imodel,
+          hierarchyConfig,
+          visibilityHandlerConfig,
+        }),
       };
     });
-  }, [imodels, getBaseIdsCache, getCache, hierarchyConfig]);
+  }, [imodels, getBaseIdsCache, getCache, hierarchyConfig, visibilityHandlerConfig]);
 
   const definition = useMemo(() => {
     return new ClassificationsTreeDefinition({

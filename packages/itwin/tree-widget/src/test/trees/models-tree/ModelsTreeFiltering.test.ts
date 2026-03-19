@@ -133,9 +133,7 @@ describe("Models tree", () => {
       using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: config.elementClassSpecification, type: "3d" });
       using idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
-        elementClassName: config.elementClassSpecification,
-        hideRootSubject: config.hideRootSubject,
-        showEmptyModels: config.showEmptyModels,
+        hierarchyConfig: config,
         baseIdsCache,
       });
       const [subTreePaths, searchPaths] = await Promise.all([
@@ -1715,9 +1713,7 @@ describe("Models tree", () => {
           baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
           modelsTreeIdsCache = new ModelsTreeIdsCache({
             queryExecutor: imodelAccess,
-            elementClassName: hierarchyConfig.elementClassSpecification,
-            hideRootSubject: hierarchyConfig.hideRootSubject,
-            showEmptyModels: hierarchyConfig.showEmptyModels,
+            hierarchyConfig,
             baseIdsCache,
           });
           hierarchyProvider = createModelsTreeProvider({ imodel, searchPaths: instanceKeyPaths, hierarchyConfig });
@@ -1791,9 +1787,7 @@ describe("Models tree", () => {
       using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
       using idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
-        elementClassName: hierarchyConfig.elementClassSpecification,
-        hideRootSubject: hierarchyConfig.hideRootSubject,
-        showEmptyModels: hierarchyConfig.showEmptyModels,
+        hierarchyConfig,
         baseIdsCache,
       });
       const actualInstanceKeyPaths = (
@@ -1822,9 +1816,7 @@ describe("Models tree", () => {
       using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
       using idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
-        elementClassName: hierarchyConfig.elementClassSpecification,
-        hideRootSubject: hierarchyConfig.hideRootSubject,
-        showEmptyModels: hierarchyConfig.showEmptyModels,
+        hierarchyConfig,
         baseIdsCache,
       });
 
@@ -1871,9 +1863,7 @@ describe("Models tree", () => {
       using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
       using idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
-        elementClassName: hierarchyConfig.elementClassSpecification,
-        hideRootSubject: hierarchyConfig.hideRootSubject,
-        showEmptyModels: hierarchyConfig.showEmptyModels,
+        hierarchyConfig,
         baseIdsCache,
       });
 
@@ -1932,9 +1922,7 @@ describe("Models tree", () => {
       using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
       using idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
-        elementClassName: hierarchyConfig.elementClassSpecification,
-        hideRootSubject: hierarchyConfig.hideRootSubject,
-        showEmptyModels: hierarchyConfig.showEmptyModels,
+        hierarchyConfig,
         baseIdsCache,
       });
 

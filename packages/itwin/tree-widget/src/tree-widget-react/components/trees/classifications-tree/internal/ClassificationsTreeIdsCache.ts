@@ -5,6 +5,7 @@
 
 import { defer, from, map, mergeMap, of, reduce, shareReplay } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
+import { normalizeFullClassName } from "@itwin/presentation-shared";
 import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
 import {
   CLASS_NAME_Classification,
@@ -23,6 +24,22 @@ import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@
 import type { BaseIdsCacheImplProps } from "../../common/internal/caches/BaseIdsCache.js";
 import type { CategoryId, ClassificationId, ClassificationTableId, ElementId } from "../../common/internal/Types.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "../ClassificationsTreeDefinition.js";
+import type { ClassificationsTreeVisibilityHandlerConfiguration } from "../UseClassificationsTree.js";
+
+/**
+ * Hierarchy config props needed for ids cache.
+ * @internal
+ */
+export type HierarchyConfigForClassificationsCache = Pick<ClassificationsTreeHierarchyConfiguration, "rootClassificationSystemCode">;
+
+/**
+ * Visibility handler config props needed for ids cache.
+ * @internal
+ */
+export type VisibilityHandlerConfigForClassificationsCache = Pick<
+  ClassificationsTreeVisibilityHandlerConfiguration,
+  "classificationToCategoriesRelationshipSpecification"
+>;
 
 interface ClassificationInfo {
   parentClassificationOrTableId: ClassificationId | ClassificationTableId | undefined;
@@ -32,22 +49,21 @@ interface ClassificationInfo {
 
 interface ClassificationsTreeIdsCacheProps extends BaseIdsCacheImplProps {
   queryExecutor: LimitingECSqlQueryExecutor;
-  hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+  hierarchyConfig: HierarchyConfigForClassificationsCache;
+  visibilityHandlerConfig?: VisibilityHandlerConfigForClassificationsCache;
 }
 
 /** @internal */
 export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
   #classificationInfos: Observable<Map<ClassificationId | ClassificationTableId, ClassificationInfo>> | undefined;
   #filteredElementsData: Observable<Map<ElementId, { modelId: Id64String; categoryId: Id64String; categoryOfTopMostParentElement: CategoryId }>> | undefined;
-  #queryExecutor: LimitingECSqlQueryExecutor;
-  #hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+  #props: ClassificationsTreeIdsCacheProps;
   #componentId: GuidString;
   #componentName: string;
 
   constructor(props: ClassificationsTreeIdsCacheProps) {
     super(props);
-    this.#queryExecutor = props.queryExecutor;
-    this.#hierarchyConfig = props.hierarchyConfig;
+    this.#props = props;
     this.#componentId = Guid.createValue();
     this.#componentName = "ClassificationsTreeIdsCache";
   }
@@ -71,7 +87,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
             JOIN ${CLASS_NAME_ClassificationTable} ct ON ct.ECInstanceId = cl.Model.Id
             JOIN ${CLASS_NAME_ClassificationSystem} cs ON cs.ECInstanceId = ct.Parent.Id
             WHERE
-              cs.CodeValue = '${this.#hierarchyConfig.rootClassificationSystemCode}'
+              cs.CodeValue = '${this.#props.hierarchyConfig.rootClassificationSystemCode}'
               AND NOT ct.IsPrivate
               AND NOT cl.IsPrivate
               AND cl.Parent.Id IS NULL
@@ -90,22 +106,39 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
           )
         `,
       ];
+      let categoriesOfClassificationSelector: string;
+      if (this.#props.visibilityHandlerConfig?.classificationToCategoriesRelationshipSpecification) {
+        const relationship = normalizeFullClassName(this.#props.visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.fullClassName);
+        const { categoryAccessor, classificationAccessor } =
+          this.#props.visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.source === "classification"
+            ? { classificationAccessor: "SourceECInstanceId", categoryAccessor: "TargetECInstanceId" }
+            : { classificationAccessor: "TargetECInstanceId", categoryAccessor: "SourceECInstanceId" };
+        categoriesOfClassificationSelector = `
+          SELECT group_concat(IdToHex(cat.ECInstanceId))
+          FROM ${CLASS_NAME_SpatialCategory} cat
+          JOIN ${relationship} rel ON rel.${categoryAccessor} = cat.ECInstanceId
+          WHERE NOT cat.IsPrivate AND rel.${classificationAccessor} = cl.ClassificationId
+          GROUP BY rel.${classificationAccessor}
+        `;
+      } else {
+        categoriesOfClassificationSelector = `
+          SELECT group_concat(IdToHex(cat.ECInstanceId))
+          FROM ${CLASS_NAME_GeometricElement3d} e
+          JOIN ${CLASS_NAME_SpatialCategory} cat ON cat.ECInstanceId = e.Category.Id
+          JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = e.ECInstanceId
+          WHERE e.Parent.Id IS NULL AND NOT cat.IsPrivate AND ehc.TargetECInstanceId = cl.ClassificationId
+          GROUP BY ehc.TargetECInstanceId
+        `;
+      }
       const ecsql = `
         SELECT
           cl.ClassificationId id,
           cl.ClassificationTableId tableId,
           cl.ParentClassificationId parentId,
-          (
-            SELECT group_concat(IdToHex(cat.ECInstanceId))
-            FROM ${CLASS_NAME_GeometricElement3d} e
-            JOIN ${CLASS_NAME_SpatialCategory} cat ON cat.ECInstanceId = e.Category.Id
-            JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = e.ECInstanceId
-            WHERE e.Parent.Id IS NULL AND NOT cat.IsPrivate AND ehc.TargetECInstanceId = cl.ClassificationId
-            GROUP BY ehc.TargetECInstanceId
-          ) relatedCategories
+          (${categoriesOfClassificationSelector}) relatedCategories
         FROM ${CLASSIFICATIONS_CTE} cl
       `;
-      return this.#queryExecutor.createQueryReader(
+      return this.#props.queryExecutor.createQueryReader(
         { ctes, ecsql },
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/classifications` },
       );
@@ -259,7 +292,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
         FROM ${CLASS_NAME_GeometricElement3d} this
         WHERE ECInstanceId IN (${joinId64Arg(elementIds, ",")})
       `;
-      return this.#queryExecutor.createQueryReader(
+      return this.#props.queryExecutor.createQueryReader(
         { ecsql: query },
         {
           rowFormat: "ECSqlPropertyNames",

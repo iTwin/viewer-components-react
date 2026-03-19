@@ -42,6 +42,7 @@ import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerP
 import type { SearchResultsTree } from "../common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { NormalizedHierarchySearchPath } from "../common/Utils.js";
+import type { HierarchyConfigForModelsCache } from "./internal/ModelsTreeIdsCache.js";
 import type { ModelsTreeSearchError, ModelsTreeSubTreeError } from "./internal/UseSearchPaths.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
 import type { ModelsTreeSearchTargets } from "./internal/visibility/SearchResultsTree.js";
@@ -308,13 +309,7 @@ export function ModelsTreeIcon({ node }: { node: TreeNode }) {
   return <Icon href={getIcon()} />;
 }
 
-function useModelsTreeIdsCache({
-  imodel,
-  hierarchyConfig,
-}: {
-  imodel: IModelConnection;
-  hierarchyConfig: ModelsTreeHierarchyConfiguration;
-}): ModelsTreeIdsCache {
+function useModelsTreeIdsCache({ imodel, hierarchyConfig }: { imodel: IModelConnection; hierarchyConfig: HierarchyConfigForModelsCache }): ModelsTreeIdsCache {
   const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
   const baseIdsCache = getBaseIdsCache({ type: "3d", elementClassName: hierarchyConfig.elementClassSpecification, imodel });
 
@@ -323,9 +318,7 @@ function useModelsTreeIdsCache({
     createCache: () =>
       new ModelsTreeIdsCache({
         baseIdsCache,
-        elementClassName: hierarchyConfig.elementClassSpecification,
-        hideRootSubject: hierarchyConfig.hideRootSubject,
-        showEmptyModels: hierarchyConfig.showEmptyModels,
+        hierarchyConfig,
         queryExecutor: createECSqlQueryExecutor(imodel),
       }),
     cacheKey: `${hierarchyConfig.hideRootSubject ? "hideRootSubject" : "showRootSubject"}-${hierarchyConfig.showEmptyModels ? "showEmptyModels" : "hideEmptyModels"}-${hierarchyConfig.elementClassSpecification}-ModelsTreeIdsCache`,
