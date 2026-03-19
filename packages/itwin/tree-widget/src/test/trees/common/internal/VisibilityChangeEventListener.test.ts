@@ -11,7 +11,7 @@ import { createFakeSinonViewport } from "../../Common.js";
 
 describe("VisibilityChangeEventListener", () => {
   it("raises event on `onAlwaysDrawnChanged` event", async () => {
-    const vpMock = createFakeSinonViewport();
+    using vpMock = createFakeSinonViewport();
     using handler = createVisibilityChangeEventListener({
       viewport: vpMock,
       listeners: {
@@ -27,7 +27,7 @@ describe("VisibilityChangeEventListener", () => {
   });
 
   it("raises event on `onNeverDrawnChanged` event", async () => {
-    const vpMock = createFakeSinonViewport();
+    using vpMock = createFakeSinonViewport();
     using handler = createVisibilityChangeEventListener({
       viewport: vpMock,
       listeners: {
@@ -43,7 +43,7 @@ describe("VisibilityChangeEventListener", () => {
   });
 
   it("raises event on `onViewedCategoriesChanged` event", async () => {
-    const vpMock = createFakeSinonViewport();
+    using vpMock = createFakeSinonViewport();
     using handler = createVisibilityChangeEventListener({
       viewport: vpMock,
       listeners: {
@@ -59,7 +59,7 @@ describe("VisibilityChangeEventListener", () => {
   });
 
   it("raises event on `onViewedModelsChanged` event", async () => {
-    const vpMock = createFakeSinonViewport();
+    using vpMock = createFakeSinonViewport();
     using handler = createVisibilityChangeEventListener({
       viewport: vpMock,
       listeners: {
@@ -75,7 +75,7 @@ describe("VisibilityChangeEventListener", () => {
   });
 
   it("raises event on `onViewedCategoriesPerModelChanged` event", async () => {
-    const vpMock = createFakeSinonViewport();
+    using vpMock = createFakeSinonViewport();
     using handler = createVisibilityChangeEventListener({
       viewport: vpMock,
       listeners: {
@@ -91,7 +91,7 @@ describe("VisibilityChangeEventListener", () => {
   });
 
   it("raises event once when multiple affecting events are fired", async () => {
-    const vpMock = createFakeSinonViewport();
+    using vpMock = createFakeSinonViewport();
     const { onPerModelCategoriesOverridesChanged, onDisplayedCategoriesChanged, onDisplayedModelsChanged, onAlwaysDrawnChanged, onNeverDrawnChanged } = vpMock;
     using handler = createVisibilityChangeEventListener({
       viewport: vpMock,
@@ -112,7 +112,7 @@ describe("VisibilityChangeEventListener", () => {
   });
 
   it("does not raise event when suppression ends and no viewport events were raised during suppression", async () => {
-    const vpMock = createFakeSinonViewport();
+    using vpMock = createFakeSinonViewport();
     using handler = createVisibilityChangeEventListener({
       viewport: vpMock,
       listeners: { categories: true, displayStyle: true, elements: true, models: true },
@@ -126,7 +126,7 @@ describe("VisibilityChangeEventListener", () => {
   });
 
   it("raises event when suppression ends and viewport events were raised during suppression", async () => {
-    const vpMock = createFakeSinonViewport();
+    using vpMock = createFakeSinonViewport();
     const { onPerModelCategoriesOverridesChanged, onDisplayedCategoriesChanged, onDisplayedModelsChanged, onAlwaysDrawnChanged, onNeverDrawnChanged } = vpMock;
     using handler = createVisibilityChangeEventListener({
       viewport: vpMock,
@@ -148,7 +148,7 @@ describe("VisibilityChangeEventListener", () => {
   });
 
   it("raises event when suppression ends and viewport events were raised after suppression", async () => {
-    const vpMock = createFakeSinonViewport();
+    using vpMock = createFakeSinonViewport();
     const { onPerModelCategoriesOverridesChanged, onDisplayedCategoriesChanged, onDisplayedModelsChanged, onAlwaysDrawnChanged, onNeverDrawnChanged } = vpMock;
     using handler = createVisibilityChangeEventListener({
       viewport: vpMock,

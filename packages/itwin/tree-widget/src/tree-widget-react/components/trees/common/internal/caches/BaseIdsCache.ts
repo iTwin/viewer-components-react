@@ -84,7 +84,7 @@ export class BaseIdsCache implements Disposable {
       );
     }
 
-    return this.#elementModelCategoriesCache.getCategoryElementModels({ categoryId: props.categoryId! }).pipe(
+    return this.#elementModelCategoriesCache.getCategoryElementModels({ categoryId: props.categoryId!, subModels: "exclude" }).pipe(
       mergeAll(),
       mergeMap((modelId) => this.#modeledElementsCache.getCategoryModeledElements({ modelId, categoryId: props.categoryId! })),
       toArray(),

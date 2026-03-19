@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, filter, forkJoin, map, mergeAll, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
+import { defer, EMPTY, filter, forkJoin, from, map, merge, mergeAll, mergeMap, of, reduce, shareReplay } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
@@ -14,7 +14,8 @@ import {
   CLASS_NAME_Subject,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
-import { pushToMap } from "../../common/internal/Utils.js";
+import { fromWithRelease, pushToMap } from "../../common/internal/Utils.js";
+import { createGeometricElementInstanceKeyPaths } from "../ModelsTreeDefinition.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -22,12 +23,17 @@ import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { BaseIdsCacheImplProps } from "../../common/internal/caches/BaseIdsCache.js";
 import type { CategoryId, ModelId, SubjectId } from "../../common/internal/Types.js";
+import type { ModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
+
+/**
+ * Hierarchy config props needed for ids cache.
+ * @internal
+ */
+export type HierarchyConfigForModelsCache = Pick<ModelsTreeHierarchyConfiguration, "elementClassSpecification" | "hideRootSubject" | "showEmptyModels">;
 
 interface ModelsTreeIdsCacheProps extends BaseIdsCacheImplProps {
   queryExecutor: LimitingECSqlQueryExecutor;
-  showEmptyModels: boolean;
-  hideRootSubject: boolean;
-  elementClassName: string;
+  hierarchyConfig: HierarchyConfigForModelsCache;
 }
 
 interface SubjectInfo {
@@ -41,9 +47,6 @@ interface SubjectInfo {
 export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
   #subjectInfos: Observable<Map<SubjectId, SubjectInfo>> | undefined;
   #parentSubjectIds: Observable<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
-  #modelKeyPaths: Map<ModelId, Observable<HierarchyNodeIdentifiersPath[]>>;
-  #subjectKeyPaths: Map<SubjectId, Observable<HierarchyNodeIdentifiersPath>>;
-  #categoryKeyPaths: Map<CategoryId, Observable<HierarchyNodeIdentifiersPath[]>>;
   #queryExecutor: LimitingECSqlQueryExecutor;
   #showEmptyModels: boolean;
   #hideRootSubject: boolean;
@@ -54,14 +57,11 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
   constructor(props: ModelsTreeIdsCacheProps) {
     super(props);
     this.#queryExecutor = props.queryExecutor;
-    this.#showEmptyModels = props.showEmptyModels;
-    this.#hideRootSubject = props.hideRootSubject;
-    this.#elementClassName = props.elementClassName;
+    this.#showEmptyModels = props.hierarchyConfig.showEmptyModels;
+    this.#hideRootSubject = props.hierarchyConfig.hideRootSubject;
+    this.#elementClassName = props.hierarchyConfig.elementClassSpecification;
     this.#componentId = Guid.createValue();
     this.#componentName = "ModelsTreeIdsCache";
-    this.#modelKeyPaths = new Map();
-    this.#subjectKeyPaths = new Map();
-    this.#categoryKeyPaths = new Map();
   }
 
   private querySubjects(): Observable<{ id: SubjectId; parentId?: SubjectId; targetPartitionId?: ModelId; hideInHierarchy: boolean }> {
@@ -283,65 +283,90 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
   }
 
   public createSubjectInstanceKeysPath(targetSubjectId: Id64String): Observable<HierarchyNodeIdentifiersPath> {
-    let entry = this.#subjectKeyPaths.get(targetSubjectId);
-    if (!entry) {
-      entry = this.getSubjectInfos().pipe(
-        map((subjectInfos) => {
-          const result = new Array<InstanceKey>();
-          let currParentId: SubjectId | undefined = targetSubjectId;
-          while (currParentId) {
-            if (this.#hideRootSubject && currParentId === IModel.rootSubjectId) {
-              break;
-            }
-            const parentInfo = subjectInfos.get(currParentId);
-            if (!parentInfo?.hideInHierarchy) {
-              result.push({ className: CLASS_NAME_Subject, id: currParentId });
-            }
-            currParentId = parentInfo?.parentSubjectId;
+    return this.getSubjectInfos().pipe(
+      map((subjectInfos) => {
+        const result = new Array<InstanceKey>();
+        let currParentId: SubjectId | undefined = targetSubjectId;
+        while (currParentId) {
+          if (this.#hideRootSubject && currParentId === IModel.rootSubjectId) {
+            break;
           }
-          return result.reverse();
-        }),
-        shareReplay(),
-      );
-      this.#subjectKeyPaths.set(targetSubjectId, entry);
-    }
-    return entry;
+          const parentInfo = subjectInfos.get(currParentId);
+          if (!parentInfo?.hideInHierarchy) {
+            result.push({ className: CLASS_NAME_Subject, id: currParentId });
+          }
+          currParentId = parentInfo?.parentSubjectId;
+        }
+        return result.reverse();
+      }),
+    );
   }
 
-  public createModelInstanceKeyPaths(modelId: Id64String): Observable<HierarchyNodeIdentifiersPath[]> {
-    let entry = this.#modelKeyPaths.get(modelId);
-    if (!entry) {
-      entry = this.getSubjectInfos().pipe(
-        mergeMap((subjectInfos) => subjectInfos.entries()),
-        filter(([_, subjectInfo]) => subjectInfo.childModelIds.has(modelId)),
-        mergeMap(([modelSubjectId]) =>
-          this.createSubjectInstanceKeysPath(modelSubjectId).pipe(map((path) => [...path, { className: CLASS_NAME_GeometricModel3d, id: modelId }])),
+  public createModelInstanceKeyPaths(modelId: Id64String): Observable<HierarchyNodeIdentifiersPath> {
+    return this.getSubjectInfos().pipe(
+      mergeMap((subjectInfos) => subjectInfos.entries()),
+      filter(([_, subjectInfo]) => subjectInfo.childModelIds.has(modelId)),
+      mergeMap(([modelSubjectId]) =>
+        this.createSubjectInstanceKeysPath(modelSubjectId).pipe(map((path) => [...path, { className: CLASS_NAME_GeometricModel3d, id: modelId }])),
+      ),
+    );
+  }
+
+  public createCategoryInstanceKeyPaths({ categoryIds }: { categoryIds: Id64Array }): Observable<HierarchyNodeIdentifiersPath> {
+    const pathsWithSubModels = fromWithRelease({ source: categoryIds, releaseOnCount: 200 }).pipe(
+      mergeMap((id) => forkJoin({ id: of(id), subModels: this.getModels({ subModels: "only", categoryId: id, includeOnlyIfCategoryOfTopMostElement: true }) })),
+      reduce((acc, { id, subModels }) => {
+        for (const subModelId of subModels) {
+          const entry = acc.get(subModelId);
+          if (!entry) {
+            acc.set(subModelId, new Set([id]));
+            continue;
+          }
+          entry.add(id);
+        }
+        return acc;
+      }, new Map<ModelId, Set<CategoryId>>()),
+      mergeMap((subModelCategoriesMap) => {
+        if (subModelCategoriesMap.size === 0) {
+          return EMPTY;
+        }
+        return createGeometricElementInstanceKeyPaths({
+          queryExecutor: this.#queryExecutor,
+          idsCache: this,
+          elementClassName: this.#elementClassName,
+          targetItems: [...subModelCategoriesMap.keys()],
+          componentId: Guid.createValue(),
+          componentName: "ModelsTreeIdsCache-categoryInstanceKeyPaths",
+          chunkIndex: -1,
+        }).pipe(
+          map((normalizedPath) => {
+            const categories = subModelCategoriesMap.get(normalizedPath.path[normalizedPath.path.length - 1].id);
+            const paths = new Array<HierarchyNodeIdentifiersPath>();
+            for (const categoryId of categories ?? []) {
+              // Paths for modeled elements are created, but category is under sub-model, so need to
+              // add sub-model and category to the path.
+              paths.push([
+                ...normalizedPath.path,
+                { className: CLASS_NAME_GeometricModel3d, id: normalizedPath.path[normalizedPath.path.length - 1].id },
+                { className: CLASS_NAME_SpatialCategory, id: categoryId },
+              ]);
+            }
+            return paths;
+          }),
+          mergeAll(),
+        );
+      }),
+    );
+    const pathsWithoutSubModels = from(categoryIds).pipe(
+      mergeMap((categoryId) =>
+        this.getModels({ categoryId, subModels: "exclude", includeOnlyIfCategoryOfTopMostElement: true }).pipe(
+          mergeAll(),
+          mergeMap((categoryModelId) => this.createModelInstanceKeyPaths(categoryModelId)),
+          map((modelPath) => [...modelPath, { className: CLASS_NAME_SpatialCategory, id: categoryId }]),
         ),
-        toArray(),
-        shareReplay(),
-      );
-
-      this.#modelKeyPaths.set(modelId, entry);
-    }
-    return entry;
-  }
-
-  public createCategoryInstanceKeyPaths(categoryId: Id64String): Observable<HierarchyNodeIdentifiersPath[]> {
-    let entry = this.#categoryKeyPaths.get(categoryId);
-    if (!entry) {
-      entry = this.getModels({ categoryId, includeSubModels: true, includeOnlyIfCategoryOfTopMostElement: true }).pipe(
-        mergeAll(),
-        mergeMap((categoryModelId) => this.createModelInstanceKeyPaths(categoryModelId)),
-        mergeAll(),
-        reduce((acc, modelPath) => {
-          acc.push([...modelPath, { className: CLASS_NAME_SpatialCategory, id: categoryId }]);
-          return acc;
-        }, new Array<HierarchyNodeIdentifiersPath>()),
-        shareReplay(),
-      );
-      this.#categoryKeyPaths.set(categoryId, entry);
-    }
-    return entry;
+      ),
+    );
+    return merge(pathsWithSubModels, pathsWithoutSubModels);
   }
 }
 

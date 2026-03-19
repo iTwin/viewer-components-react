@@ -10,7 +10,7 @@ import { ClassificationsTreeDefinition } from "../../../tree-widget-react/compon
 import { ClassificationsTreeIdsCache } from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
 import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_GeometricElement3d } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
-import { insertDefinitionSubModel } from "../../IModelUtils.js";
+import { getFullSchemaXml, insertDefinitionSubModel } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 
 import type { Id64String } from "@itwin/core-bentley";
@@ -26,7 +26,11 @@ export function createClassificationsTreeProvider(
 ): HierarchyProvider & Disposable {
   const imodelAccess = createIModelAccess(imodel);
   const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-  const idsCache = new ClassificationsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig, baseIdsCache });
+  const idsCache = new ClassificationsTreeIdsCache({
+    queryExecutor: imodelAccess,
+    hierarchyConfig,
+    baseIdsCache,
+  });
   const hierarchyProvider = createIModelHierarchyProvider({
     imodelAccess,
     hierarchyDefinition: new ClassificationsTreeDefinition({
@@ -134,5 +138,43 @@ export function insertElementHasClassificationsRelationship(props: { builder: Te
 export async function importClassificationSchema(builder: TestIModelBuilder) {
   const schemaPath = import.meta.resolve("@bentley/classification-systems-schema/ClassificationSystems.ecschema.xml");
   const schemaXml = fs.readFileSync(fs.realpathSync(new URL(schemaPath)), { encoding: "utf-8" });
+  await builder.importSchema(schemaXml);
+}
+
+export function insertCategorySymbolizesClassificationRelationship(props: {
+  builder: TestIModelBuilder;
+  categoryId: Id64String;
+  classificationId: Id64String;
+}) {
+  const { builder, categoryId, classificationId } = props;
+  return builder.insertRelationship({
+    classFullName: `${CATEGORY_SYMBOLIZES_CLASSIFICATION_RELATIONSHIP_SCHEMA}.CategorySymbolizesClassification`,
+    sourceId: categoryId,
+    targetId: classificationId,
+  });
+}
+
+export const CATEGORY_SYMBOLIZES_CLASSIFICATION_RELATIONSHIP_SCHEMA = "TestClassificationSchema";
+
+export async function importCategorySymbolizesClassificationSchema(builder: TestIModelBuilder) {
+  // cspell:disable
+  const schemaXml = getFullSchemaXml({
+    schemaName: CATEGORY_SYMBOLIZES_CLASSIFICATION_RELATIONSHIP_SCHEMA,
+    schemaAlias: "tst",
+    schemaContentXml: `
+      <ECSchemaReference name="BisCore" version="01.00.16" alias="bis" />
+      <ECSchemaReference name="ClassificationSystems" version="01.00.04" alias="clsf" />
+      <ECRelationshipClass typeName="CategorySymbolizesClassification" modifier="None" strength="referencing">
+          <BaseClass>bis:ElementRefersToElements</BaseClass>
+          <Source multiplicity="(0..*)" roleLabel="symbolizes" polymorphic="true">
+              <Class class="bis:Category" />
+          </Source>
+          <Target multiplicity="(0..*)" roleLabel="is symbolized by" polymorphic="true">
+              <Class class="clsf:Classification"/>
+          </Target>
+      </ECRelationshipClass>
+    `,
+  });
+  // cspell:enable
   await builder.importSchema(schemaXml);
 }

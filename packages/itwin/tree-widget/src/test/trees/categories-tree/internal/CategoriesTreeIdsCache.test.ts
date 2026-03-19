@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { firstValueFrom } from "rxjs";
+import { firstValueFrom, toArray } from "rxjs";
 import { IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
@@ -18,6 +18,7 @@ import {
   insertDefinitionContainer,
   insertPhysicalElement,
   insertPhysicalModelWithPartition,
+  insertPhysicalSubModel,
   insertSpatialCategory,
   insertSubCategory,
   insertSubModel,
@@ -420,210 +421,259 @@ describe("CategoriesTreeIdsCache", () => {
     });
   });
 
-  describe("getInstanceKeyPaths", () => {
-    describe("from subCategory id", () => {
-      it("returns empty list when subcategory doesn't exist", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-        });
-        const { imodel } = buildIModelResult;
-        const imodelAccess = createIModelAccess(imodel);
-        using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-        using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-        expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ subCategoryId: "0x123" }))).to.deep.eq([]);
+  describe("getSubCategoriesSearchPaths", () => {
+    it("returns empty list when subcategory doesn't exist", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
       });
-
-      it("returns path to subCategory when category has subCategory", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-
-          const subCategory = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "Test SpatialSubCategory" });
-          return { subCategory, category };
-        });
-        const { imodel, ...keys } = buildIModelResult;
-        const imodelAccess = createIModelAccess(imodel);
-        using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-        using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-        expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ subCategoryId: keys.subCategory.id }))).to.deep.eq([keys.category, keys.subCategory]);
-      });
-
-      it("returns path to subCategory when definition container contains category that has subCategory", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainer = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
-          const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
-          const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-
-          const subCategory = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "Test SpatialSubCategory", modelId: definitionModel.id });
-          return { subCategory, category, definitionContainer };
-        });
-        const { imodel, ...keys } = buildIModelResult;
-        const imodelAccess = createIModelAccess(imodel);
-        using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-        using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-        expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ subCategoryId: keys.subCategory.id }))).to.deep.eq([
-          keys.definitionContainer,
-          keys.category,
-          keys.subCategory,
-        ]);
-      });
-
-      it("returns path to subCategory when definition container contains definition container that contains category that has subCategory", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
-          const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-          const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
-          const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-
-          const subCategory = insertSubCategory({
-            builder,
-            parentCategoryId: category.id,
-            codeValue: "Test SpatialSubCategory",
-            modelId: definitionModelChild.id,
-          });
-          return { subCategory, category, definitionContainerChild, definitionContainerRoot };
-        });
-        const { imodel, ...keys } = buildIModelResult;
-        const imodelAccess = createIModelAccess(imodel);
-        using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-        using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-        expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ subCategoryId: keys.subCategory.id }))).to.deep.eq([
-          keys.definitionContainerRoot,
-          keys.definitionContainerChild,
-          keys.category,
-          keys.subCategory,
-        ]);
-      });
+      const { imodel } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodel);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      expect(await firstValueFrom(idsCache.getSubCategoriesSearchPaths({ subCategoryIds: "0x123" }))).to.deep.eq([]);
     });
 
-    describe("from category id", () => {
-      it("returns empty list when category doesn't exist", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-        });
-        const { imodel } = buildIModelResult;
-        const imodelAccess = createIModelAccess(imodel);
-        using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-        using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-        expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ categoryId: "0x123" }))).to.deep.eq([]);
+    it("returns path to subCategory when category has subCategory", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+
+        const subCategory = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "Test SpatialSubCategory" });
+        return { subCategory, category };
       });
-
-      it("returns only category when only category exists", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-
-          return { category };
-        });
-        const { imodel, ...keys } = buildIModelResult;
-        const imodelAccess = createIModelAccess(imodel);
-        using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-        using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-        expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ categoryId: keys.category.id }))).to.deep.eq([keys.category]);
-      });
-
-      it("returns path to category when definition container contains category", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainer = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
-          const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
-          const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-
-          return { category, definitionContainer };
-        });
-        const { imodel, ...keys } = buildIModelResult;
-        const imodelAccess = createIModelAccess(imodel);
-        using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-        using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-        expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ categoryId: keys.category.id }))).to.deep.eq([keys.definitionContainer, keys.category]);
-      });
-
-      it("returns path to category when definition container contains definition container that contains category", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
-          const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-          const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
-          const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-
-          return { category, definitionContainerChild, definitionContainerRoot };
-        });
-        const { imodel, ...keys } = buildIModelResult;
-        const imodelAccess = createIModelAccess(imodel);
-        using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-        using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-        expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ categoryId: keys.category.id }))).to.deep.eq([
-          keys.definitionContainerRoot,
-          keys.definitionContainerChild,
-          keys.category,
-        ]);
-      });
+      const { imodel, ...keys } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodel);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      expect(await firstValueFrom(idsCache.getSubCategoriesSearchPaths({ subCategoryIds: keys.subCategory.id }))).to.deep.eq([keys.category, keys.subCategory]);
     });
 
-    describe("from definition container id", () => {
-      it("returns empty list when definition container doesn't exist", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-        });
-        const { imodel } = buildIModelResult;
-        const imodelAccess = createIModelAccess(imodel);
-        using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-        using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-        expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ definitionContainerId: "0x123" }))).to.deep.eq([]);
+    it("returns path to subCategory when definition container contains category that has subCategory", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
+        const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+        const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+
+        const subCategory = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "Test SpatialSubCategory", modelId: definitionModel.id });
+        return { subCategory, category, definitionContainer };
       });
+      const { imodel, ...keys } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodel);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      expect(await firstValueFrom(idsCache.getSubCategoriesSearchPaths({ subCategoryIds: keys.subCategory.id }))).to.deep.eq([
+        keys.definitionContainer,
+        keys.category,
+        keys.subCategory,
+      ]);
+    });
 
-      it("returns definition container when definition container contains category", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainer = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
-          const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
-          const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+    it("returns path to subCategory when definition container contains definition container that contains category that has subCategory", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
+        const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+        const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+        const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+        const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
 
-          return { category, definitionContainer };
+        const subCategory = insertSubCategory({
+          builder,
+          parentCategoryId: category.id,
+          codeValue: "Test SpatialSubCategory",
+          modelId: definitionModelChild.id,
         });
-        const { imodel, ...keys } = buildIModelResult;
-        const imodelAccess = createIModelAccess(imodel);
-        using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-        using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-        expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ definitionContainerId: keys.definitionContainer.id }))).to.deep.eq([
+        return { subCategory, category, definitionContainerChild, definitionContainerRoot };
+      });
+      const { imodel, ...keys } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodel);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      expect(await firstValueFrom(idsCache.getSubCategoriesSearchPaths({ subCategoryIds: keys.subCategory.id }))).to.deep.eq([
+        keys.definitionContainerRoot,
+        keys.definitionContainerChild,
+        keys.category,
+        keys.subCategory,
+      ]);
+    });
+  });
+
+  describe("getCategoriesSearchPaths", () => {
+    it("returns empty list when category doesn't exist", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+      });
+      const { imodel } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodel);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      expect(await firstValueFrom(idsCache.getCategoriesSearchPaths({ categoryIds: "0x123", includePathsWithSubModels: false }))).to.deep.eq([]);
+    });
+
+    it("returns only category when only category exists", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+
+        return { category };
+      });
+      const { imodel, ...keys } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodel);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      expect(await firstValueFrom(idsCache.getCategoriesSearchPaths({ categoryIds: keys.category.id, includePathsWithSubModels: false }))).to.deep.eq([
+        keys.category,
+      ]);
+    });
+
+    it("returns category path when it exist under sub-model", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder, testSchema) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
+        const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+        const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
+        const modeledElement = insertPhysicalElement({
+          builder,
+          categoryId: category.id,
+          classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+          modelId: physicalModel.id,
+        });
+        const subModel = insertPhysicalSubModel({
+          builder,
+          modeledElementId: modeledElement.id,
+        });
+        const elementOfSubModel = insertPhysicalElement({
+          builder,
+          categoryId: category.id,
+          modelId: subModel.id,
+        });
+        return { category, definitionContainer, modeledElement, elementOfSubModel, subModel };
+      });
+      const { imodel, ...keys } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodel);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      expect(
+        await firstValueFrom(idsCache.getCategoriesSearchPaths({ categoryIds: keys.category.id, includePathsWithSubModels: false }).pipe(toArray())),
+      ).to.deep.eq([[keys.definitionContainer, keys.category]]);
+      expect(
+        (await firstValueFrom(idsCache.getCategoriesSearchPaths({ categoryIds: keys.category.id, includePathsWithSubModels: true }).pipe(toArray()))).sort(
+          (path1, path2) => path1.length - path2.length,
+        ),
+      ).to.deep.eq([
+        [keys.definitionContainer, keys.category],
+        [
           keys.definitionContainer,
-        ]);
-      });
+          keys.category,
+          { className: getClassesByView("3d").elementClass, id: keys.modeledElement.id },
+          { className: getClassesByView("3d").modelClass, id: keys.subModel.id },
+          keys.category,
+        ],
+      ]);
+    });
 
-      it("returns path to definition container when definition container is contained by definition container", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
-          const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-          const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
-          const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+    it("returns path to category when definition container contains category", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
+        const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+        const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
 
-          return { category, definitionContainerChild, definitionContainerRoot };
-        });
-        const { imodel, ...keys } = buildIModelResult;
-        const imodelAccess = createIModelAccess(imodel);
-        using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-        using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-        expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ definitionContainerId: keys.definitionContainerChild.id }))).to.deep.eq([
-          keys.definitionContainerRoot,
-          keys.definitionContainerChild,
-        ]);
+        return { category, definitionContainer };
       });
+      const { imodel, ...keys } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodel);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      expect(await firstValueFrom(idsCache.getCategoriesSearchPaths({ categoryIds: keys.category.id, includePathsWithSubModels: false }))).to.deep.eq([
+        keys.definitionContainer,
+        keys.category,
+      ]);
+    });
+
+    it("returns path to category when definition container contains definition container that contains category", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
+        const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+        const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+        const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+        const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+
+        return { category, definitionContainerChild, definitionContainerRoot };
+      });
+      const { imodel, ...keys } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodel);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      expect(await firstValueFrom(idsCache.getCategoriesSearchPaths({ categoryIds: keys.category.id, includePathsWithSubModels: false }))).to.deep.eq([
+        keys.definitionContainerRoot,
+        keys.definitionContainerChild,
+        keys.category,
+      ]);
+    });
+  });
+
+  describe("getDefinitionContainersSearchPaths", () => {
+    it("returns empty list when definition container doesn't exist", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+      });
+      const { imodel } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodel);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      expect(await firstValueFrom(idsCache.getDefinitionContainersSearchPaths({ definitionContainerIds: "0x123" }))).to.deep.eq([]);
+    });
+
+    it("returns definition container when definition container contains category", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
+        const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+        const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+
+        return { category, definitionContainer };
+      });
+      const { imodel, ...keys } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodel);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      expect(await firstValueFrom(idsCache.getDefinitionContainersSearchPaths({ definitionContainerIds: keys.definitionContainer.id }))).to.deep.eq([
+        keys.definitionContainer,
+      ]);
+    });
+
+    it("returns path to definition container when definition container is contained by definition container", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
+        const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+        const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+        const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+        const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+
+        return { category, definitionContainerChild, definitionContainerRoot };
+      });
+      const { imodel, ...keys } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodel);
+      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      expect(await firstValueFrom(idsCache.getDefinitionContainersSearchPaths({ definitionContainerIds: keys.definitionContainerChild.id }))).to.deep.eq([
+        keys.definitionContainerRoot,
+        keys.definitionContainerChild,
+      ]);
     });
   });
 

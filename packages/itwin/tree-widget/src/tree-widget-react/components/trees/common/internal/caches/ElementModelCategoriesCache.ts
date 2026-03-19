@@ -106,16 +106,16 @@ export class ElementModelCategoriesCache {
 
   public getCategoryElementModels(props: {
     categoryId: Id64String;
-    includeSubModels?: boolean;
+    subModels: "include" | "exclude" | "only";
     includeOnlyIfCategoryOfTopMostElement?: boolean;
   }): Observable<Array<ModelId>> {
-    const { categoryId, includeSubModels } = props;
+    const { categoryId, subModels } = props;
     return this.getModelsCategoriesInfo().pipe(
       map((modelCategories) => {
         const categoryModels = new Array<ModelId>();
         for (const [modelId, { allCategories, categoriesOfTopMostElements, isSubModel }] of modelCategories) {
           if (
-            (includeSubModels || !isSubModel) &&
+            (subModels === "include" || (subModels === "only" && isSubModel) || (subModels === "exclude" && !isSubModel)) &&
             (props.includeOnlyIfCategoryOfTopMostElement ? categoriesOfTopMostElements.has(categoryId) : allCategories.has(categoryId))
           ) {
             categoryModels.push(modelId);

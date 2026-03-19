@@ -56,9 +56,7 @@ export function createModelsTreeProvider({
     idsCache ??
     new ModelsTreeIdsCache({
       queryExecutor: createdImodelAccess,
-      elementClassName: config.elementClassSpecification,
-      showEmptyModels: config.showEmptyModels,
-      hideRootSubject: config.hideRootSubject,
+      hierarchyConfig: config,
       baseIdsCache,
     });
   const provider = createIModelHierarchyProvider({

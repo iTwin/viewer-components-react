@@ -212,7 +212,7 @@ export const ClassificationsTreeComponent: {
 };
 
 // @alpha (undocumented)
-interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "searchText" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "hierarchyConfig" | "getEditingProps" | "treeLabel"> {
+interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "visibilityHandlerConfig" | "selectionMode" | "searchText" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "hierarchyConfig" | "getEditingProps" | "treeLabel"> {
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
@@ -256,6 +256,17 @@ type ClassificationsTreeProps = Pick<ExtendedVisibilityTreeRendererProps, "getIn
         sizeLimit?: number;
     };
 };
+
+// @alpha
+interface ClassificationsTreeVisibilityHandlerConfiguration {
+    classificationToCategoriesRelationshipSpecification?: ClassificationToCategoriesRelationshipSpecification;
+}
+
+// @alpha
+interface ClassificationToCategoriesRelationshipSpecification {
+    fullClassName: string;
+    source: "classification" | "category";
+}
 
 // @beta (undocumented)
 type CommonTreeRendererProps = Pick<BaseTreeRendererProps, "filterHierarchyLevel" | "selectionMode" | "getTreeItemProps"> & TreeRendererProps;
@@ -824,6 +835,7 @@ export function useClassificationsTree({
     emptyTreeContent,
     searchText,
     getTreeItemProps,
+    visibilityHandlerConfig,
     ...rest
 }: UseClassificationsTreeProps): UseClassificationsTreeResult;
 
@@ -863,6 +875,7 @@ interface UseClassificationsTreeProps {
     hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
     // (undocumented)
     searchText?: string;
+    visibilityHandlerConfig?: ClassificationsTreeVisibilityHandlerConfiguration;
 }
 
 // @alpha (undocumented)
