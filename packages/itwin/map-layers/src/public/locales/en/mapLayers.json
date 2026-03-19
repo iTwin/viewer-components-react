@@ -130,7 +130,10 @@
   },
   "FeatureInfoWidget": {
     "Label": "Map Layers Info",
-    "NoRecords": "No Results"
+    "NoRecords": "No Results",
+    "Copy": "Copy",
+    "Copied": "Copied!",
+    "CopyFailed": "Copy failed"
   },
   "LayerMenu": {
     "Detach": "Detach",
