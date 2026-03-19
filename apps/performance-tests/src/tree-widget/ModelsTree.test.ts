@@ -60,9 +60,7 @@ describe("models tree", () => {
       });
       using idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
-        elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
-        hideRootSubject: defaultModelsTreeHierarchyConfiguration.hideRootSubject,
-        showEmptyModels: defaultModelsTreeHierarchyConfiguration.showEmptyModels,
+        hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
         baseIdsCache,
       });
       const search = {
@@ -118,9 +116,7 @@ describe("models tree", () => {
       });
       const idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
-        elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
-        hideRootSubject: defaultModelsTreeHierarchyConfiguration.hideRootSubject,
-        showEmptyModels: defaultModelsTreeHierarchyConfiguration.showEmptyModels,
+        hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
         baseIdsCache,
       });
       const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
@@ -197,9 +193,7 @@ describe("models tree", () => {
       });
       const idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
-        elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
-        hideRootSubject: defaultModelsTreeHierarchyConfiguration.hideRootSubject,
-        showEmptyModels: defaultModelsTreeHierarchyConfiguration.showEmptyModels,
+        hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
         baseIdsCache,
       });
       const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
@@ -274,9 +268,7 @@ describe("models tree", () => {
       });
       const idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
-        elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
-        hideRootSubject: defaultModelsTreeHierarchyConfiguration.hideRootSubject,
-        showEmptyModels: defaultModelsTreeHierarchyConfiguration.showEmptyModels,
+        hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
         baseIdsCache,
       });
       const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
@@ -353,9 +345,7 @@ describe("models tree", () => {
       });
       const idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
-        elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
-        hideRootSubject: defaultModelsTreeHierarchyConfiguration.hideRootSubject,
-        showEmptyModels: defaultModelsTreeHierarchyConfiguration.showEmptyModels,
+        hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
         baseIdsCache,
       });
       const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
@@ -434,9 +424,7 @@ describe("models tree", () => {
       });
       const idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
-        elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
-        hideRootSubject: defaultModelsTreeHierarchyConfiguration.hideRootSubject,
-        showEmptyModels: defaultModelsTreeHierarchyConfiguration.showEmptyModels,
+        hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
         baseIdsCache,
       });
       const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
@@ -528,9 +516,7 @@ describe("models tree", () => {
       });
       const idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
-        elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
-        hideRootSubject: defaultModelsTreeHierarchyConfiguration.hideRootSubject,
-        showEmptyModels: defaultModelsTreeHierarchyConfiguration.showEmptyModels,
+        hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
         baseIdsCache,
       });
       const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });

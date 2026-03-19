@@ -20,9 +20,7 @@ describe("ModelsTreeIdsCache", () => {
     const baseIdsCache = new BaseIdsCache({ queryExecutor, elementClassName: defaultHierarchyConfiguration.elementClassSpecification, type: "3d" });
     const idsCache = new ModelsTreeIdsCache({
       queryExecutor,
-      elementClassName: defaultHierarchyConfiguration.elementClassSpecification,
-      hideRootSubject: defaultHierarchyConfiguration.hideRootSubject,
-      showEmptyModels: defaultHierarchyConfiguration.showEmptyModels,
+      hierarchyConfig: defaultHierarchyConfiguration,
       baseIdsCache,
     });
     const symbolDispose = idsCache[Symbol.dispose];

@@ -21,6 +21,7 @@ interface ClassificationsTreeComponentProps extends Pick<
   ClassificationsTreeProps,
   | "selectionStorage"
   | "hierarchyLevelConfig"
+  | "visibilityHandlerConfig"
   | "selectionMode"
   | "searchText"
   | "emptyTreeContent"

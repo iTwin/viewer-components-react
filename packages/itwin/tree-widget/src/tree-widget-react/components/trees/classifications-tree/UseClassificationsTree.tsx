@@ -18,7 +18,7 @@ import { ClassificationsTreeIcon } from "./ClassificationsTreeIcon.js";
 import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
 import { ClassificationsTreeVisibilityHandler } from "./internal/visibility/ClassificationsTreeVisibilityHandler.js";
 import { createClassificationsSearchResultsTree } from "./internal/visibility/SearchResultsTree.js";
-import { useClassificationsTreeDefinition } from "./UseClassificationsTreeDefinition.js";
+import { useClassificationsTreeDefinitionInternal } from "./UseClassificationsTreeDefinition.js";
 
 import type { ReactNode } from "react";
 import type { GuidString } from "@itwin/core-bentley";
@@ -31,12 +31,49 @@ import type { SearchResultsTree } from "../common/internal/visibility/BaseSearch
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { FunctionProps } from "../common/Utils.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
+import type { HierarchyConfigForClassificationsCache, VisibilityHandlerConfigForClassificationsCache } from "./internal/ClassificationsTreeIdsCache.js";
 import type { ClassificationsTreeSearchTargets } from "./internal/visibility/SearchResultsTree.js";
+
+/**
+ * Relationship used to determine related categories for classifications.
+ *
+ * By default, categories are determined using `ClassificationSystems.ElementHasClassifications` and `BisCore.GeometricElement3dIsInCategory` relationships.
+ *
+ * @alpha
+ */
+export interface ClassificationToCategoriesRelationshipSpecification {
+  /**
+   * Full class name of the relationship which links classifications to categories. Format: `{SchemaName}.{RelationshipClassName}`.
+   */
+  fullClassName: string;
+  /**
+   * Describes the relationship direction by specifying its source.
+   * E.g. whether it's a `classification` -> `categories` or `category` -> `classifications` relationship.
+   */
+  source: "classification" | "category";
+}
+
+/**
+ * Configuration for classifications tree visibility handler.
+ * @alpha
+ */
+export interface ClassificationsTreeVisibilityHandlerConfiguration {
+  /**
+   * Relationship used to determine related categories for classifications.
+   *
+   * By default, categories are determined using `ClassificationSystems.ElementHasClassifications` and `BisCore.GeometricElement3dIsInCategory` relationships.
+   */
+  classificationToCategoriesRelationshipSpecification?: ClassificationToCategoriesRelationshipSpecification;
+}
 
 /** @alpha */
 export interface UseClassificationsTreeProps {
   activeView: TreeWidgetViewport;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+  /**
+   * Optional configuration for classifications tree visibility handler.
+   */
+  visibilityHandlerConfig?: ClassificationsTreeVisibilityHandlerConfiguration;
   emptyTreeContent?: ReactNode;
   searchText?: string;
   getTreeItemProps?: ExtendedVisibilityTreeRendererProps["getTreeItemProps"];
@@ -64,6 +101,7 @@ export function useClassificationsTree({
   emptyTreeContent,
   searchText,
   getTreeItemProps,
+  visibilityHandlerConfig,
   ...rest
 }: UseClassificationsTreeProps): UseClassificationsTreeResult {
   const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
@@ -78,7 +116,13 @@ export function useClassificationsTree({
   );
   const componentId = useGuid();
 
-  const idsCache = getClassificationsTreeIdsCache({ getCache, getBaseIdsCache, imodel: activeView.iModel, hierarchyConfig });
+  const idsCache = getClassificationsTreeIdsCache({
+    getCache,
+    getBaseIdsCache,
+    imodel: activeView.iModel,
+    hierarchyConfig,
+    visibilityHandlerConfig,
+  });
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useClassificationsCachedVisibility({
     activeView,
@@ -86,11 +130,12 @@ export function useClassificationsTree({
     componentId,
   });
 
-  const { getSearchPaths, definition } = useClassificationsTreeDefinition({
+  const { getSearchPaths, definition } = useClassificationsTreeDefinitionInternal({
     imodels: useMemo(() => [activeView.iModel], [activeView.iModel]),
     hierarchyConfig,
     search: useMemo(() => (searchText ? { searchText } : undefined), [searchText]),
     onSearchPathsChanged,
+    visibilityHandlerConfig,
   });
 
   useEffect(() => {
@@ -195,12 +240,19 @@ export function getClassificationsTreeIdsCache({
   getCache,
   imodel,
   hierarchyConfig,
+  visibilityHandlerConfig,
 }: {
   getCache: ReturnType<typeof useSharedTreeContextInternal>["getCache"];
   getBaseIdsCache: ReturnType<typeof useSharedTreeContextInternal>["getBaseIdsCache"];
   imodel: IModelConnection;
-  hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+  hierarchyConfig: HierarchyConfigForClassificationsCache;
+  visibilityHandlerConfig?: VisibilityHandlerConfigForClassificationsCache;
 }) {
+  const hierarchyConfigKey = hierarchyConfig.rootClassificationSystemCode;
+  const visibilityHandlerConfigKey = visibilityHandlerConfig?.classificationToCategoriesRelationshipSpecification
+    ? `${visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.fullClassName};${visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.source}`
+    : "default";
+  const cacheKey = `${hierarchyConfigKey}-${visibilityHandlerConfigKey}-ClassificationsTreeIdsCache`;
   return getCache({
     imodel,
     createCache: () =>
@@ -208,7 +260,8 @@ export function getClassificationsTreeIdsCache({
         baseIdsCache: getBaseIdsCache({ type: "3d", elementClassName: getClassesByView("3d").elementClass, imodel }),
         hierarchyConfig,
         queryExecutor: createECSqlQueryExecutor(imodel),
+        visibilityHandlerConfig,
       }),
-    cacheKey: `${hierarchyConfig.rootClassificationSystemCode}-ClassificationsTreeIdsCache`,
+    cacheKey,
   });
 }
