@@ -91,9 +91,7 @@ export const CategoriesTreeComponent: {
     HideAllButton: CategoriesTreeHeaderButtonType;
     InvertAllButton: CategoriesTreeHeaderButtonType;
     id: string;
-    getLabel({
-        standardLabels
-    }: {
+    getLabel(input: {
         standardLabels: StandardTreeLabels;
     }): string;
 };
@@ -125,9 +123,7 @@ interface CategoriesTreeHierarchyConfiguration {
 }
 
 // @beta (undocumented)
-export function CategoriesTreeIcon({
-    node
-}: {
+export function CategoriesTreeIcon(input: {
     node: TreeNode;
 }): react_jsx_runtime0.JSX.Element | undefined;
 
@@ -203,9 +199,7 @@ type ClassGroupingHierarchyNode = GroupingHierarchyNode & {
 export const ClassificationsTreeComponent: {
     (props: ClassificationsTreeComponentProps): react_jsx_runtime0.JSX.Element | null;
     id: string;
-    getLabel({
-        standardLabels
-    }: {
+    getLabel(input: {
         standardLabels: StandardTreeLabels;
     }): string;
     isSupportedByIModel(imodel: IModelConnection): Promise<boolean>;
@@ -226,9 +220,7 @@ interface ClassificationsTreeHierarchyConfiguration {
 }
 
 // @beta (undocumented)
-export function ClassificationsTreeIcon({
-    node
-}: {
+export function ClassificationsTreeIcon(input: {
     node: TreeNode;
 }): react_jsx_runtime0.JSX.Element | undefined;
 
@@ -300,16 +292,9 @@ type ExtendedVisibilityTreeRendererProps = CallbacksWithCommonTreeRendererProps<
 
 // @beta
 export const ExternalSourcesTreeComponent: {
-    ({
-        onFeatureUsed,
-        onPerformanceMeasured,
-        treeLabel,
-        ...props
-    }: ExternalSourcesTreeComponentProps): react_jsx_runtime0.JSX.Element | null;
+    (input: ExternalSourcesTreeComponentProps): react_jsx_runtime0.JSX.Element | null;
     id: string;
-    getLabel({
-        standardLabels
-    }: {
+    getLabel(input: {
         standardLabels: StandardTreeLabels;
     }): string;
 };
@@ -323,9 +308,7 @@ interface ExternalSourcesTreeComponentProps extends Pick<ExternalSourcesTreeProp
 }
 
 // @beta (undocumented)
-export function ExternalSourcesTreeIcon({
-    node
-}: {
+export function ExternalSourcesTreeIcon(input: {
     node: TreeNode;
 }): react_jsx_runtime0.JSX.Element | undefined;
 
@@ -344,11 +327,7 @@ interface FocusedInstancesContext {
 }
 
 // @public
-export function FocusedInstancesContextProvider({
-    selectionStorage,
-    imodelKey,
-    children
-}: PropsWithChildren<{
+export function FocusedInstancesContextProvider(input: PropsWithChildren<{
     selectionStorage: SelectionStorage;
     imodelKey: string;
 }>): react_jsx_runtime0.JSX.Element;
@@ -374,16 +353,9 @@ type HierarchyVisibilityHandlerOverridableMethodProps<TFunc> = TFunc extends ((p
 
 // @beta
 export const IModelContentTreeComponent: {
-    ({
-        onFeatureUsed,
-        onPerformanceMeasured,
-        treeLabel,
-        ...props
-    }: IModelContentTreeComponentProps): react_jsx_runtime0.JSX.Element | null;
+    (input: IModelContentTreeComponentProps): react_jsx_runtime0.JSX.Element | null;
     id: string;
-    getLabel({
-        standardLabels
-    }: {
+    getLabel(input: {
         standardLabels: StandardTreeLabels;
     }): string;
 };
@@ -402,9 +374,7 @@ interface IModelContentTreeHierarchyConfiguration {
 }
 
 // @beta (undocumented)
-export function IModelContentTreeIcon({
-    node
-}: {
+export function IModelContentTreeIcon(input: {
     node: TreeNode;
 }): react_jsx_runtime0.JSX.Element | undefined;
 
@@ -428,10 +398,7 @@ interface LoadedTreeItemVisibilityButtonState {
 export const LOCALIZATION_NAMESPACES: string[];
 
 // @beta
-export function LocalizationContextProvider({
-    localization,
-    children
-}: PropsWithChildren<LocalizationContextProviderProps>): JSX_2.Element;
+export function LocalizationContextProvider(input: PropsWithChildren<LocalizationContextProviderProps>): JSX_2.Element;
 
 // @beta
 interface LocalizationContextProviderProps {
@@ -456,9 +423,7 @@ export const ModelsTreeComponent: {
     View3DButton: ModelsTreeHeaderButtonType;
     ToggleInstancesFocusButton: ModelsTreeHeaderButtonType;
     id: string;
-    getLabel({
-        standardLabels
-    }: {
+    getLabel(input: {
         standardLabels: StandardTreeLabels;
     }): string;
 };
@@ -491,9 +456,7 @@ interface ModelsTreeHierarchyConfiguration {
 }
 
 // @beta (undocumented)
-export function ModelsTreeIcon({
-    node
-}: {
+export function ModelsTreeIcon(input: {
     node: TreeNode;
 }): react_jsx_runtime0.JSX.Element | undefined;
 
@@ -574,15 +537,10 @@ export class SearchLimitExceededError extends Error {
 }
 
 // @beta (undocumented)
-export function SelectableTree({
-    buttons,
-    children
-}: PropsWithChildren<TreeHeaderProps>): react_jsx_runtime0.JSX.Element;
+export function SelectableTree(input: PropsWithChildren<TreeHeaderProps>): react_jsx_runtime0.JSX.Element;
 
 // @beta
-export function SharedTreeContextProvider({
-    children
-}: PropsWithChildren<{}>): react_jsx_runtime0.JSX.Element;
+export function SharedTreeContextProvider(input: PropsWithChildren<{}>): react_jsx_runtime0.JSX.Element;
 
 // @beta
 export function SkeletonTree(): react_jsx_runtime0.JSX.Element;
@@ -602,12 +560,7 @@ interface StandardTreeLabels {
 }
 
 // @beta (undocumented)
-export function TelemetryContextProvider({
-    children,
-    onPerformanceMeasured,
-    onFeatureUsed,
-    componentIdentifier
-}: PropsWithChildren<TelemetryContextProviderProps>): react_jsx_runtime0.JSX.Element;
+export function TelemetryContextProvider(input: PropsWithChildren<TelemetryContextProviderProps>): react_jsx_runtime0.JSX.Element;
 
 // @beta (undocumented)
 interface TelemetryContextProviderProps {
@@ -617,16 +570,7 @@ interface TelemetryContextProviderProps {
 }
 
 // @beta
-export function Tree({
-    hierarchyLevelSizeLimit,
-    getHierarchyDefinition,
-    getSearchPaths,
-    selectionStorage,
-    imodelAccess: providedIModelAccess,
-    treeName,
-    onReload,
-    ...props
-}: TreeProps): react_jsx_runtime0.JSX.Element;
+export function Tree(input: TreeProps): react_jsx_runtime0.JSX.Element;
 
 export { TreeActionBase }
 
@@ -709,10 +653,7 @@ export class TreeWidget {
 }
 
 // @public
-export function TreeWidgetComponent({
-    localization,
-    ...props
-}: TreeWidgetProps): react_jsx_runtime0.JSX.Element;
+export function TreeWidgetComponent(input: TreeWidgetProps): react_jsx_runtime0.JSX.Element;
 
 // @public
 interface TreeWidgetProps {
@@ -780,19 +721,10 @@ export interface TreeWidgetViewport {
 }
 
 // @beta
-export function useCategoriesTree({
-    searchText,
-    activeView,
-    onCategoriesFiltered,
-    emptyTreeContent,
-    hierarchyConfig,
-    getTreeItemProps
-}: UseCategoriesTreeProps): UseCategoriesTreeResult;
+export function useCategoriesTree(input: UseCategoriesTreeProps): UseCategoriesTreeResult;
 
 // @public
-export function useCategoriesTreeButtonProps({
-    viewport
-}: {
+export function useCategoriesTreeButtonProps(input: {
     viewport: TreeWidgetViewport;
 }): {
     buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport" | "models">;
@@ -830,14 +762,7 @@ interface UseCategoriesTreeResult {
 }
 
 // @alpha
-export function useClassificationsTree({
-    activeView,
-    emptyTreeContent,
-    searchText,
-    getTreeItemProps,
-    visibilityHandlerConfig,
-    ...rest
-}: UseClassificationsTreeProps): UseClassificationsTreeResult;
+export function useClassificationsTree(input: UseClassificationsTreeProps): UseClassificationsTreeResult;
 
 // @alpha
 export function useClassificationsTreeDefinition(props: UseClassificationsTreeDefinitionProps): UseClassificationsTreeDefinitionResult;
@@ -890,24 +815,10 @@ interface UseClassificationsTreeResult {
 export function useFocusedInstancesContext(): FocusedInstancesContext;
 
 // @beta
-export function useModelsTree({
-    activeView,
-    searchText,
-    hierarchyConfig,
-    visibilityHandlerOverrides,
-    getSearchPaths,
-    onModelsFiltered,
-    selectionPredicate: nodeTypeSelectionPredicate,
-    emptyTreeContent,
-    getSubTreePaths,
-    getTreeItemProps
-}: UseModelsTreeProps): UseModelsTreeResult;
+export function useModelsTree(input: UseModelsTreeProps): UseModelsTreeResult;
 
 // @public
-export function useModelsTreeButtonProps({
-    imodel,
-    viewport
-}: {
+export function useModelsTreeButtonProps(input: {
     imodel: IModelConnection;
     viewport: TreeWidgetViewport;
 }): {
@@ -975,12 +886,7 @@ export interface VisibilityStatus {
 }
 
 // @beta
-export function VisibilityTree({
-    visibilityHandlerFactory,
-    treeRenderer,
-    hierarchyLevelSizeLimit,
-    ...props
-}: VisibilityTreeProps): react_jsx_runtime0.JSX.Element;
+export function VisibilityTree(input: VisibilityTreeProps): react_jsx_runtime0.JSX.Element;
 
 // @beta (undocumented)
 type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess"> & {
