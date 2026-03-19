@@ -462,19 +462,19 @@ function createInstanceKeyPathsFromInstanceLabelObs({
     const classificationIds = await firstValueFrom(props.idsCache.getAllClassifications());
     const ctes = [
       `
-          ${CLASSIFICATION_TABLES_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
-            SELECT
-              '${CLASSIFICATION_TABLE_CLASS_NAME_QUERY_ALIAS}',
-              this.ECInstanceId,
-              ${classificationTableLabelSelectClause}
-            FROM
-              ${CLASS_NAME_ClassificationTable} this
-            JOIN ${CLASS_NAME_ClassificationSystem} system ON system.ECInstanceId = this.Parent.Id
-            WHERE
-              system.CodeValue = '${props.hierarchyConfig.rootClassificationSystemCode}'
-              AND NOT this.IsPrivate
-          )
-        `,
+        ${CLASSIFICATION_TABLES_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
+          SELECT
+            '${CLASSIFICATION_TABLE_CLASS_NAME_QUERY_ALIAS}',
+            this.ECInstanceId,
+            ${classificationTableLabelSelectClause}
+          FROM
+            ${CLASS_NAME_ClassificationTable} this
+          JOIN ${CLASS_NAME_ClassificationSystem} system ON system.ECInstanceId = this.Parent.Id
+          WHERE
+            system.CodeValue = '${props.hierarchyConfig.rootClassificationSystemCode}'
+            AND NOT this.IsPrivate
+        )
+      `,
       ...(classificationIds.length > 0
         ? [
             `${CLASSIFICATIONS_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
@@ -516,49 +516,53 @@ function createInstanceKeyPathsFromInstanceLabelObs({
         : []),
     ];
     const ecsql = `
-        SELECT * FROM (
-          SELECT
-            ct.ClassName AS ClassName,
-            ct.ECInstanceId AS ECInstanceId
-          FROM
-            ${CLASSIFICATION_TABLES_WITH_LABELS_CTE} ct
-          WHERE
-            ct.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
+      SELECT * FROM (
+        SELECT
+          ct.ClassName AS ClassName,
+          ct.ECInstanceId AS ECInstanceId
+        FROM
+          ${CLASSIFICATION_TABLES_WITH_LABELS_CTE} ct
+        WHERE
+          ct.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
 
-          ${
-            classificationIds.length > 0
-              ? `
-                UNION ALL
+        ${
+          classificationIds.length > 0
+            ? `
+              UNION ALL
 
-                SELECT
-                  c.ClassName AS ClassName,
-                  c.ECInstanceId AS ECInstanceId
-                FROM
-                  ${CLASSIFICATIONS_WITH_LABELS_CTE} c
-                WHERE
-                  c.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
+              SELECT
+                c.ClassName AS ClassName,
+                c.ECInstanceId AS ECInstanceId
+              FROM
+                ${CLASSIFICATIONS_WITH_LABELS_CTE} c
+              WHERE
+                c.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
 
-                UNION ALL
+              UNION ALL
 
-                SELECT
-                  e.ClassName AS ClassName,
-                  e.ECInstanceId AS ECInstanceId
-                FROM
-                  ${ELEMENTS_WITH_LABELS_CTE} e
-                WHERE
-                  e.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
-              `
-              : ""
-          }
-        )
-        ${props.limit === undefined ? `LIMIT ${MAX_SEARCH_INSTANCE_KEY_COUNT + 1}` : props.limit !== "unbounded" ? `LIMIT ${props.limit}` : ""}
-      `;
+              SELECT
+                e.ClassName AS ClassName,
+                e.ECInstanceId AS ECInstanceId
+              FROM
+                ${ELEMENTS_WITH_LABELS_CTE} e
+              WHERE
+                e.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
+            `
+            : ""
+        }
+      )
+      ${props.limit === undefined ? `LIMIT ${MAX_SEARCH_INSTANCE_KEY_COUNT + 1}` : props.limit !== "unbounded" ? `LIMIT ${props.limit}` : ""}
+    `;
     const bindings = [
-      { type: "string" as const, value: adjustedLabel },
       ...(classificationIds.length > 0
         ? [
             { type: "idset" as const, value: classificationIds },
             { type: "idset" as const, value: classificationIds },
+          ]
+        : []),
+      { type: "string" as const, value: adjustedLabel },
+      ...(classificationIds.length > 0
+        ? [
             { type: "string" as const, value: adjustedLabel },
             { type: "string" as const, value: adjustedLabel },
           ]

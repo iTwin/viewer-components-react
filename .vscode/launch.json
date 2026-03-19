@@ -61,7 +61,7 @@
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "node",
-      "runtimeVersion": "22",
+      "runtimeVersion": "24",
       "runtimeArgs": [
         "--experimental-test-module-mocks",
         "--enable-source-maps",
