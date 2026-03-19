@@ -4,11 +4,19 @@
 
 This document explains visibility handling for models tree specific cases.
 
+## Table of contents
+
+- [Getting visibility status](#getting-visibility-status)
+  - [getSubjectsVisibilityStatus](#getsubjectsvisibilitystatus)
+  - [getModelsVisibilityStatus](./SharedVisibilityHandling.md#getmodelsvisibilitystatus)
+  - [getCategoriesVisibilityStatus](./SharedVisibilityHandling.md#getcategoriesvisibilitystatus)
+  - [getElementsVisibilityStatus](./SharedVisibilityHandling.md#getelementsvisibilitystatus)
+
 ## Getting visibility status
 
 ### getSubjectsVisibilityStatus
 
-To determine subjects' visibility status, get their child models from cache and call <a href='./SharedVisibilityHandling.md#getmodelsvisibilitystatus'>getModelsVisibilityStatus</a>.
+To determine subjects' visibility status, get their child models from cache and call [getModelsVisibilityStatus](./SharedVisibilityHandling.md#getmodelsvisibilitystatus).
 
 ```mermaid
 ---
@@ -24,13 +32,13 @@ flowchart TD
   RESULT_Hidden[/hidden/]
 
   %% Start
-  TITLE(getSubjectsVisibilityStatus) --> A["Get models under <code>Props.subjectIds</code> from cache. These are related models and models of child subjects (can be nested)"]
+  TITLE("<code>getSubjectsVisibilityStatus</code>") --> A["Get models under <code>props.subjectIds</code> from cache. These are related models and models of child subjects (can be nested)"]
 
-  PROPS[\"Props
+  PROPS[\"<code>props</code>
     <div style='text-align: left;'>- subjectIds: **Id64Arg**</div>
   "\]
 
-  A -- modelIds --> B["<a href='./SharedVisibilityHandling.md#getmodelsvisibilitystatus'>getModelsVisibilityStatus</a>({ modelIds })"]
+  A -- modelIds --> B["<code><a href='./SharedVisibilityHandling.md#getmodelsvisibilitystatus'>getModelsVisibilityStatus</a>({ modelIds })</code>"]
 
   %% Results
   B -- partial --> RESULT_Partial

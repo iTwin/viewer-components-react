@@ -4,11 +4,19 @@
 
 This document explains visibility handling for classifications tree specific cases.
 
+## Table of contents
+
+- [Getting visibility status](#getting-visibility-status)
+  - [getClassificationTablesVisibilityStatus](#getclassificationtablesvisibilitystatus)
+  - [getClassificationsVisibilityStatus](#getclassificationsvisibilitystatus)
+  - [getCategoriesVisibilityStatus](./SharedVisibilityHandling.md#getcategoriesvisibilitystatus)
+  - [getElementsVisibilityStatus](./SharedVisibilityHandling.md#getelementsvisibilitystatus)
+
 ## Getting visibility status
 
 ### getClassificationTablesVisibilityStatus
 
-To determine classification tables' visibility status, get their child categories from cache and call <a href='./SharedVisibilityHandling.md#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>.
+To determine classification tables' visibility status, get their child categories from cache and call [getCategoriesVisibilityStatus](./SharedVisibilityHandling.md#getcategoriesvisibilitystatus).
 
 ```mermaid
 ---
@@ -25,14 +33,14 @@ flowchart TD
 
 
   %% Start
-  TITLE([getClassificationTablesVisibilityStatus]) --> A["Get categories under <code>Props.classificationTableIds</code> from cache. These are categories of child classifications (can be nested)"]
+  TITLE(["<code>getClassificationTablesVisibilityStatus</code>"]) --> A["Get categories under <code>props.classificationTableIds</code> from cache. These are categories of child classifications (can be nested)"]
 
   PROPS[\"
-    Props
+    <code>props</code>
     <div style='text-align: left;'>- classificationTableIds: **Id64Arg**</div>
   "\]
 
-  A -- categoryIds --> B["<a href='./SharedVisibilityHandling.md#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({ categoryIds, modelId: undefined })"]
+  A -- categoryIds --> B["<code><a href='./SharedVisibilityHandling.md#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({ categoryIds, modelId: undefined })</code>"]
 
   %% Results
   B -- partial --> RESULT_Partial
@@ -42,7 +50,7 @@ flowchart TD
 
 ### getClassificationsVisibilityStatus
 
-To determine classifications' visibility status, get their child categories from cache and call <a href='./SharedVisibilityHandling.md#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>.
+To determine classifications' visibility status, get their child categories from cache and call [getCategoriesVisibilityStatus](./SharedVisibilityHandling.md#getcategoriesvisibilitystatus).
 
 ```mermaid
 ---
@@ -58,14 +66,14 @@ flowchart TD
   RESULT_Hidden[/hidden/]
 
   %% Start
-  TITLE([getClassificationsVisibilityStatus]) --> A["Get categories under <code>Props.classificationIds</code> from cache. These are related categories and categories of child classifications (can be nested)"]
+  TITLE(["<code>getClassificationsVisibilityStatus</code>"]) --> A["Get categories under <code>props.classificationIds</code> from cache. These are related categories and categories of child classifications (can be nested)"]
 
   PROPS[\"
-    Props
+    <code>props</code>
     <div style='text-align: left;'>- classificationIds: **Id64Arg**</div>
   "\]
 
-  A -- categoryIds --> B["<a href='./SharedVisibilityHandling.md#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({ categoryIds, modelId: undefined })"]
+  A -- categoryIds --> B["<code><a href='./SharedVisibilityHandling.md#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({ categoryIds, modelId: undefined })</code>"]
 
   %% Results
   B -- partial --> RESULT_Partial

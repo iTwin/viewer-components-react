@@ -31,7 +31,7 @@ This document explains visibility handling across tree types (Models, Categories
     - Data stored in this cache is requested only once, because it does not change.
   - Tree-specific id caches ([`CategoriesTreeIdsCache`](../src/tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.ts), [`ClassificationsTreeIdsCache`](../src/tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.ts), [`ModelsTreeIdsCache`](../src/tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.ts)):
     - Store various tree-specific relationships, (e.g. models tree ids cache stores element's model <-> subject relationship).
-    - Implements `BaseVisibilityHandlerImpl` so each tree-specific cache can be used in [`BaseVisibilityHelper`](../src/tree-widget-react/components/trees/common/internal/visibility/BaseVisibilityHelper.ts).
+    - Extends `BaseVisibilityHandlerImpl` so each tree-specific cache can be used in [`BaseVisibilityHelper`](../src/tree-widget-react/components/trees/common/internal/visibility/BaseVisibilityHelper.ts).
 
   - [`AlwaysAndNeverDrawnElementInfoCache`](../src/tree-widget-react/components/trees/common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.ts) — caches extra data (like category) for always/never drawn elements.
     - Always and never drawn caches are reset when always and never drawn sets change respectively.
@@ -41,7 +41,7 @@ This document explains visibility handling across tree types (Models, Categories
     - When changing element or element grouping nodes' visibility, need to put all children (nested as well) into always/never drawn list. This cache is used to retrieve child nodes' ids in such cases.
     - It is not used (and should not be used) when getting visibility status:
       - Only total children counts (this is stored on nodes `extendedData` property) and child always/never drawn elements (these are retrieved from [`AlwaysAndNeverDrawnElementInfoCache`](../src/tree-widget-react/components/trees/common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.ts)) are needed for determining visibility.
-      - It should not be used when getting visibility status, since element might have hundreds of thousands of child elements. And retrieving this information for each element in the hierarchy would be very slow.
+      - Element might have hundreds of thousands of child elements. And retrieving this information for each element in the hierarchy would be very slow.
 
 ## How visibility is determined in the viewport
 
@@ -57,6 +57,21 @@ The viewport only renders elements. Element visibility is resolved in the follow
 6. **Sub-categories**: hidden sub-categories hide their elements.
    - **Note**: Determining element -> sub-category relationship is not supported at the moment. So sub-category checks are only performed when the Categories tree calls `getVisibilityStatus()` for categories or sub-categories.
 
-## Architecture
+## Visibility logic
 
-Models, categories and classifications trees have a lot of overlap in terms of visibility handling, the architecture of shared parts can be found in <a href='./SharedVisibilityHandling.md'>SharedVisibilityHandling.md</a>. Tree specific cases can be found: <a href='./ModelsTreeVisibilityHandling.md'>models tree link</a>, <a href='./CategoriesTreeVisibilityHandling.md'>categories tree link</a> and <a href='./ClassificationsTreeVisibilityHandling.md'>classifications tree link</a>
+- Getting visibility status
+  - [Models tree](./ModelsTreeVisibilityHandling.md)
+    - [getSubjectsVisibilityStatus](./ModelsTreeVisibilityHandling.md#getsubjectsvisibilitystatus)
+    - [getModelsVisibilityStatus](./SharedVisibilityHandling.md#getmodelsvisibilitystatus)
+    - [getCategoriesVisibilityStatus](./SharedVisibilityHandling.md#getcategoriesvisibilitystatus)
+    - [getElementsVisibilityStatus](./SharedVisibilityHandling.md#getelementsvisibilitystatus)
+  - [Categories tree](./CategoriesTreeVisibilityHandling.md)
+    - [getDefinitionContainersVisibilityStatus](./CategoriesTreeVisibilityHandling.md#getdefinitioncontainersvisibilitystatus)
+    - [getCategoriesVisibilityStatus](./SharedVisibilityHandling.md#getcategoriesvisibilitystatus)
+    - [getSubCategoriesVisibilityStatus](./SharedVisibilityHandling.md#getsubcategoriesvisibilitystatus)
+    - [getElementsVisibilityStatus](./SharedVisibilityHandling.md#getelementsvisibilitystatus)
+  - [Classifications tree](./CategoriesTreeVisibilityHandling.md)
+    - [getClassificationTablesVisibilityStatus](./ClassificationsTreeVisibilityHandling.md#getclassificationtablesvisibilitystatus)
+    - [getClassificationsVisibilityStatus](./ClassificationsTreeVisibilityHandling.md#getclassificationsvisibilitystatus)
+    - [getCategoriesVisibilityStatus](./SharedVisibilityHandling.md#getcategoriesvisibilitystatus)
+    - [getElementsVisibilityStatus](./SharedVisibilityHandling.md#getelementsvisibilitystatus)

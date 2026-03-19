@@ -2,7 +2,17 @@
 
 # Shared visibility handling
 
-This document explains the shared parts of visibility handling in models, categories and classifications trees. Please read <a href='./Visibility.md#how-visibility-is-determined-in-the-viewport'>how visibility is determined in the viewport</a> before continuing.
+This document explains the shared parts of visibility handling in models, categories and classifications trees. Please read [how visibility is determined in the viewport](./Visibility.md#how-visibility-is-determined-in-the-viewport).
+
+## Table of contents
+
+- [Getting visibility status](#getting-visibility-status)
+  - [getSubCategoriesVisibilityStatus](#getsubcategoriesvisibilitystatus)
+  - [getModelsVisibilityStatus](#getmodelsvisibilitystatus)
+  - [getCategoriesVisibilityStatus](#getcategoriesvisibilitystatus)
+  - [getModelWithCategoryVisibilityStatus](#getmodelwithcategoryvisibilitystatus)
+  - [getElementsVisibilityStatus](#getelementsvisibilitystatus)
+  - [getAlwaysOrNeverDrawnVisibilityStatus](#getalwaysorneverdrawnvisibilitystatus)
 
 ## Getting visibility status
 
@@ -24,10 +34,10 @@ flowchart TD
   RESULT_Hidden[/hidden/]
 
   %% Start
-  TITLE([getSubCategoriesVisibilityStatus]) --> A{"viewport.viewsCategory(<code>Props.categoryId</code>)"}
+  TITLE(["<code>getSubCategoriesVisibilityStatus</code>"]) --> A{"viewport.viewsCategory(<code>props.categoryId</code>)"}
 
   PROPS[\"
-    Props
+    <code>props</code>
     <div style='text-align: left;'>- categoryId: **Id64String** <br/> - subCategoryIds: **Id64Arg** </div>
   "\]
 
@@ -76,10 +86,10 @@ flowchart TD
   RESULT_Hidden[/hidden/]
 
   %% Start
-  TITLE([getModelsVisibilityStatus]) --> A[Iterate through <code>Props.modelIds</code>]
+  TITLE(["<code>getModelsVisibilityStatus</code>"]) --> A[Iterate through <code>props.modelIds</code>]
 
   PROPS[\"
-    Props
+    <code>props</code>
     <div style='text-align: left;'>- modelIds: **Id64Arg**</div>
   "\]
 
@@ -87,11 +97,11 @@ flowchart TD
 
   %% Branch Yes
   B -- Yes --> C1[Get categories of elements which exist under modelId]
-  C1 -- categoryIds --> D1["<a href='#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({ modelId, categoryIds })"]
+  C1 -- categoryIds --> D1["<code><a href='#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({ modelId, categoryIds })</code>"]
 
   %% Branch No
   B -- No --> C2[Get modelled elements under modelId]
-  C2 -- modelIds --> D2{"<a href='#getmodelsvisibilitystatus'>getModelsVisibilityStatus</a>({ modelIds }) <br/> === 'hidden'/empty"}
+  C2 -- modelIds --> D2{"<code><a href='#getmodelsvisibilitystatus'>getModelsVisibilityStatus</a>({ modelIds })</code> <br/> === 'hidden'/empty"}
   D2 -- Yes --> E1[hidden]
   D2 -- No --> E2[partial]
 
@@ -133,10 +143,10 @@ flowchart TD
   RESULT_Hidden[/hidden/]
 
   %% Start
-  TITLE([getCategoriesVisibilityStatus]) --> A{<code>Props.modelId</code> <br/>=== undefined}
+  TITLE(["<code>getCategoriesVisibilityStatus</code>"]) --> A{<code>props.modelId</code> <br/>=== undefined}
 
   PROPS[\"
-    Props
+    <code>props</code>
     <div style='text-align: left;'>- modelId: **Id64String | undefined** <br/> - categoryIds: **Id64Arg**</div>
   "\]
 
@@ -145,10 +155,10 @@ flowchart TD
   B -- categoryId --> C1[Get sub-categories for specified category from cache]
   B -- categoryId --> C2[Get models for specified category from cache]
 
-  C1 -- subCategoryIds --> D1["<a href='#getsubcategoriesvisibilitystatus'>getSubCategoriesVisibilityStatus</a>({ subCategoryIds, categoryId })"]
+  C1 -- subCategoryIds --> D1["<code><a href='#getsubcategoriesvisibilitystatus'>getSubCategoriesVisibilityStatus</a>({ subCategoryIds, categoryId })</code>"]
 
   C2 --> D2[Iterate through models]
-  D2 -- modelId --> F["<a href='#getmodelwithcategoryvisibilitystatus'>getModelWithCategoryVisibilityStatus</a>({ modelId, categoryId })"]
+  D2 -- modelId --> F["<code><a href='#getmodelwithcategoryvisibilitystatus'>getModelWithCategoryVisibilityStatus</a>({ modelId, categoryId })</code>"]
 
   %% Branch No
   A -- No --> B2[Iterate through categories]
@@ -181,7 +191,7 @@ Determines visibility status of category under model. It is done by merging visi
   4.  The `opposite set` can contain elements from any categories and models, need to query data of these elements and find the ones which are related to the desired category and model.
   5.  Once all the above data (1-4) is known, visibility can be determined by comparing the total count, number of elements (related to specific model and category) in the opposite set, and default status.
 
-  **Note**: All the checks are done only when <a href='./Visibility.md#how-visibility-is-determined-in-the-viewport'>visibility rules</a> that have higher priority do not interfere (e.g. if model is hidden in selector, then always/never drawn elements are **not checked** and `hidden` is returned for `Child Elements` visibility).
+  **Note**: All the checks are done only when [visibility rules](./Visibility.md#how-visibility-is-determined-in-the-viewport) that have higher priority do not interfere (e.g. if model is hidden in selector, then always/never drawn elements are **not checked** and `hidden` is returned for `Child Elements` visibility).
 
 ```mermaid
 ---
@@ -197,16 +207,16 @@ flowchart TD
   RESULT_Hidden[/hidden/]
 
   %% Start
-  TITLE([getModelWithCategoryVisibilityStatus]) --> A1[Get modelled elements under category with model]
-  TITLE([getModelWithCategoryVisibilityStatus]) --> A2{"viewport.viewsModel(<code>Props.modelId</code>)"}
+  TITLE(["<code>getModelWithCategoryVisibilityStatus</code>"]) --> A1[Get modelled elements under category with model]
+  TITLE(["<code>getModelWithCategoryVisibilityStatus</code>"]) --> A2{"viewport.viewsModel(<code>props.modelId</code>)"}
 
   PROPS[\"
-    Props
+    <code>props</code>
     <div style='text-align: left;'>- modelId: **Id64String** <br/> - categoryId: **Id64String**</div>
   "\]
 
   %% Branch A1
-    A1 -- modelIds --> B["<a href='#getmodelsvisibilitystatus'>getModelsVisibilityStatus</a>({ modelIds })"]
+    A1 -- modelIds --> B["<code><a href='#getmodelsvisibilitystatus'>getModelsVisibilityStatus</a>({ modelIds })</code>"]
 
   %% Branch A2
 
@@ -226,7 +236,7 @@ flowchart TD
           Per model category override === 'show' <br/>
           <strong style='font-weight: bold;'>OR</strong>
           <br/>
-          Per model category override === 'none'<br/> && viewport.viewsCategory(<code>Props.categoryId</code>)
+          Per model category override === 'none'<br/> && viewport.viewsCategory(<code>props.categoryId</code>)
         </div>
       "}
 
@@ -247,10 +257,10 @@ flowchart TD
       F -- Yes --> G2[From cache get total count of elements under category with model]
 
       F -- Yes --> G3["Props
-    <div style='text-align: left;'>- For **oppositeSet** elements execute query (if set changed after last execution), to get their models, categories and parent elements path. <br/> - Find always/never drawn child elements (nested as well) where queried data matches <code>Props.modelId</code> & <code>Props.categoryId</code>. <br/> - Get count of elements under model with category in **oppositeSet**: numberOfElementsInOppositeSet </div>
+    <div style='text-align: left;'>- For **oppositeSet** elements execute query (if set changed after last execution), to get their models, categories and parent elements path. <br/> - Find always/never drawn child elements (nested as well) where queried data matches <code>props.modelId</code> & <code>props.categoryId</code>. <br/> - Get count of elements under model with category in **oppositeSet**: numberOfElementsInOppositeSet </div>
     "]
 
-      G2 -- totalCount --> H["<a href='#getalwaysorneverdrawnvisibilitystatus'>getAlwaysOrNeverDrawnVisibilityStatus</a>({ totalCount, numberOfElementsInOppositeSet, defaultStatus })"]
+      G2 -- totalCount --> H["<code><a href='#getalwaysorneverdrawnvisibilitystatus'>getAlwaysOrNeverDrawnVisibilityStatus</a>({ totalCount, numberOfElementsInOppositeSet, defaultStatus })</code>"]
       G3 -- Pass down --> H
 
 
@@ -289,16 +299,16 @@ flowchart TD
   RESULT_Hidden[/hidden/]
 
   %% Start
-  TITLE([getElementsVisibilityStatus]) --> A1["<div style='text-align: left;'> Get modelIds from cache: <br/> 1. <code>Props.elementIds</code> which are sub-models <br/> 2. Children which are sub-models (nested as well) </div>"]
-  TITLE([getElementsVisibilityStatus]) --> A2{"viewport.viewsModel(<code>Props.modelId</code>)"}
+  TITLE(["<code>getElementsVisibilityStatus</code>"]) --> A1["<div style='text-align: left;'> Get modelIds from cache: <br/> 1. <code>props.elementIds</code> which are sub-models <br/> 2. Children which are sub-models (nested as well) </div>"]
+  TITLE(["<code>getElementsVisibilityStatus</code>"]) --> A2{"viewport.viewsModel(<code>props.modelId</code>)"}
 
   PROPS[\"
-    Props
+    <code>props</code>
     <div style='text-align: left;'>- elementIds: **Id64Arg** <br/> - modelId: **Id64String** <br/> - categoryId: **Id64String** <br/> - categoryOfTopMostParentElement: **Id64String** <br/> - parentElementIdsPath: **Array<Id64Arg>** <br/> - childrenCount: **number | undefined**</div>
   "\]
 
   %% Branch A1
-    A1 -- modelIds --> B["<a href='#getmodelsvisibilitystatus'>getModelsVisibilityStatus</a>({ modelIds })"]
+    A1 -- modelIds --> B["<code><a href='#getmodelsvisibilitystatus'>getModelsVisibilityStatus</a>({ modelIds })</code>"]
 
   %% Branch A2
 
@@ -318,7 +328,7 @@ flowchart TD
           Per model category override === 'show' <br/>
           <strong style='font-weight: bold;'>OR</strong>
           <br/>
-          Per model category override === 'none'<br/> && viewport.viewsCategory(<code>Props.categoryId</code>)
+          Per model category override === 'none'<br/> && viewport.viewsCategory(<code>props.categoryId</code>)
         </div>
       "}
 
@@ -335,22 +345,22 @@ flowchart TD
       F -- No --> G1[defaultStatus]
 
       %% Branch Yes
-      F -- Yes --> G2{"<code>Props.childrenCount</code> <br/> === 0 / undefined"}
+      F -- Yes --> G2{"<code>props.childrenCount</code> <br/> === 0 / undefined"}
 
         %% Branch Yes
         G2 -- Yes --> H1[Children count in oppositeSet === 0]
 
         %% Branch No
         G2 -- No --> H2["Props
-        <div style='text-align: left;'>- For **oppositeSet** elements execute query (if set changed after last execution), to get their models, categories and parent elements path. <br/> - Find always/never drawn child elements (nested as well) where queried data matches <code>Props.modelId</code> & <code>Props.categoryId</code> & <code>Props.parentElementIdsPath</code>. <br/> - Get count of children in **oppositeSet**: numberOfElementsInOppositeSet </div>
+        <div style='text-align: left;'>- For **oppositeSet** elements execute query (if set changed after last execution), to get their models, categories and parent elements path. <br/> - Find always/never drawn child elements (nested as well) where queried data matches <code>props.modelId</code> & <code>props.categoryId</code> & <code>props.parentElementIdsPath</code>. <br/> - Get count of children in **oppositeSet**: numberOfElementsInOppositeSet </div>
         "]
 
 
 
-      H1 -- Pass down --> I["**numberOfElementsInOppositeSet**: <code>Props.elementIds</code> in oppositeSet and children count in oppositeSet <br/> **totalCount**: <code>Props.elementIds</code> + <code>Props.childrenCount</code>"]
+      H1 -- Pass down --> I["**numberOfElementsInOppositeSet**: <code>props.elementIds</code> in oppositeSet and children count in oppositeSet <br/> **totalCount**: <code>props.elementIds</code> + <code>props.childrenCount</code>"]
       H2 -- Pass down --> I
 
-      I -- Pass down --> J["<a href='#getalwaysorneverdrawnvisibilitystatus'>getAlwaysOrNeverDrawnVisibilityStatus</a>({ totalCount, numberOfElementsInOppositeSet, defaultStatus })"]
+      I -- Pass down --> J["<code><a href='#getalwaysorneverdrawnvisibilitystatus'>getAlwaysOrNeverDrawnVisibilityStatus</a>({ totalCount, numberOfElementsInOppositeSet, defaultStatus })</code>"]
 
 
   %% Merge
@@ -388,10 +398,10 @@ flowchart TD
   RESULT_Hidden[/hidden/]
 
   %% Start
-  TITLE([getAlwaysOrNeverDrawnVisibilityStatus]) --> A{"<code>Props.totalCount</code> <br/> === 0 <br/> **OR** <br/> <code>Props.numberOfElementsInOppositeSet</code> <br/> === 0"}
+  TITLE(["<code>getAlwaysOrNeverDrawnVisibilityStatus</code>"]) --> A{"<code>props.totalCount</code> <br/> === 0 <br/> **OR** <br/> <code>props.numberOfElementsInOppositeSet</code> <br/> === 0"}
 
   PROPS[\"
-    Props
+    <code>props</code>
     <div style='text-align: left; line-height: 1.2'>
       - totalCount: **number**
       %% need !important on color since to not take the config color
@@ -407,7 +417,7 @@ flowchart TD
   "\]
 
   %% Branch Yes
-  A -- Yes --> B1{"<code>Props.defaultStatus</code> <br/> === 'visible'"}
+  A -- Yes --> B1{"<code>props.defaultStatus</code> <br/> === 'visible'"}
 
     %% Branch Yes
     B1 -- Yes --> RESULT_Visible
@@ -416,13 +426,13 @@ flowchart TD
     B1 -- No --> RESULT_Hidden
 
   %% Branch No
-  A -- No --> B2{"<code>Props.numberOfElementsInOppositeSet</code> <br/> === <code>Props.totalCount</code>"}
+  A -- No --> B2{"<code>props.numberOfElementsInOppositeSet</code> <br/> === <code>props.totalCount</code>"}
 
     %% Branch No
     B2 -- No --> RESULT_Partial
 
     %% Branch Yes
-    B2 -- Yes --> C{"<code>Props.defaultStatus</code> <br/> === 'visible'"}
+    B2 -- Yes --> C{"<code>props.defaultStatus</code> <br/> === 'visible'"}
 
       %% Branch Yes
       C -- Yes --> RESULT_Hidden
