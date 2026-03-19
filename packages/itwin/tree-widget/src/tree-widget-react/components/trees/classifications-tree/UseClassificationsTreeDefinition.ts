@@ -61,8 +61,7 @@ interface UseClassificationsTreeDefinitionResult {
  * @alpha
  */
 export function useClassificationsTreeDefinition(props: UseClassificationsTreeDefinitionProps): UseClassificationsTreeDefinitionResult {
-  const result = useClassificationsTreeDefinitionInternal(props);
-  return result;
+  return useClassificationsTreeDefinitionInternal(props);
 }
 
 /** @internal */
