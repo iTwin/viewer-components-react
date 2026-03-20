@@ -8,7 +8,7 @@ declare const process: { env: Record<string, string | undefined> };
 /**
  * Map Layers MCP Server
  *
- * Exposes iTwin.js map-layer operations as MCP tools over stdio transport.
+ * Exposes iTwin.js map-layer operations as MCP tools.
  *
  * This module only **defines** the server and its tool registrations.
  */
