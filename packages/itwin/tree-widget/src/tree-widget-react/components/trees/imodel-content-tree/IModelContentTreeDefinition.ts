@@ -187,11 +187,10 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 autoExpand: { selector: `IIF(this.ECInstanceId = ${IModel.rootSubjectId}, true, false)` },
                 supportsFiltering: true,
               })}
-            FROM ${subjectFilterClauses.from} this, IdSet(?) idSetTable
+            FROM ${subjectFilterClauses.from} this
+            JOIN IdSet(?) childSubject ON childSubject.id = this.ECInstanceId
             ${subjectFilterClauses.joins}
-            WHERE
-              this.ECInstanceId = idSetTable.id
-              ${subjectFilterClauses.where ? `AND ${subjectFilterClauses.where}` : ""}
+            ${subjectFilterClauses.where ? `WHERE ${subjectFilterClauses.where}` : ""}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [
@@ -233,9 +232,9 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                   },
                   supportsFiltering: true,
                 })}
-              FROM ${CLASS_NAME_Model} m, IdSet(?) idSetTable
+              FROM ${CLASS_NAME_Model} m
+              JOIN IdSet(?) childModel ON childModel.id = m.ECInstanceId
               JOIN ${CLASS_NAME_InformationPartitionElement} [partition] ON [partition].ECInstanceId = m.ModeledElement.Id
-              WHERE m.ECInstanceId = idSetTable.id
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             ) model
             JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = model.ECInstanceId
@@ -265,10 +264,9 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 nodeLabel: "", // doesn't matter - the node is always hidden
                 hideNodeInHierarchy: true,
               })}
-            FROM ${CLASS_NAME_Model} this, IdSet(?) idSetTable
-            WHERE
-              this.ModeledElement.Id = idSetTable.id
-              AND NOT this.IsPrivate
+            FROM ${CLASS_NAME_Model} this
+            JOIN IdSet(?) elementId ON elementId.id = this.ModeledElement.Id
+            WHERE NOT this.IsPrivate
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: elementIds }],
@@ -318,11 +316,10 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 hasChildren: true,
                 supportsFiltering: true,
               })}
-            FROM ${categoryFilterClauses.from} this, IdSet(?) idSetTable
+            FROM ${categoryFilterClauses.from} this
+            JOIN IdSet(?) childCategory ON childCategory.id = this.ECInstanceId
             ${categoryFilterClauses.joins}
-            WHERE
-              this.ECInstanceId = idSetTable.id
-              ${categoryFilterClauses.where ? `AND ${categoryFilterClauses.where}` : ""}
+            ${categoryFilterClauses.where ? `WHERE ${categoryFilterClauses.where}` : ""}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: childCategoryIds }],
@@ -348,11 +345,10 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 },
                 supportsFiltering: true,
               })}
-            FROM ${informationContentElementFilterClauses.from} this, IdSet(?) idSetTable
+            FROM ${informationContentElementFilterClauses.from} this
+            JOIN IdSet(?) model ON model.id = this.Model.Id
             ${informationContentElementFilterClauses.joins}
-            WHERE
-              this.Model.Id = idSetTable.id
-              ${informationContentElementFilterClauses.where ? `AND ${informationContentElementFilterClauses.where}` : ""}
+            ${informationContentElementFilterClauses.where ? `WHERE ${informationContentElementFilterClauses.where}` : ""}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
         bindings: [{ type: "idset", value: modelIds }],
@@ -401,12 +397,12 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                   hasChildren: selectProps.hasChildren,
                   supportsFiltering: selectProps.supportsFiltering,
                 })}
-              FROM ${instanceFilterClauses.from} this, IdSet(?) categoryIdSetTable, IdSet(?) modelIdsSetTable
+              FROM ${instanceFilterClauses.from} this
+              JOIN IdSet(?) category ON this.Category.Id = category.id
+              JOIN IdSet(?) model ON this.Model.Id = model.id
               ${instanceFilterClauses.joins}
               WHERE
-                this.Category.Id = categoryIdSetTable.id
-                AND this.Model.Id = modelIdsSetTable.id
-                AND this.Parent.Id IS NULL
+                this.Parent.Id IS NULL
                 ${whereClause ? `AND ${whereClause}` : ""}
                 ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
@@ -454,11 +450,11 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                   hasChildren: selectProps?.hasChildren,
                   supportsFiltering: selectProps?.supportsFiltering,
                 })}
-              FROM ${instanceFilterClauses.from} this, IdSet(?) idSetTable
+              FROM ${instanceFilterClauses.from} this
+              JOIN IdSet(?) model ON this.Model.Id = model.id
               ${instanceFilterClauses.joins}
               WHERE
                 this.Parent.Id IS NULL
-                AND this.Model.Id = idSetTable.id
                 ${whereClause ? `AND ${whereClause}` : ""}
                 ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
@@ -534,12 +530,11 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                   hasChildren: selectProps.hasChildren,
                   supportsFiltering: selectProps.supportsFiltering,
                 })}
-              FROM ${instanceFilterClauses.from} this, IdSet(?) idSetTable
+              FROM ${instanceFilterClauses.from} this
+              JOIN IdSet(?) group ON this.Parent.Id = group.id
               ${instanceFilterClauses.joins}
-              WHERE
-                this.Parent.Id = idSetTable.id
-                ${whereClause ? `AND ${whereClause}` : ""}
-                ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+              ${whereClause ? `WHERE ${whereClause}` : ""}
+              ${instanceFilterClauses.where ? `${whereClause ? "AND" : "WHERE"} ${instanceFilterClauses.where}` : ""}
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
             bindings: [{ type: "idset", value: groupIds }],
@@ -581,13 +576,12 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                   hasChildren: selectProps.hasChildren,
                   supportsFiltering: selectProps.supportsFiltering,
                 })}
-              FROM ${instanceFilterClauses.from} this, IdSet(?) idSetTable
+              FROM ${instanceFilterClauses.from} this
               JOIN BisCore.ElementGroupsMembers egm ON egm.TargetECInstanceId = this.ECInstanceId
+              JOIN IdSet(?) group ON egm.SourceECInstanceId = group.id
               ${instanceFilterClauses.joins}
-              WHERE
-                egm.SourceECInstanceId = idSetTable.id
-                ${whereClause ? `AND ${whereClause}` : ""}
-                ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+              ${whereClause ? `WHERE ${whereClause}` : ""}
+              ${instanceFilterClauses.where ? `${whereClause ? "AND" : "WHERE"} ${instanceFilterClauses.where}` : ""}
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
             bindings: [{ type: "idset", value: groupIds }],
@@ -628,13 +622,12 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                   hasChildren: selectProps.hasChildren,
                   supportsFiltering: selectProps.supportsFiltering,
                 })}
-              FROM ${instanceFilterClauses.from} this, IdSet(?) idSetTable
+              FROM ${instanceFilterClauses.from} this
               JOIN BisCore.Element p ON p.ECInstanceId = this.Parent.Id
+              JOIN IdSet(?) element ON p.ECInstanceId = element.id
               ${instanceFilterClauses.joins}
-              WHERE
-                p.ECInstanceId = idSetTable.id
-                ${whereClause ? `AND ${whereClause}` : ""}
-                ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+              ${whereClause ? `WHERE ${whereClause}` : ""}
+              ${instanceFilterClauses.where ? `${whereClause ? "AND" : "WHERE"} ${instanceFilterClauses.where}` : ""}
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
             bindings: [{ type: "idset", value: elementIds }],

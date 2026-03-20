@@ -51,10 +51,12 @@ export class ElementChildrenCache {
         `
           ElementChildren(id, parentId) AS (
             SELECT ECInstanceId id, Parent.Id parentId
-            FROM ${this.#elementClassName}, IdSet(?) idSetTable
-            WHERE Parent.Id = idSetTable.id
+            FROM ${this.#elementClassName}
+            JOIN IdSet(?) element ON Parent.Id = element.id
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+
             UNION ALL
+
             SELECT c.ECInstanceId id, c.Parent.Id
             FROM ${this.#elementClassName} c
             JOIN ElementChildren p ON c.Parent.Id = p.id

@@ -312,11 +312,10 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 autoExpand: { selector: `IIF(this.ECInstanceId = ${IModel.rootSubjectId}, true, false)` },
                 supportsFiltering: this.supportsFiltering(),
               })}
-            FROM ${subjectFilterClauses.from} this, IdSet(?) idSetTable
+            FROM ${subjectFilterClauses.from} this
+            JOIN IdSet(?) childSubject ON this.ECInstanceId = childSubject.id
             ${subjectFilterClauses.joins}
-            WHERE
-              this.ECInstanceId = idSetTable.id
-              ${subjectFilterClauses.where ? `AND ${subjectFilterClauses.where}` : ""}
+            ${subjectFilterClauses.where ? `WHERE ${subjectFilterClauses.where}` : ""}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [
@@ -371,9 +370,9 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   },
                   supportsFiltering: this.supportsFiltering(),
                 })}
-              FROM ${CLASS_NAME_GeometricModel3d} m, IdSet(?) idSetTable
+              FROM ${CLASS_NAME_GeometricModel3d} m
+              JOIN IdSet(?) childModel ON m.ECInstanceId = childModel.id
               JOIN ${CLASS_NAME_InformationPartitionElement} [partition] ON [partition].ECInstanceId = m.ModeledElement.Id
-              WHERE m.ECInstanceId = idSetTable.id
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             ) model
             JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = model.ECInstanceId
@@ -403,10 +402,10 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 nodeLabel: "", // doesn't matter - the node is always hidden
                 hideNodeInHierarchy: true,
               })}
-            FROM ${CLASS_NAME_GeometricModel3d} this, IdSet(?) idSetTable
+            FROM ${CLASS_NAME_GeometricModel3d} this
+            JOIN IdSet(?) element ON this.ModeledElement.Id = element.id
             WHERE
-              this.ModeledElement.Id = idSetTable.id
-              AND NOT this.IsPrivate
+              NOT this.IsPrivate
               AND this.ECInstanceId IN (SELECT Model.Id FROM ${this.#hierarchyConfig.elementClassSpecification})
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
@@ -454,11 +453,10 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 },
                 supportsFiltering: this.supportsFiltering(),
               })}
-            FROM ${instanceFilterClauses.from} this, IdSet(?) idSetTable
+            FROM ${instanceFilterClauses.from} this
+            JOIN IdSet(?) category ON category.id = this.ECInstanceId
             ${instanceFilterClauses.joins}
-            WHERE
-              idSetTable.id = this.ECInstanceId
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: categoryIds }],
@@ -551,12 +549,12 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 },
                 supportsFiltering: this.supportsFiltering(),
               })}
-            FROM ${instanceFilterClauses.from} this, IdSet(?) categoryIdSetTable, IdSet(?) modelIdSetTable
+            FROM ${instanceFilterClauses.from} this
+            JOIN IdSet(?) category ON this.Category.Id = category.id
+            JOIN IdSet(?) model ON this.Model.Id = model.id
             ${instanceFilterClauses.joins}
             WHERE
-              this.Category.Id = categoryIdSetTable.id
-              AND this.Model.Id = modelIdSetTable.id
-              AND this.Parent.Id IS NULL
+              this.Parent.Id IS NULL
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
@@ -621,11 +619,10 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 },
                 supportsFiltering: this.supportsFiltering(),
               })}
-            FROM ${instanceFilterClauses.from} this, IdSet(?) idSetTable
+            FROM ${instanceFilterClauses.from} this
+            JOIN IdSet(?) element ON this.Parent.Id = element.id
             ${instanceFilterClauses.joins}
-            WHERE
-              this.Parent.Id = idSetTable.id
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: elementIds }],
@@ -719,8 +716,8 @@ export function createGeometricElementInstanceKeyPaths(props: {
       elementIds.length > 0
         ? `
             SELECT e.ECInstanceId, e.ECClassId, e.Parent.Id, e.Model.Id, e.Category.Id, -1
-            FROM ${elementClassName} e, IdSet(?) elementIdSetTable
-            WHERE e.ECInstanceId = elementIdSetTable.id
+            FROM ${elementClassName} e
+            JOIN IdSet(?) element ON e.ECInstanceId = element.id
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `
         : undefined;
@@ -728,14 +725,16 @@ export function createGeometricElementInstanceKeyPaths(props: {
     const targetGroupingNodesElementInfoQueries = groupInfos.map(
       ({ parent, groupingNode }, index) => `
           SELECT e.ECInstanceId, e.ECClassId, e.Parent.Id, e.Model.Id, e.Category.Id, ${index}
-          FROM ${elementClassName} e, IdSet(?) parentIdSetTable${index} ${parent.type !== "element" ? `, IdSet(?) modelIdSetTable${index}` : ""}
+          FROM ${elementClassName} e
+          JOIN IdSet(?) parent${index} ON ${parent.type === "element" ? `e.Parent.Id = parent${index}.id` : `e.Category.Id = parent${index}.id`}${
+            parent.type !== "element"
+              ? `
+          JOIN IdSet(?) model${index} ON e.Model.Id = model${index}.id`
+              : ""
+          }
           WHERE
             e.ECClassId IS (${groupingNode.key.className})
-            AND ${
-              parent.type === "element"
-                ? `e.Parent.Id = parentIdSetTable${index}.id`
-                : `e.Parent.Id IS NULL AND e.Category.Id = parentIdSetTable${index}.id AND e.Model.Id = modelIdSetTable${index}.id`
-            }
+            ${parent.type === "element" ? "" : `AND e.Parent.Id IS NULL`}
           ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
     );

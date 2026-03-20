@@ -294,8 +294,8 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
                 Category.Id categoryId,
                 Parent.Id parentId,
                 CAST(IdToHex(ECInstanceId) AS TEXT) elementsPath
-              FROM ${this.#elementClassName}, IdSet(?) idSetTable
-              WHERE idSetTable.id = ECInstanceId
+              FROM ${this.#elementClassName}
+              JOIN IdSet(?) element ON element.id = ECInstanceId
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
               UNION ALL

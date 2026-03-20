@@ -151,13 +151,12 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                 },
                 supportsFiltering: { selector: this.createExternalSourceSupportsFilteringSelector("this") },
               })}
-            FROM ${instanceFilterClauses.from} this, IdSet(?) idSetTable
+            FROM ${instanceFilterClauses.from} this
             JOIN BisCore.ExternalSourceGroupGroupsSources esggs ON esggs.TargetECInstanceId = this.ECInstanceId
+            JOIN IdSet(?) group ON esggs.SourceECInstanceId = group.id
             LEFT JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
             ${instanceFilterClauses.joins}
-            WHERE
-              esggs.SourceECInstanceId = idSetTable.id
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: groupIds }],
@@ -192,13 +191,12 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                 },
                 supportsFiltering: { selector: this.createExternalSourceSupportsFilteringSelector("this") },
               })}
-            FROM ${instanceFilterClauses.from} this, IdSet(?) idSetTable
+            FROM ${instanceFilterClauses.from} this
             JOIN BisCore.ExternalSourceAttachment esa ON esa.Attaches.Id = this.ECInstanceId
+            JOIN IdSet(?) source ON source.id = esa.Parent.Id
             LEFT JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
             ${instanceFilterClauses.joins}
-            WHERE
-              esa.Parent.Id = idSetTable.id
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: sourceIds }],
@@ -262,12 +260,11 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                 grouping: { byClass: true },
                 hasChildren: false,
               })}
-            FROM ${instanceFilterClauses.from} this, IdSet(?) idSetTable
+            FROM ${instanceFilterClauses.from} this
             JOIN BisCore.ExternalSourceAspect esa ON esa.Element.Id = this.ECInstanceId
+            JOIN IdSet(?) source ON source.id = esa.Source.Id
             ${instanceFilterClauses.joins}
-            WHERE
-              esa.Source.Id = idSetTable.id
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: sourceIds }],
