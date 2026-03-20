@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1773815423821,
+  "lastUpdate": 1773985272865,
   "repoUrl": "https://github.com/iTwin/viewer-components-react",
   "entries": {
     "Tree-Widget benchmark": [
@@ -11013,6 +11013,129 @@ window.BENCHMARK_DATA = {
             "value": 187,
             "unit": "ms",
             "extra": "count: 7\nmax: 187\np95: 187\nmedian: 82"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9c4d33461eba891e8bd90adc2fbdc7f1a0c879db",
+          "message": "Bump fast-xml-parser from 5.5.6 to 5.5.7 in /packages/itwin/tree-widget (#1632)\n\nBumps [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser) from 5.5.6 to 5.5.7.\n- [Release notes](https://github.com/NaturalIntelligence/fast-xml-parser/releases)\n- [Changelog](https://github.com/NaturalIntelligence/fast-xml-parser/blob/master/CHANGELOG.md)\n- [Commits](https://github.com/NaturalIntelligence/fast-xml-parser/compare/v5.5.6...v5.5.7)\n\n---\nupdated-dependencies:\n- dependency-name: fast-xml-parser\n  dependency-version: 5.5.7\n  dependency-type: direct:development\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>",
+          "timestamp": "2026-03-20T05:32:42Z",
+          "tree_id": "00406b52d01354fbad6bee254d89e0842dee1d4b",
+          "url": "https://github.com/iTwin/viewer-components-react/commit/9c4d33461eba891e8bd90adc2fbdc7f1a0c879db"
+        },
+        "date": 1773985270085,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "categories tree creates initial filtered view for 50k items",
+            "value": 1574.92,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree creates initial filtered view for 50k items (P95 of main thread blocks)",
+            "value": 470,
+            "unit": "ms",
+            "extra": "count: 9\nmax: 470\np95: 470\nmedian: 32"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k subCategories",
+            "value": 2385.04,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k subCategories (P95 of main thread blocks)",
+            "value": 40,
+            "unit": "ms",
+            "extra": "count: 1\nmax: 40\np95: 40\nmedian: 40"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k categories",
+            "value": 5003.5,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k categories (P95 of main thread blocks)",
+            "value": 108,
+            "unit": "ms",
+            "extra": "count: 7\nmax: 108\np95: 108\nmedian: 60"
+          },
+          {
+            "name": "models tree creates initial filtered view for 50k target items",
+            "value": 823.64,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree creates initial filtered view for 50k target items (P95 of main thread blocks)",
+            "value": 144,
+            "unit": "ms",
+            "extra": "count: 7\nmax: 144\np95: 144\nmedian: 25"
+          },
+          {
+            "name": "models tree validates categories visibility for imodel with 50k categories",
+            "value": 8413.44,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree validates categories visibility for imodel with 50k categories (P95 of main thread blocks)",
+            "value": 154,
+            "unit": "ms",
+            "extra": "count: 7\nmax: 154\np95: 154\nmedian: 28"
+          },
+          {
+            "name": "models tree changing model visibility changes visibility for 50k elements",
+            "value": 2514.81,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing model visibility changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 110,
+            "unit": "ms",
+            "extra": "count: 1\nmax: 110\np95: 110\nmedian: 110"
+          },
+          {
+            "name": "models tree changing category visibility changes visibility for 50k elements",
+            "value": 2476.85,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing category visibility changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 111,
+            "unit": "ms",
+            "extra": "count: 1\nmax: 111\np95: 111\nmedian: 111"
+          },
+          {
+            "name": "models tree changing per-model-category override changes visibility for 50k elements",
+            "value": 2556.44,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing per-model-category override changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 122,
+            "unit": "ms",
+            "extra": "count: 1\nmax: 122\np95: 122\nmedian: 122"
+          },
+          {
+            "name": "models tree changing element visibility changes only parent nodes visibility with 50k elements",
+            "value": 4697.06,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing element visibility changes only parent nodes visibility with 50k elements (P95 of main thread blocks)",
+            "value": 193,
+            "unit": "ms",
+            "extra": "count: 8\nmax: 193\np95: 193\nmedian: 78"
           }
         ]
       }
