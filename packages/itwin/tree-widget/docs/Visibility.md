@@ -70,7 +70,7 @@ The viewport only renders elements. Element visibility is resolved in the follow
     - [getCategoriesVisibilityStatus](./SharedVisibilityHandling.md#getcategoriesvisibilitystatus)
     - [getSubCategoriesVisibilityStatus](./SharedVisibilityHandling.md#getsubcategoriesvisibilitystatus)
     - [getElementsVisibilityStatus](./SharedVisibilityHandling.md#getelementsvisibilitystatus)
-  - [Classifications tree](./CategoriesTreeVisibilityHandling.md)
+  - [Classifications tree](./ClassificationsTreeVisibilityHandling.md)
     - [getClassificationTablesVisibilityStatus](./ClassificationsTreeVisibilityHandling.md#getclassificationtablesvisibilitystatus)
     - [getClassificationsVisibilityStatus](./ClassificationsTreeVisibilityHandling.md#getclassificationsvisibilitystatus)
     - [getCategoriesVisibilityStatus](./SharedVisibilityHandling.md#getcategoriesvisibilitystatus)
