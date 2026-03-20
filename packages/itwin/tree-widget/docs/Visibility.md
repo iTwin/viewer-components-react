@@ -31,7 +31,7 @@ This document explains visibility handling across tree types (Models, Categories
     - Data stored in this cache is requested only once, because it does not change.
   - Tree-specific id caches ([`CategoriesTreeIdsCache`](../src/tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.ts), [`ClassificationsTreeIdsCache`](../src/tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.ts), [`ModelsTreeIdsCache`](../src/tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.ts)):
     - Store various tree-specific relationships, (e.g. models tree ids cache stores element's model <-> subject relationship).
-    - Extends `BaseVisibilityHandlerImpl` so each tree-specific cache can be used in [`BaseVisibilityHelper`](../src/tree-widget-react/components/trees/common/internal/visibility/BaseVisibilityHelper.ts).
+    - Extend `BaseIdsCacheImpl` so each tree-specific cache can be used in [`BaseVisibilityHelper`](../src/tree-widget-react/components/trees/common/internal/visibility/BaseVisibilityHelper.ts).
 
   - [`AlwaysAndNeverDrawnElementInfoCache`](../src/tree-widget-react/components/trees/common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.ts) — caches extra data (like category) for always/never drawn elements.
     - Always and never drawn caches are reset when always and never drawn sets change respectively.
