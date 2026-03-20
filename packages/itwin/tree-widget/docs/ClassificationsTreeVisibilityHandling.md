@@ -1,4 +1,4 @@
-<!-- cspell: ignore getcategoriesvisibilitystatus -->
+<!-- cspell: ignore getclassificationtablesvisibilitystatus getclassificationsvisibilitystatus getcategoriesvisibilitystatus getelementsvisibilitystatus -->
 
 # Classifications tree specific visibility handling
 

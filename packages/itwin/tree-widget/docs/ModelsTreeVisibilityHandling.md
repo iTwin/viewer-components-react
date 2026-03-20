@@ -1,4 +1,4 @@
-<!-- cspell: ignore getmodelsvisibilitystatus -->
+<!-- cspell: ignore getsubjectsvisibilitystatus getmodelsvisibilitystatus getcategoriesvisibilitystatus getelementsvisibilitystatus -->
 
 # Models tree specific visibility handling
 

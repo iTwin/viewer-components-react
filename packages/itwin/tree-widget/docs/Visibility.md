@@ -1,3 +1,5 @@
+<!-- cspell: ignore getsubjectsvisibilitystatus getcategoriesvisibilitystatus getmodelsvisibilitystatus getsubcategoriesvisibilitystatus getelementsvisibilitystatus getdefinitioncontainersvisibilitystatus getclassificationtablesvisibilitystatus getclassificationsvisibilitystatus -->
+
 # Visibility Handling in Tree Widget
 
 This document explains visibility handling across tree types (Models, Categories, and Classifications) and node types (models, categories, geometric elements, sub-categories, sub-models, classifications, classification tables and definition containers).

@@ -1,4 +1,4 @@
-<!-- cspell: ignore getcategoriesvisibilitystatus -->
+<!-- cspell: ignore getcategoriesvisibilitystatus getdefinitioncontainersvisibilitystatus getsubcategoriesvisibilitystatus getelementsvisibilitystatus -->
 
 # Categories tree specific visibility handling
 
