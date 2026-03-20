@@ -17,7 +17,7 @@ export {
   setMapTransparency,
   toggleTerrain,
   getMapLayerInfo,
-  attachMapLayer,
+  // attachMapLayer, // DISABLED — SSRF & credential-leakage risk (see server.ts)
   detachMapLayer,
   setMapLayerVisibility,
 } from "./tools";

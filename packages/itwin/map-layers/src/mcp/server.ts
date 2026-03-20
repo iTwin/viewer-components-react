@@ -17,7 +17,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { getViewportAccessor } from "./viewport";
 import {
-  attachMapLayer,
+  // attachMapLayer, // DISABLED — see attach_map_layer tool comment below
   detachMapLayer,
   getMapLayerInfo,
   openMapLayersWidget,
@@ -148,30 +148,35 @@ server.tool(
 );
 
 // ── 7. attach_map_layer ──────────────────────────────────────────────────────
-
-server.tool(
-  "attach_map_layer",
-  "Attaches a new map layer to the viewport by URL. Supports WMS, WMTS, ArcGIS, ArcGISFeature, and TileURL formats.",
-  {
-    url: z.string().describe("The map layer service URL."),
-    name: z.string().describe("Display name for the layer."),
-    formatId: z
-      .enum(["WMS", "WMTS", "ArcGIS", "ArcGISFeature", "TileURL"])
-      .optional()
-      .describe("The map service format. Defaults to 'WMS'."),
-    isOverlay: z.boolean().optional().describe("If true, attach as overlay; otherwise as background layer. Default: false."),
-    userName: z.string().optional().describe("Optional username for authenticated layers."),
-    password: z.string().optional().describe("Optional password for authenticated layers."),
-  },
-  async ({ url, name, formatId, isOverlay, userName, password }) => {
-    try {
-      const result = attachMapLayer(getViewportAccessor(), url, name, formatId, isOverlay, userName, password);
-      return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
-    } catch (e: any) {
-      return { content: [{ type: "text" as const, text: JSON.stringify({ action: "attach_map_layer", error: e.message }) }], isError: true };
-    }
-  },
-);
+// DISABLED: This tool accepts an arbitrary URL and plaintext credentials, which
+// poses SSRF and credential-leakage risks when the MCP server is exposed remotely.
+// Before re-enabling, add URL allowlisting/validation (block private IPs, file://
+// schemes, etc.), sanitize error messages so they never echo back the raw URL or
+// credentials, and consider a credential-store reference instead of inline secrets.
+//
+// server.tool(
+//   "attach_map_layer",
+//   "Attaches a new map layer to the viewport by URL. Supports WMS, WMTS, ArcGIS, ArcGISFeature, and TileURL formats.",
+//   {
+//     url: z.string().describe("The map layer service URL."),
+//     name: z.string().describe("Display name for the layer."),
+//     formatId: z
+//       .enum(["WMS", "WMTS", "ArcGIS", "ArcGISFeature", "TileURL"])
+//       .optional()
+//       .describe("The map service format. Defaults to 'WMS'."),
+//     isOverlay: z.boolean().optional().describe("If true, attach as overlay; otherwise as background layer. Default: false."),
+//     userName: z.string().optional().describe("Optional username for authenticated layers."),
+//     password: z.string().optional().describe("Optional password for authenticated layers."),
+//   },
+//   async ({ url, name, formatId, isOverlay, userName, password }) => {
+//     try {
+//       const result = attachMapLayer(getViewportAccessor(), url, name, formatId, isOverlay, userName, password);
+//       return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
+//     } catch (e: any) {
+//       return { content: [{ type: "text" as const, text: JSON.stringify({ action: "attach_map_layer", error: e.message }) }], isError: true };
+//     }
+//   },
+// );
 
 // ── 8. detach_map_layer ──────────────────────────────────────────────────────
 
