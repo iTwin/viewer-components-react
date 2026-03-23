@@ -402,7 +402,7 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <div style='text-align: left; line-height: 1.2'>
+    <code style='text-align: left; line-height: 1.2'>
       - totalCount: **number**
       %% need !important on color since to not take the config color
      <span style='color: #808080 !important; font-style: italic; margin-top: 4px; display: block; margin-left: 15px'>Number of elements that are under node <br/> (includes node itself and its nested child elements)
