@@ -398,7 +398,7 @@ flowchart TD
   RESULT_Hidden[/hidden/]
 
   %% Start
-  TITLE(["<code>getAlwaysOrNeverDrawnVisibilityStatus</code>"]) --> A{"<code>props.totalCount</code> <br/> === 0 <br/> **OR** <br/> <code>props.numberOfElementsInOppositeSet</code> <br/> === 0"}
+  TITLE(["<code>getAlwaysOrNeverDrawnVisibilityStatus</code>"]) --> A{"<code>props.totalCount === 0</code><br/>**OR**<br/><code>props.numberOfElementsInOppositeSet === 0</code>"}
 
   PROPS[\"
     <code>props</code>
