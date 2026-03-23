@@ -417,7 +417,7 @@ flowchart TD
   "\]
 
   %% Branch Yes
-  A -- Yes --> B1{"<code>props.defaultStatus</code> <br/> === 'visible'"}
+  A -- Yes --> B1{"<code>props.defaultStatus === 'visible'</code>"}
 
     %% Branch Yes
     B1 -- Yes --> RESULT_Visible
