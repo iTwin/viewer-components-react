@@ -345,7 +345,7 @@ flowchart TD
       F -- No --> G1[defaultStatus]
 
       %% Branch Yes
-      F -- Yes --> G2{"<code>props.childrenCount</code> <br/> === 0 / undefined"}
+      F -- Yes --> G2{"<code>props.childrenCount<br/> === 0 / undefined</code>"}
 
         %% Branch Yes
         G2 -- Yes --> H1[Children count in oppositeSet === 0]
