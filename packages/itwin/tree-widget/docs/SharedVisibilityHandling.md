@@ -426,7 +426,7 @@ flowchart TD
     B1 -- No --> RESULT_Hidden
 
   %% Branch No
-  A -- No --> B2{"<code>props.numberOfElementsInOppositeSet</code> <br/> === <code>props.totalCount</code>"}
+  A -- No --> B2{"<code>props.numberOfElementsInOppositeSet<br /> === props.totalCount</code>"}
 
     %% Branch No
     B2 -- No --> RESULT_Partial
