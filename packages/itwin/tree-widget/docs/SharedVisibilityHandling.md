@@ -208,7 +208,7 @@ flowchart TD
 
   %% Start
   TITLE(["<code>getModelWithCategoryVisibilityStatus</code>"]) --> A1[Get modelled elements under category with model]
-  TITLE(["<code>getModelWithCategoryVisibilityStatus</code>"]) --> A2{"viewport.viewsModel(<code>props.modelId</code>)"}
+  TITLE(["<code>getModelWithCategoryVisibilityStatus</code>"]) --> A2{"<code>viewport.viewsModel(props.modelId)</code>"}
 
   PROPS[\"
     <code>props</code>
