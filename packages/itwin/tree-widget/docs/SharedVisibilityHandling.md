@@ -328,7 +328,7 @@ flowchart TD
           Per model category override === 'show' <br/>
           <strong style='font-weight: bold;'>OR</strong>
           <br/>
-          Per model category override === 'none'<br/> && viewport.viewsCategory(<code>props.categoryId</code>)
+          Per model category override === 'none'<br/> && <code>viewport.viewsCategory(props.categoryId)</code>
         </div>
       "}
 
