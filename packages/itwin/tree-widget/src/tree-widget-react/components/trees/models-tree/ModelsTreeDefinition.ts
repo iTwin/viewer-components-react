@@ -313,14 +313,14 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 supportsFiltering: this.supportsFiltering(),
               })}
             FROM ${subjectFilterClauses.from} this
+            JOIN IdSet(?) childSubject ON this.ECInstanceId = childSubject.id
             ${subjectFilterClauses.joins}
-            WHERE
-              this.ECInstanceId IN (${childSubjectIds.map(() => "?").join(",")})
-              ${subjectFilterClauses.where ? `AND ${subjectFilterClauses.where}` : ""}
+            ${subjectFilterClauses.where ? `WHERE ${subjectFilterClauses.where}` : ""}
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [
             { type: "idset", value: await firstValueFrom(this.#idsCache.getParentSubjectIds()) },
-            ...childSubjectIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
+            { type: "idset", value: childSubjectIds },
           ],
         },
       });
@@ -371,15 +371,15 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   supportsFiltering: this.supportsFiltering(),
                 })}
               FROM ${CLASS_NAME_GeometricModel3d} m
+              JOIN IdSet(?) childModel ON m.ECInstanceId = childModel.id
               JOIN ${CLASS_NAME_InformationPartitionElement} [partition] ON [partition].ECInstanceId = m.ModeledElement.Id
-              WHERE
-                m.ECInstanceId IN (${childModelIds.map(() => "?").join(",")})
+              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             ) model
             JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = model.ECInstanceId
             ${modelFilterClauses.joins}
             ${modelFilterClauses.where ? `AND (model.${NodeSelectClauseColumnNames.HideNodeInHierarchy} OR ${modelFilterClauses.where})` : ""}
           `,
-          bindings: childModelIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
+          bindings: [{ type: "idset", value: childModelIds }],
         },
       });
     return defs;
@@ -403,12 +403,13 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 hideNodeInHierarchy: true,
               })}
             FROM ${CLASS_NAME_GeometricModel3d} this
+            JOIN IdSet(?) element ON this.ModeledElement.Id = element.id
             WHERE
-              this.ModeledElement.Id IN (${elementIds.map(() => "?").join(",")})
-              AND NOT this.IsPrivate
+              NOT this.IsPrivate
               AND this.ECInstanceId IN (SELECT Model.Id FROM ${this.#hierarchyConfig.elementClassSpecification})
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
-          bindings: elementIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
+          bindings: [{ type: "idset", value: elementIds }],
         },
       },
     ];
@@ -453,9 +454,10 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 supportsFiltering: this.supportsFiltering(),
               })}
             FROM ${instanceFilterClauses.from} this
+            JOIN IdSet(?) category ON category.id = this.ECInstanceId
             ${instanceFilterClauses.joins}
-            WHERE InVirtualSet(?, this.ECInstanceId)
-            ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: categoryIds }],
         },
@@ -504,9 +506,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         toArray(),
       ),
     );
-    const bindings = new Array<ECSqlBinding>();
-    categoryIds.forEach((id) => bindings.push({ type: "id", value: id }));
-    modelIds.forEach((id) => bindings.push({ type: "id", value: id }));
     return [
       {
         fullClassName: this.#hierarchyConfig.elementClassSpecification,
@@ -528,7 +527,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 hasChildren: {
                   selector: `
                     IIF(
-                      ${modeledElements.length ? `this.ECInstanceId IN (${modeledElements.join(",")})` : `FALSE`},
+                      ${modeledElements.length ? "InVirtualSet(?, this.ECInstanceId)" : `FALSE`},
                       1,
                       IFNULL((
                         SELECT 1
@@ -551,14 +550,19 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 supportsFiltering: this.supportsFiltering(),
               })}
             FROM ${instanceFilterClauses.from} this
+            JOIN IdSet(?) category ON this.Category.Id = category.id
+            JOIN IdSet(?) model ON this.Model.Id = model.id
             ${instanceFilterClauses.joins}
             WHERE
-              this.Category.Id IN (${categoryIds.map(() => "?").join(",")})
-              AND this.Model.Id IN (${modelIds.map(() => "?").join(",")})
-              AND this.Parent.Id IS NULL
+              this.Parent.Id IS NULL
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
-          bindings,
+          bindings: [
+            ...(modeledElements.length > 0 ? [{ type: "idset" as const, value: modeledElements }] : []),
+            { type: "idset", value: categoryIds },
+            { type: "idset", value: modelIds },
+          ],
         },
       },
     ];
@@ -573,8 +577,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       filter: instanceFilter,
       contentClass: { fullName: this.#hierarchyConfig.elementClassSpecification, alias: "this" },
     });
-    const bindings = new Array<ECSqlBinding>();
-    elementIds.forEach((id) => bindings.push({ type: "id", value: id }));
     return [
       {
         fullClassName: this.#hierarchyConfig.elementClassSpecification,
@@ -618,12 +620,12 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 supportsFiltering: this.supportsFiltering(),
               })}
             FROM ${instanceFilterClauses.from} this
+            JOIN IdSet(?) element ON this.Parent.Id = element.id
             ${instanceFilterClauses.joins}
-            WHERE
-              this.Parent.Id IN (${elementIds.map(() => "?").join(",")})
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
-          bindings,
+          bindings: [{ type: "idset", value: elementIds }],
         },
       },
     ];
@@ -659,7 +661,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         SELECT 1
         FROM ECDbMeta.ECSchemaDef s
         JOIN ECDbMeta.ECClassDef c ON c.Schema.Id = s.ECInstanceId
-        WHERE s.Name = ? AND c.Name = ? AND c.ECInstanceId IS (BisCore.GeometricElement3d)
+        WHERE s.Name = ? AND c.Name = ? AND c.ECInstanceId IS (${CLASS_NAME_GeometricElement3d})
       `,
       bindings: [
         { type: "string", value: schemaName },
@@ -699,24 +701,37 @@ export function createGeometricElementInstanceKeyPaths(props: {
   const elementIds = targetItems.filter((info): info is Id64String => typeof info === "string");
   const groupInfos = targetItems.filter((info): info is ElementsGroupInfo => typeof info !== "string");
   const separator = ";";
-
+  const bindings = new Array<ECSqlBinding>();
+  if (elementIds.length > 0) {
+    bindings.push({ type: "idset", value: elementIds });
+  }
+  groupInfos.forEach(({ parent }) => {
+    bindings.push({ type: "idset", value: parent.ids });
+    if (parent.type !== "element") {
+      bindings.push({ type: "idset", value: parent.modelIds });
+    }
+  });
   return defer(() => {
     const targetElementsInfoQuery =
       elementIds.length > 0
         ? `
-          SELECT e.ECInstanceId, e.ECClassId, e.Parent.Id, e.Model.Id, e.Category.Id, -1
-          FROM ${elementClassName} e
-           WHERE e.ECInstanceId IN (${elementIds.join(",")})
-            `
+            SELECT e.ECInstanceId, e.ECClassId, e.Parent.Id, e.Model.Id, e.Category.Id, -1
+            FROM ${elementClassName} e
+            JOIN IdSet(?) element ON e.ECInstanceId = element.id
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+          `
         : undefined;
 
     const targetGroupingNodesElementInfoQueries = groupInfos.map(
       ({ parent, groupingNode }, index) => `
-        SELECT e.ECInstanceId, e.ECClassId, e.Parent.Id, e.Model.Id, e.Category.Id, ${index}
-        FROM ${elementClassName} e
-        WHERE
-          e.ECClassId IS (${groupingNode.key.className})
-          AND ${parent.type === "element" ? `e.Parent.Id IN (${parent.ids.join(",")})` : `e.Parent.Id IS NULL AND e.Category.Id IN (${parent.ids.join(",")}) AND e.Model.Id IN (${parent.modelIds.join(",")})`}
+          SELECT e.ECInstanceId, e.ECClassId, e.Parent.Id, e.Model.Id, e.Category.Id, ${index}
+          FROM ${elementClassName} e
+          JOIN IdSet(?) parent${index} ON ${parent.type === "element" ? `e.Parent.Id = parent${index}.id` : `e.Category.Id = parent${index}.id`}
+          ${parent.type !== "element" ? `JOIN IdSet(?) model${index} ON e.Model.Id = model${index}.id` : ""}
+          WHERE
+            e.ECClassId IS (${groupingNode.key.className})
+            ${parent.type === "element" ? "" : `AND e.Parent.Id IS NULL`}
+          ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
     );
 
@@ -763,7 +778,7 @@ export function createGeometricElementInstanceKeyPaths(props: {
     `;
 
     return queryExecutor.createQueryReader(
-      { ctes, ecsql },
+      { ctes, ecsql, bindings },
       { rowFormat: "Indexes", limit: "unbounded", restartToken: `${componentName}/${componentId}/geometric-element-paths/${chunkIndex}` },
     );
   }).pipe(

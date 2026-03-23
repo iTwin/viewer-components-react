@@ -179,7 +179,7 @@ async function getCategoriesFromPaths(
       entry.push(subCategory.id);
     }
   }
-  const rootElementModelMap = await firstValueFrom(idsCache.getFilteredElementsModels(rootFilteredElementIds));
+  const rootElementModelMap = await firstValueFrom(idsCache.getFilteredElementsModels([...rootFilteredElementIds]));
   const models = [...subModelIds, ...new Set(rootElementModelMap.values())];
   return {
     categories: [...categories.entries()].map(([categoryId, subCategoryIds]) => ({
