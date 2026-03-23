@@ -413,7 +413,7 @@ flowchart TD
       - defaultStatus: **'visible' | 'hidden'**
       <span style='color: #808080 !important; font-style: italic; margin-top: 4px; display: block; margin-left: 15px'>Elements visibility status when they are not <br/>in always/never drawn list
       </span>
-    </div>
+    </code>
   "\]
 
   %% Branch Yes
