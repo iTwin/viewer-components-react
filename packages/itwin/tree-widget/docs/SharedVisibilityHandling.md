@@ -90,7 +90,7 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <div style='text-align: left;'>- modelIds: **Id64Arg**</div>
+    <code style='text-align: left;'>- modelIds: **Id64Arg**</code>
   "\]
 
   A -- modelId --> B{"<code>viewport.viewsModel(modelId)</code>"}
