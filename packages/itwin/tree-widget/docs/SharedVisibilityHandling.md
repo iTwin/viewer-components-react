@@ -304,7 +304,7 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <div style='text-align: left;'>- elementIds: **Id64Arg** <br/> - modelId: **Id64String** <br/> - categoryId: **Id64String** <br/> - categoryOfTopMostParentElement: **Id64String** <br/> - parentElementIdsPath: **Array<Id64Arg>** <br/> - childrenCount: **number | undefined**</div>
+    <code style='text-align: left;'>- elementIds: **Id64Arg**<br/> - modelId: **Id64String**<br/> - categoryId: **Id64String**<br/> - categoryOfTopMostParentElement: **Id64String**<br/> - parentElementIdsPath: **Array<Id64Arg>**<br/> - childrenCount: **number | undefined**</code>
   "\]
 
   %% Branch A1
