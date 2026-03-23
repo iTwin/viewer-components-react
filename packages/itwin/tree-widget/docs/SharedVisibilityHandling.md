@@ -212,7 +212,7 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <div style='text-align: left;'>- modelId: **Id64String** <br/> - categoryId: **Id64String**</div>
+    <code style='text-align: left;'>- modelId: **Id64String**<br/> - categoryId: **Id64String**</code>
   "\]
 
   %% Branch A1
