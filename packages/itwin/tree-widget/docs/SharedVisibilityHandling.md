@@ -122,7 +122,7 @@ flowchart TD
 
 ### getCategoriesVisibilityStatus
 
-Allows getting category visibility under specific model (when modelId is defined in props) or to get generic category visibility.
+Allows getting category visibility under specific model (when `props.modelId` is defined) or to get generic category visibility.
 
 1. For category visibility under specific model, [getModelWithCategoryVisibilityStatus](#getmodelwithcategoryvisibilitystatus) is used.
 2. For generic category visibility status, merge statuses from:
