@@ -432,7 +432,7 @@ flowchart TD
     B2 -- No --> RESULT_Partial
 
     %% Branch Yes
-    B2 -- Yes --> C{"<code>props.defaultStatus</code> <br/> === 'visible'"}
+    B2 -- Yes --> C{"<code>props.defaultStatus === 'visible'</code>"}
 
       %% Branch Yes
       C -- Yes --> RESULT_Hidden
