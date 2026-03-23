@@ -46,7 +46,7 @@ flowchart TD
 
   %% Branch Yes
   A -- Yes --> B["Iterate through sub-categories"]
-  B -- subCategoryId --> C{"viewport.viewsSubCategory(subCategoryId)"}
+  B -- subCategoryId --> C{"<code>viewport.viewsSubCategory(subCategoryId)</code>"}
   C -- Yes -->  D1[visible]
   C -- No -->  D2[hidden]
 
