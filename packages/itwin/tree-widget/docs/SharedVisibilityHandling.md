@@ -102,7 +102,7 @@ flowchart TD
   C11 -- categoryIds --> D0{<code>categoryIds.size > 0<code/>}
   C12 -- categoryIds --> D0
     D0 -- Yes --> D1["<code><a href='#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({ modelId, categoryIds })</code>"]
-    D0 -- No --> E1[hidden]
+    D0 -- No --> E1[visible]
 
   %% Branch No
   B -- No --> C2[Get modelled elements under modelId]
