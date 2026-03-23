@@ -300,7 +300,7 @@ flowchart TD
 
   %% Start
   TITLE(["<code>getElementsVisibilityStatus</code>"]) --> A1["<div style='text-align: left;'> Get modelIds from cache: <br/> 1. <code>props.elementIds</code> which are sub-models <br/> 2. Children which are sub-models (nested as well) </div>"]
-  TITLE(["<code>getElementsVisibilityStatus</code>"]) --> A2{"viewport.viewsModel(<code>props.modelId</code>)"}
+  TITLE(["<code>getElementsVisibilityStatus</code>"]) --> A2{"<code>viewport.viewsModel(props.modelId)</code>"}
 
   PROPS[\"
     <code>props</code>
