@@ -54,12 +54,12 @@ flowchart TD
   D1 --> M[Merge visibility statuses]
   D2 --> M
 
-  M --> N[Some 'visible' && Some 'hidden' <br/> **OR** <br/> at least one is 'partial']
+  M --> N{Some 'visible' <br/> && <br/> Some 'hidden'}
 
   %% Results
   N -- Yes --> RESULT_Partial
 
-  N -- No --> O[All are 'visible']
+  N -- No --> O{All are 'visible'}
 
   O -- Yes --> RESULT_Visible
   O -- No --> RESULT_Hidden
@@ -96,25 +96,31 @@ flowchart TD
   A -- modelId --> B{"<code>viewport.viewsModel(modelId)</code>"}
 
   %% Branch Yes
-  B -- Yes --> C1[Get categories of elements which exist under modelId]
-  C1 -- categoryIds --> D1["<code><a href='#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({ modelId, categoryIds })</code>"]
+  B -- Yes --> C1{Is always drawn exclusive}
+  C1 -- No --> C11[Get categories of all elements which exist under modelId.]
+  C1 -- Yes --> C12[Get categories of top most elements which exist under modelId.]
+  C11 -- categoryIds --> D0{<code>categoryIds.size > 0<code/>}
+  C12 -- categoryIds --> D0
+    D0 -- Yes --> D1["<code><a href='#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({ modelId, categoryIds })</code>"]
+    D0 -- No --> E1[hidden]
 
   %% Branch No
   B -- No --> C2[Get modelled elements under modelId]
   C2 -- modelIds --> D2{"<code><a href='#getmodelsvisibilitystatus'>getModelsVisibilityStatus</a>({ modelIds })</code> <br/> === 'hidden'/empty"}
-  D2 -- Yes --> E1[hidden]
-  D2 -- No --> E2[partial]
+    D2 -- Yes --> E2[hidden]
+    D2 -- No --> E3[partial]
 
   %% Merge
   D1 --> M[Merge visibility statuses]
   E1 --> M
   E2 --> M
+  E3 --> M
 
-  M --> N[Some 'visible' && Some 'hidden' <br/> **OR** <br/> at least one is 'partial']
+  M --> N{<br/> Some 'visible' && Some 'hidden' <br/> **OR** <br/> at least one is 'partial'}
 
   N -- Yes --> RESULT_Partial
 
-  N -- No --> O[All are 'visible']
+  N -- No --> O{All are 'visible'}
 
   O -- Yes --> RESULT_Visible
   O -- No --> RESULT_Hidden
@@ -168,12 +174,12 @@ flowchart TD
   D1 --> M[Merge visibility statuses]
   F --> M
 
-  M --> N[Some 'visible' && Some 'hidden' <br/> **OR** <br/> at least one is 'partial']
+  M --> N{<br/> Some 'visible' && Some 'hidden' <br/> **OR** <br/> at least one is 'partial'}
 
   %% Results
   N -- Yes --> RESULT_Partial
 
-  N -- No --> O[All are 'visible']
+  N -- No --> O{All are 'visible'}
 
   O -- Yes --> RESULT_Visible
   O -- No --> RESULT_Hidden
@@ -270,12 +276,12 @@ flowchart TD
   H --> M
   G1 --> M
 
-  M --> N[Some 'visible' && Some 'hidden' <br/> **OR** <br/> at least one is 'partial']
+  M --> N{<br/> Some 'visible' && Some 'hidden' <br/> **OR** <br/> at least one is 'partial'}
 
   %% Results
   N -- Yes --> RESULT_Partial
 
-  N -- No --> O[All are 'visible']
+  N -- No --> O{All are 'visible'}
 
   O -- Yes --> RESULT_Visible
   O -- No --> RESULT_Hidden
@@ -369,12 +375,12 @@ flowchart TD
   G1 --> M
   J --> M
 
-  M --> N[Some 'visible' && Some 'hidden' <br/> **OR** <br/> at least one is 'partial']
+  M --> N{<br/> Some 'visible' && Some 'hidden' <br/> **OR** <br/> at least one is 'partial'}
 
   %% Results
   N -- Yes --> RESULT_Partial
 
-  N -- No --> O[All are 'visible']
+  N -- No --> O{All are 'visible'}
 
   O -- Yes --> RESULT_Visible
   O -- No --> RESULT_Hidden
