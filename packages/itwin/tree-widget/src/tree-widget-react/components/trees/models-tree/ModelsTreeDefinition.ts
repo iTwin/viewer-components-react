@@ -726,12 +726,8 @@ export function createGeometricElementInstanceKeyPaths(props: {
       ({ parent, groupingNode }, index) => `
           SELECT e.ECInstanceId, e.ECClassId, e.Parent.Id, e.Model.Id, e.Category.Id, ${index}
           FROM ${elementClassName} e
-          JOIN IdSet(?) parent${index} ON ${parent.type === "element" ? `e.Parent.Id = parent${index}.id` : `e.Category.Id = parent${index}.id`}${
-            parent.type !== "element"
-              ? `
-          JOIN IdSet(?) model${index} ON e.Model.Id = model${index}.id`
-              : ""
-          }
+          JOIN IdSet(?) parent${index} ON ${parent.type === "element" ? `e.Parent.Id = parent${index}.id` : `e.Category.Id = parent${index}.id`}
+          ${parent.type !== "element" ? `JOIN IdSet(?) model${index} ON e.Model.Id = model${index}.id` : ""}
           WHERE
             e.ECClassId IS (${groupingNode.key.className})
             ${parent.type === "element" ? "" : `AND e.Parent.Id IS NULL`}
