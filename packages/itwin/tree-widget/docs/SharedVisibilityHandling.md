@@ -70,7 +70,7 @@ flowchart TD
 Visibility of model is determined by merging visibility status of two parts:
 
 1. Model selector. If model is not hidden in selector, need to check categories of child elements (they are retrieved from cache) by calling [getCategoriesVisibilityStatus](#getcategoriesvisibilitystatus).
-2. Child elements' which are sub-models (retrieved from cache). For such elements call [getModelsVisibilityStatus](#getmodelsvisibilitystatus).
+2. Child elements which are sub-models (retrieved from cache). For such elements call [getModelsVisibilityStatus](#getmodelsvisibilitystatus).
 
 ```mermaid
 ---
