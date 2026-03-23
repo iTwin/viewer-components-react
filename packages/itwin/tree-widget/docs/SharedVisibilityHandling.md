@@ -34,7 +34,7 @@ flowchart TD
   RESULT_Hidden[/hidden/]
 
   %% Start
-  TITLE(["<code>getSubCategoriesVisibilityStatus</code>"]) --> A{"viewport.viewsCategory(<code>props.categoryId</code>)"}
+  TITLE(["<code>getSubCategoriesVisibilityStatus</code>"]) --> A{"<code>viewport.viewsCategory(props.categoryId)</code>"}
 
   PROPS[\"
     <code>props</code>
