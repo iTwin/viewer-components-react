@@ -185,11 +185,11 @@ Determines visibility status of category under model. It is done by merging visi
 
 - **Sub-models**: Model category elements which are sub-models (retrieved from cache) and calling [getModelsVisibilityStatus](#getmodelsvisibilitystatus).
 - **Child elements**: determining child elements visibility is done by:
-  1.  Getting total count of elements under the category with model.
-  2.  Getting default child elements status based on per-model category override and category selector.
-  3.  Get `opposite set` to default status: default status === `visible` -> `alwaysDrawn`, `neverDrawn` otherwise.
-  4.  The `opposite set` can contain elements from any categories and models, need to query data of these elements and find the ones which are related to the desired category and model.
-  5.  Once all the above data (1-4) is known, visibility can be determined by comparing the total count, number of elements (related to specific model and category) in the opposite set, and default status.
+  1. Getting total count of elements under the category with model.
+  2. Getting default child elements status based on per-model category override and category selector.
+  3. Get `opposite set` to default status: default status === `visible` -> `alwaysDrawn`, `neverDrawn` otherwise.
+  4. The `opposite set` can contain elements from any categories and models, need to query data of these elements and find the ones which are related to the desired category and model.
+  5. Once all the above data (1-4) is known, visibility can be determined by comparing the total count, number of elements (related to specific model and category) in the opposite set, and default status.
 
   **Note**: All the checks are done only when [visibility rules](./Visibility.md#how-visibility-is-determined-in-the-viewport) that have higher priority do not interfere (e.g. if model is hidden in selector, then always/never drawn elements are **not checked** and `hidden` is returned for `Child Elements` visibility).
 
