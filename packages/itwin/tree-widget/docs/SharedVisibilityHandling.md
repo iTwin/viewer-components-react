@@ -143,7 +143,7 @@ flowchart TD
   RESULT_Hidden[/hidden/]
 
   %% Start
-  TITLE(["<code>getCategoriesVisibilityStatus</code>"]) --> A{<code>props.modelId</code> <br/>=== undefined}
+  TITLE(["<code>getCategoriesVisibilityStatus</code>"]) --> A{<code>props.modelId === undefined</code>}
 
   PROPS[\"
     <code>props</code>
