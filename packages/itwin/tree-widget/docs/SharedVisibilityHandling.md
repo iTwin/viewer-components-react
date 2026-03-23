@@ -93,7 +93,7 @@ flowchart TD
     <div style='text-align: left;'>- modelIds: **Id64Arg**</div>
   "\]
 
-  A -- modelId --> B{"viewport.viewsModel(modelId)"}
+  A -- modelId --> B{"<code>viewport.viewsModel(modelId)</code>"}
 
   %% Branch Yes
   B -- Yes --> C1[Get categories of elements which exist under modelId]
