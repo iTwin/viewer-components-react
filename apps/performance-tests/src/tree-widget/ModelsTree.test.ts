@@ -84,8 +84,6 @@ describe("models tree", () => {
   });
   run<{
     iModel: SnapshotDb;
-    idsCache: ModelsTreeIdsCache;
-    baseIdsCache: BaseIdsCache;
     imodelAccess: IModelAccess;
     viewport: TreeWidgetTestingViewport;
     handler: HierarchyVisibilityHandler & Disposable;
@@ -132,15 +130,13 @@ describe("models tree", () => {
         expectations: "all-hidden",
       });
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
-      return { iModel, imodelAccess, viewport, provider, handler, elementsModel, idsCache, baseIdsCache, iModelConnection, hierarchyNodes };
+      return { iModel, imodelAccess, viewport, provider, handler, elementsModel, iModelConnection, hierarchyNodes };
     },
     cleanup: async (props) => {
       props.iModel.close();
       props.viewport[Symbol.dispose]();
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
-      props.idsCache[Symbol.dispose]();
-      props.baseIdsCache[Symbol.dispose]();
       if (!props.iModelConnection.isClosed) {
         await props.iModelConnection.close();
       }
@@ -161,8 +157,6 @@ describe("models tree", () => {
 
   run<{
     iModel: SnapshotDb;
-    idsCache: ModelsTreeIdsCache;
-    baseIdsCache: BaseIdsCache;
     imodelAccess: IModelAccess;
     viewport: TreeWidgetTestingViewport;
     handler: HierarchyVisibilityHandler & Disposable;
@@ -209,15 +203,13 @@ describe("models tree", () => {
         expectations: "all-hidden",
       });
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
-      return { iModel, imodelAccess, viewport, provider, handler, elementsModel, idsCache, baseIdsCache, iModelConnection, hierarchyNodes };
+      return { iModel, imodelAccess, viewport, provider, handler, elementsModel, iModelConnection, hierarchyNodes };
     },
     cleanup: async (props) => {
       props.iModel.close();
       props.viewport[Symbol.dispose]();
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
-      props.idsCache[Symbol.dispose]();
-      props.baseIdsCache[Symbol.dispose]();
       if (!props.iModelConnection.isClosed) {
         await props.iModelConnection.close();
       }
@@ -235,8 +227,6 @@ describe("models tree", () => {
 
   run<{
     iModel: SnapshotDb;
-    idsCache: ModelsTreeIdsCache;
-    baseIdsCache: BaseIdsCache;
     imodelAccess: IModelAccess;
     viewport: TreeWidgetTestingViewport;
     handler: HierarchyVisibilityHandler & Disposable;
@@ -286,15 +276,13 @@ describe("models tree", () => {
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
       expect(visibilityTargets.categories.length).to.be.eq(1);
       const elementsCategory = visibilityTargets.categories[0];
-      return { iModel, imodelAccess, viewport, provider, handler, elementsCategory, elementsModel, idsCache, baseIdsCache, iModelConnection, hierarchyNodes };
+      return { iModel, imodelAccess, viewport, provider, handler, elementsCategory, elementsModel, iModelConnection, hierarchyNodes };
     },
     cleanup: async (props) => {
       props.iModel.close();
       props.viewport[Symbol.dispose]();
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
-      props.idsCache[Symbol.dispose]();
-      props.baseIdsCache[Symbol.dispose]();
       if (!props.iModelConnection.isClosed) {
         await props.iModelConnection.close();
       }
@@ -312,8 +300,6 @@ describe("models tree", () => {
 
   run<{
     iModel: SnapshotDb;
-    idsCache: ModelsTreeIdsCache;
-    baseIdsCache: BaseIdsCache;
     imodelAccess: IModelAccess;
     viewport: TreeWidgetTestingViewport;
     handler: HierarchyVisibilityHandler & Disposable;
@@ -366,15 +352,13 @@ describe("models tree", () => {
         viewport,
         expectations: "all-visible",
       });
-      return { iModel, imodelAccess, viewport, provider, handler, elementsCategory, elementsModel, idsCache, baseIdsCache, iModelConnection, hierarchyNodes };
+      return { iModel, imodelAccess, viewport, provider, handler, elementsCategory, elementsModel, iModelConnection, hierarchyNodes };
     },
     cleanup: async (props) => {
       props.iModel.close();
       props.viewport[Symbol.dispose]();
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
-      props.idsCache[Symbol.dispose]();
-      props.baseIdsCache[Symbol.dispose]();
       if (!props.iModelConnection.isClosed) {
         await props.iModelConnection.close();
       }
@@ -392,8 +376,6 @@ describe("models tree", () => {
 
   run<{
     iModel: SnapshotDb;
-    idsCache: ModelsTreeIdsCache;
-    baseIdsCache: BaseIdsCache;
     imodelAccess: IModelAccess;
     viewport: TreeWidgetTestingViewport;
     handler: HierarchyVisibilityHandler & Disposable;
@@ -445,15 +427,13 @@ describe("models tree", () => {
         expectations: "all-hidden",
       });
 
-      return { iModel, imodelAccess, viewport, provider, handler, node, idsCache, baseIdsCache, iModelConnection, hierarchyNodes };
+      return { iModel, imodelAccess, viewport, provider, handler, node, iModelConnection, hierarchyNodes };
     },
     cleanup: async (props) => {
       props.iModel.close();
       props.viewport[Symbol.dispose]();
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
-      props.idsCache[Symbol.dispose]();
-      props.baseIdsCache[Symbol.dispose]();
       if (!props.iModelConnection.isClosed) {
         await props.iModelConnection.close();
       }
@@ -482,8 +462,6 @@ describe("models tree", () => {
 
   run<{
     iModel: SnapshotDb;
-    idsCache: ModelsTreeIdsCache;
-    baseIdsCache: BaseIdsCache;
     imodelAccess: IModelAccess;
     viewport: TreeWidgetTestingViewport;
     handler: HierarchyVisibilityHandler & Disposable;
@@ -537,15 +515,13 @@ describe("models tree", () => {
         expectations: "all-hidden",
       });
 
-      return { iModel, imodelAccess, viewport, provider, handler, node, idsCache, baseIdsCache, iModelConnection, hierarchyNodes };
+      return { iModel, imodelAccess, viewport, provider, handler, node, iModelConnection, hierarchyNodes };
     },
     cleanup: async (props) => {
       props.iModel.close();
       props.viewport[Symbol.dispose]();
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
-      props.idsCache[Symbol.dispose]();
-      props.baseIdsCache[Symbol.dispose]();
       if (!props.iModelConnection.isClosed) {
         await props.iModelConnection.close();
       }
