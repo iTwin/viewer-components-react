@@ -11,7 +11,7 @@ import { ModelCategoryElementsCountCache } from "../../../../tree-widget-react/c
 import { CLASS_NAME_GeometricElement3d } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { createFakeSinonViewport } from "../../Common.js";
 
-describe.only("ModelCategoryElementsCountCache", () => {
+describe("ModelCategoryElementsCountCache", () => {
   beforeEach(() => {
     // without this option tests sometimes fail with strange errors
     sinon.useFakeTimers({ shouldClearNativeTimers: true });
