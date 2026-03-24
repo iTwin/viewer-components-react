@@ -44,8 +44,8 @@ describe("categories tree", () => {
     },
     cleanup: (props) => props.iModel.close(),
     test: async ({ imodelAccess }) => {
-      using baseIdsCache = new BaseIdsCache({ elementClassName: "BisCore:GeometricElement3d", type: "3d", queryExecutor: imodelAccess });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ elementClassName: "BisCore:GeometricElement3d", type: "3d", queryExecutor: imodelAccess });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       const search = {
         paths: await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,

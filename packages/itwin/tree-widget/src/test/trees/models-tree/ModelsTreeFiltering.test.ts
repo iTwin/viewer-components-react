@@ -130,8 +130,8 @@ describe("Models tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const config = { ...defaultHierarchyConfiguration, hideRootSubject: true, elementClassSpecification: keys.parentElement.className };
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: config.elementClassSpecification, type: "3d" });
-      using idsCache = new ModelsTreeIdsCache({
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: config.elementClassSpecification, type: "3d" });
+      const idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
         hierarchyConfig: config,
         baseIdsCache,
@@ -1784,8 +1784,8 @@ describe("Models tree", () => {
 
       const imodelAccess = createIModelAccess(imodel);
 
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
-      using idsCache = new ModelsTreeIdsCache({
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
+      const idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
         hierarchyConfig,
         baseIdsCache,
@@ -1813,8 +1813,8 @@ describe("Models tree", () => {
       const imodelAccess = createIModelAccess(imodel);
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
 
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
-      using idsCache = new ModelsTreeIdsCache({
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
+      const idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
         hierarchyConfig,
         baseIdsCache,
@@ -1860,8 +1860,8 @@ describe("Models tree", () => {
       const { imodel, ...ids } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
-      using idsCache = new ModelsTreeIdsCache({
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
+      const idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
         hierarchyConfig,
         baseIdsCache,
@@ -1919,8 +1919,8 @@ describe("Models tree", () => {
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
 
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
-      using idsCache = new ModelsTreeIdsCache({
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
+      const idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
         hierarchyConfig,
         baseIdsCache,

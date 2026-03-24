@@ -53,12 +53,12 @@ describe("models tree", () => {
     },
     cleanup: (props) => props.iModel.close(),
     test: async ({ imodelAccess, targetItems }) => {
-      using baseIdsCache = new BaseIdsCache({
+      const baseIdsCache = new BaseIdsCache({
         elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
         type: "3d",
         queryExecutor: imodelAccess,
       });
-      using idsCache = new ModelsTreeIdsCache({
+      const idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
         hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
         baseIdsCache,

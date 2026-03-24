@@ -47,8 +47,6 @@ export function createClassificationsTreeProvider(
     setHierarchySearch: (props) => hierarchyProvider.setHierarchySearch(props),
     [Symbol.dispose]() {
       hierarchyProvider[Symbol.dispose]();
-      idsCache[Symbol.dispose]();
-      baseIdsCache[Symbol.dispose]();
     },
   };
 }

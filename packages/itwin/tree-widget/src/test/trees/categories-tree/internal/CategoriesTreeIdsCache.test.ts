@@ -60,8 +60,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(
         await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainer.id] })),
       ).to.deep.eq({
@@ -81,8 +81,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(
         await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] })),
       ).to.deep.eq({
@@ -105,8 +105,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(
         await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] })),
       ).to.deep.eq({
@@ -127,8 +127,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(
         await firstValueFrom(
           idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id], includeEmpty: true }),
@@ -151,8 +151,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(
         await firstValueFrom(
           idsCache.getDirectChildDefinitionContainersAndCategories({
@@ -178,8 +178,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(
         await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] })),
       ).to.deep.eq({
@@ -198,8 +198,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(
         await firstValueFrom(
           idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id], includeEmpty: true }),
@@ -220,8 +220,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(
         await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] })),
       ).to.deep.eq({
@@ -244,8 +244,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(
         await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] })),
       ).to.deep.eq({
@@ -271,8 +271,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(
         await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] })),
       ).to.deep.eq({
@@ -296,8 +296,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(
         await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionModelChild.id] })),
       ).to.deep.eq({
@@ -318,8 +318,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainer.id] }))).to.deep.eq(new Set());
     });
 
@@ -334,8 +334,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainer.id] }))).to.deep.eq(new Set());
     });
 
@@ -349,8 +349,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(
         await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainer.id], includeEmptyCategories: true })),
       ).to.deep.eq(new Set([keys.category.id]));
@@ -370,8 +370,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainerRoot.id] }))).to.deep.eq(
         new Set([keys.category.id]),
       );
@@ -389,8 +389,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainer.id] }))).to.deep.eq(
         new Set([keys.category.id]),
       );
@@ -413,8 +413,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       const result = await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainerRoot.id] }));
       const expectedResult = [keys.indirectCategory.id, keys.directCategory.id];
       expect(expectedResult.every((id) => result.has(id))).to.be.true;
@@ -428,8 +428,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getSubCategoriesSearchPaths({ subCategoryIds: "0x123" }))).to.deep.eq([]);
     });
 
@@ -444,8 +444,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getSubCategoriesSearchPaths({ subCategoryIds: keys.subCategory.id }))).to.deep.eq([keys.category, keys.subCategory]);
     });
 
@@ -462,8 +462,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getSubCategoriesSearchPaths({ subCategoryIds: keys.subCategory.id }))).to.deep.eq([
         keys.definitionContainer,
         keys.category,
@@ -491,8 +491,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getSubCategoriesSearchPaths({ subCategoryIds: keys.subCategory.id }))).to.deep.eq([
         keys.definitionContainerRoot,
         keys.definitionContainerChild,
@@ -511,8 +511,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getCategoriesSearchPaths({ categoryIds: "0x123", includePathsWithSubModels: false }))).to.deep.eq([]);
     });
 
@@ -526,8 +526,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getCategoriesSearchPaths({ categoryIds: keys.category.id, includePathsWithSubModels: false }))).to.deep.eq([
         keys.category,
       ]);
@@ -558,8 +558,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(
         await firstValueFrom(idsCache.getCategoriesSearchPaths({ categoryIds: keys.category.id, includePathsWithSubModels: false }).pipe(toArray())),
       ).to.deep.eq([[keys.definitionContainer, keys.category]]);
@@ -591,8 +591,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getCategoriesSearchPaths({ categoryIds: keys.category.id, includePathsWithSubModels: false }))).to.deep.eq([
         keys.definitionContainer,
         keys.category,
@@ -613,8 +613,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getCategoriesSearchPaths({ categoryIds: keys.category.id, includePathsWithSubModels: false }))).to.deep.eq([
         keys.definitionContainerRoot,
         keys.definitionContainerChild,
@@ -630,8 +630,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getDefinitionContainersSearchPaths({ definitionContainerIds: "0x123" }))).to.deep.eq([]);
     });
 
@@ -647,8 +647,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getDefinitionContainersSearchPaths({ definitionContainerIds: keys.definitionContainer.id }))).to.deep.eq([
         keys.definitionContainer,
       ]);
@@ -668,8 +668,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getDefinitionContainersSearchPaths({ definitionContainerIds: keys.definitionContainerChild.id }))).to.deep.eq([
         keys.definitionContainerRoot,
         keys.definitionContainerChild,
@@ -684,8 +684,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories())).to.deep.eq({ categories: [], definitionContainers: [] });
     });
 
@@ -698,8 +698,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories())).to.deep.eq({ categories: [], definitionContainers: [] });
     });
 
@@ -713,8 +713,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories({ includeEmpty: true }))).to.deep.eq({
         categories: [keys.category.id],
         definitionContainers: [keys.definitionContainer.id],
@@ -733,8 +733,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories())).to.deep.eq({
         categories: [keys.category.id],
         definitionContainers: [],
@@ -755,8 +755,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories())).to.deep.eq({
         categories: [keys.category.id],
         definitionContainers: [],
@@ -777,8 +777,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       const result = await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories());
       const expectedResult = {
         categories: [keys.category.id],
@@ -800,8 +800,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories())).to.deep.eq({
         categories: [keys.category.id],
         definitionContainers: [keys.definitionContainerRoot.id],
@@ -822,8 +822,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories())).to.deep.eq({
         categories: [keys.category.id],
         definitionContainers: [keys.definitionContainerRoot.id],
@@ -847,8 +847,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       const result = await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories());
       const expectedResult = {
         categories: [keys.directCategory.id, keys.indirectCategory.id],
@@ -866,8 +866,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).to.deep.eq({ categories: [], definitionContainers: [] });
     });
 
@@ -880,8 +880,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).to.deep.eq({
         categories: [],
         definitionContainers: [],
@@ -898,8 +898,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories({ includeEmpty: true }))).to.deep.eq({
         categories: [{ id: keys.rootCategory.id, subCategoryChildCount: 1, hasElements: false }],
         definitionContainers: [keys.definitionContainer.id],
@@ -918,8 +918,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).to.deep.eq({
         categories: [{ id: keys.category.id, subCategoryChildCount: 1, hasElements: true }],
         definitionContainers: [],
@@ -940,8 +940,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).to.deep.eq({
         categories: [{ id: keys.category.id, subCategoryChildCount: 1, hasElements: true }],
         definitionContainers: [],
@@ -962,8 +962,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).to.deep.eq({
         categories: [],
         definitionContainers: [keys.definitionContainerRoot.id],
@@ -982,8 +982,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).to.deep.eq({
         categories: [],
         definitionContainers: [keys.definitionContainerRoot.id],
@@ -1016,8 +1016,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       const result = await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories());
       const expectedResult = {
         categories: [
@@ -1044,8 +1044,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getSubCategories({ categoryId: "0x123" }))).to.deep.eq([]);
     });
 
@@ -1058,8 +1058,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getSubCategories({ categoryId: keys.category.id }))).to.deep.eq([getDefaultSubCategoryId(keys.category.id)]);
     });
 
@@ -1074,8 +1074,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       const result = await firstValueFrom(idsCache.getSubCategories({ categoryId: keys.category.id }));
       expect(result.includes(keys.subCategory.id)).to.be.true;
       expect(result.length).to.be.eq(2);
@@ -1096,8 +1096,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      using idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
+      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       const result = await firstValueFrom(idsCache.getSubCategories({ categoryId: keys.category2.id }));
       expect(result).to.not.be.undefined;
       expect(result.includes(keys.subCategory2.id)).to.be.true;
