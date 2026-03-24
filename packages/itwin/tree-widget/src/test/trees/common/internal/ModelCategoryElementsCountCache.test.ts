@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { firstValueFrom } from "rxjs/internal/firstValueFrom";
+import { firstValueFrom } from "rxjs";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { ModelCategoryElementsCountCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/ModelCategoryElementsCountCache.js";
 import { CLASS_NAME_GeometricElement3d } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";

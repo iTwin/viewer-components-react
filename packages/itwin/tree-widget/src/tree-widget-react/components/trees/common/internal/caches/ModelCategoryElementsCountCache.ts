@@ -161,9 +161,11 @@ export class ModelCategoryElementsCountCache {
           this.#valuesToRequest = undefined;
           return this.executeBatchQuery(valuesToRequest.values);
         }),
-        tap(() => {
-          // Remove requestedValues entry when the query completes.
-          this.#requestedValues.delete(requestId);
+        tap({
+          finalize: () => {
+            // Remove requestedValues entry when the query completes.
+            this.#requestedValues.delete(requestId);
+          },
         }),
         shareReplay(1),
       );
