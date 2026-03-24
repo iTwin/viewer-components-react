@@ -1720,8 +1720,6 @@ describe("Models tree", () => {
         });
 
         afterEach(() => {
-          modelsTreeIdsCache[Symbol.dispose]();
-          baseIdsCache[Symbol.dispose]();
           hierarchyProvider.dispose();
         });
 
