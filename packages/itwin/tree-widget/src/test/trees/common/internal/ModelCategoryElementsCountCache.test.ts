@@ -5,12 +5,22 @@
 
 import { expect } from "chai";
 import { firstValueFrom } from "rxjs";
+import sinon from "sinon";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { ModelCategoryElementsCountCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/ModelCategoryElementsCountCache.js";
 import { CLASS_NAME_GeometricElement3d } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { createFakeSinonViewport } from "../../Common.js";
 
-describe("ModelCategoryElementsCountCache", () => {
+describe.only("ModelCategoryElementsCountCache", () => {
+  beforeEach(() => {
+    // without this option tests sometimes fail with strange errors
+    sinon.useFakeTimers({ shouldClearNativeTimers: true });
+  });
+
+  afterEach(() => {
+    sinon.clock.restore();
+  });
+
   function createCache(viewport: ReturnType<typeof createFakeSinonViewport>) {
     return new ModelCategoryElementsCountCache({
       queryExecutor: createECSqlQueryExecutor(viewport.iModel),
@@ -28,7 +38,7 @@ describe("ModelCategoryElementsCountCache", () => {
     using vp = createFakeSinonViewport();
     const cache = createCache(vp);
 
-    const result = await firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
+    const [result] = await Promise.all([firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" })), sinon.clock.tickAsync(20)]);
     expect(result).to.eq(0);
     expect(vp.iModel.createQueryReader).to.be.calledOnce;
   });
@@ -37,7 +47,7 @@ describe("ModelCategoryElementsCountCache", () => {
     using vp = createFakeSinonViewport({ queryHandler: defaultQueryHandler });
     const cache = createCache(vp);
 
-    const result = await firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
+    const [result] = await Promise.all([firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" })), sinon.clock.tickAsync(20)]);
     expect(result).to.eq(2);
     expect(vp.iModel.createQueryReader).to.be.calledOnce;
   });
@@ -48,7 +58,7 @@ describe("ModelCategoryElementsCountCache", () => {
 
     const promise1 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
     const promise2 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x3" }));
-    const [result1, result2] = await Promise.all([promise1, promise2]);
+    const [result1, result2] = await Promise.all([promise1, promise2, sinon.clock.tickAsync(20)]);
     expect(result1).to.eq(3);
     expect(result2).to.eq(0);
     expect(vp.iModel.createQueryReader).to.be.calledOnce;
@@ -60,7 +70,7 @@ describe("ModelCategoryElementsCountCache", () => {
 
     const promise1 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
     const promise2 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x3" }));
-    const [result1, result2] = await Promise.all([promise1, promise2]);
+    const [result1, result2] = await Promise.all([promise1, promise2, sinon.clock.tickAsync(20)]);
     expect(result1).to.eq(2);
     expect(result2).to.eq(2);
     expect(vp.iModel.createQueryReader).to.be.calledOnce;
@@ -71,9 +81,9 @@ describe("ModelCategoryElementsCountCache", () => {
     const cache = createCache(vp);
 
     const promise1 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
-    await new Promise((resolve) => setTimeout(resolve, 19));
+    await sinon.clock.tickAsync(19);
     const promise2 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x3" }));
-    const [result1, result2] = await Promise.all([promise1, promise2]);
+    const [result1, result2] = await Promise.all([promise1, promise2, sinon.clock.tickAsync(2)]);
     expect(result1).to.eq(2);
     expect(result2).to.eq(2);
     expect(vp.iModel.createQueryReader).to.be.calledOnce;
@@ -84,9 +94,9 @@ describe("ModelCategoryElementsCountCache", () => {
     const cache = createCache(vp);
 
     const promise1 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
-    await new Promise((resolve) => setTimeout(resolve, 21));
+    await sinon.clock.tickAsync(21);
     const promise2 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x3" }));
-    const [result1, result2] = await Promise.all([promise1, promise2]);
+    const [result1, result2] = await Promise.all([promise1, promise2, sinon.clock.tickAsync(20)]);
     expect(result1).to.eq(2);
     expect(result2).to.eq(2);
     expect(vp.iModel.createQueryReader).to.be.calledTwice;
@@ -96,7 +106,7 @@ describe("ModelCategoryElementsCountCache", () => {
     using vp = createFakeSinonViewport();
     const cache = createCache(vp);
 
-    const result1 = await firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
+    const [result1] = await Promise.all([firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" })), sinon.clock.tickAsync(20)]);
     const result2 = await firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
     expect(result1).to.eq(0);
     expect(result2).to.eq(0);
@@ -107,7 +117,7 @@ describe("ModelCategoryElementsCountCache", () => {
     using vp = createFakeSinonViewport({ queryHandler: defaultQueryHandler });
     const cache = createCache(vp);
 
-    const result1 = await firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
+    const [result1] = await Promise.all([firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" })), sinon.clock.tickAsync(20)]);
     const result2 = await firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
     expect(result1).to.eq(2);
     expect(result2).to.eq(2);
@@ -121,7 +131,7 @@ describe("ModelCategoryElementsCountCache", () => {
     for (let i = 1; i <= 100; ++i) {
       promises.push(firstValueFrom(cache.getCategoryElementsCount({ modelId: `0x${i}`, categoryId: "0x1000" })));
     }
-    await Promise.all(promises);
+    await Promise.all([...promises, sinon.clock.tickAsync(20)]);
     expect(vp.iModel.createQueryReader).to.be.calledOnce;
   });
 
@@ -132,7 +142,7 @@ describe("ModelCategoryElementsCountCache", () => {
     for (let i = 1; i <= 101; ++i) {
       promises.push(firstValueFrom(cache.getCategoryElementsCount({ modelId: `0x${i}`, categoryId: "0x1000" })));
     }
-    await Promise.all(promises);
+    await Promise.all([...promises, sinon.clock.tickAsync(20)]);
     expect(vp.iModel.createQueryReader).to.be.calledTwice;
   });
 });
