@@ -44,7 +44,7 @@ export class ModelCategoryElementsCountCache {
     this.#componentName = "ModelCategoryElementsCountCache";
   }
 
-  private setCachedValue({ modelId, categoryId, elementsCount }: { modelId: ModelId; categoryId: CategoryId; elementsCount: number }) {
+  private setCachedValueIfEmpty({ modelId, categoryId, elementsCount }: { modelId: ModelId; categoryId: CategoryId; elementsCount: number }) {
     const modelEntry = this.#cachedValues.get(modelId);
     if (!modelEntry) {
       this.#cachedValues.set(modelId, new Map([[categoryId, elementsCount]]));
@@ -120,14 +120,14 @@ export class ModelCategoryElementsCountCache {
       releaseMainThreadOnItemsCount(500),
       // Cache each row as it arrives, use reduce to emit one value when query completes
       reduce((acc, row) => {
-        this.setCachedValue({ modelId: row.modelId, categoryId: row.categoryId, elementsCount: row.elementsCount });
+        this.setCachedValueIfEmpty({ modelId: row.modelId, categoryId: row.categoryId, elementsCount: row.elementsCount });
         return acc;
       }, undefined),
       tap(() => {
         for (const [modelId, categoryIds] of valuesToRequest.entries()) {
           for (const categoryId of categoryIds) {
             // Make sure that all requested categories have an entry in the cache
-            this.setCachedValue({ modelId, categoryId, elementsCount: 0 });
+            this.setCachedValueIfEmpty({ modelId, categoryId, elementsCount: 0 });
           }
         }
       }),
