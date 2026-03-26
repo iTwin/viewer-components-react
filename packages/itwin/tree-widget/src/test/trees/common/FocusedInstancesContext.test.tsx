@@ -165,10 +165,12 @@ describe("FocusedInstancesContext", () => {
 
     await waitFor(async () => {
       const instanceKeys = await collectKeys(result.current.loadFocusedItems);
-      expect(instanceKeys).toEqual(expect.arrayContaining([
-        { id: "0x1", className: "Schema:Class" },
-        { id: "0x1", className: "Schema:Class" },
-      ]));
+      expect(instanceKeys).toEqual(
+        expect.arrayContaining([
+          { id: "0x1", className: "Schema:Class" },
+          { id: "0x1", className: "Schema:Class" },
+        ]),
+      );
     });
   });
 

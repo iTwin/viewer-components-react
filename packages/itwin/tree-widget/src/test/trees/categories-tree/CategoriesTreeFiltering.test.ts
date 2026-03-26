@@ -117,9 +117,7 @@ describe("Categories tree", () => {
         idsCache,
         abortSignal: abortController2.signal,
       });
-      expect(await pathsPromise).toEqual([
-        { path: [{ className: "BisCore.DefinitionContainer", id: ids.definitionContainer.id }], options: { reveal: true } },
-      ]);
+      expect(await pathsPromise).toEqual([{ path: [{ className: "BisCore.DefinitionContainer", id: ids.definitionContainer.id }], options: { reveal: true } }]);
     });
 
     it("finds definition container by label when it is contained by another definition container", async () => {
