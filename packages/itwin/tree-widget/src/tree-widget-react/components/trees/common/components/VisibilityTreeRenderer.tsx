@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback } from "react";
-import { StrataKitTreeRenderer, TreeNodeFilterAction } from "@itwin/presentation-hierarchies-react";
+import { StrataKitTreeRenderer, TreeNodeFilterAction } from "@itwin/presentation-hierarchies-react/stratakit";
 import { VisibilityAction, VisibilityContextProvider } from "./TreeNodeVisibilityButton.js";
 import { useVisibilityButtonHandler } from "./UseVisibilityButtonHandler.js";
 

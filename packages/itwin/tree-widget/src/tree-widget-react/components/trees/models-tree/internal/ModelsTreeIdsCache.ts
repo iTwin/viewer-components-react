@@ -20,7 +20,7 @@ import { createGeometricElementInstanceKeyPaths } from "../ModelsTreeDefinition.
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { InstanceKey } from "@itwin/presentation-shared";
+import type { EC, InstanceKey } from "@itwin/presentation-shared";
 import type { BaseIdsCacheImplProps } from "../../common/internal/caches/BaseIdsCache.js";
 import type { CategoryId, ModelId, SubjectId } from "../../common/internal/Types.js";
 import type { ModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
@@ -50,7 +50,7 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
   #queryExecutor: LimitingECSqlQueryExecutor;
   #showEmptyModels: boolean;
   #hideRootSubject: boolean;
-  #elementClassName: string;
+  #elementClassName: EC.FullClassName;
   #componentId: GuidString;
   #componentName: string;
 

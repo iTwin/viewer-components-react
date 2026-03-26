@@ -16,7 +16,7 @@ import { createModelsSearchResultsTree } from "./SearchResultsTree.js";
 
 import type { Observable } from "rxjs";
 import type { Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { ClassGroupingNodeKey, GroupingHierarchyNode, HierarchyNode, HierarchySearchPath, InstancesNodeKey } from "@itwin/presentation-hierarchies";
+import type { ClassGroupingNodeKey, GroupingHierarchyNode, HierarchyNode, HierarchySearchTree, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfoCache } from "../../../common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
 import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
@@ -429,7 +429,7 @@ export function createModelsTreeVisibilityHandler(props: {
   idsCache: ModelsTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
   overrides?: ModelsTreeVisibilityHandlerOverrides;
-  searchPaths?: HierarchySearchPath[];
+  searchPaths?: HierarchySearchTree[];
 }) {
   return new HierarchyVisibilityHandlerImpl<ModelsTreeSearchTargets>({
     getSearchResultsTree: (): undefined | Promise<SearchResultsTree<ModelsTreeSearchTargets>> => {

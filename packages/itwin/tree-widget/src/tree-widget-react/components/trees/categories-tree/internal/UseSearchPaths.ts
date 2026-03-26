@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { firstValueFrom } from "rxjs";
 import { assert } from "@itwin/core-bentley";
-import { HierarchyNodeIdentifier, HierarchySearchPath } from "@itwin/presentation-hierarchies";
+import { HierarchyNodeIdentifier, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
 import { getClassesByView } from "../../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../../common/TreeErrors.js";
@@ -14,6 +14,7 @@ import { useTelemetryContext } from "../../common/UseTelemetryContext.js";
 import { CategoriesTreeDefinition } from "../CategoriesTreeDefinition.js";
 
 import type { GuidString } from "@itwin/core-bentley";
+import type { InstanceKey } from "@itwin/presentation-shared";
 import type { CategoryInfo } from "../../common/CategoriesVisibilityUtils.js";
 import type { VisibilityTreeProps } from "../../common/components/VisibilityTree.js";
 import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
@@ -22,8 +23,6 @@ import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
 
 /** @internal */
 export type CategoriesTreeSearchError = "tooManySearchMatches" | "unknownSearchError";
-
-type HierarchySearchPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getSearchPaths"]>>;
 
 /** @internal */
 export function useSearchPaths({
@@ -40,7 +39,7 @@ export function useSearchPaths({
   hierarchyConfiguration: CategoriesTreeHierarchyConfiguration;
   idsCache: CategoriesTreeIdsCache;
   onCategoriesFiltered?: (categories: { categories: CategoryInfo[] | undefined; models?: Array<ModelId> }) => void;
-  onSearchPathsChanged: (paths: HierarchySearchPaths | undefined) => void;
+  onSearchPathsChanged: (paths: HierarchySearchTree[] | undefined) => void;
   componentId: GuidString;
 }): {
   getPaths: VisibilityTreeProps["getSearchPaths"] | undefined;
@@ -50,7 +49,6 @@ export function useSearchPaths({
   const { onFeatureUsed } = useTelemetryContext();
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSearchError(undefined);
     onCategoriesFiltered?.({ categories: undefined, models: undefined });
     if (!searchText) {
@@ -66,7 +64,7 @@ export function useSearchPaths({
     return async ({ imodelAccess, abortSignal }) => {
       onFeatureUsed({ featureId: "search", reportInteraction: true });
       try {
-        const paths = await CategoriesTreeDefinition.createInstanceKeyPaths({
+        const iter = CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
           abortSignal,
           label: searchText,
@@ -75,6 +73,11 @@ export function useSearchPaths({
           hierarchyConfig: hierarchyConfiguration,
           componentId,
         });
+        const builder = HierarchySearchTree.createBuilder();
+        for await (const { path } of iter) {
+          builder.accept({ path: { path, options: { reveal: true } } });
+        }
+        const paths = builder.getTree();
         onSearchPathsChanged(paths);
         const { elementClass, modelClass } = getClassesByView(viewType);
         onCategoriesFiltered?.(await getCategoriesFromPaths(paths, idsCache, elementClass, modelClass, hierarchyConfiguration));
@@ -98,87 +101,82 @@ export function useSearchPaths({
 }
 
 async function getCategoriesFromPaths(
-  paths: HierarchySearchPaths,
+  trees: HierarchySearchTree[] | undefined,
   idsCache: CategoriesTreeIdsCache,
   elementClassName: string,
   modelsClassName: string,
   hierarchyConfig: CategoriesTreeHierarchyConfiguration,
 ): Promise<{ categories: CategoryInfo[] | undefined; models?: Array<ModelId> }> {
-  if (!paths) {
+  if (!trees) {
     return { categories: undefined };
   }
 
   const rootFilteredElementIds = new Set<ElementId>();
   const subModelIds = new Set<ModelId>();
-
   const categories = new Map<CategoryId, Array<SubCategoryId>>();
-  for (const path of paths) {
-    const currPath = HierarchySearchPath.normalize(path).path;
-    if (currPath.length === 0) {
-      continue;
+
+  async function traverse(node: HierarchySearchTree, parent?: InstanceKey): Promise<void> {
+    const identifier = node.identifier;
+    if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(identifier)) {
+      return;
     }
 
-    let category: HierarchyNodeIdentifier;
-    let subCategory: HierarchyNodeIdentifier | undefined;
-
-    let lastNodeInfo: { lastNode: HierarchyNodeIdentifier; nodeIndex: number } | undefined;
-
-    for (let i = 0; i < currPath.length; ++i) {
-      const currentNode = currPath[i];
-      if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(currentNode)) {
-        continue;
+    if (identifier.className === elementClassName) {
+      rootFilteredElementIds.add(identifier.id);
+      if (node.children) {
+        collectSubModels(node.children);
       }
-      if (currentNode.className === elementClassName) {
-        rootFilteredElementIds.add(currentNode.id);
-        for (let j = i + 1; j < currPath.length; ++j) {
-          const childNode = currPath[j];
-          if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(childNode)) {
-            continue;
-          }
-          if (childNode.className === modelsClassName) {
-            subModelIds.add(childNode.id);
-          }
-        }
-        break;
-      }
-      lastNodeInfo = { lastNode: currentNode, nodeIndex: i };
+      return;
     }
 
-    assert(lastNodeInfo !== undefined && HierarchyNodeIdentifier.isInstanceNodeIdentifier(lastNodeInfo.lastNode));
+    if (node.children) {
+      await Promise.all(node.children.map(async (childrenTree) => traverse(childrenTree)));
+      return;
+    }
 
-    if (lastNodeInfo.lastNode.className === CLASS_NAME_DefinitionContainer) {
+    if (identifier.className === CLASS_NAME_DefinitionContainer) {
       const definitionContainerCategories = await firstValueFrom(
-        idsCache.getAllContainedCategories({ definitionContainerIds: lastNodeInfo.lastNode.id, includeEmptyCategories: hierarchyConfig.showEmptyCategories }),
+        idsCache.getAllContainedCategories({ definitionContainerIds: identifier.id, includeEmptyCategories: hierarchyConfig.showEmptyCategories }),
       );
       for (const categoryId of definitionContainerCategories) {
-        const value = categories.get(categoryId);
-        if (value === undefined) {
+        if (!categories.has(categoryId)) {
           categories.set(categoryId, []);
         }
       }
-      continue;
+      return;
     }
 
-    if (lastNodeInfo.lastNode.className === CLASS_NAME_SubCategory) {
-      const secondToLastNode = lastNodeInfo.nodeIndex > 0 ? currPath[lastNodeInfo.nodeIndex - 1] : undefined;
-      assert(secondToLastNode !== undefined && HierarchyNodeIdentifier.isInstanceNodeIdentifier(secondToLastNode));
-
-      subCategory = lastNodeInfo.lastNode;
-      category = secondToLastNode;
-    } else {
-      category = lastNodeInfo.lastNode;
+    if (identifier.className === CLASS_NAME_SubCategory) {
+      assert(!!parent);
+      let entry = categories.get(parent.id);
+      if (entry === undefined) {
+        entry = [];
+        categories.set(parent.id, entry);
+      }
+      entry.push(identifier.id);
+      return;
     }
 
-    let entry = categories.get(category.id);
-    if (entry === undefined) {
-      entry = [];
-      categories.set(category.id, entry);
-    }
-
-    if (subCategory) {
-      entry.push(subCategory.id);
+    // identifier represents a CLASS_NAME_Category
+    if (!categories.has(identifier.id)) {
+      categories.set(identifier.id, []);
     }
   }
+
+  function collectSubModels(children: HierarchySearchTree[]): void {
+    for (const child of children) {
+      const id = child.identifier;
+      if (HierarchyNodeIdentifier.isInstanceNodeIdentifier(id) && id.className === modelsClassName) {
+        subModelIds.add(id.id);
+      }
+      if (child.children) {
+        collectSubModels(child.children);
+      }
+    }
+  }
+
+  await Promise.all(trees.map(async (tree) => traverse(tree)));
+
   const rootElementModelMap = await firstValueFrom(idsCache.getFilteredElementsModels(rootFilteredElementIds));
   const models = [...subModelIds, ...new Set(rootElementModelMap.values())];
   return {

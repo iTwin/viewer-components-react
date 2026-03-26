@@ -8,8 +8,8 @@ import { CLASS_NAME_Category, CLASS_NAME_GeometricElement3d, CLASS_NAME_Model, C
 import { createSearchResultsTree, SearchResultsNodesHandler } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
-import type { HierarchySearchPath } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
+import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
+import type { EC, ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
 import type {
   BaseSearchResultsTreeNode,
@@ -52,7 +52,7 @@ export interface ModelsTreeSearchTargets {
 /** @internal */
 export async function createModelsSearchResultsTree(props: {
   imodelAccess: ECClassHierarchyInspector;
-  searchPaths: HierarchySearchPath[];
+  searchPaths: HierarchySearchTree[];
 }): Promise<SearchResultsTree<ModelsTreeSearchTargets>> {
   const { imodelAccess, searchPaths } = props;
   return createSearchResultsTree({
@@ -283,7 +283,7 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<void
     throw new Error("Invalid parent node type");
   }
 
-  public async getType(className: string): Promise<SearchResultsTreeNode["type"]> {
+  public async getType(className: EC.FullClassName): Promise<SearchResultsTreeNode["type"]> {
     if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Subject)) {
       return "subject";
     }
@@ -296,7 +296,7 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<void
     return "element";
   }
 
-  public getClassName(type: SearchResultsTreeNode["type"]): string {
+  public getClassName(type: SearchResultsTreeNode["type"]): EC.FullClassName {
     switch (type) {
       case "subject":
         return CLASS_NAME_Subject;

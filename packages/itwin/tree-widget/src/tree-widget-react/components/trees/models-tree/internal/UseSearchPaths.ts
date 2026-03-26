@@ -5,19 +5,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { firstValueFrom } from "rxjs";
-import { HierarchyNodeIdentifier, HierarchyNodeKey, HierarchySearchPath } from "@itwin/presentation-hierarchies";
+import { HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import { useFocusedInstancesContext } from "../../common/FocusedInstancesContext.js";
 import { CLASS_NAME_GeometricModel3d, CLASS_NAME_Subject } from "../../common/internal/ClassNameDefinitions.js";
 import { SearchLimitExceededError } from "../../common/TreeErrors.js";
 import { useTelemetryContext } from "../../common/UseTelemetryContext.js";
-import { joinHierarchySearchPaths } from "../../common/Utils.js";
+import { joinHierarchySearchTrees } from "../../common/Utils.js";
 import { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
 
 import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
-import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, InstancesNodeKey } from "@itwin/presentation-hierarchies";
+import type { GroupingHierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../../common/components/VisibilityTree.js";
-import type { NormalizedHierarchySearchPath } from "../../common/Utils.js";
 import type { ClassGroupingHierarchyNode, ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
 import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache.js";
 
@@ -43,21 +42,21 @@ export function useSearchPaths({
     /**
      * A function that creates search paths based on provided target instance keys or node label.
      */
-    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<NormalizedHierarchySearchPath[]>;
+    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<HierarchySearchTree[]>;
     /**
      * Search text which would be used to create search paths if `getSearchPaths` wouldn't be provided.
      */
     searchText?: string;
-  }) => Promise<HierarchySearchPath[] | undefined>;
+  }) => Promise<HierarchySearchTree[] | undefined>;
   getSubTreePaths?: (props: {
     /**
      * A function that creates search paths based on provided target instance keys.
      */
-    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> }) => Promise<NormalizedHierarchySearchPath[]>;
-  }) => Promise<HierarchySearchPath[]>;
+    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> }) => Promise<HierarchySearchTree[]>;
+  }) => Promise<HierarchySearchTree[]>;
   idsCache: ModelsTreeIdsCache;
   onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
-  onSearchPathsChanged: (paths: HierarchySearchPath[] | undefined) => void;
+  onSearchPathsChanged: (paths: HierarchySearchTree[] | undefined) => void;
   componentId: GuidString;
 }): {
   getPaths: VisibilityTreeProps["getSearchPaths"] | undefined;
@@ -83,26 +82,27 @@ export function useSearchPaths({
   }, [loadFocusedItems, getSearchPaths, getSubTreePaths, searchText, onModelsFiltered, onSearchPathsChanged]);
 
   const getSubTreePathsInternal = useMemo<
-    ((...props: Parameters<Required<VisibilityTreeProps>["getSearchPaths"]>) => Promise<HierarchyNodeIdentifiersPath[]>) | undefined
+    ((...props: Parameters<Required<VisibilityTreeProps>["getSearchPaths"]>) => Promise<HierarchySearchTree[]>) | undefined
   >(() => {
     if (!getSubTreePaths) {
       return undefined;
     }
     return async ({ imodelAccess, abortSignal }) => {
       try {
-        const paths = await getSubTreePaths({
+        return await getSubTreePaths({
           createInstanceKeyPaths: async ({ targetItems }) =>
-            ModelsTreeDefinition.createInstanceKeyPaths({
-              imodelAccess,
-              targetItems,
-              idsCache,
-              hierarchyConfig: hierarchyConfiguration,
-              limit: "unbounded",
-              abortSignal,
-              componentId: `${componentId}/subTree`,
-            }),
+            createHierarchySearchTree(
+              ModelsTreeDefinition.createInstanceKeyPaths({
+                imodelAccess,
+                targetItems,
+                idsCache,
+                hierarchyConfig: hierarchyConfiguration,
+                limit: "unbounded",
+                abortSignal,
+                componentId: `${componentId}/subTree`,
+              }),
+            ),
         });
-        return paths.map(HierarchySearchPath.normalize).map(({ path }) => path);
       } catch {
         const newError = "unknownSubTreeError";
         setSubTreeError(newError);
@@ -112,7 +112,7 @@ export function useSearchPaths({
   }, [idsCache, hierarchyConfiguration, getSubTreePaths, componentId]);
 
   const getPaths = useMemo<VisibilityTreeProps["getSearchPaths"] | undefined>(() => {
-    const handlePaths = async (searchPaths: HierarchySearchPath[] | undefined, classInspector: ECClassHierarchyInspector) => {
+    const handlePaths = async (searchPaths: HierarchySearchTree[] | undefined, classInspector: ECClassHierarchyInspector) => {
       onSearchPathsChanged(searchPaths);
       if (!onModelsFiltered) {
         return;
@@ -127,17 +127,18 @@ export function useSearchPaths({
         try {
           const focusedItems = await collectFocusedItems(loadFocusedItems);
           return await createSearchPathsResult({
-            getSearchPaths: async () => {
-              const paths = await ModelsTreeDefinition.createInstanceKeyPaths({
-                imodelAccess,
-                idsCache,
-                targetItems: focusedItems,
-                hierarchyConfig: hierarchyConfiguration,
-                abortSignal,
-                componentId,
-              });
-              return paths.map(({ path, options }) => ({ path, options: { ...options, reveal: true } }));
-            },
+            getSearchPaths: async () =>
+              createHierarchySearchTree(
+                ModelsTreeDefinition.createInstanceKeyPaths({
+                  imodelAccess,
+                  idsCache,
+                  targetItems: focusedItems,
+                  hierarchyConfig: hierarchyConfiguration,
+                  abortSignal,
+                  componentId,
+                }),
+                { revealTargets: true },
+              ),
             getSubTreePaths: async () => (getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess, abortSignal }) : undefined),
             handlePaths: async (paths) => handlePaths(paths, imodelAccess),
           });
@@ -158,20 +159,22 @@ export function useSearchPaths({
         try {
           return await createSearchPathsResult({
             getSearchPaths: async () => {
-              const paths = await getSearchPaths({
+              return getSearchPaths({
                 createInstanceKeyPaths: async (props) =>
-                  ModelsTreeDefinition.createInstanceKeyPaths({
-                    ...props,
-                    imodelAccess,
-                    idsCache,
-                    hierarchyConfig: hierarchyConfiguration,
-                    limit: "unbounded",
-                    abortSignal,
-                    componentId,
-                  }),
+                  createHierarchySearchTree(
+                    ModelsTreeDefinition.createInstanceKeyPaths({
+                      ...props,
+                      imodelAccess,
+                      idsCache,
+                      hierarchyConfig: hierarchyConfiguration,
+                      limit: "unbounded",
+                      abortSignal,
+                      componentId,
+                    }),
+                    { revealTargets: true },
+                  ),
                 searchText,
               });
-              return paths?.map(HierarchySearchPath.normalize);
             },
             getSubTreePaths: async () => (getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess, abortSignal }) : undefined),
             handlePaths: async (paths) => handlePaths(paths, imodelAccess),
@@ -193,17 +196,18 @@ export function useSearchPaths({
         onFeatureUsed({ featureId: "search", reportInteraction: true });
         try {
           return await createSearchPathsResult({
-            getSearchPaths: async () => {
-              const paths = await ModelsTreeDefinition.createInstanceKeyPaths({
-                imodelAccess,
-                label: searchText,
-                idsCache,
-                hierarchyConfig: hierarchyConfiguration,
-                abortSignal,
-                componentId,
-              });
-              return paths.map(({ path, options }) => ({ path, options: { ...options, reveal: true } }));
-            },
+            getSearchPaths: async () =>
+              createHierarchySearchTree(
+                ModelsTreeDefinition.createInstanceKeyPaths({
+                  imodelAccess,
+                  label: searchText,
+                  idsCache,
+                  hierarchyConfig: hierarchyConfiguration,
+                  abortSignal,
+                  componentId,
+                }),
+                { revealTargets: true },
+              ),
             getSubTreePaths: async () => (getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess, abortSignal }) : undefined),
             handlePaths: async (paths) => handlePaths(paths, imodelAccess),
           });
@@ -239,36 +243,35 @@ export function useSearchPaths({
   };
 }
 
-async function getModels(paths: HierarchySearchPath[], idsCache: ModelsTreeIdsCache, classInspector: ECClassHierarchyInspector) {
-  if (!paths) {
-    return undefined;
-  }
-
+async function getModels(trees: HierarchySearchTree[], idsCache: ModelsTreeIdsCache, classInspector: ECClassHierarchyInspector) {
   const targetModelIds = new Set<Id64String>();
   const targetSubjectIds = new Set<Id64String>();
-  for (const path of paths) {
-    const currPath = Array.isArray(path) ? path : path.path;
-    for (let i = 0; i < currPath.length; i++) {
-      const currStep = currPath[i];
-      if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(currStep)) {
-        break;
-      }
 
-      // if paths end with subject need to get all models under that subject
-      if (i === currPath.length - 1 && currStep.className === CLASS_NAME_Subject) {
-        targetSubjectIds.add(currStep.id);
-        break;
-      }
+  async function traverse(node: HierarchySearchTree): Promise<void> {
+    const identifier = node.identifier;
+    if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(identifier)) {
+      return;
+    }
 
-      // collect all the models from the search path
-      if (await classInspector.classDerivesFrom(currStep.className, CLASS_NAME_GeometricModel3d)) {
-        targetModelIds.add(currStep.id);
-      }
+    // If this is a leaf subject node, collect it
+    if (!node.children && identifier.className === CLASS_NAME_Subject) {
+      targetSubjectIds.add(identifier.id);
+      return;
+    }
+
+    // Collect model ids
+    if (await classInspector.classDerivesFrom(identifier.className, CLASS_NAME_GeometricModel3d)) {
+      targetModelIds.add(identifier.id);
+    }
+
+    if (node.children) {
+      await Promise.all(node.children.map(async (child) => traverse(child)));
     }
   }
+  await Promise.all(trees.map(async (tree) => traverse(tree)));
 
-  const matchingModels = await firstValueFrom(idsCache.getSubjectModelIds(targetSubjectIds));
-  return [...targetModelIds, ...matchingModels];
+  const subjectModelIds = await firstValueFrom(idsCache.getSubjectModelIds(targetSubjectIds));
+  return [...targetModelIds, ...subjectModelIds];
 }
 
 async function collectFocusedItems(loadFocusedItems: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode>) {
@@ -316,15 +319,15 @@ async function createSearchPathsResult({
   getSearchPaths,
   handlePaths,
 }: {
-  getSubTreePaths: () => Promise<HierarchyNodeIdentifiersPath[] | undefined>;
-  getSearchPaths: () => Promise<NormalizedHierarchySearchPath[] | undefined>;
-  handlePaths: (searchPaths: HierarchySearchPath[] | undefined) => Promise<void>;
-}): Promise<HierarchySearchPath[] | undefined> {
+  getSubTreePaths: () => Promise<HierarchySearchTree[] | undefined>;
+  getSearchPaths: () => Promise<HierarchySearchTree[] | undefined>;
+  handlePaths: (searchPaths: HierarchySearchTree[] | undefined) => Promise<void>;
+}): Promise<HierarchySearchTree[] | undefined> {
   const [subTreePaths, searchPaths] = await Promise.all([getSubTreePaths(), getSearchPaths()]);
-  let joinedPaths: HierarchySearchPath[] | undefined;
+  let joinedPaths: HierarchySearchTree[] | undefined;
   try {
     if (subTreePaths && searchPaths) {
-      return (joinedPaths = joinHierarchySearchPaths(subTreePaths, searchPaths));
+      return (joinedPaths = joinHierarchySearchTrees(subTreePaths, searchPaths));
     }
     if (subTreePaths) {
       return (joinedPaths = subTreePaths);
@@ -336,4 +339,19 @@ async function createSearchPathsResult({
     void handlePaths(joinedPaths);
   }
   return joinedPaths;
+}
+
+async function createHierarchySearchTree(pathsIter: ReturnType<typeof ModelsTreeDefinition.createInstanceKeyPaths>, options?: { revealTargets?: boolean }) {
+  const builder = HierarchySearchTree.createBuilder();
+  for await (const { path, target } of pathsIter) {
+    builder.accept({
+      path: {
+        path,
+        options: options?.revealTargets
+          ? { reveal: typeof target === "string" ? true : { groupingLevel: HierarchyNode.getGroupingNodeLevel(target.groupingNode) } }
+          : undefined,
+      },
+    });
+  }
+  return builder.getTree();
 }

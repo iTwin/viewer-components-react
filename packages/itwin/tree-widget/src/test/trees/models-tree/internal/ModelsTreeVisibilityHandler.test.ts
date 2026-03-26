@@ -12,7 +12,7 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { BaseIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
 import {
@@ -51,7 +51,7 @@ import { validateNodeVisibility } from "./VisibilityValidation.js";
 import type { Id64String } from "@itwin/core-bentley";
 import type { GeometricElement3dProps, QueryBinder } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { GroupingHierarchyNode, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, InstanceKey, Props } from "@itwin/presentation-shared";
 import type { Visibility } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
 import type { TreeWidgetViewport } from "../../../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
@@ -1750,7 +1750,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       idsCache: ModelsTreeIdsCache;
       imodelAccess: ReturnType<typeof createIModelAccess>;
       hierarchyConfig: typeof defaultHierarchyConfiguration;
-      searchPaths?: HierarchyNodeIdentifiersPath[];
+      searchPaths?: HierarchySearchTree[];
     }) {
       return createIModelHierarchyProvider({
         hierarchyDefinition: new ModelsTreeDefinition({ ...props }),
@@ -3685,7 +3685,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       function createFilteredVisibilityTestData({
         imodel,
         searchPaths,
-      }: Parameters<typeof createVisibilityTestData>[0] & { searchPaths: HierarchyNodeIdentifiersPath[] }) {
+      }: Parameters<typeof createVisibilityTestData>[0] & { searchPaths: HierarchySearchTree[] }) {
         const commonProps = createCommonProps({ imodel });
         const visibilityHandlerWithSearchPaths = createModelsTreeVisibilityHandler({ ...commonProps, searchPaths });
         const defaultVisibilityHandler = createModelsTreeVisibilityHandler(commonProps);
@@ -3723,7 +3723,12 @@ describe("ModelsTreeVisibilityHandler", () => {
               searchTargetChildElement,
               childElement,
               parentElement,
-              searchPaths: [[model, category, parentElement, searchTargetChildElement]],
+              searchPaths: [
+                {
+                  identifier: model,
+                  children: [{ identifier: category, children: [{ identifier: parentElement, children: [{ identifier: searchTargetChildElement }] }] }],
+                },
+              ],
             };
           });
 
@@ -3740,7 +3745,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             parentKeys: [keys.model],
             search: {
               isSearchTarget: false,
-              childrenTargetPaths: [[keys.parentElement], [keys.searchTargetChildElement]],
+              childrenTargetPaths: [{ identifier: keys.parentElement }, { identifier: keys.searchTargetChildElement }],
             },
           });
           await visibilityHandlerWithSearchPaths.changeVisibility(node, true);
@@ -3782,7 +3787,12 @@ describe("ModelsTreeVisibilityHandler", () => {
               searchTargetChildElement,
               childElement,
               parentElement,
-              searchPaths: [[model, category, parentElement, searchTargetChildElement]],
+              searchPaths: [
+                {
+                  identifier: model,
+                  children: [{ identifier: category, children: [{ identifier: parentElement, children: [{ identifier: searchTargetChildElement }] }] }],
+                },
+              ],
             };
           });
 
@@ -3796,7 +3806,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             parentKeys: [keys.model, keys.category],
             search: {
               isSearchTarget: false,
-              childrenTargetPaths: [[keys.searchTargetChildElement]],
+              childrenTargetPaths: [{ identifier: keys.searchTargetChildElement }],
             },
           });
           await visibilityHandlerWithSearchPaths.changeVisibility(node, true);
@@ -3836,7 +3846,12 @@ describe("ModelsTreeVisibilityHandler", () => {
               searchTargetChildElement,
               childElement,
               parentElement,
-              searchPaths: [[model, category, parentElement, searchTargetChildElement]],
+              searchPaths: [
+                {
+                  identifier: model,
+                  children: [{ identifier: category, children: [{ identifier: parentElement, children: [{ identifier: searchTargetChildElement }] }] }],
+                },
+              ],
             };
           });
 
@@ -3890,7 +3905,12 @@ describe("ModelsTreeVisibilityHandler", () => {
               searchTargetChildElement,
               childElement,
               parentElement,
-              searchPaths: [[model, category, parentElement, searchTargetChildElement]],
+              searchPaths: [
+                {
+                  identifier: model,
+                  children: [{ identifier: category, children: [{ identifier: parentElement, children: [{ identifier: searchTargetChildElement }] }] }],
+                },
+              ],
             };
           });
 
@@ -3907,7 +3927,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             parentKeys: [keys.model],
             search: {
               isSearchTarget: false,
-              childrenTargetPaths: [[keys.parentElement], [keys.searchTargetChildElement]],
+              childrenTargetPaths: [{ identifier: keys.parentElement }, { identifier: keys.searchTargetChildElement }],
             },
           });
           await visibilityHandlerWithSearchPaths.changeVisibility(node, false);
@@ -3949,7 +3969,12 @@ describe("ModelsTreeVisibilityHandler", () => {
               searchTargetChildElement,
               childElement,
               parentElement,
-              searchPaths: [[model, category, parentElement, searchTargetChildElement]],
+              searchPaths: [
+                {
+                  identifier: model,
+                  children: [{ identifier: category, children: [{ identifier: parentElement, children: [{ identifier: searchTargetChildElement }] }] }],
+                },
+              ],
             };
           });
 
@@ -3968,7 +3993,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             parentKeys: [keys.model, keys.category],
             search: {
               isSearchTarget: false,
-              childrenTargetPaths: [[keys.searchTargetChildElement]],
+              childrenTargetPaths: [{ identifier: keys.searchTargetChildElement }],
             },
           });
           await visibilityHandlerWithSearchPaths.changeVisibility(node, false);
@@ -4010,7 +4035,12 @@ describe("ModelsTreeVisibilityHandler", () => {
               searchTargetChildElement,
               childElement,
               parentElement,
-              searchPaths: [[model, category, parentElement, searchTargetChildElement]],
+              searchPaths: [
+                {
+                  identifier: model,
+                  children: [{ identifier: category, children: [{ identifier: parentElement, children: [{ identifier: searchTargetChildElement }] }] }],
+                },
+              ],
             };
           });
 
@@ -4070,7 +4100,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               otherModel,
               otherCategory,
               otherElement,
-              searchPaths: [[model, category, searchTargetElement]],
+              searchPaths: [{ identifier: model, children: [{ identifier: category, children: [{ identifier: searchTargetElement }] }] }],
             };
           });
 
@@ -4080,7 +4110,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           const node = createModelHierarchyNode({
             modelId: keys.model.id,
             search: {
-              childrenTargetPaths: [[keys.category], [keys.searchTargetElement]],
+              childrenTargetPaths: [{ identifier: keys.category }, { identifier: keys.searchTargetElement }],
             },
           });
           await visibilityHandlerWithSearchPaths.changeVisibility(node, true);
@@ -4120,12 +4150,12 @@ describe("ModelsTreeVisibilityHandler", () => {
               insertSpatialCategory({ builder, codeValue: "category3" }),
             ];
             const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-            const paths: InstanceKey[][] = [];
+            const searchPathsBuilder = HierarchySearchTree.createBuilder();
             const searchTargets = new Array<Id64String>();
             const nonSearchTargets = new Array<Id64String>();
             categoriesOfSearchTargets.forEach((category) => {
               const searchTarget = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
-              paths.push([model, category, searchTarget]);
+              searchPathsBuilder.accept({ path: [model, category, searchTarget] });
               searchTargets.push(searchTarget.id);
 
               const nonSearchTarget = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
@@ -4139,7 +4169,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             return {
               model,
               categoriesOfSearchTargets,
-              searchPaths: paths,
+              searchPaths: searchPathsBuilder.getTree(),
               searchTargetElements: searchTargets,
               nonSearchTargetElements: nonSearchTargets,
               otherModel,
@@ -4158,7 +4188,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           const node = createModelHierarchyNode({
             modelId: keys.model.id,
             search: {
-              childrenTargetPaths: searchPaths.map((path) => path.slice(1)),
+              childrenTargetPaths: searchPaths.flatMap((tree) => tree.children ?? []),
             },
           });
           await visibilityHandlerWithSearchPaths.changeVisibility(node, true);
@@ -4207,7 +4237,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             modelId: keys.model.id,
             categoryId: keys.categoriesOfSearchTargets[0].id,
             parentKeys: [keys.model],
-            search: { childrenTargetPaths: [searchPaths[0].slice(2)] },
+            search: { childrenTargetPaths: searchPaths[0].children![0].children! },
           });
           await visibilityHandlerWithSearchPaths.changeVisibility(node, true);
 
@@ -4261,7 +4291,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       describe("multiple paths to a category and element under it", () => {
         async function createIModel(context: Mocha.Context) {
           return buildIModel(context, async (builder) => {
-            const searchPaths = new Array<InstanceKey[]>();
+            const searchPathsBuilder = HierarchySearchTree.createBuilder();
             const subjectIds = new Array<Id64String>();
             const modelIds = new Array<Id64String>();
             const categoryIds = new Array<Id64String>();
@@ -4278,7 +4308,8 @@ describe("ModelsTreeVisibilityHandler", () => {
               ];
               subjectIds.push(subject.id);
               modelIds.push(model.id);
-              searchPaths.push([parentSubject, subject, model, category], [parentSubject, subject, model, category, elements[0]]);
+              searchPathsBuilder.accept({ path: [parentSubject, subject, model, category] });
+              searchPathsBuilder.accept({ path: [parentSubject, subject, model, category, elements[0]] });
               categoryIds.push(category.id);
               elementsOfModels.push(elements.map((el) => el.id));
             }
@@ -4287,7 +4318,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               parentSubject,
               subjectIds,
               modelIds,
-              searchPaths,
+              searchPaths: searchPathsBuilder.getTree(),
               categoryIds,
               elementsOfModels,
             };
@@ -4407,14 +4438,11 @@ describe("ModelsTreeVisibilityHandler", () => {
           const element1 = insertPhysicalElement({ builder, classFullName: PhysicalElement1.fullName, modelId: model.id, categoryId: category.id });
           const element2 = insertPhysicalElement({ builder, classFullName: PhysicalElement2.fullName, modelId: model.id, categoryId: category.id });
 
-          const paths = [[model, category, element1]];
-
           return {
             firstElement: element1.id,
             model: model.id,
             category: category.id,
-            pathToFirstElement: paths[0],
-            searchPaths: paths,
+            searchPaths: [{ identifier: model, children: [{ identifier: category, children: [{ identifier: element1 }] }] }],
             element2: element2.id,
           };
         });

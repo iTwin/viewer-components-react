@@ -9,8 +9,8 @@ import { CLASS_NAME_DefinitionContainer, CLASS_NAME_SubCategory } from "../../..
 import { createSearchResultsTree, SearchResultsNodesHandler } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
-import type { HierarchySearchPath } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
+import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
+import type { EC, ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../../common/internal/Types.js";
 import type {
   BaseSearchResultsTreeNode,
@@ -82,10 +82,10 @@ type TemporarySearchResultsTreeNode =
 /** @internal */
 export async function createCategoriesSearchResultsTree(props: {
   imodelAccess: ECClassHierarchyInspector;
-  searchPaths: HierarchySearchPath[];
-  categoryClassName: string;
-  categoryElementClassName: string;
-  categoryModelClassName: string;
+  searchPaths: HierarchySearchTree[];
+  categoryClassName: EC.FullClassName;
+  categoryElementClassName: EC.FullClassName;
+  categoryModelClassName: EC.FullClassName;
   idsCache: CategoriesTreeIdsCache;
 }): Promise<SearchResultsTree<CategoriesTreeSearchTargets>> {
   const { imodelAccess, searchPaths, categoryClassName, categoryElementClassName, categoryModelClassName, idsCache } = props;
@@ -121,9 +121,9 @@ interface SearchTargetsInternal {
 interface CategoriesTreeSearchResultsNodesHandlerProps {
   idsCache: CategoriesTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
-  categoryClassName: string;
-  categoryElementClassName: string;
-  categoryModelClassName: string;
+  categoryClassName: EC.FullClassName;
+  categoryElementClassName: EC.FullClassName;
+  categoryModelClassName: EC.FullClassName;
 }
 
 type ModelCategoryKey = `${ModelId}-${CategoryId}`;
@@ -403,7 +403,7 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
     throw new Error("Invalid parent node type");
   }
 
-  public async getType(className: string): Promise<TemporarySearchResultsTreeNode["type"]> {
+  public async getType(className: EC.FullClassName): Promise<TemporarySearchResultsTreeNode["type"]> {
     if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_SubCategory)) {
       return "subCategory";
     }
@@ -419,7 +419,7 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
     return "definitionContainer";
   }
 
-  public getClassName(type: TemporarySearchResultsTreeNode["type"]): string {
+  public getClassName(type: TemporarySearchResultsTreeNode["type"]): EC.FullClassName {
     switch (type) {
       case "definitionContainer":
         return CLASS_NAME_DefinitionContainer;
