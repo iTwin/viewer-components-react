@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import sinon from "sinon";
+import { vi } from "vitest";
 import { BeEvent } from "@itwin/core-bentley";
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
@@ -23,8 +23,8 @@ type GetCategoryInfo = IModelConnection["categories"]["getCategoryInfo"];
 
 export function createIModelMock(props: { queryHandler?: QueryHandler; getCategoryInfo?: GetCategoryInfo }) {
   return {
-    isBriefcaseConnection: sinon.fake.returns(false),
-    createQueryReader: sinon.fake(async function* (query: string, params?: QueryBinder, config?: QueryOptions): AsyncIterableIterator<any> {
+    isBriefcaseConnection: vi.fn(() => false),
+    createQueryReader: vi.fn(async function* (query: string, params?: QueryBinder, config?: QueryOptions): AsyncIterableIterator<any> {
       const result = (await props.queryHandler?.(query, params, config)) ?? [];
       for (const item of result) {
         yield { ...item, toRow: () => item, toArray: () => Object.values(item) };
@@ -37,7 +37,7 @@ export function createIModelMock(props: { queryHandler?: QueryHandler; getCatego
   } as unknown as IModelConnection;
 }
 
-export function createFakeSinonViewport(
+export function createFakeViewport(
   props?: Partial<Omit<TreeWidgetViewport, "alwaysDrawn" | "neverDrawn">> & {
     neverDrawn?: Set<string>;
     alwaysDrawn?: Set<string>;
@@ -51,8 +51,8 @@ export function createFakeSinonViewport(
   const onAlwaysDrawnChanged = new BeEvent();
   const onNeverDrawnChanged = new BeEvent();
   const result: TreeWidgetTestingViewport & Disposable = {
-    changeCategoryDisplay: sinon.fake(),
-    changeModelDisplay: sinon.fake(),
+    changeCategoryDisplay: vi.fn(),
+    changeModelDisplay: vi.fn(),
     isAlwaysDrawnExclusive: false,
     onPerModelCategoriesOverridesChanged: new BeEvent(),
     onDisplayedCategoriesChanged: new BeEvent(),
@@ -60,13 +60,13 @@ export function createFakeSinonViewport(
     onDisplayedModelsChanged: new BeEvent(),
     onAlwaysDrawnChanged,
     onNeverDrawnChanged,
-    changeSubCategoryDisplay: sinon.fake(),
-    clearPerModelCategoryOverrides: sinon.fake(),
-    getPerModelCategoryOverride: sinon.fake.returns("none"),
-    setPerModelCategoryOverride: sinon.fake(),
-    viewsCategory: sinon.fake.returns(true),
-    viewsModel: sinon.fake.returns(true),
-    viewsSubCategory: sinon.fake.returns(true),
+    changeSubCategoryDisplay: vi.fn(),
+    clearPerModelCategoryOverrides: vi.fn(),
+    getPerModelCategoryOverride: vi.fn(() => "none" as const),
+    setPerModelCategoryOverride: vi.fn(),
+    viewsCategory: vi.fn(() => true),
+    viewsModel: vi.fn(() => true),
+    viewsSubCategory: vi.fn(() => true),
     viewType: "3d",
     perModelCategoryOverrides: [],
     ...props,
@@ -76,28 +76,28 @@ export function createFakeSinonViewport(
     get neverDrawn() {
       return neverDrawn;
     },
-    setAlwaysDrawn: sinon.fake((x) => {
+    setAlwaysDrawn: vi.fn((x) => {
       alwaysDrawn = x.elementIds;
       onAlwaysDrawnChanged.raiseEvent(result);
     }),
-    setNeverDrawn: sinon.fake((x) => {
+    setNeverDrawn: vi.fn((x) => {
       neverDrawn = x.elementIds;
       onNeverDrawnChanged.raiseEvent(result);
     }),
-    clearAlwaysDrawn: sinon.fake(() => {
+    clearAlwaysDrawn: vi.fn(() => {
       if (alwaysDrawn?.size) {
         alwaysDrawn.clear();
         onAlwaysDrawnChanged.raiseEvent(result);
       }
     }),
-    clearNeverDrawn: sinon.fake(() => {
+    clearNeverDrawn: vi.fn(() => {
       if (neverDrawn?.size) {
         neverDrawn.clear();
         onNeverDrawnChanged.raiseEvent(result);
       }
     }),
     iModel: createIModelMock({ queryHandler: props?.queryHandler, getCategoryInfo: props?.getCategoryInfo }),
-    renderFrame: sinon.fake(),
+    renderFrame: vi.fn(),
     [Symbol.dispose]() {
       this.iModel.onClose.raiseEvent(this.iModel);
     },

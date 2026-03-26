@@ -19,16 +19,16 @@ const rootClassificationSystemCode = "TestClassificationSystem";
 
 describe("Classifications tree", () => {
   describe("Hierarchy definition", () => {
-    before(async () => {
+    beforeAll(async () => {
       await initializeITwinJs();
     });
 
-    after(async () => {
+    afterAll(async () => {
       await terminateITwinJs();
     });
 
-    it("loads classifications' hierarchy without elements", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("loads classifications' hierarchy without elements", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         await importClassificationSchema(builder);
 
         const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -71,8 +71,8 @@ describe("Classifications tree", () => {
       });
     });
 
-    it("loads classification elements", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("loads classification elements", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         await importClassificationSchema(builder);
 
         const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });

@@ -5,6 +5,7 @@
 
 import { XMLParser } from "fast-xml-parser";
 import fs from "fs";
+import { expect } from "vitest";
 import { SnapshotDb } from "@itwin/core-backend";
 import { Id64 } from "@itwin/core-bentley";
 import { BisCodeSpec, Code, IModel } from "@itwin/core-common";
@@ -36,23 +37,25 @@ import type { TestIModelBuilder } from "@itwin/presentation-testing";
 
 // cspell:words ecdbmap jpath
 
+function getTestName(): string {
+  return expect.getState().currentTestName?.replace(/[^\w]/gi, "-").replace(/-+/g, "-").toLowerCase() ?? "unknown";
+}
+
 export async function buildIModel(
-  mochaContext: Mocha.Context,
-  setup?: (builder: TestIModelBuilder, testSchema: TestSchemaDefinition, mochaContext: Mocha.Context) => Promise<void>,
+  setup?: (builder: TestIModelBuilder, testSchema: TestSchemaDefinition) => Promise<void>,
 ): Promise<{ imodel: IModelConnection } & AsyncDisposable>;
 export async function buildIModel<TResult extends object>(
-  mochaContext: Mocha.Context,
-  setup: (builder: TestIModelBuilder, testSchema: TestSchemaDefinition, mochaContext: Mocha.Context) => Promise<TResult>,
+  setup: (builder: TestIModelBuilder, testSchema: TestSchemaDefinition) => Promise<TResult>,
 ): Promise<{ imodel: IModelConnection } & TResult & AsyncDisposable>;
 export async function buildIModel<TResult extends object | undefined>(
-  mochaContext: Mocha.Context,
-  setup?: (builder: TestIModelBuilder, testSchema: TestSchemaDefinition, mochaContext: Mocha.Context) => Promise<TResult>,
+  setup?: (builder: TestIModelBuilder, testSchema: TestSchemaDefinition) => Promise<TResult>,
 ) {
+  const testName = getTestName();
   let res!: TResult;
   // eslint-disable-next-line @typescript-eslint/no-deprecated
-  const imodel = await buildTestIModel(mochaContext, async (builder) => {
+  const imodel = await buildTestIModel(testName, async (builder) => {
     const testSchema = (await importSchema({
-      mochaContext,
+      schemaName: "TestSchema",
       builder,
       schemaContentXml: `
         <ECSchemaReference name="BisCore" version="01.00.16" alias="bis" />
@@ -61,11 +64,10 @@ export async function buildIModel<TResult extends object | undefined>(
           <BaseClass>bis:ISubModeledElement</BaseClass>
         </ECEntityClass>
       `,
-      schemaName: "TestSchema",
       schemaAlias: "test",
     })) as TestSchemaDefinition;
     if (setup) {
-      res = await setup(builder, testSchema, mochaContext);
+      res = await setup(builder, testSchema);
     }
   });
   return {
@@ -94,15 +96,9 @@ export async function importSchema({
   builder: TestIModelBuilder;
   schemaContentXml: string;
   schemaAlias: string;
-} & (
-  | {
-      mochaContext: Mocha.Context;
-    }
-  | {
-      schemaName: string;
-    }
-)): Promise<ImportSchemaResult> {
-  const schemaName = "schemaName" in props ? props.schemaName : `SCHEMA_${props.mochaContext.test!.fullTitle()}`.replace(/[^\w\d_]/gi, "_").replace(/_+/g, "_");
+  schemaName: string;
+}): Promise<ImportSchemaResult> {
+  const schemaName = props.schemaName;
   const schemaAlias = props.schemaAlias;
   const schemaXml = getFullSchemaXml({ schemaName, schemaAlias, schemaContentXml });
   await builder.importSchema(schemaXml);

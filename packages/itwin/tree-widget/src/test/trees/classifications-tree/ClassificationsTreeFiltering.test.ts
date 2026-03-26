@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
 import { ClassificationsTreeDefinition } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIdsCache } from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
 import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
@@ -30,17 +29,17 @@ const defaultHierarchyConfiguration = {
 
 describe("Classifications tree", () => {
   describe("Hierarchy search", () => {
-    before(async function () {
+    beforeAll(async () => {
       await initializeITwinJs();
     });
 
-    after(async function () {
+    afterAll(async () => {
       await terminateITwinJs();
     });
 
     ["Test", "_", "%"].forEach((label) => {
       it(`finds classification table by label when it contains '${label}'`, async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           await importClassificationSchema(builder);
 
           const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -73,7 +72,7 @@ describe("Classifications tree", () => {
             idsCache,
             hierarchyConfig: defaultHierarchyConfiguration,
           }),
-        ).to.deep.eq([
+        ).toEqual([
           {
             path: [{ id: keys.table.id, className: CLASS_NAME_ClassificationTable }],
             options: { reveal: true },
@@ -82,7 +81,7 @@ describe("Classifications tree", () => {
       });
 
       it(`finds classification by label when it contains '${label}'`, async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           await importClassificationSchema(builder);
 
           const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -115,7 +114,7 @@ describe("Classifications tree", () => {
             idsCache,
             hierarchyConfig: defaultHierarchyConfiguration,
           }),
-        ).to.deep.eq([
+        ).toEqual([
           {
             path: [
               { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
@@ -127,7 +126,7 @@ describe("Classifications tree", () => {
       });
 
       it(`finds 3d element by label when it contains '${label}'`, async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           await importClassificationSchema(builder);
 
           const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -161,7 +160,7 @@ describe("Classifications tree", () => {
             idsCache,
             hierarchyConfig: defaultHierarchyConfiguration,
           }),
-        ).to.deep.eq([
+        ).toEqual([
           {
             path: [
               { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
@@ -174,7 +173,7 @@ describe("Classifications tree", () => {
       });
 
       it(`finds 3d child element by label when it contains '${label}'`, async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           await importClassificationSchema(builder);
 
           const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -215,7 +214,7 @@ describe("Classifications tree", () => {
             idsCache,
             hierarchyConfig: defaultHierarchyConfiguration,
           }),
-        ).to.deep.eq([
+        ).toEqual([
           {
             path: [
               { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
@@ -230,8 +229,8 @@ describe("Classifications tree", () => {
     });
 
     describe("by instance key", () => {
-      it("finds classifications table", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("finds classifications table", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           await importClassificationSchema(builder);
 
           const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -276,7 +275,7 @@ describe("Classifications tree", () => {
             idsCache,
             hierarchyConfig: defaultHierarchyConfiguration,
           }),
-        ).to.deep.eq([
+        ).toEqual([
           {
             path: [{ id: keys.table2.id, className: CLASS_NAME_ClassificationTable }],
             options: { reveal: true },
@@ -284,8 +283,8 @@ describe("Classifications tree", () => {
         ]);
       });
 
-      it("finds classifications", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("finds classifications", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           await importClassificationSchema(builder);
 
           const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -330,7 +329,7 @@ describe("Classifications tree", () => {
             idsCache,
             hierarchyConfig: defaultHierarchyConfiguration,
           }),
-        ).to.deep.eq([
+        ).toEqual([
           {
             path: [
               { id: keys.table2.id, className: CLASS_NAME_ClassificationTable },
@@ -341,8 +340,8 @@ describe("Classifications tree", () => {
         ]);
       });
 
-      it("finds geometric element 3d", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("finds geometric element 3d", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           await importClassificationSchema(builder);
 
           const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -387,7 +386,7 @@ describe("Classifications tree", () => {
             idsCache,
             hierarchyConfig: defaultHierarchyConfiguration,
           }),
-        ).to.deep.eq([
+        ).toEqual([
           {
             path: [
               { id: keys.table2.id, className: CLASS_NAME_ClassificationTable },
@@ -399,8 +398,8 @@ describe("Classifications tree", () => {
         ]);
       });
 
-      it("finds child geometric element 3d", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("finds child geometric element 3d", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           await importClassificationSchema(builder);
 
           const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -454,7 +453,7 @@ describe("Classifications tree", () => {
             idsCache,
             hierarchyConfig: defaultHierarchyConfiguration,
           }),
-        ).to.deep.eq([
+        ).toEqual([
           {
             path: [
               { id: keys.table2.id, className: CLASS_NAME_ClassificationTable },
@@ -468,8 +467,8 @@ describe("Classifications tree", () => {
       });
     });
 
-    it("returns empty array when nothing matches provided search text", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("returns empty array when nothing matches provided search text", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         await importClassificationSchema(builder);
 
         const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -500,11 +499,11 @@ describe("Classifications tree", () => {
           idsCache,
           hierarchyConfig: defaultHierarchyConfiguration,
         }),
-      ).to.deep.eq([]);
+      ).toEqual([]);
     });
 
-    it("aborts when abort signal fires", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("aborts when abort signal fires", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         await importClassificationSchema(builder);
 
         const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -539,7 +538,7 @@ describe("Classifications tree", () => {
         abortSignal: abortController1.signal,
       });
       abortController1.abort();
-      expect(await pathsPromiseAborted).to.deep.eq([]);
+      expect(await pathsPromiseAborted).toEqual([]);
 
       const abortController2 = new AbortController();
       const pathsPromise = ClassificationsTreeDefinition.createInstanceKeyPaths({
@@ -549,7 +548,7 @@ describe("Classifications tree", () => {
         idsCache,
         abortSignal: abortController2.signal,
       });
-      expect(await pathsPromise).to.deep.eq([
+      expect(await pathsPromise).toEqual([
         { path: [{ className: ids.classificationTable.className, id: ids.classificationTable.id }], options: { reveal: true } },
       ]);
     });

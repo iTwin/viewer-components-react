@@ -38,7 +38,7 @@ import type { CategoriesTreeHierarchyConfiguration } from "../../../tree-widget-
 
 describe("Categories tree", () => {
   describe("Hierarchy definition", () => {
-    before(async function () {
+    beforeAll(async () => {
       await initializePresentationTesting({
         backendProps: {
           caching: {
@@ -54,12 +54,12 @@ describe("Categories tree", () => {
       ECSchemaRpcImpl.register();
     });
 
-    after(async function () {
+    afterAll(async () => {
       await terminatePresentationTesting();
     });
 
-    it("does not show private 3d categories", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("does not show private 3d categories", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
         const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
@@ -86,8 +86,8 @@ describe("Categories tree", () => {
       });
     });
 
-    it("does not show definition container when it doesn't contain category", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("does not show definition container when it doesn't contain category", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
@@ -114,8 +114,8 @@ describe("Categories tree", () => {
       });
     });
 
-    it("does not show definition container when it contains definition container without categories", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("does not show definition container when it contains definition container without categories", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
@@ -132,8 +132,8 @@ describe("Categories tree", () => {
       });
     });
 
-    it("does not show definition container or category when category is private", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("does not show definition container or category when category is private", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
@@ -152,8 +152,8 @@ describe("Categories tree", () => {
       });
     });
 
-    it("does not show definition container or category when category does not have elements", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("does not show definition container or category when category does not have elements", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
@@ -180,8 +180,8 @@ describe("Categories tree", () => {
       });
     });
 
-    it("shows definition container and category when category does not have elements and showEmptyCategories is true", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("shows definition container and category when category does not have elements and showEmptyCategories is true", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
@@ -218,8 +218,8 @@ describe("Categories tree", () => {
       });
     });
 
-    it("does not show definition container or category when definition container is private", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("does not show definition container or category when definition container is private", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer", isPrivate: true });
         const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
@@ -238,8 +238,8 @@ describe("Categories tree", () => {
       });
     });
 
-    it("does not show definition containers or categories when definition container contains another definition container that is private", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("does not show definition containers or categories when definition container contains another definition container that is private", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
@@ -265,8 +265,8 @@ describe("Categories tree", () => {
       });
     });
 
-    it("shows definition container when it contains category", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("shows definition container when it contains category", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
@@ -299,8 +299,8 @@ describe("Categories tree", () => {
       });
     });
 
-    it("shows element when showElements is set to true", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("shows element when showElements is set to true", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
@@ -343,8 +343,8 @@ describe("Categories tree", () => {
       });
     });
 
-    it("shows element and subCategories when showElements is set to true", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("shows element and subCategories when showElements is set to true", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
@@ -396,8 +396,8 @@ describe("Categories tree", () => {
       });
     });
 
-    it("shows element and hides subCategories when showElements and hideSubCategories are set to true", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("shows element and hides subCategories when showElements and hideSubCategories are set to true", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
@@ -441,8 +441,8 @@ describe("Categories tree", () => {
       });
     });
 
-    it("shows all definition containers when they contain category directly or indirectly", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("shows all definition containers when they contain category directly or indirectly", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
@@ -483,8 +483,8 @@ describe("Categories tree", () => {
       });
     });
 
-    it("shows root categories and definition container", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("shows root categories and definition container", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
@@ -524,8 +524,8 @@ describe("Categories tree", () => {
       });
     });
 
-    it("does not show private 3d subCategories", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("does not show private 3d subCategories", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
         const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
@@ -561,8 +561,8 @@ describe("Categories tree", () => {
       });
     });
 
-    it("does not show private 2d categories", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("does not show private 2d categories", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "TestDrawingModel" });
 
         const category = insertDrawingCategory({ builder, codeValue: "Test Drawing Category" });
@@ -589,8 +589,8 @@ describe("Categories tree", () => {
       });
     });
 
-    it("does not show private 2d subCategories", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("does not show private 2d subCategories", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "TestDrawingModel" });
 
         const category = insertDrawingCategory({ builder, codeValue: "Test Drawing Category" });

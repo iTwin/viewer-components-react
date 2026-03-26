@@ -58,7 +58,7 @@ import type { VisibilityExpectations } from "../../common/VisibilityValidation.j
 import type { TreeWidgetTestingViewport } from "../../TreeUtils.js";
 
 describe("CategoriesTreeVisibilityHandler", () => {
-  before(async () => {
+  beforeAll(async () => {
     await initializePresentationTesting({
       backendProps: {
         caching: {
@@ -75,7 +75,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
     ECSchemaRpcImpl.register();
   });
 
-  after(async () => {
+  afterAll(async () => {
     await terminatePresentationTesting();
     TestUtils.terminate();
   });
@@ -157,8 +157,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
   }
 
   describe("enabling visibility", () => {
-    it("by default everything is hidden", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("by default everything is hidden", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
@@ -186,8 +186,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
     });
 
     describe("definitionContainers", () => {
-      it("showing definition container makes it and all of its contained elements visible", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("showing definition container makes it and all of its contained elements visible", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
           const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -225,8 +225,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing definition container makes it and all of its contained elements visible and doesn't affect non contained definition containers", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("showing definition container makes it and all of its contained elements visible and doesn't affect non contained definition containers", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
           const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -291,8 +291,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing definition container makes it and all of its contained elements visible, and parent container partially visible if it has more direct child categories", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("showing definition container makes it and all of its contained elements visible, and parent container partially visible if it has more direct child categories", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
           const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -330,8 +330,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing definition container makes it and all of its contained elements visible, and parent container partially visible if it has more definition containers", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("showing definition container makes it and all of its contained elements visible, and parent container partially visible if it has more definition containers", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
           const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -372,8 +372,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing child definition container makes it, all of its contained elements and its parent definition container visible", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("showing child definition container makes it, all of its contained elements and its parent definition container visible", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
           const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -410,8 +410,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
     });
 
     describe("categories", () => {
-      it("showing category of hidden model does not enable other categories", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("showing category of hidden model does not enable other categories", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
           const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
@@ -452,8 +452,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing category makes it and all of its subCategories visible", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("showing category makes it and all of its subCategories visible", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
           const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
@@ -483,8 +483,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing category makes it, all of its contained subCategories visible and doesn't affect other categories", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("showing category makes it, all of its contained subCategories visible and doesn't affect other categories", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
           insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
@@ -533,8 +533,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing category makes it, all of its contained subCategories visible and doesn't affect non related definition container", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("showing category makes it, all of its contained subCategories visible and doesn't affect non related definition container", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
           insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
@@ -588,8 +588,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing category makes it and all of its subcategories visible, and parent container partially visible if it has more direct child categories", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("showing category makes it and all of its subcategories visible, and parent container partially visible if it has more direct child categories", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
           const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -643,8 +643,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing category makes it and all of its subCategories visible, and parent container partially visible if it has more definition containers", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("showing category makes it and all of its subCategories visible, and parent container partially visible if it has more definition containers", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
           const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -694,8 +694,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
     });
 
     describe("subCategories", () => {
-      it("showing subCategory of hidden model does not enable other categories", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("showing subCategory of hidden model does not enable other categories", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
           const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
@@ -744,8 +744,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing subCategory makes it visible and its parent category partially visible, and doesn't affect other subCategories", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("showing subCategory makes it visible and its parent category partially visible, and doesn't affect other subCategories", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
           const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
@@ -788,8 +788,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing subCategory makes it visible and its parent category partially visible, and doesn't affect other categories", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("showing subCategory makes it visible and its parent category partially visible, and doesn't affect other categories", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
           const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
@@ -829,8 +829,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing subCategory makes it visible and parents partially visible", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("showing subCategory makes it visible and parents partially visible", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
           const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -869,8 +869,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing subCategory makes it visible and doesn't affect non related definition containers", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("showing subCategory makes it visible and doesn't affect non related definition containers", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
           const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -926,8 +926,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
     describe("showElements set to true", () => {
       describe("definitionContainers", () => {
-        it("showing definition container makes it and all of its contained elements visible", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
+        it("showing definition container makes it and all of its contained elements visible", async () => {
+          await using buildIModelResult = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
             const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -966,8 +966,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
         });
 
-        it("showing definition container makes it and all of its contained elements visible and doesn't affect non contained definition containers", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
+        it("showing definition container makes it and all of its contained elements visible and doesn't affect non contained definition containers", async () => {
+          await using buildIModelResult = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
             const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -1037,8 +1037,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
         });
 
-        it("showing definition container makes it and all of its contained elements visible, and parent container partially visible if it has more direct child categories", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
+        it("showing definition container makes it and all of its contained elements visible, and parent container partially visible if it has more direct child categories", async () => {
+          await using buildIModelResult = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
             const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -1079,8 +1079,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
         });
 
-        it("showing definition container makes it and all of its contained elements visible, and parent container partially visible if it has more definition containers", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
+        it("showing definition container makes it and all of its contained elements visible, and parent container partially visible if it has more definition containers", async () => {
+          await using buildIModelResult = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
             const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -1137,8 +1137,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
         });
 
-        it("showing child definition container makes it, all of its contained elements and its parent definition container visible", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
+        it("showing child definition container makes it, all of its contained elements and its parent definition container visible", async () => {
+          await using buildIModelResult = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
             const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -1176,8 +1176,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       describe("categories", () => {
-        it("showing category makes it, all of its subCategories and elements visible", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
+        it("showing category makes it, all of its subCategories and elements visible", async () => {
+          await using buildIModelResult = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
             const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
@@ -1208,8 +1208,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
         });
 
-        it("showing category makes it, all of its contained subCategories and elements visible and doesn't affect other categories", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
+        it("showing category makes it, all of its contained subCategories and elements visible and doesn't affect other categories", async () => {
+          await using buildIModelResult = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
             const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
@@ -1261,8 +1261,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
         });
 
-        it("showing category makes it, all of its contained subCategories and elements visible and doesn't affect non related definition container", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
+        it("showing category makes it, all of its contained subCategories and elements visible and doesn't affect non related definition container", async () => {
+          await using buildIModelResult = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
             const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
@@ -1319,8 +1319,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
         });
 
-        it("showing category makes it, all of its subcategories and elements visible, and parent container partially visible if it has more direct child categories", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
+        it("showing category makes it, all of its subcategories and elements visible, and parent container partially visible if it has more direct child categories", async () => {
+          await using buildIModelResult = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
             const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -1377,8 +1377,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
         });
 
-        it("showing category makes it, all of its subCategories and elements visible, and parent container partially visible if it has more definition containers", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
+        it("showing category makes it, all of its subCategories and elements visible, and parent container partially visible if it has more definition containers", async () => {
+          await using buildIModelResult = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
             const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -1431,8 +1431,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       describe("subCategories", () => {
-        it("showing subCategory makes it visible and its parent category partially visible, and doesn't affect elements", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
+        it("showing subCategory makes it visible and its parent category partially visible, and doesn't affect elements", async () => {
+          await using buildIModelResult = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
             const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
@@ -1476,8 +1476,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
         });
 
-        it("showing subCategory makes it visible and its parent category partially visible, and doesn't affect elements of other categories", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
+        it("showing subCategory makes it visible and its parent category partially visible, and doesn't affect elements of other categories", async () => {
+          await using buildIModelResult = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
             const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
@@ -1527,8 +1527,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
         });
 
-        it("showing subCategory makes it visible and parents partially visible", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
+        it("showing subCategory makes it visible and parents partially visible", async () => {
+          await using buildIModelResult = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
             const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -1570,8 +1570,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
         });
 
-        it("showing subCategory makes it visible and doesn't affect non related definition containers", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
+        it("showing subCategory makes it visible and doesn't affect non related definition containers", async () => {
+          await using buildIModelResult = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
             const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -1645,8 +1645,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       describe("elements", () => {
-        it("showing element makes it visible and its parent category partially visible, and doesn't affect other subCategories or elements", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
+        it("showing element makes it visible and its parent category partially visible, and doesn't affect other subCategories or elements", async () => {
+          await using buildIModelResult = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
             const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
@@ -1695,8 +1695,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
         });
 
-        it("showing element makes it visible and its parent category partially visible, and doesn't affect other categories or subCategories", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
+        it("showing element makes it visible and its parent category partially visible, and doesn't affect other categories or subCategories", async () => {
+          await using buildIModelResult = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
             const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
@@ -1742,8 +1742,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
         });
 
-        it("showing element makes it, its children visible and parents partially visible", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
+        it("showing element makes it, its children visible and parents partially visible", async () => {
+          await using buildIModelResult = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
             const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -1789,8 +1789,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
         });
 
-        it("showing subCategory makes it visible and doesn't affect non related definition containers", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
+        it("showing subCategory makes it visible and doesn't affect non related definition containers", async () => {
+          await using buildIModelResult = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
             const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -1875,7 +1875,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
       const testCases: Array<{
         describeName: string;
-        createIModel: (context: Mocha.Context) => Promise<{ imodel: IModelConnection } & IModelWithSubModelIds>;
+        createIModel: () => Promise<{ imodel: IModelConnection } & IModelWithSubModelIds>;
         cases: Array<{
           only?: boolean;
           name: string;
@@ -1885,8 +1885,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
       }> = [
         {
           describeName: "with modeled elements",
-          createIModel: async function createIModel(context: Mocha.Context): Promise<{ imodel: IModelConnection } & IModelWithSubModelIds> {
-            return buildIModel(context, async (builder, testSchema) => {
+          createIModel: async function createIModel(): Promise<{ imodel: IModelConnection } & IModelWithSubModelIds> {
+            return buildIModel(async (builder, testSchema) => {
               const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
               const partition = insertPhysicalPartition({ builder, codeValue: "model", parentId: rootSubject.id });
               const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
@@ -2011,8 +2011,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         },
         {
           describeName: "with modeled elements that have private subModel",
-          createIModel: async function createIModel(context: Mocha.Context): Promise<{ imodel: IModelConnection } & IModelWithSubModelIds> {
-            return buildIModel(context, async (builder, testSchema) => {
+          createIModel: async function createIModel(): Promise<{ imodel: IModelConnection } & IModelWithSubModelIds> {
+            return buildIModel(async (builder, testSchema) => {
               const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
               const partition = insertPhysicalPartition({ builder, codeValue: "model", parentId: rootSubject.id });
               const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
@@ -2089,8 +2089,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         },
         {
           describeName: "with modeled elements that have subModel with no children",
-          createIModel: async function createIModel(context: Mocha.Context): Promise<{ imodel: IModelConnection } & IModelWithSubModelIds> {
-            return buildIModel(context, async (builder, testSchema) => {
+          createIModel: async function createIModel(): Promise<{ imodel: IModelConnection } & IModelWithSubModelIds> {
+            return buildIModel(async (builder, testSchema) => {
               const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
               const partition = insertPhysicalPartition({ builder, codeValue: "model", parentId: rootSubject.id });
               const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
@@ -2158,13 +2158,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
           let iModel: IModelConnection;
           let createdIds: IModelWithSubModelIds;
 
-          before(async function () {
-            const { imodel, ...ids } = await createIModel(this);
+          beforeAll(async () => {
+            const { imodel, ...ids } = await createIModel();
             iModel = imodel;
             createdIds = ids;
           });
 
-          after(async () => {
+          afterAll(async () => {
             await iModel.close();
           });
 
@@ -2204,8 +2204,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
     });
 
     describe("enabling category visibility through overrides", () => {
-      it("category is partial when multiple models contain category and override for one model is set to 'Show'", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("category is partial when multiple models contain category and override for one model is set to 'Show'", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
           const physicalModel2 = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
 
@@ -2245,8 +2245,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
     });
 
     describe("enabling category visibility through model selector", () => {
-      it("category is visible when only one model contains category and model is enabled through model selector", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("category is visible when only one model contains category and model is enabled through model selector", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
           const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
@@ -2270,8 +2270,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("category is partial when multiple models contain category and one model is enabled through model selector", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("category is partial when multiple models contain category and one model is enabled through model selector", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
           const physicalModel2 = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
 
@@ -2302,8 +2302,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
   });
 
   describe("disabling visibility", () => {
-    it("by default everything is visible", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("by default everything is visible", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
@@ -2331,8 +2331,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
     });
 
     describe("definitionContainers", () => {
-      it("hiding definition container makes it and all of its contained elements hidden", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("hiding definition container makes it and all of its contained elements hidden", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
           const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -2370,8 +2370,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("hiding definition container makes it and all of its contained elements hidden and doesn't affect non contained definition containers", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("hiding definition container makes it and all of its contained elements hidden and doesn't affect non contained definition containers", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
           const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -2436,8 +2436,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("hiding definition container makes it and all of its contained elements hidden, and parent container partially visible if it has more direct child categories", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("hiding definition container makes it and all of its contained elements hidden, and parent container partially visible if it has more direct child categories", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
           const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -2472,8 +2472,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("hiding definition container makes it and all of its contained elements hidden, and parent container partially visible if it has more definition containers", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("hiding definition container makes it and all of its contained elements hidden, and parent container partially visible if it has more definition containers", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
           const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -2511,8 +2511,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("hiding child definition container makes it, all of its contained elements and its parent definition container hidden", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("hiding child definition container makes it, all of its contained elements and its parent definition container hidden", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
           const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -2549,8 +2549,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
     });
 
     describe("categories", () => {
-      it("hiding category makes it and all of its subCategories hidden", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("hiding category makes it and all of its subCategories hidden", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
           const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
@@ -2580,8 +2580,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("hiding category makes it, all of its contained subCategories hidden and doesn't affect other categories", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("hiding category makes it, all of its contained subCategories hidden and doesn't affect other categories", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
           insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
@@ -2630,8 +2630,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("hiding category makes it, all of its contained subCategories hidden and doesn't affect non related definition container", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("hiding category makes it, all of its contained subCategories hidden and doesn't affect non related definition container", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
           insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
@@ -2685,8 +2685,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("hiding category makes it and all of its subcategories hidden, and parent container partially visible if it has more direct child categories", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("hiding category makes it and all of its subcategories hidden, and parent container partially visible if it has more direct child categories", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
           const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -2740,8 +2740,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("hiding category makes it and all of its subCategories hidden, and parent container partially visible if it has more definition containers", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("hiding category makes it and all of its subCategories hidden, and parent container partially visible if it has more definition containers", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
           const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -2791,8 +2791,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
     });
 
     describe("subCategories", () => {
-      it("hiding subCategory makes it hidden and its parent category partially visible, and doesn't affect other subCategories", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("hiding subCategory makes it hidden and its parent category partially visible, and doesn't affect other subCategories", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
           const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
@@ -2833,8 +2833,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("hiding subCategory makes it hidden and its parent category partially visible, and doesn't affect other categories", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("hiding subCategory makes it hidden and its parent category partially visible, and doesn't affect other categories", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
           const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
@@ -2874,8 +2874,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("hiding subCategory makes it hidden and parents partially visible", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("hiding subCategory makes it hidden and parents partially visible", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
           const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -2914,8 +2914,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("hiding subCategory makes it hidden and doesn't affect non related definition containers", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("hiding subCategory makes it hidden and doesn't affect non related definition containers", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
           const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
@@ -2970,8 +2970,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
     });
 
     describe("disabling category visibility through overrides", () => {
-      it("category is partial when multiple models contain category and override for one model is set to 'Hide'", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("category is partial when multiple models contain category and override for one model is set to 'Hide'", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
           const physicalModel2 = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
 
@@ -3004,8 +3004,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
     });
 
     describe("disabling category visibility through model selector", () => {
-      it("category is partial when multiple models contain category and one model is disabled through model selector", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("category is partial when multiple models contain category and one model is disabled through model selector", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
           const physicalModel2 = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
 
@@ -3091,8 +3091,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
       };
     }
 
-    it("returns 'disabled' when node has search paths but visibility handler doesn't", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("returns 'disabled' when node has search paths but visibility handler doesn't", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const category = insertSpatialCategory({ builder, codeValue: "category" });
         const subCategory = insertSubCategory({
           builder,
@@ -3141,8 +3141,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
     describe("category with sub-categories hierarchy", () => {
       let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
       let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
-      async function createIModel(context: Mocha.Context) {
-        return buildIModel(context, async (builder) => {
+      async function createIModel() {
+        return buildIModel(async (builder) => {
           const category = insertSpatialCategory({ builder, codeValue: "category" });
           const defaultSubCategory = { id: getDefaultSubCategoryId(category.id), className: CLASS_NAME_SubCategory };
           const subCategory = insertSubCategory({
@@ -3171,8 +3171,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       }
 
-      before(async function () {
-        createIModelResult = await createIModel(this);
+      beforeAll(async () => {
+        createIModelResult = await createIModel();
       });
 
       beforeEach(async function () {
@@ -3195,11 +3195,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
         visibilityTestData[Symbol.dispose]();
       });
 
-      after(async () => {
+      afterAll(async () => {
         await createIModelResult.imodel.close();
       });
 
-      it("showing category changes visibility for related nodes in search paths", async function () {
+      it("showing category changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const { category, subCategory, defaultSubCategory, siblingCategory, siblingSubCategory, defaultSiblingSubCategory } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
@@ -3241,7 +3241,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing search target sub-category changes visibility for related nodes in search paths", async function () {
+      it("showing search target sub-category changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const { category, subCategory, defaultSubCategory, siblingCategory, siblingSubCategory, defaultSiblingSubCategory } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
@@ -3286,8 +3286,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
     describe("category with child elements hierarchy", () => {
       let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
       let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
-      async function createIModel(context: Mocha.Context) {
-        return buildIModel(context, async (builder) => {
+      async function createIModel() {
+        return buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
           const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -3325,8 +3325,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       }
 
-      before(async function () {
-        createIModelResult = await createIModel(this);
+      beforeAll(async () => {
+        createIModelResult = await createIModel();
       });
 
       beforeEach(async function () {
@@ -3357,11 +3357,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
         visibilityTestData[Symbol.dispose]();
       });
 
-      after(async () => {
+      afterAll(async () => {
         await createIModelResult.imodel.close();
       });
 
-      it("showing category changes visibility for related nodes in search paths", async function () {
+      it("showing category changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const {
           category,
@@ -3426,7 +3426,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing parent element changes visibility for related nodes in search paths", async function () {
+      it("showing parent element changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const {
           category,
@@ -3495,7 +3495,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing search target child element changes visibility for related nodes in search paths", async function () {
+      it("showing search target child element changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const {
           category,
@@ -3561,7 +3561,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing search target parent element changes visibility for related nodes in search paths", async function () {
+      it("showing search target parent element changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const {
           category,
@@ -3627,7 +3627,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing search target child element of search target parent element changes visibility for related nodes in search paths", async function () {
+      it("showing search target child element of search target parent element changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const {
           category,
@@ -3697,8 +3697,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
     describe("category with elements which are search targets and have search target ancestor", () => {
       let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
       let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
-      async function createIModel(context: Mocha.Context) {
-        return buildIModel(context, async (builder) => {
+      async function createIModel() {
+        return buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
           const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -3726,8 +3726,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       }
 
-      before(async function () {
-        createIModelResult = await createIModel(this);
+      beforeAll(async () => {
+        createIModelResult = await createIModel();
       });
 
       beforeEach(async function () {
@@ -3753,11 +3753,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
         visibilityTestData[Symbol.dispose]();
       });
 
-      after(async () => {
+      afterAll(async () => {
         await createIModelResult.imodel.close();
       });
 
-      it("showing category changes visibility for related nodes in search paths", async function () {
+      it("showing category changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const { category, element, parentElement, childElement, childOfChild1, childOfChild2, defaultSubCategory } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
@@ -3803,7 +3803,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing search target parent element changes visibility for related nodes in search paths", async function () {
+      it("showing search target parent element changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const { category, element, parentElement, childElement, childOfChild1, childOfChild2, defaultSubCategory, physicalModel } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
@@ -3849,7 +3849,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing child element of search target parent element changes visibility for related nodes in search paths", async function () {
+      it("showing child element of search target parent element changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const { category, element, parentElement, childElement, childOfChild1, childOfChild2, defaultSubCategory, physicalModel } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
@@ -3900,7 +3900,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing nested child search target element with search target ancestor element changes visibility for related nodes in search paths", async function () {
+      it("showing nested child search target element with search target ancestor element changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const { category, element, parentElement, childElement, childOfChild1, childOfChild2, defaultSubCategory, physicalModel } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
@@ -3958,8 +3958,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
     describe.skip("category with modeled elements hierarchy", () => {
       let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
       let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
-      async function createIModel(context: Mocha.Context) {
-        return buildIModel(context, async (builder, testSchema) => {
+      async function createIModel() {
+        return buildIModel(async (builder, testSchema) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
           const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -4001,8 +4001,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       }
 
-      before(async function () {
-        createIModelResult = await createIModel(this);
+      beforeAll(async () => {
+        createIModelResult = await createIModel();
       });
 
       beforeEach(async function () {
@@ -4023,11 +4023,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
         visibilityTestData[Symbol.dispose]();
       });
 
-      after(async () => {
+      afterAll(async () => {
         await createIModelResult.imodel.close();
       });
 
-      it("showing category changes visibility for related nodes in search paths", async function () {
+      it("showing category changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const {
           category,
@@ -4092,7 +4092,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing modeled element changes visibility for related nodes in search paths", async function () {
+      it("showing modeled element changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const {
           category,
@@ -4161,7 +4161,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing category of subModel changes visibility for related nodes in search paths", async function () {
+      it("showing category of subModel changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const {
           category,
@@ -4231,7 +4231,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing search target subModel element changes visibility for related nodes in search paths", async function () {
+      it("showing search target subModel element changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const {
           category,
@@ -4303,8 +4303,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
     describe("category under definition container hierarchy", () => {
       let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
       let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
-      async function createIModel(context: Mocha.Context) {
-        return buildIModel(context, async (builder) => {
+      async function createIModel() {
+        return buildIModel(async (builder) => {
           const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
           const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
 
@@ -4332,8 +4332,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       }
 
-      before(async function () {
-        createIModelResult = await createIModel(this);
+      beforeAll(async () => {
+        createIModelResult = await createIModel();
       });
 
       beforeEach(async function () {
@@ -4353,11 +4353,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
         visibilityTestData[Symbol.dispose]();
       });
 
-      after(async () => {
+      afterAll(async () => {
         await createIModelResult.imodel.close();
       });
 
-      it("showing definition container changes visibility for related nodes in search paths", async function () {
+      it("showing definition container changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const { definitionContainer, category, siblingCategory, defaultSubCategory, defaultSiblingSubCategory, subCategory } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
@@ -4400,7 +4400,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing category changes visibility for related nodes in search paths", async function () {
+      it("showing category changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const { definitionContainer, category, siblingCategory, defaultSubCategory, defaultSiblingSubCategory, subCategory } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
@@ -4444,7 +4444,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing search target sub-category changes visibility for related nodes in search paths", async function () {
+      it("showing search target sub-category changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const { definitionContainer, category, siblingCategory, defaultSubCategory, defaultSiblingSubCategory, subCategory } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(

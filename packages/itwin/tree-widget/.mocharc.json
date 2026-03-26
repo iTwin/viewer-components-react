@@ -1,8 +1,0 @@
-{
-  "require": ["raf/polyfill", "ignore-styles", "./lib/test/setup.js"],
-  "check-leaks": true,
-  "timeout": "60000",
-  "globals": ["IS_REACT_ACT_ENVIRONMENT"],
-  "spec": ["./lib/test/**/*.test.js"],
-  "exclude": ["./lib/test/coverage/**/*"]
-}

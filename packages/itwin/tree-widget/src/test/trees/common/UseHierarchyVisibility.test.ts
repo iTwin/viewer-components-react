@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
-import sinon from "sinon";
+import { vi } from "vitest";
 import { BeEvent } from "@itwin/core-bentley";
 import { useHierarchyVisibility } from "../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 import { TreeWidget } from "../../../tree-widget-react/TreeWidget.js";
@@ -19,29 +18,26 @@ describe("useHierarchyVisibility", () => {
   const onVisibilityChange = new BeEvent<() => void>();
 
   const visibilityHandler = {
-    getVisibilityStatus: sinon.stub<
-      Parameters<HierarchyVisibilityHandler["getVisibilityStatus"]>,
-      ReturnType<HierarchyVisibilityHandler["getVisibilityStatus"]>
-    >(),
-    changeVisibility: sinon.stub<Parameters<HierarchyVisibilityHandler["changeVisibility"]>, ReturnType<HierarchyVisibilityHandler["changeVisibility"]>>(),
-    [Symbol.dispose]: sinon.stub<[], void>(),
+    getVisibilityStatus: vi.fn<HierarchyVisibilityHandler["getVisibilityStatus"]>(),
+    changeVisibility: vi.fn<HierarchyVisibilityHandler["changeVisibility"]>(),
+    [Symbol.dispose]: vi.fn(),
     onVisibilityChange,
   } satisfies HierarchyVisibilityHandler;
 
   const initialProps: UseHierarchyVisibilityProps = {
     visibilityHandlerFactory: () => visibilityHandler,
   };
-  before(async () => {
+  beforeAll(async () => {
     await TreeWidget.initialize();
   });
 
   beforeEach(() => {
-    visibilityHandler.getVisibilityStatus.reset();
-    visibilityHandler.changeVisibility.reset();
-    visibilityHandler[Symbol.dispose].reset();
+    visibilityHandler.getVisibilityStatus.mockReset();
+    visibilityHandler.changeVisibility.mockReset();
+    visibilityHandler[Symbol.dispose].mockReset();
   });
 
-  after(() => {
+  afterAll(() => {
     TreeWidget.terminate();
   });
 
@@ -49,104 +45,102 @@ describe("useHierarchyVisibility", () => {
     const node = createTreeNode({ id: "node-1" });
     const { result } = renderHook(useHierarchyVisibility, { initialProps });
 
-    expect(visibilityHandler.getVisibilityStatus).to.not.be.called;
-    visibilityHandler.getVisibilityStatus.resolves({ state: "visible" });
+    expect(visibilityHandler.getVisibilityStatus).not.toHaveBeenCalled();
+    visibilityHandler.getVisibilityStatus.mockResolvedValue({ state: "visible" });
 
     act(() => {
       // expect initial state to be "loading"
       const state = result.current.getVisibilityButtonState(node);
-      expect(state).to.deep.eq({ isLoading: true });
+      expect(state).toEqual({ isLoading: true });
     });
 
     await waitFor(() => {
       // wait for visibility status to be calculated
-      expect(visibilityHandler.getVisibilityStatus).to.be.called;
+      expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalled();
       const state = result.current.getVisibilityButtonState(node);
-      expect(state).to.deep.eq({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
+      expect(state).toEqual({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
     });
 
-    expect(result.current.getVisibilityButtonState(node)).to.deep.eq({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
-    expect(visibilityHandler.getVisibilityStatus).to.be.calledOnce;
+    expect(result.current.getVisibilityButtonState(node)).toEqual({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
+    expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledOnce();
   });
 
   it("recalculates node visibility status after visibility changed", async () => {
     const node = createTreeNode({ id: "node-1" });
     const { result } = renderHook(useHierarchyVisibility, { initialProps });
 
-    expect(visibilityHandler.getVisibilityStatus).to.not.be.called;
-    visibilityHandler.getVisibilityStatus.resolves({ state: "visible" });
+    expect(visibilityHandler.getVisibilityStatus).not.toHaveBeenCalled();
+    visibilityHandler.getVisibilityStatus.mockResolvedValue({ state: "visible" });
 
     act(() => {
       // expect initial state to be "loading"
       const state = result.current.getVisibilityButtonState(node);
-      expect(state).to.deep.eq({ isLoading: true });
+      expect(state).toEqual({ isLoading: true });
     });
 
     await waitFor(() => {
       // wait for visibility status to calculated
-      expect(visibilityHandler.getVisibilityStatus).to.be.called;
+      expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalled();
       const state = result.current.getVisibilityButtonState(node);
-      expect(state).to.deep.eq({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
+      expect(state).toEqual({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
     });
 
-    expect(visibilityHandler.getVisibilityStatus).to.be.calledOnce;
+    expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledOnce();
     act(() => {
       onVisibilityChange.raiseEvent();
     });
 
-    visibilityHandler.getVisibilityStatus.resetBehavior();
-    visibilityHandler.getVisibilityStatus.resolves({ state: "partial" });
+    visibilityHandler.getVisibilityStatus.mockResolvedValue({ state: "partial" });
 
-    expect(visibilityHandler.getVisibilityStatus).to.be.calledOnce;
+    expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledOnce();
     act(() => {
       // expect visibility state to be same
-      expect(visibilityHandler.getVisibilityStatus).to.be.called;
+      expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalled();
       const state = result.current.getVisibilityButtonState(node);
-      expect(state).to.deep.eq({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
+      expect(state).toEqual({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
     });
 
     await waitFor(() => {
       // wait for visibility status to calculated
-      expect(visibilityHandler.getVisibilityStatus).to.be.calledTwice;
+      expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledTimes(2);
       const state = result.current.getVisibilityButtonState(node);
-      expect(state).to.deep.eq({ state: "partial", tooltip: "visibilityTooltips.status.partial" });
+      expect(state).toEqual({ state: "partial", tooltip: "visibilityTooltips.status.partial" });
     });
 
-    expect(result.current.getVisibilityButtonState(node)).to.deep.eq({ state: "partial", tooltip: "visibilityTooltips.status.partial" });
-    expect(visibilityHandler.getVisibilityStatus).to.be.calledTwice;
+    expect(result.current.getVisibilityButtonState(node)).toEqual({ state: "partial", tooltip: "visibilityTooltips.status.partial" });
+    expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledTimes(2);
   });
 
   it("changes visibility status", async () => {
     const node = createTreeNode({ id: "node-1" });
     const { result } = renderHook(useHierarchyVisibility, { initialProps });
 
-    expect(visibilityHandler.getVisibilityStatus).to.not.be.called;
-    visibilityHandler.getVisibilityStatus.resolves({ state: "visible" });
+    expect(visibilityHandler.getVisibilityStatus).not.toHaveBeenCalled();
+    visibilityHandler.getVisibilityStatus.mockResolvedValue({ state: "visible" });
 
     act(() => {
       // expect initial state to be "loading"
       const state = result.current.getVisibilityButtonState(node);
-      expect(state).to.deep.eq({ isLoading: true });
+      expect(state).toEqual({ isLoading: true });
     });
 
     await waitFor(() => {
       // wait for visibility status to calculated
-      expect(visibilityHandler.getVisibilityStatus).to.be.called;
+      expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalled();
       const state = result.current.getVisibilityButtonState(node);
-      expect(state).to.deep.eq({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
+      expect(state).toEqual({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
     });
 
-    expect(visibilityHandler.getVisibilityStatus).to.be.calledOnce;
+    expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledOnce();
     act(() => {
       result.current.onVisibilityButtonClick(node, "visible");
     });
 
-    expect(visibilityHandler.changeVisibility).to.be.called;
+    expect(visibilityHandler.changeVisibility).toHaveBeenCalled();
 
-    visibilityHandler.getVisibilityStatus.resetBehavior();
-    visibilityHandler.getVisibilityStatus.resolves({ state: "hidden" });
+    visibilityHandler.getVisibilityStatus.mockResolvedValue({ state: "hidden" });
 
-    expect(visibilityHandler.getVisibilityStatus).to.be.calledOnce;
+    expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledOnce();
     act(() => {
       // simulate visibility change by handler
       onVisibilityChange.raiseEvent();
@@ -154,18 +148,18 @@ describe("useHierarchyVisibility", () => {
 
     act(() => {
       // expect visibility state to be optimistically updated to 'visible'
-      expect(visibilityHandler.getVisibilityStatus).to.be.calledOnce;
+      expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledOnce();
       const state = result.current.getVisibilityButtonState(node);
-      expect(state).to.deep.eq({ state: "visible", tooltip: "visibilityTooltips.status.determining" });
+      expect(state).toEqual({ state: "visible", tooltip: "visibilityTooltips.status.determining" });
     });
 
     await waitFor(() => {
       // wait for visibility status to recalculated
-      expect(visibilityHandler.getVisibilityStatus).to.be.calledTwice;
+      expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledTimes(2);
       const state = result.current.getVisibilityButtonState(node);
-      expect(state).to.deep.eq({ state: "hidden", tooltip: "visibilityTooltips.status.hidden" });
+      expect(state).toEqual({ state: "hidden", tooltip: "visibilityTooltips.status.hidden" });
     });
 
-    expect(visibilityHandler.getVisibilityStatus).to.be.calledTwice;
+    expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledTimes(2);
   });
 });

@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
 import { HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import { joinHierarchySearchPaths } from "../../../tree-widget-react/components/trees/common/Utils.js";
 
@@ -34,7 +33,7 @@ describe("Utils", () => {
         { path: [] },
       ];
       const joinedPaths = joinHierarchySearchPaths(subTreePaths, searchPaths);
-      expect(joinedPaths).to.deep.eq([]);
+      expect(joinedPaths).toEqual([]);
     });
 
     it("returns subTree paths when search paths are shorter than subTree paths", () => {
@@ -69,7 +68,7 @@ describe("Utils", () => {
           options: searchPath4.options,
         },
       ];
-      expect(joinedPaths).to.deep.eq(expectedPaths);
+      expect(joinedPaths).toEqual(expectedPaths);
     });
 
     it("returns subTree paths and search paths when search paths are longer than subTree paths", () => {
@@ -112,7 +111,7 @@ describe("Utils", () => {
         searchPaths[1],
         searchPaths[2],
       ].sort(sortFn);
-      expect(joinedPaths).to.deep.eq(expectedPaths);
+      expect(joinedPaths).toEqual(expectedPaths);
     });
   });
 });

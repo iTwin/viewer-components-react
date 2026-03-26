@@ -10,7 +10,8 @@
     "noImplicitOverride": false,
     "resolveJsonModule": true,
     "lib": ["DOM"],
-    "noEmit": true
+    "noEmit": true,
+    "types": ["vitest/globals"]
   },
   "include": ["src/**/*", "types.d.ts"]
 }

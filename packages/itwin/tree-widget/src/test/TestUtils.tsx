@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import sinon from "sinon";
+import { vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
@@ -40,7 +40,7 @@ export async function flushAsyncOperations() {
 export function stubCancelAnimationFrame() {
   const originalCaf = global.cancelAnimationFrame;
 
-  before(() => {
+  beforeAll(() => {
     Object.defineProperty(global, "cancelAnimationFrame", {
       writable: true,
       value: (handle: number) => {
@@ -49,7 +49,7 @@ export function stubCancelAnimationFrame() {
     });
   });
 
-  after(() => {
+  afterAll(() => {
     Object.defineProperty(global, "cancelAnimationFrame", {
       writable: true,
       value: originalCaf,
@@ -70,14 +70,14 @@ export function createResolvablePromise<T>() {
 export function stubDOMMatrix() {
   const domMatrix = global.DOMMatrix;
 
-  before(() => {
+  beforeAll(() => {
     Object.defineProperty(global, "DOMMatrix", {
       writable: true,
-      value: sinon.fake(() => ({ m41: 0, m42: 0 })),
+      value: vi.fn(() => ({ m41: 0, m42: 0 })),
     });
   });
 
-  after(() => {
+  afterAll(() => {
     Object.defineProperty(global, "DOMGlobal", {
       writable: true,
       value: domMatrix,

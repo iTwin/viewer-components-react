@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
-import sinon from "sinon";
+import { vi } from "vitest";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
@@ -16,7 +15,7 @@ import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 
 describe("TreeWidgetViewport", () => {
   const listeners = new Array<() => void>();
-  before(async () => {
+  beforeAll(async () => {
     await initializePresentationTesting({
       backendProps: {
         caching: {
@@ -29,13 +28,13 @@ describe("TreeWidgetViewport", () => {
     });
   });
 
-  after(async () => {
+  afterAll(async () => {
     await terminatePresentationTesting();
     listeners.forEach((listener) => listener());
   });
 
-  it("triggers onChange events when visibility changes", async function () {
-    await using buildIModelResult = await buildIModel(this, async (builder) => {
+  it("triggers onChange events when visibility changes", async () => {
+    await using buildIModelResult = await buildIModel(async (builder) => {
       const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
       const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory1" });
@@ -58,7 +57,7 @@ describe("TreeWidgetViewport", () => {
       },
     });
     const treeWidgetViewport = createTreeWidgetViewport(viewport);
-    const onChangeListener = sinon.stub();
+    const onChangeListener = vi.fn();
     listeners.push(treeWidgetViewport.onAlwaysDrawnChanged.addListener(() => onChangeListener("always")));
     listeners.push(treeWidgetViewport.onDisplayStyleChanged.addListener(() => onChangeListener("displayStyle")));
     listeners.push(treeWidgetViewport.onDisplayedCategoriesChanged.addListener(() => onChangeListener("categories")));
@@ -68,33 +67,33 @@ describe("TreeWidgetViewport", () => {
 
     treeWidgetViewport.changeCategoryDisplay({ categoryIds: keys.category.id, display: false });
     viewport.renderFrame();
-    expect(onChangeListener).to.be.calledWith("categories");
-    sinon.resetHistory();
+    expect(onChangeListener).toHaveBeenCalledWith("categories");
+    vi.clearAllMocks();
 
     treeWidgetViewport.changeModelDisplay({ modelIds: keys.model.id, display: false });
     viewport.renderFrame();
-    expect(onChangeListener).to.be.calledWith("models");
-    sinon.resetHistory();
+    expect(onChangeListener).toHaveBeenCalledWith("models");
+    vi.clearAllMocks();
 
     treeWidgetViewport.changeSubCategoryDisplay({ subCategoryId: keys.subCategory.id, display: false });
     viewport.renderFrame();
-    expect(onChangeListener).to.be.calledWith("displayStyle");
-    sinon.resetHistory();
+    expect(onChangeListener).toHaveBeenCalledWith("displayStyle");
+    vi.clearAllMocks();
 
     treeWidgetViewport.setAlwaysDrawn({ elementIds: new Set([keys.element.id]) });
     viewport.renderFrame();
-    expect(onChangeListener).to.be.calledWith("always");
-    sinon.resetHistory();
+    expect(onChangeListener).toHaveBeenCalledWith("always");
+    vi.clearAllMocks();
 
     treeWidgetViewport.setNeverDrawn({ elementIds: new Set([keys.element.id]) });
     viewport.renderFrame();
-    expect(onChangeListener).to.be.calledWith("never");
-    sinon.resetHistory();
+    expect(onChangeListener).toHaveBeenCalledWith("never");
+    vi.clearAllMocks();
 
     treeWidgetViewport.setPerModelCategoryOverride({ categoryIds: keys.category.id, modelIds: keys.model.id, override: "show" });
     viewport.renderFrame();
-    expect(onChangeListener).to.be.calledWith("override");
-    sinon.resetHistory();
+    expect(onChangeListener).toHaveBeenCalledWith("override");
+    vi.clearAllMocks();
   });
 });
 

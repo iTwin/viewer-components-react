@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
 import { Id64 } from "@itwin/core-bentley";
 import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -42,10 +41,10 @@ import type { ExpectedHierarchyDef } from "../HierarchyValidation.js";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
-interface TreeSearchTestCaseDefinition<TIModelSetupResult extends {}> {
+interface TreeSearchTestCaseDefinition<TIModelSetupResult extends object> {
   name: string;
   only?: boolean;
-  setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1];
+  setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[0];
   getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchySearchPath[];
   getTargetItems: (setupResult: TIModelSetupResult) => Array<InstanceKey | ElementsGroupInfo>;
   getTargetInstanceLabel?: (setupResult: TIModelSetupResult) => string;
@@ -58,7 +57,7 @@ namespace TreeSearchTestCaseDefinition {
   export function create<TIModelSetupResult extends object>(props: {
     only?: boolean;
     name: string;
-    setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1];
+    setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[0];
     getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchySearchPath[];
     getTargetItems: (setupResult: TIModelSetupResult) => Array<InstanceKey | ElementsGroupInfo>;
     getTargetInstanceLabel?: (setupResult: TIModelSetupResult) => string;
@@ -81,7 +80,7 @@ namespace TreeSearchTestCaseDefinition {
 
 describe("Models tree", () => {
   describe("Hierarchy search", () => {
-    before(async function () {
+    beforeAll(async () => {
       await initializePresentationTesting({
         backendProps: {
           caching: {
@@ -97,12 +96,12 @@ describe("Models tree", () => {
       ECSchemaRpcImpl.register();
     });
 
-    after(async function () {
+    afterAll(async () => {
       await terminatePresentationTesting();
     });
 
-    it("sets auto-expand on correct nodes with merged sub-tree and search paths", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("sets auto-expand on correct nodes with merged sub-tree and search paths", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
         const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -1695,9 +1694,9 @@ describe("Models tree", () => {
         let hierarchyProvider: ReturnType<typeof createModelsTreeProvider>;
         let hierarchyConfig: ModelsTreeHierarchyConfiguration;
 
-        before(async function () {
+        beforeAll(async () => {
           imodel = (
-            await buildIModel(this, async (...args) => {
+            await buildIModel(async (...args) => {
               const imodelSetupResult = await testCase.setupIModel(...args);
               instanceKeyPaths = testCase.getTargetInstancePaths(imodelSetupResult).sort(instanceKeyPathSorter);
               targetItems = testCase.getTargetItems(imodelSetupResult);
@@ -1725,18 +1724,18 @@ describe("Models tree", () => {
           hierarchyProvider.dispose();
         });
 
-        after(async function () {
+        afterAll(async () => {
           await imodel.close();
         });
 
-        it("searches hierarchy by instance key paths", async function () {
+        it("searches hierarchy by instance key paths", async () => {
           await validateHierarchy({
             provider: hierarchyProvider,
             expect: expectedHierarchy,
           });
         });
 
-        it("finds instance key paths by target instance key", async function () {
+        it("finds instance key paths by target instance key", async () => {
           const actualInstanceKeyPaths = (
             await ModelsTreeDefinition.createInstanceKeyPaths({
               imodelAccess: createIModelAccess(imodel),
@@ -1745,12 +1744,12 @@ describe("Models tree", () => {
               hierarchyConfig,
             })
           ).sort(instanceKeyPathSorter);
-          expect(actualInstanceKeyPaths).to.deep.eq(instanceKeyPaths.map(HierarchySearchPath.normalize));
+          expect(actualInstanceKeyPaths).toEqual(instanceKeyPaths.map(HierarchySearchPath.normalize));
         });
 
-        it("finds instance key paths by target instance label", async function () {
+        it("finds instance key paths by target instance label", async () => {
           if (targetInstanceLabel === undefined) {
-            this.skip();
+            return;
           }
 
           const actualInstanceKeyPaths = (
@@ -1761,13 +1760,13 @@ describe("Models tree", () => {
               hierarchyConfig,
             })
           ).sort(instanceKeyPathSorter);
-          expect(actualInstanceKeyPaths).to.deep.eq(instanceKeyPaths.map(HierarchySearchPath.normalize));
+          expect(actualInstanceKeyPaths).toEqual(instanceKeyPaths.map(HierarchySearchPath.normalize));
         });
       });
     });
 
-    it("finds elements by base36 ECInstanceId suffix", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("finds elements by base36 ECInstanceId suffix", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
         const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -1798,11 +1797,11 @@ describe("Models tree", () => {
           hierarchyConfig,
         })
       ).sort(instanceKeyPathSorter);
-      expect(actualInstanceKeyPaths).to.deep.eq(expectedPaths.map(HierarchySearchPath.normalize));
+      expect(actualInstanceKeyPaths).toEqual(expectedPaths.map(HierarchySearchPath.normalize));
     });
 
-    it("search by label aborts when abort signal fires", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("search by label aborts when abort signal fires", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
         const category = insertSpatialCategory({ builder, codeValue: "category", userLabel: "Test" });
@@ -1829,7 +1828,7 @@ describe("Models tree", () => {
         abortSignal: abortController1.signal,
       });
       abortController1.abort();
-      expect(await pathsPromiseAborted).to.deep.eq([]);
+      expect(await pathsPromiseAborted).toEqual([]);
 
       const abortController2 = new AbortController();
       const pathsPromise = ModelsTreeDefinition.createInstanceKeyPaths({
@@ -1839,7 +1838,7 @@ describe("Models tree", () => {
         hierarchyConfig,
         abortSignal: abortController2.signal,
       });
-      expect(await pathsPromise).to.deep.eq([
+      expect(await pathsPromise).toEqual([
         {
           path: [
             { className: "BisCore.GeometricModel3d", id: ids.model.id },
@@ -1849,8 +1848,8 @@ describe("Models tree", () => {
       ]);
     });
 
-    it("search by target items aborts when abort signal fires", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("search by target items aborts when abort signal fires", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
         const category = insertSpatialCategory({ builder, codeValue: "category", userLabel: "Test" });
@@ -1876,7 +1875,7 @@ describe("Models tree", () => {
         abortSignal: abortController1.signal,
       });
       abortController1.abort();
-      expect(await pathsPromiseAborted).to.deep.eq([]);
+      expect(await pathsPromiseAborted).toEqual([]);
 
       const abortController2 = new AbortController();
       const pathsPromise = ModelsTreeDefinition.createInstanceKeyPaths({
@@ -1886,7 +1885,7 @@ describe("Models tree", () => {
         hierarchyConfig,
         abortSignal: abortController2.signal,
       });
-      expect(await pathsPromise).to.deep.eq([
+      expect(await pathsPromise).toEqual([
         {
           path: [
             { className: "BisCore.GeometricModel3d", id: ids.model.id },
@@ -1896,8 +1895,8 @@ describe("Models tree", () => {
       ]);
     });
 
-    it("finds elements by label containing special SQLite characters", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("finds elements by label containing special SQLite characters", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
         const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -1935,7 +1934,7 @@ describe("Models tree", () => {
             hierarchyConfig,
           })
         ).sort(instanceKeyPathSorter),
-      ).to.deep.eq([{ path: [adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element1)] }]);
+      ).toEqual([{ path: [adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element1)] }]);
 
       expect(
         (
@@ -1946,7 +1945,7 @@ describe("Models tree", () => {
             hierarchyConfig,
           })
         ).sort(instanceKeyPathSorter),
-      ).to.deep.eq([{ path: [adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element2)] }]);
+      ).toEqual([{ path: [adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element2)] }]);
 
       expect(
         (
@@ -1957,7 +1956,7 @@ describe("Models tree", () => {
             hierarchyConfig,
           })
         ).sort(instanceKeyPathSorter),
-      ).to.deep.eq([{ path: [adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element3)] }]);
+      ).toEqual([{ path: [adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element3)] }]);
     });
   }
 });
