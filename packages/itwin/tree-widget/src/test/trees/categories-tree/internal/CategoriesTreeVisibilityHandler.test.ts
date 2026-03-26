@@ -147,8 +147,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
       provider,
       ...commonProps,
       [Symbol.dispose]() {
-        commonProps.baseIdsCache[Symbol.dispose]();
-        commonProps.idsCache[Symbol.dispose]();
         handler[Symbol.dispose]();
         provider[Symbol.dispose]();
       },
@@ -3080,8 +3078,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
         imodelAccess,
         viewport,
         [Symbol.dispose]() {
-          baseIdsCache[Symbol.dispose]();
-          idsCache[Symbol.dispose]();
           defaultVisibilityHandler[Symbol.dispose]();
           visibilityHandlerWithSearchPaths[Symbol.dispose]();
           defaultProvider[Symbol.dispose]();

@@ -73,8 +73,6 @@ describe("categories tree", () => {
     iModel: SnapshotDb;
     imodelAccess: IModelAccess;
     viewport: TreeWidgetTestingViewport;
-    idsCache: CategoriesTreeIdsCache;
-    baseIdsCache: BaseIdsCache;
     handler: HierarchyVisibilityHandler & Disposable;
     provider: HierarchyProvider & Disposable;
     definitionContainer: Id64String;
@@ -122,8 +120,6 @@ describe("categories tree", () => {
         imodelAccess,
         viewport,
         provider,
-        idsCache,
-        baseIdsCache,
         handler,
         definitionContainer: visibilityTargets.definitionContainers[0],
         iModelConnection,
@@ -135,8 +131,6 @@ describe("categories tree", () => {
       props.viewport[Symbol.dispose]();
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
-      props.idsCache[Symbol.dispose]();
-      props.baseIdsCache[Symbol.dispose]();
       if (!props.iModelConnection.isClosed) {
         await props.iModelConnection.close();
       }
@@ -155,14 +149,12 @@ describe("categories tree", () => {
   run<{
     iModel: SnapshotDb;
     imodelAccess: IModelAccess;
-    idsCache: CategoriesTreeIdsCache;
     viewport: TreeWidgetTestingViewport;
     handler: HierarchyVisibilityHandler & Disposable;
     provider: HierarchyProvider & Disposable;
     rootDefinitionContainer: Id64String;
     iModelConnection: IModelConnection;
     hierarchyNodes: HierarchyNode[];
-    baseIdsCache: BaseIdsCache;
   }>({
     testName: "changing definition container visibility changes visibility for 50k categories",
     setup: async () => {
@@ -207,15 +199,13 @@ describe("categories tree", () => {
       );
       expect(rootDefinitionContainer).to.not.be.undefined;
       assert(rootDefinitionContainer !== undefined);
-      return { iModel, imodelAccess, viewport, idsCache, baseIdsCache, provider, handler, rootDefinitionContainer, iModelConnection, hierarchyNodes };
+      return { iModel, imodelAccess, viewport, provider, handler, rootDefinitionContainer, iModelConnection, hierarchyNodes };
     },
     cleanup: async (props) => {
       props.iModel.close();
       props.viewport[Symbol.dispose]();
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
-      props.idsCache[Symbol.dispose]();
-      props.baseIdsCache[Symbol.dispose]();
       if (!props.iModelConnection.isClosed) {
         await props.iModelConnection.close();
       }

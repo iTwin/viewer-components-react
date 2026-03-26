@@ -189,7 +189,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       it("can call original implementation", async () => {
         let useOriginalImplFlag = false;
         using viewport = createFakeSinonViewport();
-        using idsCache = createIdsCache(viewport.iModel);
+        const idsCache = createIdsCache(viewport.iModel);
         using handler = createModelsTreeVisibilityHandler({
           viewport,
           idsCache,
@@ -216,7 +216,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             getSubjectsVisibilityStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
           using viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          const idsCache = createIdsCache(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -659,7 +659,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             getCategoriesVisibilityStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
           using viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          const idsCache = createIdsCache(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -923,7 +923,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             getElementsVisibilityStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
           using viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          const idsCache = createIdsCache(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1052,7 +1052,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             getElementGroupingNodeVisibilityStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
           using viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          const idsCache = createIdsCache(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1228,7 +1228,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeSubjectsVisibilityStatus: sinon.fake.resolves(undefined),
           };
           using viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          const idsCache = createIdsCache(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1412,7 +1412,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeCategoriesVisibilityStatus: sinon.fake.resolves(undefined),
           };
           using viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          const idsCache = createIdsCache(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1495,7 +1495,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeElementsVisibilityStatus: sinon.fake.resolves(undefined),
           };
           using viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          const idsCache = createIdsCache(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1651,7 +1651,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeElementGroupingNodeVisibilityStatus: sinon.fake.resolves(undefined),
           };
           using viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          const idsCache = createIdsCache(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1771,10 +1771,8 @@ describe("ModelsTreeVisibilityHandler", () => {
         idsCache: commonProps.idsCache,
         hierarchyConfig: commonProps.hierarchyConfig,
         [Symbol.dispose]() {
-          commonProps.idsCache[Symbol.dispose]();
           handler[Symbol.dispose]();
           provider[Symbol.dispose]();
-          commonProps.baseIdsCache[Symbol.dispose]();
         },
       };
     }
@@ -3698,8 +3696,6 @@ describe("ModelsTreeVisibilityHandler", () => {
           ...commonProps,
           visibilityHandlerWithSearchPaths,
           [Symbol.dispose]() {
-            commonProps.idsCache[Symbol.dispose]();
-            commonProps.baseIdsCache[Symbol.dispose]();
             defaultVisibilityHandler[Symbol.dispose]();
             visibilityHandlerWithSearchPaths[Symbol.dispose]();
             defaultProvider[Symbol.dispose]();
