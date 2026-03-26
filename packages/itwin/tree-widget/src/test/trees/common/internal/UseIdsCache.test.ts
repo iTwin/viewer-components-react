@@ -12,10 +12,10 @@ import type { BriefcaseConnection } from "@itwin/core-frontend";
 
 describe("useIdsCache", () => {
   const cache = {};
-  let createCacheSpy: ReturnType<typeof vi.fn>;
+  let createCacheSpy: ReturnType<typeof vi.fn<() => typeof cache>>;
   let imodel: BriefcaseConnection;
   beforeEach(() => {
-    createCacheSpy = vi.fn(() => cache);
+    createCacheSpy = vi.fn<() => typeof cache>(() => cache);
     imodel = {
       key: "imodelKey",
       isBriefcaseConnection: () => true,
