@@ -655,9 +655,7 @@ function createCategoryTreeProvider(
     setFormatter: (formatter) => hierarchyProvider.setFormatter(formatter),
     setHierarchySearch: (props) => hierarchyProvider.setHierarchySearch(props),
     [Symbol.dispose]() {
-      baseIdsCache[Symbol.dispose]();
       hierarchyProvider[Symbol.dispose]();
-      idsCache[Symbol.dispose]();
     },
   };
 }

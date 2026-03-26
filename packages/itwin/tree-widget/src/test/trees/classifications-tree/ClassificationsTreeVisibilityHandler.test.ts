@@ -94,8 +94,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       imodelAccess,
       viewport,
       [Symbol.dispose]() {
-        baseIdsCache[Symbol.dispose]();
-        idsCache[Symbol.dispose]();
         handler[Symbol.dispose]();
         provider[Symbol.dispose]();
       },
@@ -879,8 +877,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         imodelAccess,
         viewport,
         [Symbol.dispose]() {
-          baseIdsCache[Symbol.dispose]();
-          idsCache[Symbol.dispose]();
           defaultVisibilityHandler[Symbol.dispose]();
           visibilityHandlerWithSearchPaths[Symbol.dispose]();
           defaultProvider[Symbol.dispose]();

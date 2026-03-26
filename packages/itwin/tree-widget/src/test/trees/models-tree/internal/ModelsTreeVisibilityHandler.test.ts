@@ -79,11 +79,6 @@ describe("ModelsTreeVisibilityHandler", () => {
       hierarchyConfig: { ...defaultHierarchyConfiguration, ...hierarchyConfig },
       baseIdsCache,
     });
-    const symbolDispose = idsCache[Symbol.dispose];
-    idsCache[Symbol.dispose] = () => {
-      symbolDispose();
-      baseIdsCache[Symbol.dispose]();
-    };
     return idsCache;
   }
 
@@ -184,7 +179,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       it("can call original implementation", async () => {
         let useOriginalImplFlag = false;
         using viewport = createFakeViewport();
-        using idsCache = createIdsCache(viewport.iModel);
+        const idsCache = createIdsCache(viewport.iModel);
         using handler = createModelsTreeVisibilityHandler({
           viewport,
           idsCache,
@@ -211,7 +206,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             getSubjectsVisibilityStatus: vi.fn().mockResolvedValue(createVisibilityStatus("visible")),
           };
           using viewport = createFakeViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          const idsCache = createIdsCache(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -654,7 +649,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             getCategoriesVisibilityStatus: vi.fn().mockResolvedValue(createVisibilityStatus("visible")),
           };
           using viewport = createFakeViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          const idsCache = createIdsCache(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -918,7 +913,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             getElementsVisibilityStatus: vi.fn().mockResolvedValue(createVisibilityStatus("visible")),
           };
           using viewport = createFakeViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          const idsCache = createIdsCache(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1047,7 +1042,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             getElementGroupingNodeVisibilityStatus: vi.fn().mockResolvedValue(createVisibilityStatus("visible")),
           };
           using viewport = createFakeViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          const idsCache = createIdsCache(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1223,7 +1218,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeSubjectsVisibilityStatus: vi.fn().mockResolvedValue(undefined),
           };
           using viewport = createFakeViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          const idsCache = createIdsCache(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1407,7 +1402,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeCategoriesVisibilityStatus: vi.fn().mockResolvedValue(undefined),
           };
           using viewport = createFakeViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          const idsCache = createIdsCache(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1490,7 +1485,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeElementsVisibilityStatus: vi.fn().mockResolvedValue(undefined),
           };
           using viewport = createFakeViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          const idsCache = createIdsCache(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1646,7 +1641,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeElementGroupingNodeVisibilityStatus: vi.fn().mockResolvedValue(undefined),
           };
           using viewport = createFakeViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          const idsCache = createIdsCache(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1768,10 +1763,8 @@ describe("ModelsTreeVisibilityHandler", () => {
         idsCache: commonProps.idsCache,
         hierarchyConfig: commonProps.hierarchyConfig,
         [Symbol.dispose]() {
-          commonProps.idsCache[Symbol.dispose]();
           handler[Symbol.dispose]();
           provider[Symbol.dispose]();
-          commonProps.baseIdsCache[Symbol.dispose]();
         },
       };
     }
@@ -3695,8 +3688,6 @@ describe("ModelsTreeVisibilityHandler", () => {
           ...commonProps,
           visibilityHandlerWithSearchPaths,
           [Symbol.dispose]() {
-            commonProps.idsCache[Symbol.dispose]();
-            commonProps.baseIdsCache[Symbol.dispose]();
             defaultVisibilityHandler[Symbol.dispose]();
             visibilityHandlerWithSearchPaths[Symbol.dispose]();
             defaultProvider[Symbol.dispose]();
