@@ -12,3 +12,25 @@
     display: none;
   }
 }
+
+.tw-tree-node-checkbox-container {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background-color: var(--iui-color-background);
+  align-self: stretch;
+  margin-block: 1px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+[aria-selected="true"] .tw-tree-node-checkbox-container {
+  background-color: var(--iui-color-background-accent-muted);
+}
+
+@media (any-hover: hover) {
+  [aria-selected="false"]:hover .tw-tree-node-checkbox-container {
+    background-color: var(--iui-color-background-hover);
+  }
+}
