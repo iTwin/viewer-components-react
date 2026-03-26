@@ -18,7 +18,7 @@ import type { Observable } from "rxjs";
  */
 export async function* eachValueFrom<T>(source: Observable<T>): AsyncIterableIterator<T> {
   const deferreds = new Queue<{ resolve: (value: IteratorResult<T>) => void; reject: (reason: unknown) => void }>();
-  const values = new Queue<T>();
+  const values = new Queue<IteratorResult<T>>();
   let error;
   let completed = false;
   const subs = source.subscribe({
@@ -27,7 +27,7 @@ export async function* eachValueFrom<T>(source: Observable<T>): AsyncIterableIte
       if (deferred) {
         deferred.resolve({ value, done: false });
       } else {
-        values.push(value);
+        values.push({ value, done: false });
       }
     },
     error: (err) => {
@@ -45,9 +45,9 @@ export async function* eachValueFrom<T>(source: Observable<T>): AsyncIterableIte
   });
   try {
     while (true) {
-      const value = values.pop();
-      if (value !== undefined) {
-        yield value;
+      const queued = values.pop();
+      if (queued !== undefined) {
+        yield queued.value;
         continue;
       }
 
@@ -67,10 +67,6 @@ export async function* eachValueFrom<T>(source: Observable<T>): AsyncIterableIte
       }
       yield result.value;
     }
-  } catch (err) {
-    throw err;
-    /* https://github.com/bcoe/c8/issues/229#issuecomment-1248533082 */
-    /* c8 ignore next */
   } finally {
     subs.unsubscribe();
   }
