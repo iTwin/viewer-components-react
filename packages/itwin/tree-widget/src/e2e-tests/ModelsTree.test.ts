@@ -130,6 +130,9 @@ test.describe("Models tree", () => {
 
       // wait for node to be found
       await treeWidget.getByText(`E-104B-TOP [4-1F5]`).waitFor();
+
+      // wait for parent category to have visible checkbox to ensure it's fully loaded
+      await treeWidget.getByRole("treeitem", { name: "E-HEX"}).getByRole("checkbox", { name: "Visible" }).waitFor();
       await takeScreenshot(page, treeWidget);
     });
 
@@ -243,7 +246,7 @@ test.describe("Models tree", () => {
       const checkbox = node.getByRole("checkbox", { name: "Visible" });
       await expect(checkbox).toBeFocused();
 
-      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
+      await takeScreenshot(page, node, { resetScroll: true, boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
       // shrink panel
       await expandStagePanel(page, "right", -100);
@@ -254,7 +257,7 @@ test.describe("Models tree", () => {
 
       // scroll to the right side
       await scrollTree(page, 10000, 0);
-      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
+      await takeScreenshot(page, node, { resetScroll: true, boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
       // expand panel
       await expandStagePanel(page, "right", 100);
@@ -271,7 +274,7 @@ test.describe("Models tree", () => {
       const expander = node.getByLabel("Expand");
       await expect(expander).toBeFocused();
 
-      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
+      await takeScreenshot(page, node, { resetScroll: true, boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
       // navigate back to focus on the already selected node
       await page.keyboard.press("ArrowUp");
@@ -280,7 +283,7 @@ test.describe("Models tree", () => {
       await expect(node).toBeFocused();
       await expect(node).toHaveAttribute("aria-selected", "true");
 
-      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
+      await takeScreenshot(page, node, { resetScroll: true, boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
       // deselect the node
       await node.click({ modifiers: ["Control"] });
@@ -294,7 +297,7 @@ test.describe("Models tree", () => {
       const applyFilterButton = node.getByRole("button", { name: "Apply filter" });
       await expect(applyFilterButton).toBeFocused();
 
-      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
+      await takeScreenshot(page, node, { resetScroll: true, boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
       // open filtering dialog
       await page.keyboard.press("Enter");

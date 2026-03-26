@@ -119,7 +119,7 @@ test.describe("Categories tree", () => {
       // ensure checkbox is focused
       await expect(checkbox).toBeFocused();
 
-      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
+      await takeScreenshot(page, node, { resetScroll: true, boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
       // shrink panel
       await expandStagePanel(page, "right", -100);
@@ -131,7 +131,7 @@ test.describe("Categories tree", () => {
       await node.click({ position: nodeBox ? { x: nodeBox.width * 0.4, y: nodeBox.height * 0.5 } : undefined });
       await page.keyboard.press("Tab");
 
-      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
+      await takeScreenshot(page, node, { resetScroll: true, boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
       // expand panel
       await expandStagePanel(page, "right", 100);
