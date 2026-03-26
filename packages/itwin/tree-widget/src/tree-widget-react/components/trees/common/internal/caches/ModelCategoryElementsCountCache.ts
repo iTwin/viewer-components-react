@@ -44,18 +44,6 @@ export class ModelCategoryElementsCountCache {
     this.#componentName = "ModelCategoryElementsCountCache";
   }
 
-  private setCachedValueIfEmpty({ modelId, categoryId, elementsCount }: { modelId: ModelId; categoryId: CategoryId; elementsCount: number }) {
-    const modelEntry = this.#cachedValues.get(modelId);
-    if (!modelEntry) {
-      this.#cachedValues.set(modelId, new Map([[categoryId, elementsCount]]));
-      return;
-    }
-    if (modelEntry.has(categoryId)) {
-      return;
-    }
-    modelEntry.set(categoryId, elementsCount);
-  }
-
   private getCachedValueAfterObservable({
     modelId,
     categoryId,
@@ -74,7 +62,7 @@ export class ModelCategoryElementsCountCache {
     );
   }
 
-  private executeBatchQuery(valuesToRequest: Map<ModelId, Set<CategoryId>>): Observable<void> {
+  private executeBatchQuery(valuesToRequest: Map<ModelId, Set<CategoryId>>) {
     return from(valuesToRequest.entries()).pipe(
       map(([modelId, categoryIds]) => `Model.Id = ${modelId} AND Category.Id IN (${[...categoryIds].join(", ")})`),
       // we may have thousands of where clauses here, and sending a single query with all of them could take a
@@ -118,19 +106,6 @@ export class ModelCategoryElementsCountCache {
         ).pipe(catchBeSQLiteInterrupts),
       ),
       releaseMainThreadOnItemsCount(500),
-      // Cache each row as it arrives, use reduce to emit one value when query completes
-      reduce((acc, row) => {
-        this.setCachedValueIfEmpty({ modelId: row.modelId, categoryId: row.categoryId, elementsCount: row.elementsCount });
-        return acc;
-      }, undefined),
-      tap(() => {
-        for (const [modelId, categoryIds] of valuesToRequest.entries()) {
-          for (const categoryId of categoryIds) {
-            // Make sure that all requested categories have an entry in the cache
-            this.setCachedValueIfEmpty({ modelId, categoryId, elementsCount: 0 });
-          }
-        }
-      }),
     );
   }
 
@@ -159,7 +134,33 @@ export class ModelCategoryElementsCountCache {
           this.#requestedValues.set(requestId, valuesToRequest);
           // Clear #valuesToRequest so new requests can be collected while the query is executing
           this.#valuesToRequest = undefined;
-          return this.executeBatchQuery(valuesToRequest.values);
+          return this.executeBatchQuery(valuesToRequest.values).pipe(
+            // Cache each row as it arrives, use reduce to emit one value when query completes
+            reduce((acc, row) => {
+              const modelEntry = this.#cachedValues.get(modelId);
+              if (!modelEntry) {
+                this.#cachedValues.set(row.modelId, new Map([[row.categoryId, row.elementsCount]]));
+                return;
+              }
+              modelEntry.set(row.categoryId, row.elementsCount);
+              return acc;
+            }, undefined),
+            tap(() => {
+              for (const [entryModelId, entryCategoryIds] of valuesToRequest.values.entries()) {
+                let modelEntry = this.#cachedValues.get(entryModelId);
+                if (!modelEntry) {
+                  modelEntry = new Map();
+                  this.#cachedValues.set(entryModelId, modelEntry);
+                }
+                for (const entryCategoryId of entryCategoryIds) {
+                  // Make sure that all requested categories have an entry in the cache
+                  if (!modelEntry.has(entryCategoryId)) {
+                    modelEntry.set(entryCategoryId, 0);
+                  }
+                }
+              }
+            }),
+          );
         }),
         tap({
           finalize: () => {
