@@ -14,6 +14,10 @@ const handleMessages: Array<{ message: string; type: "error" | "warn" | "log"; h
   { message: "there are no unsaved changes", type: "log", handle: "ignoreMessage" },
 ];
 
+const originalConsoleError = console.error;
+const originalConsoleWarn = console.warn;
+const originalConsoleLog = console.log;
+
 let caughtFailTestMessages = new Array<string>();
 
 const getOverriddenMethod = (originalMethod: (message?: any, ...optionalParams: any[]) => void, type: "error" | "warn" | "log") => {
@@ -32,9 +36,9 @@ const getOverriddenMethod = (originalMethod: (message?: any, ...optionalParams: 
 };
 
 beforeAll(() => {
-  console.error = getOverriddenMethod(console.error, "error");
-  console.warn = getOverriddenMethod(console.warn, "warn");
-  console.log = getOverriddenMethod(console.log, "log");
+  console.error = getOverriddenMethod(originalConsoleError, "error");
+  console.warn = getOverriddenMethod(originalConsoleWarn, "warn");
+  console.log = getOverriddenMethod(originalConsoleLog, "log");
 });
 
 beforeEach(() => {
@@ -49,4 +53,9 @@ afterEach(() => {
     caughtFailTestMessages = [];
     throw new Error(`Test triggered the following console messages:\n${messages}`);
   }
+});
+afterAll(() => {
+  console.error = originalConsoleError;
+  console.warn = originalConsoleWarn;
+  console.log = originalConsoleLog;
 });
