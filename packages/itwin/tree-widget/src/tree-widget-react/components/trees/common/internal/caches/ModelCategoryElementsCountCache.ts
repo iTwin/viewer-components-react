@@ -138,11 +138,11 @@ export class ModelCategoryElementsCountCache {
             // Cache each row as it arrives, use reduce to emit one value when query completes
             reduce((acc, row) => {
               const modelEntry = this.#cachedValues.get(modelId);
-              if (!modelEntry) {
+              if (modelEntry) {
+                modelEntry.set(row.categoryId, row.elementsCount);
+              } else {
                 this.#cachedValues.set(row.modelId, new Map([[row.categoryId, row.elementsCount]]));
-                return;
               }
-              modelEntry.set(row.categoryId, row.elementsCount);
               return acc;
             }, undefined),
             tap(() => {
