@@ -17,7 +17,7 @@ import type { ChildrenTree } from "../../../../tree-widget-react/components/tree
 
 describe("AlwaysAndNeverDrawnElementInfoCache", () => {
   beforeEach(() => {
-    // without this option tests sometimes fail with strange errors
+    // Use fake timers to reliably advance time in tests
     vi.useFakeTimers();
   });
 
