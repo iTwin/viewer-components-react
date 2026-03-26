@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { afterEach, describe, expect, it } from "vitest";
 import { TreeWidget } from "../tree-widget-react/TreeWidget.js";
 
 describe("TreeWidget", () => {

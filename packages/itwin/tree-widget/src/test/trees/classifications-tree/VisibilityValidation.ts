@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { expect } from "vitest";
 import { ClassificationsTreeNode } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeNode.js";
 
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";

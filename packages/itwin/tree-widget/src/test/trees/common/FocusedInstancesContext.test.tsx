@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { beforeEach, describe, expect, it } from "vitest";
 import { createStorage } from "@itwin/unified-selection";
 import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../../tree-widget-react/components/trees/common/FocusedInstancesContext.js";
 import { act, createAsyncIterator, renderHook, waitFor } from "../../TestUtils.js";

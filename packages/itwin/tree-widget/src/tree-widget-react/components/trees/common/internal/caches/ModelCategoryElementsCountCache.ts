@@ -137,7 +137,7 @@ export class ModelCategoryElementsCountCache {
           return this.executeBatchQuery(valuesToRequest.values).pipe(
             // Cache each row as it arrives, use reduce to emit one value when query completes
             reduce((acc, row) => {
-              const modelEntry = this.#cachedValues.get(modelId);
+              const modelEntry = this.#cachedValues.get(row.modelId);
               if (modelEntry) {
                 modelEntry.set(row.categoryId, row.elementsCount);
               } else {

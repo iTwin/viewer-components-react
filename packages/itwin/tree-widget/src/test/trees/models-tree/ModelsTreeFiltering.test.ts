@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { Id64 } from "@itwin/core-bentley";
 import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";

@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { IModelReadRpcInterface, SubCategoryAppearance } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";

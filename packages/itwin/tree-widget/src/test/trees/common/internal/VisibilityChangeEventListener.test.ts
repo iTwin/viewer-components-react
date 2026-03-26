@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createVisibilityChangeEventListener } from "../../../../tree-widget-react/components/trees/common/internal/VisibilityChangeEventListener.js";
 import { waitFor } from "../../../TestUtils.js";
 import { createFakeViewport } from "../../Common.js";

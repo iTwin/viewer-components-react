@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { firstValueFrom } from "rxjs";
-import { vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { BaseIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";

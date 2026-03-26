@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { afterAll, beforeAll, describe, it } from "vitest";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../IModelUtils.js";
 import { initializeITwinJs, terminateITwinJs } from "../../Initialize.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";

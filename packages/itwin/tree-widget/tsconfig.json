@@ -11,7 +11,7 @@
     "resolveJsonModule": true,
     "lib": ["DOM", "ESNext"],
     "noEmit": true,
-    "types": ["vitest/globals", "node"]
+    "types": ["node"]
   },
   "include": ["src/**/*", "types.d.ts"]
 }

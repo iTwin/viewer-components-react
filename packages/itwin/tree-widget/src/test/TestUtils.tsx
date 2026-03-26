@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { vi } from "vitest";
+import { afterAll, beforeAll, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";

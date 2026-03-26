@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { firstValueFrom } from "rxjs";
-import { vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   AlwaysAndNeverDrawnElementInfoCache,
   SET_CHANGE_DEBOUNCE_TIME,

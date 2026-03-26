@@ -5,13 +5,23 @@
 
 import { coverageConfigDefaults, defineConfig } from "vitest/config";
 
+const logsToIgnore = [
+  "CSS variable not found",
+  // TODO: Should be removed after core 5.8 is consumed
+  "there are no unsaved changes",
+];
+
 export default defineConfig({
   test: {
-    globals: true,
     environment: "jsdom",
     css: false,
     include: ["src/test/**/*.test.ts?(x)"],
     setupFiles: ["src/test/setup.ts"],
+    onConsoleLog(log) {
+      if (logsToIgnore.some((logToIgnore) => log.includes(logToIgnore))) {
+        return false;
+      }
+    },
     restoreMocks: true,
     testTimeout: 60000,
     server: {

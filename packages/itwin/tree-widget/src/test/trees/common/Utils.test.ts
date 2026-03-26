@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { describe, expect, it } from "vitest";
 import { HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import { joinHierarchySearchPaths } from "../../../tree-widget-react/components/trees/common/Utils.js";
 
