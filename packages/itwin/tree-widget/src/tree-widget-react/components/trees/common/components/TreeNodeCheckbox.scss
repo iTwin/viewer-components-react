@@ -19,6 +19,9 @@
   z-index: 1;
   background-color: var(--iui-color-background);
   align-self: stretch;
+  padding-inline-start: 1px;
+  padding-inline-end: var(--iui-size-2xs);
+  margin-inline-end: 0;
   margin-block: 1px;
   display: flex;
   justify-content: center;
