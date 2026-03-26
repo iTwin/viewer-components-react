@@ -237,7 +237,8 @@ export async function createSearchResultsTree<
       });
     }
 
-    if (tree.children) {
+    // Do not descend into children once the current node is a search target.
+    if (!currentNode.isSearchTarget && tree.children) {
       for (const child of tree.children) {
         await traverseTree(child, currentNode);
       }
