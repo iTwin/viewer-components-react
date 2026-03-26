@@ -60,8 +60,8 @@ describe("Classifications tree", () => {
         });
         const { imodel, ...keys } = buildIModelResult;
         const imodelAccess = createIModelAccess(imodel);
-        using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-        using idsCache = new ClassificationsTreeIdsCache({
+        const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
+        const idsCache = new ClassificationsTreeIdsCache({
           queryExecutor: imodelAccess,
           hierarchyConfig: defaultHierarchyConfiguration,
           baseIdsCache,
@@ -102,8 +102,8 @@ describe("Classifications tree", () => {
         });
         const { imodel, ...keys } = buildIModelResult;
         const imodelAccess = createIModelAccess(imodel);
-        using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-        using idsCache = new ClassificationsTreeIdsCache({
+        const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
+        const idsCache = new ClassificationsTreeIdsCache({
           queryExecutor: imodelAccess,
           hierarchyConfig: defaultHierarchyConfiguration,
           baseIdsCache,
@@ -148,8 +148,8 @@ describe("Classifications tree", () => {
         });
         const { imodel, ...keys } = buildIModelResult;
         const imodelAccess = createIModelAccess(imodel);
-        using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-        using idsCache = new ClassificationsTreeIdsCache({
+        const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
+        const idsCache = new ClassificationsTreeIdsCache({
           queryExecutor: imodelAccess,
           hierarchyConfig: defaultHierarchyConfiguration,
           baseIdsCache,
@@ -202,8 +202,8 @@ describe("Classifications tree", () => {
         });
         const { imodel, ...keys } = buildIModelResult;
         const imodelAccess = createIModelAccess(imodel);
-        using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-        using idsCache = new ClassificationsTreeIdsCache({
+        const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
+        const idsCache = new ClassificationsTreeIdsCache({
           queryExecutor: imodelAccess,
           hierarchyConfig: defaultHierarchyConfiguration,
           baseIdsCache,
@@ -263,8 +263,8 @@ describe("Classifications tree", () => {
         });
         const { imodel, ...keys } = buildIModelResult;
         const imodelAccess = createIModelAccess(imodel);
-        using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-        using idsCache = new ClassificationsTreeIdsCache({
+        const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
+        const idsCache = new ClassificationsTreeIdsCache({
           queryExecutor: imodelAccess,
           hierarchyConfig: defaultHierarchyConfiguration,
           baseIdsCache,
@@ -317,8 +317,8 @@ describe("Classifications tree", () => {
         });
         const { imodel, ...keys } = buildIModelResult;
         const imodelAccess = createIModelAccess(imodel);
-        using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-        using idsCache = new ClassificationsTreeIdsCache({
+        const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
+        const idsCache = new ClassificationsTreeIdsCache({
           queryExecutor: imodelAccess,
           hierarchyConfig: defaultHierarchyConfiguration,
           baseIdsCache,
@@ -374,8 +374,8 @@ describe("Classifications tree", () => {
         });
         const { imodel, ...keys } = buildIModelResult;
         const imodelAccess = createIModelAccess(imodel);
-        using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-        using idsCache = new ClassificationsTreeIdsCache({
+        const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
+        const idsCache = new ClassificationsTreeIdsCache({
           queryExecutor: imodelAccess,
           hierarchyConfig: defaultHierarchyConfiguration,
           baseIdsCache,
@@ -441,8 +441,8 @@ describe("Classifications tree", () => {
         });
         const { imodel, ...keys } = buildIModelResult;
         const imodelAccess = createIModelAccess(imodel);
-        using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-        using idsCache = new ClassificationsTreeIdsCache({
+        const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
+        const idsCache = new ClassificationsTreeIdsCache({
           queryExecutor: imodelAccess,
           hierarchyConfig: defaultHierarchyConfiguration,
           baseIdsCache,
@@ -487,8 +487,8 @@ describe("Classifications tree", () => {
       });
       const { imodel } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-      using idsCache = new ClassificationsTreeIdsCache({
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
+      const idsCache = new ClassificationsTreeIdsCache({
         queryExecutor: imodelAccess,
         hierarchyConfig: defaultHierarchyConfiguration,
         baseIdsCache,
@@ -523,8 +523,8 @@ describe("Classifications tree", () => {
       });
       const { imodel, ...ids } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-      using idsCache = new ClassificationsTreeIdsCache({
+      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
+      const idsCache = new ClassificationsTreeIdsCache({
         queryExecutor: imodelAccess,
         hierarchyConfig: defaultHierarchyConfiguration,
         baseIdsCache,

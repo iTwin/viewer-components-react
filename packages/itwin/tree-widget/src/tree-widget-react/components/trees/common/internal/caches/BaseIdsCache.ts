@@ -24,7 +24,7 @@ export interface BaseIdsCacheProps {
 }
 
 /** @internal */
-export class BaseIdsCache implements Disposable {
+export class BaseIdsCache {
   #queryExecutor: LimitingECSqlQueryExecutor;
   #componentId: GuidString;
   readonly #categoryElementCounts: ModelCategoryElementsCountCache;
@@ -61,10 +61,6 @@ export class BaseIdsCache implements Disposable {
       elementClassName: props.elementClassName,
       modeledElementsCache: this.#modeledElementsCache,
     });
-  }
-
-  public [Symbol.dispose]() {
-    this.#categoryElementCounts[Symbol.dispose]();
   }
 
   // Implement get sub-models method
@@ -166,13 +162,12 @@ export interface BaseIdsCacheImplProps {
 }
 
 /** @internal */
-export class BaseIdsCacheImpl implements Disposable {
+export class BaseIdsCacheImpl {
   #baseIdsCache: BaseIdsCache;
   constructor(props: BaseIdsCacheImplProps) {
     this.#baseIdsCache = props.baseIdsCache;
   }
 
-  public [Symbol.dispose]() {}
   // Implement IBaseIdsCache by re-exporting BaseIdsCache methods
 
   public getChildElementsTree(props: Props<ElementChildrenCache["getChildElementsTree"]>): ReturnType<ElementChildrenCache["getChildElementsTree"]> {

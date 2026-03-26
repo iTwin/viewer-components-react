@@ -20,12 +20,12 @@ export interface GetCacheProps<TCache> {
 
 /** @internal */
 export function useIdsCache(): {
-  getCache: <TCache extends Disposable>(createCacheProps: GetCacheProps<TCache>) => TCache;
+  getCache: <TCache extends object = {}>(createCacheProps: GetCacheProps<TCache>) => TCache;
 } {
-  const state = useRef<Record<IModelKey, Record<CacheKey, Disposable>>>({});
+  const state = useRef<Record<IModelKey, Record<CacheKey, object>>>({});
   const [forceRerender, setForceRerender] = useState({});
   const getCache = useCallback(
-    <TCache extends Disposable>({ createCache, cacheKey, imodel }: GetCacheProps<TCache>) => {
+    <TCache extends object = {}>({ createCache, cacheKey, imodel }: GetCacheProps<TCache>) => {
       const imodelCaches = state.current[imodel.key];
       if (imodelCaches && imodelCaches[cacheKey]) {
         return imodelCaches[cacheKey] as TCache;
@@ -39,17 +39,11 @@ export function useIdsCache(): {
         let listener: undefined | (() => void);
         if (imodel.isBriefcaseConnection()) {
           listener = registerTxnListeners(imodel.txns, () => {
-            for (const cacheToDispose of Object.values(state.current[imodel.key])) {
-              cacheToDispose[Symbol.dispose]();
-            }
             state.current[imodel.key] = {};
             setForceRerender({});
           });
         }
         imodel.onClose.addOnce(() => {
-          for (const cacheToDispose of Object.values(state.current[imodel.key])) {
-            cacheToDispose[Symbol.dispose]();
-          }
           delete state.current[imodel.key];
           listener?.();
           setForceRerender({});

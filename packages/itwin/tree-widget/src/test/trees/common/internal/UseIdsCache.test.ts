@@ -12,15 +12,10 @@ import { act, renderHook } from "../../../TestUtils.js";
 import type { BriefcaseConnection } from "@itwin/core-frontend";
 
 describe("useIdsCache", () => {
-  let disposeSpy: sinon.SinonSpy;
-  let cache: Disposable;
+  const cache = {};
   let createCacheSpy: sinon.SinonSpy;
   let imodel: BriefcaseConnection;
   beforeEach(() => {
-    disposeSpy = sinon.spy();
-    cache = {
-      [Symbol.dispose]: disposeSpy,
-    };
     createCacheSpy = sinon.spy(() => cache);
     imodel = {
       key: "imodelKey",
@@ -111,7 +106,7 @@ describe("useIdsCache", () => {
     expect(cache1).to.equal(cache2Result);
   });
 
-  it("disposes caches and calls createCache after onClose event fires", () => {
+  it("calls createCache after onClose event fires", () => {
     const { result } = renderHook(useIdsCache);
     let cache1 = result.current.getCache({
       imodel,
@@ -130,8 +125,6 @@ describe("useIdsCache", () => {
       imodel.onClose.raiseEvent(imodel);
     });
 
-    expect(disposeSpy).to.be.calledTwice;
-
     cache1 = result.current.getCache({
       imodel,
       cacheKey: "cacheKey",
@@ -146,7 +139,7 @@ describe("useIdsCache", () => {
     expect(cache1).to.equal(cache2);
   });
 
-  it("disposes caches and calls createCache after onCommitted event fires", () => {
+  it("calls createCache after onCommitted event fires", () => {
     const { result } = renderHook(useIdsCache);
     let cache1 = result.current.getCache({
       imodel,
@@ -165,7 +158,6 @@ describe("useIdsCache", () => {
       imodel.txns.onCommit.raiseEvent();
       imodel.txns.onCommitted.raiseEvent(false, 1);
     });
-    expect(disposeSpy).to.be.calledTwice;
 
     cache1 = result.current.getCache({
       imodel,
@@ -181,7 +173,7 @@ describe("useIdsCache", () => {
     expect(cache1).to.equal(cache2);
   });
 
-  it("disposes caches and calls createCache after onChangesApplied event fires", () => {
+  it("calls createCache after onChangesApplied event fires", () => {
     const { result } = renderHook(useIdsCache);
     let cache1 = result.current.getCache({
       imodel,
@@ -198,7 +190,6 @@ describe("useIdsCache", () => {
     act(() => {
       imodel.txns.onChangesApplied.raiseEvent();
     });
-    expect(disposeSpy).to.be.calledTwice;
 
     cache1 = result.current.getCache({
       imodel,
@@ -230,6 +221,5 @@ describe("useIdsCache", () => {
     });
     expect(createCacheSpy).to.be.calledOnce;
     expect(cache1).to.equal(cache2);
-    expect(disposeSpy).to.not.be.called;
   });
 });

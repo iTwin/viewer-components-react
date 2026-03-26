@@ -23,11 +23,6 @@ describe("ModelsTreeIdsCache", () => {
       hierarchyConfig: defaultHierarchyConfiguration,
       baseIdsCache,
     });
-    const symbolDispose = idsCache[Symbol.dispose];
-    idsCache[Symbol.dispose] = () => {
-      symbolDispose();
-      baseIdsCache[Symbol.dispose]();
-    };
     return idsCache;
   }
 
@@ -41,7 +36,7 @@ describe("ModelsTreeIdsCache", () => {
       }
       throw new Error(`Unexpected query: ${query}`);
     });
-    using cache = createIdsCache(stub);
+    const cache = createIdsCache(stub);
     await expect(firstValueFrom(cache.getElementsCount({ modelId, categoryId }))).to.eventually.eq(elementIds.length);
     expect(stub).to.have.callCount(1);
     await expect(firstValueFrom(cache.getElementsCount({ modelId, categoryId }))).to.eventually.eq(elementIds.length);
@@ -62,7 +57,7 @@ describe("ModelsTreeIdsCache", () => {
       }
       throw new Error(`Unexpected query: ${query}`);
     });
-    using cache = createIdsCache(stub);
+    const cache = createIdsCache(stub);
     const obs1 = cache.getElementsCount({ modelId, categoryId });
     const obs2 = cache.getElementsCount({ modelId, categoryId: categoryId2 });
     await Promise.all([firstValueFrom(obs1), firstValueFrom(obs2)]).then(([count1, count2]) => {

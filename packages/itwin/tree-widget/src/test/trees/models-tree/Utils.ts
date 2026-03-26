@@ -70,10 +70,6 @@ export function createModelsTreeProvider({
   });
   const dispose = () => {
     provider[Symbol.dispose]();
-    if (!idsCache) {
-      createdIdsCache[Symbol.dispose]();
-    }
-    baseIdsCache[Symbol.dispose]();
   };
   return {
     hierarchyChanged: provider.hierarchyChanged,
