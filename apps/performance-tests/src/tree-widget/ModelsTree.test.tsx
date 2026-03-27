@@ -74,7 +74,16 @@ describe("models tree", () => {
         search: { paths: searchPaths! },
       });
       const result = await provider.loadHierarchy({ shouldExpand: (node) => node.children && !!node.autoExpand });
-      expect(result).to.eq(2);
+      expect(result).to.eq(
+        1 + // root subject
+          1 + // model
+          1 + // category
+          1 + // root elements' class grouping node
+          1000 * 2 + // root elements + class grouping nodes under them
+          16 * 1000 * 2 + // elements under root elements + class grouping nodes under them
+          16 * 1000 * 2 +
+          1000, // indirect child elements
+      ); // 67004 total
     },
   });
   run<{

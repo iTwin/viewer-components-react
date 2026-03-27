@@ -65,8 +65,12 @@ describe("categories tree", () => {
         getHierarchyFactory: () => hierarchyDefinition,
         search: { paths: searchPaths! },
       });
-      const result = await provider.loadHierarchy({ shouldExpand: () => false });
-      expect(result).to.eq(1);
+      const result = await provider.loadHierarchy({ shouldExpand: (node) => node.children && !!node.autoExpand });
+      expect(result).to.eq(
+        1 + // root definition container
+          50 + // categories
+          50 * 1000, // subcategories
+      ); // 50051 total
     },
   });
 
