@@ -1,7 +1,0 @@
-{
-  "type": "none",
-  "comment": "Bump iTwin.js core to `5.7.0`",
-  "packageName": "@itwin/property-grid-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "none"
-}

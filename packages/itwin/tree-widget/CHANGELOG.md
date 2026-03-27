@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Fri, 06 Mar 2026 19:28:38 GMT and should not be manually modified. -->
+<!-- This log was last generated on Fri, 27 Mar 2026 09:58:42 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.17.9
+
+Fri, 27 Mar 2026 09:58:42 GMT
+
+### Patches
+
+- Restored sticky eye-icon (checkbox) functionality after iTwinUI horizontal scroll issue was resolved ([#1637](https://github.com/iTwin/viewer-components-react/pull/1637))
 
 ## 3.17.8
 
