@@ -25,7 +25,7 @@ export const TreeNodeRenderer: ForwardRefExoticComponent<TreeNodeRendererProps &
         ref={forwardedRef}
         nodeProps={{ className: props.className }}
         checkboxProps={{
-          style: { paddingInline: 1 }, // add padding to make sure that checkbox is aligned with first header button}}
+          className: "tw-tree-node-checkbox-container",
         }}
         checkbox={checkboxProps ? <TreeNodeCheckbox {...checkboxProps} node={props.node} /> : null}
       />

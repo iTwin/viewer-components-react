@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Restored sticky eye-icon (checkbox) functionality after iTwinUI horizontal scroll issue was resolved",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "Modestas.Seibutis@bentley.com",
+  "dependentChangeType": "patch"
+}
