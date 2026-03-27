@@ -19,7 +19,9 @@ import type { Observable } from "rxjs";
 export async function* eachValueFrom<T>(source: Observable<T>): AsyncIterableIterator<T> {
   const deferreds = new Queue<{ resolve: (value: IteratorResult<T>) => void; reject: (reason: unknown) => void }>();
   const values = new Queue<IteratorResult<T>>();
-  let error;
+  const noError = Symbol("no-error");
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+  let error: unknown | typeof noError = noError;
   let completed = false;
   const subs = source.subscribe({
     next: (value) => {
@@ -55,8 +57,7 @@ export async function* eachValueFrom<T>(source: Observable<T>): AsyncIterableIte
         return;
       }
 
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/only-throw-error
+      if (error !== noError) {
         throw error;
       }
       const result = await new Promise<IteratorResult<T>>((resolve, reject) => {
