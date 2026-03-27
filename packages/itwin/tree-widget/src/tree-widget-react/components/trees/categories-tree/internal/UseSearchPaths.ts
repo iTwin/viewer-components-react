@@ -118,7 +118,7 @@ async function getCategoriesFromPaths(
   const subModelIds = new Set<ModelId>();
   const categories = new Map<CategoryId, Array<SubCategoryId>>();
 
-  async function traverse(node: HierarchySearchTree, parent?: InstanceKey): Promise<void> {
+  async function traverse(node: HierarchySearchTree, parent: InstanceKey | undefined): Promise<void> {
     const identifier = node.identifier;
     if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(identifier)) {
       return;
@@ -133,7 +133,7 @@ async function getCategoriesFromPaths(
     }
 
     if (node.children) {
-      await Promise.all(node.children.map(async (childrenTree) => traverse(childrenTree)));
+      await Promise.all(node.children.map(async (childrenTree) => traverse(childrenTree, identifier)));
       return;
     }
 
@@ -178,7 +178,7 @@ async function getCategoriesFromPaths(
     }
   }
 
-  await Promise.all(trees.map(async (tree) => traverse(tree)));
+  await Promise.all(trees.map(async (tree) => traverse(tree, undefined)));
 
   const rootElementModelMap = await firstValueFrom(idsCache.getFilteredElementsModels(rootFilteredElementIds));
   const models = [...subModelIds, ...new Set(rootElementModelMap.values())];
