@@ -76,6 +76,14 @@ export interface UseClassificationsTreeProps {
   visibilityHandlerConfig?: ClassificationsTreeVisibilityHandlerConfiguration;
   emptyTreeContent?: ReactNode;
   searchText?: string;
+  /**
+   * Limit of how many search results are allowed. Applies to label search by `searchText`.
+   *
+   * Can be a number or "unbounded" for no limit.
+   *
+   * Defaults to `100`.
+   */
+  searchLimit?: number | "unbounded";
   getTreeItemProps?: ExtendedVisibilityTreeRendererProps["getTreeItemProps"];
 }
 
@@ -100,6 +108,7 @@ export function useClassificationsTree({
   activeView,
   emptyTreeContent,
   searchText,
+  searchLimit,
   getTreeItemProps,
   visibilityHandlerConfig,
   ...rest
@@ -133,7 +142,7 @@ export function useClassificationsTree({
   const { getSearchPaths, definition } = useClassificationsTreeDefinitionInternal({
     imodels: useMemo(() => [activeView.iModel], [activeView.iModel]),
     hierarchyConfig,
-    search: useMemo(() => (searchText ? { searchText } : undefined), [searchText]),
+    search: useMemo(() => (searchText ? { searchText, limit: searchLimit } : undefined), [searchText, searchLimit]),
     onSearchPathsChanged,
     visibilityHandlerConfig,
   });

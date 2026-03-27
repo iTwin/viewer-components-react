@@ -32,7 +32,7 @@ interface UseClassificationsTreeDefinitionProps {
   /**
    * Optional parameters to search for tree nodes.
    */
-  search?:
+  search?: (
     | {
         /**
          * Text used to search tree nodes by label.
@@ -44,7 +44,17 @@ interface UseClassificationsTreeDefinitionProps {
          * List of instance keys to search tree nodes by.
          */
         targetItems: Array<InstanceKey>;
-      };
+      }
+  ) & {
+    /**
+     * Limit of how many search results are allowed.
+     *
+     * Can be a number or "unbounded" for no limit.
+     *
+     * Defaults to `100`.
+     */
+    limit?: number | "unbounded";
+  };
   /**
    * Action to perform when search paths change.
    */
@@ -97,6 +107,7 @@ export function useClassificationsTreeDefinitionInternal(
   }, [hierarchyConfig, imodelsWithCaches]);
 
   const searchTerm = search ? ("searchText" in search ? search.searchText : search.targetItems) : undefined;
+  const searchLimit = search?.limit;
 
   useEffect(() => {
     if (!searchTerm) {
@@ -119,7 +130,7 @@ export function useClassificationsTreeDefinitionInternal(
             idsCache: cache,
             imodelAccess,
             abortSignal,
-            limit: typeof searchTerm !== "string" ? "unbounded" : undefined,
+            limit: searchLimit,
             ...(typeof searchTerm === "string" ? { label: searchTerm } : { targetItems: searchTerm }),
           });
           for await (const { path } of iter) {
@@ -131,7 +142,7 @@ export function useClassificationsTreeDefinitionInternal(
       onSearchPathsChanged?.(joinedTrees);
       return joinedTrees;
     };
-  }, [searchTerm, onFeatureUsed, imodelsWithCaches, onSearchPathsChanged, hierarchyConfig]);
+  }, [searchTerm, searchLimit, onFeatureUsed, imodelsWithCaches, onSearchPathsChanged, hierarchyConfig]);
 
   return {
     definition,

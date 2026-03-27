@@ -57,6 +57,15 @@ export interface UseModelsTreeProps {
    * Instead, the string will be supplied to the given `getSearchPaths` function for consumers to apply the search.
    */
   searchText?: string;
+  /**
+   * Limit of how many search results are allowed. Applies to both label search by `searchText` and custom search by `getSearchPaths`.
+   * Does not apply to sub-tree paths retrieved by `getSubTreePaths`.
+   *
+   * Can be a number or "unbounded" for no limit.
+   *
+   * Defaults to `100`.
+   */
+  searchLimit?: number | "unbounded";
   activeView: TreeWidgetViewport;
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
@@ -132,6 +141,7 @@ interface UseModelsTreeResult {
 export function useModelsTree({
   activeView,
   searchText,
+  searchLimit,
   hierarchyConfig,
   visibilityHandlerOverrides,
   getSearchPaths,
@@ -174,6 +184,7 @@ export function useModelsTree({
   const { getPaths, searchError, subTreeError } = useSearchPaths({
     hierarchyConfiguration,
     searchText,
+    searchLimit,
     getSearchPaths,
     idsCache,
     onSearchPathsChanged,

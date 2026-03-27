@@ -54,6 +54,7 @@ describe("categories tree", () => {
         activeView: viewport,
         hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration,
         searchText: "sc",
+        searchLimit: "unbounded",
       });
       const hierarchyDefinition = await act(async () => hook.result.current.treeProps.getHierarchyDefinition({ imodelAccess }));
       const searchPaths = await act(async () => hook.result.current.treeProps.getSearchPaths!({ imodelAccess, abortSignal: new AbortController().signal }));

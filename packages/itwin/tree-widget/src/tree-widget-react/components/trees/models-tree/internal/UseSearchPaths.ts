@@ -29,6 +29,7 @@ export type ModelsTreeSubTreeError = "unknownSubTreeError";
 export function useSearchPaths({
   hierarchyConfiguration,
   searchText,
+  searchLimit,
   getSearchPaths,
   getSubTreePaths,
   idsCache,
@@ -38,6 +39,7 @@ export function useSearchPaths({
 }: {
   hierarchyConfiguration: ModelsTreeHierarchyConfiguration;
   searchText?: string;
+  searchLimit?: number | "unbounded";
   getSearchPaths?: (props: {
     /**
      * A function that creates search paths based on provided target instance keys or node label.
@@ -134,6 +136,7 @@ export function useSearchPaths({
                   idsCache,
                   targetItems: focusedItems,
                   hierarchyConfig: hierarchyConfiguration,
+                  limit: searchLimit,
                   abortSignal,
                   componentId,
                 }),
@@ -167,7 +170,7 @@ export function useSearchPaths({
                       imodelAccess,
                       idsCache,
                       hierarchyConfig: hierarchyConfiguration,
-                      limit: "unbounded",
+                      limit: searchLimit,
                       abortSignal,
                       componentId,
                     }),
@@ -203,6 +206,7 @@ export function useSearchPaths({
                   label: searchText,
                   idsCache,
                   hierarchyConfig: hierarchyConfiguration,
+                  limit: searchLimit,
                   abortSignal,
                   componentId,
                 }),
@@ -225,6 +229,7 @@ export function useSearchPaths({
     return getSubTreePathsInternal;
   }, [
     searchText,
+    searchLimit,
     loadFocusedItems,
     idsCache,
     onFeatureUsed,

@@ -27,6 +27,7 @@ export type CategoriesTreeSearchError = "tooManySearchMatches" | "unknownSearchE
 /** @internal */
 export function useSearchPaths({
   searchText,
+  searchLimit,
   viewType,
   hierarchyConfiguration,
   idsCache,
@@ -36,6 +37,7 @@ export function useSearchPaths({
 }: {
   viewType: "2d" | "3d";
   searchText?: string;
+  searchLimit?: number | "unbounded";
   hierarchyConfiguration: CategoriesTreeHierarchyConfiguration;
   idsCache: CategoriesTreeIdsCache;
   onCategoriesFiltered?: (categories: { categories: CategoryInfo[] | undefined; models?: Array<ModelId> }) => void;
@@ -72,6 +74,7 @@ export function useSearchPaths({
           idsCache,
           hierarchyConfig: hierarchyConfiguration,
           componentId,
+          limit: searchLimit,
         });
         const builder = HierarchySearchTree.createBuilder();
         for await (const { path } of iter) {
@@ -92,7 +95,7 @@ export function useSearchPaths({
         return [];
       }
     };
-  }, [onCategoriesFiltered, searchText, onSearchPathsChanged, onFeatureUsed, viewType, idsCache, hierarchyConfiguration, componentId]);
+  }, [onCategoriesFiltered, searchText, searchLimit, onSearchPathsChanged, onFeatureUsed, viewType, idsCache, hierarchyConfiguration, componentId]);
 
   return {
     getPaths: getSearchPaths,

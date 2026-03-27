@@ -62,6 +62,7 @@ describe("models tree", () => {
         activeView: viewport,
         hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
         getSearchPaths: async ({ createInstanceKeyPaths }) => createInstanceKeyPaths({ targetItems }),
+        searchLimit: "unbounded",
       });
       const hierarchyDefinition = await act(async () => hook.result.current.treeProps.getHierarchyDefinition({ imodelAccess }));
       const searchPaths = await act(async () => hook.result.current.treeProps.getSearchPaths!({ imodelAccess, abortSignal: new AbortController().signal }));

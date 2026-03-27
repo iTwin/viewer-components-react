@@ -747,6 +747,7 @@ interface UseCategoriesTreeProps {
         categories: CategoryInfo[] | undefined;
         models?: Id64Array;
     }) => void;
+    searchLimit?: number | "unbounded";
     // (undocumented)
     searchText?: string;
 }
@@ -771,10 +772,12 @@ interface UseClassificationsTreeDefinitionProps {
     hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
     imodels: Array<IModelConnection>;
     onSearchPathsChanged?: (paths: HierarchySearchTree[] | undefined) => void;
-    search?: {
+    search?: ({
         searchText: string;
     } | {
         targetItems: Array<InstanceKey>;
+    }) & {
+        limit?: number | "unbounded";
     };
 }
 
@@ -796,6 +799,7 @@ interface UseClassificationsTreeProps {
     getTreeItemProps?: ExtendedVisibilityTreeRendererProps["getTreeItemProps"];
     // (undocumented)
     hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+    searchLimit?: number | "unbounded";
     // (undocumented)
     searchText?: string;
     visibilityHandlerConfig?: ClassificationsTreeVisibilityHandlerConfiguration;
@@ -849,6 +853,7 @@ interface UseModelsTreeProps {
     hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
     // (undocumented)
     onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
+    searchLimit?: number | "unbounded";
     searchText?: string;
     selectionPredicate?: (props: {
         node: TreeNode;
