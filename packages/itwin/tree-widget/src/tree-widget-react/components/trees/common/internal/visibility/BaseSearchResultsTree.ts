@@ -214,7 +214,7 @@ export async function createSearchResultsTree<
     tree: HierarchySearchTree,
     parentNode: SearchResultsTreeRootNode<TSearchResultsTreeNode> | TSearchResultsTreeNode,
   ): Promise<void> {
-    // If parent is already a search target, skip deeper nodes
+    // If parent is already a search target, skip deeper nodes - we want to load all children for them.
     if ("type" in parentNode && "isSearchTarget" in parentNode && parentNode.isSearchTarget) {
       return;
     }
