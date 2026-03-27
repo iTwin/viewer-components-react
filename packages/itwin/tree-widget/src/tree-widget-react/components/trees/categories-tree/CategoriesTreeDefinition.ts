@@ -933,6 +933,9 @@ function createInstanceKeyPathsFromTargetItems({
   targetItems: InstanceKey[];
   componentName: string;
 }): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String }> {
+  if (targetItems.length === 0) {
+    return EMPTY;
+  }
   if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT)) {
     throw new SearchLimitExceededError(limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT);
   }
