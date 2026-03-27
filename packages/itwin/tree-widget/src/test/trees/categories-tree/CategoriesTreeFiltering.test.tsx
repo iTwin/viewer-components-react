@@ -9,13 +9,10 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import {
-  CategoriesTreeDefinition,
-  defaultHierarchyConfiguration,
-} from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
-import { CategoriesTreeIdsCache } from "../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
-import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
-import { getClassesByView } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
+import { act, renderHook } from "@testing-library/react";
+import { defaultHierarchyConfiguration } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
+import { useCategoriesTree } from "../../../tree-widget-react/components/trees/categories-tree/UseCategoriesTree.js";
+import { SharedTreeContextProvider } from "../../../tree-widget-react/components/trees/common/SharedTreeContextProvider.js";
 import {
   buildIModel,
   insertDefinitionContainer,
@@ -28,8 +25,11 @@ import {
   insertSubCategory,
   insertSubModel,
 } from "../../IModelUtils.js";
-import { createIModelAccess } from "../Common.js";
+import { createFakeSinonViewport, createIModelAccess } from "../Common.js";
 import { CLASS_NAME_DefinitionModel } from "../TreeUtils.js";
+
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { Props } from "@itwin/presentation-shared";
 
 // cspell:words egory
 // cspell complains about Cat_egory and Cat%egory
@@ -68,18 +68,15 @@ describe("Categories tree", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      const viewType = "3d";
-      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
-      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
-      expect(
-        await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          hierarchyConfig: defaultHierarchyConfiguration,
-          label: "Test",
-          viewType,
-          idsCache,
-        }),
-      ).to.deep.eq([{ path: [keys.definitionContainer], options: { reveal: true } }]);
+      using hook = renderUseCategoriesTreeHook({
+        imodel,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "Test",
+        viewType: "3d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+        { identifier: keys.definitionContainer, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
+      ]);
     });
 
     it("aborts when abort signal fires", async function () {
@@ -93,33 +90,26 @@ describe("Categories tree", () => {
       });
       const { imodel, ...ids } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      const viewType = "3d";
-      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
-      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
+
+      using hook = renderUseCategoriesTreeHook({
+        imodel,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "Test",
+        viewType: "3d",
+      });
 
       const abortController1 = new AbortController();
-      const pathsPromiseAborted = CategoriesTreeDefinition.createInstanceKeyPaths({
-        imodelAccess,
-        hierarchyConfig: defaultHierarchyConfiguration,
-        label: "Test",
-        viewType,
-        idsCache,
-        abortSignal: abortController1.signal,
-      });
+      const pathsPromiseAborted = act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: abortController1.signal }));
       abortController1.abort();
       expect(await pathsPromiseAborted).to.deep.eq([]);
 
       const abortController2 = new AbortController();
-      const pathsPromise = CategoriesTreeDefinition.createInstanceKeyPaths({
-        imodelAccess,
-        hierarchyConfig: defaultHierarchyConfiguration,
-        label: "Test",
-        viewType,
-        idsCache,
-        abortSignal: abortController2.signal,
-      });
+      const pathsPromise = act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: abortController2.signal }));
       expect(await pathsPromise).to.deep.eq([
-        { path: [{ className: "BisCore.DefinitionContainer", id: ids.definitionContainer.id }], options: { reveal: true } },
+        {
+          identifier: { className: "BisCore.DefinitionContainer", id: ids.definitionContainer.id },
+          options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+        },
       ]);
     });
 
@@ -142,18 +132,19 @@ describe("Categories tree", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      const viewType = "3d";
-      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
-      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
-      expect(
-        await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          hierarchyConfig: defaultHierarchyConfiguration,
-          label: "Test",
-          viewType,
-          idsCache,
-        }),
-      ).to.deep.eq([{ path: [keys.definitionContainer, keys.definitionContainerChild], options: { reveal: true } }]);
+      using hook = renderUseCategoriesTreeHook({
+        imodel,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "Test",
+        viewType: "3d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+        {
+          identifier: keys.definitionContainer,
+          options: { autoExpand: true },
+          children: [{ identifier: keys.definitionContainerChild, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } }],
+        },
+      ]);
     });
 
     it("does not find definition container by label when it doesn't contain categories", async function () {
@@ -166,18 +157,13 @@ describe("Categories tree", () => {
       });
       const { imodel } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      const viewType = "3d";
-      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
-      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
-      expect(
-        await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          hierarchyConfig: defaultHierarchyConfiguration,
-          label: "Test",
-          viewType,
-          idsCache,
-        }),
-      ).to.deep.eq([]);
+      using hook = renderUseCategoriesTreeHook({
+        imodel,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "Test",
+        viewType: "3d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([]);
     });
 
     it("finds category by label when it is contained by definition container", async function () {
@@ -192,18 +178,19 @@ describe("Categories tree", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      const viewType = "3d";
-      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
-      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
-      expect(
-        await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          hierarchyConfig: defaultHierarchyConfiguration,
-          label: "Test",
-          viewType,
-          idsCache,
-        }),
-      ).to.deep.eq([{ path: [keys.definitionContainer, keys.category], options: { reveal: true } }]);
+      using hook = renderUseCategoriesTreeHook({
+        imodel,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "Test",
+        viewType: "3d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+        {
+          identifier: keys.definitionContainer,
+          options: { autoExpand: true },
+          children: [{ identifier: keys.category, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } }],
+        },
+      ]);
     });
 
     it("finds subCategory by label when its parent category is contained by definition container", async function () {
@@ -219,18 +206,25 @@ describe("Categories tree", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      const viewType = "3d";
-      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
-      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
-      expect(
-        await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          hierarchyConfig: defaultHierarchyConfiguration,
-          label: "SubCategory1",
-          viewType,
-          idsCache,
-        }),
-      ).to.deep.eq([{ path: [keys.definitionContainer, keys.category, keys.subCategory1], options: { reveal: true } }]);
+      using hook = renderUseCategoriesTreeHook({
+        imodel,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "SubCategory1",
+        viewType: "3d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+        {
+          identifier: keys.definitionContainer,
+          options: { autoExpand: true },
+          children: [
+            {
+              identifier: keys.category,
+              options: { autoExpand: true },
+              children: [{ identifier: keys.subCategory1, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } }],
+            },
+          ],
+        },
+      ]);
     });
 
     it("finds 3d categories by label containing special SQLite characters", async function () {
@@ -248,29 +242,25 @@ describe("Categories tree", () => {
 
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      const viewType = "3d";
-      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
-      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
+      using hook = renderUseCategoriesTreeHook({
+        imodel,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "_",
+        viewType: "3d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+        { identifier: keys.category1, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
+      ]);
 
-      expect(
-        await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          hierarchyConfig: defaultHierarchyConfiguration,
-          label: "_",
-          viewType: "3d",
-          idsCache,
-        }),
-      ).to.deep.eq([{ path: [keys.category1], options: { reveal: true } }]);
-
-      expect(
-        await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          hierarchyConfig: defaultHierarchyConfiguration,
-          label: "%",
-          viewType: "3d",
-          idsCache,
-        }),
-      ).to.deep.eq([{ path: [keys.category2], options: { reveal: true } }]);
+      hook.rerender({
+        imodel,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "%",
+        viewType: "3d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+        { identifier: keys.category2, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
+      ]);
     });
 
     it("finds 3d subcategories by label containing special SQLite characters", async function () {
@@ -288,29 +278,33 @@ describe("Categories tree", () => {
 
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      const viewType = "3d";
-      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
-      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
+      using hook = renderUseCategoriesTreeHook({
+        imodel,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "_",
+        viewType: "3d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+        {
+          identifier: keys.category,
+          options: { autoExpand: true },
+          children: [{ identifier: keys.subCategory1, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } }],
+        },
+      ]);
 
-      expect(
-        await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          hierarchyConfig: defaultHierarchyConfiguration,
-          label: "_",
-          viewType: "3d",
-          idsCache,
-        }),
-      ).to.deep.eq([{ path: [keys.category, keys.subCategory1], options: { reveal: true } }]);
-
-      expect(
-        await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          hierarchyConfig: defaultHierarchyConfiguration,
-          label: "%",
-          viewType: "3d",
-          idsCache,
-        }),
-      ).to.deep.eq([{ path: [keys.category, keys.subCategory2], options: { reveal: true } }]);
+      hook.rerender({
+        imodel,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "%",
+        viewType: "3d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+        {
+          identifier: keys.category,
+          options: { autoExpand: true },
+          children: [{ identifier: keys.subCategory2, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } }],
+        },
+      ]);
     });
 
     it("finds 3d categories by label when subCategory count is 1 and labels of category and subCategory differ", async function () {
@@ -325,29 +319,24 @@ describe("Categories tree", () => {
 
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      const viewType = "3d";
-      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
-      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
+      using hook = renderUseCategoriesTreeHook({
+        imodel,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "Test",
+        viewType: "3d",
+      });
 
-      expect(
-        await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          hierarchyConfig: defaultHierarchyConfiguration,
-          label: "Test",
-          viewType: "3d",
-          idsCache,
-        }),
-      ).to.deep.eq([{ path: [keys.category], options: { reveal: true } }]);
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+        { identifier: keys.category, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
+      ]);
 
-      expect(
-        await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          hierarchyConfig: defaultHierarchyConfiguration,
-          label: "SpatialCategory",
-          viewType: "3d",
-          idsCache,
-        }),
-      ).to.deep.eq([]);
+      hook.rerender({
+        imodel,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "SpatialCategory",
+        viewType: "3d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([]);
     });
 
     it("finds 3d categories and subCategories by label when subCategory count is > 1", async function () {
@@ -366,39 +355,44 @@ describe("Categories tree", () => {
 
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      const viewType = "3d";
-      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
-      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
+      using hook = renderUseCategoriesTreeHook({
+        imodel,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "Test",
+        viewType: "3d",
+      });
 
-      expect(
-        await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          hierarchyConfig: defaultHierarchyConfiguration,
-          label: "Test",
-          viewType: "3d",
-          idsCache,
-        }),
-      ).to.deep.eq([{ path: [keys.category], options: { reveal: true } }]);
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+        { identifier: keys.category, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
+      ]);
 
-      expect(
-        await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          hierarchyConfig: defaultHierarchyConfiguration,
-          label: "SubCategory1",
-          viewType: "3d",
-          idsCache,
-        }),
-      ).to.deep.eq([{ path: [keys.category, keys.subCategory1], options: { reveal: true } }]);
+      hook.rerender({
+        imodel,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "SubCategory1",
+        viewType: "3d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+        {
+          identifier: keys.category,
+          options: { autoExpand: true },
+          children: [{ identifier: keys.subCategory1, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } }],
+        },
+      ]);
 
-      expect(
-        await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          hierarchyConfig: defaultHierarchyConfiguration,
-          label: "SubCategory2",
-          viewType: "3d",
-          idsCache,
-        }),
-      ).to.deep.eq([{ path: [keys.category, keys.subCategory2], options: { reveal: true } }]);
+      hook.rerender({
+        imodel,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "SubCategory2",
+        viewType: "3d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+        {
+          identifier: keys.category,
+          options: { autoExpand: true },
+          children: [{ identifier: keys.subCategory2, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } }],
+        },
+      ]);
     });
 
     it("finds 2d categories by label containing special SQLite characters", async function () {
@@ -416,29 +410,25 @@ describe("Categories tree", () => {
 
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      const viewType = "2d";
-      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
-      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
+      using hook = renderUseCategoriesTreeHook({
+        imodel,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "_",
+        viewType: "2d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+        { identifier: keys.category1, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
+      ]);
 
-      expect(
-        await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          hierarchyConfig: defaultHierarchyConfiguration,
-          label: "_",
-          viewType: "2d",
-          idsCache,
-        }),
-      ).to.deep.eq([{ path: [keys.category1], options: { reveal: true } }]);
-
-      expect(
-        await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          hierarchyConfig: defaultHierarchyConfiguration,
-          label: "%",
-          viewType: "2d",
-          idsCache,
-        }),
-      ).to.deep.eq([{ path: [keys.category2], options: { reveal: true } }]);
+      hook.rerender({
+        imodel,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "%",
+        viewType: "2d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+        { identifier: keys.category2, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
+      ]);
     });
 
     it("finds 2d subcategories by label containing special SQLite characters", async function () {
@@ -456,29 +446,44 @@ describe("Categories tree", () => {
 
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      const viewType = "2d";
-      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
-      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
+      using hook = renderUseCategoriesTreeHook({
+        imodel,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "_",
+        viewType: "2d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+        {
+          identifier: keys.category,
+          options: { autoExpand: true },
+          children: [{ identifier: keys.subCategory1, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } }],
+        },
+      ]);
 
-      expect(
-        await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          hierarchyConfig: defaultHierarchyConfiguration,
-          label: "_",
-          viewType: "2d",
-          idsCache,
-        }),
-      ).to.deep.eq([{ path: [keys.category, keys.subCategory1], options: { reveal: true } }]);
-
-      expect(
-        await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          hierarchyConfig: defaultHierarchyConfiguration,
-          label: "%",
-          viewType: "2d",
-          idsCache,
-        }),
-      ).to.deep.eq([{ path: [keys.category, keys.subCategory2], options: { reveal: true } }]);
+      hook.rerender({
+        imodel,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "%",
+        viewType: "2d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+        {
+          identifier: keys.category,
+          options: { autoExpand: true },
+          children: [{ identifier: keys.subCategory2, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } }],
+        },
+      ]);
     });
   });
 });
+
+function renderUseCategoriesTreeHook(props: Omit<Props<typeof useCategoriesTree>, "activeView"> & { imodel: IModelConnection; viewType: "2d" | "3d" }) {
+  const result = renderHook(
+    (hookProps) => useCategoriesTree({ activeView: createFakeSinonViewport({ iModel: props.imodel, viewType: props.viewType }), ...hookProps }),
+    {
+      initialProps: props,
+      wrapper: ({ children }) => <SharedTreeContextProvider>{children}</SharedTreeContextProvider>,
+    },
+  );
+  return { ...result, [Symbol.dispose]: () => result.unmount() };
+}

@@ -8,7 +8,8 @@ import "./Tree.css";
 import { useCallback, useState } from "react";
 import { BeEvent } from "@itwin/core-bentley";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
-import { StrataKitRootErrorRenderer, useIModelUnifiedSelectionTree, useNodeHighlighting } from "@itwin/presentation-hierarchies-react";
+import { useIModelUnifiedSelectionTree, useNodeHighlighting } from "@itwin/presentation-hierarchies-react";
+import { StrataKitRootErrorRenderer } from "@itwin/presentation-hierarchies-react/stratakit";
 import { TreeWidget } from "../../../../TreeWidget.js";
 import { useHierarchyLevelFiltering } from "../internal/UseHierarchyFiltering.js";
 import { useIModelAccess } from "../internal/UseIModelAccess.js";
@@ -22,7 +23,8 @@ import { SkeletonTree } from "./SkeletonTree.js";
 
 import type { ComponentProps, ReactNode } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { SelectionStorage, StrataKitTreeRenderer, TreeNode, TreeRendererProps, useIModelTree, useTree } from "@itwin/presentation-hierarchies-react";
+import type { SelectionStorage, TreeNode, TreeRendererProps, useIModelTree, useTree } from "@itwin/presentation-hierarchies-react";
+import type { StrataKitTreeRenderer } from "@itwin/presentation-hierarchies-react/stratakit";
 import type { FunctionProps } from "../Utils.js";
 
 /** @beta */

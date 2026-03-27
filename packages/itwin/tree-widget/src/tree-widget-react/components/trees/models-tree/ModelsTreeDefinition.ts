@@ -5,14 +5,12 @@
 
 import {
   bufferCount,
-  defaultIfEmpty,
   defer,
   firstValueFrom,
   forkJoin,
   from,
   fromEvent,
   identity,
-  lastValueFrom,
   map,
   merge,
   mergeAll,
@@ -27,11 +25,11 @@ import { IModel } from "@itwin/core-common";
 import {
   createNodesQueryClauseFactory,
   createPredicateBasedHierarchyDefinition,
-  HierarchySearchPath,
   NodeSelectClauseColumnNames,
   ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
+import { eachValueFrom } from "../../utils/EachValueFrom.js";
 import {
   CLASS_NAME_Element,
   CLASS_NAME_GeometricElement3d,
@@ -53,7 +51,7 @@ import {
 } from "../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../common/TreeErrors.js";
 
-import type { Observable, OperatorFunction } from "rxjs";
+import type { Observable, ObservedValueOf, OperatorFunction } from "rxjs";
 import type { GuidString, Id64String } from "@itwin/core-bentley";
 import type {
   ClassGroupingNodeKey,
@@ -62,6 +60,7 @@ import type {
   GroupingHierarchyNode,
   HierarchyDefinition,
   HierarchyLevelDefinition,
+  HierarchyNodeIdentifiersPath,
   HierarchyNodesDefinition,
   LimitingECSqlQueryExecutor,
   NodePostProcessor,
@@ -69,6 +68,7 @@ import type {
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
 import type {
+  EC,
   ECClassHierarchyInspector,
   ECSchemaProvider,
   ECSqlBinding,
@@ -77,7 +77,6 @@ import type {
   IInstanceLabelSelectClauseFactory,
   InstanceKey,
 } from "@itwin/presentation-shared";
-import type { NormalizedHierarchySearchPath } from "../common/Utils.js";
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 
 /** @beta */
@@ -93,7 +92,7 @@ export interface ModelsTreeHierarchyConfiguration {
   /** Should element nodes be grouped by class. Defaults to `enable`. */
   elementClassGrouping: "enable" | "enableWithCounts" | "disable";
   /** Full class name of a `GeometricElement3d` sub-class that should be used to load element nodes. Defaults to `BisCore.GeometricElement3d`. */
-  elementClassSpecification: string;
+  elementClassSpecification: EC.FullClassName;
   /** Should models without elements be shown. Defaults to `false`. */
   showEmptyModels: boolean;
   /** Should the root Subject node be hidden. Defaults to `false`. */
@@ -629,8 +628,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  public static async createInstanceKeyPaths(props: ModelsTreeInstanceKeyPathsProps): Promise<NormalizedHierarchySearchPath[]> {
-    return lastValueFrom(
+  public static createInstanceKeyPaths(props: ModelsTreeInstanceKeyPathsProps) {
+    return eachValueFrom<{ path: HierarchyNodeIdentifiersPath; target: Id64String | ElementsGroupInfo }>(
       defer(() => {
         const componentInfo = { componentId: props.componentId ?? Guid.createValue(), componentName: this.#componentName };
         if (ModelsTreeInstanceKeyPathsProps.isLabelProps(props)) {
@@ -638,7 +637,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           return createInstanceKeyPathsFromInstanceLabelObs({ ...props, ...componentInfo, labelsFactory });
         }
         return createInstanceKeyPathsFromTargetItemsObs({ ...props, ...componentInfo });
-      }).pipe(props.abortSignal ? takeUntil(fromEvent(props.abortSignal, "abort")) : identity, defaultIfEmpty([])),
+      }).pipe(props.abortSignal ? takeUntil(fromEvent(props.abortSignal, "abort")) : identity),
     );
   }
 
@@ -689,12 +688,12 @@ const ELEMENT_CLASS_NAME_QUERY_ALIAS = "e";
 export function createGeometricElementInstanceKeyPaths(props: {
   queryExecutor: LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
-  elementClassName: string;
+  elementClassName: EC.FullClassName;
   targetItems: Array<Id64String | ElementsGroupInfo>;
   componentId: GuidString;
   componentName: string;
   chunkIndex: number;
-}): Observable<NormalizedHierarchySearchPath> {
+}): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String | ElementsGroupInfo }> {
   const { targetItems, chunkIndex, componentId, componentName, elementClassName, idsCache, queryExecutor } = props;
   const elementIds = targetItems.filter((info): info is Id64String => typeof info === "string");
   const groupInfos = targetItems.filter((info): info is ElementsGroupInfo => typeof info !== "string");
@@ -706,8 +705,8 @@ export function createGeometricElementInstanceKeyPaths(props: {
         ? `
           SELECT e.ECInstanceId, e.ECClassId, e.Parent.Id, e.Model.Id, e.Category.Id, -1
           FROM ${elementClassName} e
-           WHERE e.ECInstanceId IN (${elementIds.join(",")})
-            `
+          WHERE e.ECInstanceId IN (${elementIds.join(",")})
+          `
         : undefined;
 
     const targetGroupingNodesElementInfoQueries = groupInfos.map(
@@ -770,21 +769,14 @@ export function createGeometricElementInstanceKeyPaths(props: {
     catchBeSQLiteInterrupts,
     releaseMainThreadOnItemsCount(300),
     map((row) => parseQueryRow(row, groupInfos, separator, elementClassName)),
-    mergeMap(({ modelId, elementHierarchyPath, groupingNode }) =>
+    mergeMap(({ modelId, elementHierarchyPath, groupingInfo }) =>
       idsCache.createModelInstanceKeyPaths(modelId).pipe(
         map((modelPath) => {
           modelPath.pop(); // model is already included in the element hierarchy path
           const path = [...modelPath, ...elementHierarchyPath];
-          if (!groupingNode) {
-            return { path };
-          }
           return {
             path,
-            options: {
-              reveal: {
-                depthInHierarchy: groupingNode.parentKeys.length,
-              },
-            },
+            target: groupingInfo ?? elementHierarchyPath[elementHierarchyPath.length - 1].id,
           };
         }),
       ),
@@ -792,7 +784,7 @@ export function createGeometricElementInstanceKeyPaths(props: {
   );
 }
 
-function parseQueryRow(row: ECSqlQueryRow, groupInfos: ElementsGroupInfo[], separator: string, elementClassName: string) {
+function parseQueryRow(row: ECSqlQueryRow, groupInfos: ElementsGroupInfo[], separator: string, elementClassName: EC.FullClassName) {
   const rowElements: string[] = row[1].split(separator);
   const path = new Array<InstanceKey>();
   for (let i = 0; i < rowElements.length; i += 2) {
@@ -811,15 +803,14 @@ function parseQueryRow(row: ECSqlQueryRow, groupInfos: ElementsGroupInfo[], sepa
   return {
     modelId: row[0],
     elementHierarchyPath: path,
-    groupingNode: row[2] === -1 ? undefined : groupInfos[row[2]].groupingNode,
+    groupingInfo: row[2] === -1 ? undefined : groupInfos[row[2]],
   };
 }
 
 function createInstanceKeyPathsFromTargetItemsObs(
   props: Omit<ModelsTreeInstanceKeyPathsFromTargetItemsProps, "abortSignal" | "componentId"> & { componentId: GuidString; componentName: string },
-): Observable<NormalizedHierarchySearchPath[]> {
+) {
   const { targetItems, imodelAccess } = props;
-
   return fromWithRelease({ source: targetItems, releaseOnCount: 2000 }).pipe(
     mergeMap(async (key): Promise<{ key: Id64String; type: number } | { key: ElementsGroupInfo; type: 0 }> => {
       if ("parent" in key) {
@@ -855,7 +846,7 @@ function createSearchPathsForDifferentTypes(
       key: ElementsGroupInfo;
       type: typeof ELEMENT_TYPE_AS_NUMBER;
     },
-  NormalizedHierarchySearchPath[]
+  ObservedValueOf<ReturnType<typeof createGeometricElementInstanceKeyPaths>>
 > {
   return (obs) =>
     obs.pipe(
@@ -892,9 +883,9 @@ function createSearchPathsForDifferentTypes(
         }
 
         return merge(
-          from(ids.subjectIds).pipe(mergeMap((id) => idsCache.createSubjectInstanceKeysPath(id).pipe(map(HierarchySearchPath.normalize)))),
-          from(ids.modelIds).pipe(mergeMap((id) => idsCache.createModelInstanceKeyPaths(id).pipe(map(HierarchySearchPath.normalize)))),
-          idsCache.createCategoryInstanceKeyPaths({ categoryIds: ids.categoryIds }).pipe(map(HierarchySearchPath.normalize)),
+          from(ids.subjectIds).pipe(mergeMap((id) => idsCache.createSubjectInstanceKeysPath(id).pipe(map((path) => ({ path, target: id }))))),
+          from(ids.modelIds).pipe(mergeMap((id) => idsCache.createModelInstanceKeyPaths(id).pipe(map((path) => ({ path, target: id }))))),
+          idsCache.createCategoryInstanceKeyPaths({ categoryIds: ids.categoryIds }).pipe(map((path) => ({ path, target: path[path.length - 1].id }))),
           from(ids.elementIds).pipe(
             bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),
             releaseMainThreadOnItemsCount(1),
@@ -912,7 +903,7 @@ function createSearchPathsForDifferentTypes(
               10,
             ),
           ),
-        ).pipe(toArray());
+        );
       }),
     );
 }

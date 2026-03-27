@@ -17,6 +17,7 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { DefinitionElementProps } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
+import type { EC } from "@itwin/presentation-shared";
 import type { TestIModelBuilder } from "@itwin/presentation-testing";
 import type { ClassificationsTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
 
@@ -59,7 +60,7 @@ export function insertClassificationSystem(
   } & Partial<Omit<DefinitionElementProps, "id" | "parent" | "code" | "model">>,
 ) {
   const { builder, codeValue, modelId, ...elementProps } = props;
-  const className = `ClassificationSystems.ClassificationSystem`;
+  const className: EC.FullClassName = `ClassificationSystems.ClassificationSystem`;
   const id = builder.insertElement({
     classFullName: className,
     model: modelId ?? IModel.dictionaryId,
@@ -78,7 +79,7 @@ export function insertClassificationTable(
   } & Partial<Omit<DefinitionElementProps, "id" | "parent" | "code" | "model">>,
 ) {
   const { builder, codeValue, modelId, parentId, ...elementProps } = props;
-  const className = `ClassificationSystems.ClassificationTable`;
+  const className: EC.FullClassName = `ClassificationSystems.ClassificationTable`;
   const id = builder.insertElement({
     classFullName: className,
     model: modelId ?? IModel.dictionaryId,
@@ -108,7 +109,7 @@ export function insertClassification(
   } & Partial<Omit<DefinitionElementProps, "id" | "parent" | "code" | "model">>,
 ) {
   const { builder, codeValue, modelId, parentId, ...elementProps } = props;
-  const className = `ClassificationSystems.Classification`;
+  const className: EC.FullClassName = `ClassificationSystems.Classification`;
   const id = builder.insertElement({
     classFullName: className,
     model: modelId,

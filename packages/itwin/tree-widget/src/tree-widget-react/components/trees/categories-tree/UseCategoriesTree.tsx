@@ -41,6 +41,14 @@ export interface UseCategoriesTreeProps {
   activeView: TreeWidgetViewport;
   onCategoriesFiltered?: (props: { categories: CategoryInfo[] | undefined; models?: Id64Array }) => void;
   searchText?: string;
+  /**
+   * Limit of how many search results are allowed. Applies to label search by `searchText`.
+   *
+   * Can be a number or "unbounded" for no limit.
+   *
+   * Defaults to `100`.
+   */
+  searchLimit?: number | "unbounded";
   emptyTreeContent?: ReactNode;
   hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
   getTreeItemProps?: ExtendedVisibilityTreeRendererProps["getTreeItemProps"];
@@ -63,6 +71,7 @@ interface UseCategoriesTreeResult {
  */
 export function useCategoriesTree({
   searchText,
+  searchLimit,
   activeView,
   onCategoriesFiltered,
   emptyTreeContent,
@@ -112,6 +121,7 @@ export function useCategoriesTree({
   const { getPaths, searchError } = useSearchPaths({
     hierarchyConfiguration,
     searchText,
+    searchLimit,
     idsCache,
     onSearchPathsChanged,
     viewType,

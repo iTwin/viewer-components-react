@@ -4,8 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
+import React from "react";
 import { SnapshotDb } from "@itwin/core-backend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
+import { SharedTreeContextProvider, useModelsTree } from "@itwin/tree-widget-react";
 import {
   BaseIdsCache,
   createModelsTreeVisibilityHandler,
@@ -13,8 +15,10 @@ import {
   ModelsTreeDefinition,
   ModelsTreeIdsCache,
 } from "@itwin/tree-widget-react/internal";
+import { act, renderHook } from "@testing-library/react";
 import { Datasets } from "../util/Datasets.js";
 import { run, TestIModelConnection } from "../util/TestUtilities.js";
+import { countSearchTargets } from "./SearchUtils.js";
 import { StatelessHierarchyProvider } from "./StatelessHierarchyProvider.js";
 import {
   collectNodes,
@@ -31,17 +35,18 @@ import {
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyNode, HierarchyProvider } from "@itwin/presentation-hierarchies";
-import type { ECSqlQueryDef, InstanceKey } from "@itwin/presentation-shared";
+import type { ECSqlQueryDef, InstanceKey, Props } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
 import type { IModelAccess } from "./StatelessHierarchyProvider.js";
 import type { TreeWidgetTestingViewport } from "./VisibilityUtilities.js";
 
 describe("models tree", () => {
-  run<{ iModel: SnapshotDb; imodelAccess: IModelAccess; targetItems: Array<InstanceKey> }>({
+  run<{ iModelConnection: IModelConnection; imodelAccess: IModelAccess; viewport: TreeWidgetTestingViewport; targetItems: Array<InstanceKey> }>({
     testName: "creates initial filtered view for 50k target items",
     setup: async () => {
-      const iModel = SnapshotDb.openFile(Datasets.getIModelPath("50k 3D elements"));
+      const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k 3D elements"));
       const imodelAccess = StatelessHierarchyProvider.createIModelAccess(iModel, "unbounded");
+      const viewport = await createViewport({ iModelConnection });
       const targetItems = new Array<InstanceKey>();
       const query: ECSqlQueryDef = {
         ecsql: `SELECT CAST(IdToHex(ECInstanceId) AS TEXT) AS ECInstanceId FROM bis.GeometricElement3d`,
@@ -49,37 +54,36 @@ describe("models tree", () => {
       for await (const row of imodelAccess.createQueryReader(query, { limit: "unbounded" })) {
         targetItems.push({ id: row.ECInstanceId, className: "Generic:PhysicalObject" });
       }
-      return { iModel, imodelAccess, targetItems };
+      return { iModelConnection, imodelAccess, targetItems, viewport };
     },
-    cleanup: (props) => props.iModel.close(),
-    test: async ({ imodelAccess, targetItems }) => {
-      const baseIdsCache = new BaseIdsCache({
-        elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
-        type: "3d",
-        queryExecutor: imodelAccess,
-      });
-      const idsCache = new ModelsTreeIdsCache({
-        queryExecutor: imodelAccess,
+    cleanup: (props) => props.iModelConnection.close(),
+    test: async ({ imodelAccess, targetItems, viewport }) => {
+      using hook = renderUseModelsTreeHook({
+        activeView: viewport,
         hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
-        baseIdsCache,
+        getSearchPaths: async ({ createInstanceKeyPaths }) => createInstanceKeyPaths({ targetItems }),
+        searchLimit: "unbounded",
       });
-      const search = {
-        paths: await ModelsTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          limit: "unbounded",
-          targetItems,
-          idsCache,
-          hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
-        }),
-      };
-      expect(search.paths.length).to.eq(50000);
+      const hierarchyDefinition = await act(async () => hook.result.current.treeProps.getHierarchyDefinition({ imodelAccess }));
+      const searchPaths = await act(async () => hook.result.current.treeProps.getSearchPaths!({ imodelAccess, abortSignal: new AbortController().signal }));
+      expect(countSearchTargets(searchPaths!)).to.eq(50000);
+
       using provider = new StatelessHierarchyProvider({
         imodelAccess,
-        getHierarchyFactory: () => new ModelsTreeDefinition({ imodelAccess, idsCache, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
-        search,
+        getHierarchyFactory: () => hierarchyDefinition,
+        search: { paths: searchPaths! },
       });
       const result = await provider.loadHierarchy({ shouldExpand: (node) => node.children && !!node.autoExpand });
-      expect(result).to.eq(2);
+      expect(result).to.eq(
+        1 + // root subject
+          1 + // model
+          1 + // category
+          1 + // root elements' class grouping node
+          1000 * 2 + // root elements + class grouping nodes under them
+          16 * 1000 * 2 + // elements under root elements + class grouping nodes under them
+          16 * 1000 * 2 +
+          1000, // indirect child elements
+      ); // 67004 total
     },
   });
   run<{
@@ -548,3 +552,11 @@ describe("models tree", () => {
     },
   });
 });
+
+function renderUseModelsTreeHook(props: Props<typeof useModelsTree>) {
+  const result = renderHook((hookProps) => useModelsTree(hookProps), {
+    initialProps: props,
+    wrapper: ({ children }) => <SharedTreeContextProvider>{children}</SharedTreeContextProvider>,
+  });
+  return { ...result, [Symbol.dispose]: () => result.unmount() };
+}

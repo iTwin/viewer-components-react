@@ -3,7 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { IModelReadRpcInterface } from "@itwin/core-common";
+import { expect } from "chai";
+import * as sinon from "sinon";
+import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
@@ -623,6 +625,67 @@ describe("Categories tree", () => {
             ],
           }),
         ],
+      });
+    });
+
+    describe("createInstanceKeyPaths", () => {
+      describe("query interrupts handling", () => {
+        const viewType = "3d";
+        let imodel: IModelConnection;
+        let dispose: () => Promise<void>;
+
+        before(async function () {
+          const buildIModelResult = await buildIModel(this, async (builder) => {
+            const model = insertPhysicalModelWithPartition({ builder, codeValue: "xModel" });
+            const category1 = insertSpatialCategory({ builder, codeValue: "xCategory1", modelId: IModel.dictionaryId });
+            const subCategory1 = insertSubCategory({ builder, parentCategoryId: category1.id, codeValue: "xSubCategory", modelId: IModel.dictionaryId });
+            const category2 = insertSpatialCategory({ builder, codeValue: "xCategory2", modelId: IModel.dictionaryId });
+            const elementInCategory2 = insertPhysicalElement({ builder, modelId: model.id, categoryId: category2.id, userLabel: "xElement" });
+            return { model, category1, subCategory1, category2, elementInCategory2 };
+          });
+          imodel = buildIModelResult.imodel;
+          dispose = async () => buildIModelResult[Symbol.asyncDispose]();
+        });
+
+        after(async function () {
+          await dispose();
+        });
+
+        afterEach(() => {
+          sinon.restore();
+        });
+
+        [
+          { queryIdentifier: "LIKE '%' || ? || '%'", description: "label filtering query" },
+          { queryIdentifier: "FROM CategoriesElementsHierarchy mce", description: "elements' search paths query" },
+        ].forEach(({ queryIdentifier, description }) => {
+          it(`doesn't throw on ecsql query interrupt in ${description}`, async function () {
+            const imodelAccess = createIModelAccess(imodel);
+            const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+            const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
+            const iter = CategoriesTreeDefinition.createInstanceKeyPaths({
+              imodelAccess,
+              idsCache,
+              viewType,
+              hierarchyConfig: { hideSubCategories: false, showEmptyCategories: true, showElements: true },
+              label: "x",
+            });
+            let didInterrupt = false;
+            const originalQueryReader = imodel.createQueryReader.bind(imodel);
+            sinon.stub(imodel, "createQueryReader").callsFake(async function* (...args): any {
+              const [ecsql] = args;
+              if (ecsql.includes(queryIdentifier)) {
+                didInterrupt = true;
+                const err = new Error(ecsql);
+                err.name = "BE_SQLITE_INTERRUPT";
+                throw err;
+              }
+              return yield* originalQueryReader(...args);
+            });
+            await expect(Array.fromAsync(iter)).to.not.be.rejected;
+            expect(didInterrupt).to.be.true;
+          });
+        });
       });
     });
   });

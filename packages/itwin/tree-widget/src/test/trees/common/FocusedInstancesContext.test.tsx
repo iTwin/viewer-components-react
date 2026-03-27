@@ -167,8 +167,8 @@ describe("FocusedInstancesContext", () => {
     await waitFor(async () => {
       const instanceKeys = await collectKeys(result.current.loadFocusedItems);
       expect(instanceKeys).to.containSubset([
-        { id: "0x1", className: "Schema:Class" },
-        { id: "0x1", className: "Schema:Class" },
+        { id: "0x1", className: "Schema.Class" },
+        { id: "0x1", className: "Schema.Class" },
       ]);
     });
   });

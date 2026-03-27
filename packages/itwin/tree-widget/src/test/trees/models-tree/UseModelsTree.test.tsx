@@ -9,7 +9,6 @@ import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { createStorage } from "@itwin/unified-selection";
 import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../../tree-widget-react/components/trees/common/FocusedInstancesContext.js";
@@ -25,6 +24,7 @@ import { createModelHierarchyNode } from "./Utils.js";
 import type { Id64Array } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
+import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { UseModelsTreeProps } from "../../../tree-widget-react/components/trees/models-tree/UseModelsTree.js";
 import type { TreeWidgetTestingViewport } from "../TreeUtils.js";
@@ -69,7 +69,7 @@ describe("useModelsTree", () => {
     } = renderHook(useModelsTree, {
       initialProps: {
         activeView: viewport,
-        getSearchPaths: async () => [[{ id: keys.modelId, className: "BisCore.Model" }]],
+        getSearchPaths: async () => [{ identifier: { id: keys.modelId, className: "BisCore.Model" } }],
       },
       wrapper: ({ children }) => <SharedTreeContextProviderInternal>{children}</SharedTreeContextProviderInternal>,
     });
@@ -204,24 +204,26 @@ describe("useModelsTree", () => {
         const abortSignal = new AbortController().signal;
         await waitFor(async () => {
           expect(getSearchPaths).to.not.be.undefined;
-          const result = (await getSearchPaths!({ imodelAccess, abortSignal }))?.sort((lhs, rhs) => {
-            if (HierarchySearchPath.normalize(lhs).path.length > HierarchySearchPath.normalize(rhs).path.length) {
-              return -1;
-            }
-            return 1;
-          });
-          const expectedResult: HierarchySearchPath[] = [
-            [
-              { id: IModel.rootSubjectId, className: subjectClass },
-              { id: modelIds[0], className: modelClass },
-              { id: categoryIds[0], className: categoryClass },
-              { id: elementIds[0], className: elementClass },
-            ],
-            [
-              { id: IModel.rootSubjectId, className: subjectClass },
-              { id: modelIds[1], className: modelClass },
-              { id: categoryIds[1], className: categoryClass },
-            ],
+          const result = await getSearchPaths!({ imodelAccess, abortSignal });
+          const expectedResult: HierarchySearchTree[] = [
+            {
+              identifier: { id: IModel.rootSubjectId, className: subjectClass },
+              children: [
+                {
+                  identifier: { id: modelIds[0], className: modelClass },
+                  children: [
+                    {
+                      identifier: { id: categoryIds[0], className: categoryClass },
+                      children: [{ identifier: { id: elementIds[0], className: elementClass } }],
+                    },
+                  ],
+                },
+                {
+                  identifier: { id: modelIds[1], className: modelClass },
+                  children: [{ identifier: { id: categoryIds[1], className: categoryClass } }],
+                },
+              ],
+            },
           ];
           expect(result).to.deep.eq(expectedResult);
         });
@@ -237,23 +239,25 @@ describe("useModelsTree", () => {
         await waitFor(async () => {
           expect(getSearchPaths).to.not.be.undefined;
           const result = await getSearchPaths!({ imodelAccess, abortSignal });
-          const expectedResult: HierarchySearchPath[] = [
+          const expectedResult: HierarchySearchTree[] = [
             {
-              path: [
-                { id: IModel.rootSubjectId, className: subjectClass },
-                { id: modelIds[1], className: modelClass },
-                { id: categoryIds[1], className: categoryClass },
+              identifier: { id: IModel.rootSubjectId, className: subjectClass },
+              options: { autoExpand: true },
+              children: [
+                {
+                  identifier: { id: modelIds[1], className: modelClass },
+                  options: { autoExpand: true },
+                  children: [
+                    {
+                      identifier: { id: categoryIds[1], className: categoryClass },
+                      options: { autoExpand: true },
+                      children: [
+                        { identifier: { id: elementIds[1], className: elementClass }, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
+                      ],
+                    },
+                  ],
+                },
               ],
-              options: undefined,
-            },
-            {
-              path: [
-                { id: IModel.rootSubjectId, className: subjectClass },
-                { id: modelIds[1], className: modelClass },
-                { id: categoryIds[1], className: categoryClass },
-                { id: elementIds[1], className: elementClass },
-              ],
-              options: { reveal: true },
             },
           ];
           expect(result).to.deep.eq(expectedResult);
@@ -276,15 +280,23 @@ describe("useModelsTree", () => {
         await waitFor(async () => {
           expect(getSearchPaths).to.not.be.undefined;
           const result = await getSearchPaths!({ imodelAccess, abortSignal });
-          const expectedResult: HierarchySearchPath[] = [
+          const expectedResult: HierarchySearchTree[] = [
             {
-              path: [
-                { id: IModel.rootSubjectId, className: subjectClass },
-                { id: modelIds[0], className: modelClass },
-                { id: categoryIds[0], className: categoryClass },
-                { id: elementIds[0], className: elementClass },
+              identifier: { id: IModel.rootSubjectId, className: subjectClass },
+              options: { autoExpand: true },
+              children: [
+                {
+                  identifier: { id: modelIds[0], className: modelClass },
+                  options: { autoExpand: true },
+                  children: [
+                    {
+                      identifier: { id: categoryIds[0], className: categoryClass },
+                      options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                      children: [{ identifier: { id: elementIds[0], className: elementClass } }],
+                    },
+                  ],
+                },
               ],
-              options: undefined,
             },
           ];
           expect(result).to.deep.eq(expectedResult);
@@ -331,14 +343,21 @@ describe("useModelsTree", () => {
         await waitFor(async () => {
           expect(getSearchPaths).to.not.be.undefined;
           const result = await getSearchPaths!({ imodelAccess, abortSignal });
-          const expectedResult: HierarchySearchPath[] = [
+          const expectedResult: HierarchySearchTree[] = [
             {
-              path: [
-                { id: IModel.rootSubjectId, className: subjectClass },
-                { id: modelIds[1], className: modelClass },
-                { id: categoryIds[1], className: categoryClass },
+              identifier: { id: IModel.rootSubjectId, className: subjectClass },
+              options: { autoExpand: true },
+              children: [
+                {
+                  identifier: { id: modelIds[1], className: modelClass },
+                  options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                  children: [
+                    {
+                      identifier: { id: categoryIds[1], className: categoryClass },
+                    },
+                  ],
+                },
               ],
-              options: { reveal: { depthInPath: 1 } },
             },
           ];
           expect(result).to.deep.eq(expectedResult);

@@ -34,7 +34,7 @@ import type {
   NodePostProcessor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlBinding, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
+import type { EC, ECClassHierarchyInspector, ECSchemaProvider, ECSqlBinding, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 import type { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.js";
 
 /**
@@ -633,9 +633,9 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
   }
 }
 
-function getElementsSelectProps(props?: { modelClass?: string; elementClass?: "BisCore.GeometricElement3d" | "BisCore.GeometricElement2d" }) {
-  const modelClassFullName = props?.modelClass ?? CLASS_NAME_Model;
-  const elementClassFullName = props?.elementClass ?? CLASS_NAME_Element;
+function getElementsSelectProps(props?: { modelClass?: EC.FullClassName; elementClass?: "BisCore.GeometricElement3d" | "BisCore.GeometricElement2d" }) {
+  const modelClassFullName: EC.FullClassName = props?.modelClass ?? CLASS_NAME_Model;
+  const elementClassFullName: EC.FullClassName = props?.elementClass ?? CLASS_NAME_Element;
   const result = [
     {
       classFullName: elementClassFullName,

@@ -14,7 +14,7 @@ import { createVisibilityChangeEventListener } from "../VisibilityChangeEventLis
 
 import type { Observable } from "rxjs";
 import type { GuidString } from "@itwin/core-bentley";
-import type { ClassGroupingNodeKey, HierarchySearchPath, InstancesNodeKey } from "@itwin/presentation-hierarchies";
+import type { ClassGroupingNodeKey, HierarchySearchTree, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../../components/VisibilityTree.js";
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
@@ -27,7 +27,7 @@ import type { IVisibilityChangeEventListener } from "../VisibilityChangeEventLis
 export interface CreateSearchResultsTreeProps<TCache> {
   idsCache: TCache;
   imodelAccess: ECClassHierarchyInspector;
-  searchPaths: HierarchySearchPath[];
+  searchPaths: HierarchySearchTree[];
 }
 
 /** @internal */
@@ -49,7 +49,7 @@ export interface UseCachedVisibilityProps<TCache, TSearchTargets> {
 
 /** @internal */
 export function useCachedVisibility<TCache, TSearchTargets>(props: UseCachedVisibilityProps<TCache, TSearchTargets>) {
-  const [searchPaths, setSearchPaths] = useState<HierarchySearchPath[] | undefined>(undefined);
+  const [searchPaths, setSearchPaths] = useState<HierarchySearchTree[] | undefined>(undefined);
   const { activeView, idsCache, createSearchResultsTree, createTreeSpecificVisibilityHandler, componentId } = props;
 
   const visibilityHandlerFactory = useMemo<VisibilityTreeProps["visibilityHandlerFactory"]>(
@@ -67,14 +67,14 @@ export function useCachedVisibility<TCache, TSearchTargets>(props: UseCachedVisi
 
   return {
     visibilityHandlerFactory,
-    onSearchPathsChanged: useCallback((paths: HierarchySearchPath[] | undefined) => setSearchPaths(paths), []),
+    onSearchPathsChanged: useCallback((paths: HierarchySearchTree[] | undefined) => setSearchPaths(paths), []),
     searchPaths,
   };
 }
 
 function createVisibilityHandlerFactory<TCache, TSearchTargets>(
   props: UseCachedVisibilityProps<TCache, TSearchTargets> & {
-    searchPaths: HierarchySearchPath[] | undefined;
+    searchPaths: HierarchySearchTree[] | undefined;
   },
 ): VisibilityTreeProps["visibilityHandlerFactory"] {
   const { activeView, createSearchResultsTree, createTreeSpecificVisibilityHandler, idsCache, searchPaths, componentId } = props;
