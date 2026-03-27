@@ -132,7 +132,7 @@ test.describe("Models tree", () => {
       await treeWidget.getByText(`E-104B-TOP [4-1F5]`).waitFor();
 
       // wait for parent category to have visible checkbox to ensure it's fully loaded
-      await treeWidget.getByRole("treeitem", { name: "E-HEX"}).getByRole("checkbox", { name: "Visible" }).waitFor();
+      await treeWidget.getByRole("treeitem", { name: "E-HEX" }).getByRole("checkbox", { name: "Visible" }).waitFor();
       await takeScreenshot(page, treeWidget);
     });
 
