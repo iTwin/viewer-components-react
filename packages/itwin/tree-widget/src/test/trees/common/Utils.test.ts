@@ -73,7 +73,7 @@ describe("Utils", () => {
       expect(result).to.deep.equal([{ identifier: subject, children: [{ identifier: model, children: [{ identifier: category1 }] }] }]);
     });
 
-    it("allows multiple search trees to add siblings under a sub-tree target", () => {
+    it("adds multiple search tree branches under a sub-tree target", () => {
       const result = joinHierarchySearchTrees(
         [{ identifier: subject, children: [{ identifier: model }] }],
         [{ identifier: subject, children: [{ identifier: model, children: [{ identifier: category1 }, { identifier: category2 }] }] }],
@@ -84,8 +84,7 @@ describe("Utils", () => {
     });
 
     it("preserves isTarget when search tree has explicit isTarget on node with children", () => {
-      // model has isTarget: true in the search tree, which sets isSearchTarget
-      // preventing deletion by onNewEntry for category1
+      // model has `isTarget: true` in the search tree - that flag has to be preserved
       const result = joinHierarchySearchTrees(
         [{ identifier: subject, children: [{ identifier: model }] }],
         [{ identifier: subject, children: [{ identifier: model, isTarget: true, children: [{ identifier: category1 }] }] }],
