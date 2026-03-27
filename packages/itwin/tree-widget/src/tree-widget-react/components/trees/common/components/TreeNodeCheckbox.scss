@@ -19,8 +19,7 @@
   z-index: 1;
   background-color: var(--iui-color-background);
   align-self: stretch;
-  padding-inline-start: 1px;
-  padding-inline-end: var(--iui-size-2xs);
+  padding-inline: 1px var(--iui-size-2xs);
   margin-inline-end: 0;
   margin-block: 1px;
   display: flex;
@@ -30,6 +29,13 @@
 
 [aria-selected="true"] .tw-tree-node-checkbox-container {
   background-color: var(--iui-color-background-accent-muted);
+}
+
+[aria-selected="true"]:focus-visible .tw-tree-node-checkbox-container,
+[aria-selected="true"]:has(:focus-visible) .tw-tree-node-checkbox-container {
+  box-shadow:
+    inset 0 1px 0 var(--iui-color-border-accent),
+    inset 0 -1px 0 var(--iui-color-border-accent);
 }
 
 @media (any-hover: hover) {
