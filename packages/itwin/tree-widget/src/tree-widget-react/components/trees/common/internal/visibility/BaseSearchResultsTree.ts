@@ -225,17 +225,13 @@ export async function createSearchResultsTree<
     }
 
     const isTarget = tree.isTarget === true || !tree.children?.length;
-    const existingNode: TSearchResultsTreeNode | undefined = parentNode.children?.get(identifier.id);
-    let currentNode: TSearchResultsTreeNode;
-    if (existingNode !== undefined) {
-      currentNode = existingNode;
-    } else {
-      currentNode = await searchResultsNodesHandler.accept({
+    const currentNode =
+      parentNode.children?.get(identifier.id) ??
+      (await searchResultsNodesHandler.accept({
         instanceKey: identifier,
         parentNode,
         isSearchTarget: isTarget,
-      });
-    }
+      }));
 
     // Do not descend into children once the current node is a search target.
     if (!currentNode.isSearchTarget && tree.children) {
