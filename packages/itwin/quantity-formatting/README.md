@@ -426,6 +426,74 @@ render(<FormatSetPanel formatSet={formatSet} editable={false} />);
 
 </details>
 
+## Telemetry
+
+The quantity formatting components support telemetry tracking for usage analytics. You can hook into feature usage events by wrapping your components with the `TelemetryContextProvider`.
+
+### Basic Setup
+
+<details>
+<summary>Telemetry example code</summary>
+
+<!-- [[include: [QuantityFormat.TelemetryExampleImports, QuantityFormat.QuantityFormatPanelExampleImports, QuantityFormat.TelemetryExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { TelemetryContextProvider } from "@itwin/quantity-formatting-react";
+
+import { QuantityFormatPanel } from "@itwin/quantity-formatting-react";
+import { IModelApp } from "@itwin/core-frontend";
+import type { FormatDefinition } from "@itwin/core-quantity";
+
+const formatDefinition: FormatDefinition = {
+  precision: 4,
+  type: "Decimal",
+  composite: {
+    units: [{ name: "Units.M", label: "m" }],
+  },
+};
+
+const handleFormatChange = (_newFormat: FormatDefinition) => {
+  // Handle format change
+};
+
+const handleFeatureUsed = (featureId: string) => {
+  // Send to your analytics service
+  console.log(`Feature used: ${featureId}`);
+};
+
+render(
+  <TelemetryContextProvider onFeatureUsed={handleFeatureUsed}>
+    <QuantityFormatPanel formatDefinition={formatDefinition} unitsProvider={IModelApp.quantityFormatter.unitsProvider} onFormatChange={handleFormatChange} />
+  </TelemetryContextProvider>,
+);
+```
+
+<!-- END EXTRACTION -->
+
+</details>
+
+### Tracked Features
+
+The following features are tracked:
+
+| Feature ID                  | Description                        |
+| --------------------------- | ---------------------------------- |
+| `format-apply`              | User applies format changes        |
+| `format-clear`              | User clears/resets format changes  |
+| `advanced-options-expand`   | User expands advanced options      |
+| `advanced-options-collapse` | User collapses advanced options    |
+| `format-set-select`         | User selects a format set          |
+| `format-select`             | User selects a format              |
+| `format-set-search`         | User initiates a format set search |
+| `format-search`             | User initiates a format search     |
+| `unit-system-change`        | User changes the unit system       |
+| `format-type-change`        | User changes the format type       |
+| `unit-change`               | User changes the unit              |
+| `precision-change`          | User changes precision             |
+
+Additional internal feature tracking includes toggles and changes for decimal separators, thousands separators, sign options, and various format traits.
+
 ## Complete Example
 
 A comprehensive example showing how to use FormatSelector together with QuantityFormatPanel can be found in this repository's test-viewer, found in [QuantityFormatButton.tsx](https://github.com/iTwin/viewer-components-react/blob/master/apps/test-viewer/src/components/QuantityFormatButton.tsx). The [common workflow](#common-worfklow) in the section above walks through the component in pictures.
