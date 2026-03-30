@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
 import { act } from "react";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Id64 } from "@itwin/core-bentley";
 import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -30,7 +30,7 @@ import {
   insertSpatialCategory,
   insertSubject,
 } from "../../IModelUtils.js";
-import { createFakeSinonViewport, createIModelAccess } from "../Common.js";
+import { createFakeViewport, createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 import { createClassGroupingHierarchyNode } from "./Utils.js";
 
@@ -44,10 +44,10 @@ import type { ExpectedHierarchyDef } from "../HierarchyValidation.js";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
-interface TreeSearchTestCaseDefinition<TIModelSetupResult extends {}> {
+interface TreeSearchTestCaseDefinition<TIModelSetupResult extends object> {
   name: string;
   only?: boolean;
-  setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1];
+  setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[0];
   getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchySearchTree[];
   getTargetItems: (setupResult: TIModelSetupResult) => Array<InstanceKey | ElementsGroupInfo>;
   getTargetInstanceLabel?: (setupResult: TIModelSetupResult) => string;
@@ -60,7 +60,7 @@ namespace TreeSearchTestCaseDefinition {
   export function create<TIModelSetupResult extends object>(props: {
     only?: boolean;
     name: string;
-    setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1];
+    setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[0];
     getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchySearchTree[];
     getTargetItems: (setupResult: TIModelSetupResult) => Array<InstanceKey | ElementsGroupInfo>;
     getTargetInstanceLabel?: (setupResult: TIModelSetupResult) => string;
@@ -83,7 +83,7 @@ namespace TreeSearchTestCaseDefinition {
 
 describe("Models tree", () => {
   describe("Hierarchy search", () => {
-    before(async function () {
+    beforeAll(async () => {
       await initializePresentationTesting({
         backendProps: {
           caching: {
@@ -99,12 +99,12 @@ describe("Models tree", () => {
       ECSchemaRpcImpl.register();
     });
 
-    after(async function () {
+    afterAll(async () => {
       await terminatePresentationTesting();
     });
 
-    it("sets auto-expand on correct nodes with merged sub-tree and search paths", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("sets auto-expand on correct nodes with merged sub-tree and search paths", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
         const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -1852,8 +1852,8 @@ describe("Models tree", () => {
         let expectedHierarchy!: ExpectedHierarchyDef[];
         let hierarchyConfig: ModelsTreeHierarchyConfiguration;
 
-        before(async function () {
-          const imodelSetupResult = await buildIModel(this, async (...args) => testCase.setupIModel(...args));
+        beforeAll(async () => {
+          const imodelSetupResult = await buildIModel(async (...args) => testCase.setupIModel(...args));
           imodel = imodelSetupResult.imodel;
           instanceKeyPaths = testCase.getTargetInstancePaths(imodelSetupResult);
           targetItems = testCase.getTargetItems(imodelSetupResult);
@@ -1862,11 +1862,11 @@ describe("Models tree", () => {
           hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...testCase.getHierarchyConfig?.(imodelSetupResult) };
         });
 
-        after(async function () {
+        afterAll(async () => {
           await imodel.close();
         });
 
-        it("finds instance key paths by target instance key", async function () {
+        it("finds instance key paths by target instance key", async () => {
           using hook = renderUseModelsTreeHook({
             imodel,
             hierarchyConfig,
@@ -1876,12 +1876,12 @@ describe("Models tree", () => {
           const searchPaths = await act(async () => {
             return hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal });
           });
-          expect(searchPaths).to.deep.eq(instanceKeyPaths);
+          expect(searchPaths).toEqual(instanceKeyPaths);
         });
 
-        it("finds instance key paths by target instance label", async function () {
+        it("finds instance key paths by target instance label", async () => {
           if (targetInstanceLabel === undefined) {
-            this.skip();
+            return;
           }
 
           using hook = renderUseModelsTreeHook({
@@ -1893,10 +1893,10 @@ describe("Models tree", () => {
           const searchPaths = await act(async () =>
             hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }),
           );
-          expect(searchPaths).to.deep.eq(instanceKeyPaths);
+          expect(searchPaths).toEqual(instanceKeyPaths);
         });
 
-        it("searches hierarchy by instance key paths", async function () {
+        it("searches hierarchy by instance key paths", async () => {
           using hook = renderUseModelsTreeHook({
             imodel,
             hierarchyConfig,
@@ -1919,8 +1919,8 @@ describe("Models tree", () => {
       });
     });
 
-    it("finds elements by base36 ECInstanceId suffix", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("finds elements by base36 ECInstanceId suffix", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
         const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -1958,11 +1958,11 @@ describe("Models tree", () => {
         searchText: formattedECInstanceId,
       });
       const searchPaths = await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }));
-      expect(searchPaths).to.deep.eq(expectedPaths);
+      expect(searchPaths).toEqual(expectedPaths);
     });
 
-    it("search by label aborts when abort signal fires", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("search by label aborts when abort signal fires", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
         const category = insertSpatialCategory({ builder, codeValue: "category", userLabel: "Test" });
@@ -1981,11 +1981,11 @@ describe("Models tree", () => {
       const abortController1 = new AbortController();
       const pathsPromiseAborted = act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: abortController1.signal }));
       abortController1.abort();
-      expect(await pathsPromiseAborted).to.deep.eq([]);
+      expect(await pathsPromiseAborted).toEqual([]);
 
       const abortController2 = new AbortController();
       const pathsPromise = act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: abortController2.signal }));
-      expect(await pathsPromise).to.deep.eq([
+      expect(await pathsPromise).toEqual([
         {
           identifier: { className: "BisCore.GeometricModel3d", id: ids.model.id },
           options: { autoExpand: true },
@@ -1996,8 +1996,8 @@ describe("Models tree", () => {
       ]);
     });
 
-    it("search by target items aborts when abort signal fires", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("search by target items aborts when abort signal fires", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
         const category = insertSpatialCategory({ builder, codeValue: "category", userLabel: "Test" });
@@ -2019,11 +2019,11 @@ describe("Models tree", () => {
       const abortController1 = new AbortController();
       const pathsPromiseAborted = act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: abortController1.signal }));
       abortController1.abort();
-      expect(await pathsPromiseAborted).to.deep.eq([]);
+      expect(await pathsPromiseAborted).toEqual([]);
 
       const abortController2 = new AbortController();
       const pathsPromise = act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: abortController2.signal }));
-      expect(await pathsPromise).to.deep.eq([
+      expect(await pathsPromise).toEqual([
         {
           identifier: { className: "BisCore.GeometricModel3d", id: ids.model.id },
           options: { autoExpand: true },
@@ -2034,8 +2034,8 @@ describe("Models tree", () => {
       ]);
     });
 
-    it("finds elements by label containing special SQLite characters", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("finds elements by label containing special SQLite characters", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
         const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -2059,7 +2059,7 @@ describe("Models tree", () => {
       const defaultProps = { hierarchyConfig, imodel };
 
       using hook = renderUseModelsTreeHook({ ...defaultProps, searchText: "_" });
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
         {
           identifier: adjustedModelKey(keys.model),
           options: { autoExpand: true },
@@ -2079,7 +2079,7 @@ describe("Models tree", () => {
       ]);
 
       hook.rerender({ ...defaultProps, searchText: "%" });
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
         {
           identifier: adjustedModelKey(keys.model),
           options: { autoExpand: true },
@@ -2099,7 +2099,7 @@ describe("Models tree", () => {
       ]);
 
       hook.rerender({ ...defaultProps, searchText: "\\" });
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
         {
           identifier: adjustedModelKey(keys.model),
           options: { autoExpand: true },
@@ -2131,7 +2131,7 @@ const adjustedModelKey = (source: InstanceKey) => ({ className: CLASS_NAME_Geome
 const adjustedElementKey = (source: InstanceKey) => ({ className: CLASS_NAME_GeometricElement3d, id: source.id });
 
 function renderUseModelsTreeHook(props: Omit<Props<typeof useModelsTree>, "activeView"> & { imodel: IModelConnection }) {
-  const result = renderHook((hookProps) => useModelsTree({ activeView: createFakeSinonViewport({ iModel: props.imodel }), ...hookProps }), {
+  const result = renderHook((hookProps) => useModelsTree({ activeView: createFakeViewport({ iModel: props.imodel }), ...hookProps }), {
     initialProps: props,
     wrapper: ({ children }) => <SharedTreeContextProvider>{children}</SharedTreeContextProvider>,
   });

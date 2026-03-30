@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
+import { describe, expect, it } from "vitest";
 import { joinHierarchySearchTrees } from "../../../tree-widget-react/components/trees/common/Utils.js";
 
 import type { IModelInstanceKey } from "@itwin/presentation-hierarchies";
@@ -16,17 +16,17 @@ describe("Utils", () => {
     const category2: IModelInstanceKey = { id: "0x4", className: "s:c", imodelKey: "key" };
 
     it("returns empty array when both inputs are empty", () => {
-      expect(joinHierarchySearchTrees([], [])).to.deep.equal([]);
+      expect(joinHierarchySearchTrees([], [])).toEqual([]);
     });
 
     it("returns empty when only sub-trees are provided without search trees", () => {
       const result = joinHierarchySearchTrees([{ identifier: subject, children: [{ identifier: model }] }], []);
-      expect(result).to.deep.equal([]);
+      expect(result).toEqual([]);
     });
 
     it("returns empty when only search trees are provided without sub-trees", () => {
       const result = joinHierarchySearchTrees([], [{ identifier: subject, children: [{ identifier: model }] }]);
-      expect(result).to.deep.equal([]);
+      expect(result).toEqual([]);
     });
 
     it("returns empty when none of the search targets are under sub-tree targets", () => {
@@ -34,7 +34,7 @@ describe("Utils", () => {
         [{ identifier: subject, children: [{ identifier: model, children: [{ identifier: category1 }] }] }],
         [{ identifier: subject, children: [{ identifier: model, children: [{ identifier: category2 }] }] }],
       );
-      expect(result).to.deep.equal([]);
+      expect(result).toEqual([]);
     });
 
     it("extends sub-tree leaf with search tree children, removing isTarget from leaf", () => {
@@ -43,7 +43,7 @@ describe("Utils", () => {
       // subject's isTarget (set by builder when children are added) is deleted
       // because the search tree is more specific
       const result = joinHierarchySearchTrees([{ identifier: subject }], [{ identifier: subject, children: [{ identifier: model }] }]);
-      expect(result).to.deep.equal([{ identifier: subject, children: [{ identifier: model }] }]);
+      expect(result).toEqual([{ identifier: subject, children: [{ identifier: model }] }]);
     });
 
     it("removes isTarget from intermediate sub-tree node matched by search tree", () => {
@@ -51,14 +51,14 @@ describe("Utils", () => {
       // search-tree: [subject] (matches intermediate sub-tree node that is not a sub-tree target)
       // subject's isTarget (set by builder because search tree marks it as target) is deleted
       const result = joinHierarchySearchTrees([{ identifier: subject, children: [{ identifier: model }] }], [{ identifier: subject }]);
-      expect(result).to.deep.equal([{ identifier: subject, children: [{ identifier: model }] }]);
+      expect(result).toEqual([{ identifier: subject, children: [{ identifier: model }] }]);
     });
 
     it("preserves isTarget on explicit sub-tree target matched by search tree", () => {
       // sub-tree: [subject(isTarget) -> model]
       // subject is an explicit sub-tree target, so isTarget is preserved
       const result = joinHierarchySearchTrees([{ identifier: subject, isTarget: true, children: [{ identifier: model }] }], [{ identifier: subject }]);
-      expect(result).to.deep.equal([{ identifier: subject, isTarget: true, children: [{ identifier: model }] }]);
+      expect(result).toEqual([{ identifier: subject, isTarget: true, children: [{ identifier: model }] }]);
     });
 
     it("adds search tree entries under ancestor sub-tree targets", () => {
@@ -70,7 +70,7 @@ describe("Utils", () => {
         [{ identifier: subject }],
         [{ identifier: subject, children: [{ identifier: model, children: [{ identifier: category1 }] }] }],
       );
-      expect(result).to.deep.equal([{ identifier: subject, children: [{ identifier: model, children: [{ identifier: category1 }] }] }]);
+      expect(result).toEqual([{ identifier: subject, children: [{ identifier: model, children: [{ identifier: category1 }] }] }]);
     });
 
     it("adds multiple search tree branches under a sub-tree target", () => {
@@ -78,9 +78,7 @@ describe("Utils", () => {
         [{ identifier: subject, children: [{ identifier: model }] }],
         [{ identifier: subject, children: [{ identifier: model, children: [{ identifier: category1 }, { identifier: category2 }] }] }],
       );
-      expect(result).to.deep.equal([
-        { identifier: subject, children: [{ identifier: model, children: [{ identifier: category1 }, { identifier: category2 }] }] },
-      ]);
+      expect(result).toEqual([{ identifier: subject, children: [{ identifier: model, children: [{ identifier: category1 }, { identifier: category2 }] }] }]);
     });
 
     it("preserves isTarget when search tree has explicit isTarget on node with children", () => {
@@ -89,7 +87,7 @@ describe("Utils", () => {
         [{ identifier: subject, children: [{ identifier: model }] }],
         [{ identifier: subject, children: [{ identifier: model, isTarget: true, children: [{ identifier: category1 }] }] }],
       );
-      expect(result).to.deep.equal([{ identifier: subject, children: [{ identifier: model, isTarget: true, children: [{ identifier: category1 }] }] }]);
+      expect(result).toEqual([{ identifier: subject, children: [{ identifier: model, isTarget: true, children: [{ identifier: category1 }] }] }]);
     });
   });
 });

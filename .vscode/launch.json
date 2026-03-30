@@ -56,32 +56,6 @@
       "preLaunchTask": "[TASK] test-viewer start"
     },
     {
-      "name": "Tests: Tree-widget",
-      "cwd": "${workspaceFolder}/packages/itwin/tree-widget",
-      "type": "node",
-      "request": "launch",
-      "runtimeExecutable": "node",
-      "runtimeVersion": "24",
-      "runtimeArgs": [
-        "--experimental-test-module-mocks",
-        "--enable-source-maps",
-        "--import",
-        "../../../node-hooks/ignore-styles/register.cjs",
-        "${workspaceFolder}/packages/itwin/tree-widget/node_modules/mocha/bin/mocha.js"
-      ],
-      "args": [
-        "--config",
-        "./.mocharc.json",
-        "--no-timeouts"
-      ],
-      "env": {
-        "NODE_ENV": "development"
-      },
-      "outFiles": [
-        "${workspaceFolder}/packages/itwin/tree-widget/lib/**/*.js"
-      ]
-    },
-    {
       "name": "Tests: Property-grid",
       "cwd": "${workspaceFolder}/packages/itwin/property-grid",
       "type": "node",

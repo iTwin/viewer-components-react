@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { ElementOwnsMultiAspects, ExternalSourceAspect, PhysicalModel, SpatialCategory, Subject } from "@itwin/core-backend";
 import { IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -34,7 +34,7 @@ import type { DefineHierarchyLevelProps, HierarchyProvider } from "@itwin/presen
 
 describe("Models tree", () => {
   describe("Hierarchy level filtering", () => {
-    before(async function () {
+    beforeAll(async () => {
       await initializePresentationTesting({
         backendProps: {
           caching: {
@@ -50,12 +50,12 @@ describe("Models tree", () => {
       ECSchemaRpcImpl.register();
     });
 
-    after(async function () {
+    afterAll(async () => {
       await terminatePresentationTesting();
     });
 
-    it("can filter root level", async function () {
-      await using imodelResult = await buildIModel(this, async (builder) => {
+    it("can filter root level", async () => {
+      await using imodelResult = await buildIModel(async (builder) => {
         const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
         const childSubject = insertSubject({ builder, codeValue: "child subject 1", description: "", parentId: rootSubject.id });
         const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -130,8 +130,8 @@ describe("Models tree", () => {
       });
     });
 
-    it("can filter Subject children level", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("can filter Subject children level", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
         const category = insertSpatialCategory({ builder, codeValue: "category" });
 
@@ -195,16 +195,16 @@ describe("Models tree", () => {
         expected: {
           selectClasses: [
             {
-              selectClassInfo: { name: Subject.classFullName },
-            },
-            {
               selectClassInfo: { name: PhysicalModel.classFullName },
             },
             {
               selectClassInfo: { name: SpatialCategory.classFullName },
             },
+            {
+              selectClassInfo: { name: Subject.classFullName },
+            },
           ],
-          fields: mergeFieldLists([subjectFields, physicalModelFields, spatialCategoryFields]),
+          fields: mergeFieldLists([physicalModelFields, spatialCategoryFields, subjectFields]),
         },
       });
 
@@ -253,8 +253,8 @@ describe("Models tree", () => {
       });
     });
 
-    it("can filter Model children level", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("can filter Model children level", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
         const category1 = insertSpatialCategory({ builder, codeValue: "category1" });
         const category2 = insertSpatialCategory({ builder, codeValue: "category2" });
@@ -321,8 +321,8 @@ describe("Models tree", () => {
       });
     });
 
-    it("can filter Category children level", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("can filter Category children level", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
         const category = insertSpatialCategory({ builder, codeValue: "category" });
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
@@ -405,8 +405,8 @@ describe("Models tree", () => {
       });
     });
 
-    it("can filter Element children level with child elements", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("can filter Element children level with child elements", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
         const category = insertSpatialCategory({ builder, codeValue: "category" });
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
@@ -501,8 +501,8 @@ describe("Models tree", () => {
       });
     });
 
-    it("can filter Element children level with modeling elements", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder, testSchema) => {
+    it("can filter Element children level with modeling elements", async () => {
+      await using buildIModelResult = await buildIModel(async (builder, testSchema) => {
         const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
         const category = insertSpatialCategory({ builder, codeValue: "category" });
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
@@ -603,8 +603,8 @@ describe("Models tree", () => {
       });
     });
 
-    it("creates descriptor with related properties", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("creates descriptor with related properties", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
         const category = insertSpatialCategory({ builder, codeValue: "category" });
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
@@ -681,8 +681,8 @@ describe("Models tree", () => {
     });
 
     describe("Hierarchy configuration", () => {
-      it("filters empty models when `showEmptyModels` set to true", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("filters empty models when `showEmptyModels` set to true", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
 
           // set up child model node
@@ -739,8 +739,8 @@ describe("Models tree", () => {
         });
       });
 
-      it("filters elements when `elementClassSpecification` is provided", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder, testSchema) => {
+      it("filters elements when `elementClassSpecification` is provided", async () => {
+        await using buildIModelResult = await buildIModel(async (builder, testSchema) => {
           const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
           const category = insertSpatialCategory({ builder, codeValue: "category" });
           const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
@@ -878,7 +878,7 @@ async function validateHierarchyLevelDescriptor(props: {
     displayType: DefaultContentDisplayTypes.PropertyPane,
     keys: new KeySet(inputKeys),
   });
-  expect(result).to.containSubset(expected);
+  expect(result).toMatchObject(expected);
 }
 
 function mergeFieldLists<TField extends Pick<PropertiesField, "label">>(fieldLists: TField[][]): TField[] {

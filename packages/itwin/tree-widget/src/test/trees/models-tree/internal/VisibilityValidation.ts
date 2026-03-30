@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
+import { expect } from "vitest";
 import { ModelsTreeNode } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeNode.js";
 
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
@@ -13,7 +13,7 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
   const actualVisibility = await handler.getVisibilityStatus(node);
 
   if (expectations === "all-hidden" || expectations === "all-visible") {
-    expect(actualVisibility.state).to.eq(expectations === "all-hidden" ? "hidden" : "visible", `Node, ${node.label}`);
+    expect(actualVisibility.state, `Node, ${node.label}`).toBe(expectations === "all-hidden" ? "hidden" : "visible");
     return;
   }
 
@@ -31,24 +31,24 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
         ++hiddenCount;
         ++visibleCount;
       } else if (expectations[elementId] === "disabled") {
-        expect(actualVisibility.isDisabled).to.eq(true, `Node, ${JSON.stringify(node)}`);
+        expect(actualVisibility.isDisabled, `Node, ${JSON.stringify(node)}`).toBe(true);
         return;
       }
       if (visibleCount > 0 && hiddenCount > 0) {
-        expect(actualVisibility.state).to.eq("partial", `Node, ${JSON.stringify(node)}`);
+        expect(actualVisibility.state, `Node, ${JSON.stringify(node)}`).toBe("partial");
         return;
       }
     }
-    expect(actualVisibility.state).to.eq(visibleCount > 0 ? "visible" : "hidden", `Node, ${JSON.stringify(node)}`);
+    expect(actualVisibility.state, `Node, ${JSON.stringify(node)}`).toBe(visibleCount > 0 ? "visible" : "hidden");
     return;
   }
 
   if (ModelsTreeNode.isSubjectNode(node) || ModelsTreeNode.isElementNode(node) || ModelsTreeNode.isModelNode(node)) {
     const { id } = node.key.instanceKeys[0];
     if (expectations[id] === "disabled") {
-      expect(actualVisibility.isDisabled).to.eq(true, `Node, ${JSON.stringify(node)}`);
+      expect(actualVisibility.isDisabled, `Node, ${JSON.stringify(node)}`).toBe(true);
     } else {
-      expect(actualVisibility.state).to.eq(expectations[id], `Node, ${JSON.stringify(node)}`);
+      expect(actualVisibility.state, `Node, ${JSON.stringify(node)}`).toBe(expectations[id]);
     }
     return;
   }
@@ -58,9 +58,9 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
     const modelId = node.extendedData.modelIds[0];
     const idToUse = `${modelId}-${id}`;
     if (expectations[idToUse] === "disabled") {
-      expect(actualVisibility.isDisabled).to.eq(true, `Node, ${JSON.stringify(node)}`);
+      expect(actualVisibility.isDisabled, `Node, ${JSON.stringify(node)}`).toBe(true);
     } else {
-      expect(actualVisibility.state).to.eq(expectations[idToUse], `Node, ${JSON.stringify(node)}`);
+      expect(actualVisibility.state, `Node, ${JSON.stringify(node)}`).toBe(expectations[idToUse]);
     }
     return;
   }

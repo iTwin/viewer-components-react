@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { afterAll, beforeAll, describe, it } from "vitest";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ClassificationsTreeDefinition } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIdsCache } from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
@@ -38,11 +39,11 @@ import type { SearchResultsTree } from "../../../tree-widget-react/components/tr
 import type { TreeWidgetViewport } from "../../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
 
 describe("ClassificationsTreeVisibilityHandler", () => {
-  before(async () => {
+  beforeAll(async () => {
     await initializeITwinJs();
   });
 
-  after(async () => {
+  afterAll(async () => {
     await terminateITwinJs();
   });
 
@@ -108,8 +109,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         source: "category",
       },
     };
-    const createIModel = async (mochaContext: Mocha.Context) => {
-      return buildIModel(mochaContext, async (builder) => {
+    const createIModel = async () => {
+      return buildIModel(async (builder) => {
         await importClassificationSchema(builder);
         await importCategorySymbolizesClassificationSchema(builder);
 
@@ -134,15 +135,15 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         return { table, classification, spatialCategory, elementInHierarchy, categoryFromCustomRelationship, elementNotInHierarchy, physicalModel };
       });
     };
-    before(async function () {
-      buildIModelResult = await createIModel(this);
+    beforeAll(async () => {
+      buildIModelResult = await createIModel();
     });
 
-    after(async function () {
+    afterAll(async () => {
       await buildIModelResult[Symbol.asyncDispose]();
     });
 
-    it("does not turn on categories from custom classification -> category relationship when `visibilityHandlerConfig` is not provided", async function () {
+    it("does not turn on categories from custom classification -> category relationship when `visibilityHandlerConfig` is not provided", async () => {
       const { imodel, ...keys } = buildIModelResult;
 
       using visibilityTestData = await createVisibilityTestData({
@@ -175,7 +176,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       });
     });
 
-    it("turns on categories from custom classification -> category relationship", async function () {
+    it("turns on categories from custom classification -> category relationship", async () => {
       const { imodel, ...keys } = buildIModelResult;
 
       using visibilityTestData = await createVisibilityTestData({
@@ -209,7 +210,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       });
     });
 
-    it("classification visibility takes into account categories from custom classification -> category relationship", async function () {
+    it("classification visibility takes into account categories from custom classification -> category relationship", async () => {
       const { imodel, ...keys } = buildIModelResult;
 
       using visibilityTestData = await createVisibilityTestData({
@@ -257,8 +258,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
   });
 
   describe("enabling visibility", () => {
-    it("by default everything is hidden in 3d view with 3d elements' hierarchy", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("by default everything is hidden in 3d view with 3d elements' hierarchy", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         await importClassificationSchema(builder);
 
         const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -299,8 +300,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
 
     describe("classification table", () => {
-      it("showing classification table makes contained elements under it visible", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("showing classification table makes contained elements under it visible", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           await importClassificationSchema(builder);
 
           const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -345,8 +346,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
 
     describe("classification", () => {
-      it("showing classification makes all ancestors and contained elements under it visible", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("showing classification makes all ancestors and contained elements under it visible", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           await importClassificationSchema(builder);
 
           const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -395,8 +396,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         });
       });
 
-      it("showing classification makes all ancestors partially visible, and contained elements under it visible", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("showing classification makes all ancestors partially visible, and contained elements under it visible", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           await importClassificationSchema(builder);
 
           const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -485,8 +486,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
 
     describe("geometric element", () => {
-      it("showing geometric element makes ancestors partially visible, and the element visible", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("showing geometric element makes ancestors partially visible, and the element visible", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           await importClassificationSchema(builder);
 
           const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -575,8 +576,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
   });
 
   describe("disabling visibility", () => {
-    it("by default everything is visible in 3d view with 3d elements' hierarchy", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("by default everything is visible in 3d view with 3d elements' hierarchy", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         await importClassificationSchema(builder);
 
         const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -619,8 +620,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
 
     describe("classification table", () => {
-      it("hiding classification table makes contained elements under it hidden", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("hiding classification table makes contained elements under it hidden", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           await importClassificationSchema(builder);
 
           const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -665,8 +666,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
 
     describe("classification", () => {
-      it("hiding classification makes all ancestors partially visible, and contained elements under it hidden", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("hiding classification makes all ancestors partially visible, and contained elements under it hidden", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           await importClassificationSchema(builder);
 
           const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -757,8 +758,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
 
     describe("geometric element", () => {
-      it("hiding geometric element makes ancestors partially visible, element and its children hidden", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+      it("hiding geometric element makes ancestors partially visible, element and its children hidden", async () => {
+        await using buildIModelResult = await buildIModel(async (builder) => {
           await importClassificationSchema(builder);
 
           const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -885,8 +886,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       };
     }
 
-    it("showing parent geometric element of search target changes visibility for nodes in search paths", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("showing parent geometric element of search target changes visibility for nodes in search paths", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         await importClassificationSchema(builder);
 
         const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -992,8 +993,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       });
     });
 
-    it("showing search target geometric element changes visibility for nodes in search paths", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("showing search target geometric element changes visibility for nodes in search paths", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         await importClassificationSchema(builder);
 
         const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -1102,8 +1103,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       });
     });
 
-    it("showing classification of search target element changes visibility for nodes in search paths", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("showing classification of search target element changes visibility for nodes in search paths", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         await importClassificationSchema(builder);
 
         const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
@@ -1220,8 +1221,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       });
     });
 
-    it("showing classification table of search target element changes visibility for nodes in search paths", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("showing classification table of search target element changes visibility for nodes in search paths", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         await importClassificationSchema(builder);
 
         const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });

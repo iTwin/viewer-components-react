@@ -1,6 +1,0 @@
-{
-  "include": ["src/tree-widget-react/**/*", "lib/tree-widget-react/**/*"],
-  "temp-dir": "./lib/test/coverage/.nyc_output",
-  "report-dir": "./lib/test/coverage",
-  "reporter": ["text-summary", "lcov", "cobertura"]
-}
