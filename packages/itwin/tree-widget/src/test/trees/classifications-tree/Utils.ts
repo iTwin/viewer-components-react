@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import { BisCodeSpec, Code, IModel } from "@itwin/core-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ClassificationsTreeDefinition } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
@@ -135,8 +136,9 @@ export function insertElementHasClassificationsRelationship(props: { builder: Te
 }
 
 export async function importClassificationSchema(builder: TestIModelBuilder) {
-  const schemaPath = import.meta.resolve("@bentley/classification-systems-schema/ClassificationSystems.ecschema.xml");
-  const schemaXml = fs.readFileSync(fs.realpathSync(new URL(schemaPath)), { encoding: "utf-8" });
+  const require = createRequire(import.meta.url);
+  const schemaPath = require.resolve("@bentley/classification-systems-schema/ClassificationSystems.ecschema.xml");
+  const schemaXml = fs.readFileSync(fs.realpathSync(schemaPath), { encoding: "utf-8" });
   await builder.importSchema(schemaXml);
 }
 

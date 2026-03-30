@@ -3,14 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
-import sinon from "sinon";
+import { afterEach, describe, expect, it } from "vitest";
 import { TreeWidget } from "../tree-widget-react/TreeWidget.js";
 
 describe("TreeWidget", () => {
   afterEach(() => {
     TreeWidget.terminate();
-    sinon.restore();
   });
 
   it("initializes only once", async () => {
@@ -18,10 +16,10 @@ describe("TreeWidget", () => {
     const firstLogger = TreeWidget.logger;
 
     await TreeWidget.initialize();
-    expect(TreeWidget.logger).to.equal(firstLogger);
+    expect(TreeWidget.logger).toBe(firstLogger);
   });
 
   it("`logger` throws if not initialized", () => {
-    expect(() => TreeWidget.logger).to.throw();
+    expect(() => TreeWidget.logger).toThrow();
   });
 });

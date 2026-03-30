@@ -3,25 +3,24 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
 import { firstValueFrom } from "rxjs";
-import sinon from "sinon";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { ModelCategoryElementsCountCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/ModelCategoryElementsCountCache.js";
 import { CLASS_NAME_GeometricElement3d } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
-import { createFakeSinonViewport } from "../../Common.js";
+import { createFakeViewport } from "../../Common.js";
 
 describe("ModelCategoryElementsCountCache", () => {
   beforeEach(() => {
-    // without this option tests sometimes fail with strange errors
-    sinon.useFakeTimers({ shouldClearNativeTimers: true });
+    // Use fake timers to reliably advance time in tests
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    sinon.clock.restore();
+    vi.useRealTimers();
   });
 
-  function createCache(viewport: ReturnType<typeof createFakeSinonViewport>) {
+  function createCache(viewport: ReturnType<typeof createFakeViewport>) {
     return new ModelCategoryElementsCountCache({
       queryExecutor: createECSqlQueryExecutor(viewport.iModel),
       componentId: "test",
@@ -35,114 +34,126 @@ describe("ModelCategoryElementsCountCache", () => {
   };
 
   it("returns 0 when query returns empty", async () => {
-    using vp = createFakeSinonViewport();
+    using vp = createFakeViewport();
     const cache = createCache(vp);
 
-    const [result] = await Promise.all([firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" })), sinon.clock.tickAsync(20)]);
-    expect(result).to.eq(0);
-    expect(vp.iModel.createQueryReader).to.be.calledOnce;
+    const [result] = await Promise.all([
+      firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" })),
+      vi.advanceTimersByTimeAsync(20),
+    ]);
+    expect(result).toBe(0);
+    expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
   });
 
   it("returns query value", async () => {
-    using vp = createFakeSinonViewport({ queryHandler: defaultQueryHandler });
+    using vp = createFakeViewport({ queryHandler: defaultQueryHandler });
     const cache = createCache(vp);
 
-    const [result] = await Promise.all([firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" })), sinon.clock.tickAsync(20)]);
-    expect(result).to.eq(2);
-    expect(vp.iModel.createQueryReader).to.be.calledOnce;
+    const [result] = await Promise.all([
+      firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" })),
+      vi.advanceTimersByTimeAsync(20),
+    ]);
+    expect(result).toBe(2);
+    expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
   });
 
   it("returns query and empty value", async () => {
-    using vp = createFakeSinonViewport({ queryHandler: () => [{ modelId: "0x1", categoryId: "0x2", elementsCount: 3 }] });
+    using vp = createFakeViewport({ queryHandler: () => [{ modelId: "0x1", categoryId: "0x2", elementsCount: 3 }] });
     const cache = createCache(vp);
 
     const promise1 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
     const promise2 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x3" }));
-    const [result1, result2] = await Promise.all([promise1, promise2, sinon.clock.tickAsync(20)]);
-    expect(result1).to.eq(3);
-    expect(result2).to.eq(0);
-    expect(vp.iModel.createQueryReader).to.be.calledOnce;
+    const [result1, result2] = await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(20)]);
+    expect(result1).toBe(3);
+    expect(result2).toBe(0);
+    expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
   });
 
   it("batches multiple requests", async () => {
-    using vp = createFakeSinonViewport({ queryHandler: defaultQueryHandler });
+    using vp = createFakeViewport({ queryHandler: defaultQueryHandler });
     const cache = createCache(vp);
 
     const promise1 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
     const promise2 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x3" }));
-    const [result1, result2] = await Promise.all([promise1, promise2, sinon.clock.tickAsync(20)]);
-    expect(result1).to.eq(2);
-    expect(result2).to.eq(2);
-    expect(vp.iModel.createQueryReader).to.be.calledOnce;
+    const [result1, result2] = await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(20)]);
+    expect(result1).toBe(2);
+    expect(result2).toBe(2);
+    expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
   });
 
   it("batches requests which are less than 20 ms apart", async () => {
-    using vp = createFakeSinonViewport({ queryHandler: defaultQueryHandler });
+    using vp = createFakeViewport({ queryHandler: defaultQueryHandler });
     const cache = createCache(vp);
 
     const promise1 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
-    await sinon.clock.tickAsync(19);
+    await vi.advanceTimersByTimeAsync(19);
     const promise2 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x3" }));
-    const [result1, result2] = await Promise.all([promise1, promise2, sinon.clock.tickAsync(2)]);
-    expect(result1).to.eq(2);
-    expect(result2).to.eq(2);
-    expect(vp.iModel.createQueryReader).to.be.calledOnce;
+    const [result1, result2] = await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(2)]);
+    expect(result1).toBe(2);
+    expect(result2).toBe(2);
+    expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
   });
 
   it("does not batch requests which are more than 20 ms apart", async () => {
-    using vp = createFakeSinonViewport({ queryHandler: defaultQueryHandler });
+    using vp = createFakeViewport({ queryHandler: defaultQueryHandler });
     const cache = createCache(vp);
 
     const promise1 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
-    await sinon.clock.tickAsync(21);
+    await vi.advanceTimersByTimeAsync(21);
     const promise2 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x3" }));
-    const [result1, result2] = await Promise.all([promise1, promise2, sinon.clock.tickAsync(20)]);
-    expect(result1).to.eq(2);
-    expect(result2).to.eq(2);
-    expect(vp.iModel.createQueryReader).to.be.calledTwice;
+    const [result1, result2] = await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(20)]);
+    expect(result1).toBe(2);
+    expect(result2).toBe(2);
+    expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
   });
 
   it("caches empty values", async () => {
-    using vp = createFakeSinonViewport();
+    using vp = createFakeViewport();
     const cache = createCache(vp);
 
-    const [result1] = await Promise.all([firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" })), sinon.clock.tickAsync(20)]);
+    const [result1] = await Promise.all([
+      firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" })),
+      vi.advanceTimersByTimeAsync(20),
+    ]);
     const result2 = await firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
-    expect(result1).to.eq(0);
-    expect(result2).to.eq(0);
-    expect(vp.iModel.createQueryReader).to.be.calledOnce;
+    expect(result1).toBe(0);
+    expect(result2).toBe(0);
+    expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
   });
 
   it("caches values returned by query", async () => {
-    using vp = createFakeSinonViewport({ queryHandler: defaultQueryHandler });
+    using vp = createFakeViewport({ queryHandler: defaultQueryHandler });
     const cache = createCache(vp);
 
-    const [result1] = await Promise.all([firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" })), sinon.clock.tickAsync(20)]);
+    const [result1] = await Promise.all([
+      firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" })),
+      vi.advanceTimersByTimeAsync(20),
+    ]);
     const result2 = await firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
-    expect(result1).to.eq(2);
-    expect(result2).to.eq(2);
-    expect(vp.iModel.createQueryReader).to.be.calledOnce;
+    expect(result1).toBe(2);
+    expect(result2).toBe(2);
+    expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
   });
 
   it("executes separate queries if 100 models are requested", async () => {
-    using vp = createFakeSinonViewport({ queryHandler: defaultQueryHandler });
+    using vp = createFakeViewport({ queryHandler: defaultQueryHandler });
     const cache = createCache(vp);
     const promises = new Array<Promise<number>>();
     for (let i = 1; i <= 100; ++i) {
       promises.push(firstValueFrom(cache.getCategoryElementsCount({ modelId: `0x${i}`, categoryId: "0x1000" })));
     }
-    await Promise.all([...promises, sinon.clock.tickAsync(20)]);
-    expect(vp.iModel.createQueryReader).to.be.calledOnce;
+    await Promise.all([...promises, vi.advanceTimersByTimeAsync(20)]);
+    expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
   });
 
   it("executes multiple queries if > 100 models are requested", async () => {
-    using vp = createFakeSinonViewport({ queryHandler: defaultQueryHandler });
+    using vp = createFakeViewport({ queryHandler: defaultQueryHandler });
     const cache = createCache(vp);
     const promises = new Array<Promise<number>>();
     for (let i = 1; i <= 101; ++i) {
       promises.push(firstValueFrom(cache.getCategoryElementsCount({ modelId: `0x${i}`, categoryId: "0x1000" })));
     }
-    await Promise.all([...promises, sinon.clock.tickAsync(20)]);
-    expect(vp.iModel.createQueryReader).to.be.calledTwice;
+    await Promise.all([...promises, vi.advanceTimersByTimeAsync(20)]);
+    expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
   });
 });

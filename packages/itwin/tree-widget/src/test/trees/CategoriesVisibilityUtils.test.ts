@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
-import sinon from "sinon";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { IModelReadRpcInterface, SubCategoryAppearance } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -15,7 +14,7 @@ import { invertAllCategories } from "../../tree-widget-react/components/trees/co
 import { enableCategoryDisplay, loadCategoriesFromViewport } from "../../tree-widget-react/components/trees/common/internal/VisibilityUtils.js";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubCategory } from "../IModelUtils.js";
 import { TestUtils } from "../TestUtils.js";
-import { createFakeSinonViewport, createIModelMock } from "./Common.js";
+import { createFakeViewport, createIModelMock } from "./Common.js";
 import { createTreeWidgetTestingViewport } from "./TreeUtils.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
@@ -23,12 +22,12 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeWidgetTestingViewport } from "./TreeUtils.js";
 
 describe("CategoryVisibilityUtils", () => {
-  before(async () => {
+  beforeAll(async () => {
     await NoRenderApp.startup();
     await TestUtils.initialize();
   });
 
-  after(async () => {
+  afterAll(async () => {
     TestUtils.terminate();
     await IModelApp.shutdown();
   });
@@ -56,32 +55,28 @@ describe("CategoryVisibilityUtils", () => {
   let viewport: TreeWidgetTestingViewport;
 
   beforeEach(() => {
-    viewport = createFakeSinonViewport({
+    viewport = createFakeViewport({
       queryHandler: () => [{ id: categoryId }],
       getCategoryInfo: async () => categoriesInfo,
       viewType: "3d",
     });
   });
 
-  afterEach(() => {
-    sinon.restore();
-  });
-
   describe("enableCategoryDisplay", () => {
     it("enables category", async () => {
       await enableCategoryDisplay(viewport, categoryId, true, false);
-      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: [categoryId], display: true, enableAllSubCategories: false });
+      expect(viewport.changeCategoryDisplay).toHaveBeenCalledWith({ categoryIds: [categoryId], display: true, enableAllSubCategories: false });
     });
 
     it("disables category", async () => {
       await enableCategoryDisplay(viewport, categoryId, false, false);
-      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: [categoryId], display: false, enableAllSubCategories: false });
+      expect(viewport.changeCategoryDisplay).toHaveBeenCalledWith({ categoryIds: [categoryId], display: false, enableAllSubCategories: false });
     });
 
     it("disables category and subcategories", async () => {
       await enableCategoryDisplay(viewport, categoryId, false, true);
-      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: [categoryId], display: false, enableAllSubCategories: true });
-      expect(viewport.changeSubCategoryDisplay).to.be.calledOnceWith({ subCategoryId, display: false });
+      expect(viewport.changeCategoryDisplay).toHaveBeenCalledWith({ categoryIds: [categoryId], display: false, enableAllSubCategories: true });
+      expect(viewport.changeSubCategoryDisplay).toHaveBeenCalledWith({ subCategoryId, display: false });
     });
 
     it("removes overrides per model when enabling category", async () => {
@@ -89,8 +84,8 @@ describe("CategoryVisibilityUtils", () => {
       viewport.perModelCategoryOverrides = overrides;
       await enableCategoryDisplay(viewport, categoryId, true, false);
 
-      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: [categoryId], display: true, enableAllSubCategories: false });
-      expect(viewport.setPerModelCategoryOverride).to.be.calledOnceWith({
+      expect(viewport.changeCategoryDisplay).toHaveBeenCalledWith({ categoryIds: [categoryId], display: true, enableAllSubCategories: false });
+      expect(viewport.setPerModelCategoryOverride).toHaveBeenCalledWith({
         modelIds: ["ModelId"],
         categoryIds: [categoryId],
         override: "none",
@@ -114,7 +109,7 @@ describe("CategoryVisibilityUtils", () => {
         getCategoryInfo: async () => categoryInfoWithoutSubcategories,
       });
       const result = await loadCategoriesFromViewport(viewport);
-      expect(result[0].subCategoryIds).to.be.undefined;
+      expect(result[0].subCategoryIds).toBeUndefined();
     });
   });
 
@@ -124,10 +119,8 @@ describe("CategoryVisibilityUtils", () => {
     let modelIds: Array<Id64String>;
     let subCategoryIds: Array<Id64String>;
     let nonMockedViewport: TreeWidgetTestingViewport;
-    async function createIModel(
-      context: Mocha.Context,
-    ): Promise<{ imodel: IModelConnection } & { models: Id64Array; categories: Id64Array; subCategories: Id64Array }> {
-      return buildIModel(context, async (builder) => {
+    async function createIModel(): Promise<{ imodel: IModelConnection } & { models: Id64Array; categories: Id64Array; subCategories: Id64Array }> {
+      return buildIModel(async (builder) => {
         const physicalModel1 = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel1" }).id;
         const physicalModel2 = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel2" }).id;
         const category1 = insertSpatialCategory({ builder, codeValue: "SpatialCategory1" }).id;
@@ -143,7 +136,7 @@ describe("CategoryVisibilityUtils", () => {
         };
       });
     }
-    before(async function () {
+    beforeAll(async () => {
       await initializePresentationTesting({
         backendProps: {
           caching: {
@@ -157,7 +150,7 @@ describe("CategoryVisibilityUtils", () => {
       });
       // eslint-disable-next-line @itwin/no-internal
       ECSchemaRpcImpl.register();
-      const buildIModelResult = await createIModel(this);
+      const buildIModelResult = await createIModel();
       imodel = buildIModelResult.imodel;
       categoryIds = buildIModelResult.categories;
       modelIds = buildIModelResult.models;
@@ -173,7 +166,7 @@ describe("CategoryVisibilityUtils", () => {
       });
     });
 
-    after(async function () {
+    afterAll(async () => {
       await imodel.close();
       await terminatePresentationTesting();
     });
@@ -182,14 +175,14 @@ describe("CategoryVisibilityUtils", () => {
       nonMockedViewport.changeCategoryDisplay({ categoryIds: [categoryIds[0]], display: false, enableAllSubCategories: true });
       nonMockedViewport.changeCategoryDisplay({ categoryIds: [categoryIds[1], categoryIds[2]], display: true, enableAllSubCategories: true });
       for (let i = 0; i < categoryIds.length; ++i) {
-        expect(nonMockedViewport.viewsCategory(categoryIds[i])).to.eq(i > 0);
+        expect(nonMockedViewport.viewsCategory(categoryIds[i])).toBe(i > 0);
       }
       await invertAllCategories(
         categoryIds.map((id) => ({ categoryId: id })),
         nonMockedViewport,
       );
       for (let i = 0; i < categoryIds.length; ++i) {
-        expect(nonMockedViewport.viewsCategory(categoryIds[i])).to.eq(i === 0);
+        expect(nonMockedViewport.viewsCategory(categoryIds[i])).toBe(i === 0);
       }
     });
 
@@ -199,20 +192,20 @@ describe("CategoryVisibilityUtils", () => {
       nonMockedViewport.changeSubCategoryDisplay({ subCategoryId: subCategoryIds[0], display: false });
       nonMockedViewport.changeSubCategoryDisplay({ subCategoryId: subCategoryIds[1], display: true });
       for (let i = 0; i < categoryIds.length; ++i) {
-        expect(nonMockedViewport.viewsCategory(categoryIds[i])).to.eq(i === 0);
+        expect(nonMockedViewport.viewsCategory(categoryIds[i])).toBe(i === 0);
       }
       for (let i = 0; i < subCategoryIds.length; ++i) {
-        expect(nonMockedViewport.viewsSubCategory(subCategoryIds[i])).to.eq(i !== 0);
+        expect(nonMockedViewport.viewsSubCategory(subCategoryIds[i])).toBe(i !== 0);
       }
       await invertAllCategories(
         categoryIds.map((id, index) => ({ categoryId: id, subCategoryIds: [subCategoryIds[index]] })),
         nonMockedViewport,
       );
       for (const id of categoryIds) {
-        expect(nonMockedViewport.viewsCategory(id)).to.be.true;
+        expect(nonMockedViewport.viewsCategory(id)).toBe(true);
       }
       for (const id of subCategoryIds) {
-        expect(nonMockedViewport.viewsSubCategory(id)).to.be.true;
+        expect(nonMockedViewport.viewsSubCategory(id)).toBe(true);
       }
     });
 
@@ -220,7 +213,7 @@ describe("CategoryVisibilityUtils", () => {
       nonMockedViewport.changeCategoryDisplay({ categoryIds: categoryIds[0], display: true, enableAllSubCategories: true });
       nonMockedViewport.changeCategoryDisplay({ categoryIds: categoryIds[1], display: false, enableAllSubCategories: true });
       for (let i = 0; i < categoryIds.length; ++i) {
-        expect(nonMockedViewport.viewsCategory(categoryIds[i])).to.eq(i === 0);
+        expect(nonMockedViewport.viewsCategory(categoryIds[i])).toBe(i === 0);
       }
       nonMockedViewport.setPerModelCategoryOverride({ modelIds: modelIds[0], categoryIds: categoryIds[0], override: "hide" });
       nonMockedViewport.setPerModelCategoryOverride({ modelIds: modelIds[1], categoryIds: categoryIds[1], override: "show" });
@@ -229,9 +222,9 @@ describe("CategoryVisibilityUtils", () => {
         nonMockedViewport,
       );
       for (const id of categoryIds) {
-        expect(nonMockedViewport.viewsCategory(id)).to.be.true;
-        expect(nonMockedViewport.getPerModelCategoryOverride({ modelId: modelIds[0], categoryId: id })).to.eq("none");
-        expect(nonMockedViewport.getPerModelCategoryOverride({ modelId: modelIds[1], categoryId: id })).to.eq("none");
+        expect(nonMockedViewport.viewsCategory(id)).toBe(true);
+        expect(nonMockedViewport.getPerModelCategoryOverride({ modelId: modelIds[0], categoryId: id })).toBe("none");
+        expect(nonMockedViewport.getPerModelCategoryOverride({ modelId: modelIds[1], categoryId: id })).toBe("none");
       }
     });
 
@@ -240,7 +233,7 @@ describe("CategoryVisibilityUtils", () => {
       nonMockedViewport.changeCategoryDisplay({ categoryIds: categoryIds[1], display: false, enableAllSubCategories: true });
 
       for (let i = 0; i < categoryIds.length; ++i) {
-        expect(nonMockedViewport.viewsCategory(categoryIds[i])).to.eq(i === 0);
+        expect(nonMockedViewport.viewsCategory(categoryIds[i])).toBe(i === 0);
       }
       nonMockedViewport.setPerModelCategoryOverride({ modelIds: modelIds[0], categoryIds: categoryIds[0], override: "show" });
       nonMockedViewport.setPerModelCategoryOverride({ modelIds: modelIds[1], categoryIds: categoryIds[1], override: "hide" });
@@ -249,9 +242,9 @@ describe("CategoryVisibilityUtils", () => {
         nonMockedViewport,
       );
       for (let i = 0; i < categoryIds.length; ++i) {
-        expect(nonMockedViewport.viewsCategory(categoryIds[i])).to.eq(i !== 0);
-        expect(nonMockedViewport.getPerModelCategoryOverride({ modelId: modelIds[0], categoryId: categoryIds[i] })).to.eq("none");
-        expect(nonMockedViewport.getPerModelCategoryOverride({ modelId: modelIds[1], categoryId: categoryIds[i] })).to.eq("none");
+        expect(nonMockedViewport.viewsCategory(categoryIds[i])).toBe(i !== 0);
+        expect(nonMockedViewport.getPerModelCategoryOverride({ modelId: modelIds[0], categoryId: categoryIds[i] })).toBe("none");
+        expect(nonMockedViewport.getPerModelCategoryOverride({ modelId: modelIds[1], categoryId: categoryIds[i] })).toBe("none");
       }
     });
   });

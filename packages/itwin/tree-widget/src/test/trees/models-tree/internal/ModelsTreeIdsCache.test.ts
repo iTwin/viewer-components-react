@@ -3,9 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
 import { firstValueFrom } from "rxjs";
-import sinon from "sinon";
+import { describe, expect, it, vi } from "vitest";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { BaseIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
@@ -30,17 +29,17 @@ describe("ModelsTreeIdsCache", () => {
     const modelId = "0x1";
     const categoryId = "0x2";
     const elementIds = ["0x10", "0x20", "0x30"];
-    const stub = sinon.fake((query: string) => {
+    const stub = vi.fn((query: string) => {
       if (query.includes(`WHERE Parent.Id IS NULL AND (Model.Id = ${modelId} AND Category.Id IN (${categoryId}))`)) {
         return [{ modelId, categoryId, elementsCount: elementIds.length }];
       }
       throw new Error(`Unexpected query: ${query}`);
     });
     const cache = createIdsCache(stub);
-    await expect(firstValueFrom(cache.getElementsCount({ modelId, categoryId }))).to.eventually.eq(elementIds.length);
-    expect(stub).to.have.callCount(1);
-    await expect(firstValueFrom(cache.getElementsCount({ modelId, categoryId }))).to.eventually.eq(elementIds.length);
-    expect(stub).to.have.callCount(1);
+    await expect(firstValueFrom(cache.getElementsCount({ modelId, categoryId }))).resolves.toBe(elementIds.length);
+    expect(stub).toHaveBeenCalledOnce();
+    await expect(firstValueFrom(cache.getElementsCount({ modelId, categoryId }))).resolves.toBe(elementIds.length);
+    expect(stub).toHaveBeenCalledOnce();
   });
 
   it("runs only one query when multiple requests are made", async () => {
@@ -48,7 +47,7 @@ describe("ModelsTreeIdsCache", () => {
     const categoryId = "0x2";
     const categoryId2 = "0x3";
     const elementIds = ["0x10", "0x20", "0x30"];
-    const stub = sinon.fake((query: string) => {
+    const stub = vi.fn((query: string) => {
       if (query.includes(`WHERE Parent.Id IS NULL AND (Model.Id = ${modelId} AND Category.Id IN (${categoryId}, ${categoryId2}))`)) {
         return [
           { modelId, categoryId, elementsCount: elementIds.length },
@@ -60,10 +59,9 @@ describe("ModelsTreeIdsCache", () => {
     const cache = createIdsCache(stub);
     const obs1 = cache.getElementsCount({ modelId, categoryId });
     const obs2 = cache.getElementsCount({ modelId, categoryId: categoryId2 });
-    await Promise.all([firstValueFrom(obs1), firstValueFrom(obs2)]).then(([count1, count2]) => {
-      expect(count1).to.eq(elementIds.length);
-      expect(count2).to.eq(elementIds.length + 1);
-    });
-    expect(stub).to.have.callCount(1);
+    const [count1, count2] = await Promise.all([firstValueFrom(obs1), firstValueFrom(obs2)]);
+    expect(count1).toBe(elementIds.length);
+    expect(count2).toBe(elementIds.length + 1);
+    expect(stub).toHaveBeenCalledOnce();
   });
 });

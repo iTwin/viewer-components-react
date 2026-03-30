@@ -15,7 +15,7 @@ import type { GetCacheProps } from "./useTreeHooks/UseIdsCache.js";
 
 /** @internal */
 interface SharedTreeContextInternal {
-  getCache: <TCache extends Disposable>(props: GetCacheProps<TCache>) => TCache;
+  getCache: <TCache extends object = {}>(props: GetCacheProps<TCache>) => TCache;
   getBaseIdsCache: (props: Omit<BaseIdsCacheProps, "queryExecutor"> & { imodel: IModelConnection }) => BaseIdsCache;
 }
 

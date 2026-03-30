@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
@@ -25,7 +25,7 @@ import {
   insertSubCategory,
   insertSubModel,
 } from "../../IModelUtils.js";
-import { createFakeSinonViewport, createIModelAccess } from "../Common.js";
+import { createFakeViewport, createIModelAccess } from "../Common.js";
 import { CLASS_NAME_DefinitionModel } from "../TreeUtils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -36,7 +36,7 @@ import type { Props } from "@itwin/presentation-shared";
 
 describe("Categories tree", () => {
   describe("Hierarchy search", () => {
-    before(async function () {
+    beforeAll(async () => {
       await initializePresentationTesting({
         backendProps: {
           caching: {
@@ -52,12 +52,12 @@ describe("Categories tree", () => {
       ECSchemaRpcImpl.register();
     });
 
-    after(async function () {
+    afterAll(async () => {
       await terminatePresentationTesting();
     });
 
-    it("finds definition container by label", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("finds definition container by label", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer", userLabel: "Test" });
         const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
@@ -74,13 +74,13 @@ describe("Categories tree", () => {
         searchText: "Test",
         viewType: "3d",
       });
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
         { identifier: keys.definitionContainer, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
       ]);
     });
 
-    it("aborts when abort signal fires", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("aborts when abort signal fires", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer", userLabel: "Test" });
         const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
@@ -101,11 +101,11 @@ describe("Categories tree", () => {
       const abortController1 = new AbortController();
       const pathsPromiseAborted = act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: abortController1.signal }));
       abortController1.abort();
-      expect(await pathsPromiseAborted).to.deep.eq([]);
+      expect(await pathsPromiseAborted).toEqual([]);
 
       const abortController2 = new AbortController();
       const pathsPromise = act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: abortController2.signal }));
-      expect(await pathsPromise).to.deep.eq([
+      expect(await pathsPromise).toEqual([
         {
           identifier: { className: "BisCore.DefinitionContainer", id: ids.definitionContainer.id },
           options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
@@ -113,8 +113,8 @@ describe("Categories tree", () => {
       ]);
     });
 
-    it("finds definition container by label when it is contained by another definition container", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("finds definition container by label when it is contained by another definition container", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
@@ -138,7 +138,7 @@ describe("Categories tree", () => {
         searchText: "Test",
         viewType: "3d",
       });
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
         {
           identifier: keys.definitionContainer,
           options: { autoExpand: true },
@@ -147,8 +147,8 @@ describe("Categories tree", () => {
       ]);
     });
 
-    it("does not find definition container by label when it doesn't contain categories", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("does not find definition container by label when it doesn't contain categories", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer", userLabel: "Test" });
         insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
@@ -163,11 +163,11 @@ describe("Categories tree", () => {
         searchText: "Test",
         viewType: "3d",
       });
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([]);
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([]);
     });
 
-    it("finds category by label when it is contained by definition container", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("finds category by label when it is contained by definition container", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
@@ -184,7 +184,7 @@ describe("Categories tree", () => {
         searchText: "Test",
         viewType: "3d",
       });
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
         {
           identifier: keys.definitionContainer,
           options: { autoExpand: true },
@@ -193,8 +193,8 @@ describe("Categories tree", () => {
       ]);
     });
 
-    it("finds subCategory by label when its parent category is contained by definition container", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("finds subCategory by label when its parent category is contained by definition container", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
@@ -212,7 +212,7 @@ describe("Categories tree", () => {
         searchText: "SubCategory1",
         viewType: "3d",
       });
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
         {
           identifier: keys.definitionContainer,
           options: { autoExpand: true },
@@ -227,8 +227,8 @@ describe("Categories tree", () => {
       ]);
     });
 
-    it("finds 3d categories by label containing special SQLite characters", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("finds 3d categories by label containing special SQLite characters", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
         const category1 = insertSpatialCategory({ builder, codeValue: "Test SpatialCat_egory" });
@@ -248,7 +248,7 @@ describe("Categories tree", () => {
         searchText: "_",
         viewType: "3d",
       });
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
         { identifier: keys.category1, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
       ]);
 
@@ -258,13 +258,13 @@ describe("Categories tree", () => {
         searchText: "%",
         viewType: "3d",
       });
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
         { identifier: keys.category2, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
       ]);
     });
 
-    it("finds 3d subcategories by label containing special SQLite characters", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("finds 3d subcategories by label containing special SQLite characters", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
         const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
@@ -284,7 +284,7 @@ describe("Categories tree", () => {
         searchText: "_",
         viewType: "3d",
       });
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
         {
           identifier: keys.category,
           options: { autoExpand: true },
@@ -298,7 +298,7 @@ describe("Categories tree", () => {
         searchText: "%",
         viewType: "3d",
       });
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
         {
           identifier: keys.category,
           options: { autoExpand: true },
@@ -307,8 +307,8 @@ describe("Categories tree", () => {
       ]);
     });
 
-    it("finds 3d categories by label when subCategory count is 1 and labels of category and subCategory differ", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("finds 3d categories by label when subCategory count is 1 and labels of category and subCategory differ", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         // SubCategory gets inserted by default
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", userLabel: "Test" });
@@ -326,7 +326,7 @@ describe("Categories tree", () => {
         viewType: "3d",
       });
 
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
         { identifier: keys.category, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
       ]);
 
@@ -336,11 +336,11 @@ describe("Categories tree", () => {
         searchText: "SpatialCategory",
         viewType: "3d",
       });
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([]);
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([]);
     });
 
-    it("finds 3d categories and subCategories by label when subCategory count is > 1", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("finds 3d categories and subCategories by label when subCategory count is > 1", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", userLabel: "Test" });
@@ -362,7 +362,7 @@ describe("Categories tree", () => {
         viewType: "3d",
       });
 
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
         { identifier: keys.category, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
       ]);
 
@@ -372,7 +372,7 @@ describe("Categories tree", () => {
         searchText: "SubCategory1",
         viewType: "3d",
       });
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
         {
           identifier: keys.category,
           options: { autoExpand: true },
@@ -386,7 +386,7 @@ describe("Categories tree", () => {
         searchText: "SubCategory2",
         viewType: "3d",
       });
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
         {
           identifier: keys.category,
           options: { autoExpand: true },
@@ -395,8 +395,8 @@ describe("Categories tree", () => {
       ]);
     });
 
-    it("finds 2d categories by label containing special SQLite characters", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("finds 2d categories by label containing special SQLite characters", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "TestDrawingModel" });
 
         const category1 = insertDrawingCategory({ builder, codeValue: "Test Drawing Cat_egory" });
@@ -416,7 +416,7 @@ describe("Categories tree", () => {
         searchText: "_",
         viewType: "2d",
       });
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
         { identifier: keys.category1, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
       ]);
 
@@ -426,13 +426,13 @@ describe("Categories tree", () => {
         searchText: "%",
         viewType: "2d",
       });
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
         { identifier: keys.category2, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
       ]);
     });
 
-    it("finds 2d subcategories by label containing special SQLite characters", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+    it("finds 2d subcategories by label containing special SQLite characters", async () => {
+      await using buildIModelResult = await buildIModel(async (builder) => {
         const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "TestDrawingModel" });
 
         const category = insertDrawingCategory({ builder, codeValue: "Test Drawing Category" });
@@ -452,7 +452,7 @@ describe("Categories tree", () => {
         searchText: "_",
         viewType: "2d",
       });
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
         {
           identifier: keys.category,
           options: { autoExpand: true },
@@ -466,7 +466,7 @@ describe("Categories tree", () => {
         searchText: "%",
         viewType: "2d",
       });
-      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).to.deep.eq([
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
         {
           identifier: keys.category,
           options: { autoExpand: true },
@@ -479,7 +479,7 @@ describe("Categories tree", () => {
 
 function renderUseCategoriesTreeHook(props: Omit<Props<typeof useCategoriesTree>, "activeView"> & { imodel: IModelConnection; viewType: "2d" | "3d" }) {
   const result = renderHook(
-    (hookProps) => useCategoriesTree({ activeView: createFakeSinonViewport({ iModel: props.imodel, viewType: props.viewType }), ...hookProps }),
+    (hookProps) => useCategoriesTree({ activeView: createFakeViewport({ iModel: props.imodel, viewType: props.viewType }), ...hookProps }),
     {
       initialProps: props,
       wrapper: ({ children }) => <SharedTreeContextProvider>{children}</SharedTreeContextProvider>,
