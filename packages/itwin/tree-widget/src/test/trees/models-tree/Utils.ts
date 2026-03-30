@@ -25,16 +25,16 @@ import type {
   ClassGroupingNodeKey,
   GroupingHierarchyNode,
   HierarchyProvider,
-  HierarchySearchPath,
+  HierarchySearchTree,
   NonGroupingHierarchyNode,
 } from "@itwin/presentation-hierarchies";
-import type { InstanceKey } from "@itwin/presentation-shared";
+import type { EC, InstanceKey } from "@itwin/presentation-shared";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
 interface CreateModelsTreeProviderProps {
   imodel: IModelConnection;
-  searchPaths?: HierarchySearchPath[];
+  searchPaths?: HierarchySearchTree[];
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   idsCache?: ModelsTreeIdsCache;
   imodelAccess?: ReturnType<typeof createIModelAccess>;
@@ -64,7 +64,7 @@ export function createModelsTreeProvider({
       idsCache: createdIdsCache,
       hierarchyConfig: config,
     }),
-    ...(searchPaths ? { search: { paths: searchPaths.map((path) => ("path" in path ? path : { path, options: { reveal: true } })) } } : undefined),
+    ...(searchPaths ? { search: { paths: searchPaths } } : undefined),
   });
   const dispose = () => {
     provider[Symbol.dispose]();
@@ -243,7 +243,7 @@ export function createClassGroupingHierarchyNode({
   ...props
 }: {
   elements: Id64Array;
-  className?: string;
+  className?: EC.FullClassName;
   parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   modelId: Id64String;
   categoryId: Id64String;

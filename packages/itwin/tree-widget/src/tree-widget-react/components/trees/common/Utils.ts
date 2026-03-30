@@ -3,12 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { HierarchyNodeIdentifier, HierarchySearchPath } from "@itwin/presentation-hierarchies";
+import { HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import { showAllCategories } from "./CategoriesVisibilityUtils.js";
 import { enableCategoryDisplay, loadCategoriesFromViewport } from "./internal/VisibilityUtils.js";
 
 import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
-import type { HierarchyNodeIdentifiersPath, HierarchySearchPathOptions } from "@itwin/presentation-hierarchies";
 import type { TreeWidgetViewport } from "./TreeWidgetViewport.js";
 
 /**
@@ -94,62 +93,86 @@ export function areAllModelsVisible(models: string[], viewport: TreeWidgetViewpo
   return models.length !== 0 ? models.every((id) => viewport.viewsModel(id)) : false;
 }
 
-/** @public */
-export type NormalizedHierarchySearchPath = ReturnType<(typeof HierarchySearchPath)["normalize"]>;
-
 /** @internal */
-export function joinHierarchySearchPaths(
-  subTreePaths: HierarchyNodeIdentifiersPath[],
-  searchPaths: NormalizedHierarchySearchPath[],
-): NormalizedHierarchySearchPath[] {
-  const result = new Array<NormalizedHierarchySearchPath>();
-  const searchPathsToIncludeIndexes = new Set<number>();
+export function joinHierarchySearchTrees(subTrees: HierarchySearchTree[], searchTrees: HierarchySearchTree[]): HierarchySearchTree[] {
+  const builder = HierarchySearchTree.createBuilder<{
+    isSubTreeTarget?: boolean;
+    isSubTreeNode?: boolean;
+    isSearchTreeNode?: boolean;
+    isSearchTarget?: boolean;
+    isSearchTargetAncestor?: boolean;
+  }>();
 
-  for (const subTreePath of subTreePaths) {
-    let options: HierarchySearchPathOptions | undefined;
-    let addSubTreePathToResult = false;
-
-    for (let i = 0; i < searchPaths.length; ++i) {
-      const searchPath = searchPaths[i];
-      if (searchPath.path.length === 0) {
-        continue;
-      }
-
-      for (let j = 0; j < subTreePath.length; ++j) {
-        const identifier = subTreePath[j];
-        if (searchPath.path.length <= j || !HierarchyNodeIdentifier.equal(searchPath.path[j], identifier)) {
-          break;
-        }
-
-        // search paths that are shorter or equal than subTree paths length don't need to be added to the result
-        if (searchPath.path.length === j + 1) {
-          addSubTreePathToResult = true;
-          // If search path has reveal set to true, it means that we should expand only to the targeted search node
-          // This is done by setting depthInPath
-          options =
-            searchPath.options?.reveal !== true
-              ? HierarchySearchPath.mergeOptions(options, searchPath.options)
-              : { reveal: { depthInPath: searchPath.path.length - 1 } };
-          break;
-        }
-
-        // search paths that are longer than subTree paths need to be added to the result
-        if (subTreePath.length === j + 1) {
-          addSubTreePathToResult = true;
-          searchPathsToIncludeIndexes.add(i);
-        }
-      }
-    }
-
-    if (addSubTreePathToResult) {
-      result.push({
-        path: subTreePath,
-        options,
-      });
-    }
+  for (const subTree of subTrees) {
+    builder.accept({
+      tree: subTree,
+      handler: {
+        onEntryHandled: ({ treeEntry, inputEntry }) => {
+          // Assign extra information to the entry
+          treeEntry.extras.isSubTreeTarget ||= inputEntry.isTarget || !inputEntry.hasChildren;
+          treeEntry.extras.isSubTreeNode = true;
+        },
+      },
+    });
   }
-  for (const index of searchPathsToIncludeIndexes) {
-    result.push(searchPaths[index]);
+  for (const searchTree of searchTrees) {
+    builder.accept({
+      tree: searchTree,
+      handler: {
+        onNewEntry: ({ parentEntries }) => {
+          // Only allow adding new entries under sub-tree targets
+          const hasSubTreeAncestor = parentEntries.find((entry) => entry.extras.isSubTreeTarget) !== undefined;
+          if (!hasSubTreeAncestor) {
+            return false;
+          }
+          // When adding an search-tree entry under a sub-tree, remove the `isTarget` flag - search-tree is more specific.
+          //
+          // Covers the following case:
+          // - sub-tree: [a]
+          // - search-tree: [a, b]
+          // - expected result:
+          //   - a (NOT a target)
+          //     - b (implied target)
+          const lastEntry = parentEntries[parentEntries.length - 1];
+          if (lastEntry?.extras.isSubTreeNode && !lastEntry.extras.isSearchTarget) {
+            delete lastEntry.isTarget;
+          }
+          return true;
+        },
+        onEntryHandled: ({ treeEntry, inputEntry, parentEntries }) => {
+          // Assign extra information to the entry
+          treeEntry.extras.isSearchTarget ||= inputEntry.isTarget || !inputEntry.hasChildren;
+          treeEntry.extras.isSearchTreeNode = true;
+
+          // Mark all ancestors of search-tree target as search-target-ancestors. This will allow us to keep them in the tree
+          // even if they are not sub-tree targets themselves.
+          if (treeEntry.extras.isSearchTarget) {
+            parentEntries.forEach((parentEntry) => {
+              parentEntry.extras.isSearchTargetAncestor = true;
+            });
+          }
+
+          // If we merged a search-tree entry with sub-tree entry - ensure it doesn't have the `isTarget` flag. Any sub-tree
+          // entry must also be a sub-tree target to have the `isTarget` flag.
+          //
+          // Covers the following case:
+          // - sub-tree: [a, b]
+          // - search-tree: [a]
+          // - expected result:
+          //   - a (NOT a target)
+          //     - b (implied target)
+          if (treeEntry.extras.isSubTreeNode && !treeEntry.extras.isSubTreeTarget) {
+            delete treeEntry.isTarget;
+          }
+        },
+      },
+    });
   }
-  return result;
+  return builder.getTree({
+    processEntry: ({ treeEntry, parentEntries }) =>
+      // Only include entries that are on the path to search-tree targets. This will allow us to exclude sub-tree branches that are not relevant to search results.
+      treeEntry.extras.isSearchTargetAncestor || treeEntry.extras.isSearchTarget || parentEntries.some((parentEntry) => parentEntry.extras.isSearchTarget)
+        ? treeEntry
+        : undefined,
+  });
 }

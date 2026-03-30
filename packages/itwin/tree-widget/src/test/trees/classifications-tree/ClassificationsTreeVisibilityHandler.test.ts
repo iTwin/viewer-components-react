@@ -31,7 +31,7 @@ import {
 import { validateNodeVisibility } from "./VisibilityValidation.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { HierarchyNodeIdentifiersPath, HierarchySearchPath } from "@itwin/presentation-hierarchies";
+import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, Props } from "@itwin/presentation-shared";
 import type { ClassificationsTreeSearchTargets } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/SearchResultsTree.js";
 import type { ClassificationsTreeVisibilityHandlerConfiguration } from "../../../tree-widget-react/components/trees/classifications-tree/UseClassificationsTree.js";
@@ -55,7 +55,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
   }: {
     idsCache: ClassificationsTreeIdsCache;
     imodelAccess: ReturnType<typeof createIModelAccess>;
-    searchPaths?: HierarchyNodeIdentifiersPath[];
+    searchPaths?: HierarchySearchTree[];
   }) {
     return createIModelHierarchyProvider({
       hierarchyDefinition: new ClassificationsTreeDefinition({ ...props, getIdsCache: () => idsCache, hierarchyConfig: { rootClassificationSystemCode } }),
@@ -854,7 +854,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       searchPaths,
       visibleByDefault,
     }: Parameters<typeof createVisibilityTestData>[0] & {
-      searchPaths: HierarchyNodeIdentifiersPath[];
+      searchPaths: HierarchySearchTree[];
       visibleByDefault?: boolean;
     }) {
       const imodelAccess = createIModelAccess(imodel);
@@ -934,7 +934,17 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           searchTargetChildElement,
           childElement,
           siblingElement,
-          searchPaths: [[table, classification, parentOfSearchTargetElement, searchTargetChildElement]],
+          searchPaths: [
+            {
+              identifier: table,
+              children: [
+                {
+                  identifier: classification,
+                  children: [{ identifier: parentOfSearchTargetElement, children: [{ identifier: searchTargetChildElement }] }],
+                },
+              ],
+            },
+          ],
         };
       });
 
@@ -953,7 +963,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           parentKeys: [keys.table, keys.classification],
           search: {
             isSearchTarget: false,
-            childrenTargetPaths: [[keys.searchTargetChildElement]],
+            childrenTargetPaths: [{ identifier: keys.searchTargetChildElement }],
           },
         }),
         true,
@@ -1031,7 +1041,17 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           searchTargetChildElement,
           childElement,
           siblingElement,
-          searchPaths: [[table, classification, parentOfSearchTargetElement, searchTargetChildElement]],
+          searchPaths: [
+            {
+              identifier: table,
+              children: [
+                {
+                  identifier: classification,
+                  children: [{ identifier: parentOfSearchTargetElement, children: [{ identifier: searchTargetChildElement }] }],
+                },
+              ],
+            },
+          ],
         };
       });
 
@@ -1142,7 +1162,17 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           childElement,
           siblingElement,
           elementFromOtherClassification,
-          searchPaths: [[table, classification1, parentOfSearchTargetElement, searchTargetChildElement]],
+          searchPaths: [
+            {
+              identifier: table,
+              children: [
+                {
+                  identifier: classification1,
+                  children: [{ identifier: parentOfSearchTargetElement, children: [{ identifier: searchTargetChildElement }] }],
+                },
+              ],
+            },
+          ],
         };
       });
 
@@ -1157,7 +1187,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           id: keys.classification1.id,
           search: {
             isSearchTarget: false,
-            childrenTargetPaths: [[keys.parentOfSearchTargetElement, keys.searchTargetChildElement]],
+            childrenTargetPaths: [{ identifier: keys.parentOfSearchTargetElement, children: [{ identifier: keys.searchTargetChildElement }] }],
           },
           parentKeys: [keys.table],
         }),
@@ -1250,7 +1280,17 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           childElement,
           siblingElement,
           elementFromOtherClassification,
-          searchPaths: [[table, classification1, parentOfSearchTargetElement, searchTargetChildElement]],
+          searchPaths: [
+            {
+              identifier: table,
+              children: [
+                {
+                  identifier: classification1,
+                  children: [{ identifier: parentOfSearchTargetElement, children: [{ identifier: searchTargetChildElement }] }],
+                },
+              ],
+            },
+          ],
         };
       });
 
@@ -1266,7 +1306,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           id: keys.table.id,
           search: {
             isSearchTarget: false,
-            childrenTargetPaths: [[keys.classification1, keys.parentOfSearchTargetElement, keys.searchTargetChildElement]],
+            childrenTargetPaths: [
+              {
+                identifier: keys.classification1,
+                children: [{ identifier: keys.parentOfSearchTargetElement, children: [{ identifier: keys.searchTargetChildElement }] }],
+              },
+            ],
           },
         }),
         true,
@@ -1305,7 +1350,7 @@ function createClassificationsTreeVisibilityHandler(props: {
   viewport: TreeWidgetViewport;
   idsCache: ClassificationsTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
-  searchPaths?: HierarchySearchPath[];
+  searchPaths?: HierarchySearchTree[];
 }) {
   return new HierarchyVisibilityHandlerImpl<ClassificationsTreeSearchTargets>({
     getSearchResultsTree: (): undefined | Promise<SearchResultsTree<ClassificationsTreeSearchTargets>> => {

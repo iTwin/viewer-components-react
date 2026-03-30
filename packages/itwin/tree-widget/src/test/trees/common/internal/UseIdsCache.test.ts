@@ -217,7 +217,7 @@ describe("useIdsCache", () => {
       cacheKey: "cacheKey",
       createCache: createCacheSpy,
     });
-    expect(createCacheSpy).to.be.calledOnce;
-    expect(cache1).to.equal(cache2);
+    expect(createCacheSpy).toHaveBeenCalledOnce();
+    expect(cache1).toBe(cache2);
   });
 });

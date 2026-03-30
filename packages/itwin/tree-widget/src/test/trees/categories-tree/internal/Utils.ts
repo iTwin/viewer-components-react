@@ -12,7 +12,7 @@ import { getClassesByView } from "../../../../tree-widget-react/components/trees
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, GroupingHierarchyNode, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
-import type { InstanceKey } from "@itwin/presentation-shared";
+import type { EC, InstanceKey } from "@itwin/presentation-shared";
 import type { ElementId, ModelId } from "../../../../tree-widget-react/components/trees/common/internal/Types.js";
 
 /** @internal */
@@ -100,7 +100,7 @@ export function createClassGroupingHierarchyNode({
 }: {
   categoryId: Id64String | undefined;
   modelElementsMap: Map<ModelId, { elementIds: Set<ElementId>; categoryOfTopMostParentElement?: Id64String }>;
-  className?: string;
+  className?: EC.FullClassName;
   parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   hasDirectNonSearchTargets?: boolean;
   hasSearchTargetAncestor?: boolean;

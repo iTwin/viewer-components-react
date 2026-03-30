@@ -14,6 +14,7 @@ import { createGeometricElementInstanceKeyPaths } from "../CategoriesTreeDefinit
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { EC } from "@itwin/presentation-shared";
 import type { BaseIdsCacheImplProps } from "../../common/internal/caches/BaseIdsCache.js";
 import type { CategoryId, DefinitionContainerId, ElementId, ModelId } from "../../common/internal/Types.js";
 
@@ -46,9 +47,9 @@ interface CategoriesTreeIdsCacheProps extends BaseIdsCacheImplProps {
 export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
   #definitionContainersInfo: Observable<Map<DefinitionContainerId, DefinitionContainerInfo>> | undefined;
   #modelsCategoriesInfo: Observable<Map<ModelId, CategoriesInfo>> | undefined;
-  #categoryClass: string;
-  #categoryElementClass: string;
-  #modelClass: string;
+  #categoryClass: EC.FullClassName;
+  #categoryElementClass: EC.FullClassName;
+  #modelClass: EC.FullClassName;
   #type: "2d" | "3d";
   #isDefinitionContainerSupported: Observable<boolean> | undefined;
   #filteredElementsModels: Observable<Map<ElementId, ModelId>> | undefined;
@@ -472,7 +473,7 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
               componentName: "CategoriesTreeIdsCache-categoryInstanceKeyPaths",
               chunkIndex: -1,
             }).pipe(
-              map((path) => {
+              map(({ path }) => {
                 const categories = subModelCategoriesMap.get(path[path.length - 1].id);
                 const paths = new Array<HierarchyNodeIdentifiersPath>();
                 for (const categoryId of categories ?? []) {

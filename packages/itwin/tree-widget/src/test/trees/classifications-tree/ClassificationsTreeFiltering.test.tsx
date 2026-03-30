@@ -4,17 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { ClassificationsTreeDefinition } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
-import { ClassificationsTreeIdsCache } from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
-import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
+import { act, renderHook } from "@testing-library/react";
+import { useClassificationsTreeDefinition } from "../../../tree-widget-react/components/trees/classifications-tree/UseClassificationsTreeDefinition.js";
 import {
   CLASS_NAME_Classification,
   CLASS_NAME_ClassificationTable,
   CLASS_NAME_GeometricElement3d,
 } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { SharedTreeContextProvider } from "../../../tree-widget-react/components/trees/common/SharedTreeContextProvider.js";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../IModelUtils.js";
 import { initializeITwinJs, terminateITwinJs } from "../../Initialize.js";
-import { createIModelAccess } from "../Common.js";
 import {
   importClassificationSchema,
   insertClassification,
@@ -22,6 +21,8 @@ import {
   insertClassificationTable,
   insertElementHasClassificationsRelationship,
 } from "./Utils.js";
+
+import type { Props } from "@itwin/presentation-shared";
 
 const rootClassificationSystemCode = "TestClassificationSystem";
 const defaultHierarchyConfiguration = {
@@ -59,24 +60,15 @@ describe("Classifications tree", () => {
           return { table };
         });
         const { imodel, ...keys } = buildIModelResult;
-        const imodelAccess = createIModelAccess(imodel);
-        const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-        const idsCache = new ClassificationsTreeIdsCache({
-          queryExecutor: imodelAccess,
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodel],
           hierarchyConfig: defaultHierarchyConfiguration,
-          baseIdsCache,
+          search: { searchText: label },
         });
-        expect(
-          await ClassificationsTreeDefinition.createInstanceKeyPaths({
-            imodelAccess,
-            label,
-            idsCache,
-            hierarchyConfig: defaultHierarchyConfiguration,
-          }),
-        ).toEqual([
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
           {
-            path: [{ id: keys.table.id, className: CLASS_NAME_ClassificationTable }],
-            options: { reveal: true },
+            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
           },
         ]);
       });
@@ -101,27 +93,21 @@ describe("Classifications tree", () => {
           return { table, classification };
         });
         const { imodel, ...keys } = buildIModelResult;
-        const imodelAccess = createIModelAccess(imodel);
-        const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-        const idsCache = new ClassificationsTreeIdsCache({
-          queryExecutor: imodelAccess,
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodel],
           hierarchyConfig: defaultHierarchyConfiguration,
-          baseIdsCache,
+          search: { searchText: label },
         });
-        expect(
-          await ClassificationsTreeDefinition.createInstanceKeyPaths({
-            imodelAccess,
-            label,
-            idsCache,
-            hierarchyConfig: defaultHierarchyConfiguration,
-          }),
-        ).toEqual([
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
           {
-            path: [
-              { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
-              { id: keys.classification.id, className: CLASS_NAME_Classification },
+            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: true },
+            children: [
+              {
+                identifier: { id: keys.classification.id, className: CLASS_NAME_Classification },
+                options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+              },
             ],
-            options: { reveal: true },
           },
         ]);
       });
@@ -147,28 +133,27 @@ describe("Classifications tree", () => {
           return { table, classification, element };
         });
         const { imodel, ...keys } = buildIModelResult;
-        const imodelAccess = createIModelAccess(imodel);
-        const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-        const idsCache = new ClassificationsTreeIdsCache({
-          queryExecutor: imodelAccess,
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodel],
           hierarchyConfig: defaultHierarchyConfiguration,
-          baseIdsCache,
+          search: { searchText: label },
         });
-        expect(
-          await ClassificationsTreeDefinition.createInstanceKeyPaths({
-            imodelAccess,
-            label,
-            idsCache,
-            hierarchyConfig: defaultHierarchyConfiguration,
-          }),
-        ).toEqual([
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
           {
-            path: [
-              { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
-              { id: keys.classification.id, className: CLASS_NAME_Classification },
-              { id: keys.element.id, className: CLASS_NAME_GeometricElement3d },
+            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: true },
+            children: [
+              {
+                identifier: { id: keys.classification.id, className: CLASS_NAME_Classification },
+                options: { autoExpand: true },
+                children: [
+                  {
+                    identifier: { id: keys.element.id, className: CLASS_NAME_GeometricElement3d },
+                    options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                  },
+                ],
+              },
             ],
-            options: { reveal: true },
           },
         ]);
       });
@@ -201,29 +186,33 @@ describe("Classifications tree", () => {
           return { table, classification, parentElement, childElement };
         });
         const { imodel, ...keys } = buildIModelResult;
-        const imodelAccess = createIModelAccess(imodel);
-        const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-        const idsCache = new ClassificationsTreeIdsCache({
-          queryExecutor: imodelAccess,
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodel],
           hierarchyConfig: defaultHierarchyConfiguration,
-          baseIdsCache,
+          search: { searchText: label },
         });
-        expect(
-          await ClassificationsTreeDefinition.createInstanceKeyPaths({
-            imodelAccess,
-            label,
-            idsCache,
-            hierarchyConfig: defaultHierarchyConfiguration,
-          }),
-        ).toEqual([
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
           {
-            path: [
-              { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
-              { id: keys.classification.id, className: CLASS_NAME_Classification },
-              { id: keys.parentElement.id, className: CLASS_NAME_GeometricElement3d },
-              { id: keys.childElement.id, className: CLASS_NAME_GeometricElement3d },
+            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: true },
+            children: [
+              {
+                identifier: { id: keys.classification.id, className: CLASS_NAME_Classification },
+                options: { autoExpand: true },
+                children: [
+                  {
+                    identifier: { id: keys.parentElement.id, className: CLASS_NAME_GeometricElement3d },
+                    options: { autoExpand: true },
+                    children: [
+                      {
+                        identifier: { id: keys.childElement.id, className: CLASS_NAME_GeometricElement3d },
+                        options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                      },
+                    ],
+                  },
+                ],
+              },
             ],
-            options: { reveal: true },
           },
         ]);
       });
@@ -262,24 +251,15 @@ describe("Classifications tree", () => {
           return { table1, table2 };
         });
         const { imodel, ...keys } = buildIModelResult;
-        const imodelAccess = createIModelAccess(imodel);
-        const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-        const idsCache = new ClassificationsTreeIdsCache({
-          queryExecutor: imodelAccess,
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodel],
           hierarchyConfig: defaultHierarchyConfiguration,
-          baseIdsCache,
+          search: { targetItems: [keys.table2] },
         });
-        expect(
-          await ClassificationsTreeDefinition.createInstanceKeyPaths({
-            imodelAccess,
-            targetItems: [keys.table2],
-            idsCache,
-            hierarchyConfig: defaultHierarchyConfiguration,
-          }),
-        ).toEqual([
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
           {
-            path: [{ id: keys.table2.id, className: CLASS_NAME_ClassificationTable }],
-            options: { reveal: true },
+            identifier: { id: keys.table2.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
           },
         ]);
       });
@@ -316,27 +296,21 @@ describe("Classifications tree", () => {
           return { table1, table2, classification1, classification2 };
         });
         const { imodel, ...keys } = buildIModelResult;
-        const imodelAccess = createIModelAccess(imodel);
-        const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-        const idsCache = new ClassificationsTreeIdsCache({
-          queryExecutor: imodelAccess,
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodel],
           hierarchyConfig: defaultHierarchyConfiguration,
-          baseIdsCache,
+          search: { targetItems: [keys.classification2] },
         });
-        expect(
-          await ClassificationsTreeDefinition.createInstanceKeyPaths({
-            imodelAccess,
-            targetItems: [keys.classification2],
-            idsCache,
-            hierarchyConfig: defaultHierarchyConfiguration,
-          }),
-        ).toEqual([
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
           {
-            path: [
-              { id: keys.table2.id, className: CLASS_NAME_ClassificationTable },
-              { id: keys.classification2.id, className: CLASS_NAME_Classification },
+            identifier: { id: keys.table2.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: true },
+            children: [
+              {
+                identifier: { id: keys.classification2.id, className: CLASS_NAME_Classification },
+                options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+              },
             ],
-            options: { reveal: true },
           },
         ]);
       });
@@ -373,28 +347,27 @@ describe("Classifications tree", () => {
           return { table1, table2, classification1, classification2, element1, element2 };
         });
         const { imodel, ...keys } = buildIModelResult;
-        const imodelAccess = createIModelAccess(imodel);
-        const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-        const idsCache = new ClassificationsTreeIdsCache({
-          queryExecutor: imodelAccess,
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodel],
           hierarchyConfig: defaultHierarchyConfiguration,
-          baseIdsCache,
+          search: { targetItems: [keys.element2] },
         });
-        expect(
-          await ClassificationsTreeDefinition.createInstanceKeyPaths({
-            imodelAccess,
-            targetItems: [keys.element2],
-            idsCache,
-            hierarchyConfig: defaultHierarchyConfiguration,
-          }),
-        ).toEqual([
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
           {
-            path: [
-              { id: keys.table2.id, className: CLASS_NAME_ClassificationTable },
-              { id: keys.classification2.id, className: CLASS_NAME_Classification },
-              { id: keys.element2.id, className: CLASS_NAME_GeometricElement3d },
+            identifier: { id: keys.table2.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: true },
+            children: [
+              {
+                identifier: { id: keys.classification2.id, className: CLASS_NAME_Classification },
+                options: { autoExpand: true },
+                children: [
+                  {
+                    identifier: { id: keys.element2.id, className: CLASS_NAME_GeometricElement3d },
+                    options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                  },
+                ],
+              },
             ],
-            options: { reveal: true },
           },
         ]);
       });
@@ -440,29 +413,33 @@ describe("Classifications tree", () => {
           return { table1, table2, classification1, classification2, element1, element2, childElement };
         });
         const { imodel, ...keys } = buildIModelResult;
-        const imodelAccess = createIModelAccess(imodel);
-        const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-        const idsCache = new ClassificationsTreeIdsCache({
-          queryExecutor: imodelAccess,
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodel],
           hierarchyConfig: defaultHierarchyConfiguration,
-          baseIdsCache,
+          search: { targetItems: [keys.childElement] },
         });
-        expect(
-          await ClassificationsTreeDefinition.createInstanceKeyPaths({
-            imodelAccess,
-            targetItems: [keys.childElement],
-            idsCache,
-            hierarchyConfig: defaultHierarchyConfiguration,
-          }),
-        ).toEqual([
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
           {
-            path: [
-              { id: keys.table2.id, className: CLASS_NAME_ClassificationTable },
-              { id: keys.classification2.id, className: CLASS_NAME_Classification },
-              { id: keys.element2.id, className: CLASS_NAME_GeometricElement3d },
-              { id: keys.childElement.id, className: CLASS_NAME_GeometricElement3d },
+            identifier: { id: keys.table2.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: true },
+            children: [
+              {
+                identifier: { id: keys.classification2.id, className: CLASS_NAME_Classification },
+                options: { autoExpand: true },
+                children: [
+                  {
+                    identifier: { id: keys.element2.id, className: CLASS_NAME_GeometricElement3d },
+                    options: { autoExpand: true },
+                    children: [
+                      {
+                        identifier: { id: keys.childElement.id, className: CLASS_NAME_GeometricElement3d },
+                        options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                      },
+                    ],
+                  },
+                ],
+              },
             ],
-            options: { reveal: true },
           },
         ]);
       });
@@ -486,21 +463,12 @@ describe("Classifications tree", () => {
         insertElementHasClassificationsRelationship({ builder, elementId: physicalElement.id, classificationId: classification.id });
       });
       const { imodel } = buildIModelResult;
-      const imodelAccess = createIModelAccess(imodel);
-      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-      const idsCache = new ClassificationsTreeIdsCache({
-        queryExecutor: imodelAccess,
+      using hook = renderUseClassificationsTreeDefinitionHook({
+        imodels: [imodel],
         hierarchyConfig: defaultHierarchyConfiguration,
-        baseIdsCache,
+        search: { searchText: "Test" },
       });
-      expect(
-        await ClassificationsTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          label: "Test",
-          idsCache,
-          hierarchyConfig: defaultHierarchyConfiguration,
-        }),
-      ).toEqual([]);
+      expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([]);
     });
 
     it("aborts when abort signal fires", async () => {
@@ -522,36 +490,33 @@ describe("Classifications tree", () => {
         return { classificationTable: table };
       });
       const { imodel, ...ids } = buildIModelResult;
-      const imodelAccess = createIModelAccess(imodel);
-      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-      const idsCache = new ClassificationsTreeIdsCache({
-        queryExecutor: imodelAccess,
+      using hook = renderUseClassificationsTreeDefinitionHook({
+        imodels: [imodel],
         hierarchyConfig: defaultHierarchyConfiguration,
-        baseIdsCache,
+        search: { searchText: "Test" },
       });
 
       const abortController1 = new AbortController();
-      const pathsPromiseAborted = ClassificationsTreeDefinition.createInstanceKeyPaths({
-        imodelAccess,
-        hierarchyConfig: defaultHierarchyConfiguration,
-        label: "Test",
-        idsCache,
-        abortSignal: abortController1.signal,
-      });
+      const pathsPromiseAborted = act(async () => hook.result.current.getSearchPaths?.({ abortSignal: abortController1.signal }));
       abortController1.abort();
       expect(await pathsPromiseAborted).toEqual([]);
 
       const abortController2 = new AbortController();
-      const pathsPromise = ClassificationsTreeDefinition.createInstanceKeyPaths({
-        imodelAccess,
-        hierarchyConfig: defaultHierarchyConfiguration,
-        label: "Test",
-        idsCache,
-        abortSignal: abortController2.signal,
-      });
+      const pathsPromise = act(async () => hook.result.current.getSearchPaths?.({ abortSignal: abortController2.signal }));
       expect(await pathsPromise).toEqual([
-        { path: [{ className: ids.classificationTable.className, id: ids.classificationTable.id }], options: { reveal: true } },
+        {
+          identifier: { className: ids.classificationTable.className, id: ids.classificationTable.id },
+          options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+        },
       ]);
     });
   });
 });
+
+function renderUseClassificationsTreeDefinitionHook(props: Props<typeof useClassificationsTreeDefinition>) {
+  const result = renderHook((hookProps) => useClassificationsTreeDefinition(hookProps), {
+    initialProps: props,
+    wrapper: ({ children }) => <SharedTreeContextProvider>{children}</SharedTreeContextProvider>,
+  });
+  return { ...result, [Symbol.dispose]: () => result.unmount() };
+}

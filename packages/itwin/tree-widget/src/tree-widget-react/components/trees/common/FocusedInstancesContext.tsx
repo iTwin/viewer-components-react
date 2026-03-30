@@ -4,8 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { from, map } from "rxjs";
 import { HierarchyNode } from "@itwin/presentation-hierarchies-react";
+import { normalizeFullClassName } from "@itwin/presentation-shared";
 import { Selectable, Selectables } from "@itwin/unified-selection";
+import { eachValueFrom } from "../../utils/EachValueFrom.js";
 
 import type { PropsWithChildren } from "react";
 import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
@@ -74,7 +77,7 @@ export function FocusedInstancesContextProvider({
       const selected: Array<InstanceKey | GroupingHierarchyNode | (() => AsyncIterableIterator<InstanceKey>)> = [];
       Selectables.forEach(selection, (selectable) => {
         if (Selectable.isInstanceKey(selectable)) {
-          selected.push(selectable);
+          selected.push({ ...selectable, className: normalizeFullClassName(selectable.className) });
           return;
         }
 
@@ -83,7 +86,7 @@ export function FocusedInstancesContextProvider({
           return;
         }
 
-        selected.push(selectable.loadInstanceKeys);
+        selected.push(() => eachValueFrom(from(selectable.loadInstanceKeys()).pipe(map((k) => ({ ...k, className: normalizeFullClassName(k.className) })))));
       });
 
       const loadFocusedItems: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode> = async function* () {

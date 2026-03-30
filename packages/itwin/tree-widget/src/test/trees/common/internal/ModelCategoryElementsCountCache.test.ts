@@ -41,8 +41,8 @@ describe("ModelCategoryElementsCountCache", () => {
       firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" })),
       vi.advanceTimersByTimeAsync(20),
     ]);
-    expect(result).to.eq(0);
-    expect(vp.iModel.createQueryReader).to.be.calledOnce;
+    expect(result).toBe(0);
+    expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
   });
 
   it("returns query value", async () => {
@@ -53,8 +53,8 @@ describe("ModelCategoryElementsCountCache", () => {
       firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" })),
       vi.advanceTimersByTimeAsync(20),
     ]);
-    expect(result).to.eq(2);
-    expect(vp.iModel.createQueryReader).to.be.calledOnce;
+    expect(result).toBe(2);
+    expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
   });
 
   it("returns query and empty value", async () => {
@@ -64,9 +64,9 @@ describe("ModelCategoryElementsCountCache", () => {
     const promise1 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
     const promise2 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x3" }));
     const [result1, result2] = await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(20)]);
-    expect(result1).to.eq(3);
-    expect(result2).to.eq(0);
-    expect(vp.iModel.createQueryReader).to.be.calledOnce;
+    expect(result1).toBe(3);
+    expect(result2).toBe(0);
+    expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
   });
 
   it("batches multiple requests", async () => {
@@ -76,9 +76,9 @@ describe("ModelCategoryElementsCountCache", () => {
     const promise1 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
     const promise2 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x3" }));
     const [result1, result2] = await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(20)]);
-    expect(result1).to.eq(2);
-    expect(result2).to.eq(2);
-    expect(vp.iModel.createQueryReader).to.be.calledOnce;
+    expect(result1).toBe(2);
+    expect(result2).toBe(2);
+    expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
   });
 
   it("batches requests which are less than 20 ms apart", async () => {
@@ -89,9 +89,9 @@ describe("ModelCategoryElementsCountCache", () => {
     await vi.advanceTimersByTimeAsync(19);
     const promise2 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x3" }));
     const [result1, result2] = await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(2)]);
-    expect(result1).to.eq(2);
-    expect(result2).to.eq(2);
-    expect(vp.iModel.createQueryReader).to.be.calledOnce;
+    expect(result1).toBe(2);
+    expect(result2).toBe(2);
+    expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
   });
 
   it("does not batch requests which are more than 20 ms apart", async () => {
@@ -102,9 +102,9 @@ describe("ModelCategoryElementsCountCache", () => {
     await vi.advanceTimersByTimeAsync(21);
     const promise2 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x3" }));
     const [result1, result2] = await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(20)]);
-    expect(result1).to.eq(2);
-    expect(result2).to.eq(2);
-    expect(vp.iModel.createQueryReader).to.be.calledTwice;
+    expect(result1).toBe(2);
+    expect(result2).toBe(2);
+    expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
   });
 
   it("caches empty values", async () => {
@@ -116,9 +116,9 @@ describe("ModelCategoryElementsCountCache", () => {
       vi.advanceTimersByTimeAsync(20),
     ]);
     const result2 = await firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
-    expect(result1).to.eq(0);
-    expect(result2).to.eq(0);
-    expect(vp.iModel.createQueryReader).to.be.calledOnce;
+    expect(result1).toBe(0);
+    expect(result2).toBe(0);
+    expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
   });
 
   it("caches values returned by query", async () => {
@@ -130,9 +130,9 @@ describe("ModelCategoryElementsCountCache", () => {
       vi.advanceTimersByTimeAsync(20),
     ]);
     const result2 = await firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
-    expect(result1).to.eq(2);
-    expect(result2).to.eq(2);
-    expect(vp.iModel.createQueryReader).to.be.calledOnce;
+    expect(result1).toBe(2);
+    expect(result2).toBe(2);
+    expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
   });
 
   it("executes separate queries if 100 models are requested", async () => {
@@ -143,7 +143,7 @@ describe("ModelCategoryElementsCountCache", () => {
       promises.push(firstValueFrom(cache.getCategoryElementsCount({ modelId: `0x${i}`, categoryId: "0x1000" })));
     }
     await Promise.all([...promises, vi.advanceTimersByTimeAsync(20)]);
-    expect(vp.iModel.createQueryReader).to.be.calledOnce;
+    expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
   });
 
   it("executes multiple queries if > 100 models are requested", async () => {
@@ -154,6 +154,6 @@ describe("ModelCategoryElementsCountCache", () => {
       promises.push(firstValueFrom(cache.getCategoryElementsCount({ modelId: `0x${i}`, categoryId: "0x1000" })));
     }
     await Promise.all([...promises, vi.advanceTimersByTimeAsync(20)]);
-    expect(vp.iModel.createQueryReader).to.be.calledTwice;
+    expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
   });
 });

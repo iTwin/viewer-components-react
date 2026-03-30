@@ -51,9 +51,8 @@ import { validateNodeVisibility } from "./VisibilityValidation.js";
 
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { InstanceKey } from "@itwin/presentation-common";
-import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
-import type { Props } from "@itwin/presentation-shared";
+import type { GroupingHierarchyNode, HierarchySearchTree, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { InstanceKey, Props } from "@itwin/presentation-shared";
 import type { CategoriesTreeHierarchyConfiguration } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import type { VisibilityExpectations } from "../../common/VisibilityValidation.js";
 import type { TreeWidgetTestingViewport } from "../../TreeUtils.js";
@@ -109,7 +108,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
   function createProvider(props: {
     idsCache: CategoriesTreeIdsCache;
     imodelAccess: ReturnType<typeof createIModelAccess>;
-    searchPaths?: HierarchyNodeIdentifiersPath[];
+    searchPaths?: HierarchySearchTree[];
     hierarchyConfig: CategoriesTreeHierarchyConfiguration;
   }) {
     return createIModelHierarchyProvider({
@@ -3041,7 +3040,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       visibleByDefault,
       subCategoriesOfCategories,
     }: Parameters<typeof createVisibilityTestData>[0] & {
-      searchPaths: HierarchyNodeIdentifiersPath[];
+      searchPaths: HierarchySearchTree[];
       view: "2d" | "3d";
       visibleByDefault?: boolean;
       subCategoriesOfCategories: Array<{ categoryId: string; subCategories: Id64Arg }>;
@@ -3122,7 +3121,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
         hierarchyConfig,
       });
 
-      using providerWithSearchPaths = createProvider({ idsCache, imodelAccess, searchPaths: [[keys.category, keys.subCategory]], hierarchyConfig });
+      using providerWithSearchPaths = createProvider({
+        idsCache,
+        imodelAccess,
+        searchPaths: [{ identifier: keys.category, children: [{ identifier: keys.subCategory }] }],
+        hierarchyConfig,
+      });
       await validateCategoriesTreeHierarchyVisibility({
         provider: providerWithSearchPaths,
         handler: visibilityHandlerWithoutSearchPaths,
@@ -3163,7 +3167,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             siblingSubCategory,
             defaultSubCategory,
             defaultSiblingSubCategory,
-            searchPaths: [[category, defaultSubCategory]],
+            searchPaths: [{ identifier: category, children: [{ identifier: defaultSubCategory }] }],
           };
         });
       }
@@ -3204,7 +3208,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             id: category.id,
             search: {
               isSearchTarget: false,
-              childrenTargetPaths: [[defaultSubCategory]],
+              childrenTargetPaths: [{ identifier: defaultSubCategory }],
             },
           }),
           true,
@@ -3314,9 +3318,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
             siblingCategory,
             physicalModel,
             searchPaths: [
-              [category, parentElement1, childElement11],
-              [category, parentElement2],
-              [category, parentElement2, childElement21],
+              { identifier: category, children: [{ identifier: parentElement1, children: [{ identifier: childElement11 }] }] },
+              { identifier: category, children: [{ identifier: parentElement2, isTarget: true, children: [{ identifier: childElement21 }] }] },
             ],
           };
         });
@@ -3378,7 +3381,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             id: category.id,
             search: {
               isSearchTarget: false,
-              childrenTargetPaths: [[parentElement1, childElement11], [parentElement2]],
+              childrenTargetPaths: [{ identifier: parentElement1, children: [{ identifier: childElement11 }] }, { identifier: parentElement2 }],
             },
           }),
           true,
@@ -3447,7 +3450,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             categoryId: category.id,
             search: {
               isSearchTarget: false,
-              childrenTargetPaths: [[childElement11]],
+              childrenTargetPaths: [{ identifier: childElement11 }],
             },
           }),
           true,
@@ -3580,7 +3583,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             parentKeys: [category],
             modelId: physicalModel.id,
             categoryId: category.id,
-            search: { isSearchTarget: true, childrenTargetPaths: [[childElement21]] },
+            search: { isSearchTarget: true, childrenTargetPaths: [{ identifier: childElement21 }] },
           }),
           true,
         );
@@ -3716,8 +3719,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
             childOfChild1,
             childOfChild2,
             searchPaths: [
-              [category, parentElement, childElement, childOfChild1],
-              [category, parentElement],
+              {
+                identifier: category,
+                children: [{ identifier: parentElement, isTarget: true, children: [{ identifier: childElement, children: [{ identifier: childOfChild1 }] }] }],
+              },
             ],
           };
         });
@@ -3762,7 +3767,9 @@ describe("CategoriesTreeVisibilityHandler", () => {
             id: category.id,
             search: {
               isSearchTarget: false,
-              childrenTargetPaths: [[parentElement], [parentElement, childElement, childOfChild1]],
+              childrenTargetPaths: [
+                { identifier: parentElement, isTarget: true, children: [{ identifier: childElement, children: [{ identifier: childOfChild1 }] }] },
+              ],
             },
           }),
           true,
@@ -3809,7 +3816,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             parentKeys: [category, { type: "class-grouping", className: CLASS_NAME_GeometricElement3d }],
             modelId: physicalModel.id,
             categoryId: category.id,
-            search: { isSearchTarget: true, childrenTargetPaths: [[childElement, childOfChild1]] },
+            search: { isSearchTarget: true, childrenTargetPaths: [{ identifier: childElement, children: [{ identifier: childOfChild1 }] }] },
           }),
           true,
         );
@@ -3860,7 +3867,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             ],
             modelId: physicalModel.id,
             categoryId: category.id,
-            search: { isSearchTarget: false, hasSearchTargetAncestor: true, childrenTargetPaths: [[childOfChild1]] },
+            search: { isSearchTarget: false, hasSearchTargetAncestor: true, childrenTargetPaths: [{ identifier: childOfChild1 }] },
           }),
           true,
         );
@@ -3993,7 +4000,17 @@ describe("CategoriesTreeVisibilityHandler", () => {
             siblingCategory,
             siblingElement,
             defaultSiblingSubCategory,
-            searchPaths: [[category, modeledElement, subModel, subModelCategory, subModelElement]],
+            searchPaths: [
+              {
+                identifier: category,
+                children: [
+                  {
+                    identifier: modeledElement,
+                    children: [{ identifier: subModel, children: [{ identifier: subModelCategory, children: [{ identifier: subModelElement }] }] }],
+                  },
+                ],
+              },
+            ],
           };
         });
       }
@@ -4045,7 +4062,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
             id: category.id,
             search: {
               isSearchTarget: false,
-              childrenTargetPaths: [[modeledElement, subModel, subModelCategory, subModelElement]],
+              childrenTargetPaths: [
+                {
+                  identifier: modeledElement,
+                  children: [{ identifier: subModel, children: [{ identifier: subModelCategory, children: [{ identifier: subModelElement }] }] }],
+                },
+              ],
             },
           }),
           true,
@@ -4114,7 +4136,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             modelId: physicalModel.id,
             search: {
               isSearchTarget: false,
-              childrenTargetPaths: [[subModel, subModelCategory, subModelElement]],
+              childrenTargetPaths: [{ identifier: subModel, children: [{ identifier: subModelCategory, children: [{ identifier: subModelElement }] }] }],
             },
           }),
           true,
@@ -4182,7 +4204,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             modelIds: [subModel.id],
             search: {
               isSearchTarget: false,
-              childrenTargetPaths: [[subModelElement]],
+              childrenTargetPaths: [{ identifier: subModelElement }],
             },
           }),
           true,
@@ -4324,7 +4346,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             subCategory,
             siblingCategory,
             defaultSiblingSubCategory,
-            searchPaths: [[definitionContainer, category, defaultSubCategory]],
+            searchPaths: [{ identifier: definitionContainer, children: [{ identifier: category, children: [{ identifier: defaultSubCategory }] }] }],
           };
         });
       }
@@ -4362,7 +4384,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             id: definitionContainer.id,
             search: {
               isSearchTarget: false,
-              childrenTargetPaths: [[category, defaultSubCategory]],
+              childrenTargetPaths: [{ identifier: category, children: [{ identifier: defaultSubCategory }] }],
             },
           }),
           true,
@@ -4406,7 +4428,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             parentKeys: [definitionContainer],
             search: {
               isSearchTarget: false,
-              childrenTargetPaths: [[defaultSubCategory]],
+              childrenTargetPaths: [{ identifier: defaultSubCategory }],
             },
           }),
           true,

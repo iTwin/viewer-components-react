@@ -133,12 +133,18 @@ export async function createViewport({
   testData,
 }: {
   iModelConnection: IModelConnection;
-  testData: {
+  testData?: {
     categories: VisibilityInfo[];
     models: VisibilityInfo[];
   };
 }): Promise<TreeWidgetTestingViewport> {
   const model = IModel.dictionaryId;
+  if (!testData) {
+    testData = {
+      categories: [],
+      models: [],
+    };
+  }
   const viewState = SpatialViewState.createFromProps(
     {
       categorySelectorProps: {

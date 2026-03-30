@@ -6,7 +6,7 @@
 import "./TreeNodeVisibilityButton.css";
 
 import { createContext, memo, useContext, useMemo } from "react";
-import { TreeActionBase } from "@itwin/presentation-hierarchies-react";
+import { TreeActionBase } from "@itwin/presentation-hierarchies-react/stratakit";
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
 import visibilityPartialSvg from "@stratakit/icons/visibility-partial.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
@@ -14,7 +14,8 @@ import { createTooltip } from "../internal/Tooltip.js";
 import { useTranslation } from "./LocalizationContext.js";
 
 import type { PropsWithChildren } from "react";
-import type { TreeActionBaseAttributes, TreeNode } from "@itwin/presentation-hierarchies-react";
+import type { TreeNode } from "@itwin/presentation-hierarchies-react";
+import type { TreeActionBaseAttributes } from "@itwin/presentation-hierarchies-react/stratakit";
 
 /** @beta */
 interface LoadedTreeItemVisibilityButtonState {

@@ -8,7 +8,8 @@ import { IModelVersion } from "@itwin/core-common";
 import { CheckpointConnection } from "@itwin/core-frontend";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor, createMergedIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { StrataKitTreeRenderer, useTree } from "@itwin/presentation-hierarchies-react";
+import { useTree } from "@itwin/presentation-hierarchies-react";
+import { StrataKitTreeRenderer } from "@itwin/presentation-hierarchies-react/stratakit";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 import { useClassificationsTreeDefinition } from "@itwin/tree-widget-react";
 

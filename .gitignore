@@ -5,6 +5,7 @@
 .nyc_output
 /**/lib
 /**/build
+*.tsbuildinfo
 /**/test/output
 coverage
 full_stack_test_results

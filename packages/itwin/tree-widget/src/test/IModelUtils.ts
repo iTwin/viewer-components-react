@@ -7,7 +7,7 @@ import { XMLParser } from "fast-xml-parser";
 import fs from "fs";
 import { expect } from "vitest";
 import { SnapshotDb } from "@itwin/core-backend";
-import { Id64 } from "@itwin/core-bentley";
+import { assert, Id64 } from "@itwin/core-bentley";
 import { BisCodeSpec, Code, IModel } from "@itwin/core-common";
 import { buildTestIModel } from "@itwin/presentation-testing";
 
@@ -33,6 +33,7 @@ import type {
   SubjectProps,
 } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { EC, InstanceKey } from "@itwin/presentation-shared";
 import type { TestIModelBuilder } from "@itwin/presentation-testing";
 
 // cspell:words ecdbmap jpath
@@ -80,13 +81,13 @@ export async function buildIModel<TResult extends object | undefined>(
 }
 
 interface TestSchemaDefinition extends ImportSchemaResult {
-  items: { SubModelablePhysicalObject: { name: string; fullName: string; label: string } };
+  items: { SubModelablePhysicalObject: { name: string; fullName: EC.FullClassName; label: string } };
 }
 
 interface ImportSchemaResult {
   schemaName: string;
   schemaAlias: string;
-  items: { [className: string]: { name: string; fullName: string; label: string } };
+  items: { [className: string]: { name: string; fullName: EC.FullClassName; label: string } };
 }
 export async function importSchema({
   builder,
@@ -106,7 +107,10 @@ export async function importSchema({
   const parsedSchema = new XMLParser({
     ignoreAttributes: false,
     attributeNamePrefix: "",
-    isArray: (_, jpath) => jpath.startsWith("ECSchema."),
+    isArray: (_, jpath) => {
+      assert(typeof jpath === "string");
+      return jpath.startsWith("ECSchema.");
+    },
   }).parse(schemaXml);
   const schemaItems = Object.values(parsedSchema.ECSchema)
     .flatMap<any>((itemDef) => itemDef)
@@ -115,7 +119,7 @@ export async function importSchema({
   return {
     schemaName,
     schemaAlias,
-    items: schemaItems.reduce<{ [className: string]: { name: string; fullName: string; label: string } }>((classesObj, schemaItemDef) => {
+    items: schemaItems.reduce<{ [className: string]: { name: string; fullName: EC.FullClassName; label: string } }>((classesObj, schemaItemDef) => {
       const name = schemaItemDef.typeName;
       return {
         ...classesObj,
@@ -147,10 +151,12 @@ interface BaseInstanceInsertProps {
 }
 
 export function insertSubject(
-  props: BaseInstanceInsertProps & { codeValue: string; parentId?: Id64String } & Partial<Omit<SubjectProps, "id" | "parent" | "code" | "model">>,
+  props: BaseInstanceInsertProps & { classFullName?: EC.FullClassName; codeValue: string; parentId?: Id64String } & Partial<
+      Omit<SubjectProps, "id" | "parent" | "code" | "model">
+    >,
 ) {
   const { builder, classFullName, codeValue, parentId, ...subjectProps } = props;
-  const defaultClassName = `BisCore${props.fullClassNameSeparator ?? "."}Subject`;
+  const defaultClassName: EC.FullClassName = `BisCore${props.fullClassNameSeparator ?? "."}Subject`;
   const className = classFullName ?? defaultClassName;
   const id = builder.insertElement({
     classFullName: className,
@@ -166,7 +172,12 @@ export function insertSubject(
 }
 
 export function insertModelWithPartition(
-  props: BaseInstanceInsertProps & { modelClassFullName: string; partitionClassFullName: string; codeValue: string; partitionParentId?: Id64String },
+  props: BaseInstanceInsertProps & {
+    modelClassFullName: EC.FullClassName;
+    partitionClassFullName: EC.FullClassName;
+    codeValue: string;
+    partitionParentId?: Id64String;
+  },
 ) {
   const { modelClassFullName, partitionClassFullName, codeValue, partitionParentId, ...baseProps } = props;
   const partitionKey = insertPartition({ ...baseProps, classFullName: partitionClassFullName, codeValue, parentId: partitionParentId ?? IModel.rootSubjectId });
@@ -174,7 +185,7 @@ export function insertModelWithPartition(
 }
 
 export function insertPartition(
-  props: BaseInstanceInsertProps & { classFullName: string; codeValue: string; parentId: Id64String } & Partial<
+  props: BaseInstanceInsertProps & { classFullName: EC.FullClassName; codeValue: string; parentId: Id64String } & Partial<
       Omit<InformationPartitionElementProps, "id" | "parent" | "code">
     >,
 ) {
@@ -194,7 +205,7 @@ export function insertPartition(
 
 export function insertSubModel(
   props: BaseInstanceInsertProps & {
-    classFullName: string;
+    classFullName: EC.FullClassName;
     modeledElementId: Id64String;
     modelModelsElementRelationshipName?: string;
   } & Partial<Omit<ModelProps, "id" | "modeledElement" | "parentModel">>,
@@ -218,7 +229,9 @@ export function insertPhysicalModelWithPartition(props: BaseInstanceInsertProps 
 }
 
 export function insertPhysicalPartition(
-  props: BaseInstanceInsertProps & { codeValue: string; parentId: Id64String } & Partial<Omit<InformationPartitionElementProps, "id" | "parent" | "code">>,
+  props: BaseInstanceInsertProps & { classFullName?: EC.FullClassName; codeValue: string; parentId: Id64String } & Partial<
+      Omit<InformationPartitionElementProps, "id" | "parent" | "code">
+    >,
 ) {
   return insertPartition({
     classFullName: `BisCore${props.fullClassNameSeparator ?? "."}PhysicalPartition`,
@@ -227,7 +240,9 @@ export function insertPhysicalPartition(
 }
 
 export function insertPhysicalSubModel(
-  props: BaseInstanceInsertProps & { modeledElementId: Id64String } & Partial<Omit<GeometricModel3dProps, "id" | "modeledElement" | "parentModel">>,
+  props: BaseInstanceInsertProps & { classFullName?: EC.FullClassName; modeledElementId: Id64String } & Partial<
+      Omit<GeometricModel3dProps, "id" | "modeledElement" | "parentModel">
+    >,
 ) {
   return insertSubModel({
     classFullName: `BisCore${props.fullClassNameSeparator ?? "."}PhysicalModel`,
@@ -242,7 +257,7 @@ export function insertDrawingModelWithPartition(props: BaseInstanceInsertProps &
 }
 
 export function insertDrawingPartition(
-  props: BaseInstanceInsertProps & { codeValue: string; parentId: Id64String } & Partial<
+  props: BaseInstanceInsertProps & { classFullName?: EC.FullClassName; codeValue: string; parentId: Id64String } & Partial<
       Omit<InformationPartitionElementProps, "id" | "parent" | "code" | "userLabel">
     >,
 ) {
@@ -253,7 +268,9 @@ export function insertDrawingPartition(
 }
 
 export function insertDrawingSubModel(
-  props: BaseInstanceInsertProps & { modeledElementId: Id64String } & Partial<Omit<GeometricModel2dProps, "id" | "modeledElement" | "parentModel">>,
+  props: BaseInstanceInsertProps & { classFullName?: EC.FullClassName; modeledElementId: Id64String } & Partial<
+      Omit<GeometricModel2dProps, "id" | "modeledElement" | "parentModel">
+    >,
 ) {
   return insertSubModel({
     classFullName: `BisCore${props.fullClassNameSeparator ?? "."}DrawingModel`,
@@ -263,12 +280,11 @@ export function insertDrawingSubModel(
 
 export function insertSpatialCategory(
   props: BaseInstanceInsertProps & { codeValue: string; modelId?: Id64String; userLabel?: string } & Partial<
-      Omit<CategoryProps, "id" | "model" | "parent" | "code">
+      Omit<CategoryProps, "id" | "model" | "parent" | "code" | "classFullName">
     >,
 ) {
-  const { builder, classFullName, modelId, codeValue, userLabel, ...categoryProps } = props;
-  const defaultClassName = `BisCore${props.fullClassNameSeparator ?? "."}SpatialCategory`;
-  const className = classFullName ?? defaultClassName;
+  const { builder, modelId, codeValue, userLabel, ...categoryProps } = props;
+  const className: EC.FullClassName = `BisCore${props.fullClassNameSeparator ?? "."}SpatialCategory`;
   const model = modelId ?? IModel.dictionaryId;
   const id = builder.insertElement({
     classFullName: className,
@@ -281,12 +297,12 @@ export function insertSpatialCategory(
 }
 
 export function insertDefinitionContainer(
-  props: BaseInstanceInsertProps & { codeValue: string; modelId?: Id64String; isPrivate?: boolean } & Partial<
+  props: BaseInstanceInsertProps & { classFullName?: EC.FullClassName; codeValue: string; modelId?: Id64String; isPrivate?: boolean } & Partial<
       Omit<ElementProps, "id" | "model" | "parent" | "code">
     >,
 ) {
   const { builder, classFullName, modelId, codeValue, ...elementProps } = props;
-  const defaultClassName = `BisCore${props.fullClassNameSeparator ?? "."}DefinitionContainer`;
+  const defaultClassName: EC.FullClassName = `BisCore${props.fullClassNameSeparator ?? "."}DefinitionContainer`;
   const className = classFullName ?? defaultClassName;
   const model = modelId ?? IModel.dictionaryId;
   const id = builder.insertElement({
@@ -299,11 +315,12 @@ export function insertDefinitionContainer(
 }
 
 export function insertDrawingCategory(
-  props: BaseInstanceInsertProps & { codeValue: string; modelId?: Id64String } & Partial<Omit<CategoryProps, "id" | "model" | "parent" | "code">>,
+  props: BaseInstanceInsertProps & { codeValue: string; modelId?: Id64String } & Partial<
+      Omit<CategoryProps, "id" | "model" | "parent" | "code" | "classFullName">
+    >,
 ) {
-  const { builder, classFullName, modelId, codeValue, ...categoryProps } = props;
-  const defaultClassName = `BisCore${props.fullClassNameSeparator ?? "."}DrawingCategory`;
-  const className = classFullName ?? defaultClassName;
+  const { builder, modelId, codeValue, ...categoryProps } = props;
+  const className: EC.FullClassName = `BisCore${props.fullClassNameSeparator ?? "."}DrawingCategory`;
   const model = modelId ?? IModel.dictionaryId;
   const id = builder.insertElement({
     classFullName: className,
@@ -314,23 +331,22 @@ export function insertDrawingCategory(
   return { className, id };
 }
 
-export function getDefaultSubcategoryKey(categoryId: Id64String, fullClassNameSeparator?: string) {
+export function getDefaultSubcategoryKey(categoryId: Id64String, fullClassNameSeparator?: "." | ":") {
   const pair = Id64.getUint32Pair(categoryId);
   pair.lower++; // id of default subcategory is always `category id + 1`
   return {
     className: `BisCore${fullClassNameSeparator ?? "."}SubCategory`,
     id: Id64.fromUint32PairObject(pair),
-  };
+  } satisfies InstanceKey;
 }
 
 export function insertSubCategory(
   props: BaseInstanceInsertProps & { codeValue: string; parentCategoryId: Id64String; modelId?: Id64String } & Partial<
-      Omit<SubCategoryProps, "id" | "model" | "parent" | "code">
+      Omit<SubCategoryProps, "id" | "model" | "parent" | "code" | "classFullName">
     >,
 ) {
-  const { builder, classFullName, modelId, codeValue, parentCategoryId, ...subCategoryProps } = props;
-  const defaultClassName = `BisCore${props.fullClassNameSeparator ?? "."}SubCategory`;
-  const className = classFullName ?? defaultClassName;
+  const { builder, modelId, codeValue, parentCategoryId, ...subCategoryProps } = props;
+  const className: EC.FullClassName = `BisCore${props.fullClassNameSeparator ?? "."}SubCategory`;
   const model = modelId ?? IModel.dictionaryId;
   const id = builder.insertElement({
     classFullName: className,
@@ -347,13 +363,13 @@ export function insertSubCategory(
 }
 
 export function insertPhysicalElement<TAdditionalProps extends object>(
-  props: BaseInstanceInsertProps & { modelId: Id64String; categoryId: Id64String; parentId?: Id64String } & Partial<
+  props: BaseInstanceInsertProps & { classFullName?: EC.FullClassName; modelId: Id64String; categoryId: Id64String; parentId?: Id64String } & Partial<
       Omit<PhysicalElementProps, "id" | "model" | "category" | "parent">
     > &
     TAdditionalProps,
 ) {
   const { builder, classFullName, modelId, categoryId, parentId, ...elementProps } = props;
-  const defaultClassName = `Generic${props.fullClassNameSeparator ?? "."}PhysicalObject`;
+  const defaultClassName: EC.FullClassName = `Generic${props.fullClassNameSeparator ?? "."}PhysicalObject`;
   const className = classFullName ?? defaultClassName;
   const id = builder.insertElement({
     classFullName: className,
@@ -374,14 +390,13 @@ export function insertPhysicalElement<TAdditionalProps extends object>(
 }
 
 export function insertDrawingGraphic<TAdditionalProps extends object>(
-  props: BaseInstanceInsertProps & { modelId: Id64String; categoryId: Id64String; parentId?: Id64String } & Partial<
-      Omit<GeometricElement2dProps, "id" | "model" | "category" | "parent">
+  props: BaseInstanceInsertProps & { classFullName?: EC.FullClassName; modelId: Id64String; categoryId: Id64String; parentId?: Id64String } & Partial<
+      Omit<GeometricElement2dProps, "id" | "model" | "category" | "parent" | "classFullName">
     > &
     TAdditionalProps,
 ) {
-  const { builder, classFullName, modelId, categoryId, parentId, ...elementProps } = props;
-  const defaultClassName = `BisCore${props.fullClassNameSeparator ?? "."}DrawingGraphic`;
-  const className = classFullName ?? defaultClassName;
+  const { builder, modelId, categoryId, parentId, ...elementProps } = props;
+  const className: EC.FullClassName = `BisCore${props.fullClassNameSeparator ?? "."}DrawingGraphic`;
   const id = builder.insertElement({
     classFullName: className,
     model: modelId,
@@ -402,13 +417,12 @@ export function insertDrawingGraphic<TAdditionalProps extends object>(
 
 export function insertDrawingElement<TAdditionalProps extends object>(
   props: BaseInstanceInsertProps & { modelId: Id64String; codeValue: string; parentId?: Id64String } & Partial<
-      Omit<ElementProps, "id" | "model" | "parent" | "code">
+      Omit<ElementProps, "id" | "model" | "parent" | "code" | "classFullName">
     > &
     TAdditionalProps,
 ) {
-  const { builder, classFullName, codeValue, modelId, parentId, ...elementProps } = props;
-  const defaultClassName = `BisCore${props.fullClassNameSeparator ?? "."}Drawing`;
-  const className = classFullName ?? defaultClassName;
+  const { builder, codeValue, modelId, parentId, ...elementProps } = props;
+  const className: EC.FullClassName = `BisCore${props.fullClassNameSeparator ?? "."}Drawing`;
   const id = builder.insertElement({
     classFullName: className,
     model: modelId,
@@ -426,10 +440,11 @@ export function insertDrawingElement<TAdditionalProps extends object>(
   return { className, id };
 }
 
-export function insertRepositoryLink(props: BaseInstanceInsertProps & { codeValue?: string } & Partial<Omit<RepositoryLinkProps, "id" | "model" | "code">>) {
-  const { builder, classFullName, codeValue, ...repoLinkProps } = props;
-  const defaultClassName = `BisCore${props.fullClassNameSeparator ?? "."}RepositoryLink`;
-  const className = classFullName ?? defaultClassName;
+export function insertRepositoryLink(
+  props: BaseInstanceInsertProps & { codeValue?: string } & Partial<Omit<RepositoryLinkProps, "id" | "model" | "code" | "classFullName">>,
+) {
+  const { builder, codeValue, ...repoLinkProps } = props;
+  const className: EC.FullClassName = `BisCore${props.fullClassNameSeparator ?? "."}RepositoryLink`;
   const id = builder.insertElement({
     classFullName: className,
     model: IModel.repositoryModelId,
@@ -441,11 +456,11 @@ export function insertRepositoryLink(props: BaseInstanceInsertProps & { codeValu
 
 export function insertExternalSourceAspect(
   props: BaseInstanceInsertProps & { elementId: Id64String; identifier?: string; sourceId?: Id64String } & Partial<
-      Omit<ExternalSourceAspectProps, "id" | "classFullName" | "element" | "identifier" | "source">
+      Omit<ExternalSourceAspectProps, "id" | "classFullName" | "element" | "identifier" | "source" | "classFullName">
     >,
 ) {
   const { builder, elementId, identifier, sourceId, ...externalSourceAspectProps } = props;
-  const className = `BisCore${props.fullClassNameSeparator ?? "."}ExternalSourceAspect`;
+  const className: EC.FullClassName = `BisCore${props.fullClassNameSeparator ?? "."}ExternalSourceAspect`;
   const id = builder.insertAspect({
     classFullName: className,
     kind: "ExternalSource",
@@ -466,12 +481,11 @@ export function insertExternalSourceAspect(
 
 export function insertExternalSource(
   props: BaseInstanceInsertProps & { codeValue?: string; parentId?: Id64String; repositoryLinkId?: Id64String } & Partial<
-      Omit<ExternalSourceProps, "id" | "repository" | "parent">
+      Omit<ExternalSourceProps, "id" | "repository" | "parent" | "classFullName">
     >,
 ) {
-  const { builder, classFullName, codeValue, parentId, repositoryLinkId, ...externalSourceProps } = props;
-  const defaultClassName = `BisCore${props.fullClassNameSeparator ?? "."}ExternalSource`;
-  const className = classFullName ?? defaultClassName;
+  const { builder, codeValue, parentId, repositoryLinkId, ...externalSourceProps } = props;
+  const className: EC.FullClassName = `BisCore${props.fullClassNameSeparator ?? "."}ExternalSource`;
   const id = builder.insertElement({
     classFullName: className,
     model: IModel.repositoryModelId,
@@ -494,12 +508,11 @@ export function insertExternalSource(
 
 export function insertExternalSourceAttachment(
   props: BaseInstanceInsertProps & { codeValue?: string; parentExternalSourceId: Id64String; attachedExternalSourceId: Id64String } & Partial<
-      Omit<ExternalSourceAttachmentProps, "id" | "parent" | "attaches">
+      Omit<ExternalSourceAttachmentProps, "id" | "parent" | "attaches" | "classFullName">
     >,
 ) {
-  const { builder, classFullName, codeValue, parentExternalSourceId, attachedExternalSourceId, ...externalSourceAttachmentProps } = props;
-  const defaultClassName = `BisCore${props.fullClassNameSeparator ?? "."}ExternalSourceAttachment`;
-  const className = classFullName ?? defaultClassName;
+  const { builder, codeValue, parentExternalSourceId, attachedExternalSourceId, ...externalSourceAttachmentProps } = props;
+  const className: EC.FullClassName = `BisCore${props.fullClassNameSeparator ?? "."}ExternalSourceAttachment`;
   const id = builder.insertElement({
     classFullName: className,
     model: IModel.repositoryModelId,
@@ -524,7 +537,9 @@ export function insertFunctionalModelWithPartition(props: BaseInstanceInsertProp
 }
 
 export function insertFunctionalPartition(
-  props: BaseInstanceInsertProps & { codeValue: string; parentId: Id64String } & Partial<Omit<InformationPartitionElementProps, "id" | "parent" | "code">>,
+  props: BaseInstanceInsertProps & { codeValue: string; parentId: Id64String } & Partial<
+      Omit<InformationPartitionElementProps, "id" | "parent" | "code" | "classFullName">
+    >,
 ) {
   return insertPartition({
     classFullName: `Functional${props.fullClassNameSeparator ?? "."}FunctionalPartition`,
@@ -533,7 +548,9 @@ export function insertFunctionalPartition(
 }
 
 export function insertFunctionalSubModel(
-  props: BaseInstanceInsertProps & { modeledElementId: Id64String } & Partial<Omit<GeometricModel3dProps, "id" | "modeledElement" | "parentModel">>,
+  props: BaseInstanceInsertProps & { modeledElementId: Id64String } & Partial<
+      Omit<GeometricModel3dProps, "id" | "modeledElement" | "parentModel" | "classFullName">
+    >,
 ) {
   return insertSubModel({
     classFullName: `Functional${props.fullClassNameSeparator ?? "."}FunctionalModel`,
@@ -547,10 +564,10 @@ export function insertFunctionalElement(
     representedElementId: Id64String;
     relationshipName: "DrawingGraphicRepresentsFunctionalElement" | "PhysicalElementFulfillsFunction";
     parentId?: string;
-  } & Partial<Omit<FunctionalElementProps, "id" | "parent" | "code" | "model">>,
+  } & Partial<Omit<FunctionalElementProps, "id" | "parent" | "code" | "model" | "classFullName">>,
 ) {
   const { builder, modelId, representedElementId, relationshipName, parentId, ...elementProps } = props;
-  const className = `Functional${props.fullClassNameSeparator ?? "."}FunctionalComposite`;
+  const className: EC.FullClassName = `Functional${props.fullClassNameSeparator ?? "."}FunctionalComposite`;
   const id = builder.insertElement({
     classFullName: className,
     model: modelId,
@@ -578,7 +595,9 @@ export function insertGroupInformationModelWithPartition(props: BaseInstanceInse
 }
 
 export function insertGroupInformationPartition(
-  props: BaseInstanceInsertProps & { codeValue: string; parentId: Id64String } & Partial<Omit<InformationPartitionElementProps, "id" | "parent" | "code">>,
+  props: BaseInstanceInsertProps & { codeValue: string; parentId: Id64String } & Partial<
+      Omit<InformationPartitionElementProps, "id" | "parent" | "code" | "classFullName">
+    >,
 ) {
   return insertPartition({
     classFullName: `BisCore${props.fullClassNameSeparator ?? "."}GroupInformationPartition`,
@@ -587,7 +606,9 @@ export function insertGroupInformationPartition(
 }
 
 export function insertGroupInformationSubModel(
-  props: BaseInstanceInsertProps & { modeledElementId: Id64String } & Partial<Omit<GeometricModel3dProps, "id" | "modeledElement" | "parentModel">>,
+  props: BaseInstanceInsertProps & { modeledElementId: Id64String } & Partial<
+      Omit<GeometricModel3dProps, "id" | "modeledElement" | "parentModel" | "classFullName">
+    >,
 ) {
   return insertSubModel({
     classFullName: `Generic${props.fullClassNameSeparator ?? "."}GroupModel`,
@@ -600,10 +621,10 @@ export function insertGroupInformationElement(
     modelId: Id64String;
     parentId?: Id64String;
     codeValue?: string;
-  } & Partial<Omit<FunctionalElementProps, "id" | "parent" | "code" | "model">>,
+  } & Partial<Omit<FunctionalElementProps, "id" | "parent" | "code" | "model" | "classFullName">>,
 ) {
   const { builder, codeValue, modelId, parentId, ...elementProps } = props;
-  const className = `Generic${props.fullClassNameSeparator ?? "."}Group`;
+  const className: EC.FullClassName = `Generic${props.fullClassNameSeparator ?? "."}Group`;
   const id = builder.insertElement({
     classFullName: className,
     model: modelId,
@@ -626,7 +647,9 @@ export function insertDefinitionModelWithPartition(props: BaseInstanceInsertProp
 }
 
 export function insertDefinitionPartition(
-  props: BaseInstanceInsertProps & { codeValue: string; parentId: Id64String } & Partial<Omit<InformationPartitionElementProps, "id" | "parent" | "code">>,
+  props: BaseInstanceInsertProps & { codeValue: string; parentId: Id64String } & Partial<
+      Omit<InformationPartitionElementProps, "id" | "parent" | "code" | "classFullName">
+    >,
 ) {
   return insertPartition({
     classFullName: `BisCore${props.fullClassNameSeparator ?? "."}DefinitionPartition`,
@@ -636,7 +659,7 @@ export function insertDefinitionPartition(
 
 export function insertDefinitionSubModel(
   props: BaseInstanceInsertProps & { modeledElementId: Id64String; modelModelsElementRelationshipName?: string } & Partial<
-      Omit<GeometricModel3dProps, "id" | "modeledElement" | "parentModel">
+      Omit<GeometricModel3dProps, "id" | "modeledElement" | "parentModel" | "classFullName">
     >,
 ) {
   return insertSubModel({

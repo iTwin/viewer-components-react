@@ -4,115 +4,90 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { describe, expect, it } from "vitest";
-import { HierarchySearchPath } from "@itwin/presentation-hierarchies";
-import { joinHierarchySearchPaths } from "../../../tree-widget-react/components/trees/common/Utils.js";
+import { joinHierarchySearchTrees } from "../../../tree-widget-react/components/trees/common/Utils.js";
 
-import type { HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
-import type { NormalizedHierarchySearchPath } from "../../../tree-widget-react/components/trees/common/Utils.js";
+import type { IModelInstanceKey } from "@itwin/presentation-hierarchies";
 
 describe("Utils", () => {
-  describe("joinHierarchySearchPaths", () => {
-    const subject = { id: "0x1", className: "s:s", imodelKey: "key" };
-    const model = { id: "0x2", className: "s:m", imodelKey: "key" };
-    const category1 = { id: "0x3", className: "s:c", imodelKey: "key" };
-    const category2 = { id: "0x4", className: "s:c", imodelKey: "key" };
-    const element1 = { id: "0x5", className: "s:c", imodelKey: "key" };
-    const element2 = { id: "0x6", className: "s:c", imodelKey: "key" };
-    const element3 = { id: "0x7", className: "s:c", imodelKey: "key" };
-    const element4 = { id: "0x8", className: "s:c", imodelKey: "key" };
+  describe("joinHierarchySearchTrees", () => {
+    const subject: IModelInstanceKey = { id: "0x1", className: "s:s", imodelKey: "key" };
+    const model: IModelInstanceKey = { id: "0x2", className: "s:m", imodelKey: "key" };
+    const category1: IModelInstanceKey = { id: "0x3", className: "s:c", imodelKey: "key" };
+    const category2: IModelInstanceKey = { id: "0x4", className: "s:c", imodelKey: "key" };
 
-    it("returns empty when search and subTree paths don't overlap", () => {
-      const subTreePaths: HierarchyNodeIdentifiersPath[] = [[subject, model]];
-      const searchPaths: NormalizedHierarchySearchPath[] = [
-        { path: [subject, { ...model, imodelKey: "random" }] },
-        { path: [subject, { ...model, className: "s:random" }] },
-        { path: [subject, { ...model, id: "0x123" }] },
-        { path: [subject, category1] },
-        { path: [category1, model] },
-        { path: [model] },
-        { path: [category1] },
-        { path: [] },
-      ];
-      const joinedPaths = joinHierarchySearchPaths(subTreePaths, searchPaths);
-      expect(joinedPaths).toEqual([]);
+    it("returns empty array when both inputs are empty", () => {
+      expect(joinHierarchySearchTrees([], [])).toEqual([]);
     });
 
-    it("returns subTree paths when search paths are shorter than subTree paths", () => {
-      const searchPath: NormalizedHierarchySearchPath = { path: [subject] };
-      const searchPath2: NormalizedHierarchySearchPath = { path: [element1, element2, element3], options: { reveal: true } };
-      const searchPath3: NormalizedHierarchySearchPath = { path: [element3, element4], options: { reveal: { depthInHierarchy: 1 } } };
-      const searchPath4: NormalizedHierarchySearchPath = { path: [element4, category1], options: { reveal: { depthInPath: 1 } } };
-      const searchPaths: NormalizedHierarchySearchPath[] = [searchPath, searchPath2, searchPath3, searchPath4];
-
-      const subTreePath1 = [...searchPath.path, model];
-      const subTreePath2 = [...searchPath2.path, element4];
-      const subTreePath3 = [...searchPath3.path, category1, category2];
-      const subTreePath4 = [...searchPath4.path, category2];
-      const subTreePaths: HierarchyNodeIdentifiersPath[] = [subTreePath1, subTreePath2, subTreePath3, subTreePath4];
-
-      const joinedPaths = joinHierarchySearchPaths(subTreePaths, searchPaths);
-      const expectedPaths = [
-        {
-          path: subTreePath1,
-          options: undefined,
-        },
-        {
-          path: subTreePath2,
-          options: { reveal: { depthInPath: 2 } },
-        },
-        {
-          path: subTreePath3,
-          options: searchPath3.options,
-        },
-        {
-          path: subTreePath4,
-          options: searchPath4.options,
-        },
-      ];
-      expect(joinedPaths).toEqual(expectedPaths);
+    it("returns empty when only sub-trees are provided without search trees", () => {
+      const result = joinHierarchySearchTrees([{ identifier: subject, children: [{ identifier: model }] }], []);
+      expect(result).toEqual([]);
     });
 
-    it("returns subTree paths and search paths when search paths are longer than subTree paths", () => {
-      const subTreePaths: HierarchyNodeIdentifiersPath[] = [
-        [subject, model],
-        [model, category1, element1, element2],
-        [model, category1, element1, element3],
-      ];
-      const searchPaths: NormalizedHierarchySearchPath[] = [
-        { path: [subject, model, category1] },
-        { path: [model, category1, element1, element2, element3], options: { reveal: true } },
-        { path: [model, category1, element1, element3, element1], options: { reveal: { depthInPath: 1 } } },
-      ];
-      const sortFn = (lhs: HierarchySearchPath, rhs: HierarchySearchPath) => {
-        const lhsStr = JSON.stringify(lhs);
-        const rhsStr = JSON.stringify(rhs);
-        if (rhsStr === lhsStr) {
-          return 0;
-        }
-        if (lhsStr < rhsStr) {
-          return -1;
-        }
-        return 1;
-      };
-      const joinedPaths = joinHierarchySearchPaths(subTreePaths, searchPaths).sort(sortFn);
-      const expectedPaths = [
-        {
-          path: subTreePaths[0],
-          options: undefined,
-        },
-        {
-          path: subTreePaths[1],
-          options: undefined,
-        },
-        {
-          path: subTreePaths[2],
-          options: undefined,
-        },
-        { path: HierarchySearchPath.normalize(searchPaths[0]).path },
-        searchPaths[1],
-        searchPaths[2],
-      ].sort(sortFn);
-      expect(joinedPaths).toEqual(expectedPaths);
+    it("returns empty when only search trees are provided without sub-trees", () => {
+      const result = joinHierarchySearchTrees([], [{ identifier: subject, children: [{ identifier: model }] }]);
+      expect(result).toEqual([]);
+    });
+
+    it("returns empty when none of the search targets are under sub-tree targets", () => {
+      const result = joinHierarchySearchTrees(
+        [{ identifier: subject, children: [{ identifier: model, children: [{ identifier: category1 }] }] }],
+        [{ identifier: subject, children: [{ identifier: model, children: [{ identifier: category2 }] }] }],
+      );
+      expect(result).toEqual([]);
+    });
+
+    it("extends sub-tree leaf with search tree children, removing isTarget from leaf", () => {
+      // sub-tree: [subject] (leaf target)
+      // search-tree: [subject -> model]
+      // subject's isTarget (set by builder when children are added) is deleted
+      // because the search tree is more specific
+      const result = joinHierarchySearchTrees([{ identifier: subject }], [{ identifier: subject, children: [{ identifier: model }] }]);
+      expect(result).toEqual([{ identifier: subject, children: [{ identifier: model }] }]);
+    });
+
+    it("removes isTarget from intermediate sub-tree node matched by search tree", () => {
+      // sub-tree: [subject -> model]
+      // search-tree: [subject] (matches intermediate sub-tree node that is not a sub-tree target)
+      // subject's isTarget (set by builder because search tree marks it as target) is deleted
+      const result = joinHierarchySearchTrees([{ identifier: subject, children: [{ identifier: model }] }], [{ identifier: subject }]);
+      expect(result).toEqual([{ identifier: subject, children: [{ identifier: model }] }]);
+    });
+
+    it("preserves isTarget on explicit sub-tree target matched by search tree", () => {
+      // sub-tree: [subject(isTarget) -> model]
+      // subject is an explicit sub-tree target, so isTarget is preserved
+      const result = joinHierarchySearchTrees([{ identifier: subject, isTarget: true, children: [{ identifier: model }] }], [{ identifier: subject }]);
+      expect(result).toEqual([{ identifier: subject, isTarget: true, children: [{ identifier: model }] }]);
+    });
+
+    it("adds search tree entries under ancestor sub-tree targets", () => {
+      // sub-tree: [subject] (leaf target)
+      // search-tree: [subject -> model -> category1]
+      // model is added under subject (sub-tree target), category1 is added under model
+      // because subject (ancestor) is a sub-tree target
+      const result = joinHierarchySearchTrees(
+        [{ identifier: subject }],
+        [{ identifier: subject, children: [{ identifier: model, children: [{ identifier: category1 }] }] }],
+      );
+      expect(result).toEqual([{ identifier: subject, children: [{ identifier: model, children: [{ identifier: category1 }] }] }]);
+    });
+
+    it("adds multiple search tree branches under a sub-tree target", () => {
+      const result = joinHierarchySearchTrees(
+        [{ identifier: subject, children: [{ identifier: model }] }],
+        [{ identifier: subject, children: [{ identifier: model, children: [{ identifier: category1 }, { identifier: category2 }] }] }],
+      );
+      expect(result).toEqual([{ identifier: subject, children: [{ identifier: model, children: [{ identifier: category1 }, { identifier: category2 }] }] }]);
+    });
+
+    it("preserves isTarget when search tree has explicit isTarget on node with children", () => {
+      // model has `isTarget: true` in the search tree - that flag has to be preserved
+      const result = joinHierarchySearchTrees(
+        [{ identifier: subject, children: [{ identifier: model }] }],
+        [{ identifier: subject, children: [{ identifier: model, isTarget: true, children: [{ identifier: category1 }] }] }],
+      );
+      expect(result).toEqual([{ identifier: subject, children: [{ identifier: model, isTarget: true, children: [{ identifier: category1 }] }] }]);
     });
   });
 });

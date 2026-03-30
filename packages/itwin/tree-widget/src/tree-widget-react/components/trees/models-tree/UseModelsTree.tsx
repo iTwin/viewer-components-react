@@ -33,7 +33,7 @@ import { ModelsTreeNode } from "./ModelsTreeNode.js";
 import type { ReactNode } from "react";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { HierarchySearchPath } from "@itwin/presentation-hierarchies";
+import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { TreeNode } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
@@ -41,7 +41,6 @@ import type { ExtendedVisibilityTreeRendererProps } from "../common/components/V
 import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { SearchResultsTree } from "../common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
-import type { NormalizedHierarchySearchPath } from "../common/Utils.js";
 import type { HierarchyConfigForModelsCache } from "./internal/ModelsTreeIdsCache.js";
 import type { ModelsTreeSearchError, ModelsTreeSubTreeError } from "./internal/UseSearchPaths.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
@@ -58,6 +57,15 @@ export interface UseModelsTreeProps {
    * Instead, the string will be supplied to the given `getSearchPaths` function for consumers to apply the search.
    */
   searchText?: string;
+  /**
+   * Limit of how many search results are allowed. Applies to both label search by `searchText` and custom search by `getSearchPaths`.
+   * Does not apply to sub-tree paths retrieved by `getSubTreePaths`.
+   *
+   * Can be a number or "unbounded" for no limit.
+   *
+   * Defaults to `100`.
+   */
+  searchLimit?: number | "unbounded";
   activeView: TreeWidgetViewport;
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
@@ -74,20 +82,19 @@ export interface UseModelsTreeProps {
    * - You have a list of `InstanceKey` items, which you want to use for searching the hierarchy.
    * - You want to create search paths based on node label, but also apply some extra conditions (for example exclude paths with sub-models).
    * - You want to construct custom search paths. For example: create a search path for each geometric element which has a parent element.
-   *
-   * @note Paths returned  by `createInstanceKeyPaths` will not have `reveal` flag set. If you want nodes to be expanded, iterate over the paths and
-   * set `reveal: true` manually.
    */
   getSearchPaths?: (props: {
     /**
      * A function that creates search paths based on provided target instance keys or node label.
+     *
+     * The resulting hierarchy search tree will have `options.autoExpand` set to reveal search targets.
      */
-    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<NormalizedHierarchySearchPath[]>;
+    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<HierarchySearchTree[]>;
     /**
      * Search text which would be used to create search paths if `getSearchPaths` wouldn't be provided.
      */
     searchText?: string;
-  }) => Promise<HierarchySearchPath[] | undefined>;
+  }) => Promise<HierarchySearchTree[] | undefined>;
   /**
    * Optional function for restricting the visible hierarchy to a specific sub-tree of nodes, without changing how search works.
    *
@@ -104,8 +111,8 @@ export interface UseModelsTreeProps {
     /**
      * A function that creates search paths based on provided target instance keys.
      */
-    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> }) => Promise<NormalizedHierarchySearchPath[]>;
-  }) => Promise<HierarchySearchPath[]>;
+    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> }) => Promise<HierarchySearchTree[]>;
+  }) => Promise<HierarchySearchTree[]>;
   onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
   /**
    * An optional predicate to allow or prohibit selection of a node.
@@ -134,6 +141,7 @@ interface UseModelsTreeResult {
 export function useModelsTree({
   activeView,
   searchText,
+  searchLimit,
   hierarchyConfig,
   visibilityHandlerOverrides,
   getSearchPaths,
@@ -176,6 +184,7 @@ export function useModelsTree({
   const { getPaths, searchError, subTreeError } = useSearchPaths({
     hierarchyConfiguration,
     searchText,
+    searchLimit,
     getSearchPaths,
     idsCache,
     onSearchPathsChanged,

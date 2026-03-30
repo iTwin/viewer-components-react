@@ -10,6 +10,7 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { DefaultContentDisplayTypes, KeySet, PresentationRpcInterface, PropertyValueFormat } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
+import { normalizeFullClassName } from "@itwin/presentation-shared";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { CLASS_NAME_Subject } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import {
@@ -55,7 +56,7 @@ describe("Models tree", () => {
 
     it("can filter root level", async () => {
       await using imodelResult = await buildIModel(async (builder) => {
-        const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+        const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
         const childSubject = insertSubject({ builder, codeValue: "child subject 1", description: "", parentId: rootSubject.id });
         const category = insertSpatialCategory({ builder, codeValue: "category" });
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model 1`, partitionParentId: childSubject.id });
@@ -131,7 +132,7 @@ describe("Models tree", () => {
 
     it("can filter Subject children level", async () => {
       await using buildIModelResult = await buildIModel(async (builder) => {
-        const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+        const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
         const category = insertSpatialCategory({ builder, codeValue: "category" });
 
         // set up child subject node
@@ -254,7 +255,7 @@ describe("Models tree", () => {
 
     it("can filter Model children level", async () => {
       await using buildIModelResult = await buildIModel(async (builder) => {
-        const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+        const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
         const category1 = insertSpatialCategory({ builder, codeValue: "category1" });
         const category2 = insertSpatialCategory({ builder, codeValue: "category2" });
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
@@ -322,7 +323,7 @@ describe("Models tree", () => {
 
     it("can filter Category children level", async () => {
       await using buildIModelResult = await buildIModel(async (builder) => {
-        const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+        const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
         const category = insertSpatialCategory({ builder, codeValue: "category" });
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
         const element = insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
@@ -406,7 +407,7 @@ describe("Models tree", () => {
 
     it("can filter Element children level with child elements", async () => {
       await using buildIModelResult = await buildIModel(async (builder) => {
-        const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+        const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
         const category = insertSpatialCategory({ builder, codeValue: "category" });
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
         const parentElement = insertPhysicalElement({ builder, userLabel: `parent element`, modelId: model.id, categoryId: category.id });
@@ -502,7 +503,7 @@ describe("Models tree", () => {
 
     it("can filter Element children level with modeling elements", async () => {
       await using buildIModelResult = await buildIModel(async (builder, testSchema) => {
-        const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+        const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
         const category = insertSpatialCategory({ builder, codeValue: "category" });
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
         const modeledElement = insertPhysicalElement({
@@ -604,7 +605,7 @@ describe("Models tree", () => {
 
     it("creates descriptor with related properties", async () => {
       await using buildIModelResult = await buildIModel(async (builder) => {
-        const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+        const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
         const category = insertSpatialCategory({ builder, codeValue: "category" });
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
         const element = insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
@@ -682,7 +683,7 @@ describe("Models tree", () => {
     describe("Hierarchy configuration", () => {
       it("filters empty models when `showEmptyModels` set to true", async () => {
         await using buildIModelResult = await buildIModel(async (builder) => {
-          const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+          const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
 
           // set up child model node
           const model = insertPhysicalModelWithPartition({ builder, codeValue: `model 2`, partitionParentId: rootSubject.id });
@@ -740,7 +741,7 @@ describe("Models tree", () => {
 
       it("filters elements when `elementClassSpecification` is provided", async () => {
         await using buildIModelResult = await buildIModel(async (builder, testSchema) => {
-          const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+          const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
           const category = insertSpatialCategory({ builder, codeValue: "category" });
           const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
           const element1 = insertPhysicalElement({

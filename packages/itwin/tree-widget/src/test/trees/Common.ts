@@ -96,7 +96,7 @@ export function createFakeViewport(
         onNeverDrawnChanged.raiseEvent(result);
       }
     }),
-    iModel: createIModelMock({ queryHandler: props?.queryHandler, getCategoryInfo: props?.getCategoryInfo }),
+    iModel: props?.iModel ?? createIModelMock({ queryHandler: props?.queryHandler, getCategoryInfo: props?.getCategoryInfo }),
     renderFrame: vi.fn(),
     [Symbol.dispose]() {
       this.iModel.onClose.raiseEvent(this.iModel);

@@ -4,9 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
+import React from "react";
 import { SnapshotDb } from "@itwin/core-backend";
 import { assert } from "@itwin/core-bentley";
-import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
+import { createIModelHierarchyProvider, HierarchySearchTree } from "@itwin/presentation-hierarchies";
+import { Props } from "@itwin/presentation-shared";
+import { SharedTreeContextProvider, useCategoriesTree } from "@itwin/tree-widget-react";
 import {
   BaseIdsCache,
   CategoriesTreeDefinition,
@@ -14,8 +17,10 @@ import {
   createCategoriesTreeVisibilityHandler,
   defaultCategoriesTreeHierarchyConfiguration,
 } from "@itwin/tree-widget-react/internal";
+import { act, renderHook } from "@testing-library/react";
 import { Datasets } from "../util/Datasets.js";
 import { run, TestIModelConnection } from "../util/TestUtilities.js";
+import { countSearchTargets } from "./SearchUtils.js";
 import { StatelessHierarchyProvider } from "./StatelessHierarchyProvider.js";
 import {
   collectNodes,
@@ -35,36 +40,37 @@ import type { IModelAccess } from "./StatelessHierarchyProvider.js";
 import type { TreeWidgetTestingViewport } from "./VisibilityUtilities.js";
 
 describe("categories tree", () => {
-  run<{ iModel: SnapshotDb; imodelAccess: IModelAccess }>({
+  run<{ iModelConnection: IModelConnection; imodelAccess: IModelAccess; viewport: TreeWidgetTestingViewport }>({
     testName: "creates initial filtered view for 50k items",
     setup: async () => {
-      const iModel = SnapshotDb.openFile(Datasets.getIModelPath("50k subcategories"));
+      const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k subcategories"));
       const imodelAccess = StatelessHierarchyProvider.createIModelAccess(iModel, "unbounded");
-      return { iModel, imodelAccess };
+      const viewport = await createViewport({ iModelConnection });
+      return { iModelConnection, imodelAccess, viewport };
     },
-    cleanup: (props) => props.iModel.close(),
-    test: async ({ imodelAccess }) => {
-      const baseIdsCache = new BaseIdsCache({ elementClassName: "BisCore:GeometricElement3d", type: "3d", queryExecutor: imodelAccess });
-      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-      const search = {
-        paths: await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          limit: "unbounded",
-          label: "sc",
-          viewType: "3d",
-          idsCache,
-          hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration,
-        }),
-      };
-      expect(search.paths.length).to.eq(50000);
+    cleanup: (props) => props.iModelConnection.close(),
+    test: async ({ viewport, imodelAccess }) => {
+      using hook = renderUseCategoriesTreeHook({
+        activeView: viewport,
+        hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration,
+        searchText: "sc",
+        searchLimit: "unbounded",
+      });
+      const hierarchyDefinition = await act(async () => hook.result.current.treeProps.getHierarchyDefinition({ imodelAccess }));
+      const searchPaths = await act(async () => hook.result.current.treeProps.getSearchPaths!({ imodelAccess, abortSignal: new AbortController().signal }));
+      expect(countSearchTargets(searchPaths!)).to.eq(50000);
+
       using provider = new StatelessHierarchyProvider({
         imodelAccess,
-        getHierarchyFactory: () =>
-          new CategoriesTreeDefinition({ imodelAccess, idsCache, viewType: "3d", hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration }),
-        search,
+        getHierarchyFactory: () => hierarchyDefinition,
+        search: { paths: searchPaths! },
       });
-      const result = await provider.loadHierarchy({ shouldExpand: () => false });
-      expect(result).to.eq(1);
+      const result = await provider.loadHierarchy({ shouldExpand: (node) => node.children && !!node.autoExpand });
+      expect(result).to.eq(
+        1 + // root definition container
+          50 + // categories
+          50 * 1000, // subcategories
+      ); // 50051 total
     },
   });
 
@@ -220,3 +226,11 @@ describe("categories tree", () => {
     },
   });
 });
+
+function renderUseCategoriesTreeHook(props: Props<typeof useCategoriesTree>) {
+  const result = renderHook((hookProps) => useCategoriesTree(hookProps), {
+    initialProps: props,
+    wrapper: ({ children }) => <SharedTreeContextProvider>{children}</SharedTreeContextProvider>,
+  });
+  return { ...result, [Symbol.dispose]: () => result.unmount() };
+}
