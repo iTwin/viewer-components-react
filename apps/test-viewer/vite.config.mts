@@ -35,6 +35,8 @@ export default defineConfig(({ mode }) => {
             // copy assets from `@itwin` dependencies
             src: "./node_modules/@itwin/*/lib/public",
             dest: ".",
+            // strip `node_modules/@itwin/package/lib/public` from the copied path.
+            rename: { stripBase: 5 },
           },
         ],
       }),
