@@ -221,7 +221,7 @@ describe("<MultiElementPropertyGrid />", () => {
 
         // navigate back to multi instances properties grid
         const elementList = container.querySelector<HTMLDivElement>(".property-grid-react-element-list");
-        expect(element).not.toBeNull();
+        expect(elementList).not.toBeNull();
         const elementListBackButton = getByRoleRTL(elementList!, "button", { name: "header.back" });
         await user.click(elementListBackButton);
         await waitFor(() => getByText("MultiInstances"));
@@ -449,7 +449,7 @@ describe("<MultiElementPropertyGrid />", () => {
           // navigate back to multi instances properties grid
           onFeatureUsedSpy.mockClear();
           const elementList = container.querySelector<HTMLDivElement>(".property-grid-react-element-list");
-          expect(element).not.toBeNull();
+          expect(elementList).not.toBeNull();
           const elementListBackButton = getByRoleRTL(elementList!, "button", { name: "header.back" });
           await user.click(elementListBackButton);
           await waitFor(() => getByText("MultiInstances"));
