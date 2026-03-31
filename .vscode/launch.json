@@ -82,25 +82,6 @@
       ]
     },
     {
-      "name": "Tests: Property-grid",
-      "cwd": "${workspaceFolder}/packages/itwin/property-grid",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceFolder}/packages/itwin/property-grid/node_modules/mocha/bin/_mocha",
-      "args": [
-        "--config",
-        "./.mocharc.json",
-        "--no-timeouts"
-      ],
-      "env": {
-        "NODE_ENV": "development",
-        "NODE_OPTIONS": "--enable-source-maps --import ../../../node-hooks/ignore-styles/register.cjs"
-      },
-      "outFiles": [
-        "${workspaceFolder}/packages/itwin/property-grid/lib/**/*.js"
-      ]
-    },
-    {
       "name": "Tests: Breakdown-trees",
       "cwd": "${workspaceFolder}/packages/itwin/breakdown-trees",
       "type": "node",
