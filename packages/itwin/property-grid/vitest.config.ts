@@ -9,7 +9,7 @@ const logsToIgnore = ["CSS variable not found"];
 
 export default defineConfig({
   test: {
-    environment: "jsdom",
+    environment: "happy-dom",
     css: false,
     include: ["src/test/**/*.test.ts?(x)"],
     setupFiles: ["src/test/setup.ts"],
@@ -17,6 +17,15 @@ export default defineConfig({
       if (logsToIgnore.some((logToIgnore) => log.includes(logToIgnore))) {
         return false;
       }
+    },
+    environmentOptions: {
+      happyDOM: {
+        settings: {
+          // Prevent DOMException [NetworkError] when iTwinUI injects Google Fonts <link> elements
+          disableCSSFileLoading: true,
+          handleDisabledFileLoadingAsSuccess: true,
+        },
+      },
     },
     restoreMocks: true,
     testTimeout: 60000,

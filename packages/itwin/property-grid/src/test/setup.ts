@@ -4,17 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable no-console */
 
-import { afterAll, afterEach, beforeAll, beforeEach, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
 import { cleanup, configure } from "@testing-library/react";
-
-vi.stubGlobal(
-  "ResizeObserver",
-  class ResizeObserver {
-    public observe() {}
-    public unobserve() {}
-    public disconnect() {}
-  },
-);
 
 const logsWhichFailTest = ["was not wrapped in act"];
 const originalConsoleError = console.error;
