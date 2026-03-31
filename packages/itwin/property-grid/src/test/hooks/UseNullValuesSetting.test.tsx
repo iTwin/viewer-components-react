@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
-import sinon from "sinon";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { useNullValueSetting } from "../../property-grid-react/hooks/UseNullValuesSetting.js";
 import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTelemetryContext.js";
 import { PreferencesContextProvider } from "../../property-grid-react/PropertyGridPreferencesContext.js";
@@ -35,8 +34,8 @@ describe("useNullValuesSetting", () => {
   };
 
   afterEach(() => {
-    storage.get.reset();
-    storage.set.reset();
+    storage.get.mockReset();
+    storage.set.mockReset();
   });
 
   it("defaults to `true`", async () => {
@@ -56,7 +55,7 @@ describe("useNullValuesSetting", () => {
 
   describe("with persistence", () => {
     it("loads persisted value", async () => {
-      storage.get.resolves(JSON.stringify(false));
+      storage.get.mockResolvedValue(JSON.stringify(false));
 
       const { getByRole } = renderWithContext(<TestComponent />, { storage });
 
@@ -64,7 +63,7 @@ describe("useNullValuesSetting", () => {
     });
 
     it("defaults to `true` if there is no persisted value", async () => {
-      storage.get.resolves(undefined);
+      storage.get.mockResolvedValue(undefined);
 
       const { getByRole } = renderWithContext(<TestComponent />, { storage });
 
@@ -72,7 +71,7 @@ describe("useNullValuesSetting", () => {
     });
 
     it("stores persisted value", async () => {
-      storage.get.resolves(JSON.stringify(false));
+      storage.get.mockResolvedValue(JSON.stringify(false));
 
       const { getByRole, user } = renderWithContext(<TestComponent persistOnClick={true} />, { storage });
 
@@ -80,14 +79,14 @@ describe("useNullValuesSetting", () => {
       await user.click(button);
 
       await waitFor(() => getByRole("button", { name: "Hide Null Values" }));
-      expect(storage.set).to.be.calledWith("showNullValues", JSON.stringify(true));
+      expect(storage.set).toHaveBeenCalledWith("showNullValues", JSON.stringify(true));
     });
   });
 
   describe("feature usage reporting", () => {
     it("reports initial value", async () => {
-      const onFeatureUsedSpy = sinon.spy();
-      storage.get.resolves(JSON.stringify(false));
+      const onFeatureUsedSpy = vi.fn();
+      storage.get.mockResolvedValue(JSON.stringify(false));
 
       const { getByRole } = renderWithContext(
         <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
@@ -97,12 +96,12 @@ describe("useNullValuesSetting", () => {
       );
 
       await waitFor(() => getByRole("button", { name: "Show Null Values" }));
-      expect(onFeatureUsedSpy).to.be.calledWith("hide-empty-values-enabled");
+      expect(onFeatureUsedSpy).toHaveBeenCalledWith("hide-empty-values-enabled");
     });
   });
 
   it("reports when updates value", async () => {
-    const onFeatureUsedSpy = sinon.spy();
+    const onFeatureUsedSpy = vi.fn();
     const { getByRole, user } = renderWithContext(
       <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
         <TestComponent />
@@ -114,12 +113,12 @@ describe("useNullValuesSetting", () => {
     await user.click(hideButton);
 
     await waitFor(() => getByRole("button", { name: "Show Null Values" }));
-    expect(onFeatureUsedSpy).to.be.calledWith("hide-empty-values-enabled");
+    expect(onFeatureUsedSpy).toHaveBeenCalledWith("hide-empty-values-enabled");
 
     const showButton = await waitFor(() => getByRole("button", { name: "Show Null Values" }));
     await user.click(showButton);
 
     await waitFor(() => getByRole("button", { name: "Hide Null Values" }));
-    expect(onFeatureUsedSpy).to.be.calledWith("hide-empty-values-disabled");
+    expect(onFeatureUsedSpy).toHaveBeenCalledWith("hide-empty-values-disabled");
   });
 });

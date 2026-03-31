@@ -2,78 +2,51 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-// WARNING: The order of imports in this file is important!
+/* eslint-disable no-console */
 
-// setup chai
-import * as chai from "chai";
-import sinonChai from "sinon-chai";
-chai.use(sinonChai);
+import { afterAll, afterEach, beforeAll, beforeEach, vi } from "vitest";
+import { cleanup, configure } from "@testing-library/react";
 
-// get rid of various xhr errors in the console
-import globalJsdom from "global-jsdom";
-import * as jsdom from "jsdom";
-globalJsdom(undefined, {
-  virtualConsole: new jsdom.VirtualConsole().forwardTo(console, { jsdomErrors: "none" }),
+vi.stubGlobal(
+  "ResizeObserver",
+  class ResizeObserver {
+    public observe() {}
+    public unobserve() {}
+    public disconnect() {}
+  },
+);
+
+const logsWhichFailTest = ["was not wrapped in act"];
+const originalConsoleError = console.error;
+let caughtLogsWhichFailTest = new Array<string>();
+
+beforeAll(() => {
+  console.error = (message?: any, ...optionalParams: any[]) => {
+    if (typeof message === "string") {
+      const caughtMessage = logsWhichFailTest.find((log) => message.includes(log));
+      if (caughtMessage) {
+        caughtLogsWhichFailTest.push(caughtMessage);
+        return;
+      }
+    }
+    originalConsoleError(message, ...optionalParams);
+  };
 });
 
-// polyfill ResizeObserver
-global.ResizeObserver = class ResizeObserver {
-  public observe() {}
-  public unobserve() {}
-  public disconnect() {}
-};
-// needed for context menu to work in tests
-global.DOMRect = class DOMRect {
-  public bottom: number = 0;
-  public left: number = 0;
-  public right: number = 0;
-  public top: number = 0;
-  constructor(
-    public x = 0,
-    public y = 0,
-    public width = 0,
-    public height = 0,
-  ) {}
-  public static fromRect(other?: DOMRectInit): DOMRect {
-    return new DOMRect(other?.x, other?.y, other?.width, other?.height);
-  }
-  public toJSON() {
-    return JSON.stringify(this);
-  }
-};
+beforeEach(() => {
+  caughtLogsWhichFailTest = [];
+  configure({ reactStrictMode: !process.env.DISABLE_STRICT_MODE });
+});
 
-// supply mocha hooks
-const { cleanup, configure } = await import("@testing-library/react");
-import v8 from "node:v8";
-export const mochaHooks = {
-  beforeAll() {
-    getGlobalThis().IS_REACT_ACT_ENVIRONMENT = true;
-  },
-  beforeEach() {
-    // enable strict mode for each test by default
-    configure({ reactStrictMode: !process.env.DISABLE_STRICT_MODE });
-  },
-  afterEach() {
-    cleanup();
-  },
-  afterAll() {
-    delete getGlobalThis().IS_REACT_ACT_ENVIRONMENT;
-    v8.takeCoverage();
-  },
-};
+afterEach(() => {
+  cleanup();
+  if (caughtLogsWhichFailTest.length > 0) {
+    const messages = caughtLogsWhichFailTest.join("\n");
+    caughtLogsWhichFailTest = [];
+    throw new Error(`Test triggered the following console messages:\n${messages}`);
+  }
+});
 
-function getGlobalThis(): typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean } {
-  if (typeof globalThis !== "undefined") {
-    return globalThis;
-  }
-  if (typeof self !== "undefined") {
-    return self;
-  }
-  if (typeof window !== "undefined") {
-    return window;
-  }
-  if (typeof global !== "undefined") {
-    return global;
-  }
-  throw new Error("unable to locate global object");
-}
+afterAll(() => {
+  console.error = originalConsoleError;
+});

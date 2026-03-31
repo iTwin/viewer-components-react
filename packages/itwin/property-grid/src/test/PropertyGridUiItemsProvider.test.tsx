@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
-import sinon from "sinon";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import * as appuiReactModule from "@itwin/appui-react";
 import { UiFramework } from "@itwin/appui-react";
 import { EmptyLocalization } from "@itwin/core-common";
@@ -32,24 +31,26 @@ import type { PropertyGridWidgetProps } from "../property-grid-react/PropertyGri
 
 /* eslint-disable @typescript-eslint/no-deprecated */
 describe("PropertyGridUiItemsProvider", () => {
-  before(async () => {
+  beforeAll(async () => {
     await PropertyGridManager.initialize(new EmptyLocalization());
   });
 
-  after(() => {
+  afterAll(() => {
     PropertyGridManager.terminate();
   });
 
   it("provides widgets to default location", () => {
     const provider = new PropertyGridUiItemsProvider();
 
-    expect(provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Right, appuiReactModule.StagePanelSection.End))
-      .to.not.be.empty;
+    expect(
+      provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Right, appuiReactModule.StagePanelSection.End),
+    ).not.toHaveLength(0);
     expect(
       provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Right, appuiReactModule.StagePanelSection.Start),
-    ).to.be.empty;
-    expect(provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Left, appuiReactModule.StagePanelSection.Start))
-      .to.be.empty;
+    ).toHaveLength(0);
+    expect(
+      provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Left, appuiReactModule.StagePanelSection.Start),
+    ).toHaveLength(0);
   });
 
   it("provides widgets to preferred location", () => {
@@ -58,12 +59,15 @@ describe("PropertyGridUiItemsProvider", () => {
       defaultPanelSection: appuiReactModule.StagePanelSection.End,
     });
 
-    expect(provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Right, appuiReactModule.StagePanelSection.End))
-      .to.be.empty;
-    expect(provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Left, appuiReactModule.StagePanelSection.End))
-      .to.not.be.empty;
-    expect(provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Left, appuiReactModule.StagePanelSection.Start))
-      .to.be.empty;
+    expect(
+      provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Right, appuiReactModule.StagePanelSection.End),
+    ).toHaveLength(0);
+    expect(
+      provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Left, appuiReactModule.StagePanelSection.End),
+    ).not.toHaveLength(0);
+    expect(
+      provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Left, appuiReactModule.StagePanelSection.Start),
+    ).toHaveLength(0);
   });
 });
 /* eslint-enable @typescript-eslint/no-deprecated */
@@ -76,11 +80,11 @@ describe("createPropertyGrid", () => {
   let selectionManager: ReturnType<typeof stubSelectionManager>;
   let selectionStorage: ReturnType<typeof stubSelectionStorage>;
 
-  before(async () => {
+  beforeAll(async () => {
     await PropertyGridManager.initialize(new EmptyLocalization());
   });
 
-  after(() => {
+  afterAll(() => {
     PropertyGridManager.terminate();
   });
 
@@ -89,13 +93,9 @@ describe("createPropertyGrid", () => {
     selectionStorage = stubSelectionStorage();
   });
 
-  afterEach(() => {
-    sinon.restore();
-  });
-
   it("creates a basic widget", async () => {
     const widget = createPropertyGrid({});
-    expect(widget.content).to.not.be.undefined;
+    expect(widget.content).toBeDefined();
   });
 
   it("renders property grid component", async () => {
@@ -104,11 +104,14 @@ describe("createPropertyGrid", () => {
   });
 
   it("renders error message if property grid component throws", async () => {
+    const errorStub = vi.spyOn(console, "error").mockImplementation(() => {});
     function ThrowingComponent(): ReactElement | null {
       throw new Error("Test error");
     }
     const { getByText } = render(<PropertyGridWidget widgetId="x" propertyGridComponent={<ThrowingComponent />} />);
     await waitFor(() => getByText("error"));
+
+    errorStub.mockRestore(); // Restore original console.error implementation after the test
   });
 
   describe("widget state", () => {
@@ -116,14 +119,14 @@ describe("createPropertyGrid", () => {
     const widgetDef = {
       id: PropertyGridWidgetId,
       state: appuiReactModule.WidgetState.Hidden,
-      setWidgetState: sinon.stub<Parameters<appuiReactModule.WidgetDef["setWidgetState"]>, ReturnType<appuiReactModule.WidgetDef["setWidgetState"]>>(),
+      setWidgetState: vi.fn<appuiReactModule.WidgetDef["setWidgetState"]>(),
     };
 
     beforeEach(async () => {
       widgetDef.state = appuiReactModule.WidgetState.Hidden;
-      widgetDef.setWidgetState.reset();
+      widgetDef.setWidgetState.mockReset();
 
-      sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
+      vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
     });
 
     [
@@ -131,8 +134,8 @@ describe("createPropertyGrid", () => {
         name: "with unified selection storage",
         getProps: (): Partial<PropertyGridWidgetProps> => ({ selectionStorage }),
         async setupSelection(keys: Selectable[]) {
-          selectionStorage.getSelection.reset();
-          selectionStorage.getSelection.returns(Selectables.create(keys));
+          selectionStorage.getSelection.mockReset();
+          selectionStorage.getSelection.mockReturnValue(Selectables.create(keys));
         },
         triggerSelectionChange(props?: Pick<Partial<EventArgs<typeof selectionStorage.selectionChangeEvent>>, "source">) {
           selectionStorage.selectionChangeEvent.raiseEvent({ source: "TestSource", imodelKey: imodel.key, ...props } as EventArgs<
@@ -144,8 +147,8 @@ describe("createPropertyGrid", () => {
         name: "with deprecated selection manager",
         getProps: (): Partial<PropertyGridWidgetProps> => ({}),
         async setupSelection(keys: Selectable[]) {
-          selectionManager.getSelection.reset();
-          selectionManager.getSelection.returns(new KeySet((await Promise.all(keys.map(createKeysFromSelectable))).flat()));
+          selectionManager.getSelection.mockReset();
+          selectionManager.getSelection.mockReturnValue(new KeySet((await Promise.all(keys.map(createKeysFromSelectable))).flat()));
         },
         triggerSelectionChange(props?: Pick<Partial<EventArgs<typeof selectionStorage.selectionChangeEvent>>, "source">) {
           selectionManager.selectionChange.raiseEvent(
@@ -177,8 +180,8 @@ describe("createPropertyGrid", () => {
           act(() => triggerSelectionChange());
 
           await waitFor(() => {
-            expect(widgetDef.setWidgetState).to.be.called;
-            expect(widgetDef.setWidgetState).to.be.calledWith(appuiReactModule.WidgetState.Hidden);
+            expect(widgetDef.setWidgetState).toHaveBeenCalled();
+            expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Hidden);
           });
         });
 
@@ -187,18 +190,18 @@ describe("createPropertyGrid", () => {
           renderWidget();
 
           await waitFor(() => {
-            expect(widgetDef.setWidgetState).to.be.called;
-            expect(widgetDef.setWidgetState).to.be.calledWith(appuiReactModule.WidgetState.Open);
+            expect(widgetDef.setWidgetState).toHaveBeenCalled();
+            expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Open);
           });
 
-          widgetDef.setWidgetState.reset();
+          widgetDef.setWidgetState.mockReset();
           widgetDef.state = appuiReactModule.WidgetState.Open;
           await setupSelection([{ id: "0xffffff0000000001", className: TRANSIENT_ELEMENT_CLASSNAME }]);
           act(() => triggerSelectionChange());
 
           await waitFor(() => {
-            expect(widgetDef.setWidgetState).to.be.called;
-            expect(widgetDef.setWidgetState).to.be.calledWith(appuiReactModule.WidgetState.Hidden);
+            expect(widgetDef.setWidgetState).toHaveBeenCalled();
+            expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Hidden);
           });
         });
 
@@ -206,13 +209,13 @@ describe("createPropertyGrid", () => {
           await setupSelection([]);
           renderWidget();
 
-          widgetDef.setWidgetState.reset();
+          widgetDef.setWidgetState.mockReset();
           await setupSelection([{ id: "0x1", className: "TestSchema.TestClass" }]);
           act(() => triggerSelectionChange());
 
           await waitFor(() => {
-            expect(widgetDef.setWidgetState).to.be.called;
-            expect(widgetDef.setWidgetState).to.be.calledWith(appuiReactModule.WidgetState.Open);
+            expect(widgetDef.setWidgetState).toHaveBeenCalled();
+            expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Open);
           });
         });
 
@@ -220,7 +223,7 @@ describe("createPropertyGrid", () => {
           await setupSelection([]);
           renderWidget();
 
-          widgetDef.setWidgetState.reset();
+          widgetDef.setWidgetState.mockReset();
           // eslint-disable-next-line @typescript-eslint/no-deprecated
           const key: ECClassGroupingNodeKey = {
             className: "TestSchema.TestClass",
@@ -234,8 +237,8 @@ describe("createPropertyGrid", () => {
           act(() => triggerSelectionChange());
 
           await waitFor(() => {
-            expect(widgetDef.setWidgetState).to.be.called;
-            expect(widgetDef.setWidgetState).to.be.calledWith(appuiReactModule.WidgetState.Open);
+            expect(widgetDef.setWidgetState).toHaveBeenCalled();
+            expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Open);
           });
         });
 
@@ -244,17 +247,17 @@ describe("createPropertyGrid", () => {
           renderWidget();
 
           await waitFor(() => {
-            expect(widgetDef.setWidgetState).to.be.called;
-            expect(widgetDef.setWidgetState).to.be.calledWith(appuiReactModule.WidgetState.Open);
+            expect(widgetDef.setWidgetState).toHaveBeenCalled();
+            expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Open);
           });
 
-          widgetDef.setWidgetState.reset();
+          widgetDef.setWidgetState.mockReset();
           widgetDef.state = appuiReactModule.WidgetState.Closed;
 
           await setupSelection([{ id: "0x1", className: "TestSchema.TestClass" }]);
           act(() => triggerSelectionChange());
 
-          await waitFor(() => expect(widgetDef.setWidgetState).to.not.be.called);
+          await waitFor(() => expect(widgetDef.setWidgetState).not.toHaveBeenCalled());
         });
 
         it("opens widget if unified selection non-empty with instance keys and `shouldShow` return true", async () => {
@@ -262,8 +265,8 @@ describe("createPropertyGrid", () => {
           renderWidget({ shouldShow: () => true });
 
           await waitFor(() => {
-            expect(widgetDef.setWidgetState).to.be.called;
-            expect(widgetDef.setWidgetState).to.be.calledWith(appuiReactModule.WidgetState.Open);
+            expect(widgetDef.setWidgetState).toHaveBeenCalled();
+            expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Open);
           });
         });
 
@@ -281,8 +284,8 @@ describe("createPropertyGrid", () => {
           renderWidget({ shouldShow: () => true });
 
           await waitFor(() => {
-            expect(widgetDef.setWidgetState).to.be.called;
-            expect(widgetDef.setWidgetState).to.be.calledWith(appuiReactModule.WidgetState.Open);
+            expect(widgetDef.setWidgetState).toHaveBeenCalled();
+            expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Open);
           });
         });
 
@@ -292,8 +295,8 @@ describe("createPropertyGrid", () => {
           renderWidget({ shouldShow: () => false });
 
           await waitFor(() => {
-            expect(widgetDef.setWidgetState).to.be.called;
-            expect(widgetDef.setWidgetState).to.be.calledWith(appuiReactModule.WidgetState.Hidden);
+            expect(widgetDef.setWidgetState).toHaveBeenCalled();
+            expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Hidden);
           });
         });
       });

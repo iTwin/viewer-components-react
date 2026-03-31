@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
-import sinon from "sinon";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { PropertyDataChangeEvent } from "@itwin/components-react";
 import { KeySet } from "@itwin/presentation-common";
@@ -22,13 +21,9 @@ import type { IPresentationPropertyDataProvider } from "@itwin/presentation-comp
 import type { PropertyGridContentProps } from "../../property-grid-react/components/PropertyGridContent.js";
 
 describe("<PropertyGridContent />", () => {
-  before(() => {
-    sinon.stub(PropertyGridManager, "translate").callsFake((key) => key);
+  beforeEach(() => {
+    vi.spyOn(PropertyGridManager, "translate").mockImplementation((key) => key);
     stubSelectionManager();
-  });
-
-  after(() => {
-    sinon.restore();
   });
 
   const createProvider = () =>
@@ -68,26 +63,26 @@ describe("<PropertyGridContent />", () => {
     const { getByText, queryByText } = renderWithContext(<PropertyGridContent dataProvider={provider} imodel={imodel} />);
 
     await waitFor(() => getByText("Test Prop"));
-    expect(queryByText("Test Instance")).to.not.be.null;
+    expect(queryByText("Test Instance")).not.toBeNull();
   });
 
   it("renders header with back button", async () => {
     const imodel = {} as IModelConnection;
     const provider = createProvider();
-    const onBackClickSpy = sinon.spy();
+    const onBackClickSpy = vi.fn();
 
     const { getByText, getByRole, user } = renderWithContext(<PropertyGridContent dataProvider={provider} imodel={imodel} onBackButton={onBackClickSpy} />);
 
     await waitFor(() => getByText("Test Prop"));
     const backButton = getByRole("button", { name: "header.back" });
     await user.click(backButton);
-    expect(onBackClickSpy).to.be.calledOnce;
+    expect(onBackClickSpy).toHaveBeenCalledOnce();
   });
 
   it("renders header with settings dropdown", async () => {
     const imodel = {} as IModelConnection;
     const provider = createProvider();
-    const spy = sinon.spy();
+    const spy = vi.fn();
 
     const { getByText, getByRole, user } = renderWithContext(
       <PropertyGridContent
@@ -109,18 +104,18 @@ describe("<PropertyGridContent />", () => {
     const setting = await waitFor(() => getByText("Test Setting"));
     await user.click(setting);
 
-    expect(spy).to.be.calledOnce;
+    expect(spy).toHaveBeenCalledOnce();
   });
 
   it("renders with extended props action buttons", async () => {
     const imodel = {} as IModelConnection;
     const provider = createProvider();
-    const stub = sinon.stub().returns(<div>Test action button</div>);
+    const stub = vi.fn().mockReturnValue(<div>Test action button</div>);
 
     const { getAllByText } = renderWithContext(<PropertyGridContent dataProvider={provider} imodel={imodel} actionButtonRenderers={[stub]} />);
 
     await waitFor(() => {
-      expect(stub).to.be.calledWith(sinon.match((arg) => arg.dataProvider === provider));
+      expect(stub).toHaveBeenCalledWith(expect.objectContaining({ dataProvider: provider }));
       getAllByText("Test action button");
     });
   });
@@ -134,8 +129,8 @@ describe("<PropertyGridContent />", () => {
     );
 
     await waitFor(() => {
-      expect(queryByText("Test Prop")).to.not.be.null;
-      expect(queryByText("Null Prop")).to.not.be.null;
+      expect(queryByText("Test Prop")).not.toBeNull();
+      expect(queryByText("Null Prop")).not.toBeNull();
     });
 
     const settingsButton = await waitFor(() => getByRole("button", { name: "settings.label" }));
@@ -145,8 +140,8 @@ describe("<PropertyGridContent />", () => {
     await user.click(setting);
 
     await waitFor(() => {
-      expect(queryByText("Test Prop")).to.not.be.null;
-      expect(queryByText("Null Prop")).to.be.null;
+      expect(queryByText("Test Prop")).not.toBeNull();
+      expect(queryByText("Null Prop")).toBeNull();
     });
   });
 
@@ -157,8 +152,8 @@ describe("<PropertyGridContent />", () => {
     const { queryByText, user, getByRole, getByText } = renderWithContext(<PropertyGridContent dataProvider={provider} imodel={imodel} />);
 
     await waitFor(() => {
-      expect(queryByText("Test Prop")).to.not.be.null;
-      expect(queryByText("Null Prop")).to.not.be.null;
+      expect(queryByText("Test Prop")).not.toBeNull();
+      expect(queryByText("Null Prop")).not.toBeNull();
     });
 
     const searchButton = await waitFor(() => getByText(PropertyGridManager.translate("search-bar.open")));
@@ -169,16 +164,16 @@ describe("<PropertyGridContent />", () => {
     await user.type(searchTextInput, "test prop");
 
     await waitFor(() => {
-      expect(queryByText("Test Prop")).to.not.be.null;
-      expect(queryByText("Null Prop")).to.be.null;
+      expect(queryByText("Test Prop")).not.toBeNull();
+      expect(queryByText("Null Prop")).toBeNull();
     });
 
     // input text that should not match
     await user.clear(searchTextInput);
     await user.type(searchTextInput, "null prop");
     await waitFor(() => {
-      expect(queryByText("Test Prop")).to.be.null;
-      expect(queryByText("Null Prop")).to.not.be.null;
+      expect(queryByText("Test Prop")).toBeNull();
+      expect(queryByText("Null Prop")).not.toBeNull();
     });
   });
 
@@ -189,7 +184,7 @@ describe("<PropertyGridContent />", () => {
     const { queryByText, user, getByRole, getByText } = renderWithContext(<PropertyGridContent dataProvider={provider} imodel={imodel} />);
 
     await waitFor(() => {
-      expect(queryByText("Test Category")).to.not.be.null;
+      expect(queryByText("Test Category")).not.toBeNull();
     });
 
     const searchButton = await waitFor(() => getByText(PropertyGridManager.translate("search-bar.open")));
@@ -200,7 +195,7 @@ describe("<PropertyGridContent />", () => {
     await user.type(searchTextInput, "input text for test");
 
     await waitFor(() => {
-      expect(queryByText("Test Category")).to.be.null;
+      expect(queryByText("Test Category")).toBeNull();
     });
 
     // press collapse button which should clear the filter
@@ -208,16 +203,14 @@ describe("<PropertyGridContent />", () => {
     await user.click(collapseSearchButton);
 
     await waitFor(() => {
-      expect(queryByText("Test Category")).to.not.be.null;
+      expect(queryByText("Test Category")).not.toBeNull();
     });
   });
 
   it("allows editing property", async () => {
     const imodel = {} as IModelConnection;
     const provider = createProvider();
-    const stub = sinon
-      .stub<Parameters<Required<PropertyGridContentProps>["onPropertyUpdated"]>, ReturnType<Required<PropertyGridContentProps>["onPropertyUpdated"]>>()
-      .resolves(true);
+    const stub = vi.fn<Required<PropertyGridContentProps>["onPropertyUpdated"]>().mockResolvedValue(true);
 
     const { findByText, findByDisplayValue, user } = renderWithContext(
       <PropertyGridContent dataProvider={provider} imodel={imodel} isPropertyEditingEnabled={true} onPropertyUpdated={stub} />,
@@ -233,10 +226,10 @@ describe("<PropertyGridContent />", () => {
     await user.type(editor, " Updated{Enter}");
 
     await waitFor(() => {
-      expect(stub).to.be.calledOnce;
-      const [{ dataProvider, newValue }] = stub.args[0];
-      expect(dataProvider).to.be.eq(provider);
-      expect((newValue as PrimitiveValue).value).to.be.eq("Prop Value Updated");
+      expect(stub).toHaveBeenCalledOnce();
+      const [{ dataProvider, newValue }] = stub.mock.calls[0];
+      expect(dataProvider).toBe(provider);
+      expect((newValue as PrimitiveValue).value).toBe("Prop Value Updated");
     });
   });
 
@@ -244,7 +237,7 @@ describe("<PropertyGridContent />", () => {
     it("reports when filters properties according to search prompt", async () => {
       const imodel = {} as IModelConnection;
       const provider = createProvider();
-      const onFeatureUsedSpy = sinon.spy();
+      const onFeatureUsedSpy = vi.fn();
 
       const { queryByText, user, getByRole, getByText } = renderWithContext(
         <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
@@ -253,8 +246,8 @@ describe("<PropertyGridContent />", () => {
       );
 
       await waitFor(() => {
-        expect(queryByText("Test Prop")).to.not.be.null;
-        expect(queryByText("Null Prop")).to.not.be.null;
+        expect(queryByText("Test Prop")).not.toBeNull();
+        expect(queryByText("Null Prop")).not.toBeNull();
       });
 
       const searchButton = await waitFor(() => getByText(PropertyGridManager.translate("search-bar.open")));
@@ -265,25 +258,25 @@ describe("<PropertyGridContent />", () => {
       await user.type(searchTextInput, "test prop");
 
       await waitFor(() => {
-        expect(queryByText("Test Prop")).to.not.be.null;
-        expect(queryByText("Null Prop")).to.be.null;
-        expect(onFeatureUsedSpy).to.be.calledOnceWith("filter-properties");
+        expect(queryByText("Test Prop")).not.toBeNull();
+        expect(queryByText("Null Prop")).toBeNull();
+        expect(onFeatureUsedSpy).toHaveBeenCalledExactlyOnceWith("filter-properties");
       });
-      onFeatureUsedSpy.resetHistory();
+      onFeatureUsedSpy.mockClear();
 
       // clear input text
       await user.clear(searchTextInput);
       await waitFor(() => {
-        expect(queryByText("Test Prop")).to.not.be.null;
-        expect(queryByText("Null Prop")).to.not.be.null;
+        expect(queryByText("Test Prop")).not.toBeNull();
+        expect(queryByText("Null Prop")).not.toBeNull();
       });
-      expect(onFeatureUsedSpy).to.not.be.calledOnceWith("filter-properties");
+      expect(onFeatureUsedSpy).not.toHaveBeenCalledWith("filter-properties");
     });
 
     it("reports once when filter keeps changing", async () => {
       const imodel = {} as IModelConnection;
       const provider = createProvider();
-      const onFeatureUsedSpy = sinon.spy();
+      const onFeatureUsedSpy = vi.fn();
 
       const { queryByText, user, getByRole, getByText } = renderWithContext(
         <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
@@ -292,8 +285,8 @@ describe("<PropertyGridContent />", () => {
       );
 
       await waitFor(() => {
-        expect(queryByText("Test Prop")).to.not.be.null;
-        expect(queryByText("Null Prop")).to.not.be.null;
+        expect(queryByText("Test Prop")).not.toBeNull();
+        expect(queryByText("Null Prop")).not.toBeNull();
       });
 
       const searchButton = await waitFor(() => getByText(PropertyGridManager.translate("search-bar.open")));
@@ -305,11 +298,11 @@ describe("<PropertyGridContent />", () => {
       await user.type(searchTextInput, "prop");
 
       await waitFor(() => {
-        expect(queryByText("Test Prop")).to.not.be.null;
-        expect(queryByText("Null Prop")).to.be.null;
+        expect(queryByText("Test Prop")).not.toBeNull();
+        expect(queryByText("Null Prop")).toBeNull();
       });
 
-      expect(onFeatureUsedSpy).to.be.calledOnceWith("filter-properties");
+      expect(onFeatureUsedSpy).toHaveBeenCalledExactlyOnceWith("filter-properties");
     });
   });
 });

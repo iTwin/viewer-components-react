@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import sinon from "sinon";
+import { beforeEach, describe, it, vi } from "vitest";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { KeySet } from "@itwin/presentation-common";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
@@ -16,14 +16,14 @@ import type { IModelConnection } from "@itwin/core-frontend";
 describe("<PropertyGrid />", () => {
   let selectionManager: ReturnType<typeof stubSelectionManager>;
 
-  before(() => {
-    sinon.stub(PropertyGridManager, "translate").callsFake((key) => key);
+  beforeEach(() => {
+    vi.spyOn(PropertyGridManager, "translate").mockImplementation((key) => key);
 
     selectionManager = stubSelectionManager();
     stubPresentation();
     stubFavoriteProperties();
 
-    sinon.stub(PresentationPropertyDataProvider.prototype, "getData").callsFake(async () => {
+    vi.spyOn(PresentationPropertyDataProvider.prototype, "getData").mockImplementation(async () => {
       return {
         categories: [{ expand: true, label: "Test Category", name: "test-category" }],
         label: PropertyRecord.fromString("Test Instance"),
@@ -39,13 +39,9 @@ describe("<PropertyGrid />", () => {
     });
   });
 
-  after(() => {
-    sinon.restore();
-  });
-
   it("renders content", async () => {
     const imodel = {} as IModelConnection;
-    selectionManager.getSelection.returns(new KeySet());
+    selectionManager.getSelection.mockReturnValue(new KeySet());
 
     const { getByText } = render(<PropertyGrid imodel={imodel} />);
 
@@ -57,7 +53,7 @@ describe("<PropertyGrid />", () => {
     const keys = Array(500)
       .fill(0)
       .map((_, i) => ({ id: `0x${i}`, className: "TestClass" }));
-    selectionManager.getSelection.returns(new KeySet(keys));
+    selectionManager.getSelection.mockReturnValue(new KeySet(keys));
 
     const { getByText } = render(<PropertyGrid imodel={imodel} />);
 
@@ -69,7 +65,7 @@ describe("<PropertyGrid />", () => {
     const keys = Array(500)
       .fill(0)
       .map((_, i) => ({ id: `0x${i}`, className: "TestClass" }));
-    selectionManager.getSelection.returns(new KeySet(keys));
+    selectionManager.getSelection.mockReturnValue(new KeySet(keys));
 
     const { getByText } = render(<PropertyGrid imodel={imodel} headerControls={[<div key={1}>TestControl</div>]} />);
 

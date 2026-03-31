@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import sinon from "sinon";
+import { beforeEach, describe, it, vi } from "vitest";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import { SingleElementPropertyGrid } from "../../property-grid-react/components/SingleElementPropertyGrid.js";
@@ -14,13 +14,13 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 
 describe("<SingleElementPropertyGrid />", () => {
-  before(() => {
-    sinon.stub(PropertyGridManager, "translate").callsFake((key) => key);
+  beforeEach(() => {
+    vi.spyOn(PropertyGridManager, "translate").mockImplementation((key) => key);
 
     stubPresentation();
     stubFavoriteProperties();
 
-    sinon.stub(PresentationPropertyDataProvider.prototype, "getData").callsFake(async () => {
+    vi.spyOn(PresentationPropertyDataProvider.prototype, "getData").mockImplementation(async () => {
       return {
         categories: [{ expand: true, label: "Test Category", name: "test-category" }],
         label: PropertyRecord.fromString("Test Instance"),
@@ -34,10 +34,6 @@ describe("<SingleElementPropertyGrid />", () => {
         },
       };
     });
-  });
-
-  after(() => {
-    sinon.restore();
   });
 
   it("renders", async () => {
