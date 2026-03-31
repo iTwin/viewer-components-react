@@ -104,14 +104,17 @@ describe("createPropertyGrid", () => {
   });
 
   it("renders error message if property grid component throws", async () => {
-    const errorStub = vi.spyOn(console, "error").mockImplementation(() => {});
-    function ThrowingComponent(): ReactElement | null {
-      throw new Error("Test error");
+    const onError = (e: ErrorEvent) => e.preventDefault();
+    window.addEventListener("error", onError);
+    try {
+      function ThrowingComponent(): ReactElement | null {
+        throw new Error("Test error");
+      }
+      const { getByText } = render(<PropertyGridWidget widgetId="x" propertyGridComponent={<ThrowingComponent />} />);
+      await waitFor(() => getByText("error"));
+    } finally {
+      window.removeEventListener("error", onError);
     }
-    const { getByText } = render(<PropertyGridWidget widgetId="x" propertyGridComponent={<ThrowingComponent />} />);
-    await waitFor(() => getByText("error"));
-
-    errorStub.mockRestore(); // Restore original console.error implementation after the test
   });
 
   describe("widget state", () => {

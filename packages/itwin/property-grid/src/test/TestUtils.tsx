@@ -14,6 +14,7 @@ import { renderHook as renderHookRTL, render as renderRTL } from "@testing-libra
 import { userEvent } from "@testing-library/user-event";
 
 import type { PropsWithChildren, ReactElement } from "react";
+import type { Mock, Mocked } from "vitest";
 import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
 import type { FavoritePropertiesManager, SelectionManager } from "@itwin/presentation-frontend";
 import type { SelectionStorage, StorageSelectionChangesListener } from "@itwin/unified-selection";
@@ -46,7 +47,7 @@ export function stubSelectionManager(presentationSingleton?: typeof Presentation
   return selectionManagerStub;
 }
 
-export function stubSelectionStorage() {
+export function stubSelectionStorage(): Mocked<SelectionStorage> & { selectionChangeEvent: BeEvent<StorageSelectionChangesListener> } {
   return {
     addToSelection: vi.fn(),
     clearSelection: vi.fn(),
@@ -72,7 +73,12 @@ export function stubFavoriteProperties() {
   return favoritePropertiesStub;
 }
 
-export function stubPresentation() {
+export function stubPresentation(): {
+  onIModelContentChanged: BeEvent<() => void>;
+  getDisplayLabelDefinitions: Mock;
+  rulesets: () => { onRulesetModified: BeEvent<() => void> };
+  vars: () => { onVariableChanged: BeEvent<() => void> };
+} {
   const presentationStub = {
     onIModelContentChanged: new BeEvent(),
     getDisplayLabelDefinitions: vi.fn().mockResolvedValue([]),
