@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fixed css styles referencing invalid variables.",
+  "packageName": "@itwin/ec3-widget-react",
+  "email": "24278440+saskliutas@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
