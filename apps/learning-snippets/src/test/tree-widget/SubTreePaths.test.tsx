@@ -3,9 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { useCallback } from "react";
-import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { useModelsTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
@@ -65,22 +64,18 @@ describe("Tree widget", () => {
   describe("Learning snippets", () => {
     describe("Components", () => {
       describe("SubTree paths", () => {
-        before(async function () {
+        beforeAll(async () => {
           await initializeLearningSnippetsTests();
           await TreeWidgetTestUtils.initialize();
         });
 
-        after(async function () {
+        afterAll(async () => {
           await terminateLearningSnippetsTests();
           TreeWidgetTestUtils.terminate();
         });
 
-        afterEach(async () => {
-          sinon.restore();
-        });
-
-        it("renders custom models tree component with filtered paths using targetItems", async function () {
-          const imodel = await buildIModel(this, async (builder) => {
+        it("renders custom models tree component with filtered paths using targetItems", async () => {
+          const imodel = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const physicalModel2 = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel 2" });
             const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
@@ -91,8 +86,8 @@ describe("Tree widget", () => {
           });
           const testViewport = getTestViewer(imodel.imodel, true);
           const unifiedSelectionStorage = createStorage();
-          sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
-          sinon.stub(UiFramework, "getIModelConnection").returns(imodel.imodel);
+          vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
+          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel.imodel);
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText, queryByText } = render(
@@ -106,7 +101,7 @@ describe("Tree widget", () => {
 
           await waitFor(() => {
             getByText("TestPhysicalModel");
-            expect(queryByText("TestPhysicalModel 2")).to.be.null;
+            expect(queryByText("TestPhysicalModel 2")).toBeNull();
           });
         });
       });

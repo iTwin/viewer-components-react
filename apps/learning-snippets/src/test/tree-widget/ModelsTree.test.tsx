@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
 
-import sinon from "sinon";
+import { afterAll, beforeAll, describe, it, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 import { IModel } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
@@ -32,23 +32,19 @@ describe("Tree widget", () => {
   describe("Learning snippets", () => {
     describe("Components", () => {
       describe("Models tree", () => {
-        before(async function () {
+        beforeAll(async () => {
           await initializeLearningSnippetsTests();
           await TreeWidgetTestUtils.initialize();
         });
 
-        after(async function () {
+        afterAll(async () => {
           await terminateLearningSnippetsTests();
           TreeWidgetTestUtils.terminate();
         });
 
-        afterEach(async () => {
-          sinon.restore();
-        });
-
-        it("renders <ModelsTreeComponent />", async function () {
+        it("renders <ModelsTreeComponent />", async () => {
           const imodel = (
-            await buildIModel(this, async (builder) => {
+            await buildIModel(async (builder) => {
               const model = insertPhysicalModelWithPartition({ builder, codeValue: "Test model X", partitionParentId: IModel.rootSubjectId });
               const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
               insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
@@ -57,8 +53,8 @@ describe("Tree widget", () => {
           ).imodel;
           const testViewport = getTestViewer(imodel, true);
           const unifiedSelectionStorage = createStorage();
-          sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
-          sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
+          vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
+          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
           const getSchemaContext = getTestSchemaContext;
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.ModelsTreeExample
@@ -85,7 +81,7 @@ describe("Tree widget", () => {
 
         it("renders custom models tree", async function () {
           const testImodel = (
-            await buildIModel(this, async (builder) => {
+            await buildIModel(async (builder) => {
               const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
               const childSubject = insertSubject({
                 builder,
@@ -104,8 +100,8 @@ describe("Tree widget", () => {
           ).imodel;
           const testViewport = getTestViewer(testImodel, true);
           const unifiedSelectionStorage = createStorage();
-          sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
-          sinon.stub(UiFramework, "getIModelConnection").returns(testImodel);
+          vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
+          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(testImodel);
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.CustomModelsTreeExample
           type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;

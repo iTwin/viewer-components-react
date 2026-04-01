@@ -1,7 +1,0 @@
-{
-  "require": ["./lib/setup.js"],
-  "timeout": 300000,
-  "check-leaks": true,
-  "file": "./lib/main.js",
-  "reporter": ["./lib/util/TestReporter.cjs"]
-}

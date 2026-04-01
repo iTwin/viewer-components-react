@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { afterAll, beforeAll } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 import { EmptyLocalization, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -12,9 +13,9 @@ import { setLogger } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { TreeWidget } from "@itwin/tree-widget-react";
 import { Datasets } from "./util/Datasets.js";
-import { LOGGER } from "./util/Logging.cjs";
+import { LOGGER } from "./util/Logging.js";
 
-before(async () => {
+beforeAll(async () => {
   setLogger(LOGGER);
   await initializePresentationTesting({
     backendHostProps: {
@@ -36,7 +37,7 @@ before(async () => {
   await TreeWidget.initialize(new EmptyLocalization());
 });
 
-after(async () => {
+afterAll(async () => {
   await terminatePresentationTesting();
   UiFramework.terminate();
   TreeWidget.terminate();

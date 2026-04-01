@@ -9,7 +9,7 @@ import { Schema, SchemaContext, SchemaJsonLocater } from "@itwin/ecschema-metada
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
-import { LOGGER } from "../util/Logging.cjs";
+import { LOGGER } from "../util/Logging.js";
 
 import type { IModelDb } from "@itwin/core-backend";
 import type { SchemaKey, SchemaMatchType, SchemaPropsGetter } from "@itwin/ecschema-metadata";

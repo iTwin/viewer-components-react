@@ -5,8 +5,7 @@
 /* eslint-disable import/no-duplicates */
 /* eslint-disable no-console */
 
-import { expect } from "chai";
-import sinon from "sinon";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 // __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryTreeComponentExampleImports
 import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
@@ -26,23 +25,19 @@ describe("Tree widget", () => {
   describe("Learning snippets", () => {
     describe("Telemetry", () => {
       describe("Usage tracking", () => {
-        before(async function () {
+        beforeAll(async () => {
           await initializeLearningSnippetsTests();
           await TreeWidgetTestUtils.initialize();
         });
 
-        after(async function () {
+        afterAll(async () => {
           await terminateLearningSnippetsTests();
           TreeWidgetTestUtils.terminate();
         });
 
-        afterEach(async () => {
-          sinon.restore();
-        });
-
-        it("renders <IModelContentTreeComponent /> with telemetry", async function () {
+        it("renders <IModelContentTreeComponent /> with telemetry", async () => {
           const testImodel = (
-            await buildIModel(this, async (builder) => {
+            await buildIModel(async (builder) => {
               const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
               const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
               insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
@@ -51,9 +46,9 @@ describe("Tree widget", () => {
           ).imodel;
           const testViewport = getTestViewer(testImodel);
           const unifiedSelectionStorage = createStorage();
-          sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
-          sinon.stub(UiFramework, "getIModelConnection").returns(testImodel);
-          const consoleSpy = sinon.spy(console, "log");
+          vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
+          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(testImodel);
+          const consoleSpy = vi.spyOn(console, "log");
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryTreeComponentExample
           function MyWidget() {
@@ -75,13 +70,13 @@ describe("Tree widget", () => {
           using _ = { [Symbol.dispose]: cleanup };
           render(<MyWidget />);
           await waitFor(() => {
-            expect(consoleSpy).to.be.calledOnce;
+            expect(consoleSpy).toHaveBeenCalledOnce();
           });
         });
 
-        it("renders custom categories tree with telemetry", async function () {
+        it("renders custom categories tree with telemetry", async () => {
           const imodel = (
-            await buildIModel(this, async (builder) => {
+            await buildIModel(async (builder) => {
               const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
               const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
               insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
@@ -90,9 +85,9 @@ describe("Tree widget", () => {
           ).imodel;
           const viewport = getTestViewer(imodel);
           const unifiedSelectionStorage = createStorage();
-          sinon.stub(IModelApp.viewManager, "selectedView").get(() => imodel);
-          sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
-          const consoleSpy = sinon.spy(console, "log");
+          vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(viewport);
+          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
+          const consoleSpy = vi.spyOn(console, "log");
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryCustomTreeExample
           function MyWidget() {
@@ -130,7 +125,7 @@ describe("Tree widget", () => {
           using _ = { [Symbol.dispose]: cleanup };
           render(<MyWidget />);
           await waitFor(() => {
-            expect(consoleSpy).to.be.calledOnce;
+            expect(consoleSpy).toHaveBeenCalledOnce();
           });
         });
       });

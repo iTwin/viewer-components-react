@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
 
-import sinon from "sinon";
+import { afterAll, beforeAll, describe, it, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleSettingsMenuItemImports
 import { PropertyGridSettingsMenuItem } from "@itwin/property-grid-react";
@@ -21,23 +21,19 @@ import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils.js";
 describe("Property grid", () => {
   describe("Learning snippets", () => {
     describe("Settings menu item", () => {
-      before(async function () {
+      beforeAll(async () => {
         await initializeLearningSnippetsTests();
         await PropertyGridTestUtils.initialize();
       });
 
-      after(async function () {
+      afterAll(async () => {
         await terminateLearningSnippetsTests();
         await PropertyGridTestUtils.terminate();
       });
 
-      afterEach(async () => {
-        sinon.restore();
-      });
-
-      it("renders settings menu item", async function () {
+      it("renders settings menu item", async () => {
         const imodel = (
-          await buildIModel(this, async (builder) => {
+          await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
             insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
@@ -45,7 +41,7 @@ describe("Property grid", () => {
           })
         ).imodel;
         const user = userEvent.setup();
-        sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
+        vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
 
         // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleSettingsMenuItem
         function ExampleSettingsMenuItem() {
