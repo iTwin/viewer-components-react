@@ -13,7 +13,7 @@ export default defineConfig({
     restoreMocks: true,
     testTimeout: 300000,
     fileParallelism: false,
-    setupFiles: ["src/main.ts"],
+    globalSetup: ["src/main.ts"],
     reporters: [new TestReporter()],
     css: false,
     server: {
