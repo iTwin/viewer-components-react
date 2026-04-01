@@ -35,6 +35,7 @@ describe("Quantity formatting", () => {
         const handleFormatSetChange = (_updatedFormatSet: FormatSet) => {
           // Handle format set change
         };
+
         render(<FormatSetPanel formatSet={formatSet} editable={true} onFormatSetChange={handleFormatSetChange} />);
         // __PUBLISH_EXTRACT_END__
 
