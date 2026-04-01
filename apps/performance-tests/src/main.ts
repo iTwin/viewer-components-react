@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { afterAll, beforeAll } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 import { EmptyLocalization, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -15,7 +14,13 @@ import { TreeWidget } from "@itwin/tree-widget-react";
 import { Datasets } from "./util/Datasets.js";
 import { LOGGER } from "./util/Logging.js";
 
-beforeAll(async () => {
+declare global {
+  var isInitialized: boolean | undefined;
+}
+
+if (!globalThis.isInitialized) {
+  globalThis.isInitialized = true;
+
   setLogger(LOGGER);
   await initializePresentationTesting({
     backendHostProps: {
@@ -35,10 +40,10 @@ beforeAll(async () => {
   await Datasets.initialize("./datasets");
   await UiFramework.initialize();
   await TreeWidget.initialize(new EmptyLocalization());
-});
 
-afterAll(async () => {
-  await terminatePresentationTesting();
-  UiFramework.terminate();
-  TreeWidget.terminate();
-});
+  process.on("beforeExit", async () => {
+    await terminatePresentationTesting();
+    UiFramework.terminate();
+    TreeWidget.terminate();
+  });
+}
