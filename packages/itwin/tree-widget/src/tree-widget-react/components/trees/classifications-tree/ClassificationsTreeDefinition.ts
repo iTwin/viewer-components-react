@@ -219,7 +219,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                     supportsFiltering: true,
                   })}
                 FROM ${instanceFilterClauses.from} this
-                JOIN IdSet(?) classification ON this.ECInstanceId = classification.id
+                JOIN IdSet(?) classificationIdSet ON this.ECInstanceId = classificationIdSet.id
                 ${instanceFilterClauses.joins}
                 ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
                 ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
@@ -251,7 +251,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
             SELECT ${await this.#createElementSelectClause({})}
             FROM ${elementsInstanceFilterClauses.from} this
             JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = this.ECInstanceId
-            JOIN IdSet(?) parentClassification ON ehc.TargetECInstanceId = parentClassification.id
+            JOIN IdSet(?) parentClassificationIdSet ON ehc.TargetECInstanceId = parentClassificationIdSet.id
             ${elementsInstanceFilterClauses.joins}
             WHERE
               this.Parent.Id IS NULL
@@ -292,7 +292,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                         supportsFiltering: true,
                       })}
                     FROM ${instanceFilterClauses.from} this
-                    JOIN IdSet(?) classification ON this.ECInstanceId = classification.id
+                    JOIN IdSet(?) classificationIdSet ON this.ECInstanceId = classificationIdSet.id
                     ${instanceFilterClauses.joins}
                     ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
                     ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
@@ -322,7 +322,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
           ecsql: `
           SELECT ${await this.#createElementSelectClause({ categoryOfTopMostParentElement: parentNode.extendedData?.categoryOfTopMostParentElement, topMostParentElementId: parentNode.extendedData?.topMostParentElementId })}
           FROM ${instanceFilterClauses.from} this
-          JOIN IdSet(?) parentElement ON this.Parent.Id = parentElement.id
+          JOIN IdSet(?) parentElementIdSet ON this.Parent.Id = parentElementIdSet.id
           ${instanceFilterClauses.joins}
           ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
           ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
@@ -479,7 +479,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
                 this.ECInstanceId,
                 ${classificationLabelSelectClause}
               FROM ${CLASS_NAME_Classification} this
-              JOIN IdSet(?) classification ON this.ECInstanceId = classification.id
+              JOIN IdSet(?) classificationIdSet ON this.ECInstanceId = classificationIdSetIdSet.id
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             )`,
             `${ELEMENTS_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
@@ -489,7 +489,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
                 ${elementLabelSelectClause}
               FROM ${CLASS_NAME_GeometricElement3d} this
               JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = this.ECInstanceId
-              JOIN IdSet(?) classification ON ehc.TargetECInstanceId = classification.id
+              JOIN IdSet(?) classificationIdSet ON ehc.TargetECInstanceId = classificationIdSet.id
               WHERE this.Parent.Id IS NULL
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
@@ -686,7 +686,7 @@ function createGeometricElementInstanceKeyPaths(props: {
           e.Parent.Id,
           '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT)
         FROM  ${CLASS_NAME_Element} e
-        JOIN IdSet(?) targetItem ON e.ECInstanceId = targetItem.id
+        JOIN IdSet(?) targetItemIdSet ON e.ECInstanceId = targetItemIdSet.id
         ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
         UNION ALL

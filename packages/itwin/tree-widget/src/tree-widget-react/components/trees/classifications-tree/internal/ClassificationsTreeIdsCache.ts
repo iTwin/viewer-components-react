@@ -289,7 +289,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
             WHERE parentId IS NULL
           ) categoryOfTopMostParentElement
         FROM ${CLASS_NAME_GeometricElement3d} this
-        JOIN IdSet(?) element ON ECInstanceId = element.id
+        JOIN IdSet(?) elementIdSet ON ECInstanceId = elementIdSet.id
         ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
       `;
       return this.#props.queryExecutor.createQueryReader(

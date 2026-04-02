@@ -267,7 +267,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 },
               })}
             FROM ${this.#categoryModelClass} this
-            JOIN IdSet(?) element ON this.ModeledElement.Id = element.id
+            JOIN IdSet(?) elementIdSet ON this.ModeledElement.Id = elementIdSet.id
             WHERE
               NOT this.IsPrivate
               AND this.ECInstanceId IN (SELECT Model.Id FROM ${this.#categoryElementClass})
@@ -320,7 +320,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 supportsFiltering: true,
               })}
             FROM ${instanceFilterClauses.from} this
-            JOIN IdSet(?) category ON category.id = this.ECInstanceId
+            JOIN IdSet(?) categoryIdSet ON categoryIdSet.id = this.ECInstanceId
             ${instanceFilterClauses.joins}
             ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
@@ -391,7 +391,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 supportsFiltering: true,
               })}
             FROM ${instanceFilterClauses.from} this
-            JOIN IdSet(?) definitionContainer ON this.ECInstanceId = definitionContainer.id
+            JOIN IdSet(?) definitionContainerIdSet ON this.ECInstanceId = definitionContainerIdSet.id
             ${instanceFilterClauses.joins}
             ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
@@ -465,7 +465,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 supportsFiltering: true,
               })}
             FROM ${instanceFilterClauses.from} this
-            JOIN IdSet(?) category ON this.ECInstanceId = category.id
+            JOIN IdSet(?) categoryIdSet ON this.ECInstanceId = categoryIdSet.id
             ${instanceFilterClauses.joins}
             ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
@@ -523,7 +523,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 supportsFiltering: false,
               })}
             FROM ${instanceFilterClauses.from} this
-            JOIN IdSet(?) category ON this.Parent.Id = category.id
+            JOIN IdSet(?) categoryIdSet ON this.Parent.Id = categoryIdSet.id
             ${instanceFilterClauses.joins}
             WHERE
               NOT this.IsPrivate
@@ -631,8 +631,8 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
               supportsFiltering: true,
             })}
           FROM ${instanceFilterClauses.from} this
-          JOIN IdSet(?) category ON this.Category.Id = category.id
-          JOIN IdSet(?) model ON this.Model.Id = model.id
+          JOIN IdSet(?) categoryIdSet ON this.Category.Id = categoryIdSet.id
+          JOIN IdSet(?) modelIdSet ON this.Model.Id = modelIdSet.id
           ${parentNode.extendedData?.isCategoryOfSubModel ? "" : `JOIN ${CLASS_NAME_InformationPartitionElement} ipe ON ipe.ECInstanceId = this.Model.Id`}
           ${instanceFilterClauses.joins}
           WHERE
@@ -702,7 +702,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 supportsFiltering: true,
               })}
             FROM ${instanceFilterClauses.from} this
-            JOIN IdSet(?) element ON this.Parent.Id = element.id
+            JOIN IdSet(?) elementIdSet ON this.Parent.Id = elementIdSet.id
             ${instanceFilterClauses.joins}
             ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
@@ -769,7 +769,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
                 COUNT(sc.ECInstanceId),
                 ${categoryLabelSelectClause}
               FROM ${categoryClass} this
-              JOIN IdSet(?) category ON this.ECInstanceId = category.id
+              JOIN IdSet(?) categoryIdSet ON this.ECInstanceId = categoryIdSet.id
               JOIN ${CLASS_NAME_SubCategory} sc ON sc.Parent.Id = this.ECInstanceId
               GROUP BY this.ECInstanceId
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
@@ -783,7 +783,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
                       this.Parent.Id,
                       ${elementLabelSelectClause}
                     FROM ${elementClass} this
-                    JOIN IdSet(?) elementCategory ON this.Category.Id = elementCategory.id
+                    JOIN IdSet(?) elementCategoryIdSet ON this.Category.Id = elementCategoryIdSet.id
                     JOIN ${CLASS_NAME_Model} m ON this.Model.Id = m.ECInstanceId
                     WHERE NOT m.IsPrivate
                     ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
@@ -800,7 +800,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
                       this.Parent.Id,
                       ${subCategoryLabelSelectClause}
                     FROM ${CLASS_NAME_SubCategory} this
-                    JOIN IdSet(?) subCategoryParent ON this.Parent.Id = subCategoryParent.id
+                    JOIN IdSet(?) subCategoryParentIdSet ON this.Parent.Id = subCategoryParentIdSet.id
                     WHERE NOT this.IsPrivate
                     ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
                   )`,
@@ -813,7 +813,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
                       this.ECInstanceId,
                       ${definitionContainerLabelSelectClause}
                     FROM ${CLASS_NAME_DefinitionContainer} this
-                    JOIN IdSet(?) definitionContainer ON this.ECInstanceId = definitionContainer.id
+                    JOIN IdSet(?) definitionContainerIdSet ON this.ECInstanceId = definitionContainerIdSet.id
                     WHERE NOT this.IsPrivate
                     ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
                   )`,
@@ -1035,7 +1035,7 @@ export function createGeometricElementInstanceKeyPaths(props: {
             '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT)
           )
         FROM ${elementClass} e
-        JOIN IdSet(?) targetItem ON e.ECInstanceId = targetItem.id
+        JOIN IdSet(?) targetItemIdSet ON e.ECInstanceId = targetItemIdSet.id
         LEFT JOIN ${modelClass} m ON (e.Parent.Id IS NULL AND m.ECInstanceId = e.Model.Id)
         LEFT JOIN ${categoryClass} c ON (e.Parent.Id IS NULL AND c.ECInstanceId = e.Category.Id)
         ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES

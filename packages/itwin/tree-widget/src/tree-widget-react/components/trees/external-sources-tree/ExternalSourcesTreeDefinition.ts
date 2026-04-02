@@ -153,7 +153,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
               })}
             FROM ${instanceFilterClauses.from} this
             JOIN BisCore.ExternalSourceGroupGroupsSources esggs ON esggs.TargetECInstanceId = this.ECInstanceId
-            JOIN IdSet(?) group ON esggs.SourceECInstanceId = group.id
+            JOIN IdSet(?) groupIdSet ON esggs.SourceECInstanceId = groupIdSet.id
             LEFT JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
             ${instanceFilterClauses.joins}
             ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
@@ -193,7 +193,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
               })}
             FROM ${instanceFilterClauses.from} this
             JOIN BisCore.ExternalSourceAttachment esa ON esa.Attaches.Id = this.ECInstanceId
-            JOIN IdSet(?) source ON source.id = esa.Parent.Id
+            JOIN IdSet(?) sourceIdSet ON sourceIdSet.id = esa.Parent.Id
             LEFT JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
             ${instanceFilterClauses.joins}
             ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
@@ -262,7 +262,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
               })}
             FROM ${instanceFilterClauses.from} this
             JOIN BisCore.ExternalSourceAspect esa ON esa.Element.Id = this.ECInstanceId
-            JOIN IdSet(?) source ON source.id = esa.Source.Id
+            JOIN IdSet(?) sourceIdSet ON sourceIdSet.id = esa.Source.Id
             ${instanceFilterClauses.joins}
             ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
