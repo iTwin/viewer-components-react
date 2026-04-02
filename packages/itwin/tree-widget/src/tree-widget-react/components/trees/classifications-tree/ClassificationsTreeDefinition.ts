@@ -469,7 +469,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
                 this.ECInstanceId,
                 ${classificationLabelSelectClause}
               FROM ${CLASS_NAME_Classification} this
-              JOIN IdSet(?) classificationIdSet ON this.ECInstanceId = classificationIdSetIdSet.id
+              JOIN IdSet(?) classificationIdSet ON this.ECInstanceId = classificationIdSet.id
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             )`,
             `${ELEMENTS_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (

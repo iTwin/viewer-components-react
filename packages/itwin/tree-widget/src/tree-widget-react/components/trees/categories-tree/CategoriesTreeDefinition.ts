@@ -792,6 +792,7 @@ function createInstanceKeyPathsFromInstanceLabel(
                   JOIN IdSet(?) elementCategoryIdSet ON this.Category.Id = elementCategoryIdSet.id
                   JOIN ${CLASS_NAME_Model} m ON this.Model.Id = m.ECInstanceId
                   WHERE NOT m.IsPrivate
+                  ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
                 )`,
               ]
             : []),
