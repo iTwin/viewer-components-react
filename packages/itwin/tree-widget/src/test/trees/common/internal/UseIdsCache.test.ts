@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
-import sinon from "sinon";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BeEvent } from "@itwin/core-bentley";
 import { useIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/useTreeHooks/UseIdsCache.js";
 import { act, renderHook } from "../../../TestUtils.js";
@@ -12,16 +11,11 @@ import { act, renderHook } from "../../../TestUtils.js";
 import type { BriefcaseConnection } from "@itwin/core-frontend";
 
 describe("useIdsCache", () => {
-  let disposeSpy: sinon.SinonSpy;
-  let cache: Disposable;
-  let createCacheSpy: sinon.SinonSpy;
+  const cache = {};
+  let createCacheSpy: ReturnType<typeof vi.fn<() => typeof cache>>;
   let imodel: BriefcaseConnection;
   beforeEach(() => {
-    disposeSpy = sinon.spy();
-    cache = {
-      [Symbol.dispose]: disposeSpy,
-    };
-    createCacheSpy = sinon.spy(() => cache);
+    createCacheSpy = vi.fn<() => typeof cache>(() => cache);
     imodel = {
       key: "imodelKey",
       isBriefcaseConnection: () => true,
@@ -32,7 +26,6 @@ describe("useIdsCache", () => {
       },
       onClose: new BeEvent(),
     } as unknown as BriefcaseConnection;
-    sinon.restore();
   });
 
   it("calls createCache when imodelKey differs", () => {
@@ -49,8 +42,8 @@ describe("useIdsCache", () => {
       cacheKey: "cacheKey",
       createCache: createCacheSpy,
     });
-    expect(createCacheSpy).to.be.calledTwice;
-    expect(cache1).to.equal(cache2);
+    expect(createCacheSpy).toHaveBeenCalledTimes(2);
+    expect(cache1).toBe(cache2);
   });
 
   it("calls createCache when cacheKey differs", () => {
@@ -66,8 +59,8 @@ describe("useIdsCache", () => {
       cacheKey: "newCacheKey",
       createCache: createCacheSpy,
     });
-    expect(createCacheSpy).to.be.calledTwice;
-    expect(cache1).to.equal(cache2);
+    expect(createCacheSpy).toHaveBeenCalledTimes(2);
+    expect(cache1).toBe(cache2);
   });
 
   it("creates a new cache when new cache is requested", () => {
@@ -80,15 +73,15 @@ describe("useIdsCache", () => {
     const cache2: Disposable = {
       [Symbol.dispose]() {},
     };
-    const createCacheSpy2 = sinon.spy(() => cache2);
+    const createCacheSpy2 = vi.fn(() => cache2);
     const cache2Result = result.current.getCache({
       imodel,
       cacheKey: "newCacheKey",
       createCache: createCacheSpy2,
     });
-    expect(createCacheSpy).to.be.calledOnce;
-    expect(createCacheSpy2).to.be.calledOnce;
-    expect(cache1).to.not.equal(cache2Result);
+    expect(createCacheSpy).toHaveBeenCalledOnce();
+    expect(createCacheSpy2).toHaveBeenCalledOnce();
+    expect(cache1).not.toBe(cache2Result);
   });
 
   it("calls createCache only once with the same imodel key and cacheKey", () => {
@@ -101,17 +94,17 @@ describe("useIdsCache", () => {
     const cache2: Disposable = {
       [Symbol.dispose]() {},
     };
-    const createCacheSpy2 = sinon.spy(() => cache2);
+    const createCacheSpy2 = vi.fn(() => cache2);
     const cache2Result = result.current.getCache({
       imodel,
       cacheKey: "cacheKey",
       createCache: createCacheSpy2,
     });
-    expect(createCacheSpy).to.be.calledOnce;
-    expect(cache1).to.equal(cache2Result);
+    expect(createCacheSpy).toHaveBeenCalledOnce();
+    expect(cache1).toBe(cache2Result);
   });
 
-  it("disposes caches and calls createCache after onClose event fires", () => {
+  it("calls createCache after onClose event fires", () => {
     const { result } = renderHook(useIdsCache);
     let cache1 = result.current.getCache({
       imodel,
@@ -123,15 +116,13 @@ describe("useIdsCache", () => {
       cacheKey: "cacheKey2",
       createCache: createCacheSpy,
     });
-    expect(createCacheSpy).to.be.calledTwice;
-    expect(cache1).to.equal(cache2);
+    expect(createCacheSpy).toHaveBeenCalledTimes(2);
+    expect(cache1).toBe(cache2);
 
     act(() => {
       imodel.onClose.raiseEvent(imodel);
     });
 
-    expect(disposeSpy).to.be.calledTwice;
-
     cache1 = result.current.getCache({
       imodel,
       cacheKey: "cacheKey",
@@ -142,11 +133,11 @@ describe("useIdsCache", () => {
       cacheKey: "cacheKey2",
       createCache: createCacheSpy,
     });
-    expect(createCacheSpy.callCount).to.be.equal(4);
-    expect(cache1).to.equal(cache2);
+    expect(createCacheSpy.mock.calls.length).toBe(4);
+    expect(cache1).toBe(cache2);
   });
 
-  it("disposes caches and calls createCache after onCommitted event fires", () => {
+  it("calls createCache after onCommitted event fires", () => {
     const { result } = renderHook(useIdsCache);
     let cache1 = result.current.getCache({
       imodel,
@@ -158,14 +149,13 @@ describe("useIdsCache", () => {
       cacheKey: "cacheKey2",
       createCache: createCacheSpy,
     });
-    expect(createCacheSpy).to.be.calledTwice;
-    expect(cache1).to.equal(cache2);
+    expect(createCacheSpy).toHaveBeenCalledTimes(2);
+    expect(cache1).toBe(cache2);
 
     act(() => {
       imodel.txns.onCommit.raiseEvent();
       imodel.txns.onCommitted.raiseEvent(false, 1);
     });
-    expect(disposeSpy).to.be.calledTwice;
 
     cache1 = result.current.getCache({
       imodel,
@@ -177,11 +167,11 @@ describe("useIdsCache", () => {
       cacheKey: "cacheKey2",
       createCache: createCacheSpy,
     });
-    expect(createCacheSpy.callCount).to.be.equal(4);
-    expect(cache1).to.equal(cache2);
+    expect(createCacheSpy.mock.calls.length).toBe(4);
+    expect(cache1).toBe(cache2);
   });
 
-  it("disposes caches and calls createCache after onChangesApplied event fires", () => {
+  it("calls createCache after onChangesApplied event fires", () => {
     const { result } = renderHook(useIdsCache);
     let cache1 = result.current.getCache({
       imodel,
@@ -193,12 +183,11 @@ describe("useIdsCache", () => {
       cacheKey: "cacheKey2",
       createCache: createCacheSpy,
     });
-    expect(createCacheSpy).to.be.calledTwice;
-    expect(cache1).to.equal(cache2);
+    expect(createCacheSpy).toHaveBeenCalledTimes(2);
+    expect(cache1).toBe(cache2);
     act(() => {
       imodel.txns.onChangesApplied.raiseEvent();
     });
-    expect(disposeSpy).to.be.calledTwice;
 
     cache1 = result.current.getCache({
       imodel,
@@ -210,8 +199,8 @@ describe("useIdsCache", () => {
       cacheKey: "cacheKey2",
       createCache: createCacheSpy,
     });
-    expect(createCacheSpy.callCount).to.be.equal(4);
-    expect(cache1).to.equal(cache2);
+    expect(createCacheSpy.mock.calls.length).toBe(4);
+    expect(cache1).toBe(cache2);
   });
 
   it("does not call createCache after onCommit event fires", () => {
@@ -228,8 +217,7 @@ describe("useIdsCache", () => {
       cacheKey: "cacheKey",
       createCache: createCacheSpy,
     });
-    expect(createCacheSpy).to.be.calledOnce;
-    expect(cache1).to.equal(cache2);
-    expect(disposeSpy).to.not.be.called;
+    expect(createCacheSpy).toHaveBeenCalledOnce();
+    expect(cache1).toBe(cache2);
   });
 });

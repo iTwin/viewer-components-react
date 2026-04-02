@@ -13,7 +13,7 @@ import { LOGGER } from "../util/Logging.cjs";
 
 import type { IModelDb } from "@itwin/core-backend";
 import type { SchemaKey, SchemaMatchType, SchemaPropsGetter } from "@itwin/ecschema-metadata";
-import type { HierarchyDefinition, HierarchyNode, HierarchyProvider, HierarchySearchPath } from "@itwin/presentation-hierarchies";
+import type { HierarchyDefinition, HierarchyNode, HierarchyProvider, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { EC, ECClassHierarchyInspector, ECSchemaProvider, ECSqlQueryDef, ECSqlQueryExecutor, ECSqlQueryReaderOptions } from "@itwin/presentation-shared";
 import type { CategoriesTreeIdsCache, ModelsTreeIdsCache } from "@itwin/tree-widget-react/internal";
 
@@ -24,7 +24,7 @@ interface ProviderOptionsBase {
     idsCache?: typeof ModelsTreeIdsCache | typeof CategoriesTreeIdsCache,
   ): HierarchyDefinition;
   search?: {
-    paths: HierarchySearchPath[];
+    paths: HierarchySearchTree[];
   };
   queryCacheSize?: number;
 }

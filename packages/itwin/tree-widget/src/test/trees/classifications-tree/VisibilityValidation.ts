@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
+import { expect } from "vitest";
 import { ClassificationsTreeNode } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeNode.js";
 
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
@@ -13,7 +13,7 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
   const actualVisibility = await handler.getVisibilityStatus(node);
 
   if (expectations === "all-hidden" || expectations === "all-visible") {
-    expect(actualVisibility.state).to.eq(expectations === "all-hidden" ? "hidden" : "visible", `Node, ${JSON.stringify(node)}}`);
+    expect(actualVisibility.state, `Node, ${JSON.stringify(node)}`).toBe(expectations === "all-hidden" ? "hidden" : "visible");
     return;
   }
 
@@ -24,9 +24,9 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
   ) {
     const { id } = node.key.instanceKeys[0];
     if (expectations[id] === "disabled") {
-      expect(actualVisibility.isDisabled).to.eq(true, `Node, ${JSON.stringify(node)}`);
+      expect(actualVisibility.isDisabled, `Node, ${JSON.stringify(node)}`).toBe(true);
     } else {
-      expect(actualVisibility.state).to.eq(expectations[id], `Node, ${JSON.stringify(node)}`);
+      expect(actualVisibility.state, `Node, ${JSON.stringify(node)}`).toBe(expectations[id]);
     }
     return;
   }

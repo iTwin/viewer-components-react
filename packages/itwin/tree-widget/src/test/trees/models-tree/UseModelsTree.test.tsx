@@ -3,13 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
-import sinon from "sinon";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { createStorage } from "@itwin/unified-selection";
 import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../../tree-widget-react/components/trees/common/FocusedInstancesContext.js";
@@ -18,19 +16,20 @@ import { useModelsTree } from "../../../tree-widget-react/components/trees/model
 import { TreeWidget } from "../../../tree-widget-react/TreeWidget.js";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../IModelUtils.js";
 import { act, renderHook, waitFor } from "../../TestUtils.js";
-import { createFakeSinonViewport, createIModelAccess } from "../Common.js";
+import { createFakeViewport, createIModelAccess } from "../Common.js";
 import { createTreeWidgetTestingViewport } from "../TreeUtils.js";
 import { createModelHierarchyNode } from "./Utils.js";
 
 import type { Id64Array } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
+import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { UseModelsTreeProps } from "../../../tree-widget-react/components/trees/models-tree/UseModelsTree.js";
 import type { TreeWidgetTestingViewport } from "../TreeUtils.js";
 
 describe("useModelsTree", () => {
-  before(async () => {
+  beforeAll(async () => {
     await initializePresentationTesting({
       backendProps: {
         caching: {
@@ -42,16 +41,18 @@ describe("useModelsTree", () => {
       },
       rpcs: [IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
     });
+    // eslint-disable-next-line @itwin/no-internal
+    ECSchemaRpcImpl.register();
     await TreeWidget.initialize();
   });
 
-  after(async function () {
+  afterAll(async () => {
     await terminatePresentationTesting();
     TreeWidget.terminate();
   });
 
-  it("preserves cache when search changes", async function () {
-    await using buildIModelResult = await buildIModel(this, async (builder) => {
+  it("preserves cache when search changes", async () => {
+    await using buildIModelResult = await buildIModel(async (builder) => {
       const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
       const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
       const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -59,8 +60,8 @@ describe("useModelsTree", () => {
       return { modelId: model.id, categoryId: category.id, rootSubjectId: rootSubject.id };
     });
     const { imodel, ...keys } = buildIModelResult;
-    const queryHandler = sinon.fake(() => []);
-    using viewport = createFakeSinonViewport({ queryHandler });
+    const queryHandler = vi.fn(() => []);
+    using viewport = createFakeViewport({ queryHandler });
     const imodelAccess = createIModelAccess(imodel);
     const {
       result: renderHookResult,
@@ -69,20 +70,21 @@ describe("useModelsTree", () => {
     } = renderHook(useModelsTree, {
       initialProps: {
         activeView: viewport,
-        getSearchPaths: async () => [[{ id: keys.modelId, className: "BisCore.Model" }]],
+        getSearchPaths: async () => [{ identifier: { id: keys.modelId, className: "BisCore.Model" } }],
       },
       wrapper: ({ children }) => <SharedTreeContextProviderInternal>{children}</SharedTreeContextProviderInternal>,
     });
     try {
       let getSearchPaths = renderHookResult.current.treeProps.getSearchPaths;
       using visibilityHandler1 = renderHookResult.current.treeProps.visibilityHandlerFactory({ imodelAccess });
-      await waitFor(() => expect(getSearchPaths).to.not.be.undefined);
+      await waitFor(() => expect(getSearchPaths).toBeDefined());
       await act(async () => {
         await getSearchPaths!({ imodelAccess, abortSignal: new AbortController().signal });
         await visibilityHandler1.getVisibilityStatus(createModelHierarchyNode({ modelId: keys.modelId }));
       });
-      await waitFor(() => expect(viewport.iModel.createQueryReader).to.be.called);
-      sinon.reset();
+      await waitFor(() => expect(viewport.iModel.createQueryReader).toHaveBeenCalled());
+      vi.mocked(viewport.iModel.createQueryReader).mockClear();
+      queryHandler.mockClear();
 
       rerender({
         activeView: viewport,
@@ -90,12 +92,12 @@ describe("useModelsTree", () => {
       });
       getSearchPaths = renderHookResult.current.treeProps.getSearchPaths;
       using visibilityHandler2 = renderHookResult.current.treeProps.visibilityHandlerFactory({ imodelAccess });
-      await waitFor(() => expect(getSearchPaths).to.not.be.undefined);
+      await waitFor(() => expect(getSearchPaths).toBeDefined());
       await act(async () => {
         await getSearchPaths!({ imodelAccess, abortSignal: new AbortController().signal });
         await visibilityHandler2.getVisibilityStatus(createModelHierarchyNode({ modelId: keys.modelId }));
       });
-      await waitFor(() => expect(viewport.iModel.createQueryReader).not.to.be.called);
+      await waitFor(() => expect(viewport.iModel.createQueryReader).not.toHaveBeenCalled());
     } finally {
       // Unmount before test ends because:
       // 1. test ends -> `using` disposes the imodel -> `onClose` fires -> caches are disposed.
@@ -122,10 +124,10 @@ describe("useModelsTree", () => {
       let getSubTreePaths: UseModelsTreeProps["getSubTreePaths"];
       let selectionStorage: SelectionStorage;
 
-      async function createIModel(
-        context: Mocha.Context,
-      ): Promise<{ imodel: IModelConnection } & { models: Id64Array; categories: Id64Array; elements: Id64Array } & AsyncDisposable> {
-        return buildIModel(context, async (builder) => {
+      async function createIModel(): Promise<
+        { imodel: IModelConnection } & { models: Id64Array; categories: Id64Array; elements: Id64Array } & AsyncDisposable
+      > {
+        return buildIModel(async (builder) => {
           const physicalModel1 = insertPhysicalModelWithPartition({ builder, codeValue: "Model1" }).id;
           const physicalModel2 = insertPhysicalModelWithPartition({ builder, codeValue: "Model2" }).id;
           const physicalModel3 = insertPhysicalModelWithPartition({ builder, codeValue: "Model3" }).id;
@@ -142,22 +144,10 @@ describe("useModelsTree", () => {
           };
         });
       }
-      before(async function () {
-        await initializePresentationTesting({
-          backendProps: {
-            caching: {
-              hierarchies: {
-                // eslint-disable-next-line @typescript-eslint/no-deprecated
-                mode: HierarchyCacheMode.Memory,
-              },
-            },
-          },
-          rpcs: [IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
-        });
+      beforeAll(async () => {
         // eslint-disable-next-line @itwin/no-internal
         ECSchemaRpcImpl.register();
-        await TreeWidget.initialize();
-        buildIModelResult = await createIModel(this);
+        buildIModelResult = await createIModel();
         imodel = buildIModelResult.imodel;
         categoryIds = buildIModelResult.categories;
         modelIds = buildIModelResult.models;
@@ -180,10 +170,8 @@ describe("useModelsTree", () => {
         selectionStorage.clearStorage({ imodelKey: imodel.key });
       });
 
-      after(async function () {
+      afterAll(async () => {
         await buildIModelResult?.[Symbol.asyncDispose]();
-        await terminatePresentationTesting();
-        TreeWidget.terminate();
       });
 
       it("getSearchPaths returns correct result when getSubTreePaths is not defined", async () => {
@@ -192,7 +180,7 @@ describe("useModelsTree", () => {
           wrapper: ({ children }) => <SharedTreeContextProviderInternal>{children}</SharedTreeContextProviderInternal>,
         });
         const { getSearchPaths } = renderHookResult.current.treeProps;
-        expect(getSearchPaths).to.be.undefined;
+        expect(getSearchPaths).toBeUndefined();
       });
 
       it("getSearchPaths returns correct result when getSubTreePaths is defined", async () => {
@@ -203,27 +191,29 @@ describe("useModelsTree", () => {
         const { getSearchPaths } = renderHookResult.current.treeProps;
         const abortSignal = new AbortController().signal;
         await waitFor(async () => {
-          expect(getSearchPaths).to.not.be.undefined;
-          const result = (await getSearchPaths!({ imodelAccess, abortSignal }))?.sort((lhs, rhs) => {
-            if (HierarchySearchPath.normalize(lhs).path.length > HierarchySearchPath.normalize(rhs).path.length) {
-              return -1;
-            }
-            return 1;
-          });
-          const expectedResult: HierarchySearchPath[] = [
-            [
-              { id: IModel.rootSubjectId, className: subjectClass },
-              { id: modelIds[0], className: modelClass },
-              { id: categoryIds[0], className: categoryClass },
-              { id: elementIds[0], className: elementClass },
-            ],
-            [
-              { id: IModel.rootSubjectId, className: subjectClass },
-              { id: modelIds[1], className: modelClass },
-              { id: categoryIds[1], className: categoryClass },
-            ],
+          expect(getSearchPaths).toBeDefined();
+          const result = await getSearchPaths!({ imodelAccess, abortSignal });
+          const expectedResult: HierarchySearchTree[] = [
+            {
+              identifier: { id: IModel.rootSubjectId, className: subjectClass },
+              children: [
+                {
+                  identifier: { id: modelIds[0], className: modelClass },
+                  children: [
+                    {
+                      identifier: { id: categoryIds[0], className: categoryClass },
+                      children: [{ identifier: { id: elementIds[0], className: elementClass } }],
+                    },
+                  ],
+                },
+                {
+                  identifier: { id: modelIds[1], className: modelClass },
+                  children: [{ identifier: { id: categoryIds[1], className: categoryClass } }],
+                },
+              ],
+            },
           ];
-          expect(result).to.deep.eq(expectedResult);
+          expect(result).toEqual(expectedResult);
         });
       });
 
@@ -235,28 +225,30 @@ describe("useModelsTree", () => {
         const { getSearchPaths } = renderHookResult.current.treeProps;
         const abortSignal = new AbortController().signal;
         await waitFor(async () => {
-          expect(getSearchPaths).to.not.be.undefined;
+          expect(getSearchPaths).toBeDefined();
           const result = await getSearchPaths!({ imodelAccess, abortSignal });
-          const expectedResult: HierarchySearchPath[] = [
+          const expectedResult: HierarchySearchTree[] = [
             {
-              path: [
-                { id: IModel.rootSubjectId, className: subjectClass },
-                { id: modelIds[1], className: modelClass },
-                { id: categoryIds[1], className: categoryClass },
+              identifier: { id: IModel.rootSubjectId, className: subjectClass },
+              options: { autoExpand: true },
+              children: [
+                {
+                  identifier: { id: modelIds[1], className: modelClass },
+                  options: { autoExpand: true },
+                  children: [
+                    {
+                      identifier: { id: categoryIds[1], className: categoryClass },
+                      options: { autoExpand: true },
+                      children: [
+                        { identifier: { id: elementIds[1], className: elementClass }, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
+                      ],
+                    },
+                  ],
+                },
               ],
-              options: undefined,
-            },
-            {
-              path: [
-                { id: IModel.rootSubjectId, className: subjectClass },
-                { id: modelIds[1], className: modelClass },
-                { id: categoryIds[1], className: categoryClass },
-                { id: elementIds[1], className: elementClass },
-              ],
-              options: { reveal: true },
             },
           ];
-          expect(result).to.deep.eq(expectedResult);
+          expect(result).toEqual(expectedResult);
         });
       });
 
@@ -274,20 +266,28 @@ describe("useModelsTree", () => {
         const abortSignal = new AbortController().signal;
 
         await waitFor(async () => {
-          expect(getSearchPaths).to.not.be.undefined;
+          expect(getSearchPaths).toBeDefined();
           const result = await getSearchPaths!({ imodelAccess, abortSignal });
-          const expectedResult: HierarchySearchPath[] = [
+          const expectedResult: HierarchySearchTree[] = [
             {
-              path: [
-                { id: IModel.rootSubjectId, className: subjectClass },
-                { id: modelIds[0], className: modelClass },
-                { id: categoryIds[0], className: categoryClass },
-                { id: elementIds[0], className: elementClass },
+              identifier: { id: IModel.rootSubjectId, className: subjectClass },
+              options: { autoExpand: true },
+              children: [
+                {
+                  identifier: { id: modelIds[0], className: modelClass },
+                  options: { autoExpand: true },
+                  children: [
+                    {
+                      identifier: { id: categoryIds[0], className: categoryClass },
+                      options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                      children: [{ identifier: { id: elementIds[0], className: elementClass } }],
+                    },
+                  ],
+                },
               ],
-              options: undefined,
             },
           ];
-          expect(result).to.deep.eq(expectedResult);
+          expect(result).toEqual(expectedResult);
         });
       });
 
@@ -317,7 +317,7 @@ describe("useModelsTree", () => {
 
         // Wait for enabled to be true
         await waitFor(() => {
-          expect(hooksResult.current.focusedInstancesContext.enabled).to.be.true;
+          expect(hooksResult.current.focusedInstancesContext.enabled).toBe(true);
         });
 
         // Add to selection
@@ -329,19 +329,26 @@ describe("useModelsTree", () => {
         const abortSignal = new AbortController().signal;
 
         await waitFor(async () => {
-          expect(getSearchPaths).to.not.be.undefined;
+          expect(getSearchPaths).toBeDefined();
           const result = await getSearchPaths!({ imodelAccess, abortSignal });
-          const expectedResult: HierarchySearchPath[] = [
+          const expectedResult: HierarchySearchTree[] = [
             {
-              path: [
-                { id: IModel.rootSubjectId, className: subjectClass },
-                { id: modelIds[1], className: modelClass },
-                { id: categoryIds[1], className: categoryClass },
+              identifier: { id: IModel.rootSubjectId, className: subjectClass },
+              options: { autoExpand: true },
+              children: [
+                {
+                  identifier: { id: modelIds[1], className: modelClass },
+                  options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                  children: [
+                    {
+                      identifier: { id: categoryIds[1], className: categoryClass },
+                    },
+                  ],
+                },
               ],
-              options: { reveal: { depthInPath: 1 } },
             },
           ];
-          expect(result).to.deep.eq(expectedResult);
+          expect(result).toEqual(expectedResult);
         });
       });
     });

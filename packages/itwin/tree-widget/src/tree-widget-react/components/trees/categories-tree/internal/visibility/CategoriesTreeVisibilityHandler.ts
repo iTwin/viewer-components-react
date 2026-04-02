@@ -23,7 +23,7 @@ import { createCategoriesSearchResultsTree } from "./SearchResultsTree.js";
 
 import type { Observable } from "rxjs";
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
-import type { ClassGroupingNodeKey, HierarchyNode, HierarchySearchPath, InstancesNodeKey } from "@itwin/presentation-hierarchies";
+import type { ClassGroupingNodeKey, HierarchyNode, HierarchySearchTree, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfoCache } from "../../../common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
 import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
@@ -432,7 +432,7 @@ export function createCategoriesTreeVisibilityHandler(props: {
   viewport: TreeWidgetViewport;
   idsCache: CategoriesTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
-  searchPaths?: HierarchySearchPath[];
+  searchPaths?: HierarchySearchTree[];
   hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 }) {
   return new HierarchyVisibilityHandlerImpl<CategoriesTreeSearchTargets>({

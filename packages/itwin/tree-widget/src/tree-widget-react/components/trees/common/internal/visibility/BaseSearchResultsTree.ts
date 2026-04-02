@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Id64 } from "@itwin/core-bentley";
-import { HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey, HierarchySearchPath } from "@itwin/presentation-hierarchies";
+import { HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
-import type { ClassGroupingNodeKey, InstancesNodeKey } from "@itwin/presentation-hierarchies";
-import type { InstanceKey } from "@itwin/presentation-shared";
+import type { ClassGroupingNodeKey, HierarchySearchTree, InstancesNodeKey } from "@itwin/presentation-hierarchies";
+import type { EC, InstanceKey } from "@itwin/presentation-shared";
 
 /** @internal */
 export type SearchResultsTreeNodeChildren<TSearchResultsTreeNode> = Map<Id64String, TSearchResultsTreeNode>;
@@ -68,9 +68,9 @@ export abstract class SearchResultsNodesHandler<
   public readonly searchResultsNodesArr = new Array<TSearchResultsTreeNode>();
 
   /** Returns search results tree node type based on its' className */
-  public abstract getType(className: string): Promise<TSearchResultsTreeNode["type"]>;
+  public abstract getType(className: EC.FullClassName): Promise<TSearchResultsTreeNode["type"]>;
   /** Returns search results tree node className based on its' type */
-  public abstract getClassName(type: TSearchResultsTreeNode["type"]): string;
+  public abstract getClassName(type: TSearchResultsTreeNode["type"]): EC.FullClassName;
   /** Converts nodes to search targets */
   public abstract convertNodesToSearchTargets(
     searchResultsNodes: TSearchResultsTreeNode[],
@@ -196,11 +196,11 @@ export interface CreateSearchResultsTreeProps<
   TSearchResultsTreeNode extends BaseSearchResultsTreeNode<TSearchResultsTreeNode>,
 > {
   searchResultsNodesHandler: SearchResultsNodesHandler<TProcessedSearchResultsNodes, TSearchTargets, TSearchResultsTreeNode>;
-  searchPaths: HierarchySearchPath[];
+  searchPaths: HierarchySearchTree[];
 }
 
 /**
- * Function iterates over search paths and uses `searchResultsNodesHandler` to create a search results tree.
+ * Function iterates over search trees and uses `searchResultsNodesHandler` to create a search results tree.
  * @internal
  */
 export async function createSearchResultsTree<
@@ -209,37 +209,42 @@ export async function createSearchResultsTree<
   TSearchResultsTreeNode extends BaseSearchResultsTreeNode<TSearchResultsTreeNode>,
 >(props: CreateSearchResultsTreeProps<TProcessedSearchResultsNodes, TSearchTargets, TSearchResultsTreeNode>): Promise<SearchResultsTree<TSearchTargets>> {
   const { searchPaths, searchResultsNodesHandler } = props;
-  // Sort search paths by their length, this ensures that nodes which have search target ancestors, and are search targets, won't be included in the
-  // search results tree. Search results tree is only needed to find which nodes might have children missing. Since nodes which have search target ancestors
-  // always have all children, they can be skipped.
-  const sortedSearchPaths = searchPaths.sort((lhs, rhs) => HierarchySearchPath.normalize(lhs).path.length - HierarchySearchPath.normalize(rhs).path.length);
-  for (const searchPath of sortedSearchPaths) {
-    const normalizedPath = HierarchySearchPath.normalize(searchPath).path;
 
-    let parentNode: SearchResultsTreeRootNode<TSearchResultsTreeNode> | TSearchResultsTreeNode = searchResultsNodesHandler.root;
-    for (let i = 0; i < normalizedPath.length; ++i) {
-      if ("type" in parentNode && "isSearchTarget" in parentNode && parentNode.isSearchTarget) {
-        break;
-      }
+  async function traverseTree(
+    tree: HierarchySearchTree,
+    parentNode: SearchResultsTreeRootNode<TSearchResultsTreeNode> | TSearchResultsTreeNode,
+  ): Promise<void> {
+    // If parent is already a search target, skip deeper nodes - we want to load all children for them.
+    if ("type" in parentNode && "isSearchTarget" in parentNode && parentNode.isSearchTarget) {
+      return;
+    }
 
-      const identifier = normalizedPath[i];
+    const identifier = tree.identifier;
+    if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(identifier)) {
+      return;
+    }
 
-      if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(identifier)) {
-        break;
-      }
-
-      const currentNode: TSearchResultsTreeNode | undefined = parentNode.children?.get(identifier.id);
-      if (currentNode !== undefined) {
-        parentNode = currentNode;
-        continue;
-      }
-      parentNode = await searchResultsNodesHandler.accept({
+    const isTarget = tree.isTarget === true || !tree.children?.length;
+    const currentNode =
+      parentNode.children?.get(identifier.id) ??
+      (await searchResultsNodesHandler.accept({
         instanceKey: identifier,
         parentNode,
-        isSearchTarget: i === normalizedPath.length - 1,
-      });
+        isSearchTarget: isTarget,
+      }));
+
+    // Do not descend into children once the current node is a search target.
+    if (!currentNode.isSearchTarget && tree.children) {
+      for (const child of tree.children) {
+        await traverseTree(child, currentNode);
+      }
     }
   }
+
+  for (const tree of searchPaths) {
+    await traverseTree(tree, searchResultsNodesHandler.root);
+  }
+
   const processedSearchResultsNodes = await searchResultsNodesHandler.processSearchResultsNodes();
   return {
     getSearchTargets: (node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) => processedSearchResultsNodes.getNodeSearchTargets(node),

@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useMemo } from "react";
+import { HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { createIModelAccess } from "../common/internal/UseIModelAccess.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
@@ -11,7 +12,7 @@ import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.j
 import { getClassificationsTreeIdsCache } from "./UseClassificationsTree.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { HierarchyDefinition, HierarchySearchPath } from "@itwin/presentation-hierarchies";
+import type { HierarchyDefinition } from "@itwin/presentation-hierarchies";
 import type { useTree } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { FunctionProps } from "../common/Utils.js";
@@ -31,7 +32,7 @@ interface UseClassificationsTreeDefinitionProps {
   /**
    * Optional parameters to search for tree nodes.
    */
-  search?:
+  search?: (
     | {
         /**
          * Text used to search tree nodes by label.
@@ -43,11 +44,21 @@ interface UseClassificationsTreeDefinitionProps {
          * List of instance keys to search tree nodes by.
          */
         targetItems: Array<InstanceKey>;
-      };
+      }
+  ) & {
+    /**
+     * Limit of how many search results are allowed.
+     *
+     * Can be a number or "unbounded" for no limit.
+     *
+     * Defaults to `100`.
+     */
+    limit?: number | "unbounded";
+  };
   /**
    * Action to perform when search paths change.
    */
-  onSearchPathsChanged?: (paths: HierarchySearchPath[] | undefined) => void;
+  onSearchPathsChanged?: (paths: HierarchySearchTree[] | undefined) => void;
 }
 
 /** @alpha */
@@ -96,6 +107,7 @@ export function useClassificationsTreeDefinitionInternal(
   }, [hierarchyConfig, imodelsWithCaches]);
 
   const searchTerm = search ? ("searchText" in search ? search.searchText : search.targetItems) : undefined;
+  const searchLimit = search?.limit;
 
   useEffect(() => {
     if (!searchTerm) {
@@ -110,24 +122,27 @@ export function useClassificationsTreeDefinitionInternal(
 
     return async ({ abortSignal }) => {
       onFeatureUsed({ featureId: "search", reportInteraction: true });
-      const [first, ...rest] = await Promise.all(
+      const builder = HierarchySearchTree.createBuilder();
+      await Promise.all(
         imodelsWithCaches.map(async ({ imodelAccess, cache }) => {
-          return ClassificationsTreeDefinition.createInstanceKeyPaths({
+          const iter = ClassificationsTreeDefinition.createInstanceKeyPaths({
             hierarchyConfig,
             idsCache: cache,
             imodelAccess,
             abortSignal,
-            limit: typeof searchTerm !== "string" ? "unbounded" : undefined,
+            limit: searchLimit,
             ...(typeof searchTerm === "string" ? { label: searchTerm } : { targetItems: searchTerm }),
           });
+          for await (const { path } of iter) {
+            builder.accept({ path: { path, options: { reveal: true } } });
+          }
         }),
       );
-
-      const joinedPaths = first.concat(...rest);
-      onSearchPathsChanged?.(joinedPaths);
-      return joinedPaths;
+      const joinedTrees = builder.getTree();
+      onSearchPathsChanged?.(joinedTrees);
+      return joinedTrees;
     };
-  }, [searchTerm, onFeatureUsed, imodelsWithCaches, onSearchPathsChanged, hierarchyConfig]);
+  }, [searchTerm, searchLimit, onFeatureUsed, imodelsWithCaches, onSearchPathsChanged, hierarchyConfig]);
 
   return {
     definition,

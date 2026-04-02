@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
+import { beforeEach, describe, expect, it } from "vitest";
 import { createStorage } from "@itwin/unified-selection";
 import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../../tree-widget-react/components/trees/common/FocusedInstancesContext.js";
 import { act, createAsyncIterator, renderHook, waitFor } from "../../TestUtils.js";
@@ -40,13 +40,13 @@ describe("FocusedInstancesContext", () => {
       ),
     });
 
-    expect(result.current.enabled).to.be.false;
+    expect(result.current.enabled).toBe(false);
     act(() => {
       result.current.toggle();
     });
 
     await waitFor(() => {
-      expect(result.current.enabled).to.be.true;
+      expect(result.current.enabled).toBe(true);
     });
 
     act(() => {
@@ -54,7 +54,7 @@ describe("FocusedInstancesContext", () => {
     });
 
     await waitFor(() => {
-      expect(result.current.enabled).to.be.false;
+      expect(result.current.enabled).toBe(false);
     });
   });
 
@@ -72,7 +72,7 @@ describe("FocusedInstancesContext", () => {
     });
 
     await waitFor(() => {
-      expect(result.current.enabled).to.be.true;
+      expect(result.current.enabled).toBe(true);
     });
 
     act(() => {
@@ -81,7 +81,7 @@ describe("FocusedInstancesContext", () => {
 
     await waitFor(async () => {
       const instanceKeys = await collectKeys(result.current.loadFocusedItems);
-      expect(instanceKeys).to.containSubset([{ className: "Schema.Class", id: "0x1" }]);
+      expect(instanceKeys).toEqual(expect.arrayContaining([{ className: "Schema.Class", id: "0x1" }]));
     });
   });
 
@@ -110,7 +110,7 @@ describe("FocusedInstancesContext", () => {
     };
 
     await waitFor(() => {
-      expect(result.current.enabled).to.be.true;
+      expect(result.current.enabled).toBe(true);
     });
 
     act(() => {
@@ -124,7 +124,7 @@ describe("FocusedInstancesContext", () => {
 
     await waitFor(async () => {
       const instanceKeys = await collectKeys(result.current.loadFocusedItems);
-      expect(instanceKeys).to.containSubset([node]);
+      expect(instanceKeys).toEqual(expect.arrayContaining([node]));
     });
   });
 
@@ -142,7 +142,7 @@ describe("FocusedInstancesContext", () => {
     });
 
     await waitFor(() => {
-      expect(result.current.enabled).to.be.true;
+      expect(result.current.enabled).toBe(true);
     });
 
     act(() => {
@@ -166,10 +166,12 @@ describe("FocusedInstancesContext", () => {
 
     await waitFor(async () => {
       const instanceKeys = await collectKeys(result.current.loadFocusedItems);
-      expect(instanceKeys).to.containSubset([
-        { id: "0x1", className: "Schema:Class" },
-        { id: "0x1", className: "Schema:Class" },
-      ]);
+      expect(instanceKeys).toEqual(
+        expect.arrayContaining([
+          { id: "0x1", className: "Schema.Class" },
+          { id: "0x1", className: "Schema.Class" },
+        ]),
+      );
     });
   });
 
@@ -187,7 +189,7 @@ describe("FocusedInstancesContext", () => {
     });
 
     await waitFor(() => {
-      expect(result.current.enabled).to.be.true;
+      expect(result.current.enabled).toBe(true);
     });
 
     act(() => {
@@ -195,7 +197,7 @@ describe("FocusedInstancesContext", () => {
     });
 
     await waitFor(() => {
-      expect(result.current.loadFocusedItems).to.be.undefined;
+      expect(result.current.loadFocusedItems).toBeUndefined();
     });
   });
 
@@ -213,7 +215,7 @@ describe("FocusedInstancesContext", () => {
     });
 
     await waitFor(() => {
-      expect(result.current.enabled).to.be.true;
+      expect(result.current.enabled).toBe(true);
     });
 
     act(() => {
@@ -221,7 +223,7 @@ describe("FocusedInstancesContext", () => {
     });
 
     await waitFor(() => {
-      expect(result.current.loadFocusedItems).to.be.undefined;
+      expect(result.current.loadFocusedItems).toBeUndefined();
     });
   });
 });

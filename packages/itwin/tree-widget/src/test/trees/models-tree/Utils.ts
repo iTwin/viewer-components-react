@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { concatMap, EMPTY, expand, from, of, toArray } from "rxjs";
-import sinon from "sinon";
+import { vi } from "vitest";
 import { Id64 } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
@@ -19,24 +19,22 @@ import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelAccess } from "../Common.js";
 
-import type { Observable } from "rxjs";
-import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type {
   ClassGroupingNodeKey,
   GroupingHierarchyNode,
   HierarchyProvider,
-  HierarchySearchPath,
+  HierarchySearchTree,
   NonGroupingHierarchyNode,
 } from "@itwin/presentation-hierarchies";
-import type { InstanceKey } from "@itwin/presentation-shared";
-import type { ChildrenTree } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
+import type { EC, InstanceKey } from "@itwin/presentation-shared";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
 interface CreateModelsTreeProviderProps {
   imodel: IModelConnection;
-  searchPaths?: HierarchySearchPath[];
+  searchPaths?: HierarchySearchTree[];
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   idsCache?: ModelsTreeIdsCache;
   imodelAccess?: ReturnType<typeof createIModelAccess>;
@@ -66,14 +64,10 @@ export function createModelsTreeProvider({
       idsCache: createdIdsCache,
       hierarchyConfig: config,
     }),
-    ...(searchPaths ? { search: { paths: searchPaths.map((path) => ("path" in path ? path : { path, options: { reveal: true } })) } } : undefined),
+    ...(searchPaths ? { search: { paths: searchPaths } } : undefined),
   });
   const dispose = () => {
     provider[Symbol.dispose]();
-    if (!idsCache) {
-      createdIdsCache[Symbol.dispose]();
-    }
-    baseIdsCache[Symbol.dispose]();
   };
   return {
     hierarchyChanged: provider.hierarchyChanged,
@@ -96,26 +90,26 @@ interface IdsCacheMockProps {
 }
 
 export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCache {
-  return sinon.createStubInstance(ModelsTreeIdsCache, {
-    getChildSubjectIds: sinon.stub<[Id64Arg], Observable<Id64Array>>().callsFake((subjectIds) => {
+  return {
+    getChildSubjectIds: vi.fn((subjectIds: Id64Arg) => {
       return from(Id64.iterable(subjectIds)).pipe(
         concatMap((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         toArray(),
       );
     }),
-    getChildSubjectModelIds: sinon.stub(),
-    getSubjectModelIds: sinon.stub<[Id64Arg], Observable<Id64Array>>().callsFake((subjectIds) => {
+    getChildSubjectModelIds: vi.fn(),
+    getSubjectModelIds: vi.fn((subjectIds: Id64Arg) => {
       return from(Id64.iterable(subjectIds)).pipe(
         expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         concatMap((id) => props?.subjectModels?.get(id) ?? EMPTY),
         toArray(),
       );
     }),
-    getCategories: sinon.stub<[{ modelId: Id64String; includeOnlyIfCategoryOfTopMostElement?: boolean }], Observable<Id64Set>>().callsFake(({ modelId }) => {
+    getCategories: vi.fn(({ modelId }: { modelId: Id64String; includeOnlyIfCategoryOfTopMostElement?: boolean }) => {
       return of(new Set(props?.modelCategories?.get(modelId) ?? []));
     }),
-    getAllCategoriesOfElements: sinon.stub<[], Observable<Id64Set>>().callsFake(() => {
+    getAllCategoriesOfElements: vi.fn(() => {
       const result = new Set<Id64String>();
       for (const categories of props?.modelCategories?.values() ?? []) {
         categories.forEach((category) => {
@@ -124,20 +118,19 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       }
       return of(result);
     }),
-    getElementsCount: sinon.stub<[{ modelId: Id64String; categoryId: Id64String }], Observable<number>>().callsFake(({ categoryId }) => {
+    getElementsCount: vi.fn(({ categoryId }: { modelId: Id64String; categoryId: Id64String }) => {
       return of(props?.categoryElements?.get(categoryId)?.length ?? 0);
     }),
-    getChildElementsTree: sinon.stub<[{ elementIds: Id64Arg }], Observable<ChildrenTree>>().callsFake(() => {
+    getChildElementsTree: vi.fn(() => {
       return of(new Map());
     }),
-    getAllChildElementsCount: sinon.stub<[{ elementIds: Id64Arg }], Observable<Map<Id64String, number>>>().callsFake(() => {
+    getAllChildElementsCount: vi.fn(() => {
       return of(new Map());
     }),
-    getSubModelsUnderElement: sinon.stub<[Id64String], Observable<Id64Array>>().callsFake(() => of([])),
-    getSubModels: sinon
-      .stub<[{ modelId: Id64String; categoryId?: Id64String } | { categoryId: Id64String; modelId: Id64String | undefined }], Observable<Id64Array>>()
-      .callsFake(() => EMPTY),
-  });
+    getSubModelsUnderElement: vi.fn(() => of([])),
+    getSubModels: vi.fn(() => EMPTY),
+    [Symbol.dispose]: vi.fn(),
+  } as unknown as ModelsTreeIdsCache;
 }
 
 export function createSubjectHierarchyNode(props?: { ids?: Id64Arg; parentKeys?: InstanceKey[] }): NonGroupingHierarchyNode {
@@ -250,7 +243,7 @@ export function createClassGroupingHierarchyNode({
   ...props
 }: {
   elements: Id64Array;
-  className?: string;
+  className?: EC.FullClassName;
   parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   modelId: Id64String;
   categoryId: Id64String;

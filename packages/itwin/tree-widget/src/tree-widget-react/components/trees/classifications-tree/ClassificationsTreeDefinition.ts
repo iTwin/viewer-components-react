@@ -3,27 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  bufferCount,
-  defaultIfEmpty,
-  defer,
-  EMPTY,
-  firstValueFrom,
-  from,
-  fromEvent,
-  identity,
-  lastValueFrom,
-  map,
-  merge,
-  mergeMap,
-  of,
-  reduce,
-  takeUntil,
-  toArray,
-} from "rxjs";
+import { bufferCount, defer, EMPTY, firstValueFrom, from, fromEvent, identity, map, merge, mergeMap, of, reduce, takeUntil, toArray } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql, parseFullClassName } from "@itwin/presentation-shared";
+import { eachValueFrom } from "../../utils/EachValueFrom.js";
 import {
   CLASS_NAME_Classification,
   CLASS_NAME_ClassificationSystem,
@@ -51,9 +35,15 @@ import type {
   LimitingECSqlQueryExecutor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlQueryRow, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
+import type {
+  EC,
+  ECClassHierarchyInspector,
+  ECSchemaProvider,
+  ECSqlQueryRow,
+  IInstanceLabelSelectClauseFactory,
+  InstanceKey,
+} from "@itwin/presentation-shared";
 import type { ClassificationId, ClassificationTableId, ElementId } from "../common/internal/Types.js";
-import type { NormalizedHierarchySearchPath } from "../common/Utils.js";
 import type { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
 
 const MAX_SEARCH_INSTANCE_KEY_COUNT = 100;
@@ -391,10 +381,10 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     });
   }
 
-  public static async createInstanceKeyPaths(
+  public static createInstanceKeyPaths(
     props: ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps | ClassificationsTreeInstanceKeyPathsFromInstanceKeysProps,
-  ): Promise<NormalizedHierarchySearchPath[]> {
-    return lastValueFrom(
+  ) {
+    return eachValueFrom<{ path: HierarchyNodeIdentifiersPath; target: Id64String }>(
       defer(() => {
         const componentInfo = { componentId: props.componentId ?? Guid.createValue(), componentName: this.#componentName };
         if ("label" in props) {
@@ -402,7 +392,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
           return createInstanceKeyPathsFromInstanceLabelObs({ ...props, ...componentInfo, labelsFactory });
         }
         return createInstanceKeyPathsFromTargetItemsObs({ ...props, ...componentInfo });
-      }).pipe(props.abortSignal ? takeUntil(fromEvent(props.abortSignal, "abort")) : identity, defaultIfEmpty([])),
+      }).pipe(props.abortSignal ? takeUntil(fromEvent(props.abortSignal, "abort")) : identity),
     );
   }
 }
@@ -443,7 +433,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
   labelsFactory: IInstanceLabelSelectClauseFactory;
   componentName: string;
   componentId: string;
-}): Observable<NormalizedHierarchySearchPath[]> {
+}) {
   const adjustedLabel = label.replace(/[%_\\]/g, "\\$&");
 
   const CLASSIFICATION_TABLES_WITH_LABELS_CTE = "ClassificationTablesWithLabels";
@@ -566,7 +556,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
     ),
     catchBeSQLiteInterrupts,
     map((row): InstanceKey => {
-      let className: string;
+      let className: EC.FullClassName;
       switch (row.ClassName) {
         case CLASSIFICATION_TABLE_CLASS_NAME_QUERY_ALIAS:
           className = CLASS_NAME_ClassificationTable;
@@ -598,7 +588,7 @@ function createInstanceKeyPathsFromTargetItemsObs({
 }: Omit<ClassificationsTreeInstanceKeyPathsFromInstanceKeysProps, "abortSignal" | "componentId"> & {
   componentId: GuidString;
   componentName: string;
-}): Observable<NormalizedHierarchySearchPath[]> {
+}): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String }> {
   const actualLimit = limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT;
   if (actualLimit !== "unbounded" && targetItems.length > actualLimit) {
     throw new SearchLimitExceededError(actualLimit);
@@ -615,7 +605,6 @@ function createInstanceKeyPathsFromTargetItemsObs({
 
       return { id: key.id, type: ELEMENT_TYPE_AS_NUMBER };
     }, 2),
-
     reduce(
       (acc, { id, type }) => {
         switch (type) {
@@ -639,8 +628,8 @@ function createInstanceKeyPathsFromTargetItemsObs({
     ),
     mergeMap((ids) => {
       return merge(
-        from(ids.classificationTableIds).pipe(map((id) => ({ path: [{ id, className: CLASS_NAME_ClassificationTable }], options: { reveal: true } }))),
-        idsCache.getClassificationsPathObs(ids.classificationIds).pipe(map((path) => ({ path, options: { reveal: true } }))),
+        from(ids.classificationTableIds).pipe(map((id) => ({ path: [{ id, className: CLASS_NAME_ClassificationTable }], target: id }))),
+        idsCache.getClassificationsPathObs(ids.classificationIds).pipe(map((path) => ({ path, target: path[path.length - 1].id }))),
         from(ids.elementIds).pipe(
           bufferCount(getOptimalBatchSize({ totalSize: ids.elementIds.length, maximumBatchSize: 5000 })),
           releaseMainThreadOnItemsCount(1),
@@ -659,7 +648,6 @@ function createInstanceKeyPathsFromTargetItemsObs({
         ),
       );
     }),
-    toArray(),
   );
 }
 
@@ -670,7 +658,7 @@ function createGeometricElementInstanceKeyPaths(props: {
   componentId: GuidString;
   componentName: string;
   chunkIndex: number;
-}): Observable<NormalizedHierarchySearchPath> {
+}): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String }> {
   const { targetItems, imodelAccess, idsCache, componentId, componentName, chunkIndex } = props;
   if (targetItems.length === 0) {
     return EMPTY;
@@ -719,12 +707,13 @@ function createGeometricElementInstanceKeyPaths(props: {
     releaseMainThreadOnItemsCount(300),
     map((row) => parseQueryRow(row, separator)),
     mergeMap(({ path, parentClassificationId }) => {
+      const target = path[path.length - 1].id;
       if (parentClassificationId) {
         return idsCache
           .getClassificationsPathObs(parentClassificationId)
-          .pipe(map((parentClassificationPath) => ({ path: parentClassificationPath.concat(path), options: { reveal: true } })));
+          .pipe(map((parentClassificationPath) => ({ path: parentClassificationPath.concat(path), target })));
       }
-      return of({ path, options: { reveal: true } });
+      return of({ path, target });
     }),
   );
 }

@@ -51,8 +51,6 @@ function runClassificationsPerformanceTest({
   return run<{
     imodel: SnapshotDb;
     imodelAccess: IModelAccess;
-    idsCache: ClassificationsTreeIdsCache;
-    baseIdsCache: BaseIdsCache;
     hierarchyDefinition: HierarchyDefinition;
   }>({
     testName,
@@ -67,12 +65,10 @@ function runClassificationsPerformanceTest({
         baseIdsCache,
       });
       const hierarchyDefinition = new ClassificationsTreeDefinition({ imodelAccess, getIdsCache: () => idsCache, hierarchyConfig });
-      return { imodel, imodelAccess, idsCache, baseIdsCache, hierarchyDefinition };
+      return { imodel, imodelAccess, hierarchyDefinition };
     },
     cleanup: (props) => {
       props.imodel.close();
-      props.idsCache[Symbol.dispose]();
-      props.baseIdsCache[Symbol.dispose]();
     },
     test: async ({ imodelAccess, hierarchyDefinition }) => {
       using provider = new StatelessHierarchyProvider({

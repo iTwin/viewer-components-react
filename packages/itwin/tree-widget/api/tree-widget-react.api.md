@@ -7,12 +7,13 @@
 import { BeEvent } from '@itwin/core-bentley';
 import { ClassGroupingNodeKey } from '@itwin/presentation-hierarchies';
 import { ComponentProps } from 'react';
+import { EC } from '@itwin/presentation-shared';
 import { ECClassHierarchyInspector } from '@itwin/presentation-shared';
 import { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
 import { HierarchyDefinition } from '@itwin/presentation-hierarchies';
 import { HierarchyNode } from '@itwin/presentation-hierarchies-react';
 import { HierarchyNode as HierarchyNode_2 } from '@itwin/presentation-hierarchies';
-import { HierarchySearchPath } from '@itwin/presentation-hierarchies';
+import { HierarchySearchTree } from '@itwin/presentation-hierarchies';
 import { Id64Arg } from '@itwin/core-bentley';
 import { Id64Array } from '@itwin/core-bentley';
 import { Id64String } from '@itwin/core-bentley';
@@ -29,12 +30,12 @@ import * as react_jsx_runtime0 from 'react/jsx-runtime';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 import { SelectionStorage } from '@itwin/presentation-hierarchies-react';
-import { StrataKitTreeRenderer } from '@itwin/presentation-hierarchies-react';
-import { TreeActionBase } from '@itwin/presentation-hierarchies-react';
-import { TreeActionBaseAttributes } from '@itwin/presentation-hierarchies-react';
+import { StrataKitTreeRenderer } from '@itwin/presentation-hierarchies-react/stratakit';
+import { TreeActionBase } from '@itwin/presentation-hierarchies-react/stratakit';
+import { TreeActionBaseAttributes } from '@itwin/presentation-hierarchies-react/stratakit';
 import { TreeNode } from '@itwin/presentation-hierarchies-react';
-import { TreeNodeFilterAction } from '@itwin/presentation-hierarchies-react';
-import { TreeNodeRenameAction } from '@itwin/presentation-hierarchies-react';
+import { TreeNodeFilterAction } from '@itwin/presentation-hierarchies-react/stratakit';
+import { TreeNodeRenameAction } from '@itwin/presentation-hierarchies-react/stratakit';
 import { TreeRendererProps } from '@itwin/presentation-hierarchies-react';
 import { useIModelTree } from '@itwin/presentation-hierarchies-react';
 import { useTree } from '@itwin/presentation-hierarchies-react';
@@ -285,7 +286,7 @@ interface ElementsGroupInfo {
 }
 
 // @beta (undocumented)
-type ExtendedTreeRendererProps = CallbacksWithCommonTreeRendererProps<TreeRendererProps$1, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps">;
+type ExtendedTreeRendererProps = CallbacksWithCommonTreeRendererProps<TreeRendererProps_2, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps">;
 
 // @beta (undocumented)
 type ExtendedVisibilityTreeRendererProps = CallbacksWithCommonTreeRendererProps<VisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps">;
@@ -449,7 +450,7 @@ type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => ReactE
 // @beta
 interface ModelsTreeHierarchyConfiguration {
     elementClassGrouping: "enable" | "enableWithCounts" | "disable";
-    elementClassSpecification: string;
+    elementClassSpecification: EC.FullClassName;
     hideRootSubject: boolean;
     hierarchyLevelFiltering: "enable" | "disable";
     showEmptyModels: boolean;
@@ -522,9 +523,6 @@ export interface ModelsTreeVisibilityHandlerOverrides extends BaseTreeVisibility
         subjectIds: Id64Arg;
     }) => Promise<VisibilityStatus>>;
 }
-
-// @public (undocumented)
-type NormalizedHierarchySearchPath = ReturnType<(typeof HierarchySearchPath)["normalize"]>;
 
 // @public (undocumented)
 type PerModelCategoryOverride = "show" | "hide" | "none";
@@ -620,10 +618,10 @@ type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPaths" | "g
 };
 
 // @beta
-export function TreeRenderer(props: TreeRendererProps$1): react_jsx_runtime0.JSX.Element;
+export function TreeRenderer(props: TreeRendererProps_2): react_jsx_runtime0.JSX.Element;
 
 // @beta (undocumented)
-type TreeRendererProps$1 = ComponentProps<typeof StrataKitTreeRenderer>;
+type TreeRendererProps_2 = ComponentProps<typeof StrataKitTreeRenderer>;
 
 // @public
 interface TreeRenderProps {
@@ -749,6 +747,7 @@ interface UseCategoriesTreeProps {
         categories: CategoryInfo[] | undefined;
         models?: Id64Array;
     }) => void;
+    searchLimit?: number | "unbounded";
     // (undocumented)
     searchText?: string;
 }
@@ -772,11 +771,13 @@ interface UseClassificationsTreeDefinitionProps {
     // (undocumented)
     hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
     imodels: Array<IModelConnection>;
-    onSearchPathsChanged?: (paths: HierarchySearchPath[] | undefined) => void;
-    search?: {
+    onSearchPathsChanged?: (paths: HierarchySearchTree[] | undefined) => void;
+    search?: ({
         searchText: string;
     } | {
         targetItems: Array<InstanceKey>;
+    }) & {
+        limit?: number | "unbounded";
     };
 }
 
@@ -798,6 +799,7 @@ interface UseClassificationsTreeProps {
     getTreeItemProps?: ExtendedVisibilityTreeRendererProps["getTreeItemProps"];
     // (undocumented)
     hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+    searchLimit?: number | "unbounded";
     // (undocumented)
     searchText?: string;
     visibilityHandlerConfig?: ClassificationsTreeVisibilityHandlerConfiguration;
@@ -837,20 +839,21 @@ interface UseModelsTreeProps {
             targetItems: Array<InstanceKey | ElementsGroupInfo>;
         } | {
             label: string;
-        }) => Promise<NormalizedHierarchySearchPath[]>;
+        }) => Promise<HierarchySearchTree[]>;
         searchText?: string;
-    }) => Promise<HierarchySearchPath[] | undefined>;
+    }) => Promise<HierarchySearchTree[] | undefined>;
     getSubTreePaths?: (props: {
         createInstanceKeyPaths: (props: {
             targetItems: Array<InstanceKey | ElementsGroupInfo>;
-        }) => Promise<NormalizedHierarchySearchPath[]>;
-    }) => Promise<HierarchySearchPath[]>;
+        }) => Promise<HierarchySearchTree[]>;
+    }) => Promise<HierarchySearchTree[]>;
     // (undocumented)
     getTreeItemProps?: ExtendedVisibilityTreeRendererProps["getTreeItemProps"];
     // (undocumented)
     hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
     // (undocumented)
     onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
+    searchLimit?: number | "unbounded";
     searchText?: string;
     selectionPredicate?: (props: {
         node: TreeNode;

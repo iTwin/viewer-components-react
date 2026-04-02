@@ -9,8 +9,8 @@ import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable, CLASS_NAME_G
 import { createSearchResultsTree, SearchResultsNodesHandler } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
-import type { HierarchySearchPath } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
+import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
+import type { EC, ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
 import type {
   BaseSearchResultsTreeNode,
@@ -64,7 +64,7 @@ export interface ClassificationsTreeSearchTargets {
 /** @internal */
 export async function createClassificationsSearchResultsTree(props: {
   imodelAccess: ECClassHierarchyInspector;
-  searchPaths: HierarchySearchPath[];
+  searchPaths: HierarchySearchTree[];
   idsCache: ClassificationsTreeIdsCache;
 }): Promise<SearchResultsTree<ClassificationsTreeSearchTargets>> {
   const { imodelAccess, searchPaths, idsCache } = props;
@@ -315,7 +315,7 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
     };
   }
 
-  public async getType(className: string): Promise<TemporarySearchResultsTreeNode["type"]> {
+  public async getType(className: EC.FullClassName): Promise<TemporarySearchResultsTreeNode["type"]> {
     if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_ClassificationTable)) {
       return "classificationTable";
     }
@@ -325,7 +325,7 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
     return "element";
   }
 
-  public getClassName(type: TemporarySearchResultsTreeNode["type"]): string {
+  public getClassName(type: TemporarySearchResultsTreeNode["type"]): EC.FullClassName {
     switch (type) {
       case "classificationTable":
         return CLASS_NAME_ClassificationTable;
