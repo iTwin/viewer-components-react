@@ -6,7 +6,7 @@
 import asTable from "as-table";
 import fs from "fs";
 
-import type { UserConsoleLog } from "vitest";
+import type { SerializedError, UserConsoleLog } from "vitest";
 import type { Reporter, TestCase, TestModule, TestSuite } from "vitest/node";
 import type { Summary } from "./MainThreadBlocksDetector.js";
 
@@ -72,6 +72,9 @@ export default class TestReporter implements Reporter {
     this.#testInfo.push(info);
     if (state === "failed") {
       this.#hasFailures = true;
+      if (result.errors.length > 0) {
+        this.printErrors(result.errors);
+      }
     }
 
     this.print(`${info.symbol} ${testCase.name} (${info.duration} ms)`);
@@ -82,13 +85,17 @@ export default class TestReporter implements Reporter {
     if (errors.length > 0) {
       this.#hasFailures = true;
       this.print(`\n❌ Module errors in ${testModule.moduleId}:`);
-      for (const error of errors) {
-        this.print(`  ${error.name ?? "Error"}: ${error.message}`);
-        if (error.stack) {
-          const stackLines = error.stack.split("\n").slice(1, 6);
-          for (const line of stackLines) {
-            this.print(`    ${line.trim()}`);
-          }
+      this.printErrors(errors);
+    }
+  }
+
+  public printErrors(errors: ReadonlyArray<SerializedError>) {
+    for (const error of errors) {
+      this.print(`  ${error.name ?? "Error"}: ${error.message}`);
+      if (error.stack) {
+        const stackLines = error.stack.split("\n").slice(1, 6);
+        for (const line of stackLines) {
+          this.print(`    ${line.trim()}`);
         }
       }
     }
