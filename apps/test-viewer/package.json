@@ -72,7 +72,7 @@
     "rimraf": "^6.1.2",
     "sass": "^1.98.0",
     "typescript": "~5.9.3",
-    "vite": "^8.0.3",
+    "vite": "^8.0.5",
     "vite-plugin-static-copy": "^4.0.0"
   },
   "scripts": {
