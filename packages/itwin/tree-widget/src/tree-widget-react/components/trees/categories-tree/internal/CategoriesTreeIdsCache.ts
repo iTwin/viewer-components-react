@@ -8,11 +8,11 @@ import { Guid, Id64 } from "@itwin/core-bentley";
 import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
-import { fromWithRelease, getClassesByView, joinId64Arg } from "../../common/internal/Utils.js";
+import { fromWithRelease, getClassesByView } from "../../common/internal/Utils.js";
 import { createGeometricElementInstanceKeyPaths } from "../CategoriesTreeDefinition.js";
 
 import type { Observable } from "rxjs";
-import type { GuidString, Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { EC } from "@itwin/presentation-shared";
 import type { BaseIdsCacheImplProps } from "../../common/internal/caches/BaseIdsCache.js";
@@ -69,7 +69,7 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
     this.#componentName = "CategoriesTreeIdsCache";
   }
 
-  private queryFilteredElementsModels(filteredElementIds: Id64Arg): Observable<{
+  private queryFilteredElementsModels(filteredElementIds: Id64Array): Observable<{
     modelId: Id64String;
     id: ElementId;
   }> {
@@ -77,10 +77,11 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
       const query = `
         SELECT Model.Id modelId, ECInstanceId id
         FROM ${this.#categoryElementClass}
-        WHERE ECInstanceId IN (${joinId64Arg(filteredElementIds, ",")})
+        JOIN IdSet(?) filteredElementIdSet ON ECInstanceId = filteredElementIdSet.id
+        ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
       `;
       return this.#queryExecutor.createQueryReader(
-        { ecsql: query },
+        { ecsql: query, bindings: [{ type: "idset", value: filteredElementIds }] },
         {
           rowFormat: "ECSqlPropertyNames",
           limit: "unbounded",
@@ -95,7 +96,7 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
     );
   }
 
-  public getFilteredElementsModels(filteredElementIds: Id64Arg) {
+  public getFilteredElementsModels(filteredElementIds: Id64Array) {
     if (Id64.sizeOf(filteredElementIds) === 0) {
       return of(new Map<ElementId, ModelId>());
     }

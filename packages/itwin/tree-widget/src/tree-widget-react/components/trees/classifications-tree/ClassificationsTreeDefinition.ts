@@ -208,13 +208,13 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                     },
                     supportsFiltering: true,
                   })}
-                FROM
-                  ${instanceFilterClauses.from} this
+                FROM ${instanceFilterClauses.from} this
+                JOIN IdSet(?) classificationIdSet ON this.ECInstanceId = classificationIdSet.id
                 ${instanceFilterClauses.joins}
-                WHERE
-                  this.ECInstanceId IN (${classificationIds.join(",")})
-                  ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+                ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+                ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
               `,
+              bindings: [{ type: "idset", value: classificationIds }],
             },
           },
         ]
@@ -241,12 +241,14 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
             SELECT ${await this.#createElementSelectClause({})}
             FROM ${elementsInstanceFilterClauses.from} this
             JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = this.ECInstanceId
+            JOIN IdSet(?) parentClassificationIdSet ON ehc.TargetECInstanceId = parentClassificationIdSet.id
             ${elementsInstanceFilterClauses.joins}
             WHERE
-              ehc.TargetECInstanceId IN (${parentClassificationIds.join(",")})
-              AND this.Parent.Id IS NULL
+              this.Parent.Id IS NULL
               ${elementsInstanceFilterClauses.where ? `AND ${elementsInstanceFilterClauses.where}` : ""}
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
+          bindings: [{ type: "idset", value: parentClassificationIds }],
         },
       },
       // load child classifications
@@ -279,13 +281,13 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                         },
                         supportsFiltering: true,
                       })}
-                    FROM
-                      ${instanceFilterClauses.from} this
+                    FROM ${instanceFilterClauses.from} this
+                    JOIN IdSet(?) classificationIdSet ON this.ECInstanceId = classificationIdSet.id
                     ${instanceFilterClauses.joins}
-                    WHERE
-                      this.ECInstanceId IN (${classificationIds.join(",")})
-                      ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+                    ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+                    ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
                   `,
+                  bindings: [{ type: "idset" as const, value: classificationIds }],
                 },
               };
             })(),
@@ -310,11 +312,12 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
           ecsql: `
           SELECT ${await this.#createElementSelectClause({ categoryOfTopMostParentElement: parentNode.extendedData?.categoryOfTopMostParentElement, topMostParentElementId: parentNode.extendedData?.topMostParentElementId })}
           FROM ${instanceFilterClauses.from} this
+          JOIN IdSet(?) parentElementIdSet ON this.Parent.Id = parentElementIdSet.id
           ${instanceFilterClauses.joins}
-          WHERE
-            this.Parent.Id IN (${parentElementIds.join(",")})
-            ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+          ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+          ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
+          bindings: [{ type: "idset", value: parentElementIds }],
         },
       },
     ];
@@ -445,95 +448,99 @@ function createInstanceKeyPathsFromInstanceLabelObs({
     const classificationIds = await firstValueFrom(props.idsCache.getAllClassifications());
     const ctes = [
       `
-          ${CLASSIFICATION_TABLES_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
-            SELECT
-              '${CLASSIFICATION_TABLE_CLASS_NAME_QUERY_ALIAS}',
-              this.ECInstanceId,
-              ${classificationTableLabelSelectClause}
-            FROM
-              ${CLASS_NAME_ClassificationTable} this
-            JOIN ${CLASS_NAME_ClassificationSystem} system ON system.ECInstanceId = this.Parent.Id
-            WHERE
-              system.CodeValue = '${props.hierarchyConfig.rootClassificationSystemCode}'
-              AND NOT this.IsPrivate
-          )
-        `,
+        ${CLASSIFICATION_TABLES_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
+          SELECT
+            '${CLASSIFICATION_TABLE_CLASS_NAME_QUERY_ALIAS}',
+            this.ECInstanceId,
+            ${classificationTableLabelSelectClause}
+          FROM
+            ${CLASS_NAME_ClassificationTable} this
+          JOIN ${CLASS_NAME_ClassificationSystem} system ON system.ECInstanceId = this.Parent.Id
+          WHERE
+            system.CodeValue = '${props.hierarchyConfig.rootClassificationSystemCode}'
+            AND NOT this.IsPrivate
+        )
+      `,
       ...(classificationIds.length > 0
         ? [
             `${CLASSIFICATIONS_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
-            SELECT
-              '${CLASSIFICATION_CLASS_NAME_QUERY_ALIAS}',
-              this.ECInstanceId,
-              ${classificationLabelSelectClause}
-            FROM
-              ${CLASS_NAME_Classification} this
-            WHERE
-              this.ECInstanceId IN (${classificationIds.join(",")})
-          )`,
+              SELECT
+                '${CLASSIFICATION_CLASS_NAME_QUERY_ALIAS}',
+                this.ECInstanceId,
+                ${classificationLabelSelectClause}
+              FROM ${CLASS_NAME_Classification} this
+              JOIN IdSet(?) classificationIdSet ON this.ECInstanceId = classificationIdSet.id
+              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+            )`,
             `${ELEMENTS_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
-            SELECT
-              '${ELEMENT_CLASS_NAME_QUERY_ALIAS}',
-              this.ECInstanceId,
-              ${elementLabelSelectClause}
-            FROM
-              ${CLASS_NAME_GeometricElement3d} this
+              SELECT
+                '${ELEMENT_CLASS_NAME_QUERY_ALIAS}',
+                this.ECInstanceId,
+                ${elementLabelSelectClause}
+              FROM ${CLASS_NAME_GeometricElement3d} this
               JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = this.ECInstanceId
-            WHERE
-              ehc.TargetECInstanceId IN (${classificationIds.join(",")})
-              AND this.Parent.Id IS NULL
+              JOIN IdSet(?) classificationIdSet ON ehc.TargetECInstanceId = classificationIdSet.id
+              WHERE this.Parent.Id IS NULL
+              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
-            UNION ALL
+              UNION ALL
 
-            SELECT
-              '${ELEMENT_CLASS_NAME_QUERY_ALIAS}',
-              this.ECInstanceId,
-              ${elementLabelSelectClause}
-            FROM
-              ${CLASS_NAME_GeometricElement3d} this
-              JOIN ${ELEMENTS_WITH_LABELS_CTE} pe ON pe.ECInstanceId = this.Parent.Id
-          )`,
+              SELECT
+                '${ELEMENT_CLASS_NAME_QUERY_ALIAS}',
+                this.ECInstanceId,
+                ${elementLabelSelectClause}
+              FROM
+                ${CLASS_NAME_GeometricElement3d} this
+                JOIN ${ELEMENTS_WITH_LABELS_CTE} pe ON pe.ECInstanceId = this.Parent.Id
+            )`,
           ]
         : []),
     ];
     const ecsql = `
-        SELECT * FROM (
-          SELECT
-            ct.ClassName AS ClassName,
-            ct.ECInstanceId AS ECInstanceId
-          FROM
-            ${CLASSIFICATION_TABLES_WITH_LABELS_CTE} ct
-          WHERE
-            ct.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
+      SELECT * FROM (
+        SELECT
+          ct.ClassName AS ClassName,
+          ct.ECInstanceId AS ECInstanceId
+        FROM
+          ${CLASSIFICATION_TABLES_WITH_LABELS_CTE} ct
+        WHERE
+          ct.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
 
-          ${
-            classificationIds.length > 0
-              ? `
-                UNION ALL
+        ${
+          classificationIds.length > 0
+            ? `
+              UNION ALL
 
-                SELECT
-                  c.ClassName AS ClassName,
-                  c.ECInstanceId AS ECInstanceId
-                FROM
-                  ${CLASSIFICATIONS_WITH_LABELS_CTE} c
-                WHERE
-                  c.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
+              SELECT
+                c.ClassName AS ClassName,
+                c.ECInstanceId AS ECInstanceId
+              FROM
+                ${CLASSIFICATIONS_WITH_LABELS_CTE} c
+              WHERE
+                c.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
 
-                UNION ALL
+              UNION ALL
 
-                SELECT
-                  e.ClassName AS ClassName,
-                  e.ECInstanceId AS ECInstanceId
-                FROM
-                  ${ELEMENTS_WITH_LABELS_CTE} e
-                WHERE
-                  e.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
-              `
-              : ""
-          }
-        )
-        ${props.limit === undefined ? `LIMIT ${MAX_SEARCH_INSTANCE_KEY_COUNT + 1}` : props.limit !== "unbounded" ? `LIMIT ${props.limit}` : ""}
-      `;
+              SELECT
+                e.ClassName AS ClassName,
+                e.ECInstanceId AS ECInstanceId
+              FROM
+                ${ELEMENTS_WITH_LABELS_CTE} e
+              WHERE
+                e.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
+            `
+            : ""
+        }
+      )
+      ${props.limit === undefined ? `LIMIT ${MAX_SEARCH_INSTANCE_KEY_COUNT + 1}` : props.limit !== "unbounded" ? `LIMIT ${props.limit}` : ""}
+    `;
     const bindings = [
+      ...(classificationIds.length > 0
+        ? [
+            { type: "idset" as const, value: classificationIds },
+            { type: "idset" as const, value: classificationIds },
+          ]
+        : []),
       { type: "string" as const, value: adjustedLabel },
       ...(classificationIds.length > 0
         ? [
@@ -667,7 +674,8 @@ function createGeometricElementInstanceKeyPaths(props: {
           e.Parent.Id,
           '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT)
         FROM  ${CLASS_NAME_Element} e
-        WHERE e.ECInstanceId IN (${targetItems.join(",")})
+        JOIN IdSet(?) targetItemIdSet ON e.ECInstanceId = targetItemIdSet.id
+        ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
         UNION ALL
 
@@ -691,7 +699,7 @@ function createGeometricElementInstanceKeyPaths(props: {
     `;
 
     return imodelAccess.createQueryReader(
-      { ctes, ecsql },
+      { ctes, ecsql, bindings: [{ type: "idset", value: targetItems }] },
       { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${componentName}/${componentId}/elements-filter-paths/${chunkIndex}` },
     );
   }).pipe(

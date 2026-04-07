@@ -129,19 +129,6 @@ export function getClassesByView(viewType: "2d" | "3d") {
     : ({ categoryClass: CLASS_NAME_SpatialCategory, elementClass: CLASS_NAME_GeometricElement3d, modelClass: CLASS_NAME_GeometricModel3d } as const);
 }
 
-/** @internal */
-export function joinId64Arg(arg: Id64Arg, separator: string): string {
-  let joined = "";
-  for (const argItem of Id64.iterable(arg)) {
-    if (joined !== "") {
-      joined += separator;
-    }
-
-    joined += argItem;
-  }
-  return joined;
-}
-
 /**
  * Creates an Observable from provided props. If `releaseOnCount` is provided, main thread will be released after processing specified number of items.
  * @internal

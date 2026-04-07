@@ -65,7 +65,6 @@ import type {
   EC,
   ECClassHierarchyInspector,
   ECSchemaProvider,
-  ECSqlBinding,
   ECSqlQueryRow,
   IInstanceLabelSelectClauseFactory,
   InstanceKey,
@@ -273,12 +272,13 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 },
               })}
             FROM ${this.#categoryModelClass} this
+            JOIN IdSet(?) elementIdSet ON this.ModeledElement.Id = elementIdSet.id
             WHERE
-              this.ModeledElement.Id IN (${elementIds.map(() => "?").join(",")})
-              AND NOT this.IsPrivate
+              NOT this.IsPrivate
               AND this.ECInstanceId IN (SELECT Model.Id FROM ${this.#categoryElementClass})
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
-          bindings: [...elementIds.map((id): ECSqlBinding => ({ type: "id", value: id }))],
+          bindings: [{ type: "idset", value: elementIds }],
         },
       },
     ];
@@ -325,9 +325,10 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 supportsFiltering: true,
               })}
             FROM ${instanceFilterClauses.from} this
+            JOIN IdSet(?) categoryIdSet ON categoryIdSet.id = this.ECInstanceId
             ${instanceFilterClauses.joins}
-            WHERE InVirtualSet(?, this.ECInstanceId)
-            ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: categoryIds }],
         },
@@ -394,13 +395,13 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 hasChildren: true,
                 supportsFiltering: true,
               })}
-            FROM
-              ${instanceFilterClauses.from} this
-              ${instanceFilterClauses.joins}
-            WHERE
-              this.ECInstanceId IN (${definitionContainerIds.join(", ")})
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            FROM ${instanceFilterClauses.from} this
+            JOIN IdSet(?) definitionContainerIdSet ON this.ECInstanceId = definitionContainerIdSet.id
+            ${instanceFilterClauses.joins}
+            ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
+          bindings: [{ type: "idset", value: definitionContainerIds }],
         },
       },
     ];
@@ -424,7 +425,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     const hasChildrenSelector = () => {
       const conditions = new Array<string>();
       if (!this.#hierarchyConfig.hideSubCategories && categoriesWithMultipleSubCategories.length > 0) {
-        conditions.push(`this.ECInstanceId IN (${categoriesWithMultipleSubCategories.join(",")})`);
+        conditions.push(`InVirtualSet(?, this.ECInstanceId)`);
       }
       if (this.#hierarchyConfig.showElements) {
         conditions.push(`
@@ -464,19 +465,23 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                   isCategory: true,
                   imageId: "icon-layers",
                   hasSubCategories:
-                    categoriesWithMultipleSubCategories.length > 0
-                      ? { selector: `IIF(this.ECInstanceId IN (${categoriesWithMultipleSubCategories.join(",")}), true, false) ` }
-                      : false,
+                    categoriesWithMultipleSubCategories.length > 0 ? { selector: "IIF(InVirtualSet(?, this.ECInstanceId), true, false)" } : false,
                 },
                 supportsFiltering: true,
               })}
-            FROM
-              ${instanceFilterClauses.from} this
-              ${instanceFilterClauses.joins}
-            WHERE
-              this.ECInstanceId IN (${categories.map((category) => category.id).join(", ")})
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            FROM ${instanceFilterClauses.from} this
+            JOIN IdSet(?) categoryIdSet ON this.ECInstanceId = categoryIdSet.id
+            ${instanceFilterClauses.joins}
+            ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
+          bindings: [
+            ...(!this.#hierarchyConfig.hideSubCategories && categoriesWithMultipleSubCategories.length > 0
+              ? [{ type: "idset" as const, value: categoriesWithMultipleSubCategories }]
+              : []),
+            ...(categoriesWithMultipleSubCategories.length > 0 ? [{ type: "idset" as const, value: categoriesWithMultipleSubCategories }] : []),
+            { type: "idset", value: categories.map((category) => category.id) },
+          ],
         },
       },
     ];
@@ -523,11 +528,14 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 supportsFiltering: false,
               })}
             FROM ${instanceFilterClauses.from} this
+            JOIN IdSet(?) categoryIdSet ON this.Parent.Id = categoryIdSet.id
             ${instanceFilterClauses.joins}
             WHERE
-              NOT this.IsPrivate AND this.Parent.Id IN (${categoryIds.join(",")})
+              NOT this.IsPrivate
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
+          bindings: [{ type: "idset", value: categoryIds }],
         },
       },
     ];
@@ -584,9 +592,6 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         toArray(),
       ),
     );
-    const bindings = new Array<ECSqlBinding>();
-    categoryIds.forEach((id) => bindings.push({ type: "id", value: id }));
-    modelIds.forEach((id) => bindings.push({ type: "id", value: id }));
     return [
       {
         fullClassName: this.#categoryElementClass,
@@ -605,7 +610,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
               hasChildren: {
                 selector: `
                   IIF(
-                    ${modeledElements.length ? `this.ECInstanceId IN (${modeledElements.join(",")})` : `FALSE`},
+                    ${modeledElements.length ? "InVirtualSet(?, this.ECInstanceId)" : "FALSE"},
                     1,
                     IFNULL((
                       SELECT 1
@@ -631,15 +636,20 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
               supportsFiltering: true,
             })}
           FROM ${instanceFilterClauses.from} this
+          JOIN IdSet(?) categoryIdSet ON this.Category.Id = categoryIdSet.id
+          JOIN IdSet(?) modelIdSet ON this.Model.Id = modelIdSet.id
           ${parentNode.extendedData?.isCategoryOfSubModel ? "" : `JOIN ${CLASS_NAME_InformationPartitionElement} ipe ON ipe.ECInstanceId = this.Model.Id`}
           ${instanceFilterClauses.joins}
           WHERE
-            this.Category.Id IN (${categoryIds.map(() => "?").join(",")})
-            AND this.Model.Id IN (${modelIds.map(() => "?").join(",")})
-            AND this.Parent.Id IS NULL
+            this.Parent.Id IS NULL
             ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+          ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
-          bindings,
+          bindings: [
+            ...(modeledElements.length > 0 ? [{ type: "idset" as const, value: modeledElements }] : []),
+            { type: "idset", value: categoryIds },
+            { type: "idset", value: modelIds },
+          ],
         },
       },
     ];
@@ -654,8 +664,6 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       filter: instanceFilter,
       contentClass: { fullName: this.#categoryElementClass, alias: "this" },
     });
-    const bindings = new Array<ECSqlBinding>();
-    elementIds.forEach((id) => bindings.push({ type: "id", value: id }));
     return [
       {
         fullClassName: this.#categoryElementClass,
@@ -699,11 +707,12 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 supportsFiltering: true,
               })}
             FROM ${instanceFilterClauses.from} this
+            JOIN IdSet(?) elementIdSet ON this.Parent.Id = elementIdSet.id
             ${instanceFilterClauses.joins}
-            WHERE
-              this.Parent.Id IN (${elementIds.join(",")})
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
+          bindings: [{ type: "idset", value: elementIds }],
         },
       },
     ];
@@ -767,12 +776,9 @@ function createInstanceKeyPathsFromInstanceLabel(
               this.ECInstanceId,
               COUNT(sc.ECInstanceId),
               ${categoryLabelSelectClause}
-            FROM
-              ${categoryClass} this
-              JOIN ${CLASS_NAME_SubCategory} sc ON sc.Parent.Id = this.ECInstanceId
-            WHERE
-              this.ECInstanceId IN (${categories.join(", ")})
-              GROUP BY this.ECInstanceId
+            FROM ${categoryClass} this
+            JOIN ${CLASS_NAME_SubCategory} sc ON sc.Parent.Id = this.ECInstanceId
+            GROUP BY this.ECInstanceId
           )`,
           ...(hierarchyConfig.showElements
             ? [
@@ -782,12 +788,11 @@ function createInstanceKeyPathsFromInstanceLabel(
                     this.ECInstanceId,
                     this.Parent.Id,
                     ${elementLabelSelectClause}
-                  FROM
-                    ${elementClass} this
-                    JOIN ${CLASS_NAME_Model} m ON this.Model.Id = m.ECInstanceId
-                  WHERE
-                    NOT m.IsPrivate
-                    AND this.Category.Id IN (${categories.join(", ")})
+                  FROM ${elementClass} this
+                  JOIN IdSet(?) elementCategoryIdSet ON this.Category.Id = elementCategoryIdSet.id
+                  JOIN ${CLASS_NAME_Model} m ON this.Model.Id = m.ECInstanceId
+                  WHERE NOT m.IsPrivate
+                  ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
                 )`,
               ]
             : []),
@@ -800,11 +805,10 @@ function createInstanceKeyPathsFromInstanceLabel(
                     this.ECInstanceId,
                     this.Parent.Id,
                     ${subCategoryLabelSelectClause}
-                  FROM
-                    ${CLASS_NAME_SubCategory} this
-                  WHERE
-                    NOT this.IsPrivate
-                    AND this.Parent.Id IN (${categories.join(", ")})
+                  FROM ${CLASS_NAME_SubCategory} this
+                  JOIN IdSet(?) subCategoryParentIdSet ON this.Parent.Id = subCategoryParentIdSet.id
+                  WHERE NOT this.IsPrivate
+                  ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
                 )`,
               ]),
           ...(definitionContainers.length > 0
@@ -814,10 +818,10 @@ function createInstanceKeyPathsFromInstanceLabel(
                     '${DEFINITION_CONTAINER_CLASS_NAME_QUERY_ALIAS}',
                     this.ECInstanceId,
                     ${definitionContainerLabelSelectClause}
-                  FROM
-                    ${CLASS_NAME_DefinitionContainer} this
-                  WHERE
-                    this.ECInstanceId IN (${definitionContainers.join(", ")})
+                  FROM ${CLASS_NAME_DefinitionContainer} this
+                  JOIN IdSet(?) definitionContainerIdSet ON this.ECInstanceId = definitionContainerIdSet.id
+                  WHERE NOT this.IsPrivate
+                  ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
                 )`,
               ]
             : []),
@@ -879,6 +883,9 @@ function createInstanceKeyPathsFromInstanceLabel(
           ${limit === undefined ? `LIMIT ${MAX_SEARCH_INSTANCE_KEY_COUNT + 1}` : limit !== "unbounded" ? `LIMIT ${limit}` : ""}
         `;
         const bindings = [
+          ...(hierarchyConfig.showElements ? [{ type: "idset" as const, value: categories }] : []),
+          ...(hierarchyConfig.hideSubCategories ? [] : [{ type: "idset" as const, value: categories }]),
+          ...(definitionContainers.length > 0 ? [{ type: "idset" as const, value: definitionContainers }] : []),
           { type: "string" as const, value: adjustedLabel },
           ...(hierarchyConfig.showElements ? [{ type: "string" as const, value: adjustedLabel }] : []),
           ...(hierarchyConfig.hideSubCategories ? [] : [{ type: "string" as const, value: adjustedLabel }]),
@@ -1035,9 +1042,10 @@ export function createGeometricElementInstanceKeyPaths(props: {
             '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT)
           )
         FROM ${elementClass} e
+        JOIN IdSet(?) targetItemIdSet ON e.ECInstanceId = targetItemIdSet.id
         LEFT JOIN ${modelClass} m ON (e.Parent.Id IS NULL AND m.ECInstanceId = e.Model.Id)
         LEFT JOIN ${categoryClass} c ON (e.Parent.Id IS NULL AND c.ECInstanceId = e.Category.Id)
-        WHERE e.ECInstanceId IN (${targetItems.join(",")})
+        ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
         UNION ALL
 
@@ -1062,7 +1070,7 @@ export function createGeometricElementInstanceKeyPaths(props: {
     `;
 
     return queryExecutor.createQueryReader(
-      { ctes, ecsql },
+      { ctes, ecsql, bindings: [{ type: "idset", value: targetItems }] },
       { rowFormat: "Indexes", limit: "unbounded", restartToken: `${componentName}/${componentId}/element-paths/${chunkIndex}` },
     );
   }).pipe(
