@@ -50,7 +50,11 @@ export class SubCategoriesCache {
       `;
       return this.#queryExecutor.createQueryReader(
         { ecsql },
-        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/sub-categories` },
+        {
+          rowFormat: "ECSqlPropertyNames",
+          limit: "unbounded",
+          restartToken: `${this.#componentName}/${this.#componentId}/sub-categories/${lastSubCategoryId ?? "0"}`,
+        },
       );
     };
     return defer(() => getQueryReader()).pipe(
