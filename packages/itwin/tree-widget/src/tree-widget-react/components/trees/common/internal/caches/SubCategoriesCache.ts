@@ -26,7 +26,7 @@ export class SubCategoriesCache {
   #subCategoriesInfo:
     | Observable<{ subCategoryCategories: Map<SubCategoryId, CategoryId>; categorySubCategories: Map<CategoryId, Array<SubCategoryId>> }>
     | undefined;
-  #rowLimit = 10000;
+  #rowLimit = 7500;
 
   constructor(props: SubCategoriesCacheProps) {
     this.#queryExecutor = props.queryExecutor;
