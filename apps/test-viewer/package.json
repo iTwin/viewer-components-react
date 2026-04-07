@@ -39,7 +39,7 @@
     "@itwin/presentation-frontend": "^5.8.0",
     "@itwin/presentation-core-interop": "2.0.0-alpha.0",
     "@itwin/presentation-hierarchies": "2.0.0-alpha.14",
-    "@itwin/presentation-hierarchies-react": "2.0.0-alpha.59",
+    "@itwin/presentation-hierarchies-react": "2.0.0-alpha.60",
     "@itwin/presentation-shared": "2.0.0-alpha.9",
     "@itwin/property-grid-react": "workspace:*",
     "@itwin/quantity-formatting-react": "workspace:*",
