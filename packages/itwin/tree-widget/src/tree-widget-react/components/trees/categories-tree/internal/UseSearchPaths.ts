@@ -180,7 +180,7 @@ async function getCategoriesFromPaths(
 
   await Promise.all(trees.map(async (tree) => traverse(tree, undefined)));
 
-  const rootElementModelMap = await firstValueFrom(idsCache.getFilteredElementsModels(rootFilteredElementIds));
+  const rootElementModelMap = await firstValueFrom(idsCache.getFilteredElementsModels([...rootFilteredElementIds]));
   const models = [...subModelIds, ...new Set(rootElementModelMap.values())];
   return {
     categories: [...categories.entries()].map(([categoryId, subCategoryIds]) => ({
