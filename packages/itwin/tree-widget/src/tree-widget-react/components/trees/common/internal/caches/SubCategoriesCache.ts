@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, map, reduce, shareReplay } from "rxjs";
+import { defer, EMPTY, expand, map, reduce, shareReplay } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
 import { CLASS_NAME_SubCategory } from "../ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
@@ -26,6 +26,7 @@ export class SubCategoriesCache {
   #subCategoriesInfo:
     | Observable<{ subCategoryCategories: Map<SubCategoryId, CategoryId>; categorySubCategories: Map<CategoryId, Array<SubCategoryId>> }>
     | undefined;
+  #rowLimit = 7500;
 
   constructor(props: SubCategoriesCacheProps) {
     this.#queryExecutor = props.queryExecutor;
@@ -34,7 +35,7 @@ export class SubCategoriesCache {
   }
 
   private querySubCategories(): Observable<{ id: SubCategoryId; parentId: CategoryId }> {
-    return defer(() => {
+    const getQueryReader = (lastSubCategoryId?: SubCategoryId) => {
       const ecsql = `
         SELECT
           sc.ECInstanceId id,
@@ -43,12 +44,26 @@ export class SubCategoriesCache {
           ${CLASS_NAME_SubCategory} sc
         WHERE
           NOT sc.IsPrivate
+          ${lastSubCategoryId === undefined ? "" : `AND sc.ECInstanceId > ${lastSubCategoryId ?? 0}`}
+        ORDER BY sc.ECInstanceId
+        LIMIT ${this.#rowLimit}
       `;
       return this.#queryExecutor.createQueryReader(
         { ecsql },
-        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/sub-categories` },
+        {
+          rowFormat: "ECSqlPropertyNames",
+          limit: "unbounded",
+          restartToken: `${this.#componentName}/${this.#componentId}/sub-categories/${lastSubCategoryId ?? "0"}`,
+        },
       );
-    }).pipe(
+    };
+    return defer(() => getQueryReader()).pipe(
+      expand((row, idx) => {
+        if (idx % this.#rowLimit === this.#rowLimit - 1) {
+          return getQueryReader(row.id);
+        }
+        return EMPTY;
+      }),
       catchBeSQLiteInterrupts,
       map((row) => {
         return { id: row.id, parentId: row.categoryId };
