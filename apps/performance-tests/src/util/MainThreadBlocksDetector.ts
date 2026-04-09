@@ -5,7 +5,7 @@
 
 import { setInterval } from "timers/promises";
 import { SortedArray } from "@itwin/core-bentley";
-import { LOGGER } from "./Logging.cjs";
+import { LOGGER } from "./Logging.js";
 
 const ENABLE_PINGS = false;
 const LOG_CATEGORY = "Presentation.PerformanceTests.MainThreadBlocksDetector";

@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { IModel } from "@itwin/core-common";
 // __PUBLISH_EXTRACT_START__ TreeWidget.GetSchemaContextExampleImports
 import { SchemaContext } from "@itwin/ecschema-metadata";
@@ -17,17 +17,17 @@ describe("Tree widget", () => {
   describe("Learning snippets", () => {
     describe("Components", () => {
       describe("GetSchemaContext", () => {
-        before(async function () {
+        beforeAll(async () => {
           await initializeLearningSnippetsTests();
         });
 
-        after(async function () {
+        afterAll(async () => {
           await terminateLearningSnippetsTests();
         });
 
-        it("returns schema context", async function () {
+        it("returns schema context", async () => {
           const imodelConnection = (
-            await buildIModel(this, async (builder) => {
+            await buildIModel(async (builder) => {
               const model = insertPhysicalModelWithPartition({ builder, codeValue: "model", partitionParentId: IModel.rootSubjectId });
               const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
               insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
@@ -52,7 +52,7 @@ describe("Tree widget", () => {
           // __PUBLISH_EXTRACT_END__
 
           const result = getSchemaContext(imodelConnection);
-          expect(result).to.be.eq(schemaContextCache.get(imodelConnection.getRpcProps().key));
+          expect(result).toBe(schemaContextCache.get(imodelConnection.getRpcProps().key));
         });
       });
     });

@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
-import sinon from "sinon";
+import { afterEach, describe, expect, it, vi } from "vitest";
 // __PUBLISH_EXTRACT_START__  TreeWidget.SelectionStorageInitializeExampleImports
 import { Presentation } from "@itwin/presentation-frontend";
 // __PUBLISH_EXTRACT_END__
@@ -32,17 +31,16 @@ describe("Tree widget", () => {
         // __PUBLISH_EXTRACT_END__
 
         afterEach(async () => {
-          sinon.restore();
           unifiedSelectionStorage = undefined;
         });
 
-        it("creates unified storage", async function () {
+        it("creates unified storage", async () => {
           const result = getUnifiedSelectionStorage();
-          expect(result).to.be.eq(unifiedSelectionStorage);
+          expect(result).toBe(unifiedSelectionStorage);
         });
 
-        it("initializes presentation with unified storage", async function () {
-          sinon.stub(Presentation, "initialize").resolves(undefined);
+        it("initializes presentation with unified storage", async () => {
+          vi.spyOn(Presentation, "initialize").mockResolvedValue(undefined);
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.SelectionStorageInitializeExample
           await Presentation.initialize({ selection: { selectionStorage: getUnifiedSelectionStorage() } });

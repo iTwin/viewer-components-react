@@ -10,7 +10,7 @@ import { Tree, TreeRenderer } from "@itwin/tree-widget-react";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 // __PUBLISH_EXTRACT_END__
-import sinon from "sinon";
+import { afterAll, beforeAll, describe, it, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { createStorage } from "@itwin/unified-selection";
@@ -23,23 +23,19 @@ describe("Tree widget", () => {
   mockGetBoundingClientRect();
   describe("Learning snippets", () => {
     describe("Components", () => {
-      before(async function () {
+      beforeAll(async () => {
         await initializeLearningSnippetsTests();
         await TreeWidgetTestUtils.initialize();
       });
 
-      after(async function () {
+      afterAll(async () => {
         await terminateLearningSnippetsTests();
         TreeWidgetTestUtils.terminate();
       });
 
-      afterEach(async () => {
-        sinon.restore();
-      });
-
-      it("renders custom tree", async function () {
+      it("renders custom tree", async () => {
         const imodelConnection = (
-          await buildIModel(this, async (builder) => {
+          await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
             insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
@@ -48,8 +44,8 @@ describe("Tree widget", () => {
         ).imodel;
         const testViewport = getTestViewer(imodelConnection);
         const unifiedSelectionStorage = createStorage();
-        sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
-        sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
+        vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
+        vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
 
         // __PUBLISH_EXTRACT_START__ TreeWidget.CustomTreeExample
         type TreeProps = ComponentPropsWithoutRef<typeof Tree>;

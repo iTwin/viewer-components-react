@@ -6,8 +6,7 @@
 /* eslint-disable import/no-duplicates */
 /* eslint-disable @typescript-eslint/no-deprecated */
 
-import { expect } from "chai";
-import sinon from "sinon";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 import { Presentation } from "@itwin/presentation-frontend";
 // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleContextMenuItemImports
@@ -26,29 +25,25 @@ import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils.js";
 describe("Property grid", () => {
   describe("Learning snippets", () => {
     describe("Context menu item", () => {
-      before(async function () {
+      beforeAll(async () => {
         await initializeLearningSnippetsTests();
         await PropertyGridTestUtils.initialize();
       });
 
-      after(async function () {
+      afterAll(async () => {
         await terminateLearningSnippetsTests();
         await PropertyGridTestUtils.terminate();
       });
 
-      afterEach(async () => {
-        sinon.restore();
-      });
-
-      it("renders context menu item", async function () {
-        const imodel = await buildIModel(this, async (builder) => {
+      it("renders context menu item", async () => {
+        const imodel = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
           insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
           return { category };
         });
         const user = userEvent.setup();
-        sinon.stub(UiFramework, "getIModelConnection").returns(imodel.imodel);
+        vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel.imodel);
 
         // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleContextMenuItem
         function ExampleContextMenuItem(props: ContextMenuItemProps) {
@@ -81,7 +76,7 @@ describe("Property grid", () => {
         // Wait for property grid to render with the category text and get the elements
         const categoryElements = await waitFor(() => {
           const elements = getAllByText("Test SpatialCategory");
-          expect(elements.length).to.be.greaterThan(1);
+          expect(elements.length).toBeGreaterThan(1);
           return elements;
         });
 
@@ -90,7 +85,7 @@ describe("Property grid", () => {
 
         // Wait for context menu to appear
         await waitFor(() => {
-          expect(queryByText(baseElement, "Click me!")).to.not.be.null;
+          expect(queryByText(baseElement, "Click me!")).not.toBeNull();
         });
       });
     });

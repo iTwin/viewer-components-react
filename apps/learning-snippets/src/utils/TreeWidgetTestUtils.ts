@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
 
-import sinon from "sinon";
+import { beforeEach, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
@@ -15,7 +15,7 @@ import { TreeWidget } from "@itwin/tree-widget-react";
 import { IModelApp } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_END__
 
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { IModelConnection, ScreenViewport, Viewport } from "@itwin/core-frontend";
 export class TreeWidgetTestUtils {
   private static _initialized = false;
 
@@ -58,33 +58,24 @@ export function getTestViewer(imodel: IModelConnection, isSimple = false) {
     viewsModel: () => !isSimple,
     perModelCategoryVisibility: { getOverride: () => PerModelCategoryVisibility.Override.Show },
     iModel: imodel,
-  } as unknown as Viewport;
+  } as unknown as ScreenViewport;
 }
 
 export function mockGetBoundingClientRect() {
-  let stubs: sinon.SinonStub[] = [];
-
   beforeEach(() => {
-    stubs.push(sinon.stub(window.HTMLElement.prototype, "offsetHeight").get(() => 800));
-    stubs.push(sinon.stub(window.HTMLElement.prototype, "offsetWidth").get(() => 800));
+    vi.spyOn(window.HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(800);
+    vi.spyOn(window.HTMLElement.prototype, "offsetWidth", "get").mockReturnValue(800);
 
-    stubs.push(
-      sinon.stub(window.Element.prototype, "getBoundingClientRect").returns({
-        height: 20,
-        width: 20,
-        x: 0,
-        y: 0,
-        bottom: 0,
-        left: 0,
-        right: 0,
-        top: 0,
-        toJSON: () => {},
-      }),
-    );
-  });
-
-  afterEach(() => {
-    stubs.forEach((stub) => stub.restore());
-    stubs = [];
+    vi.spyOn(window.Element.prototype, "getBoundingClientRect").mockReturnValue({
+      height: 20,
+      width: 20,
+      x: 0,
+      y: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      top: 0,
+      toJSON: () => {},
+    } as DOMRect);
   });
 }

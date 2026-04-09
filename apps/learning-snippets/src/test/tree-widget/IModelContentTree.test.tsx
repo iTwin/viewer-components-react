@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import sinon from "sinon";
+import { afterAll, beforeAll, describe, it, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 import { IModel } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
@@ -21,31 +21,27 @@ describe("Tree widget", () => {
   describe("Learning snippets", () => {
     describe("Components", () => {
       describe("IModel content tree", () => {
-        before(async function () {
+        beforeAll(async () => {
           await initializeLearningSnippetsTests();
           await TreeWidgetTestUtils.initialize();
         });
 
-        after(async function () {
+        afterAll(async () => {
           await terminateLearningSnippetsTests();
           TreeWidgetTestUtils.terminate();
         });
 
-        afterEach(async () => {
-          sinon.restore();
-        });
-
-        it("renders <IModelContentTreeComponent />", async function () {
+        it("renders <IModelContentTreeComponent />", async () => {
           const imodel = (
-            await buildIModel(this, async (builder) => {
+            await buildIModel(async (builder) => {
               const subjectA = insertSubject({ builder, codeValue: "Test subject A", parentId: IModel.rootSubjectId });
               return { subjectA };
             })
           ).imodel;
           const testViewport = getTestViewer(imodel);
           const unifiedSelectionStorage = createStorage();
-          sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
-          sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
+          vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
+          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.ImodelContentTreeExample
           function MyWidget() {

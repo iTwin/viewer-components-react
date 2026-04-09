@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 
 import { useCallback } from "react";
-import sinon from "sinon";
+import { afterAll, beforeAll, describe, it, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_START__ TreeWidget.CategoriesTreeExampleImports
@@ -30,22 +30,18 @@ describe("Tree widget", () => {
   describe("Learning snippets", () => {
     describe("Components", () => {
       describe("Categories tree", () => {
-        before(async function () {
+        beforeAll(async () => {
           await initializeLearningSnippetsTests();
           await TreeWidgetTestUtils.initialize();
         });
 
-        after(async function () {
+        afterAll(async () => {
           await terminateLearningSnippetsTests();
           TreeWidgetTestUtils.terminate();
         });
 
-        afterEach(async () => {
-          sinon.restore();
-        });
-
-        it("renders <CategoriesTreeComponent />", async function () {
-          const { imodel } = await buildIModel(this, async (builder) => {
+        it("renders <CategoriesTreeComponent />", async () => {
+          const { imodel } = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
             insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
@@ -53,8 +49,8 @@ describe("Tree widget", () => {
           });
           const testViewport = getTestViewer(imodel);
           const unifiedSelectionStorage = createStorage();
-          sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
-          sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
+          vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
+          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.CategoriesTreeExample
           function MyWidget() {
@@ -78,8 +74,8 @@ describe("Tree widget", () => {
           await waitFor(() => getByText("Test SpatialCategory"));
         });
 
-        it("renders custom categories tree", async function () {
-          const { imodel } = await buildIModel(this, async (builder) => {
+        it("renders custom categories tree", async () => {
+          const { imodel } = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
             insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
@@ -87,8 +83,8 @@ describe("Tree widget", () => {
           });
           const testViewport = getTestViewer(imodel);
           const unifiedSelectionStorage = createStorage();
-          sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
-          sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
+          vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
+          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.CustomCategoriesTreeExample
           type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;

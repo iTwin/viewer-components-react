@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable unused-imports/no-unused-vars */
 
-import sinon from "sinon";
+import { afterAll, beforeAll, describe, it, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 // __PUBLISH_EXTRACT_START__ TreeWidget.CustomVisibilityTreeExampleImports
 import { BeEvent } from "@itwin/core-bentley";
@@ -28,23 +28,19 @@ describe("Tree widget", () => {
   mockGetBoundingClientRect();
   describe("Learning snippets", () => {
     describe("Components", () => {
-      before(async function () {
+      beforeAll(async () => {
         await initializeLearningSnippetsTests();
         await TreeWidgetTestUtils.initialize();
       });
 
-      after(async function () {
+      afterAll(async () => {
         await terminateLearningSnippetsTests();
         TreeWidgetTestUtils.terminate();
       });
 
-      afterEach(async () => {
-        sinon.restore();
-      });
-
-      it("renders custom visibility tree", async function () {
+      it("renders custom visibility tree", async () => {
         const imodelConnection = (
-          await buildIModel(this, async (builder) => {
+          await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
             insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
@@ -53,8 +49,8 @@ describe("Tree widget", () => {
         ).imodel;
         const testViewport = getTestViewer(imodelConnection);
         const unifiedSelectionStorage = createStorage();
-        sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
-        sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
+        vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
+        vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
 
         // __PUBLISH_EXTRACT_START__ TreeWidget.CustomVisibilityTreeExample
         type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
