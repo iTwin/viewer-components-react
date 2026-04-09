@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
+import { describe, expect } from "vitest";
 import { SnapshotDb } from "@itwin/core-backend";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
@@ -62,14 +62,14 @@ describe("models tree", () => {
           hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
         }),
       };
-      expect(filtering.paths.length).to.eq(50000);
+      expect(filtering.paths.length).toBe(50000);
       using provider = new StatelessHierarchyProvider({
         imodelAccess,
         getHierarchyFactory: () => new ModelsTreeDefinition({ imodelAccess, idsCache, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
         filtering,
       });
       const result = await provider.loadHierarchy({ depth: 2 });
-      expect(result).to.eq(2);
+      expect(result).toBe(2);
     },
   });
   run<{
@@ -242,7 +242,7 @@ describe("models tree", () => {
         expectations: "all-visible",
       });
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
-      expect(visibilityTargets.categories.length).to.be.eq(1);
+      expect(visibilityTargets.categories.length).toBe(1);
       const elementsCategory = visibilityTargets.categories[0];
       return { iModel, imodelAccess, viewport, provider, handler, elementsCategory, elementsModel, idsCache, iModelConnection, hierarchyNodes };
     },
@@ -303,7 +303,7 @@ describe("models tree", () => {
       const hierarchyNodes = await collectNodes({ provider });
 
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
-      expect(visibilityTargets.categories.length).to.be.eq(1);
+      expect(visibilityTargets.categories.length).toBe(1);
       const elementsCategory = visibilityTargets.categories[0];
 
       await handler.changeVisibility(createModelHierarchyNode(elementsModel), true);
@@ -371,7 +371,7 @@ describe("models tree", () => {
       const hierarchyNodes = await collectNodes({ provider });
 
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
-      expect(visibilityTargets.categories.length).to.be.eq(1);
+      expect(visibilityTargets.categories.length).toBe(1);
       const elementsCategory = visibilityTargets.categories[0];
       const node = { modelId: elementsModel, elementId: visibilityTargets.elements[0], categoryId: elementsCategory, subjectId: "0x1" };
       await validateHierarchyVisibility({

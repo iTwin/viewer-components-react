@@ -3,9 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { useCallback } from "react";
-import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { IModel, QueryRowFormat } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
@@ -178,22 +177,18 @@ describe("Tree widget", () => {
   describe("Learning snippets", () => {
     describe("Components", () => {
       describe("Filtered paths", () => {
-        before(async function () {
+        beforeAll(async () => {
           await initializeLearningSnippetsTests();
           await TreeWidgetTestUtils.initialize();
         });
 
-        after(async function () {
+        afterAll(async () => {
           await terminateLearningSnippetsTests();
           TreeWidgetTestUtils.terminate();
         });
 
-        afterEach(async () => {
-          sinon.restore();
-        });
-
-        it("renders custom models tree component with filtered paths using targetItems", async function () {
-          const imodel = await buildIModel(this, async (builder) => {
+        it("renders custom models tree component with filtered paths using targetItems", async () => {
+          const imodel = await buildIModel(async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const physicalModel2 = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel 2" });
             const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
@@ -204,8 +199,8 @@ describe("Tree widget", () => {
           });
           const testViewport = getTestViewer(imodel.imodel, true);
           const unifiedSelectionStorage = createStorage();
-          sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
-          sinon.stub(UiFramework, "getIModelConnection").returns(imodel.imodel);
+          vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
+          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel.imodel);
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText, queryByText } = render(
@@ -219,12 +214,12 @@ describe("Tree widget", () => {
 
           await waitFor(() => {
             getByText("TestPhysicalModel");
-            expect(queryByText("TestPhysicalModel 2")).to.be.null;
+            expect(queryByText("TestPhysicalModel 2")).toBeNull();
           });
         });
 
-        it("renders custom models tree component with filtered paths when they are modified", async function () {
-          const imodel = await buildIModel(this, async (builder, testSchema) => {
+        it("renders custom models tree component with filtered paths when they are modified", async () => {
+          const imodel = await buildIModel(async (builder, testSchema) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "PhysicalModel" });
             const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
             insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id, userLabel: "test element 1" });
@@ -242,8 +237,8 @@ describe("Tree widget", () => {
           });
           const testViewport = getTestViewer(imodel.imodel, true);
           const unifiedSelectionStorage = createStorage();
-          sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
-          sinon.stub(UiFramework, "getIModelConnection").returns(imodel.imodel);
+          vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
+          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel.imodel);
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText, queryByText } = render(
@@ -252,12 +247,12 @@ describe("Tree widget", () => {
 
           await waitFor(() => {
             getByText("PhysicalModel");
-            expect(queryByText("PhysicalModel2")).to.be.null;
+            expect(queryByText("PhysicalModel2")).toBeNull();
           });
         });
 
-        it("renders custom models tree component with filtered paths when the paths are created using filter", async function () {
-          const { imodel } = await buildIModel(this, async (builder) => {
+        it("renders custom models tree component with filtered paths when the paths are created using filter", async () => {
+          const { imodel } = await buildIModel(async (builder) => {
             const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
 
             // category label will match our filter
@@ -284,8 +279,8 @@ describe("Tree widget", () => {
 
           const testViewport = getTestViewer(imodel, true);
           const unifiedSelectionStorage = createStorage();
-          sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
-          sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
+          vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
+          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
 
           using _ = { [Symbol.dispose]: cleanup };
 
@@ -299,16 +294,16 @@ describe("Tree widget", () => {
           );
           await waitFor(() => {
             getByText("subject 1", { exact: false });
-            expect(queryByText("model 1", { exact: false })).to.be.null;
+            expect(queryByText("model 1", { exact: false })).toBeNull();
             getByText("subject 2", { exact: false });
-            expect(queryByText("subject 3", { exact: false })).to.be.null;
-            expect(queryByText("model 3", { exact: false })).to.be.null;
+            expect(queryByText("subject 3", { exact: false })).toBeNull();
+            expect(queryByText("model 3", { exact: false })).toBeNull();
             getByText("subject 4", { exact: false });
-            expect(queryByText("model 4", { exact: false })).to.be.null;
-            expect(queryByText("category", { exact: false })).to.be.null;
-            expect(queryByText("element 1", { exact: false })).to.be.null;
-            expect(queryByText("element 3", { exact: false })).to.be.null;
-            expect(queryByText("element 4", { exact: false })).to.be.null;
+            expect(queryByText("model 4", { exact: false })).toBeNull();
+            expect(queryByText("category", { exact: false })).toBeNull();
+            expect(queryByText("element 1", { exact: false })).toBeNull();
+            expect(queryByText("element 3", { exact: false })).toBeNull();
+            expect(queryByText("element 4", { exact: false })).toBeNull();
           });
 
           rerender(
@@ -324,10 +319,10 @@ describe("Tree widget", () => {
             getByText("subject 2", { exact: false });
             getByText("subject 3", { exact: false });
             getByText("model 3", { exact: false });
-            expect(queryByText("category", { exact: false })).to.be.null;
-            expect(queryByText("element 1", { exact: false })).to.be.null;
-            expect(queryByText("element 3", { exact: false })).to.be.null;
-            expect(queryByText("element 4", { exact: false })).to.be.null;
+            expect(queryByText("category", { exact: false })).toBeNull();
+            expect(queryByText("element 1", { exact: false })).toBeNull();
+            expect(queryByText("element 3", { exact: false })).toBeNull();
+            expect(queryByText("element 4", { exact: false })).toBeNull();
           });
         });
       });

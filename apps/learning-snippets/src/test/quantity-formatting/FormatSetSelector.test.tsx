@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 // __PUBLISH_EXTRACT_START__ QuantityFormat.FormatSetSelectorExampleImports
 import { FormatSetSelector } from "@itwin/quantity-formatting-react";
@@ -14,15 +14,15 @@ import { QuantityFormattingTestUtils } from "../../utils/QuantityFormattingTestU
 describe("Quantity formatting", () => {
   describe("Learning snippets", () => {
     describe("FormatSetSelector", () => {
-      before(async function () {
+      beforeAll(async () => {
         await QuantityFormattingTestUtils.initialize();
       });
 
-      after(async function () {
+      afterAll(async () => {
         await QuantityFormattingTestUtils.terminate();
       });
 
-      it("renders FormatSetSelector", async function () {
+      it("renders FormatSetSelector", async () => {
         // __PUBLISH_EXTRACT_START__ QuantityFormat.FormatSetSelectorExample
         const formatSets: FormatSet[] = [
           {
@@ -55,7 +55,7 @@ describe("Quantity formatting", () => {
         );
         // __PUBLISH_EXTRACT_END__
 
-        expect(screen.getByPlaceholderText("labels.searchFormatSets")).to.exist;
+        expect(screen.getByPlaceholderText("labels.searchFormatSets")).toBeDefined();
       });
     });
   });

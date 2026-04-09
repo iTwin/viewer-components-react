@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
+import { describe, expect } from "vitest";
 import { SnapshotDb } from "@itwin/core-backend";
 import { assert } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
@@ -53,7 +53,7 @@ describe("categories tree", () => {
           hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration,
         }),
       };
-      expect(filtering.paths.length).to.eq(50000);
+      expect(filtering.paths.length).toBe(50000);
       const provider = new StatelessHierarchyProvider({
         imodelAccess,
         getHierarchyFactory: () =>
@@ -61,7 +61,7 @@ describe("categories tree", () => {
         filtering,
       });
       const result = await provider.loadHierarchy({ depth: 1 });
-      expect(result).to.eq(1);
+      expect(result).toBe(1);
     },
   });
 
@@ -109,7 +109,7 @@ describe("categories tree", () => {
         expectations: "all-hidden",
       });
 
-      expect(visibilityTargets.definitionContainers.length).to.be.eq(1);
+      expect(visibilityTargets.definitionContainers.length).toBe(1);
       return {
         iModel,
         imodelAccess,
@@ -191,7 +191,7 @@ describe("categories tree", () => {
       const rootDefinitionContainer = visibilityTargets.definitionContainers.find(
         (definitionContainerId) => !categoriesDefinitionContainers.has(definitionContainerId),
       );
-      expect(rootDefinitionContainer).to.not.be.undefined;
+      expect(rootDefinitionContainer).toBeDefined();
       assert(rootDefinitionContainer !== undefined);
       return { iModel, imodelAccess, viewport, idsCache, provider, handler, rootDefinitionContainer, iModelConnection, hierarchyNodes };
     },

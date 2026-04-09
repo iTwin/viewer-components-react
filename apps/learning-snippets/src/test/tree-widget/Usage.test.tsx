@@ -5,8 +5,7 @@
 /* eslint-disable import/no-duplicates */
 /* eslint-disable unused-imports/no-unused-vars */
 
-import { expect } from "chai";
-import sinon from "sinon";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 // __PUBLISH_EXTRACT_START__ TreeWidget.RegisterExampleImports
 import { UiItemsManager } from "@itwin/appui-react";
 import { createTreeWidget, ModelsTreeComponent } from "@itwin/tree-widget-react";
@@ -26,23 +25,19 @@ import type { Widget } from "@itwin/appui-react";
 describe("Tree widget", () => {
   describe("Learning snippets", () => {
     describe("Usage", () => {
-      before(async function () {
+      beforeAll(async () => {
         await initializeLearningSnippetsTests();
         await TreeWidgetTestUtils.initialize();
       });
 
-      after(async function () {
+      afterAll(async () => {
         await terminateLearningSnippetsTests();
         TreeWidgetTestUtils.terminate();
       });
 
-      afterEach(async () => {
-        sinon.restore();
-      });
-
-      it("registers tree widget", async function () {
+      it("registers tree widget", async () => {
         const imodel = (
-          await buildIModel(this, async (builder) => {
+          await buildIModel(async (builder) => {
             const model = insertPhysicalModelWithPartition({ builder, codeValue: "model" });
             const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
             const childSubject = insertSubject({
@@ -55,10 +50,10 @@ describe("Tree widget", () => {
         ).imodel;
         const testViewport = getTestViewer(imodel);
         const unifiedSelectionStorage = createStorage();
-        sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
-        sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
+        vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
+        vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
         let createTreeWidgetFunction: (() => ReadonlyArray<Widget>) | undefined;
-        sinon.stub(UiItemsManager, "register").callsFake(({ id: _id, getWidgets }) => {
+        vi.spyOn(UiItemsManager, "register").mockImplementation(({ id: _id, getWidgets }) => {
           createTreeWidgetFunction = getWidgets;
         });
 
@@ -90,9 +85,9 @@ describe("Tree widget", () => {
         });
         // __PUBLISH_EXTRACT_END__
 
-        expect(createTreeWidgetFunction).to.not.be.undefined;
+        expect(createTreeWidgetFunction).toBeDefined();
         const widgets = createTreeWidgetFunction!();
-        expect(widgets).to.not.be.undefined;
+        expect(widgets).toBeDefined();
         const { getByText } = render(<>{widgets[0].content}</>);
         await waitFor(() => getByText("My Custom Tree"));
       });

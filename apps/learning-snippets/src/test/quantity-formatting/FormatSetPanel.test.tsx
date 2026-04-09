@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 // __PUBLISH_EXTRACT_START__ QuantityFormat.FormatSetPanelExampleImports
 import { FormatSetPanel } from "@itwin/quantity-formatting-react";
@@ -14,15 +14,15 @@ import { QuantityFormattingTestUtils } from "../../utils/QuantityFormattingTestU
 describe("Quantity formatting", () => {
   describe("Learning snippets", () => {
     describe("FormatSetPanel", () => {
-      before(async function () {
+      beforeAll(async () => {
         await QuantityFormattingTestUtils.initialize();
       });
 
-      after(async function () {
+      afterAll(async () => {
         await QuantityFormattingTestUtils.terminate();
       });
 
-      it("renders FormatSetPanel in editable mode", async function () {
+      it("renders FormatSetPanel in editable mode", async () => {
         // __PUBLISH_EXTRACT_START__ QuantityFormat.FormatSetPanelEditableExample
         const formatSet: FormatSet = {
           name: "CustomSet",
@@ -39,10 +39,10 @@ describe("Quantity formatting", () => {
         render(<FormatSetPanel formatSet={formatSet} editable={true} onFormatSetChange={handleFormatSetChange} />);
         // __PUBLISH_EXTRACT_END__
 
-        expect(screen.getByText("labels.description")).to.exist;
+        expect(screen.getByText("labels.description")).toBeDefined();
       });
 
-      it("renders FormatSetPanel in read-only mode", async function () {
+      it("renders FormatSetPanel in read-only mode", async () => {
         // __PUBLISH_EXTRACT_START__ QuantityFormat.FormatSetPanelReadOnlyExample
         const formatSet: FormatSet = {
           name: "ReadOnlySet",
@@ -56,7 +56,7 @@ describe("Quantity formatting", () => {
         // __PUBLISH_EXTRACT_END__
 
         const labelInput = screen.getByLabelText("labels.description");
-        expect((labelInput as HTMLInputElement).disabled).to.be.true;
+        expect((labelInput as HTMLInputElement).disabled).toBe(true);
       });
     });
   });

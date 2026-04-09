@@ -5,8 +5,7 @@
 /* eslint-disable import/no-duplicates */
 /* eslint-disable @typescript-eslint/no-deprecated */
 
-import { expect } from "chai";
-import sinon from "sinon";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 import { Presentation } from "@itwin/presentation-frontend";
 // __PUBLISH_EXTRACT_START__ PropertyGrid.ComponentWithTelemetryImports
@@ -32,19 +31,18 @@ describe("Property grid", () => {
       afterEach(async () => {
         await terminateLearningSnippetsTests();
         await PropertyGridTestUtils.terminate();
-        sinon.restore();
       });
 
-      it("renders component with feature usage and performance tracking", async function () {
-        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+      it("renders component with feature usage and performance tracking", async () => {
+        const { imodel, ...keys } = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
           insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
           return { category };
         });
-        sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
-        const logPerformance = sinon.spy();
-        const logUsage = sinon.spy();
+        vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
+        const logPerformance = vi.fn();
+        const logUsage = vi.fn();
 
         // __PUBLISH_EXTRACT_START__ PropertyGrid.ComponentWithTelemetry
         function MyPropertyGrid() {
@@ -69,23 +67,23 @@ describe("Property grid", () => {
           Presentation.selection.addToSelection("", imodel, [keys.category]);
         });
         await waitFor(() => {
-          expect(logUsage)
-            .to.be.calledThrice.and.calledWith("hide-empty-values-disabled") // two times (due to React strict mode)
-            .and.calledWith("single-element");
-          expect(logPerformance).to.be.calledOnceWith("properties-load");
+          expect(logUsage).toHaveBeenCalledTimes(3);
+          expect(logUsage).toHaveBeenCalledWith("hide-empty-values-disabled");
+          expect(logUsage).toHaveBeenCalledWith("single-element");
+          expect(logPerformance).toHaveBeenCalledExactlyOnceWith("properties-load", expect.any(Number));
         });
       });
 
-      it("renders property grid with telemetry context", async function () {
-        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+      it("renders property grid with telemetry context", async () => {
+        const { imodel, ...keys } = await buildIModel(async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
           insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
           return { category };
         });
-        sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
-        const logPerformance = sinon.spy();
-        const logUsage = sinon.spy();
+        vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
+        const logPerformance = vi.fn();
+        const logUsage = vi.fn();
 
         // __PUBLISH_EXTRACT_START__ PropertyGrid.ComponentWithTelemetryWrapper
         function ExampleComponent() {
@@ -118,9 +116,9 @@ describe("Property grid", () => {
         await user.type(getByRole("searchbox"), "Test SpatialCategory");
 
         await waitFor(async () => {
-          expect(logUsage).to.be.calledOnceWith("filter-properties");
-          expect(logPerformance).to.be.calledOnceWith("properties-load");
-          expect(queryByText("User Label")).to.be.null; // all properties except Code should be filtered-out
+          expect(logUsage).toHaveBeenCalledExactlyOnceWith("filter-properties");
+          expect(logPerformance).toHaveBeenCalledExactlyOnceWith("properties-load", expect.any(Number));
+          expect(queryByText("User Label")).toBeNull(); // all properties except Code should be filtered-out
         });
       });
     });
