@@ -8,7 +8,8 @@
     "noImplicitOverride": false,
     "resolveJsonModule": true,
     "noUnusedParameters": false,
-    "lib": ["DOM", "ES2022"],
+    "lib": ["DOM", "ESNext"],
+    "jsx": "react-jsx",
     "outDir": "lib"
   },
   "include": ["src"]

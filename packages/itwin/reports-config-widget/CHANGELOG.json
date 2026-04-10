@@ -2,6 +2,21 @@
   "name": "@itwin/reports-config-widget-react",
   "entries": [
     {
+      "date": "Fri, 06 Mar 2026 19:28:38 GMT",
+      "version": "0.9.0",
+      "tag": "@itwin/reports-config-widget-react_v0.9.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/reports-config-widget-react",
+            "commit": "6b4b5644e079771c6251a3d3c14069e853c952e3",
+            "comment": "Dropped support for iTwin.js 4.x. Minimum required version is now ^5.0.0."
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 13 Aug 2025 12:30:20 GMT",
       "version": "0.8.2",
       "tag": "@itwin/reports-config-widget-react_v0.8.2",

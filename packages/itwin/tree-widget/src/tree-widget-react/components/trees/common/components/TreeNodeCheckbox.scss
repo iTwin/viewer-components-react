@@ -1,0 +1,43 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+@media (hover: none) {
+  .tw-tree-node-checkbox:hover {
+    background-color: transparent;
+  }
+
+  .tw-tree-node-checkbox-tooltip {
+    display: none;
+  }
+}
+
+.tw-tree-node-checkbox-container {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background-color: var(--iui-color-background);
+  align-self: stretch;
+  padding-inline: 1px var(--iui-size-2xs);
+  margin-inline-end: 0;
+  margin-block: 1px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+[aria-selected="true"] .tw-tree-node-checkbox-container {
+  background-color: var(--iui-color-background-accent-muted);
+}
+
+[aria-selected="true"]:focus-visible .tw-tree-node-checkbox-container,
+[aria-selected="true"]:has(:focus-visible) .tw-tree-node-checkbox-container {
+  margin-block: 2px;
+}
+
+@media (any-hover: hover) {
+  [aria-selected="false"]:hover .tw-tree-node-checkbox-container {
+    background-color: var(--iui-color-background-hover);
+  }
+}

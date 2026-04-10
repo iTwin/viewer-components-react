@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
-import React from "react";
+import { describe, expect } from "vitest";
 import { SnapshotDb } from "@itwin/core-backend";
 import { assert } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider, HierarchySearchTree } from "@itwin/presentation-hierarchies";
@@ -119,7 +118,7 @@ describe("categories tree", () => {
         expectations: "all-hidden",
       });
 
-      expect(visibilityTargets.definitionContainers.length).to.be.eq(1);
+      expect(visibilityTargets.definitionContainers.length).toBe(1);
       return {
         iModel,
         imodelAccess,
@@ -202,7 +201,7 @@ describe("categories tree", () => {
       const rootDefinitionContainer = visibilityTargets.definitionContainers.find(
         (definitionContainerId) => !categoriesDefinitionContainers.has(definitionContainerId),
       );
-      expect(rootDefinitionContainer).to.not.be.undefined;
+      expect(rootDefinitionContainer).toBeDefined();
       assert(rootDefinitionContainer !== undefined);
       return { iModel, imodelAccess, viewport, provider, handler, rootDefinitionContainer, iModelConnection, hierarchyNodes };
     },

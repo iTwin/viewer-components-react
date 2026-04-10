@@ -2,7 +2,6 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import { QueryRowFormat } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
 import { toaster } from "@itwin/itwinui-react";
@@ -25,20 +24,14 @@ export const fetchIdsFromQuery = async (query: string, iModelConnection: IModelC
     return [];
   }
   const ids: string[] = [];
-  const rowIterator = iModelConnection.query(query, undefined, {
-    rowFormat: QueryRowFormat.UseJsPropertyNames,
-  });
-  while (true) {
-    const { done, value } = await rowIterator.next();
-    if (done) {
-      break;
-    }
-    if (Object.keys(value).includes("id")) {
-      ids.push(value.id);
-    } else if (Object.keys(value).includes("element.id")) {
-      ids.push(value["element.id"]);
-    } else if (Object.keys(value).includes("eCInstanceId")) {
-      ids.push(value.eCInstanceId);
+  const reader = iModelConnection.createQueryReader(query);
+  for await (const row of reader) {
+    if (Object.keys(row).includes("id")) {
+      ids.push(row.id);
+    } else if (Object.keys(row).includes("element.id")) {
+      ids.push(row["element.id"]);
+    } else if (Object.keys(row).includes("eCInstanceId")) {
+      ids.push(row.eCInstanceId);
     }
   }
   return ids;

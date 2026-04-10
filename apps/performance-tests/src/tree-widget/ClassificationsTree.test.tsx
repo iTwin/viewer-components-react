@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
+import { describe, expect } from "vitest";
 import { SnapshotDb } from "@itwin/core-backend";
 import { BaseIdsCache, ClassificationsTreeDefinition, ClassificationsTreeIdsCache } from "@itwin/tree-widget-react/internal";
 import { Datasets } from "../util/Datasets.js";
@@ -21,7 +21,7 @@ describe("classifications tree", () => {
     hierarchyConfig: { rootClassificationSystemCode },
     loadHierarchyProps: { shouldExpand: (node) => node.children && !!node.autoExpand },
     validateResult: (result) => {
-      expect(result).to.eq(50);
+      expect(result).toBe(50);
     },
   });
 
@@ -30,7 +30,7 @@ describe("classifications tree", () => {
     hierarchyConfig: { rootClassificationSystemCode },
     loadHierarchyProps: { shouldExpand: (node, index) => node.children && index === 0 },
     validateResult: (result) => {
-      expect(result).to.eq(50 /* tables */ + 1000 /* classifications */ + 2 /* classification + spatial category */);
+      expect(result).toBe(50 /* tables */ + 1000 /* classifications */ + 2 /* classification + spatial category */);
     },
   });
 });

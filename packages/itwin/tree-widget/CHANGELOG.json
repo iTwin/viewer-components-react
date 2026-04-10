@@ -2,6 +2,44 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Fri, 27 Mar 2026 09:58:42 GMT",
+      "version": "3.17.9",
+      "tag": "@itwin/tree-widget-react_v3.17.9",
+      "comments": {
+        "none": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "9008b8ce028719f34fb929708f131f8b6ad9f42c",
+            "comment": "Bump iTwin.js core to `5.7.0`"
+          }
+        ],
+        "patch": [
+          {
+            "author": "Modestas.Seibutis@bentley.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "704f627e303e46ec04bb147756592368bf97aa09",
+            "comment": "Restored sticky eye-icon (checkbox) functionality after iTwinUI horizontal scroll issue was resolved"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Fri, 06 Mar 2026 19:28:38 GMT",
+      "version": "3.17.8",
+      "tag": "@itwin/tree-widget-react_v3.17.8",
+      "comments": {
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "9935a806db3027f13ae3e132bfba07f0badb1115",
+            "comment": "Hide visibility checkbox tooltip and hover effect on touch devices."
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 24 Feb 2026 07:54:06 GMT",
       "version": "3.17.7",
       "tag": "@itwin/tree-widget-react_v3.17.7",

@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import "@testing-library/jest-dom";
+import { vi } from "vitest";
 import { render, screen, waitForElementToBeRemoved, within } from "../test/test-utils";
 import { Reports } from "../widget/components/Reports";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
@@ -36,8 +36,8 @@ const reportsFactory = (): ReportCollection => ({
   },
 });
 
-const mockGetReports = jest.fn();
-const mockDeleteReport = jest.fn();
+const mockGetReports = vi.fn();
+const mockDeleteReport = vi.fn();
 
 const mockReportsClient = moq.Mock.ofType<ReportsClient>();
 
@@ -57,7 +57,7 @@ afterEach(() => {
 describe("Reports View", () => {
   it("call to action button should be clickable with no reports", async () => {
     mockGetReports.mockReturnValueOnce([]);
-    const onClickAddMock = jest.fn();
+    const onClickAddMock = vi.fn();
 
     const { user } = render(<Reports onClickAddReport={onClickAddMock} />, { reportsClient: mockReportsClient.object });
 
@@ -72,7 +72,7 @@ describe("Reports View", () => {
   it("be able to add new report", async () => {
     mockGetReports.mockReturnValueOnce([]);
 
-    const onClickAddMock = jest.fn();
+    const onClickAddMock = vi.fn();
     const { user } = render(<Reports onClickAddReport={onClickAddMock} />, { reportsClient: mockReportsClient.object });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
@@ -104,7 +104,7 @@ describe("Reports View", () => {
   it("able to modify a report", async () => {
     const mockedReports: ReportCollection = reportsFactory();
     mockGetReports.mockReturnValueOnce(mockedReports.reports);
-    const onClickModifyMock = jest.fn();
+    const onClickModifyMock = vi.fn();
     const { user } = render(<Reports onClickReportModify={onClickModifyMock} />, { reportsClient: mockReportsClient.object });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
@@ -175,7 +175,7 @@ describe("Reports View", () => {
   it("modify a report", async () => {
     const mockedReports: ReportCollection = reportsFactory();
     mockGetReports.mockReturnValueOnce(mockedReports.reports);
-    const onClickModifyMock = jest.fn();
+    const onClickModifyMock = vi.fn();
     const { user } = render(<Reports onClickReportModify={onClickModifyMock} />, { reportsClient: mockReportsClient.object });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
@@ -190,7 +190,7 @@ describe("Reports View", () => {
   it("click a report", async () => {
     const mockedReports: ReportCollection = reportsFactory();
     mockGetReports.mockReturnValueOnce(mockedReports.reports);
-    const onClickTitleMock = jest.fn();
+    const onClickTitleMock = vi.fn();
     const { user } = render(<Reports onClickReportTitle={onClickTitleMock} />, { reportsClient: mockReportsClient.object });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));

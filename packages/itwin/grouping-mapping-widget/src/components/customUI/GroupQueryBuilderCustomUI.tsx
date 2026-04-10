@@ -99,9 +99,10 @@ export const GroupQueryBuilderCustomUI = ({ updateQuery, isUpdating, resetView }
       setCurrentPropertyList,
       queryBuilder,
       setQuery: updateQuery,
+      resetView,
       isUpdating: isUpdating ?? false,
     }),
-    [currentPropertyList, isUpdating, queryBuilder, updateQuery],
+    [currentPropertyList, isUpdating, queryBuilder, resetView, updateQuery],
   );
 
   const actionButtonRenderers = useMemo(() => [({ property }: ActionButtonRendererProps) => <PropertyAction property={property} />], []);

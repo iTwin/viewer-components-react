@@ -2,6 +2,21 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "date": "Fri, 06 Mar 2026 19:28:38 GMT",
+      "version": "0.37.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.37.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "6b4b5644e079771c6251a3d3c14069e853c952e3",
+            "comment": "Dropped support for iTwin.js 4.x. Minimum required version is now ^5.0.0."
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 16 Feb 2026 15:24:45 GMT",
       "version": "0.36.0",
       "tag": "@itwin/grouping-mapping-widget_v0.36.0",

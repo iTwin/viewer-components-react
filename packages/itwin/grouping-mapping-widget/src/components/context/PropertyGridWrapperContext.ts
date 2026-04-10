@@ -10,6 +10,7 @@ export interface PropertySelection {
   currentPropertyList: PropertyRecord[];
   setCurrentPropertyList: (value: PropertyRecord[] | ((value: PropertyRecord[]) => PropertyRecord[])) => void;
   setQuery: (value: string) => void;
+  resetView?: () => Promise<void>;
   queryBuilder?: QueryBuilder;
   isUpdating: boolean;
 }

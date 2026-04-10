@@ -4,8 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
 
-import { expect } from "chai";
-import sinon from "sinon";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { StagePanelLocation, StagePanelSection, StageUsage } from "@itwin/appui-react";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import { createStorage } from "@itwin/unified-selection";
@@ -35,20 +34,19 @@ describe("Property grid", () => {
 
       afterEach(async () => {
         await PropertyGridTestUtils.terminate();
-        sinon.restore();
         // eslint-disable-next-line @itwin/no-internal
         UiItemsManager.clearAllProviders();
       });
 
-      it("registers property grid", async function () {
+      it("registers property grid", async () => {
         // __PUBLISH_EXTRACT_START__ PropertyGrid.RegisterPropertyGridWidget
         UiItemsManager.register({ id: "property-grid-provider", getWidgets: () => [createPropertyGrid({})] });
         // __PUBLISH_EXTRACT_END__
 
-        expect(UiItemsManager.getWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End)).to.not.be.empty;
+        expect(UiItemsManager.getWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End)).not.toHaveLength(0);
       });
 
-      it("registers customizable property grid", async function () {
+      it("registers customizable property grid", async () => {
         const MY_CUSTOM_RULESET = undefined;
 
         const selectionStorage = createStorage();
@@ -100,7 +98,7 @@ describe("Property grid", () => {
         });
         // __PUBLISH_EXTRACT_END__
 
-        expect(UiItemsManager.getWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End)).to.not.be.empty;
+        expect(UiItemsManager.getWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End)).not.toHaveLength(0);
       });
     });
   });

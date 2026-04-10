@@ -5,6 +5,7 @@
 import type { BeEvent } from "@itwin/core-bentley";
 import type { BaseMapLayerSettings, MapSubLayerProps } from "@itwin/core-common";
 import type { HitDetail, MapLayerImageryProvider, MapTileTreeScaleRangeVisibility } from "@itwin/core-frontend";
+import type { ToolbarOrientation } from "@itwin/appui-react";
 
 export interface StyleMapLayerSettings {
   /** Name */
@@ -62,6 +63,14 @@ export interface MapFeatureInfoOptions {
   disableDefaultFeatureInfoTool?: boolean;
   showLoadProgressAnimation?: boolean;
   propertyGridOptions?: MapFeatureInfoPropertyGridOptions;
+  toolbarOrientation?: ToolbarOrientation;
+  itemPriority?: number;
+  /**
+   * Optional flag to disable the default feature info widget.
+   * When true, the default widget will not be created, allowing you to display
+   * the feature info content in a custom widget.
+   */
+  disableDefaultFeatureInfoWidget?: boolean;
 }
 
 export interface CustomParamItem {

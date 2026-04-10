@@ -2,8 +2,7 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import React from "react";
-import { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../../common/utils";
 import { InformationPanel, InformationPanelBody, InformationPanelHeader, Table, Text, toaster } from "@itwin/itwinui-react";
 import "./OverlappedElementsInformationPanel.scss";

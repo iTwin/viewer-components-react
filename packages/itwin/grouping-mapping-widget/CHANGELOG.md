@@ -1,8 +1,16 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-<!-- This log was last generated on Mon, 16 Feb 2026 15:24:45 GMT and should not be manually modified. -->
+<!-- This log was last generated on Fri, 06 Mar 2026 19:28:38 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.37.0
+
+Fri, 06 Mar 2026 19:28:38 GMT
+
+### Minor changes
+
+- Dropped support for iTwin.js 4.x. Minimum required version is now ^5.0.0. ([#1596](https://github.com/iTwin/viewer-components-react/pull/1596))
 
 ## 0.36.0
 

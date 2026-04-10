@@ -4,8 +4,6 @@
 
 ```ts
 
-/// <reference types="react" />
-
 import type { AccessToken } from '@itwin/core-bentley';
 import { Alert } from '@itwin/itwinui-react';
 import { Context } from 'react';

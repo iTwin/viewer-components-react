@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
-import React from "react";
+import { describe, expect } from "vitest";
 import { SnapshotDb } from "@itwin/core-backend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { SharedTreeContextProvider, useModelsTree } from "@itwin/tree-widget-react";
@@ -278,7 +277,7 @@ describe("models tree", () => {
         expectations: "all-visible",
       });
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
-      expect(visibilityTargets.categories.length).to.be.eq(1);
+      expect(visibilityTargets.categories.length).toBe(1);
       const elementsCategory = visibilityTargets.categories[0];
       return { iModel, imodelAccess, viewport, provider, handler, elementsCategory, elementsModel, iModelConnection, hierarchyNodes };
     },
@@ -346,7 +345,7 @@ describe("models tree", () => {
       const hierarchyNodes = await collectNodes({ provider });
 
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
-      expect(visibilityTargets.categories.length).to.be.eq(1);
+      expect(visibilityTargets.categories.length).toBe(1);
       const elementsCategory = visibilityTargets.categories[0];
 
       await handler.changeVisibility(createModelHierarchyNode(elementsModel), true);
@@ -421,7 +420,7 @@ describe("models tree", () => {
       const hierarchyNodes = await collectNodes({ provider });
 
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
-      expect(visibilityTargets.categories.length).to.be.eq(1);
+      expect(visibilityTargets.categories.length).toBe(1);
       const elementsCategory = visibilityTargets.categories[0];
       const node = { modelId: elementsModel, elementId: visibilityTargets.elements[0], categoryId: elementsCategory, subjectId: "0x1" };
       await validateHierarchyVisibility({

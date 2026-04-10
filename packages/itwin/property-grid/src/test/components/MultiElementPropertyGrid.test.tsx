@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
-import sinon from "sinon";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { KeySet } from "@itwin/presentation-common";
 import { PresentationLabelsProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";
@@ -25,6 +24,7 @@ import {
   waitFor,
 } from "../TestUtils.js";
 
+import type { MockInstance } from "vitest";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { ISelectionProvider } from "@itwin/presentation-frontend";
@@ -37,36 +37,24 @@ describe("<MultiElementPropertyGrid />", () => {
     key: "test-imodel",
   } as IModelConnection;
 
-  let getDataStub: sinon.SinonStub;
-  let getLabelsStub: sinon.SinonStub;
+  let getDataStub: ReturnType<typeof vi.spyOn>;
+  let getLabelsStub: MockInstance<(keys: InstanceKey[]) => Promise<string[]>>;
   let selectionStorage: ReturnType<typeof stubSelectionStorage>;
   let selectionManager: ReturnType<typeof stubSelectionManager>;
-  const getParentInstanceKeyStub = sinon.stub<[InstanceKey], Promise<InstanceKey | undefined>>();
+  const getParentInstanceKeyStub = vi.fn<(key: InstanceKey) => Promise<InstanceKey | undefined>>();
 
-  before(async () => {
-    getDataStub = sinon.stub(PresentationPropertyDataProvider.prototype, "getData");
-    getLabelsStub = sinon.stub(PresentationLabelsProvider.prototype, "getLabels");
+  beforeEach(() => {
+    getDataStub = vi.spyOn(PresentationPropertyDataProvider.prototype, "getData");
+    getLabelsStub = vi.spyOn(PresentationLabelsProvider.prototype, "getLabels");
 
-    sinon.stub(PropertyGridManager, "translate").callsFake((key) => key);
+    vi.spyOn(PropertyGridManager, "translate").mockImplementation((key) => key);
 
     stubFavoriteProperties();
     stubPresentation();
-  });
 
-  after(() => {
-    sinon.restore();
-  });
-
-  beforeEach(() => {
     selectionStorage = stubSelectionStorage();
     selectionManager = stubSelectionManager();
-    getParentInstanceKeyStub.resolves(undefined);
-  });
-
-  afterEach(() => {
-    getDataStub.reset();
-    getLabelsStub.reset();
-    getParentInstanceKeyStub.reset();
+    getParentInstanceKeyStub.mockResolvedValue(undefined);
   });
 
   [
@@ -74,8 +62,8 @@ describe("<MultiElementPropertyGrid />", () => {
       name: "with unified selection storage",
       getProps: () => ({ imodel, selectionStorage, getParentInstanceKey: getParentInstanceKeyStub }),
       setupSelection(keys: SelectableInstanceKey[]) {
-        selectionStorage.getSelection.reset();
-        selectionStorage.getSelection.returns(Selectables.create(keys));
+        selectionStorage.getSelection.mockReset();
+        selectionStorage.getSelection.mockReturnValue(Selectables.create(keys));
       },
       triggerSelectionChange(props: Pick<Partial<EventArgs<typeof selectionStorage.selectionChangeEvent>>, "source">) {
         selectionStorage.selectionChangeEvent.raiseEvent({
@@ -95,8 +83,8 @@ describe("<MultiElementPropertyGrid />", () => {
       name: "with deprecated selection manager",
       getProps: () => ({ imodel, getParentInstanceKey: getParentInstanceKeyStub }),
       setupSelection(keys: SelectableInstanceKey[]) {
-        selectionManager.getSelection.reset();
-        selectionManager.getSelection.returns(new KeySet(keys));
+        selectionManager.getSelection.mockReset();
+        selectionManager.getSelection.mockReturnValue(new KeySet(keys));
       },
       triggerSelectionChange(props: Pick<Partial<EventArgs<typeof selectionStorage.selectionChangeEvent>>, "source">) {
         selectionManager.selectionChange.raiseEvent(
@@ -129,7 +117,7 @@ describe("<MultiElementPropertyGrid />", () => {
 
         await waitFor(() => getByText("Test-Value"));
         // verify button for opening element list is not rendered
-        expect(queryByRole("button", { name: "element-list.title" })).to.be.null;
+        expect(queryByRole("button", { name: "element-list.title" })).toBeNull();
       });
 
       it("renders properties for multiple instances", async () => {
@@ -148,7 +136,7 @@ describe("<MultiElementPropertyGrid />", () => {
 
         await waitFor(() => getByText("MultiInstances"));
         // verify button for opening element list is rendered
-        expect(queryByRole("button", { name: "element-list.title" })).to.not.be.null;
+        expect(queryByRole("button", { name: "element-list.title" })).not.toBeNull();
       });
 
       it("renders element list", async () => {
@@ -159,7 +147,7 @@ describe("<MultiElementPropertyGrid />", () => {
         const expectedLabels = instanceKeys.map(buildLabel);
 
         setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-        getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
+        getLabelsStub.mockImplementation(async (keys) => keys.map(buildLabel));
 
         const { getByText, getByRole, user } = render(<MultiElementPropertyGrid {...getProps()} />);
 
@@ -181,7 +169,7 @@ describe("<MultiElementPropertyGrid />", () => {
         const expectedLabels = instanceKeys.map(buildLabel);
 
         setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-        getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
+        getLabelsStub.mockImplementation(async (keys) => keys.map(buildLabel));
 
         const { getByText, getByRole, user } = render(<MultiElementPropertyGrid {...getProps()} />);
 
@@ -206,7 +194,7 @@ describe("<MultiElementPropertyGrid />", () => {
         const expectedLabels = instanceKeys.map(buildLabel);
 
         setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-        getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
+        getLabelsStub.mockImplementation(async (keys) => keys.map(buildLabel));
 
         const { getByText, getByRole, container, user } = render(<MultiElementPropertyGrid {...getProps()} />);
 
@@ -226,14 +214,14 @@ describe("<MultiElementPropertyGrid />", () => {
 
         // navigate back to element list
         const singleElementGrid = container.querySelector<HTMLButtonElement>(".property-grid-react-single-element-property-grid");
-        expect(singleElementGrid).to.not.be.null;
+        expect(singleElementGrid).not.toBeNull();
         const singleElementBackButton = getByRoleRTL(singleElementGrid!, "button", { name: "header.back" });
         await user.click(singleElementBackButton);
         await waitFor(() => getByText(expectedLabels[0]));
 
         // navigate back to multi instances properties grid
         const elementList = container.querySelector<HTMLDivElement>(".property-grid-react-element-list");
-        expect(element).to.not.be.null;
+        expect(elementList).not.toBeNull();
         const elementListBackButton = getByRoleRTL(elementList!, "button", { name: "header.back" });
         await user.click(elementListBackButton);
         await waitFor(() => getByText("MultiInstances"));
@@ -247,7 +235,7 @@ describe("<MultiElementPropertyGrid />", () => {
         const expectedLabels = instanceKeys.map(buildLabel);
 
         setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-        getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
+        getLabelsStub.mockImplementation(async (keys) => keys.map(buildLabel));
 
         const { getByText, getByRole, user, unmount } = render(<MultiElementPropertyGrid {...getProps()} />);
 
@@ -272,8 +260,8 @@ describe("<MultiElementPropertyGrid />", () => {
         const instanceKey = { id: "0x1", className: "TestSchema.TestClass" };
         setupMultiInstanceData([{ key: instanceKey, value: "Test-Value-1" }]);
 
-        getParentInstanceKeyStub.reset();
-        getParentInstanceKeyStub.resolves({ id: "0x2", className: "TestSchema.ParentClass" });
+        getParentInstanceKeyStub.mockReset();
+        getParentInstanceKeyStub.mockResolvedValue({ id: "0x2", className: "TestSchema.ParentClass" });
 
         const { getByText, queryByRole } = render(
           <MultiElementPropertyGrid {...getProps()} ancestorsNavigationControls={(navigationProps) => <AncestorsNavigationControls {...navigationProps} />} />,
@@ -281,20 +269,20 @@ describe("<MultiElementPropertyGrid />", () => {
 
         await waitFor(() => {
           getByText("Test-Value-1");
-          expect(queryByRole("button", { name: "header.navigateUp" })).to.not.be.null;
-          expect(queryByRole("button", { name: "header.navigateDown" })).to.not.be.null;
+          expect(queryByRole("button", { name: "header.navigateUp" })).not.toBeNull();
+          expect(queryByRole("button", { name: "header.navigateDown" })).not.toBeNull();
         });
       });
 
       describe("feature usage reporting", () => {
         let TelemetryContextProvider: typeof UseTelemetryContextModule.TelemetryContextProvider;
 
-        before(async () => {
+        beforeAll(async () => {
           TelemetryContextProvider = (await import("../../property-grid-react/hooks/UseTelemetryContext.js")).TelemetryContextProvider;
         });
 
         it("reports when properties for a single instance are shown", async () => {
-          const onFeatureUsedSpy = sinon.spy();
+          const onFeatureUsedSpy = vi.fn();
           setupMultiInstanceData([
             {
               key: { id: "0x1", className: "TestSchema.TestClass" },
@@ -309,12 +297,12 @@ describe("<MultiElementPropertyGrid />", () => {
           );
 
           await waitFor(() => getByText("Test-Value"));
-          expect(onFeatureUsedSpy).to.be.calledWith("single-element");
-          expect(onFeatureUsedSpy).to.not.be.calledWith("multiple-elements");
+          expect(onFeatureUsedSpy).toHaveBeenCalledWith("single-element");
+          expect(onFeatureUsedSpy).not.toHaveBeenCalledWith("multiple-elements");
         });
 
         it("reports when properties of multiple instances are shown", async () => {
-          const onFeatureUsedSpy = sinon.spy();
+          const onFeatureUsedSpy = vi.fn();
           setupMultiInstanceData([
             {
               key: { id: "0x1", className: "TestSchema.TestClass" },
@@ -333,14 +321,14 @@ describe("<MultiElementPropertyGrid />", () => {
           );
 
           await waitFor(() => getByText("MultiInstances"));
-          expect(onFeatureUsedSpy).to.be.calledWith("multiple-elements");
-          expect(onFeatureUsedSpy).to.not.be.calledWith("single-element");
+          expect(onFeatureUsedSpy).toHaveBeenCalledWith("multiple-elements");
+          expect(onFeatureUsedSpy).not.toHaveBeenCalledWith("single-element");
         });
 
         it("does not report when no properties are shown", async () => {
-          const onFeatureUsedSpy = sinon.spy();
+          const onFeatureUsedSpy = vi.fn();
           setupSelection([]);
-          getDataStub.callsFake(async () => {
+          getDataStub.mockImplementation(async () => {
             return {
               categories: [{ expand: true, label: "Test Category", name: "test-category" }],
               label: PropertyRecord.fromString("Test Instance"),
@@ -355,12 +343,12 @@ describe("<MultiElementPropertyGrid />", () => {
           );
 
           await waitFor(() => getByText("Test Instance"));
-          expect(onFeatureUsedSpy).to.not.be.calledWith("single-element");
-          expect(onFeatureUsedSpy).to.not.be.calledWith("multiple-elements");
+          expect(onFeatureUsedSpy).not.toHaveBeenCalledWith("single-element");
+          expect(onFeatureUsedSpy).not.toHaveBeenCalledWith("multiple-elements");
         });
 
         it("reports when element list is shown", async () => {
-          const onFeatureUsedSpy = sinon.spy();
+          const onFeatureUsedSpy = vi.fn();
           const instanceKeys = [
             { id: "0x1", className: "TestSchema.TestClass" },
             { id: "0x2", className: "TestSchema.TestClass" },
@@ -368,7 +356,7 @@ describe("<MultiElementPropertyGrid />", () => {
           const expectedLabels = instanceKeys.map(buildLabel);
 
           setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-          getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
+          getLabelsStub.mockImplementation(async (keys) => keys.map(buildLabel));
 
           const { getByText, getByRole, user } = render(
             <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
@@ -384,11 +372,11 @@ describe("<MultiElementPropertyGrid />", () => {
           for (const expected of expectedLabels) {
             await waitFor(() => getByText(expected));
           }
-          expect(onFeatureUsedSpy).to.be.calledWith("elements-list");
+          expect(onFeatureUsedSpy).toHaveBeenCalledWith("elements-list");
         });
 
         it("reports when element selected from element list", async () => {
-          const onFeatureUsedSpy = sinon.spy();
+          const onFeatureUsedSpy = vi.fn();
           const instanceKeys = [
             { id: "0x1", className: "TestSchema.TestClass" },
             { id: "0x2", className: "TestSchema.TestClass" },
@@ -396,7 +384,7 @@ describe("<MultiElementPropertyGrid />", () => {
           const expectedLabels = instanceKeys.map(buildLabel);
 
           setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-          getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
+          getLabelsStub.mockImplementation(async (keys) => keys.map(buildLabel));
 
           const { getByText, getByRole, user } = render(
             <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
@@ -415,11 +403,11 @@ describe("<MultiElementPropertyGrid />", () => {
 
           await user.click(element);
           await waitFor(() => getByText("Test-Value-2"));
-          expect(onFeatureUsedSpy).to.be.calledWith("single-element-from-list");
+          expect(onFeatureUsedSpy).toHaveBeenCalledWith("single-element-from-list");
         });
 
         it("reports when navigates from single element to multi element grid using 'Back' button", async () => {
-          const onFeatureUsedSpy = sinon.spy();
+          const onFeatureUsedSpy = vi.fn();
           const instanceKeys = [
             { id: "0x1", className: "TestSchema.TestClass" },
             { id: "0x2", className: "TestSchema.TestClass" },
@@ -427,7 +415,7 @@ describe("<MultiElementPropertyGrid />", () => {
           const expectedLabels = instanceKeys.map(buildLabel);
 
           setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-          getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
+          getLabelsStub.mockImplementation(async (keys) => keys.map(buildLabel));
 
           const { container, getByText, getByRole, user } = render(
             <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
@@ -450,22 +438,22 @@ describe("<MultiElementPropertyGrid />", () => {
           await waitFor(() => getByText("Test-Value-2"));
 
           // navigate back to element list
-          onFeatureUsedSpy.resetHistory();
+          onFeatureUsedSpy.mockClear();
           const singleElementGrid = container.querySelector<HTMLButtonElement>(".property-grid-react-single-element-property-grid");
-          expect(singleElementGrid).to.not.be.null;
+          expect(singleElementGrid).not.toBeNull();
           const singleElementBackButton = getByRoleRTL(singleElementGrid!, "button", { name: "header.back" });
           await user.click(singleElementBackButton);
           await waitFor(() => getByText(expectedLabels[0]));
-          expect(onFeatureUsedSpy).to.be.calledWith("elements-list");
+          expect(onFeatureUsedSpy).toHaveBeenCalledWith("elements-list");
 
           // navigate back to multi instances properties grid
-          onFeatureUsedSpy.resetHistory();
+          onFeatureUsedSpy.mockClear();
           const elementList = container.querySelector<HTMLDivElement>(".property-grid-react-element-list");
-          expect(element).to.not.be.null;
+          expect(elementList).not.toBeNull();
           const elementListBackButton = getByRoleRTL(elementList!, "button", { name: "header.back" });
           await user.click(elementListBackButton);
           await waitFor(() => getByText("MultiInstances"));
-          expect(onFeatureUsedSpy).to.be.calledWith("multiple-elements");
+          expect(onFeatureUsedSpy).toHaveBeenCalledWith("multiple-elements");
         });
       });
 
@@ -480,7 +468,7 @@ describe("<MultiElementPropertyGrid />", () => {
 
         const value = instances.length > 1 ? "MultiInstances" : instances[0].value;
 
-        getDataStub.callsFake(async () => {
+        getDataStub.mockImplementation(async () => {
           return {
             categories: [{ expand: true, label: "Test Category", name: "test-category" }],
             label: PropertyRecord.fromString("Test Instance"),
@@ -497,8 +485,8 @@ describe("<MultiElementPropertyGrid />", () => {
       };
 
       const setupSingleElementData = (label: string, value: string) => {
-        getDataStub.reset();
-        getDataStub.callsFake(async () => ({
+        getDataStub.mockReset();
+        getDataStub.mockImplementation(async () => ({
           categories: [{ expand: true, label: "Test Category", name: "test-category" }],
           label: PropertyRecord.fromString(label),
           records: {
