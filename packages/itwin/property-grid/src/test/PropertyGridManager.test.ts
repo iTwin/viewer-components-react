@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
-import sinon from "sinon";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { EmptyLocalization } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 import { PropertyGridManager } from "../property-grid-react/PropertyGridManager.js";
@@ -12,53 +11,52 @@ import { PropertyGridManager } from "../property-grid-react/PropertyGridManager.
 describe("PropertyGridManager", () => {
   afterEach(() => {
     PropertyGridManager.terminate();
-    sinon.restore();
   });
 
   it("registers localization namespace only once", async () => {
     const localization = new EmptyLocalization();
-    const registerStub = sinon.stub(localization, "registerNamespace");
+    const registerStub = vi.spyOn(localization, "registerNamespace");
 
     await PropertyGridManager.initialize(localization);
-    expect(registerStub).to.be.calledOnce;
+    expect(registerStub).toHaveBeenCalledOnce();
 
     await PropertyGridManager.initialize(localization);
-    expect(registerStub).to.be.calledOnce;
+    expect(registerStub).toHaveBeenCalledOnce();
   });
 
   it("uses localization from `IModelApp`", async () => {
     const localization = new EmptyLocalization();
-    const registerStub = sinon.stub(localization, "registerNamespace");
-    sinon.stub(IModelApp, "localization").get(() => localization);
+    const registerStub = vi.spyOn(localization, "registerNamespace");
+    vi.spyOn(IModelApp, "localization", "get").mockReturnValue(localization);
 
     await PropertyGridManager.initialize();
-    expect(registerStub).to.be.calledOnce;
+    expect(registerStub).toHaveBeenCalledOnce();
   });
 
   it("unregisters namespace once when terminating", async () => {
     const localization = new EmptyLocalization();
-    const unregisterStub = sinon.stub(localization, "unregisterNamespace");
+    const unregisterStub = vi.spyOn(localization, "unregisterNamespace");
     await PropertyGridManager.initialize(localization);
 
     PropertyGridManager.terminate();
-    expect(unregisterStub).to.be.calledOnce;
+    expect(unregisterStub).toHaveBeenCalledOnce();
 
     PropertyGridManager.terminate();
-    expect(unregisterStub).to.be.calledOnce;
+    expect(unregisterStub).toHaveBeenCalledOnce();
   });
 
   describe("translate", () => {
     it("translates string", async () => {
       const localization = new EmptyLocalization();
-      const getLocalizedStringStub = sinon.stub(localization, "getLocalizedString").returns("testString");
+      const getLocalizedStringStub = vi.spyOn(localization, "getLocalizedString").mockReturnValue("testString");
       await PropertyGridManager.initialize(localization);
 
-      expect(PropertyGridManager.translate("testKey")).to.be.eq("testString");
-      expect(getLocalizedStringStub).to.be.calledOnceWith(`${PropertyGridManager.i18nNamespace}:testKey`);
+      expect(PropertyGridManager.translate("testKey")).toBe("testString");
+      expect(getLocalizedStringStub).toHaveBeenCalledExactlyOnceWith(`${PropertyGridManager.i18nNamespace}:testKey`, undefined);
     });
 
     it("throws if not initialized", () => {
-      expect(() => PropertyGridManager.translate("test")).to.throw();
+      expect(() => PropertyGridManager.translate("test")).toThrow();
     });
   });
 });

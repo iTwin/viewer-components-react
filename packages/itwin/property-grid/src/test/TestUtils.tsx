@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { createElement, Fragment, StrictMode } from "react";
-import sinon from "sinon";
+import { vi } from "vitest";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { BeEvent } from "@itwin/core-bentley";
 import { KeySet } from "@itwin/presentation-common";
@@ -14,6 +14,7 @@ import { renderHook as renderHookRTL, render as renderRTL } from "@testing-libra
 import { userEvent } from "@testing-library/user-event";
 
 import type { PropsWithChildren, ReactElement } from "react";
+import type { Mock, Mocked } from "vitest";
 import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
 import type { FavoritePropertiesManager, SelectionManager } from "@itwin/presentation-frontend";
 import type { SelectionStorage, StorageSelectionChangesListener } from "@itwin/unified-selection";
@@ -35,25 +36,26 @@ export function stubSelectionManager(presentationSingleton?: typeof Presentation
     // eslint-disable-next-line @typescript-eslint/no-deprecated
     selectionChange: new SelectionChangeEvent(),
     // eslint-disable-next-line @typescript-eslint/no-deprecated
-    getSelectionLevels: createFunctionStub<SelectionManager["getSelectionLevels"]>().returns([0]),
+    getSelectionLevels: createFunctionStub<SelectionManager["getSelectionLevels"]>().mockReturnValue([0]),
     // eslint-disable-next-line @typescript-eslint/no-deprecated
-    getSelection: createFunctionStub<SelectionManager["getSelection"]>().returns(new KeySet()),
+    getSelection: createFunctionStub<SelectionManager["getSelection"]>().mockReturnValue(new KeySet()),
     // eslint-disable-next-line @typescript-eslint/no-deprecated
     replaceSelection: createFunctionStub<SelectionManager["replaceSelection"]>(),
   };
-  sinon.stub(presentationSingleton ?? Presentation, "selection").get(() => selectionManagerStub);
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  vi.spyOn(presentationSingleton ?? Presentation, "selection", "get").mockReturnValue(selectionManagerStub as unknown as SelectionManager);
   return selectionManagerStub;
 }
 
-export function stubSelectionStorage(): sinon.SinonStubbedInstance<SelectionStorage> & { selectionChangeEvent: BeEvent<StorageSelectionChangesListener> } {
+export function stubSelectionStorage(): Mocked<SelectionStorage> & { selectionChangeEvent: BeEvent<StorageSelectionChangesListener> } {
   return {
-    addToSelection: sinon.stub(),
-    clearSelection: sinon.stub(),
-    clearStorage: sinon.stub(),
-    getSelectionLevels: sinon.stub<Parameters<SelectionStorage["getSelectionLevels"]>, number[]>().returns([0]),
-    getSelection: sinon.stub<Parameters<SelectionStorage["getSelectionLevels"]>, Selectables>().returns(Selectables.create([])),
-    removeFromSelection: sinon.stub(),
-    replaceSelection: sinon.stub(),
+    addToSelection: vi.fn(),
+    clearSelection: vi.fn(),
+    clearStorage: vi.fn(),
+    getSelectionLevels: vi.fn<SelectionStorage["getSelectionLevels"]>().mockReturnValue([0]),
+    getSelection: vi.fn<SelectionStorage["getSelection"]>().mockReturnValue(Selectables.create([])),
+    removeFromSelection: vi.fn(),
+    replaceSelection: vi.fn(),
     selectionChangeEvent: new BeEvent<StorageSelectionChangesListener>(),
   };
 }
@@ -61,19 +63,25 @@ export function stubSelectionStorage(): sinon.SinonStubbedInstance<SelectionStor
 export function stubFavoriteProperties() {
   const favoritePropertiesStub = {
     onFavoritesChanged: new BeEvent<() => void>(),
-    hasAsync: createFunctionStub<FavoritePropertiesManager["hasAsync"]>().resolves(false),
+    hasAsync: createFunctionStub<FavoritePropertiesManager["hasAsync"]>().mockResolvedValue(false),
     add: createFunctionStub<FavoritePropertiesManager["add"]>(),
     remove: createFunctionStub<FavoritePropertiesManager["remove"]>(),
   };
 
-  sinon.stub(Presentation, "favoriteProperties").get(() => favoritePropertiesStub);
+  vi.spyOn(Presentation, "favoriteProperties", "get").mockReturnValue(favoritePropertiesStub as any);
 
   return favoritePropertiesStub;
 }
 
-export function stubPresentation() {
+export function stubPresentation(): {
+  onIModelContentChanged: BeEvent<() => void>;
+  getDisplayLabelDefinitions: Mock;
+  rulesets: () => { onRulesetModified: BeEvent<() => void> };
+  vars: () => { onVariableChanged: BeEvent<() => void> };
+} {
   const presentationStub = {
     onIModelContentChanged: new BeEvent(),
+    getDisplayLabelDefinitions: vi.fn().mockResolvedValue([]),
     rulesets: () => ({
       onRulesetModified: new BeEvent(),
     }),
@@ -82,12 +90,12 @@ export function stubPresentation() {
     }),
   };
 
-  sinon.stub(Presentation, "presentation").get(() => presentationStub);
+  vi.spyOn(Presentation, "presentation", "get").mockReturnValue(presentationStub as any);
   return presentationStub;
 }
 
 export function createFunctionStub<TFunc extends (...args: any) => any>() {
-  return sinon.stub<Parameters<TFunc>, ReturnType<TFunc>>();
+  return vi.fn<TFunc>();
 }
 
 export function createResolvablePromise<T>() {

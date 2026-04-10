@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
+import { beforeEach, describe, expect, it } from "vitest";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { BeEvent } from "@itwin/core-bentley";
 import { useLoadedInstanceInfo } from "../../property-grid-react/hooks/UseInstanceInfo.js";
@@ -20,7 +20,7 @@ describe("useInstanceInfo", () => {
   };
 
   beforeEach(() => {
-    dataProvider.getData.resolves({
+    dataProvider.getData.mockResolvedValue({
       categories: [],
       records: {},
       label: PropertyRecord.fromString("Test Label"),
@@ -31,14 +31,14 @@ describe("useInstanceInfo", () => {
   it("returns label and className", async () => {
     const { result } = renderHook(useLoadedInstanceInfo, { initialProps: { dataProvider: dataProvider as unknown as IPresentationPropertyDataProvider } });
     await waitFor(() => {
-      expect(result.current.item?.className).to.be.eq("TestClassName");
-      expect((result.current.item?.label.value as PrimitiveValue).value).to.be.eq("Test Label");
+      expect(result.current.item?.className).toBe("TestClassName");
+      expect((result.current.item?.label.value as PrimitiveValue).value).toBe("Test Label");
     });
   });
 
   it("returns label and empty className if `propertyData` does not have it", async () => {
-    dataProvider.getData.reset();
-    dataProvider.getData.resolves({
+    dataProvider.getData.mockReset();
+    dataProvider.getData.mockResolvedValue({
       categories: [],
       records: {},
       label: PropertyRecord.fromString("Test Label"),
@@ -47,20 +47,20 @@ describe("useInstanceInfo", () => {
 
     const { result } = renderHook(useLoadedInstanceInfo, { initialProps: { dataProvider: dataProvider as unknown as IPresentationPropertyDataProvider } });
     await waitFor(() => {
-      expect((result.current.item?.label.value as PrimitiveValue).value).to.be.eq("Test Label");
-      expect(result.current.item?.className).to.be.empty;
+      expect((result.current.item?.label.value as PrimitiveValue).value).toBe("Test Label");
+      expect(result.current.item?.className).toHaveLength(0);
     });
   });
 
   it("returns new label and className when property data changes", async () => {
     const { result } = renderHook(useLoadedInstanceInfo, { initialProps: { dataProvider: dataProvider as unknown as IPresentationPropertyDataProvider } });
     await waitFor(() => {
-      expect(result.current.item?.className).to.be.eq("TestClassName");
-      expect((result.current.item?.label.value as PrimitiveValue).value).to.be.eq("Test Label");
+      expect(result.current.item?.className).toBe("TestClassName");
+      expect((result.current.item?.label.value as PrimitiveValue).value).toBe("Test Label");
     });
 
-    dataProvider.getData.reset();
-    dataProvider.getData.resolves({
+    dataProvider.getData.mockReset();
+    dataProvider.getData.mockResolvedValue({
       categories: [],
       records: {},
       label: PropertyRecord.fromString("New Test Label"),
@@ -70,25 +70,25 @@ describe("useInstanceInfo", () => {
     dataProvider.onDataChanged.raiseEvent();
 
     await waitFor(() => {
-      expect(result.current.item?.className).to.be.eq("NewTestClassName");
-      expect((result.current.item?.label.value as PrimitiveValue).value).to.be.eq("New Test Label");
+      expect(result.current.item?.className).toBe("NewTestClassName");
+      expect((result.current.item?.label.value as PrimitiveValue).value).toBe("New Test Label");
     });
   });
 
   it("returns the data of the last event raised, even if the one preceding it completes later", async () => {
     const { result } = renderHook(useLoadedInstanceInfo, { initialProps: { dataProvider: dataProvider as unknown as IPresentationPropertyDataProvider } });
     await waitFor(() => {
-      expect(result.current.item?.className).to.be.eq("TestClassName");
-      expect((result.current.item?.label.value as PrimitiveValue).value).to.be.eq("Test Label");
+      expect(result.current.item?.className).toBe("TestClassName");
+      expect((result.current.item?.label.value as PrimitiveValue).value).toBe("Test Label");
     });
 
     const firstGetDataPromise = createResolvablePromise<PropertyData>();
     const secondGetDataPromise = createResolvablePromise<PropertyData>();
 
-    dataProvider.getData.reset();
+    dataProvider.getData.mockReset();
 
-    dataProvider.getData.onFirstCall().returns(firstGetDataPromise.promise);
-    dataProvider.getData.onSecondCall().returns(secondGetDataPromise.promise);
+    dataProvider.getData.mockReturnValueOnce(firstGetDataPromise.promise);
+    dataProvider.getData.mockReturnValueOnce(secondGetDataPromise.promise);
 
     act(() => dataProvider.onDataChanged.raiseEvent());
     act(() => dataProvider.onDataChanged.raiseEvent());
@@ -112,8 +112,8 @@ describe("useInstanceInfo", () => {
     );
 
     await waitFor(() => {
-      expect(result.current.item?.className).to.be.eq("NewTestClassName");
-      expect((result.current.item?.label.value as PrimitiveValue).value).to.be.eq("New Test Label");
+      expect(result.current.item?.className).toBe("NewTestClassName");
+      expect((result.current.item?.label.value as PrimitiveValue).value).toBe("New Test Label");
     });
   });
 });

@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
-import * as sinon from "sinon";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { KeySet, StandardNodeTypes } from "@itwin/presentation-common";
 import { Selectables, TRANSIENT_ELEMENT_CLASSNAME } from "@itwin/unified-selection";
 import { useInstanceSelection } from "../../property-grid-react/hooks/UseInstanceSelection.js";
@@ -22,7 +21,7 @@ describe("useInstanceSelection", () => {
   const imodel = {
     key: "test-imodel",
   } as IModelConnection;
-  const getParentInstanceKeyStub = sinon.stub<[SelectableInstanceKey], Promise<SelectableInstanceKey | undefined>>();
+  const getParentInstanceKeyStub = vi.fn<(key: SelectableInstanceKey) => Promise<SelectableInstanceKey | undefined>>();
 
   const parentKey: InstanceKey = { id: "0x1", className: "TestSchema.TestClass" };
   const childKey: InstanceKey = { id: "0x2", className: "TestSchema.TestClass" };
@@ -32,17 +31,13 @@ describe("useInstanceSelection", () => {
   let selectionManager: ReturnType<typeof stubSelectionManager>;
   let selectionStorage: ReturnType<typeof stubSelectionStorage>;
 
-  before(async () => {
+  beforeEach(async () => {
     selectionManager = stubSelectionManager();
     selectionStorage = stubSelectionStorage();
   });
 
-  after(() => {
-    sinon.restore();
-  });
-
   beforeEach(async () => {
-    getParentInstanceKeyStub.callsFake(async ({ id }) => {
+    getParentInstanceKeyStub.mockImplementation(async ({ id }) => {
       switch (id) {
         case parentKey.id:
           return parentKey;
@@ -58,7 +53,7 @@ describe("useInstanceSelection", () => {
   });
 
   afterEach(() => {
-    sinon.reset();
+    vi.resetAllMocks();
   });
 
   [
@@ -66,8 +61,8 @@ describe("useInstanceSelection", () => {
       name: "with unified selection storage",
       getProps: () => ({ imodel, selectionStorage, getParentInstanceKey: getParentInstanceKeyStub }),
       async setupSelection(keys: Selectable[]) {
-        selectionStorage.getSelection.reset();
-        selectionStorage.getSelection.returns(Selectables.create(keys));
+        selectionStorage.getSelection.mockReset();
+        selectionStorage.getSelection.mockReturnValue(Selectables.create(keys));
       },
       triggerSelectionChange(props?: Pick<Partial<EventArgs<typeof selectionStorage.selectionChangeEvent>>, "source">) {
         selectionStorage.selectionChangeEvent.raiseEvent({ source: "TestSource", imodelKey: imodel.key, ...props } as EventArgs<
@@ -75,18 +70,18 @@ describe("useInstanceSelection", () => {
         >);
       },
       assertReplaceNotCalled() {
-        expect(selectionStorage.replaceSelection).to.not.be.called;
+        expect(selectionStorage.replaceSelection).not.toHaveBeenCalled();
       },
       assertReplaceCalledWithKeys(keys: InstanceKey[]) {
-        expect(selectionStorage.replaceSelection).to.be.calledWith({ source: "Property Grid", imodelKey: imodel.key, selectables: keys, level: 0 });
+        expect(selectionStorage.replaceSelection).toHaveBeenCalledWith({ source: "Property Grid", imodelKey: imodel.key, selectables: keys, level: 0 });
       },
     },
     {
       name: "with deprecated selection manager",
       getProps: () => ({ imodel, getParentInstanceKey: getParentInstanceKeyStub }),
       async setupSelection(keys: Selectable[]) {
-        selectionManager.getSelection.reset();
-        selectionManager.getSelection.returns(new KeySet((await Promise.all(keys.map(createKeysFromSelectable))).flat()));
+        selectionManager.getSelection.mockReset();
+        selectionManager.getSelection.mockReturnValue(new KeySet((await Promise.all(keys.map(createKeysFromSelectable))).flat()));
       },
       triggerSelectionChange(props?: Pick<Partial<EventArgs<typeof selectionStorage.selectionChangeEvent>>, "source">) {
         selectionManager.selectionChange.raiseEvent(
@@ -96,10 +91,10 @@ describe("useInstanceSelection", () => {
         );
       },
       assertReplaceNotCalled() {
-        expect(selectionManager.replaceSelection).to.not.be.called;
+        expect(selectionManager.replaceSelection).not.toHaveBeenCalled();
       },
       assertReplaceCalledWithKeys(keys: InstanceKey[]) {
-        expect(selectionManager.replaceSelection).to.be.calledWith("Property Grid", imodel, keys);
+        expect(selectionManager.replaceSelection).toHaveBeenCalledWith("Property Grid", imodel, keys, 0);
       },
     },
   ].forEach(({ name, getProps, setupSelection, triggerSelectionChange, assertReplaceNotCalled, assertReplaceCalledWithKeys }) => {
@@ -110,7 +105,7 @@ describe("useInstanceSelection", () => {
         const { result } = renderHook(useInstanceSelection, { initialProps: getProps() });
 
         await waitFor(() => {
-          expect(result.current.selectedKeys).to.have.lengthOf(2);
+          expect(result.current.selectedKeys).toHaveLength(2);
         });
       });
 
@@ -136,7 +131,7 @@ describe("useInstanceSelection", () => {
         const { result } = renderHook(useInstanceSelection, { initialProps: getProps() });
 
         await waitFor(() => {
-          expect(result.current.selectedKeys).to.deep.eq([noParentKey]);
+          expect(result.current.selectedKeys).toEqual([noParentKey]);
         });
       });
 
@@ -146,7 +141,7 @@ describe("useInstanceSelection", () => {
         const { result } = renderHook(useInstanceSelection, { initialProps: getProps() });
 
         await waitFor(() => {
-          expect(result.current.selectedKeys).to.have.lengthOf(1);
+          expect(result.current.selectedKeys).toHaveLength(1);
         });
       });
 
@@ -156,16 +151,16 @@ describe("useInstanceSelection", () => {
         const { result } = renderHook(useInstanceSelection, { initialProps: getProps() });
 
         await waitFor(() => {
-          expect(result.current.selectedKeys).to.have.lengthOf(1);
-          expect(result.current.selectedKeys[0].id).to.be.eq(noParentKey.id);
+          expect(result.current.selectedKeys).toHaveLength(1);
+          expect(result.current.selectedKeys[0].id).toBe(noParentKey.id);
         });
 
         await setupSelection([otherKey]);
         act(() => triggerSelectionChange({ source: "OtherSource" }));
 
         await waitFor(() => {
-          expect(result.current.selectedKeys).to.have.lengthOf(1);
-          expect(result.current.selectedKeys[0].id).to.be.eq(otherKey.id);
+          expect(result.current.selectedKeys).toHaveLength(1);
+          expect(result.current.selectedKeys[0].id).toBe(otherKey.id);
         });
       });
 
@@ -175,14 +170,14 @@ describe("useInstanceSelection", () => {
         const { result } = renderHook(useInstanceSelection, { initialProps: getProps() });
 
         await waitFor(() => {
-          expect(result.current.selectedKeys).to.have.lengthOf(2);
-          expect(result.current.focusedInstanceKey).to.be.undefined;
+          expect(result.current.selectedKeys).toHaveLength(2);
+          expect(result.current.focusedInstanceKey).toBeUndefined();
         });
 
         act(() => result.current.focusInstance(otherKey));
 
         await waitFor(() => {
-          expect(result.current.focusedInstanceKey).to.be.eq(otherKey);
+          expect(result.current.focusedInstanceKey).toBe(otherKey);
         });
       });
 
@@ -192,22 +187,22 @@ describe("useInstanceSelection", () => {
         const { result } = renderHook(useInstanceSelection, { initialProps: getProps() });
 
         await waitFor(() => {
-          expect(result.current.selectedKeys).to.have.lengthOf(2);
-          expect(result.current.focusedInstanceKey).to.be.undefined;
+          expect(result.current.selectedKeys).toHaveLength(2);
+          expect(result.current.focusedInstanceKey).toBeUndefined();
         });
 
         act(() => result.current.focusInstance(otherKey));
 
         await waitFor(() => {
-          expect(result.current.focusedInstanceKey).to.be.eq(otherKey);
+          expect(result.current.focusedInstanceKey).toBe(otherKey);
         });
 
         await setupSelection([otherKey]);
         act(() => triggerSelectionChange({ source: "OtherSource" }));
 
         await waitFor(() => {
-          expect(result.current.selectedKeys).to.have.lengthOf(1);
-          expect(result.current.focusedInstanceKey).to.be.undefined;
+          expect(result.current.selectedKeys).toHaveLength(1);
+          expect(result.current.focusedInstanceKey).toBeUndefined();
         });
       });
 
@@ -217,8 +212,8 @@ describe("useInstanceSelection", () => {
           const { result } = renderHook(useInstanceSelection, { initialProps: getProps() });
 
           await waitFor(() => {
-            expect(result.current.selectedKeys).to.have.lengthOf(1);
-            expect(result.current.ancestorsNavigationProps.canNavigateUp).to.be.true;
+            expect(result.current.selectedKeys).toHaveLength(1);
+            expect(result.current.ancestorsNavigationProps.canNavigateUp).toBe(true);
           });
         });
 
@@ -227,8 +222,8 @@ describe("useInstanceSelection", () => {
           const { result } = renderHook(useInstanceSelection, { initialProps: getProps() });
 
           await waitFor(() => {
-            expect(result.current.selectedKeys).to.have.lengthOf(2);
-            expect(result.current.ancestorsNavigationProps.canNavigateUp).to.be.false;
+            expect(result.current.selectedKeys).toHaveLength(2);
+            expect(result.current.ancestorsNavigationProps.canNavigateUp).toBe(false);
           });
         });
 
@@ -237,14 +232,14 @@ describe("useInstanceSelection", () => {
           const { result } = renderHook(useInstanceSelection, { initialProps: getProps() });
 
           await waitFor(() => {
-            expect(result.current.selectedKeys[0].id).to.be.eq(childKey.id);
-            expect(result.current.ancestorsNavigationProps.canNavigateUp).to.be.true;
+            expect(result.current.selectedKeys[0].id).toBe(childKey.id);
+            expect(result.current.ancestorsNavigationProps.canNavigateUp).toBe(true);
           });
 
           await act(async () => result.current.ancestorsNavigationProps.navigateUp());
 
           await waitFor(() => {
-            expect(result.current.selectedKeys[0].id).to.be.eq(parentKey.id);
+            expect(result.current.selectedKeys[0].id).toBe(parentKey.id);
           });
 
           assertReplaceCalledWithKeys([parentKey]);
@@ -255,21 +250,21 @@ describe("useInstanceSelection", () => {
           const { result } = renderHook(useInstanceSelection, { initialProps: getProps() });
 
           await waitFor(() => {
-            expect(result.current.selectedKeys[0].id).to.be.eq(childKey.id);
-            expect(result.current.ancestorsNavigationProps.canNavigateUp).to.be.true;
+            expect(result.current.selectedKeys[0].id).toBe(childKey.id);
+            expect(result.current.ancestorsNavigationProps.canNavigateUp).toBe(true);
           });
 
           await act(async () => result.current.ancestorsNavigationProps.navigateUp());
           await waitFor(() => {
-            expect(result.current.selectedKeys[0].id).to.be.eq(parentKey.id);
-            expect(result.current.ancestorsNavigationProps.canNavigateDown).to.be.true;
+            expect(result.current.selectedKeys[0].id).toBe(parentKey.id);
+            expect(result.current.ancestorsNavigationProps.canNavigateDown).toBe(true);
           });
           assertReplaceCalledWithKeys([parentKey]);
 
           act(() => result.current.ancestorsNavigationProps.navigateDown());
           await waitFor(() => {
-            expect(result.current.selectedKeys[0].id).to.be.eq(childKey.id);
-            expect(result.current.ancestorsNavigationProps.canNavigateDown).to.be.false;
+            expect(result.current.selectedKeys[0].id).toBe(childKey.id);
+            expect(result.current.ancestorsNavigationProps.canNavigateDown).toBe(false);
           });
           assertReplaceCalledWithKeys([childKey]);
         });
@@ -279,8 +274,8 @@ describe("useInstanceSelection", () => {
           const { result } = renderHook(useInstanceSelection, { initialProps: getProps() });
 
           await waitFor(() => {
-            expect(result.current.selectedKeys[0].id).to.be.eq(parentKey.id);
-            expect(result.current.ancestorsNavigationProps.canNavigateDown).to.be.false;
+            expect(result.current.selectedKeys[0].id).toBe(parentKey.id);
+            expect(result.current.ancestorsNavigationProps.canNavigateDown).toBe(false);
           });
         });
 
@@ -289,7 +284,7 @@ describe("useInstanceSelection", () => {
           const { result } = renderHook(useInstanceSelection, { initialProps: getProps() });
 
           await waitFor(() => {
-            expect(result.current.selectedKeys).to.have.lengthOf(2);
+            expect(result.current.selectedKeys).toHaveLength(2);
           });
 
           await act(async () => result.current.ancestorsNavigationProps.navigateUp());
@@ -303,24 +298,24 @@ describe("useInstanceSelection", () => {
           await setupSelection([grandChildKey]);
           const { result } = renderHook(useInstanceSelection, { initialProps: getProps() });
 
-          getParentInstanceKeyStub.reset();
-          getParentInstanceKeyStub.resolves(childKey);
+          getParentInstanceKeyStub.mockReset();
+          getParentInstanceKeyStub.mockResolvedValue(childKey);
 
           // wait until navigating up is possible
           await waitFor(() => {
-            expect(result.current.ancestorsNavigationProps.canNavigateUp).to.be.true;
+            expect(result.current.ancestorsNavigationProps.canNavigateUp).toBe(true);
           });
 
           const getParentInstanceKeyResult = createResolvablePromise<InstanceKey | undefined>();
-          getParentInstanceKeyStub.reset();
-          getParentInstanceKeyStub.returns(getParentInstanceKeyResult.promise);
+          getParentInstanceKeyStub.mockReset();
+          getParentInstanceKeyStub.mockReturnValue(getParentInstanceKeyResult.promise);
 
           // initiate navigation up
           act(() => void result.current.ancestorsNavigationProps.navigateUp());
 
           // expect navigating up again to be not possible
           await waitFor(() => {
-            expect(result.current.ancestorsNavigationProps.canNavigateUp).to.be.false;
+            expect(result.current.ancestorsNavigationProps.canNavigateUp).toBe(false);
           });
 
           // finish navigating up
@@ -328,8 +323,8 @@ describe("useInstanceSelection", () => {
 
           // expect navigating up to be possible again
           await waitFor(() => {
-            expect(result.current.selectedKeys[0].id).to.be.eq(childKey.id);
-            expect(result.current.ancestorsNavigationProps.canNavigateDown).to.be.true;
+            expect(result.current.selectedKeys[0].id).toBe(childKey.id);
+            expect(result.current.ancestorsNavigationProps.canNavigateDown).toBe(true);
           });
         });
       });
@@ -339,22 +334,22 @@ describe("useInstanceSelection", () => {
         const { result } = renderHook(useInstanceSelection, { initialProps: getProps() });
 
         await waitFor(() => {
-          expect(result.current.selectedKeys).to.have.lengthOf(0);
+          expect(result.current.selectedKeys).toHaveLength(0);
         });
 
-        getParentInstanceKeyStub.reset();
+        getParentInstanceKeyStub.mockReset();
         const getParentInstanceKeyCall1 = createResolvablePromise<InstanceKey | undefined>();
         const getParentInstanceKeyCall2 = createResolvablePromise<InstanceKey | undefined>();
 
         // simulate first selection change
         await setupSelection([noParentKey]);
-        getParentInstanceKeyStub.returns(getParentInstanceKeyCall1.promise);
+        getParentInstanceKeyStub.mockReturnValue(getParentInstanceKeyCall1.promise);
         act(() => triggerSelectionChange({ source: "OtherSource" }));
         assertReplaceNotCalled();
 
         // simulate second selection change
         await setupSelection([childKey]);
-        getParentInstanceKeyStub.returns(getParentInstanceKeyCall2.promise);
+        getParentInstanceKeyStub.mockReturnValue(getParentInstanceKeyCall2.promise);
         act(() => triggerSelectionChange({ source: "OtherSource" }));
         assertReplaceNotCalled();
 
@@ -363,9 +358,9 @@ describe("useInstanceSelection", () => {
 
         // make sure state matches result of second selection change
         await waitFor(() => {
-          expect(result.current.selectedKeys).to.have.lengthOf(1);
-          expect(result.current.selectedKeys[0].id).to.be.eq(childKey.id);
-          expect(result.current.ancestorsNavigationProps.canNavigateUp).to.be.true;
+          expect(result.current.selectedKeys).toHaveLength(1);
+          expect(result.current.selectedKeys[0].id).toBe(childKey.id);
+          expect(result.current.ancestorsNavigationProps.canNavigateUp).toBe(true);
         });
 
         // resolve promise for first selection change
@@ -373,9 +368,9 @@ describe("useInstanceSelection", () => {
 
         // make sure state still matches result of second selection change
         await waitFor(() => {
-          expect(result.current.selectedKeys).to.have.lengthOf(1);
-          expect(result.current.selectedKeys[0].id).to.be.eq(childKey.id);
-          expect(result.current.ancestorsNavigationProps.canNavigateUp).to.be.true;
+          expect(result.current.selectedKeys).toHaveLength(1);
+          expect(result.current.selectedKeys[0].id).toBe(childKey.id);
+          expect(result.current.ancestorsNavigationProps.canNavigateUp).toBe(true);
         });
       });
     });
@@ -383,8 +378,8 @@ describe("useInstanceSelection", () => {
 
   describe("feature usage reporting", () => {
     it("reports when navigates up and down", async () => {
-      const onFeatureUsedSpy = sinon.spy();
-      selectionStorage.getSelection.returns(Selectables.create([childKey]));
+      const onFeatureUsedSpy = vi.fn();
+      selectionStorage.getSelection.mockReturnValue(Selectables.create([childKey]));
 
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>{children}</TelemetryContextProvider>
@@ -395,28 +390,28 @@ describe("useInstanceSelection", () => {
       });
 
       await waitFor(() => {
-        expect(result.current.selectedKeys[0].id).to.be.eq(childKey.id);
-        expect(result.current.ancestorsNavigationProps.canNavigateUp).to.be.true;
+        expect(result.current.selectedKeys[0].id).toBe(childKey.id);
+        expect(result.current.ancestorsNavigationProps.canNavigateUp).toBe(true);
       });
 
       await act(async () => result.current.ancestorsNavigationProps.navigateUp());
 
       await waitFor(() => {
-        expect(result.current.selectedKeys[0].id).to.be.eq(parentKey.id);
-        expect(result.current.ancestorsNavigationProps.canNavigateDown).to.be.true;
+        expect(result.current.selectedKeys[0].id).toBe(parentKey.id);
+        expect(result.current.ancestorsNavigationProps.canNavigateDown).toBe(true);
       });
 
-      expect(onFeatureUsedSpy).to.be.calledOnceWith("ancestor-navigation");
-      onFeatureUsedSpy.resetHistory();
+      expect(onFeatureUsedSpy).toHaveBeenCalledExactlyOnceWith("ancestor-navigation");
+      onFeatureUsedSpy.mockClear();
 
       act(() => result.current.ancestorsNavigationProps.navigateDown());
 
       await waitFor(() => {
-        expect(result.current.selectedKeys[0].id).to.be.eq(childKey.id);
-        expect(result.current.ancestorsNavigationProps.canNavigateDown).to.be.false;
+        expect(result.current.selectedKeys[0].id).toBe(childKey.id);
+        expect(result.current.ancestorsNavigationProps.canNavigateDown).toBe(false);
       });
 
-      expect(onFeatureUsedSpy).to.be.calledOnceWith("ancestor-navigation");
+      expect(onFeatureUsedSpy).toHaveBeenCalledExactlyOnceWith("ancestor-navigation");
     });
   });
 });

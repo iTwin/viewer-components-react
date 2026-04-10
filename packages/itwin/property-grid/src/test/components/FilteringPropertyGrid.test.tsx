@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
-import sinon from "sinon";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { PropertyDataChangeEvent } from "@itwin/components-react";
 import {
@@ -57,12 +56,8 @@ describe("<FilteringPropertyGrid />", () => {
     }),
   };
 
-  before(() => {
-    sinon.stub(PropertyGridManager, "translate").callsFake((key) => key);
-  });
-
-  after(() => {
-    sinon.restore();
+  beforeEach(() => {
+    vi.spyOn(PropertyGridManager, "translate").mockImplementation((key) => key);
   });
 
   it("renders with `NoopPropertyDataFilterer`", async () => {
@@ -71,7 +66,7 @@ describe("<FilteringPropertyGrid />", () => {
     const { getByText, queryByText } = render(<FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={provider} />);
 
     await waitFor(() => getByText("Non-null Prop"));
-    expect(queryByText("Null Prop")).to.not.be.null;
+    expect(queryByText("Null Prop")).not.toBeNull();
   });
 
   it("auto expands child categories by default", async () => {
@@ -80,8 +75,8 @@ describe("<FilteringPropertyGrid />", () => {
     const { getByText, queryByText } = render(<FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={provider} />);
 
     await waitFor(() => getByText("Non-null Prop"));
-    expect(queryByText("Null Prop")).to.not.be.null;
-    expect(queryByText("Child Prop")).to.not.be.null;
+    expect(queryByText("Null Prop")).not.toBeNull();
+    expect(queryByText("Child Prop")).not.toBeNull();
   });
 
   it("doesn't auto expand child categories when disabled", async () => {
@@ -92,8 +87,8 @@ describe("<FilteringPropertyGrid />", () => {
     );
 
     await waitFor(() => getByText("Non-null Prop"));
-    expect(queryByText("Null Prop")).to.not.be.null;
-    expect(queryByText("Child Prop")).to.be.null;
+    expect(queryByText("Null Prop")).not.toBeNull();
+    expect(queryByText("Child Prop")).toBeNull();
   });
 
   describe("with `NonEmptyValuesPropertyDataFilterer`", () => {
@@ -103,7 +98,7 @@ describe("<FilteringPropertyGrid />", () => {
       const { getByText, queryByText } = render(<FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={provider} />);
 
       await waitFor(() => getByText("Non-null Prop"));
-      expect(queryByText("Null Prop")).to.be.null;
+      expect(queryByText("Null Prop")).toBeNull();
     });
 
     it("filters out empty array properties", async () => {
@@ -152,7 +147,7 @@ describe("<FilteringPropertyGrid />", () => {
       const { getByText, queryByText } = render(<FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={dataProvider} />);
 
       await waitFor(() => getByText(/^Non-Empty Array Prop/));
-      expect(queryByText(/^Empty Array Prop/)).to.be.null;
+      expect(queryByText(/^Empty Array Prop/)).toBeNull();
     });
 
     it("filters out array properties with empty items", async () => {
@@ -208,7 +203,7 @@ describe("<FilteringPropertyGrid />", () => {
       const { getByText, queryByText } = render(<FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={dataProvider} />);
 
       await waitFor(() => getByText(/^Non-Empty Array Prop/));
-      expect(queryByText(/^Empty Array Prop/)).to.be.null;
+      expect(queryByText(/^Empty Array Prop/)).toBeNull();
     });
 
     it("filters out empty struct properties", async () => {
@@ -253,7 +248,7 @@ describe("<FilteringPropertyGrid />", () => {
       const { getByText, queryByText } = render(<FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={dataProvider} />);
 
       await waitFor(() => getByText("Non-Empty Struct Prop"));
-      expect(queryByText("Empty Struct Prop")).to.be.null;
+      expect(queryByText("Empty Struct Prop")).toBeNull();
     });
 
     it("filters out struct properties with empty members", async () => {
@@ -313,7 +308,7 @@ describe("<FilteringPropertyGrid />", () => {
       const { getByText, queryByText } = render(<FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={dataProvider} />);
 
       await waitFor(() => getByText("Non-Empty Struct Prop"));
-      expect(queryByText("Empty Struct Prop")).to.be.null;
+      expect(queryByText("Empty Struct Prop")).toBeNull();
     });
 
     it("re-renders when underlying data changes", async () => {
@@ -358,14 +353,14 @@ describe("<FilteringPropertyGrid />", () => {
         mutatingProvider.onDataChanged.raiseEvent();
       });
       await waitFor(() => getByText("Prop 1"));
-      expect(queryByText("Null Prop")).to.be.null;
+      expect(queryByText("Null Prop")).toBeNull();
 
       act(() => {
         propertyData.records["test-category"] = [propertyRecord2, nullPropertyRecord];
         mutatingProvider.onDataChanged.raiseEvent();
       });
       await waitFor(() => getByText("Prop 2"));
-      expect(queryByText("Null Prop")).to.be.null;
+      expect(queryByText("Null Prop")).toBeNull();
     });
   });
 });
