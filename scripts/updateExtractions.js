@@ -12,6 +12,7 @@ const argv = yargs(process.argv).argv;
 
 // parse args
 const isCheck = "check" in argv;
+const gatherDocs = "gatherDocs" in argv;
 const targets = argv.targets;
 if (!targets) {
   console.error(
@@ -24,8 +25,13 @@ if (!targets) {
 const [{ path: workspaceRootPath }] = JSON.parse(execFileSync("pnpm", ["list", "-w", "--only-projects", "--json"], { shell: true, encoding: "utf-8" }));
 
 // gather extractions from different packages into the workspace root
-console.log(`Gathering extractions from different packages...`);
-execFileSync("node", [path.join(workspaceRootPath, "scripts", "gatherDocs.js")], { stdio: "inherit", cwd: workspaceRootPath });
+if (gatherDocs) {
+  console.log(`Gathering extractions from different packages...`);
+  execFileSync("node", [path.join(workspaceRootPath, "scripts", "gatherDocs.js")], {
+    stdio: "inherit",
+    cwd: workspaceRootPath,
+  });
+}
 
 // set up constants
 const extractionsDir = path.join(workspaceRootPath, "build/docs/extract");
