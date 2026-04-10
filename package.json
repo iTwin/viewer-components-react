@@ -24,8 +24,9 @@
     "bump": "beachball bump",
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --write .",
-    "update-extractions": "npm run docs:all && lage update-extractions",
-    "check-extractions": "npm run docs:all && lage check-extractions",
+    "gather-docs": "node ./scripts/gatherDocs.js",
+    "update-extractions": "npm run docs:all && npm run gather-docs && lage update-extractions",
+    "check-extractions": "npm run docs:all && npm run gather-docs && lage check-extractions",
     "benchmark:tree-widget": "pnpm run -C ./apps/performance-tests benchmark:tree-widget"
   },
   "devDependencies": {

@@ -4,6 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 const { execSync } = require("child_process");
 const cpx = require("cpx2");
+const fs = require("fs");
+const path = require("path");
 
 function safeJsonParse(data) {
   try {
@@ -25,11 +27,14 @@ const allWorkspacePackages = safeJsonParse(execSync("pnpm list -r --depth -1 --o
 // get info about root package
 const [{ name: workspaceRootName, path: workspaceRootPath }] = JSON.parse(execSync("pnpm list -w --only-projects --json", { encoding: "utf-8" }));
 
+const targetDir = path.join(workspaceRootPath, "build");
+fs.mkdirSync(targetDir, { recursive: true });
+
 // filter out root package
 const workspacePackages = allWorkspacePackages.filter(({ name }) => name !== workspaceRootName);
 console.log(workspacePackages);
 
 for (const package of workspacePackages) {
   // copy docs build from each package to the root
-  cpx.copySync(`${package.path}/build/**`, `${workspaceRootPath}/build`);
+  cpx.copySync(`${package.path}/build/**`, targetDir);
 }
