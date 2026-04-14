@@ -153,7 +153,7 @@ describe("BufferingViewport", () => {
       },
     ].forEach(({ describeName, getDisplay, changeDisplay, getViewport }) => {
       describe(describeName, () => {
-        it("returns viewport viewports result when change function has not been called", () => {
+        it("returns real viewports result when change function has not been called", () => {
           const viewport = getViewport();
           const bufferingViewport = new BufferingViewport(viewport);
           expect(getDisplay(bufferingViewport)).toBe(true);
@@ -170,7 +170,7 @@ describe("BufferingViewport", () => {
           expect(getDisplay(bufferingViewport)).toBe(false);
         });
 
-        it("adjusts viewport viewport when commit is called", () => {
+        it("adjusts real viewport when commit is called", () => {
           const viewport = getViewport();
           const bufferingViewport = new BufferingViewport(viewport);
           changeDisplay(bufferingViewport);
@@ -192,7 +192,7 @@ describe("BufferingViewport", () => {
   });
 
   describe("per-model category overrides", () => {
-    it("returns viewport viewports result when change function has not been called", () => {
+    it("returns real viewports result when change function has not been called", () => {
       const viewport = createMockViewport({ perModelCategoryOverrides: new Map([["0x1", new Map([["0x2", "show"]])]]) });
       const bufferingViewport = new BufferingViewport(viewport);
 
@@ -296,7 +296,7 @@ describe("BufferingViewport", () => {
       expect(iteratedOverrides).toEqual([{ modelId: "0x1", categoryId: "0x2", visible: false }]);
     });
 
-    it("adjusts viewport viewport when commit is called", () => {
+    it("adjusts real viewport when commit is called", () => {
       const viewport = createMockViewport({
         perModelCategoryOverrides: new Map([
           ["0x1", new Map([["0x2", "show" as PerModelCategoryOverride]])],
