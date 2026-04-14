@@ -354,11 +354,11 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
       neverDrawn: this.#viewport.neverDrawn?.size ? this.getAlwaysOrNeverDrawnElements({ modelId, categoryIds, setType: "never" }) : of(new Set<Id64String>()),
     }).pipe(
       map(({ alwaysDrawn, neverDrawn }) => {
-        if (this.#viewport.alwaysDrawn?.size && alwaysDrawn.size) {
-          bufferingViewport.setAlwaysDrawn({ elementIds: setDifference(this.#viewport.alwaysDrawn, alwaysDrawn) });
+        if (bufferingViewport.alwaysDrawn?.size && alwaysDrawn.size) {
+          bufferingViewport.setAlwaysDrawn({ elementIds: setDifference(bufferingViewport.alwaysDrawn, alwaysDrawn) });
         }
-        if (this.#viewport.neverDrawn?.size && neverDrawn.size) {
-          bufferingViewport.setNeverDrawn({ elementIds: setDifference(this.#viewport.neverDrawn, neverDrawn) });
+        if (bufferingViewport.neverDrawn?.size && neverDrawn.size) {
+          bufferingViewport.setNeverDrawn({ elementIds: setDifference(bufferingViewport.neverDrawn, neverDrawn) });
         }
       }),
     );
