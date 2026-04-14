@@ -141,6 +141,7 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
         state: on ? "visible" : "hidden",
         tooltip: createTooltip("determining", translate),
       };
+      entry.needsRefresh = true;
       triggerCheckboxUpdate();
     };
 
