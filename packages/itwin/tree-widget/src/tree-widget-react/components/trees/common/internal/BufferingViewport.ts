@@ -194,8 +194,8 @@ export class BufferingViewport implements TreeWidgetViewport {
     this.#clearedPerModelCategoryOverrides = new Set<string>();
     // When converting from "all" to Set, need to iterate over real viewport overrides and add them to cleared set
     // If they have not been changed yet.
-    for (const { modelId } of this.#realViewport.perModelCategoryOverrides) {
-      if (!this.#changedPerModelCategoryOverrides.has(modelId)) {
+    for (const { modelId, categoryId } of this.#realViewport.perModelCategoryOverrides) {
+      if (!this.#changedPerModelCategoryOverrides.get(modelId)?.get(categoryId)) {
         this.#clearedPerModelCategoryOverrides.add(modelId);
       }
     }
@@ -251,10 +251,13 @@ export class BufferingViewport implements TreeWidgetViewport {
   }
 
   public commit(): void {
-    for (const callback of this.#onCommitCallbacks) {
-      callback();
+    try {
+      for (const callback of this.#onCommitCallbacks) {
+        callback();
+      }
+    } finally {
+      this.discard();
     }
-    this.discard();
   }
 
   public discard(): void {

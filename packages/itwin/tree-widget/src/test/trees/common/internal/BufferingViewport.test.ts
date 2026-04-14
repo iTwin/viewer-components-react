@@ -262,6 +262,40 @@ describe("BufferingViewport", () => {
       expect(viewport.getPerModelCategoryOverride({ modelId: "0x3", categoryId: "0x4" })).toBe("hide");
       expect(viewport.getPerModelCategoryOverride({ modelId: "0x5", categoryId: "0x6" })).toBe("none");
     });
+
+    it("adjusts state correctly when multiple changes are made in sequence", () => {
+      const viewport = createMockViewport({
+        perModelCategoryOverrides: new Map([
+          [
+            "0x1",
+            new Map([
+              ["0x2", "show" as PerModelCategoryOverride],
+              ["0x3", "hide" as PerModelCategoryOverride],
+            ]),
+          ],
+          ["0x4", new Map([["0x5", "show" as PerModelCategoryOverride]])],
+        ]),
+      });
+      const bufferingViewport = new BufferingViewport(viewport);
+
+      // 1. Clear all overrides
+      bufferingViewport.clearPerModelCategoryOverrides();
+      // 2. Set a new override for the same model but only one category
+      bufferingViewport.setPerModelCategoryOverride({ modelIds: "0x1", categoryIds: "0x2", override: "hide" });
+      // 3. Clear overrides for a different model
+      bufferingViewport.clearPerModelCategoryOverrides({ modelIds: "0x4" });
+
+      // changed override in step 2 should be preserved
+      expect(bufferingViewport.getPerModelCategoryOverride({ modelId: "0x1", categoryId: "0x2" })).toBe("hide");
+      // 0x1/0x3 was cleared in step 1 and never re-set — must be "none", not the real viewport's "hide"
+      expect(bufferingViewport.getPerModelCategoryOverride({ modelId: "0x1", categoryId: "0x3" })).toBe("none");
+      expect(bufferingViewport.getPerModelCategoryOverride({ modelId: "0x4", categoryId: "0x5" })).toBe("none");
+
+      // Also verify the iterator doesn't yield the leaked override
+      const iteratedOverrides = [...bufferingViewport.perModelCategoryOverrides];
+      expect(iteratedOverrides).toEqual([{ modelId: "0x1", categoryId: "0x2", visible: false }]);
+    });
+
     it("adjusts viewport viewport when commit is called", () => {
       const viewport = createMockViewport({
         perModelCategoryOverrides: new Map([
