@@ -347,11 +347,22 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
     modelId: Id64String;
     bufferingViewport: BufferingViewport;
   }) {
+    // Check both the real viewport and the buffering viewport sets:
+    // - Real viewport: checking the real viewport's set is sufficient because the queried elements are only used
+    //   to `setDifference` them from the buffered sets. If the buffered set has fewer elements, they were already
+    //   removed. If it has more, those additions should stay - elements should never be added and then removed within
+    //   the same `changeVisibility` call.
+    // - Buffering viewport: the query results are subtracted from the buffered sets via `setDifference`.
+    //   If the buffered set is already empty, there's nothing to subtract from.
     return forkJoin({
-      alwaysDrawn: this.#viewport.alwaysDrawn?.size
-        ? this.getAlwaysOrNeverDrawnElements({ modelId, categoryIds, setType: "always" })
-        : of(new Set<Id64String>()),
-      neverDrawn: this.#viewport.neverDrawn?.size ? this.getAlwaysOrNeverDrawnElements({ modelId, categoryIds, setType: "never" }) : of(new Set<Id64String>()),
+      alwaysDrawn:
+        this.#viewport.alwaysDrawn?.size && bufferingViewport.alwaysDrawn?.size
+          ? this.getAlwaysOrNeverDrawnElements({ modelId, categoryIds, setType: "always" })
+          : of(new Set<Id64String>()),
+      neverDrawn:
+        this.#viewport.neverDrawn?.size && bufferingViewport.neverDrawn?.size
+          ? this.getAlwaysOrNeverDrawnElements({ modelId, categoryIds, setType: "never" })
+          : of(new Set<Id64String>()),
     }).pipe(
       map(({ alwaysDrawn, neverDrawn }) => {
         if (bufferingViewport.alwaysDrawn?.size && alwaysDrawn.size) {
