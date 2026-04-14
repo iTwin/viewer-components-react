@@ -44,9 +44,20 @@ interface UseHierarchyVisibilityProps {
   visibilityHandlerFactory: () => HierarchyVisibilityHandler;
 }
 
+type VisibilityStatusMap = MutableRefObject<
+  Map<
+    string,
+    {
+      node: TreeNode;
+      status: TreeItemVisibilityButtonState;
+      needsRefresh: boolean;
+    }
+  >
+>;
+
 /** @internal */
 export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarchyVisibilityProps): VisibilityContext & { triggerRefresh: () => void } {
-  const visibilityStatusMap = useRef(new Map<string, { node: TreeNode; status: TreeItemVisibilityButtonState; needsRefresh: boolean }>());
+  const visibilityStatusMap: VisibilityStatusMap = useRef(new Map());
   const [state, setState] = useState<VisibilityContext & { triggerRefresh: () => void }>({
     getVisibilityButtonState: () => ({ isLoading: true }),
     onVisibilityButtonClick: () => {},
@@ -116,21 +127,29 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
     const changeVisibility: VisibilityContext["onVisibilityButtonClick"] = (node, visibilityState) => {
       onFeatureUsed({ featureId: "visibility-change", reportInteraction: true });
       // visible should become hidden, partial and hidden should become visible TODO: redo for clarity
-      const on = visibilityState === "visible" ? false : true;
+      const { on, newState } = visibilityState === "visible" ? { on: false, newState: "hidden" as const } : { on: true, newState: "visible" as const };
       void (async () => {
         try {
           await handler.changeVisibility(node.nodeData, on);
         } catch {}
       })();
+      const tooltip = createTooltip("determining", translate);
       const entry = visibilityStatusMap.current.get(node.id);
+      setChildrenStateRecursively({
+        node,
+        newState,
+        tooltip,
+        map: visibilityStatusMap,
+      });
       if (!entry) {
         return;
       }
       entry.status = {
         ...entry.status,
-        state: visibilityState,
-        tooltip: createTooltip("determining", translate),
+        state: newState,
+        tooltip,
       };
+      entry.needsRefresh = true;
       triggerCheckboxUpdate();
     };
 
@@ -158,10 +177,39 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
   return state;
 }
 
-function createStateGetter(
-  map: MutableRefObject<Map<string, { node: TreeNode; status: TreeItemVisibilityButtonState; needsRefresh: boolean }>>,
-  calculateVisibility: (node: TreeNode) => void,
-): VisibilityContext["getVisibilityButtonState"] {
+function setChildrenStateRecursively({
+  node,
+  newState,
+  tooltip,
+  map,
+}: {
+  node: TreeNode;
+  newState: "visible" | "hidden";
+  tooltip: string;
+  map: MutableRefObject<Map<string, { node: TreeNode; status: TreeItemVisibilityButtonState; needsRefresh: boolean }>>;
+}) {
+  if (Array.isArray(node.children)) {
+    for (const child of node.children) {
+      const childEntry = map.current.get(child.id);
+      if (childEntry) {
+        childEntry.status = {
+          ...childEntry.status,
+          state: newState,
+          tooltip,
+        };
+        childEntry.needsRefresh = true;
+      }
+      setChildrenStateRecursively({
+        node: child,
+        newState,
+        tooltip,
+        map,
+      });
+    }
+  }
+}
+
+function createStateGetter(map: VisibilityStatusMap, calculateVisibility: (node: TreeNode) => void): VisibilityContext["getVisibilityButtonState"] {
   return (node) => {
     const entry = map.current.get(node.id);
     if (entry === undefined) {
