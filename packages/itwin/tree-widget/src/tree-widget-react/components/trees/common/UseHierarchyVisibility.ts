@@ -131,7 +131,11 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
       void (async () => {
         try {
           await handler.changeVisibility(node.nodeData, on);
-        } catch {}
+        } catch (error) {
+          setErrorState(error);
+          resetCache();
+          triggerCheckboxUpdate();
+        }
       })();
       const tooltip = createTooltip("determining", translate);
       const entry = visibilityStatusMap.current.get(node.id);
@@ -186,7 +190,7 @@ function setChildrenStateRecursively({
   node: TreeNode;
   newState: "visible" | "hidden";
   tooltip: string;
-  map: MutableRefObject<Map<string, { node: TreeNode; status: TreeItemVisibilityButtonState; needsRefresh: boolean }>>;
+  map: VisibilityStatusMap;
 }) {
   if (Array.isArray(node.children)) {
     for (const child of node.children) {
