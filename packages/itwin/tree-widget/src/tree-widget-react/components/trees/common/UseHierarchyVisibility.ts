@@ -43,10 +43,20 @@ export interface HierarchyVisibilityHandler extends Disposable {
 interface UseHierarchyVisibilityProps {
   visibilityHandlerFactory: () => HierarchyVisibilityHandler;
 }
+type VisibilityStatusMap = MutableRefObject<
+  Map<
+    string,
+    {
+      node: TreeNode;
+      status: TreeItemVisibilityButtonState;
+      needsRefresh: boolean;
+    }
+  >
+>;
 
 /** @internal */
 export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarchyVisibilityProps): VisibilityContext & { triggerRefresh: () => void } {
-  const visibilityStatusMap = useRef(new Map<string, { node: TreeNode; status: TreeItemVisibilityButtonState; needsRefresh: boolean }>());
+  const visibilityStatusMap: VisibilityStatusMap = useRef(new Map());
   const [state, setState] = useState<VisibilityContext & { triggerRefresh: () => void }>({
     getVisibilityButtonState: () => ({ isLoading: true }),
     onVisibilityButtonClick: () => {},
@@ -128,7 +138,7 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
       }
       entry.status = {
         ...entry.status,
-        state: visibilityState,
+        state: on ? "visible" : "hidden",
         tooltip: createTooltip("determining", translate),
       };
       triggerCheckboxUpdate();
@@ -158,10 +168,7 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
   return state;
 }
 
-function createStateGetter(
-  map: MutableRefObject<Map<string, { node: TreeNode; status: TreeItemVisibilityButtonState; needsRefresh: boolean }>>,
-  calculateVisibility: (node: TreeNode) => void,
-): VisibilityContext["getVisibilityButtonState"] {
+function createStateGetter(map: VisibilityStatusMap, calculateVisibility: (node: TreeNode) => void): VisibilityContext["getVisibilityButtonState"] {
   return (node) => {
     const entry = map.current.get(node.id);
     if (entry === undefined) {

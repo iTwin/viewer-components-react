@@ -147,10 +147,10 @@ describe("useHierarchyVisibility", () => {
     });
 
     act(() => {
-      // expect visibility state to be optimistically updated to 'visible'
+      // expect visibility state to be optimistically updated to 'hidden'
       expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledOnce();
       const state = result.current.getVisibilityButtonState(node);
-      expect(state).toEqual({ state: "visible", tooltip: "visibilityTooltips.status.determining" });
+      expect(state).toEqual({ state: "hidden", tooltip: "visibilityTooltips.status.determining" });
     });
 
     await waitFor(() => {

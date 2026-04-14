@@ -12,6 +12,7 @@ import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtil
 
 import type { Observable } from "rxjs";
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
+import type { BufferingViewport } from "../../../common/internal/BufferingViewport.js";
 import type { CategoryId, ElementId } from "../../../common/internal/Types.js";
 import type { BaseVisibilityHelperProps } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
@@ -93,10 +94,12 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
    *
    * Does this by changing visibility status of related models.
    */
-  public changeSubjectsVisibilityStatus(props: { subjectIds: Id64Arg; on: boolean }): Observable<void> {
+  public changeSubjectsVisibilityStatus(props: { subjectIds: Id64Arg; on: boolean; bufferingViewport: BufferingViewport }): Observable<void> {
     const result = defer(() => {
-      const { on, subjectIds } = props;
-      return this.#props.idsCache.getSubjectModelIds(subjectIds).pipe(mergeMap((modelIds) => this.changeModelsVisibilityStatus({ modelIds, on })));
+      const { on, subjectIds, bufferingViewport } = props;
+      return this.#props.idsCache
+        .getSubjectModelIds(subjectIds)
+        .pipe(mergeMap((modelIds) => this.changeModelsVisibilityStatus({ modelIds, on, bufferingViewport })));
     });
     return this.#props.overrideHandler
       ? this.#props.overrideHandler.createVisibilityHandlerResult({
@@ -108,11 +111,17 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
   }
 
   /** Changes visibility of grouped elements. */
-  public changeGroupedElementsVisibilityStatus(props: { modelId: Id64String; categoryId: Id64String; elementIds: Id64Arg; on: boolean }): Observable<void> {
-    const { modelId, categoryId, elementIds, on } = props;
+  public changeGroupedElementsVisibilityStatus(props: {
+    modelId: Id64String;
+    categoryId: Id64String;
+    elementIds: Id64Arg;
+    on: boolean;
+    bufferingViewport: BufferingViewport;
+  }): Observable<void> {
+    const { modelId, categoryId, elementIds, on, bufferingViewport } = props;
     return this.#props.idsCache.getChildElementsTree({ elementIds }).pipe(
       map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ depth }) => depth > 0 })),
-      mergeMap((children) => this.changeElementsVisibilityStatus({ modelId, elementIds, categoryId, on, children })),
+      mergeMap((children) => this.changeElementsVisibilityStatus({ modelId, elementIds, categoryId, on, children, bufferingViewport })),
     );
   }
 }

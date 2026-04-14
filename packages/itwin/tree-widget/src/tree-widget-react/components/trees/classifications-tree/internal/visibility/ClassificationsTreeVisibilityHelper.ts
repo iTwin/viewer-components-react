@@ -9,6 +9,7 @@ import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVi
 
 import type { Observable } from "rxjs";
 import type { Id64Arg } from "@itwin/core-bentley";
+import type { BufferingViewport } from "../../../common/internal/BufferingViewport.js";
 import type { BaseVisibilityHelperProps } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { ClassificationsTreeIdsCache } from "../ClassificationsTreeIdsCache.js";
@@ -70,13 +71,18 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
    *
    * Does this by changing visibility status of related categories.
    */
-  public changeClassificationTablesVisibilityStatus(props: { classificationTableIds: Id64Arg; on: boolean }): Observable<void> {
+  public changeClassificationTablesVisibilityStatus(props: {
+    classificationTableIds: Id64Arg;
+    on: boolean;
+    bufferingViewport: BufferingViewport;
+  }): Observable<void> {
     return this.#props.idsCache.getAllContainedCategories(props.classificationTableIds).pipe(
       mergeMap((categories) =>
         this.changeCategoriesVisibilityStatus({
           modelId: undefined,
           categoryIds: categories,
           on: props.on,
+          bufferingViewport: props.bufferingViewport,
         }),
       ),
     );
@@ -87,13 +93,14 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
    *
    * Does this by changing visibility status of related categories.
    */
-  public changeClassificationsVisibilityStatus(props: { classificationIds: Id64Arg; on: boolean }): Observable<void> {
+  public changeClassificationsVisibilityStatus(props: { classificationIds: Id64Arg; on: boolean; bufferingViewport: BufferingViewport }): Observable<void> {
     return this.#props.idsCache.getAllContainedCategories(props.classificationIds).pipe(
       mergeMap((categories) =>
         this.changeCategoriesVisibilityStatus({
           modelId: undefined,
           categoryIds: categories,
           on: props.on,
+          bufferingViewport: props.bufferingViewport,
         }),
       ),
     );

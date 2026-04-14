@@ -15,6 +15,7 @@ import { ClassificationsTreeVisibilityHelper } from "./ClassificationsTreeVisibi
 import type { Observable } from "rxjs";
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
+import type { BufferingViewport } from "../../../common/internal/BufferingViewport.js";
 import type { AlwaysAndNeverDrawnElementInfoCache } from "../../../common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
 import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
 import type { ChildrenTree } from "../../../common/internal/Utils.js";
@@ -55,7 +56,15 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
     this.#visibilityHelper[Symbol.dispose]();
   }
 
-  public changeSearchTargetsVisibilityStatus(targets: ClassificationsTreeSearchTargets, on: boolean): Observable<void> {
+  public changeSearchTargetsVisibilityStatus({
+    targets,
+    on,
+    bufferingViewport,
+  }: {
+    targets: ClassificationsTreeSearchTargets;
+    on: boolean;
+    bufferingViewport: BufferingViewport;
+  }): Observable<void> {
     return defer(() => {
       if (this.#props.viewport.viewType !== "3d") {
         return EMPTY;
@@ -63,15 +72,15 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       const { classificationIds, classificationTableIds, elements } = targets;
       const observables = new Array<Observable<void>>();
       if (classificationTableIds?.size) {
-        observables.push(this.#visibilityHelper.changeClassificationTablesVisibilityStatus({ classificationTableIds, on }));
+        observables.push(this.#visibilityHelper.changeClassificationTablesVisibilityStatus({ classificationTableIds, on, bufferingViewport }));
       }
 
       if (classificationIds?.size) {
-        observables.push(this.#visibilityHelper.changeClassificationsVisibilityStatus({ classificationIds, on }));
+        observables.push(this.#visibilityHelper.changeClassificationsVisibilityStatus({ classificationIds, on, bufferingViewport }));
       }
 
       if (elements?.length) {
-        observables.push(this.changeSearchTargetElementsVisibilityStatus({ elements, on }));
+        observables.push(this.changeSearchTargetElementsVisibilityStatus({ elements, on, bufferingViewport }));
       }
 
       return merge(...observables);
@@ -81,9 +90,11 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
   private changeSearchTargetElementsVisibilityStatus({
     elements,
     on,
+    bufferingViewport,
   }: {
     elements: Required<ClassificationsTreeSearchTargets>["elements"];
     on: boolean;
+    bufferingViewport: BufferingViewport;
   }): Observable<void> {
     const searchTargetElements = new Array<Id64String>();
     const elementIdsSet = new Set<Id64String>();
@@ -138,6 +149,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
               // Pass only those children that are not part of search paths.
               children: setIntersection(childrenIds, childrenNotInSearchPaths),
               on,
+              bufferingViewport,
             });
           }),
         ),
@@ -176,7 +188,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
   }
 
   /** Changes visibility of the items represented by the tree node. */
-  public changeVisibilityStatus(node: HierarchyNode, on: boolean): Observable<void> {
+  public changeVisibilityStatus({ node, on, bufferingViewport }: { node: HierarchyNode; on: boolean; bufferingViewport: BufferingViewport }): Observable<void> {
     const changeObs = defer(() => {
       if (this.#props.viewport.viewType !== "3d") {
         return EMPTY;
@@ -185,6 +197,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
         return this.#visibilityHelper.changeClassificationTablesVisibilityStatus({
           classificationTableIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
           on,
+          bufferingViewport,
         });
       }
 
@@ -192,6 +205,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
         return this.#visibilityHelper.changeClassificationsVisibilityStatus({
           classificationIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
           on,
+          bufferingViewport,
         });
       }
       assert(ClassificationsTreeNodeInternal.isGeometricElementNode(node));
@@ -209,13 +223,14 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
             categoryId: node.extendedData.categoryId,
             children: children.size > 0 ? children : undefined,
             on,
+            bufferingViewport,
           }),
         ),
       );
     });
 
     if (this.#props.viewport.isAlwaysDrawnExclusive) {
-      return concat(this.#visibilityHelper.removeAlwaysDrawnExclusive(), changeObs);
+      return concat(this.#visibilityHelper.removeAlwaysDrawnExclusive(bufferingViewport), changeObs);
     }
     return changeObs;
   }

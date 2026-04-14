@@ -37,6 +37,7 @@ import { getClassesByView, getIdsFromChildrenTree, getOptimalBatchSize, releaseM
 import type { Observable, Subscription } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
+import type { BufferingViewport } from "../BufferingViewport.js";
 import type { ChildrenTree } from "../Utils.js";
 
 /** @internal */
@@ -337,22 +338,27 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
     );
   }
 
-  public clearAlwaysAndNeverDrawnElements(props: { categoryIds: Id64Arg; modelId: Id64String }) {
+  public clearAlwaysAndNeverDrawnElements({
+    bufferingViewport,
+    categoryIds,
+    modelId,
+  }: {
+    categoryIds: Id64Arg;
+    modelId: Id64String;
+    bufferingViewport: BufferingViewport;
+  }) {
     return forkJoin({
       alwaysDrawn: this.#viewport.alwaysDrawn?.size
-        ? this.getAlwaysOrNeverDrawnElements({ modelId: props.modelId, categoryIds: props.categoryIds, setType: "always" })
+        ? this.getAlwaysOrNeverDrawnElements({ modelId, categoryIds, setType: "always" })
         : of(new Set<Id64String>()),
-      neverDrawn: this.#viewport.neverDrawn?.size
-        ? this.getAlwaysOrNeverDrawnElements({ modelId: props.modelId, categoryIds: props.categoryIds, setType: "never" })
-        : of(new Set<Id64String>()),
+      neverDrawn: this.#viewport.neverDrawn?.size ? this.getAlwaysOrNeverDrawnElements({ modelId, categoryIds, setType: "never" }) : of(new Set<Id64String>()),
     }).pipe(
       map(({ alwaysDrawn, neverDrawn }) => {
-        const viewport = this.#viewport;
-        if (viewport.alwaysDrawn?.size && alwaysDrawn.size) {
-          viewport.setAlwaysDrawn({ elementIds: setDifference(viewport.alwaysDrawn, alwaysDrawn) });
+        if (this.#viewport.alwaysDrawn?.size && alwaysDrawn.size) {
+          bufferingViewport.setAlwaysDrawn({ elementIds: setDifference(this.#viewport.alwaysDrawn, alwaysDrawn) });
         }
-        if (viewport.neverDrawn?.size && neverDrawn.size) {
-          viewport.setNeverDrawn({ elementIds: setDifference(viewport.neverDrawn, neverDrawn) });
+        if (this.#viewport.neverDrawn?.size && neverDrawn.size) {
+          bufferingViewport.setNeverDrawn({ elementIds: setDifference(this.#viewport.neverDrawn, neverDrawn) });
         }
       }),
     );

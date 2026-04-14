@@ -7,6 +7,7 @@ import { useCallback, useMemo, useState } from "react";
 import { defaultIfEmpty, EMPTY, filter, firstValueFrom, from, fromEventPattern, map, mergeMap, Subject, takeUntil, tap } from "rxjs";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { HierarchyVisibilityOverrideHandler } from "../../UseHierarchyVisibility.js";
+import { BufferingViewport } from "../BufferingViewport.js";
 import { AlwaysAndNeverDrawnElementInfoCache } from "../caches/AlwaysAndNeverDrawnElementInfoCache.js";
 import { toVoidPromise } from "../Rxjs.js";
 import { createVisibilityStatus } from "../Tooltip.js";
@@ -176,7 +177,8 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
     // notify about new change request
     this.#changeRequest.next({ key: node.key, depth: node.parentKeys.length });
 
-    const changeObservable = this.changeVisibilityStatusInternal(node, shouldDisplay).pipe(
+    const bufferingViewport = new BufferingViewport(this.#props.viewport);
+    const changeObservable = this.changeVisibilityStatusInternal({ node, on: shouldDisplay, bufferingViewport }).pipe(
       // unsubscribe from the observable if the change request for this node is received
       takeUntil(this.#changeRequest.pipe(filter(({ key, depth }) => depth === node.parentKeys.length && HierarchyNodeKey.equals(node.key, key)))),
       tap({
@@ -184,7 +186,13 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
           this.#eventListener.suppressChangeEvents();
           this.#alwaysAndNeverDrawnElements.suppressChangeEvents();
         },
+        // Apply all changes that were made at once
+        complete: () => {
+          bufferingViewport.commit();
+        },
         finalize: () => {
+          // Discard any changes that were made. If commit was called, then this will have no effect
+          bufferingViewport.discard();
           this.#eventListener.resumeChangeEvents();
           this.#alwaysAndNeverDrawnElements.resumeChangeEvents();
         },
@@ -218,10 +226,18 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
     return this.#treeSpecificVisibilityHandler.getVisibilityStatus(node);
   }
 
-  private changeVisibilityStatusInternal(node: HierarchyNode, on: boolean): Observable<void> {
+  private changeVisibilityStatusInternal({
+    node,
+    on,
+    bufferingViewport,
+  }: {
+    node: HierarchyNode;
+    on: boolean;
+    bufferingViewport: BufferingViewport;
+  }): Observable<void> {
     if (HierarchyNode.isClassGroupingNode(node)) {
       if (node.extendedData?.hasDirectNonSearchTargets && !node.extendedData?.hasSearchTargetAncestor) {
-        return this.changeSearchResultsNodeVisibility({ node, on });
+        return this.changeSearchResultsNodeVisibility({ node, on, bufferingViewport });
       }
     }
     if (
@@ -230,9 +246,9 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
       !node.search.isSearchTarget &&
       !node.search.hasSearchTargetAncestor
     ) {
-      return this.changeSearchResultsNodeVisibility({ node, on });
+      return this.changeSearchResultsNodeVisibility({ node, on, bufferingViewport });
     }
-    return this.#treeSpecificVisibilityHandler.changeVisibilityStatus(node, on);
+    return this.#treeSpecificVisibilityHandler.changeVisibilityStatus({ node, on, bufferingViewport });
   }
 
   private getSearchResultsNodeVisibility(props: {
@@ -266,18 +282,20 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
   private changeSearchResultsNodeVisibility({
     on,
     node,
+    bufferingViewport,
   }: {
     on: boolean;
     node: HierarchyNode & {
       key: ClassGroupingNodeKey | InstancesNodeKey;
     };
+    bufferingViewport: BufferingViewport;
   }) {
     return this.getSearchResultsTreeTargets({ node }).pipe(
       mergeMap((targets) => {
         if (!targets) {
           return EMPTY;
         }
-        return this.#treeSpecificVisibilityHandler.changeSearchTargetsVisibilityStatus(targets, on);
+        return this.#treeSpecificVisibilityHandler.changeSearchTargetsVisibilityStatus({ targets, on, bufferingViewport });
       }),
     );
   }
