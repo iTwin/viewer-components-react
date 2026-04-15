@@ -4,20 +4,24 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { concat, defer, EMPTY, from, map, merge, mergeAll, mergeMap, of } from "rxjs";
-import { assert } from "@itwin/core-bentley";
+import { assert, Guid } from "@itwin/core-bentley";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
+import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { fromWithRelease, getIdsFromChildrenTree, getParentElementsIdsPath, setDifference, setIntersection } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 import { ClassificationsTreeNodeInternal } from "../ClassificationsTreeNodeInternal.js";
 import { ClassificationsTreeVisibilityHelper } from "./ClassificationsTreeVisibilityHelper.js";
+import { createClassificationsSearchResultsTree } from "./SearchResultsTree.js";
 
 import type { Observable } from "rxjs";
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
-import type { HierarchyNode } from "@itwin/presentation-hierarchies";
+import type { HierarchyNode, HierarchySearchTree } from "@itwin/presentation-hierarchies";
+import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfoCache } from "../../../common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
 import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
 import type { ChildrenTree } from "../../../common/internal/Utils.js";
+import type { SearchResultsTree } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeSpecificVisibilityHandler } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
@@ -309,4 +313,37 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       ),
     );
   }
+}
+
+/**
+ * Creates classifications tree visibility handler. Is used by integration and performance tests.
+ * @internal
+ */
+export function createClassificationsTreeVisibilityHandler(props: {
+  viewport: TreeWidgetViewport;
+  idsCache: ClassificationsTreeIdsCache;
+  imodelAccess: ECClassHierarchyInspector;
+  searchPaths?: HierarchySearchTree[];
+}) {
+  return new HierarchyVisibilityHandlerImpl<ClassificationsTreeSearchTargets>({
+    getSearchResultsTree: (): undefined | Promise<SearchResultsTree<ClassificationsTreeSearchTargets>> => {
+      if (!props.searchPaths) {
+        return undefined;
+      }
+      return createClassificationsSearchResultsTree({
+        idsCache: props.idsCache,
+        searchPaths: props.searchPaths,
+        imodelAccess: props.imodelAccess,
+      });
+    },
+    getTreeSpecificVisibilityHandler: (info) => {
+      return new ClassificationsTreeVisibilityHandler({
+        alwaysAndNeverDrawnElementInfo: info,
+        idsCache: props.idsCache,
+        viewport: props.viewport,
+      });
+    },
+    viewport: props.viewport,
+    componentId: Guid.createValue(),
+  });
 }

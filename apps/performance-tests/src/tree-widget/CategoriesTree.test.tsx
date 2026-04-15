@@ -6,7 +6,7 @@
 import { describe, expect } from "vitest";
 import { SnapshotDb } from "@itwin/core-backend";
 import { assert } from "@itwin/core-bentley";
-import { createIModelHierarchyProvider, HierarchySearchTree } from "@itwin/presentation-hierarchies";
+import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { Props } from "@itwin/presentation-shared";
 import { SharedTreeContextProvider, useCategoriesTree } from "@itwin/tree-widget-react";
 import {
@@ -33,44 +33,67 @@ import {
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { HierarchyNode, HierarchyProvider } from "@itwin/presentation-hierarchies";
+import type { HierarchyDefinition, HierarchyNode, HierarchyProvider, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
 import type { IModelAccess } from "./StatelessHierarchyProvider.js";
 import type { TreeWidgetTestingViewport } from "./VisibilityUtilities.js";
 
 describe("categories tree", () => {
-  run<{ iModelConnection: IModelConnection; imodelAccess: IModelAccess; viewport: TreeWidgetTestingViewport }>({
-    testName: "creates initial filtered view for 50k items",
+  run<{
+    iModelConnection: IModelConnection;
+    imodelAccess: IModelAccess;
+    viewport: TreeWidgetTestingViewport;
+    searchPaths: HierarchySearchTree[] | undefined;
+    hierarchyDefinition: HierarchyDefinition | undefined;
+  }>({
+    testName: "50k subCategories search",
     setup: async () => {
       const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k subcategories"));
       const imodelAccess = StatelessHierarchyProvider.createIModelAccess(iModel, "unbounded");
       const viewport = await createViewport({ iModelConnection });
-      return { iModelConnection, imodelAccess, viewport };
+      return {
+        iModelConnection,
+        imodelAccess,
+        viewport,
+        searchPaths: undefined as HierarchySearchTree[] | undefined,
+        hierarchyDefinition: undefined as HierarchyDefinition | undefined,
+      };
     },
     cleanup: (props) => props.iModelConnection.close(),
-    test: async ({ viewport, imodelAccess }) => {
-      using hook = renderUseCategoriesTreeHook({
-        activeView: viewport,
-        hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration,
-        searchText: "sc",
-        searchLimit: "unbounded",
-      });
-      const hierarchyDefinition = await act(async () => hook.result.current.treeProps.getHierarchyDefinition({ imodelAccess }));
-      const searchPaths = await act(async () => hook.result.current.treeProps.getSearchPaths!({ imodelAccess, abortSignal: new AbortController().signal }));
-      expect(countSearchTargets(searchPaths!)).to.eq(50000);
-
-      using provider = new StatelessHierarchyProvider({
-        imodelAccess,
-        getHierarchyFactory: () => hierarchyDefinition,
-        search: { paths: searchPaths! },
-      });
-      const result = await provider.loadHierarchy({ shouldExpand: (node) => node.children && !!node.autoExpand });
-      expect(result).to.eq(
-        1 + // root definition container
-          50 + // categories
-          50 * 1000, // subcategories
-      ); // 50051 total
-    },
+    testSteps: [
+      {
+        name: "get search paths",
+        callBack: async (ctx) => {
+          using hook = renderUseCategoriesTreeHook({
+            activeView: ctx.viewport,
+            hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration,
+            searchText: "sc",
+            searchLimit: "unbounded",
+          });
+          ctx.hierarchyDefinition = await act(async () => hook.result.current.treeProps.getHierarchyDefinition({ imodelAccess: ctx.imodelAccess }));
+          ctx.searchPaths = await act(async () =>
+            hook.result.current.treeProps.getSearchPaths!({ imodelAccess: ctx.imodelAccess, abortSignal: new AbortController().signal }),
+          );
+          expect(countSearchTargets(ctx.searchPaths!)).to.eq(50000);
+        },
+      },
+      {
+        name: "load hierarchy from search paths",
+        callBack: async ({ imodelAccess, hierarchyDefinition, searchPaths }) => {
+          using provider = new StatelessHierarchyProvider({
+            imodelAccess,
+            getHierarchyFactory: () => hierarchyDefinition!,
+            search: { paths: searchPaths! },
+          });
+          const result = await provider.loadHierarchy({ shouldExpand: (node) => node.children && !!node.autoExpand });
+          expect(result).to.eq(
+            1 + // root definition container
+              50 + // categories
+              50 * 1000, // sub-categories
+          ); // 50051 total
+        },
+      },
+    ],
   });
 
   run<{
@@ -83,7 +106,7 @@ describe("categories tree", () => {
     iModelConnection: IModelConnection;
     hierarchyNodes: HierarchyNode[];
   }>({
-    testName: "changing definition container visibility changes visibility for 50k subCategories",
+    testName: "50k subCategories",
     setup: async () => {
       const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k subcategories"));
       const imodelAccess = StatelessHierarchyProvider.createIModelAccess(iModel, "unbounded");
@@ -110,13 +133,6 @@ describe("categories tree", () => {
         }),
         imodelAccess,
       });
-      const hierarchyNodes = await collectNodes({ provider });
-      await validateHierarchyVisibility({
-        hierarchyNodes,
-        handler,
-        viewport,
-        expectations: "all-hidden",
-      });
 
       expect(visibilityTargets.definitionContainers.length).toBe(1);
       return {
@@ -127,7 +143,7 @@ describe("categories tree", () => {
         handler,
         definitionContainer: visibilityTargets.definitionContainers[0],
         iModelConnection,
-        hierarchyNodes,
+        hierarchyNodes: [],
       };
     },
     cleanup: async (props) => {
@@ -139,15 +155,42 @@ describe("categories tree", () => {
         await props.iModelConnection.close();
       }
     },
-    test: async ({ viewport, handler, hierarchyNodes, definitionContainer }) => {
-      await handler.changeVisibility(createDefinitionContainerHierarchyNode(definitionContainer), true);
-      await validateHierarchyVisibility({
-        hierarchyNodes,
-        handler,
-        viewport,
-        expectations: "all-visible",
-      });
-    },
+    testSteps: [
+      {
+        name: "collect nodes",
+        callBack: async (ctx) => {
+          ctx.hierarchyNodes = await collectNodes({ provider: ctx.provider });
+        },
+      },
+      {
+        name: "validate initial visibility",
+        callBack: async ({ hierarchyNodes, handler, viewport }) => {
+          await validateHierarchyVisibility({
+            hierarchyNodes,
+            handler,
+            viewport,
+            expectations: "all-hidden",
+          });
+        },
+      },
+      {
+        name: "change visibility",
+        callBack: async ({ handler, definitionContainer }) => {
+          await handler.changeVisibility(createDefinitionContainerHierarchyNode(definitionContainer), true);
+        },
+      },
+      {
+        name: "validate changed visibility",
+        callBack: async ({ hierarchyNodes, handler, viewport }) => {
+          await validateHierarchyVisibility({
+            hierarchyNodes,
+            handler,
+            viewport,
+            expectations: "all-visible",
+          });
+        },
+      },
+    ],
   });
 
   run<{
@@ -160,7 +203,7 @@ describe("categories tree", () => {
     iModelConnection: IModelConnection;
     hierarchyNodes: HierarchyNode[];
   }>({
-    testName: "changing definition container visibility changes visibility for 50k categories",
+    testName: "50k categories",
     setup: async () => {
       const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k categories"));
       const imodelAccess = StatelessHierarchyProvider.createIModelAccess(iModel, "unbounded");
@@ -187,13 +230,6 @@ describe("categories tree", () => {
         }),
         imodelAccess,
       });
-      const hierarchyNodes = await collectNodes({ provider });
-      await validateHierarchyVisibility({
-        hierarchyNodes,
-        handler,
-        viewport,
-        expectations: "all-hidden",
-      });
       const categoriesDefinitionContainers = new Set<Id64String>();
       visibilityTargets.categories.forEach((categoryId) => {
         categoriesDefinitionContainers.add(iModel.elements.getElementProps(categoryId).model);
@@ -203,7 +239,7 @@ describe("categories tree", () => {
       );
       expect(rootDefinitionContainer).toBeDefined();
       assert(rootDefinitionContainer !== undefined);
-      return { iModel, imodelAccess, viewport, provider, handler, rootDefinitionContainer, iModelConnection, hierarchyNodes };
+      return { iModel, imodelAccess, viewport, provider, handler, rootDefinitionContainer, iModelConnection, hierarchyNodes: [] };
     },
     cleanup: async (props) => {
       props.iModel.close();
@@ -214,15 +250,42 @@ describe("categories tree", () => {
         await props.iModelConnection.close();
       }
     },
-    test: async ({ viewport, handler, hierarchyNodes, rootDefinitionContainer }) => {
-      await handler.changeVisibility(createDefinitionContainerHierarchyNode(rootDefinitionContainer), true);
-      await validateHierarchyVisibility({
-        hierarchyNodes,
-        handler,
-        viewport,
-        expectations: "all-visible",
-      });
-    },
+    testSteps: [
+      {
+        name: "collect nodes",
+        callBack: async (ctx) => {
+          ctx.hierarchyNodes = await collectNodes({ provider: ctx.provider });
+        },
+      },
+      {
+        name: "validate initial visibility",
+        callBack: async ({ hierarchyNodes, handler, viewport }) => {
+          await validateHierarchyVisibility({
+            hierarchyNodes,
+            handler,
+            viewport,
+            expectations: "all-hidden",
+          });
+        },
+      },
+      {
+        name: "change visibility",
+        callBack: async ({ handler, rootDefinitionContainer }) => {
+          await handler.changeVisibility(createDefinitionContainerHierarchyNode(rootDefinitionContainer), true);
+        },
+      },
+      {
+        name: "validate changed visibility",
+        callBack: async ({ hierarchyNodes, handler, viewport }) => {
+          await validateHierarchyVisibility({
+            hierarchyNodes,
+            handler,
+            viewport,
+            expectations: "all-visible",
+          });
+        },
+      },
+    ],
   });
 });
 

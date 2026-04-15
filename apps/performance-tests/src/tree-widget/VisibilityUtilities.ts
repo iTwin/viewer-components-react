@@ -42,11 +42,12 @@ export interface ValidateNodeProps {
   expectations:
     | "all-visible"
     | "all-hidden"
-    | {
+    | ({
         default: "all-visible" | "all-hidden";
-        instances: { [id: string]: Visibility };
-        parentIds?: { [id: string]: Visibility };
-      };
+      } & (
+        | { instances: { [id: string]: Visibility }; parentIds?: { [id: string]: Visibility } }
+        | { instances?: { [id: string]: Visibility }; parentIds: { [id: string]: Visibility } }
+      ));
 }
 
 async function validateNodeVisibility({ node, handler, expectations }: ValidateNodeProps & { node: HierarchyNode }) {
@@ -60,11 +61,13 @@ async function validateNodeVisibility({ node, handler, expectations }: ValidateN
     expect(actualVisibility.state, node.label).toBe(expectations === "all-hidden" ? "hidden" : "visible");
     return;
   }
-  const idInExpectations = ids.find((id) => id in expectations.instances);
-  if (idInExpectations) {
-    const expectedVisibility = expectations.instances[idInExpectations];
-    expect(actualVisibility.state, node.label).toBe(expectedVisibility);
-    return;
+  if (expectations.instances) {
+    const idInExpectations = ids.find((id) => id in expectations.instances!);
+    if (idInExpectations) {
+      const expectedVisibility = expectations.instances[idInExpectations];
+      expect(actualVisibility.state, node.label).toBe(expectedVisibility);
+      return;
+    }
   }
 
   if (expectations.parentIds) {
@@ -371,9 +374,32 @@ export function createDefinitionContainerHierarchyNode(definitionContainerId: Id
   };
 }
 
+export function createClassificationTableHierarchyNode(classificationTableId: Id64String): NonGroupingHierarchyNode {
+  return {
+    key: {
+      type: "instances",
+      instanceKeys: [{ className: "ClassificationSystems.ClassificationTable", id: classificationTableId }],
+    },
+    children: true,
+    label: "",
+    parentKeys: [],
+    extendedData: {
+      type: "ClassificationTable",
+    },
+  };
+}
+
 export async function getVisibilityTargets(
   imodelAccess: IModelAccess,
-): Promise<{ models: Id64Array; categories: Id64Array; subCategories: Id64Array; elements: Id64Array; definitionContainers: Id64Array }> {
+  rootClassificationSystemCode?: string,
+): Promise<{
+  models: Id64Array;
+  categories: Id64Array;
+  subCategories: Id64Array;
+  elements: Id64Array;
+  definitionContainers: Id64Array;
+  classificationTables: Id64Array;
+}> {
   const query: ECSqlQueryDef = {
     ecsql: `
       SELECT
@@ -400,6 +426,19 @@ export async function getVisibilityTargets(
         CAST(IdToHex(ECInstanceId) AS TEXT) AS ECInstanceId,
         'BisCore.DefinitionContainer' as ClassName
       FROM bis.DefinitionContainer
+      ${
+        rootClassificationSystemCode
+          ? `
+            UNION ALL
+            SELECT
+              CAST(IdToHex(this.ECInstanceId) AS TEXT) AS ECInstanceId,
+              'BisCore.ClassificationTable' as ClassName
+            FROM ClassificationSystems.ClassificationTable this
+            JOIN ClassificationSystems.ClassificationSystem system ON system.ECInstanceId = this.Parent.Id
+            WHERE system.CodeValue = '${rootClassificationSystemCode}'
+          `
+          : ""
+      }
     `,
   };
   const categories = new Array<Id64String>();
@@ -407,6 +446,7 @@ export async function getVisibilityTargets(
   const elements = new Array<Id64String>();
   const models = new Array<Id64String>();
   const definitionContainers = new Array<Id64String>();
+  const classificationTables = new Array<Id64String>();
   for await (const row of imodelAccess.createQueryReader(query, { limit: "unbounded" })) {
     if (row.ClassName.toLowerCase().includes("subcategory")) {
       subCategories.push(row.ECInstanceId);
@@ -427,6 +467,9 @@ export async function getVisibilityTargets(
     if (row.ClassName.toLowerCase().includes("container")) {
       definitionContainers.push(row.ECInstanceId);
     }
+    if (row.ClassName.toLowerCase().includes("classificationTable".toLowerCase())) {
+      classificationTables.push(row.ECInstanceId);
+    }
   }
-  return { categories, subCategories, elements, models, definitionContainers };
+  return { categories, subCategories, elements, models, definitionContainers, classificationTables };
 }

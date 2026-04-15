@@ -12,10 +12,15 @@ import type { TaskMeta } from "vitest";
 import type { IModelDb } from "@itwin/core-backend";
 import type { Summary } from "./MainThreadBlocksDetector.js";
 
+interface TestStepEntry {
+  name: string;
+  blockingSummary: Summary;
+  duration: number;
+}
+
 declare module "vitest" {
   interface TaskMeta {
-    blockingSummary?: Summary;
-    duration?: number;
+    testSteps?: Array<TestStepEntry>;
   }
 }
 
@@ -26,8 +31,12 @@ export interface RunOptions<TContext> {
   /** Callback to run before the test that should produce the context required for the test. */
   setup(): TContext | Promise<TContext>;
 
-  /** Test function to run and measure. */
-  test(x: TContext): void | Promise<void>;
+  /** Test steps which are run in order and measured. */
+  testSteps: Array<{
+    name?: string;
+    callBack: (x: TContext) => void | Promise<void>;
+    ignoreMeasurement?: boolean; // if true, the time spent in this step will not be measured and included in the results
+  }>;
 
   /** Callback that cleans up the context produced by the "before" callback. */
   cleanup?: (x: TContext) => void | Promise<void>;
@@ -48,15 +57,25 @@ export function run<T>(props: RunOptions<T>): void {
   const testFunc = async ({ task }: { task: { meta: TaskMeta } }) => {
     const blockHandler = new MainThreadBlocksDetector();
     const value = await props.setup();
-    const start = Date.now();
-    try {
-      blockHandler.start();
-      await props.test(value);
-    } finally {
-      await blockHandler.stop();
-      task.meta.blockingSummary = blockHandler.getSummary();
-      task.meta.duration = Date.now() - start;
-      await props.cleanup?.(value);
+
+    for (const { name, callBack, ignoreMeasurement } of props.testSteps) {
+      const start = Date.now();
+      try {
+        if (!ignoreMeasurement) {
+          blockHandler.start();
+        }
+        await callBack(value);
+      } finally {
+        if (!ignoreMeasurement) {
+          await blockHandler.stop();
+          task.meta.testSteps ??= [];
+          task.meta.testSteps.push({
+            name: name ?? "unknown",
+            blockingSummary: blockHandler.getSummary(),
+            duration: Date.now() - start,
+          });
+        }
+      }
     }
   };
 
