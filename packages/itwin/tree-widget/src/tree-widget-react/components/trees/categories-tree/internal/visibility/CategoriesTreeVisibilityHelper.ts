@@ -11,7 +11,6 @@ import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtil
 
 import type { Observable } from "rxjs";
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
-import type { BufferingViewport } from "../../../common/internal/BufferingViewport.js";
 import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
 import type { BaseVisibilityHelperProps } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
@@ -92,21 +91,13 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
    *
    * Does this by changing visibility status of related categories.
    */
-  public changeDefinitionContainersVisibilityStatus(props: {
-    definitionContainerIds: Id64Arg;
-    on: boolean;
-    bufferingViewport: BufferingViewport;
-  }): Observable<void> {
+  public changeDefinitionContainersVisibilityStatus(props: { definitionContainerIds: Id64Arg; on: boolean }): Observable<void> {
     return this.#props.idsCache
       .getAllContainedCategories({
         definitionContainerIds: props.definitionContainerIds,
         includeEmptyCategories: this.#props.hierarchyConfig.showEmptyCategories,
       })
-      .pipe(
-        mergeMap((categoryIds) =>
-          this.changeCategoriesVisibilityStatus({ categoryIds, modelId: undefined, on: props.on, bufferingViewport: props.bufferingViewport }),
-        ),
-      );
+      .pipe(mergeMap((categoryIds) => this.changeCategoriesVisibilityStatus({ categoryIds, modelId: undefined, on: props.on })));
   }
 
   /**
@@ -114,16 +105,11 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
    *
    * Also, enables parent categories if `on` is true.
    */
-  public changeSubCategoriesVisibilityStatus(props: {
-    categoryId: Id64String;
-    subCategoryIds: Id64Arg;
-    on: boolean;
-    bufferingViewport: BufferingViewport;
-  }): Observable<void> {
+  public changeSubCategoriesVisibilityStatus(props: { categoryId: Id64String; subCategoryIds: Id64Arg; on: boolean }): Observable<void> {
     return concat(
       // make sure parent category and models are enabled
-      props.on ? this.enableCategoryWithoutEnablingOtherCategories({ categoryId: props.categoryId, bufferingViewport: props.bufferingViewport }) : EMPTY,
-      from(props.subCategoryIds).pipe(map((subCategoryId) => props.bufferingViewport.changeSubCategoryDisplay({ subCategoryId, display: props.on }))),
+      props.on ? this.enableCategoryWithoutEnablingOtherCategories({ categoryId: props.categoryId }) : EMPTY,
+      from(props.subCategoryIds).pipe(map((subCategoryId) => this.#props.viewport.changeSubCategoryDisplay({ subCategoryId, display: props.on }))),
     );
   }
 
@@ -132,7 +118,6 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
     modelElementsMap: Map<ModelId, { elementIds: Set<ElementId> }>;
     categoryId: Id64String;
     on: boolean;
-    bufferingViewport: BufferingViewport;
   }): Observable<void> {
     const elementIds = new Array<ElementId>();
     for (const { elementIds: ids } of props.modelElementsMap.values()) {
@@ -151,7 +136,6 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
               categoryId: props.categoryId,
               on: props.on,
               children,
-              bufferingViewport: props.bufferingViewport,
             });
           }),
         ),
@@ -160,26 +144,20 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
   }
 
   /** Turns on category and its' related models. Does not turn on other categories contained in those models.*/
-  private enableCategoryWithoutEnablingOtherCategories({
-    categoryId,
-    bufferingViewport,
-  }: {
-    categoryId: Id64String;
-    bufferingViewport: BufferingViewport;
-  }): Observable<void> {
-    bufferingViewport.changeCategoryDisplay({ categoryIds: categoryId, display: true });
+  private enableCategoryWithoutEnablingOtherCategories({ categoryId }: { categoryId: Id64String }): Observable<void> {
+    this.#props.viewport.changeCategoryDisplay({ categoryIds: categoryId, display: true });
     return this.#props.idsCache.getModels({ categoryId, subModels: "include" }).pipe(
       mergeAll(),
       mergeMap((modelId) => {
-        bufferingViewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: categoryId, override: "none" });
-        return bufferingViewport.viewsModel(modelId)
+        this.#props.viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: categoryId, override: "none" });
+        return this.#props.viewport.viewsModel(modelId)
           ? EMPTY
           : this.#props.idsCache.getCategories({ modelId }).pipe(
               map((allModelCategories) => {
                 // Add 'Hide' override to categories that were hidden before model is turned on
                 for (const modelCategoryId of allModelCategories) {
                   if (modelCategoryId !== categoryId) {
-                    bufferingViewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: modelCategoryId, override: "hide" });
+                    this.#props.viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: modelCategoryId, override: "hide" });
                   }
                 }
                 return modelId;
@@ -189,7 +167,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
       toArray(),
       map((hiddenModels) => {
         if (hiddenModels.length > 0) {
-          bufferingViewport.changeModelDisplay({ modelIds: hiddenModels, display: true });
+          this.#props.viewport.changeModelDisplay({ modelIds: hiddenModels, display: true });
         }
       }),
     );

@@ -25,7 +25,6 @@ import type { Observable } from "rxjs";
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, HierarchyNode, HierarchySearchTree, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
-import type { BufferingViewport } from "../../../common/internal/BufferingViewport.js";
 import type { AlwaysAndNeverDrawnElementInfoCache } from "../../../common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
 import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
 import type { ChildrenTree } from "../../../common/internal/Utils.js";
@@ -69,15 +68,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
     this.#visibilityHelper[Symbol.dispose]();
   }
 
-  public changeSearchTargetsVisibilityStatus({
-    targets,
-    on,
-    bufferingViewport,
-  }: {
-    targets: CategoriesTreeSearchTargets;
-    on: boolean;
-    bufferingViewport: BufferingViewport;
-  }): Observable<void> {
+  public changeSearchTargetsVisibilityStatus({ targets, on }: { targets: CategoriesTreeSearchTargets; on: boolean }): Observable<void> {
     return defer(() => {
       if (this.#props.viewport.viewType === "other") {
         return EMPTY;
@@ -85,27 +76,23 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       const { definitionContainerIds, subCategories, modelIds, categories, elements } = targets;
       const observables = new Array<Observable<void>>();
       if (definitionContainerIds?.size) {
-        observables.push(this.#visibilityHelper.changeDefinitionContainersVisibilityStatus({ definitionContainerIds, on, bufferingViewport }));
+        observables.push(this.#visibilityHelper.changeDefinitionContainersVisibilityStatus({ definitionContainerIds, on }));
       }
 
       if (modelIds?.size) {
-        observables.push(this.#visibilityHelper.changeModelsVisibilityStatus({ modelIds, on, bufferingViewport }));
+        observables.push(this.#visibilityHelper.changeModelsVisibilityStatus({ modelIds, on }));
       }
 
       if (categories?.length) {
         observables.push(
-          from(categories).pipe(
-            mergeMap(({ modelId, categoryIds }) => this.#visibilityHelper.changeCategoriesVisibilityStatus({ categoryIds, modelId, on, bufferingViewport })),
-          ),
+          from(categories).pipe(mergeMap(({ modelId, categoryIds }) => this.#visibilityHelper.changeCategoriesVisibilityStatus({ categoryIds, modelId, on }))),
         );
       }
 
       if (subCategories?.length) {
         observables.push(
           from(subCategories).pipe(
-            mergeMap(({ categoryId, subCategoryIds }) =>
-              this.#visibilityHelper.changeSubCategoriesVisibilityStatus({ subCategoryIds, categoryId, on, bufferingViewport }),
-            ),
+            mergeMap(({ categoryId, subCategoryIds }) => this.#visibilityHelper.changeSubCategoriesVisibilityStatus({ subCategoryIds, categoryId, on })),
           ),
         );
       }
@@ -164,7 +151,6 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
                     elementIds: elementsInSearchPathsGroupedByModelAndCategory,
                     // Pass only those children that are not part of search paths.
                     children: setIntersection(childrenIds, childrenNotInSearchPaths),
-                    bufferingViewport,
                     on,
                   });
                 }),
@@ -235,7 +221,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
   }
 
   /** Changes visibility of the items represented by the tree node. */
-  public changeVisibilityStatus({ node, on, bufferingViewport }: { node: HierarchyNode; on: boolean; bufferingViewport: BufferingViewport }): Observable<void> {
+  public changeVisibilityStatus({ node, on }: { node: HierarchyNode; on: boolean }): Observable<void> {
     const changeObs = defer(() => {
       if (this.#props.viewport.viewType === "other") {
         return EMPTY;
@@ -245,7 +231,6 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
           categoryId: node.extendedData.categoryId,
           modelElementsMap: node.extendedData.modelElementsMap,
           on,
-          bufferingViewport,
         });
       }
 
@@ -253,7 +238,6 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
         return this.#visibilityHelper.changeDefinitionContainersVisibilityStatus({
           definitionContainerIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
           on,
-          bufferingViewport,
         });
       }
 
@@ -261,7 +245,6 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
         return this.#visibilityHelper.changeModelsVisibilityStatus({
           modelIds: node.key.instanceKeys.map(({ id }) => id),
           on,
-          bufferingViewport,
         });
       }
 
@@ -270,7 +253,6 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
           categoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
           modelId: node.extendedData.isCategoryOfSubModel ? node.extendedData.modelIds[0] : undefined,
           on,
-          bufferingViewport,
         });
       }
 
@@ -279,7 +261,6 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
           categoryId: node.extendedData.categoryId,
           subCategoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
           on,
-          bufferingViewport,
         });
       }
       assert(CategoriesTreeNodeInternal.isElementNode(node));
@@ -298,14 +279,13 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
             children: children.size > 0 ? children : undefined,
             categoryId: node.extendedData.categoryId,
             on,
-            bufferingViewport,
           }),
         ),
       );
     });
 
     if (this.#props.viewport.isAlwaysDrawnExclusive) {
-      return concat(this.#visibilityHelper.removeAlwaysDrawnExclusive(bufferingViewport), changeObs);
+      return concat(this.#visibilityHelper.removeAlwaysDrawnExclusive(), changeObs);
     }
     return changeObs;
   }
@@ -470,11 +450,11 @@ export function createCategoriesTreeVisibilityHandler(props: {
         categoryModelClassName: modelClass,
       });
     },
-    getTreeSpecificVisibilityHandler: (info) => {
+    getTreeSpecificVisibilityHandler: ({ info, viewport }) => {
       return new CategoriesTreeVisibilityHandler({
         alwaysAndNeverDrawnElementInfo: info,
         idsCache: props.idsCache,
-        viewport: props.viewport,
+        viewport,
         hierarchyConfig: props.hierarchyConfig,
       });
     },

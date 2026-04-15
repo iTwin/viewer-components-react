@@ -11,7 +11,6 @@ import {
   EMPTY,
   filter,
   first,
-  forkJoin,
   from,
   fromEventPattern,
   map,
@@ -32,12 +31,12 @@ import {
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
-import { getClassesByView, getIdsFromChildrenTree, getOptimalBatchSize, releaseMainThreadOnItemsCount, setDifference, updateChildrenTree } from "../Utils.js";
+import { getClassesByView, getIdsFromChildrenTree, getOptimalBatchSize, releaseMainThreadOnItemsCount, updateChildrenTree } from "../Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
-import type { BufferingViewport } from "../BufferingViewport.js";
+import type { ElementId } from "../Types.js";
 import type { ChildrenTree } from "../Utils.js";
 
 /** @internal */
@@ -333,45 +332,12 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
   }
 
   public getAlwaysOrNeverDrawnElements(props: GetElementsTreeProps) {
+    const cache = props.setType === "always" ? this.#viewport.alwaysDrawn : this.#viewport.neverDrawn;
+    if (!cache?.size) {
+      return of(new Set<ElementId>());
+    }
     return this.getElementsTree(props).pipe(
       map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet })),
-    );
-  }
-
-  public clearAlwaysAndNeverDrawnElements({
-    bufferingViewport,
-    categoryIds,
-    modelId,
-  }: {
-    categoryIds: Id64Arg;
-    modelId: Id64String;
-    bufferingViewport: BufferingViewport;
-  }) {
-    // Check both the real viewport and the buffering viewport sets:
-    // - Real viewport: checking the real viewport's set is sufficient because the queried elements are only used
-    //   to `setDifference` them from the buffered sets. If the buffered set has fewer elements, they were already
-    //   removed. If it has more, those additions should stay - elements should never be added and then removed within
-    //   the same `changeVisibility` call.
-    // - Buffering viewport: the query results are subtracted from the buffered sets via `setDifference`.
-    //   If the buffered set is already empty, there's nothing to subtract from.
-    return forkJoin({
-      alwaysDrawn:
-        this.#viewport.alwaysDrawn?.size && bufferingViewport.alwaysDrawn?.size
-          ? this.getAlwaysOrNeverDrawnElements({ modelId, categoryIds, setType: "always" })
-          : of(new Set<Id64String>()),
-      neverDrawn:
-        this.#viewport.neverDrawn?.size && bufferingViewport.neverDrawn?.size
-          ? this.getAlwaysOrNeverDrawnElements({ modelId, categoryIds, setType: "never" })
-          : of(new Set<Id64String>()),
-    }).pipe(
-      map(({ alwaysDrawn, neverDrawn }) => {
-        if (bufferingViewport.alwaysDrawn?.size && alwaysDrawn.size) {
-          bufferingViewport.setAlwaysDrawn({ elementIds: setDifference(bufferingViewport.alwaysDrawn, alwaysDrawn) });
-        }
-        if (bufferingViewport.neverDrawn?.size && neverDrawn.size) {
-          bufferingViewport.setNeverDrawn({ elementIds: setDifference(bufferingViewport.neverDrawn, neverDrawn) });
-        }
-      }),
     );
   }
 }
