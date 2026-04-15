@@ -42,6 +42,7 @@ export interface HierarchyVisibilityHandler extends Disposable {
 interface UseHierarchyVisibilityProps {
   visibilityHandlerFactory: () => HierarchyVisibilityHandler;
 }
+
 type VisibilityStatusMap = Map<
   string,
   {

@@ -72,14 +72,14 @@ export interface BaseTreeVisibilityHandlerOverrides {
  */
 export interface TreeSpecificVisibilityHandler<TSearchTargets> {
   getVisibilityStatus: (node: HierarchyNode) => Observable<VisibilityStatus>;
-  changeVisibilityStatus: (props: { node: HierarchyNode; on: boolean }) => Observable<void>;
+  changeVisibilityStatus: (node: HierarchyNode, on: boolean) => Observable<void>;
   getSearchTargetsVisibilityStatus: (
     targets: TSearchTargets,
     node: HierarchyNode & {
       key: ClassGroupingNodeKey | InstancesNodeKey;
     },
   ) => Observable<VisibilityStatus>;
-  changeSearchTargetsVisibilityStatus: (props: { targets: TSearchTargets; on: boolean }) => Observable<void>;
+  changeSearchTargetsVisibilityStatus: (targets: TSearchTargets, on: boolean) => Observable<void>;
 }
 
 /** @internal */

@@ -55,7 +55,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
     this.#visibilityHelper[Symbol.dispose]();
   }
 
-  public changeSearchTargetsVisibilityStatus({ targets, on }: { targets: ClassificationsTreeSearchTargets; on: boolean }): Observable<void> {
+  public changeSearchTargetsVisibilityStatus(targets: ClassificationsTreeSearchTargets, on: boolean): Observable<void> {
     return defer(() => {
       if (this.#props.viewport.viewType !== "3d") {
         return EMPTY;
@@ -176,7 +176,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
   }
 
   /** Changes visibility of the items represented by the tree node. */
-  public changeVisibilityStatus({ node, on }: { node: HierarchyNode; on: boolean }): Observable<void> {
+  public changeVisibilityStatus(node: HierarchyNode, on: boolean): Observable<void> {
     const changeObs = defer(() => {
       if (this.#props.viewport.viewType !== "3d") {
         return EMPTY;

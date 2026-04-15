@@ -81,7 +81,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
     this.#visibilityHelper[Symbol.dispose]();
   }
 
-  public changeSearchTargetsVisibilityStatus({ targets, on }: { targets: ModelsTreeSearchTargets; on: boolean }): Observable<void> {
+  public changeSearchTargetsVisibilityStatus(targets: ModelsTreeSearchTargets, on: boolean): Observable<void> {
     return defer(() => {
       const { subjectIds, modelIds, categories, elements } = targets;
       const observables = new Array<Observable<void>>();
@@ -231,7 +231,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
   }
 
   /** Changes visibility of the items represented by the tree node. */
-  public changeVisibilityStatus({ node, on }: { node: HierarchyNode; on: boolean }): Observable<void> {
+  public changeVisibilityStatus(node: HierarchyNode, on: boolean): Observable<void> {
     const changeObs = defer(() => {
       if (this.#props.viewport.viewType !== "3d") {
         return EMPTY;

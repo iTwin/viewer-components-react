@@ -267,7 +267,7 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
     ) {
       return this.changeSearchResultsNodeVisibility({ node, on, treeSpecificVisibilityHandler });
     }
-    return treeSpecificVisibilityHandler.changeVisibilityStatus({ node, on });
+    return treeSpecificVisibilityHandler.changeVisibilityStatus(node, on);
   }
 
   private getSearchResultsNodeVisibility({
@@ -318,7 +318,7 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
         if (!targets) {
           return EMPTY;
         }
-        return treeSpecificVisibilityHandler.changeSearchTargetsVisibilityStatus({ targets, on });
+        return treeSpecificVisibilityHandler.changeSearchTargetsVisibilityStatus(targets, on);
       }),
     );
   }
