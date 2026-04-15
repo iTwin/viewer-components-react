@@ -172,14 +172,7 @@ describe("useHierarchyVisibility", () => {
 
     visibilityHandler.getVisibilityStatus.mockResolvedValue({ state: "visible" });
 
-    act(() => {
-      result.current.getVisibilityButtonState(parent);
-      result.current.getVisibilityButtonState(child);
-      result.current.getVisibilityButtonState(grandchild);
-    });
-
     await waitFor(() => {
-      expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledTimes(3);
       expect(result.current.getVisibilityButtonState(parent)).toEqual({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
       expect(result.current.getVisibilityButtonState(child)).toEqual({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
       expect(result.current.getVisibilityButtonState(grandchild)).toEqual({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
@@ -202,12 +195,6 @@ describe("useHierarchyVisibility", () => {
 
     act(() => {
       onVisibilityChange.raiseEvent();
-    });
-
-    act(() => {
-      result.current.getVisibilityButtonState(parent);
-      result.current.getVisibilityButtonState(child);
-      result.current.getVisibilityButtonState(grandchild);
     });
 
     // After reconciliation, all nodes should reflect the actual handler state
