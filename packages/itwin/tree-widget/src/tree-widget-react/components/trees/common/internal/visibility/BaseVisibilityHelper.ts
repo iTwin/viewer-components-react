@@ -721,11 +721,7 @@ export class BaseVisibilityHelper implements Disposable {
                 };
           if (!this.#props.viewport.viewsModel(modelId)) {
             if (!on) {
-              return this.queueElementsVisibilityChange({
-                elementIds: elementsToChange,
-                on,
-                visibleByDefault: () => false,
-              });
+              return this.queueElementsVisibilityChange(elementsToChange, on, () => false);
             }
 
             return this.showModelWithoutAnyCategoriesOrElements({ modelId }).pipe(
@@ -734,21 +730,13 @@ export class BaseVisibilityHelper implements Disposable {
                   categoryId,
                   modelId,
                 });
-                return this.queueElementsVisibilityChange({
-                  elementIds: elementsToChange,
-                  on,
-                  visibleByDefault: isDisplayedByDefault(defaultVisibility.state === "visible"),
-                });
+                return this.queueElementsVisibilityChange(elementsToChange, on, isDisplayedByDefault(defaultVisibility.state === "visible"));
               }),
             );
           }
 
           const categoryVisibility = this.getVisibleModelCategoryDirectVisibilityStatus({ categoryId, modelId });
-          return this.queueElementsVisibilityChange({
-            elementIds: elementsToChange,
-            on,
-            visibleByDefault: isDisplayedByDefault(categoryVisibility.state === "visible"),
-          });
+          return this.queueElementsVisibilityChange(elementsToChange, on, isDisplayedByDefault(categoryVisibility.state === "visible"));
         }),
         // Change visibility of elements that are models
         fromWithRelease({ source: elementIds, releaseOnCount: 100 }).pipe(
@@ -775,15 +763,7 @@ export class BaseVisibilityHelper implements Disposable {
   }
 
   /** Queues visibility change for elements. */
-  private queueElementsVisibilityChange({
-    elementIds,
-    on,
-    visibleByDefault,
-  }: {
-    elementIds: Id64Arg;
-    on: boolean;
-    visibleByDefault: (elementId: Id64String) => boolean;
-  }) {
+  private queueElementsVisibilityChange(elementIds: Id64Arg, on: boolean, visibleByDefault: (elementId: Id64String) => boolean) {
     const finishedSubject = new Subject<boolean>();
     // observable to track if visibility change is finished/cancelled
     const changeFinished = finishedSubject.pipe(
