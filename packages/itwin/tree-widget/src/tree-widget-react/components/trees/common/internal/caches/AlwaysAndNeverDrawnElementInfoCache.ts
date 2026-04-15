@@ -212,8 +212,9 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
       map(() => {
         // Make sure latestCacheEntry is set to a new observable if change happened before suppression
         const cache = setType === "always" ? this.#alwaysDrawn : this.#neverDrawn;
-        cache.latestCacheEntryValue = this.queryAlwaysOrNeverDrawnElementInfo(getIds(), setType).pipe(shareReplay());
-        return cache.latestCacheEntryValue;
+        const queryObservable = this.queryAlwaysOrNeverDrawnElementInfo(getIds(), setType).pipe(shareReplay());
+        cache.latestCacheEntryValue = queryObservable;
+        return queryObservable;
       }),
       debounceTime(SET_CHANGE_DEBOUNCE_TIME),
       // Cancel pending request if dispose() is called.
