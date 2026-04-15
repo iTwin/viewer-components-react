@@ -147,10 +147,10 @@ describe("useHierarchyVisibility", () => {
     });
 
     act(() => {
-      // expect visibility state to be optimistically updated to 'visible'
+      // expect visibility state to be optimistically updated to 'hidden'
       expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledOnce();
       const state = result.current.getVisibilityButtonState(node);
-      expect(state).toEqual({ state: "visible", tooltip: "visibilityTooltips.status.determining" });
+      expect(state).toEqual({ state: "hidden", tooltip: "visibilityTooltips.status.determining" });
     });
 
     await waitFor(() => {
@@ -161,5 +161,47 @@ describe("useHierarchyVisibility", () => {
     });
 
     expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledTimes(2);
+  });
+
+  it("optimistically updates children visibility when changing parent visibility", async () => {
+    const grandchild = createTreeNode({ id: "grandchild-1" });
+    const child = createTreeNode({ id: "child-1", children: [grandchild] });
+    const parent = createTreeNode({ id: "parent-1", children: [child] });
+
+    const { result } = renderHook(useHierarchyVisibility, { initialProps });
+
+    visibilityHandler.getVisibilityStatus.mockResolvedValue({ state: "visible" });
+
+    await waitFor(() => {
+      expect(result.current.getVisibilityButtonState(parent)).toEqual({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
+      expect(result.current.getVisibilityButtonState(child)).toEqual({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
+      expect(result.current.getVisibilityButtonState(grandchild)).toEqual({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
+    });
+
+    // Toggle parent from visible to hidden
+    act(() => {
+      result.current.onVisibilityButtonClick(parent, "visible");
+    });
+
+    // All descendants should be optimistically set to "hidden"
+    act(() => {
+      expect(result.current.getVisibilityButtonState(parent)).toEqual({ state: "hidden", tooltip: "visibilityTooltips.status.determining" });
+      expect(result.current.getVisibilityButtonState(child)).toEqual({ state: "hidden", tooltip: "visibilityTooltips.status.determining" });
+      expect(result.current.getVisibilityButtonState(grandchild)).toEqual({ state: "hidden", tooltip: "visibilityTooltips.status.determining" });
+    });
+
+    // Simulate handler reporting actual visibility after change
+    visibilityHandler.getVisibilityStatus.mockResolvedValue({ state: "hidden" });
+
+    act(() => {
+      onVisibilityChange.raiseEvent();
+    });
+
+    // After reconciliation, all nodes should reflect the actual handler state
+    await waitFor(() => {
+      expect(result.current.getVisibilityButtonState(parent)).toEqual({ state: "hidden", tooltip: "visibilityTooltips.status.hidden" });
+      expect(result.current.getVisibilityButtonState(child)).toEqual({ state: "hidden", tooltip: "visibilityTooltips.status.hidden" });
+      expect(result.current.getVisibilityButtonState(grandchild)).toEqual({ state: "hidden", tooltip: "visibilityTooltips.status.hidden" });
+    });
   });
 });
