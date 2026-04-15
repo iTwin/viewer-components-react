@@ -90,8 +90,8 @@ interface AlwaysAndNeverDrawnElementInfoCacheProps {
 /** @internal */
 export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
   #subscriptions: Subscription[];
-  #alwaysDrawn: { cacheEntryObs: Observable<CachedNodesMap>; latestCacheEntryValue?: CachedNodesMap };
-  #neverDrawn: { cacheEntryObs: Observable<CachedNodesMap>; latestCacheEntryValue?: CachedNodesMap };
+  #alwaysDrawn: { cacheEntryObs: Observable<CachedNodesMap>; latestCacheEntryValue?: Observable<CachedNodesMap> };
+  #neverDrawn: { cacheEntryObs: Observable<CachedNodesMap>; latestCacheEntryValue?: Observable<CachedNodesMap> };
   #disposeSubject = new Subject<void>();
   readonly #viewport: TreeWidgetViewport;
   readonly #elementClassName: string;
@@ -145,7 +145,7 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
       : this.#suppressors.pipe(
           take(1),
           mergeMap((suppressionCount) =>
-            suppressionCount > 0 ? of(cache.latestCacheEntryValue).pipe(map(getElements)) : cache.cacheEntryObs.pipe(map(getElements)),
+            suppressionCount > 0 ? cache.latestCacheEntryValue!.pipe(map(getElements)) : cache.cacheEntryObs.pipe(map(getElements)),
           ),
         );
   }
@@ -194,6 +194,7 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
       map(() => undefined),
       share(),
     );
+
     const obs = sharedObs.pipe(
       // Fire the observable once at the beginning
       startWith(undefined),
@@ -208,24 +209,21 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
           take(1),
         ),
       ),
+      map(() => {
+        // Make sure latestCacheEntry is set to a new observable if change happened before suppression
+        const cache = setType === "always" ? this.#alwaysDrawn : this.#neverDrawn;
+        cache.latestCacheEntryValue = this.queryAlwaysOrNeverDrawnElementInfo(getIds(), setType).pipe(shareReplay());
+        return cache.latestCacheEntryValue;
+      }),
       debounceTime(SET_CHANGE_DEBOUNCE_TIME),
       // Cancel pending request if dispose() is called.
       takeUntil(this.#disposeSubject),
       // If multiple requests are sent at once, preserve only the result of the newest.
-      switchMap(() =>
+      switchMap((queryObservable) =>
         // Race between the event and the query.
         // In cases where event is raised before query returns, the query result is discarded.
-        race(
-          sharedObs,
-          defer(() => this.queryAlwaysOrNeverDrawnElementInfo(getIds(), setType)),
-        ),
+        race(sharedObs, queryObservable),
       ),
-      tap((cacheEntry) => {
-        if (cacheEntry !== undefined) {
-          const value = setType === "always" ? this.#alwaysDrawn : this.#neverDrawn;
-          value.latestCacheEntryValue = cacheEntry;
-        }
-      }),
       // Share the result by using a subject which always emits the saved result.
       share({
         connector: () => resultSubject,

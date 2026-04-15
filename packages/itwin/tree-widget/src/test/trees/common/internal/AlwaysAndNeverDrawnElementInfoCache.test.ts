@@ -175,6 +175,48 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
     });
 
+    it.only(`finishes pending request when suppression is activated for ${setType}Drawn after event fires but before debounce time has passed`, async () => {
+      const modelId = "0x1";
+      const categoryId = "0x2";
+      const elementId = "0x3";
+      const set = new Set([elementId]);
+      const queryHandler = vi
+        .fn()
+        .mockReturnValueOnce([{ rootCategoryId: categoryId, modelId, categoryId, elementsPath: elementId }])
+        .mockReturnValueOnce([{ rootCategoryId: categoryId, modelId, categoryId, elementsPath: "0x4" }]);
+
+      using vp = createFakeViewport({
+        [`${setType}Drawn`]: set,
+        queryHandler,
+      });
+
+      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
+      const result1 = await firstValueFrom(info.getElementsTree({ setType, modelId }));
+      const expectedResult: ChildrenTree<MapEntry> = new Map();
+      expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInAlwaysOrNeverDrawnSet: true }]]), isInAlwaysOrNeverDrawnSet: false });
+      expect(result1).toEqual(expectedResult);
+      expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
+      const setterFunction = (ids: Set<Id64String>) => {
+        if (setType === "always") {
+          vp.setAlwaysDrawn({ elementIds: ids });
+          return;
+        }
+        vp.setNeverDrawn({ elementIds: ids });
+      };
+      setterFunction(new Set(["0x4"]));
+      info.suppressChangeEvents();
+      const promiseResult2 = firstValueFrom(info.getElementsTree({ setType, modelId }));
+      await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
+      const result2 = await promiseResult2;
+      expectedResult.set(categoryId, { children: new Map([["0x4", { categoryId, isInAlwaysOrNeverDrawnSet: true }]]), isInAlwaysOrNeverDrawnSet: false });
+      info.resumeChangeEvents();
+      const result3 = await firstValueFrom(info.getElementsTree({ setType, modelId }));
+      expect(result2).toEqual(expectedResult);
+      expect(result3).toEqual(expectedResult);
+      expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
+    });
+
     it(`does not requery when suppress is activated and deactivated for ${setType}Drawn`, async () => {
       const modelId = "0x1";
       const categoryId = "0x2";
