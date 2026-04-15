@@ -477,13 +477,7 @@ export class BaseVisibilityHelper implements Disposable {
   }
 
   /** Turns model on and turns off elements with categories related to that model. */
-  private showModelWithoutAnyCategoriesOrElements({
-    modelId,
-    categoriesToNotOverride,
-  }: {
-    modelId: Id64String;
-    categoriesToNotOverride?: Id64Set;
-  }): Observable<void> {
+  private showModelWithoutAnyCategoriesOrElements(modelId: Id64String, categoriesToNotOverride?: Id64Set): Observable<void> {
     return forkJoin({
       allModelCategories: this.#props.baseIdsCache.getCategories({ modelId }),
       modelAlwaysDrawnElements: this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({ modelId, setType: "always" }),
@@ -582,9 +576,7 @@ export class BaseVisibilityHelper implements Disposable {
       const changeModelsObs = on
         ? categoryModelsObs.pipe(
             mergeMap(([modelId, modelCategories]) =>
-              this.#props.viewport.viewsModel(modelId)
-                ? EMPTY
-                : this.showModelWithoutAnyCategoriesOrElements({ modelId, categoriesToNotOverride: modelCategories }),
+              this.#props.viewport.viewsModel(modelId) ? EMPTY : this.showModelWithoutAnyCategoriesOrElements(modelId, modelCategories),
             ),
           )
         : EMPTY;
@@ -668,9 +660,7 @@ export class BaseVisibilityHelper implements Disposable {
     on: boolean;
   }): Observable<void> {
     const changeModelsVisibilityStatusObs =
-      on && !this.#props.viewport.viewsModel(modelId)
-        ? this.showModelWithoutAnyCategoriesOrElements({ modelId, categoriesToNotOverride: Id64.toIdSet(categoryIds) })
-        : EMPTY;
+      on && !this.#props.viewport.viewsModel(modelId) ? this.showModelWithoutAnyCategoriesOrElements(modelId, Id64.toIdSet(categoryIds)) : EMPTY;
     const changeCategoriesVisibilityStatusObs = of(
       this.#props.viewport.setPerModelCategoryOverride({
         modelIds: modelId,
@@ -724,7 +714,7 @@ export class BaseVisibilityHelper implements Disposable {
               return this.queueElementsVisibilityChange(elementsToChange, on, () => false);
             }
 
-            return this.showModelWithoutAnyCategoriesOrElements({ modelId }).pipe(
+            return this.showModelWithoutAnyCategoriesOrElements(modelId).pipe(
               mergeMap(() => {
                 const defaultVisibility = this.getVisibleModelCategoryDirectVisibilityStatus({
                   categoryId,
