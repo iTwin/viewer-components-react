@@ -175,7 +175,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
     });
 
-    it.only(`finishes pending request when suppression is activated for ${setType}Drawn after event fires but before debounce time has passed`, async () => {
+    it(`finishes pending request when suppression is activated for ${setType}Drawn after event fires but before debounce time has passed`, async () => {
       const modelId = "0x1";
       const categoryId = "0x2";
       const elementId = "0x3";
