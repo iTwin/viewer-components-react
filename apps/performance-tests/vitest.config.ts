@@ -5,9 +5,12 @@
 
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import { defineConfig } from "vitest/config";
 import TestReporter from "./src/util/TestReporter.js";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const treeWidgetRoot = path.resolve(__dirname, "../../packages/itwin/tree-widget");
 const treeWidgetSrc = path.resolve(treeWidgetRoot, "src");
 
