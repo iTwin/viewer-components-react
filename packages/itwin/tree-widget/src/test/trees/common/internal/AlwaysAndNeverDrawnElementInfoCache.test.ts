@@ -330,13 +330,6 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
           .map((_, i) => `0x${i}`),
       );
 
-      const setterFunction = (ids: Set<Id64String>) => {
-        if (setType === "always") {
-          vp.setAlwaysDrawn({ elementIds: ids });
-          return;
-        }
-        vp.setNeverDrawn({ elementIds: ids });
-      };
       let resolvablePromise: undefined | ((_?: unknown) => void);
       let queryExecutedResolvablePromise: undefined | ((_?: unknown) => void);
       const queryExecutedPromise = new Promise((resolve) => {
@@ -366,6 +359,14 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
           .fill(0)
           .map((_, i) => `0x${i}`),
       );
+
+      const setterFunction = (ids: Set<Id64String>) => {
+        if (setType === "always") {
+          vp.setAlwaysDrawn({ elementIds: ids });
+          return;
+        }
+        vp.setNeverDrawn({ elementIds: ids });
+      };
       setterFunction(newSet);
       resolvablePromise?.();
       const firstResult = await firstPromise;
@@ -395,7 +396,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
         queryExecutedResolvablePromise = resolve;
       });
 
-      const vp = createFakeViewport({
+      using vp = createFakeViewport({
         [`${setType}Drawn`]: set,
         queryHandler: vi
           .fn()
@@ -418,7 +419,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
           }),
       });
 
-      const info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       // first request: results depends on change
       const firstPromise = firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId }));
       await queryExecutedPromise;
