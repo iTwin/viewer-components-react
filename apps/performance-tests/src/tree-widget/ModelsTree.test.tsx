@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { describe, expect } from "vitest";
-import { SnapshotDb } from "@itwin/core-backend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ModelsTreeNode, SharedTreeContextProvider, useModelsTree } from "@itwin/tree-widget-react";
 import {
@@ -31,6 +30,7 @@ import {
   validateHierarchyVisibility,
 } from "./VisibilityUtilities.js";
 
+import type { SnapshotDb } from "@itwin/core-backend";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyDefinition, HierarchyNode, HierarchyProvider, HierarchySearchTree } from "@itwin/presentation-hierarchies";

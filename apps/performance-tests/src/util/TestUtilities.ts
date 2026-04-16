@@ -57,27 +57,30 @@ export function run<T>(props: RunOptions<T>): void {
   const testFunc = async ({ task }: { task: { meta: TaskMeta } }) => {
     const blockHandler = new MainThreadBlocksDetector();
     const value = await props.setup();
-
-    for (const { name, callBack, ignoreMeasurement } of props.testSteps) {
-      console.log(`Step "${name ?? "unknown"}" in progress...`);
-      const start = Date.now();
-      try {
-        if (!ignoreMeasurement) {
-          blockHandler.start();
-        }
-        await callBack(value);
-        console.log(`✅ Step "${name ?? "unknown"}" done`);
-      } finally {
-        if (!ignoreMeasurement) {
-          await blockHandler.stop();
-          task.meta.testSteps ??= [];
-          task.meta.testSteps.push({
-            name: name ?? "unknown",
-            blockingSummary: blockHandler.getSummary(),
-            duration: Date.now() - start,
-          });
+    try {
+      for (const { name, callBack, ignoreMeasurement } of props.testSteps) {
+        console.log(`Step "${name ?? "unknown"}" in progress...`);
+        const start = Date.now();
+        try {
+          if (!ignoreMeasurement) {
+            blockHandler.start();
+          }
+          await callBack(value);
+          console.log(`✅ Step "${name ?? "unknown"}" done`);
+        } finally {
+          if (!ignoreMeasurement) {
+            await blockHandler.stop();
+            task.meta.testSteps ??= [];
+            task.meta.testSteps.push({
+              name: name ?? "unknown",
+              blockingSummary: blockHandler.getSummary(),
+              duration: Date.now() - start,
+            });
+          }
         }
       }
+    } finally {
+      await props.cleanup?.(value);
     }
   };
 

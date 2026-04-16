@@ -3,26 +3,31 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-const iTwinPlugin = require("@itwin/eslint-plugin");
-const eslintConfigPrettier = require("eslint-config-prettier");
-const unusedImports = require("eslint-plugin-unused-imports");
+import eslintConfigPrettier from "eslint-config-prettier";
+import unusedImports from "eslint-plugin-unused-imports";
+import { defineConfig } from "eslint/config";
+import iTwinPlugin from "@itwin/eslint-plugin";
 
-module.exports = [
+export default defineConfig([
   {
-    files: ["**/*.{ts,cts}"],
+    ignores: ["lib/**", "vitest.config.ts"],
+  },
+  {
+    files: ["**/*.{ts,tsx,cts}"],
     ...iTwinPlugin.configs.iTwinjsRecommendedConfig,
   },
   {
     plugins: {
       "unused-imports": unusedImports,
     },
-    files: ["**/*.{ts,cts}"],
+    files: ["**/*.{ts,tsx,cts}"],
     rules: {
       "no-duplicate-imports": "off",
       "no-console": "off",
       "import/no-duplicates": "error",
       "object-curly-spacing": ["error", "always"],
       "@typescript-eslint/consistent-type-imports": "error",
+      "@typescript-eslint/consistent-type-exports": "error",
       "@typescript-eslint/no-non-null-assertion": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "unused-imports/no-unused-imports": "error",
@@ -31,4 +36,4 @@ module.exports = [
     },
   },
   eslintConfigPrettier,
-];
+]);

@@ -4,10 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { describe, expect } from "vitest";
-import { SnapshotDb } from "@itwin/core-backend";
-import { Id64String } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { ClassificationsTreeNode, HierarchyVisibilityHandler, SharedTreeContextProvider, useClassificationsTree } from "@itwin/tree-widget-react";
+import { ClassificationsTreeNode, SharedTreeContextProvider, useClassificationsTree } from "@itwin/tree-widget-react";
 import {
   BaseIdsCache,
   ClassificationsTreeDefinition,
@@ -29,9 +27,12 @@ import {
   validateHierarchyVisibility,
 } from "./VisibilityUtilities.js";
 
+import type { SnapshotDb } from "@itwin/core-backend";
+import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyDefinition, HierarchyNode, HierarchyProvider, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { Props } from "@itwin/presentation-shared";
+import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
 import type { IModelAccess } from "./StatelessHierarchyProvider.js";
 import type { TreeWidgetTestingViewport } from "./VisibilityUtilities.js";
 
