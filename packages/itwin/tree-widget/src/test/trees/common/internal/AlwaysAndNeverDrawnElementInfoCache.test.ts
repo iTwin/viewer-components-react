@@ -6,6 +6,7 @@
 import { firstValueFrom } from "rxjs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  ALWAYS_NEVER_BUFFER_THRESHOLD,
   AlwaysAndNeverDrawnElementInfoCache,
   SET_CHANGE_DEBOUNCE_TIME,
 } from "../../../../tree-widget-react/components/trees/common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
@@ -282,6 +283,177 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
+    });
+
+    it(`executes number of queries based on buffer threshold for ${setType}Drawn`, async () => {
+      // For this test no need to check if debounce time is working
+      vi.useRealTimers();
+
+      const modelId = "0x1";
+      const set = new Set(
+        Array(ALWAYS_NEVER_BUFFER_THRESHOLD + 1)
+          .fill(0)
+          .map((_, i) => `0x${i}`),
+      );
+
+      using vp = createFakeViewport({
+        [`${setType}Drawn`]: set,
+      });
+      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      await firstValueFrom(info.getElementsTree({ setType, modelId }));
+      expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
+      const setterFunction = (ids: Set<Id64String>) => {
+        if (setType === "always") {
+          vp.setAlwaysDrawn({ elementIds: ids });
+          return;
+        }
+        vp.setNeverDrawn({ elementIds: ids });
+      };
+      const newSet = new Set(
+        Array(ALWAYS_NEVER_BUFFER_THRESHOLD * 2 + 1)
+          .fill(0)
+          .map((_, i) => `0x${i}`),
+      );
+      setterFunction(newSet);
+      await firstValueFrom(info.getElementsTree({ setType, modelId }));
+      expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(5); // 2 previous + 3 new
+    });
+
+    it(`cancels scheduled queries when ${setType}Drawn changes without suppression`, async () => {
+      // For this test no need to check if debounce time is working
+      vi.useRealTimers();
+
+      const modelId = "0x1";
+      const set = new Set(
+        Array(ALWAYS_NEVER_BUFFER_THRESHOLD * 2 + 1)
+          .fill(0)
+          .map((_, i) => `0x${i}`),
+      );
+
+      const setterFunction = (ids: Set<Id64String>) => {
+        if (setType === "always") {
+          vp.setAlwaysDrawn({ elementIds: ids });
+          return;
+        }
+        vp.setNeverDrawn({ elementIds: ids });
+      };
+      let resolvablePromise: undefined | ((_?: unknown) => void);
+      let queryExecutedResolvablePromise: undefined | ((_?: unknown) => void);
+      const queryExecutedPromise = new Promise((resolve) => {
+        queryExecutedResolvablePromise = resolve;
+      });
+      using vp = createFakeViewport({
+        [`${setType}Drawn`]: set,
+        queryHandler: vi
+          .fn()
+          .mockImplementationOnce(async () => {
+            queryExecutedResolvablePromise?.();
+            await new Promise((resolve) => {
+              resolvablePromise = resolve;
+            }); // wait to ensure debounce time has passed and query is scheduled
+            return [{ rootCategoryId: "0x2", categoryId: "0x2", modelId: "0x1", elementsPath: "0x3" }];
+          })
+          .mockImplementation(() => {
+            return [{ rootCategoryId: "0x5", categoryId: "0x5", modelId: "0x1", elementsPath: "0x4" }];
+          }),
+      });
+
+      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      const firstPromise = firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId }));
+      await queryExecutedPromise;
+      const newSet = new Set(
+        Array(ALWAYS_NEVER_BUFFER_THRESHOLD * 2 + 1)
+          .fill(0)
+          .map((_, i) => `0x${i}`),
+      );
+      setterFunction(newSet);
+      resolvablePromise?.();
+      const firstResult = await firstPromise;
+      expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(5);
+
+      const secondResult = await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId }));
+      const expectedResult = new Set(["0x4"]);
+      expect(secondResult).toEqual(expectedResult);
+      expect(firstResult).toEqual(expectedResult);
+      expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(5);
+    });
+
+    it(`updates latestCacheEntryValue depending on when ${setType}Drawn changes`, async () => {
+      // For this test no need to check if debounce time is working
+      vi.useRealTimers();
+
+      const modelId = "0x1";
+      const set = new Set(
+        Array(ALWAYS_NEVER_BUFFER_THRESHOLD * 2 + 1)
+          .fill(0)
+          .map((_, i) => `0x${i}`),
+      );
+
+      let resolvablePromise: undefined | ((_?: unknown) => void);
+      let queryExecutedResolvablePromise: undefined | ((_?: unknown) => void);
+      const queryExecutedPromise = new Promise((resolve) => {
+        queryExecutedResolvablePromise = resolve;
+      });
+
+      const vp = createFakeViewport({
+        [`${setType}Drawn`]: set,
+        queryHandler: vi
+          .fn()
+          .mockImplementationOnce(async () => {
+            queryExecutedResolvablePromise?.();
+            await new Promise((resolve) => {
+              resolvablePromise = resolve;
+            });
+            return [{ rootCategoryId: "0x2", categoryId: "0x2", modelId: "0x1", elementsPath: "0x3" }];
+          })
+          .mockImplementation((...args) => {
+            const config = args[2];
+            if (config.restartToken.endsWith("-0")) {
+              return [{ rootCategoryId: "0x2", categoryId: "0x2", modelId: "0x1", elementsPath: "0x4" }];
+            }
+            if (config.restartToken.endsWith("-1")) {
+              return [{ rootCategoryId: "0x2", categoryId: "0x2", modelId: "0x1", elementsPath: "0x5" }];
+            }
+            return [{ rootCategoryId: "0x2", categoryId: "0x2", modelId: "0x1", elementsPath: "0x6" }];
+          }),
+      });
+
+      const info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      // first request: results depends on change
+      const firstPromise = firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId }));
+      await queryExecutedPromise;
+      info.suppressChangeEvents();
+      // second request: results will be generated for the current state
+      const secondPromise = firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId }));
+      info.resumeChangeEvents();
+
+      const setterFunction = (ids: Set<Id64String>) => {
+        if (setType === "always") {
+          vp.setAlwaysDrawn({ elementIds: ids });
+          return;
+        }
+        vp.setNeverDrawn({ elementIds: ids });
+      };
+      const newSet = new Set(
+        Array(ALWAYS_NEVER_BUFFER_THRESHOLD + 1)
+          .fill(0)
+          .map((_, i) => `0x${i}`),
+      );
+      setterFunction(newSet);
+      info.suppressChangeEvents();
+      // third request: since suppression happened after change event, latestCacheEntryValue contains the new values
+      const thirdPromise = firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId }));
+      resolvablePromise?.();
+      const secondResult = await secondPromise;
+      info.resumeChangeEvents();
+      const firstResult = await firstPromise;
+      expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(5);
+      const expectedResultAfterChange = new Set(["0x4", "0x5"]);
+      const expectedResultBeforeChange = new Set(["0x3", "0x5", "0x6"]);
+      expect(firstResult).toEqual(expectedResultAfterChange);
+      expect(secondResult).toEqual(expectedResultBeforeChange);
+      expect(await thirdPromise).toEqual(expectedResultAfterChange);
+      expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(5);
     });
 
     it(`requeries when suppression is removed and ${setType}Drawn changes`, async () => {
