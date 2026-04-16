@@ -218,7 +218,11 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
           // previous latestCacheEntry is not used, invalidate it
           invalidateCache.next();
         }
-        const queryObservable = this.queryAlwaysOrNeverDrawnElementInfo(getIds(), setType).pipe(takeUntil(invalidateCache), shareReplay());
+        const queryObservable = this.queryAlwaysOrNeverDrawnElementInfo(getIds(), setType).pipe(
+          takeUntil(invalidateCache),
+          takeUntil(this.#disposeSubject),
+          shareReplay(),
+        );
 
         // Make sure latestCacheEntry is set to a new observable if change happened before suppression
         cache.latestCacheEntryValue = queryObservable;
