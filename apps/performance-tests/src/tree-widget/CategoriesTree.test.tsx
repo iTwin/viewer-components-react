@@ -40,6 +40,7 @@ import type { TreeWidgetTestingViewport } from "./VisibilityUtilities.js";
 
 describe("categories tree", () => {
   run<{
+    iModel: SnapshotDb;
     iModelConnection: IModelConnection;
     imodelAccess: IModelAccess;
     viewport: TreeWidgetTestingViewport;
@@ -52,6 +53,7 @@ describe("categories tree", () => {
       const imodelAccess = StatelessHierarchyProvider.createIModelAccess(iModel, "unbounded");
       const viewport = await createViewport({ iModelConnection });
       return {
+        iModel,
         iModelConnection,
         imodelAccess,
         viewport,
@@ -59,7 +61,13 @@ describe("categories tree", () => {
         hierarchyDefinition: undefined as HierarchyDefinition | undefined,
       };
     },
-    cleanup: (props) => props.iModelConnection.close(),
+    cleanup: async ({ iModelConnection, iModel, viewport }) => {
+      iModel.close();
+      viewport[Symbol.dispose]();
+      if (!iModelConnection.isClosed) {
+        await iModelConnection.close();
+      }
+    },
     testSteps: [
       {
         name: "get search paths",

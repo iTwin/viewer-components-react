@@ -59,12 +59,14 @@ export function run<T>(props: RunOptions<T>): void {
     const value = await props.setup();
 
     for (const { name, callBack, ignoreMeasurement } of props.testSteps) {
+      console.log(`Step "${name ?? "unknown"}" in progress...`);
       const start = Date.now();
       try {
         if (!ignoreMeasurement) {
           blockHandler.start();
         }
         await callBack(value);
+        console.log(`✅ Step "${name ?? "unknown"}" done`);
       } finally {
         if (!ignoreMeasurement) {
           await blockHandler.stop();

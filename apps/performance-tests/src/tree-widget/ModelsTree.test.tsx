@@ -41,6 +41,7 @@ import type { TreeWidgetTestingViewport } from "./VisibilityUtilities.js";
 
 describe("models tree", () => {
   run<{
+    iModel: SnapshotDb;
     iModelConnection: IModelConnection;
     imodelAccess: IModelAccess;
     viewport: TreeWidgetTestingViewport;
@@ -61,6 +62,7 @@ describe("models tree", () => {
         targetItems.push({ id: row.ECInstanceId, className: "Generic:PhysicalObject" });
       }
       return {
+        iModel,
         iModelConnection,
         imodelAccess,
         targetItems,
@@ -69,7 +71,13 @@ describe("models tree", () => {
         hierarchyDefinition: undefined as HierarchyDefinition | undefined,
       };
     },
-    cleanup: (props) => props.iModelConnection.close(),
+    cleanup: async ({ iModelConnection, viewport, iModel }) => {
+      iModel.close();
+      viewport[Symbol.dispose]();
+      if (!iModelConnection.isClosed) {
+        await iModelConnection.close();
+      }
+    },
     testSteps: [
       {
         name: "get search paths",
@@ -153,13 +161,13 @@ describe("models tree", () => {
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
       return { iModel, imodelAccess, viewport, provider, handler, elementsModel, iModelConnection, hierarchyNodes: [] };
     },
-    cleanup: async (props) => {
-      props.iModel.close();
-      props.viewport[Symbol.dispose]();
-      props.handler[Symbol.dispose]();
-      props.provider[Symbol.dispose]();
-      if (!props.iModelConnection.isClosed) {
-        await props.iModelConnection.close();
+    cleanup: async ({ iModel, viewport, handler, provider, iModelConnection }) => {
+      iModel.close();
+      viewport[Symbol.dispose]();
+      handler[Symbol.dispose]();
+      provider[Symbol.dispose]();
+      if (!iModelConnection.isClosed) {
+        await iModelConnection.close();
       }
     },
     testSteps: [
@@ -338,9 +346,11 @@ describe("models tree", () => {
         },
       },
       {
-        name: "make everything visible 2",
-        callBack: ({ viewport, resetInitialVisibilityState }) => {
+        name: "make everything visible and clear always/never drawn sets",
+        callBack: ({ resetInitialVisibilityState, viewport }) => {
           resetInitialVisibilityState({ shouldBeVisible: true });
+          viewport.clearAlwaysDrawn();
+          viewport.clearNeverDrawn();
         },
         ignoreMeasurement: true,
       },

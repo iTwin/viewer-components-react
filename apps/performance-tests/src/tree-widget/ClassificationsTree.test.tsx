@@ -39,6 +39,7 @@ describe("classifications tree", () => {
   const rootClassificationSystemCode = "50k classifications";
 
   run<{
+    iModel: SnapshotDb;
     iModelConnection: IModelConnection;
     imodelAccess: IModelAccess;
     viewport: TreeWidgetTestingViewport;
@@ -51,6 +52,7 @@ describe("classifications tree", () => {
       const imodelAccess = StatelessHierarchyProvider.createIModelAccess(iModel, "unbounded");
       const viewport = await createViewport({ iModelConnection });
       return {
+        iModel,
         iModelConnection,
         imodelAccess,
         viewport,
@@ -58,9 +60,12 @@ describe("classifications tree", () => {
         hierarchyDefinition: undefined as HierarchyDefinition | undefined,
       };
     },
-    cleanup: (props) => {
-      props.viewport[Symbol.dispose]();
-      props.iModelConnection.close();
+    cleanup: async ({ iModelConnection, iModel, viewport }) => {
+      iModel.close();
+      viewport[Symbol.dispose]();
+      if (!iModelConnection.isClosed) {
+        await iModelConnection.close();
+      }
     },
     testSteps: [
       {
