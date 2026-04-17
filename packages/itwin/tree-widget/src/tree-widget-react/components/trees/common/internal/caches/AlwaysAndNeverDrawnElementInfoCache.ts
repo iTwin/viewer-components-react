@@ -41,7 +41,8 @@ import type { ChildrenTree } from "../Utils.js";
 
 /** @internal */
 export const SET_CHANGE_DEBOUNCE_TIME = 20;
-const ALWAYS_NEVER_BUFFER_THRESHOLD = 5000;
+/** @internal */
+export const ALWAYS_NEVER_BUFFER_THRESHOLD = 5000;
 
 type SetType = "always" | "never";
 
@@ -86,12 +87,23 @@ interface AlwaysAndNeverDrawnElementInfoCacheProps {
   elementClassName?: string;
   componentId?: GuidString;
 }
+interface LatestCacheEntry {
+  value: Observable<CachedNodesMap>;
+  isUsed: boolean;
+  invalidateValue: Subject<void>;
+}
 
 /** @internal */
 export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
   #subscriptions: Subscription[];
-  #alwaysDrawn: { cacheEntryObs: Observable<CachedNodesMap>; latestCacheEntryValue?: CachedNodesMap };
-  #neverDrawn: { cacheEntryObs: Observable<CachedNodesMap>; latestCacheEntryValue?: CachedNodesMap };
+  #alwaysDrawn: {
+    upToDateCacheEntryValue: Observable<CachedNodesMap>;
+    latestCacheEntry: LatestCacheEntry;
+  };
+  #neverDrawn: {
+    upToDateCacheEntryValue: Observable<CachedNodesMap>;
+    latestCacheEntry: LatestCacheEntry;
+  };
   #disposeSubject = new Subject<void>();
   readonly #viewport: TreeWidgetViewport;
   readonly #elementClassName: string;
@@ -103,14 +115,26 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
 
   constructor(props: AlwaysAndNeverDrawnElementInfoCacheProps) {
     this.#viewport = props.viewport;
-    this.#alwaysDrawn = { cacheEntryObs: this.createCacheEntryObservable("always") };
-    this.#neverDrawn = { cacheEntryObs: this.createCacheEntryObservable("never") };
+    const partialLatestAlwaysDrawnCacheEntry = { isUsed: false, invalidateValue: new Subject<void>() };
+    // Entry value is created only for typescript types, it will be thrown away when createUpToDateCacheEntryValue is called
+    const latestAlwaysDrawnCacheEntryValue = this.createLatestCacheEntryValue({ setType: "always", latestCacheEntry: partialLatestAlwaysDrawnCacheEntry });
+    this.#alwaysDrawn = {
+      upToDateCacheEntryValue: this.createUpToDateCacheEntryValue("always"),
+      latestCacheEntry: { ...partialLatestAlwaysDrawnCacheEntry, value: latestAlwaysDrawnCacheEntryValue },
+    };
+    const partialLatestNeverDrawnCacheEntry = { isUsed: false, invalidateValue: new Subject<void>() };
+    // Entry value is created only for typescript types, it will be thrown away when createUpToDateCacheEntryValue is called
+    const latestNeverDrawnCacheEntryValue = this.createLatestCacheEntryValue({ setType: "never", latestCacheEntry: partialLatestNeverDrawnCacheEntry });
+    this.#neverDrawn = {
+      upToDateCacheEntryValue: this.createUpToDateCacheEntryValue("never"),
+      latestCacheEntry: { ...partialLatestNeverDrawnCacheEntry, value: latestNeverDrawnCacheEntryValue },
+    };
     this.#suppressors = this.#suppress.pipe(
       scan((acc, suppress) => acc + (suppress ? 1 : -1), 0),
       startWith(0),
       shareReplay(1),
     );
-    this.#subscriptions = [this.#alwaysDrawn.cacheEntryObs.subscribe(), this.#neverDrawn.cacheEntryObs.subscribe()];
+    this.#subscriptions = [this.#alwaysDrawn.upToDateCacheEntryValue.subscribe(), this.#neverDrawn.upToDateCacheEntryValue.subscribe()];
     this.#componentId = props.componentId ?? Guid.createValue();
     this.#componentName = "AlwaysAndNeverDrawnElementInfo";
     this.#elementClassName = props.elementClassName ? props.elementClassName : getClassesByView(this.#viewport.viewType === "2d" ? "2d" : "3d").elementClass;
@@ -140,14 +164,16 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
       return this.getChildrenTree({ currentChildrenTree: rootTreeNodes, pathToElements, currentIdsIndex: 0 });
     };
 
-    return !cache.latestCacheEntryValue
-      ? cache.cacheEntryObs.pipe(map(getElements))
-      : this.#suppressors.pipe(
-          take(1),
-          mergeMap((suppressionCount) =>
-            suppressionCount > 0 ? of(cache.latestCacheEntryValue).pipe(map(getElements)) : cache.cacheEntryObs.pipe(map(getElements)),
-          ),
-        );
+    return this.#suppressors.pipe(
+      take(1),
+      mergeMap((suppressionCount) => {
+        if (suppressionCount > 0) {
+          cache.latestCacheEntry.isUsed = true;
+          return cache.latestCacheEntry.value.pipe(map(getElements));
+        }
+        return cache.upToDateCacheEntryValue.pipe(map(getElements));
+      }),
+    );
   }
 
   private getChildrenTree({
@@ -180,10 +206,8 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
     return result;
   }
 
-  private createCacheEntryObservable(setType: SetType): Observable<CachedNodesMap> {
+  private createUpToDateCacheEntryValue(setType: SetType): Observable<CachedNodesMap> {
     const event = setType === "always" ? this.#viewport.onAlwaysDrawnChanged : this.#viewport.onNeverDrawnChanged;
-    const getIds = setType === "always" ? () => this.#viewport.alwaysDrawn : () => this.#viewport.neverDrawn;
-
     const resultSubject = new BehaviorSubject<CachedNodesMap | undefined>(undefined);
     // Observable listens to viewport always/never drawn set change events.
     const sharedObs = fromEventPattern(
@@ -194,6 +218,7 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
       map(() => undefined),
       share(),
     );
+
     const obs = sharedObs.pipe(
       // Fire the observable once at the beginning
       startWith(undefined),
@@ -208,24 +233,22 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
           take(1),
         ),
       ),
+      map(() => {
+        const cache = setType === "always" ? this.#alwaysDrawn : this.#neverDrawn;
+        // Make sure to set new latestCacheEntry value
+        const queryObservable = this.createLatestCacheEntryValue({ setType, latestCacheEntry: cache.latestCacheEntry });
+        cache.latestCacheEntry.value = queryObservable;
+        return queryObservable;
+      }),
       debounceTime(SET_CHANGE_DEBOUNCE_TIME),
       // Cancel pending request if dispose() is called.
       takeUntil(this.#disposeSubject),
       // If multiple requests are sent at once, preserve only the result of the newest.
-      switchMap(() =>
+      switchMap((queryObservable) =>
         // Race between the event and the query.
         // In cases where event is raised before query returns, the query result is discarded.
-        race(
-          sharedObs,
-          defer(() => this.queryAlwaysOrNeverDrawnElementInfo(getIds(), setType)),
-        ),
+        race(sharedObs, queryObservable),
       ),
-      tap((cacheEntry) => {
-        if (cacheEntry !== undefined) {
-          const value = setType === "always" ? this.#alwaysDrawn : this.#neverDrawn;
-          value.latestCacheEntryValue = cacheEntry;
-        }
-      }),
       // Share the result by using a subject which always emits the saved result.
       share({
         connector: () => resultSubject,
@@ -235,6 +258,28 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
       first((x): x is CachedNodesMap => !!x),
     );
     return obs;
+  }
+
+  private createLatestCacheEntryValue({
+    setType,
+    latestCacheEntry,
+  }: {
+    setType: SetType;
+    latestCacheEntry: Omit<LatestCacheEntry, "value">;
+  }): Observable<CachedNodesMap> {
+    if (!latestCacheEntry.isUsed) {
+      // previous latestCacheEntry is not used, invalidate it
+      latestCacheEntry.invalidateValue.next();
+    }
+    const set = setType === "always" ? this.#viewport.alwaysDrawn : this.#viewport.neverDrawn;
+    const queryObservable = this.queryAlwaysOrNeverDrawnElementInfo(set, setType).pipe(
+      takeUntil(latestCacheEntry.invalidateValue),
+      takeUntil(this.#disposeSubject),
+      shareReplay(),
+    );
+
+    latestCacheEntry.isUsed = false;
+    return queryObservable;
   }
 
   public [Symbol.dispose](): void {
