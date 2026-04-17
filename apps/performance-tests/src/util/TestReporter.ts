@@ -7,12 +7,12 @@ import asTable from "as-table";
 import fs from "fs";
 
 import type { SerializedError, UserConsoleLog } from "vitest";
-import type { Reporter, TestCase, TestModule, TestSuite } from "vitest/node";
+import type { Reporter, TestCase, TestModule, TestRunEndReason, TestSpecification, TestSuite } from "vitest/node";
 import type { Summary } from "./MainThreadBlocksDetector.js";
 
-interface TestInfo {
-  fullName: string;
-  name: string;
+interface TestStepInfo {
+  testFullName: string;
+  stepName: string;
   state: "passed" | "failed" | "skipped" | "pending";
   duration: number;
   blockingSummary: Summary;
@@ -27,13 +27,24 @@ const tableFormatter = asTable.configure({
  * Measures test time and the amounts of time when the main thread was blocked.
  */
 export default class TestReporter implements Reporter {
-  readonly #testInfo: TestInfo[] = [];
+  readonly #stepResults: TestStepInfo[] = [];
   #hasFailures = false;
   #outputPath?: string;
   #indentLevel = 0;
+  #symbols = {
+    passed: "✅",
+    failed: "❌",
+    skipped: "⏩",
+  };
 
   public onInit(): void {
     this.#outputPath = process.env.BENCHMARK_OUTPUT_PATH;
+  }
+
+  public onTestRunStart(specifications: readonly TestSpecification[]): void {
+    if (specifications.length === 0) {
+      this.print(`\n${this.#symbols.failed}  No test files found`);
+    }
   }
 
   public onTestSuiteReady(testSuite: TestSuite): void {
@@ -59,17 +70,22 @@ export default class TestReporter implements Reporter {
     const result = testCase.result();
     const state = result.state;
     const meta = testCase.meta();
+    const symbol = state === "passed" ? this.#symbols.passed : state === "failed" ? this.#symbols.failed : this.#symbols.skipped;
+    const testFullName = testCase.fullName.replaceAll(">", "").replaceAll("  ", " ");
+    const steps = meta.steps ?? [];
+    for (let i = 0; i < steps.length; ++i) {
+      const step = steps[i];
+      const isLastStep = i === steps.length - 1;
+      this.#stepResults.push({
+        testFullName,
+        stepName: step.name,
+        state: isLastStep ? state : "passed", // if a step fails, steps before should be marked as passed, not failed
+        duration: step.duration,
+        blockingSummary: step.blockingSummary,
+        symbol: isLastStep ? symbol : this.#symbols.passed, // if a step fails, steps before should be marked as passed, not failed
+      });
+    }
 
-    const info: TestInfo = {
-      fullName: testCase.fullName.replaceAll(">", "").replaceAll("  ", " "),
-      name: testCase.name,
-      state,
-      duration: meta.duration ?? 0,
-      blockingSummary: meta.blockingSummary ?? { count: 0 },
-      symbol: state === "passed" ? "✅" : state === "failed" ? "❌" : "⏩",
-    };
-
-    this.#testInfo.push(info);
     if (state === "failed") {
       this.#hasFailures = true;
       if (result.errors.length > 0) {
@@ -77,14 +93,15 @@ export default class TestReporter implements Reporter {
       }
     }
 
-    this.print(`${info.symbol} ${testCase.name} (${info.duration} ms)`);
+    const totalDuration = steps.reduce<number>((sum, s) => sum + s.duration, 0);
+    this.print(`${symbol} ${testCase.name} (${totalDuration} ms)`);
   }
 
   public onTestModuleEnd(testModule: TestModule): void {
     const errors = testModule.errors();
     if (errors.length > 0) {
       this.#hasFailures = true;
-      this.print(`\n❌ Module errors in ${testModule.moduleId}:`);
+      this.print(`\n${this.#symbols.failed} Module errors in ${testModule.moduleId}:`);
       this.printErrors(errors);
     }
   }
@@ -101,7 +118,16 @@ export default class TestReporter implements Reporter {
     }
   }
 
-  public onTestRunEnd(): void {
+  public onTestRunEnd(testModules: ReadonlyArray<TestModule>, unhandledErrors: ReadonlyArray<SerializedError>, reason: TestRunEndReason): void {
+    if (unhandledErrors.length > 0) {
+      this.#hasFailures = true;
+      this.print(`\n${this.#symbols.failed} Unhandled errors:`);
+      this.printErrors(unhandledErrors);
+    }
+    if (reason === "failed" && testModules.length === 0) {
+      this.#hasFailures = true;
+      this.print(`\n${this.#symbols.failed} Test run failed: no tests were executed`);
+    }
     this.printResults();
     if (this.#outputPath && !this.#hasFailures) {
       this.saveResults();
@@ -115,7 +141,7 @@ export default class TestReporter implements Reporter {
   }
 
   private printResults() {
-    const results = this.#testInfo.map(({ state, fullName, duration, blockingSummary, symbol }) => {
+    const results = this.#stepResults.map(({ state, testFullName, stepName, duration, blockingSummary, symbol }) => {
       const blockingInfo = Object.entries(blockingSummary)
         .filter(([_, val]) => val !== undefined)
         .map(([key, val]) => `${key}: ${(key === "count" ? val : val?.toFixed(2)) ?? "N/A"}`)
@@ -125,7 +151,7 @@ export default class TestReporter implements Reporter {
 
       return {
         Status: `${symbol} ${state}`,
-        Test: fullName,
+        Test: stepName ? `${testFullName}: ${stepName}` : testFullName,
         Duration: `${duration} ms`,
         Blocks: blockingInfo,
       };
@@ -138,15 +164,16 @@ export default class TestReporter implements Reporter {
 
   /** Saves performance results in a format that is compatible with Github benchmark action. */
   private saveResults() {
-    const data = this.#testInfo.flatMap(({ fullName, duration, blockingSummary }) => {
+    const data = this.#stepResults.flatMap(({ testFullName, stepName, duration, blockingSummary }) => {
+      const name = stepName ? `${testFullName} > ${stepName}` : testFullName;
       const durationEntry = {
-        name: fullName,
+        name,
         unit: "ms",
         value: duration,
       };
 
       const blockingEntry = {
-        name: `${fullName} (P95 of main thread blocks)`,
+        name: `${name} (P95 of main thread blocks)`,
         unit: "ms",
         value: blockingSummary.p95 ?? 0,
         extra: Object.entries(blockingSummary)

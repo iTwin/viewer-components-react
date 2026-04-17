@@ -364,14 +364,14 @@ export class Datasets {
             id: tableId,
           },
         });
-        for (let j = 0; j < numElements / classificationTablesCount; ++j) {
+        for (let j = 0; j < numElements / classificationTablesCount / 2; ++j) {
           const classificationId = builder.insertElement({
             classFullName: "ClassificationSystems.Classification",
             model: tableModelId,
             code: builder.createCode(tableModelId, BisCodeSpec.nullCodeSpec, `Classification ${j + 1}`),
           });
 
-          builder.insertElement({
+          const childClassificationId = builder.insertElement({
             classFullName: "ClassificationSystems.Classification",
             model: tableModelId,
             code: builder.createCode(tableModelId, BisCodeSpec.nullCodeSpec, `Child classification ${j + 1}`),
@@ -395,12 +395,12 @@ export class Datasets {
           builder.insertRelationship({
             classFullName: "ClassificationSystems.ElementHasClassifications",
             sourceId: physicalElement.id,
-            targetId: classificationId,
+            targetId: childClassificationId,
           });
           builder.insertRelationship({
             classFullName: "TestClassificationSchema.CategorySymbolizesClassification",
             sourceId: spatialCategory.id,
-            targetId: classificationId,
+            targetId: childClassificationId,
           });
         }
       }
