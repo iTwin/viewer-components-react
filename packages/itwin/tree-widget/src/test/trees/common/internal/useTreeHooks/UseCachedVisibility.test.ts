@@ -215,17 +215,20 @@ describe("HierarchyVisibilityHandlerImpl", () => {
     it("discards partial changes when takeUntil fires for same node", async () => {
       const vp = createFakeViewport();
       const firstChangeSubject = new Subject<void>();
-      const changeVisibilityStatus = vi
-        .fn()
-        .mockImplementationOnce(() => {
-          // First call: buffer a viewport change and return a long-running observable
-          vp.changeModelDisplay({ modelIds: "0x1", display: true });
-          return firstChangeSubject;
-        })
-        .mockImplementation(() => EMPTY);
+      const getTreeSpecificVisibilityHandler = vi
+        .fn<HierarchyVisibilityHandlerImplProps<void>["getTreeSpecificVisibilityHandler"]>()
+        .mockImplementationOnce(({ viewport: bufferingViewport }) =>
+          createTreeSpecificVisibilityHandler({
+            changeVisibilityStatus: vi.fn(() => {
+              bufferingViewport.changeModelDisplay({ modelIds: "0x1", display: true });
+              return firstChangeSubject;
+            }),
+          }),
+        )
+        .mockImplementation(() => createTreeSpecificVisibilityHandler());
       const { handler } = createHandler({
         viewport: vp,
-        getTreeSpecificVisibilityHandler: () => createTreeSpecificVisibilityHandler({ changeVisibilityStatus }),
+        getTreeSpecificVisibilityHandler,
       });
 
       const node = createNode();
@@ -247,19 +250,27 @@ describe("HierarchyVisibilityHandlerImpl", () => {
     it("applies changes when a different node completes", async () => {
       const vp = createFakeViewport();
       const firstChangeSubject = new Subject<void>();
-      const changeVisibilityStatus = vi
-        .fn()
-        .mockImplementationOnce(() => {
-          vp.changeModelDisplay({ modelIds: "0xFIRST", display: true });
-          return firstChangeSubject;
-        })
-        .mockImplementation(() => {
-          vp.changeModelDisplay({ modelIds: "0xSECOND", display: true });
-          return EMPTY;
-        });
+      const getTreeSpecificVisibilityHandler = vi
+        .fn<HierarchyVisibilityHandlerImplProps<void>["getTreeSpecificVisibilityHandler"]>()
+        .mockImplementationOnce(({ viewport: bufferingViewport }) =>
+          createTreeSpecificVisibilityHandler({
+            changeVisibilityStatus: vi.fn(() => {
+              bufferingViewport.changeModelDisplay({ modelIds: "0xFIRST", display: true });
+              return firstChangeSubject;
+            }),
+          }),
+        )
+        .mockImplementation(({ viewport: bufferingViewport }) =>
+          createTreeSpecificVisibilityHandler({
+            changeVisibilityStatus: vi.fn(() => {
+              bufferingViewport.changeModelDisplay({ modelIds: "0xSECOND", display: true });
+              return EMPTY;
+            }),
+          }),
+        );
       const { handler } = createHandler({
         viewport: vp,
-        getTreeSpecificVisibilityHandler: () => createTreeSpecificVisibilityHandler({ changeVisibilityStatus }),
+        getTreeSpecificVisibilityHandler,
       });
 
       const nodeA = createNode({ instanceKeys: [{ className: "BisCore.Element", id: "0x1" }] });
@@ -286,19 +297,27 @@ describe("HierarchyVisibilityHandlerImpl", () => {
     it("applies changes when same key but different depth completes", async () => {
       const vp = createFakeViewport();
       const firstChangeSubject = new Subject<void>();
-      const changeVisibilityStatus = vi
-        .fn()
-        .mockImplementationOnce(() => {
-          vp.changeModelDisplay({ modelIds: "0xDEPTH0", display: true });
-          return firstChangeSubject;
-        })
-        .mockImplementation(() => {
-          vp.changeModelDisplay({ modelIds: "0xDEPTH1", display: true });
-          return EMPTY;
-        });
+      const getTreeSpecificVisibilityHandler = vi
+        .fn<HierarchyVisibilityHandlerImplProps<void>["getTreeSpecificVisibilityHandler"]>()
+        .mockImplementationOnce(({ viewport: bufferingViewport }) =>
+          createTreeSpecificVisibilityHandler({
+            changeVisibilityStatus: vi.fn(() => {
+              bufferingViewport.changeModelDisplay({ modelIds: "0xDEPTH0", display: true });
+              return firstChangeSubject;
+            }),
+          }),
+        )
+        .mockImplementation(({ viewport: bufferingViewport }) =>
+          createTreeSpecificVisibilityHandler({
+            changeVisibilityStatus: vi.fn(() => {
+              bufferingViewport.changeModelDisplay({ modelIds: "0xDEPTH1", display: true });
+              return EMPTY;
+            }),
+          }),
+        );
       const { handler } = createHandler({
         viewport: vp,
-        getTreeSpecificVisibilityHandler: () => createTreeSpecificVisibilityHandler({ changeVisibilityStatus }),
+        getTreeSpecificVisibilityHandler,
       });
 
       const nodeA = createNode({ parentKeys: [] }); // depth 0
