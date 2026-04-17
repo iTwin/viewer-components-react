@@ -58,25 +58,13 @@ export function run<T>(props: RunOptions<T>): void {
     const value = await props.setup();
     try {
       for (const { name, callBack, ignoreMeasurement } of props.steps) {
-        const blockDetector = new MainThreadBlocksDetector();
         console.log(`Step "${name}" in progress...`);
-        const start = Date.now();
+        await using blockDetector = createThreadBlocksDetector({ ignoreMeasurement, name });
         try {
-          if (!ignoreMeasurement) {
-            blockDetector.start();
-          }
           await callBack(value);
           console.log(`✅ Step "${name}" done`);
         } finally {
-          if (!ignoreMeasurement) {
-            await blockDetector.stop();
-            task.meta.steps ??= [];
-            task.meta.steps.push({
-              name,
-              blockingSummary: blockDetector.getSummary(),
-              duration: Date.now() - start,
-            });
-          }
+          await blockDetector.complete(task);
         }
       }
     } finally {
@@ -89,6 +77,32 @@ export function run<T>(props: RunOptions<T>): void {
   } else {
     it(props.testName, testFunc);
   }
+}
+
+function createThreadBlocksDetector({ ignoreMeasurement, name }: { ignoreMeasurement?: boolean; name: string }): {
+  complete: (task: { meta: TaskMeta }) => Promise<void>;
+} & AsyncDisposable {
+  if (ignoreMeasurement) {
+    return { complete: async () => {}, [Symbol.asyncDispose]: async () => {} };
+  }
+
+  const start = Date.now();
+  const detector = new MainThreadBlocksDetector();
+  detector.start();
+  return {
+    complete: async (task: { meta: TaskMeta }) => {
+      await detector.stop();
+      task.meta.steps ??= [];
+      task.meta.steps.push({
+        name,
+        blockingSummary: detector.getSummary(),
+        duration: Date.now() - start,
+      });
+    },
+    [Symbol.asyncDispose]: async () => {
+      await detector.stop();
+    },
+  };
 }
 
 /**
