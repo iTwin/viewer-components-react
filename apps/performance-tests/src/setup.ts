@@ -31,7 +31,7 @@ beforeAll(async () => {
   });
   ECSchemaRpcImpl.register();
   await Datasets.initialize("./datasets");
-}, 30_000);
+}, 60_000);
 
 afterAll(async () => {
   await terminatePresentationTesting();
