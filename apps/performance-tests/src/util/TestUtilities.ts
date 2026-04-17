@@ -33,7 +33,7 @@ export interface RunOptions<TContext> {
 
   /** Test steps which are run in order and measured. */
   steps: Array<{
-    name?: string;
+    name: string;
     callBack: (x: TContext) => void | Promise<void>;
     ignoreMeasurement?: boolean; // if true, the time spent in this step will not be measured and included in the results
   }>;
@@ -59,20 +59,20 @@ export function run<T>(props: RunOptions<T>): void {
     const value = await props.setup();
     try {
       for (const { name, callBack, ignoreMeasurement } of props.steps) {
-        console.log(`Step "${name ?? "unknown"}" in progress...`);
+        console.log(`Step "${name}" in progress...`);
         const start = Date.now();
         try {
           if (!ignoreMeasurement) {
             blockHandler.start();
           }
           await callBack(value);
-          console.log(`✅ Step "${name ?? "unknown"}" done`);
+          console.log(`✅ Step "${name}" done`);
         } finally {
           if (!ignoreMeasurement) {
             await blockHandler.stop();
             task.meta.steps ??= [];
             task.meta.steps.push({
-              name: name ?? "unknown",
+              name,
               blockingSummary: blockHandler.getSummary(),
               duration: Date.now() - start,
             });
