@@ -72,10 +72,10 @@ export default class TestReporter implements Reporter {
     const meta = testCase.meta();
     const symbol = state === "passed" ? this.#symbols.passed : state === "failed" ? this.#symbols.failed : this.#symbols.skipped;
     const testFullName = testCase.fullName.replaceAll(">", "").replaceAll("  ", " ");
-    const testSteps = meta.testSteps ?? [];
-    for (let i = 0; i < testSteps.length; ++i) {
-      const step = testSteps[i];
-      const isLastStep = i === testSteps.length - 1;
+    const steps = meta.steps ?? [];
+    for (let i = 0; i < steps.length; ++i) {
+      const step = steps[i];
+      const isLastStep = i === steps.length - 1;
       this.#stepResults.push({
         testFullName,
         stepName: step.name,
@@ -93,7 +93,7 @@ export default class TestReporter implements Reporter {
       }
     }
 
-    const totalDuration = testSteps.reduce<number>((sum, s) => sum + s.duration, 0);
+    const totalDuration = steps.reduce<number>((sum, s) => sum + s.duration, 0);
     this.print(`${symbol} ${testCase.name} (${totalDuration} ms)`);
   }
 

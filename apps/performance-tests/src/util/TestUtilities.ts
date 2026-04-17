@@ -20,7 +20,7 @@ interface TestStepEntry {
 
 declare module "vitest" {
   interface TaskMeta {
-    testSteps?: Array<TestStepEntry>;
+    steps?: Array<TestStepEntry>;
   }
 }
 
@@ -32,7 +32,7 @@ export interface RunOptions<TContext> {
   setup(): TContext | Promise<TContext>;
 
   /** Test steps which are run in order and measured. */
-  testSteps: Array<{
+  steps: Array<{
     name?: string;
     callBack: (x: TContext) => void | Promise<void>;
     ignoreMeasurement?: boolean; // if true, the time spent in this step will not be measured and included in the results
@@ -58,7 +58,7 @@ export function run<T>(props: RunOptions<T>): void {
     const blockHandler = new MainThreadBlocksDetector();
     const value = await props.setup();
     try {
-      for (const { name, callBack, ignoreMeasurement } of props.testSteps) {
+      for (const { name, callBack, ignoreMeasurement } of props.steps) {
         console.log(`Step "${name ?? "unknown"}" in progress...`);
         const start = Date.now();
         try {
@@ -70,8 +70,8 @@ export function run<T>(props: RunOptions<T>): void {
         } finally {
           if (!ignoreMeasurement) {
             await blockHandler.stop();
-            task.meta.testSteps ??= [];
-            task.meta.testSteps.push({
+            task.meta.steps ??= [];
+            task.meta.steps.push({
               name: name ?? "unknown",
               blockingSummary: blockHandler.getSummary(),
               duration: Date.now() - start,

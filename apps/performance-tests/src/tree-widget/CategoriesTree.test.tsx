@@ -68,7 +68,7 @@ describe("categories tree", () => {
         await iModelConnection.close();
       }
     },
-    testSteps: [
+    steps: [
       {
         name: "get search paths",
         callBack: async (ctx) => {
@@ -163,7 +163,7 @@ describe("categories tree", () => {
         await props.iModelConnection.close();
       }
     },
-    testSteps: [
+    steps: [
       {
         name: "collect nodes",
         callBack: async (ctx) => {
@@ -258,7 +258,7 @@ describe("categories tree", () => {
         await props.iModelConnection.close();
       }
     },
-    testSteps: [
+    steps: [
       {
         name: "collect nodes",
         callBack: async (ctx) => {
