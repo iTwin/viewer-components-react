@@ -55,25 +55,25 @@ export function run<T>(props: RunOptions<T>): void {
   }
 
   const testFunc = async ({ task }: { task: { meta: TaskMeta } }) => {
-    const blockHandler = new MainThreadBlocksDetector();
     const value = await props.setup();
     try {
       for (const { name, callBack, ignoreMeasurement } of props.steps) {
+        const blockDetector = new MainThreadBlocksDetector();
         console.log(`Step "${name}" in progress...`);
         const start = Date.now();
         try {
           if (!ignoreMeasurement) {
-            blockHandler.start();
+            blockDetector.start();
           }
           await callBack(value);
           console.log(`✅ Step "${name}" done`);
         } finally {
           if (!ignoreMeasurement) {
-            await blockHandler.stop();
+            await blockDetector.stop();
             task.meta.steps ??= [];
             task.meta.steps.push({
               name,
-              blockingSummary: blockHandler.getSummary(),
+              blockingSummary: blockDetector.getSummary(),
               duration: Date.now() - start,
             });
           }
