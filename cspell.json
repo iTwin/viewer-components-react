@@ -54,6 +54,7 @@
     "e2e-out",
     "**/CHANGELOG.*",
     "**/tsconfig.json",
+    "**/*.tsbuildinfo",
     "**/*.api.md",
     "breakdown-trees",
     "ec3-widget",
