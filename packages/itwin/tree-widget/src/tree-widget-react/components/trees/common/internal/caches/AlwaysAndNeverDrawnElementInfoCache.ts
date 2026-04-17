@@ -11,7 +11,6 @@ import {
   EMPTY,
   filter,
   first,
-  forkJoin,
   from,
   fromEventPattern,
   map,
@@ -32,11 +31,12 @@ import {
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
-import { getClassesByView, getIdsFromChildrenTree, getOptimalBatchSize, releaseMainThreadOnItemsCount, setDifference, updateChildrenTree } from "../Utils.js";
+import { getClassesByView, getIdsFromChildrenTree, getOptimalBatchSize, releaseMainThreadOnItemsCount, updateChildrenTree } from "../Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
+import type { ElementId } from "../Types.js";
 import type { ChildrenTree } from "../Utils.js";
 
 /** @internal */
@@ -340,29 +340,12 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
   }
 
   public getAlwaysOrNeverDrawnElements(props: GetElementsTreeProps) {
+    const cache = props.setType === "always" ? this.#viewport.alwaysDrawn : this.#viewport.neverDrawn;
+    if (!cache?.size) {
+      return of(new Set<ElementId>());
+    }
     return this.getElementsTree(props).pipe(
       map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet })),
-    );
-  }
-
-  public clearAlwaysAndNeverDrawnElements(props: { categoryIds: Id64Arg; modelId: Id64String }) {
-    return forkJoin({
-      alwaysDrawn: this.#viewport.alwaysDrawn?.size
-        ? this.getAlwaysOrNeverDrawnElements({ modelId: props.modelId, categoryIds: props.categoryIds, setType: "always" })
-        : of(new Set<Id64String>()),
-      neverDrawn: this.#viewport.neverDrawn?.size
-        ? this.getAlwaysOrNeverDrawnElements({ modelId: props.modelId, categoryIds: props.categoryIds, setType: "never" })
-        : of(new Set<Id64String>()),
-    }).pipe(
-      map(({ alwaysDrawn, neverDrawn }) => {
-        const viewport = this.#viewport;
-        if (viewport.alwaysDrawn?.size && alwaysDrawn.size) {
-          viewport.setAlwaysDrawn({ elementIds: setDifference(viewport.alwaysDrawn, alwaysDrawn) });
-        }
-        if (viewport.neverDrawn?.size && neverDrawn.size) {
-          viewport.setNeverDrawn({ elementIds: setDifference(viewport.neverDrawn, neverDrawn) });
-        }
-      }),
     );
   }
 }

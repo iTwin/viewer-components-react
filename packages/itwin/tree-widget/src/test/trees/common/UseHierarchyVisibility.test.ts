@@ -126,7 +126,7 @@ describe("useHierarchyVisibility", () => {
 
     await waitFor(() => {
       // wait for visibility status to calculated
-      expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalled();
+      expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledOnce();
       const state = result.current.getVisibilityButtonState(node);
       expect(state).toEqual({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
     });
@@ -135,8 +135,14 @@ describe("useHierarchyVisibility", () => {
     act(() => {
       result.current.onVisibilityButtonClick(node, "visible");
     });
-
     expect(visibilityHandler.changeVisibility).toHaveBeenCalled();
+
+    act(() => {
+      // expect visibility state to be optimistically updated to 'hidden'
+      expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledOnce();
+      const state = result.current.getVisibilityButtonState(node);
+      expect(state).toEqual({ state: "hidden", tooltip: "visibilityTooltips.status.determining" });
+    });
 
     visibilityHandler.getVisibilityStatus.mockResolvedValue({ state: "hidden" });
 
@@ -146,6 +152,40 @@ describe("useHierarchyVisibility", () => {
       onVisibilityChange.raiseEvent();
     });
 
+    await waitFor(() => {
+      const state = result.current.getVisibilityButtonState(node);
+      expect(state).toEqual({ state: "hidden", tooltip: "visibilityTooltips.status.hidden" });
+    });
+
+    expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledTimes(2);
+  });
+
+  it("changes visibility status when multiple clicks are made before status can be calculated", async () => {
+    const node = createTreeNode({ id: "node-1" });
+    const { result } = renderHook(useHierarchyVisibility, { initialProps });
+
+    expect(visibilityHandler.getVisibilityStatus).not.toHaveBeenCalled();
+    visibilityHandler.getVisibilityStatus.mockResolvedValue({ state: "visible" });
+
+    act(() => {
+      // expect initial state to be "loading"
+      const state = result.current.getVisibilityButtonState(node);
+      expect(state).toEqual({ isLoading: true });
+    });
+
+    await waitFor(() => {
+      // wait for visibility status to calculated
+      expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalled();
+      const state = result.current.getVisibilityButtonState(node);
+      expect(state).toEqual({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
+    });
+
+    expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledOnce();
+    act(() => {
+      result.current.onVisibilityButtonClick(node, "visible");
+    });
+    expect(visibilityHandler.changeVisibility).toHaveBeenCalledTimes(1);
+
     act(() => {
       // expect visibility state to be optimistically updated to 'hidden'
       expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledOnce();
@@ -153,11 +193,26 @@ describe("useHierarchyVisibility", () => {
       expect(state).toEqual({ state: "hidden", tooltip: "visibilityTooltips.status.determining" });
     });
 
-    await waitFor(() => {
-      // wait for visibility status to recalculated
-      expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledTimes(2);
+    act(() => {
+      result.current.onVisibilityButtonClick(node, "hidden");
+    });
+    expect(visibilityHandler.changeVisibility).toHaveBeenCalledTimes(2);
+
+    act(() => {
+      expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledOnce();
       const state = result.current.getVisibilityButtonState(node);
-      expect(state).toEqual({ state: "hidden", tooltip: "visibilityTooltips.status.hidden" });
+      expect(state).toEqual({ state: "visible", tooltip: "visibilityTooltips.status.determining" });
+    });
+
+    expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledOnce();
+    visibilityHandler.getVisibilityStatus.mockResolvedValue({ state: "visible" });
+    act(() => {
+      // simulate visibility change by handler
+      onVisibilityChange.raiseEvent();
+    });
+    await waitFor(() => {
+      const state = result.current.getVisibilityButtonState(node);
+      expect(state).toEqual({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
     });
 
     expect(visibilityHandler.getVisibilityStatus).toHaveBeenCalledTimes(2);
