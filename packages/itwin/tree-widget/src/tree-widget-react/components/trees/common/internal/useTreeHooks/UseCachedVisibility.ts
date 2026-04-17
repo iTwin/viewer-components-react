@@ -192,17 +192,21 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
       viewport: bufferingViewport,
     });
     const changeObservable = this.changeVisibilityStatusInternal({ node, on: shouldDisplay, treeSpecificVisibilityHandler }).pipe(
-      // unsubscribe from the observable if the change request for this node is received
-      takeUntil(this.#changeRequest.pipe(filter(({ key, depth }) => depth === node.parentKeys.length && HierarchyNodeKey.equals(node.key, key)))),
       tap({
         subscribe: () => {
           this.#eventListener.suppressChangeEvents();
           this.#alwaysAndNeverDrawnElements.suppressChangeEvents();
         },
-        // Apply all changes that were made at once
+        // Apply all changes that were made at once.
+        // This only fires on natural changeVisibilityStatusInternal completion:
+        // takeUntil below does not trigger complete.
         complete: () => {
           bufferingViewport.commit();
         },
+      }),
+      // unsubscribe from the observable if the change request for this node is received
+      takeUntil(this.#changeRequest.pipe(filter(({ key, depth }) => depth === node.parentKeys.length && HierarchyNodeKey.equals(node.key, key)))),
+      tap({
         finalize: () => {
           // Discard any changes that were made. If commit was called, then this will have no effect
           bufferingViewport.discard();
