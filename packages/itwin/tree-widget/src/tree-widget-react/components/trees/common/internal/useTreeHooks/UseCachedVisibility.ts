@@ -7,6 +7,7 @@ import { useCallback, useMemo, useState } from "react";
 import { defaultIfEmpty, EMPTY, filter, firstValueFrom, from, fromEventPattern, map, mergeMap, Subject, takeUntil, tap } from "rxjs";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { HierarchyVisibilityOverrideHandler } from "../../UseHierarchyVisibility.js";
+import { BufferingViewport } from "../BufferingViewport.js";
 import { AlwaysAndNeverDrawnElementInfoCache } from "../caches/AlwaysAndNeverDrawnElementInfoCache.js";
 import { toVoidPromise } from "../Rxjs.js";
 import { createVisibilityStatus } from "../Tooltip.js";
@@ -88,11 +89,11 @@ function createVisibilityHandlerFactory<TCache, TSearchTargets>(
         }
         return undefined;
       },
-      getTreeSpecificVisibilityHandler: (info, overrideHandler) =>
+      getTreeSpecificVisibilityHandler: ({ info, overrideHandler, viewport }) =>
         createTreeSpecificVisibilityHandler({
           info,
           idsCache,
-          viewport: activeView,
+          viewport,
           overrideHandler,
         }),
     });
@@ -101,10 +102,11 @@ function createVisibilityHandlerFactory<TCache, TSearchTargets>(
 /** @internal */
 export interface HierarchyVisibilityHandlerImplProps<TSearchTargets> {
   viewport: TreeWidgetViewport;
-  getTreeSpecificVisibilityHandler: (
-    info: AlwaysAndNeverDrawnElementInfoCache,
-    overrideHandler: HierarchyVisibilityOverrideHandler,
-  ) => TreeSpecificVisibilityHandler<TSearchTargets> & Disposable;
+  getTreeSpecificVisibilityHandler: (props: {
+    info: AlwaysAndNeverDrawnElementInfoCache;
+    overrideHandler: HierarchyVisibilityOverrideHandler;
+    viewport: TreeWidgetViewport;
+  }) => TreeSpecificVisibilityHandler<TSearchTargets> & Disposable;
   getSearchResultsTree: () => Promise<SearchResultsTree<TSearchTargets>> | undefined;
   componentId?: GuidString;
 }
@@ -121,7 +123,7 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
   readonly #props: HierarchyVisibilityHandlerImplProps<TSearchTargets>;
   readonly #eventListener: IVisibilityChangeEventListener;
   readonly #alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfoCache;
-  #treeSpecificVisibilityHandler: TreeSpecificVisibilityHandler<TSearchTargets> & Disposable;
+  #overrideHandler: HierarchyVisibilityOverrideHandler;
   #changeRequest = new Subject<{ key: HierarchyNodeKey; depth: number }>();
   #searchResultsTree: Promise<SearchResultsTree<TSearchTargets>> | undefined;
 
@@ -141,10 +143,7 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
       viewport: this.#props.viewport,
       componentId: props.componentId,
     });
-    this.#treeSpecificVisibilityHandler = this.#props.getTreeSpecificVisibilityHandler(
-      this.#alwaysAndNeverDrawnElements,
-      new HierarchyVisibilityOverrideHandler(this),
-    );
+    this.#overrideHandler = new HierarchyVisibilityOverrideHandler(this);
   }
 
   public get onVisibilityChange() {
@@ -152,8 +151,13 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
   }
 
   public async getVisibilityStatus(node: HierarchyNode): Promise<VisibilityStatus> {
+    const treeSpecificVisibilityHandler = this.#props.getTreeSpecificVisibilityHandler({
+      info: this.#alwaysAndNeverDrawnElements,
+      overrideHandler: this.#overrideHandler,
+      viewport: this.#props.viewport,
+    });
     return firstValueFrom(
-      this.getVisibilityStatusInternal(node).pipe(
+      this.getVisibilityStatusInternal({ node, treeSpecificVisibilityHandler }).pipe(
         // unsubscribe from the observable if the change request for this node is received
         takeUntil(this.#changeRequest.pipe(filter(({ key, depth }) => depth === node.parentKeys.length && HierarchyNodeKey.equals(node.key, key)))),
         // unsubscribe if visibility changes
@@ -168,6 +172,11 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
           ),
         ),
         defaultIfEmpty(createVisibilityStatus("disabled")),
+        tap({
+          finalize: () => {
+            treeSpecificVisibilityHandler[Symbol.dispose]();
+          },
+        }),
       ),
     );
   }
@@ -176,17 +185,34 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
     // notify about new change request
     this.#changeRequest.next({ key: node.key, depth: node.parentKeys.length });
 
-    const changeObservable = this.changeVisibilityStatusInternal(node, shouldDisplay).pipe(
-      // unsubscribe from the observable if the change request for this node is received
-      takeUntil(this.#changeRequest.pipe(filter(({ key, depth }) => depth === node.parentKeys.length && HierarchyNodeKey.equals(node.key, key)))),
+    const bufferingViewport = new BufferingViewport(this.#props.viewport);
+    const treeSpecificVisibilityHandler = this.#props.getTreeSpecificVisibilityHandler({
+      info: this.#alwaysAndNeverDrawnElements,
+      overrideHandler: this.#overrideHandler,
+      viewport: bufferingViewport,
+    });
+    const changeObservable = this.changeVisibilityStatusInternal({ node, on: shouldDisplay, treeSpecificVisibilityHandler }).pipe(
       tap({
         subscribe: () => {
           this.#eventListener.suppressChangeEvents();
           this.#alwaysAndNeverDrawnElements.suppressChangeEvents();
         },
+        // Apply all changes that were made at once.
+        // This only fires on natural changeVisibilityStatusInternal completion:
+        // takeUntil below does not trigger complete.
+        complete: () => {
+          bufferingViewport.commit();
+        },
+      }),
+      // unsubscribe from the observable if the change request for this node is received
+      takeUntil(this.#changeRequest.pipe(filter(({ key, depth }) => depth === node.parentKeys.length && HierarchyNodeKey.equals(node.key, key)))),
+      tap({
         finalize: () => {
+          // Discard any changes that were made. If commit was called, then this will have no effect
+          bufferingViewport.discard();
           this.#eventListener.resumeChangeEvents();
           this.#alwaysAndNeverDrawnElements.resumeChangeEvents();
+          treeSpecificVisibilityHandler[Symbol.dispose]();
         },
       }),
     );
@@ -197,13 +223,18 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
   public [Symbol.dispose]() {
     this.#eventListener[Symbol.dispose]();
     this.#alwaysAndNeverDrawnElements[Symbol.dispose]();
-    this.#treeSpecificVisibilityHandler[Symbol.dispose]();
   }
 
-  private getVisibilityStatusInternal(node: HierarchyNode) {
+  private getVisibilityStatusInternal({
+    node,
+    treeSpecificVisibilityHandler,
+  }: {
+    node: HierarchyNode;
+    treeSpecificVisibilityHandler: TreeSpecificVisibilityHandler<TSearchTargets>;
+  }): Observable<VisibilityStatus> {
     if (HierarchyNode.isClassGroupingNode(node)) {
       if (node.extendedData?.hasDirectNonSearchTargets && !node.extendedData?.hasSearchTargetAncestor) {
-        return this.getSearchResultsNodeVisibility({ node });
+        return this.getSearchResultsNodeVisibility({ node, treeSpecificVisibilityHandler });
       }
     }
 
@@ -213,15 +244,23 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
       !node.search.isSearchTarget &&
       !node.search.hasSearchTargetAncestor
     ) {
-      return this.getSearchResultsNodeVisibility({ node });
+      return this.getSearchResultsNodeVisibility({ node, treeSpecificVisibilityHandler });
     }
-    return this.#treeSpecificVisibilityHandler.getVisibilityStatus(node);
+    return treeSpecificVisibilityHandler.getVisibilityStatus(node);
   }
 
-  private changeVisibilityStatusInternal(node: HierarchyNode, on: boolean): Observable<void> {
+  private changeVisibilityStatusInternal({
+    node,
+    on,
+    treeSpecificVisibilityHandler,
+  }: {
+    node: HierarchyNode;
+    on: boolean;
+    treeSpecificVisibilityHandler: TreeSpecificVisibilityHandler<TSearchTargets>;
+  }): Observable<void> {
     if (HierarchyNode.isClassGroupingNode(node)) {
       if (node.extendedData?.hasDirectNonSearchTargets && !node.extendedData?.hasSearchTargetAncestor) {
-        return this.changeSearchResultsNodeVisibility({ node, on });
+        return this.changeSearchResultsNodeVisibility({ node, on, treeSpecificVisibilityHandler });
       }
     }
     if (
@@ -230,22 +269,26 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
       !node.search.isSearchTarget &&
       !node.search.hasSearchTargetAncestor
     ) {
-      return this.changeSearchResultsNodeVisibility({ node, on });
+      return this.changeSearchResultsNodeVisibility({ node, on, treeSpecificVisibilityHandler });
     }
-    return this.#treeSpecificVisibilityHandler.changeVisibilityStatus(node, on);
+    return treeSpecificVisibilityHandler.changeVisibilityStatus(node, on);
   }
 
-  private getSearchResultsNodeVisibility(props: {
+  private getSearchResultsNodeVisibility({
+    node,
+    treeSpecificVisibilityHandler,
+  }: {
     node: HierarchyNode & {
       key: ClassGroupingNodeKey | InstancesNodeKey;
     };
+    treeSpecificVisibilityHandler: TreeSpecificVisibilityHandler<TSearchTargets>;
   }) {
-    return this.getSearchResultsTreeTargets(props).pipe(
+    return this.getSearchResultsTreeTargets({ node }).pipe(
       mergeMap((targets) => {
         if (!targets) {
           return EMPTY;
         }
-        return this.#treeSpecificVisibilityHandler.getSearchTargetsVisibilityStatus(targets, props.node);
+        return treeSpecificVisibilityHandler.getSearchTargetsVisibilityStatus(targets, node);
       }),
     );
   }
@@ -266,18 +309,20 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
   private changeSearchResultsNodeVisibility({
     on,
     node,
+    treeSpecificVisibilityHandler,
   }: {
     on: boolean;
     node: HierarchyNode & {
       key: ClassGroupingNodeKey | InstancesNodeKey;
     };
+    treeSpecificVisibilityHandler: TreeSpecificVisibilityHandler<TSearchTargets>;
   }) {
     return this.getSearchResultsTreeTargets({ node }).pipe(
       mergeMap((targets) => {
         if (!targets) {
           return EMPTY;
         }
-        return this.#treeSpecificVisibilityHandler.changeSearchTargetsVisibilityStatus(targets, on);
+        return treeSpecificVisibilityHandler.changeSearchTargetsVisibilityStatus(targets, on);
       }),
     );
   }

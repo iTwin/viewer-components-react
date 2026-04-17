@@ -483,6 +483,10 @@ export class BaseVisibilityHelper implements Disposable {
       modelAlwaysDrawnElements: this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({ modelId, setType: "always" }),
     }).pipe(
       mergeMap(({ allModelCategories, modelAlwaysDrawnElements }) => {
+        if (this.#props.viewport.viewsModel(modelId)) {
+          // Model might have been turned on while completing forkJoin, if that happens, no need to do anything, just return.
+          return of(undefined);
+        }
         const alwaysDrawn = this.#props.viewport.alwaysDrawn;
         if (alwaysDrawn && modelAlwaysDrawnElements) {
           this.#props.viewport.setAlwaysDrawn({ elementIds: setDifference(alwaysDrawn, modelAlwaysDrawnElements) });
@@ -490,7 +494,7 @@ export class BaseVisibilityHelper implements Disposable {
         this.#props.viewport.changeModelDisplay({ modelIds: modelId, display: true });
         return from(Id64.iterable(allModelCategories)).pipe(
           categoriesToNotOverride ? filter((modelCategory) => !categoriesToNotOverride.has(modelCategory)) : identity,
-          map((categoryId) => this.changeCategoryStateInViewportAccordingToModelVisibility(modelId, categoryId, false, false)),
+          map((categoryId) => this.changeCategoryStateInViewportAccordingToModelVisibility({ modelId, categoryId, on: false, changeSubCategories: false })),
           takeLast(1),
           defaultIfEmpty(undefined),
         );
@@ -499,7 +503,17 @@ export class BaseVisibilityHelper implements Disposable {
   }
 
   /** Adds per-model category overrides based on category visibility in category selector. */
-  private changeCategoryStateInViewportAccordingToModelVisibility(modelId: string, categoryId: string, on: boolean, changeSubCategories: boolean) {
+  private changeCategoryStateInViewportAccordingToModelVisibility({
+    modelId,
+    categoryId,
+    on,
+    changeSubCategories,
+  }: {
+    modelId: string;
+    categoryId: string;
+    on: boolean;
+    changeSubCategories: boolean;
+  }) {
     const isDisplayedInSelector = this.#props.viewport.viewsCategory(categoryId);
     const override = on === isDisplayedInSelector ? "none" : on ? "show" : "hide";
     this.#props.viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: categoryId, override });
@@ -576,7 +590,7 @@ export class BaseVisibilityHelper implements Disposable {
         ),
       );
       const changeAlwaysAndNeverDrawnElementsObs = categoryModelsObs.pipe(
-        mergeMap(([modelId, modelCategories]) => this.#alwaysAndNeverDrawnElements.clearAlwaysAndNeverDrawnElements({ categoryIds: modelCategories, modelId })),
+        mergeMap(([modelId, modelCategories]) => this.clearAlwaysAndNeverDrawnElements({ categoryIds: modelCategories, modelId })),
       );
 
       const changeSubCategoriesObs = on
@@ -611,6 +625,23 @@ export class BaseVisibilityHelper implements Disposable {
       : result;
   }
 
+  private clearAlwaysAndNeverDrawnElements(props: { categoryIds: Id64Arg; modelId: Id64String }): Observable<void> {
+    return forkJoin({
+      alwaysDrawn: this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({ ...props, setType: "always" }),
+      neverDrawn: this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({ ...props, setType: "never" }),
+    }).pipe(
+      map(({ alwaysDrawn, neverDrawn }) => {
+        const viewport = this.#props.viewport;
+        if (viewport.alwaysDrawn?.size && alwaysDrawn.size) {
+          viewport.setAlwaysDrawn({ elementIds: setDifference(viewport.alwaysDrawn, alwaysDrawn) });
+        }
+        if (viewport.neverDrawn?.size && neverDrawn.size) {
+          viewport.setNeverDrawn({ elementIds: setDifference(viewport.neverDrawn, neverDrawn) });
+        }
+      }),
+    );
+  }
+
   /**
    * Changes categories under specific model visibility status.
    *
@@ -637,7 +668,10 @@ export class BaseVisibilityHelper implements Disposable {
         override: on ? "show" : "hide",
       }),
     );
-    const changeAlwaysAndNeverDrawnElementsObs = this.#alwaysAndNeverDrawnElements.clearAlwaysAndNeverDrawnElements({ categoryIds, modelId });
+    const changeAlwaysAndNeverDrawnElementsObs = this.clearAlwaysAndNeverDrawnElements({
+      categoryIds,
+      modelId,
+    });
     const changeSubModelsObs = fromWithRelease({ source: categoryIds, releaseOnCount: 200 }).pipe(
       mergeMap((categoryId) => this.#props.baseIdsCache.getSubModels({ categoryId, modelId })),
       mergeMap((subModels) => this.changeModelsVisibilityStatus({ modelIds: subModels, on })),
@@ -659,7 +693,6 @@ export class BaseVisibilityHelper implements Disposable {
   }): Observable<void> {
     const result = defer(() => {
       const { modelId, categoryId, elementIds, on, children } = props;
-      const viewport = this.#props.viewport;
       // TODO: determine which child elements to change based on their categories https://github.com/iTwin/viewer-components-react/issues/1561
       return concat(
         // Change elements state
@@ -676,7 +709,7 @@ export class BaseVisibilityHelper implements Disposable {
                   }
                   return !on;
                 };
-          if (!viewport.viewsModel(modelId)) {
+          if (!this.#props.viewport.viewsModel(modelId)) {
             if (!on) {
               return this.queueElementsVisibilityChange(elementsToChange, on, () => false);
             }

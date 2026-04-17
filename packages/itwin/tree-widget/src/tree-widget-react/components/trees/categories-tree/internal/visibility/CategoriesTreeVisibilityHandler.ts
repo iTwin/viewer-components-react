@@ -450,11 +450,11 @@ export function createCategoriesTreeVisibilityHandler(props: {
         categoryModelClassName: modelClass,
       });
     },
-    getTreeSpecificVisibilityHandler: (info) => {
+    getTreeSpecificVisibilityHandler: ({ info, viewport }) => {
       return new CategoriesTreeVisibilityHandler({
         alwaysAndNeverDrawnElementInfo: info,
         idsCache: props.idsCache,
-        viewport: props.viewport,
+        viewport,
         hierarchyConfig: props.hierarchyConfig,
       });
     },

@@ -441,11 +441,11 @@ export function createModelsTreeVisibilityHandler(props: {
         imodelAccess: props.imodelAccess,
       });
     },
-    getTreeSpecificVisibilityHandler: (info, overrideHandler) => {
+    getTreeSpecificVisibilityHandler: ({ info, overrideHandler, viewport }) => {
       return new ModelsTreeVisibilityHandler({
         alwaysAndNeverDrawnElementInfo: info,
         idsCache: props.idsCache,
-        viewport: props.viewport,
+        viewport,
         overrideHandler,
         overrides: props.overrides,
       });
