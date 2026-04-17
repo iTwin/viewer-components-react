@@ -238,6 +238,9 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
         ),
       ),
       map((_, idx) => {
+        // Initial latest cache entry value is created at the constructor
+        // Should reuse the same observable until the first event is raised, when it is raised `idx` will be larger than 0
+        // And a new latestCacheEntry.value will be created and assigned
         if (idx === 0) {
           return latestCacheEntryValue;
         }
