@@ -59,13 +59,10 @@ export function run<T>(props: RunOptions<T>): void {
     try {
       for (const { name, callBack, ignoreMeasurement } of props.steps) {
         console.log(`Step "${name}" in progress...`);
-        await using blockDetector = createThreadBlocksDetector({ ignoreMeasurement, name });
-        try {
-          await callBack(value);
-          console.log(`✅ Step "${name}" done`);
-        } finally {
-          await blockDetector.complete(task);
-        }
+        await using blockDetector = createThreadBlocksDetector({ ignoreMeasurement, name, task });
+        await callBack(value);
+        await blockDetector.complete();
+        console.log(`✅ Step "${name}" done`);
       }
     } finally {
       await props.cleanup?.(value);
@@ -79,8 +76,8 @@ export function run<T>(props: RunOptions<T>): void {
   }
 }
 
-function createThreadBlocksDetector({ ignoreMeasurement, name }: { ignoreMeasurement?: boolean; name: string }): {
-  complete: (task: { meta: TaskMeta }) => Promise<void>;
+function createThreadBlocksDetector({ ignoreMeasurement, name, task }: { ignoreMeasurement?: boolean; name: string; task: { meta: TaskMeta } }): {
+  complete: () => Promise<void>;
 } & AsyncDisposable {
   if (ignoreMeasurement) {
     return { complete: async () => {}, [Symbol.asyncDispose]: async () => {} };
@@ -90,7 +87,10 @@ function createThreadBlocksDetector({ ignoreMeasurement, name }: { ignoreMeasure
   const detector = new MainThreadBlocksDetector();
   detector.start();
   return {
-    complete: async (task: { meta: TaskMeta }) => {
+    complete: async () => {
+      await detector.stop();
+    },
+    [Symbol.asyncDispose]: async () => {
       await detector.stop();
       task.meta.steps ??= [];
       task.meta.steps.push({
@@ -98,9 +98,6 @@ function createThreadBlocksDetector({ ignoreMeasurement, name }: { ignoreMeasure
         blockingSummary: detector.getSummary(),
         duration: Date.now() - start,
       });
-    },
-    [Symbol.asyncDispose]: async () => {
-      await detector.stop();
     },
   };
 }
