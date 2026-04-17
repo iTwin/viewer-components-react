@@ -338,7 +338,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       setterFunction(newSet, vp);
       queryPausePromise.resolve();
-      // After change, set still contains > 2x the treshold, so there should be 3 new queries executed.
+      // After change, set still contains > 2x the threshold, so there should be 3 new queries executed.
       const firstResult = await firstPromise;
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(5); // 2 on the first run, 3 after the change
 
