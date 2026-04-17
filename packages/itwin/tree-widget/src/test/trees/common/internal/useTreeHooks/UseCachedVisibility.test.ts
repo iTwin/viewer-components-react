@@ -39,7 +39,7 @@ function createTreeSpecificVisibilityHandler(
   };
 }
 
-function createHandler(overrides?: {
+function setupTest(overrides?: {
   visibilityHandler?: Partial<TreeSpecificVisibilityHandler<void> & Disposable>;
   viewport?: ReturnType<typeof createFakeViewport>;
   getTreeSpecificVisibilityHandler?: HierarchyVisibilityHandlerImplProps<void>["getTreeSpecificVisibilityHandler"];
@@ -51,7 +51,12 @@ function createHandler(overrides?: {
     getTreeSpecificVisibilityHandler: overrides?.getTreeSpecificVisibilityHandler ?? (() => defaultVisibilityHandler),
     getSearchResultsTree: () => undefined,
   });
-  return { handler, viewport, visibilityHandler: defaultVisibilityHandler };
+  return {
+    handler,
+    viewport,
+    visibilityHandler: defaultVisibilityHandler,
+    [Symbol.dispose]: () => handler[Symbol.dispose](),
+  };
 }
 
 describe("HierarchyVisibilityHandlerImpl", () => {
@@ -66,11 +71,12 @@ describe("HierarchyVisibilityHandlerImpl", () => {
   describe("getVisibilityStatus", () => {
     it("returns status from tree-specific handler", async () => {
       const expectedStatus = createVisibilityStatus("visible");
-      const { handler } = createHandler({
+      using setup = setupTest({
         visibilityHandler: {
           getVisibilityStatus: vi.fn(() => of(expectedStatus)),
         },
       });
+      const { handler } = setup;
 
       const result = await handler.getVisibilityStatus(createNode());
 
@@ -79,11 +85,12 @@ describe("HierarchyVisibilityHandlerImpl", () => {
 
     it("returns disabled status when change request arrives for same node before status completes", async () => {
       const statusSubject = new Subject<VisibilityStatus>();
-      const { handler } = createHandler({
+      using setup = setupTest({
         visibilityHandler: {
           getVisibilityStatus: vi.fn(() => statusSubject),
         },
       });
+      const { handler } = setup;
 
       const node = createNode();
       const statusPromise = handler.getVisibilityStatus(node);
@@ -97,11 +104,12 @@ describe("HierarchyVisibilityHandlerImpl", () => {
 
     it("returns disabled status when visibility change event fires before status completes", async () => {
       const statusSubject = new Subject<VisibilityStatus>();
-      const { handler, viewport } = createHandler({
+      using setup = setupTest({
         visibilityHandler: {
           getVisibilityStatus: vi.fn(() => statusSubject),
         },
       });
+      const { handler, viewport } = setup;
 
       const statusPromise = handler.getVisibilityStatus(createNode());
 
@@ -116,11 +124,12 @@ describe("HierarchyVisibilityHandlerImpl", () => {
 
     it("does not cancel status for change request on a different node", async () => {
       const statusSubject = new Subject<VisibilityStatus>();
-      const { handler } = createHandler({
+      using setup = setupTest({
         visibilityHandler: {
           getVisibilityStatus: vi.fn(() => statusSubject),
         },
       });
+      const { handler } = setup;
 
       const nodeA = createNode({ instanceKeys: [{ className: "BisCore.Element", id: "0x1" }] });
       const nodeB = createNode({ instanceKeys: [{ className: "BisCore.Element", id: "0x2" }] });
@@ -141,11 +150,12 @@ describe("HierarchyVisibilityHandlerImpl", () => {
 
     it("does not cancel status for change request on same key but different depth", async () => {
       const statusSubject = new Subject<VisibilityStatus>();
-      const { handler } = createHandler({
+      using setup = setupTest({
         visibilityHandler: {
           getVisibilityStatus: vi.fn(() => statusSubject),
         },
       });
+      const { handler } = setup;
 
       const nodeA = createNode({ parentKeys: [] }); // depth 0
       const nodeB = createNode({ parentKeys: [{ type: "instances", instanceKeys: [{ className: "BisCore.Element", id: "0x99" }] }] }); // depth 1
@@ -167,7 +177,7 @@ describe("HierarchyVisibilityHandlerImpl", () => {
   describe("changeVisibility", () => {
     it("commits buffered changes to real viewport on normal completion", async () => {
       const vp = createFakeViewport();
-      const { handler } = createHandler({
+      using setup = setupTest({
         viewport: vp,
         getTreeSpecificVisibilityHandler: ({ viewport }) => {
           return createTreeSpecificVisibilityHandler({
@@ -178,6 +188,7 @@ describe("HierarchyVisibilityHandlerImpl", () => {
           });
         },
       });
+      const { handler } = setup;
 
       await handler.changeVisibility(createNode(), true);
 
@@ -187,7 +198,7 @@ describe("HierarchyVisibilityHandlerImpl", () => {
     it("does not apply changes to real viewport before observable completes", async () => {
       const vp = createFakeViewport();
       const changeSubject = new Subject<void>();
-      const { handler } = createHandler({
+      using setup2 = setupTest({
         viewport: vp,
         getTreeSpecificVisibilityHandler: ({ viewport }) => {
           return createTreeSpecificVisibilityHandler({
@@ -198,6 +209,7 @@ describe("HierarchyVisibilityHandlerImpl", () => {
           });
         },
       });
+      const { handler } = setup2;
 
       const changePromise = handler.changeVisibility(createNode(), true);
 
@@ -226,10 +238,11 @@ describe("HierarchyVisibilityHandlerImpl", () => {
           }),
         )
         .mockImplementation(() => createTreeSpecificVisibilityHandler());
-      const { handler } = createHandler({
+      using setup = setupTest({
         viewport: vp,
         getTreeSpecificVisibilityHandler,
       });
+      const { handler } = setup;
 
       const node = createNode();
 
@@ -268,10 +281,11 @@ describe("HierarchyVisibilityHandlerImpl", () => {
             }),
           }),
         );
-      const { handler } = createHandler({
+      using setup = setupTest({
         viewport: vp,
         getTreeSpecificVisibilityHandler,
       });
+      const { handler } = setup;
 
       const nodeA = createNode({ instanceKeys: [{ className: "BisCore.Element", id: "0x1" }] });
       const nodeB = createNode({ instanceKeys: [{ className: "BisCore.Element", id: "0x2" }] });
@@ -315,10 +329,11 @@ describe("HierarchyVisibilityHandlerImpl", () => {
             }),
           }),
         );
-      const { handler } = createHandler({
+      using setup = setupTest({
         viewport: vp,
         getTreeSpecificVisibilityHandler,
       });
+      const { handler } = setup;
 
       const nodeA = createNode({ parentKeys: [] }); // depth 0
       const nodeB = createNode({ parentKeys: [{ type: "instances", instanceKeys: [{ className: "BisCore.Element", id: "0x99" }] }] }); // depth 1
@@ -339,31 +354,30 @@ describe("HierarchyVisibilityHandlerImpl", () => {
 
     it("suppresses and resumes event listeners during change", async () => {
       const changeSubject = new Subject<void>();
-      const { handler: handler2, viewport: viewport2 } = createHandler({
+      using setup = setupTest({
         visibilityHandler: {
           changeVisibilityStatus: vi.fn(() => changeSubject),
         },
       });
-      const spy2 = vi.fn();
-      handler2.onVisibilityChange.addListener(spy2);
+      const { handler, viewport } = setup;
+      const spy = vi.fn();
+      handler.onVisibilityChange.addListener(spy);
 
-      const changePromise = handler2.changeVisibility(createNode(), true);
+      const changePromise = handler.changeVisibility(createNode(), true);
 
       // During change, events should be suppressed
-      viewport2.onDisplayedModelsChanged.raiseEvent();
+      viewport.onDisplayedModelsChanged.raiseEvent();
       await vi.advanceTimersByTimeAsync(0);
-      expect(spy2).not.toHaveBeenCalled();
+      expect(spy).not.toHaveBeenCalled();
 
       // Complete the change
       changeSubject.complete();
       await changePromise;
 
       // After change, events should be resumed
-      viewport2.onDisplayedModelsChanged.raiseEvent();
+      viewport.onDisplayedModelsChanged.raiseEvent();
       await vi.advanceTimersByTimeAsync(0);
-      expect(spy2).toHaveBeenCalled();
-
-      handler2[Symbol.dispose]();
+      expect(spy).toHaveBeenCalled();
     });
   });
 
