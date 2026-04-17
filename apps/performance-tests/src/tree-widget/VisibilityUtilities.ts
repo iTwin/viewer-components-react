@@ -44,10 +44,12 @@ export interface ValidateNodeProps {
     | "all-hidden"
     | ({
         default: "all-visible" | "all-hidden";
-      } & (
-        | { instances: { [id: string]: Visibility }; parentIds?: { [id: string]: Visibility } }
-        | { instances?: { [id: string]: Visibility }; parentIds: { [id: string]: Visibility } }
-      ));
+      } &
+        // instances: if node has this instanceId then it should have the specified visibility.
+        // parentIds: if node has parent with this parentId then it should have the specified visibility.
+        (| { instances: { [id: string]: Visibility }; parentIds?: { [id: string]: Visibility } }
+          | { instances?: { [id: string]: Visibility }; parentIds: { [id: string]: Visibility } }
+        ));
 }
 
 async function validateNodeVisibility({ node, handler, expectations }: ValidateNodeProps & { node: HierarchyNode }) {
