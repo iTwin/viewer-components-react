@@ -151,13 +151,13 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
   }
 
   public async getVisibilityStatus(node: HierarchyNode): Promise<VisibilityStatus> {
-    const visibilityHelper = this.#props.getTreeSpecificVisibilityHandler({
+    const treeSpecificVisibilityHandler = this.#props.getTreeSpecificVisibilityHandler({
       info: this.#alwaysAndNeverDrawnElements,
       overrideHandler: this.#overrideHandler,
       viewport: this.#props.viewport,
     });
     return firstValueFrom(
-      this.getVisibilityStatusInternal({ node, treeSpecificVisibilityHandler: visibilityHelper }).pipe(
+      this.getVisibilityStatusInternal({ node, treeSpecificVisibilityHandler }).pipe(
         // unsubscribe from the observable if the change request for this node is received
         takeUntil(this.#changeRequest.pipe(filter(({ key, depth }) => depth === node.parentKeys.length && HierarchyNodeKey.equals(node.key, key)))),
         // unsubscribe if visibility changes
@@ -174,7 +174,7 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
         defaultIfEmpty(createVisibilityStatus("disabled")),
         tap({
           finalize: () => {
-            visibilityHelper[Symbol.dispose]();
+            treeSpecificVisibilityHandler[Symbol.dispose]();
           },
         }),
       ),
