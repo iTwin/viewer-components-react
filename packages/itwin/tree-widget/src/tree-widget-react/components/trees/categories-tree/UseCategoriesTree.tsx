@@ -83,8 +83,7 @@ export function useCategoriesTree({
       ...defaultHierarchyConfiguration,
       ...hierarchyConfig,
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    Object.values(hierarchyConfig ?? {}),
+    [hierarchyConfig],
   );
   const [viewType, setViewType] = useState<"2d" | "3d">(activeView.viewType === "2d" ? "2d" : "3d");
   const componentId = useGuid();
