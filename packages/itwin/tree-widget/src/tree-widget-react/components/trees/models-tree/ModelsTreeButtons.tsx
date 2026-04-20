@@ -105,11 +105,12 @@ export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) =>
  * @public
  */
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
-  const { getBaseIdsCache } = useSharedTreeContextInternal();
+  const { getBaseIdsCache, cancelChangesInProgress } = useSharedTreeContextInternal();
   const baseIdsCache = getBaseIdsCache({ imodel: props.viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
   const translate = useTranslation();
   const onClick = useCallback(async () => {
     try {
+      cancelChangesInProgress.next();
       const categories = await firstValueFrom(baseIdsCache.getAllCategoriesOfElements().pipe(mergeAll(), toArray()));
       return await showAll({
         models: props.models.map((model) => model.id),
@@ -117,7 +118,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
         viewport: props.viewport,
       });
     } catch {}
-  }, [baseIdsCache, props.viewport, props.models]);
+  }, [baseIdsCache, props.viewport, props.models, cancelChangesInProgress]);
   return (
     <IconButton
       variant={"ghost"}
@@ -134,6 +135,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
 
 /** @public */
 export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
+  const { cancelChangesInProgress } = useSharedTreeContextInternal();
   const translate = useTranslation();
   return (
     <IconButton
@@ -142,6 +144,7 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
       onClick={() => {
         // cspell:disable-next-line
         props.onFeatureUsed?.("models-tree-hideall");
+        cancelChangesInProgress.next();
         hideAllModels(
           props.models.map((model) => model.id),
           props.viewport,
@@ -154,6 +157,7 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
 
 /** @public */
 export function InvertButton(props: ModelsTreeHeaderButtonProps) {
+  const { changesInProgress } = useSharedTreeContextInternal();
   const translate = useTranslation();
   return (
     <IconButton
@@ -161,10 +165,12 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
       label={translate("modelsTree.buttons.invert.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-invert");
-        invertAllModels(
-          props.models.map((model) => model.id),
-          props.viewport,
-        );
+        void Promise.all([...changesInProgress]).then(() => {
+          invertAllModels(
+            props.models.map((model) => model.id),
+            props.viewport,
+          );
+        });
       }}
       icon={visibilityInvertSvg}
     />

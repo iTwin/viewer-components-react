@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, defer, EMPTY, from, map, merge, mergeAll, mergeMap, of } from "rxjs";
+import { concat, defer, EMPTY, from, map, merge, mergeAll, mergeMap, of, Subject } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
@@ -432,6 +432,8 @@ export function createModelsTreeVisibilityHandler(props: {
   searchPaths?: HierarchySearchTree[];
 }) {
   return new HierarchyVisibilityHandlerImpl<ModelsTreeSearchTargets>({
+    cancelChangesInProgress: new Subject<void>(),
+    updateChangesInProgress: () => {},
     getSearchResultsTree: (): undefined | Promise<SearchResultsTree<ModelsTreeSearchTargets>> => {
       if (!props.searchPaths) {
         return undefined;

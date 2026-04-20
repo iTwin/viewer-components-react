@@ -3,7 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { createContext, useCallback, useContext, useEffect } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { Subject } from "rxjs";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { BaseIdsCache } from "./caches/BaseIdsCache.js";
 import { useIdsCache } from "./useTreeHooks/UseIdsCache.js";
@@ -17,6 +18,9 @@ import type { GetCacheProps } from "./useTreeHooks/UseIdsCache.js";
 interface SharedTreeContextInternal {
   getCache: <TCache extends object = {}>(props: GetCacheProps<TCache>) => TCache;
   getBaseIdsCache: (props: Omit<BaseIdsCacheProps, "queryExecutor"> & { imodel: IModelConnection }) => BaseIdsCache;
+  cancelChangesInProgress: Subject<void>;
+  changesInProgress: Set<Promise<void>>;
+  updateChangesInProgress: (promise: Promise<void>, action: "add" | "remove") => void;
 }
 
 const treeWidgetContextInternal = createContext<SharedTreeContextInternal | undefined>(undefined);
@@ -42,6 +46,22 @@ export function SharedTreeContextProviderInternal({ children, showWarning }: Pro
 
 function SharedTreeContextProviderInternalImpl({ children, showWarning }: PropsWithChildren<{ showWarning?: boolean }>) {
   const { getCache } = useIdsCache();
+  const [cancelChangesInProgress] = useState(() => new Subject<void>());
+  const [changesInProgress, setOngoing] = useState(() => new Set<Promise<void>>());
+  const updateChangesInProgress = useCallback(
+    (promise: Promise<void>, action: "add" | "remove") => {
+      if (action === "add") {
+        setOngoing((prev) => new Set(prev).add(promise));
+        return;
+      }
+      setOngoing((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(promise);
+        return newSet;
+      });
+    },
+    [setOngoing],
+  );
   useEffect(() => {
     if (showWarning) {
       // eslint-disable-next-line no-console
@@ -58,5 +78,9 @@ function SharedTreeContextProviderInternalImpl({ children, showWarning }: PropsW
     },
     [getCache],
   );
-  return <treeWidgetContextInternal.Provider value={{ getCache, getBaseIdsCache }}>{children}</treeWidgetContextInternal.Provider>;
+  return (
+    <treeWidgetContextInternal.Provider value={{ getCache, getBaseIdsCache, cancelChangesInProgress, changesInProgress, updateChangesInProgress }}>
+      {children}
+    </treeWidgetContextInternal.Provider>
+  );
 }
