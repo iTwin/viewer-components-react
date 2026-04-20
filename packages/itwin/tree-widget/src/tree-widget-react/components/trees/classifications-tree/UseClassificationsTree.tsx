@@ -118,7 +118,11 @@ export function useClassificationsTree({
 
   const [searchError, setSearchError] = useState<ClassificationsTreeSearchError | undefined>();
 
-  const hierarchyConfig = useMemo(() => ({ ...rest.hierarchyConfig }), [rest.hierarchyConfig]);
+  const hierarchyConfig = useMemo(
+    () => ({ ...rest.hierarchyConfig }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
+    [...Object.values(rest.hierarchyConfig)],
+  );
   const componentId = useGuid();
 
   const idsCache = getClassificationsTreeIdsCache({
