@@ -8,7 +8,7 @@ import { IModelApp } from "@itwin/core-frontend";
 import { FormatSetFormatsProvider, SchemaFormatsProvider } from "@itwin/ecschema-metadata";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { FormatsProvider } from "@itwin/core-quantity";
+import type { FormatDefinition, FormatsProvider } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
 
 export class FormatManager {
@@ -131,7 +131,20 @@ export class FormatManager {
       // If there are duplicate labels, use the unique fullName of the KoQ instead of it's label.
       const usedLabels: Set<string> = new Set();
 
-      // Get all used KindOfQuantities from the iModel, and populate the formatSet.
+      // QuantityFormatter's _formatSpecsRegistry uses canonical names like "DefaultToolsUnits.LENGTH",
+      // not schema names like "CivilUnits.LENGTH". When a format edit fires onFormatsChanged,
+      // the QuantityFormatter only rebuilds entries whose name is in the registry. To ensure
+      // edits propagate, we store formats under canonical names and alias schema KoQs to them.
+      const canonicalByItemName: Record<string, string> = {
+        LENGTH: "DefaultToolsUnits.LENGTH",
+        ANGLE: "DefaultToolsUnits.ANGLE",
+        AREA: "DefaultToolsUnits.AREA",
+        VOLUME: "DefaultToolsUnits.VOLUME",
+        LENGTH_COORDINATE: "DefaultToolsUnits.LENGTH_COORDINATE",
+        STATION: "CivilUnits.STATION",
+      };
+
+      // Phase 1: Collect all schema KoQ formats from the ECSQL query, grouped by item name.
       const ecsqlQuery = `
         SELECT
           ks.Name || '.' || k.Name AS kindOfQuantityFullName,
@@ -149,19 +162,56 @@ export class FormatManager {
       `;
       const reader = iModel.createQueryReader(ecsqlQuery);
       const allRows = await reader.toArray();
+
+      const schemaFormats = new Map<string, FormatDefinition>();
+      const byItemName = new Map<string, string[]>();
       for (const row of allRows) {
-        const formatName = row[0];
+        const formatName: string = row[0];
         const format = await schemaFormatsProvider.getFormat(formatName);
         if (format) {
-          if (format.label) {
-            if (usedLabels.has(format.label)) {
-              const schemaName = formatName.split(".")[0];
-              (format as any).label = `${format.label} (${schemaName})`;
-            }
-            usedLabels.add(format.label);
+          schemaFormats.set(formatName, format);
+          const itemName = formatName.split(".")[1];
+          if (itemName) {
+            const existing = byItemName.get(itemName) ?? [];
+            existing.push(formatName);
+            byItemName.set(itemName, existing);
           }
-          schemaFormatSet.formats[formatName] = format;
         }
+      }
+
+      // Phase 2: For each canonical KoQ, adopt a matching schema format under the canonical name.
+      // The adopted format's `name` is changed so addFormat() fires with the canonical name,
+      // which the QuantityFormatter's registry recognizes. Original schema entries become aliases.
+      for (const [itemName, canonicalName] of Object.entries(canonicalByItemName)) {
+        const matches = byItemName.get(itemName);
+        if (!matches || matches.length === 0) continue;
+
+        const sourceFormat = schemaFormats.get(matches[0])!;
+        const canonicalFormat: FormatDefinition = { ...sourceFormat, name: canonicalName };
+        if (canonicalFormat.label) {
+          usedLabels.add(canonicalFormat.label);
+        }
+        schemaFormatSet.formats[canonicalName] = canonicalFormat;
+
+        // Alias all matching schema KoQs to the canonical entry (hidden in the format selector)
+        for (const matchName of matches) {
+          if (matchName !== canonicalName) {
+            schemaFormatSet.formats[matchName] = canonicalName;
+          }
+          schemaFormats.delete(matchName);
+        }
+      }
+
+      // Phase 3: Add remaining schema KoQs that don't match any canonical entry.
+      for (const [formatName, format] of schemaFormats) {
+        if (format.label) {
+          if (usedLabels.has(format.label)) {
+            const schemaName = formatName.split(".")[0];
+            (format as any).label = `${format.label} (${schemaName})`;
+          }
+          usedLabels.add(format.label);
+        }
+        schemaFormatSet.formats[formatName] = format;
       }
 
       // Set this as the active format set if we found any formats
