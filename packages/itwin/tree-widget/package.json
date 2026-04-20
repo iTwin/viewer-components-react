@@ -103,7 +103,7 @@
     "@itwin/presentation-frontend": "^5.8.2",
     "@itwin/presentation-testing": "^5.4.19",
     "@itwin/webgl-compatibility": "^5.8.2",
-    "@playwright/test": "1.59.1",
+    "@playwright/test": "1.56.1",
     "@rollup/plugin-babel": "^7.0.0",
     "@stratakit/bricks": "^0.5.4",
     "@stratakit/foundations": "^0.4.8",
