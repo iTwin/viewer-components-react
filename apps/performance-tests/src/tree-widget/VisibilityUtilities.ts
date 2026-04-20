@@ -98,7 +98,7 @@ async function* getNodesAndChildren({
   for await (const node of provider.getNodes({ parentNode })) {
     --releaseAfterProcessingNodes.amount;
     if (!releaseAfterProcessingNodes.amount) {
-      await new Promise<void>((resolve) => setTimeout(resolve));
+      await new Promise((resolve) => setTimeout(resolve));
       releaseAfterProcessingNodes.amount = releaseAfterProcessingAmount;
     }
 
