@@ -10,6 +10,7 @@ import { HierarchyVisibilityOverrideHandler } from "../../UseHierarchyVisibility
 import { BufferingViewport } from "../BufferingViewport.js";
 import { AlwaysAndNeverDrawnElementInfoCache } from "../caches/AlwaysAndNeverDrawnElementInfoCache.js";
 import { toVoidPromise } from "../Rxjs.js";
+import { useSharedTreeContextInternal } from "../SharedTreeContextProviderInternal.js";
 import { createVisibilityStatus } from "../Tooltip.js";
 import { createVisibilityChangeEventListener } from "../VisibilityChangeEventListener.js";
 
@@ -52,6 +53,7 @@ export interface UseCachedVisibilityProps<TCache, TSearchTargets> {
 export function useCachedVisibility<TCache, TSearchTargets>(props: UseCachedVisibilityProps<TCache, TSearchTargets>) {
   const [searchPaths, setSearchPaths] = useState<HierarchySearchTree[] | undefined>(undefined);
   const { activeView, idsCache, createSearchResultsTree, createTreeSpecificVisibilityHandler, componentId } = props;
+  const { cancelChangesInProgress } = useSharedTreeContextInternal();
 
   const visibilityHandlerFactory = useMemo<VisibilityTreeProps["visibilityHandlerFactory"]>(
     () =>
@@ -62,8 +64,9 @@ export function useCachedVisibility<TCache, TSearchTargets>(props: UseCachedVisi
         createTreeSpecificVisibilityHandler,
         searchPaths,
         componentId,
+        cancelChangesInProgress,
       }),
-    [activeView, idsCache, searchPaths, createSearchResultsTree, createTreeSpecificVisibilityHandler, componentId],
+    [activeView, idsCache, searchPaths, createSearchResultsTree, createTreeSpecificVisibilityHandler, componentId, cancelChangesInProgress],
   );
 
   return {
@@ -74,15 +77,17 @@ export function useCachedVisibility<TCache, TSearchTargets>(props: UseCachedVisi
 }
 
 function createVisibilityHandlerFactory<TCache, TSearchTargets>(
-  props: UseCachedVisibilityProps<TCache, TSearchTargets> & {
-    searchPaths: HierarchySearchTree[] | undefined;
-  },
+  props: UseCachedVisibilityProps<TCache, TSearchTargets> &
+    Pick<ReturnType<typeof useSharedTreeContextInternal>, "cancelChangesInProgress"> & {
+      searchPaths: HierarchySearchTree[] | undefined;
+    },
 ): VisibilityTreeProps["visibilityHandlerFactory"] {
-  const { activeView, createSearchResultsTree, createTreeSpecificVisibilityHandler, idsCache, searchPaths, componentId } = props;
+  const { activeView, createSearchResultsTree, createTreeSpecificVisibilityHandler, idsCache, searchPaths, componentId, cancelChangesInProgress } = props;
   return ({ imodelAccess }) =>
     new HierarchyVisibilityHandlerImpl<TSearchTargets>({
       componentId,
       viewport: activeView,
+      cancelChangesInProgress,
       getSearchResultsTree: (): Promise<SearchResultsTree<TSearchTargets>> | undefined => {
         if (searchPaths) {
           return createSearchResultsTree({ imodelAccess, searchPaths, idsCache });
@@ -109,6 +114,7 @@ export interface HierarchyVisibilityHandlerImplProps<TSearchTargets> {
   }) => TreeSpecificVisibilityHandler<TSearchTargets> & Disposable;
   getSearchResultsTree: () => Promise<SearchResultsTree<TSearchTargets>> | undefined;
   componentId?: GuidString;
+  cancelChangesInProgress: Subject<void>;
 }
 
 /**
@@ -206,6 +212,8 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
       }),
       // unsubscribe from the observable if the change request for this node is received
       takeUntil(this.#changeRequest.pipe(filter(({ key, depth }) => depth === node.parentKeys.length && HierarchyNodeKey.equals(node.key, key)))),
+      // unsubscribe if all ongoing changes are cancelled
+      takeUntil(this.#props.cancelChangesInProgress),
       tap({
         finalize: () => {
           // Discard any changes that were made. If commit was called, then this will have no effect
