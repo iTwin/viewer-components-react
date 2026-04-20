@@ -433,7 +433,6 @@ export function createModelsTreeVisibilityHandler(props: {
 }) {
   return new HierarchyVisibilityHandlerImpl<ModelsTreeSearchTargets>({
     cancelChangesInProgress: new Subject<void>(),
-    updateChangesInProgress: () => {},
     getSearchResultsTree: (): undefined | Promise<SearchResultsTree<ModelsTreeSearchTargets>> => {
       if (!props.searchPaths) {
         return undefined;
