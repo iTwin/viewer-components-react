@@ -91,15 +91,19 @@ async function* getNodesAndChildren({
   ignoreChildren: (node: HierarchyNode) => boolean;
   provider: HierarchyProvider;
   parentNode?: HierarchyNode;
-  releaseAfterProcessingNodes?: { amount: number };
+  /**
+   * Releases main thread after processing specified amount of nodes.
+   * Threshold specifies how many nodes should be processed before releasing again.
+   */
+  releaseAfterProcessingNodes?: { amount: number; threshold: number };
 }): AsyncIterableIterator<HierarchyNode> {
-  const releaseAfterProcessingAmount = 500;
-  const releaseAfterProcessingNodes = props.releaseAfterProcessingNodes ?? { amount: releaseAfterProcessingAmount };
+  const defaultThreshold = 500;
+  const releaseAfterProcessingNodes = props.releaseAfterProcessingNodes ?? { amount: defaultThreshold, threshold: defaultThreshold };
   for await (const node of provider.getNodes({ parentNode })) {
     --releaseAfterProcessingNodes.amount;
     if (!releaseAfterProcessingNodes.amount) {
       await new Promise((resolve) => setTimeout(resolve));
-      releaseAfterProcessingNodes.amount = releaseAfterProcessingAmount;
+      releaseAfterProcessingNodes.amount = releaseAfterProcessingNodes.threshold;
     }
 
     yield node;
