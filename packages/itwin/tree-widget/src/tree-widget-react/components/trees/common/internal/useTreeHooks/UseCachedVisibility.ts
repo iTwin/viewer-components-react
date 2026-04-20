@@ -53,7 +53,7 @@ export interface UseCachedVisibilityProps<TCache, TSearchTargets> {
 export function useCachedVisibility<TCache, TSearchTargets>(props: UseCachedVisibilityProps<TCache, TSearchTargets>) {
   const [searchPaths, setSearchPaths] = useState<HierarchySearchTree[] | undefined>(undefined);
   const { activeView, idsCache, createSearchResultsTree, createTreeSpecificVisibilityHandler, componentId } = props;
-  const { cancelChangesInProgress, updateChangesInProgress } = useSharedTreeContextInternal();
+  const { cancelChangesInProgress } = useSharedTreeContextInternal();
 
   const visibilityHandlerFactory = useMemo<VisibilityTreeProps["visibilityHandlerFactory"]>(
     () =>
@@ -65,18 +65,8 @@ export function useCachedVisibility<TCache, TSearchTargets>(props: UseCachedVisi
         searchPaths,
         componentId,
         cancelChangesInProgress,
-        updateChangesInProgress,
       }),
-    [
-      activeView,
-      idsCache,
-      searchPaths,
-      createSearchResultsTree,
-      createTreeSpecificVisibilityHandler,
-      componentId,
-      cancelChangesInProgress,
-      updateChangesInProgress,
-    ],
+    [activeView, idsCache, searchPaths, createSearchResultsTree, createTreeSpecificVisibilityHandler, componentId, cancelChangesInProgress],
   );
 
   return {
@@ -88,25 +78,15 @@ export function useCachedVisibility<TCache, TSearchTargets>(props: UseCachedVisi
 
 function createVisibilityHandlerFactory<TCache, TSearchTargets>(
   props: UseCachedVisibilityProps<TCache, TSearchTargets> &
-    Pick<ReturnType<typeof useSharedTreeContextInternal>, "cancelChangesInProgress" | "updateChangesInProgress"> & {
+    Pick<ReturnType<typeof useSharedTreeContextInternal>, "cancelChangesInProgress"> & {
       searchPaths: HierarchySearchTree[] | undefined;
     },
 ): VisibilityTreeProps["visibilityHandlerFactory"] {
-  const {
-    activeView,
-    createSearchResultsTree,
-    createTreeSpecificVisibilityHandler,
-    idsCache,
-    searchPaths,
-    componentId,
-    updateChangesInProgress,
-    cancelChangesInProgress,
-  } = props;
+  const { activeView, createSearchResultsTree, createTreeSpecificVisibilityHandler, idsCache, searchPaths, componentId, cancelChangesInProgress } = props;
   return ({ imodelAccess }) =>
     new HierarchyVisibilityHandlerImpl<TSearchTargets>({
       componentId,
       viewport: activeView,
-      updateChangesInProgress,
       cancelChangesInProgress,
       getSearchResultsTree: (): Promise<SearchResultsTree<TSearchTargets>> | undefined => {
         if (searchPaths) {
@@ -135,7 +115,6 @@ export interface HierarchyVisibilityHandlerImplProps<TSearchTargets> {
   getSearchResultsTree: () => Promise<SearchResultsTree<TSearchTargets>> | undefined;
   componentId?: GuidString;
   cancelChangesInProgress: Subject<void>;
-  updateChangesInProgress: (promise: Promise<void>, action: "add" | "remove") => void;
 }
 
 /**
@@ -246,12 +225,7 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
       }),
     );
 
-    const promise = toVoidPromise(changeObservable);
-    this.#props.updateChangesInProgress(promise, "add");
-    void promise.finally(() => {
-      this.#props.updateChangesInProgress(promise, "remove");
-    });
-    return promise;
+    return toVoidPromise(changeObservable);
   }
 
   public [Symbol.dispose]() {

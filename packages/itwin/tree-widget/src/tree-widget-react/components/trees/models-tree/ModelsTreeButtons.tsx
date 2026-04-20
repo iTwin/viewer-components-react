@@ -157,7 +157,7 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
 
 /** @public */
 export function InvertButton(props: ModelsTreeHeaderButtonProps) {
-  const { changesInProgress } = useSharedTreeContextInternal();
+  const { cancelChangesInProgress } = useSharedTreeContextInternal();
   const translate = useTranslation();
   return (
     <IconButton
@@ -165,13 +165,11 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
       label={translate("modelsTree.buttons.invert.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-invert");
-        void (async () => {
-          await Promise.allSettled([...changesInProgress]);
-          invertAllModels(
-            props.models.map((model) => model.id),
-            props.viewport,
-          );
-        })();
+        cancelChangesInProgress.next();
+        invertAllModels(
+          props.models.map((model) => model.id),
+          props.viewport,
+        );
       }}
       icon={visibilityInvertSvg}
     />

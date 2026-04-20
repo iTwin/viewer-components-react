@@ -327,7 +327,6 @@ export function createClassificationsTreeVisibilityHandler(props: {
 }) {
   return new HierarchyVisibilityHandlerImpl<ClassificationsTreeSearchTargets>({
     cancelChangesInProgress: new Subject<void>(),
-    updateChangesInProgress: () => {},
     getSearchResultsTree: (): undefined | Promise<SearchResultsTree<ClassificationsTreeSearchTargets>> => {
       if (!props.searchPaths) {
         return undefined;

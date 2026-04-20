@@ -131,7 +131,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
 
 /** @public */
 export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
-  const { changesInProgress } = useSharedTreeContextInternal();
+  const { cancelChangesInProgress } = useSharedTreeContextInternal();
   const translate = useTranslation();
   return (
     <IconButton
@@ -139,10 +139,8 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
       label={translate("categoriesTree.buttons.invert.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.(`categories-tree-invert`);
-        void (async () => {
-          await Promise.allSettled([...changesInProgress]);
-          await invertAllCategories(props.categories, props.viewport);
-        })();
+        cancelChangesInProgress.next();
+        void invertAllCategories(props.categories, props.viewport);
       }}
       icon={visibilityInvertSvg}
     />

@@ -44,25 +44,21 @@ function setupTest(overrides?: {
   viewport?: ReturnType<typeof createFakeViewport>;
   getTreeSpecificVisibilityHandler?: HierarchyVisibilityHandlerImplProps<void>["getTreeSpecificVisibilityHandler"];
   cancelChangesInProgress?: Subject<void>;
-  updateChangesInProgress?: HierarchyVisibilityHandlerImplProps<void>["updateChangesInProgress"];
 }) {
   const viewport = overrides?.viewport ?? createFakeViewport();
   const cancelChangesInProgress = overrides?.cancelChangesInProgress ?? new Subject<void>();
-  const updateChangesInProgress = overrides?.updateChangesInProgress ?? vi.fn();
   const defaultVisibilityHandler = createTreeSpecificVisibilityHandler(overrides?.visibilityHandler);
   const handler = new HierarchyVisibilityHandlerImpl<void>({
     viewport,
     getTreeSpecificVisibilityHandler: overrides?.getTreeSpecificVisibilityHandler ?? (() => defaultVisibilityHandler),
     getSearchResultsTree: () => undefined,
     cancelChangesInProgress,
-    updateChangesInProgress,
   });
   return {
     handler,
     viewport,
     visibilityHandler: defaultVisibilityHandler,
     cancelChangesInProgress,
-    updateChangesInProgress,
     [Symbol.dispose]: () => handler[Symbol.dispose](),
   };
 }
@@ -399,7 +395,6 @@ describe("HierarchyVisibilityHandlerImpl", () => {
         getTreeSpecificVisibilityHandler: () => createTreeSpecificVisibilityHandler(),
         getSearchResultsTree: () => undefined,
         cancelChangesInProgress: new Subject<void>(),
-        updateChangesInProgress: vi.fn(),
       });
 
       expect(viewport.onDisplayedModelsChanged.numberOfListeners).toBeGreaterThan(listenerCountBefore);
@@ -417,7 +412,6 @@ describe("HierarchyVisibilityHandlerImpl", () => {
       using setup = setupTest({
         viewport: vp,
         cancelChangesInProgress: new Subject<void>(),
-        updateChangesInProgress: vi.fn(),
         getTreeSpecificVisibilityHandler: ({ viewport: bufferingViewport }) =>
           createTreeSpecificVisibilityHandler({
             changeVisibilityStatus: vi.fn(() => {
@@ -504,67 +498,6 @@ describe("HierarchyVisibilityHandlerImpl", () => {
 
       // Neither change should have been committed
       expect(vp.changeModelDisplay).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("updateChangesInProgress", () => {
-    it("calls updateChangesInProgress with 'add' when changeVisibility starts", async () => {
-      const updateChangesInProgress = vi.fn();
-      using setup = setupTest({ updateChangesInProgress });
-      const { handler } = setup;
-
-      const changePromise = handler.changeVisibility(createNode(), true);
-
-      expect(updateChangesInProgress).toHaveBeenCalledWith(expect.any(Promise), "add");
-
-      await changePromise;
-    });
-
-    it("calls updateChangesInProgress with 'remove' when changeVisibility completes", async () => {
-      const updateChangesInProgress = vi.fn();
-      using setup = setupTest({ updateChangesInProgress });
-      const { handler } = setup;
-
-      await handler.changeVisibility(createNode(), true);
-
-      expect(updateChangesInProgress).toHaveBeenCalledWith(expect.any(Promise), "remove");
-      // "add" called first, then "remove"
-      expect(updateChangesInProgress).toHaveBeenCalledTimes(2);
-      expect(updateChangesInProgress.mock.calls[0][1]).toBe("add");
-      expect(updateChangesInProgress.mock.calls[1][1]).toBe("remove");
-    });
-
-    it("calls updateChangesInProgress with 'remove' when changeVisibility is cancelled", async () => {
-      const updateChangesInProgress = vi.fn();
-      const changeSubject = new Subject<void>();
-      using setup = setupTest({
-        updateChangesInProgress,
-        visibilityHandler: {
-          changeVisibilityStatus: vi.fn(() => changeSubject),
-        },
-      });
-      const { handler, cancelChangesInProgress } = setup;
-
-      const changePromise = handler.changeVisibility(createNode(), true);
-      expect(updateChangesInProgress).toHaveBeenCalledWith(expect.any(Promise), "add");
-
-      // Cancel
-      cancelChangesInProgress.next();
-      await changePromise;
-
-      expect(updateChangesInProgress).toHaveBeenCalledWith(expect.any(Promise), "remove");
-    });
-
-    it("passes the same promise reference to both 'add' and 'remove'", async () => {
-      const updateChangesInProgress = vi.fn();
-      using setup = setupTest({ updateChangesInProgress });
-      const { handler } = setup;
-
-      await handler.changeVisibility(createNode(), true);
-
-      const addedPromise = updateChangesInProgress.mock.calls[0][0];
-      const removedPromise = updateChangesInProgress.mock.calls[1][0];
-      expect(addedPromise).toBe(removedPromise);
     });
   });
 });
