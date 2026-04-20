@@ -162,7 +162,7 @@ export class Polygon {
       this._textMarker.textLines = this._overrideText;
     } else {
       const lines: string[] = [];
-      const areaFormatter = FormatterUtils.getFormatterSpecWithFallback(this._areaKoQ, QuantityType.Area);
+      const areaFormatter = FormatterUtils.getFormatterSpecWithFallback(this._areaKoQ, this._areaPersistenceUnitName, QuantityType.Area);
       if (undefined !== areaFormatter)
         lines.push(IModelApp.quantityFormatter.formatQuantity(this.area, areaFormatter));
 

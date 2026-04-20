@@ -25,6 +25,7 @@ import type {
   MeasurementWidgetData,
 } from "../api/Measurement.js";
 import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
+import type { FormatSpecHandle } from "@itwin/core-quantity";
 
 /**
  * Props for serializing a [[DistanceMeasurement]].
@@ -133,6 +134,7 @@ export class DistanceMeasurement extends Measurement {
   }
   public set lengthKoQ(value: string) {
     this._lengthKoQ = value;
+    this._disposeHandles();
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
@@ -141,6 +143,7 @@ export class DistanceMeasurement extends Measurement {
   }
   public set lengthPersistenceUnitName(value: string) {
     this._lengthPersistenceUnitName = value;
+    this._disposeHandles();
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
@@ -150,6 +153,7 @@ export class DistanceMeasurement extends Measurement {
 
   public set bearingKoQ(value: string) {
     this._bearingKoQ = value;
+    this._disposeHandles();
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
@@ -159,6 +163,7 @@ export class DistanceMeasurement extends Measurement {
 
   public set bearingPersistenceUnitName(value: string) {
     this._bearingPersistenceUnitName = value;
+    this._disposeHandles();
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
@@ -168,6 +173,7 @@ export class DistanceMeasurement extends Measurement {
 
   public set coordinateKoQ(value: string) {
     this._coordinateKoQ = value;
+    this._disposeHandles();
   }
 
   public get coordinatePersistenceUnitName(): string {
@@ -176,6 +182,7 @@ export class DistanceMeasurement extends Measurement {
 
   public set coordinatePersistenceUnitName(value: string) {
     this._coordinatePersistenceUnitName = value;
+    this._disposeHandles();
   }
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -235,22 +242,37 @@ export class DistanceMeasurement extends Measurement {
     this._endPoint.setFrom(end);
   }
 
-  public override async populateFormattingSpecsRegistry(_force?: boolean): Promise<void> {
-    const lengthEntry = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ);
-    if (_force || !lengthEntry || lengthEntry.formatterSpec.persistenceUnit?.name !== this._lengthPersistenceUnitName) {
-      const lengthFormatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
-      if (lengthFormatProps) {
-        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._lengthKoQ, this._lengthPersistenceUnitName, lengthFormatProps);
-      }
-    }
+  private _lengthHandle?: FormatSpecHandle;
+  private _coordinateHandle?: FormatSpecHandle;
 
-    const coordinateEntry = IModelApp.quantityFormatter.getSpecsByName(this._coordinateKoQ);
-    if (_force || !coordinateEntry || coordinateEntry.formatterSpec.persistenceUnit?.name !== this._coordinatePersistenceUnitName) {
-      const coordinateFormatProps = await IModelApp.formatsProvider.getFormat(this._coordinateKoQ);
-      if (coordinateFormatProps) {
-        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._coordinateKoQ, this._coordinatePersistenceUnitName, coordinateFormatProps);
-      }
+  private _getLengthHandle(): FormatSpecHandle {
+    if (!this._lengthHandle) {
+      this._lengthHandle = IModelApp.quantityFormatter.getFormatSpecHandle(
+        this._lengthKoQ, this._lengthPersistenceUnitName
+      );
     }
+    return this._lengthHandle;
+  }
+
+  private _getCoordinateHandle(): FormatSpecHandle {
+    if (!this._coordinateHandle) {
+      this._coordinateHandle = IModelApp.quantityFormatter.getFormatSpecHandle(
+        this._coordinateKoQ, this._coordinatePersistenceUnitName
+      );
+    }
+    return this._coordinateHandle;
+  }
+
+  private _disposeHandles(): void {
+    this._lengthHandle?.[Symbol.dispose]();
+    this._lengthHandle = undefined;
+    this._coordinateHandle?.[Symbol.dispose]();
+    this._coordinateHandle = undefined;
+  }
+
+  public override onCleanup(): void {
+    super.onCleanup();
+    this._disposeHandles();
   }
 
   public override testDecorationHit(
@@ -501,7 +523,7 @@ export class DistanceMeasurement extends Measurement {
   }
 
   private async createTextMarker(): Promise<void> {
-    const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, QuantityType.LengthEngineering);
+    const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, this._lengthPersistenceUnitName, QuantityType.LengthEngineering);
 
     const adjustedStartPoint = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._startPoint));
     const adjustedEndPoint = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._endPoint));
@@ -556,8 +578,8 @@ export class DistanceMeasurement extends Measurement {
     const bearing = FormatterUtils.calculateBearing(adjustedEndPoint.x - adjustedStartPoint.x, adjustedEndPoint.y - adjustedStartPoint.y);
     const adjustedStart = this.adjustPointForGlobalOrigin(adjustedStartPoint);
     const adjustedEnd = this.adjustPointForGlobalOrigin(adjustedEndPoint);
-    const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, QuantityType.LengthEngineering);
-    const coordinateSpec = FormatterUtils.getFormatterSpecWithFallback(this._coordinateKoQ, QuantityType.Coordinate);
+    const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, this._lengthPersistenceUnitName, QuantityType.LengthEngineering);
+    const coordinateSpec = FormatterUtils.getFormatterSpecWithFallback(this._coordinateKoQ, this._coordinatePersistenceUnitName, QuantityType.Coordinate);
 
     const fDistance = lengthSpec ? IModelApp.quantityFormatter.formatQuantity(distance, lengthSpec) : await FormatterUtils.formatLength(distance);
     const fStartCoords = FormatterUtils.formatCoordinatesImmediate(adjustedStart, coordinateSpec);
