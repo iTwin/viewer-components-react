@@ -6,7 +6,7 @@
 import type { Id64String } from "@itwin/core-bentley";
 import type { XYZProps } from "@itwin/core-geometry";
 import { Cartographic } from "@itwin/core-common";
-import { GraphicType, IModelApp } from "@itwin/core-frontend";
+import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
 import { Geometry, IModelJson, Point3d, PointString3d } from "@itwin/core-geometry";
 import { FormatterUtils } from "../api/FormatterUtils.js";
 import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle.js";
@@ -369,7 +369,7 @@ export class LocationMeasurement extends Measurement {
 
   private async createTextMarker(): Promise<void> {
     const adjustedLocation = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._location));
-    const coordinateSpec = this._getCoordinateHandle().formatterSpec;
+    const coordinateSpec = FormatterUtils.getSpecFromHandle(this._getCoordinateHandle(), QuantityType.Coordinate);
 
     const entries = [
       {
@@ -425,10 +425,10 @@ export class LocationMeasurement extends Measurement {
   protected override async getDataForMeasurementWidgetInternal(): Promise<
   MeasurementWidgetData | undefined
   > {
-    const coordinateSpec = this._getCoordinateHandle().formatterSpec;
-    const lengthSpec = this._getLengthHandle().formatterSpec;
-    const angleSpec = this._getAngleHandle().formatterSpec;
-    const stationSpec = this._getStationHandle().formatterSpec;
+    const coordinateSpec = FormatterUtils.getSpecFromHandle(this._getCoordinateHandle(), QuantityType.Coordinate);
+    const lengthSpec = FormatterUtils.getSpecFromHandle(this._getLengthHandle(), QuantityType.LengthEngineering);
+    const angleSpec = FormatterUtils.getSpecFromHandle(this._getAngleHandle(), QuantityType.Angle);
+    const stationSpec = FormatterUtils.getSpecFromHandle(this._getStationHandle(), QuantityType.Stationing);
 
     const adjustedLocation = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._location));
     const fCoordinates = FormatterUtils.formatCoordinatesImmediate(adjustedLocation, coordinateSpec);

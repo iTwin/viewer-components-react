@@ -5,7 +5,7 @@
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { XYAndZ, XYZProps } from "@itwin/core-geometry";
-import { GraphicType, IModelApp } from "@itwin/core-frontend";
+import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
 import { Geometry, IModelJson, LineSegment3d, Point3d, PointString3d, Range1d, Ray3d, Vector3d } from "@itwin/core-geometry";
 import { FormatterUtils } from "../api/FormatterUtils.js";
 import { StyleSet, TextOffsetType, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle.js";
@@ -523,7 +523,7 @@ export class DistanceMeasurement extends Measurement {
   }
 
   private async createTextMarker(): Promise<void> {
-    const lengthSpec = this._getLengthHandle().formatterSpec;
+    const lengthSpec = FormatterUtils.getSpecFromHandle(this._getLengthHandle(), QuantityType.LengthEngineering);
 
     const adjustedStartPoint = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._startPoint));
     const adjustedEndPoint = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._endPoint));
@@ -578,8 +578,8 @@ export class DistanceMeasurement extends Measurement {
     const bearing = FormatterUtils.calculateBearing(adjustedEndPoint.x - adjustedStartPoint.x, adjustedEndPoint.y - adjustedStartPoint.y);
     const adjustedStart = this.adjustPointForGlobalOrigin(adjustedStartPoint);
     const adjustedEnd = this.adjustPointForGlobalOrigin(adjustedEndPoint);
-    const lengthSpec = this._getLengthHandle().formatterSpec;
-    const coordinateSpec = this._getCoordinateHandle().formatterSpec;
+    const lengthSpec = FormatterUtils.getSpecFromHandle(this._getLengthHandle(), QuantityType.LengthEngineering);
+    const coordinateSpec = FormatterUtils.getSpecFromHandle(this._getCoordinateHandle(), QuantityType.Coordinate);
 
     const fDistance = lengthSpec ? IModelApp.quantityFormatter.formatQuantity(distance, lengthSpec) : await FormatterUtils.formatLength(distance);
     const fStartCoords = FormatterUtils.formatCoordinatesImmediate(adjustedStart, coordinateSpec);

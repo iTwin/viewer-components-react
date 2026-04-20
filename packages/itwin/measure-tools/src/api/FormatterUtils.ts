@@ -9,7 +9,7 @@ import { IModelApp, QuantityType } from "@itwin/core-frontend";
 import { FormatTraits } from "@itwin/core-quantity";
 import { MeasureTools } from "../MeasureTools.js";
 
-import type { FormatDefinition, FormatProps , FormatterSpec} from "@itwin/core-quantity";
+import type { FormatDefinition, FormatProps, FormatSpecHandle, FormatterSpec} from "@itwin/core-quantity";
 export namespace FormatterUtils {
 
   /**
@@ -26,6 +26,11 @@ export namespace FormatterUtils {
 
     // Fallback to QuantityType
     return IModelApp.quantityFormatter.findFormatterSpecByQuantityType(fallbackQuantityType);
+  }
+
+  /** Returns the handle's formatterSpec, falling back to QuantityType if the handle couldn't resolve its KoQ. */
+  export function getSpecFromHandle(handle: FormatSpecHandle, fallback: QuantityType): FormatterSpec | undefined {
+    return handle.formatterSpec ?? IModelApp.quantityFormatter.findFormatterSpecByQuantityType(fallback);
   }
 
   /** Formats a sequence of values with spec without the unit label */
