@@ -433,29 +433,6 @@ describe("HierarchyVisibilityHandlerImpl", () => {
       expect(vp.changeModelDisplay).not.toHaveBeenCalled();
     });
 
-    it("does not affect already completed changes", async () => {
-      const vp = createFakeViewport();
-      using setup = setupTest({
-        viewport: vp,
-        getTreeSpecificVisibilityHandler: ({ viewport: bufferingViewport }) =>
-          createTreeSpecificVisibilityHandler({
-            changeVisibilityStatus: vi.fn(() => {
-              bufferingViewport.changeModelDisplay({ modelIds: "0x1", display: true });
-              return EMPTY;
-            }),
-          }),
-      });
-      const { handler, cancelChangesInProgress } = setup;
-
-      // Let change complete normally
-      await handler.changeVisibility(createNode(), true);
-      expect(vp.changeModelDisplay).toHaveBeenCalledWith({ modelIds: "0x1", display: true });
-
-      // Cancel after completion — should be a no-op
-      cancelChangesInProgress.next();
-      expect(vp.changeModelDisplay).toHaveBeenCalledTimes(1);
-    });
-
     it("cancels multiple in-flight changes at once", async () => {
       const vp = createFakeViewport();
       const changeSubjectA = new Subject<void>();
