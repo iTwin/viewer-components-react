@@ -3,22 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  bufferCount,
-  concatMap,
-  defaultIfEmpty,
-  delay,
-  EMPTY,
-  expand,
-  firstValueFrom,
-  from,
-  identity,
-  mergeMap,
-  of,
-  queueScheduler,
-  takeLast,
-  toArray,
-} from "rxjs";
+import { bufferCount, concatMap, defaultIfEmpty, delay, firstValueFrom, from, identity, mergeMap, of, takeLast, toArray } from "rxjs";
 import { expect } from "vitest";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
@@ -94,12 +79,35 @@ export async function collectNodes({
   ignoreChildren?: (node: HierarchyNode) => boolean;
   provider: HierarchyProvider;
 }): Promise<HierarchyNode[]> {
-  return firstValueFrom(
-    from(provider.getNodes({ parentNode: undefined })).pipe(
-      expand((node) => (node.children && !ignoreChildren(node) ? provider.getNodes({ parentNode: node }) : EMPTY), 1000, queueScheduler),
-      toArray(),
-    ),
-  );
+  return firstValueFrom(from(getNodesAndChildren({ provider, ignoreChildren })).pipe(toArray()));
+}
+
+async function* getNodesAndChildren({
+  provider,
+  parentNode,
+  ignoreChildren,
+  ...props
+}: {
+  ignoreChildren: (node: HierarchyNode) => boolean;
+  provider: HierarchyProvider;
+  parentNode?: HierarchyNode;
+  releaseAfterProcessingNodes?: { amount: number };
+}): AsyncIterableIterator<HierarchyNode> {
+  const releaseAfterProcessingAmount = 500;
+  const releaseAfterProcessingNodes = props.releaseAfterProcessingNodes ?? { amount: releaseAfterProcessingAmount };
+  for await (const node of provider.getNodes({ parentNode })) {
+    --releaseAfterProcessingNodes.amount;
+    if (!releaseAfterProcessingNodes.amount) {
+      await new Promise<void>((resolve) => setTimeout(resolve));
+      releaseAfterProcessingNodes.amount = releaseAfterProcessingAmount;
+    }
+
+    yield node;
+
+    if (node.children && !ignoreChildren(node)) {
+      yield* getNodesAndChildren({ provider, parentNode: node, releaseAfterProcessingNodes, ignoreChildren });
+    }
+  }
 }
 
 export async function validateHierarchyVisibility(
