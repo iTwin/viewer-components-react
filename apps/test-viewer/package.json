@@ -20,7 +20,7 @@
     "@itwin/ec3-widget-react": "workspace:*",
     "@itwin/ecschema-metadata": "5.9.0-dev.11",
     "@itwin/ecschema-rpcinterface-common": "^5.7.0",
-    "@itwin/frontend-devtools": "^5.7.0",
+    "@itwin/frontend-devtools": "5.9.0-dev.11",
     "@itwin/geo-tools-react": "workspace:*",
     "@itwin/grouping-mapping-widget": "workspace:*",
     "@itwin/imodel-components-react": "^5.24.1",

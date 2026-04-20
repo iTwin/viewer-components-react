@@ -452,10 +452,15 @@ export class MeasurementManager implements Decorator {
     this._dropDecoratorCallback = IModelApp.viewManager.addDecorator(this);
 
     if (undefined === this._dropQuantityFormatterListeners) {
-      const unsubscribe = IModelApp.quantityFormatter.onFormattingReady.addListener(() => {
+      const unsubReady = IModelApp.quantityFormatter.onFormattingReady.addListener(() => {
         this._onFormattingRefresh();
       });
-      this._dropQuantityFormatterListeners = unsubscribe;
+      // Format overrides (user edits a format) bypass the reload pipeline and
+      // only emit onQuantityFormatsChanged, so we must listen for that separately.
+      const unsubFormats = IModelApp.quantityFormatter.onQuantityFormatsChanged.addListener(() => {
+        this._onFormattingRefresh();
+      });
+      this._dropQuantityFormatterListeners = () => { unsubReady(); unsubFormats(); };
     } else {
       this._onFormattingRefresh();
     }
