@@ -139,7 +139,7 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
       label={translate("categoriesTree.buttons.invert.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.(`categories-tree-invert`);
-        void Promise.all([...changesInProgress]).then(async () => {
+        void Promise.allSettled([...changesInProgress]).then(async () => {
           await invertAllCategories(props.categories, props.viewport);
         });
       }}

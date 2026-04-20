@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { Subject } from "rxjs";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { BaseIdsCache } from "./caches/BaseIdsCache.js";
@@ -48,8 +48,12 @@ function SharedTreeContextProviderInternalImpl({ children, showWarning }: PropsW
   const { getCache } = useIdsCache();
   const [cancelChangesInProgress] = useState(() => new Subject<void>());
   const [changesInProgress, setOngoing] = useState(() => new Set<Promise<void>>());
+  const isMounted = useRef(true);
   const updateChangesInProgress = useCallback(
     (promise: Promise<void>, action: "add" | "remove") => {
+      if (!isMounted.current) {
+        return;
+      }
       if (action === "add") {
         setOngoing((prev) => new Set(prev).add(promise));
         return;
@@ -62,6 +66,12 @@ function SharedTreeContextProviderInternalImpl({ children, showWarning }: PropsW
     },
     [setOngoing],
   );
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+      cancelChangesInProgress.complete();
+    };
+  }, [cancelChangesInProgress]);
   useEffect(() => {
     if (showWarning) {
       // eslint-disable-next-line no-console

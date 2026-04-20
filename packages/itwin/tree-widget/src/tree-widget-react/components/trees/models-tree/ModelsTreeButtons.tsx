@@ -165,7 +165,7 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
       label={translate("modelsTree.buttons.invert.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-invert");
-        void Promise.all([...changesInProgress]).then(() => {
+        void Promise.allSettled([...changesInProgress]).then(() => {
           invertAllModels(
             props.models.map((model) => model.id),
             props.viewport,
