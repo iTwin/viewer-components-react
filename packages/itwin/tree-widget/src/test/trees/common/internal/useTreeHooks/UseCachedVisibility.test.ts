@@ -43,18 +43,22 @@ function setupTest(overrides?: {
   visibilityHandler?: Partial<TreeSpecificVisibilityHandler<void> & Disposable>;
   viewport?: ReturnType<typeof createFakeViewport>;
   getTreeSpecificVisibilityHandler?: HierarchyVisibilityHandlerImplProps<void>["getTreeSpecificVisibilityHandler"];
+  cancelChangesInProgress?: Subject<void>;
 }) {
   const viewport = overrides?.viewport ?? createFakeViewport();
+  const cancelChangesInProgress = overrides?.cancelChangesInProgress ?? new Subject<void>();
   const defaultVisibilityHandler = createTreeSpecificVisibilityHandler(overrides?.visibilityHandler);
   const handler = new HierarchyVisibilityHandlerImpl<void>({
     viewport,
     getTreeSpecificVisibilityHandler: overrides?.getTreeSpecificVisibilityHandler ?? (() => defaultVisibilityHandler),
     getSearchResultsTree: () => undefined,
+    cancelChangesInProgress,
   });
   return {
     handler,
     viewport,
     visibilityHandler: defaultVisibilityHandler,
+    cancelChangesInProgress,
     [Symbol.dispose]: () => handler[Symbol.dispose](),
   };
 }
@@ -390,6 +394,7 @@ describe("HierarchyVisibilityHandlerImpl", () => {
         viewport,
         getTreeSpecificVisibilityHandler: () => createTreeSpecificVisibilityHandler(),
         getSearchResultsTree: () => undefined,
+        cancelChangesInProgress: new Subject<void>(),
       });
 
       expect(viewport.onDisplayedModelsChanged.numberOfListeners).toBeGreaterThan(listenerCountBefore);
@@ -397,6 +402,79 @@ describe("HierarchyVisibilityHandlerImpl", () => {
       handler[Symbol.dispose]();
 
       expect(viewport.onDisplayedModelsChanged.numberOfListeners).toBe(listenerCountBefore);
+    });
+  });
+
+  describe("cancelChangesInProgress", () => {
+    it("discards buffered changes when cancelChangesInProgress fires during changeVisibility", async () => {
+      const vp = createFakeViewport();
+      const changeSubject = new Subject<void>();
+      using setup = setupTest({
+        viewport: vp,
+        cancelChangesInProgress: new Subject<void>(),
+        getTreeSpecificVisibilityHandler: ({ viewport: bufferingViewport }) =>
+          createTreeSpecificVisibilityHandler({
+            changeVisibilityStatus: vi.fn(() => {
+              bufferingViewport.changeModelDisplay({ modelIds: "0x1", display: true });
+              return changeSubject;
+            }),
+          }),
+      });
+      const { handler, cancelChangesInProgress } = setup;
+
+      const changePromise = handler.changeVisibility(createNode(), true);
+
+      // Cancel all ongoing changes — should unsubscribe and discard
+      cancelChangesInProgress.next();
+
+      await changePromise;
+
+      // The buffered changes should have been discarded, not committed
+      expect(vp.changeModelDisplay).not.toHaveBeenCalled();
+    });
+
+    it("cancels multiple in-flight changes at once", async () => {
+      const vp = createFakeViewport();
+      const changeSubjectA = new Subject<void>();
+      const changeSubjectB = new Subject<void>();
+      const getTreeSpecificVisibilityHandler = vi
+        .fn<HierarchyVisibilityHandlerImplProps<void>["getTreeSpecificVisibilityHandler"]>()
+        .mockImplementationOnce(({ viewport: bufferingViewport }) =>
+          createTreeSpecificVisibilityHandler({
+            changeVisibilityStatus: vi.fn(() => {
+              bufferingViewport.changeModelDisplay({ modelIds: "0xA", display: true });
+              return changeSubjectA;
+            }),
+          }),
+        )
+        .mockImplementationOnce(({ viewport: bufferingViewport }) =>
+          createTreeSpecificVisibilityHandler({
+            changeVisibilityStatus: vi.fn(() => {
+              bufferingViewport.changeModelDisplay({ modelIds: "0xB", display: false });
+              return changeSubjectB;
+            }),
+          }),
+        );
+      using setup = setupTest({
+        viewport: vp,
+        getTreeSpecificVisibilityHandler,
+      });
+      const { handler, cancelChangesInProgress } = setup;
+
+      const nodeA = createNode({ instanceKeys: [{ className: "BisCore.Element", id: "0x1" }] });
+      const nodeB = createNode({ instanceKeys: [{ className: "BisCore.Element", id: "0x2" }] });
+
+      const promiseA = handler.changeVisibility(nodeA, true);
+      const promiseB = handler.changeVisibility(nodeB, false);
+
+      // Cancel all
+      cancelChangesInProgress.next();
+
+      await promiseA;
+      await promiseB;
+
+      // Neither change should have been committed
+      expect(vp.changeModelDisplay).not.toHaveBeenCalled();
     });
   });
 });
