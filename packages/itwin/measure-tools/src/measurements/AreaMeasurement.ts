@@ -5,7 +5,7 @@
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { XYZProps } from "@itwin/core-geometry";
-import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
+import { GraphicType, IModelApp } from "@itwin/core-frontend";
 import { Geometry, IModelJson, Point3d, PointString3d, PolygonOps, Transform } from "@itwin/core-geometry";
 import { FormatterUtils } from "../api/FormatterUtils.js";
 import { StyleSet, WellKnownGraphicStyleType } from "../api/GraphicStyle.js";
@@ -479,8 +479,8 @@ export class AreaMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, this._lengthPersistenceUnitName, QuantityType.LengthEngineering);
-    const areaSpec = FormatterUtils.getFormatterSpecWithFallback(this._areaKoQ, this._areaPersistenceUnitName, QuantityType.Area);
+    const lengthSpec = this._getLengthHandle().formatterSpec;
+    const areaSpec = this._getAreaHandle().formatterSpec;
 
     const fPerimeter = await FormatterUtils.formatLength(
       this._polygon.perimeter,

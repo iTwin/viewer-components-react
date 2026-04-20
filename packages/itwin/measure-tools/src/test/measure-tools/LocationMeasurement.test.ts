@@ -6,7 +6,7 @@
 import { assert } from "chai";
 import { vi } from "vitest";
 import { Cartographic } from "@itwin/core-common";
-import { IModelApp, QuantityType } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import { Point3d } from "@itwin/core-geometry";
 import { Measurement, MeasurementPickContext } from "../../api/Measurement.js";
 import { WellKnownViewType } from "../../api/MeasurementEnums.js";
@@ -72,20 +72,8 @@ describe("LocationMeasurement tests", () => {
     assert.isString(await measure3.getDecorationToolTip(pickContext));
   });
 
-  it("Test fallback from getFormatterSpec on construction", async () => {
-    // Mock getSpecsByNameAndUnit to return undefined (simulating KoQ lookup failure)
-    const originalGetSpecsByNameAndUnit = IModelApp.quantityFormatter.getSpecsByNameAndUnit;
-    const originalFindFormatterSpecByQuantityType = IModelApp.quantityFormatter.findFormatterSpecByQuantityType;
-
-    const getSpecsByNameAndUnitSpy = vi.fn().mockReturnValue(undefined);
-    const findFormatterSpecSpy = vi.fn().mockReturnValue({
-      format: { formatTraits: 0 },
-      persistenceUnit: { name: "Units.M" },
-      applyFormatting: vi.fn().mockReturnValue("mockedFormattedValue")
-    });
-
-    IModelApp.quantityFormatter.getSpecsByNameAndUnit = getSpecsByNameAndUnitSpy;
-    IModelApp.quantityFormatter.findFormatterSpecByQuantityType = findFormatterSpecSpy;
+  it("Test FormatSpecHandle used on construction", async () => {
+    const getFormatSpecHandleSpy = vi.spyOn(IModelApp.quantityFormatter, "getFormatSpecHandle");
 
     try {
       const measurement = LocationMeasurement.create(
@@ -96,22 +84,17 @@ describe("LocationMeasurement tests", () => {
       // Wait for the async createTextMarker to complete
       await new Promise(resolve => setTimeout(resolve, 10));
 
-      // Verify that the KoQ lookup was attempted via getSpecsByNameAndUnit
-      assert.isTrue(getSpecsByNameAndUnitSpy.mock.calls.length > 0, "getSpecsByNameAndUnit should have been called during construction");
-      assert.strictEqual(getSpecsByNameAndUnitSpy.mock.calls[0][0].name, "DefaultToolsUnits.LENGTH_COORDINATE", "Should lookup the default coordinate KoQ string");
-      assert.strictEqual(getSpecsByNameAndUnitSpy.mock.calls[0][0].persistenceUnitName, "Units.M", "Should use the correct persistence unit");
-
-      // Verify that the fallback method was called
-      assert.isTrue(findFormatterSpecSpy.mock.calls.length > 0, "findFormatterSpecByQuantityType should have been called as fallback");
-      assert.strictEqual(findFormatterSpecSpy.mock.calls[0][0], QuantityType.Coordinate, "Should fallback to QuantityType.Coordinate");
+      // Verify that getFormatSpecHandle was called with the correct KoQ and unit
+      assert.isTrue(getFormatSpecHandleSpy.mock.calls.length > 0, "getFormatSpecHandle should have been called during construction");
+      assert.strictEqual(getFormatSpecHandleSpy.mock.calls[0][0], "DefaultToolsUnits.LENGTH_COORDINATE", "Should use the default coordinate KoQ");
+      assert.strictEqual(getFormatSpecHandleSpy.mock.calls[0][1], "Units.M", "Should use the correct persistence unit");
 
       // Verify the measurement was created successfully
       assert.isDefined(measurement);
       assert.isDefined(measurement.location);
       assert.strictEqual(measurement.coordinateKoQ, "DefaultToolsUnits.LENGTH_COORDINATE");
     } finally {
-      IModelApp.quantityFormatter.getSpecsByNameAndUnit = originalGetSpecsByNameAndUnit;
-      IModelApp.quantityFormatter.findFormatterSpecByQuantityType = originalFindFormatterSpecByQuantityType;
+      getFormatSpecHandleSpy.mockRestore();
     }
   });
 

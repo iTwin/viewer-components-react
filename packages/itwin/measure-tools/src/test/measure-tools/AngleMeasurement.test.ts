@@ -5,7 +5,7 @@
 
 import { assert } from "chai";
 import { vi } from "vitest";
-import { IModelApp, QuantityType } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import { Point3d } from "@itwin/core-geometry";
 import { Measurement, MeasurementPickContext } from "../../api/Measurement.js";
 import { WellKnownViewType } from "../../api/MeasurementEnums.js";
@@ -68,20 +68,8 @@ describe("AngleMeasurement tests", () => {
     assert.isString(await measure3.getDecorationToolTip(pickContext));
   });
 
-  it("Test fallback from getFormatterSpec on construction", async () => {
-    // Mock getSpecsByNameAndUnit to return undefined (simulating KoQ lookup failure)
-    const originalGetSpecsByNameAndUnit = IModelApp.quantityFormatter.getSpecsByNameAndUnit;
-    const originalFindFormatterSpecByQuantityType = IModelApp.quantityFormatter.findFormatterSpecByQuantityType;
-
-    const getSpecsByNameAndUnitSpy = vi.fn().mockReturnValue(undefined);
-    const findFormatterSpecSpy = vi.fn().mockReturnValue({
-      format: { formatTraits: 0 },
-      persistenceUnit: { name: "Units.RAD" },
-      applyFormatting: vi.fn().mockReturnValue("mockedFormattedValue")
-    });
-
-    IModelApp.quantityFormatter.getSpecsByNameAndUnit = getSpecsByNameAndUnitSpy;
-    IModelApp.quantityFormatter.findFormatterSpecByQuantityType = findFormatterSpecSpy;
+  it("Test FormatSpecHandle used on construction", async () => {
+    const getFormatSpecHandleSpy = vi.spyOn(IModelApp.quantityFormatter, "getFormatSpecHandle");
 
     try {
       const measurement = AngleMeasurement.create(
@@ -94,22 +82,17 @@ describe("AngleMeasurement tests", () => {
       // Wait for the async createTextMarker to complete
       await new Promise(resolve => setTimeout(resolve, 10));
 
-      // Verify that the KoQ lookup was attempted via getSpecsByNameAndUnit
-      assert.isTrue(getSpecsByNameAndUnitSpy.mock.calls.length > 0, "getSpecsByNameAndUnit should have been called during construction");
-      assert.strictEqual(getSpecsByNameAndUnitSpy.mock.calls[0][0].name, "DefaultToolsUnits.ANGLE", "Should lookup the default KoQ string");
-      assert.strictEqual(getSpecsByNameAndUnitSpy.mock.calls[0][0].persistenceUnitName, "Units.RAD", "Should use the correct persistence unit");
-
-      // Verify that the fallback method was called
-      assert.isTrue(findFormatterSpecSpy.mock.calls.length > 0, "findFormatterSpecByQuantityType should have been called as fallback");
-      assert.strictEqual(findFormatterSpecSpy.mock.calls[0][0], QuantityType.Angle, "Should fallback to QuantityType.Angle");
+      // Verify that getFormatSpecHandle was called with the correct KoQ and unit
+      assert.isTrue(getFormatSpecHandleSpy.mock.calls.length > 0, "getFormatSpecHandle should have been called during construction");
+      assert.strictEqual(getFormatSpecHandleSpy.mock.calls[0][0], "DefaultToolsUnits.ANGLE", "Should use the default angle KoQ");
+      assert.strictEqual(getFormatSpecHandleSpy.mock.calls[0][1], "Units.RAD", "Should use the correct persistence unit");
 
       // Verify the measurement was created successfully
       assert.isDefined(measurement);
       assert.isDefined(measurement.angle);
       assert.strictEqual(measurement.angleKoQ, "DefaultToolsUnits.ANGLE");
     } finally {
-      IModelApp.quantityFormatter.getSpecsByNameAndUnit = originalGetSpecsByNameAndUnit;
-      IModelApp.quantityFormatter.findFormatterSpecByQuantityType = originalFindFormatterSpecByQuantityType;
+      getFormatSpecHandleSpy.mockRestore();
     }
   });
 

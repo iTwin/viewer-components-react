@@ -5,7 +5,7 @@
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { XYZProps } from "@itwin/core-geometry";
-import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
+import { GraphicType, IModelApp } from "@itwin/core-frontend";
 import { Angle, AngleSweep, Arc3d, AxisOrder, IModelJson, Matrix3d, Point3d, PointString3d, Vector3d } from "@itwin/core-geometry";
 import { FormatterUtils } from "../api/FormatterUtils.js";
 import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle.js";
@@ -398,7 +398,7 @@ export class AngleMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const angleSpec = FormatterUtils.getFormatterSpecWithFallback(this._angleKoQ, this._anglePersistenceUnitName, QuantityType.Angle);
+    const angleSpec = this._getAngleHandle().formatterSpec;
     const angle = this.angle ?? 0;
     const fAngle = await FormatterUtils.formatAngle(angle, angleSpec);
 
@@ -427,7 +427,7 @@ export class AngleMeasurement extends Measurement {
 
   private async createTextMarker(): Promise<void> {
     if (this._center !== undefined && this.angle !== undefined) {
-      const angleSpec = FormatterUtils.getFormatterSpecWithFallback(this._angleKoQ, this._anglePersistenceUnitName, QuantityType.Angle);
+      const angleSpec = this._getAngleHandle().formatterSpec;
       const angle = this.angle;
       const fAngle = await FormatterUtils.formatAngle(
         angle,

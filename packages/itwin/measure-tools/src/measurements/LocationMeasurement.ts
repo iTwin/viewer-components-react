@@ -6,7 +6,7 @@
 import type { Id64String } from "@itwin/core-bentley";
 import type { XYZProps } from "@itwin/core-geometry";
 import { Cartographic } from "@itwin/core-common";
-import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
+import { GraphicType, IModelApp } from "@itwin/core-frontend";
 import { Geometry, IModelJson, Point3d, PointString3d } from "@itwin/core-geometry";
 import { FormatterUtils } from "../api/FormatterUtils.js";
 import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle.js";
@@ -369,7 +369,7 @@ export class LocationMeasurement extends Measurement {
 
   private async createTextMarker(): Promise<void> {
     const adjustedLocation = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._location));
-    const coordinateSpec = FormatterUtils.getFormatterSpecWithFallback(this._coordinateKoQ, this._coordinatePersistenceUnitName, QuantityType.Coordinate);
+    const coordinateSpec = this._getCoordinateHandle().formatterSpec;
 
     const entries = [
       {
@@ -425,10 +425,10 @@ export class LocationMeasurement extends Measurement {
   protected override async getDataForMeasurementWidgetInternal(): Promise<
   MeasurementWidgetData | undefined
   > {
-    const coordinateSpec = FormatterUtils.getFormatterSpecWithFallback(this._coordinateKoQ, this._coordinatePersistenceUnitName, QuantityType.Coordinate);
-    const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, this._lengthPersistenceUnitName, QuantityType.LengthEngineering);
-    const angleSpec = FormatterUtils.getFormatterSpecWithFallback(this._angleKoQ, this._anglePersistenceUnitName, QuantityType.Angle);
-    const stationSpec = FormatterUtils.getFormatterSpecWithFallback(this._stationKoQ, this._stationPersistenceUnitName, QuantityType.Stationing);
+    const coordinateSpec = this._getCoordinateHandle().formatterSpec;
+    const lengthSpec = this._getLengthHandle().formatterSpec;
+    const angleSpec = this._getAngleHandle().formatterSpec;
+    const stationSpec = this._getStationHandle().formatterSpec;
 
     const adjustedLocation = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._location));
     const fCoordinates = FormatterUtils.formatCoordinatesImmediate(adjustedLocation, coordinateSpec);
