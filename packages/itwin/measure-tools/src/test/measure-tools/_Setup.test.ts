@@ -23,7 +23,7 @@ beforeAll(async () => {
   const locUnits = new SchemaXmlFileLocater();
   locUnits.addSchemaSearchPath(unitSchemaFilePath)
   schemaContext.addLocater(locUnits);
-  IModelApp.quantityFormatter.setUnitsProvider(new SchemaUnitProvider(schemaContext));
+  await IModelApp.quantityFormatter.setUnitsProvider(new SchemaUnitProvider(schemaContext));
   window.HTMLElement.prototype.scrollTo = vi.fn();
   window.HTMLElement.prototype.scrollIntoView = vi.fn();
 });

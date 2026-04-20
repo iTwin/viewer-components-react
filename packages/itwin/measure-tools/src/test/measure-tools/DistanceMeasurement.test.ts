@@ -63,24 +63,21 @@ describe("DistanceMeasurement tests", () => {
   });
 
   it("Test fallback from getFormatterSpec on construction", async () => {
-    // Mock getSpecsByName to return undefined (simulating KoQ lookup failure)
-    const originalGetSpecsByName = IModelApp.quantityFormatter.getSpecsByName;
+    // Mock getSpecsByNameAndUnit to return undefined (simulating KoQ lookup failure)
+    const originalGetSpecsByNameAndUnit = IModelApp.quantityFormatter.getSpecsByNameAndUnit;
     const originalFindFormatterSpecByQuantityType = IModelApp.quantityFormatter.findFormatterSpecByQuantityType;
 
-    // Create a mock that returns undefined for KoQ lookup
-    const getSpecsByNameSpy = vi.fn().mockReturnValue(undefined);
+    const getSpecsByNameAndUnitSpy = vi.fn().mockReturnValue(undefined);
     const findFormatterSpecSpy = vi.fn().mockReturnValue({
       format: { formatTraits: 0 },
       persistenceUnit: { name: "Units.M" },
       applyFormatting: vi.fn().mockReturnValue("mockedFormattedValue")
     });
 
-    // Replace the methods with our spies
-    IModelApp.quantityFormatter.getSpecsByName = getSpecsByNameSpy;
+    IModelApp.quantityFormatter.getSpecsByNameAndUnit = getSpecsByNameAndUnitSpy;
     IModelApp.quantityFormatter.findFormatterSpecByQuantityType = findFormatterSpecSpy;
 
     try {
-      // Create a DistanceMeasurement with complete distance data to trigger createTextMarker
       const measurement = DistanceMeasurement.create(
         Point3d.create(0, 0, 0),
         Point3d.create(0, 10, 0),
@@ -90,9 +87,10 @@ describe("DistanceMeasurement tests", () => {
       // Wait for the async createTextMarker to complete
       await new Promise(resolve => setTimeout(resolve, 10));
 
-      // Verify that the KoQ lookup was attempted
-      assert.isTrue(getSpecsByNameSpy.mock.calls.length > 0, "getSpecsByName should have been called during construction");
-      assert.strictEqual(getSpecsByNameSpy.mock.calls[0][0], "DefaultToolsUnits.LENGTH", "Should lookup the default KoQ string");
+      // Verify that the KoQ lookup was attempted via getSpecsByNameAndUnit
+      assert.isTrue(getSpecsByNameAndUnitSpy.mock.calls.length > 0, "getSpecsByNameAndUnit should have been called during construction");
+      assert.strictEqual(getSpecsByNameAndUnitSpy.mock.calls[0][0].name, "DefaultToolsUnits.LENGTH", "Should lookup the default KoQ string");
+      assert.strictEqual(getSpecsByNameAndUnitSpy.mock.calls[0][0].persistenceUnitName, "Units.M", "Should use the correct persistence unit");
 
       // Verify that the fallback method was called
       assert.isTrue(findFormatterSpecSpy.mock.calls.length > 0, "findFormatterSpecByQuantityType should have been called as fallback");
@@ -104,8 +102,7 @@ describe("DistanceMeasurement tests", () => {
       assert.isDefined(measurement.endPointRef);
       assert.strictEqual(measurement.lengthKoQ, "DefaultToolsUnits.LENGTH");
     } finally {
-      // Restore original methods
-      IModelApp.quantityFormatter.getSpecsByName = originalGetSpecsByName;
+      IModelApp.quantityFormatter.getSpecsByNameAndUnit = originalGetSpecsByNameAndUnit;
       IModelApp.quantityFormatter.findFormatterSpecByQuantityType = originalFindFormatterSpecByQuantityType;
     }
   });
