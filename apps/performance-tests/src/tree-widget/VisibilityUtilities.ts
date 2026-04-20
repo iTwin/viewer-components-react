@@ -3,22 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  bufferCount,
-  concatMap,
-  defaultIfEmpty,
-  delay,
-  EMPTY,
-  expand,
-  firstValueFrom,
-  from,
-  identity,
-  mergeMap,
-  of,
-  queueScheduler,
-  takeLast,
-  toArray,
-} from "rxjs";
+import { bufferCount, concatMap, defaultIfEmpty, delay, firstValueFrom, from, identity, mergeMap, of, takeLast, toArray } from "rxjs";
 import { expect } from "vitest";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
@@ -94,12 +79,31 @@ export async function collectNodes({
   ignoreChildren?: (node: HierarchyNode) => boolean;
   provider: HierarchyProvider;
 }): Promise<HierarchyNode[]> {
-  return firstValueFrom(
-    from(provider.getNodes({ parentNode: undefined })).pipe(
-      expand((node) => (node.children && !ignoreChildren(node) ? provider.getNodes({ parentNode: node }) : EMPTY), 1000, queueScheduler),
-      toArray(),
-    ),
-  );
+  return firstValueFrom(from(getNodesAndChildren({ provider, ignoreChildren })).pipe(toArray()));
+}
+
+async function* getNodesAndChildren({
+  provider,
+  parentNode,
+  ignoreChildren,
+}: {
+  ignoreChildren: (node: HierarchyNode) => boolean;
+  provider: HierarchyProvider;
+  parentNode?: HierarchyNode;
+}): AsyncIterableIterator<HierarchyNode> {
+  const releaseAfterProcessing = 500;
+  let nodesProcessed = 0;
+  for await (const node of provider.getNodes({ parentNode })) {
+    ++nodesProcessed;
+    if (nodesProcessed >= releaseAfterProcessing) {
+      await new Promise((resolve) => setTimeout(resolve));
+      nodesProcessed = 0;
+    }
+    yield node;
+    if (node.children && !ignoreChildren(node)) {
+      yield* getNodesAndChildren({ provider, parentNode: node, ignoreChildren });
+    }
+  }
 }
 
 export async function validateHierarchyVisibility(
