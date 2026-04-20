@@ -156,7 +156,7 @@ export function useModelsTree({
       ...defaultHierarchyConfiguration,
       ...hierarchyConfig,
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
     Object.values(hierarchyConfig ?? {}),
   );
   const componentId = useGuid();

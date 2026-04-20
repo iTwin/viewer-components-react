@@ -50,8 +50,13 @@ export function useSearchPaths({
   const [searchError, setSearchError] = useState<CategoriesTreeSearchError | undefined>();
   const { onFeatureUsed } = useTelemetryContext();
 
-  useEffect(() => {
+  const [prevSearchText, setPrevSearchText] = useState(searchText);
+  if (prevSearchText !== searchText) {
+    setPrevSearchText(searchText);
     setSearchError(undefined);
+  }
+
+  useEffect(() => {
     onCategoriesFiltered?.({ categories: undefined, models: undefined });
     if (!searchText) {
       onSearchPathsChanged(undefined);
