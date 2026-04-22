@@ -120,7 +120,7 @@ export function useClassificationsTree({
 
   const hierarchyConfig = useMemo(
     () => ({ ...rest.hierarchyConfig }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
     [...Object.values(rest.hierarchyConfig)],
   );
   const componentId = useGuid();
@@ -147,9 +147,11 @@ export function useClassificationsTree({
     visibilityHandlerConfig,
   });
 
-  useEffect(() => {
+  const [prevSearchText, setPrevSearchText] = useState(searchText);
+  if (prevSearchText !== searchText) {
+    setPrevSearchText(searchText);
     setSearchError(undefined);
-  }, [searchText]);
+  }
 
   const getPaths = useMemo<FunctionProps<typeof useTree>["getSearchPaths"]>(() => {
     if (!searchText || !getSearchPaths) {

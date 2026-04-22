@@ -7,11 +7,9 @@ import { afterAll, beforeAll, describe, it } from "vitest";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ClassificationsTreeDefinition } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIdsCache } from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
-import { ClassificationsTreeVisibilityHandler } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHandler.js";
-import { createClassificationsSearchResultsTree } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/SearchResultsTree.js";
+import { createClassificationsTreeVisibilityHandler } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHandler.js";
 import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_GeometricElement3d } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
-import { HierarchyVisibilityHandlerImpl } from "../../../tree-widget-react/components/trees/common/internal/useTreeHooks/UseCachedVisibility.js";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../IModelUtils.js";
 import { initializeITwinJs, terminateITwinJs } from "../../Initialize.js";
 import { createIModelAccess } from "../Common.js";
@@ -32,11 +30,8 @@ import { validateNodeVisibility } from "./VisibilityValidation.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector, Props } from "@itwin/presentation-shared";
-import type { ClassificationsTreeSearchTargets } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/SearchResultsTree.js";
+import type { Props } from "@itwin/presentation-shared";
 import type { ClassificationsTreeVisibilityHandlerConfiguration } from "../../../tree-widget-react/components/trees/classifications-tree/UseClassificationsTree.js";
-import type { SearchResultsTree } from "../../../tree-widget-react/components/trees/common/internal/visibility/BaseSearchResultsTree.js";
-import type { TreeWidgetViewport } from "../../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
 
 describe("ClassificationsTreeVisibilityHandler", () => {
   beforeAll(async () => {
@@ -1345,34 +1340,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
   });
 });
-
-function createClassificationsTreeVisibilityHandler(props: {
-  viewport: TreeWidgetViewport;
-  idsCache: ClassificationsTreeIdsCache;
-  imodelAccess: ECClassHierarchyInspector;
-  searchPaths?: HierarchySearchTree[];
-}) {
-  return new HierarchyVisibilityHandlerImpl<ClassificationsTreeSearchTargets>({
-    getSearchResultsTree: (): undefined | Promise<SearchResultsTree<ClassificationsTreeSearchTargets>> => {
-      if (!props.searchPaths) {
-        return undefined;
-      }
-      return createClassificationsSearchResultsTree({
-        idsCache: props.idsCache,
-        searchPaths: props.searchPaths,
-        imodelAccess: props.imodelAccess,
-      });
-    },
-    getTreeSpecificVisibilityHandler: ({ info, viewport }) => {
-      return new ClassificationsTreeVisibilityHandler({
-        alwaysAndNeverDrawnElementInfo: info,
-        idsCache: props.idsCache,
-        viewport,
-      });
-    },
-    viewport: props.viewport,
-  });
-}
 
 async function validateClassificationsTreeHierarchyVisibility(props: Omit<Props<typeof validateHierarchyVisibility>, "validateNodeVisibility">) {
   return validateHierarchyVisibility({
