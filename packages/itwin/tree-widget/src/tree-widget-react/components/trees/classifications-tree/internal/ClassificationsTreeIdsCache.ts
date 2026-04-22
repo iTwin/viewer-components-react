@@ -16,6 +16,7 @@ import {
   CLASS_NAME_SpatialCategory,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
+import { fromWithRelease } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
@@ -235,9 +236,9 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
   }
 
   public getClassificationsPathObs(classificationIds: Id64Arg): Observable<HierarchyNodeIdentifiersPath> {
-    return from(this.getClassificationsInfo()).pipe(
-      mergeMap((classificationsInfo) => {
-        return from(Id64.iterable(classificationIds)).pipe(
+    return this.getClassificationsInfo().pipe(
+      mergeMap((classificationsInfo) =>
+        fromWithRelease({ source: classificationIds, releaseOnCount: 200 }).pipe(
           map((classificationId) => {
             const path: HierarchyNodeIdentifiersPath = [{ id: classificationId, className: CLASS_NAME_Classification }];
             let parentId = classificationsInfo.get(classificationId)?.parentClassificationOrTableId;
@@ -252,8 +253,8 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
             }
             return path.reverse();
           }),
-        );
-      }),
+        ),
+      ),
     );
   }
 
