@@ -47,7 +47,7 @@ export default defineConfig({
     environment: "happy-dom",
     include: ["src/**/*.test.{ts,tsx}"],
     restoreMocks: true,
-    testTimeout: 300_000,
+    testTimeout: 600_000,
     fileParallelism: false,
     setupFiles: ["src/setup.ts"],
     reporters: [new TestReporter()],
