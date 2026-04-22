@@ -37,9 +37,11 @@
     "url": "http://www.bentley.com"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "7.0.1",
+    "@dnd-kit/utilities": "3.2.0",
     "@itwin/itwinui-icons-color-react": "^2.1.0",
-    "@itwin/itwinui-icons-react": "^2.10.0",
-    "react-beautiful-dnd": "^13.1.1"
+    "@itwin/itwinui-icons-react": "^2.10.0"
   },
   "devDependencies": {
     "@itwin/appui-abstract": "^5.0.0",
@@ -66,7 +68,6 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "^22.13.9",
     "@types/react": "^18.3.20",
-    "@types/react-beautiful-dnd": "^13.1.8",
     "@typescript-eslint/eslint-plugin": "^8.31.1",
     "@typescript-eslint/parser": "^8.31.1",
     "@vitest/coverage-v8": "^4.0.18",

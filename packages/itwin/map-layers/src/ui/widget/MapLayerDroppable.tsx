@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore droppable Sublayer Basemap
 
-// the following quiet warning caused by react-beautiful-dnd package
-
 import "./MapLayerDroppable.scss";
 import * as React from "react";
-import { Draggable, Droppable } from "react-beautiful-dnd";
+import { useDroppable } from "@dnd-kit/core";
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { UiFramework } from "@itwin/appui-react";
 import { assert } from "@itwin/core-bentley";
 import { ImageMapLayerSettings } from "@itwin/core-common";
@@ -17,11 +17,11 @@ import { SvgStatusWarning, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/i
 import { Checkbox, IconButton } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { AttachLayerButtonType, AttachLayerPopupButton } from "./AttachLayerPopupButton";
+import { backgroundMapLayersId, createMapLayerSortableId, overlayMapLayersId } from "./MapLayerDragDrop";
 import { MapLayerSettingsMenu } from "./MapLayerSettingsMenu";
 import { MapUrlDialog } from "./MapUrlDialog";
 import { SubLayersPopupButton } from "./SubLayersPopupButton";
 
-import type { DraggableChildrenFn, DroppableProps , DroppableProvided , DroppableStateSnapshot } from "react-beautiful-dnd";
 import type { SubLayerId } from "@itwin/core-common";
 import type { MapLayerIndex, ScreenViewport } from "@itwin/core-frontend";
 import type { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
@@ -42,33 +42,60 @@ interface MapLayerDroppableProps {
   disabled?: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/unbound-method
-const StrictModeDroppable = ({ children, ...props }: DroppableProps) =>{
-  const [enabled, setEnabled] = React.useState(false);
-  React.useEffect(() => {
-    const animation = requestAnimationFrame(() => setEnabled(true));
-    return () => {
-      cancelAnimationFrame(animation);
-      setEnabled(false);
-    };
-  }, []);
-  if (!enabled) {
-    return null;
-  }
-  return <Droppable {...props}>{children}</Droppable>;
-};
+interface MapLayerDragOverlayItemProps {
+  mapLayerSettings: StyleMapLayerSettings;
+  disabled?: boolean;
+}
 
+export function MapLayerDragOverlayItem(props: MapLayerDragOverlayItemProps) {
+  const toggleVisibility = MapLayersUI.localization.getLocalizedString("mapLayers:Widget.ToggleVisibility");
+  const requireAuthTooltip = MapLayersUI.localization.getLocalizedString("mapLayers:Widget.RequireAuthTooltip");
+  const outOfRangeTitle = MapLayersUI.localization.getLocalizedString("mapLayers:Widget.layerOutOfRange");
+  const outOfRange = props.mapLayerSettings.treeVisibility === MapTileTreeScaleRangeVisibility.Hidden;
+
+  return (
+    <div className="map-manager-source-item" data-testid="map-layer-drag-overlay-item">
+      <Checkbox checked={props.mapLayerSettings.selected} disabled readOnly></Checkbox>
+      <IconButton disabled size="small" styleType="borderless" className="map-manager-item-visibility" label={toggleVisibility}>
+        {props.mapLayerSettings.visible ? (
+          <SvgVisibilityShow data-testid="layer-visibility-icon-show" />
+        ) : (
+          <SvgVisibilityHide data-testid="layer-visibility-icon-hide" />
+        )}
+      </IconButton>
+      <span
+        className={props.disabled || outOfRange ? "map-manager-item-label-disabled" : "map-manager-item-label"}
+        title={outOfRange ? outOfRangeTitle : undefined}
+      >
+        {props.mapLayerSettings.name}
+      </span>
+      {props.mapLayerSettings.provider?.status === MapLayerImageryProviderStatus.RequireAuth && (
+        <IconButton disabled={true} size="small" styleType="borderless" label={requireAuthTooltip}>
+          <SvgStatusWarning />
+        </IconButton>
+      )}
+    </div>
+  );
+}
 
 /** @internal */
 export function MapLayerDroppable(props: MapLayerDroppableProps) {
   const containsLayer = props.layersList && props.layersList.length > 0;
-  const droppableId = props.isOverlay ? "overlayMapLayers" : "backgroundMapLayers";
+  const droppableId = props.isOverlay ? overlayMapLayersId : backgroundMapLayersId;
   const [toggleVisibility] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Widget.ToggleVisibility"));
   const [requireAuthTooltip] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Widget.RequireAuthTooltip"));
   const [noBackgroundMapsSpecifiedLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Widget.NoBackgroundLayers"));
   const [noUnderlaysSpecifiedLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Widget.NoOverlayLayers"));
   const [dropLayerLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Widget.DropLayerLabel"));
   const [outOfRangeTitle] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Widget.layerOutOfRange"));
+  const sortableItems = props.layersList?.map((layer) => createMapLayerSortableId(droppableId, layer.name, layer.layerIndex)) ?? [];
+  const { isOver, setNodeRef } = useDroppable({
+    id: droppableId,
+    data: {
+      droppableId,
+      index: containsLayer ? undefined : 0,
+    },
+  });
 
   const onSubLayerStateChange = (activeLayer: StyleMapLayerSettings, subLayerId: SubLayerId, isSelected: boolean) => {
     const mapLayerStyleIdx = props.activeViewport.displayStyle.findMapLayerIndexByNameAndSource(activeLayer.name, activeLayer.source, activeLayer.isOverlay);
@@ -111,18 +138,21 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
     [props],
   );
 
-  const renderItem: DraggableChildrenFn = (dragProvided, _, rubric) => {
-    assert(props.layersList !== undefined);
-    const activeLayer = props.layersList[rubric.source.index];
+  const renderItem = (activeLayer: StyleMapLayerSettings, index: number, sortable: ReturnType<typeof useSortable>) => {
     const outOfRange = activeLayer.treeVisibility === MapTileTreeScaleRangeVisibility.Hidden;
 
     return (
       <div
         className="map-manager-source-item"
-        data-id={rubric.source.index}
+        data-id={index}
         key={activeLayer.name}
-        {...dragProvided.draggableProps}
-        ref={dragProvided.innerRef}
+        ref={sortable.setNodeRef}
+        style={{
+          visibility: sortable.isDragging ? "hidden" : undefined,
+          transform: CSS.Transform.toString(sortable.transform),
+          transition: sortable.transition,
+          zIndex: sortable.isDragging ? 1 : undefined,
+        }}
       >
         {/* Checkbox */}
         <Checkbox
@@ -130,7 +160,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
           checked={activeLayer.selected}
           onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
             activeLayer.selected = event.target.checked;
-            props.onItemSelected(props.isOverlay, rubric.source.index);
+            props.onItemSelected(props.isOverlay, index);
           }}
         ></Checkbox>
         {/* Visibility icon */}
@@ -151,7 +181,8 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
         <span
           className={props.disabled || outOfRange ? "map-manager-item-label-disabled" : "map-manager-item-label"}
           title={outOfRange ? outOfRangeTitle : undefined}
-          {...dragProvided.dragHandleProps}
+          {...sortable.attributes}
+          {...sortable.listeners}
         >
           {activeLayer.name}
           {/* eslint-disable-next-line @itwin/no-internal */}
@@ -167,14 +198,14 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
                   activeLayer.isOverlay,
                 );
                 if (indexInDisplayStyle !== undefined && indexInDisplayStyle >= 0) {
-                  const index = { index: indexInDisplayStyle, isOverlay: activeLayer.isOverlay };
-                  const layer = props.activeViewport.displayStyle.mapLayerAtIndex(index);
+                  const mapLayerIndex = { index: indexInDisplayStyle, isOverlay: activeLayer.isOverlay };
+                  const layer = props.activeViewport.displayStyle.mapLayerAtIndex(mapLayerIndex);
                   if (layer instanceof ImageMapLayerSettings) {
                     UiFramework.dialogs.modal.open(
                       <MapUrlDialog
                         activeViewport={props.activeViewport}
                         signInModeArgs={{ layer }}
-                        onOkResult={(sourceState?: SourceState) => handleOk(index, sourceState)}
+                        onOkResult={(sourceState?: SourceState) => handleOk(mapLayerIndex, sourceState)}
                         onCancelResult={() => {
                           UiFramework.dialogs.modal.close();
                         }}
@@ -218,14 +249,14 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
                 activeLayer.isOverlay,
               );
               if (indexInDisplayStyle !== undefined && indexInDisplayStyle >= 0) {
-                const index = { index: indexInDisplayStyle, isOverlay: activeLayer.isOverlay };
-                const layer = props.activeViewport.displayStyle.mapLayerAtIndex(index);
+                const mapLayerIndex = { index: indexInDisplayStyle, isOverlay: activeLayer.isOverlay };
+                const layer = props.activeViewport.displayStyle.mapLayerAtIndex(mapLayerIndex);
                 if (layer instanceof ImageMapLayerSettings) {
                   UiFramework.dialogs.modal.open(
                     <MapUrlDialog
                       activeViewport={props.activeViewport}
                       signInModeArgs={{ layer }}
-                      onOkResult={(sourceState?: SourceState) => handleOk(index, sourceState)}
+                      onOkResult={(sourceState?: SourceState) => handleOk(mapLayerIndex, sourceState)}
                       onCancelResult={() => {
                         UiFramework.dialogs.modal.close();
                       }}
@@ -252,21 +283,24 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
     );
   };
 
-  function renderDraggableContent(snapshot: DroppableStateSnapshot): React.ReactNode {
+  function renderDraggableContent(): React.ReactNode {
     let node: React.ReactNode;
     if (containsLayer) {
-      // Render a <Draggable>
       node = props.layersList?.map((mapLayerSettings, i) => (
-        <Draggable isDragDisabled={props.disabled} key={mapLayerSettings.name} draggableId={mapLayerSettings.name} index={i}>
-          {renderItem}
-        </Draggable>
+        <SortableMapLayerItem
+          key={createMapLayerSortableId(droppableId, mapLayerSettings.name, mapLayerSettings.layerIndex)}
+          activeLayer={mapLayerSettings}
+          disabled={props.disabled}
+          droppableId={droppableId}
+          index={i}
+          renderItem={renderItem}
+        />
       ));
     } else {
-      // Render a label that provide a 'Drop here' hint
       const label = props.isOverlay ? noUnderlaysSpecifiedLabel : noBackgroundMapsSpecifiedLabel;
       node = (
         <div title={label} className="map-manager-no-layers-container">
-          {snapshot.isDraggingOver ? (
+          {isOver ? (
             <span className="map-manager-no-layers-label">{dropLayerLabel}</span>
           ) : (
             <>
@@ -280,26 +314,34 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
     return node;
   }
 
-  function renderDraggable(dropProvided: DroppableProvided, dropSnapshot: DroppableStateSnapshot): React.ReactElement<HTMLElement> {
-    return (
-      <div
-        className={`map-manager-attachments${dropSnapshot.isDraggingOver && containsLayer ? " is-dragging-map-over" : ""}`}
-        ref={dropProvided.innerRef}
-        {...dropProvided.droppableProps}
-      >
-        {renderDraggableContent(dropSnapshot)}
-
-        {/* We don't want a placeholder when displaying the 'Drop here' message
-              Unfortunately, if don't add it, 'react-beautiful-dnd' show an error message in the console.
-              So I simply make it hidden. See https://github.com/atlassian/react-beautiful-dnd/issues/518 */}
-        <div className={containsLayer ? undefined : "map-manager-display-none"}>{dropProvided.placeholder}</div>
-      </div>
-    );
-  }
-
   return (
-    <StrictModeDroppable droppableId={droppableId} renderClone={renderItem} getContainerForClone={props.getContainerForClone as any}>
-      {renderDraggable}
-    </StrictModeDroppable>
+    <div className={`map-manager-attachments${isOver && containsLayer ? " is-dragging-map-over" : ""}`} ref={setNodeRef}>
+      <SortableContext items={sortableItems} strategy={verticalListSortingStrategy}>
+        {renderDraggableContent()}
+      </SortableContext>
+    </div>
   );
+}
+
+interface SortableMapLayerItemProps {
+  activeLayer: StyleMapLayerSettings;
+  disabled?: boolean;
+  droppableId: typeof overlayMapLayersId | typeof backgroundMapLayersId;
+  index: number;
+  renderItem: (activeLayer: StyleMapLayerSettings, index: number, sortable: ReturnType<typeof useSortable>) => React.ReactNode;
+}
+
+function SortableMapLayerItem(props: SortableMapLayerItemProps) {
+  assert(props.activeLayer !== undefined);
+
+  const sortable = useSortable({
+    id: createMapLayerSortableId(props.droppableId, props.activeLayer.name, props.activeLayer.layerIndex),
+    disabled: props.disabled,
+    data: {
+      droppableId: props.droppableId,
+      index: props.index,
+    },
+  });
+
+  return props.renderItem(props.activeLayer, props.index, sortable);
 }

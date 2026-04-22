@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore droppable Sublayer Basemap
 
-// the following quiet warning caused by react-beautiful-dnd package
 import "./MapLayerManager.scss";
 import * as React from "react";
-import { DragDropContext } from "react-beautiful-dnd";
+import { closestCenter, DndContext, DragOverlay, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { BentleyError, compareStrings } from "@itwin/core-bentley";
 import { BackgroundMapProvider, BackgroundMapType, BaseMapLayerSettings, ImageMapLayerSettings } from "@itwin/core-common";
 import { IModelApp, MapLayerSources, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
@@ -20,14 +20,16 @@ import { MapLayersUI } from "../../mapLayers";
 import { MapLayersSyncUiEventId } from "../../MapLayersActionIds";
 import { BasemapPanel } from "./BasemapPanel";
 import { MapLayerActionButtons } from "./MapLayerActionButtons";
-import { MapLayerDroppable } from "./MapLayerDroppable";
+import { MapLayerDragOverlayItem, MapLayerDroppable } from "./MapLayerDroppable";
+import {  getMapLayerDropResult, overlayMapLayersId } from "./MapLayerDragDrop";
 import { MapLayerSettingsPopupButton } from "./MapLayerSettingsPopupButton";
 import { MapManagerLayersHeader } from "./MapManagerMapLayersHeader";
 
-import type { DropResult } from "react-beautiful-dnd";
+import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import type { MapImagerySettings, MapSubLayerProps, MapSubLayerSettings } from "@itwin/core-common";
 import type { MapLayerImageryProvider, MapLayerScaleRangeVisibility, MapLayerSource, ScreenViewport, Viewport } from "@itwin/core-frontend";
 import type { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
+import type { MapLayerDropLocation } from "./MapLayerDragDrop";
 /** @internal */
 export interface SourceMapContextProps {
   readonly sources: MapLayerSource[];
@@ -106,6 +108,12 @@ interface MapLayerManagerProps {
 }
 
 export function MapLayerManager(props: MapLayerManagerProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
   const [mapSources, setMapSources] = React.useState<MapLayerSource[] | undefined>();
   const [loadingSources, setLoadingSources] = React.useState(false);
   // const [bgProviders] = React.useState<BaseMapLayerSettings[]>(props.mapLayerOptions?.baseMapLayers ?? defaultBaseMapLayers);
@@ -136,6 +144,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
     getMapLayerSettingsFromViewport(activeViewport, true),
   );
   const [overlayMapLayers, setOverlayMapLayers] = React.useState<StyleMapLayerSettings[] | undefined>(getMapLayerSettingsFromViewport(activeViewport, false));
+  const [activeDragLayer, setActiveDragLayer] = React.useState<StyleMapLayerSettings | undefined>();
 
   const loadMapLayerSettingsFromViewport = React.useCallback(
     (viewport: Viewport) => {
@@ -410,8 +419,12 @@ export function MapLayerManager(props: MapLayerManagerProps) {
     }
   }, [backgroundMapVisible, setBackgroundMapVisible, activeViewport]);
 
-  const handleOnMapLayerDragEnd = React.useCallback(
-    (result: DropResult /* ,  _provided: ResponderProvided*/) => {
+  const handleOnMapLayerDrop = React.useCallback(
+    (result: ReturnType<typeof getMapLayerDropResult>) => {
+      if (!result) {
+        return;
+      }
+
       const { destination, source } = result;
 
       if (!destination) {
@@ -425,6 +438,10 @@ export function MapLayerManager(props: MapLayerManagerProps) {
       }
 
       let fromMapLayer: StyleMapLayerSettings | undefined;
+      if (source.index === undefined) {
+        return;
+      }
+
       if (source.droppableId === "overlayMapLayers" && overlayMapLayers) {
         fromMapLayer = overlayMapLayers[source.index];
       } else if (source.droppableId === "backgroundMapLayers" && backgroundMapLayers) {
@@ -464,7 +481,11 @@ export function MapLayerManager(props: MapLayerManagerProps) {
           activeViewport.displayStyle.detachMapLayerByIndex({ index: fromIndexInDisplayStyle, isOverlay: fromMapLayer.isOverlay });
 
           // Manually reverse index when moved from one section to the other
-          if (fromMapLayer.isOverlay && backgroundMapLayers) {
+          // When destination.index is undefined the user dropped onto the container area (not a specific item);
+          // append at the bottom of the destination list (index 0 in the display style, since the UI is reversed).
+          if (destination.index === undefined) {
+            toIndexInDisplayStyle = 0;
+          } else if (fromMapLayer.isOverlay && backgroundMapLayers) {
             toIndexInDisplayStyle = displayStyle.settings.mapImagery.backgroundLayers.length - destination.index;
           } else if (!fromMapLayer.isOverlay && overlayMapLayers) {
             toIndexInDisplayStyle = overlayMapLayers.length - destination.index;
@@ -491,6 +512,37 @@ export function MapLayerManager(props: MapLayerManagerProps) {
     },
     [loadMapLayerSettingsFromViewport, activeViewport, overlayMapLayers, backgroundMapLayers],
   );
+
+  const getMapLayerAtLocation = React.useCallback(
+    (location?: MapLayerDropLocation) => {
+      if (!location || location.index === undefined) {
+        return undefined;
+      }
+
+      const layerList = location.droppableId === overlayMapLayersId ? overlayMapLayers : backgroundMapLayers;
+      return layerList?.[location.index];
+    },
+    [backgroundMapLayers, overlayMapLayers],
+  );
+
+  const handleOnMapLayerDragStart = React.useCallback(
+    (event: DragStartEvent) => {
+      setActiveDragLayer(getMapLayerAtLocation(event.active.data.current as MapLayerDropLocation | undefined));
+    },
+    [getMapLayerAtLocation],
+  );
+
+  const handleOnMapLayerDragEnd = React.useCallback(
+    (event: DragEndEvent) => {
+      handleOnMapLayerDrop(getMapLayerDropResult(event));
+      setActiveDragLayer(undefined);
+    },
+    [handleOnMapLayerDrop],
+  );
+
+  const handleOnMapLayerDragCancel = React.useCallback(() => {
+    setActiveDragLayer(undefined);
+  }, []);
 
   const handleRefreshFromStyle = React.useCallback(() => {
     if (activeViewport) {
@@ -692,10 +744,19 @@ export function MapLayerManager(props: MapLayerManagerProps) {
         {/* List of Layers (droppable) */}
         {!hideExternalMapLayersSection && (
           <div>
-            <DragDropContext onDragEnd={handleOnMapLayerDragEnd}>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={handleOnMapLayerDragStart}
+              onDragEnd={handleOnMapLayerDragEnd}
+              onDragCancel={handleOnMapLayerDragCancel}
+            >
               {renderMapLayersList({ isOverlay: false })}
               {renderMapLayersList({ isOverlay: true })}
-            </DragDropContext>
+              <DragOverlay zIndex={9999}>
+                {activeDragLayer ? <MapLayerDragOverlayItem mapLayerSettings={activeDragLayer} disabled={!backgroundMapVisible} /> : null}
+              </DragOverlay>
+            </DndContext>
           </div>
         )}
       </div>
