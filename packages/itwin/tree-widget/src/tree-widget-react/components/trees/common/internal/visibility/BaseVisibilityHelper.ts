@@ -41,8 +41,6 @@ import type { BaseIdsCacheImpl } from "../caches/BaseIdsCache.js";
 import type { NonPartialVisibilityStatus } from "../Tooltip.js";
 import type { CategoryId, ModelId } from "../Types.js";
 
-const MERGE_MAP_CONCURRENCY = 8;
-
 /**
  * Functionality of tree visibility handler methods that can be overridden.
  * Each callback is provided original implementation and reference to a `HierarchyVisibilityHandler`.
@@ -168,7 +166,7 @@ export class BaseVisibilityHelper implements Disposable {
             mergeMap((categories) => this.getCategoriesVisibilityStatus({ modelId, categoryIds: categories })),
             defaultIfEmpty(createVisibilityStatus("visible")),
           );
-        }, MERGE_MAP_CONCURRENCY),
+        }),
         mergeVisibilityStatuses(),
       );
     });
@@ -224,41 +222,39 @@ export class BaseVisibilityHelper implements Disposable {
       const { categoryIds, modelId: modelIdFromProps } = props;
       if (modelIdFromProps) {
         return fromWithRelease({ source: categoryIds, releaseOnCount: 100 }).pipe(
-          mergeMap((categoryId) => this.getModelWithCategoryVisibilityStatus({ modelId: modelIdFromProps, categoryId }), MERGE_MAP_CONCURRENCY),
+          mergeMap((categoryId) => this.getModelWithCategoryVisibilityStatus({ modelId: modelIdFromProps, categoryId })),
           mergeVisibilityStatuses(),
         );
       }
 
       return fromWithRelease({ source: categoryIds, releaseOnCount: 100 }).pipe(
-        mergeMap(
-          (categoryId) =>
-            // When always drawn exclusive mode is enabled need to get only models for which category has top most element.
-            // This is because always/never drawn elements can be retrieved using top most category.
-            // TODO fix with: https://github.com/iTwin/viewer-components-react/issues/1100
-            this.#props.baseIdsCache
-              .getModels({ categoryId, includeOnlyIfCategoryOfTopMostElement: this.#props.viewport.isAlwaysDrawnExclusive, subModels: "include" })
-              .pipe(
-                mergeMap((models) =>
-                  merge(
-                    from(Id64.iterable(models)).pipe(
-                      mergeMap((modelId) => this.getModelWithCategoryVisibilityStatus({ modelId, categoryId }), MERGE_MAP_CONCURRENCY),
-                      mergeVisibilityStatuses(),
-                    ),
-                    // For category not under specific model, need to check subCategories as well
-                    this.#props.baseIdsCache
-                      .getSubCategories({ categoryId })
-                      .pipe(mergeMap((subCategoryIds) => this.getSubCategoriesVisibilityStatus({ categoryId, subCategoryIds }))),
-                  ).pipe(
-                    // This can happen when category does not have any geometric elements or sub-categories
-                    defaultIfEmpty(
-                      createVisibilityStatus(
-                        !this.#props.viewport.isAlwaysDrawnExclusive && this.#props.viewport.viewsCategory(categoryId) ? "visible" : "hidden",
-                      ),
+        mergeMap((categoryId) =>
+          // When always drawn exclusive mode is enabled need to get only models for which category has top most element.
+          // This is because always/never drawn elements can be retrieved using top most category.
+          // TODO fix with: https://github.com/iTwin/viewer-components-react/issues/1100
+          this.#props.baseIdsCache
+            .getModels({ categoryId, includeOnlyIfCategoryOfTopMostElement: this.#props.viewport.isAlwaysDrawnExclusive, subModels: "include" })
+            .pipe(
+              mergeMap((models) =>
+                merge(
+                  from(Id64.iterable(models)).pipe(
+                    mergeMap((modelId) => this.getModelWithCategoryVisibilityStatus({ modelId, categoryId })),
+                    mergeVisibilityStatuses(),
+                  ),
+                  // For category not under specific model, need to check subCategories as well
+                  this.#props.baseIdsCache
+                    .getSubCategories({ categoryId })
+                    .pipe(mergeMap((subCategoryIds) => this.getSubCategoriesVisibilityStatus({ categoryId, subCategoryIds }))),
+                ).pipe(
+                  // This can happen when category does not have any geometric elements or sub-categories
+                  defaultIfEmpty(
+                    createVisibilityStatus(
+                      !this.#props.viewport.isAlwaysDrawnExclusive && this.#props.viewport.viewsCategory(categoryId) ? "visible" : "hidden",
                     ),
                   ),
                 ),
               ),
-          MERGE_MAP_CONCURRENCY,
+            ),
         ),
         mergeVisibilityStatuses(),
       );
@@ -458,14 +454,14 @@ export class BaseVisibilityHelper implements Disposable {
       if (!on) {
         this.#props.viewport.changeModelDisplay({ modelIds, display: false });
         return from(Id64.iterable(modelIds)).pipe(
-          mergeMap((modelId) => this.#props.baseIdsCache.getSubModels({ modelId }), MERGE_MAP_CONCURRENCY),
+          mergeMap((modelId) => this.#props.baseIdsCache.getSubModels({ modelId })),
           mergeMap((subModels) => this.changeModelsVisibilityStatus({ modelIds: subModels, on })),
         );
       }
 
       this.#props.viewport.changeModelDisplay({ modelIds, display: true });
       return from(Id64.iterable(modelIds)).pipe(
-        mergeMap((modelId) => forkJoin({ categoryIds: this.#props.baseIdsCache.getCategories({ modelId }), modelId: of(modelId) }), MERGE_MAP_CONCURRENCY),
+        mergeMap((modelId) => forkJoin({ categoryIds: this.#props.baseIdsCache.getCategories({ modelId }), modelId: of(modelId) })),
         mergeMap(({ categoryIds, modelId }) => this.changeCategoriesVisibilityStatus({ categoryIds, modelId, on })),
       );
     });
@@ -541,10 +537,7 @@ export class BaseVisibilityHelper implements Disposable {
         map((categoryIdsBatch) => this.#props.viewport.changeCategoryDisplay({ categoryIds: categoryIdsBatch, display: on, enableAllSubCategories: false })),
       );
       const categoryModelsObs = from(Id64.iterable(categoryIds)).pipe(
-        mergeMap(
-          (categoryId) => forkJoin({ categoryId: of(categoryId), models: this.#props.baseIdsCache.getModels({ categoryId, subModels: "include" }) }),
-          MERGE_MAP_CONCURRENCY,
-        ),
+        mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), models: this.#props.baseIdsCache.getModels({ categoryId, subModels: "include" }) })),
         reduce((acc, { models, categoryId }) => {
           for (const modelId of Id64.iterable(models)) {
             let entry = acc.get(modelId);
