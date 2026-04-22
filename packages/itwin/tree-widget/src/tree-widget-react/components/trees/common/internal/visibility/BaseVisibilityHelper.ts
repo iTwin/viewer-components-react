@@ -13,7 +13,6 @@ import {
   filter,
   forkJoin,
   from,
-  identity,
   map,
   merge,
   mergeAll,
@@ -24,7 +23,6 @@ import {
   startWith,
   Subject,
   take,
-  takeLast,
   takeUntil,
   tap,
 } from "rxjs";
@@ -42,6 +40,8 @@ import type { AlwaysAndNeverDrawnElementInfoCache } from "../caches/AlwaysAndNev
 import type { BaseIdsCacheImpl } from "../caches/BaseIdsCache.js";
 import type { NonPartialVisibilityStatus } from "../Tooltip.js";
 import type { CategoryId, ModelId } from "../Types.js";
+
+const MERGE_MAP_CONCURRENCY = 8;
 
 /**
  * Functionality of tree visibility handler methods that can be overridden.
@@ -168,7 +168,7 @@ export class BaseVisibilityHelper implements Disposable {
             mergeMap((categories) => this.getCategoriesVisibilityStatus({ modelId, categoryIds: categories })),
             defaultIfEmpty(createVisibilityStatus("visible")),
           );
-        }),
+        }, MERGE_MAP_CONCURRENCY),
         mergeVisibilityStatuses(),
       );
     });
@@ -224,39 +224,41 @@ export class BaseVisibilityHelper implements Disposable {
       const { categoryIds, modelId: modelIdFromProps } = props;
       if (modelIdFromProps) {
         return fromWithRelease({ source: categoryIds, releaseOnCount: 100 }).pipe(
-          mergeMap((categoryId) => this.getModelWithCategoryVisibilityStatus({ modelId: modelIdFromProps, categoryId })),
+          mergeMap((categoryId) => this.getModelWithCategoryVisibilityStatus({ modelId: modelIdFromProps, categoryId }), MERGE_MAP_CONCURRENCY),
           mergeVisibilityStatuses(),
         );
       }
 
       return fromWithRelease({ source: categoryIds, releaseOnCount: 100 }).pipe(
-        mergeMap((categoryId) =>
-          // When always drawn exclusive mode is enabled need to get only models for which category has top most element.
-          // This is because always/never drawn elements can be retrieved using top most category.
-          // TODO fix with: https://github.com/iTwin/viewer-components-react/issues/1100
-          this.#props.baseIdsCache
-            .getModels({ categoryId, includeOnlyIfCategoryOfTopMostElement: this.#props.viewport.isAlwaysDrawnExclusive, subModels: "include" })
-            .pipe(
-              mergeMap((models) =>
-                merge(
-                  from(Id64.iterable(models)).pipe(
-                    mergeMap((modelId) => this.getModelWithCategoryVisibilityStatus({ modelId, categoryId })),
-                    mergeVisibilityStatuses(),
-                  ),
-                  // For category not under specific model, need to check subCategories as well
-                  this.#props.baseIdsCache
-                    .getSubCategories({ categoryId })
-                    .pipe(mergeMap((subCategoryIds) => this.getSubCategoriesVisibilityStatus({ categoryId, subCategoryIds }))),
-                ).pipe(
-                  // This can happen when category does not have any geometric elements or sub-categories
-                  defaultIfEmpty(
-                    createVisibilityStatus(
-                      !this.#props.viewport.isAlwaysDrawnExclusive && this.#props.viewport.viewsCategory(categoryId) ? "visible" : "hidden",
+        mergeMap(
+          (categoryId) =>
+            // When always drawn exclusive mode is enabled need to get only models for which category has top most element.
+            // This is because always/never drawn elements can be retrieved using top most category.
+            // TODO fix with: https://github.com/iTwin/viewer-components-react/issues/1100
+            this.#props.baseIdsCache
+              .getModels({ categoryId, includeOnlyIfCategoryOfTopMostElement: this.#props.viewport.isAlwaysDrawnExclusive, subModels: "include" })
+              .pipe(
+                mergeMap((models) =>
+                  merge(
+                    from(Id64.iterable(models)).pipe(
+                      mergeMap((modelId) => this.getModelWithCategoryVisibilityStatus({ modelId, categoryId }), MERGE_MAP_CONCURRENCY),
+                      mergeVisibilityStatuses(),
+                    ),
+                    // For category not under specific model, need to check subCategories as well
+                    this.#props.baseIdsCache
+                      .getSubCategories({ categoryId })
+                      .pipe(mergeMap((subCategoryIds) => this.getSubCategoriesVisibilityStatus({ categoryId, subCategoryIds }))),
+                  ).pipe(
+                    // This can happen when category does not have any geometric elements or sub-categories
+                    defaultIfEmpty(
+                      createVisibilityStatus(
+                        !this.#props.viewport.isAlwaysDrawnExclusive && this.#props.viewport.viewsCategory(categoryId) ? "visible" : "hidden",
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
+          MERGE_MAP_CONCURRENCY,
         ),
         mergeVisibilityStatuses(),
       );
@@ -456,14 +458,14 @@ export class BaseVisibilityHelper implements Disposable {
       if (!on) {
         this.#props.viewport.changeModelDisplay({ modelIds, display: false });
         return from(Id64.iterable(modelIds)).pipe(
-          mergeMap((modelId) => this.#props.baseIdsCache.getSubModels({ modelId })),
+          mergeMap((modelId) => this.#props.baseIdsCache.getSubModels({ modelId }), MERGE_MAP_CONCURRENCY),
           mergeMap((subModels) => this.changeModelsVisibilityStatus({ modelIds: subModels, on })),
         );
       }
 
       this.#props.viewport.changeModelDisplay({ modelIds, display: true });
       return from(Id64.iterable(modelIds)).pipe(
-        mergeMap((modelId) => forkJoin({ categoryIds: this.#props.baseIdsCache.getCategories({ modelId }), modelId: of(modelId) })),
+        mergeMap((modelId) => forkJoin({ categoryIds: this.#props.baseIdsCache.getCategories({ modelId }), modelId: of(modelId) }), MERGE_MAP_CONCURRENCY),
         mergeMap(({ categoryIds, modelId }) => this.changeCategoriesVisibilityStatus({ categoryIds, modelId, on })),
       );
     });
@@ -482,49 +484,37 @@ export class BaseVisibilityHelper implements Disposable {
       allModelCategories: this.#props.baseIdsCache.getCategories({ modelId }),
       modelAlwaysDrawnElements: this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({ modelId, setType: "always" }),
     }).pipe(
-      mergeMap(({ allModelCategories, modelAlwaysDrawnElements }) => {
+      map(({ allModelCategories, modelAlwaysDrawnElements }) => {
         if (this.#props.viewport.viewsModel(modelId)) {
           // Model might have been turned on while completing forkJoin, if that happens, no need to do anything, just return.
-          return of(undefined);
+          return;
         }
         const alwaysDrawn = this.#props.viewport.alwaysDrawn;
         if (alwaysDrawn && modelAlwaysDrawnElements) {
           this.#props.viewport.setAlwaysDrawn({ elementIds: setDifference(alwaysDrawn, modelAlwaysDrawnElements) });
         }
         this.#props.viewport.changeModelDisplay({ modelIds: modelId, display: true });
-        return from(Id64.iterable(allModelCategories)).pipe(
-          categoriesToNotOverride ? filter((modelCategory) => !categoriesToNotOverride.has(modelCategory)) : identity,
-          map((categoryId) => this.changeCategoryStateInViewportAccordingToModelVisibility({ modelId, categoryId, on: false, changeSubCategories: false })),
-          takeLast(1),
-          defaultIfEmpty(undefined),
-        );
+        const toHide = new Array<Id64String>();
+        const toNone = new Array<Id64String>();
+        for (const categoryId of allModelCategories) {
+          if (categoriesToNotOverride?.has(categoryId)) {
+            continue;
+          }
+          if (this.#props.viewport.viewsCategory(categoryId)) {
+            toHide.push(categoryId);
+          } else {
+            toNone.push(categoryId);
+          }
+        }
+        if (toHide.length > 0) {
+          this.#props.viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: toHide, override: "hide" });
+        }
+        if (toNone.length > 0) {
+          this.#props.viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: toNone, override: "none" });
+        }
       }),
     );
   }
-
-  /** Adds per-model category overrides based on category visibility in category selector. */
-  private changeCategoryStateInViewportAccordingToModelVisibility({
-    modelId,
-    categoryId,
-    on,
-    changeSubCategories,
-  }: {
-    modelId: string;
-    categoryId: string;
-    on: boolean;
-    changeSubCategories: boolean;
-  }) {
-    const isDisplayedInSelector = this.#props.viewport.viewsCategory(categoryId);
-    const override = on === isDisplayedInSelector ? "none" : on ? "show" : "hide";
-    this.#props.viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: categoryId, override });
-
-    if (override === "none" && on) {
-      // we took off the override which means the category is displayed in selector, but
-      // doesn't mean all its subcategories are displayed - this call ensures that
-      this.#props.viewport.changeCategoryDisplay({ categoryIds: categoryId, display: true, enableAllSubCategories: changeSubCategories });
-    }
-  }
-
   /**
    * Changes categories visibility status.
    *
@@ -551,7 +541,10 @@ export class BaseVisibilityHelper implements Disposable {
         map((categoryIdsBatch) => this.#props.viewport.changeCategoryDisplay({ categoryIds: categoryIdsBatch, display: on, enableAllSubCategories: false })),
       );
       const categoryModelsObs = from(Id64.iterable(categoryIds)).pipe(
-        mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), models: this.#props.baseIdsCache.getModels({ categoryId, subModels: "include" }) })),
+        mergeMap(
+          (categoryId) => forkJoin({ categoryId: of(categoryId), models: this.#props.baseIdsCache.getModels({ categoryId, subModels: "include" }) }),
+          MERGE_MAP_CONCURRENCY,
+        ),
         reduce((acc, { models, categoryId }) => {
           for (const modelId of Id64.iterable(models)) {
             let entry = acc.get(modelId);
@@ -564,7 +557,7 @@ export class BaseVisibilityHelper implements Disposable {
           return acc;
         }, new Map<ModelId, Set<CategoryId>>()),
         mergeMap((modelCategoriesMap) => modelCategoriesMap.entries()),
-        shareReplay(),
+        shareReplay({ refCount: true }),
       );
 
       const changeSubModelsObs = categoryModelsObs.pipe(
@@ -697,14 +690,15 @@ export class BaseVisibilityHelper implements Disposable {
       return concat(
         // Change elements state
         defer(() => {
-          const elementsToChange = children ? [...elementIds, ...(typeof children === "string" ? [children] : children)] : elementIds;
+          const elementIdsSet = Id64.toIdSet(elementIds);
+          const elementsToChange = children ? [...elementIdsSet, ...(typeof children === "string" ? [children] : children)] : elementIdsSet;
           const isDisplayedByDefault = (isCategoryVisible: boolean) =>
             // When category is visible and elements need to be turned off, or when category is hidden and elements need to be turned on,
             // We can set isDisplayedByDefault to isCategoryVisible. This allows to not check if each element is in the elementIds list or not.
             isCategoryVisible === !on
               ? () => isCategoryVisible
               : (elementId: Id64String) => {
-                  if (Id64.has(elementIds, elementId)) {
+                  if (elementIdsSet.has(elementId)) {
                     return isCategoryVisible;
                   }
                   return !on;
