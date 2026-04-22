@@ -823,7 +823,10 @@ function parseQueryRow(row: ECSqlQueryRow, groupInfos: ElementsGroupInfo[], sepa
 function createInstanceKeyPathsFromTargetItemsObs(
   props: Omit<ModelsTreeInstanceKeyPathsFromTargetItemsProps, "abortSignal" | "componentId"> & { componentId: GuidString; componentName: string },
 ) {
-  const { targetItems, imodelAccess } = props;
+  const { targetItems, imodelAccess, limit } = props;
+  if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT)) {
+    throw new SearchLimitExceededError(limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT);
+  }
   return fromWithRelease({ source: targetItems, releaseOnCount: 2000 }).pipe(
     mergeMap(async (key): Promise<{ key: Id64String; type: number } | { key: ElementsGroupInfo; type: 0 }> => {
       if ("parent" in key) {
