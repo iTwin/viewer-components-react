@@ -782,12 +782,11 @@ export function createGeometricElementInstanceKeyPaths(props: {
     );
   }).pipe(
     catchBeSQLiteInterrupts,
-    releaseMainThreadOnItemsCount(300),
+    targetItems.length > 300 ? releaseMainThreadOnItemsCount(300) : identity,
     map((row) => parseQueryRow(row, groupInfos, separator, elementClassName)),
     mergeMap(({ modelId, elementHierarchyPath, groupingInfo }) =>
-      idsCache.createModelInstanceKeyPaths(modelId).pipe(
+      idsCache.createUpToModelInstanceKeyPaths(modelId).pipe(
         map((modelPath) => {
-          modelPath.pop(); // model is already included in the element hierarchy path
           const path = [...modelPath, ...elementHierarchyPath];
           return {
             path,
@@ -899,7 +898,13 @@ function createSearchPathsForDifferentTypes(
 
         return merge(
           from(ids.subjectIds).pipe(mergeMap((id) => idsCache.createSubjectInstanceKeysPath(id).pipe(map((path) => ({ path, target: id }))))),
-          from(ids.modelIds).pipe(mergeMap((id) => idsCache.createModelInstanceKeyPaths(id).pipe(map((path) => ({ path, target: id }))))),
+          from(ids.modelIds).pipe(
+            mergeMap((id) =>
+              idsCache
+                .createUpToModelInstanceKeyPaths(id)
+                .pipe(map((path) => ({ path: [...path, { className: CLASS_NAME_GeometricModel3d, id }], target: id }))),
+            ),
+          ),
           idsCache.createCategoryInstanceKeyPaths({ categoryIds: ids.categoryIds }).pipe(map((path) => ({ path, target: path[path.length - 1].id }))),
           from(ids.elementIds).pipe(
             bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),

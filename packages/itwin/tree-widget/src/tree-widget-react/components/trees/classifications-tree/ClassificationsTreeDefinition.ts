@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, defer, EMPTY, firstValueFrom, from, fromEvent, identity, map, merge, mergeMap, of, reduce, takeUntil, toArray } from "rxjs";
+import { bufferCount, defer, EMPTY, firstValueFrom, from, fromEvent, identity, map, merge, mergeMap, of, reduce, switchMap, takeUntil } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql, parseFullClassName } from "@itwin/presentation-shared";
@@ -21,7 +21,7 @@ import { catchBeSQLiteInterrupts } from "../common/internal/UseErrorState.js";
 import { fromWithRelease, getOptimalBatchSize, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../common/TreeErrors.js";
 
-import type { Observable } from "rxjs";
+import type { Observable, ObservedValueOf, OperatorFunction } from "rxjs";
 import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
 import type {
   DefineHierarchyLevelProps,
@@ -35,14 +35,7 @@ import type {
   LimitingECSqlQueryExecutor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
-import type {
-  EC,
-  ECClassHierarchyInspector,
-  ECSchemaProvider,
-  ECSqlQueryRow,
-  IInstanceLabelSelectClauseFactory,
-  InstanceKey,
-} from "@itwin/presentation-shared";
+import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlQueryRow, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
 import type { ClassificationId, ClassificationTableId, ElementId } from "../common/internal/Types.js";
 import type { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
 
@@ -555,100 +548,109 @@ function createInstanceKeyPathsFromInstanceLabelObs({
       props.imodelAccess.createQueryReader(queryProps, { restartToken: `${props.componentName}/${props.componentId}/filter-by-label`, limit: props.limit }),
     ),
     catchBeSQLiteInterrupts,
-    map((row): InstanceKey => {
-      let className: EC.FullClassName;
+    map((row): { key: Id64String; type: number } => {
+      let type: 0 | 1 | 2;
       switch (row.ClassName) {
         case CLASSIFICATION_TABLE_CLASS_NAME_QUERY_ALIAS:
-          className = CLASS_NAME_ClassificationTable;
+          type = CLASSIFICATION_TABLE_TYPE_AS_NUMBER;
           break;
         case CLASSIFICATION_CLASS_NAME_QUERY_ALIAS:
-          className = CLASS_NAME_Classification;
+          type = CLASSIFICATION_TYPE_AS_NUMBER;
           break;
         default:
-          className = CLASS_NAME_GeometricElement3d;
+          type = ELEMENT_TYPE_AS_NUMBER;
           break;
       }
       return {
-        className,
-        id: row.ECInstanceId,
+        type,
+        key: row.ECInstanceId,
       };
     }),
-    toArray(),
-    mergeMap((targetKeys) => createInstanceKeyPathsFromTargetItemsObs({ ...props, targetItems: targetKeys })),
+    createSearchPathsForDifferentTypes(props),
   );
 }
-
-function createInstanceKeyPathsFromTargetItemsObs({
-  idsCache,
-  imodelAccess,
-  limit,
-  componentId,
-  targetItems,
-  componentName,
-}: Omit<ClassificationsTreeInstanceKeyPathsFromInstanceKeysProps, "abortSignal" | "componentId"> & {
-  componentId: GuidString;
-  componentName: string;
-}): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String }> {
-  const actualLimit = limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT;
-  if (actualLimit !== "unbounded" && targetItems.length > actualLimit) {
-    throw new SearchLimitExceededError(actualLimit);
-  }
+function createInstanceKeyPathsFromTargetItemsObs(
+  props: Omit<ClassificationsTreeInstanceKeyPathsFromInstanceKeysProps, "abortSignal" | "componentId"> & { componentId: GuidString; componentName: string },
+) {
+  const { targetItems, imodelAccess } = props;
   return fromWithRelease({ source: targetItems, releaseOnCount: 2000 }).pipe(
-    mergeMap(async (key): Promise<{ id: Id64String; type: number }> => {
+    mergeMap(async (key): Promise<{ key: Id64String; type: number }> => {
       if (await imodelAccess.classDerivesFrom(key.className, CLASS_NAME_ClassificationTable)) {
-        return { id: key.id, type: CLASSIFICATION_TABLE_TYPE_AS_NUMBER };
+        return { key: key.id, type: CLASSIFICATION_TABLE_TYPE_AS_NUMBER };
       }
 
       if (await imodelAccess.classDerivesFrom(key.className, CLASS_NAME_Classification)) {
-        return { id: key.id, type: CLASSIFICATION_TYPE_AS_NUMBER };
+        return { key: key.id, type: CLASSIFICATION_TYPE_AS_NUMBER };
       }
 
-      return { id: key.id, type: ELEMENT_TYPE_AS_NUMBER };
+      return { key: key.id, type: ELEMENT_TYPE_AS_NUMBER };
     }, 2),
-    reduce(
-      (acc, { id, type }) => {
-        switch (type) {
-          case CLASSIFICATION_TABLE_TYPE_AS_NUMBER:
-            acc.classificationTableIds.push(id);
-            break;
-          case CLASSIFICATION_TYPE_AS_NUMBER:
-            acc.classificationIds.push(id);
-            break;
-          case ELEMENT_TYPE_AS_NUMBER:
-            acc.elementIds.push(id);
-            break;
-        }
-        return acc;
-      },
-      {
-        classificationTableIds: new Array<ClassificationTableId>(),
-        classificationIds: new Array<ClassificationId>(),
-        elementIds: new Array<ElementId>(),
-      },
-    ),
-    mergeMap((ids) => {
-      return merge(
-        from(ids.classificationTableIds).pipe(map((id) => ({ path: [{ id, className: CLASS_NAME_ClassificationTable }], target: id }))),
-        idsCache.getClassificationsPathObs(ids.classificationIds).pipe(map((path) => ({ path, target: path[path.length - 1].id }))),
-        from(ids.elementIds).pipe(
-          bufferCount(getOptimalBatchSize({ totalSize: ids.elementIds.length, maximumBatchSize: 5000 })),
-          releaseMainThreadOnItemsCount(1),
-          mergeMap(
-            (block, chunkIndex) =>
-              createGeometricElementInstanceKeyPaths({
-                idsCache,
-                imodelAccess,
-                targetItems: block,
-                chunkIndex,
-                componentId,
-                componentName,
-              }),
-            10,
-          ),
-        ),
-      );
-    }),
+    createSearchPathsForDifferentTypes(props),
   );
+}
+
+function createSearchPathsForDifferentTypes(
+  props: Omit<ClassificationsTreeInstanceKeyPathsBaseProps, "componentId"> & { componentId: GuidString; componentName: string },
+): OperatorFunction<
+  {
+    key: Id64String;
+    type: number;
+  },
+  ObservedValueOf<ReturnType<typeof createGeometricElementInstanceKeyPaths>>
+> {
+  return (obs) =>
+    obs.pipe(
+      reduce(
+        (acc, { key, type }) => {
+          switch (type) {
+            case CLASSIFICATION_TABLE_TYPE_AS_NUMBER:
+              acc.classificationTableIds.push(key);
+              break;
+            case CLASSIFICATION_TYPE_AS_NUMBER:
+              acc.classificationIds.push(key);
+              break;
+            case ELEMENT_TYPE_AS_NUMBER:
+              acc.elementIds.push(key);
+              break;
+          }
+          return acc;
+        },
+        {
+          classificationTableIds: new Array<ClassificationTableId>(),
+          classificationIds: new Array<ClassificationId>(),
+          elementIds: new Array<ElementId>(),
+        },
+      ),
+      switchMap((ids) => {
+        const { idsCache, imodelAccess, componentId, componentName, limit } = props;
+        const elementsLength = ids.elementIds.length;
+        const totalSize = ids.classificationTableIds.length + ids.classificationIds.length + elementsLength;
+        if (limit !== "unbounded" && totalSize > (limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT)) {
+          throw new SearchLimitExceededError(limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT);
+        }
+
+        return merge(
+          from(ids.classificationTableIds).pipe(map((id) => ({ path: [{ id, className: CLASS_NAME_ClassificationTable }], target: id }))),
+          idsCache.getClassificationsPathObs(ids.classificationIds).pipe(map((path) => ({ path, target: path[path.length - 1].id }))),
+          from(ids.elementIds).pipe(
+            bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),
+            releaseMainThreadOnItemsCount(1),
+            mergeMap(
+              (block, chunkIndex) =>
+                createGeometricElementInstanceKeyPaths({
+                  idsCache,
+                  imodelAccess,
+                  targetItems: block,
+                  chunkIndex,
+                  componentId,
+                  componentName,
+                }),
+              10,
+            ),
+          ),
+        );
+      }),
+    );
 }
 
 function createGeometricElementInstanceKeyPaths(props: {
@@ -704,7 +706,7 @@ function createGeometricElementInstanceKeyPaths(props: {
     );
   }).pipe(
     catchBeSQLiteInterrupts,
-    releaseMainThreadOnItemsCount(300),
+    targetItems.length > 300 ? releaseMainThreadOnItemsCount(300) : identity,
     map((row) => parseQueryRow(row, separator)),
     mergeMap(({ path, parentClassificationId }) => {
       const target = path[path.length - 1].id;

@@ -47,6 +47,7 @@ interface CategoriesTreeIdsCacheProps extends BaseIdsCacheImplProps {
 export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
   #definitionContainersInfo: Observable<Map<DefinitionContainerId, DefinitionContainerInfo>> | undefined;
   #modelsCategoriesInfo: Observable<Map<ModelId, CategoriesInfo>> | undefined;
+  #definitionContainerInstanceKeyPaths: Map<DefinitionContainerId, Observable<HierarchyNodeIdentifiersPath>> = new Map();
   #categoryClass: EC.FullClassName;
   #categoryElementClass: EC.FullClassName;
   #modelClass: EC.FullClassName;
@@ -421,17 +422,27 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
       mergeMap((definitionContainersInfo) =>
         fromWithRelease({ source: definitionContainerIds, releaseOnCount: 200 }).pipe(
           mergeMap((definitionContainerId) => {
-            const definitionContainerInfo = definitionContainersInfo.get(definitionContainerId);
-            if (definitionContainerInfo === undefined) {
-              return of([]);
+            let entry = this.#definitionContainerInstanceKeyPaths.get(definitionContainerId);
+            if (!entry) {
+              const definitionContainerInfo = definitionContainersInfo.get(definitionContainerId);
+              if (definitionContainerInfo === undefined) {
+                entry = of([]).pipe(shareReplay());
+                this.#definitionContainerInstanceKeyPaths.set(definitionContainerId, entry);
+                return entry;
+              }
+              const instanceKey = { id: definitionContainerId, className: CLASS_NAME_DefinitionContainer };
+              if (!definitionContainerInfo.parentDefinitionContainerExists) {
+                entry = of([instanceKey]).pipe(shareReplay());
+                this.#definitionContainerInstanceKeyPaths.set(definitionContainerId, entry);
+                return entry;
+              }
+              entry = this.getDefinitionContainersSearchPaths({ definitionContainerIds: definitionContainerInfo.modelId }).pipe(
+                map((pathToParentDefinitionContainer) => [...pathToParentDefinitionContainer, instanceKey]),
+                shareReplay(),
+              );
+              this.#definitionContainerInstanceKeyPaths.set(definitionContainerId, entry);
             }
-            const instanceKey = { id: definitionContainerId, className: CLASS_NAME_DefinitionContainer };
-            if (!definitionContainerInfo.parentDefinitionContainerExists) {
-              return of([instanceKey]);
-            }
-            return this.getDefinitionContainersSearchPaths({ definitionContainerIds: definitionContainerInfo.modelId }).pipe(
-              map((pathToParentDefinitionContainer) => [...pathToParentDefinitionContainer, instanceKey]),
-            );
+            return entry;
           }),
         ),
       ),

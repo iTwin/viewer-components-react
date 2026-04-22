@@ -19,6 +19,7 @@ import {
   mergeMap,
   of,
   reduce,
+  switchMap,
   takeUntil,
   toArray,
 } from "rxjs";
@@ -36,7 +37,6 @@ import {
 import { catchBeSQLiteInterrupts } from "../common/internal/UseErrorState.js";
 import {
   createIdsSelector,
-  fromWithRelease,
   getClassesByView,
   getOptimalBatchSize,
   groupingNodeDataFromChildren,
@@ -45,7 +45,7 @@ import {
 } from "../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../common/TreeErrors.js";
 
-import type { Observable } from "rxjs";
+import type { Observable, ObservedValueOf, OperatorFunction } from "rxjs";
 import type { GuidString, Id64Array, Id64String, MarkRequired } from "@itwin/core-bentley";
 import type {
   DefineHierarchyLevelProps,
@@ -81,15 +81,19 @@ interface CategoriesTreeDefinitionProps {
   hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 }
 
-interface CategoriesTreeInstanceKeyPathsFromInstanceLabelProps {
+interface CategoriesTreeInstanceKeyPathsBaseProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
-  label: string;
-  viewType: "2d" | "3d";
   limit?: number | "unbounded";
+  viewType: "2d" | "3d";
   idsCache: CategoriesTreeIdsCache;
   hierarchyConfig: CategoriesTreeHierarchyConfiguration;
-  abortSignal?: AbortSignal;
   componentId?: GuidString;
+  abortSignal?: AbortSignal;
+}
+
+/** @internal */
+export interface CategoriesTreeInstanceKeyPathsFromInstanceLabelProps extends CategoriesTreeInstanceKeyPathsBaseProps {
+  label: string;
 }
 
 /**
@@ -733,11 +737,15 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   }
 }
 
+const DEFINITION_CONTAINER_TYPE_AS_NUMBER = 0;
 const DEFINITION_CONTAINER_CLASS_NAME_QUERY_ALIAS = "dc";
+const SUB_CATEGORY_TYPE_AS_NUMBER = 1;
 const SUB_CATEGORY_CLASS_NAME_QUERY_ALIAS = "sc";
+const CATEGORY_TYPE_AS_NUMBER = 2;
 const CATEGORY_CLASS_NAME_QUERY_ALIAS = "c";
-const MODEL_CLASS_NAME_QUERY_ALIAS = "m";
+const ELEMENT_TYPE_AS_NUMBER = 3;
 const ELEMENT_CLASS_NAME_QUERY_ALIAS = "e";
+const MODEL_CLASS_NAME_QUERY_ALIAS = "m";
 
 function createInstanceKeyPathsFromInstanceLabel(
   props: MarkRequired<Omit<CategoriesTreeInstanceKeyPathsFromInstanceLabelProps, "abortSignal">, "componentId"> & {
@@ -900,117 +908,111 @@ function createInstanceKeyPathsFromInstanceLabel(
         return imodelAccess.createQueryReader(queryProps, { restartToken: `${componentName}/${componentId}/filter-by-label`, limit });
       }),
       catchBeSQLiteInterrupts,
-      releaseMainThreadOnItemsCount(1000),
-      map((row): InstanceKey => {
-        let className: EC.FullClassName;
+      map((row): { key: Id64String; type: number } => {
+        let type: number;
         switch (row.ClassName) {
           case CATEGORY_CLASS_NAME_QUERY_ALIAS:
-            className = categoryClass;
+            type = CATEGORY_TYPE_AS_NUMBER;
             break;
           case SUB_CATEGORY_CLASS_NAME_QUERY_ALIAS:
-            className = CLASS_NAME_SubCategory;
+            type = SUB_CATEGORY_TYPE_AS_NUMBER;
             break;
           case ELEMENT_CLASS_NAME_QUERY_ALIAS:
-            className = elementClass;
+            type = ELEMENT_TYPE_AS_NUMBER;
             break;
           default:
-            className = CLASS_NAME_DefinitionContainer;
+            type = DEFINITION_CONTAINER_TYPE_AS_NUMBER;
             break;
         }
         return {
-          className,
-          id: row.ECInstanceId,
+          type,
+          key: row.ECInstanceId,
         };
       }),
-      toArray(),
-      mergeMap((targetItems) => createInstanceKeyPathsFromTargetItems({ ...props, targetItems })),
+      createSearchPathsForDifferentTypes(props),
     );
 }
 
-function createInstanceKeyPathsFromTargetItems({
-  targetItems,
-  imodelAccess,
-  viewType,
-  hierarchyConfig,
-  idsCache,
-  limit,
-  componentId,
-  componentName,
-}: Omit<MarkRequired<CategoriesTreeInstanceKeyPathsFromInstanceLabelProps, "componentId">, "label"> & {
-  targetItems: InstanceKey[];
-  componentName: string;
-}): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String }> {
-  if (targetItems.length === 0) {
-    return EMPTY;
-  }
-  if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT)) {
-    throw new SearchLimitExceededError(limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT);
-  }
-  const { categoryClass } = getClassesByView(viewType);
-  return fromWithRelease({ source: targetItems, releaseOnCount: 500 }).pipe(
-    reduce(
-      (acc, { id, className }) => {
-        if (className === categoryClass) {
-          acc.categoryIds.push(id);
-          return acc;
-        }
-        if (className === CLASS_NAME_DefinitionContainer) {
-          acc.definitionContainerIds.push(id);
-          return acc;
-        }
-        if (className === CLASS_NAME_SubCategory) {
-          if (hierarchyConfig.hideSubCategories) {
-            return acc;
+function createSearchPathsForDifferentTypes(
+  props: Omit<CategoriesTreeInstanceKeyPathsBaseProps, "componentId"> & { componentId: GuidString; componentName: string },
+): OperatorFunction<
+  {
+    key: Id64String;
+    type: number;
+  },
+  ObservedValueOf<ReturnType<typeof createGeometricElementInstanceKeyPaths>>
+> {
+  return (obs) =>
+    obs.pipe(
+      reduce(
+        (acc, { key, type }) => {
+          switch (type) {
+            case CATEGORY_TYPE_AS_NUMBER:
+              acc.categoryIds.push(key);
+              break;
+            case DEFINITION_CONTAINER_TYPE_AS_NUMBER:
+              acc.definitionContainerIds.push(key);
+              break;
+            case SUB_CATEGORY_TYPE_AS_NUMBER:
+              if (props.hierarchyConfig.hideSubCategories) {
+                break;
+              }
+              acc.subCategoryIds.push(key);
+              break;
+            default:
+              if (!props.hierarchyConfig.showElements) {
+                break;
+              }
+              acc.elementIds.push(key);
+              break;
           }
-          acc.subCategoryIds.push(id);
           return acc;
+        },
+        {
+          definitionContainerIds: new Array<DefinitionContainerId>(),
+          categoryIds: new Array<CategoryId>(),
+          subCategoryIds: new Array<SubCategoryId>(),
+          elementIds: new Array<ElementId>(),
+        },
+      ),
+      switchMap((ids) => {
+        const { idsCache, imodelAccess, componentId, componentName, limit } = props;
+        const elementsLength = ids.elementIds.length;
+        const totalSize = ids.definitionContainerIds.length + ids.categoryIds.length + ids.subCategoryIds.length + elementsLength;
+        if (limit !== "unbounded" && totalSize > (limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT)) {
+          throw new SearchLimitExceededError(limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT);
         }
 
-        if (!hierarchyConfig.showElements) {
-          return acc;
-        }
-        acc.elementIds.push(id);
-        return acc;
-      },
-      {
-        definitionContainerIds: new Array<DefinitionContainerId>(),
-        categoryIds: new Array<CategoryId>(),
-        subCategoryIds: new Array<SubCategoryId>(),
-        elementIds: new Array<ElementId>(),
-      },
-    ),
-    mergeMap((ids) => {
-      const elementsLength = ids.elementIds.length;
-      return merge(
-        idsCache
-          .getDefinitionContainersSearchPaths({ definitionContainerIds: ids.definitionContainerIds })
-          .pipe(map((path) => ({ path, target: path[path.length - 1].id }))),
-        idsCache
-          .getCategoriesSearchPaths({ categoryIds: ids.categoryIds, includePathsWithSubModels: hierarchyConfig.showElements })
-          .pipe(map((path) => ({ path, target: path[path.length - 1].id }))),
-        idsCache.getSubCategoriesSearchPaths({ subCategoryIds: ids.subCategoryIds }).pipe(map((path) => ({ path, target: path[path.length - 1].id }))),
-        hierarchyConfig.showElements
-          ? from(ids.elementIds).pipe(
-              bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),
-              releaseMainThreadOnItemsCount(1),
-              mergeMap(
-                (block, chunkIndex) =>
-                  createGeometricElementInstanceKeyPaths({
-                    queryExecutor: imodelAccess,
-                    idsCache,
-                    viewType,
-                    targetItems: block,
-                    chunkIndex,
-                    componentId,
-                    componentName,
-                  }),
-                10,
-              ),
-            )
-          : EMPTY,
-      );
-    }),
-  );
+        return merge(
+          idsCache
+            .getDefinitionContainersSearchPaths({ definitionContainerIds: ids.definitionContainerIds })
+            .pipe(map((path) => ({ path, target: path[path.length - 1].id }))),
+          idsCache
+            .getCategoriesSearchPaths({ categoryIds: ids.categoryIds, includePathsWithSubModels: props.hierarchyConfig.showElements })
+            .pipe(map((path) => ({ path, target: path[path.length - 1].id }))),
+          idsCache.getSubCategoriesSearchPaths({ subCategoryIds: ids.subCategoryIds }).pipe(map((path) => ({ path, target: path[path.length - 1].id }))),
+          props.hierarchyConfig.showElements
+            ? from(ids.elementIds).pipe(
+                bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),
+                releaseMainThreadOnItemsCount(1),
+                mergeMap(
+                  (block, chunkIndex) =>
+                    createGeometricElementInstanceKeyPaths({
+                      queryExecutor: imodelAccess,
+                      idsCache,
+                      viewType: props.viewType,
+                      targetItems: block,
+                      chunkIndex,
+                      componentId,
+                      componentName,
+                    }),
+                  10,
+                ),
+              )
+            : EMPTY,
+        );
+      }),
+    );
 }
 
 /** @internal */
@@ -1075,7 +1077,7 @@ export function createGeometricElementInstanceKeyPaths(props: {
     );
   }).pipe(
     catchBeSQLiteInterrupts,
-    releaseMainThreadOnItemsCount(300),
+    targetItems.length > 300 ? releaseMainThreadOnItemsCount(300) : identity,
     map((row) => parseQueryRow(row, separator, elementClass, categoryClass, modelClass)),
     mergeMap((elementHierarchyPath) =>
       forkJoin({
