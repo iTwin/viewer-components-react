@@ -57,7 +57,7 @@ export function IModelContentTree({
       };
       return new IModelContentTreeDefinition({ imodelAccess, idsCache: new IModelContentTreeIdsCache(imodelAccess, componentId), hierarchyConfig });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
     Object.values({ ...(hierarchyConfigProp ?? {}), componentId }),
   );
 

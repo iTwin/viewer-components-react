@@ -4,6 +4,8 @@
 
 ```ts
 
+import * as _$react from 'react';
+import * as _$react_jsx_runtime0 from 'react/jsx-runtime';
 import { BeEvent } from '@itwin/core-bentley';
 import { ClassGroupingNodeKey } from '@itwin/presentation-hierarchies';
 import { ComponentProps } from 'react';
@@ -25,8 +27,6 @@ import { JSX as JSX_2 } from 'react';
 import { Localization } from '@itwin/core-common';
 import { NonGroupingHierarchyNode } from '@itwin/presentation-hierarchies';
 import { PropsWithChildren } from 'react';
-import * as react from 'react';
-import * as react_jsx_runtime0 from 'react/jsx-runtime';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 import { SelectionStorage } from '@itwin/presentation-hierarchies-react';
@@ -87,7 +87,7 @@ type CallbacksWithCommonTreeRendererProps<T extends BaseTreeRendererProps, K ext
 
 // @public
 export const CategoriesTreeComponent: {
-    (props: CategoriesTreeComponentProps): react_jsx_runtime0.JSX.Element | null;
+    (props: CategoriesTreeComponentProps): _$react_jsx_runtime0.JSX.Element | null;
     ShowAllButton: CategoriesTreeHeaderButtonType;
     HideAllButton: CategoriesTreeHeaderButtonType;
     InvertAllButton: CategoriesTreeHeaderButtonType;
@@ -126,7 +126,7 @@ interface CategoriesTreeHierarchyConfiguration {
 // @beta (undocumented)
 export function CategoriesTreeIcon(input: {
     node: TreeNode;
-}): react_jsx_runtime0.JSX.Element | undefined;
+}): _$react_jsx_runtime0.JSX.Element | undefined;
 
 // @beta
 export namespace CategoriesTreeNode {
@@ -198,7 +198,7 @@ type ClassGroupingHierarchyNode = GroupingHierarchyNode & {
 
 // @alpha
 export const ClassificationsTreeComponent: {
-    (props: ClassificationsTreeComponentProps): react_jsx_runtime0.JSX.Element | null;
+    (props: ClassificationsTreeComponentProps): _$react_jsx_runtime0.JSX.Element | null;
     id: string;
     getLabel(input: {
         standardLabels: StandardTreeLabels;
@@ -223,7 +223,7 @@ interface ClassificationsTreeHierarchyConfiguration {
 // @beta (undocumented)
 export function ClassificationsTreeIcon(input: {
     node: TreeNode;
-}): react_jsx_runtime0.JSX.Element | undefined;
+}): _$react_jsx_runtime0.JSX.Element | undefined;
 
 // @beta
 export namespace ClassificationsTreeNode {
@@ -293,7 +293,7 @@ type ExtendedVisibilityTreeRendererProps = CallbacksWithCommonTreeRendererProps<
 
 // @beta
 export const ExternalSourcesTreeComponent: {
-    (input: ExternalSourcesTreeComponentProps): react_jsx_runtime0.JSX.Element | null;
+    (input: ExternalSourcesTreeComponentProps): _$react_jsx_runtime0.JSX.Element | null;
     id: string;
     getLabel(input: {
         standardLabels: StandardTreeLabels;
@@ -311,7 +311,7 @@ interface ExternalSourcesTreeComponentProps extends Pick<ExternalSourcesTreeProp
 // @beta (undocumented)
 export function ExternalSourcesTreeIcon(input: {
     node: TreeNode;
-}): react_jsx_runtime0.JSX.Element | undefined;
+}): _$react_jsx_runtime0.JSX.Element | undefined;
 
 // @beta (undocumented)
 type ExternalSourcesTreeProps = Pick<ExtendedTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "treeLabel"> & Pick<TreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & {
@@ -331,7 +331,7 @@ interface FocusedInstancesContext {
 export function FocusedInstancesContextProvider(input: PropsWithChildren<{
     selectionStorage: SelectionStorage;
     imodelKey: string;
-}>): react_jsx_runtime0.JSX.Element;
+}>): _$react_jsx_runtime0.JSX.Element;
 
 // @beta (undocumented)
 type FunctionProps<THook extends (props: any) => any> = Parameters<THook>[0];
@@ -354,7 +354,7 @@ type HierarchyVisibilityHandlerOverridableMethodProps<TFunc> = TFunc extends ((p
 
 // @beta
 export const IModelContentTreeComponent: {
-    (input: IModelContentTreeComponentProps): react_jsx_runtime0.JSX.Element | null;
+    (input: IModelContentTreeComponentProps): _$react_jsx_runtime0.JSX.Element | null;
     id: string;
     getLabel(input: {
         standardLabels: StandardTreeLabels;
@@ -377,7 +377,7 @@ interface IModelContentTreeHierarchyConfiguration {
 // @beta (undocumented)
 export function IModelContentTreeIcon(input: {
     node: TreeNode;
-}): react_jsx_runtime0.JSX.Element | undefined;
+}): _$react_jsx_runtime0.JSX.Element | undefined;
 
 // @beta (undocumented)
 type IModelContentTreeProps = Pick<ExtendedTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "treeLabel"> & Pick<TreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & {
@@ -416,7 +416,7 @@ interface ModelInfo {
 
 // @public
 export const ModelsTreeComponent: {
-    (props: ModelsTreeComponentProps): react_jsx_runtime0.JSX.Element | null;
+    (props: ModelsTreeComponentProps): _$react_jsx_runtime0.JSX.Element | null;
     ShowAllButton: ModelsTreeHeaderButtonType;
     HideAllButton: ModelsTreeHeaderButtonType;
     InvertButton: ModelsTreeHeaderButtonType;
@@ -459,7 +459,7 @@ interface ModelsTreeHierarchyConfiguration {
 // @beta (undocumented)
 export function ModelsTreeIcon(input: {
     node: TreeNode;
-}): react_jsx_runtime0.JSX.Element | undefined;
+}): _$react_jsx_runtime0.JSX.Element | undefined;
 
 // @beta
 export namespace ModelsTreeNode {
@@ -535,13 +535,13 @@ export class SearchLimitExceededError extends Error {
 }
 
 // @beta (undocumented)
-export function SelectableTree(input: PropsWithChildren<TreeHeaderProps>): react_jsx_runtime0.JSX.Element;
+export function SelectableTree(input: PropsWithChildren<TreeHeaderProps>): _$react_jsx_runtime0.JSX.Element;
 
 // @beta
-export function SharedTreeContextProvider(input: PropsWithChildren<{}>): react_jsx_runtime0.JSX.Element;
+export function SharedTreeContextProvider(input: PropsWithChildren<{}>): _$react_jsx_runtime0.JSX.Element;
 
 // @beta
-export function SkeletonTree(): react_jsx_runtime0.JSX.Element;
+export function SkeletonTree(): _$react_jsx_runtime0.JSX.Element;
 
 // @beta (undocumented)
 interface StandardTreeLabels {
@@ -558,7 +558,7 @@ interface StandardTreeLabels {
 }
 
 // @beta (undocumented)
-export function TelemetryContextProvider(input: PropsWithChildren<TelemetryContextProviderProps>): react_jsx_runtime0.JSX.Element;
+export function TelemetryContextProvider(input: PropsWithChildren<TelemetryContextProviderProps>): _$react_jsx_runtime0.JSX.Element;
 
 // @beta (undocumented)
 interface TelemetryContextProviderProps {
@@ -568,7 +568,7 @@ interface TelemetryContextProviderProps {
 }
 
 // @beta
-export function Tree(input: TreeProps): react_jsx_runtime0.JSX.Element;
+export function Tree(input: TreeProps): _$react_jsx_runtime0.JSX.Element;
 
 export { TreeActionBase }
 
@@ -618,7 +618,7 @@ type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPaths" | "g
 };
 
 // @beta
-export function TreeRenderer(props: TreeRendererProps_2): react_jsx_runtime0.JSX.Element;
+export function TreeRenderer(props: TreeRendererProps_2): _$react_jsx_runtime0.JSX.Element;
 
 // @beta (undocumented)
 type TreeRendererProps_2 = ComponentProps<typeof StrataKitTreeRenderer>;
@@ -651,7 +651,7 @@ export class TreeWidget {
 }
 
 // @public
-export function TreeWidgetComponent(input: TreeWidgetProps): react_jsx_runtime0.JSX.Element;
+export function TreeWidgetComponent(input: TreeWidgetProps): _$react_jsx_runtime0.JSX.Element;
 
 // @public
 interface TreeWidgetProps {
@@ -872,7 +872,7 @@ interface UseModelsTreeResult {
 }
 
 // @beta
-export const VisibilityAction: react.NamedExoticComponent<{
+export const VisibilityAction: _$react.NamedExoticComponent<{
     node: TreeNode;
 } & TreeActionBaseAttributes>;
 
@@ -889,7 +889,7 @@ export interface VisibilityStatus {
 }
 
 // @beta
-export function VisibilityTree(input: VisibilityTreeProps): react_jsx_runtime0.JSX.Element;
+export function VisibilityTree(input: VisibilityTreeProps): _$react_jsx_runtime0.JSX.Element;
 
 // @beta (undocumented)
 type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess"> & {
@@ -900,7 +900,7 @@ type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess"> & {
 };
 
 // @beta
-export function VisibilityTreeRenderer(props: VisibilityTreeRendererProps): react_jsx_runtime0.JSX.Element;
+export function VisibilityTreeRenderer(props: VisibilityTreeRendererProps): _$react_jsx_runtime0.JSX.Element;
 
 // @beta (undocumented)
 type VisibilityTreeRendererProps = ComponentProps<typeof StrataKitTreeRenderer> & VisibilityContext;

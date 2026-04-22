@@ -84,6 +84,7 @@ export type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonP
 /** @public */
 export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   const componentId = useGuid();
+  const { cancelChangesInProgress } = useSharedTreeContextInternal();
   const translate = useTranslation();
   return (
     <IconButton
@@ -92,6 +93,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
       onClick={() => {
         // cspell:disable-next-line
         props.onFeatureUsed?.(`categories-tree-showall`);
+        cancelChangesInProgress.next();
         void showAll({
           models: props.models,
           viewport: props.viewport,
@@ -106,6 +108,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
 
 /** @public */
 export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
+  const { cancelChangesInProgress } = useSharedTreeContextInternal();
   const translate = useTranslation();
   return (
     <IconButton
@@ -114,6 +117,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
       onClick={() => {
         // cspell:disable-next-line
         props.onFeatureUsed?.(`categories-tree-hideall`);
+        cancelChangesInProgress.next();
         void hideAllCategories(
           props.categories.map((category) => category.categoryId),
           props.viewport,
@@ -127,6 +131,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
 
 /** @public */
 export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
+  const { cancelChangesInProgress } = useSharedTreeContextInternal();
   const translate = useTranslation();
   return (
     <IconButton
@@ -134,6 +139,7 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
       label={translate("categoriesTree.buttons.invert.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.(`categories-tree-invert`);
+        cancelChangesInProgress.next();
         void invertAllCategories(props.categories, props.viewport);
       }}
       icon={visibilityInvertSvg}
