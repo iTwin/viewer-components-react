@@ -781,7 +781,7 @@ export function createGeometricElementInstanceKeyPaths(props: {
     );
   }).pipe(
     catchBeSQLiteInterrupts,
-    targetItems.length > 300 ? releaseMainThreadOnItemsCount(300) : identity,
+    releaseMainThreadOnItemsCount(300),
     map((row) => parseQueryRow(row, groupInfos, separator, elementClassName)),
     mergeMap(({ modelId, elementHierarchyPath, groupingInfo }) =>
       idsCache.createUpToModelInstanceKeyPaths(modelId).pipe(
