@@ -27,6 +27,7 @@ import type {
   MeasurementWidgetData,
 } from "../api/Measurement.js";
 import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
+import type { FormatSpecHandle } from "@itwin/core-quantity";
 export interface RadiusMeasurementProps extends MeasurementProps {
   startPoint?: XYZProps;
   midPoint?: XYZProps;
@@ -86,6 +87,7 @@ export class RadiusMeasurement extends Measurement {
   }
   public set lengthKoQ(value: string) {
     this._lengthKoQ = value;
+    this._disposeHandles();
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
@@ -94,6 +96,7 @@ export class RadiusMeasurement extends Measurement {
   }
   public set lengthPersistenceUnitName(value: string) {
     this._lengthPersistenceUnitName = value;
+    this._disposeHandles();
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
@@ -288,14 +291,25 @@ export class RadiusMeasurement extends Measurement {
     return undefined;
   }
 
-  public override async populateFormattingSpecsRegistry(_force?: boolean): Promise<void> {
-    const lengthEntry = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ);
-    if (_force || !lengthEntry || lengthEntry.formatterSpec.persistenceUnit?.name !== this._lengthPersistenceUnitName) {
-      const lengthFormatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
-      if (lengthFormatProps) {
-        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._lengthKoQ, this._lengthPersistenceUnitName, lengthFormatProps);
-      }
+  private _lengthHandle?: FormatSpecHandle;
+
+  private _getLengthHandle(): FormatSpecHandle {
+    if (!this._lengthHandle) {
+      this._lengthHandle = IModelApp.quantityFormatter.getFormatSpecHandle(
+        this._lengthKoQ, this._lengthPersistenceUnitName
+      );
     }
+    return this._lengthHandle;
+  }
+
+  private _disposeHandles(): void {
+    this._lengthHandle?.[Symbol.dispose]();
+    this._lengthHandle = undefined;
+  }
+
+  public override onCleanup(): void {
+    super.onCleanup();
+    this._disposeHandles();
   }
 
   private _getSnapId(): string | undefined {
@@ -434,7 +448,7 @@ export class RadiusMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, QuantityType.LengthEngineering);
+    const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, this._lengthPersistenceUnitName, QuantityType.LengthEngineering);
 
     const radius = this._arc?.circularRadius() ?? 0.0;
     const diameter = radius * 2;
@@ -535,7 +549,7 @@ export class RadiusMeasurement extends Measurement {
 
   private async createTextMarker(): Promise<void> {
     if (this._arc !== undefined) {
-      const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, QuantityType.LengthEngineering);
+      const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, this._lengthPersistenceUnitName, QuantityType.LengthEngineering);
       const radius = this._arc.circularRadius()!;
       const fRadius = await FormatterUtils.formatLength(
         radius,

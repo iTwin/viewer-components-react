@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Migrate quantity formatting to FormatSpecHandle-based API from iTwin.js 5.9. Removes populateFormattingSpecsRegistry in favor of auto-refreshing handles. Simplifies MeasurementManager event wiring.",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "50554904+hl662@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

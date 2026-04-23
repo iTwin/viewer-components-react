@@ -22,6 +22,7 @@ import type {
   MeasurementWidgetData,
 } from "../api/Measurement.js";
 import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
+import type { FormatSpecHandle } from "@itwin/core-quantity";
 export interface AngleMeasurementProps extends MeasurementProps {
   startPoint?: XYZProps;
   center?: XYZProps;
@@ -117,6 +118,7 @@ export class AngleMeasurement extends Measurement {
   }
   public set angleKoQ(koqName: string) {
     this._angleKoQ = koqName;
+    this._disposeHandles();
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
   public get anglePersistenceUnitName(): string {
@@ -124,6 +126,7 @@ export class AngleMeasurement extends Measurement {
   }
   public set anglePersistenceUnitName(unitName: string) {
     this._anglePersistenceUnitName = unitName;
+    this._disposeHandles();
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
@@ -161,18 +164,25 @@ export class AngleMeasurement extends Measurement {
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
-  public override async populateFormattingSpecsRegistry(_force?: boolean): Promise<void> {
-    const angleEntry = IModelApp.quantityFormatter.getSpecsByName(this._angleKoQ);
-    if (_force || !angleEntry || angleEntry.formatterSpec.persistenceUnit?.name !== this._anglePersistenceUnitName) {
-      const angleFormatProps = await IModelApp.formatsProvider.getFormat(this._angleKoQ);
-      if (angleFormatProps) {
-        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(
-          this._angleKoQ,
-          this._anglePersistenceUnitName,
-          angleFormatProps
-        );
-      }
+  private _angleHandle?: FormatSpecHandle;
+
+  private _getAngleHandle(): FormatSpecHandle {
+    if (!this._angleHandle) {
+      this._angleHandle = IModelApp.quantityFormatter.getFormatSpecHandle(
+        this._angleKoQ, this._anglePersistenceUnitName
+      );
     }
+    return this._angleHandle;
+  }
+
+  private _disposeHandles(): void {
+    this._angleHandle?.[Symbol.dispose]();
+    this._angleHandle = undefined;
+  }
+
+  public override onCleanup(): void {
+    super.onCleanup();
+    this._disposeHandles();
   }
   /**
    * Tests equality with another measurement.
@@ -388,7 +398,7 @@ export class AngleMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const angleSpec = FormatterUtils.getFormatterSpecWithFallback(this._angleKoQ, QuantityType.Angle);
+    const angleSpec = FormatterUtils.getFormatterSpecWithFallback(this._angleKoQ, this._anglePersistenceUnitName, QuantityType.Angle);
     const angle = this.angle ?? 0;
     const fAngle = await FormatterUtils.formatAngle(angle, angleSpec);
 
@@ -417,7 +427,7 @@ export class AngleMeasurement extends Measurement {
 
   private async createTextMarker(): Promise<void> {
     if (this._center !== undefined && this.angle !== undefined) {
-      const angleSpec = FormatterUtils.getFormatterSpecWithFallback(this._angleKoQ, QuantityType.Angle);
+      const angleSpec = FormatterUtils.getFormatterSpecWithFallback(this._angleKoQ, this._anglePersistenceUnitName, QuantityType.Angle);
       const angle = this.angle;
       const fAngle = await FormatterUtils.formatAngle(
         angle,

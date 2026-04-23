@@ -18,9 +18,8 @@ export namespace FormatterUtils {
    * @param fallbackQuantityType The QuantityType to use if KoQ lookup fails.
    * @returns A FormatterSpec or undefined if both lookups fail.
    */
-  export function getFormatterSpecWithFallback(koqString: string, fallbackQuantityType: QuantityType): FormatterSpec | undefined {
-    // First try to get the spec by KoQ string
-    const koqEntry = IModelApp.quantityFormatter.getSpecsByName(koqString);
+  export function getFormatterSpecWithFallback(koqString: string, persistenceUnitName: string, fallbackQuantityType: QuantityType): FormatterSpec | undefined {
+    const koqEntry = IModelApp.quantityFormatter.getSpecsByNameAndUnit({ name: koqString, persistenceUnitName });
     if (koqEntry) {
       return koqEntry.formatterSpec;
     }

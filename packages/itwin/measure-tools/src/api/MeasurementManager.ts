@@ -419,7 +419,7 @@ export class MeasurementManager implements Decorator {
       if (this._dropGlobalOriginChangedCallback)
         this._dropGlobalOriginChangedCallback();
 
-      this._dropGlobalOriginChangedCallback = iModel.onGlobalOriginChanged.addListener(this.onActiveUnitSystemChanged, this);
+      this._dropGlobalOriginChangedCallback = iModel.onGlobalOriginChanged.addListener(() => this._onFormattingRefresh(), this);
       this._iModelIdForGlobalOrigin = iModel.iModelId;
     }
   }
@@ -452,19 +452,17 @@ export class MeasurementManager implements Decorator {
     this._dropDecoratorCallback = IModelApp.viewManager.addDecorator(this);
 
     if (undefined === this._dropQuantityFormatterListeners) {
-      const unsubscribers = [IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener(this.onActiveUnitSystemChanged, this),
-        IModelApp.quantityFormatter.onQuantityFormatsChanged.addListener(this.onActiveUnitSystemChanged, this),
-        IModelApp.quantityFormatter.onUnitsProviderChanged.addListener(this.onActiveUnitSystemChanged, this),
-        IModelApp.formatsProvider.onFormatsChanged.addListener(async () => {
-          await this.onFormatsChanged();
-        }, this)
-      ];
-      this._dropQuantityFormatterListeners = () => unsubscribers.forEach((unsubscriber) => {
-        unsubscriber();
+      const unsubReady = IModelApp.quantityFormatter.onFormattingReady.addListener(() => {
+        this._onFormattingRefresh();
       });
-
+      // Format overrides (user edits a format) bypass the reload pipeline and
+      // only emit onQuantityFormatsChanged, so we must listen for that separately.
+      const unsubFormats = IModelApp.quantityFormatter.onQuantityFormatsChanged.addListener(() => {
+        this._onFormattingRefresh();
+      });
+      this._dropQuantityFormatterListeners = () => { unsubReady(); unsubFormats(); };
     } else {
-      this.onActiveUnitSystemChanged();
+      this._onFormattingRefresh();
     }
   }
 
@@ -472,6 +470,11 @@ export class MeasurementManager implements Decorator {
    * participate in drawing or picking operations.
    */
   public stopDecorator(): void {
+    // Dispose all measurements
+    for (const measurement of this._measurements) {
+      measurement.onCleanup();
+    }
+
     if (this._dropDecoratorCallback) {
       this._dropDecoratorCallback();
       this._dropDecoratorCallback = undefined;
@@ -486,19 +489,12 @@ export class MeasurementManager implements Decorator {
     MeasurementCachedGraphicsHandler.instance.stopDecorator();
   }
 
-  public onActiveUnitSystemChanged() {
+  private _onFormattingRefresh() {
     for (const measurement of this._measurements) {
       measurement.onDisplayUnitsChanged();
     }
-  }
-
-  public async onFormatsChanged() {
-    for (const measurement of this._measurements) {
-      await measurement.populateFormattingSpecsRegistry(true);
-      measurement.onDisplayUnitsChanged();
-      this.invalidateDecorations();
-    }
-    MeasurementUIEvents.notifyMeasurementPropertiesChanged(this._measurements)
+    this.invalidateDecorations();
+    MeasurementUIEvents.notifyMeasurementPropertiesChanged(this._measurements);
   }
 }
 

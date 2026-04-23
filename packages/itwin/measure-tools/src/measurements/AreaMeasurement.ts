@@ -29,6 +29,7 @@ import type {
   MeasurementWidgetData,
 } from "../api/Measurement.js";
 import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
+import type { FormatSpecHandle } from "@itwin/core-quantity";
 /**
  * Props for serializing a [[AreaMeasurement]].
  */
@@ -127,6 +128,7 @@ export class AreaMeasurement extends Measurement {
   }
   public set lengthKoQ(value: string) {
     this._lengthKoQ = value;
+    this._disposeHandles();
     this._polygon.recomputeFromPoints();
   }
 
@@ -135,6 +137,7 @@ export class AreaMeasurement extends Measurement {
   }
   public set lengthPersistenceUnitName(value: string) {
     this._lengthPersistenceUnitName = value;
+    this._disposeHandles();
     this._polygon.recomputeFromPoints();
   }
 
@@ -144,6 +147,7 @@ export class AreaMeasurement extends Measurement {
 
   public set areaKoQ(value: string) {
     this._areaKoQ = value;
+    this._disposeHandles();
     this._polygon.recomputeFromPoints();
   }
 
@@ -153,6 +157,7 @@ export class AreaMeasurement extends Measurement {
 
   public set areaPersistenceUnitName(value: string) {
     this._areaPersistenceUnitName = value;
+    this._disposeHandles();
     this._polygon.recomputeFromPoints();
   }
 
@@ -185,21 +190,32 @@ export class AreaMeasurement extends Measurement {
     return true;
   }
 
-  public override async populateFormattingSpecsRegistry(_force?: boolean): Promise<void> {
-    const lengthEntry = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ);
-    if (_force || !lengthEntry || lengthEntry.formatterSpec.persistenceUnit?.name !== this._lengthPersistenceUnitName) {
-      const lengthFormatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
-      if (lengthFormatProps) {
-        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._lengthKoQ, this._lengthPersistenceUnitName, lengthFormatProps);
-      }
+  private _lengthHandle?: FormatSpecHandle;
+  private _areaHandle?: FormatSpecHandle;
+
+  private _getLengthHandle(): FormatSpecHandle {
+    if (!this._lengthHandle) {
+      this._lengthHandle = IModelApp.quantityFormatter.getFormatSpecHandle(
+        this._lengthKoQ, this._lengthPersistenceUnitName
+      );
     }
-    const areaEntry = IModelApp.quantityFormatter.getSpecsByName(this._areaKoQ);
-    if (_force || !areaEntry || areaEntry.formatterSpec.persistenceUnit?.name !== this._areaPersistenceUnitName) {
-      const areaFormatProps = await IModelApp.formatsProvider.getFormat(this._areaKoQ);
-      if (areaFormatProps) {
-        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._areaKoQ, this._areaPersistenceUnitName, areaFormatProps);
-      }
+    return this._lengthHandle;
+  }
+
+  private _getAreaHandle(): FormatSpecHandle {
+    if (!this._areaHandle) {
+      this._areaHandle = IModelApp.quantityFormatter.getFormatSpecHandle(
+        this._areaKoQ, this._areaPersistenceUnitName
+      );
     }
+    return this._areaHandle;
+  }
+
+  private _disposeHandles(): void {
+    this._lengthHandle?.[Symbol.dispose]();
+    this._lengthHandle = undefined;
+    this._areaHandle?.[Symbol.dispose]();
+    this._areaHandle = undefined;
   }
 
   public addPointToDynamicPolygon(point: Point3d): boolean {
@@ -331,6 +347,7 @@ export class AreaMeasurement extends Measurement {
 
   public override onCleanup() {
     this.clearCachedGraphics();
+    this._disposeHandles();
   }
 
   protected override onTransientIdChanged(_prevId: Id64String) {
@@ -462,8 +479,8 @@ export class AreaMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, QuantityType.LengthEngineering);
-    const areaSpec = FormatterUtils.getFormatterSpecWithFallback(this._areaKoQ, QuantityType.Area);
+    const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, this._lengthPersistenceUnitName, QuantityType.LengthEngineering);
+    const areaSpec = FormatterUtils.getFormatterSpecWithFallback(this._areaKoQ, this._areaPersistenceUnitName, QuantityType.Area);
 
     const fPerimeter = await FormatterUtils.formatLength(
       this._polygon.perimeter,
