@@ -1,14 +1,16 @@
+;
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import React from "react";
+import React, { useCallback } from "react";
 import { Flex, Text } from "@itwin/itwinui-react";
-import { FormatSelector, QuantityFormatPanel } from "@itwin/quantity-formatting-react";
+import { FormatSelector, QuantityFormatPanel, TelemetryContextProvider } from "@itwin/quantity-formatting-react";
 
 import type { FormatDefinition, UnitsProvider } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
+import type { UsageTrackedFeatures } from "@itwin/quantity-formatting-react";
 
 interface FormatTabPanelProps {
   activeFormatSet: FormatSet | undefined;
@@ -28,35 +30,41 @@ export const FormatTabPanel: React.FC<FormatTabPanelProps> = ({
   onListItemChange,
   onFormatChange,
 }) => {
-  return (
-    <Flex flexDirection="row" gap="l" className="format-tab-panel">
-      <Flex.Item className="quantity-format-selector-item">
-        <FormatSelector activeFormatSet={activeFormatSet} activeFormatDefinitionKey={activeFormatDefinitionKey} onListItemChange={onListItemChange} />
-      </Flex.Item>
+  const handleFeatureUsed = useCallback((feature: UsageTrackedFeatures) => {
+    console.log(`[QuantityFormatting] Feature used: ${feature}`);
+  }, []);
 
-      <Flex.Item className="quantity-format-panel-item">
-        {formatDefinition ? (
-          <>
-            {(formatDefinition.label || formatDefinition.description) && (
-              <Flex flexDirection="column" alignItems="flex-start" gap="xs" className="format-definition-header">
-                {formatDefinition.label && <Text variant="subheading">{formatDefinition.label}</Text>}
-                {formatDefinition.description && (
-                  <Text variant="body" isMuted>
-                    {formatDefinition.description}
-                  </Text>
-                )}
-              </Flex>
-            )}
-            <QuantityFormatPanel formatDefinition={formatDefinition} unitsProvider={unitsProvider} onFormatChange={onFormatChange} />
-          </>
-        ) : (
-          <Flex flexDirection="column" justifyContent="center" alignItems="center" className="quantity-format-empty-state">
-            <Text variant="leading" isMuted>
-              Select a format in the list to edit
-            </Text>
-          </Flex>
-        )}
-      </Flex.Item>
-    </Flex>
+  return (
+    <TelemetryContextProvider onFeatureUsed={handleFeatureUsed}>
+      <Flex flexDirection="row" gap="l" className="format-tab-panel">
+        <Flex.Item className="quantity-format-selector-item">
+          <FormatSelector activeFormatSet={activeFormatSet} activeFormatDefinitionKey={activeFormatDefinitionKey} onListItemChange={onListItemChange} />
+        </Flex.Item>
+
+        <Flex.Item className="quantity-format-panel-item">
+          {formatDefinition ? (
+            <>
+              {(formatDefinition.label || formatDefinition.description) && (
+                <Flex flexDirection="column" alignItems="flex-start" gap="xs" className="format-definition-header">
+                  {formatDefinition.label && <Text variant="subheading">{formatDefinition.label}</Text>}
+                  {formatDefinition.description && (
+                    <Text variant="body" isMuted>
+                      {formatDefinition.description}
+                    </Text>
+                  )}
+                </Flex>
+              )}
+              <QuantityFormatPanel formatDefinition={formatDefinition} unitsProvider={unitsProvider} onFormatChange={onFormatChange} />
+            </>
+          ) : (
+            <Flex flexDirection="column" justifyContent="center" alignItems="center" className="quantity-format-empty-state">
+              <Text variant="leading" isMuted>
+                Select a format in the list to edit
+              </Text>
+            </Flex>
+          )}
+        </Flex.Item>
+      </Flex>
+    </TelemetryContextProvider>
   );
 };
