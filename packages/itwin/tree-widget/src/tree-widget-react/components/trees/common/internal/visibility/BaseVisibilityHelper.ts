@@ -13,7 +13,6 @@ import {
   filter,
   forkJoin,
   from,
-  identity,
   map,
   merge,
   mergeAll,
@@ -24,7 +23,6 @@ import {
   startWith,
   Subject,
   take,
-  takeLast,
   takeUntil,
   tap,
 } from "rxjs";
@@ -482,49 +480,37 @@ export class BaseVisibilityHelper implements Disposable {
       allModelCategories: this.#props.baseIdsCache.getCategories({ modelId }),
       modelAlwaysDrawnElements: this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({ modelId, setType: "always" }),
     }).pipe(
-      mergeMap(({ allModelCategories, modelAlwaysDrawnElements }) => {
+      map(({ allModelCategories, modelAlwaysDrawnElements }) => {
         if (this.#props.viewport.viewsModel(modelId)) {
           // Model might have been turned on while completing forkJoin, if that happens, no need to do anything, just return.
-          return of(undefined);
+          return;
         }
         const alwaysDrawn = this.#props.viewport.alwaysDrawn;
         if (alwaysDrawn && modelAlwaysDrawnElements) {
           this.#props.viewport.setAlwaysDrawn({ elementIds: setDifference(alwaysDrawn, modelAlwaysDrawnElements) });
         }
         this.#props.viewport.changeModelDisplay({ modelIds: modelId, display: true });
-        return from(Id64.iterable(allModelCategories)).pipe(
-          categoriesToNotOverride ? filter((modelCategory) => !categoriesToNotOverride.has(modelCategory)) : identity,
-          map((categoryId) => this.changeCategoryStateInViewportAccordingToModelVisibility({ modelId, categoryId, on: false, changeSubCategories: false })),
-          takeLast(1),
-          defaultIfEmpty(undefined),
-        );
+        const toHide = new Array<Id64String>();
+        const toNone = new Array<Id64String>();
+        for (const categoryId of allModelCategories) {
+          if (categoriesToNotOverride?.has(categoryId)) {
+            continue;
+          }
+          if (this.#props.viewport.viewsCategory(categoryId)) {
+            toHide.push(categoryId);
+          } else {
+            toNone.push(categoryId);
+          }
+        }
+        if (toHide.length > 0) {
+          this.#props.viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: toHide, override: "hide" });
+        }
+        if (toNone.length > 0) {
+          this.#props.viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: toNone, override: "none" });
+        }
       }),
     );
   }
-
-  /** Adds per-model category overrides based on category visibility in category selector. */
-  private changeCategoryStateInViewportAccordingToModelVisibility({
-    modelId,
-    categoryId,
-    on,
-    changeSubCategories,
-  }: {
-    modelId: string;
-    categoryId: string;
-    on: boolean;
-    changeSubCategories: boolean;
-  }) {
-    const isDisplayedInSelector = this.#props.viewport.viewsCategory(categoryId);
-    const override = on === isDisplayedInSelector ? "none" : on ? "show" : "hide";
-    this.#props.viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: categoryId, override });
-
-    if (override === "none" && on) {
-      // we took off the override which means the category is displayed in selector, but
-      // doesn't mean all its subcategories are displayed - this call ensures that
-      this.#props.viewport.changeCategoryDisplay({ categoryIds: categoryId, display: true, enableAllSubCategories: changeSubCategories });
-    }
-  }
-
   /**
    * Changes categories visibility status.
    *
@@ -564,7 +550,7 @@ export class BaseVisibilityHelper implements Disposable {
           return acc;
         }, new Map<ModelId, Set<CategoryId>>()),
         mergeMap((modelCategoriesMap) => modelCategoriesMap.entries()),
-        shareReplay(),
+        shareReplay({ refCount: true }),
       );
 
       const changeSubModelsObs = categoryModelsObs.pipe(
@@ -697,14 +683,15 @@ export class BaseVisibilityHelper implements Disposable {
       return concat(
         // Change elements state
         defer(() => {
-          const elementsToChange = children ? [...elementIds, ...(typeof children === "string" ? [children] : children)] : elementIds;
+          const elementIdsSet = Id64.toIdSet(elementIds);
+          const elementsToChange = children ? [...elementIdsSet, ...(typeof children === "string" ? [children] : children)] : elementIdsSet;
           const isDisplayedByDefault = (isCategoryVisible: boolean) =>
             // When category is visible and elements need to be turned off, or when category is hidden and elements need to be turned on,
             // We can set isDisplayedByDefault to isCategoryVisible. This allows to not check if each element is in the elementIds list or not.
             isCategoryVisible === !on
               ? () => isCategoryVisible
               : (elementId: Id64String) => {
-                  if (Id64.has(elementIds, elementId)) {
+                  if (elementIdsSet.has(elementId)) {
                     return isCategoryVisible;
                   }
                   return !on;

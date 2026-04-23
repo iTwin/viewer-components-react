@@ -86,8 +86,8 @@ describe("CategoryVisibilityUtils", () => {
 
       expect(viewport.changeCategoryDisplay).toHaveBeenCalledWith({ categoryIds: [categoryId], display: true, enableAllSubCategories: false });
       expect(viewport.setPerModelCategoryOverride).toHaveBeenCalledWith({
-        modelIds: ["ModelId"],
-        categoryIds: [categoryId],
+        modelIds: new Set(["ModelId"]),
+        categoryIds: new Set([categoryId]),
         override: "none",
       });
     });
