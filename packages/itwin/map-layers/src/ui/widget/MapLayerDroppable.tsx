@@ -69,6 +69,8 @@ export function MapLayerDragOverlayItem(props: MapLayerDragOverlayItemProps) {
       >
         {props.mapLayerSettings.name}
       </span>
+
+      {/* eslint-disable-next-line @itwin/no-internal */}
       {props.mapLayerSettings.provider?.status === MapLayerImageryProviderStatus.RequireAuth && (
         <IconButton disabled={true} size="small" styleType="borderless" label={requireAuthTooltip}>
           <SvgStatusWarning />
