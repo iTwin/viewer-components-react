@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore Modeless WMTS
 
-import "./MapUrlDialog.scss";
+import "./map-layer/MapUrlDialog.scss";
 import "./SelectMapFormat.scss";
 import * as React from "react";
 import { IModelApp } from "@itwin/core-frontend";
