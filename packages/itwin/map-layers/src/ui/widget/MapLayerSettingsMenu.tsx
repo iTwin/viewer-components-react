@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import "./MapLayerManager.scss";
-import * as React from "react";
+import React from "react";
 import { SvgMoreVertical } from "@itwin/itwinui-icons-react";
 import { DropdownMenu, IconButton, MenuItem, Slider } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";

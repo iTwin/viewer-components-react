@@ -186,6 +186,9 @@ $default-font-size: --iui-font-size-1;
   .map-manager-attachments {
     height: auto;
     max-height: 30%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 
     &.is-dragging-map-over {
       background-color:var(--iui-color-background-disabled);
@@ -253,8 +256,10 @@ $default-font-size: --iui-font-size-1;
   align-items: center;
   height: 2.5em;
   width: 100%;
-  padding-right: 4px;
   background-color:  var(--iui-color-background);
+  border: solid 1px var(--iui-color-border);
+  border-radius: var(--iui-border-radius-1);
+  padding-inline: 4px;
 
   .map-manager-item-label {
     flex: 1 1;

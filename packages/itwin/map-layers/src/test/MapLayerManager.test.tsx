@@ -50,12 +50,12 @@ describe("MapLayerManager", () => {
 
     render(
       <div>
-        <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
+        <MapLayerManager activeViewport={viewportMock.object}></MapLayerManager>
       </div>,
     );
     let renderResult = render(
       <div>
-        <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
+        <MapLayerManager activeViewport={viewportMock.object}></MapLayerManager>
       </div>,
     );
 
@@ -65,7 +65,7 @@ describe("MapLayerManager", () => {
       Array.from(Array(renderTimes)).forEach(() => {
         renderResult = render(
           <div>
-            <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
+            <MapLayerManager activeViewport={viewportMock.object}></MapLayerManager>
           </div>,
         );
       });
@@ -90,7 +90,7 @@ describe("MapLayerManager", () => {
   it("renders base maps", async () => {
     const { container } = render(
       <div>
-        <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
+        <MapLayerManager activeViewport={viewportMock.object}></MapLayerManager>
       </div>,
     ) as RenderResult;
 
@@ -141,12 +141,12 @@ describe("MapLayerManager", () => {
 
     render(
       <div>
-        <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
+        <MapLayerManager activeViewport={viewportMock.object}></MapLayerManager>
       </div>,
     );
     const { container } = render(
       <div>
-        <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
+        <MapLayerManager activeViewport={viewportMock.object}></MapLayerManager>
       </div>,
     );
 
@@ -242,7 +242,7 @@ describe("MapLayerManager", () => {
 
     const renderResult = render(
       <div>
-        <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
+        <MapLayerManager activeViewport={viewportMock.object}></MapLayerManager>
       </div>,
     );
     const { container } = renderResult;
@@ -313,7 +313,7 @@ describe("MapLayerManager", () => {
     viewportMock.setup();
     const renderResult = render(
       <div>
-        <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
+        <MapLayerManager activeViewport={viewportMock.object}></MapLayerManager>
       </div>,
     );
     const { container } = renderResult;
@@ -385,7 +385,7 @@ describe("MapLayerManager", () => {
     viewportMock.setup();
     const renderResult = render(
       <div>
-        <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
+        <MapLayerManager activeViewport={viewportMock.object}></MapLayerManager>
       </div>,
     );
     const { container } = renderResult;

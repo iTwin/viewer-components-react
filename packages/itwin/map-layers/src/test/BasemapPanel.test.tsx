@@ -60,6 +60,7 @@ describe("BasemapPanel", () => {
           sources: [],
           bases: defaultBaseMapLayers,
           refreshFromStyle: () => {},
+          selectAllLayers: () => {},
         }}
       >
         <BasemapPanel />
@@ -83,6 +84,7 @@ describe("BasemapPanel", () => {
           sources: [],
           bases: defaultBaseMapLayers,
           refreshFromStyle: () => {},
+          selectAllLayers: () => {},
         }}
       >
         <BasemapPanel />
@@ -128,6 +130,7 @@ describe("BasemapPanel", () => {
           sources: [],
           bases: defaultBaseMapLayers,
           refreshFromStyle: () => {},
+          selectAllLayers: () => {},
         }}
       >
         <BasemapPanel />

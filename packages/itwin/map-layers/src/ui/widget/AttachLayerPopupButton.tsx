@@ -411,9 +411,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
     [handleNoConfirmation, handleYesConfirmation, onHandleOutsideClick, removeLayerDefDialogTitle],
   );
 
-  /*
- Handle Edit layer button clicked
- */
+  // Handle Edit layer button clicked
   const onItemEditButtonClicked = React.useCallback(
     (event: React.MouseEvent, source: MapLayerSource) => {
       event.stopPropagation(); // We don't want the owning ListBox to react on mouse click.
@@ -444,7 +442,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
     <div className="map-manager-header">
       {(loading || loadingSources) && (
         <div className="map-manager-loading-overlay">
-          <ProgressRadial as="div"/>
+          <ProgressRadial as="div" />
         </div>
       )}
       <div className="map-manager-source-listbox-header">
@@ -566,49 +564,7 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
     refreshFromStyle();
   }, [refreshFromStyle]);
 
-  function renderButton(): React.ReactNode {
-    let button: React.ReactNode;
-
-    if (props.buttonType === undefined || props.buttonType === AttachLayerButtonType.Icon) {
-      button = (
-        <IconButton
-          disabled={props.disabled}
-          size="small"
-          styleType="borderless"
-          ref={buttonRef}
-          className="map-manager-attach-layer-button"
-          label={popupOpen ? hideAttachLayerLabel : showAttachLayerLabel}
-          onClick={togglePopup}
-        >
-          <SvgAdd />
-        </IconButton>
-      );
-    } else {
-      const determineStyleType = () => {
-        switch (props.buttonType) {
-          case AttachLayerButtonType.Blue:
-            return "high-visibility";
-          case AttachLayerButtonType.Primary:
-          default:
-            return "cta";
-        }
-      };
-      const styleType = determineStyleType();
-      button = (
-        <Button
-          disabled={props.disabled}
-          ref={buttonRef}
-          styleType={styleType}
-          title={popupOpen ? hideAttachLayerLabel : showAttachLayerLabel}
-          onClick={togglePopup}
-        >
-          <span className="map-manager-attach-layer-label">{addCustomLayerButtonLabel}</span>
-        </Button>
-      );
-    }
-
-    return button;
-  }
+  const buttonLabel = popupOpen ? hideAttachLayerLabel : showAttachLayerLabel;
 
   return (
     <>
@@ -625,7 +581,28 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
         placement={"bottom-end"}
         className="map-manager-popover-overflow"
       >
-        {renderButton()}
+        {
+          props.buttonType === undefined || props.buttonType === AttachLayerButtonType.Icon ?
+            <IconButton
+            disabled={props.disabled}
+            size="small"
+            styleType="borderless"
+            ref={buttonRef}
+            className="map-manager-attach-layer-button"
+            label={buttonLabel}
+            onClick={togglePopup}
+          >
+            <SvgAdd />
+          </IconButton> :
+          <Button
+            ref={buttonRef}
+            title={buttonLabel}
+            disabled={props.disabled}  onClick={togglePopup}
+            styleType={props.buttonType === AttachLayerButtonType.Blue ? "high-visibility" : "cta"}
+          >
+            <span className="map-manager-attach-layer-label">{addCustomLayerButtonLabel}</span>
+          </Button>
+        }
       </Popover>
     </>
   );

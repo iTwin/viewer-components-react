@@ -5,7 +5,7 @@
 // cSpell:ignore Modeless WMTS
 
 import "./MapUrlDialog.scss";
-import * as React from "react";
+import React from "react";
 import { BeEvent, Guid } from "@itwin/core-bentley";
 import { IModelApp, MapLayerSource, MapLayerSourceStatus, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { SvgStatusWarning, SvgTechnicalPreviewMini } from "@itwin/itwinui-icons-color-react";
