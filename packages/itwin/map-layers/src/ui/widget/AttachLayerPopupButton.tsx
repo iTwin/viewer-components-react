@@ -25,89 +25,6 @@ enum LayerAction {
   Edit,
 }
 
-/** @internal */
-export enum AttachLayerButtonType {
-  Primary,
-  Blue,
-  Icon,
-}
-export interface AttachLayerPopupButtonProps {
-  isOverlay: boolean;
-  buttonType?: AttachLayerButtonType;
-  disabled?: boolean;
-}
-
-/** @internal */
-export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
-  const { showAttachLayerLabel, hideAttachLayerLabel, addCustomLayerButtonLabel } = React.useMemo(() => {
-    return {
-      showAttachLayerLabel: MapLayersUI.localization.getLocalizedString("mapLayers:AttachLayerPopup.Attach"),
-      hideAttachLayerLabel: MapLayersUI.localization.getLocalizedString("mapLayers:AttachLayerPopup.Close"),
-      addCustomLayerButtonLabel: MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.AddCustomLayerButtonLabel"),
-    };
-  }, []);
-
-  const [handleOutsideClick, setHandleOutsideClick] = React.useState(true);
-  const [mapUrlModalOpen, setMapUrlModalOpen] = React.useState(false);
-  const [popupOpen, setPopupOpen] = React.useState(false);
-  const buttonRef = React.useRef<HTMLButtonElement>(null);
-  const panelRef = React.useRef<HTMLDivElement>(null);
-
-  // 'isMounted' is used to prevent any async operation once the hook has been
-  // unloaded.  Otherwise we get a 'Can't perform a React state update on an unmounted component.' warning in the console.
-  const isMounted = React.useRef(false);
-  React.useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
-  const togglePopup = React.useCallback(() => {
-    setPopupOpen(!popupOpen);
-  }, [popupOpen]);
-
-
-  const { refreshFromStyle } = useSourceMapContext();
-
-  const handleLayerAttached = React.useCallback(() => {
-    if (!isMounted.current) {
-      return;
-    }
-    setPopupOpen(false);
-    refreshFromStyle();
-  }, [refreshFromStyle]);
-
-  return (
-    <>
-      <Popover
-        content={
-          <div ref={panelRef} className="map-sources-popup-panel">
-            <AttachLayerPanel isOverlay={props.isOverlay} onLayerAttached={handleLayerAttached} onHandleOutsideClick={setHandleOutsideClick} setMapUrlModalOpen={setMapUrlModalOpen} />
-          </div>
-        }
-        applyBackground
-        visible={popupOpen || mapUrlModalOpen} // keep the Popover open while the mapUrlModal is active
-        onVisibleChange={setPopupOpen}
-        closeOnOutsideClick={handleOutsideClick}
-        placement={"bottom-end"}
-        className="map-manager-popover-overflow"
-      >
-        <AttachLayerTriggerButton
-          ref={buttonRef}
-          buttonType={props.buttonType}
-          disabled={props.disabled}
-          popupOpen={popupOpen}
-          showAttachLayerLabel={showAttachLayerLabel}
-          hideAttachLayerLabel={hideAttachLayerLabel}
-          addCustomLayerButtonLabel={addCustomLayerButtonLabel}
-          onClick={togglePopup}
-        />
-      </Popover>
-    </>
-  );
-}
-
 interface AttachLayerPanelProps {
   isOverlay: boolean;
   onLayerAttached: () => void;
@@ -494,9 +411,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
     [handleNoConfirmation, handleYesConfirmation, onHandleOutsideClick, removeLayerDefDialogTitle],
   );
 
-  /*
- Handle Edit layer button clicked
- */
+  // Handle Edit layer button clicked
   const onItemEditButtonClicked = React.useCallback(
     (event: React.MouseEvent, source: MapLayerSource) => {
       event.stopPropagation(); // We don't want the owning ListBox to react on mouse click.
@@ -593,6 +508,89 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
         </List>
       </div>
     </div>
+  );
+}
+
+/** @internal */
+export enum AttachLayerButtonType {
+  Primary,
+  Blue,
+  Icon,
+}
+export interface AttachLayerPopupButtonProps {
+  isOverlay: boolean;
+  buttonType?: AttachLayerButtonType;
+  disabled?: boolean;
+}
+
+/** @internal */
+export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
+  const { showAttachLayerLabel, hideAttachLayerLabel, addCustomLayerButtonLabel } = React.useMemo(() => {
+    return {
+      showAttachLayerLabel: MapLayersUI.localization.getLocalizedString("mapLayers:AttachLayerPopup.Attach"),
+      hideAttachLayerLabel: MapLayersUI.localization.getLocalizedString("mapLayers:AttachLayerPopup.Close"),
+      addCustomLayerButtonLabel: MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.AddCustomLayerButtonLabel"),
+    };
+  }, []);
+
+  const [handleOutsideClick, setHandleOutsideClick] = React.useState(true);
+  const [mapUrlModalOpen, setMapUrlModalOpen] = React.useState(false);
+  const [popupOpen, setPopupOpen] = React.useState(false);
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+  const panelRef = React.useRef<HTMLDivElement>(null);
+
+  // 'isMounted' is used to prevent any async operation once the hook has been
+  // unloaded.  Otherwise we get a 'Can't perform a React state update on an unmounted component.' warning in the console.
+  const isMounted = React.useRef(false);
+  React.useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  const togglePopup = React.useCallback(() => {
+    setPopupOpen(!popupOpen);
+  }, [popupOpen]);
+
+
+  const { refreshFromStyle } = useSourceMapContext();
+
+  const handleLayerAttached = React.useCallback(() => {
+    if (!isMounted.current) {
+      return;
+    }
+    setPopupOpen(false);
+    refreshFromStyle();
+  }, [refreshFromStyle]);
+
+  return (
+    <>
+      <Popover
+        content={
+          <div ref={panelRef} className="map-sources-popup-panel">
+            <AttachLayerPanel isOverlay={props.isOverlay} onLayerAttached={handleLayerAttached} onHandleOutsideClick={setHandleOutsideClick} setMapUrlModalOpen={setMapUrlModalOpen} />
+          </div>
+        }
+        applyBackground
+        visible={popupOpen || mapUrlModalOpen} // keep the Popover open while the mapUrlModal is active
+        onVisibleChange={setPopupOpen}
+        closeOnOutsideClick={handleOutsideClick}
+        placement={"bottom-end"}
+        className="map-manager-popover-overflow"
+      >
+        <AttachLayerTriggerButton
+          ref={buttonRef}
+          buttonType={props.buttonType}
+          disabled={props.disabled}
+          popupOpen={popupOpen}
+          showAttachLayerLabel={showAttachLayerLabel}
+          hideAttachLayerLabel={hideAttachLayerLabel}
+          addCustomLayerButtonLabel={addCustomLayerButtonLabel}
+          onClick={togglePopup}
+        />
+      </Popover>
+    </>
   );
 }
 
