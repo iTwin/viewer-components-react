@@ -8,6 +8,7 @@ import type { HitDetail, MapLayerImageryProvider, MapTileTreeScaleRangeVisibilit
 import type { ToolbarOrientation } from "@itwin/appui-react";
 
 export interface StyleMapLayerSettings {
+  id: string;
   /** Name */
   name: string;
   /** source (i.URL for ImageMapLayerSettings or modelId for ModelMapLayerSettings)  */

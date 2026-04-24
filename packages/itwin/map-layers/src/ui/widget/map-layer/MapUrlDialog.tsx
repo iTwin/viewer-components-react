@@ -5,24 +5,24 @@
 // cSpell:ignore Modeless WMTS
 
 import "./MapUrlDialog.scss";
-import * as React from "react";
+import React from "react";
 import { BeEvent, Guid } from "@itwin/core-bentley";
 import { IModelApp, MapLayerSource, MapLayerSourceStatus, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { SvgStatusWarning, SvgTechnicalPreviewMini } from "@itwin/itwinui-icons-color-react";
 import { Button, Icon, Input, LabeledInput, Modal, ModalButtonBar, ModalContent, ProgressLinear } from "@itwin/itwinui-react";
-import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
-import { CustomParamsStorage } from "../../CustomParamsStorage";
-import { CustomParamUtils } from "../../CustomParamUtils";
-import { MapLayerPreferences } from "../../MapLayerPreferences";
-import { MapLayersUI } from "../../mapLayers";
-import { useCrossOriginPopup } from "../hooks/useCrossOriginPopup";
-import { SelectCustomParam } from "./SelectCustomParam";
-import { SelectMapFormat } from "./SelectMapFormat";
-import { UserPreferencesStorageOptions } from "./UserPreferencesStorageOptions";
+import { CustomParamsMappingStorage } from "../../../CustomParamsMappingStorage";
+import { CustomParamsStorage } from "../../../CustomParamsStorage";
+import { CustomParamUtils } from "../../../CustomParamUtils";
+import { MapLayerPreferences } from "../../../MapLayerPreferences";
+import { MapLayersUI } from "../../../mapLayers";
+import { useCrossOriginPopup } from "../../hooks/useCrossOriginPopup";
+import { SelectCustomParam } from "../SelectCustomParam";
+import { SelectMapFormat } from "../SelectMapFormat";
+import { UserPreferencesStorageOptions } from "../UserPreferencesStorageOptions";
 
 import type { ImageMapLayerSettings } from "@itwin/core-common";
 import type { MapLayerAccessClient, MapLayerSourceValidation, ScreenViewport } from "@itwin/core-frontend";
-import type { MapLayerOptions } from "../Interfaces";
+import type { MapLayerOptions } from "../../Interfaces";
 export const MAP_TYPES = {
   wms: "WMS",
   arcGis: "ArcGIS",

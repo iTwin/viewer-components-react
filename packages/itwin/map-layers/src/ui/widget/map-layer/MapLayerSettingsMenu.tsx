@@ -2,14 +2,14 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import "./MapLayerManager.scss";
-import * as React from "react";
+import "../MapLayerManager.scss";
+import React from "react";
 import { SvgMoreVertical } from "@itwin/itwinui-icons-react";
 import { DropdownMenu, IconButton, MenuItem, Slider } from "@itwin/itwinui-react";
-import { MapLayersUI } from "../../mapLayers";
+import { MapLayersUI } from "../../../mapLayers";
 
 import type { ScreenViewport } from "@itwin/core-frontend";
-import type { StyleMapLayerSettings } from "../Interfaces";
+import type { StyleMapLayerSettings } from "../../Interfaces";
 interface MapLayerSettingsMenuProps {
   mapLayerSettings: StyleMapLayerSettings;
   onMenuItemSelection: (action: string, mapLayerSettings: StyleMapLayerSettings) => void;

@@ -32,13 +32,10 @@ export function MapLayersWidget(props: MapLayersWidgetProps) {
 
   if (activeViewport && isGeoLocated && activeViewport.view.isSpatialView()) {
     return (
-      <div ref={ref} className="map-manager-layer-host">
+      <div ref={ref} className="map-manager-layer-host" data-testid="map-layers-widget">
         <MapLayerManager
           activeViewport={activeViewport}
           mapLayerOptions={props.mapLayerOptions}
-          getContainerForClone={() => {
-            return ref.current ? ref.current : document.body;
-          }}
         />
       </div>
     );

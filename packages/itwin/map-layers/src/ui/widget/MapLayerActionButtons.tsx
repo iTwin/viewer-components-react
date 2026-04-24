@@ -19,18 +19,16 @@ interface MapLayerActionButtonsProps {
 }
 
 export const MapLayerActionButtons = ({ disabled, showAll, hideAll, invert, selectAll, unlink, checked, disabledUnlink }: MapLayerActionButtonsProps) => {
-  const [showAllLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.ShowAllLabel"));
-  const [hideAllLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.HideAllLabel"));
-  const [invertAllLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.InvertAllLabel"));
-  const [detachSelectedLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.DetachSelectedLabel"));
+  const showAllLabel = MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.ShowAllLabel");
+  const hideAllLabel = MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.HideAllLabel");
+  const invertAllLabel = MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.InvertAllLabel");
+  const detachSelectedLabel = MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.DetachSelectedLabel");
   return (
     <div className="map-manager-layer-action-buttons">
-      <Checkbox data-testid={"select-all-checkbox"} checked={checked} onChange={selectAll} className="map-manager-layer-action-unlink-button"></Checkbox>
-      <ButtonGroup>
-        <IconButton disabled={disabled || disabledUnlink} data-testid="detach-label-button" label={detachSelectedLabel} size="small" styleType="borderless" onClick={unlink}>
-          <SvgUnlink />
-        </IconButton>
-      </ButtonGroup>
+      <Checkbox data-testid="select-all-checkbox" checked={checked} onChange={selectAll} className="map-manager-layer-action-unlink-button" />
+      <IconButton disabled={disabled || disabledUnlink} data-testid="detach-label-button" label={detachSelectedLabel} size="small" styleType="borderless" onClick={unlink}>
+        <SvgUnlink />
+      </IconButton>
       <ButtonGroup className="map-manager-layer-action-buttons-inside-separator">
         <IconButton disabled={disabled} data-testid="show-all-label-button" label={showAllLabel} size="small" onClick={showAll} styleType="borderless">
           <SvgVisibilityShow />
