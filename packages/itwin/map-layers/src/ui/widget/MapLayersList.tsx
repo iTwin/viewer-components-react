@@ -9,7 +9,7 @@ import { MapLayerDroppable } from "./MapLayerDroppable";
 
 import type { ScreenViewport } from "@itwin/core-frontend";
 import type { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
-import { AttachLayerPopupButton } from "./map-layer/AttachLayerPopupButton";
+import { AttachLayerPopupButton } from "./AttachLayerPopupButton";
 
 /** @internal */
 interface MapLayersListProps {

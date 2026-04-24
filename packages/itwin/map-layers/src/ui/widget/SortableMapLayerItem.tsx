@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import type React from "react";
 import { useSortable } from "@dnd-kit/react/sortable";
-import type { StyleMapLayerSettings } from "../../Interfaces";
+import type { StyleMapLayerSettings } from "../Interfaces";
 import type { backgroundMapLayersId, overlayMapLayersId } from "./MapLayerDragDrop";
 import { assert } from "@itwin/core-bentley";
 

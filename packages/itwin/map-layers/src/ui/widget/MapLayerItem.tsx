@@ -5,7 +5,7 @@
 import React from "react";
 import type { MapLayerIndex, ScreenViewport } from "@itwin/core-frontend";
 import { MapLayerImageryProviderStatus, MapTileTreeScaleRangeVisibility } from "@itwin/core-frontend";
-import type { MapLayerOptions, StyleMapLayerSettings } from "../../Interfaces";
+import type { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
 import { MapUrlDialog, type SourceState } from "./MapUrlDialog";
 import { ImageMapLayerSettings, type SubLayerId } from "@itwin/core-common";
 import type { useSortable } from "@dnd-kit/react/sortable";

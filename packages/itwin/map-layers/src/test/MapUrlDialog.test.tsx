@@ -16,13 +16,13 @@ import {
 import { getAllByRole, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MapLayersUI } from "../mapLayers";
-import { MapUrlDialog } from "../ui/widget/map-layer/MapUrlDialog";
+import { MapUrlDialog } from "../ui/widget/MapUrlDialog";
 import { AccessClientMock, TokenEndpointMock } from "./AccessClientMock";
 import { TestUtils } from "./TestUtils";
 
 import type { MapSubLayerProps } from "@itwin/core-common";
 import type { DisplayStyle3dState, IModelConnection, MapLayerTokenEndpoint, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
-import type { SourceState } from "../ui/widget/map-layer/MapUrlDialog";
+import type { SourceState } from "../ui/widget/MapUrlDialog";
 
 describe("MapUrlDialog", () => {
   const viewportMock = moq.Mock.ofType<ScreenViewport>();

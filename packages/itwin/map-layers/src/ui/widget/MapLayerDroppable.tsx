@@ -9,16 +9,16 @@ import React from "react";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelApp, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { MapLayersUI } from "../../mapLayers";
-import { AttachLayerButtonType, AttachLayerPopupButton } from "./map-layer/AttachLayerPopupButton";
-import { backgroundMapLayersId, overlayMapLayersId } from "./map-layer/MapLayerDragDrop";
+import { AttachLayerButtonType, AttachLayerPopupButton } from "./AttachLayerPopupButton";
+import { backgroundMapLayersId, overlayMapLayersId } from "./MapLayerDragDrop";
 import { useDroppable } from "@dnd-kit/react";
 
 import type { SubLayerId } from "@itwin/core-common";
 import type { MapLayerIndex, ScreenViewport } from "@itwin/core-frontend";
 import type { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
-import type { SourceState } from "./map-layer/MapUrlDialog";
-import { SortableMapLayerItem } from "./map-layer/SortableMapLayerItem";
-import { MapLayerItem } from "./map-layer/MapLayerItem";
+import type { SourceState } from "./MapUrlDialog";
+import { SortableMapLayerItem } from "./SortableMapLayerItem";
+import { MapLayerItem } from "./MapLayerItem";
 import { CollisionPriority } from "@dnd-kit/abstract";
 
 

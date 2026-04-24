@@ -5,10 +5,10 @@
 import React from "react";
 import { SvgLayers } from "@itwin/itwinui-icons-react";
 import { IconButton, Popover } from "@itwin/itwinui-react";
-import { MapLayersUI } from "../../../mapLayers";
-import { SubLayersPanel } from "../SubLayersTree";
+import { MapLayersUI } from "../../mapLayers";
+import { SubLayersPanel } from "./SubLayersTree";
 
-import type { SubLayersPanelProps } from "../SubLayersTree";
+import type { SubLayersPanelProps } from "./SubLayersTree";
 // cSpell:ignore droppable Sublayer
 
 /** @internal */

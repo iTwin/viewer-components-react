@@ -8,11 +8,11 @@ import { UiFramework } from "@itwin/appui-react";
 import { IModelApp, MapLayerSource, MapLayerSourceStatus, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { SvgAdd, SvgDelete, SvgEdit } from "@itwin/itwinui-icons-react";
 import { Button, IconButton, Input, List, ListItem, Popover, ProgressRadial } from "@itwin/itwinui-react";
-import { MapLayerPreferences } from "../../../MapLayerPreferences";
-import { MapLayersUI } from "../../../mapLayers";
-import { ConfirmMessageDialog } from "../ConfirmMessageDialog";
-import { useSourceMapContext } from "../MapLayerManager";
-import { MapSelectFeaturesDialog } from "../MapSelectFeaturesDialog";
+import { MapLayerPreferences } from "../../MapLayerPreferences";
+import { MapLayersUI } from "../../mapLayers";
+import { ConfirmMessageDialog } from "./ConfirmMessageDialog";
+import { useSourceMapContext } from "./MapLayerManager";
+import { MapSelectFeaturesDialog } from "./MapSelectFeaturesDialog";
 import { MapUrlDialog } from "./MapUrlDialog";
 
 import type { MapSubLayerProps } from "@itwin/core-common";

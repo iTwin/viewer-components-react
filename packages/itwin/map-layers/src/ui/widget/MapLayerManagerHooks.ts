@@ -15,8 +15,8 @@ import { MapLayersSyncUiEventId } from "../../MapLayersActionIds";
 import type { MapImagerySettings, MapSubLayerProps, MapSubLayerSettings } from "@itwin/core-common";
 import type { MapLayerImageryProvider, MapLayerScaleRangeVisibility, MapLayerSource, ScreenViewport, Viewport } from "@itwin/core-frontend";
 import type { StyleMapLayerSettings } from "../Interfaces";
-import type { MapLayerDroppableId } from "./map-layer/MapLayerDragDrop";
-import { backgroundMapLayersId, createMapLayerSortableId, overlayMapLayersId } from "./map-layer/MapLayerDragDrop";
+import type { MapLayerDroppableId } from "./MapLayerDragDrop";
+import { backgroundMapLayersId, createMapLayerSortableId, overlayMapLayersId } from "./MapLayerDragDrop";
 
 interface ViewportMapLayersState {
   backgroundMapVisible: boolean;
