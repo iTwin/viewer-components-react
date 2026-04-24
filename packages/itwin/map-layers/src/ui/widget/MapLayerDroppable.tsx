@@ -44,7 +44,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
   const { isDropTarget, ref } = useDroppable({
     id: droppableId,
     type: "column",
-    accept: 'item',
+    accept: "item",
     collisionPriority: CollisionPriority.Low,
   });
 
