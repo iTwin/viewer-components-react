@@ -11,7 +11,7 @@ import { IModelApp, NotifyMessageDetails, OutputMessagePriority } from "@itwin/c
 import { MapLayersUI } from "../../mapLayers";
 import { AttachLayerButtonType, AttachLayerPopupButton } from "./map-layer/AttachLayerPopupButton";
 import { backgroundMapLayersId, overlayMapLayersId } from "./map-layer/MapLayerDragDrop";
-import { useDroppable } from '@dnd-kit/react';
+import { useDroppable } from "@dnd-kit/react";
 
 import type { SubLayerId } from "@itwin/core-common";
 import type { MapLayerIndex, ScreenViewport } from "@itwin/core-frontend";
@@ -101,6 +101,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
           <SortableMapLayerItem
             key={mapLayerSettings.id}
             layer={mapLayerSettings}
+            disabled={props.disabled}
             droppableId={droppableId}
             index={i}
             renderItem={(sortable) =>

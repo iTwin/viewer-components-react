@@ -270,12 +270,12 @@ export function MapLayerManager(props: MapLayerManagerProps) {
 
   const invertAllLayerVisibility = React.useCallback(
     async (isOverlay?: boolean) => {
-      if (isOverlay === undefined) {
-        if (isOverlay) {
+      if (isOverlay === undefined || !isOverlay) {
           overlayLayers.forEach((layer) => changeLayerVisibility(!layer.visible, layer.layerIndex, layer.isOverlay));
-        } else {
-          backgroundLayers.forEach((layer) => changeLayerVisibility(!layer.visible, layer.layerIndex, layer.isOverlay));
-        }
+      }
+
+      if (isOverlay === undefined || isOverlay) {
+        backgroundLayers.forEach((layer) => changeLayerVisibility(!layer.visible, layer.layerIndex, layer.isOverlay));
       }
     },
     [backgroundLayers, overlayLayers, changeLayerVisibility],
