@@ -15,20 +15,14 @@ import { AttachLayerPopupButton } from "./map-layer/AttachLayerPopupButton";
 interface MapLayersListProps {
   activeViewport: ScreenViewport;
   backgroundMapVisible: boolean;
-  hasSelectedLayers: boolean;
   isOverlay: boolean;
   label: string;
   layersList: StyleMapLayerSettings[];
   mapLayerOptions?: MapLayerOptions;
-  onHideAll: () => Promise<void>;
-  onInvertAll: () => Promise<void>;
   onItemEdited: () => void;
   onItemSelected: (isOverlay: boolean, index: number) => void;
   onItemVisibilityToggleClicked: (mapLayerSettings: StyleMapLayerSettings) => void;
   onMenuItemSelected: (action: string, mapLayerSettings: StyleMapLayerSettings) => void;
-  onSelectAll: () => Promise<void>;
-  onShowAll: () => Promise<void>;
-  onUnlink: () => Promise<void>;
 }
 
 /** @internal */
@@ -42,13 +36,9 @@ export function MapLayersList(props: MapLayersListProps) {
       {props.layersList.length > 0 && (
         <MapLayerActionButtons
           disabled={!props.backgroundMapVisible}
-          disabledUnlink={!props.hasSelectedLayers}
-          hideAll={props.onHideAll}
-          showAll={props.onShowAll}
-          invert={props.onInvertAll}
-          selectAll={props.onSelectAll}
-          unlink={props.onUnlink}
-          checked={props.hasSelectedLayers}
+          isOverlay={props.isOverlay}
+          layersList={props.layersList}
+          activeViewport={props.activeViewport}
         />
       )}
       <MapLayerDroppable

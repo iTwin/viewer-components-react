@@ -28,6 +28,7 @@ export interface SourceMapContextProps {
   readonly loadingSources: boolean;
   readonly bases: BaseMapLayerSettings[];
   readonly refreshFromStyle: () => void;
+  readonly selectAllLayers: (isOverlay: boolean) => void;
   readonly activeViewport?: ScreenViewport;
   readonly backgroundLayers?: StyleMapLayerSettings[];
   readonly overlayLayers?: StyleMapLayerSettings[];
@@ -47,6 +48,7 @@ export const SourceMapContext = React.createContext<SourceMapContextProps>({
   loadingSources: false,
   bases: [],
   refreshFromStyle: () => {},
+  selectAllLayers: () => {},
 });
 
 /** @internal */
@@ -237,69 +239,8 @@ export function MapLayerManager(props: MapLayerManagerProps) {
     [backgroundLayers, overlayLayers, setMapLayers],
   );
 
-  const hasItemSelected = React.useCallback(
-    (isOverlay: boolean) => {
-      const layerList = isOverlay ? overlayLayers : backgroundLayers;
-      if (!layerList) {
-        return false;
-      }
-      return undefined !== layerList?.find((value) => value.selected === true);
-    },
-    [backgroundLayers, overlayLayers],
-  );
-
-  const changeLayerVisibility = React.useCallback(
-    (visible: boolean, index: number, isOverlay: boolean) => {
-      activeViewport.displayStyle.changeMapLayerProps({ visible }, { index, isOverlay });
-    },
-    [activeViewport],
-  );
-
-  const changeAllLayerVisibility = React.useCallback(
-    async (visible: boolean, isOverlay?: boolean) => {
-      if (isOverlay === undefined || !isOverlay) {
-        backgroundLayers.forEach((layer) => changeLayerVisibility(visible, layer.layerIndex, layer.isOverlay));
-      }
-
-      if (isOverlay === undefined || isOverlay) {
-        overlayLayers.forEach((layer) => changeLayerVisibility(visible, layer.layerIndex, layer.isOverlay));
-      }
-    },
-    [backgroundLayers, overlayLayers, changeLayerVisibility],
-  );
-
-  const invertAllLayerVisibility = React.useCallback(
-    async (isOverlay?: boolean) => {
-      if (isOverlay === undefined || !isOverlay) {
-          overlayLayers.forEach((layer) => changeLayerVisibility(!layer.visible, layer.layerIndex, layer.isOverlay));
-      }
-
-      if (isOverlay === undefined || isOverlay) {
-        backgroundLayers.forEach((layer) => changeLayerVisibility(!layer.visible, layer.layerIndex, layer.isOverlay));
-      }
-    },
-    [backgroundLayers, overlayLayers, changeLayerVisibility],
-  );
-
-  const detachSelectedLayers = React.useCallback(
-    async (isOverlay: boolean) => {
-      const layerList = isOverlay ? overlayLayers : backgroundLayers;
-      if (!layerList || layerList.length === 0) {
-        return;
-      }
-
-      for (let i = 0; i < layerList.length; i++) {
-        if (layerList[i].selected) {
-          const index = layerList.length - 1 - i; // Layers are reverted order is display style
-          activeViewport.displayStyle.detachMapLayerByIndex({ isOverlay, index });
-        }
-      }
-    },
-    [activeViewport, backgroundLayers, overlayLayers],
-  );
-
   const selectAllLayers = React.useCallback(
-    async (isOverlay: boolean) => {
+    (isOverlay: boolean) => {
       const layerList = isOverlay ? [...overlayLayers] : [...backgroundLayers];
       const hasCheckedLayer = undefined !== layerList?.find((value) => value.selected === true);
       layerList.forEach((layer) => {
@@ -319,6 +260,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
         sources: mapSources ?? [],
         bases: bgProviders,
         refreshFromStyle: handleRefreshFromStyle,
+        selectAllLayers,
         backgroundLayers,
         overlayLayers,
         mapLayerOptions,
@@ -349,38 +291,26 @@ export function MapLayerManager(props: MapLayerManagerProps) {
                   <MapLayersList
                     activeViewport={props.activeViewport}
                     backgroundMapVisible={backgroundMapVisible}
-                    hasSelectedLayers={hasItemSelected(false)}
                     isOverlay={false}
                     label={underlaysLabel}
                     layersList={backgroundLayers}
                     mapLayerOptions={props.mapLayerOptions}
-                    onHideAll={async () => changeAllLayerVisibility(false, false)}
-                    onInvertAll={async () => invertAllLayerVisibility(false)}
                     onItemEdited={handleRefreshFromStyle}
                     onItemSelected={handleItemSelected}
                     onItemVisibilityToggleClicked={handleLayerVisibilityChange}
                     onMenuItemSelected={handleOnMenuItemSelection}
-                    onSelectAll={async () => selectAllLayers(false)}
-                    onShowAll={async () => changeAllLayerVisibility(true, false)}
-                    onUnlink={async () => detachSelectedLayers(false)}
                   />
                   <MapLayersList
                     activeViewport={props.activeViewport}
                     backgroundMapVisible={backgroundMapVisible}
-                    hasSelectedLayers={hasItemSelected(true)}
                     isOverlay
                     label={overlaysLabel}
                     layersList={overlayLayers}
                     mapLayerOptions={props.mapLayerOptions}
-                    onHideAll={async () => changeAllLayerVisibility(false, true)}
-                    onInvertAll={async () => invertAllLayerVisibility(true)}
                     onItemEdited={handleRefreshFromStyle}
                     onItemSelected={handleItemSelected}
                     onItemVisibilityToggleClicked={handleLayerVisibilityChange}
                     onMenuItemSelected={handleOnMenuItemSelection}
-                    onSelectAll={async () => selectAllLayers(true)}
-                    onShowAll={async () => changeAllLayerVisibility(true, true)}
-                    onUnlink={async () => detachSelectedLayers(true)}
                   />
                 </>
               )}
