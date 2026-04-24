@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore Modeless WMTS
 
-import "./map-layer/MapUrlDialog.scss";
+import "./MapUrlDialog.scss";
 import * as React from "react";
 import { Button, Dialog } from "@itwin/itwinui-react";
 
