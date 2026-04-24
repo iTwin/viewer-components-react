@@ -525,7 +525,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
 
   return (
     <div className="map-manager-header">
-      {loading && (
+      {(loading || loadingSources) && (
         <div className="map-manager-loading-overlay">
           <ProgressRadial as="div" />
         </div>
