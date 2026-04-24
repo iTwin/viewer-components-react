@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "feat: use dnd-kit instead of react-beautiful-dnd for map layers",
+  "packageName": "@itwin/map-layers",
+  "email": "omar.halbouni@bentley.com",
+  "dependentChangeType": "patch"
+}
