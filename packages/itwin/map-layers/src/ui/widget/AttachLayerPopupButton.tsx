@@ -564,6 +564,8 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
     refreshFromStyle();
   }, [refreshFromStyle]);
 
+  const buttonLabel = popupOpen ? hideAttachLayerLabel : showAttachLayerLabel;
+
   return (
     <>
       <Popover
@@ -579,59 +581,71 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
         placement={"bottom-end"}
         className="map-manager-popover-overflow"
       >
-        <AttachLayerTriggerButton
-          ref={buttonRef}
-          buttonType={props.buttonType}
-          disabled={props.disabled}
-          popupOpen={popupOpen}
-          showAttachLayerLabel={showAttachLayerLabel}
-          hideAttachLayerLabel={hideAttachLayerLabel}
-          addCustomLayerButtonLabel={addCustomLayerButtonLabel}
-          onClick={togglePopup}
-        />
+        {
+          props.buttonType === undefined || props.buttonType === AttachLayerButtonType.Icon ?
+            <IconButton
+            disabled={props.disabled}
+            size="small"
+            styleType="borderless"
+            ref={buttonRef}
+            className="map-manager-attach-layer-button"
+            label={buttonLabel}
+            onClick={togglePopup}
+          >
+            <SvgAdd />
+          </IconButton> :
+          <Button
+            ref={buttonRef}
+            title={buttonLabel}
+            disabled={props.disabled}  onClick={togglePopup}
+            styleType={props.buttonType === AttachLayerButtonType.Blue ? "high-visibility" : "cta"}
+          >
+            <span className="map-manager-attach-layer-label">{addCustomLayerButtonLabel}</span>
+          </Button>
+        }
       </Popover>
     </>
   );
 }
 
-interface AttachLayerTriggerButtonProps {
-  buttonType?: AttachLayerButtonType;
-  disabled?: boolean;
-  popupOpen: boolean;
-  showAttachLayerLabel: string;
-  hideAttachLayerLabel: string;
-  addCustomLayerButtonLabel: string;
-  onClick: () => void;
-}
+// interface AttachLayerTriggerButtonProps {
+//   buttonType?: AttachLayerButtonType;
+//   disabled?: boolean;
+//   popupOpen: boolean;
+//   showAttachLayerLabel: string;
+//   hideAttachLayerLabel: string;
+//   addCustomLayerButtonLabel: string;
+//   onClick: () => void;
+// }
 
-const AttachLayerTriggerButton = React.forwardRef<HTMLButtonElement, AttachLayerTriggerButtonProps>(
-  ({ buttonType, disabled, popupOpen, showAttachLayerLabel, hideAttachLayerLabel, addCustomLayerButtonLabel, onClick }, ref) => {
-    const buttonLabel = popupOpen ? hideAttachLayerLabel : showAttachLayerLabel;
+// const AttachLayerTriggerButton = React.forwardRef<HTMLButtonElement, AttachLayerTriggerButtonProps>(
+//   ({ buttonType, disabled, popupOpen, showAttachLayerLabel, hideAttachLayerLabel, addCustomLayerButtonLabel, onClick }, ref) => {
+//     const buttonLabel = popupOpen ? hideAttachLayerLabel : showAttachLayerLabel;
 
-    if (buttonType === undefined || buttonType === AttachLayerButtonType.Icon) {
-      return (
-        <IconButton
-          disabled={disabled}
-          size="small"
-          styleType="borderless"
-          ref={ref}
-          className="map-manager-attach-layer-button"
-          label={buttonLabel}
-          onClick={onClick}
-        >
-          <SvgAdd />
-        </IconButton>
-      );
-    }
+//     if (buttonType === undefined || buttonType === AttachLayerButtonType.Icon) {
+//       return (
+//         <IconButton
+//           disabled={disabled}
+//           size="small"
+//           styleType="borderless"
+//           ref={ref}
+//           className="map-manager-attach-layer-button"
+//           label={buttonLabel}
+//           onClick={onClick}
+//         >
+//           <SvgAdd />
+//         </IconButton>
+//       );
+//     }
 
-    const styleType = buttonType === AttachLayerButtonType.Blue ? "high-visibility" : "cta";
+//     const styleType = buttonType === AttachLayerButtonType.Blue ? "high-visibility" : "cta";
 
-    return (
-      <Button disabled={disabled} ref={ref} styleType={styleType} title={buttonLabel} onClick={onClick}>
-        <span className="map-manager-attach-layer-label">{addCustomLayerButtonLabel}</span>
-      </Button>
-    );
-  },
-);
+//     return (
+//       <Button disabled={disabled} ref={ref} styleType={styleType} title={buttonLabel} onClick={onClick}>
+//         <span className="map-manager-attach-layer-label">{addCustomLayerButtonLabel}</span>
+//       </Button>
+//     );
+//   },
+// );
 
-AttachLayerTriggerButton.displayName = "AttachLayerTriggerButton";
+// AttachLayerTriggerButton.displayName = "AttachLayerTriggerButton";
