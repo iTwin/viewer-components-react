@@ -21,8 +21,8 @@ export function SortableMapLayerItem(props: SortableMapLayerItemProps) {
   const sortable = useSortable({
     id: props.layer.id,
     index: props.index,
-    type: 'item',
-    accept: 'item',
+    type: "item",
+    accept: "item",
     group: props.droppableId,
   });
 
