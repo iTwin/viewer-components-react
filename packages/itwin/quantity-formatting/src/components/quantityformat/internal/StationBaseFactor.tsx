@@ -60,7 +60,9 @@ export function StationBaseFactor(props: StationBaseFactorProps) {
 
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      // Allow control keys (Backspace, Delete, Tab, Escape, Enter, Arrow keys)
+      // Pass through Ctrl/Cmd combos (clipboard: Ctrl+C/V/X/A, undo, etc.)
+      if (event.ctrlKey || event.metaKey) return;
+
       const allowedKeys = [
         'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
         'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',

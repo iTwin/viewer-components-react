@@ -73,17 +73,33 @@ describe("StationBaseFactor", () => {
 
     const input = screen.getByRole("textbox") as HTMLInputElement;
 
-    // Test that decimal point is prevented
-    fireEvent.keyDown(input, { key: "." });
-    expect(input.value).toBe("1"); // Should remain unchanged
+    expect(fireEvent.keyDown(input, { key: "." })).toBe(false);
+    expect(fireEvent.keyDown(input, { key: "a" })).toBe(false);
+    expect(fireEvent.keyDown(input, { key: "-" })).toBe(false);
+  });
 
-    // Test that letters are prevented
-    fireEvent.keyDown(input, { key: "a" });
-    expect(input.value).toBe("1"); // Should remain unchanged
+  it("should pass through Ctrl+V (paste)", () => {
+    const onChange = vi.fn();
+    render(<StationBaseFactor formatProps={defaultStationFormatProps} onChange={onChange} />);
 
-    // Test that negative sign is prevented
-    fireEvent.keyDown(input, { key: "-" });
-    expect(input.value).toBe("1"); // Should remain unchanged
+    const input = screen.getByRole("textbox");
+    expect(fireEvent.keyDown(input, { key: "v", ctrlKey: true })).toBe(true);
+  });
+
+  it("should pass through Cmd+V (paste on macOS)", () => {
+    const onChange = vi.fn();
+    render(<StationBaseFactor formatProps={defaultStationFormatProps} onChange={onChange} />);
+
+    const input = screen.getByRole("textbox");
+    expect(fireEvent.keyDown(input, { key: "v", metaKey: true })).toBe(true);
+  });
+
+  it("should pass through Ctrl+A (select-all)", () => {
+    const onChange = vi.fn();
+    render(<StationBaseFactor formatProps={defaultStationFormatProps} onChange={onChange} />);
+
+    const input = screen.getByRole("textbox");
+    expect(fireEvent.keyDown(input, { key: "a", ctrlKey: true })).toBe(true);
   });
 
   it("should allow only numeric input in onChange", () => {
