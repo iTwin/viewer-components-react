@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fix decimal precision label typo, stale closure in FormatSample sample input, keyboard handling to allow clipboard shortcuts and leading minus sign, and double-minus guard.",
+  "packageName": "@itwin/quantity-formatting-react",
+  "email": "HoangNam.Le@bentley.com",
+  "dependentChangeType": "patch"
+}
