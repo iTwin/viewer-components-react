@@ -17,7 +17,7 @@ describe("FormatSample", () => {
   } as unknown as UnitsProvider;
 
   describe("handleOnValueChange", () => {
-    it("should update input value on each change (no stale closure)", () => {
+    it("should reflect each change event's target value without accumulating stale state", () => {
       render(<FormatSample formatProps={formatProps} unitsProvider={unitsProvider} />);
       const input = screen.getByRole("textbox") as HTMLInputElement;
 
@@ -115,6 +115,19 @@ describe("FormatSample", () => {
       const input = screen.getByRole("textbox") as HTMLInputElement;
 
       // Value is "5", selectionStart defaults to end (1)
+      expect(fireEvent.keyDown(input, { key: "-" })).toBe(false);
+    });
+
+    it("should block a second minus sign when value already starts with one", () => {
+      render(<FormatSample formatProps={formatProps} unitsProvider={unitsProvider} />);
+      const input = screen.getByRole("textbox") as HTMLInputElement;
+
+      // Type leading minus to get "-" as current value
+      fireEvent.change(input, { target: { value: "" } });
+      fireEvent.keyDown(input, { key: "-" });
+      fireEvent.change(input, { target: { value: "-" } });
+
+      // Cursor at 0 but value already starts with "-" — second minus must be blocked
       expect(fireEvent.keyDown(input, { key: "-" })).toBe(false);
     });
   });

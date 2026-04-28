@@ -127,8 +127,8 @@ export function FormatSample(props: FormatSampleProps) {
         return;
       }
 
-      // Only allow minus at position 0 to prevent mid-string negation
-      if (e.key === "-" && (e.currentTarget.selectionStart ?? 0) !== 0) {
+      // Only allow minus at position 0, and only if value doesn't already start with one
+      if (e.key === "-" && ((e.currentTarget.selectionStart ?? 0) !== 0 || sampleValue.startsWith("-"))) {
         e.preventDefault();
         return;
       }
