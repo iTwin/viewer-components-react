@@ -222,7 +222,7 @@ export function createTreeWidgetTestingViewport({ viewState }: { viewState: View
       return treeWidgetViewport.isAlwaysDrawnExclusive;
     },
     changeCategoryDisplay: (props) => treeWidgetViewport.changeCategoryDisplay(props),
-    changeModelDisplay: async (props) => treeWidgetViewport.changeModelDisplay(props),
+    changeModelDisplay: (props) => treeWidgetViewport.changeModelDisplay(props),
     changeSubCategoryDisplay: (props) => treeWidgetViewport.changeSubCategoryDisplay(props),
     clearNeverDrawn: () => treeWidgetViewport.clearNeverDrawn(),
     clearAlwaysDrawn: () => treeWidgetViewport.clearAlwaysDrawn(),
@@ -282,8 +282,21 @@ export function setupInitialDisplayState(props: {
   for (const subCategoryInfo of subCategories) {
     viewport.changeSubCategoryDisplay({ subCategoryId: subCategoryInfo.id, display: subCategoryInfo.visible });
   }
-  for (const categoryInfo of categories) {
-    viewport.changeCategoryDisplay({ categoryIds: categoryInfo.id, display: categoryInfo.visible, enableAllSubCategories: false });
+  const visibleCategories = categories.filter(({ visible }) => visible).map(({ id }) => id);
+  if (visibleCategories.length > 0) {
+    viewport.changeCategoryDisplay({
+      categoryIds: visibleCategories,
+      display: true,
+      enableAllSubCategories: false,
+    });
+  }
+  const hiddenCategories = categories.filter(({ visible }) => !visible).map(({ id }) => id);
+  if (hiddenCategories.length > 0) {
+    viewport.changeCategoryDisplay({
+      categoryIds: hiddenCategories,
+      display: false,
+      enableAllSubCategories: false,
+    });
   }
 
   const alwaysDrawn = elements.filter(({ visible }) => visible).map(({ id }) => id);
@@ -294,8 +307,14 @@ export function setupInitialDisplayState(props: {
   if (neverDrawn.length > 0) {
     viewport.setNeverDrawn({ elementIds: new Set([...neverDrawn, ...(viewport.neverDrawn ?? [])]) });
   }
-  for (const modelInfo of models) {
-    viewport.changeModelDisplay({ modelIds: modelInfo.id, display: modelInfo.visible });
+
+  const visibleModels = models.filter(({ visible }) => visible).map(({ id }) => id);
+  if (visibleModels.length > 0) {
+    viewport.changeModelDisplay({ modelIds: visibleModels, display: true });
+  }
+  const hiddenModels = models.filter(({ visible }) => !visible).map(({ id }) => id);
+  if (hiddenModels.length > 0) {
+    viewport.changeModelDisplay({ modelIds: hiddenModels, display: false });
   }
   viewport.renderFrame();
 }
