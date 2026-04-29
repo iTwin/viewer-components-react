@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
-  bufferCount,
   concat,
   concatAll,
   defaultIfEmpty,
@@ -30,7 +29,7 @@ import {
 } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
 import { createVisibilityStatus } from "../Tooltip.js";
-import { countInSet, fromWithRelease, getOptimalBatchSize, releaseMainThreadOnItemsCount, setDifference } from "../Utils.js";
+import { countInSet, fromWithRelease, releaseMainThreadOnItemsCount, setDifference } from "../Utils.js";
 import { changeElementStateNoChildrenOperator, getVisibilityFromAlwaysAndNeverDrawnElementsImpl, mergeVisibilityStatuses } from "../VisibilityUtils.js";
 
 import type { Observable, Subscription } from "rxjs";
@@ -492,7 +491,7 @@ export class BaseVisibilityHelper implements Disposable {
           this.#props.viewport.setAlwaysDrawn({ elementIds: setDifference(alwaysDrawn, modelAlwaysDrawnElements) });
         }
         this.#props.viewport.changeModelDisplay({ modelIds: modelId, display: true });
-        return from(Id64.iterable(allModelCategories)).pipe(
+        return fromWithRelease({ source: allModelCategories, releaseOnCount: 500 }).pipe(
           categoriesToNotOverride ? filter((modelCategory) => !categoriesToNotOverride.has(modelCategory)) : identity,
           map((categoryId) => this.changeCategoryStateInViewportAccordingToModelVisibility({ modelId, categoryId, on: false, changeSubCategories: false })),
           takeLast(1),
@@ -545,12 +544,9 @@ export class BaseVisibilityHelper implements Disposable {
       if (props.modelId) {
         return this.changeCategoriesUnderModelVisibilityStatus({ categoryIds, modelId: props.modelId, on });
       }
+      this.#props.viewport.changeCategoryDisplay({ categoryIds, display: on, enableAllSubCategories: false });
 
-      const changeCategoriesObs = fromWithRelease({ source: categoryIds, releaseOnCount: 500 }).pipe(
-        bufferCount(getOptimalBatchSize({ totalSize: Id64.sizeOf(categoryIds), maximumBatchSize: 500 })),
-        map((categoryIdsBatch) => this.#props.viewport.changeCategoryDisplay({ categoryIds: categoryIdsBatch, display: on, enableAllSubCategories: false })),
-      );
-      const categoryModelsObs = from(Id64.iterable(categoryIds)).pipe(
+      const categoryModelsObs = fromWithRelease({ source: categoryIds, releaseOnCount: 500 }).pipe(
         mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), models: this.#props.baseIdsCache.getModels({ categoryId, subModels: "include" }) })),
         reduce((acc, { models, categoryId }) => {
           for (const modelId of Id64.iterable(models)) {
@@ -569,7 +565,9 @@ export class BaseVisibilityHelper implements Disposable {
 
       const changeSubModelsObs = categoryModelsObs.pipe(
         mergeMap(([modelId, modelCategories]) =>
-          from(modelCategories).pipe(mergeMap((modelCategoryId) => this.#props.baseIdsCache.getSubModels({ categoryId: modelCategoryId, modelId }))),
+          fromWithRelease({ source: modelCategories, releaseOnCount: 500 }).pipe(
+            mergeMap((modelCategoryId) => this.#props.baseIdsCache.getSubModels({ categoryId: modelCategoryId, modelId })),
+          ),
         ),
         mergeMap((subModels) => this.changeModelsVisibilityStatus({ modelIds: subModels, on })),
       );
@@ -606,14 +604,7 @@ export class BaseVisibilityHelper implements Disposable {
           )
         : EMPTY;
 
-      return merge(
-        changeCategoriesObs,
-        changeSubModelsObs,
-        changeModelsObs,
-        removeCategoriesOverridesObs,
-        changeAlwaysAndNeverDrawnElementsObs,
-        changeSubCategoriesObs,
-      );
+      return merge(changeSubModelsObs, changeModelsObs, removeCategoriesOverridesObs, changeAlwaysAndNeverDrawnElementsObs, changeSubCategoriesObs);
     });
 
     return this.#props.overrideHandler

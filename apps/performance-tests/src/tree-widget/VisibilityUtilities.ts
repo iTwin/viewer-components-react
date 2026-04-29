@@ -222,7 +222,7 @@ export function createTreeWidgetTestingViewport({ viewState }: { viewState: View
       return treeWidgetViewport.isAlwaysDrawnExclusive;
     },
     changeCategoryDisplay: (props) => treeWidgetViewport.changeCategoryDisplay(props),
-    changeModelDisplay: async (props) => treeWidgetViewport.changeModelDisplay(props),
+    changeModelDisplay: (props) => treeWidgetViewport.changeModelDisplay(props),
     changeSubCategoryDisplay: (props) => treeWidgetViewport.changeSubCategoryDisplay(props),
     clearNeverDrawn: () => treeWidgetViewport.clearNeverDrawn(),
     clearAlwaysDrawn: () => treeWidgetViewport.clearAlwaysDrawn(),
@@ -282,9 +282,16 @@ export function setupInitialDisplayState(props: {
   for (const subCategoryInfo of subCategories) {
     viewport.changeSubCategoryDisplay({ subCategoryId: subCategoryInfo.id, display: subCategoryInfo.visible });
   }
-  for (const categoryInfo of categories) {
-    viewport.changeCategoryDisplay({ categoryIds: categoryInfo.id, display: categoryInfo.visible, enableAllSubCategories: false });
-  }
+  viewport.changeCategoryDisplay({
+    categoryIds: categories.filter(({ visible }) => visible).map(({ id }) => id),
+    display: true,
+    enableAllSubCategories: false,
+  });
+  viewport.changeCategoryDisplay({
+    categoryIds: categories.filter(({ visible }) => !visible).map(({ id }) => id),
+    display: false,
+    enableAllSubCategories: false,
+  });
 
   const alwaysDrawn = elements.filter(({ visible }) => visible).map(({ id }) => id);
   if (alwaysDrawn.length > 0) {
@@ -294,9 +301,8 @@ export function setupInitialDisplayState(props: {
   if (neverDrawn.length > 0) {
     viewport.setNeverDrawn({ elementIds: new Set([...neverDrawn, ...(viewport.neverDrawn ?? [])]) });
   }
-  for (const modelInfo of models) {
-    viewport.changeModelDisplay({ modelIds: modelInfo.id, display: modelInfo.visible });
-  }
+  viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => visible).map(({ id }) => id), display: true });
+  viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => !visible).map(({ id }) => id), display: false });
   viewport.renderFrame();
 }
 
