@@ -12,7 +12,7 @@ import { isBeSqliteInterruptError } from "./UseErrorState.js";
 import { fromWithRelease, getClassesByView, getOptimalBatchSize, releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Observable, OperatorFunction } from "rxjs";
-import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { CategoryInfo } from "../CategoriesVisibilityUtils.js";
 import type { TreeWidgetViewport } from "../TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
@@ -128,11 +128,11 @@ export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(props: {
  * @internal
  */
 export async function enableCategoryDisplay(viewport: TreeWidgetViewport, categoryIds: Id64Arg, enabled: boolean, enableAllSubCategories = true) {
-  const removeOverrides = (bufferedCategories: Id64Array) => {
-    const modelsContainingOverrides: string[] = [];
+  const removeOverrides = (bufferedCategories: Id64Set) => {
+    const modelsContainingOverrides = new Set<Id64String>();
     for (const ovr of viewport.perModelCategoryOverrides) {
-      if (Id64.has(bufferedCategories, ovr.categoryId)) {
-        modelsContainingOverrides.push(ovr.modelId);
+      if (bufferedCategories.has(ovr.categoryId)) {
+        modelsContainingOverrides.add(ovr.modelId);
       }
     }
     viewport.setPerModelCategoryOverride({ modelIds: modelsContainingOverrides, categoryIds: bufferedCategories, override: "none" });
@@ -151,7 +151,7 @@ export async function enableCategoryDisplay(viewport: TreeWidgetViewport, catego
       bufferCount(getOptimalBatchSize({ totalSize: Id64.sizeOf(categoryIds), maximumBatchSize: 500 })),
       mergeMap(async (bufferedCategories) => {
         viewport.changeCategoryDisplay({ categoryIds: bufferedCategories, display: enabled, enableAllSubCategories });
-        removeOverrides(bufferedCategories);
+        removeOverrides(new Set(bufferedCategories));
         if (!enabled) {
           await disableSubCategories(bufferedCategories);
         }

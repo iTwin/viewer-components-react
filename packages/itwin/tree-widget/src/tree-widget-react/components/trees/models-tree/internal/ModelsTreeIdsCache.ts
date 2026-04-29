@@ -46,6 +46,7 @@ interface SubjectInfo {
 /** @internal */
 export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
   #subjectInfos: Observable<Map<SubjectId, SubjectInfo>> | undefined;
+  #upToModelInstanceKeyPaths: Map<ModelId, Observable<HierarchyNodeIdentifiersPath>> = new Map();
   #parentSubjectIds: Observable<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   #queryExecutor: LimitingECSqlQueryExecutor;
   #showEmptyModels: boolean;
@@ -302,14 +303,18 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
     );
   }
 
-  public createModelInstanceKeyPaths(modelId: Id64String): Observable<HierarchyNodeIdentifiersPath> {
-    return this.getSubjectInfos().pipe(
-      mergeMap((subjectInfos) => subjectInfos.entries()),
-      filter(([_, subjectInfo]) => subjectInfo.childModelIds.has(modelId)),
-      mergeMap(([modelSubjectId]) =>
-        this.createSubjectInstanceKeysPath(modelSubjectId).pipe(map((path) => [...path, { className: CLASS_NAME_GeometricModel3d, id: modelId }])),
-      ),
-    );
+  public createUpToModelInstanceKeyPaths(modelId: Id64String): Observable<HierarchyNodeIdentifiersPath> {
+    let entry = this.#upToModelInstanceKeyPaths.get(modelId);
+    if (!entry) {
+      entry = this.getSubjectInfos().pipe(
+        mergeMap((subjectInfos) => subjectInfos.entries()),
+        filter(([_, subjectInfo]) => subjectInfo.childModelIds.has(modelId)),
+        mergeMap(([modelSubjectId]) => this.createSubjectInstanceKeysPath(modelSubjectId)),
+        shareReplay(),
+      );
+      this.#upToModelInstanceKeyPaths.set(modelId, entry);
+    }
+    return entry;
   }
 
   public createCategoryInstanceKeyPaths({ categoryIds }: { categoryIds: Id64Array }): Observable<HierarchyNodeIdentifiersPath> {
@@ -361,8 +366,15 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
       mergeMap((categoryId) =>
         this.getModels({ categoryId, subModels: "exclude", includeOnlyIfCategoryOfTopMostElement: true }).pipe(
           mergeAll(),
-          mergeMap((categoryModelId) => this.createModelInstanceKeyPaths(categoryModelId)),
-          map((modelPath) => [...modelPath, { className: CLASS_NAME_SpatialCategory, id: categoryId }]),
+          mergeMap((categoryModelId) =>
+            this.createUpToModelInstanceKeyPaths(categoryModelId).pipe(
+              map((modelPath) => [
+                ...modelPath,
+                { className: CLASS_NAME_GeometricModel3d, id: categoryModelId },
+                { className: CLASS_NAME_SpatialCategory, id: categoryId },
+              ]),
+            ),
+          ),
         ),
       ),
     );

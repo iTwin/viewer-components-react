@@ -784,9 +784,8 @@ export function createGeometricElementInstanceKeyPaths(props: {
     releaseMainThreadOnItemsCount(300),
     map((row) => parseQueryRow(row, groupInfos, separator, elementClassName)),
     mergeMap(({ modelId, elementHierarchyPath, groupingInfo }) =>
-      idsCache.createModelInstanceKeyPaths(modelId).pipe(
+      idsCache.createUpToModelInstanceKeyPaths(modelId).pipe(
         map((modelPath) => {
-          modelPath.pop(); // model is already included in the element hierarchy path
           const path = [...modelPath, ...elementHierarchyPath];
           return {
             path,
@@ -824,7 +823,10 @@ function parseQueryRow(row: ECSqlQueryRow, groupInfos: ElementsGroupInfo[], sepa
 function createInstanceKeyPathsFromTargetItemsObs(
   props: Omit<ModelsTreeInstanceKeyPathsFromTargetItemsProps, "abortSignal" | "componentId"> & { componentId: GuidString; componentName: string },
 ) {
-  const { targetItems, imodelAccess } = props;
+  const { targetItems, imodelAccess, limit } = props;
+  if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT)) {
+    throw new SearchLimitExceededError(limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT);
+  }
   return fromWithRelease({ source: targetItems, releaseOnCount: 2000 }).pipe(
     mergeMap(async (key): Promise<{ key: Id64String; type: number } | { key: ElementsGroupInfo; type: 0 }> => {
       if ("parent" in key) {
@@ -898,7 +900,13 @@ function createSearchPathsForDifferentTypes(
 
         return merge(
           from(ids.subjectIds).pipe(mergeMap((id) => idsCache.createSubjectInstanceKeysPath(id).pipe(map((path) => ({ path, target: id }))))),
-          from(ids.modelIds).pipe(mergeMap((id) => idsCache.createModelInstanceKeyPaths(id).pipe(map((path) => ({ path, target: id }))))),
+          from(ids.modelIds).pipe(
+            mergeMap((id) =>
+              idsCache
+                .createUpToModelInstanceKeyPaths(id)
+                .pipe(map((path) => ({ path: [...path, { className: CLASS_NAME_GeometricModel3d, id }], target: id }))),
+            ),
+          ),
           idsCache.createCategoryInstanceKeyPaths({ categoryIds: ids.categoryIds }).pipe(map((path) => ({ path, target: path[path.length - 1].id }))),
           from(ids.elementIds).pipe(
             bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),

@@ -22,11 +22,18 @@ import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ElementId } from "./Types.js";
 
 /** @internal */
-export function setDifference<T>(lhs: Readonly<Iterable<T>>, rhs: ReadonlySet<T>): Set<T> {
-  const result = new Set<T>();
-  for (const x of lhs) {
-    if (!rhs.has(x)) {
-      result.add(x);
+export function setDifference<T>(lhs: ReadonlySet<T>, rhs: ReadonlySet<T>): Set<T> {
+  let result = new Set<T>();
+  if (lhs.size < rhs.size) {
+    for (const x of lhs) {
+      if (!rhs.has(x)) {
+        result.add(x);
+      }
+    }
+  } else {
+    result = new Set(lhs);
+    for (const x of rhs) {
+      result.delete(x);
     }
   }
   return result;
@@ -49,9 +56,11 @@ export function countInSet(ids: Id64Arg, set: ReadonlySet<Id64String> | undefine
   if (!set?.size) {
     return 0;
   }
+  const { smallerIterable, largerSet } =
+    set.size < Id64.sizeOf(ids) ? { smallerIterable: set, largerSet: Id64.toIdSet(ids) } : { smallerIterable: Id64.iterable(ids), largerSet: set };
   let count = 0;
-  for (const id of Id64.iterable(ids)) {
-    if (set.has(id)) {
+  for (const id of smallerIterable) {
+    if (largerSet.has(id)) {
       ++count;
     }
   }
@@ -164,22 +173,19 @@ export function getIdsFromChildrenTree<T extends object = {}>({
   tree: ChildrenTree<T>;
   predicate?: (props: { depth: number; treeEntry: T }) => boolean;
 }): Set<string> {
-  function getIdsInternal({ childrenTree, depth }: { childrenTree: ChildrenTree<T>; depth: number }): Set<string> {
-    const result = new Set<string>();
+  function getIdsInternal({ childrenTree, depth, resultAccumulator }: { childrenTree: ChildrenTree<T>; depth: number; resultAccumulator: Set<string> }): void {
     for (const [id, entry] of childrenTree) {
       if (!predicate || predicate({ depth, treeEntry: entry })) {
-        result.add(id);
+        resultAccumulator.add(id);
       }
       if (entry.children) {
-        const childrenIds = getIdsInternal({ childrenTree: entry.children, depth: depth + 1 });
-        for (const childId of childrenIds) {
-          result.add(childId);
-        }
+        getIdsInternal({ childrenTree: entry.children, depth: depth + 1, resultAccumulator });
       }
     }
-    return result;
   }
-  return getIdsInternal({ childrenTree: tree, depth: 0 });
+  const result = new Set<string>();
+  getIdsInternal({ childrenTree: tree, depth: 0, resultAccumulator: result });
+  return result;
 }
 
 /**
