@@ -282,16 +282,22 @@ export function setupInitialDisplayState(props: {
   for (const subCategoryInfo of subCategories) {
     viewport.changeSubCategoryDisplay({ subCategoryId: subCategoryInfo.id, display: subCategoryInfo.visible });
   }
-  viewport.changeCategoryDisplay({
-    categoryIds: categories.filter(({ visible }) => visible).map(({ id }) => id),
-    display: true,
-    enableAllSubCategories: false,
-  });
-  viewport.changeCategoryDisplay({
-    categoryIds: categories.filter(({ visible }) => !visible).map(({ id }) => id),
-    display: false,
-    enableAllSubCategories: false,
-  });
+  const visibleCategories = categories.filter(({ visible }) => visible).map(({ id }) => id);
+  if (visibleCategories.length > 0) {
+    viewport.changeCategoryDisplay({
+      categoryIds: visibleCategories,
+      display: true,
+      enableAllSubCategories: false,
+    });
+  }
+  const hiddenCategories = categories.filter(({ visible }) => !visible).map(({ id }) => id);
+  if (hiddenCategories.length > 0) {
+    viewport.changeCategoryDisplay({
+      categoryIds: hiddenCategories,
+      display: false,
+      enableAllSubCategories: false,
+    });
+  }
 
   const alwaysDrawn = elements.filter(({ visible }) => visible).map(({ id }) => id);
   if (alwaysDrawn.length > 0) {
@@ -301,8 +307,15 @@ export function setupInitialDisplayState(props: {
   if (neverDrawn.length > 0) {
     viewport.setNeverDrawn({ elementIds: new Set([...neverDrawn, ...(viewport.neverDrawn ?? [])]) });
   }
-  viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => visible).map(({ id }) => id), display: true });
-  viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => !visible).map(({ id }) => id), display: false });
+
+  const visibleModels = models.filter(({ visible }) => visible).map(({ id }) => id);
+  if (visibleModels.length > 0) {
+    viewport.changeModelDisplay({ modelIds: visibleModels, display: true });
+  }
+  const hiddenModels = models.filter(({ visible }) => !visible).map(({ id }) => id);
+  if (hiddenModels.length > 0) {
+    viewport.changeModelDisplay({ modelIds: hiddenModels, display: false });
+  }
   viewport.renderFrame();
 }
 
