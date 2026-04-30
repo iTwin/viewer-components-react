@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 // __PUBLISH_EXTRACT_START__ QuantityFormat.FormatSetPanelExampleImports
 import { FormatSetPanel } from "@itwin/quantity-formatting-react";
 import type { FormatSet } from "@itwin/ecschema-metadata";
@@ -39,7 +39,7 @@ describe("Quantity formatting", () => {
         render(<FormatSetPanel formatSet={formatSet} editable={true} onFormatSetChange={handleFormatSetChange} />);
         // __PUBLISH_EXTRACT_END__
 
-        expect(screen.getByText("labels.description")).toBeDefined();
+        await waitFor(() => expect(screen.getByText("labels.description")).toBeDefined());
       });
 
       it("renders FormatSetPanel in read-only mode", async () => {
@@ -55,8 +55,10 @@ describe("Quantity formatting", () => {
         render(<FormatSetPanel formatSet={formatSet} editable={false} />);
         // __PUBLISH_EXTRACT_END__
 
-        const labelInput = screen.getByLabelText("labels.description");
-        expect((labelInput as HTMLInputElement).disabled).toBe(true);
+        await waitFor(() => {
+          const labelInput = screen.getByLabelText("labels.description");
+          expect((labelInput as HTMLInputElement).disabled).toBe(true);
+        });
       });
     });
   });

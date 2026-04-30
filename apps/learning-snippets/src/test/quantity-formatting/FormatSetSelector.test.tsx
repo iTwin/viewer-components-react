@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 // __PUBLISH_EXTRACT_START__ QuantityFormat.FormatSetSelectorExampleImports
 import { FormatSetSelector } from "@itwin/quantity-formatting-react";
 import type { FormatSet } from "@itwin/ecschema-metadata";
@@ -55,7 +55,7 @@ describe("Quantity formatting", () => {
         );
         // __PUBLISH_EXTRACT_END__
 
-        expect(screen.getByPlaceholderText("labels.searchFormatSets")).toBeDefined();
+        await waitFor(() => expect(screen.getByPlaceholderText("labels.searchFormatSets")).toBeDefined());
       });
     });
   });

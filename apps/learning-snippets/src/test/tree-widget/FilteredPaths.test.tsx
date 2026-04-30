@@ -12,14 +12,8 @@ import { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import { useModelsTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 import { createStorage } from "@itwin/unified-selection";
 import { cleanup, render, waitFor } from "@testing-library/react";
-import {
-  buildIModel,
-  insertPhysicalElement,
-  insertPhysicalModelWithPartition,
-  insertPhysicalSubModel,
-  insertSpatialCategory,
-  insertSubject,
-} from "../../utils/IModelUtils.js";
+import { insertPhysicalElement, insertPhysicalModelWithPartition, insertPhysicalSubModel, insertSpatialCategory, insertSubject } from "test-utilities";
+import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
 import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
 
@@ -188,27 +182,27 @@ describe("Tree widget", () => {
         });
 
         it("renders custom models tree component with filtered paths using targetItems", async () => {
-          const imodel = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-            const physicalModel2 = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel 2" });
-            const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
-            insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-            const category2 = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory 2" });
-            insertPhysicalElement({ builder, modelId: physicalModel2.id, categoryId: category2.id });
+          const { imodelConnection, ...keys } = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+            const physicalModel2 = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel 2" });
+            const category = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory" });
+            insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+            const category2 = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory 2" });
+            insertPhysicalElement({ imodel, modelId: physicalModel2.id, categoryId: category2.id });
             return { physicalModel, physicalModel2 };
           });
-          const testViewport = getTestViewer(imodel.imodel, true);
+          const testViewport = getTestViewer(imodelConnection, true);
           const unifiedSelectionStorage = createStorage();
           vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
-          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel.imodel);
+          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText, queryByText } = render(
             <CustomModelsTreeComponentWithTargetItems
               selectionStorage={unifiedSelectionStorage}
-              imodel={imodel.imodel}
+              imodel={imodelConnection}
               viewport={testViewport}
-              targetItems={[imodel.physicalModel]}
+              targetItems={[keys.physicalModel]}
             />,
           );
 
@@ -219,30 +213,30 @@ describe("Tree widget", () => {
         });
 
         it("renders custom models tree component with filtered paths when they are modified", async () => {
-          const imodel = await buildIModel(async (builder, testSchema) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "PhysicalModel" });
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-            insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id, userLabel: "test element 1" });
-            insertPhysicalModelWithPartition({ builder, codeValue: "PhysicalModel2" });
-            const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory 2" });
+          const { imodelConnection } = await buildIModel(async (imodel, testSchema) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "PhysicalModel" });
+            const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+            insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id, userLabel: "test element 1" });
+            insertPhysicalModelWithPartition({ imodel, codeValue: "PhysicalModel2" });
+            const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory 2" });
             const element2 = insertPhysicalElement({
-              builder,
+              imodel,
               classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
               userLabel: `element 2`,
               modelId: physicalModel.id,
               categoryId: category2.id,
             });
-            const subModel = insertPhysicalSubModel({ builder, modeledElementId: element2.id });
-            insertPhysicalElement({ builder, userLabel: `test modeling element`, modelId: subModel.id, categoryId: category.id });
+            const subModel = insertPhysicalSubModel({ imodel, modeledElementId: element2.id });
+            insertPhysicalElement({ imodel, userLabel: `test modeling element`, modelId: subModel.id, categoryId: category.id });
           });
-          const testViewport = getTestViewer(imodel.imodel, true);
+          const testViewport = getTestViewer(imodelConnection, true);
           const unifiedSelectionStorage = createStorage();
           vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
-          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel.imodel);
+          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText, queryByText } = render(
-            <CustomModelsTreeComponentWithPostProcessing selectionStorage={unifiedSelectionStorage} imodel={imodel.imodel} viewport={testViewport} />,
+            <CustomModelsTreeComponentWithPostProcessing selectionStorage={unifiedSelectionStorage} imodel={imodelConnection} viewport={testViewport} />,
           );
 
           await waitFor(() => {
@@ -252,42 +246,42 @@ describe("Tree widget", () => {
         });
 
         it("renders custom models tree component with filtered paths when the paths are created using filter", async () => {
-          const { imodel } = await buildIModel(async (builder) => {
+          const { imodelConnection } = await buildIModel(async (imodel) => {
             const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
 
             // category label will match our filter
-            const category = insertSpatialCategory({ builder, codeValue: "category match" });
+            const category = insertSpatialCategory({ imodel, codeValue: "category match" });
 
             // will match childSubject1
-            const childSubject1 = insertSubject({ builder, codeValue: "subject 1 match", parentId: rootSubject.id });
-            const model1 = insertPhysicalModelWithPartition({ builder, codeValue: `model 1`, partitionParentId: childSubject1.id });
-            insertPhysicalElement({ builder, userLabel: `element 1 match`, modelId: model1.id, categoryId: category.id });
+            const childSubject1 = insertSubject({ imodel, codeValue: "subject 1 match", parentId: rootSubject.id });
+            const model1 = insertPhysicalModelWithPartition({ imodel, codeValue: `model 1`, partitionParentId: childSubject1.id });
+            insertPhysicalElement({ imodel, userLabel: `element 1 match`, modelId: model1.id, categoryId: category.id });
 
             // will match model3
-            const childSubject2 = insertSubject({ builder, codeValue: "subject 2", parentId: rootSubject.id });
-            const childSubject3 = insertSubject({ builder, codeValue: "subject 3", parentId: childSubject2.id });
-            const model3 = insertPhysicalModelWithPartition({ builder, codeValue: `model 3 match`, partitionParentId: childSubject3.id });
-            insertPhysicalElement({ builder, userLabel: `element 3 match`, modelId: model3.id, categoryId: category.id });
+            const childSubject2 = insertSubject({ imodel, codeValue: "subject 2", parentId: rootSubject.id });
+            const childSubject3 = insertSubject({ imodel, codeValue: "subject 3", parentId: childSubject2.id });
+            const model3 = insertPhysicalModelWithPartition({ imodel, codeValue: `model 3 match`, partitionParentId: childSubject3.id });
+            insertPhysicalElement({ imodel, userLabel: `element 3 match`, modelId: model3.id, categoryId: category.id });
 
             // will try & fail to match the element
-            const childSubject4 = insertSubject({ builder, codeValue: "subject 4", parentId: rootSubject.id });
-            const model4 = insertPhysicalModelWithPartition({ builder, codeValue: `model 4`, partitionParentId: childSubject4.id });
-            insertPhysicalElement({ builder, userLabel: `element 4 match`, modelId: model4.id, categoryId: category.id });
+            const childSubject4 = insertSubject({ imodel, codeValue: "subject 4", parentId: rootSubject.id });
+            const model4 = insertPhysicalModelWithPartition({ imodel, codeValue: `model 4`, partitionParentId: childSubject4.id });
+            insertPhysicalElement({ imodel, userLabel: `element 4 match`, modelId: model4.id, categoryId: category.id });
 
             return { rootSubject, childSubject1, model1, childSubject3, model3, childSubject4, model4 };
           });
 
-          const testViewport = getTestViewer(imodel, true);
+          const testViewport = getTestViewer(imodelConnection, true);
           const unifiedSelectionStorage = createStorage();
           vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
-          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
+          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
 
           using _ = { [Symbol.dispose]: cleanup };
 
           const { getByText, queryByText, rerender } = render(
             <CustomModelsTreeComponentWithFilterAndTargetItems
               selectionStorage={unifiedSelectionStorage}
-              imodel={imodel}
+              imodel={imodelConnection}
               viewport={testViewport}
               filter={undefined}
             />,
@@ -309,7 +303,7 @@ describe("Tree widget", () => {
           rerender(
             <CustomModelsTreeComponentWithFilterAndTargetItems
               selectionStorage={unifiedSelectionStorage}
-              imodel={imodel}
+              imodel={imodelConnection}
               viewport={testViewport}
               filter="match"
             />,

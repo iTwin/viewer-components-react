@@ -17,7 +17,8 @@ import { TelemetryContextProvider, useCategoriesTree, VisibilityTree, Visibility
 import { IModelApp } from "@itwin/core-frontend";
 import { createStorage } from "@itwin/unified-selection";
 import { cleanup, render, waitFor } from "@testing-library/react";
-import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils.js";
+import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
+import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
 import { getSchemaContext, getTestViewer, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
 
@@ -36,18 +37,16 @@ describe("Tree widget", () => {
         });
 
         it("renders <IModelContentTreeComponent /> with telemetry", async () => {
-          const testImodel = (
-            await buildIModel(async (builder) => {
-              const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-              const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
-              insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-              return { category };
-            })
-          ).imodel;
-          const testViewport = getTestViewer(testImodel);
+          const { imodelConnection } = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+            const category = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory" });
+            insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+            return { category };
+          });
+          const testViewport = getTestViewer(imodelConnection);
           const unifiedSelectionStorage = createStorage();
           vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
-          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(testImodel);
+          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
           const consoleSpy = vi.spyOn(console, "log");
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryTreeComponentExample
@@ -75,18 +74,16 @@ describe("Tree widget", () => {
         });
 
         it("renders custom categories tree with telemetry", async () => {
-          const imodel = (
-            await buildIModel(async (builder) => {
-              const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-              const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
-              insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-              return { category };
-            })
-          ).imodel;
-          const viewport = getTestViewer(imodel);
+          const { imodelConnection } = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+            const category = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory" });
+            insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+            return { category };
+          });
+          const viewport = getTestViewer(imodelConnection);
           const unifiedSelectionStorage = createStorage();
           vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(viewport);
-          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
+          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
           const consoleSpy = vi.spyOn(console, "log");
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryCustomTreeExample
@@ -114,7 +111,7 @@ describe("Tree widget", () => {
                 {...categoriesTreeProps}
                 getSchemaContext={getSchemaContext}
                 selectionStorage={unifiedSelectionStorage}
-                imodel={imodel}
+                imodel={imodelConnection}
                 treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
               />
             );

@@ -41,8 +41,14 @@ function initializeRpcInterfaces(interfaces: RpcInterfaceDefinition[]) {
   /* c8 ignore end */
 }
 
-const testOutputDir = join(tmpdir(), "itwinjs", "viewer-components-react", "test-output");
-fs.mkdirSync(testOutputDir, { recursive: true });
+const defaultTestOutputDir = join(tmpdir(), "itwinjs", "viewer-components-react", "test-output");
+let testOutputDir: string | undefined;
+export function getTestOutputDir() {
+  return testOutputDir ?? defaultTestOutputDir;
+}
+export function setTestOutputDir(dir: string | undefined) {
+  testOutputDir = dir;
+}
 
 let isInitialized = false;
 
@@ -61,6 +67,7 @@ interface InitializeCoreProps {
   frontendProps?: PresentationFrontendProps;
   /** `IModelApp` options */
   frontendAppOptions?: IModelAppOptions;
+  testOutputDir?: string;
 }
 export async function initializeCore(props?: InitializeCoreProps) {
   if (isInitialized) {
@@ -77,6 +84,9 @@ export async function initializeCore(props?: InitializeCoreProps) {
   Logger.setLevel("SQLite", LogLevel.Error);
   Logger.setLevel(PresentationBackendNativeLoggerCategory.ECObjects, LogLevel.Warning);
 
+  setTestOutputDir(props.testOutputDir);
+  fs.mkdirSync(getTestOutputDir(), { recursive: true });
+
   // set up rpc interfaces
   initializeRpcInterfaces(props.rpcs ?? [IModelReadRpcInterface, PresentationRpcInterface]);
 
@@ -87,7 +97,7 @@ export async function initializeCore(props?: InitializeCoreProps) {
     props.backendProps.id = `test-${Guid.createValue()}`;
   }
   await IModelHost.startup({
-    cacheDir: join(testOutputDir, ".cache", `${process.pid}`),
+    cacheDir: join(getTestOutputDir(), ".cache", `${process.pid}`),
     ...props.backendHostProps,
   });
   PresentationBackend.initialize(props.backendProps);

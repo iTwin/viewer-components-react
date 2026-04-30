@@ -21,7 +21,8 @@ import type { ComponentPropsWithoutRef } from "react";
 // __PUBLISH_EXTRACT_END__
 import { createStorage } from "@itwin/unified-selection";
 import { cleanup, render, waitFor } from "@testing-library/react";
-import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils.js";
+import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
+import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
 import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
 
@@ -41,16 +42,16 @@ describe("Tree widget", () => {
         });
 
         it("renders <CategoriesTreeComponent />", async () => {
-          const { imodel } = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-            const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
-            insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          const { imodelConnection } = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+            const category = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory" });
+            insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
             return { category };
           });
-          const testViewport = getTestViewer(imodel);
+          const testViewport = getTestViewer(imodelConnection);
           const unifiedSelectionStorage = createStorage();
           vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
-          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
+          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.CategoriesTreeExample
           function MyWidget() {
@@ -75,16 +76,16 @@ describe("Tree widget", () => {
         });
 
         it("renders custom categories tree", async () => {
-          const { imodel } = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-            const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
-            insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          const { imodelConnection } = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+            const category = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory" });
+            insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
             return { category };
           });
-          const testViewport = getTestViewer(imodel);
+          const testViewport = getTestViewer(imodelConnection);
           const unifiedSelectionStorage = createStorage();
           vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
-          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
+          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.CustomCategoriesTreeExample
           type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
@@ -137,7 +138,7 @@ describe("Tree widget", () => {
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText } = render(
             <CustomCategoriesTreeComponent
-              imodel={imodel}
+              imodel={imodelConnection}
               viewport={testViewport}
               getSchemaContext={getSchemaContext}
               selectionStorage={unifiedSelectionStorage}
