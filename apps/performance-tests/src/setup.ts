@@ -3,21 +3,23 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { initializeCore, terminateCore } from "test-utilities";
 import { afterAll, beforeAll } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 import { EmptyLocalization, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
+import { HierarchyCacheMode } from "@itwin/presentation-backend";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { setLogger } from "@itwin/presentation-hierarchies";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { TreeWidget } from "@itwin/tree-widget-react";
 import { Datasets } from "./util/Datasets.js";
 import { LOGGER } from "./util/Logging.js";
 
 beforeAll(async () => {
   setLogger(LOGGER);
-  await initializePresentationTesting({
+
+  await initializeCore({
     backendHostProps: {
       profileName: "vcr-performance-tests",
     },
@@ -31,6 +33,7 @@ beforeAll(async () => {
     },
     rpcs: [IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
   });
+
   ECSchemaRpcImpl.register();
   await Datasets.initialize("./datasets");
   await UiFramework.initialize();
@@ -38,7 +41,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await terminatePresentationTesting();
+  await terminateCore();
   UiFramework.terminate();
   TreeWidget.terminate();
 });
