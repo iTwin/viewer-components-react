@@ -42,6 +42,12 @@ export function commitMapLayerDrop<TItem extends MapLayerDragStateItem>(
     return false;
   }
 
+  // Ensure the drop occurred over a valid droppable area.
+  // If target is null, the user released outside any droppable, so no-op.
+  if (!event.operation.target) {
+    return false;
+  }
+
   const draggedId = event.operation.source?.id;
   if (draggedId === undefined || typeof draggedId !== "string") {
     return false;
