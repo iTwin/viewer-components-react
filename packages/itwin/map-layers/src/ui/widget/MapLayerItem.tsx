@@ -73,7 +73,6 @@ export function MapLayerItem(props: MapLayerItemProps) {
         title={outOfRange ? props.outOfRangeTitle : undefined}
       >
         {props.activeLayer.name}
-        {/* eslint-disable-next-line @itwin/no-internal */}
         {props.activeLayer.provider?.status === MapLayerImageryProviderStatus.RequireAuth && (
           <IconButton
             disabled={props.disabled}
@@ -123,7 +122,6 @@ export function MapLayerItem(props: MapLayerItemProps) {
           />
         )}
       </div>
-      {/* eslint-disable-next-line @itwin/no-internal */}
       {props.activeLayer.provider?.status === MapLayerImageryProviderStatus.RequireAuth && (
         <IconButton
           disabled={props.disabled}
