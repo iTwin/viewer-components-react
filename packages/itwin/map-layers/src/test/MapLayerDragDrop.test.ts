@@ -40,10 +40,8 @@ describe("MapLayerDragDrop", () => {
         source: { id: `${backgroundMapLayersId}:Layer1` },
         target: { id: `${backgroundMapLayersId}` },
       } as any,
-      active: null as any,
-      over: null as any,
       ...overrides,
-    });
+    } as DragEndEvent);
 
     it("should return false if drag was canceled", () => {
       const displayStyle = createMockDisplayStyle();
@@ -59,7 +57,7 @@ describe("MapLayerDragDrop", () => {
 
     it("should return false if drop target is null (outside droppables)", () => {
       const displayStyle = createMockDisplayStyle();
-      const event = createMockEvent({ operation: { source: { id: `${backgroundMapLayersId}:Layer1` }, target: null } });
+      const event = createMockEvent({ operation: { source: { id: `${backgroundMapLayersId}:Layer1` }, target: null } as any });
       const mapLayers = {
         [backgroundMapLayersId]: [{ id: `${backgroundMapLayersId}:Layer1`, layerIndex: 0 }],
         [overlayMapLayersId]: [],
@@ -117,7 +115,7 @@ describe("MapLayerDragDrop", () => {
         operation: {
           source: { id: `${overlayMapLayersId}:Layer1` },
           target: { id: `${overlayMapLayersId}` },
-        },
+        } as any,
       });
       const itemId = `${overlayMapLayersId}:Layer1`;
       const mapLayers = {
@@ -139,7 +137,7 @@ describe("MapLayerDragDrop", () => {
         operation: {
           source: { id: `${backgroundMapLayersId}:Layer1` },
           target: { id: `${overlayMapLayersId}` },
-        },
+        } as any,
       });
       const itemId = `${backgroundMapLayersId}:Layer1`;
       const mockLayerSettings = { name: "Layer1" };
@@ -166,7 +164,7 @@ describe("MapLayerDragDrop", () => {
         operation: {
           source: { id: `${overlayMapLayersId}:Layer1` },
           target: { id: `${backgroundMapLayersId}` },
-        },
+        } as any,
       });
       const itemId = `${overlayMapLayersId}:Layer1`;
       const mockLayerSettings = { name: "Layer1" };
@@ -194,7 +192,7 @@ describe("MapLayerDragDrop", () => {
         operation: {
           source: { id: `${backgroundMapLayersId}:Layer1` },
           target: { id: `${overlayMapLayersId}` },
-        },
+        } as any,
       });
       const itemId = `${backgroundMapLayersId}:Layer1`;
       const mapLayers = {
