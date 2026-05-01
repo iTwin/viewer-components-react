@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import type { GuidString } from "@itwin/core-bentley";
 import { Guid } from "@itwin/core-bentley";
-import { IModelApp, MapLayerSource } from "@itwin/core-frontend";
+import { MapLayerSource, NoRenderApp, NotificationManager } from "@itwin/core-frontend";
 import { MapLayerPreferences } from "../MapLayerPreferences";
 import { restore, setup } from "./UserPreferencesMock";
 
@@ -13,13 +13,8 @@ describe("MapLayerPreferences", () => {
   const iModelId: GuidString = Guid.createValue();
   const testName: string = `test${Guid.createValue()}`;
 
-  beforeEach(() => {
-    vi.spyOn(IModelApp, "localization", "get").mockReturnValue({
-      getLocalizedString: (_key: string, _args?: object) => "mock localized message",
-    } as any);
-    vi.spyOn(IModelApp, "notifications", "get").mockReturnValue({
-      outputMessage: vi.fn(),
-    } as any);
+  beforeEach(async () => {
+    await NoRenderApp.startup({notifications: new NotificationManager()})
     setup();
   });
 
