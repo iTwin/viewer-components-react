@@ -39,7 +39,7 @@ describe("MapLayerDragDrop", () => {
       operation: {
         source: { id: `${backgroundMapLayersId}:Layer1` },
         target: { id: `${backgroundMapLayersId}` },
-      },
+      } as any,
       active: null as any,
       over: null as any,
       ...overrides,
