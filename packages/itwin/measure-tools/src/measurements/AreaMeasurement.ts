@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { Id64String } from "@itwin/core-bentley";
+import { dispose, type Id64String } from "@itwin/core-bentley";
 import type { XYZProps } from "@itwin/core-geometry";
 import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
 import { Geometry, IModelJson, Point3d, PointString3d, PolygonOps, Transform } from "@itwin/core-geometry";
@@ -218,10 +218,8 @@ export class AreaMeasurement extends Measurement {
   }
 
   private _disposeHandles(): void {
-    this._lengthHandle?.[Symbol.dispose]();
-    this._lengthHandle = undefined;
-    this._areaHandle?.[Symbol.dispose]();
-    this._areaHandle = undefined;
+    this._lengthHandle = dispose(this._lengthHandle);
+    this._areaHandle = dispose(this._areaHandle);
   }
 
   public addPointToDynamicPolygon(point: Point3d): boolean {
@@ -581,8 +579,8 @@ export class AreaMeasurement extends Measurement {
     this.clearCachedGraphics();
   }
 
-  public override async onDisplayUnitsChanged(): Promise<void> {
-    await this._polygon.refreshTextMarker();
+  public override onDisplayUnitsChanged(): void {
+    this._polygon.refreshTextMarker();
   }
 
   /**

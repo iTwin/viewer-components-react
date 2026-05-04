@@ -493,12 +493,14 @@ export class MeasurementManager implements Decorator {
 
     this._formattingRefreshTimeout = setTimeout(() => {
       this._formattingRefreshTimeout = undefined;
-      void this._onFormattingRefresh();
+      this._onFormattingRefresh();
     }, 0);
   }
 
-  private async _onFormattingRefresh(): Promise<void> {
-    await Promise.all(this._measurements.map(async (measurement) => measurement.onDisplayUnitsChanged()));
+  private _onFormattingRefresh(): void {
+    for (const measurement of this._measurements) {
+      measurement.onDisplayUnitsChanged();
+    }
     this.invalidateDecorations();
     MeasurementUIEvents.notifyMeasurementPropertiesChanged(this._measurements);
   }

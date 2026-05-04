@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { Id64String } from "@itwin/core-bentley";
+import { dispose, type Id64String } from "@itwin/core-bentley";
 import type { XYZProps } from "@itwin/core-geometry";
 import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
 import { Arc3d, IModelJson, Point3d, Ray3d, Vector3d } from "@itwin/core-geometry";
@@ -88,7 +88,7 @@ export class RadiusMeasurement extends Measurement {
   public set lengthKoQ(value: string) {
     this._lengthKoQ = value;
     this._disposeHandles();
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
 
   public get lengthPersistenceUnitName(): string {
@@ -97,7 +97,7 @@ export class RadiusMeasurement extends Measurement {
   public set lengthPersistenceUnitName(value: string) {
     this._lengthPersistenceUnitName = value;
     this._disposeHandles();
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
 
   constructor(props?: RadiusMeasurementProps) {
@@ -108,7 +108,7 @@ export class RadiusMeasurement extends Measurement {
     this._lengthPersistenceUnitName = "Units.M";
     if (props) this.readFromJSON(props);
 
-    this.createTextMarker().catch();
+    this.createTextMarker();
   }
 
   public get startPointRef(): Point3d | undefined {
@@ -149,7 +149,7 @@ export class RadiusMeasurement extends Measurement {
 
       if (arc !== undefined && arc instanceof Arc3d) {
         this._arc = arc;
-        this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+        this.createTextMarker();
       }
     }
   }
@@ -303,8 +303,7 @@ export class RadiusMeasurement extends Measurement {
   }
 
   private _disposeHandles(): void {
-    this._lengthHandle?.[Symbol.dispose]();
-    this._lengthHandle = undefined;
+    this._lengthHandle = dispose(this._lengthHandle);
   }
 
   public override onCleanup(): void {
@@ -547,14 +546,10 @@ export class RadiusMeasurement extends Measurement {
     throw Error("No arc defined for measurement");
   }
 
-  private async createTextMarker(): Promise<void> {
+  private createTextMarker(): void {
     if (this._arc !== undefined) {
-      const lengthSpec = FormatterUtils.getSpecFromHandle(this._getLengthHandle(), QuantityType.LengthEngineering);
       const radius = this._arc.circularRadius()!;
-      const fRadius = await FormatterUtils.formatLength(
-        radius,
-        lengthSpec
-      );
+      const fRadius = this._getLengthHandle().format(radius);
       const point = this._arc.center;
       const styleTheme = StyleSet.getOrDefault(this.activeStyle);
 
@@ -593,8 +588,8 @@ export class RadiusMeasurement extends Measurement {
     this.updateMarkerStyle();
   }
 
-  public override async onDisplayUnitsChanged(): Promise<void> {
-    await this.createTextMarker();
+  public override onDisplayUnitsChanged(): void {
+    this.createTextMarker();
   }
 
   private _handleTextMarkerButtonEvent(ev: BeButtonEvent): boolean {

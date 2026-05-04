@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { Id64String } from "@itwin/core-bentley";
+import { dispose, type Id64String } from "@itwin/core-bentley";
 import type { XYAndZ, XYZProps } from "@itwin/core-geometry";
 import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
 import { Geometry, IModelJson, LineSegment3d, Point3d, PointString3d, Range1d, Ray3d, Vector3d } from "@itwin/core-geometry";
@@ -135,7 +135,7 @@ export class DistanceMeasurement extends Measurement {
   public set lengthKoQ(value: string) {
     this._lengthKoQ = value;
     this._disposeHandles();
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
 
   public get lengthPersistenceUnitName(): string {
@@ -144,7 +144,7 @@ export class DistanceMeasurement extends Measurement {
   public set lengthPersistenceUnitName(value: string) {
     this._lengthPersistenceUnitName = value;
     this._disposeHandles();
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
 
   public get bearingKoQ(): string | undefined {
@@ -154,7 +154,7 @@ export class DistanceMeasurement extends Measurement {
   public set bearingKoQ(value: string) {
     this._bearingKoQ = value;
     this._disposeHandles();
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
 
   public get bearingPersistenceUnitName(): string | undefined {
@@ -164,7 +164,7 @@ export class DistanceMeasurement extends Measurement {
   public set bearingPersistenceUnitName(value: string) {
     this._bearingPersistenceUnitName = value;
     this._disposeHandles();
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
 
   public get coordinateKoQ(): string {
@@ -208,25 +208,25 @@ export class DistanceMeasurement extends Measurement {
 
     if (props) this.readFromJSON(props);
 
-    this.createTextMarker().catch();
+    this.createTextMarker();
   }
 
   public setStartPoint(point: XYAndZ) {
     this._startPoint.setFrom(point);
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
     this.buildRunRiseAxes();
   }
 
   public setEndPoint(point: XYAndZ) {
     this._endPoint.setFrom(point);
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
     this.buildRunRiseAxes();
   }
 
   public setStartEndPoints(start: XYAndZ, end: XYAndZ) {
     this._startPoint.setFrom(start);
     this._endPoint.setFrom(end);
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
     this.buildRunRiseAxes();
   }
 
@@ -264,10 +264,8 @@ export class DistanceMeasurement extends Measurement {
   }
 
   private _disposeHandles(): void {
-    this._lengthHandle?.[Symbol.dispose]();
-    this._lengthHandle = undefined;
-    this._coordinateHandle?.[Symbol.dispose]();
-    this._coordinateHandle = undefined;
+    this._lengthHandle = dispose(this._lengthHandle);
+    this._coordinateHandle = dispose(this._coordinateHandle);
   }
 
   public override onCleanup(): void {
@@ -468,27 +466,19 @@ export class DistanceMeasurement extends Measurement {
       this._runRiseAxes.push(dm);
     }
 
-    // When all text markers are ready for display, trigger a refresh
-    const promises = this._runRiseAxes.map(async (value: DistanceMeasurement) =>
-      value.createTextMarker()
-    ); // eslint-disable-line @typescript-eslint/no-floating-promises
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    Promise.all(promises)
-      .then(() => {
-        for (const axis of this._runRiseAxes) {
-          if (axis._textMarker) {
-            axis._textMarker.pickable = !this._isDynamic;
-            axis._textMarker.transientHiliteId = this.transientId;
-            axis._textMarker.setMouseButtonHandler(
-              this.handleTextMarkerButtonEvent.bind(this)
-            );
-          }
-        }
+    for (const axis of this._runRiseAxes) {
+      axis.createTextMarker();
+      if (axis._textMarker) {
+        axis._textMarker.pickable = !this._isDynamic;
+        axis._textMarker.transientHiliteId = this.transientId;
+        axis._textMarker.setMouseButtonHandler(
+          this.handleTextMarkerButtonEvent.bind(this)
+        );
+      }
+    }
 
-        if (this._showAxes)
-          IModelApp.viewManager.invalidateDecorationsAllViews();
-      })
-      .catch();
+    if (this._showAxes)
+      IModelApp.viewManager.invalidateDecorationsAllViews();
   }
 
   protected override onStyleChanged(_isLock: boolean, _prevStyle: string) {
@@ -503,9 +493,11 @@ export class DistanceMeasurement extends Measurement {
     for (const dm of this._runRiseAxes) dm.displayLabels = this.displayLabels;
   }
 
-  public override async onDisplayUnitsChanged(): Promise<void> {
-    await this.createTextMarker();
-    await Promise.all(this._runRiseAxes.map(async (axis: DistanceMeasurement) => axis.onDisplayUnitsChanged()));
+  public override onDisplayUnitsChanged(): void {
+    this.createTextMarker();
+    for (const axis of this._runRiseAxes) {
+      axis.onDisplayUnitsChanged();
+    }
   }
 
   private updateMarkerStyle() {
@@ -519,17 +511,12 @@ export class DistanceMeasurement extends Measurement {
     this._textMarker.applyStyle(tStyle);
   }
 
-  private async createTextMarker(): Promise<void> {
-    const lengthSpec = FormatterUtils.getSpecFromHandle(this._getLengthHandle(), QuantityType.LengthEngineering);
-
+  private createTextMarker(): void {
     const adjustedStartPoint = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._startPoint));
     const adjustedEndPoint = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._endPoint));
 
     const distance = adjustedStartPoint.distance(adjustedEndPoint);
-    const fDistance = await FormatterUtils.formatLength(
-      distance,
-      lengthSpec
-    );
+    const fDistance = this._getLengthHandle().format(distance);
 
     const midPoint = Point3d.createAdd2Scaled(
       this._startPoint,
@@ -720,7 +707,7 @@ export class DistanceMeasurement extends Measurement {
       this._endPoint.setFrom(other._endPoint);
       this._lengthKoQ = other._lengthKoQ;
       this.buildRunRiseAxes();
-      this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+      this.createTextMarker();
     }
   }
 
@@ -751,7 +738,7 @@ export class DistanceMeasurement extends Measurement {
     if (jsonDist.formatting?.coordinate?.persistenceUnitName) this._coordinatePersistenceUnitName = jsonDist.formatting.coordinate.persistenceUnitName;
 
     this.buildRunRiseAxes();
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
 
   /**

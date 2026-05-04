@@ -193,11 +193,10 @@ describe("Measurement tests", () => {
     assert.isTrue(MeasurementManager.instance.measurements.length === 0);
   });
 
-  it("Test measurement manager awaits async formatting refresh before invalidating", async () => {
+  it("Test measurement manager refreshes measurements before invalidating", () => {
     const manager = MeasurementManager.instance as any;
     const fakeMeasurement = {
-      onDisplayUnitsChanged: vi.fn(async () => {
-        await Promise.resolve();
+      onDisplayUnitsChanged: vi.fn(() => {
         refreshed = true;
       }),
     };
@@ -214,7 +213,7 @@ describe("Measurement tests", () => {
     manager._measurements = [fakeMeasurement];
 
     try {
-      await manager._onFormattingRefresh();
+      manager._onFormattingRefresh();
       assert.strictEqual(fakeMeasurement.onDisplayUnitsChanged.mock.calls.length, 1);
       assert.strictEqual(invalidateSpy.mock.calls.length, 1);
       assert.strictEqual(notifySpy.mock.calls.length, 1);

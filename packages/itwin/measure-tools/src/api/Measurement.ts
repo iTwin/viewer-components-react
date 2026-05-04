@@ -843,7 +843,7 @@ export abstract class Measurement {
   protected onLockToggled() { }
 
   /** Notify subclasses when the display units have changed. */
-  public async onDisplayUnitsChanged(): Promise<void> { }
+  public onDisplayUnitsChanged(): void { }
 
 
 

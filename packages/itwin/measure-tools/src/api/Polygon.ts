@@ -171,11 +171,11 @@ export class Polygon {
       this.recomputeFromPoints();
   }
 
-  public async refreshTextMarker(): Promise<void> {
-    await this.setTextToMarker();
+  public refreshTextMarker(): void {
+    this.setTextToMarker();
   }
 
-  private async setTextToMarker() {
+  private setTextToMarker() {
     if (this._overrideText) {
       this._textMarker.textLines = this._overrideText;
     } else {

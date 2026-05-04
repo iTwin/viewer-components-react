@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { Id64String } from "@itwin/core-bentley";
+import { dispose, type Id64String } from "@itwin/core-bentley";
 import type { XYZProps } from "@itwin/core-geometry";
 import { Cartographic } from "@itwin/core-common";
 import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
@@ -109,7 +109,7 @@ export class LocationMeasurement extends Measurement {
   }
   public set location(pt: Point3d) {
     this._location.setFrom(pt);
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
 
   public get geoLocation(): Cartographic | undefined {
@@ -156,7 +156,7 @@ export class LocationMeasurement extends Measurement {
   public set coordinateKoQ(value: string) {
     this._coordinateKoQ = value;
     this._disposeHandles();
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
   public get coordinatePersistenceUnitName(): string {
     return this._coordinatePersistenceUnitName;
@@ -164,7 +164,7 @@ export class LocationMeasurement extends Measurement {
   public set coordinatePersistenceUnitName(value: string) {
     this._coordinatePersistenceUnitName = value;
     this._disposeHandles();
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
 
   public get lengthKoQ(): string {
@@ -173,7 +173,7 @@ export class LocationMeasurement extends Measurement {
   public set lengthKoQ(value: string) {
     this._lengthKoQ = value;
     this._disposeHandles();
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
   public get lengthPersistenceUnitName(): string {
     return this._lengthPersistenceUnitName;
@@ -181,7 +181,7 @@ export class LocationMeasurement extends Measurement {
   public set lengthPersistenceUnitName(value: string) {
     this._lengthPersistenceUnitName = value;
     this._disposeHandles();
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
 
   public get stationKoQ(): string {
@@ -233,7 +233,7 @@ export class LocationMeasurement extends Measurement {
       this.readFromJSON(props);
     }
 
-    this.createTextMarker().catch();
+    this.createTextMarker();
   }
 
   /** Changes the location. Only possible if the measurement is dynamic. */
@@ -329,14 +329,10 @@ export class LocationMeasurement extends Measurement {
   }
 
   private _disposeHandles(): void {
-    this._coordinateHandle?.[Symbol.dispose]();
-    this._coordinateHandle = undefined;
-    this._lengthHandle?.[Symbol.dispose]();
-    this._lengthHandle = undefined;
-    this._stationHandle?.[Symbol.dispose]();
-    this._stationHandle = undefined;
-    this._angleHandle?.[Symbol.dispose]();
-    this._angleHandle = undefined;
+    this._coordinateHandle = dispose(this._coordinateHandle);
+    this._lengthHandle = dispose(this._lengthHandle);
+    this._stationHandle = dispose(this._stationHandle);
+    this._angleHandle = dispose(this._angleHandle);
   }
 
   public override onCleanup(): void {
@@ -367,28 +363,28 @@ export class LocationMeasurement extends Measurement {
     context.addDecorationFromBuilder(xBuilder);
   }
 
-  private async createTextMarker(): Promise<void> {
+  private createTextMarker(): void {
     const adjustedLocation = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._location));
-    const coordinateSpec = FormatterUtils.getSpecFromHandle(this._getCoordinateHandle(), QuantityType.Coordinate);
+    const coordinateHandle = this._getCoordinateHandle();
 
     const entries = [
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_x"
         ),
-        value: await FormatterUtils.formatLength(adjustedLocation.x, coordinateSpec),
+        value: coordinateHandle.format(adjustedLocation.x),
       },
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_y"
         ),
-        value: await FormatterUtils.formatLength(adjustedLocation.y, coordinateSpec),
+        value: coordinateHandle.format(adjustedLocation.y),
       },
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_z"
         ),
-        value: await FormatterUtils.formatLength(adjustedLocation.z, coordinateSpec),
+        value: coordinateHandle.format(adjustedLocation.z),
       },
     ];
 
@@ -529,8 +525,8 @@ export class LocationMeasurement extends Measurement {
     this.updateMarkerStyle();
   }
 
-  public override async onDisplayUnitsChanged(): Promise<void> {
-    await this.createTextMarker();
+  public override onDisplayUnitsChanged(): void {
+    this.createTextMarker();
   }
 
   private updateMarkerStyle() {
@@ -597,7 +593,7 @@ export class LocationMeasurement extends Measurement {
       this._slope = other._slope;
       this._offset = other._offset;
       this._station = other._station;
-      this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+      this.createTextMarker();
     }
   }
 
@@ -635,7 +631,7 @@ export class LocationMeasurement extends Measurement {
     this._slope = jsonLoc.slope;
     this._station = jsonLoc.station;
     this._offset = jsonLoc.offset;
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
 
   /**
