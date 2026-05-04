@@ -16,7 +16,6 @@ export async function buildIModel<TResult extends object>(
   setup: (imodel: IModelDb, testSchema: TestSchemaDefinition) => Promise<TResult>,
 ): Promise<{ imodelConnection: IModelConnection; testSchema: TestSchemaDefinition } & TResult>;
 export async function buildIModel<TResult extends object | undefined>(setup?: (imodel: IModelDb, testSchema: TestSchemaDefinition) => Promise<TResult>) {
-  // let res!: TResult;
   return buildNamedIModel(getTestName(), async (imodel) => {
     const testSchema = (await importSchema({
       imodel,
