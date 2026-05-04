@@ -27,7 +27,6 @@ export default defineConfig({
           "@itwin/imodel-components-react",
           "@itwin/presentation-components",
           "@itwin/presentation-hierarchies-react",
-          "@itwin/presentation-testing",
           "@itwin/tree-widget-react",
         ],
       },
