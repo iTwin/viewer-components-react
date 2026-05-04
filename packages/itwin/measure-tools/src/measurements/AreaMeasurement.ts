@@ -575,7 +575,7 @@ export class AreaMeasurement extends Measurement {
     this.clearCachedGraphics();
   }
 
-  public override onDisplayUnitsChanged(): void {
+  public override async onDisplayUnitsChanged(): Promise<void> {
     this._polygon.recomputeFromPoints();
   }
 

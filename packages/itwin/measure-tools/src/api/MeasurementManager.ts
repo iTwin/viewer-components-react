@@ -419,7 +419,9 @@ export class MeasurementManager implements Decorator {
       if (this._dropGlobalOriginChangedCallback)
         this._dropGlobalOriginChangedCallback();
 
-      this._dropGlobalOriginChangedCallback = iModel.onGlobalOriginChanged.addListener(() => this._onFormattingRefresh(), this);
+      this._dropGlobalOriginChangedCallback = iModel.onGlobalOriginChanged.addListener(() => {
+        void this._onFormattingRefresh();
+      }, this);
       this._iModelIdForGlobalOrigin = iModel.iModelId;
     }
   }
@@ -453,10 +455,10 @@ export class MeasurementManager implements Decorator {
 
     if (undefined === this._dropQuantityFormatterListeners) {
       this._dropQuantityFormatterListeners = IModelApp.quantityFormatter.onFormattingReady.addListener(() => {
-        this._onFormattingRefresh();
+        void this._onFormattingRefresh();
       });
     } else {
-      this._onFormattingRefresh();
+      void this._onFormattingRefresh();
     }
   }
 
@@ -483,10 +485,8 @@ export class MeasurementManager implements Decorator {
     MeasurementCachedGraphicsHandler.instance.stopDecorator();
   }
 
-  private _onFormattingRefresh() {
-    for (const measurement of this._measurements) {
-      measurement.onDisplayUnitsChanged();
-    }
+  private async _onFormattingRefresh(): Promise<void> {
+    await Promise.all(this._measurements.map(async (measurement) => measurement.onDisplayUnitsChanged()));
     this.invalidateDecorations();
     MeasurementUIEvents.notifyMeasurementPropertiesChanged(this._measurements);
   }

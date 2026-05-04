@@ -503,12 +503,9 @@ export class DistanceMeasurement extends Measurement {
     for (const dm of this._runRiseAxes) dm.displayLabels = this.displayLabels;
   }
 
-  public override onDisplayUnitsChanged(): void {
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
-    this._runRiseAxes.forEach((axis: DistanceMeasurement) =>
-      axis.onDisplayUnitsChanged()
-    );
-
+  public override async onDisplayUnitsChanged(): Promise<void> {
+    await this.createTextMarker();
+    await Promise.all(this._runRiseAxes.map(async (axis: DistanceMeasurement) => axis.onDisplayUnitsChanged()));
   }
 
   private updateMarkerStyle() {

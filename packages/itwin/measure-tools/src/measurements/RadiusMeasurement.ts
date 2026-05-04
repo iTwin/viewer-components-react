@@ -593,8 +593,8 @@ export class RadiusMeasurement extends Measurement {
     this.updateMarkerStyle();
   }
 
-  public override onDisplayUnitsChanged(): void {
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  public override async onDisplayUnitsChanged(): Promise<void> {
+    await this.createTextMarker();
   }
 
   private _handleTextMarkerButtonEvent(ev: BeButtonEvent): boolean {

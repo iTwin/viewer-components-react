@@ -86,7 +86,11 @@ function adoptCanonicalFormats(
 
     // The ECSQL query orders by propertyCount DESC, so matches[0] is the KoQ referenced
     // by the most properties in the iModel — i.e., the most relevant format for this item name.
-    const sourceFormat = schemaFormats.get(matches[0])!;
+    const sourceFormatName = matches[0];
+    const sourceFormat = sourceFormatName ? schemaFormats.get(sourceFormatName) : undefined;
+    if (!sourceFormat) {
+      continue;
+    }
     const canonicalFormat: FormatDefinition = { ...sourceFormat, name: canonicalName };
     if (canonicalFormat.label) {
       usedLabels.add(canonicalFormat.label);
