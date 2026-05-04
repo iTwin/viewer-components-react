@@ -249,6 +249,18 @@ describe("Measurement tests", () => {
     assert.isTrue(test.cleanupCalled);
   });
 
+  it("Test measurement manager, stopDecorator does not cleanup managed measurements", () => {
+    const test = new CleanupDistanceMeasurement();
+
+    MeasurementManager.instance.clear();
+    MeasurementManager.instance.addMeasurement(test);
+    MeasurementManager.instance.stopDecorator();
+
+    assert.isFalse(test.cleanupCalled);
+
+    MeasurementManager.instance.clear();
+  });
+
   it("Test measurement allowActions", () => {
     MeasurementActionToolbar.setDefaultActionProvider();
     const didOpen = MeasurementActionToolbar.openToolbar([new NoParticipateMeasurement()], Point2d.create(0, 0));

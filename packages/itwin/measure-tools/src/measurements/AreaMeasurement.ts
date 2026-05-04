@@ -164,14 +164,20 @@ export class AreaMeasurement extends Measurement {
   constructor(props?: AreaMeasurementProps) {
     super(props);
 
-    this._polygon = new Polygon([], false, undefined, props?.formatting?.area);
+    this._lengthKoQ = props?.formatting?.length?.koqName ?? "DefaultToolsUnits.LENGTH";
+    this._lengthPersistenceUnitName = props?.formatting?.length?.persistenceUnitName ?? "Units.M";
+    this._areaKoQ = props?.formatting?.area?.koqName ?? "DefaultToolsUnits.AREA";
+    this._areaPersistenceUnitName = props?.formatting?.area?.persistenceUnitName ?? "Units.SQ_M";
+    this._polygon = new Polygon(
+      [],
+      false,
+      undefined,
+      { koqName: this._areaKoQ, persistenceUnitName: this._areaPersistenceUnitName },
+      () => FormatterUtils.getSpecFromHandle(this._getAreaHandle(), QuantityType.Area),
+    );
     this._polygon.textMarker.setMouseButtonHandler(
       this.handleTextMarkerButtonEvent.bind(this)
     );
-    this._lengthKoQ = "DefaultToolsUnits.LENGTH";
-    this._lengthPersistenceUnitName = "Units.M";
-    this._areaKoQ = "DefaultToolsUnits.AREA";
-    this._areaPersistenceUnitName = "Units.SQ_M";
     this._polygon.textMarker.transientHiliteId = this.transientId;
     this._polygon.makeSelectable(true);
     this._isDynamic = false;
@@ -576,7 +582,7 @@ export class AreaMeasurement extends Measurement {
   }
 
   public override async onDisplayUnitsChanged(): Promise<void> {
-    this._polygon.recomputeFromPoints();
+    await this._polygon.refreshTextMarker();
   }
 
   /**

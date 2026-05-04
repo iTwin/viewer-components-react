@@ -46,6 +46,7 @@ export class MeasurementManager implements Decorator {
   private _overrideToolTipHandler?: MeasurementToolTipHandler;
   private _overrideGeometryHandler?: MeasurementGeometryHandler;
   private _overrideHitHandler?: MeasurementHitHandler;
+  private _formattingRefreshTimeout?: ReturnType<typeof setTimeout>;
 
   /** Event that is invoked when a measurement has responded to a button event. */
   public readonly onMeasurementButtonEvent: BeUiEvent<MeasurementButtonEvent> = new BeUiEvent<MeasurementButtonEvent>();
@@ -455,22 +456,17 @@ export class MeasurementManager implements Decorator {
 
     if (undefined === this._dropQuantityFormatterListeners) {
       this._dropQuantityFormatterListeners = IModelApp.quantityFormatter.onFormattingReady.addListener(() => {
-        void this._onFormattingRefresh();
+        this._scheduleFormattingRefresh();
       });
-    } else {
-      void this._onFormattingRefresh();
     }
+
+    this._scheduleFormattingRefresh();
   }
 
   /** Removes the decorator singleton from the view manager's list of active decorators. The decorator will still manage measurements, but will not
    * participate in drawing or picking operations.
    */
   public stopDecorator(): void {
-    // Dispose all measurements
-    for (const measurement of this._measurements) {
-      measurement.onCleanup();
-    }
-
     if (this._dropDecoratorCallback) {
       this._dropDecoratorCallback();
       this._dropDecoratorCallback = undefined;
@@ -481,8 +477,24 @@ export class MeasurementManager implements Decorator {
       this._dropQuantityFormatterListeners = undefined;
     }
 
+    if (this._formattingRefreshTimeout) {
+      clearTimeout(this._formattingRefreshTimeout);
+      this._formattingRefreshTimeout = undefined;
+    }
+
     MeasurementCachedGraphicsHandler.instance.setDecorateCallback(undefined);
     MeasurementCachedGraphicsHandler.instance.stopDecorator();
+  }
+
+  private _scheduleFormattingRefresh(): void {
+    if (this._formattingRefreshTimeout) {
+      clearTimeout(this._formattingRefreshTimeout);
+    }
+
+    this._formattingRefreshTimeout = setTimeout(() => {
+      this._formattingRefreshTimeout = undefined;
+      void this._onFormattingRefresh();
+    }, 0);
   }
 
   private async _onFormattingRefresh(): Promise<void> {

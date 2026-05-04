@@ -11,6 +11,7 @@ import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "./G
 import { TextMarker } from "./TextMarker.js";
 
 import type { DecorateContext, GraphicBuilder} from "@itwin/core-frontend";
+import type { FormatterSpec } from "@itwin/core-quantity";
 import type { TextEntry} from "./TextMarker.js";
 import type { MeasurementFormattingProps } from "./MeasurementProps.js";
 export class Polygon {
@@ -29,6 +30,7 @@ export class Polygon {
   private _styleSet: StyleSet;
   private _areaKoQ: string;
   private _areaPersistenceUnitName: string;
+  private _areaFormatterSpecProvider?: () => FormatterSpec | undefined;
 
   public get points(): Point3d[] {
     return this._points;
@@ -108,9 +110,21 @@ export class Polygon {
     this.recomputeFromPoints();
   }
 
-  constructor(points: Point3d[], copyPoints: boolean = true, styleSet?: StyleSet, formatting?: MeasurementFormattingProps) {
+  public set areaFormatterSpecProvider(provider: (() => FormatterSpec | undefined) | undefined) {
+    this._areaFormatterSpecProvider = provider;
+    this.setTextToMarker();
+  }
+
+  constructor(
+    points: Point3d[],
+    copyPoints: boolean = true,
+    styleSet?: StyleSet,
+    formatting?: MeasurementFormattingProps,
+    areaFormatterSpecProvider?: () => FormatterSpec | undefined,
+  ) {
     this._areaKoQ = formatting?.koqName ?? "DefaultToolsUnits.AREA";
     this._areaPersistenceUnitName = formatting?.persistenceUnitName ?? "Units.SQ_M";
+    this._areaFormatterSpecProvider = areaFormatterSpecProvider;
     this._styleSet = (styleSet !== undefined) ? styleSet : StyleSet.default;
     this.drawMarker = true;
     this.drawFillArea = true;
@@ -157,12 +171,16 @@ export class Polygon {
       this.recomputeFromPoints();
   }
 
+  public async refreshTextMarker(): Promise<void> {
+    await this.setTextToMarker();
+  }
+
   private async setTextToMarker() {
     if (this._overrideText) {
       this._textMarker.textLines = this._overrideText;
     } else {
       const lines: string[] = [];
-      const areaFormatter = FormatterUtils.getFormatterSpecWithFallback(this._areaKoQ, this._areaPersistenceUnitName, QuantityType.Area);
+      const areaFormatter = this._areaFormatterSpecProvider?.() ?? FormatterUtils.getFormatterSpecWithFallback(this._areaKoQ, this._areaPersistenceUnitName, QuantityType.Area);
       if (undefined !== areaFormatter)
         lines.push(IModelApp.quantityFormatter.formatQuantity(this.area, areaFormatter));
 

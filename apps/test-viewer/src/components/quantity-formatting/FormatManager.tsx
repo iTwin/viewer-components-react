@@ -12,9 +12,9 @@ import type { FormatDefinition, FormatsProvider } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
 
 // QuantityFormatter's _formatSpecsRegistry uses canonical names like "DefaultToolsUnits.LENGTH",
-// not schema names like "CivilUnits.LENGTH". When a format edit fires onFormatsChanged,
-// the QuantityFormatter only rebuilds entries whose name is in the registry. To ensure
-// edits propagate, we store formats under canonical names and alias schema KoQs to them.
+// not schema names like "CivilUnits.LENGTH". To keep measurement-tool edits propagating in
+// the test viewer without changing the meaning of every schema KoQ, we preserve the original
+// schema entries and add canonical measurement keys as aliases to selected schema entries.
 const canonicalByItemName: Record<string, string> = {
   LENGTH: "DefaultToolsUnits.LENGTH",
   ANGLE: "DefaultToolsUnits.ANGLE",
@@ -66,44 +66,25 @@ async function querySchemaFormats(
 }
 
 /**
- * For each canonical KoQ (e.g., DefaultToolsUnits.LENGTH), adopt a matching schema format
- * under the canonical name. The adopted format's `name` is changed so addFormat() fires
- * with the canonical name, which the QuantityFormatter's registry recognizes.
- * Original schema entries become string aliases (hidden from the format selector UI).
- *
- * Consumes matched entries from `schemaFormats` so Phase 3 only sees remainders.
+ * For each canonical KoQ (e.g., DefaultToolsUnits.LENGTH), add an alias to the selected
+ * schema entry so QuantityFormatter registry updates continue to reach the measurement tools.
+ * Original schema entries stay intact and are added separately.
  */
-function adoptCanonicalFormats(
-  schemaFormats: Map<string, FormatDefinition>,
-  byItemName: Map<string, string[]>,
-  usedLabels: Set<string>,
-): Record<string, FormatDefinition | string> {
-  const formats: Record<string, FormatDefinition | string> = {};
+function addCanonicalAliases(byItemName: Map<string, string[]>): Record<string, string> {
+  const formats: Record<string, string> = {};
 
   for (const [itemName, canonicalName] of Object.entries(canonicalByItemName)) {
     const matches = byItemName.get(itemName);
     if (!matches || matches.length === 0) continue;
 
     // The ECSQL query orders by propertyCount DESC, so matches[0] is the KoQ referenced
-    // by the most properties in the iModel — i.e., the most relevant format for this item name.
+    // by the most properties in the iModel — i.e., the most relevant default source for this item name.
     const sourceFormatName = matches[0];
-    const sourceFormat = sourceFormatName ? schemaFormats.get(sourceFormatName) : undefined;
-    if (!sourceFormat) {
+    if (!sourceFormatName || sourceFormatName === canonicalName) {
       continue;
     }
-    const canonicalFormat: FormatDefinition = { ...sourceFormat, name: canonicalName };
-    if (canonicalFormat.label) {
-      usedLabels.add(canonicalFormat.label);
-    }
-    formats[canonicalName] = canonicalFormat;
 
-    // Alias all matching schema KoQs to the canonical entry (hidden in the format selector)
-    for (const matchName of matches) {
-      if (matchName !== canonicalName) {
-        formats[matchName] = canonicalName;
-      }
-      schemaFormats.delete(matchName);
-    }
+    formats[canonicalName] = sourceFormatName;
   }
 
   return formats;
@@ -113,10 +94,7 @@ function adoptCanonicalFormats(
  * Add remaining schema KoQs that don't match any canonical entry.
  * Clones format objects before modifying labels to avoid mutating provider-owned instances.
  */
-function addRemainingFormats(
-  schemaFormats: Map<string, FormatDefinition>,
-  usedLabels: Set<string>,
-): Record<string, FormatDefinition> {
+function addSchemaFormats(schemaFormats: Map<string, FormatDefinition>, usedLabels: Set<string>): Record<string, FormatDefinition> {
   const formats: Record<string, FormatDefinition> = {};
   for (const [formatName, format] of schemaFormats) {
     // Clone to avoid mutating the SchemaFormatsProvider's cached objects
@@ -133,6 +111,15 @@ function addRemainingFormats(
     formats[formatName] = entry;
   }
   return formats;
+}
+
+function getCanonicalFormatName(formatName: string): string | undefined {
+  if (Object.values(canonicalByItemName).includes(formatName)) {
+    return formatName;
+  }
+
+  const itemName = formatName.split(".")[1];
+  return itemName ? canonicalByItemName[itemName] : undefined;
 }
 
 export class FormatManager {
@@ -166,6 +153,20 @@ export class FormatManager {
 
   public get activeFormatSetFormatsProvider(): FormatSetFormatsProvider | undefined {
     return this._activeFormatSetFormatsProvider;
+  }
+
+  public async updateActiveFormat(formatKey: string, format: FormatDefinition): Promise<void> {
+    const provider = this._activeFormatSetFormatsProvider;
+    if (!provider) {
+      return;
+    }
+
+    await provider.addFormat(formatKey, { ...format, name: formatKey });
+
+    const canonicalFormatName = getCanonicalFormatName(formatKey);
+    if (canonicalFormatName && canonicalFormatName !== formatKey) {
+      await provider.addFormat(canonicalFormatName, formatKey);
+    }
   }
 
   /** Initialize with a set of format sets to use */
@@ -258,8 +259,8 @@ export class FormatManager {
       // If there are duplicate labels, use the unique fullName of the KoQ instead of its label.
       const usedLabels = new Set<string>();
 
-      const canonicalEntries = adoptCanonicalFormats(schemaFormats, byItemName, usedLabels);
-      const remainingEntries = addRemainingFormats(schemaFormats, usedLabels);
+      const canonicalEntries = addCanonicalAliases(byItemName);
+      const remainingEntries = addSchemaFormats(schemaFormats, usedLabels);
 
       const schemaFormatSet: FormatSet = {
         name: "AutogeneratedFormatSet",

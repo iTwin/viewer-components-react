@@ -108,20 +108,21 @@ describe("AreaMeasurement tests", () => {
     }
   });
 
-  it("Test fallback from getFormatterSpec in setTextToMarker", async () => {
-    // Mock getSpecsByNameAndUnit to return undefined (simulating KoQ lookup failure)
-    const originalGetSpecsByNameAndUnit = IModelApp.quantityFormatter.getSpecsByNameAndUnit;
+  it("Test fallback from getSpecFromHandle in setTextToMarker", async () => {
+    const originalGetFormatSpecHandle = IModelApp.quantityFormatter.getFormatSpecHandle;
     const originalFindFormatterSpecByQuantityType = IModelApp.quantityFormatter.findFormatterSpecByQuantityType;
     const originalFormatQuantity = IModelApp.quantityFormatter.formatQuantity;
 
-    const getSpecsByNameAndUnitSpy = vi.fn().mockReturnValue(undefined);
     const findFormatterSpecSpy = vi.fn().mockReturnValue({
       format: { formatTraits: 0 },
       persistenceUnit: { name: "Units.SQ_M" },
     });
     const formatQuantitySpy = vi.fn().mockReturnValue("1.5 m²");
 
-    IModelApp.quantityFormatter.getSpecsByNameAndUnit = getSpecsByNameAndUnitSpy;
+    IModelApp.quantityFormatter.getFormatSpecHandle = vi.fn().mockReturnValue({
+      formatterSpec: undefined,
+      [Symbol.dispose]: vi.fn(),
+    } as any);
     IModelApp.quantityFormatter.findFormatterSpecByQuantityType = findFormatterSpecSpy;
     IModelApp.quantityFormatter.formatQuantity = formatQuantitySpy;
 
@@ -132,7 +133,6 @@ describe("AreaMeasurement tests", () => {
       );
 
       // Clear previous calls from construction
-      getSpecsByNameAndUnitSpy.mockClear();
       findFormatterSpecSpy.mockClear();
       formatQuantitySpy.mockClear();
 
@@ -141,10 +141,6 @@ describe("AreaMeasurement tests", () => {
 
       // Wait for any async operations
       await new Promise(resolve => setTimeout(resolve, 10));
-
-      // Verify that the KoQ lookup was attempted in setTextToMarker
-      assert.isTrue(getSpecsByNameAndUnitSpy.mock.calls.length > 0, "getSpecsByNameAndUnit should have been called in setTextToMarker");
-      assert.strictEqual(getSpecsByNameAndUnitSpy.mock.calls[0][0].name, "DefaultToolsUnits.AREA", "Should lookup the area KoQ string in setTextToMarker");
 
       // Verify that the fallback method was called
       assert.isTrue(findFormatterSpecSpy.mock.calls.length > 0, "findFormatterSpecByQuantityType should have been called as fallback in setTextToMarker");
@@ -158,7 +154,7 @@ describe("AreaMeasurement tests", () => {
       assert.isDefined(measurement.polygon);
       assert.isDefined(measurement.polygon.textMarker);
     } finally {
-      IModelApp.quantityFormatter.getSpecsByNameAndUnit = originalGetSpecsByNameAndUnit;
+      IModelApp.quantityFormatter.getFormatSpecHandle = originalGetFormatSpecHandle;
       IModelApp.quantityFormatter.findFormatterSpecByQuantityType = originalFindFormatterSpecByQuantityType;
       IModelApp.quantityFormatter.formatQuantity = originalFormatQuantity;
     }
