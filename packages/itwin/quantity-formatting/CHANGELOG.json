@@ -2,6 +2,21 @@
   "name": "@itwin/quantity-formatting-react",
   "entries": [
     {
+      "date": "Tue, 28 Apr 2026 15:59:28 GMT",
+      "version": "0.1.5",
+      "tag": "@itwin/quantity-formatting-react_v0.1.5",
+      "comments": {
+        "patch": [
+          {
+            "author": "HoangNam.Le@bentley.com",
+            "package": "@itwin/quantity-formatting-react",
+            "commit": "b53f46d078f3a6fe6dbe556bcf52d31dda8655c6",
+            "comment": "Fix decimal precision label typo, stale closure in FormatSample sample input, keyboard handling to allow clipboard shortcuts and leading minus sign, and double-minus guard."
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 15 Jan 2026 14:30:28 GMT",
       "version": "0.1.4",
       "tag": "@itwin/quantity-formatting-react_v0.1.4",

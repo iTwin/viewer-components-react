@@ -1,8 +1,16 @@
 # Change Log - @itwin/quantity-formatting-react
 
-<!-- This log was last generated on Thu, 15 Jan 2026 14:30:28 GMT and should not be manually modified. -->
+<!-- This log was last generated on Tue, 28 Apr 2026 15:59:28 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.1.5
+
+Tue, 28 Apr 2026 15:59:28 GMT
+
+### Patches
+
+- Fix decimal precision label typo, stale closure in FormatSample sample input, keyboard handling to allow clipboard shortcuts and leading minus sign, and double-minus guard. ([#1666](https://github.com/iTwin/viewer-components-react/pull/1666))
 
 ## 0.1.4
 
