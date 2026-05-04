@@ -20,6 +20,9 @@ import type { IModelAppOptions } from "@itwin/core-frontend";
 import type { PresentationManagerProps as PresentationBackendProps } from "@itwin/presentation-backend";
 import type { PresentationProps as PresentationFrontendProps } from "@itwin/presentation-frontend";
 
+// eslint-disable-next-line @typescript-eslint/no-deprecated
+export { HierarchyCacheMode } from "@itwin/presentation-backend";
+
 function initializeRpcInterfaces(interfaces: RpcInterfaceDefinition[]) {
   const config = class extends RpcDefaultConfiguration {
     public override interfaces: any = () => interfaces;

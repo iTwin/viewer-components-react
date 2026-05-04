@@ -3,16 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { Id64 } from "@itwin/core-bentley";
-import { BisCodeSpec, IModel, IModelReadRpcInterface } from "@itwin/core-common";
-import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
-import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { ExternalSourcesTreeDefinition } from "../../../tree-widget-react/components/trees/external-sources-tree/ExternalSourcesTreeDefinition.js";
 import {
-  buildIModel,
+  HierarchyCacheMode,
+  initializeCore,
   insertExternalSource,
   insertExternalSourceAspect,
   insertExternalSourceAttachment,
@@ -20,18 +13,27 @@ import {
   insertPhysicalModelWithPartition,
   insertRepositoryLink,
   insertSpatialCategory,
-} from "../../IModelUtils.js";
+  terminateCore,
+} from "test-utilities";
+import { Id64 } from "@itwin/core-bentley";
+import { BisCodeSpec, Code, IModel, IModelReadRpcInterface } from "@itwin/core-common";
+import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
+import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
+import { PresentationRpcInterface } from "@itwin/presentation-common";
+import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
+import { ExternalSourcesTreeDefinition } from "../../../tree-widget-react/components/trees/external-sources-tree/ExternalSourcesTreeDefinition.js";
+import { buildIModel } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 
+import type { IModelDb } from "@itwin/core-backend";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { TestIModelBuilder } from "@itwin/presentation-testing";
 
 describe("External sources tree", () => {
   describe("Hierarchy definition", () => {
     before(async function () {
-      await initializePresentationTesting({
+      await initializeCore({
         backendProps: {
           caching: {
             hierarchies: {
@@ -47,20 +49,20 @@ describe("External sources tree", () => {
     });
 
     after(async function () {
-      await terminatePresentationTesting();
+      await terminateCore();
     });
 
     it("creates auto-expanded root nodes", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (imodel) => {
         const { externalSource: rootExternalSource } = insertRootExternalSource({
-          builder,
+          imodel,
           repositoryLinkProps: { codeValue: "Test repo link" },
           externalSourceProps: { codeValue: "Test external source" },
         });
         return { rootExternalSource };
       });
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createExternalSourcesTreeProvider(imodel);
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createExternalSourcesTreeProvider(imodelConnection);
       await validateHierarchy({
         provider,
         expect: [
@@ -76,23 +78,23 @@ describe("External sources tree", () => {
     });
 
     it("creates external sources as external source group node children", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (imodel) => {
         const { externalSource: rootExternalSource, repositoryLink: rootRepositoryLink } = insertRootExternalSource({
-          builder,
+          imodel,
           externalSourceProps: { codeValue: "Root external source" },
         });
-        const externalSourceGroup = insertExternalSource({ builder, classFullName: `BisCore.ExternalSourceGroup`, codeValue: "External source group" });
+        const externalSourceGroup = insertExternalSource({ imodel, classFullName: `BisCore.ExternalSourceGroup`, codeValue: "External source group" });
         const externalSourceAttachment = insertExternalSourceAttachment({
-          builder,
+          imodel,
           parentExternalSourceId: rootExternalSource.id,
           attachedExternalSourceId: externalSourceGroup.id,
         });
-        const childExternalSource = insertExternalSource({ builder, codeValue: "Child external source" });
-        groupExternalSources(builder, externalSourceGroup.id, [childExternalSource.id]);
+        const childExternalSource = insertExternalSource({ imodel, codeValue: "Child external source" });
+        groupExternalSources(imodel, externalSourceGroup.id, [childExternalSource.id]);
         return { rootExternalSource, rootRepositoryLink, externalSourceGroup, externalSourceAttachment, childExternalSource };
       });
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createExternalSourcesTreeProvider(imodel);
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createExternalSourcesTreeProvider(imodelConnection);
       await validateHierarchy({
         provider,
         expect: [
@@ -122,18 +124,18 @@ describe("External sources tree", () => {
     });
 
     it("creates attached external sources as external source node children", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
-        const { externalSource: rootExternalSource } = insertRootExternalSource({ builder });
-        const childExternalSource = insertExternalSource({ builder, codeValue: "Child external source" });
+      await using buildIModelResult = await buildIModel(this, async (imodel) => {
+        const { externalSource: rootExternalSource } = insertRootExternalSource({ imodel });
+        const childExternalSource = insertExternalSource({ imodel, codeValue: "Child external source" });
         const attachment = insertExternalSourceAttachment({
-          builder,
+          imodel,
           parentExternalSourceId: rootExternalSource.id,
           attachedExternalSourceId: childExternalSource.id,
         });
         return { rootExternalSource, childExternalSource, attachment };
       });
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createExternalSourcesTreeProvider(imodel);
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createExternalSourcesTreeProvider(imodelConnection);
       await validateHierarchy({
         provider,
         expect: [
@@ -155,28 +157,28 @@ describe("External sources tree", () => {
     });
 
     it("creates elements as external source node children", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
-        const { externalSource: rootExternalSource } = insertRootExternalSource({ builder });
-        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "Model" });
-        const category = insertSpatialCategory({ builder, codeValue: "Category" });
+      await using buildIModelResult = await buildIModel(this, async (imodel) => {
+        const { externalSource: rootExternalSource } = insertRootExternalSource({ imodel });
+        const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "Model" });
+        const category = insertSpatialCategory({ imodel, codeValue: "Category" });
         const element1 = insertPhysicalElement({
-          builder,
+          imodel,
           userLabel: "Element 1",
           modelId: physicalModel.id,
           categoryId: category.id,
         });
-        insertExternalSourceAspect({ builder, elementId: element1.id, sourceId: rootExternalSource.id });
+        insertExternalSourceAspect({ imodel, elementId: element1.id, sourceId: rootExternalSource.id });
         const element2 = insertPhysicalElement({
-          builder,
+          imodel,
           userLabel: "Element 2",
           modelId: physicalModel.id,
           categoryId: category.id,
         });
-        insertExternalSourceAspect({ builder, elementId: element2.id, sourceId: rootExternalSource.id });
+        insertExternalSourceAspect({ imodel, elementId: element2.id, sourceId: rootExternalSource.id });
         return { rootExternalSource, physicalModel, category, element1, element2 };
       });
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createExternalSourcesTreeProvider(imodel);
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createExternalSourcesTreeProvider(imodelConnection);
       await validateHierarchy({
         provider,
         expect: [
@@ -225,22 +227,23 @@ function createExternalSourcesTreeProvider(imodel: IModelConnection) {
 }
 
 function insertRootExternalSource({
-  builder,
+  imodel,
   repositoryLinkProps,
   externalSourceProps,
 }: {
-  builder: TestIModelBuilder;
-  repositoryLinkProps?: Omit<Parameters<typeof insertRepositoryLink>[0], "builder">;
-  externalSourceProps?: Omit<Parameters<typeof insertExternalSource>[0], "builder" | "repositoryLinkId">;
+  imodel: IModelDb;
+  repositoryLinkProps?: Omit<Parameters<typeof insertRepositoryLink>[0], "imodel">;
+  externalSourceProps?: Omit<Parameters<typeof insertExternalSource>[0], "imodel" | "repositoryLinkId">;
 }) {
-  const synchronizationConfigLinkId = builder.insertElement({
+  const codeSpec = imodel.codeSpecs.getByName(BisCodeSpec.linkElement);
+  const synchronizationConfigLinkId = imodel.elements.insertElement({
     classFullName: "BisCore:SynchronizationConfigLink",
     model: IModel.repositoryModelId,
-    code: builder.createCode(IModel.repositoryModelId, BisCodeSpec.linkElement, `Root configuration link`),
+    code: new Code({ spec: codeSpec.id, scope: IModel.repositoryModelId, value: `Root configuration link` }),
   });
-  const repositoryLink = insertRepositoryLink({ builder, ...repositoryLinkProps });
-  const externalSource = insertExternalSource({ builder, repositoryLinkId: repositoryLink.id, ...externalSourceProps });
-  builder.insertRelationship({
+  const repositoryLink = insertRepositoryLink({ imodel, ...repositoryLinkProps });
+  const externalSource = insertExternalSource({ imodel, repositoryLinkId: repositoryLink.id, ...externalSourceProps });
+  imodel.relationships.insertInstance({
     classFullName: "BisCore:SynchronizationConfigSpecifiesRootSources",
     sourceId: synchronizationConfigLinkId,
     targetId: externalSource.id,
@@ -252,9 +255,9 @@ function insertRootExternalSource({
   };
 }
 
-function groupExternalSources(builder: TestIModelBuilder, groupId: Id64String, groupedExternalSourceIds: Id64String[]) {
+function groupExternalSources(imodel: IModelDb, groupId: Id64String, groupedExternalSourceIds: Id64String[]) {
   groupedExternalSourceIds.forEach((groupedExternalSourceId) => {
-    builder.insertRelationship({
+    imodel.relationships.insertInstance({
       classFullName: "BisCore:ExternalSourceGroupGroupsSources",
       sourceId: groupId,
       targetId: groupedExternalSourceId,

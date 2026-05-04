@@ -4,15 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { ElementOwnsMultiAspects, ExternalSourceAspect, PhysicalModel, SpatialCategory, Subject } from "@itwin/core-backend";
-import { IModelReadRpcInterface } from "@itwin/core-common";
-import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
-import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import { DefaultContentDisplayTypes, KeySet, PresentationRpcInterface, PropertyValueFormat } from "@itwin/presentation-common";
-import { Presentation } from "@itwin/presentation-frontend";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import {
-  buildIModel,
+  HierarchyCacheMode,
+  initializeCore,
   insertExternalSourceAspect,
   insertPhysicalElement,
   insertPhysicalModelWithPartition,
@@ -20,7 +14,15 @@ import {
   insertPhysicalSubModel,
   insertSpatialCategory,
   insertSubject,
-} from "../../IModelUtils.js";
+  terminateCore,
+} from "test-utilities";
+import { ElementOwnsMultiAspects, ExternalSourceAspect, PhysicalModel, SpatialCategory, Subject } from "@itwin/core-backend";
+import { IModelReadRpcInterface } from "@itwin/core-common";
+import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
+import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
+import { DefaultContentDisplayTypes, KeySet, PresentationRpcInterface, PropertyValueFormat } from "@itwin/presentation-common";
+import { Presentation } from "@itwin/presentation-frontend";
+import { buildIModel } from "../../IModelUtils.js";
 import { collect } from "../Common.js";
 import { NodeValidators, validateHierarchyLevel } from "../HierarchyValidation.js";
 import { createModelsTreeProvider } from "./Utils.js";
@@ -33,7 +35,7 @@ import type { DefineHierarchyLevelProps, HierarchyProvider } from "@itwin/presen
 describe("Models tree", () => {
   describe("Hierarchy level filtering", () => {
     before(async function () {
-      await initializePresentationTesting({
+      await initializeCore({
         backendProps: {
           caching: {
             hierarchies: {
@@ -49,17 +51,17 @@ describe("Models tree", () => {
     });
 
     after(async function () {
-      await terminatePresentationTesting();
+      await terminateCore();
     });
 
     it("can filter root level", async function () {
-      await using imodelResult = await buildIModel(this, async (builder) => {
+      await using imodelResult = await buildIModel(this, async (imodel) => {
         const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
-        const childSubject = insertSubject({ builder, codeValue: "child subject 1", description: "", parentId: rootSubject.id });
-        const category = insertSpatialCategory({ builder, codeValue: "category" });
-        const model = insertPhysicalModelWithPartition({ builder, codeValue: `model 1`, partitionParentId: childSubject.id });
+        const childSubject = insertSubject({ imodel, codeValue: "child subject 1", description: "", parentId: rootSubject.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "category" });
+        const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model 1`, partitionParentId: childSubject.id });
         insertPhysicalElement({
-          builder,
+          imodel,
           userLabel: `element`,
           modelId: model.id,
           categoryId: category.id,
@@ -67,8 +69,8 @@ describe("Models tree", () => {
 
         return { rootSubject, childSubject, model, category };
       });
-      const { imodel, ...keys } = imodelResult;
-      using provider = createModelsTreeProvider({ imodel });
+      const { imodelConnection, ...keys } = imodelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
 
       // validate hierarchy level without filter
       validateHierarchyLevel({
@@ -82,7 +84,7 @@ describe("Models tree", () => {
 
       // validate descriptor, that is required for creating the filter
       await validateHierarchyLevelDescriptor({
-        imodel,
+        imodelConnection,
         provider,
         parentNode: undefined,
         expected: {
@@ -129,31 +131,31 @@ describe("Models tree", () => {
     });
 
     it("can filter Subject children level", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (imodel) => {
         const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
-        const category = insertSpatialCategory({ builder, codeValue: "category" });
+        const category = insertSpatialCategory({ imodel, codeValue: "category" });
 
         // set up child subject node
-        const childSubject = insertSubject({ builder, codeValue: "child subject 1", parentId: rootSubject.id });
+        const childSubject = insertSubject({ imodel, codeValue: "child subject 1", parentId: rootSubject.id });
         insertPhysicalElement({
-          builder,
+          imodel,
           userLabel: `root element 1`,
-          modelId: insertPhysicalModelWithPartition({ builder, codeValue: `model 1`, partitionParentId: childSubject.id }).id,
+          modelId: insertPhysicalModelWithPartition({ imodel, codeValue: `model 1`, partitionParentId: childSubject.id }).id,
           categoryId: category.id,
         });
 
         // set up child model node
-        const model = insertPhysicalModelWithPartition({ builder, codeValue: `model 2`, partitionParentId: rootSubject.id });
-        insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
+        const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model 2`, partitionParentId: rootSubject.id });
+        insertPhysicalElement({ imodel, userLabel: `element`, modelId: model.id, categoryId: category.id });
 
         // set up child category node
         insertPhysicalElement({
-          builder,
+          imodel,
           userLabel: `element`,
           modelId: insertPhysicalSubModel({
-            builder,
+            imodel,
             modeledElementId: insertPhysicalPartition({
-              builder,
+              imodel,
               codeValue: `model 3`,
               parentId: rootSubject.id,
 
@@ -165,8 +167,8 @@ describe("Models tree", () => {
 
         return { rootSubject, childSubject, model, category };
       });
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createModelsTreeProvider({ imodel });
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
       const parentNode = {
         key: {
           type: "instances" as const,
@@ -188,7 +190,7 @@ describe("Models tree", () => {
 
       // validate descriptor, that is required for creating the filter
       await validateHierarchyLevelDescriptor({
-        imodel,
+        imodelConnection,
         provider,
         parentNode,
         expected: {
@@ -253,17 +255,17 @@ describe("Models tree", () => {
     });
 
     it("can filter Model children level", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (imodel) => {
         const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
-        const category1 = insertSpatialCategory({ builder, codeValue: "category1" });
-        const category2 = insertSpatialCategory({ builder, codeValue: "category2" });
-        const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
-        insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category1.id });
-        insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category2.id });
+        const category1 = insertSpatialCategory({ imodel, codeValue: "category1" });
+        const category2 = insertSpatialCategory({ imodel, codeValue: "category2" });
+        const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model`, partitionParentId: rootSubject.id });
+        insertPhysicalElement({ imodel, userLabel: `element`, modelId: model.id, categoryId: category1.id });
+        insertPhysicalElement({ imodel, userLabel: `element`, modelId: model.id, categoryId: category2.id });
         return { rootSubject, model, category1, category2 };
       });
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createModelsTreeProvider({ imodel });
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
       const parentNode = {
         key: {
           type: "instances" as const,
@@ -289,7 +291,7 @@ describe("Models tree", () => {
 
       // validate descriptor, that is required for creating the filter
       await validateHierarchyLevelDescriptor({
-        imodel,
+        imodelConnection,
         provider,
         parentNode,
         expected: {
@@ -321,15 +323,15 @@ describe("Models tree", () => {
     });
 
     it("can filter Category children level", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (imodel) => {
         const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
-        const category = insertSpatialCategory({ builder, codeValue: "category" });
-        const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
-        const element = insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "category" });
+        const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model`, partitionParentId: rootSubject.id });
+        const element = insertPhysicalElement({ imodel, userLabel: `element`, modelId: model.id, categoryId: category.id });
         return { rootSubject, model, category, element };
       });
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createModelsTreeProvider({ imodel });
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
       const parentNode = {
         key: {
           type: "instances" as const,
@@ -359,7 +361,7 @@ describe("Models tree", () => {
 
       // validate descriptor, that is required for creating the filter
       await validateHierarchyLevelDescriptor({
-        imodel,
+        imodelConnection,
         provider,
         parentNode,
         expected: {
@@ -405,13 +407,13 @@ describe("Models tree", () => {
     });
 
     it("can filter Element children level with child elements", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (imodel) => {
         const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
-        const category = insertSpatialCategory({ builder, codeValue: "category" });
-        const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
-        const parentElement = insertPhysicalElement({ builder, userLabel: `parent element`, modelId: model.id, categoryId: category.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "category" });
+        const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model`, partitionParentId: rootSubject.id });
+        const parentElement = insertPhysicalElement({ imodel, userLabel: `parent element`, modelId: model.id, categoryId: category.id });
         const childElement = insertPhysicalElement({
-          builder,
+          imodel,
           userLabel: `child element`,
           modelId: model.id,
           categoryId: category.id,
@@ -419,8 +421,8 @@ describe("Models tree", () => {
         });
         return { rootSubject, model, category, parentElement, childElement };
       });
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createModelsTreeProvider({ imodel });
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
       const parentNode = {
         key: {
           type: "instances" as const,
@@ -451,7 +453,7 @@ describe("Models tree", () => {
 
       // validate descriptor, that is required for creating the filter
       await validateHierarchyLevelDescriptor({
-        imodel,
+        imodelConnection,
         provider,
         parentNode,
         expected: {
@@ -497,28 +499,28 @@ describe("Models tree", () => {
     });
 
     it("can filter Element children level with modeling elements", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder, testSchema) => {
+      await using buildIModelResult = await buildIModel(this, async (imodel, testSchema) => {
         const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
-        const category = insertSpatialCategory({ builder, codeValue: "category" });
-        const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "category" });
+        const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model`, partitionParentId: rootSubject.id });
         const modeledElement = insertPhysicalElement({
-          builder,
+          imodel,
           classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
           userLabel: `parent element`,
           modelId: model.id,
           categoryId: category.id,
         });
-        const subModel = insertPhysicalSubModel({ builder, modeledElementId: modeledElement.id });
+        const subModel = insertPhysicalSubModel({ imodel, modeledElementId: modeledElement.id });
         const modelingElement = insertPhysicalElement({
-          builder,
+          imodel,
           userLabel: `modeling element`,
           modelId: subModel.id,
           categoryId: category.id,
         });
         return { rootSubject, model, category, modeledElement, modelingElement };
       });
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createModelsTreeProvider({ imodel });
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
       const parentNode = {
         key: {
           type: "instances" as const,
@@ -549,7 +551,7 @@ describe("Models tree", () => {
 
       // validate descriptor, that is required for creating the filter
       await validateHierarchyLevelDescriptor({
-        imodel,
+        imodelConnection,
         provider,
         parentNode,
         expected: {
@@ -595,16 +597,16 @@ describe("Models tree", () => {
     });
 
     it("creates descriptor with related properties", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (imodel) => {
         const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
-        const category = insertSpatialCategory({ builder, codeValue: "category" });
-        const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
-        const element = insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
-        const aspect = insertExternalSourceAspect({ builder, elementId: element.id, identifier: "test aspect" });
+        const category = insertSpatialCategory({ imodel, codeValue: "category" });
+        const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model`, partitionParentId: rootSubject.id });
+        const element = insertPhysicalElement({ imodel, userLabel: `element`, modelId: model.id, categoryId: category.id });
+        const aspect = insertExternalSourceAspect({ imodel, elementId: element.id, identifier: "test aspect" });
         return { rootSubject, model, category, element, aspect };
       });
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createModelsTreeProvider({ imodel });
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
       const parentNode = {
         key: {
           type: "instances" as const,
@@ -630,7 +632,7 @@ describe("Models tree", () => {
         expect: [NodeValidators.createForClassGroupingNode({ className: keys.element.className })],
       });
       await validateHierarchyLevelDescriptor({
-        imodel,
+        imodelConnection,
         provider,
         parentNode,
         expected: {
@@ -673,16 +675,16 @@ describe("Models tree", () => {
 
     describe("Hierarchy configuration", () => {
       it("filters empty models when `showEmptyModels` set to true", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(this, async (imodel) => {
           const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
 
           // set up child model node
-          const model = insertPhysicalModelWithPartition({ builder, codeValue: `model 2`, partitionParentId: rootSubject.id });
+          const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model 2`, partitionParentId: rootSubject.id });
 
           return { rootSubject, model };
         });
-        const { imodel, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodel, hierarchyConfig: { showEmptyModels: true } });
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { showEmptyModels: true } });
         const parentNode = {
           key: {
             type: "instances" as const,
@@ -700,7 +702,7 @@ describe("Models tree", () => {
 
         // validate descriptor, that is required for creating the filter
         await validateHierarchyLevelDescriptor({
-          imodel,
+          imodelConnection,
           provider,
           parentNode,
           expected: {
@@ -731,27 +733,27 @@ describe("Models tree", () => {
       });
 
       it("filters elements when `elementClassSpecification` is provided", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder, testSchema) => {
+        await using buildIModelResult = await buildIModel(this, async (imodel, testSchema) => {
           const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
-          const category = insertSpatialCategory({ builder, codeValue: "category" });
-          const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "category" });
+          const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model`, partitionParentId: rootSubject.id });
           const element1 = insertPhysicalElement({
-            builder,
+            imodel,
             userLabel: `element`,
             classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
             modelId: model.id,
             categoryId: category.id,
           });
           const element2 = insertPhysicalElement({
-            builder,
+            imodel,
             userLabel: `element`,
             modelId: model.id,
             categoryId: category.id,
           });
           return { rootSubject, model, category, element1, element2 };
         });
-        const { imodel, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodel, hierarchyConfig: { elementClassSpecification: keys.element1.className } });
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { elementClassSpecification: keys.element1.className } });
         const parentNode = {
           key: {
             type: "instances" as const,
@@ -781,7 +783,7 @@ describe("Models tree", () => {
 
         // validate descriptor, that is required for creating the filter
         await validateHierarchyLevelDescriptor({
-          imodel,
+          imodelConnection,
           provider,
           parentNode,
           expected: {
@@ -844,15 +846,15 @@ type RecursivelyPartial<T> = {
   [P in keyof T]?: RecursivelyPartial<T[P]>;
 };
 async function validateHierarchyLevelDescriptor(props: {
-  imodel: IModelConnection;
+  imodelConnection: IModelConnection;
   provider: HierarchyProvider;
   parentNode: DefineHierarchyLevelProps["parentNode"] | undefined;
   expected: RecursivelyPartial<Descriptor>;
 }) {
-  const { imodel, provider, parentNode, expected } = props;
+  const { imodelConnection, provider, parentNode, expected } = props;
   const inputKeys = await collect(provider.getNodeInstanceKeys({ parentNode }));
   const result = await Presentation.presentation.getContentDescriptor({
-    imodel,
+    imodel: imodelConnection,
     rulesetOrId: {
       id: "test",
       rules: [
