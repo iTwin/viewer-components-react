@@ -9,8 +9,7 @@ import { IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { initializeCore, terminateCore } from "test-utilities";
-import { HierarchyCacheMode } from "@itwin/presentation-backend";
+import { HierarchyCacheMode, initializeCore, terminateCore } from "test-utilities";
 
 export async function initializeLearningSnippetsTests() {
   await initializeCore({

@@ -6,6 +6,7 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import {
+  HierarchyCacheMode,
   initializeCore,
   insertPhysicalElement,
   insertPhysicalModelWithPartition,
@@ -18,7 +19,6 @@ import { IModelReadRpcInterface, SubCategoryAppearance } from "@itwin/core-commo
 import { IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, ViewRect } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import { HierarchyCacheMode } from "@itwin/presentation-backend";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import {
   enableCategoryDisplay,

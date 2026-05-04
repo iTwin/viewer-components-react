@@ -3,13 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { initializeCore, terminateCore } from "test-utilities";
+import { HierarchyCacheMode, initializeCore, terminateCore } from "test-utilities";
 import { afterAll, beforeAll } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 import { EmptyLocalization, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import { HierarchyCacheMode } from "@itwin/presentation-backend";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { setLogger } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "@itwin/tree-widget-react";
