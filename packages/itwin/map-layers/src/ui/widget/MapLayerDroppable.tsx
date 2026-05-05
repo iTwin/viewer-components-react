@@ -5,7 +5,6 @@
 // cSpell:ignore droppable Sublayer Basemap
 
 import "./MapLayerDroppable.scss";
-import React from "react";
 import { MapLayersUI } from "../../mapLayers";
 import { AttachLayerButtonType, AttachLayerPopupButton } from "./AttachLayerPopupButton";
 import { backgroundMapLayersId, overlayMapLayersId } from "./MapLayerDragDrop";
@@ -49,12 +48,6 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
     context.isDraggingMapLayer ? "map-manager-attachments--drop-available" : undefined,
     isActiveDropTarget ? "map-manager-attachments--drop-target" : undefined,
   ].filter(Boolean).join(" ");
-  const renderEmptyPlaceholder = (label: string, showAttachButton: boolean) => (
-    <div title={title} className="map-manager-no-layers-container">
-      <span className="map-manager-no-layers-label">{label}</span>
-      {showAttachButton && <AttachLayerPopupButton disabled={context.disabled} buttonType={AttachLayerButtonType.Blue} isOverlay={props.isOverlay} />}
-    </div>
-  );
 
   return (
     <div className={className} ref={ref} key={droppableId}>
@@ -79,7 +72,10 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
           ))}
         </>
         : props.hideEmptyPlaceholder ? undefined
-        : renderEmptyPlaceholder(showEmptyDropHint ? dropLayerLabel : title, !showEmptyDropHint)
+        : <div title={title} className="map-manager-no-layers-container">
+            <span className="map-manager-no-layers-label">{showEmptyDropHint ? dropLayerLabel : title}</span>
+            {!showEmptyDropHint && <AttachLayerPopupButton disabled={context.disabled} buttonType={AttachLayerButtonType.Blue} isOverlay={props.isOverlay} />}
+          </div>
       }
     </div>
   );
