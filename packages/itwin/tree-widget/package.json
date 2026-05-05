@@ -33,10 +33,11 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "npm run -s dual-build && npm run -s copy:assets",
+    "build": "npm run -s link:deps && npm run -s copy:assets && npm run -s dual-build ",
     "dual-build": "npm run -s build:cjs && npm run -s build:esm",
     "build:cjs": "node ../../../scripts/package-cjs.js ./lib/cjs && tsc 1>&2 -p tsconfig.cjs.json",
     "build:esm": "tsc 1>&2 -p tsconfig.esm.json",
+    "link:deps": "node ./scripts/linkWorkspaceDeps.cjs",
     "copy:assets": "npm run -s copy:public && npm run -s copy:cjs && npm run -s copy:esm",
     "copy:public": "cpx \"./public/**/*\" ./lib/public",
     "copy:cjs": "cpx \"./src/**/*.{scss,json}\" ./lib/cjs",
