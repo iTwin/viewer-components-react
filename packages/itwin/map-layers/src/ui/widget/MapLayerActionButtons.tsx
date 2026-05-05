@@ -59,7 +59,7 @@ export const MapLayerActionButtons = ({ disabled, isOverlay, layersList, activeV
 
   return (
     <div className="map-manager-layer-action-buttons">
-      <Checkbox data-testid="select-all-checkbox" checked={hasSelected} onChange={selectAll} className="map-manager-layer-action-unlink-button" />
+      <Checkbox data-testid="select-all-checkbox" disabled={disabled} checked={hasSelected} onChange={selectAll} className="map-manager-layer-action-unlink-button" />
       <IconButton disabled={disabled || !hasSelected} data-testid="detach-label-button" label={detachSelectedLabel} size="small" styleType="borderless" onClick={unlink}>
         <SvgUnlink />
       </IconButton>

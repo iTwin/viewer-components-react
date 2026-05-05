@@ -40,14 +40,12 @@ export function MapLayersList(props: MapLayersListProps) {
         <span className="map-manager-layers-label">{props.label}</span>
         <AttachLayerPopupButton disabled={!props.backgroundMapVisible} isOverlay={props.isOverlay} />
       </div>
-      {props.actionButtonsLayersList.length > 0 && !props.showEmptyDropPlaceholder && (
-        <MapLayerActionButtons
-          disabled={!props.backgroundMapVisible}
-          isOverlay={props.isOverlay}
-          layersList={props.actionButtonsLayersList}
-          activeViewport={props.activeViewport}
-        />
-      )}
+      <MapLayerActionButtons
+        disabled={!props.backgroundMapVisible || props.actionButtonsLayersList.length === 0}
+        isOverlay={props.isOverlay}
+        layersList={props.actionButtonsLayersList}
+        activeViewport={props.activeViewport}
+      />
       <MapLayerDroppable
         disabled={!props.backgroundMapVisible}
         isOverlay={props.isOverlay}

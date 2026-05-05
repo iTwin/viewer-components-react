@@ -206,7 +206,17 @@ export function MapLayerManager(props: MapLayerManagerProps) {
         return;
       }
 
+      if (isSameListContainerTarget(event.operation.source?.id, event.operation.target?.id, targetId, mapLayersRef.current)) {
+        setDropTargetId(targetId);
+        return;
+      }
+
       const nextMapLayers = move(mapLayersRef.current, event) as MapLayerDragState;
+      if (hasSameMapLayerOrder(mapLayersRef.current, nextMapLayers)) {
+        setDropTargetId(targetId);
+        return;
+      }
+
       mapLayersRef.current = nextMapLayers;
       setMapLayers(nextMapLayers);
       setDropTargetId(targetId);
@@ -391,4 +401,24 @@ export function MapLayerManager(props: MapLayerManagerProps) {
       </div>
     </SourceMapContext.Provider>
   );
+}
+
+function hasSameMapLayerOrder(a: MapLayerDragState, b: MapLayerDragState) {
+  return hasSameLayerOrder(a[backgroundMapLayersId], b[backgroundMapLayersId])
+    && hasSameLayerOrder(a[overlayMapLayersId], b[overlayMapLayersId]);
+}
+
+function hasSameLayerOrder(a: StyleMapLayerSettings[], b: StyleMapLayerSettings[]) {
+  return a.length === b.length && a.every((layer, index) => layer.id === b[index].id);
+}
+
+function isSameListContainerTarget(
+  sourceId: unknown,
+  targetIdValue: unknown,
+  targetId: MapLayerDroppableId,
+  mapLayers: MapLayerDragState,
+) {
+  return targetIdValue === targetId
+    && typeof sourceId === "string"
+    && mapLayers[targetId].some((layer) => layer.id === sourceId);
 }

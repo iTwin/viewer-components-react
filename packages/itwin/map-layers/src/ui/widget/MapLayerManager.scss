@@ -189,6 +189,7 @@ $default-font-size: --iui-font-size-1;
 
   .map-manager-attachments {
     height: auto;
+    min-height: 91px;
     max-height: 30%;
     display: flex;
     flex-direction: column;
