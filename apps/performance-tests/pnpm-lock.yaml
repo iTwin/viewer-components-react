@@ -51,9 +51,6 @@ importers:
       '@itwin/eslint-plugin':
         specifier: ^6.0.0
         version: 6.0.0(eslint@9.39.2)(typescript@5.9.3)
-      '@itwin/presentation-backend':
-        specifier: ^5.7.0
-        version: 5.7.0(@itwin/core-backend@5.7.0(@itwin/core-bentley@5.7.0)(@itwin/core-common@5.7.0(@itwin/core-bentley@5.7.0)(@itwin/core-geometry@5.7.0))(@itwin/core-geometry@5.7.0)(@itwin/ecschema-metadata@5.7.0(@itwin/core-bentley@5.7.0)(@itwin/core-quantity@5.7.0(@itwin/core-bentley@5.7.0))))(@itwin/core-bentley@5.7.0)(@itwin/core-common@5.7.0(@itwin/core-bentley@5.7.0)(@itwin/core-geometry@5.7.0))(@itwin/core-quantity@5.7.0(@itwin/core-bentley@5.7.0))(@itwin/ecschema-metadata@5.7.0(@itwin/core-bentley@5.7.0)(@itwin/core-quantity@5.7.0(@itwin/core-bentley@5.7.0)))(@itwin/presentation-common@5.7.0(@itwin/core-bentley@5.7.0)(@itwin/core-common@5.7.0(@itwin/core-bentley@5.7.0)(@itwin/core-geometry@5.7.0))(@itwin/core-quantity@5.7.0(@itwin/core-bentley@5.7.0))(@itwin/ecschema-metadata@5.7.0(@itwin/core-bentley@5.7.0)(@itwin/core-quantity@5.7.0(@itwin/core-bentley@5.7.0))))
       '@itwin/presentation-common':
         specifier: ^5.7.0
         version: 5.7.0(@itwin/core-bentley@5.7.0)(@itwin/core-common@5.7.0(@itwin/core-bentley@5.7.0)(@itwin/core-geometry@5.7.0))(@itwin/core-quantity@5.7.0(@itwin/core-bentley@5.7.0))(@itwin/ecschema-metadata@5.7.0(@itwin/core-bentley@5.7.0)(@itwin/core-quantity@5.7.0(@itwin/core-bentley@5.7.0)))
