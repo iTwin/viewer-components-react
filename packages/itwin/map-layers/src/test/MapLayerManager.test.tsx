@@ -42,7 +42,12 @@ describe("MapLayerManager", () => {
     viewportMock.setup();
   });
 
-  async function testSourceItems(testFunc: (menuItems: NodeListOf<HTMLLIElement>) => void, customDataset?: any, nbRender?: number, extraFunc?: () => void) {
+  async function testSourceItems(
+    testFunc: (menuItems: NodeListOf<HTMLLIElement>) => void | Promise<void>,
+    customDataset?: any,
+    nbRender?: number,
+    extraFunc?: () => void | Promise<void>,
+  ) {
     vi.spyOn(MapLayerPreferences, "getSources").mockImplementation(async (_iTwinId: GuidString, _iModelId?: GuidString) => {
       const dataset = customDataset ? customDataset : sourceDataset;
       return dataset.map((source: any) => MapLayerSource.fromJSON(source)!);
@@ -71,11 +76,15 @@ describe("MapLayerManager", () => {
       });
     }
     const { container } = renderResult;
-    await TestUtils.flushAsyncOperations();
+    await act(async () => {
+      await TestUtils.flushAsyncOperations();
+    });
 
     if (extraFunc) {
-      extraFunc();
-      await TestUtils.flushAsyncOperations();
+      await act(async () => {
+        await extraFunc();
+        await TestUtils.flushAsyncOperations();
+      });
     }
 
     const addButton = container.querySelector(attachLayerButtonSelector) as HTMLElement;
@@ -84,7 +93,7 @@ describe("MapLayerManager", () => {
 
     const sourceList = document.querySelector(sourceListSelector) as HTMLUListElement;
     expect(sourceList).toBeDefined();
-    testFunc(sourceList.querySelectorAll('div[role="listitem"]'));
+    await testFunc(sourceList.querySelectorAll('div[role="listitem"]'));
   }
 
   it("renders base maps", async () => {
