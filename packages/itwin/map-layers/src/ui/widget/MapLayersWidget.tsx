@@ -11,6 +11,7 @@ import { MapLayersUI } from "../../mapLayers";
 import { MapLayerManager } from "./MapLayerManager";
 
 import type { MapLayerOptions } from "../Interfaces";
+import { useIsGeoLocated } from "../hooks/useIsGeoLocated";
 /**
  * Widget to Manage Map Layers
  * @beta
@@ -22,15 +23,9 @@ export function MapLayersWidget(props: MapLayersWidgetProps) {
   const [notGeoLocatedMsg] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Messages.NotSupported"));
   const activeViewport = useActiveViewport();
   const ref = React.useRef<HTMLDivElement>(null);
-  const [isGeoLocated, setIsGeoLocated] = React.useState(!!activeViewport?.iModel.isGeoLocated);
-  React.useEffect(() => {
-    const updateIsGeoLocated = () => setIsGeoLocated(!!activeViewport?.iModel.isGeoLocated);
-    // call immediately in case the activeViewport changes after its iModel.onEcefLocationChanged has already emitted
-    updateIsGeoLocated();
-    return activeViewport?.iModel.onEcefLocationChanged.addListener(updateIsGeoLocated);
-  }, [activeViewport?.iModel]);
+  const isGeoLocated = useIsGeoLocated(activeViewport);
 
-  if (activeViewport && isGeoLocated && activeViewport.view.isSpatialView()) {
+  if (isGeoLocated && activeViewport?.view.isSpatialView()) {
     return (
       <div ref={ref} className="map-manager-layer-host" data-testid="map-layers-widget">
         <MapLayerManager

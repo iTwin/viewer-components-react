@@ -3,9 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import type { MapLayerIndex, ScreenViewport } from "@itwin/core-frontend";
-import { MapLayerImageryProviderStatus, MapTileTreeScaleRangeVisibility } from "@itwin/core-frontend";
-import type { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
+import type { MapLayerIndex } from "@itwin/core-frontend";
+import { IModelApp, MapLayerImageryProviderStatus, MapTileTreeScaleRangeVisibility, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
+import type { StyleMapLayerSettings } from "../Interfaces";
 import { MapUrlDialog, type SourceState } from "./MapUrlDialog";
 import { ImageMapLayerSettings, type SubLayerId } from "@itwin/core-common";
 import type { useSortable } from "@dnd-kit/react/sortable";
@@ -14,97 +14,134 @@ import { SvgStatusWarning, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/i
 import { UiFramework } from "@itwin/appui-react";
 import { SubLayersPopupButton } from "./SubLayersPopupButton";
 import { MapLayerSettingsMenu } from "./MapLayerSettingsMenu";
+import { MapLayersUI } from "../../mapLayers";
+import { useMapLayerListContext } from "./MapLayerListContext";
 
 interface MapLayerItemProps {
-  id: string;
-  activeLayer: StyleMapLayerSettings;
-  activeViewport: ScreenViewport;
-  disabled?: boolean;
-  handleOk: (index: MapLayerIndex, sourceState?: SourceState) => void;
+  layer: StyleMapLayerSettings;
   index: number;
-  isOverlay: boolean;
-  mapLayerOptions?: MapLayerOptions;
-  onItemSelected: (isOverlay: boolean, index: number) => void;
-  onItemVisibilityToggleClicked: (mapLayerSettings: StyleMapLayerSettings) => void;
-  onMenuItemSelected: (action: string, mapLayerSettings: StyleMapLayerSettings) => void;
-  onSubLayerStateChange: (activeLayer: StyleMapLayerSettings, subLayerId: SubLayerId, isSelected: boolean) => void;
-  outOfRangeTitle: string;
-  requireAuthTooltip: string;
   sortable: ReturnType<typeof useSortable>;
-  toggleVisibility: string;
 }
 
 export function MapLayerItem(props: MapLayerItemProps) {
-  const outOfRange = props.activeLayer.treeVisibility === MapTileTreeScaleRangeVisibility.Hidden;
+  const context = useMapLayerListContext();
+  const { layer, index, sortable } = props;
+  const toggleVisibility = MapLayersUI.localization.getLocalizedString("mapLayers:Widget.ToggleVisibility");
+  const requireAuthTooltip = MapLayersUI.localization.getLocalizedString("mapLayers:Widget.RequireAuthTooltip");
+  const outOfRangeTitle = MapLayersUI.localization.getLocalizedString("mapLayers:Widget.layerOutOfRange");
+  const outOfRange = layer.treeVisibility === MapTileTreeScaleRangeVisibility.Hidden;
+
+  const onSubLayerStateChange = React.useCallback(
+    (activeLayer: StyleMapLayerSettings, subLayerId: SubLayerId, isSelected: boolean) => {
+      const mapLayerStyleIdx = context.activeViewport.displayStyle.findMapLayerIndexByNameAndSource(activeLayer.name, activeLayer.source, activeLayer.isOverlay);
+      if (mapLayerStyleIdx !== -1 && activeLayer.subLayers) {
+        context.activeViewport.displayStyle.changeMapSubLayerProps({ visible: isSelected }, subLayerId, {
+          index: mapLayerStyleIdx,
+          isOverlay: activeLayer.isOverlay,
+        });
+      }
+    },
+    [context.activeViewport],
+  );
+
+  const handleOk = React.useCallback(
+    (mapLayerIndex: MapLayerIndex, sourceState?: SourceState) => {
+      UiFramework.dialogs.modal.close();
+
+      const source = sourceState?.source;
+      if (sourceState === undefined || source === undefined) {
+        const error = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachMissingViewOrSource");
+        const msg = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachError", { error, sourceName: source?.name ?? "" });
+        IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
+        return;
+      }
+
+      const validation = sourceState.validation;
+
+      // Layer is already attached,
+      // This calls invalidateRenderPlan()
+      context.activeViewport.displayStyle.changeMapLayerProps({ subLayers: validation.subLayers }, mapLayerIndex);
+      context.activeViewport.displayStyle.changeMapLayerCredentials(mapLayerIndex, source.userName, source.password);
+
+      // Either initial attach/initialize failed or the layer failed to load at least one tile
+      // because of an invalid token; in both cases tile tree needs to be fully reset
+      const provider = context.activeViewport.getMapLayerImageryProvider(mapLayerIndex);
+      provider?.resetStatus();
+      context.activeViewport.resetMapLayer(mapLayerIndex);
+
+      context.onItemEdited();
+    },
+    [context],
+  );
 
   return (
     <div
       className="map-manager-source-item"
-      data-id={props.index}
-      ref={props.sortable.ref}
+      data-id={index}
+      ref={sortable.ref}
       style={{
-        cursor: props.disabled ? undefined : props.sortable.isDragging ? "grabbing" : "grab",
-        position: props.sortable.isDragging ? "relative" : undefined,
-        zIndex: props.sortable.isDragging ? 2 : undefined,
-        boxShadow: props.sortable.isDragging ? "10px 5px 5px rgba(0, 0, 0, 0.15)" : undefined,
+        cursor: context.disabled ? undefined : sortable.isDragging ? "grabbing" : "grab",
+        position: sortable.isDragging ? "relative" : undefined,
+        zIndex: sortable.isDragging ? 2 : undefined,
+        boxShadow: sortable.isDragging ? "10px 5px 5px rgba(0, 0, 0, 0.15)" : undefined,
       }}
     >
       <Checkbox
         data-testid={"select-item-checkbox"}
-        checked={props.activeLayer.selected}
+        checked={layer.selected}
         onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-          props.activeLayer.selected = event.target.checked;
-          props.onItemSelected(props.isOverlay, props.index);
+          layer.selected = event.target.checked;
+          context.onItemSelected(layer.isOverlay, index);
         }}
       />
       <IconButton
-        disabled={props.disabled}
+        disabled={context.disabled}
         size="small"
         styleType="borderless"
         className="map-manager-item-visibility"
-        label={props.toggleVisibility}
+        label={toggleVisibility}
         onClick={() => {
-          props.onItemVisibilityToggleClicked(props.activeLayer);
+          context.onItemVisibilityToggleClicked(layer);
         }}
       >
-        {props.activeLayer.visible ? <SvgVisibilityShow data-testid="layer-visibility-icon-show" /> : <SvgVisibilityHide data-testid="layer-visibility-icon-hide" />}
+        {layer.visible ? <SvgVisibilityShow data-testid="layer-visibility-icon-show" /> : <SvgVisibilityHide data-testid="layer-visibility-icon-hide" />}
       </IconButton>
 
       <span
-        className={props.disabled || outOfRange ? "map-manager-item-label-disabled" : "map-manager-item-label"}
-        title={outOfRange ? props.outOfRangeTitle : undefined}
+        className={context.disabled || outOfRange ? "map-manager-item-label-disabled" : "map-manager-item-label"}
+        title={outOfRange ? outOfRangeTitle : undefined}
       >
-        {props.activeLayer.name}
-        {props.activeLayer.provider?.status === MapLayerImageryProviderStatus.RequireAuth && (
+        {layer.name}
+        {layer.provider?.status === MapLayerImageryProviderStatus.RequireAuth && (
           <IconButton
-            disabled={props.disabled}
+            disabled={context.disabled}
             size="small"
             styleType="borderless"
             onClick={() => {
-              const indexInDisplayStyle = props.activeViewport?.displayStyle.findMapLayerIndexByNameAndSource(
-                props.activeLayer.name,
-                props.activeLayer.source,
-                props.activeLayer.isOverlay,
+              const indexInDisplayStyle = context.activeViewport.displayStyle.findMapLayerIndexByNameAndSource(
+                layer.name,
+                layer.source,
+                layer.isOverlay,
               );
               if (indexInDisplayStyle !== undefined && indexInDisplayStyle >= 0) {
-                const mapLayerIndex = { index: indexInDisplayStyle, isOverlay: props.activeLayer.isOverlay };
-                const layer = props.activeViewport.displayStyle.mapLayerAtIndex(mapLayerIndex);
-                if (layer instanceof ImageMapLayerSettings) {
+                const mapLayerIndex = { index: indexInDisplayStyle, isOverlay: layer.isOverlay };
+                const layerSettings = context.activeViewport.displayStyle.mapLayerAtIndex(mapLayerIndex);
+                if (layerSettings instanceof ImageMapLayerSettings) {
                   UiFramework.dialogs.modal.open(
                     <MapUrlDialog
-                      activeViewport={props.activeViewport}
-                      signInModeArgs={{ layer }}
-                      onOkResult={(sourceState?: SourceState) => props.handleOk(mapLayerIndex, sourceState)}
+                      activeViewport={context.activeViewport}
+                      signInModeArgs={{ layer: layerSettings }}
+                      onOkResult={(sourceState?: SourceState) => handleOk(mapLayerIndex, sourceState)}
                       onCancelResult={() => {
                         UiFramework.dialogs.modal.close();
                       }}
-                      mapLayerOptions={props.mapLayerOptions}
+                      mapLayerOptions={context.mapLayerOptions}
                     />,
                   );
                 }
               }
             }}
-            label={props.requireAuthTooltip}
+            label={requireAuthTooltip}
           >
             <SvgStatusWarning />
           </IconButton>
@@ -112,58 +149,58 @@ export function MapLayerItem(props: MapLayerItemProps) {
       </span>
 
       <div className="map-manager-item-sub-layer-container map-layer-settings-sublayers-menu">
-        {props.activeLayer.subLayers && props.activeLayer.subLayers.length > 1 && (
+        {layer.subLayers && layer.subLayers.length > 1 && (
           <SubLayersPopupButton
             checkboxStyle="eye"
             expandMode="rootGroupOnly"
-            subLayers={props.activeViewport ? props.activeLayer.subLayers : undefined}
-            singleVisibleSubLayer={props.activeLayer.provider?.mutualExclusiveSubLayer}
+            subLayers={layer.subLayers}
+            singleVisibleSubLayer={layer.provider?.mutualExclusiveSubLayer}
             onSubLayerStateChange={(subLayerId: SubLayerId, isSelected: boolean) => {
-              props.onSubLayerStateChange(props.activeLayer, subLayerId, isSelected);
+              onSubLayerStateChange(layer, subLayerId, isSelected);
             }}
           />
         )}
       </div>
-      {props.activeLayer.provider?.status === MapLayerImageryProviderStatus.RequireAuth && (
+      {layer.provider?.status === MapLayerImageryProviderStatus.RequireAuth && (
         <IconButton
-          disabled={props.disabled}
+          disabled={context.disabled}
           size="small"
           styleType="borderless"
           onClick={() => {
-            const indexInDisplayStyle = props.activeViewport?.displayStyle.findMapLayerIndexByNameAndSource(
-              props.activeLayer.name,
-              props.activeLayer.source,
-              props.activeLayer.isOverlay,
+            const indexInDisplayStyle = context.activeViewport.displayStyle.findMapLayerIndexByNameAndSource(
+              layer.name,
+              layer.source,
+              layer.isOverlay,
             );
             if (indexInDisplayStyle !== undefined && indexInDisplayStyle >= 0) {
-              const mapLayerIndex = { index: indexInDisplayStyle, isOverlay: props.activeLayer.isOverlay };
-              const layer = props.activeViewport.displayStyle.mapLayerAtIndex(mapLayerIndex);
-              if (layer instanceof ImageMapLayerSettings) {
+              const mapLayerIndex = { index: indexInDisplayStyle, isOverlay: layer.isOverlay };
+              const layerSettings = context.activeViewport.displayStyle.mapLayerAtIndex(mapLayerIndex);
+              if (layerSettings instanceof ImageMapLayerSettings) {
                 UiFramework.dialogs.modal.open(
                   <MapUrlDialog
-                    activeViewport={props.activeViewport}
-                    signInModeArgs={{ layer }}
-                    onOkResult={(sourceState?: SourceState) => props.handleOk(mapLayerIndex, sourceState)}
+                    activeViewport={context.activeViewport}
+                    signInModeArgs={{ layer: layerSettings }}
+                    onOkResult={(sourceState?: SourceState) => handleOk(mapLayerIndex, sourceState)}
                     onCancelResult={() => {
                       UiFramework.dialogs.modal.close();
                     }}
-                    mapLayerOptions={props.mapLayerOptions}
+                    mapLayerOptions={context.mapLayerOptions}
                   />,
                 );
               }
             }
           }}
-          label={props.requireAuthTooltip}
+          label={requireAuthTooltip}
         >
           <SvgStatusWarning />
         </IconButton>
       )}
       <div className="map-layer-settings-menu-wrapper">
         <MapLayerSettingsMenu
-          activeViewport={props.activeViewport}
-          mapLayerSettings={props.activeLayer}
-          onMenuItemSelection={props.onMenuItemSelected}
-          disabled={props.disabled}
+          activeViewport={context.activeViewport}
+          mapLayerSettings={layer}
+          onMenuItemSelection={context.onMenuItemSelected}
+          disabled={context.disabled}
         />
       </div>
     </div>

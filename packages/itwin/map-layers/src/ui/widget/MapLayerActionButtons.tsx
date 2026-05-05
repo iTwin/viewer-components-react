@@ -6,24 +6,24 @@ import * as React from "react";
 import { SvgUnlink, SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { ButtonGroup, Checkbox, IconButton } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
-import { useSourceMapContext } from "./MapLayerManager";
-import type { ScreenViewport } from "@itwin/core-frontend";
+import { useSourceMapContext } from "./SourceMapContext";
 import type { StyleMapLayerSettings } from "../Interfaces";
+import { useMapLayerListContext } from "./MapLayerListContext";
 
 interface MapLayerActionButtonsProps {
-  disabled: boolean;
   isOverlay: boolean;
   layersList: StyleMapLayerSettings[];
-  activeViewport: ScreenViewport;
 }
 
-export const MapLayerActionButtons = ({ disabled, isOverlay, layersList, activeViewport }: MapLayerActionButtonsProps) => {
+export const MapLayerActionButtons = ({ isOverlay, layersList }: MapLayerActionButtonsProps) => {
   const showAllLabel = MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.ShowAllLabel");
   const hideAllLabel = MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.HideAllLabel");
   const invertAllLabel = MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.InvertAllLabel");
   const detachSelectedLabel = MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.DetachSelectedLabel");
 
   const { selectAllLayers } = useSourceMapContext();
+  const { disabled: mapLayerDisabled, activeViewport} = useMapLayerListContext();
+  const disabled = mapLayerDisabled || layersList.length === 0;
   const hasSelected = layersList.some((l) => l.selected);
 
   const showAll = React.useCallback(async () => {

@@ -11,7 +11,7 @@ import { Button, IconButton, Input, List, ListItem, Popover, ProgressRadial } fr
 import { MapLayerPreferences } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
 import { ConfirmMessageDialog } from "./ConfirmMessageDialog";
-import { useSourceMapContext } from "./MapLayerManager";
+import { useSourceMapContext } from "./SourceMapContext";
 import { MapSelectFeaturesDialog } from "./MapSelectFeaturesDialog";
 import { MapUrlDialog } from "./MapUrlDialog";
 

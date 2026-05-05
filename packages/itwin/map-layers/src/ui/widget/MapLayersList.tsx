@@ -7,60 +7,46 @@ import React from "react";
 import { MapLayerActionButtons } from "./MapLayerActionButtons";
 import { MapLayerDroppable } from "./MapLayerDroppable";
 
-import type { ScreenViewport } from "@itwin/core-frontend";
-import type { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
+import type { StyleMapLayerSettings } from "../Interfaces";
 import { AttachLayerPopupButton } from "./AttachLayerPopupButton";
-import type { MapLayerDroppableId } from "./MapLayerDragDrop";
+import { useMapLayerListContext } from "./MapLayerListContext";
+import { MapLayersUI } from "../../mapLayers";
+import { backgroundMapLayersId, overlayMapLayersId } from "./MapLayerDragDrop";
 
 /** @internal */
 interface MapLayersListProps {
-  activeViewport: ScreenViewport;
-  backgroundMapVisible: boolean;
   isOverlay: boolean;
-  isDraggingMapLayer: boolean;
-  label: string;
-  actionButtonsLayersList: StyleMapLayerSettings[];
   layersList: StyleMapLayerSettings[];
-  mapLayerOptions?: MapLayerOptions;
-  onItemEdited: () => void;
-  onItemSelected: (isOverlay: boolean, index: number) => void;
-  onItemVisibilityToggleClicked: (mapLayerSettings: StyleMapLayerSettings) => void;
-  onMenuItemSelected: (action: string, mapLayerSettings: StyleMapLayerSettings) => void;
-  dropTargetId?: MapLayerDroppableId;
-  hideEmptyPlaceholder: boolean;
-  showDropLayerHereWhenEmpty: boolean;
-  showEmptyDropPlaceholder: boolean;
+  dragStartLayersList?: StyleMapLayerSettings[];
 }
 
 /** @internal */
 export function MapLayersList(props: MapLayersListProps) {
+  const context = useMapLayerListContext();
+  const droppableId = props.isOverlay ? overlayMapLayersId : backgroundMapLayersId;
+  const overlaysLabel = MapLayersUI.localization.getLocalizedString("mapLayers:Widget.OverlayLayers");
+  const backgroundsLabel = MapLayersUI.localization.getLocalizedString("mapLayers:Widget.BackgroundLayers");
+  const wasEmptyAtDragStart = context.isDraggingMapLayer && props.dragStartLayersList?.length === 0;
+  const becameEmptyDuringDrag = context.isDraggingMapLayer && !wasEmptyAtDragStart && props.layersList.length === 0;
+  const showEmptyDropPlaceholder = context.dropTargetId === droppableId && wasEmptyAtDragStart && props.layersList.length === 0;
+  const actionButtonsLayersList = becameEmptyDuringDrag ? props.dragStartLayersList ?? props.layersList : props.layersList;
+
   return (
     <div className="map-manager-layer-wrapper" data-testid="map-manager-layer-section">
       <div className="map-manager-layers">
-        <span className="map-manager-layers-label">{props.label}</span>
-        <AttachLayerPopupButton disabled={!props.backgroundMapVisible} isOverlay={props.isOverlay} />
+        <span className="map-manager-layers-label">{props.isOverlay ? overlaysLabel : backgroundsLabel}</span>
+        <AttachLayerPopupButton disabled={context.disabled} isOverlay={props.isOverlay} />
       </div>
       <MapLayerActionButtons
-        disabled={!props.backgroundMapVisible || props.actionButtonsLayersList.length === 0}
         isOverlay={props.isOverlay}
-        layersList={props.actionButtonsLayersList}
-        activeViewport={props.activeViewport}
+        layersList={actionButtonsLayersList}
       />
       <MapLayerDroppable
-        disabled={!props.backgroundMapVisible}
         isOverlay={props.isOverlay}
-        isDraggingMapLayer={props.isDraggingMapLayer}
         layersList={props.layersList}
-        mapLayerOptions={props.mapLayerOptions}
-        activeViewport={props.activeViewport}
-        onMenuItemSelected={props.onMenuItemSelected}
-        onItemVisibilityToggleClicked={props.onItemVisibilityToggleClicked}
-        onItemSelected={props.onItemSelected}
-        onItemEdited={props.onItemEdited}
-        dropTargetId={props.dropTargetId}
-        hideEmptyPlaceholder={props.hideEmptyPlaceholder}
-        showDropLayerHereWhenEmpty={props.showDropLayerHereWhenEmpty}
-        showEmptyDropPlaceholder={props.showEmptyDropPlaceholder}
+        hideEmptyPlaceholder={becameEmptyDuringDrag}
+        showDropLayerHereWhenEmpty={wasEmptyAtDragStart}
+        showEmptyDropPlaceholder={showEmptyDropPlaceholder}
       />
     </div>
   );

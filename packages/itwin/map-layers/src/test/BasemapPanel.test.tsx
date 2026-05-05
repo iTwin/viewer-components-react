@@ -14,7 +14,8 @@ import {
 import { NoRenderApp, NotificationManager } from "@itwin/core-frontend";
 import { findByTestId, fireEvent, getByTestId, render } from "@testing-library/react";
 import { BasemapPanel } from "../ui/widget/BasemapPanel";
-import { defaultBaseMapLayers, SourceMapContext } from "../ui/widget/MapLayerManager";
+import { defaultBaseMapLayers } from "../ui/widget/MapLayerManager";
+import { SourceMapProvider } from "../ui/widget/SourceMapContext";
 import { TestUtils } from "./TestUtils";
 import { ViewportMock } from "./ViewportMock";
 
@@ -53,7 +54,7 @@ describe("BasemapPanel", () => {
 
   it("renders base maps", async () => {
     const { container } = render(
-      <SourceMapContext.Provider
+      <SourceMapProvider
         value={{
           activeViewport: viewportMock.object,
           loadingSources: false,
@@ -64,7 +65,7 @@ describe("BasemapPanel", () => {
         }}
       >
         <BasemapPanel />
-      </SourceMapContext.Provider>
+      </SourceMapProvider>
     );
     await TestUtils.flushAsyncOperations();
     const iconVisibility = getByTestId(container, "base-map-visibility-icon-button");
@@ -77,7 +78,7 @@ describe("BasemapPanel", () => {
 
   it.skip("should refresh select content after API call", async () => {
     const { container } = render(
-      <SourceMapContext.Provider
+      <SourceMapProvider
         value={{
           activeViewport: viewportMock.object,
           loadingSources: false,
@@ -88,7 +89,7 @@ describe("BasemapPanel", () => {
         }}
       >
         <BasemapPanel />
-      </SourceMapContext.Provider>
+      </SourceMapProvider>
     );
 
     let baseMap: BaseLayerSettings = defaultBaseMapLayers[2];
@@ -123,7 +124,7 @@ describe("BasemapPanel", () => {
 
   it("should refresh transparency slider and visibility icon after API call", async () => {
     const { container } = render(
-      <SourceMapContext.Provider
+      <SourceMapProvider
         value={{
           activeViewport: viewportMock.object,
           loadingSources: false,
@@ -134,7 +135,7 @@ describe("BasemapPanel", () => {
         }}
       >
         <BasemapPanel />
-      </SourceMapContext.Provider>
+      </SourceMapProvider>
     );
 
     const baseMap = BaseMapLayerSettings.fromProvider(
