@@ -14,6 +14,7 @@ RUN corepack enable
 WORKDIR /workspaces/viewer-components-react/
 COPY /scripts ./scripts
 COPY ${TEST_VIEWER_DIST} ./apps/test-viewer/dist
+COPY /packages/itwin/test-utilities ./packages/itwin/test-utilities
 COPY /packages/itwin/${PACKAGE_NAME} ./packages/itwin/${PACKAGE_NAME}
 
 # Switch to the directory where E2E tests will run
