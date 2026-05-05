@@ -5,7 +5,7 @@
 import type React from "react";
 import { useSortable } from "@dnd-kit/react/sortable";
 import type { StyleMapLayerSettings } from "../Interfaces";
-import type { backgroundMapLayersId, overlayMapLayersId } from "./MapLayerDragDrop";
+import type { backgroundMapLayersId, overlayMapLayersId } from "./MapLayerDragModel";
 import { assert } from "@itwin/core-bentley";
 
 interface SortableMapLayerItemProps {

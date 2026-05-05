@@ -11,7 +11,7 @@ import type { StyleMapLayerSettings } from "../Interfaces";
 import { AttachLayerPopupButton } from "./AttachLayerPopupButton";
 import { useMapLayerListContext } from "./MapLayerListContext";
 import { MapLayersUI } from "../../mapLayers";
-import { backgroundMapLayersId, overlayMapLayersId } from "./MapLayerDragDrop";
+import { backgroundMapLayersId, overlayMapLayersId } from "./MapLayerDragModel";
 
 /** @internal */
 interface MapLayersListProps {

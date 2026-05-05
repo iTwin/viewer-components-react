@@ -5,10 +5,17 @@
 
 import { move } from "@dnd-kit/helpers";
 import type { DragMoveEvent, DragOverEvent } from "@dnd-kit/react";
-import type { StyleMapLayerSettings } from "../../Interfaces";
-import { backgroundMapLayersId, getMapLayerDropTargetId, overlayMapLayersId } from "../../widget/MapLayerDragDrop";
-import type { MapLayerDroppableId } from "../../widget/MapLayerDragDrop";
-import type { MapLayerState } from "./types";
+import type { StyleMapLayerSettings } from "../Interfaces";
+import { backgroundMapLayersId, getMapLayerDropTargetId, overlayMapLayersId } from "../widget/MapLayerDragModel";
+import type { MapLayerDroppableId } from "../widget/MapLayerDragModel";
+import type { MapLayerState } from "../hooks/map-layer/types";
+
+/**
+ * Pure projection helpers for in-progress map-layer dragging.
+ *
+ * This module decides how React should optimistically render hover state while a
+ * drag is active. The final display-style mutation stays in MapLayerDragModel.
+ */
 
 export type MapLayerDragProjection =
   | { kind: "restore" }

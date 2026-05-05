@@ -10,12 +10,12 @@ import {
   getMapLayerDropTargetId,
   getMapLayerDroppableId,
   overlayMapLayersId,
-} from "../ui/widget/MapLayerDragDrop";
+} from "../ui/widget/MapLayerDragModel";
 
 import type { DragEndEvent } from "@dnd-kit/react";
 import type { DisplayStyle3dState } from "@itwin/core-frontend";
 
-describe("MapLayerDragDrop", () => {
+describe("MapLayerDragModel", () => {
   describe("createMapLayerSortableId", () => {
     it("should create a sortable ID with droppable prefix and layer name", () => {
       const id = createMapLayerSortableId(backgroundMapLayersId, "MyLayer");

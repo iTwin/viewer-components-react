@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 import { describe, expect, it, vi } from "vitest";
 import { MapTileTreeScaleRangeVisibility } from "@itwin/core-frontend";
-import { projectMapLayerDragOver, refreshCommittedMapLayerIndices } from "../ui/hooks/map-layer/MapLayerDragController";
+import { projectMapLayerDragOver, refreshCommittedMapLayerIndices } from "../ui/helpers/MapLayerDragProjection";
 import type { MapLayerState } from "../ui/hooks/map-layer/types";
 import type { StyleMapLayerSettings } from "../ui/Interfaces";
-import { backgroundMapLayersId, overlayMapLayersId } from "../ui/widget/MapLayerDragDrop";
+import { backgroundMapLayersId, overlayMapLayersId } from "../ui/widget/MapLayerDragModel";
 
 const moveMock = vi.hoisted(() => vi.fn());
 
@@ -15,7 +15,7 @@ vi.mock("@dnd-kit/helpers", () => ({
   move: moveMock,
 }));
 
-describe("MapLayerDragController", () => {
+describe("MapLayerDragProjection", () => {
   function layer(id: string, layerIndex: number): StyleMapLayerSettings {
     return {
       id,

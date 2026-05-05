@@ -7,9 +7,9 @@ import React from "react";
 import type { DragEndEvent, DragMoveEvent, DragOverEvent } from "@dnd-kit/react";
 
 import type { ScreenViewport, Viewport } from "@itwin/core-frontend";
-import { commitMapLayerDrop } from "../../widget/MapLayerDragDrop";
-import type { MapLayerDroppableId } from "../../widget/MapLayerDragDrop";
-import { getMapLayerDragMoveTarget, projectMapLayerDragOver, refreshCommittedMapLayerIndices } from "./MapLayerDragController";
+import { commitMapLayerDrop } from "../../widget/MapLayerDragModel";
+import type { MapLayerDroppableId } from "../../widget/MapLayerDragModel";
+import { getMapLayerDragMoveTarget, projectMapLayerDragOver, refreshCommittedMapLayerIndices } from "../../helpers/MapLayerDragProjection";
 import type { MapLayerDragStateProps, MapLayerState } from "./types";
 
 /**

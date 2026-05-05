@@ -6,7 +6,7 @@ import React from "react";
 
 import type { ScreenViewport } from "@itwin/core-frontend";
 import type { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
-import type { MapLayerDroppableId } from "./MapLayerDragDrop";
+import type { MapLayerDroppableId } from "./MapLayerDragModel";
 
 /** @internal */
 export interface MapLayerListContextProps {

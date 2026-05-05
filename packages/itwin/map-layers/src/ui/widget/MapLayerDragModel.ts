@@ -7,6 +7,14 @@ import type { DragEndEvent } from "@dnd-kit/react";
 
 import type { DisplayStyle3dState } from "@itwin/core-frontend";
 
+/**
+ * Shared map-layer drag model utilities.
+ *
+ * This module defines stable droppable IDs, sortable item IDs, target parsing,
+ * and the final drop commit into the viewport display style. It intentionally
+ * contains no React state or optimistic hover behavior.
+ */
+
 export const overlayMapLayersId = "overlayMapLayers";
 export const backgroundMapLayersId = "backgroundMapLayers";
 

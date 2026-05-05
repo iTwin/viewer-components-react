@@ -7,7 +7,7 @@ import { NoRenderApp, NotificationManager } from "@itwin/core-frontend";
 import { act, cleanup, render, screen, within } from "@testing-library/react";
 import { vi } from "vitest";
 import { MapLayerManager } from "../ui/widget/MapLayerManager";
-import { backgroundMapLayersId, overlayMapLayersId } from "../ui/widget/MapLayerDragDrop";
+import { backgroundMapLayersId, overlayMapLayersId } from "../ui/widget/MapLayerDragModel";
 import { TestUtils } from "./TestUtils";
 import { ViewportMock } from "./ViewportMock";
 

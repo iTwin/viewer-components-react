@@ -24,7 +24,7 @@ import { MapLayerSettingsPopupButton } from "./MapLayerSettingsPopupButton";
 
 import type { ScreenViewport } from "@itwin/core-frontend";
 import type { MapLayerOptions } from "../Interfaces";
-import { backgroundMapLayersId, overlayMapLayersId } from "./MapLayerDragDrop";
+import { backgroundMapLayersId, overlayMapLayersId } from "./MapLayerDragModel";
 import { SourceMapContext } from "./SourceMapContext";
 
 /** @internal */

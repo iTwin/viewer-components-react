@@ -7,7 +7,7 @@ import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import type { DragEndEvent, DragMoveEvent, DragOverEvent, DragStartEvent } from "@dnd-kit/react";
 import type { MapLayerSource, ScreenViewport, Viewport } from "@itwin/core-frontend";
 import type { StyleMapLayerSettings } from "../../Interfaces";
-import type { MapLayerDroppableId } from "../../widget/MapLayerDragDrop";
+import type { MapLayerDroppableId } from "../../widget/MapLayerDragModel";
 
 export type MapLayerState = Record<MapLayerDroppableId, StyleMapLayerSettings[]>;
 

@@ -6,7 +6,7 @@
 import React from "react";
 
 import type { StyleMapLayerSettings } from "../../Interfaces";
-import { backgroundMapLayersId, overlayMapLayersId } from "../../widget/MapLayerDragDrop";
+import { backgroundMapLayersId, overlayMapLayersId } from "../../widget/MapLayerDragModel";
 import type { MapLayerSelectionActions, MapLayerState } from "./types";
 
 export function useMapLayerSelectionActions(args: {
