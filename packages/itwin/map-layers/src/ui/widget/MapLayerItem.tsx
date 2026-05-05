@@ -43,7 +43,9 @@ export function MapLayerItem(props: MapLayerItemProps) {
       data-id={props.index}
       ref={props.sortable.ref}
       style={{
-        zIndex: props.sortable.isDragging ? 1 : undefined,
+        cursor: props.disabled ? undefined : props.sortable.isDragging ? "grabbing" : "grab",
+        position: props.sortable.isDragging ? "relative" : undefined,
+        zIndex: props.sortable.isDragging ? 2 : undefined,
         boxShadow: props.sortable.isDragging ? "10px 5px 5px rgba(0, 0, 0, 0.15)" : undefined,
       }}
     >

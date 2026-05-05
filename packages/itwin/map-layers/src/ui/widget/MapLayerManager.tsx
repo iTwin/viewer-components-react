@@ -6,8 +6,8 @@
 
 import "./MapLayerManager.scss";
 import React from "react";
-import { DragDropProvider } from "@dnd-kit/react";
 import { move } from "@dnd-kit/helpers";
+import { DragDropProvider } from "@dnd-kit/react";
 import { BackgroundMapProvider, BackgroundMapType, BaseMapLayerSettings } from "@itwin/core-common";
 import { IModelApp, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { ToggleSwitch } from "@itwin/itwinui-react";
@@ -21,7 +21,8 @@ import { MapLayerSettingsPopupButton } from "./MapLayerSettingsPopupButton";
 
 import type { MapLayerSource, ScreenViewport } from "@itwin/core-frontend";
 import type { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
-import { backgroundMapLayersId, commitMapLayerDrop, overlayMapLayersId } from "./MapLayerDragDrop";
+import { backgroundMapLayersId, commitMapLayerDrop, getMapLayerDropTargetId, overlayMapLayersId } from "./MapLayerDragDrop";
+import type { MapLayerDroppableId } from "./MapLayerDragDrop";
 /** @internal */
 export interface SourceMapContextProps {
   readonly sources: MapLayerSource[];
@@ -55,6 +56,8 @@ export const SourceMapContext = React.createContext<SourceMapContextProps>({
 export function useSourceMapContext(): SourceMapContextProps {
   return React.useContext(SourceMapContext);
 }
+
+type MapLayerDragState = Record<MapLayerDroppableId, StyleMapLayerSettings[]>;
 
 interface MapLayerManagerProps {
   activeViewport: ScreenViewport;
@@ -98,6 +101,9 @@ export function MapLayerManager(props: MapLayerManagerProps) {
     suppressReloadRef,
   } = useViewportMapLayersState(activeViewport);
   const mapLayersRef = React.useRef(mapLayers);
+  const dragStartMapLayersRef = React.useRef<MapLayerDragState>();
+  const [dropTargetId, setDropTargetId] = React.useState<MapLayerDroppableId>();
+  const [isDraggingMapLayer, setIsDraggingMapLayer] = React.useState(false);
   const backgroundLayers = mapLayers[backgroundMapLayersId];
   const overlayLayers = mapLayers[overlayMapLayersId];
 
@@ -177,22 +183,57 @@ export function MapLayerManager(props: MapLayerManagerProps) {
     }
   }, [activeViewport, loadMapLayerSettingsFromViewport]);
 
+  const restoreDragStartMapLayers = React.useCallback(() => {
+    if (!dragStartMapLayersRef.current || mapLayersRef.current === dragStartMapLayersRef.current) {
+      return;
+    }
+
+    mapLayersRef.current = dragStartMapLayersRef.current;
+    setMapLayers(dragStartMapLayersRef.current);
+  }, [setMapLayers]);
+
+  const handleMapLayerDragStart = React.useCallback(() => {
+    dragStartMapLayersRef.current = mapLayersRef.current;
+    setIsDraggingMapLayer(true);
+  }, []);
+
   const handleMapLayerDragOver = React.useCallback(
     (event: Parameters<NonNullable<React.ComponentProps<typeof DragDropProvider>["onDragOver"]>>[0]) => {
-      const nextMapLayers = move(mapLayersRef.current, event);
+      const targetId = getMapLayerDropTargetId(event.operation.target);
+      if (!targetId) {
+        restoreDragStartMapLayers();
+        setDropTargetId(undefined);
+        return;
+      }
+
+      const nextMapLayers = move(mapLayersRef.current, event) as MapLayerDragState;
       mapLayersRef.current = nextMapLayers;
       setMapLayers(nextMapLayers);
+      setDropTargetId(targetId);
     },
-    [setMapLayers],
+    [restoreDragStartMapLayers, setMapLayers],
+  );
+
+  const handleMapLayerDragMove = React.useCallback(
+    (event: Parameters<NonNullable<React.ComponentProps<typeof DragDropProvider>["onDragMove"]>>[0]) => {
+      const targetId = getMapLayerDropTargetId(event.operation.target);
+      if (!targetId) {
+        restoreDragStartMapLayers();
+      }
+      setDropTargetId(targetId);
+    },
+    [restoreDragStartMapLayers],
   );
 
   const handleMapLayerDragEnd = React.useCallback(
     (event: Parameters<NonNullable<React.ComponentProps<typeof DragDropProvider>["onDragEnd"]>>[0]) => {
+      setIsDraggingMapLayer(false);
       // Suppress the automatic reload triggered by onDisplayStyleChanged so
       // dnd-kit's 250ms drop animation can run without its source element being
       // unmounted/replaced mid-flight (which causes the visible layout shift).
       suppressReloadRef.current = true;
       const committed = commitMapLayerDrop(activeViewport.displayStyle, mapLayersRef.current, event);
+      dragStartMapLayersRef.current = undefined;
       if (committed) {
         // Immediately recompute layerIndex values in the ref so that a second
         // drag started before the setTimeout fires uses correct display-style indices.
@@ -210,15 +251,16 @@ export function MapLayerManager(props: MapLayerManagerProps) {
         // Reloading earlier would change item IDs mid-animation (cross-group
         // moves change the droppableId prefix in the ID), causing a layout shift.
         setTimeout(() => {
+          setDropTargetId(undefined);
           suppressReloadRef.current = false;
           loadMapLayerSettingsFromViewport(activeViewport);
         }, 300);
       } else {
+        setDropTargetId(undefined);
         suppressReloadRef.current = false;
-        if (event.canceled) {
-          // Drag was cancelled (e.g. Escape key); revert the optimistic onDragOver state.
-          requestAnimationFrame(() => loadMapLayerSettingsFromViewport(activeViewport));
-        }
+        // Restore rendered state for cancelled drags, drops outside any droppable,
+        // or other cases where commitMapLayerDrop returns false.
+        requestAnimationFrame(() => loadMapLayerSettingsFromViewport(activeViewport));
       }
     },
     [activeViewport, loadMapLayerSettingsFromViewport, suppressReloadRef],
@@ -238,6 +280,23 @@ export function MapLayerManager(props: MapLayerManagerProps) {
     },
     [backgroundLayers, overlayLayers, setMapLayers],
   );
+
+  const backgroundWasEmptyAtDragStart = isDraggingMapLayer && dragStartMapLayersRef.current?.[backgroundMapLayersId].length === 0;
+  const overlayWasEmptyAtDragStart = isDraggingMapLayer && dragStartMapLayersRef.current?.[overlayMapLayersId].length === 0;
+  const backgroundBecameEmptyDuringDrag = isDraggingMapLayer
+    && !backgroundWasEmptyAtDragStart
+    && backgroundLayers.length === 0;
+  const overlayBecameEmptyDuringDrag = isDraggingMapLayer
+    && !overlayWasEmptyAtDragStart
+    && overlayLayers.length === 0;
+  const backgroundActionButtonsLayers = backgroundBecameEmptyDuringDrag
+    ? dragStartMapLayersRef.current?.[backgroundMapLayersId] ?? backgroundLayers
+    : backgroundLayers;
+  const overlayActionButtonsLayers = overlayBecameEmptyDuringDrag
+    ? dragStartMapLayersRef.current?.[overlayMapLayersId] ?? overlayLayers
+    : overlayLayers;
+  const showBackgroundEmptyDropPlaceholder = dropTargetId === backgroundMapLayersId && backgroundWasEmptyAtDragStart && backgroundLayers.length === 0;
+  const showOverlayEmptyDropPlaceholder = dropTargetId === overlayMapLayersId && overlayWasEmptyAtDragStart && overlayLayers.length === 0;
 
   const selectAllLayers = React.useCallback(
     (isOverlay: boolean) => {
@@ -285,13 +344,17 @@ export function MapLayerManager(props: MapLayerManagerProps) {
         {/* List of Layers (droppable) */}
         {!hideExternalMapLayersSection && (
           <div>
-            <DragDropProvider onDragEnd={handleMapLayerDragEnd} onDragOver={handleMapLayerDragOver}>
+            <DragDropProvider onDragEnd={handleMapLayerDragEnd} onDragMove={handleMapLayerDragMove} onDragOver={handleMapLayerDragOver} onDragStart={handleMapLayerDragStart}>
               {backgroundLayers && overlayLayers && (
                 <>
                   <MapLayersList
                     activeViewport={props.activeViewport}
+                    actionButtonsLayersList={backgroundActionButtonsLayers}
                     backgroundMapVisible={backgroundMapVisible}
+                    dropTargetId={dropTargetId}
+                    hideEmptyPlaceholder={backgroundBecameEmptyDuringDrag}
                     isOverlay={false}
+                    isDraggingMapLayer={isDraggingMapLayer}
                     label={underlaysLabel}
                     layersList={backgroundLayers}
                     mapLayerOptions={props.mapLayerOptions}
@@ -299,11 +362,17 @@ export function MapLayerManager(props: MapLayerManagerProps) {
                     onItemSelected={handleItemSelected}
                     onItemVisibilityToggleClicked={handleLayerVisibilityChange}
                     onMenuItemSelected={handleOnMenuItemSelection}
+                    showDropLayerHereWhenEmpty={backgroundWasEmptyAtDragStart}
+                    showEmptyDropPlaceholder={showBackgroundEmptyDropPlaceholder}
                   />
                   <MapLayersList
                     activeViewport={props.activeViewport}
+                    actionButtonsLayersList={overlayActionButtonsLayers}
                     backgroundMapVisible={backgroundMapVisible}
+                    dropTargetId={dropTargetId}
+                    hideEmptyPlaceholder={overlayBecameEmptyDuringDrag}
                     isOverlay
+                    isDraggingMapLayer={isDraggingMapLayer}
                     label={overlaysLabel}
                     layersList={overlayLayers}
                     mapLayerOptions={props.mapLayerOptions}
@@ -311,6 +380,8 @@ export function MapLayerManager(props: MapLayerManagerProps) {
                     onItemSelected={handleItemSelected}
                     onItemVisibilityToggleClicked={handleLayerVisibilityChange}
                     onMenuItemSelected={handleOnMenuItemSelection}
+                    showDropLayerHereWhenEmpty={overlayWasEmptyAtDragStart}
+                    showEmptyDropPlaceholder={showOverlayEmptyDropPlaceholder}
                   />
                 </>
               )}

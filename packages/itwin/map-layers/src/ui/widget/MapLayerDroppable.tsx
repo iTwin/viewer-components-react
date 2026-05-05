@@ -21,6 +21,7 @@ import { SortableMapLayerItem } from "./SortableMapLayerItem";
 import { MapLayerItem } from "./MapLayerItem";
 import { CollisionPriority } from "@dnd-kit/abstract";
 
+import type { MapLayerDroppableId } from "./MapLayerDragDrop";
 
 /** @internal */
 interface MapLayerDroppableProps {
@@ -32,6 +33,11 @@ interface MapLayerDroppableProps {
   onItemVisibilityToggleClicked: (mapLayerSettings: StyleMapLayerSettings) => void;
   onItemSelected: (isOverlay: boolean, index: number) => void;
   onItemEdited: () => void;
+  hideEmptyPlaceholder: boolean;
+  isDraggingMapLayer: boolean;
+  dropTargetId?: MapLayerDroppableId;
+  showDropLayerHereWhenEmpty: boolean;
+  showEmptyDropPlaceholder: boolean;
   disabled?: boolean;
 }
 
@@ -93,50 +99,58 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
   const noUnderlaysSpecifiedLabel = MapLayersUI.localization.getLocalizedString("mapLayers:Widget.NoOverlayLayers");
   const dropLayerLabel = MapLayersUI.localization.getLocalizedString("mapLayers:Widget.DropLayerLabel");
   const title = props.isOverlay ? noUnderlaysSpecifiedLabel : noBackgroundMapsSpecifiedLabel;
+  const showDropHint = props.dropTargetId === droppableId;
+  const showEmptyDropHint = props.showDropLayerHereWhenEmpty || isDropTarget || showDropHint;
+  const isActiveDropTarget = isDropTarget || showDropHint;
+  const className = [
+    "map-manager-attachments",
+    props.isDraggingMapLayer ? "map-manager-attachments--drop-available" : undefined,
+    isActiveDropTarget ? "map-manager-attachments--drop-target" : undefined,
+  ].filter(Boolean).join(" ");
+  const renderEmptyPlaceholder = (label: string, showAttachButton: boolean) => (
+    <div title={title} className="map-manager-no-layers-container">
+      <span className="map-manager-no-layers-label">{label}</span>
+      {showAttachButton && <AttachLayerPopupButton disabled={props.disabled} buttonType={AttachLayerButtonType.Blue} isOverlay={props.isOverlay} />}
+    </div>
+  );
 
   return (
-    <div className="map-manager-attachments" ref={ref} key={droppableId}>
-      {props.layersList && props.layersList.length > 0 ?
-        props.layersList.map((mapLayerSettings, i) => (
-          <SortableMapLayerItem
-            key={mapLayerSettings.id}
-            layer={mapLayerSettings}
-            disabled={props.disabled}
-            droppableId={droppableId}
-            index={i}
-            renderItem={(sortable) =>
-              <MapLayerItem
-                key={mapLayerSettings.id}
-                id={mapLayerSettings.id}
-                activeLayer={mapLayerSettings}
-                activeViewport={props.activeViewport}
-                disabled={props.disabled}
-                handleOk={handleOk}
-                index={i}
-                isOverlay={props.isOverlay}
-                mapLayerOptions={props.mapLayerOptions}
-                onItemSelected={props.onItemSelected}
-                onItemVisibilityToggleClicked={props.onItemVisibilityToggleClicked}
-                onMenuItemSelected={props.onMenuItemSelected}
-                onSubLayerStateChange={onSubLayerStateChange}
-                outOfRangeTitle={outOfRangeTitle}
-                requireAuthTooltip={requireAuthTooltip}
-                sortable={sortable}
-                toggleVisibility={toggleVisibility}
-              />
-            }
-          />
-        ))
-        : <div title={title} className="map-manager-no-layers-container">
-          {isDropTarget ? (
-            <span className="map-manager-no-layers-label">{dropLayerLabel}</span>
-          ) : (
-            <>
-              <span className="map-manager-no-layers-label">{title}</span>
-              <AttachLayerPopupButton disabled={props.disabled} buttonType={AttachLayerButtonType.Blue} isOverlay={props.isOverlay} />
-            </>
-          )}
-        </div>
+    <div className={className} ref={ref} key={droppableId}>
+      {props.layersList && props.layersList.length > 0 && !props.showEmptyDropPlaceholder ?
+        <>
+          {props.layersList.map((mapLayerSettings, i) => (
+            <SortableMapLayerItem
+              key={mapLayerSettings.id}
+              layer={mapLayerSettings}
+              disabled={props.disabled}
+              droppableId={droppableId}
+              index={i}
+              renderItem={(sortable) =>
+                <MapLayerItem
+                  key={mapLayerSettings.id}
+                  id={mapLayerSettings.id}
+                  activeLayer={mapLayerSettings}
+                  activeViewport={props.activeViewport}
+                  disabled={props.disabled}
+                  handleOk={handleOk}
+                  index={i}
+                  isOverlay={props.isOverlay}
+                  mapLayerOptions={props.mapLayerOptions}
+                  onItemSelected={props.onItemSelected}
+                  onItemVisibilityToggleClicked={props.onItemVisibilityToggleClicked}
+                  onMenuItemSelected={props.onMenuItemSelected}
+                  onSubLayerStateChange={onSubLayerStateChange}
+                  outOfRangeTitle={outOfRangeTitle}
+                  requireAuthTooltip={requireAuthTooltip}
+                  sortable={sortable}
+                  toggleVisibility={toggleVisibility}
+                />
+              }
+            />
+          ))}
+        </>
+        : props.hideEmptyPlaceholder ? undefined
+        : renderEmptyPlaceholder(showEmptyDropHint ? dropLayerLabel : title, !showEmptyDropHint)
       }
     </div>
   );

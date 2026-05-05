@@ -12,17 +12,24 @@ export const backgroundMapLayersId = "backgroundMapLayers";
 
 export type MapLayerDroppableId = typeof overlayMapLayersId | typeof backgroundMapLayersId;
 
-export interface MapLayerDropLocation {
-  droppableId: MapLayerDroppableId;
-  index: number | undefined;
-}
-
 interface MapLayerDragStateItem {
   id: UniqueIdentifier;
   layerIndex: number;
 }
 
 type MapLayerDragState<TItem extends MapLayerDragStateItem> = Record<MapLayerDroppableId, TItem[]>;
+
+interface MapLayerDropTarget {
+  id: UniqueIdentifier;
+  group?: UniqueIdentifier;
+  index?: number;
+}
+
+interface MapLayerLocation<TItem extends MapLayerDragStateItem> {
+  droppableId: MapLayerDroppableId;
+  item: TItem;
+  uiIndex: number;
+}
 
 type MapLayerDisplayStyle = Pick<
   DisplayStyle3dState,
@@ -31,6 +38,25 @@ type MapLayerDisplayStyle = Pick<
 
 export function createMapLayerSortableId(droppableId: MapLayerDroppableId, layerName: string) {
   return `${droppableId}:${layerName}`;
+}
+
+export function getMapLayerDroppableId(id: UniqueIdentifier | undefined): MapLayerDroppableId | undefined {
+  if (id === undefined) {
+    return undefined;
+  }
+
+  const idStr = typeof id === "string" ? id : String(id);
+  const colon = idStr.indexOf(":");
+  const droppableId = colon >= 0 ? idStr.slice(0, colon) : idStr;
+  return isMapLayerDroppableId(droppableId) ? droppableId : undefined;
+}
+
+export function getMapLayerDropTargetId(target: MapLayerDropTarget | null | undefined): MapLayerDroppableId | undefined {
+  if (!target) {
+    return undefined;
+  }
+
+  return getMapLayerDroppableId(target.group) ?? getMapLayerDroppableId(target.id);
 }
 
 export function commitMapLayerDrop<TItem extends MapLayerDragStateItem>(
@@ -54,55 +80,134 @@ export function commitMapLayerDrop<TItem extends MapLayerDragStateItem>(
   }
 
   // Item IDs are formatted as `${droppableId}:${layerName}`.
-  // Parse the source droppable ID directly from the ID so we never depend on
-  // event.operation.target (which is often null at drag-end time).
-  const firstColon = draggedId.indexOf(":");
-  if (firstColon < 0) {
-    return false;
-  }
-  const sourceDroppableId = draggedId.slice(0, firstColon);
-  if (!isMapLayerDroppableId(sourceDroppableId)) {
+  const sourceDroppableId = getMapLayerDroppableId(draggedId);
+  if (sourceDroppableId === undefined) {
     return false;
   }
 
-  // Locate the dragged item in the post-drag-over state to find its destination.
-  for (const destinationDroppableId of [backgroundMapLayersId, overlayMapLayersId] as const) {
-    const layers = mapLayers[destinationDroppableId];
-    const destinationUiIndex = layers.findIndex((l) => l.id === draggedId);
-    if (destinationUiIndex < 0) {
-      continue;
-    }
-
-    const draggedLayer = layers[destinationUiIndex];
-    const sourceIsOverlay = sourceDroppableId === overlayMapLayersId;
-    const destinationIsOverlay = destinationDroppableId === overlayMapLayersId;
-    // UI arrays are the reverse of display-style order, so:
-    //   displayStyleIndex = array.length - 1 - uiIndex
-    const sourceDisplayStyleIndex = draggedLayer.layerIndex;
-    const destinationDisplayStyleIndex = layers.length - 1 - destinationUiIndex;
-
-    if (sourceIsOverlay === destinationIsOverlay) {
-      if (sourceDisplayStyleIndex === destinationDisplayStyleIndex) {
-        return false;
-      }
-      displayStyle.moveMapLayerToIndex(sourceDisplayStyleIndex, destinationDisplayStyleIndex, sourceIsOverlay);
-    } else {
-      const layerSettings = displayStyle.mapLayerAtIndex({ index: sourceDisplayStyleIndex, isOverlay: sourceIsOverlay });
-      if (!layerSettings) {
-        return false;
-      }
-      displayStyle.detachMapLayerByIndex({ index: sourceDisplayStyleIndex, isOverlay: sourceIsOverlay });
-      displayStyle.attachMapLayer({
-        settings: layerSettings,
-        mapLayerIndex: { index: destinationDisplayStyleIndex, isOverlay: destinationIsOverlay },
-      });
-    }
-    return true;
+  // Prefer the final target for the destination. Sortable source group/index
+  // can describe dnd-kit's projected location, but source.group may still be
+  // the original list when rendered lists are not updated optimistically.
+  const source = event.operation.source as MapLayerDropTarget | null;
+  const target = event.operation.target as MapLayerDropTarget | null;
+  const targetDroppableId = getMapLayerDropTargetId(target) ?? getMapLayerDroppableId(source?.group);
+  if (targetDroppableId === undefined) {
+    return false;
   }
 
-  return false;
+  const destinationDroppableId = targetDroppableId;
+  const draggedLocation = findDraggedLocation(mapLayers, draggedId);
+  if (!draggedLocation) {
+    return false;
+  }
+
+  const destinationUiIndex = getDestinationUiIndex(source, target, mapLayers, sourceDroppableId, destinationDroppableId, draggedLocation);
+  if (destinationUiIndex === undefined) {
+    return false;
+  }
+
+  const draggedLayer = draggedLocation.item;
+  const sourceIsOverlay = sourceDroppableId === overlayMapLayersId;
+  const destinationIsOverlay = destinationDroppableId === overlayMapLayersId;
+  // UI arrays are the reverse of display-style order, so:
+  //   displayStyleIndex = array.length - 1 - uiIndex
+  const sourceDisplayStyleIndex = draggedLayer.layerIndex;
+  const destinationLayerCount = mapLayers[destinationDroppableId].length + (draggedLocation.droppableId === destinationDroppableId ? 0 : 1);
+  const destinationDisplayStyleIndex = destinationLayerCount - 1 - destinationUiIndex;
+
+  if (sourceIsOverlay === destinationIsOverlay) {
+    if (sourceDisplayStyleIndex === destinationDisplayStyleIndex) {
+      return false;
+    }
+    displayStyle.moveMapLayerToIndex(sourceDisplayStyleIndex, destinationDisplayStyleIndex, sourceIsOverlay);
+  } else {
+    const layerSettings = displayStyle.mapLayerAtIndex({ index: sourceDisplayStyleIndex, isOverlay: sourceIsOverlay });
+    if (!layerSettings) {
+      return false;
+    }
+    displayStyle.detachMapLayerByIndex({ index: sourceDisplayStyleIndex, isOverlay: sourceIsOverlay });
+    displayStyle.attachMapLayer({
+      settings: layerSettings,
+      mapLayerIndex: { index: destinationDisplayStyleIndex, isOverlay: destinationIsOverlay },
+    });
+  }
+  return true;
+}
+
+function findDraggedLocation<TItem extends MapLayerDragStateItem>(
+  mapLayers: MapLayerDragState<TItem>,
+  draggedId: string,
+): MapLayerLocation<TItem> | undefined {
+  for (const droppableId of [backgroundMapLayersId, overlayMapLayersId] as const) {
+    const uiIndex = mapLayers[droppableId].findIndex((layer) => layer.id === draggedId);
+    if (uiIndex >= 0) {
+      return { droppableId, item: mapLayers[droppableId][uiIndex], uiIndex };
+    }
+  }
+
+  return undefined;
 }
 
 function isMapLayerDroppableId(value: UniqueIdentifier): value is MapLayerDroppableId {
   return value === overlayMapLayersId || value === backgroundMapLayersId;
+}
+
+function getDestinationUiIndex<TItem extends MapLayerDragStateItem>(
+  source: MapLayerDropTarget | null,
+  target: MapLayerDropTarget | null,
+  mapLayers: MapLayerDragState<TItem>,
+  sourceDroppableId: MapLayerDroppableId,
+  destinationDroppableId: MapLayerDroppableId,
+  draggedLocation: MapLayerLocation<TItem>,
+): number | undefined {
+  const destinationLayerCount = mapLayers[destinationDroppableId].length + (sourceDroppableId === destinationDroppableId ? 0 : 1);
+  if (destinationLayerCount <= 0) {
+    return undefined;
+  }
+
+  if (getMapLayerDropTargetId(target) === destinationDroppableId && typeof target?.index === "number") {
+    return clampIndex(target.index, destinationLayerCount);
+  }
+
+  if (target?.id === destinationDroppableId) {
+    return 0;
+  }
+
+  const targetIndex = findTargetUiIndex(mapLayers[destinationDroppableId], target?.id, destinationDroppableId);
+  if (targetIndex >= 0) {
+    return clampIndex(targetIndex, destinationLayerCount);
+  }
+
+  if (draggedLocation.droppableId === destinationDroppableId) {
+    return clampIndex(draggedLocation.uiIndex, destinationLayerCount);
+  }
+
+  if (getMapLayerDroppableId(source?.group) === destinationDroppableId && typeof source?.index === "number") {
+    return clampIndex(source.index, destinationLayerCount);
+  }
+
+  return undefined;
+}
+
+function findTargetUiIndex<TItem extends MapLayerDragStateItem>(
+  layers: TItem[],
+  targetId: UniqueIdentifier | undefined,
+  destinationDroppableId: MapLayerDroppableId,
+) {
+  const exactIndex = layers.findIndex((layer) => layer.id === targetId);
+  if (exactIndex >= 0 || typeof targetId !== "string") {
+    return exactIndex;
+  }
+
+  const colon = targetId.indexOf(":");
+  if (colon < 0) {
+    return -1;
+  }
+
+  const destinationSortableId = `${destinationDroppableId}:${targetId.slice(colon + 1)}`;
+  return layers.findIndex((layer) => layer.id === destinationSortableId);
+}
+
+function clampIndex(index: number, itemCount: number) {
+  return Math.max(0, Math.min(index, itemCount - 1));
 }
