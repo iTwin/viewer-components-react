@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import React from "react";
-import type { DragDropProvider } from "@dnd-kit/react";
+import type { DragEndEvent, DragMoveEvent, DragOverEvent } from "@dnd-kit/react";
 
 import type { ScreenViewport, Viewport } from "@itwin/core-frontend";
 import { commitMapLayerDrop } from "../../widget/MapLayerDragDrop";
@@ -51,7 +51,7 @@ export function useMapLayerDrag(args: {
   }, []);
 
   const handleMapLayerDragOver = React.useCallback(
-    (event: Parameters<NonNullable<React.ComponentProps<typeof DragDropProvider>["onDragOver"]>>[0]) => {
+    (event: DragOverEvent) => {
       const projection = projectMapLayerDragOver(mapLayersRef.current, event);
       if (projection.kind === "restore") {
         restoreDragStartMapLayers();
@@ -72,7 +72,7 @@ export function useMapLayerDrag(args: {
   );
 
   const handleMapLayerDragMove = React.useCallback(
-    (event: Parameters<NonNullable<React.ComponentProps<typeof DragDropProvider>["onDragMove"]>>[0]) => {
+    (event: DragMoveEvent) => {
       const targetId = getMapLayerDragMoveTarget(event);
       if (!targetId) {
         restoreDragStartMapLayers();
@@ -83,7 +83,7 @@ export function useMapLayerDrag(args: {
   );
 
   const handleMapLayerDragEnd = React.useCallback(
-    (event: Parameters<NonNullable<React.ComponentProps<typeof DragDropProvider>["onDragEnd"]>>[0]) => {
+    (event: DragEndEvent) => {
       setIsDraggingMapLayer(false);
       suppressReloadRef.current = true;
       const committed = commitMapLayerDrop(activeViewport.displayStyle, mapLayersRef.current, event);

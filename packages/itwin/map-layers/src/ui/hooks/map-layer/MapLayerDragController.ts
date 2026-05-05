@@ -3,28 +3,23 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type React from "react";
-
 import { move } from "@dnd-kit/helpers";
-import type { DragDropProvider } from "@dnd-kit/react";
+import type { DragMoveEvent, DragOverEvent } from "@dnd-kit/react";
 import type { StyleMapLayerSettings } from "../../Interfaces";
 import { backgroundMapLayersId, getMapLayerDropTargetId, overlayMapLayersId } from "../../widget/MapLayerDragDrop";
 import type { MapLayerDroppableId } from "../../widget/MapLayerDragDrop";
 import type { MapLayerState } from "./types";
-
-type MapLayerDragOverEvent = Parameters<NonNullable<React.ComponentProps<typeof DragDropProvider>["onDragOver"]>>[0];
-type MapLayerDragMoveEvent = Parameters<NonNullable<React.ComponentProps<typeof DragDropProvider>["onDragMove"]>>[0];
 
 export type MapLayerDragProjection =
   | { kind: "restore" }
   | { kind: "unchanged"; targetId: MapLayerDroppableId }
   | { kind: "project"; targetId: MapLayerDroppableId; mapLayers: MapLayerState };
 
-export function getMapLayerDragMoveTarget(event: MapLayerDragMoveEvent): MapLayerDroppableId | undefined {
+export function getMapLayerDragMoveTarget(event: DragMoveEvent): MapLayerDroppableId | undefined {
   return getMapLayerDropTargetId(event.operation.target);
 }
 
-export function projectMapLayerDragOver(mapLayers: MapLayerState, event: MapLayerDragOverEvent): MapLayerDragProjection {
+export function projectMapLayerDragOver(mapLayers: MapLayerState, event: DragOverEvent): MapLayerDragProjection {
   const targetId = getMapLayerDropTargetId(event.operation.target);
   if (!targetId) {
     return { kind: "restore" };

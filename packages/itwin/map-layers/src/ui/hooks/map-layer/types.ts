@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import type React from "react";
 
-import type { DragDropProvider } from "@dnd-kit/react";
+import type { DragEndEvent, DragMoveEvent, DragOverEvent, DragStartEvent } from "@dnd-kit/react";
 import type { MapLayerSource, ScreenViewport, Viewport } from "@itwin/core-frontend";
 import type { StyleMapLayerSettings } from "../../Interfaces";
 import type { MapLayerDroppableId } from "../../widget/MapLayerDragDrop";
@@ -35,10 +35,10 @@ export interface MapLayerSelectionActions {
 export interface MapLayerDragStateProps {
   dragStartMapLayersRef: React.MutableRefObject<MapLayerState | undefined>;
   dropTargetId?: MapLayerDroppableId;
-  handleMapLayerDragEnd: NonNullable<React.ComponentProps<typeof DragDropProvider>["onDragEnd"]>;
-  handleMapLayerDragMove: NonNullable<React.ComponentProps<typeof DragDropProvider>["onDragMove"]>;
-  handleMapLayerDragOver: NonNullable<React.ComponentProps<typeof DragDropProvider>["onDragOver"]>;
-  handleMapLayerDragStart: NonNullable<React.ComponentProps<typeof DragDropProvider>["onDragStart"]>;
+  handleMapLayerDragEnd: (event: DragEndEvent) => void;
+  handleMapLayerDragMove: (event: DragMoveEvent) => void;
+  handleMapLayerDragOver: (event: DragOverEvent) => void;
+  handleMapLayerDragStart: (event: DragStartEvent) => void;
   isDraggingMapLayer: boolean;
 }
 
