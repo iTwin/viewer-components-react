@@ -234,6 +234,7 @@ const configuredUiItems = new Map<string, UiItem>([
                 },
                 selectionStorage: unifiedSelectionStorage,
                 isPropertyEditingEnabled: true,
+                editorSystem: "new",
                 onPropertyUpdated: async ({ newValue }) => {
                   console.log(`Updated new value`, newValue);
                   return true;
