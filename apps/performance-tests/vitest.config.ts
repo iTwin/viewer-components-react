@@ -12,6 +12,7 @@ export default defineConfig({
     include: ["src/**/*.test.{ts,tsx}"],
     restoreMocks: true,
     testTimeout: 300000,
+    hookTimeout: 60000,
     fileParallelism: false,
     setupFiles: ["src/setup.ts"],
     reporters: [new TestReporter()],
