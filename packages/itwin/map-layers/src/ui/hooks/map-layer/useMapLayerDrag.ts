@@ -5,12 +5,11 @@
 
 import React from "react";
 import type { DragDropProvider } from "@dnd-kit/react";
-import { move } from "@dnd-kit/helpers";
 
 import type { ScreenViewport, Viewport } from "@itwin/core-frontend";
-import type { StyleMapLayerSettings } from "../../Interfaces";
-import { backgroundMapLayersId, commitMapLayerDrop, getMapLayerDropTargetId, overlayMapLayersId } from "../../widget/MapLayerDragDrop";
+import { commitMapLayerDrop } from "../../widget/MapLayerDragDrop";
 import type { MapLayerDroppableId } from "../../widget/MapLayerDragDrop";
+import { getMapLayerDragMoveTarget, projectMapLayerDragOver, refreshCommittedMapLayerIndices } from "./MapLayerDragController";
 import type { MapLayerDragStateProps, MapLayerState } from "./types";
 
 /**
@@ -53,34 +52,28 @@ export function useMapLayerDrag(args: {
 
   const handleMapLayerDragOver = React.useCallback(
     (event: Parameters<NonNullable<React.ComponentProps<typeof DragDropProvider>["onDragOver"]>>[0]) => {
-      const targetId = getMapLayerDropTargetId(event.operation.target);
-      if (!targetId) {
+      const projection = projectMapLayerDragOver(mapLayersRef.current, event);
+      if (projection.kind === "restore") {
         restoreDragStartMapLayers();
         setDropTargetId(undefined);
         return;
       }
 
-      if (isSameListContainerTarget(event.operation.source?.id, event.operation.target?.id, targetId, mapLayersRef.current)) {
-        setDropTargetId(targetId);
+      if (projection.kind === "unchanged") {
+        setDropTargetId(projection.targetId);
         return;
       }
 
-      const nextMapLayers = move(mapLayersRef.current, event);
-      if (hasSameMapLayerOrder(mapLayersRef.current, nextMapLayers)) {
-        setDropTargetId(targetId);
-        return;
-      }
-
-      mapLayersRef.current = nextMapLayers;
-      setMapLayers(nextMapLayers);
-      setDropTargetId(targetId);
+      mapLayersRef.current = projection.mapLayers;
+      setMapLayers(projection.mapLayers);
+      setDropTargetId(projection.targetId);
     },
     [restoreDragStartMapLayers, setMapLayers],
   );
 
   const handleMapLayerDragMove = React.useCallback(
     (event: Parameters<NonNullable<React.ComponentProps<typeof DragDropProvider>["onDragMove"]>>[0]) => {
-      const targetId = getMapLayerDropTargetId(event.operation.target);
+      const targetId = getMapLayerDragMoveTarget(event);
       if (!targetId) {
         restoreDragStartMapLayers();
       }
@@ -96,16 +89,7 @@ export function useMapLayerDrag(args: {
       const committed = commitMapLayerDrop(activeViewport.displayStyle, mapLayersRef.current, event);
       dragStartMapLayersRef.current = undefined;
       if (committed) {
-        mapLayersRef.current = {
-          [backgroundMapLayersId]: mapLayersRef.current[backgroundMapLayersId].map((layer, i, arr) => ({
-            ...layer,
-            layerIndex: arr.length - 1 - i,
-          })),
-          [overlayMapLayersId]: mapLayersRef.current[overlayMapLayersId].map((layer, i, arr) => ({
-            ...layer,
-            layerIndex: arr.length - 1 - i,
-          })),
-        };
+        mapLayersRef.current = refreshCommittedMapLayerIndices(mapLayersRef.current);
         setTimeout(() => {
           setDropTargetId(undefined);
           suppressReloadRef.current = false;
@@ -129,24 +113,4 @@ export function useMapLayerDrag(args: {
     handleMapLayerDragStart,
     isDraggingMapLayer,
   };
-}
-
-function hasSameMapLayerOrder(a: MapLayerState, b: MapLayerState) {
-  return hasSameLayerOrder(a[backgroundMapLayersId], b[backgroundMapLayersId])
-    && hasSameLayerOrder(a[overlayMapLayersId], b[overlayMapLayersId]);
-}
-
-function hasSameLayerOrder(a: StyleMapLayerSettings[], b: StyleMapLayerSettings[]) {
-  return a.length === b.length && a.every((layer, index) => layer.id === b[index].id);
-}
-
-function isSameListContainerTarget(
-  sourceId: unknown,
-  targetIdValue: unknown,
-  targetId: MapLayerDroppableId,
-  mapLayers: MapLayerState,
-) {
-  return targetIdValue === targetId
-    && typeof sourceId === "string"
-    && mapLayers[targetId].some((layer) => layer.id === sourceId);
 }

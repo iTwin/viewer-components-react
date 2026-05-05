@@ -80,7 +80,6 @@ export function MapLayerItem(props: MapLayerItemProps) {
       data-id={index}
       ref={sortable.ref}
       style={{
-        cursor: context.disabled ? undefined : sortable.isDragging ? "grabbing" : "grab",
         position: sortable.isDragging ? "relative" : undefined,
         zIndex: sortable.isDragging ? 2 : undefined,
         boxShadow: sortable.isDragging ? "10px 5px 5px rgba(0, 0, 0, 0.15)" : undefined,
@@ -109,6 +108,8 @@ export function MapLayerItem(props: MapLayerItemProps) {
 
       <span
         className={context.disabled || outOfRange ? "map-manager-item-label-disabled" : "map-manager-item-label"}
+        ref={sortable.handleRef}
+        style={{ cursor: context.disabled ? undefined : sortable.isDragging ? "grabbing" : "grab" }}
         title={outOfRange ? outOfRangeTitle : undefined}
       >
         {layer.name}
