@@ -22,12 +22,6 @@ export interface SourceMapContextProps {
 }
 
 /** @internal */
-export interface SourceMapProviderProps {
-  readonly children: React.ReactNode;
-  readonly value: SourceMapContextProps;
-}
-
-/** @internal */
 export const SourceMapContext = React.createContext<SourceMapContextProps>({
   sources: [],
   loadingSources: false,
@@ -35,11 +29,6 @@ export const SourceMapContext = React.createContext<SourceMapContextProps>({
   refreshFromStyle: () => {},
   selectAllLayers: () => {},
 });
-
-/** @internal */
-export function SourceMapProvider(props: SourceMapProviderProps): React.ReactElement {
-  return React.createElement(SourceMapContext.Provider, { value: props.value }, props.children);
-}
 
 /** @internal */
 export function useSourceMapContext(): SourceMapContextProps {

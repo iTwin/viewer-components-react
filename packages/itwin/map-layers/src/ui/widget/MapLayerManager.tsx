@@ -21,11 +21,11 @@ import { useMapLayerStyleActions } from "../hooks/map-layer/useMapLayerStyleActi
 import { useViewportMapLayers } from "../hooks/map-layer/useViewportMapLayers";
 import { MapLayersList } from "./MapLayersList";
 import { MapLayerSettingsPopupButton } from "./MapLayerSettingsPopupButton";
-import { SourceMapProvider } from "./SourceMapContext";
 
 import type { ScreenViewport } from "@itwin/core-frontend";
 import type { MapLayerOptions } from "../Interfaces";
 import { backgroundMapLayersId, overlayMapLayersId } from "./MapLayerDragDrop";
+import { SourceMapContext } from "./SourceMapContext";
 
 /** @internal */
 export const defaultBaseMapLayers = [
@@ -93,7 +93,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
   } = useMapLayerDrag({ activeViewport, loadMapLayerSettingsFromViewport, mapLayers, setMapLayers, suppressReloadRef });
 
   return (
-    <SourceMapProvider
+    <SourceMapContext.Provider
       value={{
         activeViewport,
         loadingSources,
@@ -156,6 +156,6 @@ export function MapLayerManager(props: MapLayerManagerProps) {
           </div>
         )}
       </div>
-    </SourceMapProvider>
+    </SourceMapContext.Provider>
   );
 }
