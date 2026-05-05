@@ -342,7 +342,6 @@ describe("MapLayerDragModel", () => {
           target: { id: `${overlayMapLayersId}` },
         } as any,
       });
-      const itemId = `${backgroundMapLayersId}:Layer1`;
       const mapLayers = {
         [backgroundMapLayersId]: [],
         [overlayMapLayersId]: [],

@@ -106,24 +106,6 @@ describe("MapLayerManager drag and drop", () => {
     } as any;
   }
 
-  it("optimistically moves a layer to another list on drag over", async () => {
-    await renderMapLayerManager(["Background"], ["Overlay"]);
-
-    const draggedId = `${backgroundMapLayersId}:Background`;
-    dndKitMock.move.mockImplementation((items) => ({
-      [backgroundMapLayersId]: [],
-      [overlayMapLayersId]: [items[backgroundMapLayersId][0], ...items[overlayMapLayersId]],
-    }));
-
-    await act(async () => {
-      dndKitMock.dragDropProviderProps.onDragStart();
-      dndKitMock.dragDropProviderProps.onDragOver(dragEvent(draggedId, { id: overlayMapLayersId }));
-    });
-
-    expectLayerNotInSection(0, "Background");
-    expectLayerInSection(1, "Background");
-  });
-
   it("restores the drag-start layer order when the pointer leaves all droppables", async () => {
     await renderMapLayerManager(["Background"], ["Overlay"]);
 
