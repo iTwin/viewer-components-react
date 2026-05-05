@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { type IModelDb } from "@itwin/core-backend";
+import type { IModelDb } from "@itwin/core-backend";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { expect } from "vitest";
 import type { ImportSchemaResult } from "test-utilities";
