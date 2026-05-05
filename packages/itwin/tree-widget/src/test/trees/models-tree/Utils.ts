@@ -29,7 +29,7 @@ import type { ChildrenTree } from "../../../tree-widget-react/components/trees/m
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
 interface CreateModelsTreeProviderProps {
-  imodel: IModelConnection;
+  imodelConnection: IModelConnection;
   filteredNodePaths?: HierarchyFilteringPath[];
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   idsCache?: ModelsTreeIdsCache;
@@ -37,14 +37,14 @@ interface CreateModelsTreeProviderProps {
 }
 
 export function createModelsTreeProvider({
-  imodel,
+  imodelConnection,
   filteredNodePaths,
   hierarchyConfig,
   imodelAccess,
   idsCache,
 }: CreateModelsTreeProviderProps): HierarchyProvider & { dispose: () => void; [Symbol.dispose]: () => void } {
   const config = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...hierarchyConfig };
-  const createdImodelAccess = imodelAccess ?? createIModelAccess(imodel);
+  const createdImodelAccess = imodelAccess ?? createIModelAccess(imodelConnection);
   const createdIdsCache = idsCache ?? new ModelsTreeIdsCache(createdImodelAccess, config);
   const provider = createIModelHierarchyProvider({
     imodelAccess: createdImodelAccess,

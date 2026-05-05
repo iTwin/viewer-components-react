@@ -33,10 +33,11 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "npm run -s dual-build && npm run -s copy:assets",
+    "build": "npm run -s link:deps && npm run -s copy:assets && npm run -s dual-build ",
     "dual-build": "npm run -s build:cjs && npm run -s build:esm",
     "build:cjs": "node ../../../scripts/package-cjs.js ./lib/cjs && tsc 1>&2 -p tsconfig.cjs.json",
     "build:esm": "tsc 1>&2 -p tsconfig.esm.json",
+    "link:deps": "node ./scripts/linkWorkspaceDeps.cjs",
     "copy:assets": "npm run -s copy:public && npm run -s copy:cjs && npm run -s copy:esm",
     "copy:public": "cpx \"./public/**/*\" ./lib/public",
     "copy:cjs": "cpx \"./src/**/*.{scss,json}\" ./lib/cjs",
@@ -112,7 +113,6 @@
     "@itwin/presentation-common": "^5.7.0",
     "@itwin/presentation-components": "^5.12.18",
     "@itwin/presentation-frontend": "^5.7.0",
-    "@itwin/presentation-testing": "^5.4.14",
     "@itwin/webgl-compatibility": "^5.7.0",
     "@playwright/test": "1.56.1",
     "@testing-library/dom": "^10.4.1",
@@ -159,6 +159,7 @@
     "sinon-chai": "^4.0.1",
     "stylelint": "^17.1.1",
     "stylelint-config-standard-scss": "^17.0.0",
+    "test-utilities": "workspace:*",
     "typemoq": "^2.1.0",
     "typescript": "~5.8.3"
   }

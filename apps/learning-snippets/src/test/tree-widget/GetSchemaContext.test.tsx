@@ -10,7 +10,8 @@ import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_END__
-import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils.js";
+import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
+import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
 
 describe("Tree widget", () => {
@@ -26,14 +27,12 @@ describe("Tree widget", () => {
         });
 
         it("returns schema context", async () => {
-          const imodelConnection = (
-            await buildIModel(async (builder) => {
-              const model = insertPhysicalModelWithPartition({ builder, codeValue: "model", partitionParentId: IModel.rootSubjectId });
-              const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
-              insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
-              return { model, category };
-            })
-          ).imodel;
+          const { imodelConnection } = await buildIModel(async (imodel) => {
+            const model = insertPhysicalModelWithPartition({ imodel, codeValue: "model", partitionParentId: IModel.rootSubjectId });
+            const category = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory" });
+            insertPhysicalElement({ imodel, userLabel: `element`, modelId: model.id, categoryId: category.id });
+            return { model, category };
+          });
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.GetSchemaContextExample
           const schemaContextCache = new Map<string, SchemaContext>();

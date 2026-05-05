@@ -368,7 +368,7 @@ function ExampleComponent() {
         logUsage(feature);
       }}
     >
-      <PropertyGrid imodel={imodel} />
+      <PropertyGrid imodel={imodelConnection} />
     </TelemetryContextProvider>
   );
 }

@@ -3,16 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
-import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
-import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { IModelContentTreeDefinition } from "../../../tree-widget-react/components/trees/imodel-content-tree/IModelContentTreeDefinition.js";
-import { IModelContentTreeIdsCache } from "../../../tree-widget-react/components/trees/imodel-content-tree/internal/IModelContentTreeIdsCache.js";
 import {
-  buildIModel,
+  HierarchyCacheMode,
+  initializeCore,
   insertDrawingCategory,
   insertDrawingElement,
   insertDrawingGraphic,
@@ -26,7 +19,16 @@ import {
   insertSpatialCategory,
   insertSubject,
   insertSubModel,
-} from "../../IModelUtils.js";
+  terminateCore,
+} from "test-utilities";
+import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
+import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
+import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
+import { PresentationRpcInterface } from "@itwin/presentation-common";
+import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
+import { IModelContentTreeDefinition } from "../../../tree-widget-react/components/trees/imodel-content-tree/IModelContentTreeDefinition.js";
+import { IModelContentTreeIdsCache } from "../../../tree-widget-react/components/trees/imodel-content-tree/internal/IModelContentTreeIdsCache.js";
+import { buildIModel } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 
@@ -40,7 +42,7 @@ describe("iModel content tree", () => {
     const dictionaryModel: InstanceKey = { className: "BisCore.DictionaryModel", id: IModel.dictionaryId };
 
     before(async function () {
-      await initializePresentationTesting({
+      await initializeCore({
         backendProps: {
           caching: {
             hierarchies: {
@@ -56,19 +58,19 @@ describe("iModel content tree", () => {
     });
 
     after(async function () {
-      await terminatePresentationTesting();
+      await terminateCore();
     });
 
     describe("subjects' children", () => {
       it("creates subjects hierarchy with root subject", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          const subjectA = insertSubject({ builder, codeValue: "A", parentId: IModel.rootSubjectId });
-          const subjectB = insertSubject({ builder, codeValue: "B", parentId: IModel.rootSubjectId });
-          const subjectC = insertSubject({ builder, codeValue: "C", parentId: subjectB.id });
+        await using buildIModelResult = await buildIModel(this, async (imodel) => {
+          const subjectA = insertSubject({ imodel, codeValue: "A", parentId: IModel.rootSubjectId });
+          const subjectB = insertSubject({ imodel, codeValue: "B", parentId: IModel.rootSubjectId });
+          const subjectC = insertSubject({ imodel, codeValue: "C", parentId: subjectB.id });
           return { rootSubject, dictionaryModel, subjectA, subjectB, subjectC };
         });
-        const { imodel, ...keys } = buildIModelResult;
-        using provider = createIModelContentTreeProvider(imodel, { hideRootSubject: false });
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createIModelContentTreeProvider(imodelConnection, { hideRootSubject: false });
         await validateHierarchy({
           provider,
           expect: [
@@ -105,14 +107,14 @@ describe("iModel content tree", () => {
       });
 
       it("creates subjects hierarchy without root subject", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          const subjectA = insertSubject({ builder, codeValue: "A", parentId: IModel.rootSubjectId });
-          const subjectB = insertSubject({ builder, codeValue: "B", parentId: IModel.rootSubjectId });
-          const subjectC = insertSubject({ builder, codeValue: "C", parentId: subjectB.id });
+        await using buildIModelResult = await buildIModel(this, async (imodel) => {
+          const subjectA = insertSubject({ imodel, codeValue: "A", parentId: IModel.rootSubjectId });
+          const subjectB = insertSubject({ imodel, codeValue: "B", parentId: IModel.rootSubjectId });
+          const subjectC = insertSubject({ imodel, codeValue: "C", parentId: subjectB.id });
           return { rootSubject, dictionaryModel, subjectA, subjectB, subjectC };
         });
-        const { imodel, ...keys } = buildIModelResult;
-        using provider = createIModelContentTreeProvider(imodel);
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createIModelContentTreeProvider(imodelConnection);
         await validateHierarchy({
           provider,
           expect: [
@@ -142,12 +144,12 @@ describe("iModel content tree", () => {
       });
 
       it("creates 3d model nodes child nodes", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "test partition", partitionParentId: IModel.rootSubjectId });
+        await using buildIModelResult = await buildIModel(this, async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "test partition", partitionParentId: IModel.rootSubjectId });
           return { rootSubject, dictionaryModel, physicalModel };
         });
-        const { imodel, ...keys } = buildIModelResult;
-        using provider = createIModelContentTreeProvider(imodel);
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createIModelContentTreeProvider(imodelConnection);
         await validateHierarchy({
           provider,
           expect: [
@@ -168,25 +170,25 @@ describe("iModel content tree", () => {
 
     describe("2d models' children", () => {
       it("creates drawing category child nodes", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(this, async (imodel) => {
           const documentModel = insertModelWithPartition({
-            builder,
+            imodel,
             modelClassFullName: "BisCore.DocumentListModel",
             partitionClassFullName: "BisCore.DocumentPartition",
             partitionParentId: IModel.rootSubjectId,
             codeValue: "document model",
           });
-          const drawingElement = insertDrawingElement({ builder, modelId: documentModel.id, codeValue: "test drawing" });
+          const drawingElement = insertDrawingElement({ imodel, modelId: documentModel.id, codeValue: "test drawing" });
           const drawingModel = insertDrawingSubModel({
-            builder,
+            imodel,
             modeledElementId: drawingElement.id,
           });
-          const drawingCategory = insertDrawingCategory({ builder, modelId: IModel.dictionaryId, codeValue: "drawing category" });
-          const drawingGraphic = insertDrawingGraphic({ builder, modelId: drawingModel.id, categoryId: drawingCategory.id });
+          const drawingCategory = insertDrawingCategory({ imodel, modelId: IModel.dictionaryId, codeValue: "drawing category" });
+          const drawingGraphic = insertDrawingGraphic({ imodel, modelId: drawingModel.id, categoryId: drawingCategory.id });
           return { rootSubject, dictionaryModel, documentModel, drawingElement, drawingModel, drawingCategory, drawingGraphic };
         });
-        const { imodel, ...keys } = buildIModelResult;
-        using provider = createIModelContentTreeProvider(imodel);
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createIModelContentTreeProvider(imodelConnection);
         await validateHierarchy({
           provider,
           expect: [
@@ -254,24 +256,24 @@ describe("iModel content tree", () => {
       });
 
       it("loads only categories with root elements", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(this, async (imodel) => {
           const documentModel = insertModelWithPartition({
-            builder,
+            imodel,
             modelClassFullName: "BisCore.DocumentListModel",
             partitionClassFullName: "BisCore.DocumentPartition",
             partitionParentId: IModel.rootSubjectId,
             codeValue: "document model",
           });
-          const drawingElement = insertDrawingElement({ builder, modelId: documentModel.id, codeValue: "test drawing" });
+          const drawingElement = insertDrawingElement({ imodel, modelId: documentModel.id, codeValue: "test drawing" });
           const drawingModel = insertDrawingSubModel({
-            builder,
+            imodel,
             modeledElementId: drawingElement.id,
           });
-          const drawingCategory1 = insertDrawingCategory({ builder, modelId: IModel.dictionaryId, codeValue: "drawing category 1" });
-          const drawingCategory2 = insertDrawingCategory({ builder, modelId: IModel.dictionaryId, codeValue: "drawing category 2" });
-          const parentDrawingGraphic = insertDrawingGraphic({ builder, modelId: drawingModel.id, categoryId: drawingCategory1.id });
+          const drawingCategory1 = insertDrawingCategory({ imodel, modelId: IModel.dictionaryId, codeValue: "drawing category 1" });
+          const drawingCategory2 = insertDrawingCategory({ imodel, modelId: IModel.dictionaryId, codeValue: "drawing category 2" });
+          const parentDrawingGraphic = insertDrawingGraphic({ imodel, modelId: drawingModel.id, categoryId: drawingCategory1.id });
           const childDrawingGraphic = insertDrawingGraphic({
-            builder,
+            imodel,
             modelId: drawingModel.id,
             categoryId: drawingCategory2.id,
             parentId: parentDrawingGraphic.id,
@@ -288,8 +290,8 @@ describe("iModel content tree", () => {
             childDrawingGraphic,
           };
         });
-        const { imodel, ...keys } = buildIModelResult;
-        using provider = createIModelContentTreeProvider(imodel);
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createIModelContentTreeProvider(imodelConnection);
         await validateHierarchy({
           provider,
           expect: [
@@ -385,14 +387,14 @@ describe("iModel content tree", () => {
 
     describe("3d models' children", () => {
       it("creates spatial category child nodes", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "physical model" });
-          const category = insertSpatialCategory({ builder, codeValue: "test category" });
-          const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        await using buildIModelResult = await buildIModel(this, async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "physical model" });
+          const category = insertSpatialCategory({ imodel, codeValue: "test category" });
+          const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           return { rootSubject, dictionaryModel, physicalModel, category, element };
         });
-        const { imodel, ...keys } = buildIModelResult;
-        using provider = createIModelContentTreeProvider(imodel);
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createIModelContentTreeProvider(imodelConnection);
         await validateHierarchy({
           provider,
           expect: [
@@ -449,16 +451,16 @@ describe("iModel content tree", () => {
       });
 
       it("loads only categories with root elements", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "physical model" });
-          const category1 = insertSpatialCategory({ builder, codeValue: "test category 1" });
-          const category2 = insertSpatialCategory({ builder, codeValue: "test category 2" });
-          const parentElement = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category1.id });
-          const childElement = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category2.id, parentId: parentElement.id });
+        await using buildIModelResult = await buildIModel(this, async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "physical model" });
+          const category1 = insertSpatialCategory({ imodel, codeValue: "test category 1" });
+          const category2 = insertSpatialCategory({ imodel, codeValue: "test category 2" });
+          const parentElement = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category1.id });
+          const childElement = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category2.id, parentId: parentElement.id });
           return { rootSubject, dictionaryModel, physicalModel, category1, category2, parentElement, childElement };
         });
-        const { imodel, ...keys } = buildIModelResult;
-        using provider = createIModelContentTreeProvider(imodel);
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createIModelContentTreeProvider(imodelConnection);
         await validateHierarchy({
           provider,
           expect: [
@@ -543,18 +545,18 @@ describe("iModel content tree", () => {
 
     describe("non-geometric models' children", () => {
       it("creates element child nodes", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(this, async (imodel) => {
           const documentModel = insertModelWithPartition({
-            builder,
+            imodel,
             partitionClassFullName: "BisCore.DocumentPartition",
             modelClassFullName: "BisCore.DocumentListModel",
             codeValue: "test partition",
           });
-          const drawingElement = insertDrawingElement({ builder, modelId: documentModel.id, codeValue: "test document" });
+          const drawingElement = insertDrawingElement({ imodel, modelId: documentModel.id, codeValue: "test document" });
           return { rootSubject, dictionaryModel, documentModel, drawingElement };
         });
-        const { imodel, ...keys } = buildIModelResult;
-        using provider = createIModelContentTreeProvider(imodel);
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createIModelContentTreeProvider(imodelConnection);
         await validateHierarchy({
           provider,
           expect: [
@@ -586,13 +588,13 @@ describe("iModel content tree", () => {
 
     describe("groups' children", () => {
       it("creates childless node when group has no child or grouped elements", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          const groupModel = insertGroupInformationModelWithPartition({ builder, codeValue: "test partition" });
-          const groupElement = insertGroupInformationElement({ builder, modelId: groupModel.id, codeValue: "test group" });
+        await using buildIModelResult = await buildIModel(this, async (imodel) => {
+          const groupModel = insertGroupInformationModelWithPartition({ imodel, codeValue: "test partition" });
+          const groupElement = insertGroupInformationElement({ imodel, modelId: groupModel.id, codeValue: "test group" });
           return { rootSubject, dictionaryModel, groupModel, groupElement };
         });
-        const { imodel, ...keys } = buildIModelResult;
-        using provider = createIModelContentTreeProvider(imodel);
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createIModelContentTreeProvider(imodelConnection);
         await validateHierarchy({
           provider,
           expect: [
@@ -622,14 +624,14 @@ describe("iModel content tree", () => {
       });
 
       it("creates child elements as child nodes", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          const groupModel = insertGroupInformationModelWithPartition({ builder, codeValue: "test partition" });
-          const parentGroup = insertGroupInformationElement({ builder, modelId: groupModel.id, codeValue: "parent group" });
-          const childGroup = insertGroupInformationElement({ builder, modelId: groupModel.id, parentId: parentGroup.id, codeValue: "child group" });
+        await using buildIModelResult = await buildIModel(this, async (imodel) => {
+          const groupModel = insertGroupInformationModelWithPartition({ imodel, codeValue: "test partition" });
+          const parentGroup = insertGroupInformationElement({ imodel, modelId: groupModel.id, codeValue: "parent group" });
+          const childGroup = insertGroupInformationElement({ imodel, modelId: groupModel.id, parentId: parentGroup.id, codeValue: "child group" });
           return { rootSubject, dictionaryModel, groupModel, parentGroup, childGroup };
         });
-        const { imodel, ...keys } = buildIModelResult;
-        using provider = createIModelContentTreeProvider(imodel);
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createIModelContentTreeProvider(imodelConnection);
         await validateHierarchy({
           provider,
           expect: [
@@ -676,25 +678,25 @@ describe("iModel content tree", () => {
       });
 
       it("creates grouped elements as child nodes", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          const groupModel = insertGroupInformationModelWithPartition({ builder, codeValue: "group partition" });
-          const group = insertGroupInformationElement({ builder, modelId: groupModel.id, codeValue: "group" });
+        await using buildIModelResult = await buildIModel(this, async (imodel) => {
+          const groupModel = insertGroupInformationModelWithPartition({ imodel, codeValue: "group partition" });
+          const group = insertGroupInformationElement({ imodel, modelId: groupModel.id, codeValue: "group" });
           const documentModel = insertModelWithPartition({
-            builder,
+            imodel,
             modelClassFullName: "BisCore.DocumentListModel",
             partitionClassFullName: "BisCore.DocumentPartition",
             codeValue: "document partition",
           });
-          const document = insertDrawingElement({ builder, modelId: documentModel.id, codeValue: "test document" });
-          builder.insertRelationship({
+          const document = insertDrawingElement({ imodel, modelId: documentModel.id, codeValue: "test document" });
+          imodel.relationships.insertInstance({
             classFullName: "BisCore.ElementGroupsMembers",
             sourceId: group.id,
             targetId: document.id,
           });
           return { rootSubject, dictionaryModel, groupModel, group, documentModel, document };
         });
-        const { imodel, ...keys } = buildIModelResult;
-        using provider = createIModelContentTreeProvider(imodel);
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createIModelContentTreeProvider(imodelConnection);
         await validateHierarchy({
           provider,
           expect: [
@@ -759,20 +761,20 @@ describe("iModel content tree", () => {
 
     describe("elements' children", () => {
       it("creates childless node when element has no child or modeling elements", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder, testSchema) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "test partition" });
-          const category = insertSpatialCategory({ builder, codeValue: "test category" });
+        await using buildIModelResult = await buildIModel(this, async (imodel, testSchema) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "test partition" });
+          const category = insertSpatialCategory({ imodel, codeValue: "test category" });
           const physicalElement = insertPhysicalElement({
-            builder,
+            imodel,
             classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
             modelId: physicalModel.id,
             categoryId: category.id,
           });
-          const subModel = insertPhysicalSubModel({ builder, modeledElementId: physicalElement.id });
+          const subModel = insertPhysicalSubModel({ imodel, modeledElementId: physicalElement.id });
           return { rootSubject, dictionaryModel, physicalModel, category, physicalElement, subModel };
         });
-        const { imodel, ...keys } = buildIModelResult;
-        using provider = createIModelContentTreeProvider(imodel);
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createIModelContentTreeProvider(imodelConnection);
         await validateHierarchy({
           provider,
           expect: [
@@ -829,15 +831,15 @@ describe("iModel content tree", () => {
       });
 
       it("creates child elements as child nodes", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "test partition" });
-          const category = insertSpatialCategory({ builder, codeValue: "test category" });
-          const parentElement = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-          const childElement = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id, parentId: parentElement.id });
+        await using buildIModelResult = await buildIModel(this, async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "test partition" });
+          const category = insertSpatialCategory({ imodel, codeValue: "test category" });
+          const parentElement = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+          const childElement = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id, parentId: parentElement.id });
           return { rootSubject, dictionaryModel, physicalModel, category, parentElement, childElement };
         });
-        const { imodel, ...keys } = buildIModelResult;
-        using provider = createIModelContentTreeProvider(imodel);
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createIModelContentTreeProvider(imodelConnection);
         await validateHierarchy({
           provider,
           expect: [
@@ -905,20 +907,20 @@ describe("iModel content tree", () => {
       });
 
       it("creates modeling elements as child nodes", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(this, async (imodel) => {
           const documentModel = insertModelWithPartition({
-            builder,
+            imodel,
             modelClassFullName: "BisCore.DocumentListModel",
             partitionClassFullName: "BisCore.DocumentPartition",
             codeValue: "test partition",
           });
-          const parentDocument = insertDrawingElement({ builder, modelId: documentModel.id, codeValue: "parent document" });
-          const childModel = insertSubModel({ builder, classFullName: "BisCore.DocumentListModel", modeledElementId: parentDocument.id });
-          const childDocument = insertDrawingElement({ builder, modelId: childModel.id, codeValue: "child document" });
+          const parentDocument = insertDrawingElement({ imodel, modelId: documentModel.id, codeValue: "parent document" });
+          const childModel = insertSubModel({ imodel, classFullName: "BisCore.DocumentListModel", modeledElementId: parentDocument.id });
+          const childDocument = insertDrawingElement({ imodel, modelId: childModel.id, codeValue: "child document" });
           return { rootSubject, dictionaryModel, documentModel, parentDocument, childModel, childDocument };
         });
-        const { imodel, ...keys } = buildIModelResult;
-        using provider = createIModelContentTreeProvider(imodel);
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createIModelContentTreeProvider(imodelConnection);
         await validateHierarchy({
           provider,
           expect: [

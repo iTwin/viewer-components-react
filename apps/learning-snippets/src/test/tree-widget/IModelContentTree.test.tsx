@@ -12,7 +12,8 @@ import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 import { createStorage } from "@itwin/unified-selection";
 import { cleanup, render, waitFor } from "@testing-library/react";
-import { buildIModel, insertSubject } from "../../utils/IModelUtils.js";
+import { insertSubject } from "test-utilities";
+import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
 import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
 
@@ -32,16 +33,14 @@ describe("Tree widget", () => {
         });
 
         it("renders <IModelContentTreeComponent />", async () => {
-          const imodel = (
-            await buildIModel(async (builder) => {
-              const subjectA = insertSubject({ builder, codeValue: "Test subject A", parentId: IModel.rootSubjectId });
-              return { subjectA };
-            })
-          ).imodel;
-          const testViewport = getTestViewer(imodel);
+          const { imodelConnection } = await buildIModel(async (imodel) => {
+            const subjectA = insertSubject({ imodel, codeValue: "Test subject A", parentId: IModel.rootSubjectId });
+            return { subjectA };
+          });
+          const testViewport = getTestViewer(imodelConnection);
           const unifiedSelectionStorage = createStorage();
           vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
-          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
+          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.ImodelContentTreeExample
           function MyWidget() {

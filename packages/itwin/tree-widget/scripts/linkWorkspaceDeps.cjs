@@ -4,21 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 const fs = require("fs");
 const path = require("path");
-const watch = process.argv[2] && process.argv[2] === "--watch";
 
 const packages = [
-  {
-    name: "@itwin/tree-widget-react",
-    dir: "tree-widget",
-  },
-  {
-    name: "@itwin/property-grid-react",
-    dir: "property-grid",
-  },
-  {
-    name: "@itwin/quantity-formatting-react",
-    dir: "quantity-formatting",
-  },
   {
     name: "test-utilities",
     dir: "test-utilities",
@@ -29,31 +16,14 @@ linkPackages();
 
 function linkPackages() {
   for (const pack of packages) {
-    const sourcePath = getSourceLibPath(pack.dir, pack.libDirName);
+    const sourcePath = getSourceLibPath(pack.dir);
     if (!fs.existsSync(sourcePath)) {
       console.warn(`Package ${pack.name} source path does not exist: ${sourcePath}`);
       continue;
     }
-    const targetPath = getTargetLibPath(pack.name, pack.libDirName);
+    const targetPath = getTargetLibPath(pack.name);
 
     copyChangedFiles(pack.name, sourcePath, targetPath);
-
-    if (watch) {
-      let lastChange = undefined;
-      fs.watch(sourcePath, { recursive: true }, () => {
-        const now = new Date();
-        if (now === lastChange) {
-          return;
-        }
-        lastChange = now;
-        setTimeout(() => {
-          if (now === lastChange) {
-            copyChangedFiles(pack.name, sourcePath, targetPath);
-            lastChange = undefined;
-          }
-        }, 100);
-      });
-    }
   }
 }
 
@@ -75,13 +45,13 @@ function copyChangedFiles(packageName, sourceDir, targetDir) {
   });
 }
 
-function getTargetLibPath(packageName, distDirName) {
+function getTargetLibPath(packageName) {
   const packagePath = path.resolve(__dirname, "../node_modules", packageName);
   const realPath = fs.realpathSync(packagePath);
-  return path.resolve(realPath, distDirName ?? "lib");
+  return path.resolve(realPath, "lib");
 }
 
-function getSourceLibPath(packageDir, distDirName) {
-  const sourcePath = path.resolve(__dirname, "../../../packages/itwin", packageDir);
-  return path.resolve(sourcePath, distDirName ?? "lib");
+function getSourceLibPath(packageDir) {
+  const sourcePath = path.resolve(__dirname, "../../", packageDir);
+  return path.resolve(sourcePath, "lib");
 }

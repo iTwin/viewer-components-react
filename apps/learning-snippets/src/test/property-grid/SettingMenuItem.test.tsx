@@ -14,7 +14,8 @@ import { PropertyGridComponent } from "@itwin/property-grid-react";
 // __PUBLISH_EXTRACT_END__
 import { render, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils.js";
+import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
+import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
 import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils.js";
 
@@ -32,16 +33,14 @@ describe("Property grid", () => {
       });
 
       it("renders settings menu item", async () => {
-        const imodel = (
-          await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-            const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
-            insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-            return { category };
-          })
-        ).imodel;
+        const { imodelConnection } = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const category = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+          return { category };
+        });
         const user = userEvent.setup();
-        vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
+        vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
 
         // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleSettingsMenuItem
         function ExampleSettingsMenuItem() {

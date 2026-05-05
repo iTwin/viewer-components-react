@@ -5,20 +5,28 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
+import {
+  HierarchyCacheMode,
+  initializeCore,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
+  insertSpatialCategory,
+  insertSubCategory,
+  terminateCore,
+} from "test-utilities";
 import * as moq from "typemoq";
 import { IModelReadRpcInterface, SubCategoryAppearance } from "@itwin/core-common";
 import { IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, ViewRect } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import {
   enableCategoryDisplay,
   enableSubCategoryDisplay,
   invertAllCategories,
   loadCategoriesFromViewport,
 } from "../../tree-widget-react/components/trees/common/CategoriesVisibilityUtils.js";
-import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubCategory } from "../IModelUtils.js";
+import { buildIModel } from "../IModelUtils.js";
 import { TestUtils } from "../TestUtils.js";
 import { createViewState } from "./TreeUtils.js";
 
@@ -147,23 +155,23 @@ describe("CategoryVisibilityUtils", () => {
   });
 
   describe("invertAllCategories", () => {
-    let imodel: IModelConnection;
+    let imodelConnection: IModelConnection;
     let categoryIds: Array<Id64String>;
     let modelIds: Array<Id64String>;
     let subCategoryIds: Array<Id64String>;
     let viewport: Viewport;
     async function createIModel(
       context: Mocha.Context,
-    ): Promise<{ imodel: IModelConnection } & { models: Id64Array; categories: Id64Array; subCategories: Id64Array }> {
-      return buildIModel(context, async (builder) => {
-        const physicalModel1 = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel1" }).id;
-        const physicalModel2 = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel2" }).id;
-        const category1 = insertSpatialCategory({ builder, codeValue: "SpatialCategory1" }).id;
-        const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2" }).id;
-        const subCategory1 = insertSubCategory({ builder, codeValue: "SubCategory1", parentCategoryId: category1 }).id;
-        const subCategory2 = insertSubCategory({ builder, codeValue: "SubCategory2", parentCategoryId: category2 }).id;
-        insertPhysicalElement({ builder, codeValue: "element1", categoryId: category1, modelId: physicalModel1 }).id;
-        insertPhysicalElement({ builder, codeValue: "element2", categoryId: category2, modelId: physicalModel2 }).id;
+    ): Promise<{ imodelConnection: IModelConnection } & { models: Id64Array; categories: Id64Array; subCategories: Id64Array }> {
+      return buildIModel(context, async (imodel) => {
+        const physicalModel1 = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel1" }).id;
+        const physicalModel2 = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel2" }).id;
+        const category1 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory1" }).id;
+        const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2" }).id;
+        const subCategory1 = insertSubCategory({ imodel, codeValue: "SubCategory1", parentCategoryId: category1 }).id;
+        const subCategory2 = insertSubCategory({ imodel, codeValue: "SubCategory2", parentCategoryId: category2 }).id;
+        insertPhysicalElement({ imodel, codeValue: "element1", categoryId: category1, modelId: physicalModel1 }).id;
+        insertPhysicalElement({ imodel, codeValue: "element2", categoryId: category2, modelId: physicalModel2 }).id;
         return {
           models: [physicalModel1, physicalModel2],
           categories: [category1, category2],
@@ -172,7 +180,7 @@ describe("CategoryVisibilityUtils", () => {
       });
     }
     before(async function () {
-      await initializePresentationTesting({
+      await initializeCore({
         backendProps: {
           caching: {
             hierarchies: {
@@ -186,20 +194,20 @@ describe("CategoryVisibilityUtils", () => {
       // eslint-disable-next-line @itwin/no-internal
       ECSchemaRpcImpl.register();
       const buildIModelResult = await createIModel(this);
-      imodel = buildIModelResult.imodel;
+      imodelConnection = buildIModelResult.imodelConnection;
       categoryIds = buildIModelResult.categories;
       modelIds = buildIModelResult.models;
       subCategoryIds = buildIModelResult.subCategories;
       viewport = OffScreenViewport.create({
-        view: await createViewState(imodel, categoryIds, modelIds),
+        view: await createViewState(imodelConnection, categoryIds, modelIds),
         viewRect: new ViewRect(),
       });
     });
 
     after(async function () {
       viewport[Symbol.dispose]();
-      await imodel.close();
-      await terminatePresentationTesting();
+      await imodelConnection.close();
+      await terminateCore();
     });
 
     it("inverts visible and hidden categories", async () => {

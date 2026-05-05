@@ -15,7 +15,8 @@ import { IModel } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 import { createStorage } from "@itwin/unified-selection";
 import { render, waitFor } from "@testing-library/react";
-import { buildIModel, insertPhysicalModelWithPartition, insertSubject } from "../../utils/IModelUtils.js";
+import { insertPhysicalModelWithPartition, insertSubject } from "test-utilities";
+import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
 import { getSchemaContext, getTestViewer, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
 
@@ -36,22 +37,20 @@ describe("Tree widget", () => {
       });
 
       it("registers tree widget", async () => {
-        const imodel = (
-          await buildIModel(async (builder) => {
-            const model = insertPhysicalModelWithPartition({ builder, codeValue: "model" });
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const childSubject = insertSubject({
-              builder,
-              codeValue: "test subject",
-              parentId: rootSubject.id,
-            });
-            return { model, childSubject };
-          })
-        ).imodel;
-        const testViewport = getTestViewer(imodel);
+        const { imodelConnection } = await buildIModel(async (imodel) => {
+          const model = insertPhysicalModelWithPartition({ imodel, codeValue: "model" });
+          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const childSubject = insertSubject({
+            imodel,
+            codeValue: "test subject",
+            parentId: rootSubject.id,
+          });
+          return { model, childSubject };
+        });
+        const testViewport = getTestViewer(imodelConnection);
         const unifiedSelectionStorage = createStorage();
         vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
-        vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
+        vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
         let createTreeWidgetFunction: (() => ReadonlyArray<Widget>) | undefined;
         vi.spyOn(UiItemsManager, "register").mockImplementation(({ id: _id, getWidgets }) => {
           createTreeWidgetFunction = getWidgets;

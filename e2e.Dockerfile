@@ -12,8 +12,10 @@ RUN corepack enable
 
 # Copy the local files to the container
 WORKDIR /workspaces/viewer-components-react/
+COPY /pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY /scripts ./scripts
 COPY ${TEST_VIEWER_DIST} ./apps/test-viewer/dist
+COPY /packages/itwin/test-utilities ./packages/itwin/test-utilities
 COPY /packages/itwin/${PACKAGE_NAME} ./packages/itwin/${PACKAGE_NAME}
 
 # Switch to the directory where E2E tests will run
