@@ -2,7 +2,7 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import type React from "react";
+import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 
 import type { DragEndEvent, DragMoveEvent, DragOverEvent, DragStartEvent } from "@dnd-kit/react";
 import type { MapLayerSource, ScreenViewport, Viewport } from "@itwin/core-frontend";
@@ -13,11 +13,11 @@ export type MapLayerState = Record<MapLayerDroppableId, StyleMapLayerSettings[]>
 
 export interface ViewportMapLayersState {
   backgroundMapVisible: boolean;
-  setBackgroundMapVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setBackgroundMapVisible: Dispatch<SetStateAction<boolean>>;
   loadMapLayerSettingsFromViewport: (viewport: Viewport) => void;
   mapLayers: MapLayerState;
-  setMapLayers: React.Dispatch<React.SetStateAction<MapLayerState>>;
-  suppressReloadRef: React.MutableRefObject<boolean>;
+  setMapLayers: Dispatch<SetStateAction<MapLayerState>>;
+  suppressReloadRef: MutableRefObject<boolean>;
 }
 
 export interface MapLayerStyleActions {
@@ -33,7 +33,7 @@ export interface MapLayerSelectionActions {
 }
 
 export interface MapLayerDragStateProps {
-  dragStartMapLayersRef: React.MutableRefObject<MapLayerState | undefined>;
+  dragStartMapLayers?: MapLayerState;
   dropTargetId?: MapLayerDroppableId;
   handleMapLayerDragEnd: (event: DragEndEvent) => void;
   handleMapLayerDragMove: (event: DragMoveEvent) => void;
@@ -51,5 +51,5 @@ export interface MapLayerStyleActionsArgs {
   activeViewport: ScreenViewport;
   backgroundMapVisible: boolean;
   loadMapLayerSettingsFromViewport: (viewport: Viewport) => void;
-  setBackgroundMapVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setBackgroundMapVisible: Dispatch<SetStateAction<boolean>>;
 }

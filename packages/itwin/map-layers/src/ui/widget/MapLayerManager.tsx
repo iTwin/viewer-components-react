@@ -83,7 +83,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
   } = useMapLayerStyleActions({ activeViewport, backgroundMapVisible, loadMapLayerSettingsFromViewport, setBackgroundMapVisible });
   const { handleItemSelected, selectAllLayers } = useMapLayerSelectionActions({ backgroundLayers, overlayLayers, setMapLayers });
   const {
-    dragStartMapLayersRef,
+    dragStartMapLayers,
     dropTargetId,
     handleMapLayerDragEnd,
     handleMapLayerDragMove,
@@ -140,12 +140,12 @@ export function MapLayerManager(props: MapLayerManagerProps) {
                 {backgroundLayers && overlayLayers && (
                   <>
                     <MapLayersList
-                      dragStartLayersList={dragStartMapLayersRef.current?.[backgroundMapLayersId]}
+                      dragStartLayersList={dragStartMapLayers?.[backgroundMapLayersId]}
                       isOverlay={false}
                       layersList={backgroundLayers}
                     />
                     <MapLayersList
-                      dragStartLayersList={dragStartMapLayersRef.current?.[overlayMapLayersId]}
+                      dragStartLayersList={dragStartMapLayers?.[overlayMapLayersId]}
                       isOverlay
                       layersList={overlayLayers}
                     />

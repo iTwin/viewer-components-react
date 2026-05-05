@@ -105,7 +105,7 @@ export function useMapLayerDrag(args: {
   );
 
   return {
-    dragStartMapLayersRef,
+    dragStartMapLayers: dragStartMapLayersRef.current,
     dropTargetId,
     handleMapLayerDragEnd,
     handleMapLayerDragMove,
