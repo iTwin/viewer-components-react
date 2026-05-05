@@ -394,5 +394,29 @@ describe("MapLayerDragModel", () => {
       expect(result).toBe(false);
       expect(displayStyle.moveMapLayerToIndex).not.toHaveBeenCalled();
     });
+
+    it("should reorder background layer to a lower display-style index", () => {
+      const displayStyle = createMockDisplayStyle();
+      const itemId = `${backgroundMapLayersId}:Layer1`;
+      const event = createMockEvent({
+        operation: {
+          source: { id: itemId, group: backgroundMapLayersId, index: 1 },
+          // Use sortable target index 1 so destination display-style index becomes 0.
+          target: { id: `${backgroundMapLayersId}:Layer2`, group: backgroundMapLayersId, index: 1 },
+        } as any,
+      });
+      // Layer1 at uiIndex=1, layerIndex=1 → destinationDisplayStyleIndex = 2-1-1 = 0
+      // 1 !== 0, so a real move occurs.
+      const mapLayers = {
+        [backgroundMapLayersId]: [
+          { id: `${backgroundMapLayersId}:Layer2`, layerIndex: 0 },
+          { id: itemId, layerIndex: 1 },
+        ],
+        [overlayMapLayersId]: [],
+      };
+      const result = commitMapLayerDrop(displayStyle, mapLayers, event);
+      expect(result).toBe(true);
+      expect(displayStyle.moveMapLayerToIndex).toHaveBeenCalledWith(1, 0, false);
+    });
   });
 });
