@@ -70,7 +70,6 @@ describe("MapManagerSettings", () => {
           sources: [],
           bases: [],
           refreshFromStyle,
-          selectAllLayers: () => {},
         }}
       >
         <MapManagerSettings />

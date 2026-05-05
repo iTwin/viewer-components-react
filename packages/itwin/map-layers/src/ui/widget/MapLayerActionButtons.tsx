@@ -6,7 +6,6 @@ import * as React from "react";
 import { SvgUnlink, SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { ButtonGroup, Checkbox, IconButton } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
-import { useSourceMapContext } from "./SourceMapContext";
 import type { StyleMapLayerSettings } from "../Interfaces";
 import { useMapLayerListContext } from "./MapLayerListContext";
 
@@ -21,8 +20,7 @@ export const MapLayerActionButtons = ({ isOverlay, layersList }: MapLayerActionB
   const invertAllLabel = MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.InvertAllLabel");
   const detachSelectedLabel = MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.DetachSelectedLabel");
 
-  const { selectAllLayers } = useSourceMapContext();
-  const { disabled: mapLayerDisabled, activeViewport} = useMapLayerListContext();
+  const { disabled: mapLayerDisabled, activeViewport, onSelectAllLayers } = useMapLayerListContext();
   const disabled = mapLayerDisabled || layersList.length === 0;
   const hasSelected = layersList.some((l) => l.selected);
 
@@ -54,8 +52,8 @@ export const MapLayerActionButtons = ({ isOverlay, layersList }: MapLayerActionB
   }, [layersList, activeViewport, isOverlay]);
 
   const selectAll = React.useCallback(async () => {
-    selectAllLayers(isOverlay);
-  }, [selectAllLayers, isOverlay]);
+    onSelectAllLayers(isOverlay);
+  }, [onSelectAllLayers, isOverlay]);
 
   return (
     <div className="map-manager-layer-action-buttons">

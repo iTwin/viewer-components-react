@@ -14,7 +14,6 @@ export interface SourceMapContextProps {
   readonly loadingSources: boolean;
   readonly bases: BaseMapLayerSettings[];
   readonly refreshFromStyle: () => void;
-  readonly selectAllLayers: (isOverlay: boolean) => void;
   readonly activeViewport?: ScreenViewport;
   readonly backgroundLayers?: StyleMapLayerSettings[];
   readonly overlayLayers?: StyleMapLayerSettings[];
@@ -27,7 +26,6 @@ export const SourceMapContext = React.createContext<SourceMapContextProps>({
   loadingSources: false,
   bases: [],
   refreshFromStyle: () => {},
-  selectAllLayers: () => {},
 });
 
 /** @internal */

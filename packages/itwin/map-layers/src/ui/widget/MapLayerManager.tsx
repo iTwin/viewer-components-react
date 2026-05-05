@@ -100,7 +100,6 @@ export function MapLayerManager(props: MapLayerManagerProps) {
         sources: mapSources ?? [],
         bases: bgProviders,
         refreshFromStyle: handleRefreshFromStyle,
-        selectAllLayers,
         backgroundLayers,
         overlayLayers,
         mapLayerOptions,
@@ -136,6 +135,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
                 onItemSelected={handleItemSelected}
                 onItemVisibilityToggleClicked={handleLayerVisibilityChange}
                 onMenuItemSelected={handleOnMenuItemSelection}
+                onSelectAllLayers={selectAllLayers}
               >
                 {backgroundLayers && overlayLayers && (
                   <>
