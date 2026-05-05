@@ -99,10 +99,6 @@ export function MapLayerManager(props: MapLayerManagerProps) {
         loadingSources,
         sources: mapSources ?? [],
         bases: bgProviders,
-        refreshFromStyle: handleRefreshFromStyle,
-        backgroundLayers,
-        overlayLayers,
-        mapLayerOptions,
       }}
     >
       {/* Header*/}
@@ -127,6 +123,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
             <DragDropProvider onDragEnd={handleMapLayerDragEnd} onDragMove={handleMapLayerDragMove} onDragOver={handleMapLayerDragOver} onDragStart={handleMapLayerDragStart}>
               <MapLayerListProvider
                 activeViewport={activeViewport}
+                backgroundLayers={backgroundLayers}
                 disabled={!backgroundMapVisible}
                 dropTargetId={dropTargetId}
                 isDraggingMapLayer={isDraggingMapLayer}
@@ -136,6 +133,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
                 onItemVisibilityToggleClicked={handleLayerVisibilityChange}
                 onMenuItemSelected={handleOnMenuItemSelection}
                 onSelectAllLayers={selectAllLayers}
+                overlayLayers={overlayLayers}
               >
                 {backgroundLayers && overlayLayers && (
                   <>

@@ -11,6 +11,7 @@ import type { MapLayerDroppableId } from "./MapLayerDragDrop";
 /** @internal */
 export interface MapLayerListContextProps {
   readonly activeViewport: ScreenViewport;
+  readonly backgroundLayers: StyleMapLayerSettings[];
   readonly disabled: boolean;
   readonly dropTargetId?: MapLayerDroppableId;
   readonly isDraggingMapLayer: boolean;
@@ -20,6 +21,7 @@ export interface MapLayerListContextProps {
   readonly onItemVisibilityToggleClicked: (mapLayerSettings: StyleMapLayerSettings) => void;
   readonly onMenuItemSelected: (action: string, mapLayerSettings: StyleMapLayerSettings) => void;
   readonly onSelectAllLayers: (isOverlay: boolean) => void;
+  readonly overlayLayers: StyleMapLayerSettings[];
 }
 
 /** @internal */
@@ -35,6 +37,7 @@ export function MapLayerListProvider(props: MapLayerListProviderProps): React.Re
   const value = React.useMemo<MapLayerListContextProps>(
     () => ({
       activeViewport: props.activeViewport,
+      backgroundLayers: props.backgroundLayers,
       disabled: props.disabled,
       dropTargetId: props.dropTargetId,
       isDraggingMapLayer: props.isDraggingMapLayer,
@@ -44,9 +47,11 @@ export function MapLayerListProvider(props: MapLayerListProviderProps): React.Re
       onItemVisibilityToggleClicked: props.onItemVisibilityToggleClicked,
       onMenuItemSelected: props.onMenuItemSelected,
       onSelectAllLayers: props.onSelectAllLayers,
+      overlayLayers: props.overlayLayers,
     }),
     [
       props.activeViewport,
+      props.backgroundLayers,
       props.disabled,
       props.dropTargetId,
       props.isDraggingMapLayer,
@@ -56,6 +61,7 @@ export function MapLayerListProvider(props: MapLayerListProviderProps): React.Re
       props.onItemVisibilityToggleClicked,
       props.onMenuItemSelected,
       props.onSelectAllLayers,
+      props.overlayLayers,
     ],
   );
 

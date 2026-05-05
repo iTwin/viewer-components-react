@@ -59,8 +59,6 @@ describe("MapManagerSettings", () => {
     viewportMock.setup((viewport) => viewport.changeBackgroundMapProps(moq.It.isAny()));
   });
 
-  const refreshFromStyle = vi.fn();
-
   const renderComponent = () => {
     return render(
       <SourceMapContext.Provider
@@ -69,7 +67,6 @@ describe("MapManagerSettings", () => {
           loadingSources: false,
           sources: [],
           bases: [],
-          refreshFromStyle,
         }}
       >
         <MapManagerSettings />

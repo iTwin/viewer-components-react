@@ -11,6 +11,7 @@ import { Button, IconButton, Input, List, ListItem, Popover, ProgressRadial } fr
 import { MapLayerPreferences } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
 import { ConfirmMessageDialog } from "./ConfirmMessageDialog";
+import { useMapLayerListContext } from "./MapLayerListContext";
 import { useSourceMapContext } from "./SourceMapContext";
 import { MapSelectFeaturesDialog } from "./MapSelectFeaturesDialog";
 import { MapUrlDialog } from "./MapUrlDialog";
@@ -81,7 +82,8 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
     setSourceFilterString(event.target.value);
   }, []);
 
-  const { loadingSources, sources, activeViewport, backgroundLayers, overlayLayers, mapLayerOptions } = useSourceMapContext();
+  const { loadingSources, sources, activeViewport } = useSourceMapContext();
+  const { backgroundLayers, overlayLayers, mapLayerOptions } = useMapLayerListContext();
   const iTwinId = activeViewport?.iModel?.iTwinId;
   const iModelId = activeViewport?.iModel?.iModelId;
 
@@ -554,15 +556,15 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
   }, [popupOpen]);
 
 
-  const { refreshFromStyle } = useSourceMapContext();
+  const { onItemEdited } = useMapLayerListContext();
 
   const handleLayerAttached = React.useCallback(() => {
     if (!isMounted.current) {
       return;
     }
     setPopupOpen(false);
-    refreshFromStyle();
-  }, [refreshFromStyle]);
+    onItemEdited();
+  }, [onItemEdited]);
 
   const buttonLabel = popupOpen ? hideAttachLayerLabel : showAttachLayerLabel;
 
