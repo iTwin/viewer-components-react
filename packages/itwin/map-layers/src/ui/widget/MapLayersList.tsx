@@ -9,7 +9,7 @@ import { MapLayerDroppable } from "./MapLayerDroppable";
 
 import type { StyleMapLayerSettings } from "../Interfaces";
 import { AttachLayerPopupButton } from "./AttachLayerPopupButton";
-import { useMapLayerListContext } from "./MapLayerListContext";
+import { useMapLayerListContext } from "../contexts/MapLayerListContext";
 import { MapLayersUI } from "../../mapLayers";
 import { backgroundMapLayersId, overlayMapLayersId } from "./MapLayerDragModel";
 

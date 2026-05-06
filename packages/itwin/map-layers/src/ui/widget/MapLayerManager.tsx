@@ -13,7 +13,7 @@ import { ToggleSwitch } from "@itwin/itwinui-react";
 import { GoogleMaps } from "@itwin/map-layers-formats";
 import { MapLayersUI } from "../../mapLayers";
 import { BasemapPanel } from "./BasemapPanel";
-import { MapLayerListProvider } from "./MapLayerListContext";
+import { MapLayerListProvider } from "../contexts/MapLayerListContext";
 import { useMapLayerDrag } from "../hooks/map-layer/useMapLayerDrag";
 import { useMapLayerSelectionActions } from "../hooks/map-layer/useMapLayerSelectionActions";
 import { useMapLayerSources } from "../hooks/map-layer/useMapLayerSources";
@@ -25,7 +25,7 @@ import { MapLayerSettingsPopupButton } from "./MapLayerSettingsPopupButton";
 import type { ScreenViewport } from "@itwin/core-frontend";
 import type { MapLayerOptions } from "../Interfaces";
 import { backgroundMapLayersId, overlayMapLayersId } from "./MapLayerDragModel";
-import { SourceMapContext } from "./SourceMapContext";
+import { SourceMapContext } from "../contexts/SourceMapContext";
 
 /** @internal */
 export const defaultBaseMapLayers = [

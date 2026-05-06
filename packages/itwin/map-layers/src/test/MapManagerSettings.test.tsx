@@ -7,7 +7,7 @@ import { PlanarClipMaskMode, PlanarClipMaskPriority, TerrainHeightOriginMode } f
 import { DisplayStyle3dState, IModelConnection, NoRenderApp, NotificationManager, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
 import { act, fireEvent, getByTestId, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { SourceMapContext } from "../ui/widget/SourceMapContext";
+import { SourceMapContext } from "../ui/contexts/SourceMapContext";
 import { MapManagerSettings } from "../ui/widget/MapManagerSettings";
 import { TestUtils } from "./TestUtils";
 

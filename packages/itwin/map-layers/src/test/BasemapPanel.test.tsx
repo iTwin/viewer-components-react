@@ -15,7 +15,7 @@ import { NoRenderApp, NotificationManager } from "@itwin/core-frontend";
 import { findByTestId, fireEvent, getByTestId, render } from "@testing-library/react";
 import { BasemapPanel } from "../ui/widget/BasemapPanel";
 import { defaultBaseMapLayers } from "../ui/widget/MapLayerManager";
-import { SourceMapContext } from "../ui/widget/SourceMapContext";
+import { SourceMapContext } from "../ui/contexts/SourceMapContext";
 import { TestUtils } from "./TestUtils";
 import { ViewportMock } from "./ViewportMock";
 

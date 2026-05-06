@@ -15,7 +15,7 @@ import { UiFramework } from "@itwin/appui-react";
 import { SubLayersPopupButton } from "./SubLayersPopupButton";
 import { MapLayerSettingsMenu } from "./MapLayerSettingsMenu";
 import { MapLayersUI } from "../../mapLayers";
-import { useMapLayerListContext } from "./MapLayerListContext";
+import { useMapLayerListContext } from "../contexts/MapLayerListContext";
 
 interface MapLayerItemProps {
   layer: StyleMapLayerSettings;

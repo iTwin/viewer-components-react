@@ -9,7 +9,7 @@ import { MapLayersUI } from "../../mapLayers";
 import { AttachLayerButtonType, AttachLayerPopupButton } from "./AttachLayerPopupButton";
 import { backgroundMapLayersId, overlayMapLayersId } from "./MapLayerDragModel";
 import { useDroppable } from "@dnd-kit/react";
-import { useMapLayerListContext } from "./MapLayerListContext";
+import { useMapLayerListContext } from "../contexts/MapLayerListContext";
 
 import type { StyleMapLayerSettings } from "../Interfaces";
 import { SortableMapLayerItem } from "./SortableMapLayerItem";

@@ -7,7 +7,7 @@ import { SvgUnlink, SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } fr
 import { ButtonGroup, Checkbox, IconButton } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import type { StyleMapLayerSettings } from "../Interfaces";
-import { useMapLayerListContext } from "./MapLayerListContext";
+import { useMapLayerListContext } from "../contexts/MapLayerListContext";
 
 interface MapLayerActionButtonsProps {
   isOverlay: boolean;
