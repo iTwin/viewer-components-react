@@ -25,7 +25,10 @@ export function useSelectionHandler({ selectionStorage }: { selectionStorage?: S
   useEffect(() => {
     if (selectionStorage) {
       return selectionStorage.selectionChangeEvent.addListener((args) => {
-        selectionChange.raiseEvent({ ...args, getSelection: () => selectionStorage.getSelection(args) });
+        selectionChange.raiseEvent({
+          ...args,
+          getSelection: () => selectionStorage.getSelection({ imodelKey: args.imodelKey, level: args.level }),
+        });
       });
     }
     // eslint-disable-next-line @typescript-eslint/no-deprecated
