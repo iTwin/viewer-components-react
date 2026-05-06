@@ -189,6 +189,8 @@ describe("models tree", () => {
         },
       },
       {
+        // Main thread gets blocked for > 100 ms, due to:
+        // bufferingViewport.commit calls setPerModelCategoryOverride with 50k categories, nothing can be done from tree-widget side
         name: "change visibility",
         callBack: async ({ viewport, handler, elementsModel }) => {
           // Add one element to always draw set to trigger additional queries
