@@ -35,14 +35,14 @@
     "@itwin/itwinui-react": "^3.20.2",
     "@itwin/presentation-backend": "^5.9.1",
     "@itwin/presentation-common": "^5.9.1",
-    "@itwin/presentation-components": "^5.13.6",
+    "@itwin/presentation-components": "^5.13.7",
     "@itwin/presentation-frontend": "^5.9.1",
-    "@itwin/presentation-hierarchies": "^1.7.13",
-    "@itwin/presentation-shared": "^1.2.12",
+    "@itwin/presentation-hierarchies": "^1.7.14",
+    "@itwin/presentation-shared": "^1.2.13",
     "@itwin/property-grid-react": "workspace:*",
     "@itwin/quantity-formatting-react": "workspace:*",
     "@itwin/tree-widget-react": "workspace:*",
-    "@itwin/unified-selection": "^1.7.2",
+    "@itwin/unified-selection": "^1.7.3",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -62,8 +62,8 @@
     "sass-embedded": "1.98.0",
     "test-utilities": "workspace:*",
     "typescript": "~5.9.3",
-    "vitest": "^4.1.5",
-    "vite": "^8.0.10"
+    "vite": "^8.0.11",
+    "vitest": "^4.1.5"
   },
   "eslintConfig": {
     "extends": [
