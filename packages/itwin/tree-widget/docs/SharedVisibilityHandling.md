@@ -592,7 +592,7 @@ flowchart TD
   TITLE --> D{"hasSubModels({ modelId })"}
   D -- Yes --> D1["Iterate through categories"]
   D1 -- categoryId --> D2["Get sub-models under model & category"]
-  D2 -- subModels --> D3["<code><a href='#changemodelsvisibilitystatus'>changeModelsVisibilityStatus</a>({ subModels, on })</code>"]
+  D2 -- subModels --> D3["<code><a href='#changemodelsvisibilitystatus'>changeModelsVisibilityStatus</a>({ modelIds: subModels, on })</code>"]
 
   B --> RESULT_Done
   C --> RESULT_Done
