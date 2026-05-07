@@ -14,7 +14,7 @@ This document explains visibility handling for categories tree specific cases.
 - [Changing visibility status](#changing-visibility-status)
   - [changeDefinitionContainersVisibilityStatus](#changedefinitioncontainersvisibilitystatus)
   - [changeSubCategoriesVisibilityStatus](#changesubcategoriesvisibilitystatus)
-  - [enableCategoryWithoutEnablingOtherCategories](#enablecategorywithout-enablingothercategories)
+  - [enableCategoryWithoutEnablingOtherCategories](#enablecategorywithoutenablingothercategories)
   - [changeGroupedElementsVisibilityStatus](#changegroupedelementsvisibilitystatus)
   - [changeCategoriesVisibilityStatus](./SharedVisibilityHandling.md#changecategoriesvisibilitystatus)
   - [changeElementsVisibilityStatus](./SharedVisibilityHandling.md#changeelementsvisibilitystatus)
