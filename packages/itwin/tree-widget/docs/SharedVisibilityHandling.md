@@ -533,11 +533,11 @@ flowchart TD
   B -- No --> E["<code>viewport.changeCategoryDisplay({ categoryIds, display: on, enableAllSubCategories: false })</code>"]
   B -- No --> D["Get models which are related to categories from cache."]
   D -- "Map(modelId, Set(modelCategoryIds))" --> F["Iterate through map entries"]
-  F -- "modelId, modelCategoryIds" --> F1{"<code>hasSubModels({ modelId })"}
+  F -- "modelId, modelCategoryIds" --> F1{"<code>hasSubModels({ modelId })</code>"}
   F1 -- No --> RESULT_Done
   F1 -- Yes --> F1_1["Iterate through modelCategoryIds"]
   F1_1 -- categoryId --> F1_2["Get sub-models under the model & category from cache"]
-  F1_2 -- subModels --> F1_3["<a href='#changemodelsvisibilitystatus'>changeModelsVisibilityStatus</a>({ subModels, on })</code>"]
+  F1_2 -- subModels --> F1_3["<code><a href='#changemodelsvisibilitystatus'>changeModelsVisibilityStatus</a>({ subModels, on })</code>"]
 
   B -- No --> G{"<code>props.on</code>"}
 
