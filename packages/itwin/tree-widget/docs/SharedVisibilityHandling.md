@@ -537,7 +537,7 @@ flowchart TD
   F1 -- No --> RESULT_Done
   F1 -- Yes --> F1_1["Iterate through modelCategoryIds"]
   F1_1 -- categoryId --> F1_2["Get sub-models under the model & category from cache"]
-  F1_2 -- subModels --> F1_3["<code><a href='#changemodelsvisibilitystatus'>changeModelsVisibilityStatus</a>({ subModels, on })</code>"]
+  F1_2 -- subModels --> F1_3["<code><a href='#changemodelsvisibilitystatus'>changeModelsVisibilityStatus</a>({ modelIds: subModels, on })</code>"]
 
   B -- No --> G{"<code>props.on</code>"}
 
