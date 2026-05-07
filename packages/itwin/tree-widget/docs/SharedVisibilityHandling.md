@@ -732,7 +732,7 @@ flowchart TD
 
   I1 --> K
   I2 --> K
-  K -- toHide, toNone --> J["list.length > 0 <br/> && viewport.setPerModelCategoryOverride({ modelIds, categoryIds: list, override: list === toHide ? 'hide' : 'none' })</code>"]
+  K -- toHide, toNone --> J["<code>list.length > 0 <br/> && viewport.setPerModelCategoryOverride({ modelIds, categoryIds: list, override: list === toHide ? 'hide' : 'none' })</code>"]
 
   C --> RESULT_Done
   D --> RESULT_Done
