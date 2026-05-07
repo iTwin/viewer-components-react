@@ -628,13 +628,13 @@ flowchart TD
   %% Model not visible
   B -- No --> C{"<code>props.on</code>"}
   C -- No --> D["visibleByDefault = () => false"]
-  D --> D1["<code><a href='#queueelementsvisibilitychange'>queueElementsVisibilityChange</a>({ elementsToChange, on, visibleByDefault})</code>"]
+  D --> D1["<code><a href='#queueelementsvisibilitychange'>queueElementsVisibilityChange</a>({ elementIds: elementsToChange, on, visibleByDefault})</code>"]
   C -- Yes --> E["<code><a href='#showmodelwithoutanycategoriesorelements'>showModelWithoutAnyCategoriesOrElements</a>(props.modelId)</code>"]
   E --> F["<code>defaultVisibility</code> = <code><a href='#getvisiblemodelcategorydirectvisibilitystatus'>getVisibleModelCategoryDirectVisibilityStatus</a>({ categoryId, modelId })</code>"]
   B -- Yes --> F
   F -- defaultVisibility --> G1["visibleByDefault = (elementId) => { elementIds.has(elementId) ? defaultVisibility : !on }"]
 
-  G1 --> G2["<code><a href='#queueelementsvisibilitychange'>queueElementsVisibilityChange</a>({ elementsToChange, on, visibleByDefault})</code>"]
+  G1 --> G2["<code><a href='#queueelementsvisibilitychange'>queueElementsVisibilityChange</a>({ elementIds: elementsToChange, on, visibleByDefault})</code>"]
 
   %% Sub-models (runs concurrently)
   TITLE --> J["Iterate through elementIds"]
