@@ -1,8 +1,16 @@
 # Change Log - @itwin/property-grid-react
 
-<!-- This log was last generated on Mon, 09 Feb 2026 12:17:01 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 07 May 2026 14:10:55 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 1.19.7
+
+Thu, 07 May 2026 14:10:55 GMT
+
+### Patches
+
+- Bump dependencies to resolve vulnerabilities ([#1672](https://github.com/iTwin/viewer-components-react/pull/1672))
 
 ## 1.19.6
 
