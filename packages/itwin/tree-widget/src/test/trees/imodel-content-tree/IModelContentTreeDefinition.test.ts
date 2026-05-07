@@ -688,6 +688,7 @@ describe("iModel content tree", () => {
             codeValue: "document partition",
           });
           const document = insertDrawingElement({ imodel, modelId: documentModel.id, codeValue: "test document" });
+          // eslint-disable-next-line @typescript-eslint/no-deprecated
           imodel.relationships.insertInstance({
             classFullName: "BisCore.ElementGroupsMembers",
             sourceId: group.id,

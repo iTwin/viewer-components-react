@@ -3360,6 +3360,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               code: new Code({ scope: partitionId, spec: "", value: `Configuration_${customClassName}_${childIdx}` }),
               classFullName: childIdx !== 2 ? customClassName : "Generic:PhysicalObject",
             };
+            // eslint-disable-next-line @typescript-eslint/no-deprecated
             elements.push(imodel.elements.insertElement(props));
           }
           const [customClassElement1, customClassElement2, nonCustomClassElement] = elements;

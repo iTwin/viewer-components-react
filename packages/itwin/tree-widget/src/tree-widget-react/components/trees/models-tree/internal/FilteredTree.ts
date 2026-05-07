@@ -106,7 +106,7 @@ export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector
         type,
         id: identifier.id,
         isFilterTarget: i === normalizedPath.length - 1,
-        parent: parentNode as FilteredTreeNode,
+        parent: parentNode,
       });
       (parentNode.children ??= new Map()).set(identifier.id, newNode);
       parentNode = newNode;

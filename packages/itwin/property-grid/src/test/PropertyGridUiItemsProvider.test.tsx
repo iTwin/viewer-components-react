@@ -24,7 +24,6 @@ import type { ReactElement } from "react";
 import type { WidgetDef } from "@itwin/appui-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ECClassGroupingNodeKey } from "@itwin/presentation-common";
-import type { ISelectionProvider } from "@itwin/presentation-frontend";
 import type { EventArgs, Props } from "@itwin/presentation-shared";
 import type { Selectable } from "@itwin/unified-selection";
 import type { PropertyGridWidgetProps } from "../property-grid-react/PropertyGridUiItemsProvider.js";
@@ -152,8 +151,7 @@ describe("createPropertyGrid", () => {
         triggerSelectionChange(props?: Pick<Partial<EventArgs<typeof selectionStorage.selectionChangeEvent>>, "source">) {
           selectionManager.selectionChange.raiseEvent(
             { source: "TestSource", imodel, ...props } as EventArgs<typeof selectionManager.selectionChange>,
-            // eslint-disable-next-line @typescript-eslint/no-deprecated
-            selectionManager as ISelectionProvider,
+            selectionManager,
           );
         },
       },

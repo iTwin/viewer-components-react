@@ -13,7 +13,6 @@ import { act, createResolvablePromise, renderHook, stubSelectionManager, stubSel
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ECInstancesNodeKey, InstanceKey } from "@itwin/presentation-common";
-import type { ISelectionProvider } from "@itwin/presentation-frontend";
 import type { EventArgs } from "@itwin/presentation-shared";
 import type { Selectable, SelectableInstanceKey } from "@itwin/unified-selection";
 
@@ -86,8 +85,7 @@ describe("useInstanceSelection", () => {
       triggerSelectionChange(props?: Pick<Partial<EventArgs<typeof selectionStorage.selectionChangeEvent>>, "source">) {
         selectionManager.selectionChange.raiseEvent(
           { source: "TestSource", imodel, ...props } as EventArgs<typeof selectionManager.selectionChange>,
-          // eslint-disable-next-line @typescript-eslint/no-deprecated
-          selectionManager as ISelectionProvider,
+          selectionManager,
         );
       },
       assertReplaceNotCalled() {
