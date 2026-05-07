@@ -27,7 +27,6 @@ import {
 import type { MockInstance } from "vitest";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
-import type { ISelectionProvider } from "@itwin/presentation-frontend";
 import type { EventArgs } from "@itwin/presentation-shared";
 import type { SelectableInstanceKey } from "@itwin/unified-selection";
 import type * as UseTelemetryContextModule from "../../property-grid-react/hooks/UseTelemetryContext.js";
@@ -98,8 +97,7 @@ describe("<MultiElementPropertyGrid />", () => {
             timestamp: new Date(),
             ...props,
           },
-          // eslint-disable-next-line @typescript-eslint/no-deprecated
-          selectionManager as ISelectionProvider,
+          selectionManager,
         );
       },
     },

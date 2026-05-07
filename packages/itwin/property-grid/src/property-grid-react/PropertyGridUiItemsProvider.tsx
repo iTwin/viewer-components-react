@@ -185,9 +185,9 @@ export function PropertyGridWidget({
     const predicate = shouldShow
       ? selectionStorage
         ? // if selection storage is provided, `shouldShow` takes `Selectables` as an argument
-          (shouldShow as (selection: Selectables) => Promise<boolean>)
+          shouldShow
         : // else, it takes a `KeySet`, so we have to do the conversion
-          async (selectables: Selectables) => (shouldShow as (selection: Readonly<KeySet>) => boolean)(await createKeySetFromSelectables(selectables))
+          async (selectables: Selectables) => shouldShow(await createKeySetFromSelectables(selectables))
       : // finally, if `shouldShow` is not provided, we default to showing the widget if there are any non-transient instances selected
         defaultWidgetShowPredicate;
 

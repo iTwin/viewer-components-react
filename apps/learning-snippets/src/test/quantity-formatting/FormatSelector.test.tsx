@@ -38,7 +38,7 @@ describe("Quantity formatting", () => {
               composite: { units: [{ name: "Units.M", label: "m" }] },
             },
           },
-        } as FormatSet;
+        };
 
         const handleFormatSelection = (_formatDef: FormatDefinition, _key: string) => {
           // Handle format selection

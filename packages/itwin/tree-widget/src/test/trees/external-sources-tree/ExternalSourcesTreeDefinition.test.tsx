@@ -236,6 +236,7 @@ function insertRootExternalSource({
   externalSourceProps?: Omit<Parameters<typeof insertExternalSource>[0], "imodel" | "repositoryLinkId">;
 }) {
   const codeSpec = imodel.codeSpecs.getByName(BisCodeSpec.linkElement);
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   const synchronizationConfigLinkId = imodel.elements.insertElement({
     classFullName: "BisCore:SynchronizationConfigLink",
     model: IModel.repositoryModelId,
@@ -243,6 +244,7 @@ function insertRootExternalSource({
   });
   const repositoryLink = insertRepositoryLink({ imodel, ...repositoryLinkProps });
   const externalSource = insertExternalSource({ imodel, repositoryLinkId: repositoryLink.id, ...externalSourceProps });
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   imodel.relationships.insertInstance({
     classFullName: "BisCore:SynchronizationConfigSpecifiesRootSources",
     sourceId: synchronizationConfigLinkId,
@@ -257,6 +259,7 @@ function insertRootExternalSource({
 
 function groupExternalSources(imodel: IModelDb, groupId: Id64String, groupedExternalSourceIds: Id64String[]) {
   groupedExternalSourceIds.forEach((groupedExternalSourceId) => {
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     imodel.relationships.insertInstance({
       classFullName: "BisCore:ExternalSourceGroupGroupsSources",
       sourceId: groupId,

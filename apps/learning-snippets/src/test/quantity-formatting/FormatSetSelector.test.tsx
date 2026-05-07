@@ -31,14 +31,14 @@ describe("Quantity formatting", () => {
             unitSystem: "metric",
             description: "Standard metric unit formats",
             formats: {},
-          } as FormatSet,
+          },
           {
             name: "ImperialSet",
             label: "Imperial Formats",
             unitSystem: "imperial",
             description: "Imperial unit formats",
             formats: {},
-          } as FormatSet,
+          },
         ];
 
         const handleFormatSetChange = (_formatSet: FormatSet, _key: string) => {
