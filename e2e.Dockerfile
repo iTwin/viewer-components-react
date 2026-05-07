@@ -13,6 +13,7 @@ RUN corepack enable
 # Copy the local files to the container
 WORKDIR /workspaces/viewer-components-react/
 COPY /pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY /package.json ./package.json
 COPY /scripts ./scripts
 COPY ${TEST_VIEWER_DIST} ./apps/test-viewer/dist
 COPY /packages/itwin/test-utilities ./packages/itwin/test-utilities
