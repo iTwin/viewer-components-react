@@ -2,6 +2,21 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Thu, 07 May 2026 07:30:42 GMT",
+      "version": "3.17.9",
+      "tag": "@itwin/tree-widget-react_v3.17.9",
+      "comments": {
+        "none": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "a0b632e5f4d1889ca0fa717afa3b83756d3ecbdd",
+            "comment": "Use internal `test-utilities` for shared test code"
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 27 Mar 2026 09:58:42 GMT",
       "version": "3.17.9",
       "tag": "@itwin/tree-widget-react_v3.17.9",

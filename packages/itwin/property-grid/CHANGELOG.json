@@ -2,6 +2,27 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Thu, 07 May 2026 07:30:42 GMT",
+      "version": "1.19.6",
+      "tag": "@itwin/property-grid-react_v1.19.6",
+      "comments": {
+        "none": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "a0b632e5f4d1889ca0fa717afa3b83756d3ecbdd",
+            "comment": ""
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "dfde762239edc2e68fd0123cdf6e4746c110fdf1",
+            "comment": "Bump AppUI"
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 10 Apr 2026 09:38:26 GMT",
       "version": "1.19.6",
       "tag": "@itwin/property-grid-react_v1.19.6",
