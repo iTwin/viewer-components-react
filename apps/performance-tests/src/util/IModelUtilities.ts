@@ -15,11 +15,13 @@ export async function createIModel(name: string, localPath: string, cb: (imodel:
   try {
     await cb(imodel);
   } finally {
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     imodel.saveChanges("Initial commit");
     imodel.withSqliteStatement("ANALYZE", (stmt) => {
       const analyzeResult = stmt.step();
       assert(analyzeResult === DbResult.BE_SQLITE_DONE, `ANALYZE failed with result ${DbResult[analyzeResult]}`);
     });
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     imodel.saveChanges("Analyze");
     imodel.close();
   }

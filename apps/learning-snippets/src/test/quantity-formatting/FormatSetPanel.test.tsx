@@ -30,7 +30,7 @@ describe("Quantity formatting", () => {
           unitSystem: "metric",
           description: "A custom format set",
           formats: {},
-        } as FormatSet;
+        };
 
         const handleFormatSetChange = (_updatedFormatSet: FormatSet) => {
           // Handle format set change
@@ -50,7 +50,7 @@ describe("Quantity formatting", () => {
           unitSystem: "imperial",
           description: "A read-only format set",
           formats: {},
-        } as FormatSet;
+        };
 
         render(<FormatSetPanel formatSet={formatSet} editable={false} />);
         // __PUBLISH_EXTRACT_END__
