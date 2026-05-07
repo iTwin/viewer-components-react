@@ -922,7 +922,7 @@ function createSearchPathsForDifferentTypes(
                   componentName,
                   chunkIndex,
                 }),
-              10,
+              2,
             ),
           ),
         );

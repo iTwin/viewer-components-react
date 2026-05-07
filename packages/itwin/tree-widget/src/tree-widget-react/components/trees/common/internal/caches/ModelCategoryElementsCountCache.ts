@@ -92,10 +92,10 @@ export class ModelCategoryElementsCountCache {
               `,
               ],
               ecsql: `
-              SELECT modelId, categoryId, COUNT(id) elementsCount
-              FROM (SELECT * FROM CategoryElements)
-              GROUP BY modelId, categoryId
-            `,
+                SELECT modelId, categoryId, COUNT(id) elementsCount
+                FROM (SELECT * FROM CategoryElements)
+                GROUP BY modelId, categoryId
+              `,
             },
             {
               rowFormat: "ECSqlPropertyNames",

@@ -457,8 +457,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
             '${CLASSIFICATION_TABLE_CLASS_NAME_QUERY_ALIAS}',
             this.ECInstanceId,
             ${classificationTableLabelSelectClause}
-          FROM
-            ${CLASS_NAME_ClassificationTable} this
+          FROM ${CLASS_NAME_ClassificationTable} this
           JOIN ${CLASS_NAME_ClassificationSystem} system ON system.ECInstanceId = this.Parent.Id
           WHERE
             system.CodeValue = '${props.hierarchyConfig.rootClassificationSystemCode}'
@@ -659,7 +658,7 @@ function createSearchPathsForDifferentTypes(
                   componentId,
                   componentName,
                 }),
-              10,
+              2,
             ),
           ),
         );

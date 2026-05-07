@@ -6,6 +6,7 @@
 import { defer, forkJoin, from, map, mergeMap, reduce, shareReplay } from "rxjs";
 import { CLASS_NAME_Model } from "../ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
+import { releaseMainThreadOnItemsCount } from "../Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -87,6 +88,7 @@ export class ElementModelCategoriesCache {
       ),
       allSubModels: this.#modeledElementsCache.getModeledElementsInfo().pipe(map(({ allSubModels }) => allSubModels)),
     }).pipe(
+      releaseMainThreadOnItemsCount(1),
       map(({ modelCategories, allSubModels }) => {
         const result = new Map<ModelId, { categoriesOfTopMostElements: Set<CategoryId>; allCategories: Set<CategoryId>; isSubModel: boolean }>();
         for (const [modelId, { categoriesOfTopMostElements, allCategories }] of modelCategories) {

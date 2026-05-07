@@ -1023,7 +1023,7 @@ function createSearchPathsForDifferentTypes(
                       componentId,
                       componentName,
                     }),
-                  10,
+                  2,
                 ),
               )
             : EMPTY,

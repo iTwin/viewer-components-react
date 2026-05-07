@@ -3,9 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, EMPTY, from, map, mergeAll, mergeMap, toArray } from "rxjs";
+import { bufferCount, concat, concatMap, delay, EMPTY, from, map, mergeAll, mergeMap, toArray } from "rxjs";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import { getIdsFromChildrenTree, getParentElementsIdsPath } from "../../../common/internal/Utils.js";
+import { getIdsFromChildrenTree, getOptimalBatchSize, getParentElementsIdsPath } from "../../../common/internal/Utils.js";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 
@@ -48,12 +48,17 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
         includeEmptyCategories: this.#props.hierarchyConfig.showEmptyCategories,
       })
       .pipe(
-        mergeMap((categoryIds) =>
-          this.getCategoriesVisibilityStatus({
-            categoryIds,
-            modelId: undefined,
-          }),
-        ),
+        mergeMap((categoryIds) => {
+          if (categoryIds.size < 1001) {
+            return this.getCategoriesVisibilityStatus({ categoryIds, modelId: undefined });
+          }
+          const optimalBatchSize = getOptimalBatchSize({ totalSize: categoryIds.size, maximumBatchSize: 1001 });
+          return from(categoryIds).pipe(
+            bufferCount(optimalBatchSize),
+            concatMap((categoryIdsBatch) => this.getCategoriesVisibilityStatus({ categoryIds: categoryIdsBatch, modelId: undefined }).pipe(delay(0))),
+            mergeVisibilityStatuses(),
+          );
+        }),
       );
   }
 

@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, from, map, mergeMap, of, reduce, shareReplay } from "rxjs";
+import { defer, EMPTY, expand, from, map, mergeMap, of, reduce, shareReplay } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { normalizeFullClassName } from "@itwin/presentation-shared";
 import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
@@ -60,6 +60,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
   #props: ClassificationsTreeIdsCacheProps;
   #componentId: GuidString;
   #componentName: string;
+  #rowLimit = 7500;
 
   constructor(props: ClassificationsTreeIdsCacheProps) {
     super(props);
@@ -74,7 +75,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
       relatedCategories: CategoryId[];
     } & ({ tableId: ClassificationTableId; parentId: undefined } | { tableId: undefined; parentId: ClassificationId })
   > {
-    return defer(() => {
+    const getQueryReader = (lastClassificationId?: ClassificationId) => {
       const CLASSIFICATIONS_CTE = "Classifications";
       const ctes = [
         `
@@ -137,12 +138,28 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
           cl.ParentClassificationId parentId,
           (${categoriesOfClassificationSelector}) relatedCategories
         FROM ${CLASSIFICATIONS_CTE} cl
+        ${lastClassificationId === undefined ? "" : `WHERE cl.ClassificationId > ${lastClassificationId}`}
+        ORDER BY cl.ClassificationId
+        LIMIT ${this.#rowLimit}
       `;
       return this.#props.queryExecutor.createQueryReader(
         { ctes, ecsql },
-        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/classifications` },
+        {
+          rowFormat: "ECSqlPropertyNames",
+          limit: "unbounded",
+          restartToken: `${this.#componentName}/${this.#componentId}/classifications/${lastClassificationId ?? "0"}`,
+        },
       );
-    }).pipe(
+    };
+    return defer(() => getQueryReader()).pipe(
+      // Note: if the total row count is an exact multiple of `#rowLimit`, an extra request that returns
+      // 0 rows will be sent. This is acceptable to keep the implementation simple.
+      expand((row, idx) => {
+        if (idx % this.#rowLimit === this.#rowLimit - 1) {
+          return getQueryReader(row.id);
+        }
+        return EMPTY;
+      }),
       catchBeSQLiteInterrupts,
       map((row) => {
         return {

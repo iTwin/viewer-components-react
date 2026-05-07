@@ -70,6 +70,8 @@ describe("classifications tree", () => {
     },
     steps: [
       {
+        // Main thread might get blocked for about 100ms:
+        // query that gets classifications by label takes that long to finish
         name: "get search paths",
         callBack: async (ctx) => {
           using hook = renderUseClassificationsTreeHook({

@@ -145,4 +145,8 @@ export class ModeledElementsCache {
       mergeMap(({ modelWithCategoryModeledElements }) => modelWithCategoryModeledElements.get(modelId)?.get(categoryId) ?? new Set<Id64String>()),
     );
   }
+
+  public hasModeledElements({ modelId }: { modelId: Id64String }): Observable<boolean> {
+    return this.getModeledElementsInfo().pipe(map(({ modelWithCategoryModeledElements }) => !!modelWithCategoryModeledElements.get(modelId)?.size));
+  }
 }

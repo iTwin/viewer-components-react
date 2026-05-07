@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { mergeAll, mergeMap, toArray } from "rxjs";
+import { mergeAll, mergeMap, of, toArray } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
 import { ElementChildrenCache } from "./ElementChildrenCache.js";
 import { ElementModelCategoriesCache } from "./ElementModelCategoriesCache.js";
@@ -69,20 +69,28 @@ export class BaseIdsCache {
     props: { modelId: Id64String; categoryId?: Id64String } | { categoryId: Id64String; modelId: Id64String | undefined },
   ): Observable<Id64Array> {
     if (props.modelId) {
-      if (props.categoryId) {
-        return this.#modeledElementsCache.getCategoryModeledElements({ modelId: props.modelId, categoryId: props.categoryId }).pipe(toArray());
+      const { modelId, categoryId } = props;
+      if (categoryId) {
+        return this.#modeledElementsCache.getCategoryModeledElements({ modelId, categoryId }).pipe(toArray());
       }
 
-      return this.#elementModelCategoriesCache.getModelCategoryIds({ modelId: props.modelId }).pipe(
-        mergeAll(),
-        mergeMap((modelCategoryId) => this.#modeledElementsCache.getCategoryModeledElements({ modelId: props.modelId!, categoryId: modelCategoryId })),
-        toArray(),
+      return this.#modeledElementsCache.hasModeledElements({ modelId }).pipe(
+        mergeMap((hasModeledElements) => {
+          if (!hasModeledElements) {
+            return of([]);
+          }
+          return this.#elementModelCategoriesCache.getModelCategoryIds({ modelId }).pipe(
+            mergeAll(),
+            mergeMap((modelCategoryId) => this.#modeledElementsCache.getCategoryModeledElements({ modelId, categoryId: modelCategoryId })),
+            toArray(),
+          );
+        }),
       );
     }
 
     return this.#elementModelCategoriesCache.getCategoryElementModels({ categoryId: props.categoryId!, subModels: "exclude" }).pipe(
       mergeAll(),
-      mergeMap((modelId) => this.#modeledElementsCache.getCategoryModeledElements({ modelId, categoryId: props.categoryId! })),
+      mergeMap((categoryModelId) => this.#modeledElementsCache.getCategoryModeledElements({ modelId: categoryModelId, categoryId: props.categoryId! })),
       toArray(),
     );
   }

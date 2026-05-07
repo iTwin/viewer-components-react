@@ -295,7 +295,7 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
           from(set).pipe(
             bufferCount(getOptimalBatchSize({ totalSize: set.size, maximumBatchSize: ALWAYS_NEVER_BUFFER_THRESHOLD })),
             releaseMainThreadOnItemsCount(2),
-            mergeMap((block, index) => this.queryElementInfo(block, `${setType}-${index}`), 10),
+            mergeMap((block, index) => this.queryElementInfo(block, `${setType}-${index}`), 2),
           )
         : this.queryElementInfo([...set], `${setType}-0`)
       : EMPTY;

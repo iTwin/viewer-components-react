@@ -228,32 +228,30 @@ export class BaseVisibilityHelper implements Disposable {
 
       return fromWithRelease({ source: categoryIds, releaseOnCount: 100 }).pipe(
         mergeMap((categoryId) =>
-          // When always drawn exclusive mode is enabled need to get only models for which category has top most element.
-          // This is because always/never drawn elements can be retrieved using top most category.
-          // TODO fix with: https://github.com/iTwin/viewer-components-react/issues/1100
-          this.#props.baseIdsCache
-            .getModels({ categoryId, includeOnlyIfCategoryOfTopMostElement: this.#props.viewport.isAlwaysDrawnExclusive, subModels: "include" })
-            .pipe(
-              mergeMap((models) =>
-                merge(
+          merge(
+            // When always drawn exclusive mode is enabled need to get only models for which category has top most element.
+            // This is because always/never drawn elements can be retrieved using top most category.
+            // TODO fix with: https://github.com/iTwin/viewer-components-react/issues/1100
+            this.#props.baseIdsCache
+              .getModels({ categoryId, includeOnlyIfCategoryOfTopMostElement: this.#props.viewport.isAlwaysDrawnExclusive, subModels: "include" })
+              .pipe(
+                mergeMap((models) =>
                   from(Id64.iterable(models)).pipe(
                     mergeMap((modelId) => this.getModelWithCategoryVisibilityStatus({ modelId, categoryId })),
                     mergeVisibilityStatuses(),
                   ),
-                  // For category not under specific model, need to check subCategories as well
-                  this.#props.baseIdsCache
-                    .getSubCategories({ categoryId })
-                    .pipe(mergeMap((subCategoryIds) => this.getSubCategoriesVisibilityStatus({ categoryId, subCategoryIds }))),
-                ).pipe(
-                  // This can happen when category does not have any geometric elements or sub-categories
-                  defaultIfEmpty(
-                    createVisibilityStatus(
-                      !this.#props.viewport.isAlwaysDrawnExclusive && this.#props.viewport.viewsCategory(categoryId) ? "visible" : "hidden",
-                    ),
-                  ),
                 ),
               ),
+            // For category not under specific model, need to check subCategories as well
+            this.#props.baseIdsCache
+              .getSubCategories({ categoryId })
+              .pipe(mergeMap((subCategoryIds) => this.getSubCategoriesVisibilityStatus({ categoryId, subCategoryIds }))),
+          ).pipe(
+            // This can happen when category does not have any geometric elements or sub-categories
+            defaultIfEmpty(
+              createVisibilityStatus(!this.#props.viewport.isAlwaysDrawnExclusive && this.#props.viewport.viewsCategory(categoryId) ? "visible" : "hidden"),
             ),
+          ),
         ),
         mergeVisibilityStatuses(),
       );

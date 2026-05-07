@@ -44,7 +44,7 @@ export class SubCategoriesCache {
           ${CLASS_NAME_SubCategory} sc
         WHERE
           NOT sc.IsPrivate
-          ${lastSubCategoryId === undefined ? "" : `AND sc.ECInstanceId > ${lastSubCategoryId ?? 0}`}
+          ${lastSubCategoryId === undefined ? "" : `AND sc.ECInstanceId > ${lastSubCategoryId}`}
         ORDER BY sc.ECInstanceId
         LIMIT ${this.#rowLimit}
       `;
@@ -58,6 +58,8 @@ export class SubCategoriesCache {
       );
     };
     return defer(() => getQueryReader()).pipe(
+      // Note: if the total row count is an exact multiple of `#rowLimit`, an extra request that returns
+      // 0 rows will be sent. This is acceptable to keep the implementation simple.
       expand((row, idx) => {
         if (idx % this.#rowLimit === this.#rowLimit - 1) {
           return getQueryReader(row.id);
