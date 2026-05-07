@@ -138,7 +138,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
           cl.ParentClassificationId parentId,
           (${categoriesOfClassificationSelector}) relatedCategories
         FROM ${CLASSIFICATIONS_CTE} cl
-        ${lastClassificationId === undefined ? "" : `WHERE cl.ClassificationId > ${lastClassificationId ?? 0}`}
+        ${lastClassificationId === undefined ? "" : `WHERE cl.ClassificationId > ${lastClassificationId}`}
         ORDER BY cl.ClassificationId
         LIMIT ${this.#rowLimit}
       `;

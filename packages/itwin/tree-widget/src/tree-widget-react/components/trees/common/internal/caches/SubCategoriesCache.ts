@@ -44,7 +44,7 @@ export class SubCategoriesCache {
           ${CLASS_NAME_SubCategory} sc
         WHERE
           NOT sc.IsPrivate
-          ${lastSubCategoryId === undefined ? "" : `AND sc.ECInstanceId > ${lastSubCategoryId ?? 0}`}
+          ${lastSubCategoryId === undefined ? "" : `AND sc.ECInstanceId > ${lastSubCategoryId}`}
         ORDER BY sc.ECInstanceId
         LIMIT ${this.#rowLimit}
       `;
