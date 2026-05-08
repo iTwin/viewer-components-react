@@ -3,3 +3,29 @@ packages:
   - apps/test-viewer
   - apps/learning-snippets
   - apps/performance-tests
+
+packageConfigs:
+  "test-viewer":
+    overrides:
+      "@itwin/itwinui-react@^2": "2.12.26"
+      "@itwin/itwinui-react@^3": "3.20.1"
+
+
+allowBuilds:
+  '@bentley/imodeljs-native': true
+  '@itwin/certa': true
+  '@itwin/oidc-signin-tool': true
+  '@parcel/watcher': false
+  esbuild: true
+  puppeteer: true
+  typemoq: true
+
+syncInjectedDepsAfterScripts:
+  - "build"
+
+resolutionMode: lowest-direct
+
+sharedWorkspaceLockfile: false
+injectWorkspacePackages: true
+
+packageManagerStrict: false
