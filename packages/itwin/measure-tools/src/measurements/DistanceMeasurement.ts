@@ -243,6 +243,7 @@ export class DistanceMeasurement extends Measurement {
   }
 
   private _lengthHandle?: FormatSpecHandle;
+  private _bearingHandle?: FormatSpecHandle;
   private _coordinateHandle?: FormatSpecHandle;
 
   private _getLengthHandle(): FormatSpecHandle {
@@ -252,6 +253,20 @@ export class DistanceMeasurement extends Measurement {
       );
     }
     return this._lengthHandle;
+  }
+
+  private _getBearingHandle(): FormatSpecHandle | undefined {
+    if (!this._bearingKoQ || !this._bearingPersistenceUnitName) {
+      return undefined;
+    }
+
+    if (!this._bearingHandle) {
+      this._bearingHandle = IModelApp.quantityFormatter.getFormatSpecHandle(
+        this._bearingKoQ,
+        this._bearingPersistenceUnitName,
+      );
+    }
+    return this._bearingHandle;
   }
 
   private _getCoordinateHandle(): FormatSpecHandle {
@@ -265,12 +280,22 @@ export class DistanceMeasurement extends Measurement {
 
   private _disposeHandles(): void {
     this._lengthHandle = dispose(this._lengthHandle);
+    this._bearingHandle = dispose(this._bearingHandle);
     this._coordinateHandle = dispose(this._coordinateHandle);
   }
 
   public override onCleanup(): void {
     super.onCleanup();
     this._disposeHandles();
+  }
+
+  protected override async prepareFormatting(): Promise<void> {
+    if (!this._bearingKoQ || !this._bearingPersistenceUnitName) {
+      return;
+    }
+
+    await FormatterUtils.ensureBearingFormatSpecsRegistered(this._bearingKoQ, this._bearingPersistenceUnitName);
+    this._getBearingHandle();
   }
 
   public override testDecorationHit(
@@ -547,7 +572,7 @@ export class DistanceMeasurement extends Measurement {
     return true;
   }
 
-  protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
+  protected override getDataForMeasurementWidgetInternal(): MeasurementWidgetData {
 
     const adjustedStartPoint = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._startPoint));
     const adjustedEndPoint = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._endPoint));
@@ -565,14 +590,14 @@ export class DistanceMeasurement extends Measurement {
     const lengthSpec = FormatterUtils.getSpecFromHandle(this._getLengthHandle(), QuantityType.LengthEngineering);
     const coordinateSpec = FormatterUtils.getSpecFromHandle(this._getCoordinateHandle(), QuantityType.Coordinate);
 
-    const fDistance = lengthSpec ? IModelApp.quantityFormatter.formatQuantity(distance, lengthSpec) : await FormatterUtils.formatLength(distance);
+    const fDistance = FormatterUtils.formatLengthImmediate(distance, lengthSpec);
     const fStartCoords = FormatterUtils.formatCoordinatesImmediate(adjustedStart, coordinateSpec);
     const fEndCoords = FormatterUtils.formatCoordinatesImmediate(adjustedEnd, coordinateSpec);
     const fSlope = FormatterUtils.formatSlope(slope, true);
-    const fRun = lengthSpec ? IModelApp.quantityFormatter.formatQuantity(run, lengthSpec) : await FormatterUtils.formatLength(run);
-    const fDeltaX = lengthSpec ? IModelApp.quantityFormatter.formatQuantity(dx, lengthSpec) : await FormatterUtils.formatLength(dx);
-    const fDeltaY = lengthSpec ? IModelApp.quantityFormatter.formatQuantity(dy, lengthSpec) : await FormatterUtils.formatLength(dy);
-    const fRise = lengthSpec ? IModelApp.quantityFormatter.formatQuantity(rise, lengthSpec) : await FormatterUtils.formatLength(rise);
+    const fRun = FormatterUtils.formatLengthImmediate(run, lengthSpec);
+    const fDeltaX = FormatterUtils.formatLengthImmediate(dx, lengthSpec);
+    const fDeltaY = FormatterUtils.formatLengthImmediate(dy, lengthSpec);
+    const fRise = FormatterUtils.formatLengthImmediate(rise, lengthSpec);
 
     let title = MeasureTools.localization.getLocalizedString(
       "MeasureTools:Measurements.distanceMeasurement"
@@ -620,15 +645,14 @@ export class DistanceMeasurement extends Measurement {
         value: fSlope,
       },
     );
-    if (this._bearingKoQ && this._bearingPersistenceUnitName) {
-      const bearingSpec = await FormatterUtils.getBearingFormatterSpec(this._bearingKoQ, this._bearingPersistenceUnitName);
-      const fBearing: string = IModelApp.quantityFormatter.formatQuantity(bearing, bearingSpec);
+    const bearingHandle = this._getBearingHandle();
+    if (bearingHandle) {
       data.properties.push({
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureDistance.bearing"
         ),
         name: "DistanceMeasurement_Bearing",
-        value: fBearing,
+        value: bearingHandle.format(bearing),
       });
     }
     if (this.drawingMetadata?.sheetToWorldTransformProps?.sheetScale === undefined) {

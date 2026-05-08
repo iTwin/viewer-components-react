@@ -446,7 +446,7 @@ export class RadiusMeasurement extends Measurement {
     context.addDecorationFromBuilder(builder);
   }
 
-  protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
+  protected override getDataForMeasurementWidgetInternal(): MeasurementWidgetData {
     const lengthSpec = FormatterUtils.getSpecFromHandle(this._getLengthHandle(), QuantityType.LengthEngineering);
 
     const radius = this._arc?.circularRadius() ?? 0.0;
@@ -454,22 +454,10 @@ export class RadiusMeasurement extends Measurement {
     const length = this._arc?.curveLength() ?? 0.0;
     const circumference = 2 * Math.PI * radius;
 
-    const fRadius = await FormatterUtils.formatLength(
-      radius,
-      lengthSpec
-    );
-    const fDiameter = await FormatterUtils.formatLength(
-      diameter,
-      lengthSpec
-    );
-    const fCircumference = await FormatterUtils.formatLength(
-      circumference,
-      lengthSpec
-    );
-    const fArcLength = await FormatterUtils.formatLength(
-      length,
-      lengthSpec
-    );
+    const fRadius = FormatterUtils.formatLengthImmediate(radius, lengthSpec);
+    const fDiameter = FormatterUtils.formatLengthImmediate(diameter, lengthSpec);
+    const fCircumference = FormatterUtils.formatLengthImmediate(circumference, lengthSpec);
+    const fArcLength = FormatterUtils.formatLengthImmediate(length, lengthSpec);
 
     let title = MeasureTools.localization.getLocalizedString(
       "MeasureTools:tools.MeasureRadius.measurement"

@@ -418,9 +418,7 @@ export class LocationMeasurement extends Measurement {
     }
   }
 
-  protected override async getDataForMeasurementWidgetInternal(): Promise<
-  MeasurementWidgetData | undefined
-  > {
+  protected override getDataForMeasurementWidgetInternal(): MeasurementWidgetData | undefined {
     const coordinateSpec = FormatterUtils.getSpecFromHandle(this._getCoordinateHandle(), QuantityType.Coordinate);
     const lengthSpec = FormatterUtils.getSpecFromHandle(this._getLengthHandle(), QuantityType.LengthEngineering);
     const angleSpec = FormatterUtils.getSpecFromHandle(this._getAngleHandle(), QuantityType.Angle);
@@ -451,7 +449,7 @@ export class LocationMeasurement extends Measurement {
           "MeasureTools:tools.MeasureLocation.latLong"
         ),
         name: "LocationMeasurement_LatLong",
-        value: await FormatterUtils.formatCartographicToLatLong(
+        value: FormatterUtils.formatCartographicToLatLongImmediate(
           this._geoLocation, angleSpec
         ),
       });
@@ -462,7 +460,7 @@ export class LocationMeasurement extends Measurement {
           "MeasureTools:tools.MeasureLocation.altitude"
         ),
         name: "LocationMeasurement_Altitude",
-        value: await FormatterUtils.formatLength(adjustedLocation.z, coordinateSpec),
+        value: FormatterUtils.formatLengthImmediate(adjustedLocation.z, coordinateSpec),
       });
     }
     if (this.drawingMetadata?.sheetToWorldTransformv2 === undefined) {
@@ -489,7 +487,7 @@ export class LocationMeasurement extends Measurement {
           "MeasureTools:tools.MeasureLocation.station"
         ),
         name: "LocationMeasurement_Station",
-        value: await FormatterUtils.formatStation(this._station, stationSpec),
+        value: FormatterUtils.formatStationImmediate(this._station, stationSpec),
       });
     }
 
@@ -499,7 +497,7 @@ export class LocationMeasurement extends Measurement {
           "MeasureTools:tools.MeasureLocation.offset"
         ),
         name: "LocationMeasurement_Offset",
-        value: await FormatterUtils.formatLength(this._offset, lengthSpec),
+        value: FormatterUtils.formatLengthImmediate(this._offset, lengthSpec),
       });
     }
 

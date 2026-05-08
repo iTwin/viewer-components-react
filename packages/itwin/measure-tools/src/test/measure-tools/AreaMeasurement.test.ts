@@ -86,9 +86,6 @@ describe("AreaMeasurement tests", () => {
         WellKnownViewType.XSection
       );
 
-      // Wait for the async createTextMarker to complete
-      await new Promise(resolve => setTimeout(resolve, 10));
-
       // Verify that the KoQ lookup was attempted via getSpecsByNameAndUnit
       assert.isTrue(getSpecsByNameAndUnitSpy.mock.calls.length > 0, "getSpecsByNameAndUnit should have been called during construction");
       assert.strictEqual(getSpecsByNameAndUnitSpy.mock.calls[0][0].name, "DefaultToolsUnits.AREA", "Should lookup the default area KoQ string");
@@ -138,9 +135,6 @@ describe("AreaMeasurement tests", () => {
 
       // Trigger setTextToMarker by calling recomputeFromPoints
       measurement.polygon.recomputeFromPoints();
-
-      // Wait for any async operations
-      await new Promise(resolve => setTimeout(resolve, 10));
 
       // Verify that the fallback method was called
       assert.isTrue(findFormatterSpecSpy.mock.calls.length > 0, "findFormatterSpecByQuantityType should have been called as fallback in setTextToMarker");

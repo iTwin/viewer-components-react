@@ -90,6 +90,38 @@ describe("DistanceMeasurement tests", () => {
     }
   });
 
+  it("Test bearing formatting is prepared before widget data is gathered", async () => {
+    const addFormattingSpecsToRegistrySpy = vi.spyOn(IModelApp.quantityFormatter, "addFormattingSpecsToRegistry").mockResolvedValue();
+    const getFormatSpecHandleSpy = vi.spyOn(IModelApp.quantityFormatter, "getFormatSpecHandle");
+
+    try {
+      const measurement = DistanceMeasurement.create(
+        Point3d.create(0, 0, 0),
+        Point3d.create(0, 10, 0),
+        WellKnownViewType.XSection,
+        {
+          bearing: { koqName: "CivilUnits.BEARING", persistenceUnitName: "Units.RAD" },
+        },
+      );
+
+      const data = await measurement.getDataForMeasurementWidget();
+
+      assert.isDefined(data);
+      assert.isAtLeast(addFormattingSpecsToRegistrySpy.mock.calls.length, 1, "bearing formatting should be registered before widget data is gathered");
+      assert.isTrue(
+        addFormattingSpecsToRegistrySpy.mock.calls.some((call) => call[0].name === "CivilUnits.BEARING" && call[0].persistenceUnitName === "Units.RAD"),
+        "bearing KoQ should be registered in the formatting specs registry",
+      );
+      assert.isTrue(
+        getFormatSpecHandleSpy.mock.calls.some((call) => call[0] === "CivilUnits.BEARING" && call[1] === "Units.RAD"),
+        "bearing should use a format spec handle after registration",
+      );
+    } finally {
+      addFormattingSpecsToRegistrySpy.mockRestore();
+      getFormatSpecHandleSpy.mockRestore();
+    }
+  });
+
   it("Test setters", () => {
     const m = DistanceMeasurement.create(Point3d.createZero(), Point3d.create(1.0, 2.0, 3.0));
     assert.instanceOf(m, DistanceMeasurement);

@@ -99,14 +99,20 @@ export const MeasurementPropertyWidget = () => {
     dataProvider.categories = [];
     dataProvider.records = {};
 
+    const widgetDataEntries = await Promise.all(
+      [...MeasurementSelectionSet.global].map(async (measurement) => ({
+        measurement,
+        data: await measurement.getDataForMeasurementWidget(),
+      })),
+    );
+
     let data: MeasurementWidgetData[] = [];
     let transientIds: Id64String[] = [];
 
-    for (const measurement of MeasurementSelectionSet.global) {
-      const mData = await measurement.getDataForMeasurementWidget();
-      if (mData?.properties.length && measurement.transientId) {
-        data.push(mData);
-        transientIds.push(measurement.transientId);
+    for (const entry of widgetDataEntries) {
+      if (entry.data?.properties.length && entry.measurement.transientId) {
+        data.push(entry.data);
+        transientIds.push(entry.measurement.transientId);
       }
     }
 

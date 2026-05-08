@@ -46,7 +46,6 @@ export class MeasurementManager implements Decorator {
   private _overrideToolTipHandler?: MeasurementToolTipHandler;
   private _overrideGeometryHandler?: MeasurementGeometryHandler;
   private _overrideHitHandler?: MeasurementHitHandler;
-  private _formattingRefreshTimeout?: ReturnType<typeof setTimeout>;
 
   /** Event that is invoked when a measurement has responded to a button event. */
   public readonly onMeasurementButtonEvent: BeUiEvent<MeasurementButtonEvent> = new BeUiEvent<MeasurementButtonEvent>();
@@ -456,11 +455,11 @@ export class MeasurementManager implements Decorator {
 
     if (undefined === this._dropQuantityFormatterListeners) {
       this._dropQuantityFormatterListeners = IModelApp.quantityFormatter.onFormattingReady.addListener(() => {
-        this._scheduleFormattingRefresh();
+        this._onFormattingRefresh();
       });
     }
 
-    this._scheduleFormattingRefresh();
+    this._onFormattingRefresh();
   }
 
   /** Removes the decorator singleton from the view manager's list of active decorators. The decorator will still manage measurements, but will not
@@ -477,24 +476,8 @@ export class MeasurementManager implements Decorator {
       this._dropQuantityFormatterListeners = undefined;
     }
 
-    if (this._formattingRefreshTimeout) {
-      clearTimeout(this._formattingRefreshTimeout);
-      this._formattingRefreshTimeout = undefined;
-    }
-
     MeasurementCachedGraphicsHandler.instance.setDecorateCallback(undefined);
     MeasurementCachedGraphicsHandler.instance.stopDecorator();
-  }
-
-  private _scheduleFormattingRefresh(): void {
-    if (this._formattingRefreshTimeout) {
-      clearTimeout(this._formattingRefreshTimeout);
-    }
-
-    this._formattingRefreshTimeout = setTimeout(() => {
-      this._formattingRefreshTimeout = undefined;
-      this._onFormattingRefresh();
-    }, 0);
   }
 
   private _onFormattingRefresh(): void {

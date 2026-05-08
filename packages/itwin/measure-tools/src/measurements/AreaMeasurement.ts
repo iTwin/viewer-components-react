@@ -172,7 +172,6 @@ export class AreaMeasurement extends Measurement {
       [],
       false,
       undefined,
-      { koqName: this._areaKoQ, persistenceUnitName: this._areaPersistenceUnitName },
       () => FormatterUtils.getSpecFromHandle(this._getAreaHandle(), QuantityType.Area),
     );
     this._polygon.textMarker.setMouseButtonHandler(
@@ -482,22 +481,13 @@ export class AreaMeasurement extends Measurement {
     }
   }
 
-  protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
+  protected override getDataForMeasurementWidgetInternal(): MeasurementWidgetData {
     const lengthSpec = FormatterUtils.getSpecFromHandle(this._getLengthHandle(), QuantityType.LengthEngineering);
     const areaSpec = FormatterUtils.getSpecFromHandle(this._getAreaHandle(), QuantityType.Area);
 
-    const fPerimeter = await FormatterUtils.formatLength(
-      this._polygon.perimeter,
-      lengthSpec
-    );
-    const fArea = await FormatterUtils.formatArea(
-      this._polygon.area,
-      areaSpec
-    );
-    const fAreaXY = await FormatterUtils.formatArea(
-      this._polygon.areaXY,
-      areaSpec
-    );
+    const fPerimeter = FormatterUtils.formatLengthImmediate(this._polygon.perimeter, lengthSpec);
+    const fArea = FormatterUtils.formatAreaImmediate(this._polygon.area, areaSpec);
+    const fAreaXY = FormatterUtils.formatAreaImmediate(this._polygon.areaXY, areaSpec);
     const fEdgeCount = (this._polygon.points.length - 1).toFixed();
 
     let title = MeasureTools.localization.getLocalizedString(
@@ -646,11 +636,9 @@ export class AreaMeasurement extends Measurement {
     const jsonArea = json as AreaMeasurementProps;
     if (jsonArea.formatting?.area?.koqName) {
       this._areaKoQ = jsonArea.formatting.area.koqName;
-      this._polygon.areaKoQ = this._areaKoQ;
     }
     if (jsonArea.formatting?.area?.persistenceUnitName) {
       this._areaPersistenceUnitName = jsonArea.formatting.area.persistenceUnitName;
-      this._polygon.areaPersistenceUnitName = this._areaPersistenceUnitName;
     }
     if (jsonArea.formatting?.length?.koqName) this._lengthKoQ = jsonArea.formatting.length.koqName;
     if (jsonArea.formatting?.length?.persistenceUnitName) this._lengthPersistenceUnitName = jsonArea.formatting.length.persistenceUnitName;

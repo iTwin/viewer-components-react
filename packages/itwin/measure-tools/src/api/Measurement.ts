@@ -318,7 +318,7 @@ export interface DrawingMetadata {
 }
 
 /** Handler function that modifies the data sent to the widget for display. */
-export type MeasurementDataWidgetHandlerFunction = (m: Measurement, currentData: MeasurementWidgetData) => Promise<void>;
+export type MeasurementDataWidgetHandlerFunction = (m: Measurement, currentData: MeasurementWidgetData) => void | Promise<void>;
 /** Handler for modifying the data sent to the widget for display. The highest priority will execute last. */
 export interface MeasurementDataWidgetHandler { priority: number, handlerFunction: MeasurementDataWidgetHandlerFunction }
 /**
@@ -649,10 +649,10 @@ export abstract class Measurement {
    * @returns promise with data or undefined if there is no data to display.
    */
   public async getDataForMeasurementWidget(): Promise<MeasurementWidgetData | undefined> {
+    await this.prepareFormatting();
     const data = await this.getDataForMeasurementWidgetInternal();
     if (data !== undefined) {
-      for (const handler of Measurement._dataForMeasurementWidgetHandlers.sort((h) => h.priority))
-        await handler.handlerFunction(this, data);
+      await this.applyDataForMeasurementWidgetHandlers(data);
     }
 
     return data;
@@ -660,9 +660,17 @@ export abstract class Measurement {
 
   /**
    * Gets formatted property data for the measurement UI widget.
-   * @returns promise with data or undefined if there is no data to display.
+   * @returns data or a promise with data, or undefined if there is no data to display.
    */
-  protected async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData | undefined> { return undefined; }
+  protected getDataForMeasurementWidgetInternal(): MeasurementWidgetData | undefined | Promise<MeasurementWidgetData | undefined> { return undefined; }
+
+  /** Allows subclasses to asynchronously prepare any custom formatting state before widget data is gathered. */
+  protected async prepareFormatting(): Promise<void> { }
+
+  private async applyDataForMeasurementWidgetHandlers(data: MeasurementWidgetData): Promise<void> {
+    for (const handler of Measurement._dataForMeasurementWidgetHandlers.sort((h) => h.priority))
+      await handler.handlerFunction(this, data);
+  }
 
   /**
    * Responds to a button event. By default this tests if the measurement was picked and opens the action toolbar.

@@ -396,10 +396,10 @@ export class AngleMeasurement extends Measurement {
     context.addDecorationFromBuilder(builder);
   }
 
-  protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
+  protected override getDataForMeasurementWidgetInternal(): MeasurementWidgetData {
     const angleSpec = FormatterUtils.getSpecFromHandle(this._getAngleHandle(), QuantityType.Angle);
     const angle = this.angle ?? 0;
-    const fAngle = await FormatterUtils.formatAngle(angle, angleSpec);
+    const fAngle = FormatterUtils.formatAngleImmediate(angle, angleSpec);
 
     let title = MeasureTools.localization.getLocalizedString(
       "MeasureTools:tools.MeasureAngle.measurement"
