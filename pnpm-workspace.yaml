@@ -25,6 +25,8 @@ syncInjectedDepsAfterScripts:
 
 resolutionMode: lowest-direct
 
+sideEffectsCache: false
+
 sharedWorkspaceLockfile: false
 injectWorkspacePackages: true
 
