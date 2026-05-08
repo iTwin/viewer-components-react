@@ -138,6 +138,7 @@ function Elements({ view, ...rest }: ElementsProps) {
     getTreeItemProps: (node) => ({
       decorations: (
         <>
+          {/* eslint-disable-next-line @typescript-eslint/no-deprecated */}
           <Chip label={node.label.substring(0, 1)} variant="outline" />
           <CategoriesTreeIcon node={node} />
         </>

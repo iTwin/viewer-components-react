@@ -3,8 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
 import { afterAll, beforeAll, describe, it } from "vitest";
-import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../IModelUtils.js";
+import { buildIModel } from "../../IModelUtils.js";
 import { initializeITwinJs, terminateITwinJs } from "../../Initialize.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 import {
@@ -29,14 +30,14 @@ describe("Classifications tree", () => {
     });
 
     it("loads classifications' hierarchy without elements", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        await importClassificationSchema(builder);
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        await importClassificationSchema(imodel);
 
-        const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
-        const table = insertClassificationTable({ builder, parentId: system.id, codeValue: "TestClassificationTable" });
-        const parentClassification = insertClassification({ builder, modelId: table.id, codeValue: "TestParentClassification" });
+        const system = insertClassificationSystem({ imodel, codeValue: rootClassificationSystemCode });
+        const table = insertClassificationTable({ imodel, parentId: system.id, codeValue: "TestClassificationTable" });
+        const parentClassification = insertClassification({ imodel, modelId: table.id, codeValue: "TestParentClassification" });
         const childClassification = insertClassification({
-          builder,
+          imodel,
           modelId: table.id,
           parentId: parentClassification.id,
           codeValue: "TestChildClassification",
@@ -45,8 +46,8 @@ describe("Classifications tree", () => {
         return { table, parentClassification, childClassification };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createClassificationsTreeProvider(imodel, { rootClassificationSystemCode });
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createClassificationsTreeProvider(imodelConnection, { rootClassificationSystemCode });
 
       await validateHierarchy({
         provider,
@@ -73,35 +74,35 @@ describe("Classifications tree", () => {
     });
 
     it("loads classification elements", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        await importClassificationSchema(builder);
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        await importClassificationSchema(imodel);
 
-        const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
-        const table = insertClassificationTable({ builder, parentId: system.id, codeValue: "TestClassificationTable" });
-        const classification = insertClassification({ builder, modelId: table.id, codeValue: "TestClassification" });
+        const system = insertClassificationSystem({ imodel, codeValue: rootClassificationSystemCode });
+        const table = insertClassificationTable({ imodel, parentId: system.id, codeValue: "TestClassificationTable" });
+        const classification = insertClassification({ imodel, modelId: table.id, codeValue: "TestClassification" });
 
-        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "Test physical model" });
-        const spatialCategory = insertSpatialCategory({ builder, codeValue: "Test spatial category" });
+        const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "Test physical model" });
+        const spatialCategory = insertSpatialCategory({ imodel, codeValue: "Test spatial category" });
         const parentPhysicalElement = insertPhysicalElement({
-          builder,
+          imodel,
           modelId: physicalModel.id,
           categoryId: spatialCategory.id,
           codeValue: "Parent 3d element",
         });
         const childPhysicalElement = insertPhysicalElement({
-          builder,
+          imodel,
           modelId: physicalModel.id,
           categoryId: spatialCategory.id,
           parentId: parentPhysicalElement.id,
           codeValue: "Child 3d element",
         });
-        insertElementHasClassificationsRelationship({ builder, elementId: parentPhysicalElement.id, classificationId: classification.id });
+        insertElementHasClassificationsRelationship({ imodel, elementId: parentPhysicalElement.id, classificationId: classification.id });
 
         return { table, classification, parentPhysicalElement, childPhysicalElement };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createClassificationsTreeProvider(imodel, { rootClassificationSystemCode });
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createClassificationsTreeProvider(imodelConnection, { rootClassificationSystemCode });
 
       await validateHierarchy({
         provider,

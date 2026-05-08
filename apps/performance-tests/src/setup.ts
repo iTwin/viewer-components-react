@@ -3,19 +3,20 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { HierarchyCacheMode, initializeCore, terminateCore } from "test-utilities";
 import { afterAll, beforeAll } from "vitest";
 import { IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { setLogger } from "@itwin/presentation-hierarchies";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { Datasets } from "./util/Datasets.js";
 import { LOGGER } from "./util/Logging.js";
 
 beforeAll(async () => {
   setLogger(LOGGER);
-  await initializePresentationTesting({
+
+  await initializeCore({
     backendHostProps: {
       profileName: "vcr-performance-tests",
     },
@@ -29,10 +30,11 @@ beforeAll(async () => {
     },
     rpcs: [IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
   });
+
   ECSchemaRpcImpl.register();
   await Datasets.initialize("./datasets");
 }, 60_000);
 
 afterAll(async () => {
-  await terminatePresentationTesting();
+  await terminateCore();
 });

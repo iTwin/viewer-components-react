@@ -5,21 +5,21 @@
 
 import fs from "node:fs";
 import { createRequire } from "node:module";
-import { BisCodeSpec, Code, IModel } from "@itwin/core-common";
+import { createCode, importSchema, insertDefinitionSubModel } from "test-utilities";
+import { Code, IModel } from "@itwin/core-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ClassificationsTreeDefinition } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIdsCache } from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
 import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_GeometricElement3d } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
-import { getFullSchemaXml, insertDefinitionSubModel } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 
+import type { IModelDb } from "@itwin/core-backend";
 import type { Id64String } from "@itwin/core-bentley";
 import type { DefinitionElementProps } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { EC } from "@itwin/presentation-shared";
-import type { TestIModelBuilder } from "@itwin/presentation-testing";
 import type { ClassificationsTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
 
 export function createClassificationsTreeProvider(
@@ -55,17 +55,18 @@ export function createClassificationsTreeProvider(
 
 export function insertClassificationSystem(
   props: {
-    builder: TestIModelBuilder;
+    imodel: IModelDb;
     modelId?: Id64String;
     codeValue?: string;
   } & Partial<Omit<DefinitionElementProps, "id" | "parent" | "code" | "model">>,
 ) {
-  const { builder, codeValue, modelId, ...elementProps } = props;
+  const { imodel, codeValue, modelId, ...elementProps } = props;
   const className: EC.FullClassName = `ClassificationSystems.ClassificationSystem`;
-  const id = builder.insertElement({
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  const id = imodel.elements.insertElement({
     classFullName: className,
     model: modelId ?? IModel.dictionaryId,
-    code: codeValue ? builder.createCode(modelId ?? IModel.dictionaryId, BisCodeSpec.nullCodeSpec, codeValue) : Code.createEmpty(),
+    code: codeValue ? createCode({ imodel, scopeId: modelId ?? IModel.dictionaryId, codeValue }) : Code.createEmpty(),
     ...elementProps,
   });
   return { className, id };
@@ -73,18 +74,19 @@ export function insertClassificationSystem(
 
 export function insertClassificationTable(
   props: {
-    builder: TestIModelBuilder;
+    imodel: IModelDb;
     modelId?: Id64String;
     parentId?: Id64String;
     codeValue?: string;
   } & Partial<Omit<DefinitionElementProps, "id" | "parent" | "code" | "model">>,
 ) {
-  const { builder, codeValue, modelId, parentId, ...elementProps } = props;
+  const { imodel, codeValue, modelId, parentId, ...elementProps } = props;
   const className: EC.FullClassName = `ClassificationSystems.ClassificationTable`;
-  const id = builder.insertElement({
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  const id = imodel.elements.insertElement({
     classFullName: className,
     model: modelId ?? IModel.dictionaryId,
-    code: codeValue ? builder.createCode(parentId ?? modelId ?? IModel.dictionaryId, BisCodeSpec.nullCodeSpec, codeValue) : Code.createEmpty(),
+    code: codeValue ? createCode({ imodel, scopeId: parentId ?? modelId ?? IModel.dictionaryId, codeValue }) : Code.createEmpty(),
     parent: parentId
       ? {
           id: parentId,
@@ -94,27 +96,28 @@ export function insertClassificationTable(
     ...elementProps,
   });
   insertDefinitionSubModel({
-    builder,
+    imodel,
     modeledElementId: id,
-    modelModelsElementRelationshipName: "ClassificationSystems.DefinitionModelBreaksDownClassificationTable",
+    relationshipName: "ClassificationSystems.DefinitionModelBreaksDownClassificationTable",
   });
   return { className, id };
 }
 
 export function insertClassification(
   props: {
-    builder: TestIModelBuilder;
+    imodel: IModelDb;
     modelId: Id64String;
     parentId?: Id64String;
     codeValue?: string;
   } & Partial<Omit<DefinitionElementProps, "id" | "parent" | "code" | "model">>,
 ) {
-  const { builder, codeValue, modelId, parentId, ...elementProps } = props;
+  const { imodel, codeValue, modelId, parentId, ...elementProps } = props;
   const className: EC.FullClassName = `ClassificationSystems.Classification`;
-  const id = builder.insertElement({
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  const id = imodel.elements.insertElement({
     classFullName: className,
     model: modelId,
-    code: codeValue ? builder.createCode(parentId ?? modelId, BisCodeSpec.nullCodeSpec, codeValue) : Code.createEmpty(),
+    code: codeValue ? createCode({ imodel, scopeId: parentId ?? modelId, codeValue }) : Code.createEmpty(),
     parent: parentId
       ? {
           id: parentId,
@@ -126,29 +129,27 @@ export function insertClassification(
   return { className, id };
 }
 
-export function insertElementHasClassificationsRelationship(props: { builder: TestIModelBuilder; elementId: Id64String; classificationId: Id64String }) {
-  const { builder, elementId, classificationId } = props;
-  return builder.insertRelationship({
+export function insertElementHasClassificationsRelationship(props: { imodel: IModelDb; elementId: Id64String; classificationId: Id64String }) {
+  const { imodel, elementId, classificationId } = props;
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  return imodel.relationships.insertInstance({
     classFullName: "ClassificationSystems.ElementHasClassifications",
     sourceId: elementId,
     targetId: classificationId,
   });
 }
 
-export async function importClassificationSchema(builder: TestIModelBuilder) {
+export async function importClassificationSchema(imodel: IModelDb) {
   const require = createRequire(import.meta.url);
   const schemaPath = require.resolve("@bentley/classification-systems-schema/ClassificationSystems.ecschema.xml");
   const schemaXml = fs.readFileSync(fs.realpathSync(schemaPath), { encoding: "utf-8" });
-  await builder.importSchema(schemaXml);
+  await imodel.importSchemaStrings([schemaXml]);
 }
 
-export function insertCategorySymbolizesClassificationRelationship(props: {
-  builder: TestIModelBuilder;
-  categoryId: Id64String;
-  classificationId: Id64String;
-}) {
-  const { builder, categoryId, classificationId } = props;
-  return builder.insertRelationship({
+export function insertCategorySymbolizesClassificationRelationship(props: { imodel: IModelDb; categoryId: Id64String; classificationId: Id64String }) {
+  const { imodel, categoryId, classificationId } = props;
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  return imodel.relationships.insertInstance({
     classFullName: `${CATEGORY_SYMBOLIZES_CLASSIFICATION_RELATIONSHIP_SCHEMA}.CategorySymbolizesClassification`,
     sourceId: categoryId,
     targetId: classificationId,
@@ -157,9 +158,10 @@ export function insertCategorySymbolizesClassificationRelationship(props: {
 
 export const CATEGORY_SYMBOLIZES_CLASSIFICATION_RELATIONSHIP_SCHEMA = "TestClassificationSchema";
 
-export async function importCategorySymbolizesClassificationSchema(builder: TestIModelBuilder) {
+export async function importCategorySymbolizesClassificationSchema(imodel: IModelDb) {
   // cspell:disable
-  const schemaXml = getFullSchemaXml({
+  await importSchema({
+    imodel,
     schemaName: CATEGORY_SYMBOLIZES_CLASSIFICATION_RELATIONSHIP_SCHEMA,
     schemaAlias: "tst",
     schemaContentXml: `
@@ -177,5 +179,4 @@ export async function importCategorySymbolizesClassificationSchema(builder: Test
     `,
   });
   // cspell:enable
-  await builder.importSchema(schemaXml);
 }

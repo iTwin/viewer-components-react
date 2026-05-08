@@ -9,6 +9,8 @@
   display: grid;
   place-items: center;
   z-index: 100;
+  backdrop-filter: blur(1px);
+  background: rgba(0, 0, 0, .1);
 }
 
 .map-manager-popover-overflow {

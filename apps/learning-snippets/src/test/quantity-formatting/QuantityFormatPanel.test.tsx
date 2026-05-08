@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 // __PUBLISH_EXTRACT_START__ QuantityFormat.QuantityFormatPanelExampleImports
 import { QuantityFormatPanel } from "@itwin/quantity-formatting-react";
 import { IModelApp } from "@itwin/core-frontend";
@@ -47,7 +47,7 @@ describe("Quantity formatting", () => {
         );
         // __PUBLISH_EXTRACT_END__
 
-        expect(screen.getByText("labels.type")).toBeDefined();
+        await waitFor(() => expect(screen.getByText("labels.type")).toBeDefined());
       });
     });
   });

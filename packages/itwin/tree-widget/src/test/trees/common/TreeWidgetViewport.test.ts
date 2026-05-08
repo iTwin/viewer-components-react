@@ -3,12 +3,20 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import {
+  HierarchyCacheMode,
+  initializeCore,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
+  insertSpatialCategory,
+  insertSubCategory,
+  terminateCore,
+} from "test-utilities";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { createTreeWidgetViewport } from "../../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
-import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubCategory } from "../../IModelUtils.js";
+import { buildIModel } from "../../IModelUtils.js";
 
 import type { Id64Array } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -16,7 +24,7 @@ import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 describe("TreeWidgetViewport", () => {
   const listeners = new Array<() => void>();
   beforeAll(async () => {
-    await initializePresentationTesting({
+    await initializeCore({
       backendProps: {
         caching: {
           hierarchies: {
@@ -29,28 +37,28 @@ describe("TreeWidgetViewport", () => {
   });
 
   afterAll(async () => {
-    await terminatePresentationTesting();
+    await terminateCore();
     listeners.forEach((listener) => listener());
   });
 
   it("triggers onChange events when visibility changes", async () => {
-    await using buildIModelResult = await buildIModel(async (builder) => {
-      const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+    await using buildIModelResult = await buildIModel(async (imodel) => {
+      const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
 
-      const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory1" });
-      const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+      const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory1" });
+      const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
       const subCategory = insertSubCategory({
-        builder,
+        imodel,
         parentCategoryId: category.id,
         codeValue: "subCategory",
       });
       return { category, model: physicalModel, subCategory, element };
     });
 
-    const { imodel, ...keys } = buildIModelResult;
+    const { imodelConnection, ...keys } = buildIModelResult;
 
     using viewport = await createViewport({
-      iModelConnection: imodel,
+      iModelConnection: imodelConnection,
       testData: {
         models: [keys.model.id],
         categories: [keys.category.id],

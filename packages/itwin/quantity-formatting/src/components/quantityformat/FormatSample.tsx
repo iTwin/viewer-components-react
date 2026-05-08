@@ -96,25 +96,39 @@ export function FormatSample(props: FormatSampleProps) {
 
   const handleOnValueChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      let newValue = Number.parseFloat(sampleValue);
-      if (Number.isNaN(newValue)) newValue = 0;
-      setMagnitude(newValue);
-      setSampleValue(event.target.value);
+      const inputValue = event.target.value;
+      setSampleValue(inputValue);
+      if (inputValue === "") {
+        setMagnitude(0);
+      } else {
+        const newValue = Number.parseFloat(inputValue);
+        if (!Number.isNaN(newValue)) {
+          setMagnitude(newValue);
+        }
+      }
     },
     []
   );
 
   const handleKeyDown = React.useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      // Allow control keys (Backspace, Delete, Tab, Escape, Enter, Arrow keys)
+      // Pass through Ctrl/Cmd combos (clipboard: Ctrl+C/V/X/A, undo, etc.)
+      if (e.ctrlKey || e.metaKey) return;
+
       const allowedControlKeys = [
         'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
         'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
         'Home', 'End'
       ];
 
-      // Allow control keys, numbers (0-9), and decimal point
-      if (!allowedControlKeys.includes(e.key) && !/^[0-9.]$/.test(e.key)) {
+      // Allow control keys, digits, decimal point, and leading minus sign
+      if (!allowedControlKeys.includes(e.key) && !/^[0-9.-]$/.test(e.key)) {
+        e.preventDefault();
+        return;
+      }
+
+      // Only allow minus at position 0, and only if value doesn't already start with one
+      if (e.key === "-" && ((e.currentTarget.selectionStart ?? 0) !== 0 || sampleValue.startsWith("-"))) {
         e.preventDefault();
         return;
       }

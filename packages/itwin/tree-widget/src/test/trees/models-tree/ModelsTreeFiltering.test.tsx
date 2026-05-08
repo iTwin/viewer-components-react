@@ -4,6 +4,17 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { act } from "react";
+import {
+  HierarchyCacheMode,
+  initializeCore,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
+  insertPhysicalPartition,
+  insertPhysicalSubModel,
+  insertSpatialCategory,
+  insertSubject,
+  terminateCore,
+} from "test-utilities";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Id64 } from "@itwin/core-bentley";
 import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
@@ -11,7 +22,6 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider, HierarchyNode } from "@itwin/presentation-hierarchies";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { renderHook } from "@testing-library/react";
 import {
   CLASS_NAME_GeometricElement3d,
@@ -21,24 +31,16 @@ import {
 import { SharedTreeContextProvider } from "../../../tree-widget-react/components/trees/common/SharedTreeContextProvider.js";
 import { defaultHierarchyConfiguration } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import { useModelsTree } from "../../../tree-widget-react/components/trees/models-tree/UseModelsTree.js";
-import {
-  buildIModel,
-  insertPhysicalElement,
-  insertPhysicalModelWithPartition,
-  insertPhysicalPartition,
-  insertPhysicalSubModel,
-  insertSpatialCategory,
-  insertSubject,
-} from "../../IModelUtils.js";
+import { buildIModel } from "../../IModelUtils.js";
 import { createFakeViewport, createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 import { createClassGroupingHierarchyNode } from "./Utils.js";
 
+import type { IModelDb } from "@itwin/core-backend";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { InstanceKey, Props } from "@itwin/presentation-shared";
-import type { TestIModelBuilder } from "@itwin/presentation-testing";
 import type { ElementsGroupInfo, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import type { ExpectedHierarchyDef } from "../HierarchyValidation.js";
 
@@ -84,7 +86,7 @@ namespace TreeSearchTestCaseDefinition {
 describe("Models tree", () => {
   describe("Hierarchy search", () => {
     beforeAll(async () => {
-      await initializePresentationTesting({
+      await initializeCore({
         backendProps: {
           caching: {
             hierarchies: {
@@ -100,40 +102,40 @@ describe("Models tree", () => {
     });
 
     afterAll(async () => {
-      await terminatePresentationTesting();
+      await terminateCore();
     });
 
     it("sets auto-expand on correct nodes with merged sub-tree and search paths", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
+      await using buildIModelResult = await buildIModel(async (imodel) => {
         const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-        const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
-        const category = insertSpatialCategory({ builder, codeValue: "category" });
+        const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model`, partitionParentId: rootSubject.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "category" });
         const parentElement = insertPhysicalElement({
-          builder,
+          imodel,
           userLabel: `parent el`,
           modelId: model.id,
           categoryId: category.id,
         });
         const childElement = insertPhysicalElement({
-          builder,
+          imodel,
           userLabel: `child el`,
           modelId: model.id,
           categoryId: category.id,
           parentId: parentElement.id,
         });
         insertPhysicalElement({
-          builder,
+          imodel,
           userLabel: `unrelated el`,
           modelId: model.id,
           categoryId: category.id,
         });
         return { rootSubject, model, category, parentElement, childElement };
       });
-      const { imodel, ...keys } = buildIModelResult;
-      const imodelAccess = createIModelAccess(imodel);
+      const { imodelConnection, ...keys } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodelConnection);
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true, elementClassSpecification: keys.parentElement.className };
       using hook = renderUseModelsTreeHook({
-        imodel,
+        imodelConnection,
         hierarchyConfig,
         getSubTreePaths: async ({ createInstanceKeyPaths }) =>
           createInstanceKeyPaths({ targetItems: [{ id: keys.childElement.id, className: keys.childElement.className }] }),
@@ -190,15 +192,15 @@ describe("Models tree", () => {
     runTestCases(
       TreeSearchTestCaseDefinition.create({
         name: "immediate Subject nodes",
-        setupIModel: async (builder) => {
+        setupIModel: async (imodel) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-          const category = insertSpatialCategory({ builder, codeValue: "category" });
-          const childSubject1 = insertSubject({ builder, codeValue: "matching subject 1", parentId: rootSubject.id });
-          const childSubject2 = insertSubject({ builder, codeValue: "subject 2", parentId: rootSubject.id });
-          const childSubject3 = insertSubject({ builder, codeValue: "matching subject 3", parentId: rootSubject.id });
-          insertModelWithElements(builder, 1, category.id, childSubject1.id);
-          insertModelWithElements(builder, 2, category.id, childSubject2.id);
-          insertModelWithElements(builder, 3, category.id, childSubject3.id);
+          const category = insertSpatialCategory({ imodel, codeValue: "category" });
+          const childSubject1 = insertSubject({ imodel, codeValue: "matching subject 1", parentId: rootSubject.id });
+          const childSubject2 = insertSubject({ imodel, codeValue: "subject 2", parentId: rootSubject.id });
+          const childSubject3 = insertSubject({ imodel, codeValue: "matching subject 3", parentId: rootSubject.id });
+          insertModelWithElements(imodel, 1, category.id, childSubject1.id);
+          insertModelWithElements(imodel, 2, category.id, childSubject2.id);
+          insertModelWithElements(imodel, 3, category.id, childSubject3.id);
           return { rootSubject, childSubject1, childSubject2, childSubject3 };
         },
         getTargetInstancePaths: (x) => [
@@ -254,16 +256,16 @@ describe("Models tree", () => {
       }),
       TreeSearchTestCaseDefinition.create({
         name: "nested Subject nodes",
-        setupIModel: async (builder) => {
+        setupIModel: async (imodel) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-          const category = insertSpatialCategory({ builder, codeValue: "category" });
-          const intermediateSubject = insertSubject({ builder, codeValue: `subject-x` });
-          const childSubject1 = insertSubject({ builder, codeValue: "matching subject 1", parentId: intermediateSubject.id });
-          const childSubject2 = insertSubject({ builder, codeValue: "subject 2", parentId: intermediateSubject.id });
-          const childSubject3 = insertSubject({ builder, codeValue: "matching subject 3", parentId: intermediateSubject.id });
-          insertModelWithElements(builder, 1, category.id, childSubject1.id);
-          insertModelWithElements(builder, 2, category.id, childSubject2.id);
-          insertModelWithElements(builder, 3, category.id, childSubject3.id);
+          const category = insertSpatialCategory({ imodel, codeValue: "category" });
+          const intermediateSubject = insertSubject({ imodel, codeValue: `subject-x` });
+          const childSubject1 = insertSubject({ imodel, codeValue: "matching subject 1", parentId: intermediateSubject.id });
+          const childSubject2 = insertSubject({ imodel, codeValue: "subject 2", parentId: intermediateSubject.id });
+          const childSubject3 = insertSubject({ imodel, codeValue: "matching subject 3", parentId: intermediateSubject.id });
+          insertModelWithElements(imodel, 1, category.id, childSubject1.id);
+          insertModelWithElements(imodel, 2, category.id, childSubject2.id);
+          insertModelWithElements(imodel, 3, category.id, childSubject3.id);
           return { rootSubject, intermediateSubject, childSubject1, childSubject2, childSubject3 };
         },
         getTargetInstancePaths: (x) => [
@@ -330,16 +332,16 @@ describe("Models tree", () => {
       }),
       TreeSearchTestCaseDefinition.create({
         name: "two levels of Subject nodes",
-        setupIModel: async (builder) => {
-          const category = insertSpatialCategory({ builder, codeValue: "category" });
+        setupIModel: async (imodel) => {
+          const category = insertSpatialCategory({ imodel, codeValue: "category" });
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-          const intermediateSubject1 = insertSubject({ builder, codeValue: `matching intermediate subject 1`, parentId: rootSubject.id });
-          const intermediateSubject2 = insertSubject({ builder, codeValue: `intermediate subject 2`, parentId: rootSubject.id });
-          insertModelWithElements(builder, 1, category.id, intermediateSubject2.id);
-          const childSubject1 = insertSubject({ builder, codeValue: "matching subject 1", parentId: intermediateSubject1.id });
-          const childSubject2 = insertSubject({ builder, codeValue: "subject 2", parentId: intermediateSubject1.id });
-          insertModelWithElements(builder, 1, category.id, childSubject1.id);
-          insertModelWithElements(builder, 2, category.id, childSubject2.id);
+          const intermediateSubject1 = insertSubject({ imodel, codeValue: `matching intermediate subject 1`, parentId: rootSubject.id });
+          const intermediateSubject2 = insertSubject({ imodel, codeValue: `intermediate subject 2`, parentId: rootSubject.id });
+          insertModelWithElements(imodel, 1, category.id, intermediateSubject2.id);
+          const childSubject1 = insertSubject({ imodel, codeValue: "matching subject 1", parentId: intermediateSubject1.id });
+          const childSubject2 = insertSubject({ imodel, codeValue: "subject 2", parentId: intermediateSubject1.id });
+          insertModelWithElements(imodel, 1, category.id, childSubject1.id);
+          insertModelWithElements(imodel, 2, category.id, childSubject2.id);
           return { rootSubject, intermediateSubject1, intermediateSubject2, childSubject1, childSubject2 };
         },
         getTargetInstancePaths: (x) => [
@@ -406,15 +408,15 @@ describe("Models tree", () => {
       }),
       TreeSearchTestCaseDefinition.create({
         name: "Model nodes",
-        setupIModel: async (builder) => {
+        setupIModel: async (imodel) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-          const category = insertSpatialCategory({ builder, codeValue: "category" });
-          const model1 = insertPhysicalModelWithPartition({ builder, codeValue: `matching model 1`, partitionParentId: rootSubject.id });
-          const model2 = insertPhysicalModelWithPartition({ builder, codeValue: `model 2`, partitionParentId: rootSubject.id });
-          const model3 = insertPhysicalModelWithPartition({ builder, codeValue: `matching model 3`, partitionParentId: rootSubject.id });
-          insertPhysicalElement({ builder, userLabel: `element-1`, modelId: model1.id, categoryId: category.id });
-          insertPhysicalElement({ builder, userLabel: `element-2`, modelId: model2.id, categoryId: category.id });
-          insertPhysicalElement({ builder, userLabel: `element-3`, modelId: model3.id, categoryId: category.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "category" });
+          const model1 = insertPhysicalModelWithPartition({ imodel, codeValue: `matching model 1`, partitionParentId: rootSubject.id });
+          const model2 = insertPhysicalModelWithPartition({ imodel, codeValue: `model 2`, partitionParentId: rootSubject.id });
+          const model3 = insertPhysicalModelWithPartition({ imodel, codeValue: `matching model 3`, partitionParentId: rootSubject.id });
+          insertPhysicalElement({ imodel, userLabel: `element-1`, modelId: model1.id, categoryId: category.id });
+          insertPhysicalElement({ imodel, userLabel: `element-2`, modelId: model2.id, categoryId: category.id });
+          insertPhysicalElement({ imodel, userLabel: `element-3`, modelId: model3.id, categoryId: category.id });
           return { rootSubject, model1, model2, model3 };
         },
         getTargetInstancePaths: (x) => [
@@ -460,11 +462,11 @@ describe("Models tree", () => {
       }),
       TreeSearchTestCaseDefinition.create({
         name: "Empty model nodes",
-        setupIModel: async (builder) => {
+        setupIModel: async (imodel) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-          const model1 = insertPhysicalModelWithPartition({ builder, codeValue: `matching model 1`, partitionParentId: rootSubject.id });
-          const model2 = insertPhysicalModelWithPartition({ builder, codeValue: `model 2`, partitionParentId: rootSubject.id });
-          const model3 = insertPhysicalModelWithPartition({ builder, codeValue: `matching model 3`, partitionParentId: rootSubject.id });
+          const model1 = insertPhysicalModelWithPartition({ imodel, codeValue: `matching model 1`, partitionParentId: rootSubject.id });
+          const model2 = insertPhysicalModelWithPartition({ imodel, codeValue: `model 2`, partitionParentId: rootSubject.id });
+          const model3 = insertPhysicalModelWithPartition({ imodel, codeValue: `matching model 3`, partitionParentId: rootSubject.id });
           return { rootSubject, model1, model2, model3 };
         },
         getTargetInstancePaths: (x) => [
@@ -491,20 +493,20 @@ describe("Models tree", () => {
       }),
       TreeSearchTestCaseDefinition.create({
         name: "Subject with hidden child Model node",
-        setupIModel: async (builder) => {
+        setupIModel: async (imodel) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-          const childSubject = insertSubject({ builder, codeValue: "matching child subject", parentId: rootSubject.id });
-          const category = insertSpatialCategory({ builder, codeValue: "category" });
+          const childSubject = insertSubject({ imodel, codeValue: "matching child subject", parentId: rootSubject.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "category" });
           const partition = insertPhysicalPartition({
-            builder,
+            imodel,
             codeValue: `matching model 1`,
             parentId: childSubject.id,
             jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
           });
-          const model1 = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
-          const model2 = insertPhysicalModelWithPartition({ builder, codeValue: `model 2`, partitionParentId: childSubject.id });
-          insertPhysicalElement({ builder, userLabel: `element-1`, modelId: model1.id, categoryId: category.id });
-          insertPhysicalElement({ builder, userLabel: `element-2`, modelId: model2.id, categoryId: category.id });
+          const model1 = insertPhysicalSubModel({ imodel, modeledElementId: partition.id });
+          const model2 = insertPhysicalModelWithPartition({ imodel, codeValue: `model 2`, partitionParentId: childSubject.id });
+          insertPhysicalElement({ imodel, userLabel: `element-1`, modelId: model1.id, categoryId: category.id });
+          insertPhysicalElement({ imodel, userLabel: `element-2`, modelId: model2.id, categoryId: category.id });
           return { rootSubject, childSubject, model1, model2, category };
         },
         getTargetInstancePaths: (x) => [{ identifier: x.childSubject, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } }],
@@ -547,18 +549,18 @@ describe("Models tree", () => {
       }),
       TreeSearchTestCaseDefinition.create({
         name: "Category nodes",
-        setupIModel: async (builder) => {
+        setupIModel: async (imodel) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-          const model1 = insertPhysicalModelWithPartition({ builder, codeValue: `model-1`, partitionParentId: rootSubject.id });
-          const model2 = insertPhysicalModelWithPartition({ builder, codeValue: `model-2`, partitionParentId: rootSubject.id });
+          const model1 = insertPhysicalModelWithPartition({ imodel, codeValue: `model-1`, partitionParentId: rootSubject.id });
+          const model2 = insertPhysicalModelWithPartition({ imodel, codeValue: `model-2`, partitionParentId: rootSubject.id });
 
-          const category1 = insertSpatialCategory({ builder, codeValue: "matching category 1" });
-          const category2 = insertSpatialCategory({ builder, codeValue: "category-2" });
-          const category3 = insertSpatialCategory({ builder, codeValue: "matching category 3" });
+          const category1 = insertSpatialCategory({ imodel, codeValue: "matching category 1" });
+          const category2 = insertSpatialCategory({ imodel, codeValue: "category-2" });
+          const category3 = insertSpatialCategory({ imodel, codeValue: "matching category 3" });
 
-          insertPhysicalElement({ builder, userLabel: `element-1`, modelId: model1.id, categoryId: category1.id });
-          insertPhysicalElement({ builder, userLabel: `element-2`, modelId: model1.id, categoryId: category2.id });
-          insertPhysicalElement({ builder, userLabel: `element-3`, modelId: model2.id, categoryId: category3.id });
+          insertPhysicalElement({ imodel, userLabel: `element-1`, modelId: model1.id, categoryId: category1.id });
+          insertPhysicalElement({ imodel, userLabel: `element-2`, modelId: model1.id, categoryId: category2.id });
+          insertPhysicalElement({ imodel, userLabel: `element-3`, modelId: model2.id, categoryId: category3.id });
 
           return { rootSubject, model1, model2, category1, category2, category3 };
         },
@@ -617,19 +619,19 @@ describe("Models tree", () => {
       }),
       TreeSearchTestCaseDefinition.create({
         name: "root Element nodes",
-        setupIModel: async (builder) => {
+        setupIModel: async (imodel) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-          const model1 = insertPhysicalModelWithPartition({ builder, codeValue: `model-1`, partitionParentId: rootSubject.id });
-          const model2 = insertPhysicalModelWithPartition({ builder, codeValue: `model-2`, partitionParentId: rootSubject.id });
+          const model1 = insertPhysicalModelWithPartition({ imodel, codeValue: `model-1`, partitionParentId: rootSubject.id });
+          const model2 = insertPhysicalModelWithPartition({ imodel, codeValue: `model-2`, partitionParentId: rootSubject.id });
 
-          const category1 = insertSpatialCategory({ builder, codeValue: "category-1" });
-          const category2 = insertSpatialCategory({ builder, codeValue: "category-2" });
+          const category1 = insertSpatialCategory({ imodel, codeValue: "category-1" });
+          const category2 = insertSpatialCategory({ imodel, codeValue: "category-2" });
 
-          const element11 = insertPhysicalElement({ builder, userLabel: `matching element 11`, modelId: model1.id, categoryId: category1.id });
-          const element12 = insertPhysicalElement({ builder, userLabel: `element 12`, modelId: model1.id, categoryId: category1.id });
+          const element11 = insertPhysicalElement({ imodel, userLabel: `matching element 11`, modelId: model1.id, categoryId: category1.id });
+          const element12 = insertPhysicalElement({ imodel, userLabel: `element 12`, modelId: model1.id, categoryId: category1.id });
 
-          const element21 = insertPhysicalElement({ builder, userLabel: `element 21`, modelId: model2.id, categoryId: category2.id });
-          const element22 = insertPhysicalElement({ builder, userLabel: `matching element 22`, modelId: model2.id, categoryId: category2.id });
+          const element21 = insertPhysicalElement({ imodel, userLabel: `element 21`, modelId: model2.id, categoryId: category2.id });
+          const element22 = insertPhysicalElement({ imodel, userLabel: `matching element 22`, modelId: model2.id, categoryId: category2.id });
 
           return { rootSubject, model1, model2, category1, category2, element11, element12, element21, element22 };
         },
@@ -698,19 +700,19 @@ describe("Models tree", () => {
       }),
       TreeSearchTestCaseDefinition.create({
         name: "category and element nodes",
-        setupIModel: async (builder) => {
+        setupIModel: async (imodel) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-          const model1 = insertPhysicalModelWithPartition({ builder, codeValue: `model-1`, partitionParentId: rootSubject.id });
-          const model2 = insertPhysicalModelWithPartition({ builder, codeValue: `model-2`, partitionParentId: rootSubject.id });
+          const model1 = insertPhysicalModelWithPartition({ imodel, codeValue: `model-1`, partitionParentId: rootSubject.id });
+          const model2 = insertPhysicalModelWithPartition({ imodel, codeValue: `model-2`, partitionParentId: rootSubject.id });
 
-          const category1 = insertSpatialCategory({ builder, codeValue: "matching category-1" });
-          const category2 = insertSpatialCategory({ builder, codeValue: "category-2" });
+          const category1 = insertSpatialCategory({ imodel, codeValue: "matching category-1" });
+          const category2 = insertSpatialCategory({ imodel, codeValue: "category-2" });
 
-          const element11 = insertPhysicalElement({ builder, userLabel: `matching element 11`, modelId: model1.id, categoryId: category1.id });
-          const element12 = insertPhysicalElement({ builder, userLabel: `element 12`, modelId: model1.id, categoryId: category1.id });
+          const element11 = insertPhysicalElement({ imodel, userLabel: `matching element 11`, modelId: model1.id, categoryId: category1.id });
+          const element12 = insertPhysicalElement({ imodel, userLabel: `element 12`, modelId: model1.id, categoryId: category1.id });
 
-          const element21 = insertPhysicalElement({ builder, userLabel: `element 21`, modelId: model2.id, categoryId: category2.id });
-          const element22 = insertPhysicalElement({ builder, userLabel: `element 22`, modelId: model2.id, categoryId: category2.id });
+          const element21 = insertPhysicalElement({ imodel, userLabel: `element 21`, modelId: model2.id, categoryId: category2.id });
+          const element22 = insertPhysicalElement({ imodel, userLabel: `element 22`, modelId: model2.id, categoryId: category2.id });
 
           return { rootSubject, model1, model2, category1, category2, element11, element12, element21, element22 };
         },
@@ -755,27 +757,27 @@ describe("Models tree", () => {
       }),
       TreeSearchTestCaseDefinition.create({
         name: "child Element nodes",
-        setupIModel: async (builder) => {
+        setupIModel: async (imodel) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-          const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
-          const category = insertSpatialCategory({ builder, codeValue: "category-x" });
-          const rootElement = insertPhysicalElement({ builder, userLabel: `root element 0`, modelId: model.id, categoryId: category.id });
+          const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model-x`, partitionParentId: rootSubject.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "category-x" });
+          const rootElement = insertPhysicalElement({ imodel, userLabel: `root element 0`, modelId: model.id, categoryId: category.id });
           const childElement1 = insertPhysicalElement({
-            builder,
+            imodel,
             userLabel: `matching element 1`,
             modelId: model.id,
             categoryId: category.id,
             parentId: rootElement.id,
           });
           const childElement2 = insertPhysicalElement({
-            builder,
+            imodel,
             userLabel: `element 2`,
             modelId: model.id,
             categoryId: category.id,
             parentId: rootElement.id,
           });
           const childElement3 = insertPhysicalElement({
-            builder,
+            imodel,
             userLabel: `matching element 3`,
             modelId: model.id,
             categoryId: category.id,
@@ -857,25 +859,25 @@ describe("Models tree", () => {
       }),
       TreeSearchTestCaseDefinition.create({
         name: "child Element nodes when custom element specification class is used",
-        setupIModel: async (builder, testSchema) => {
+        setupIModel: async (imodel, testSchema) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-          const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
-          const category = insertSpatialCategory({ builder, codeValue: "category-x" });
+          const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model-x`, partitionParentId: rootSubject.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "category-x" });
           const rootElement1 = insertPhysicalElement({
-            builder,
+            imodel,
             userLabel: `matching element 1`,
             classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
             modelId: model.id,
             categoryId: category.id,
           });
           const rootElement2 = insertPhysicalElement({
-            builder,
+            imodel,
             userLabel: `element 2`,
             modelId: model.id,
             categoryId: category.id,
           });
           const rootElement3 = insertPhysicalElement({
-            builder,
+            imodel,
             userLabel: `matching element 3`,
             classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
             modelId: model.id,
@@ -951,21 +953,21 @@ describe("Models tree", () => {
       }),
       TreeSearchTestCaseDefinition.create({
         name: "sub-modeled Element nodes",
-        setupIModel: async (builder, testSchema) => {
+        setupIModel: async (imodel, testSchema) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-          const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
-          const category = insertSpatialCategory({ builder, codeValue: "category" });
+          const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model`, partitionParentId: rootSubject.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "category" });
           const rootElement = insertPhysicalElement({
-            builder,
+            imodel,
             classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
             userLabel: `root element`,
             modelId: model.id,
             categoryId: category.id,
           });
-          const subModel = insertPhysicalSubModel({ builder, modeledElementId: rootElement.id });
-          const subModeledElement1 = insertPhysicalElement({ builder, userLabel: `matching element 1`, modelId: subModel.id, categoryId: category.id });
-          const subModeledElement2 = insertPhysicalElement({ builder, userLabel: `element 2`, modelId: subModel.id, categoryId: category.id });
-          const subModeledElement3 = insertPhysicalElement({ builder, userLabel: `matching element 3`, modelId: subModel.id, categoryId: category.id });
+          const subModel = insertPhysicalSubModel({ imodel, modeledElementId: rootElement.id });
+          const subModeledElement1 = insertPhysicalElement({ imodel, userLabel: `matching element 1`, modelId: subModel.id, categoryId: category.id });
+          const subModeledElement2 = insertPhysicalElement({ imodel, userLabel: `element 2`, modelId: subModel.id, categoryId: category.id });
+          const subModeledElement3 = insertPhysicalElement({ imodel, userLabel: `matching element 3`, modelId: subModel.id, categoryId: category.id });
           return { rootSubject, model, category, rootElement, subModel, subModeledElement1, subModeledElement2, subModeledElement3 };
         },
         getTargetInstancePaths: (x) => [
@@ -1061,27 +1063,27 @@ describe("Models tree", () => {
       }),
       TreeSearchTestCaseDefinition.create({
         name: "categories under sub-modeled Elements",
-        setupIModel: async (builder, testSchema) => {
+        setupIModel: async (imodel, testSchema) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-          const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
-          const category = insertSpatialCategory({ builder, codeValue: "category" });
+          const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model`, partitionParentId: rootSubject.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "category" });
           const rootElement = insertPhysicalElement({
-            builder,
+            imodel,
             classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
             userLabel: `root element`,
             modelId: model.id,
             categoryId: category.id,
           });
-          const subModelElementCategory = insertSpatialCategory({ builder, codeValue: "sub-model category", userLabel: "sub-model category" });
-          const otherCategory = insertSpatialCategory({ builder, codeValue: "other category", userLabel: "other category" });
-          const subModel = insertPhysicalSubModel({ builder, modeledElementId: rootElement.id });
+          const subModelElementCategory = insertSpatialCategory({ imodel, codeValue: "sub-model category", userLabel: "sub-model category" });
+          const otherCategory = insertSpatialCategory({ imodel, codeValue: "other category", userLabel: "other category" });
+          const subModel = insertPhysicalSubModel({ imodel, modeledElementId: rootElement.id });
           const subModeledElement1 = insertPhysicalElement({
-            builder,
+            imodel,
             userLabel: `matching element 1`,
             modelId: subModel.id,
             categoryId: subModelElementCategory.id,
           });
-          const subModeledElement2 = insertPhysicalElement({ builder, userLabel: `element 2`, modelId: subModel.id, categoryId: otherCategory.id });
+          const subModeledElement2 = insertPhysicalElement({ imodel, userLabel: `element 2`, modelId: subModel.id, categoryId: otherCategory.id });
           return { rootSubject, model, category, rootElement, subModel, subModeledElement1, subModeledElement2, subModelElementCategory };
         },
         getTargetInstancePaths: (x) => [
@@ -1167,24 +1169,24 @@ describe("Models tree", () => {
       }),
       TreeSearchTestCaseDefinition.create({
         name: "Element node through hidden ancestors",
-        setupIModel: async (builder) => {
+        setupIModel: async (imodel) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
           const hiddenChildSubject = insertSubject({
-            builder,
+            imodel,
             codeValue: `hidden-subject`,
             parentId: rootSubject.id,
             jsonProperties: { Subject: { Job: { Bridge: "Test" } } },
           });
           const partition = insertPhysicalPartition({
-            builder,
+            imodel,
             codeValue: `hidden-model`,
             parentId: hiddenChildSubject.id,
             jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
           });
-          const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
-          const category = insertSpatialCategory({ builder, codeValue: "category" });
-          const element1 = insertPhysicalElement({ builder, userLabel: `matching element 1`, modelId: model.id, categoryId: category.id });
-          const element2 = insertPhysicalElement({ builder, userLabel: `element 2`, modelId: model.id, categoryId: category.id });
+          const model = insertPhysicalSubModel({ imodel, modeledElementId: partition.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "category" });
+          const element1 = insertPhysicalElement({ imodel, userLabel: `matching element 1`, modelId: model.id, categoryId: category.id });
+          const element2 = insertPhysicalElement({ imodel, userLabel: `element 2`, modelId: model.id, categoryId: category.id });
           return { rootSubject, model, category, element1, element2 };
         },
         getTargetInstancePaths: (x) => [
@@ -1222,21 +1224,21 @@ describe("Models tree", () => {
       runTestCases(
         TreeSearchTestCaseDefinition.create({
           name: "grouped root element",
-          setupIModel: async (builder) => {
+          setupIModel: async (imodel) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-            const model1 = insertPhysicalModelWithPartition({ builder, codeValue: `model-1`, partitionParentId: rootSubject.id });
-            const model2 = insertPhysicalModelWithPartition({ builder, codeValue: `model-2`, partitionParentId: rootSubject.id });
-            const category = insertSpatialCategory({ builder, codeValue: "category-x" });
-            insertPhysicalElement({ builder, userLabel: `element 1-1`, modelId: model1.id, categoryId: category.id });
+            const model1 = insertPhysicalModelWithPartition({ imodel, codeValue: `model-1`, partitionParentId: rootSubject.id });
+            const model2 = insertPhysicalModelWithPartition({ imodel, codeValue: `model-2`, partitionParentId: rootSubject.id });
+            const category = insertSpatialCategory({ imodel, codeValue: "category-x" });
+            insertPhysicalElement({ imodel, userLabel: `element 1-1`, modelId: model1.id, categoryId: category.id });
             insertPhysicalElement({
-              builder,
+              imodel,
               userLabel: `element 1-2`,
               modelId: model1.id,
               categoryId: category.id,
             });
-            const physicalElement21 = insertPhysicalElement({ builder, userLabel: `element 2-1`, modelId: model2.id, categoryId: category.id });
+            const physicalElement21 = insertPhysicalElement({ imodel, userLabel: `element 2-1`, modelId: model2.id, categoryId: category.id });
             const physicalElement22 = insertPhysicalElement({
-              builder,
+              imodel,
               userLabel: `element 2-2`,
               modelId: model2.id,
               categoryId: category.id,
@@ -1300,27 +1302,27 @@ describe("Models tree", () => {
         }),
         TreeSearchTestCaseDefinition.create({
           name: "grouped child element",
-          setupIModel: async (builder, testSchema) => {
+          setupIModel: async (imodel, testSchema) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-            const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
-            const category = insertSpatialCategory({ builder, codeValue: "category-x" });
-            const rootElement = insertPhysicalElement({ builder, userLabel: `root element`, modelId: model.id, categoryId: category.id });
+            const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model-x`, partitionParentId: rootSubject.id });
+            const category = insertSpatialCategory({ imodel, codeValue: "category-x" });
+            const rootElement = insertPhysicalElement({ imodel, userLabel: `root element`, modelId: model.id, categoryId: category.id });
             insertPhysicalElement({
-              builder,
+              imodel,
               userLabel: `element 1`,
               modelId: model.id,
               categoryId: category.id,
               parentId: rootElement.id,
             });
             insertPhysicalElement({
-              builder,
+              imodel,
               userLabel: `element 2`,
               modelId: model.id,
               categoryId: category.id,
               parentId: rootElement.id,
             });
             const testElement1 = insertPhysicalElement({
-              builder,
+              imodel,
               classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
               userLabel: `test element 1`,
               modelId: model.id,
@@ -1328,7 +1330,7 @@ describe("Models tree", () => {
               parentId: rootElement.id,
             });
             const testElement2 = insertPhysicalElement({
-              builder,
+              imodel,
               classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
               userLabel: `test element 2`,
               modelId: model.id,
@@ -1426,27 +1428,27 @@ describe("Models tree", () => {
         }),
         TreeSearchTestCaseDefinition.create({
           name: "grouped child elements of different classes",
-          setupIModel: async (builder, testSchema) => {
+          setupIModel: async (imodel, testSchema) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-            const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
-            const category = insertSpatialCategory({ builder, codeValue: "category-x" });
-            const rootElement = insertPhysicalElement({ builder, userLabel: `root element`, modelId: model.id, categoryId: category.id });
+            const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model-x`, partitionParentId: rootSubject.id });
+            const category = insertSpatialCategory({ imodel, codeValue: "category-x" });
+            const rootElement = insertPhysicalElement({ imodel, userLabel: `root element`, modelId: model.id, categoryId: category.id });
             const physicalElement1 = insertPhysicalElement({
-              builder,
+              imodel,
               userLabel: `element 1`,
               modelId: model.id,
               categoryId: category.id,
               parentId: rootElement.id,
             });
             const physicalElement2 = insertPhysicalElement({
-              builder,
+              imodel,
               userLabel: `element 2`,
               modelId: model.id,
               categoryId: category.id,
               parentId: rootElement.id,
             });
             const testElement1 = insertPhysicalElement({
-              builder,
+              imodel,
               classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
               userLabel: `test element 1`,
               modelId: model.id,
@@ -1454,7 +1456,7 @@ describe("Models tree", () => {
               parentId: rootElement.id,
             });
             const testElement2 = insertPhysicalElement({
-              builder,
+              imodel,
               classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
               userLabel: `test element 2`,
               modelId: model.id,
@@ -1583,20 +1585,20 @@ describe("Models tree", () => {
         }),
         TreeSearchTestCaseDefinition.create({
           name: "hierarchy of grouped elements",
-          setupIModel: async (builder) => {
+          setupIModel: async (imodel) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-            const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
-            const category = insertSpatialCategory({ builder, codeValue: "category-x" });
-            const parentElement = insertPhysicalElement({ builder, userLabel: `parent element`, modelId: model.id, categoryId: category.id });
+            const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model-x`, partitionParentId: rootSubject.id });
+            const category = insertSpatialCategory({ imodel, codeValue: "category-x" });
+            const parentElement = insertPhysicalElement({ imodel, userLabel: `parent element`, modelId: model.id, categoryId: category.id });
             const middleElement = insertPhysicalElement({
-              builder,
+              imodel,
               userLabel: `middle element`,
               modelId: model.id,
               categoryId: category.id,
               parentId: parentElement.id,
             });
             const childElement = insertPhysicalElement({
-              builder,
+              imodel,
               userLabel: `element 1`,
               modelId: model.id,
               categoryId: category.id,
@@ -1733,13 +1735,13 @@ describe("Models tree", () => {
         }),
         TreeSearchTestCaseDefinition.create({
           name: "grouped elements under different categories",
-          setupIModel: async (builder) => {
+          setupIModel: async (imodel) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-            const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
-            const category1 = insertSpatialCategory({ builder, codeValue: "category-1" });
-            const category2 = insertSpatialCategory({ builder, codeValue: "category-2" });
-            const element1 = insertPhysicalElement({ builder, modelId: model.id, categoryId: category1.id });
-            const element2 = insertPhysicalElement({ builder, modelId: model.id, categoryId: category2.id });
+            const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model-x`, partitionParentId: rootSubject.id });
+            const category1 = insertSpatialCategory({ imodel, codeValue: "category-1" });
+            const category2 = insertSpatialCategory({ imodel, codeValue: "category-2" });
+            const element1 = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category1.id });
+            const element2 = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category2.id });
             const groupingNode1 = createClassGroupingHierarchyNode({
               className: element1.className,
               modelId: model.id,
@@ -1845,7 +1847,7 @@ describe("Models tree", () => {
   function runTestCases(...testCases: TreeSearchTestCaseDefinition<any>[]) {
     testCases.forEach((testCase: TreeSearchTestCaseDefinition<any>) => {
       (testCase.only ? describe.only : describe)(testCase.name, () => {
-        let imodel: IModelConnection;
+        let imodelConnection: IModelConnection;
         let instanceKeyPaths!: HierarchySearchTree[];
         let targetItems!: Array<InstanceKey | ElementsGroupInfo>;
         let targetInstanceLabel: string | undefined;
@@ -1854,7 +1856,7 @@ describe("Models tree", () => {
 
         beforeAll(async () => {
           const imodelSetupResult = await buildIModel(async (...args) => testCase.setupIModel(...args));
-          imodel = imodelSetupResult.imodel;
+          imodelConnection = imodelSetupResult.imodelConnection;
           instanceKeyPaths = testCase.getTargetInstancePaths(imodelSetupResult);
           targetItems = testCase.getTargetItems(imodelSetupResult);
           targetInstanceLabel = testCase.getTargetInstanceLabel?.(imodelSetupResult);
@@ -1863,16 +1865,16 @@ describe("Models tree", () => {
         });
 
         afterAll(async () => {
-          await imodel.close();
+          await imodelConnection.close();
         });
 
         it("finds instance key paths by target instance key", async () => {
           using hook = renderUseModelsTreeHook({
-            imodel,
+            imodelConnection,
             hierarchyConfig,
             getSearchPaths: async ({ createInstanceKeyPaths }) => createInstanceKeyPaths({ targetItems }),
           });
-          const imodelAccess = createIModelAccess(imodel);
+          const imodelAccess = createIModelAccess(imodelConnection);
           const searchPaths = await act(async () => {
             return hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal });
           });
@@ -1885,11 +1887,11 @@ describe("Models tree", () => {
           }
 
           using hook = renderUseModelsTreeHook({
-            imodel,
+            imodelConnection,
             hierarchyConfig,
             searchText: targetInstanceLabel,
           });
-          const imodelAccess = createIModelAccess(imodel);
+          const imodelAccess = createIModelAccess(imodelConnection);
           const searchPaths = await act(async () =>
             hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }),
           );
@@ -1898,11 +1900,11 @@ describe("Models tree", () => {
 
         it("searches hierarchy by instance key paths", async () => {
           using hook = renderUseModelsTreeHook({
-            imodel,
+            imodelConnection,
             hierarchyConfig,
             getSearchPaths: async () => instanceKeyPaths,
           });
-          const imodelAccess = createIModelAccess(imodel);
+          const imodelAccess = createIModelAccess(imodelConnection);
           const searchPaths = await act(async () =>
             hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }),
           );
@@ -1920,11 +1922,11 @@ describe("Models tree", () => {
     });
 
     it("finds elements by base36 ECInstanceId suffix", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
+      await using buildIModelResult = await buildIModel(async (imodel) => {
         const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-        const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
-        const category = insertSpatialCategory({ builder, codeValue: "category" });
-        const element = insertPhysicalElement({ builder, userLabel: `element 21`, modelId: model.id, categoryId: category.id });
+        const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model`, partitionParentId: rootSubject.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "category" });
+        const element = insertPhysicalElement({ imodel, userLabel: `element 21`, modelId: model.id, categoryId: category.id });
         const elementBriefcaseId = Id64.getBriefcaseId(element.id).toString(36).toLocaleUpperCase();
         const elementLocalId = Id64.getLocalId(element.id).toString(36).toLocaleUpperCase();
         return {
@@ -1949,11 +1951,11 @@ describe("Models tree", () => {
           ],
         };
       });
-      const { imodel, expectedPaths, formattedECInstanceId } = buildIModelResult;
+      const { imodelConnection, expectedPaths, formattedECInstanceId } = buildIModelResult;
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
-      const imodelAccess = createIModelAccess(imodel);
+      const imodelAccess = createIModelAccess(imodelConnection);
       using hook = renderUseModelsTreeHook({
-        imodel,
+        imodelConnection,
         hierarchyConfig,
         searchText: formattedECInstanceId,
       });
@@ -1962,18 +1964,18 @@ describe("Models tree", () => {
     });
 
     it("search by label aborts when abort signal fires", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
+      await using buildIModelResult = await buildIModel(async (imodel) => {
         const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-        const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
-        const category = insertSpatialCategory({ builder, codeValue: "category", userLabel: "Test" });
-        insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
+        const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model`, partitionParentId: rootSubject.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "category", userLabel: "Test" });
+        insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id });
         return { model, category };
       });
-      const { imodel, ...ids } = buildIModelResult;
-      const imodelAccess = createIModelAccess(imodel);
+      const { imodelConnection, ...ids } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodelConnection);
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
       using hook = renderUseModelsTreeHook({
-        imodel,
+        imodelConnection,
         hierarchyConfig,
         searchText: "Test",
       });
@@ -1997,18 +1999,18 @@ describe("Models tree", () => {
     });
 
     it("search by target items aborts when abort signal fires", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
+      await using buildIModelResult = await buildIModel(async (imodel) => {
         const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-        const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
-        const category = insertSpatialCategory({ builder, codeValue: "category", userLabel: "Test" });
-        insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
+        const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model`, partitionParentId: rootSubject.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "category", userLabel: "Test" });
+        insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id });
         return { model, category };
       });
-      const { imodel, ...ids } = buildIModelResult;
-      const imodelAccess = createIModelAccess(imodel);
+      const { imodelConnection, ...ids } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodelConnection);
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
       using hook = renderUseModelsTreeHook({
-        imodel,
+        imodelConnection,
         hierarchyConfig,
         getSearchPaths: async ({ createInstanceKeyPaths }) =>
           createInstanceKeyPaths({
@@ -2035,13 +2037,13 @@ describe("Models tree", () => {
     });
 
     it("finds elements by label containing special SQLite characters", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
+      await using buildIModelResult = await buildIModel(async (imodel) => {
         const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-        const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
-        const category = insertSpatialCategory({ builder, codeValue: "category" });
-        const element1 = insertPhysicalElement({ builder, userLabel: `elem_ent 1`, modelId: model.id, categoryId: category.id });
-        const element2 = insertPhysicalElement({ builder, userLabel: `elem%ent 2`, modelId: model.id, categoryId: category.id });
-        const element3 = insertPhysicalElement({ builder, userLabel: `elem\\ent 3`, modelId: model.id, categoryId: category.id });
+        const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model`, partitionParentId: rootSubject.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "category" });
+        const element1 = insertPhysicalElement({ imodel, userLabel: `elem_ent 1`, modelId: model.id, categoryId: category.id });
+        const element2 = insertPhysicalElement({ imodel, userLabel: `elem%ent 2`, modelId: model.id, categoryId: category.id });
+        const element3 = insertPhysicalElement({ imodel, userLabel: `elem\\ent 3`, modelId: model.id, categoryId: category.id });
         return {
           keys: {
             rootSubject,
@@ -2053,10 +2055,10 @@ describe("Models tree", () => {
           },
         };
       });
-      const { imodel, keys } = buildIModelResult;
+      const { imodelConnection, keys } = buildIModelResult;
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
-      const imodelAccess = createIModelAccess(imodel);
-      const defaultProps = { hierarchyConfig, imodel };
+      const imodelAccess = createIModelAccess(imodelConnection);
+      const defaultProps = { hierarchyConfig, imodelConnection };
 
       using hook = renderUseModelsTreeHook({ ...defaultProps, searchText: "_" });
       expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
@@ -2121,17 +2123,17 @@ describe("Models tree", () => {
   }
 });
 
-function insertModelWithElements(builder: TestIModelBuilder, modelNo: number, elementsCategoryId: Id64String, parentId?: Id64String) {
-  const modelKey = insertPhysicalModelWithPartition({ builder, codeValue: `model-${modelNo}`, partitionParentId: parentId });
-  insertPhysicalElement({ builder, userLabel: `element-${modelNo}`, modelId: modelKey.id, categoryId: elementsCategoryId });
+function insertModelWithElements(imodel: IModelDb, modelNo: number, elementsCategoryId: Id64String, parentId?: Id64String) {
+  const modelKey = insertPhysicalModelWithPartition({ imodel, codeValue: `model-${modelNo}`, partitionParentId: parentId });
+  insertPhysicalElement({ imodel, userLabel: `element-${modelNo}`, modelId: modelKey.id, categoryId: elementsCategoryId });
   return modelKey;
 }
 
 const adjustedModelKey = (source: InstanceKey) => ({ className: CLASS_NAME_GeometricModel3d, id: source.id });
 const adjustedElementKey = (source: InstanceKey) => ({ className: CLASS_NAME_GeometricElement3d, id: source.id });
 
-function renderUseModelsTreeHook(props: Omit<Props<typeof useModelsTree>, "activeView"> & { imodel: IModelConnection }) {
-  const result = renderHook((hookProps) => useModelsTree({ activeView: createFakeViewport({ iModel: props.imodel }), ...hookProps }), {
+function renderUseModelsTreeHook(props: Omit<Props<typeof useModelsTree>, "activeView"> & { imodelConnection: IModelConnection }) {
+  const result = renderHook((hookProps) => useModelsTree({ activeView: createFakeViewport({ iModel: props.imodelConnection }), ...hookProps }), {
     initialProps: props,
     wrapper: ({ children }) => <SharedTreeContextProvider>{children}</SharedTreeContextProvider>,
   });

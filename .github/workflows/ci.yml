@@ -114,8 +114,5 @@ jobs:
 
       - run: pnpm install
 
-      - run: pnpm exec lage docs --grouped
-        name: Build docs
-
-      - run: pnpm exec lage check-extractions --grouped
-        name: Validate snippets in markdowns
+      - name: Check code snippets
+        run: pnpm check-extractions

@@ -65,7 +65,7 @@ export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildC
   const actionButtonWidth =
     props.actionButtonWidth !== undefined ? /* c8 ignore next */ props.actionButtonWidth : props.actionButtonRenderers !== undefined ? undefined : 0;
 
-  const filterMatchesCount = (propertyData as FilteredPropertyData | undefined)?.matchesCount;
+  const filterMatchesCount = (propertyData as FilteredPropertyData)?.matchesCount;
   if (!isFiltering && filterMatchesCount === 0) {
     return (
       <Flex justifyContent="center" alignItems="center" flexDirection="column" style={{ width: "100%", height: "100%" }}>

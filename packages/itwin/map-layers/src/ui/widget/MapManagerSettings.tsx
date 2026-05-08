@@ -12,7 +12,7 @@ import { QuantityNumberInput } from "@itwin/imodel-components-react";
 import { Input, Select, Slider, Tab, Tabs, ToggleSwitch } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { CustomParamsSettingsPanel } from "./CustomParamsSettings";
-import { useSourceMapContext } from "./MapLayerManager";
+import { useSourceMapContext } from "../contexts/SourceMapContext";
 
 import type { ViewState3d } from "@itwin/core-frontend";
 import type { BackgroundMapProps, BackgroundMapSettings, TerrainProps } from "@itwin/core-common";

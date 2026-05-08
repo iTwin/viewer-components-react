@@ -18,7 +18,8 @@ import { PropertyGridComponent } from "@itwin/property-grid-react";
 // __PUBLISH_EXTRACT_END__
 import { cleanup, queryByText, render, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils.js";
+import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
+import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
 import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils.js";
 
@@ -36,14 +37,14 @@ describe("Property grid", () => {
       });
 
       it("renders context menu item", async () => {
-        const imodel = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        const { imodelConnection, ...keys } = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const category = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           return { category };
         });
         const user = userEvent.setup();
-        vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel.imodel);
+        vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
 
         // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleContextMenuItem
         function ExampleContextMenuItem(props: ContextMenuItemProps) {
@@ -68,7 +69,7 @@ describe("Property grid", () => {
         }
         // __PUBLISH_EXTRACT_END__
 
-        Presentation.selection.addToSelection("", imodel.imodel, [imodel.category]);
+        Presentation.selection.addToSelection("", imodelConnection, [keys.category]);
 
         using _ = { [Symbol.dispose]: cleanup };
         const { baseElement, getAllByText } = render(<MyPropertyGrid />);

@@ -3,22 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
-import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
-import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import {
-  CategoriesTreeDefinition,
-  defaultHierarchyConfiguration,
-} from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
-import { CategoriesTreeIdsCache } from "../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
-import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
-import { getClassesByView } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
-import {
-  buildIModel,
+  HierarchyCacheMode,
+  initializeCore,
   insertDefinitionContainer,
   insertDrawingCategory,
   insertDrawingGraphic,
@@ -28,7 +15,22 @@ import {
   insertSpatialCategory,
   insertSubCategory,
   insertSubModel,
-} from "../../IModelUtils.js";
+  terminateCore,
+} from "test-utilities";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
+import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
+import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
+import { PresentationRpcInterface } from "@itwin/presentation-common";
+import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
+import {
+  CategoriesTreeDefinition,
+  defaultHierarchyConfiguration,
+} from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
+import { CategoriesTreeIdsCache } from "../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
+import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
+import { getClassesByView } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
+import { buildIModel } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 import { CLASS_NAME_DefinitionModel } from "../TreeUtils.js";
@@ -40,7 +42,7 @@ import type { CategoriesTreeHierarchyConfiguration } from "../../../tree-widget-
 describe("Categories tree", () => {
   describe("Hierarchy definition", () => {
     beforeAll(async () => {
-      await initializePresentationTesting({
+      await initializeCore({
         backendProps: {
           caching: {
             hierarchies: {
@@ -56,24 +58,24 @@ describe("Categories tree", () => {
     });
 
     afterAll(async () => {
-      await terminatePresentationTesting();
+      await terminateCore();
     });
 
     it("does not show private 3d categories", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
 
-        const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
-        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory" });
+        insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
 
-        const privateCategory = insertSpatialCategory({ builder, codeValue: "Private Test SpatialCategory", isPrivate: true });
-        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: privateCategory.id });
+        const privateCategory = insertSpatialCategory({ imodel, codeValue: "Private Test SpatialCategory", isPrivate: true });
+        insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: privateCategory.id });
 
         return { category, privateCategory };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createCategoryTreeProvider(imodel, "3d");
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodelConnection, "3d");
 
       await validateHierarchy({
         provider,
@@ -88,20 +90,20 @@ describe("Categories tree", () => {
     });
 
     it("does not show definition container when it doesn't contain category", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainer" });
+        insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
 
-        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+        const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
 
-        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
 
         return { category };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createCategoryTreeProvider(imodel, "3d");
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodelConnection, "3d");
 
       await validateHierarchy({
         provider,
@@ -116,16 +118,16 @@ describe("Categories tree", () => {
     });
 
     it("does not show definition container when it contains definition container without categories", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
-        const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModel.id });
-        insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+        const definitionContainerChild = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild", modelId: definitionModel.id });
+        insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
       });
 
-      const { imodel } = buildIModelResult;
-      using provider = createCategoryTreeProvider(imodel, "3d");
+      const { imodelConnection } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodelConnection, "3d");
 
       await validateHierarchy({
         provider,
@@ -134,18 +136,18 @@ describe("Categories tree", () => {
     });
 
     it("does not show definition container or category when category is private", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
 
-        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id, isPrivate: true });
+        const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModel.id, isPrivate: true });
 
-        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
       });
 
-      const { imodel } = buildIModelResult;
-      using provider = createCategoryTreeProvider(imodel, "3d");
+      const { imodelConnection } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodelConnection, "3d");
 
       await validateHierarchy({
         provider,
@@ -154,20 +156,20 @@ describe("Categories tree", () => {
     });
 
     it("does not show definition container or category when category does not have elements", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
 
-        insertSpatialCategory({ builder, codeValue: "SpatialCategory1", modelId: definitionModel.id });
-        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+        insertSpatialCategory({ imodel, codeValue: "SpatialCategory1", modelId: definitionModel.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
 
-        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
         return { category };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createCategoryTreeProvider(imodel, "3d");
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodelConnection, "3d");
 
       await validateHierarchy({
         provider,
@@ -182,20 +184,20 @@ describe("Categories tree", () => {
     });
 
     it("shows definition container and category when category does not have elements and showEmptyCategories is true", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ imodel, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
 
-        const emptyCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory1", modelId: definitionModel.id });
-        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+        const emptyCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory1", modelId: definitionModel.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
 
-        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
         return { category, emptyCategory, definitionContainer };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createCategoryTreeProvider(imodel, "3d", { showEmptyCategories: true });
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodelConnection, "3d", { showEmptyCategories: true });
 
       await validateHierarchy({
         provider,
@@ -220,18 +222,18 @@ describe("Categories tree", () => {
     });
 
     it("does not show definition container or category when definition container is private", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer", isPrivate: true });
-        const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainer", isPrivate: true });
+        const definitionModel = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
 
-        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModel.id });
 
-        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
       });
 
-      const { imodel } = buildIModelResult;
-      using provider = createCategoryTreeProvider(imodel, "3d");
+      const { imodelConnection } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodelConnection, "3d");
 
       await validateHierarchy({
         provider,
@@ -240,25 +242,25 @@ describe("Categories tree", () => {
     });
 
     it("does not show definition containers or categories when definition container contains another definition container that is private", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
         const definitionContainerChild = insertDefinitionContainer({
-          builder,
+          imodel,
           codeValue: "DefinitionContainerChild",
           isPrivate: true,
           modelId: definitionModel.id,
         });
-        const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+        const definitionModelChild = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
 
-        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
 
-        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
       });
 
-      const { imodel } = buildIModelResult;
-      using provider = createCategoryTreeProvider(imodel, "3d");
+      const { imodelConnection } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodelConnection, "3d");
 
       await validateHierarchy({
         provider,
@@ -267,20 +269,20 @@ describe("Categories tree", () => {
     });
 
     it("shows definition container when it contains category", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
 
-        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModel.id });
 
-        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
 
         return { definitionContainer, category };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createCategoryTreeProvider(imodel, "3d");
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodelConnection, "3d");
 
       await validateHierarchy({
         provider,
@@ -301,20 +303,20 @@ describe("Categories tree", () => {
     });
 
     it("shows element when showElements is set to true", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
 
-        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModel.id });
 
-        const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
 
         return { definitionContainer, category, element };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createCategoryTreeProvider(imodel, "3d", { showElements: true });
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodelConnection, "3d", { showElements: true });
 
       await validateHierarchy({
         provider,
@@ -345,21 +347,21 @@ describe("Categories tree", () => {
     });
 
     it("shows element and subCategories when showElements is set to true", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
 
-        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModel.id });
 
-        const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-        const subCategory = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "Test SpatialSubCategory", modelId: definitionModel.id });
+        const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+        const subCategory = insertSubCategory({ imodel, parentCategoryId: category.id, codeValue: "Test SpatialSubCategory", modelId: definitionModel.id });
 
         return { definitionContainer, category, element, subCategory };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createCategoryTreeProvider(imodel, "3d", { showElements: true });
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodelConnection, "3d", { showElements: true });
 
       await validateHierarchy({
         provider,
@@ -398,21 +400,21 @@ describe("Categories tree", () => {
     });
 
     it("shows element and hides subCategories when showElements and hideSubCategories are set to true", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
 
-        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModel.id });
 
-        const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-        const subCategory = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "Test SpatialSubCategory", modelId: definitionModel.id });
+        const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+        const subCategory = insertSubCategory({ imodel, parentCategoryId: category.id, codeValue: "Test SpatialSubCategory", modelId: definitionModel.id });
 
         return { definitionContainer, category, element, subCategory };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createCategoryTreeProvider(imodel, "3d", { showElements: true, hideSubCategories: true });
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodelConnection, "3d", { showElements: true, hideSubCategories: true });
 
       await validateHierarchy({
         provider,
@@ -443,22 +445,22 @@ describe("Categories tree", () => {
     });
 
     it("shows all definition containers when they contain category directly or indirectly", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
-        const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModel.id });
-        const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+        const definitionContainerChild = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild", modelId: definitionModel.id });
+        const definitionModelChild = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
 
-        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
 
-        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
 
         return { definitionContainer, definitionContainerChild, category };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createCategoryTreeProvider(imodel, "3d");
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodelConnection, "3d");
 
       await validateHierarchy({
         provider,
@@ -485,22 +487,22 @@ describe("Categories tree", () => {
     });
 
     it("shows root categories and definition container", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
 
-        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-        const childCategory = insertSpatialCategory({ builder, codeValue: "ScChild", modelId: definitionModel.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+        const childCategory = insertSpatialCategory({ imodel, codeValue: "ScChild", modelId: definitionModel.id });
 
-        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: childCategory.id });
+        insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+        insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: childCategory.id });
 
         return { category, definitionContainer, childCategory };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createCategoryTreeProvider(imodel, "3d");
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodelConnection, "3d");
 
       await validateHierarchy({
         provider,
@@ -526,20 +528,20 @@ describe("Categories tree", () => {
     });
 
     it("does not show private 3d subCategories", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
 
-        const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
-        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory" });
+        insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
 
-        const subCategory = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "Test SpatialSubCategory" });
-        const privateSubCategory = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "Private Test SpatialSubCategory", isPrivate: true });
+        const subCategory = insertSubCategory({ imodel, parentCategoryId: category.id, codeValue: "Test SpatialSubCategory" });
+        const privateSubCategory = insertSubCategory({ imodel, parentCategoryId: category.id, codeValue: "Private Test SpatialSubCategory", isPrivate: true });
 
         return { category, subCategory, privateSubCategory };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createCategoryTreeProvider(imodel, "3d");
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodelConnection, "3d");
 
       await validateHierarchy({
         provider,
@@ -563,20 +565,20 @@ describe("Categories tree", () => {
     });
 
     it("does not show private 2d categories", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "TestDrawingModel" });
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        const drawingModel = insertDrawingModelWithPartition({ imodel, codeValue: "TestDrawingModel" });
 
-        const category = insertDrawingCategory({ builder, codeValue: "Test Drawing Category" });
-        insertDrawingGraphic({ builder, modelId: drawingModel.id, categoryId: category.id });
+        const category = insertDrawingCategory({ imodel, codeValue: "Test Drawing Category" });
+        insertDrawingGraphic({ imodel, modelId: drawingModel.id, categoryId: category.id });
 
-        const privateCategory = insertDrawingCategory({ builder, codeValue: "Private Test DrawingCategory", isPrivate: true });
-        insertDrawingGraphic({ builder, modelId: drawingModel.id, categoryId: privateCategory.id });
+        const privateCategory = insertDrawingCategory({ imodel, codeValue: "Private Test DrawingCategory", isPrivate: true });
+        insertDrawingGraphic({ imodel, modelId: drawingModel.id, categoryId: privateCategory.id });
 
         return { category, privateCategory };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createCategoryTreeProvider(imodel, "2d");
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodelConnection, "2d");
 
       await validateHierarchy({
         provider,
@@ -591,20 +593,20 @@ describe("Categories tree", () => {
     });
 
     it("does not show private 2d subCategories", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "TestDrawingModel" });
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        const drawingModel = insertDrawingModelWithPartition({ imodel, codeValue: "TestDrawingModel" });
 
-        const category = insertDrawingCategory({ builder, codeValue: "Test Drawing Category" });
-        insertDrawingGraphic({ builder, modelId: drawingModel.id, categoryId: category.id });
+        const category = insertDrawingCategory({ imodel, codeValue: "Test Drawing Category" });
+        insertDrawingGraphic({ imodel, modelId: drawingModel.id, categoryId: category.id });
 
-        const subCategory = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "Test DrawingSubCategory" });
-        const privateSubCategory = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "Private Test DrawingSubCategory", isPrivate: true });
+        const subCategory = insertSubCategory({ imodel, parentCategoryId: category.id, codeValue: "Test DrawingSubCategory" });
+        const privateSubCategory = insertSubCategory({ imodel, parentCategoryId: category.id, codeValue: "Private Test DrawingSubCategory", isPrivate: true });
 
         return { category, subCategory, privateSubCategory };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
-      using provider = createCategoryTreeProvider(imodel, "2d");
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodelConnection, "2d");
 
       await validateHierarchy({
         provider,
@@ -630,19 +632,19 @@ describe("Categories tree", () => {
     describe("createInstanceKeyPaths", () => {
       describe("query interrupts handling", () => {
         const viewType = "3d";
-        let imodel: IModelConnection;
+        let imodelConnection: IModelConnection;
         let dispose: () => Promise<void>;
 
         beforeAll(async () => {
-          const buildIModelResult = await buildIModel(async (builder) => {
-            const model = insertPhysicalModelWithPartition({ builder, codeValue: "xModel" });
-            const category1 = insertSpatialCategory({ builder, codeValue: "xCategory1", modelId: IModel.dictionaryId });
-            const subCategory1 = insertSubCategory({ builder, parentCategoryId: category1.id, codeValue: "xSubCategory", modelId: IModel.dictionaryId });
-            const category2 = insertSpatialCategory({ builder, codeValue: "xCategory2", modelId: IModel.dictionaryId });
-            const elementInCategory2 = insertPhysicalElement({ builder, modelId: model.id, categoryId: category2.id, userLabel: "xElement" });
+          const buildIModelResult = await buildIModel(async (imodel) => {
+            const model = insertPhysicalModelWithPartition({ imodel, codeValue: "xModel" });
+            const category1 = insertSpatialCategory({ imodel, codeValue: "xCategory1", modelId: IModel.dictionaryId });
+            const subCategory1 = insertSubCategory({ imodel, parentCategoryId: category1.id, codeValue: "xSubCategory", modelId: IModel.dictionaryId });
+            const category2 = insertSpatialCategory({ imodel, codeValue: "xCategory2", modelId: IModel.dictionaryId });
+            const elementInCategory2 = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category2.id, userLabel: "xElement" });
             return { model, category1, subCategory1, category2, elementInCategory2 };
           });
-          imodel = buildIModelResult.imodel;
+          imodelConnection = buildIModelResult.imodelConnection;
           dispose = async () => buildIModelResult[Symbol.asyncDispose]();
         });
 
@@ -655,7 +657,7 @@ describe("Categories tree", () => {
           { queryIdentifier: "FROM CategoriesElementsHierarchy mce", description: "elements' search paths query" },
         ].forEach(({ queryIdentifier, description }) => {
           it(`doesn't throw on ecsql query interrupt in ${description}`, async () => {
-            const imodelAccess = createIModelAccess(imodel);
+            const imodelAccess = createIModelAccess(imodelConnection);
             const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
             const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
             const iter = CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -666,8 +668,8 @@ describe("Categories tree", () => {
               label: "x",
             });
             let didInterrupt = false;
-            const originalQueryReader = imodel.createQueryReader.bind(imodel);
-            vi.spyOn(imodel, "createQueryReader").mockImplementation(async function* (...args): any {
+            const originalQueryReader = imodelConnection.createQueryReader.bind(imodelConnection);
+            vi.spyOn(imodelConnection, "createQueryReader").mockImplementation(async function* (...args): any {
               const [ecsql] = args;
               if (ecsql.includes(queryIdentifier)) {
                 didInterrupt = true;
@@ -687,11 +689,11 @@ describe("Categories tree", () => {
 });
 
 function createCategoryTreeProvider(
-  imodel: IModelConnection,
+  imodelConnection: IModelConnection,
   viewType: "2d" | "3d",
   hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>,
 ): HierarchyProvider & Disposable {
-  const imodelAccess = createIModelAccess(imodel);
+  const imodelAccess = createIModelAccess(imodelConnection);
   const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
   const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
   const hierarchyProvider = createIModelHierarchyProvider({
