@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 // __PUBLISH_EXTRACT_START__ QuantityFormat.FormatSelectorExampleImports
 import { FormatSelector } from "@itwin/quantity-formatting-react";
 import type { FormatDefinition } from "@itwin/core-quantity";
@@ -38,7 +38,7 @@ describe("Quantity formatting", () => {
               composite: { units: [{ name: "Units.M", label: "m" }] },
             },
           },
-        } as FormatSet;
+        };
 
         const handleFormatSelection = (_formatDef: FormatDefinition, _key: string) => {
           // Handle format selection
@@ -47,7 +47,7 @@ describe("Quantity formatting", () => {
         render(<FormatSelector activeFormatSet={formatSet} activeFormatDefinitionKey={undefined} onListItemChange={handleFormatSelection} />);
         // __PUBLISH_EXTRACT_END__
 
-        expect(screen.getByPlaceholderText("labels.searchFormats")).toBeDefined();
+        await waitFor(() => expect(screen.getByPlaceholderText("labels.searchFormats")).toBeDefined());
       });
     });
   });

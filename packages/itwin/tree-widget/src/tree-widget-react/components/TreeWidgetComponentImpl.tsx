@@ -174,7 +174,7 @@ async function getActiveTrees(
     };
   };
 
-  return (await Promise.all(treeDefinitions.map(handleDefinition))).filter((tree) => tree !== undefined) as TreeContentDefinition[];
+  return (await Promise.all(treeDefinitions.map(handleDefinition))).filter((tree) => tree !== undefined);
 }
 
 function getWidgetWithHeaderProps(translate: TranslateFunc, trees?: TreeContentDefinition[]): TreeSelectionProps {

@@ -74,6 +74,6 @@ export function mockGetBoundingClientRect() {
       right: 0,
       top: 0,
       toJSON: () => {},
-    } as DOMRect);
+    });
   });
 }

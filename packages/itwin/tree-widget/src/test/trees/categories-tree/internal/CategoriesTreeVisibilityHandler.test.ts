@@ -3,13 +3,25 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import {
+  HierarchyCacheMode,
+  initializeCore,
+  insertDefinitionContainer,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
+  insertPhysicalPartition,
+  insertPhysicalSubModel,
+  insertSpatialCategory,
+  insertSubCategory,
+  insertSubModel,
+  terminateCore,
+} from "test-utilities";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, it } from "vitest";
 import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import {
   CategoriesTreeDefinition,
   defaultHierarchyConfiguration,
@@ -23,17 +35,7 @@ import {
   CLASS_NAME_Subject,
 } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { getClassesByView } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
-import {
-  buildIModel,
-  insertDefinitionContainer,
-  insertPhysicalElement,
-  insertPhysicalModelWithPartition,
-  insertPhysicalPartition,
-  insertPhysicalSubModel,
-  insertSpatialCategory,
-  insertSubCategory,
-  insertSubModel,
-} from "../../../IModelUtils.js";
+import { buildIModel } from "../../../IModelUtils.js";
 import { TestUtils } from "../../../TestUtils.js";
 import { createIModelAccess } from "../../Common.js";
 import { validateHierarchyVisibility } from "../../common/VisibilityValidation.js";
@@ -59,7 +61,7 @@ import type { TreeWidgetTestingViewport } from "../../TreeUtils.js";
 
 describe("CategoriesTreeVisibilityHandler", () => {
   beforeAll(async () => {
-    await initializePresentationTesting({
+    await initializeCore({
       backendProps: {
         caching: {
           hierarchies: {
@@ -76,25 +78,25 @@ describe("CategoriesTreeVisibilityHandler", () => {
   });
 
   afterAll(async () => {
-    await terminatePresentationTesting();
+    await terminateCore();
     TestUtils.terminate();
   });
 
   async function createCommonProps({
-    imodel,
+    imodelConnection,
     hierarchyConfig,
     subCategoriesOfCategories,
     visibleByDefault,
   }: {
-    imodel: IModelConnection;
+    imodelConnection: IModelConnection;
     hierarchyConfig: CategoriesTreeHierarchyConfiguration;
     subCategoriesOfCategories?: Array<{ categoryId: Id64String; subCategories: Id64Arg }>;
     visibleByDefault?: boolean;
   }) {
-    const imodelAccess = createIModelAccess(imodel);
+    const imodelAccess = createIModelAccess(imodelConnection);
     const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
     const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-    const viewport = createTreeWidgetTestingViewport({ iModel: imodel, subCategoriesOfCategories, viewType: "3d", visibleByDefault });
+    const viewport = createTreeWidgetTestingViewport({ iModel: imodelConnection, subCategoriesOfCategories, viewType: "3d", visibleByDefault });
 
     return {
       imodelAccess,
@@ -119,12 +121,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
   }
 
   async function createVisibilityTestData({
-    imodel,
+    imodelConnection,
     hierarchyConfig,
     subCategoriesOfCategories,
     visibleByDefault,
   }: {
-    imodel: IModelConnection;
+    imodelConnection: IModelConnection;
     hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
     subCategoriesOfCategories?: Array<{ categoryId: Id64String; subCategories: Id64Arg }>;
     visibleByDefault?: boolean;
@@ -133,7 +135,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       ...defaultHierarchyConfiguration,
       ...hierarchyConfig,
     };
-    const commonProps = await createCommonProps({ imodel, hierarchyConfig: hierarchyConfiguration, subCategoriesOfCategories, visibleByDefault });
+    const commonProps = await createCommonProps({ imodelConnection, hierarchyConfig: hierarchyConfiguration, subCategoriesOfCategories, visibleByDefault });
     const handler = createCategoriesTreeVisibilityHandler({
       viewport: commonProps.viewport,
       idsCache: commonProps.idsCache,
@@ -156,21 +158,21 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
   describe("enabling visibility", () => {
     it("by default everything is hidden", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
 
-        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
-        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-        const subCategory = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "subCategory", modelId: definitionModel.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModel.id });
+        insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+        const subCategory = insertSubCategory({ imodel, parentCategoryId: category.id, codeValue: "subCategory", modelId: definitionModel.id });
         return { category, subCategory, physicalModel };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
+      const { imodelConnection, ...keys } = buildIModelResult;
 
       using visibilityTestData = await createVisibilityTestData({
-        imodel,
+        imodelConnection,
         subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
       });
       const { handler, provider, viewport } = visibilityTestData;
@@ -185,20 +187,20 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
     describe("definitionContainers", () => {
       it("showing definition container makes it and all of its contained elements visible", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+          const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-          const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
-          const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+          const definitionContainerChild = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
 
-          const directCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory1", modelId: definitionModelRoot.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: directCategory.id });
-          const indirectCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelChild.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory.id });
+          const directCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory1", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: directCategory.id });
+          const indirectCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelChild.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory.id });
           const indirectSubCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: indirectCategory.id,
             codeValue: "subCategory",
             modelId: definitionModelChild.id,
@@ -206,10 +208,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
           return { definitionContainerRoot, definitionContainerChild, directCategory, indirectCategory, indirectSubCategory, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
 
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [{ categoryId: keys.indirectCategory.id, subCategories: keys.indirectSubCategory.id }],
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -224,26 +226,26 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("showing definition container makes it and all of its contained elements visible and doesn't affect non contained definition containers", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
-          const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
-          const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
-          const indirectCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+          const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+          const definitionContainerChild = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+          const indirectCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory.id });
           const indirectSubCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: indirectCategory.id,
             codeValue: "subCategory",
             modelId: definitionModelChild.id,
           });
 
-          const definitionContainerRoot2 = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot2" });
-          const definitionModelRoot2 = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot2.id });
-          const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelRoot2.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category2.id });
-          const subCategory2 = insertSubCategory({ builder, parentCategoryId: category2.id, codeValue: "subCategory2", modelId: definitionModelRoot2.id });
+          const definitionContainerRoot2 = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot2" });
+          const definitionModelRoot2 = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot2.id });
+          const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelRoot2.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category2.id });
+          const subCategory2 = insertSubCategory({ imodel, parentCategoryId: category2.id, codeValue: "subCategory2", modelId: definitionModelRoot2.id });
 
           return {
             definitionContainerRoot,
@@ -257,10 +259,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
           };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
 
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [
             { categoryId: keys.indirectCategory.id, subCategories: keys.indirectSubCategory.id },
             { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
@@ -290,25 +292,25 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("showing definition container makes it and all of its contained elements visible, and parent container partially visible if it has more direct child categories", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+          const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-          const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
-          const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+          const definitionContainerChild = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
 
-          const directCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory1", modelId: definitionModelRoot.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: directCategory.id });
-          const indirectCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelChild.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory.id });
+          const directCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory1", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: directCategory.id });
+          const indirectCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelChild.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory.id });
           return { definitionContainerRoot, definitionContainerChild, directCategory, indirectCategory, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
 
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
         });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -329,27 +331,27 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("showing definition container makes it and all of its contained elements visible, and parent container partially visible if it has more definition containers", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+          const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-          const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
-          const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
-          const indirectCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory.id });
+          const definitionContainerChild = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+          const indirectCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory.id });
 
-          const definitionContainerChild2 = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild2", modelId: definitionModelRoot.id });
-          const definitionModelChild2 = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild2.id });
-          const indirectCategory2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelChild2.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory2.id });
+          const definitionContainerChild2 = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild2", modelId: definitionModelRoot.id });
+          const definitionModelChild2 = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild2.id });
+          const indirectCategory2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelChild2.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory2.id });
           return { definitionContainerRoot, definitionContainerChild, indirectCategory2, indirectCategory, definitionContainerChild2, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
 
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
         });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -371,16 +373,16 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("showing child definition container makes it, all of its contained elements and its parent definition container visible", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
-          const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
-          const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
-          const indirectCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+          const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+          const definitionContainerChild = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+          const indirectCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory.id });
           const indirectSubCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: indirectCategory.id,
             codeValue: "subCategory",
             modelId: definitionModelChild.id,
@@ -389,10 +391,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
           return { definitionContainerRoot, definitionContainerChild, indirectCategory, indirectSubCategory, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
 
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [{ categoryId: keys.indirectCategory.id, subCategories: keys.indirectSubCategory.id }],
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -409,23 +411,23 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
     describe("categories", () => {
       it("showing category of hidden model does not enable other categories", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-          const otherCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory2" });
-          const categoryWithHideOverride = insertSpatialCategory({ builder, codeValue: "SpatialCategory3" });
-          const categoryWithShowOverride = insertSpatialCategory({ builder, codeValue: "SpatialCategory4" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: otherCategory.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: categoryWithHideOverride.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: categoryWithShowOverride.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+          const otherCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2" });
+          const categoryWithHideOverride = insertSpatialCategory({ imodel, codeValue: "SpatialCategory3" });
+          const categoryWithShowOverride = insertSpatialCategory({ imodel, codeValue: "SpatialCategory4" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: otherCategory.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: categoryWithHideOverride.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: categoryWithShowOverride.id });
           return { category, otherCategory, categoryWithHideOverride, categoryWithShowOverride, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: getDefaultSubCategoryId(keys.category.id) }],
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -451,23 +453,23 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("showing category makes it and all of its subCategories visible", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
           });
           return { category, subCategory, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
 
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -482,19 +484,19 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("showing category makes it, all of its contained subCategories visible and doesn't affect other categories", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
           });
-          const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category2.id });
+          const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category2.id });
           const subCategory2 = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category2.id,
             codeValue: "subCategory2",
           });
@@ -502,10 +504,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
           return { category, category2, subCategory, subCategory2, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
 
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [
             { categoryId: keys.category.id, subCategories: keys.subCategory.id },
             { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
@@ -532,22 +534,22 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("showing category makes it, all of its contained subCategories visible and doesn't affect non related definition container", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
           });
 
-          const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
-          const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModel.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category2.id });
+          const definitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+          const definitionModel = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+          const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModel.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category2.id });
           const subCategory2 = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category2.id,
             codeValue: "subCategory2",
             modelId: definitionContainer.id,
@@ -556,10 +558,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
           return { definitionContainer, category, category2, subCategory, subCategory2, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
 
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [
             { categoryId: keys.category.id, subCategories: keys.subCategory.id },
             { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
@@ -587,23 +589,23 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("showing category makes it and all of its subcategories visible, and parent container partially visible if it has more direct child categories", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+          const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelRoot.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
             modelId: definitionModelRoot.id,
           });
-          const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelRoot.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category2.id });
+          const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category2.id });
           const subCategory2 = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category2.id,
             codeValue: "subCategory2",
             modelId: definitionModelRoot.id,
@@ -611,10 +613,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
           return { definitionContainerRoot, category, category2, subCategory, subCategory2, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
 
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [
             { categoryId: keys.category.id, subCategories: keys.subCategory.id },
             { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
@@ -642,20 +644,20 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("showing category makes it and all of its subCategories visible, and parent container partially visible if it has more definition containers", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+          const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-          const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
-          const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
-          const indirectCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory.id });
+          const definitionContainerChild = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+          const indirectCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory.id });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelRoot.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
             modelId: definitionModelRoot.id,
@@ -663,10 +665,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
           return { definitionContainerRoot, definitionContainerChild, category, indirectCategory, subCategory, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
 
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -693,28 +695,28 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
     describe("subCategories", () => {
       it("showing subCategory of hidden model does not enable other categories", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
           });
-          const otherCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory2" });
-          const categoryWithHideOverride = insertSpatialCategory({ builder, codeValue: "SpatialCategory3" });
-          const categoryWithShowOverride = insertSpatialCategory({ builder, codeValue: "SpatialCategory4" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: otherCategory.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: categoryWithHideOverride.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: categoryWithShowOverride.id });
+          const otherCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2" });
+          const categoryWithHideOverride = insertSpatialCategory({ imodel, codeValue: "SpatialCategory3" });
+          const categoryWithShowOverride = insertSpatialCategory({ imodel, codeValue: "SpatialCategory4" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: otherCategory.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: categoryWithHideOverride.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: categoryWithShowOverride.id });
           return { category, otherCategory, categoryWithHideOverride, categoryWithShowOverride, physicalModel, subCategory };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: [keys.subCategory.id, getDefaultSubCategoryId(keys.category.id)] }],
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -743,28 +745,28 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("showing subCategory makes it visible and its parent category partially visible, and doesn't affect other subCategories", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
           });
           const subCategory2 = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory2",
           });
           return { category, subCategory, subCategory2, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
 
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: [keys.subCategory.id, keys.subCategory2.id] }],
         });
 
@@ -787,25 +789,25 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("showing subCategory makes it visible and its parent category partially visible, and doesn't affect other categories", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
           });
-          const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category2.id });
+          const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category2.id });
           return { category, subCategory, category2, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
 
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -828,15 +830,15 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("showing subCategory makes it visible and parents partially visible", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+          const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelRoot.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
             modelId: definitionModelRoot.id,
@@ -844,10 +846,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
           return { category, subCategory, definitionContainerRoot, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
 
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -868,22 +870,22 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("showing subCategory makes it visible and doesn't affect non related definition containers", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+          const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
           });
-          const categoryOfDefinitionContainer = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelRoot.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: categoryOfDefinitionContainer.id });
+          const categoryOfDefinitionContainer = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: categoryOfDefinitionContainer.id });
           const subCategoryOfDefinitionContainer = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: categoryOfDefinitionContainer.id,
             codeValue: "subCategory2",
             modelId: definitionModelRoot.id,
@@ -891,10 +893,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
           return { category, subCategory, definitionContainerRoot, categoryOfDefinitionContainer, subCategoryOfDefinitionContainer, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
 
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [
             { categoryId: keys.category.id, subCategories: keys.subCategory.id },
             { categoryId: keys.categoryOfDefinitionContainer.id, subCategories: keys.subCategoryOfDefinitionContainer.id },
@@ -925,20 +927,20 @@ describe("CategoriesTreeVisibilityHandler", () => {
     describe("showElements set to true", () => {
       describe("definitionContainers", () => {
         it("showing definition container makes it and all of its contained elements visible", async () => {
-          await using buildIModelResult = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-            const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-            const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+          await using buildIModelResult = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+            const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+            const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-            const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
-            const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+            const definitionContainerChild = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
+            const definitionModelChild = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
 
-            const directCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory1", modelId: definitionModelRoot.id });
-            const element1 = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: directCategory.id });
-            const indirectCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelChild.id });
-            const element2 = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory.id });
+            const directCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory1", modelId: definitionModelRoot.id });
+            const element1 = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: directCategory.id });
+            const indirectCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelChild.id });
+            const element2 = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory.id });
             const subCategory = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: indirectCategory.id,
               codeValue: "subCategory",
               modelId: definitionModelChild.id,
@@ -946,10 +948,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
             return { definitionContainerRoot, physicalModel, directCategory, element1, element2, subCategory, definitionModelChild, indirectCategory };
           });
 
-          const { imodel, ...keys } = buildIModelResult;
+          const { imodelConnection, ...keys } = buildIModelResult;
 
           using visibilityTestData = await createVisibilityTestData({
-            imodel,
+            imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.indirectCategory.id, subCategories: keys.subCategory.id }],
             hierarchyConfig: { showElements: true },
           });
@@ -965,26 +967,26 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
 
         it("showing definition container makes it and all of its contained elements visible and doesn't affect non contained definition containers", async () => {
-          await using buildIModelResult = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-            const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-            const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
-            const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
-            const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
-            const indirectCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
-            const indirectElement = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory.id });
+          await using buildIModelResult = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+            const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+            const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+            const definitionContainerChild = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
+            const definitionModelChild = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+            const indirectCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
+            const indirectElement = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory.id });
             const indirectSubCategory = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: indirectCategory.id,
               codeValue: "subCategory",
               modelId: definitionModelChild.id,
             });
 
-            const definitionContainerRoot2 = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot2" });
-            const definitionModelRoot2 = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot2.id });
-            const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelRoot2.id });
-            const element2 = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category2.id });
-            const subCategory2 = insertSubCategory({ builder, parentCategoryId: category2.id, codeValue: "subCategory2", modelId: definitionModelRoot2.id });
+            const definitionContainerRoot2 = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot2" });
+            const definitionModelRoot2 = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot2.id });
+            const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelRoot2.id });
+            const element2 = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category2.id });
+            const subCategory2 = insertSubCategory({ imodel, parentCategoryId: category2.id, codeValue: "subCategory2", modelId: definitionModelRoot2.id });
 
             return {
               definitionContainerRoot,
@@ -1000,10 +1002,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
             };
           });
 
-          const { imodel, ...keys } = buildIModelResult;
+          const { imodelConnection, ...keys } = buildIModelResult;
 
           using visibilityTestData = await createVisibilityTestData({
-            imodel,
+            imodelConnection,
             subCategoriesOfCategories: [
               { categoryId: keys.indirectCategory.id, subCategories: keys.indirectSubCategory.id },
               { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
@@ -1036,25 +1038,25 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
 
         it("showing definition container makes it and all of its contained elements visible, and parent container partially visible if it has more direct child categories", async () => {
-          await using buildIModelResult = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-            const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-            const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+          await using buildIModelResult = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+            const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+            const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-            const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
-            const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+            const definitionContainerChild = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
+            const definitionModelChild = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
 
-            const directCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory1", modelId: definitionModelRoot.id });
-            const directElement = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: directCategory.id });
-            const indirectCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelChild.id });
-            const indirectElement = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory.id });
+            const directCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory1", modelId: definitionModelRoot.id });
+            const directElement = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: directCategory.id });
+            const indirectCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelChild.id });
+            const indirectElement = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory.id });
             return { definitionContainerRoot, definitionContainerChild, directCategory, indirectCategory, directElement, indirectElement, physicalModel };
           });
 
-          const { imodel, ...keys } = buildIModelResult;
+          const { imodelConnection, ...keys } = buildIModelResult;
 
           using visibilityTestData = await createVisibilityTestData({
-            imodel,
+            imodelConnection,
             hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
@@ -1078,24 +1080,24 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
 
         it("showing definition container makes it and all of its contained elements visible, and parent container partially visible if it has more definition containers", async () => {
-          await using buildIModelResult = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-            const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-            const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+          await using buildIModelResult = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+            const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+            const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-            const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
-            const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
-            const indirectCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
-            const indirectElement = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory.id });
+            const definitionContainerChild = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
+            const definitionModelChild = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+            const indirectCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
+            const indirectElement = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory.id });
 
-            const definitionContainerChild2 = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild2", modelId: definitionModelRoot.id });
+            const definitionContainerChild2 = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild2", modelId: definitionModelRoot.id });
             const definitionModelChild2 = insertSubModel({
-              builder,
+              imodel,
               classFullName: CLASS_NAME_DefinitionModel,
               modeledElementId: definitionContainerChild2.id,
             });
-            const indirectCategory2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelChild2.id });
-            const indirectElement2 = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory2.id });
+            const indirectCategory2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelChild2.id });
+            const indirectElement2 = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory2.id });
             return {
               definitionContainerRoot,
               definitionContainerChild,
@@ -1108,10 +1110,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
             };
           });
 
-          const { imodel, ...keys } = buildIModelResult;
+          const { imodelConnection, ...keys } = buildIModelResult;
 
           using visibilityTestData = await createVisibilityTestData({
-            imodel,
+            imodelConnection,
             hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
@@ -1136,16 +1138,16 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
 
         it("showing child definition container makes it, all of its contained elements and its parent definition container visible", async () => {
-          await using buildIModelResult = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-            const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-            const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
-            const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
-            const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
-            const indirectCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
-            const indirectElement = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory.id });
+          await using buildIModelResult = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+            const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+            const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+            const definitionContainerChild = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
+            const definitionModelChild = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+            const indirectCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
+            const indirectElement = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory.id });
             const indirectSubCategory = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: indirectCategory.id,
               codeValue: "subCategory",
               modelId: definitionModelChild.id,
@@ -1154,10 +1156,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
             return { definitionContainerChild, indirectElement, indirectSubCategory, indirectCategory, definitionModelChild, physicalModel };
           });
 
-          const { imodel, ...keys } = buildIModelResult;
+          const { imodelConnection, ...keys } = buildIModelResult;
 
           using visibilityTestData = await createVisibilityTestData({
-            imodel,
+            imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.indirectCategory.id, subCategories: keys.indirectSubCategory.id }],
             hierarchyConfig: { showElements: true },
           });
@@ -1175,23 +1177,23 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
       describe("categories", () => {
         it("showing category makes it, all of its subCategories and elements visible", async () => {
-          await using buildIModelResult = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+          await using buildIModelResult = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
 
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-            const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+            const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+            const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
             const subCategory = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: category.id,
               codeValue: "subCategory",
             });
             return { category, subCategory, element, physicalModel };
           });
 
-          const { imodel, ...keys } = buildIModelResult;
+          const { imodelConnection, ...keys } = buildIModelResult;
 
           using visibilityTestData = await createVisibilityTestData({
-            imodel,
+            imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
             hierarchyConfig: { showElements: true },
           });
@@ -1207,19 +1209,19 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
 
         it("showing category makes it, all of its contained subCategories and elements visible and doesn't affect other categories", async () => {
-          await using buildIModelResult = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-            const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          await using buildIModelResult = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+            const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+            const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
             const subCategory = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: category.id,
               codeValue: "subCategory",
             });
-            const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2" });
-            const element2 = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category2.id });
+            const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2" });
+            const element2 = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category2.id });
             const subCategory2 = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: category2.id,
               codeValue: "subCategory2",
             });
@@ -1227,10 +1229,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
             return { category, category2, subCategory, subCategory2, element, element2, physicalModel };
           });
 
-          const { imodel, ...keys } = buildIModelResult;
+          const { imodelConnection, ...keys } = buildIModelResult;
 
           using visibilityTestData = await createVisibilityTestData({
-            imodel,
+            imodelConnection,
             subCategoriesOfCategories: [
               { categoryId: keys.category.id, subCategories: keys.subCategory.id },
               { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
@@ -1260,22 +1262,22 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
 
         it("showing category makes it, all of its contained subCategories and elements visible and doesn't affect non related definition container", async () => {
-          await using buildIModelResult = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-            const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          await using buildIModelResult = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+            const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+            const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
             const subCategory = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: category.id,
               codeValue: "subCategory",
             });
 
-            const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-            const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
-            const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModel.id });
-            const element2 = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category2.id });
+            const definitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+            const definitionModel = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+            const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModel.id });
+            const element2 = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category2.id });
             const subCategory2 = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: category2.id,
               codeValue: "subCategory2",
               modelId: definitionContainer.id,
@@ -1284,10 +1286,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
             return { definitionContainer, category, category2, subCategory, subCategory2, element, element2, physicalModel };
           });
 
-          const { imodel, ...keys } = buildIModelResult;
+          const { imodelConnection, ...keys } = buildIModelResult;
 
           using visibilityTestData = await createVisibilityTestData({
-            imodel,
+            imodelConnection,
             subCategoriesOfCategories: [
               { categoryId: keys.category.id, subCategories: keys.subCategory.id },
               { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
@@ -1318,23 +1320,23 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
 
         it("showing category makes it, all of its subcategories and elements visible, and parent container partially visible if it has more direct child categories", async () => {
-          await using buildIModelResult = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-            const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-            const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+          await using buildIModelResult = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+            const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+            const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelRoot.id });
-            const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+            const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelRoot.id });
+            const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
             const subCategory = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: category.id,
               codeValue: "subCategory",
               modelId: definitionModelRoot.id,
             });
-            const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelRoot.id });
-            const element2 = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category2.id });
+            const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelRoot.id });
+            const element2 = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category2.id });
             const subCategory2 = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: category2.id,
               codeValue: "subCategory2",
               modelId: definitionModelRoot.id,
@@ -1342,10 +1344,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
             return { definitionContainerRoot, category, category2, subCategory, subCategory2, element, element2, physicalModel };
           });
 
-          const { imodel, ...keys } = buildIModelResult;
+          const { imodelConnection, ...keys } = buildIModelResult;
 
           using visibilityTestData = await createVisibilityTestData({
-            imodel,
+            imodelConnection,
             subCategoriesOfCategories: [
               { categoryId: keys.category.id, subCategories: keys.subCategory.id },
               { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
@@ -1376,20 +1378,20 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
 
         it("showing category makes it, all of its subCategories and elements visible, and parent container partially visible if it has more definition containers", async () => {
-          await using buildIModelResult = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-            const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-            const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+          await using buildIModelResult = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+            const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+            const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-            const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
-            const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
-            const indirectCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
-            const indirectElement = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory.id });
+            const definitionContainerChild = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
+            const definitionModelChild = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+            const indirectCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
+            const indirectElement = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory.id });
 
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelRoot.id });
-            const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+            const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelRoot.id });
+            const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
             const subCategory = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: category.id,
               codeValue: "subCategory",
               modelId: definitionModelRoot.id,
@@ -1397,10 +1399,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
             return { definitionContainerRoot, definitionContainerChild, category, indirectCategory, subCategory, indirectElement, element, physicalModel };
           });
 
-          const { imodel, ...keys } = buildIModelResult;
+          const { imodelConnection, ...keys } = buildIModelResult;
 
           using visibilityTestData = await createVisibilityTestData({
-            imodel,
+            imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
             hierarchyConfig: { showElements: true },
           });
@@ -1430,28 +1432,28 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
       describe("subCategories", () => {
         it("showing subCategory makes it visible and its parent category partially visible, and doesn't affect elements", async () => {
-          await using buildIModelResult = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+          await using buildIModelResult = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
 
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-            const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+            const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+            const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
             const subCategory = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: category.id,
               codeValue: "subCategory",
             });
             const subCategory2 = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: category.id,
               codeValue: "subCategory2",
             });
             return { category, subCategory, subCategory2, element, physicalModel };
           });
 
-          const { imodel, ...keys } = buildIModelResult;
+          const { imodelConnection, ...keys } = buildIModelResult;
 
           using visibilityTestData = await createVisibilityTestData({
-            imodel,
+            imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: [keys.subCategory.id, keys.subCategory2.id] }],
             hierarchyConfig: { showElements: true },
           });
@@ -1475,25 +1477,25 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
 
         it("showing subCategory makes it visible and its parent category partially visible, and doesn't affect elements of other categories", async () => {
-          await using buildIModelResult = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+          await using buildIModelResult = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
 
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-            const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+            const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+            const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
             const subCategory = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: category.id,
               codeValue: "subCategory",
             });
-            const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2" });
-            const element2 = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category2.id });
+            const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2" });
+            const element2 = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category2.id });
             return { category, subCategory, category2, element, element2, physicalModel };
           });
 
-          const { imodel, ...keys } = buildIModelResult;
+          const { imodelConnection, ...keys } = buildIModelResult;
 
           using visibilityTestData = await createVisibilityTestData({
-            imodel,
+            imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
             hierarchyConfig: { showElements: true },
           });
@@ -1526,15 +1528,15 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
 
         it("showing subCategory makes it visible and parents partially visible", async () => {
-          await using buildIModelResult = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-            const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-            const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+          await using buildIModelResult = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+            const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+            const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelRoot.id });
-            const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+            const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelRoot.id });
+            const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
             const subCategory = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: category.id,
               codeValue: "subCategory",
               modelId: definitionModelRoot.id,
@@ -1542,10 +1544,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
             return { category, subCategory, definitionContainerRoot, element, physicalModel };
           });
 
-          const { imodel, ...keys } = buildIModelResult;
+          const { imodelConnection, ...keys } = buildIModelResult;
 
           using visibilityTestData = await createVisibilityTestData({
-            imodel,
+            imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
             hierarchyConfig: { showElements: true },
           });
@@ -1569,22 +1571,22 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
 
         it("showing subCategory makes it visible and doesn't affect non related definition containers", async () => {
-          await using buildIModelResult = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-            const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-            const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+          await using buildIModelResult = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+            const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+            const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-            const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+            const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+            const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
             const subCategory = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: category.id,
               codeValue: "subCategory",
             });
-            const categoryOfDefinitionContainer = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelRoot.id });
-            const elementOfDefinitionContainer = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: categoryOfDefinitionContainer.id });
+            const categoryOfDefinitionContainer = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelRoot.id });
+            const elementOfDefinitionContainer = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: categoryOfDefinitionContainer.id });
             const subCategoryOfDefinitionContainer = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: categoryOfDefinitionContainer.id,
               codeValue: "subCategory2",
               modelId: definitionModelRoot.id,
@@ -1601,10 +1603,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
             };
           });
 
-          const { imodel, ...keys } = buildIModelResult;
+          const { imodelConnection, ...keys } = buildIModelResult;
 
           using visibilityTestData = await createVisibilityTestData({
-            imodel,
+            imodelConnection,
             subCategoriesOfCategories: [
               { categoryId: keys.category.id, subCategories: keys.subCategory.id },
               { categoryId: keys.categoryOfDefinitionContainer.id, subCategories: keys.subCategoryOfDefinitionContainer.id },
@@ -1644,29 +1646,29 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
       describe("elements", () => {
         it("showing element makes it visible and its parent category partially visible, and doesn't affect other subCategories or elements", async () => {
-          await using buildIModelResult = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+          await using buildIModelResult = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
 
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-            const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-            const element2 = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+            const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+            const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+            const element2 = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
             const subCategory = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: category.id,
               codeValue: "subCategory",
             });
             const subCategory2 = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: category.id,
               codeValue: "subCategory2",
             });
             return { category, subCategory, subCategory2, element, element2, physicalModel };
           });
 
-          const { imodel, ...keys } = buildIModelResult;
+          const { imodelConnection, ...keys } = buildIModelResult;
 
           using visibilityTestData = await createVisibilityTestData({
-            imodel,
+            imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: [keys.subCategory.id, keys.subCategory2.id] }],
             hierarchyConfig: { showElements: true },
           });
@@ -1694,25 +1696,25 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
 
         it("showing element makes it visible and its parent category partially visible, and doesn't affect other categories or subCategories", async () => {
-          await using buildIModelResult = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+          await using buildIModelResult = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
 
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-            const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+            const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+            const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
             const subCategory = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: category.id,
               codeValue: "subCategory",
             });
-            const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2" });
-            const element2 = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category2.id });
+            const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2" });
+            const element2 = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category2.id });
             return { category, subCategory, category2, element, element2, physicalModel };
           });
 
-          const { imodel, ...keys } = buildIModelResult;
+          const { imodelConnection, ...keys } = buildIModelResult;
 
           using visibilityTestData = await createVisibilityTestData({
-            imodel,
+            imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
             hierarchyConfig: { showElements: true },
           });
@@ -1741,16 +1743,16 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
 
         it("showing element makes it, its children visible and parents partially visible", async () => {
-          await using buildIModelResult = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-            const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-            const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+          await using buildIModelResult = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+            const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+            const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelRoot.id });
-            const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-            const childElement = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id, parentId: element.id });
+            const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelRoot.id });
+            const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+            const childElement = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id, parentId: element.id });
             const subCategory = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: category.id,
               codeValue: "subCategory",
               modelId: definitionModelRoot.id,
@@ -1758,10 +1760,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
             return { category, subCategory, definitionContainerRoot, element, physicalModel, childElement };
           });
 
-          const { imodel, ...keys } = buildIModelResult;
+          const { imodelConnection, ...keys } = buildIModelResult;
 
           using visibilityTestData = await createVisibilityTestData({
-            imodel,
+            imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
             hierarchyConfig: { showElements: true },
           });
@@ -1788,22 +1790,22 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
 
         it("showing subCategory makes it visible and doesn't affect non related definition containers", async () => {
-          await using buildIModelResult = await buildIModel(async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-            const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-            const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+          await using buildIModelResult = await buildIModel(async (imodel) => {
+            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+            const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+            const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-            const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+            const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+            const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
             const subCategory = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: category.id,
               codeValue: "subCategory",
             });
-            const categoryOfDefinitionContainer = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelRoot.id });
-            const elementOfDefinitionContainer = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: categoryOfDefinitionContainer.id });
+            const categoryOfDefinitionContainer = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelRoot.id });
+            const elementOfDefinitionContainer = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: categoryOfDefinitionContainer.id });
             const subCategoryOfDefinitionContainer = insertSubCategory({
-              builder,
+              imodel,
               parentCategoryId: categoryOfDefinitionContainer.id,
               codeValue: "subCategory2",
               modelId: definitionModelRoot.id,
@@ -1820,10 +1822,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
             };
           });
 
-          const { imodel, ...keys } = buildIModelResult;
+          const { imodelConnection, ...keys } = buildIModelResult;
 
           using visibilityTestData = await createVisibilityTestData({
-            imodel,
+            imodelConnection,
             subCategoriesOfCategories: [
               { categoryId: keys.category.id, subCategories: keys.subCategory.id },
               { categoryId: keys.categoryOfDefinitionContainer.id, subCategories: keys.subCategoryOfDefinitionContainer.id },
@@ -1873,7 +1875,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
       const testCases: Array<{
         describeName: string;
-        createIModel: () => Promise<{ imodel: IModelConnection } & IModelWithSubModelIds>;
+        createIModel: () => Promise<{ imodelConnection: IModelConnection } & IModelWithSubModelIds>;
         cases: Array<{
           only?: boolean;
           name: string;
@@ -1883,22 +1885,22 @@ describe("CategoriesTreeVisibilityHandler", () => {
       }> = [
         {
           describeName: "with modeled elements",
-          createIModel: async function createIModel(): Promise<{ imodel: IModelConnection } & IModelWithSubModelIds> {
-            return buildIModel(async (builder, testSchema) => {
+          createIModel: async function createIModel(): Promise<{ imodelConnection: IModelConnection } & IModelWithSubModelIds> {
+            return buildIModel(async (imodel, testSchema) => {
               const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-              const partition = insertPhysicalPartition({ builder, codeValue: "model", parentId: rootSubject.id });
-              const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
-              const category = insertSpatialCategory({ builder, codeValue: "category" });
+              const partition = insertPhysicalPartition({ imodel, codeValue: "model", parentId: rootSubject.id });
+              const model = insertPhysicalSubModel({ imodel, modeledElementId: partition.id });
+              const category = insertSpatialCategory({ imodel, codeValue: "category" });
               const modeledElement = insertPhysicalElement({
-                builder,
+                imodel,
                 userLabel: `element`,
                 modelId: model.id,
                 categoryId: category.id,
                 classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
               });
-              const subModel = insertPhysicalSubModel({ builder, modeledElementId: modeledElement.id });
-              const subModelCategory = insertSpatialCategory({ builder, codeValue: "category2" });
-              const subModelElement = insertPhysicalElement({ builder, userLabel: `element2`, modelId: subModel.id, categoryId: subModelCategory.id });
+              const subModel = insertPhysicalSubModel({ imodel, modeledElementId: modeledElement.id });
+              const subModelCategory = insertSpatialCategory({ imodel, codeValue: "category2" });
+              const subModelElement = insertPhysicalElement({ imodel, userLabel: `element2`, modelId: subModel.id, categoryId: subModelCategory.id });
               return {
                 modeledElement,
                 model,
@@ -2009,22 +2011,22 @@ describe("CategoriesTreeVisibilityHandler", () => {
         },
         {
           describeName: "with modeled elements that have private subModel",
-          createIModel: async function createIModel(): Promise<{ imodel: IModelConnection } & IModelWithSubModelIds> {
-            return buildIModel(async (builder, testSchema) => {
+          createIModel: async function createIModel(): Promise<{ imodelConnection: IModelConnection } & IModelWithSubModelIds> {
+            return buildIModel(async (imodel, testSchema) => {
               const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-              const partition = insertPhysicalPartition({ builder, codeValue: "model", parentId: rootSubject.id });
-              const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
-              const category = insertSpatialCategory({ builder, codeValue: "category" });
+              const partition = insertPhysicalPartition({ imodel, codeValue: "model", parentId: rootSubject.id });
+              const model = insertPhysicalSubModel({ imodel, modeledElementId: partition.id });
+              const category = insertSpatialCategory({ imodel, codeValue: "category" });
               const modeledElement = insertPhysicalElement({
-                builder,
+                imodel,
                 userLabel: `element`,
                 modelId: model.id,
                 categoryId: category.id,
                 classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
               });
-              const subModel = insertPhysicalSubModel({ builder, modeledElementId: modeledElement.id, isPrivate: true });
-              const subModelCategory = insertSpatialCategory({ builder, codeValue: "category2" });
-              const subModelElement = insertPhysicalElement({ builder, userLabel: `element2`, modelId: subModel.id, categoryId: subModelCategory.id });
+              const subModel = insertPhysicalSubModel({ imodel, modeledElementId: modeledElement.id, isPrivate: true });
+              const subModelCategory = insertSpatialCategory({ imodel, codeValue: "category2" });
+              const subModelElement = insertPhysicalElement({ imodel, userLabel: `element2`, modelId: subModel.id, categoryId: subModelCategory.id });
               return {
                 modeledElement,
                 model,
@@ -2087,20 +2089,20 @@ describe("CategoriesTreeVisibilityHandler", () => {
         },
         {
           describeName: "with modeled elements that have subModel with no children",
-          createIModel: async function createIModel(): Promise<{ imodel: IModelConnection } & IModelWithSubModelIds> {
-            return buildIModel(async (builder, testSchema) => {
+          createIModel: async function createIModel(): Promise<{ imodelConnection: IModelConnection } & IModelWithSubModelIds> {
+            return buildIModel(async (imodel, testSchema) => {
               const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
-              const partition = insertPhysicalPartition({ builder, codeValue: "model", parentId: rootSubject.id });
-              const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
-              const category = insertSpatialCategory({ builder, codeValue: "category" });
+              const partition = insertPhysicalPartition({ imodel, codeValue: "model", parentId: rootSubject.id });
+              const model = insertPhysicalSubModel({ imodel, modeledElementId: partition.id });
+              const category = insertSpatialCategory({ imodel, codeValue: "category" });
               const modeledElement = insertPhysicalElement({
-                builder,
+                imodel,
                 userLabel: `element`,
                 modelId: model.id,
                 categoryId: category.id,
                 classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
               });
-              const subModel = insertPhysicalSubModel({ builder, modeledElementId: modeledElement.id });
+              const subModel = insertPhysicalSubModel({ imodel, modeledElementId: modeledElement.id });
               return {
                 rootSubject,
                 modeledElement,
@@ -2157,8 +2159,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
           let createdIds: IModelWithSubModelIds;
 
           beforeAll(async () => {
-            const { imodel, ...ids } = await createIModel();
-            iModel = imodel;
+            const { imodelConnection, ...ids } = await createIModel();
+            iModel = imodelConnection;
             createdIds = ids;
           });
 
@@ -2169,7 +2171,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           cases.forEach(({ name, getTargetNode, expectations, only }) => {
             (only ? it.only : it)(name, async function () {
               using visibilityTestData = await createVisibilityTestData({
-                imodel: iModel,
+                imodelConnection: iModel,
                 hierarchyConfig: { showElements: true },
               });
               const { handler, provider, viewport } = visibilityTestData;
@@ -2203,19 +2205,19 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
     describe("enabling category visibility through overrides", () => {
       it("category is partial when multiple models contain category and override for one model is set to 'Show'", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-          const physicalModel2 = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
+          const physicalModel2 = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-          insertPhysicalElement({ builder, modelId: physicalModel2.id, categoryId: category.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel2.id, categoryId: category.id });
           return { category, physicalModel, physicalModel2 };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
 
-        using visibilityTestData = await createVisibilityTestData({ imodel });
+        using visibilityTestData = await createVisibilityTestData({ imodelConnection });
         const { handler, provider, viewport } = visibilityTestData;
         setupInitialDisplayState({
           viewport,
@@ -2244,17 +2246,17 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
     describe("enabling category visibility through model selector", () => {
       it("category is visible when only one model contains category and model is enabled through model selector", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           return { category, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
 
-        using visibilityTestData = await createVisibilityTestData({ imodel });
+        using visibilityTestData = await createVisibilityTestData({ imodelConnection });
         const { handler, provider, viewport } = visibilityTestData;
         setupInitialDisplayState({ viewport, categories: [{ id: keys.category.id, visible: true }] });
 
@@ -2269,19 +2271,19 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("category is partial when multiple models contain category and one model is enabled through model selector", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-          const physicalModel2 = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
+          const physicalModel2 = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-          insertPhysicalElement({ builder, modelId: physicalModel2.id, categoryId: category.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel2.id, categoryId: category.id });
           return { category, physicalModel, physicalModel2 };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
 
-        using visibilityTestData = await createVisibilityTestData({ imodel });
+        using visibilityTestData = await createVisibilityTestData({ imodelConnection });
         const { handler, provider, viewport } = visibilityTestData;
         setupInitialDisplayState({ viewport, categories: [{ id: keys.category.id, visible: true }] });
 
@@ -2301,20 +2303,20 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
   describe("disabling visibility", () => {
     it("by default everything is visible", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
 
-        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
-        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-        const subCategory = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "subCategory", modelId: definitionModel.id });
+        const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModel.id });
+        insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+        const subCategory = insertSubCategory({ imodel, parentCategoryId: category.id, codeValue: "subCategory", modelId: definitionModel.id });
         return { category, physicalModel, subCategory };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
+      const { imodelConnection, ...keys } = buildIModelResult;
       using visibilityTestData = await createVisibilityTestData({
-        imodel,
+        imodelConnection,
         subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
         visibleByDefault: true,
       });
@@ -2330,20 +2332,20 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
     describe("definitionContainers", () => {
       it("hiding definition container makes it and all of its contained elements hidden", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+          const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-          const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
-          const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+          const definitionContainerChild = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
 
-          const directCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory1", modelId: definitionModelRoot.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: directCategory.id });
-          const indirectCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelChild.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory.id });
+          const directCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory1", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: directCategory.id });
+          const indirectCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelChild.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory.id });
           const indirectSubCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: indirectCategory.id,
             codeValue: "subCategory",
             modelId: definitionModelChild.id,
@@ -2351,9 +2353,9 @@ describe("CategoriesTreeVisibilityHandler", () => {
           return { definitionContainerRoot, definitionContainerChild, directCategory, indirectCategory, indirectSubCategory, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [{ categoryId: keys.indirectCategory.id, subCategories: keys.indirectSubCategory.id }],
           visibleByDefault: true,
         });
@@ -2369,26 +2371,26 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("hiding definition container makes it and all of its contained elements hidden and doesn't affect non contained definition containers", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
-          const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
-          const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
-          const indirectCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+          const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+          const definitionContainerChild = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+          const indirectCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory.id });
           const indirectSubCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: indirectCategory.id,
             codeValue: "subCategory",
             modelId: definitionModelChild.id,
           });
 
-          const definitionContainerRoot2 = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot2" });
-          const definitionModelRoot2 = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot2.id });
-          const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelRoot2.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category2.id });
-          const subCategory2 = insertSubCategory({ builder, parentCategoryId: category2.id, codeValue: "subCategory2", modelId: definitionModelRoot2.id });
+          const definitionContainerRoot2 = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot2" });
+          const definitionModelRoot2 = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot2.id });
+          const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelRoot2.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category2.id });
+          const subCategory2 = insertSubCategory({ imodel, parentCategoryId: category2.id, codeValue: "subCategory2", modelId: definitionModelRoot2.id });
 
           return {
             definitionContainerRoot,
@@ -2402,9 +2404,9 @@ describe("CategoriesTreeVisibilityHandler", () => {
           };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [
             { categoryId: keys.indirectCategory.id, subCategories: keys.indirectSubCategory.id },
             { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
@@ -2435,23 +2437,23 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("hiding definition container makes it and all of its contained elements hidden, and parent container partially visible if it has more direct child categories", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+          const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-          const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
-          const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+          const definitionContainerChild = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
 
-          const directCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory1", modelId: definitionModelRoot.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: directCategory.id });
-          const indirectCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelChild.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory.id });
+          const directCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory1", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: directCategory.id });
+          const indirectCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelChild.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory.id });
           return { definitionContainerRoot, definitionContainerChild, directCategory, indirectCategory, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
-        using visibilityTestData = await createVisibilityTestData({ imodel, visibleByDefault: true });
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using visibilityTestData = await createVisibilityTestData({ imodelConnection, visibleByDefault: true });
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode({ id: keys.definitionContainerChild.id }), false);
@@ -2471,25 +2473,25 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("hiding definition container makes it and all of its contained elements hidden, and parent container partially visible if it has more definition containers", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+          const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-          const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
-          const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
-          const indirectCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory.id });
+          const definitionContainerChild = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+          const indirectCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory.id });
 
-          const definitionContainerChild2 = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild2", modelId: definitionModelRoot.id });
-          const definitionModelChild2 = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild2.id });
-          const indirectCategory2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelChild2.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory2.id });
+          const definitionContainerChild2 = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild2", modelId: definitionModelRoot.id });
+          const definitionModelChild2 = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild2.id });
+          const indirectCategory2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelChild2.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory2.id });
           return { definitionContainerRoot, definitionContainerChild, indirectCategory2, indirectCategory, definitionContainerChild2, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
-        using visibilityTestData = await createVisibilityTestData({ imodel, visibleByDefault: true });
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using visibilityTestData = await createVisibilityTestData({ imodelConnection, visibleByDefault: true });
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode({ id: keys.definitionContainerChild.id }), false);
@@ -2510,16 +2512,16 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("hiding child definition container makes it, all of its contained elements and its parent definition container hidden", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
-          const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
-          const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
-          const indirectCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+          const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+          const definitionContainerChild = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+          const indirectCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory.id });
           const indirectSubCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: indirectCategory.id,
             codeValue: "subCategory",
             modelId: definitionModelChild.id,
@@ -2528,9 +2530,9 @@ describe("CategoriesTreeVisibilityHandler", () => {
           return { definitionContainerRoot, definitionContainerChild, indirectCategory, indirectSubCategory, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [{ categoryId: keys.indirectCategory.id, subCategories: keys.indirectSubCategory.id }],
           visibleByDefault: true,
         });
@@ -2548,22 +2550,22 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
     describe("categories", () => {
       it("hiding category makes it and all of its subCategories hidden", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
           });
           return { category, subCategory, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
           visibleByDefault: true,
         });
@@ -2579,19 +2581,19 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("hiding category makes it, all of its contained subCategories hidden and doesn't affect other categories", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
           });
-          const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category2.id });
+          const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category2.id });
           const subCategory2 = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category2.id,
             codeValue: "subCategory2",
           });
@@ -2599,9 +2601,9 @@ describe("CategoriesTreeVisibilityHandler", () => {
           return { category, category2, subCategory, subCategory2, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [
             { categoryId: keys.category.id, subCategories: keys.subCategory.id },
             { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
@@ -2629,22 +2631,22 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("hiding category makes it, all of its contained subCategories hidden and doesn't affect non related definition container", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
           });
 
-          const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
-          const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModel.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category2.id });
+          const definitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+          const definitionModel = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+          const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModel.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category2.id });
           const subCategory2 = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category2.id,
             codeValue: "subCategory2",
             modelId: definitionContainer.id,
@@ -2653,9 +2655,9 @@ describe("CategoriesTreeVisibilityHandler", () => {
           return { definitionContainer, category, category2, subCategory, subCategory2, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [
             { categoryId: keys.category.id, subCategories: keys.subCategory.id },
             { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
@@ -2684,23 +2686,23 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("hiding category makes it and all of its subcategories hidden, and parent container partially visible if it has more direct child categories", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+          const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelRoot.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
             modelId: definitionModelRoot.id,
           });
-          const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelRoot.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category2.id });
+          const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category2.id });
           const subCategory2 = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category2.id,
             codeValue: "subCategory2",
             modelId: definitionModelRoot.id,
@@ -2708,9 +2710,9 @@ describe("CategoriesTreeVisibilityHandler", () => {
           return { definitionContainerRoot, category, category2, subCategory, subCategory2, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [
             { categoryId: keys.category.id, subCategories: keys.subCategory.id },
             { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
@@ -2739,20 +2741,20 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("hiding category makes it and all of its subCategories hidden, and parent container partially visible if it has more definition containers", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+          const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-          const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
-          const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
-          const indirectCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: indirectCategory.id });
+          const definitionContainerChild = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerChild", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+          const indirectCategory = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: indirectCategory.id });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelRoot.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
             modelId: definitionModelRoot.id,
@@ -2760,9 +2762,9 @@ describe("CategoriesTreeVisibilityHandler", () => {
           return { definitionContainerRoot, definitionContainerChild, category, indirectCategory, subCategory, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
           visibleByDefault: true,
         });
@@ -2790,27 +2792,27 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
     describe("subCategories", () => {
       it("hiding subCategory makes it hidden and its parent category partially visible, and doesn't affect other subCategories", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
           });
           const subCategory2 = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory2",
           });
           return { category, subCategory, subCategory2, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: [keys.subCategory.id, keys.subCategory2.id] }],
           visibleByDefault: true,
         });
@@ -2832,24 +2834,24 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("hiding subCategory makes it hidden and its parent category partially visible, and doesn't affect other categories", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
           });
-          const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category2.id });
+          const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category2.id });
           return { category, subCategory, category2, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
           visibleByDefault: true,
         });
@@ -2873,15 +2875,15 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("hiding subCategory makes it hidden and parents partially visible", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+          const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelRoot.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
             modelId: definitionModelRoot.id,
@@ -2889,9 +2891,9 @@ describe("CategoriesTreeVisibilityHandler", () => {
           return { category, subCategory, definitionContainerRoot, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
           visibleByDefault: true,
         });
@@ -2913,22 +2915,22 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       it("hiding subCategory makes it hidden and doesn't affect non related definition containers", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
+          const definitionModelRoot = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
           });
-          const categoryOfDefinitionContainer = insertSpatialCategory({ builder, codeValue: "SpatialCategory2", modelId: definitionModelRoot.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: categoryOfDefinitionContainer.id });
+          const categoryOfDefinitionContainer = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: categoryOfDefinitionContainer.id });
           const subCategoryOfDefinitionContainer = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: categoryOfDefinitionContainer.id,
             codeValue: "subCategory2",
             modelId: definitionModelRoot.id,
@@ -2936,9 +2938,9 @@ describe("CategoriesTreeVisibilityHandler", () => {
           return { category, subCategory, definitionContainerRoot, categoryOfDefinitionContainer, subCategoryOfDefinitionContainer, physicalModel };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
         using visibilityTestData = await createVisibilityTestData({
-          imodel,
+          imodelConnection,
           subCategoriesOfCategories: [
             { categoryId: keys.category.id, subCategories: keys.subCategory.id },
             { categoryId: keys.categoryOfDefinitionContainer.id, subCategories: keys.subCategoryOfDefinitionContainer.id },
@@ -2969,19 +2971,19 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
     describe("disabling category visibility through overrides", () => {
       it("category is partial when multiple models contain category and override for one model is set to 'Hide'", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-          const physicalModel2 = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
+          const physicalModel2 = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-          insertPhysicalElement({ builder, modelId: physicalModel2.id, categoryId: category.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel2.id, categoryId: category.id });
           return { category, physicalModel, physicalModel2 };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
 
-        using visibilityTestData = await createVisibilityTestData({ imodel, visibleByDefault: true });
+        using visibilityTestData = await createVisibilityTestData({ imodelConnection, visibleByDefault: true });
         const { handler, provider, viewport } = visibilityTestData;
 
         viewport.setPerModelCategoryOverride({
@@ -3003,19 +3005,19 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
     describe("disabling category visibility through model selector", () => {
       it("category is partial when multiple models contain category and one model is disabled through model selector", async () => {
-        await using buildIModelResult = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-          const physicalModel2 = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
+        await using buildIModelResult = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
+          const physicalModel2 = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
 
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-          insertPhysicalElement({ builder, modelId: physicalModel2.id, categoryId: category.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+          insertPhysicalElement({ imodel, modelId: physicalModel2.id, categoryId: category.id });
           return { category, physicalModel, physicalModel2 };
         });
 
-        const { imodel, ...keys } = buildIModelResult;
+        const { imodelConnection, ...keys } = buildIModelResult;
 
-        using visibilityTestData = await createVisibilityTestData({ imodel, visibleByDefault: true });
+        using visibilityTestData = await createVisibilityTestData({ imodelConnection, visibleByDefault: true });
         const { handler, provider, viewport } = visibilityTestData;
 
         viewport.changeModelDisplay({ modelIds: keys.physicalModel.id, display: false });
@@ -3034,7 +3036,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
   describe("search nodes", () => {
     async function createFilteredVisibilityTestData({
-      imodel,
+      imodelConnection,
       searchPaths,
       view,
       visibleByDefault,
@@ -3046,11 +3048,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
       subCategoriesOfCategories: Array<{ categoryId: string; subCategories: Id64Arg }>;
     }) {
       const hierarchyConfig = { ...defaultHierarchyConfiguration, showElements: true, showEmptyCategories: true };
-      const imodelAccess = createIModelAccess(imodel);
+      const imodelAccess = createIModelAccess(imodelConnection);
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(view).elementClass, type: view });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: view, baseIdsCache });
       const viewport = createTreeWidgetTestingViewport({
-        iModel: imodel,
+        iModel: imodelConnection,
         viewType: view,
         visibleByDefault,
         subCategoriesOfCategories,
@@ -3075,7 +3077,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         visibilityHandlerWithSearchPaths,
         defaultProvider,
         providerWithSearchPaths,
-        imodel,
+        imodelConnection,
         imodelAccess,
         viewport,
         [Symbol.dispose]() {
@@ -3088,22 +3090,22 @@ describe("CategoriesTreeVisibilityHandler", () => {
     }
 
     it("returns 'disabled' when node has search paths but visibility handler doesn't", async () => {
-      await using buildIModelResult = await buildIModel(async (builder) => {
-        const category = insertSpatialCategory({ builder, codeValue: "category" });
+      await using buildIModelResult = await buildIModel(async (imodel) => {
+        const category = insertSpatialCategory({ imodel, codeValue: "category" });
         const subCategory = insertSubCategory({
-          builder,
+          imodel,
           parentCategoryId: category.id,
           codeValue: "subCategory",
         });
         return { category, subCategory };
       });
-      const { imodel, ...keys } = buildIModelResult;
+      const { imodelConnection, ...keys } = buildIModelResult;
       const hierarchyConfig = { ...defaultHierarchyConfiguration, showElements: true, showEmptyCategories: true };
-      const imodelAccess = createIModelAccess(imodel);
+      const imodelAccess = createIModelAccess(imodelConnection);
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       const viewport = createTreeWidgetTestingViewport({
-        iModel: imodel,
+        iModel: imodelConnection,
         viewType: "3d",
         visibleByDefault: true,
         subCategoriesOfCategories: [
@@ -3143,19 +3145,19 @@ describe("CategoriesTreeVisibilityHandler", () => {
       let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
       let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
       async function createIModel() {
-        return buildIModel(async (builder) => {
-          const category = insertSpatialCategory({ builder, codeValue: "category" });
+        return buildIModel(async (imodel) => {
+          const category = insertSpatialCategory({ imodel, codeValue: "category" });
           const defaultSubCategory = { id: getDefaultSubCategoryId(category.id), className: CLASS_NAME_SubCategory };
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
           });
 
-          const siblingCategory = insertSpatialCategory({ builder, codeValue: "sibling category" });
+          const siblingCategory = insertSpatialCategory({ imodel, codeValue: "sibling category" });
           const defaultSiblingSubCategory = { id: getDefaultSubCategoryId(siblingCategory.id), className: CLASS_NAME_SubCategory };
           const siblingSubCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: siblingCategory.id,
             codeValue: "sibling SubCategory",
           });
@@ -3178,7 +3180,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
       beforeEach(async function () {
         visibilityTestData = await createFilteredVisibilityTestData({
-          imodel: createIModelResult.imodel,
+          imodelConnection: createIModelResult.imodelConnection,
           searchPaths: createIModelResult.searchPaths,
           view: "3d",
           visibleByDefault: false,
@@ -3197,7 +3199,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       afterAll(async () => {
-        await createIModelResult.imodel.close();
+        await createIModelResult.imodelConnection.close();
       });
 
       it("showing category changes visibility for related nodes in search paths", async () => {
@@ -3288,21 +3290,21 @@ describe("CategoriesTreeVisibilityHandler", () => {
       let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
       let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
       async function createIModel() {
-        return buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        return buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
 
-          const category = insertSpatialCategory({ builder, codeValue: "category" });
+          const category = insertSpatialCategory({ imodel, codeValue: "category" });
           const defaultSubCategory = { id: getDefaultSubCategoryId(category.id), className: CLASS_NAME_SubCategory };
-          const parentElement1 = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-          const parentElement2 = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-          const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-          const childElement11 = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id, parentId: parentElement1.id });
-          const childElement12 = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id, parentId: parentElement1.id });
-          const childElement21 = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id, parentId: parentElement2.id });
+          const parentElement1 = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+          const parentElement2 = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+          const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+          const childElement11 = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id, parentId: parentElement1.id });
+          const childElement12 = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id, parentId: parentElement1.id });
+          const childElement21 = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id, parentId: parentElement2.id });
 
-          const siblingCategory = insertSpatialCategory({ builder, codeValue: "sibling category" });
+          const siblingCategory = insertSpatialCategory({ imodel, codeValue: "sibling category" });
           const defaultSiblingSubCategory = { id: getDefaultSubCategoryId(siblingCategory.id), className: CLASS_NAME_SubCategory };
-          const siblingElement = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: siblingCategory.id });
+          const siblingElement = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: siblingCategory.id });
 
           return {
             category,
@@ -3331,7 +3333,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
       beforeEach(async function () {
         visibilityTestData = await createFilteredVisibilityTestData({
-          imodel: createIModelResult.imodel,
+          imodelConnection: createIModelResult.imodelConnection,
           searchPaths: createIModelResult.searchPaths,
           view: "3d",
           visibleByDefault: false,
@@ -3358,7 +3360,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       afterAll(async () => {
-        await createIModelResult.imodel.close();
+        await createIModelResult.imodelConnection.close();
       });
 
       it("showing category changes visibility for related nodes in search paths", async () => {
@@ -3698,16 +3700,16 @@ describe("CategoriesTreeVisibilityHandler", () => {
       let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
       let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
       async function createIModel() {
-        return buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        return buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
 
-          const category = insertSpatialCategory({ builder, codeValue: "category" });
+          const category = insertSpatialCategory({ imodel, codeValue: "category" });
           const defaultSubCategory = { id: getDefaultSubCategoryId(category.id), className: CLASS_NAME_SubCategory };
-          const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-          const parentElement = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-          const childElement = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id, parentId: parentElement.id });
-          const childOfChild1 = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id, parentId: childElement.id });
-          const childOfChild2 = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id, parentId: childElement.id });
+          const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+          const parentElement = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
+          const childElement = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id, parentId: parentElement.id });
+          const childOfChild1 = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id, parentId: childElement.id });
+          const childOfChild2 = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id, parentId: childElement.id });
 
           return {
             category,
@@ -3734,7 +3736,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
       beforeEach(async function () {
         visibilityTestData = await createFilteredVisibilityTestData({
-          imodel: createIModelResult.imodel,
+          imodelConnection: createIModelResult.imodelConnection,
           searchPaths: createIModelResult.searchPaths,
           view: "3d",
           visibleByDefault: false,
@@ -3756,7 +3758,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       afterAll(async () => {
-        await createIModelResult.imodel.close();
+        await createIModelResult.imodelConnection.close();
       });
 
       it("showing category changes visibility for related nodes in search paths", async () => {
@@ -3963,27 +3965,27 @@ describe("CategoriesTreeVisibilityHandler", () => {
       let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
       let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
       async function createIModel() {
-        return buildIModel(async (builder, testSchema) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        return buildIModel(async (imodel, testSchema) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
 
-          const category = insertSpatialCategory({ builder, codeValue: "category" });
+          const category = insertSpatialCategory({ imodel, codeValue: "category" });
           const defaultSubCategory = { id: getDefaultSubCategoryId(category.id), className: CLASS_NAME_SubCategory };
-          const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           const modeledElement = insertPhysicalElement({
-            builder,
+            imodel,
             userLabel: `modeled element`,
             modelId: physicalModel.id,
             categoryId: category.id,
             classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
           });
-          const subModel = insertPhysicalSubModel({ builder, modeledElementId: modeledElement.id });
-          const subModelCategory = insertSpatialCategory({ builder, codeValue: "subModel category" });
-          const subModelElement = insertPhysicalElement({ builder, userLabel: `subModel element`, modelId: subModel.id, categoryId: subModelCategory.id });
-          const subModelElement2 = insertPhysicalElement({ builder, userLabel: `subModel element 2`, modelId: subModel.id, categoryId: subModelCategory.id });
+          const subModel = insertPhysicalSubModel({ imodel, modeledElementId: modeledElement.id });
+          const subModelCategory = insertSpatialCategory({ imodel, codeValue: "subModel category" });
+          const subModelElement = insertPhysicalElement({ imodel, userLabel: `subModel element`, modelId: subModel.id, categoryId: subModelCategory.id });
+          const subModelElement2 = insertPhysicalElement({ imodel, userLabel: `subModel element 2`, modelId: subModel.id, categoryId: subModelCategory.id });
           const defaultSubCategoryOfSubModelCategory = { id: getDefaultSubCategoryId(subModelCategory.id), className: CLASS_NAME_SubCategory };
 
-          const siblingCategory = insertSpatialCategory({ builder, codeValue: "sibling category" });
-          const siblingElement = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: siblingCategory.id });
+          const siblingCategory = insertSpatialCategory({ imodel, codeValue: "sibling category" });
+          const siblingElement = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: siblingCategory.id });
           const defaultSiblingSubCategory = { id: getDefaultSubCategoryId(siblingCategory.id), className: CLASS_NAME_SubCategory };
 
           return {
@@ -4021,7 +4023,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
       beforeEach(async function () {
         visibilityTestData = await createFilteredVisibilityTestData({
-          imodel: createIModelResult.imodel,
+          imodelConnection: createIModelResult.imodelConnection,
           searchPaths: createIModelResult.searchPaths,
           view: "3d",
           visibleByDefault: false,
@@ -4038,7 +4040,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       afterAll(async () => {
-        await createIModelResult.imodel.close();
+        await createIModelResult.imodelConnection.close();
       });
 
       it("showing category changes visibility for related nodes in search paths", async () => {
@@ -4323,20 +4325,20 @@ describe("CategoriesTreeVisibilityHandler", () => {
       let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
       let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
       async function createIModel() {
-        return buildIModel(async (builder) => {
-          const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-          const definitionModel = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+        return buildIModel(async (imodel) => {
+          const definitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainer" });
+          const definitionModel = insertSubModel({ imodel, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
 
-          const category = insertSpatialCategory({ builder, codeValue: "category", modelId: definitionModel.id });
+          const category = insertSpatialCategory({ imodel, codeValue: "category", modelId: definitionModel.id });
           const defaultSubCategory = { id: getDefaultSubCategoryId(category.id), className: CLASS_NAME_SubCategory };
           const subCategory = insertSubCategory({
-            builder,
+            imodel,
             parentCategoryId: category.id,
             codeValue: "subCategory",
             modelId: definitionModel.id,
           });
 
-          const siblingCategory = insertSpatialCategory({ builder, codeValue: "sibling category", modelId: definitionModel.id });
+          const siblingCategory = insertSpatialCategory({ imodel, codeValue: "sibling category", modelId: definitionModel.id });
           const defaultSiblingSubCategory = { id: getDefaultSubCategoryId(siblingCategory.id), className: CLASS_NAME_SubCategory };
 
           return {
@@ -4357,7 +4359,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
       beforeEach(async function () {
         visibilityTestData = await createFilteredVisibilityTestData({
-          imodel: createIModelResult.imodel,
+          imodelConnection: createIModelResult.imodelConnection,
           searchPaths: createIModelResult.searchPaths,
           view: "3d",
           visibleByDefault: false,
@@ -4373,7 +4375,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
 
       afterAll(async () => {
-        await createIModelResult.imodel.close();
+        await createIModelResult.imodelConnection.close();
       });
 
       it("showing definition container changes visibility for related nodes in search paths", async () => {

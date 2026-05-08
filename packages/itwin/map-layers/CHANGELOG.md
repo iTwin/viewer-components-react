@@ -1,8 +1,16 @@
 # Change Log - @itwin/map-layers
 
-<!-- This log was last generated on Fri, 06 Mar 2026 19:28:38 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 07 May 2026 07:30:42 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 7.0.0
+
+Thu, 07 May 2026 07:30:42 GMT
+
+### Major changes
+
+- feat: use dnd-kit instead of react-beautiful-dnd for map layers ([#1665](https://github.com/iTwin/viewer-components-react/pull/1665))
 
 ## 6.2.0
 

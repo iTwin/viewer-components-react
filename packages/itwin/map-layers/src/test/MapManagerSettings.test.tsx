@@ -7,7 +7,7 @@ import { PlanarClipMaskMode, PlanarClipMaskPriority, TerrainHeightOriginMode } f
 import { DisplayStyle3dState, IModelConnection, NoRenderApp, NotificationManager, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
 import { act, fireEvent, getByTestId, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { SourceMapContext } from "../ui/widget/MapLayerManager";
+import { SourceMapContext } from "../ui/contexts/SourceMapContext";
 import { MapManagerSettings } from "../ui/widget/MapManagerSettings";
 import { TestUtils } from "./TestUtils";
 
@@ -59,8 +59,6 @@ describe("MapManagerSettings", () => {
     viewportMock.setup((viewport) => viewport.changeBackgroundMapProps(moq.It.isAny()));
   });
 
-  const refreshFromStyle = vi.fn();
-
   const renderComponent = () => {
     return render(
       <SourceMapContext.Provider
@@ -69,7 +67,6 @@ describe("MapManagerSettings", () => {
           loadingSources: false,
           sources: [],
           bases: [],
-          refreshFromStyle,
         }}
       >
         <MapManagerSettings />

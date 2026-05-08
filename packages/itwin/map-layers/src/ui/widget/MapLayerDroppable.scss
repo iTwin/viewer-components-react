@@ -25,3 +25,17 @@
     }
   }
 }
+
+.map-manager-attachments--drop-available {
+  position: relative;
+  outline: 2px dashed var(--iui-color-border-accent);
+  outline-offset: -2px;
+  border-radius: var(--iui-border-radius-1);
+  background-color: var(--iui-color-background-accent-muted);
+  transition: background-color var(--iui-duration-1) ease, outline-color var(--iui-duration-1) ease;
+}
+
+.map-manager-attachments--drop-target {
+  outline-color: var(--iui-color-border-positive);
+  background-color: var(--iui-color-background-positive-muted);
+}

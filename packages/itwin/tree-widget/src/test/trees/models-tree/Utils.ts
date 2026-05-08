@@ -33,7 +33,7 @@ import type { EC, InstanceKey } from "@itwin/presentation-shared";
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
 interface CreateModelsTreeProviderProps {
-  imodel: IModelConnection;
+  imodelConnection: IModelConnection;
   searchPaths?: HierarchySearchTree[];
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   idsCache?: ModelsTreeIdsCache;
@@ -41,14 +41,14 @@ interface CreateModelsTreeProviderProps {
 }
 
 export function createModelsTreeProvider({
-  imodel,
+  imodelConnection,
   searchPaths,
   hierarchyConfig,
   imodelAccess,
   idsCache,
 }: CreateModelsTreeProviderProps): HierarchyProvider & { dispose: () => void; [Symbol.dispose]: () => void } {
   const config = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...hierarchyConfig };
-  const createdImodelAccess = imodelAccess ?? createIModelAccess(imodel);
+  const createdImodelAccess = imodelAccess ?? createIModelAccess(imodelConnection);
   const baseIdsCache = new BaseIdsCache({ queryExecutor: createdImodelAccess, elementClassName: config.elementClassSpecification, type: "3d" });
   const createdIdsCache =
     idsCache ??
