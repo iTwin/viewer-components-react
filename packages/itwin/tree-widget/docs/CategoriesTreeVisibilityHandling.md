@@ -43,10 +43,13 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <div style='text-align: left;'>- definitionContainerIds: **Id64Arg**</div>
+    <code style='text-align: left;'>- definitionContainerIds: Id64Arg</code>
   "\]
 
-  A -- categoryIds --> B["<code><a href='./SharedVisibilityHandling.md#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({ categoryIds, modelId: undefined })</code>"]
+  A -- categoryIds --> B["<code style='text-align: left;'><a href='./SharedVisibilityHandling.md#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({
+    <code style='padding-left: 2rem'>categoryIds,
+    modelId: undefined</code>
+  })</code>"]
 
   %% Results
   B -- partial --> RESULT_Partial
@@ -76,10 +79,14 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>- definitionContainerIds: **Id64Arg**<br/>- on: **boolean**</code>
+    <code style='text-align: left;'>- definitionContainerIds: Id64Arg<br/>- on: boolean</code>
   "\]
 
-  A -- categoryIds --> B["<code><a href='./SharedVisibilityHandling.md#changecategoriesvisibilitystatus'>changeCategoriesVisibilityStatus</a>({ categoryIds, modelId: undefined, on })</code>"]
+  A -- categoryIds --> B["<code style='text-align: left;'><a href='./SharedVisibilityHandling.md#changecategoriesvisibilitystatus'>changeCategoriesVisibilityStatus</a>({
+    <code style='padding-left: 2rem'>categoryIds,
+    modelId: undefined,
+    on</code>
+  })</code>"]
   B --> RESULT_Done
 ```
 
@@ -103,18 +110,26 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>- categoryId: **Id64String**<br/>- subCategoryIds: **Id64Arg**<br/>- on: **boolean**</code>
+    <code style='text-align: left;'>- categoryId: Id64String<br/>- subCategoryIds: Id64Arg<br/>- on: boolean</code>
   "\]
 
   %% Branch on=true
   A -- true --> B["<code><a href='#enablecategorywithoutenablingothercategories'>enableCategoryWithoutEnablingOtherCategories</a>(props.categoryId)</code>"]
-  B --> C["For each subCategoryId:<br/><code>viewport.changeSubCategoryDisplay({ subCategoryId, display: true })</code>"]
+  B --> C["Iterate through sub-categories"]
+  C -- subCategoryId --> C1["<code style='text-align: left;'>viewport.changeSubCategoryDisplay({
+    <code style='padding-left: 2rem'>subCategoryId,
+    display: true</code>
+  })</code>"]
 
   %% Branch on=false
-  A -- false --> D["For each subCategoryId:<br/><code>viewport.changeSubCategoryDisplay({ subCategoryId, display: false })</code>"]
+  A -- false --> D["Iterate through sub-categories"]
+  D -- subCategoryId --> D1["<code style='text-align: left;'>viewport.changeSubCategoryDisplay({
+    <code style='padding-left: 2rem'>subCategoryId,
+    display: false</code>
+    })</code>"]
 
-  C --> RESULT_Done
-  D --> RESULT_Done
+  C1 --> RESULT_Done
+  D1 --> RESULT_Done
 ```
 
 ### enableCategoryWithoutEnablingOtherCategories
@@ -137,22 +152,35 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>- categoryId: **Id64String**</code>
+    <code style='text-align: left;'>- categoryId: Id64String</code>
   "\]
 
   A --> B["Get all models for <code>categoryId</code> from cache (including sub-models)"]
   B -- modelIds --> C["Iterate through models"]
-  C -- modelId --> D1["<code>viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: categoryId, override: 'none' })</code>"]
+  C -- modelId --> D1["<code style='text-align: left;'>viewport.setPerModelCategoryOverride({
+    <code style='padding-left: 2rem'>modelIds: modelId,
+    categoryIds: categoryId,
+    override: 'none'</code>
+  })</code>"]
   C -- modelId --> D2{"<code>viewport.viewsModel(modelId)</code>"}
 
   D1 --> RESULT_Done
 
   D2 -- Yes --> RESULT_Done
-  D2 -- No --> E1["Get all categories for modelId from cache."]
+  D2 -- No --> E1["Get all categories for <code>modelId</code> from cache."]
   D2 -- No --> E2["Collect hidden models"]
   E1 -- modelCategoryIds --> F["Iterate through model categories"]
-  F -- modelCategoryId --> G["<code>modelCategoryId !== categoryId <br/> && <br/> viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: otherCategoryId, override: 'hide' })</code>"]
-  G --> RESULT_Done
-  E2 -- hiddenModels --> H["<code>viewport.changeModelDisplay({ modelIds: hiddenModels, display: true })</code>"]
+  F -- modelCategoryId --> G{"<code>modelCategoryId === categoryId </code>"}
+  G -- No --> G1["<code style='text-align: left;'>viewport.setPerModelCategoryOverride({
+    <code style='padding-left: 2rem'>modelIds: modelId,
+    categoryIds: otherCategoryId,
+    override: 'hide'</code>
+    })</code>"]
+    G1 --> RESULT_Done
+  G -- Yes --> RESULT_Done
+  E2 -- hiddenModels --> H["<code style='text-align: left;'>viewport.changeModelDisplay({
+    <code style='padding-left: 2rem'>modelIds: hiddenModels,
+    display: true</code>
+  })</code>"]
   H --> RESULT_Done
 ```

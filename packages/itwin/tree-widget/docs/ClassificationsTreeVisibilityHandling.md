@@ -41,10 +41,13 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <div style='text-align: left;'>- classificationTableIds: **Id64Arg**</div>
+    <code style='text-align: left;'>- classificationTableIds: Id64Arg</code>
   "\]
 
-  A -- categoryIds --> B["<code><a href='./SharedVisibilityHandling.md#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({ categoryIds, modelId: undefined })</code>"]
+  A -- categoryIds --> B["<code style='text-align: left;'><a href='./SharedVisibilityHandling.md#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({
+    <code style='padding-left: 2rem'>categoryIds,
+    modelId: undefined</code>
+  })</code>"]
 
   %% Results
   B -- partial --> RESULT_Partial
@@ -74,10 +77,13 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <div style='text-align: left;'>- classificationIds: **Id64Arg**</div>
+    <code style='text-align: left;'>- classificationIds: Id64Arg</code>
   "\]
 
-  A -- categoryIds --> B["<code><a href='./SharedVisibilityHandling.md#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({ categoryIds, modelId: undefined })</code>"]
+  A -- categoryIds --> B["<code style='text-align: left;'><a href='./SharedVisibilityHandling.md#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({
+  <code style='padding-left: 2rem'>categoryIds,
+  modelId: undefined</code>
+  })</code>"]
 
   %% Results
   B -- partial --> RESULT_Partial
@@ -107,10 +113,14 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>- classificationTableIds: **Id64Arg**<br/>- on: **boolean**</code>
+    <code style='text-align: left;'>- classificationTableIds: Id64Arg<br/>- on: boolean</code>
   "\]
 
-  A -- categoryIds --> B["<code><a href='./SharedVisibilityHandling.md#changecategoriesvisibilitystatus'>changeCategoriesVisibilityStatus</a>({ categoryIds, modelId: undefined, on })</code>"]
+  A -- categoryIds --> B["<code style='text-align: left;'><a href='./SharedVisibilityHandling.md#changecategoriesvisibilitystatus'>changeCategoriesVisibilityStatus</a>({
+    <code style='padding-left: 2rem'>categoryIds,
+    modelId: undefined,
+    on</code>
+  })</code>"]
   B --> RESULT_Done
 ```
 
@@ -134,9 +144,13 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>- classificationIds: **Id64Arg**<br/>- on: **boolean**</code>
+    <code style='text-align: left;'>- classificationIds: Id64Arg<br/>- on: boolean</code>
   "\]
 
-  A -- categoryIds --> B["<code><a href='./SharedVisibilityHandling.md#changecategoriesvisibilitystatus'>changeCategoriesVisibilityStatus</a>({ categoryIds, modelId: undefined, on })</code>"]
+  A -- categoryIds --> B["<code style='text-align: left;'><a href='./SharedVisibilityHandling.md#changecategoriesvisibilitystatus'>changeCategoriesVisibilityStatus</a>({
+    <code style='padding-left: 2rem'>categoryIds,
+    modelId: undefined,
+    on</code>
+  })</code>"]
   B --> RESULT_Done
 ```
