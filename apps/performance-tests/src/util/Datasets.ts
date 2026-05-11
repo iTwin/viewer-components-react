@@ -13,6 +13,7 @@ import {
   insertSpatialCategory,
   insertSubCategory,
 } from "test-utilities";
+import { withEditTxn } from "@itwin/core-backend";
 import { createIModel } from "./IModelUtilities.js";
 
 export const IMODEL_NAMES = ["50k 3D elements", "50k subcategories", "50k categories"] as const;
@@ -85,35 +86,37 @@ export class Datasets {
    */
   private static async createCategoryIModel(name: string, localPath: string, numElements: number) {
     console.log(`${numElements} categories: Creating...`);
-    await createIModel(name, localPath, async (imodel) => {
-      const { id: physicalModelId } = insertPhysicalModelWithPartition({ imodel, codeValue: "test physical model" });
-      const rootDefinitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
-      const rootDefinitionModel = insertPhysicalSubModel({ imodel, classFullName: "BisCore.DefinitionModel", modeledElementId: rootDefinitionContainer.id });
-      const numberOfCategoriesPerDefinitionContainer = 1000;
-      const numberOfDefinitionContainers = Math.round(numElements / numberOfCategoriesPerDefinitionContainer);
-      for (let i = 0; i < numberOfDefinitionContainers; ++i) {
-        const definitionContainer = insertDefinitionContainer({ imodel, codeValue: `DefinitionContainer ${i}`, modelId: rootDefinitionModel.id });
-        const definitionModel = insertPhysicalSubModel({ imodel, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
-        const numberOfCategories =
-          i + 1 < numberOfDefinitionContainers
-            ? numberOfCategoriesPerDefinitionContainer
-            : numElements - (numberOfDefinitionContainers - 1) * numberOfCategoriesPerDefinitionContainer;
-        for (let j = 0; j < numberOfCategories; ++j) {
-          const { id: categoryId } = insertSpatialCategory({
-            imodel,
-            codeValue: `c${i}-${j}`,
-            userLabel: `test_category${i}-${j}`,
-            modelId: definitionModel.id,
-          });
-          insertPhysicalElement({
-            imodel,
-            modelId: physicalModelId,
-            categoryId,
-            userLabel: "test_element",
-          });
+    await createIModel(name, localPath, async (imodel) =>
+      withEditTxn(imodel, (txn) => {
+        const { id: physicalModelId } = insertPhysicalModelWithPartition({ txn, codeValue: "test physical model" });
+        const rootDefinitionContainer = insertDefinitionContainer({ txn, codeValue: "DefinitionContainerRoot" });
+        const rootDefinitionModel = insertPhysicalSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: rootDefinitionContainer.id });
+        const numberOfCategoriesPerDefinitionContainer = 1000;
+        const numberOfDefinitionContainers = Math.round(numElements / numberOfCategoriesPerDefinitionContainer);
+        for (let i = 0; i < numberOfDefinitionContainers; ++i) {
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: `DefinitionContainer ${i}`, modelId: rootDefinitionModel.id });
+          const definitionModel = insertPhysicalSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+          const numberOfCategories =
+            i + 1 < numberOfDefinitionContainers
+              ? numberOfCategoriesPerDefinitionContainer
+              : numElements - (numberOfDefinitionContainers - 1) * numberOfCategoriesPerDefinitionContainer;
+          for (let j = 0; j < numberOfCategories; ++j) {
+            const { id: categoryId } = insertSpatialCategory({
+              txn,
+              codeValue: `c${i}-${j}`,
+              userLabel: `test_category${i}-${j}`,
+              modelId: definitionModel.id,
+            });
+            insertPhysicalElement({
+              txn,
+              modelId: physicalModelId,
+              categoryId,
+              userLabel: "test_element",
+            });
+          }
         }
-      }
-    });
+      }),
+    );
 
     console.log(`${numElements} categories: Done.`);
   }
@@ -124,38 +127,40 @@ export class Datasets {
    */
   private static async createSubCategoryIModel(name: string, localPath: string, numElements: number) {
     console.log(`${numElements} sub-categories: Creating...`);
-    await createIModel(name, localPath, async (imodel) => {
-      const { id: physicalModelId } = insertPhysicalModelWithPartition({ imodel, codeValue: "test physical model" });
-      const rootDefinitionContainer = insertDefinitionContainer({ imodel, codeValue: "DefinitionContainerRoot" });
-      const rootDefinitionModel = insertPhysicalSubModel({ imodel, classFullName: "BisCore.DefinitionModel", modeledElementId: rootDefinitionContainer.id });
-      const numberOfSubcategoriesPerCategory = 1000;
-      const categoryCount = numElements / numberOfSubcategoriesPerCategory;
-      for (let i = 0; i < categoryCount; ++i) {
-        const { id: categoryId } = insertSpatialCategory({
-          imodel,
-          codeValue: `sc${i}`,
-          userLabel: `test_category${i}`,
-          modelId: rootDefinitionModel.id,
-        });
-        insertPhysicalElement({
-          imodel,
-          modelId: physicalModelId,
-          categoryId,
-          userLabel: "test_element",
-        }).id;
-
-        // Insert `numberOfSubcategoriesPerCategory` - 1 subcategories as `insertSpatialCategory` provides one additional subcategory
-        for (let j = 0; j < numberOfSubcategoriesPerCategory - 1; ++j) {
-          insertSubCategory({
-            parentCategoryId: categoryId,
-            imodel,
-            codeValue: `sc${i}-${j}`,
-            userLabel: `sc${i}-${j}`,
+    await createIModel(name, localPath, async (imodel) =>
+      withEditTxn(imodel, (txn) => {
+        const { id: physicalModelId } = insertPhysicalModelWithPartition({ txn, codeValue: "test physical model" });
+        const rootDefinitionContainer = insertDefinitionContainer({ txn, codeValue: "DefinitionContainerRoot" });
+        const rootDefinitionModel = insertPhysicalSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: rootDefinitionContainer.id });
+        const numberOfSubcategoriesPerCategory = 1000;
+        const categoryCount = numElements / numberOfSubcategoriesPerCategory;
+        for (let i = 0; i < categoryCount; ++i) {
+          const { id: categoryId } = insertSpatialCategory({
+            txn,
+            codeValue: `sc${i}`,
+            userLabel: `test_category${i}`,
             modelId: rootDefinitionModel.id,
           });
+          insertPhysicalElement({
+            txn,
+            modelId: physicalModelId,
+            categoryId,
+            userLabel: "test_element",
+          }).id;
+
+          // Insert `numberOfSubcategoriesPerCategory` - 1 subcategories as `insertSpatialCategory` provides one additional subcategory
+          for (let j = 0; j < numberOfSubcategoriesPerCategory - 1; ++j) {
+            insertSubCategory({
+              parentCategoryId: categoryId,
+              txn,
+              codeValue: `sc${i}-${j}`,
+              userLabel: `sc${i}-${j}`,
+              modelId: rootDefinitionModel.id,
+            });
+          }
         }
-      }
-    });
+      }),
+    );
 
     console.log(`${numElements} sub-categories: Done.`);
   }
@@ -168,59 +173,61 @@ export class Datasets {
   private static async create3dElementIModel(name: string, localPath: string, numElements: number) {
     console.log(`${numElements} physical elements: Creating...`);
 
-    await createIModel(name, localPath, async (imodel) => {
-      const { id: physicalModelId } = insertPhysicalModelWithPartition({ imodel, codeValue: "test physical model" });
-      const { id: categoryId } = insertSpatialCategory({ imodel, codeValue: "test category" });
+    await createIModel(name, localPath, async (imodel) =>
+      withEditTxn(imodel, (txn) => {
+        const { id: physicalModelId } = insertPhysicalModelWithPartition({ txn, codeValue: "test physical model" });
+        const { id: categoryId } = insertSpatialCategory({ txn, codeValue: "test category" });
 
-      const numberOfRootElements = 1000;
-      // Number of children each direct child should have
-      const numberOfIndirectChildren = 2;
-      // Number of children each root element should have
-      const numberOfDirectChildren = Math.floor((numElements - numberOfRootElements) / (numberOfRootElements * (numberOfIndirectChildren + 1)));
-      // Due to rounding not enough elements would be inserted, calculate how many more nodes we need to add
-      let numberOfMissingElements =
-        numElements -
-        numberOfRootElements -
-        numberOfRootElements * numberOfDirectChildren -
-        numberOfRootElements * numberOfDirectChildren * numberOfIndirectChildren;
-      for (let i = 0; i < numberOfRootElements; ++i) {
-        const rootElementId = insertPhysicalElement({
-          imodel,
-          parentId: undefined,
-          modelId: physicalModelId,
-          categoryId,
-          userLabel: `root element${i}`,
-        }).id;
-        for (let j = 0; j < numberOfDirectChildren; ++j) {
-          const directChildId = insertPhysicalElement({
-            imodel,
-            parentId: rootElementId,
+        const numberOfRootElements = 1000;
+        // Number of children each direct child should have
+        const numberOfIndirectChildren = 2;
+        // Number of children each root element should have
+        const numberOfDirectChildren = Math.floor((numElements - numberOfRootElements) / (numberOfRootElements * (numberOfIndirectChildren + 1)));
+        // Due to rounding not enough elements would be inserted, calculate how many more nodes we need to add
+        let numberOfMissingElements =
+          numElements -
+          numberOfRootElements -
+          numberOfRootElements * numberOfDirectChildren -
+          numberOfRootElements * numberOfDirectChildren * numberOfIndirectChildren;
+        for (let i = 0; i < numberOfRootElements; ++i) {
+          const rootElementId = insertPhysicalElement({
+            txn,
+            parentId: undefined,
             modelId: physicalModelId,
             categoryId,
-            userLabel: `direct child ${i}-${j}`,
+            userLabel: `root element${i}`,
           }).id;
-          for (let z = 0; z < numberOfIndirectChildren; ++z) {
-            insertPhysicalElement({
-              imodel,
-              parentId: directChildId,
+          for (let j = 0; j < numberOfDirectChildren; ++j) {
+            const directChildId = insertPhysicalElement({
+              txn,
+              parentId: rootElementId,
               modelId: physicalModelId,
               categoryId,
-              userLabel: `indirect child ${i}-${j}-${z}`,
-            });
-          }
-          if (numberOfMissingElements > 0) {
-            insertPhysicalElement({
-              imodel,
-              parentId: directChildId,
-              modelId: physicalModelId,
-              categoryId,
-              userLabel: `indirect child ${i}-${j}-missing`,
-            });
-            --numberOfMissingElements;
+              userLabel: `direct child ${i}-${j}`,
+            }).id;
+            for (let z = 0; z < numberOfIndirectChildren; ++z) {
+              insertPhysicalElement({
+                txn,
+                parentId: directChildId,
+                modelId: physicalModelId,
+                categoryId,
+                userLabel: `indirect child ${i}-${j}-${z}`,
+              });
+            }
+            if (numberOfMissingElements > 0) {
+              insertPhysicalElement({
+                txn,
+                parentId: directChildId,
+                modelId: physicalModelId,
+                categoryId,
+                userLabel: `indirect child ${i}-${j}-missing`,
+              });
+              --numberOfMissingElements;
+            }
           }
         }
-      }
-    });
+      }),
+    );
 
     console.log(`${numElements} elements: Done.`);
   }

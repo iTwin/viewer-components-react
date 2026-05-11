@@ -22,6 +22,7 @@ import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialC
 import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
 import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils.js";
+import { withEditTxn } from "@itwin/core-backend";
 
 describe("Property grid", () => {
   describe("Learning snippets", () => {
@@ -37,12 +38,14 @@ describe("Property grid", () => {
       });
 
       it("renders context menu item", async () => {
-        const { imodelConnection, ...keys } = await buildIModel(async (imodel) => {
-          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
-          const category = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory" });
-          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
-          return { category };
-        });
+        const { imodelConnection, ...keys } = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+            const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
+            insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+            return { category };
+          }),
+        );
         const user = userEvent.setup();
         vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
 

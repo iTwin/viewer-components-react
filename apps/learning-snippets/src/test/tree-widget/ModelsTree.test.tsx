@@ -27,6 +27,7 @@ import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from 
 import { getSchemaContext as getTestSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
 
 import type { InstanceKey } from "@itwin/presentation-common";
+import { withEditTxn } from "@itwin/core-backend";
 
 describe("Tree widget", () => {
   mockGetBoundingClientRect();
@@ -44,12 +45,14 @@ describe("Tree widget", () => {
         });
 
         it("renders <ModelsTreeComponent />", async () => {
-          const { imodelConnection } = await buildIModel(async (imodel) => {
-            const model = insertPhysicalModelWithPartition({ imodel, codeValue: "Test model X", partitionParentId: IModel.rootSubjectId });
-            const category = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory" });
-            insertPhysicalElement({ imodel, userLabel: `element`, modelId: model.id, categoryId: category.id });
-            return { model };
-          });
+          const { imodelConnection } = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertPhysicalModelWithPartition({ txn, codeValue: "Test model X", partitionParentId: IModel.rootSubjectId });
+              const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
+              insertPhysicalElement({ txn, userLabel: `element`, modelId: model.id, categoryId: category.id });
+              return { model };
+            }),
+          );
           const testViewport = getTestViewer(imodelConnection, true);
           const unifiedSelectionStorage = createStorage();
           vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
@@ -79,22 +82,24 @@ describe("Tree widget", () => {
         });
 
         it("renders custom models tree", async function () {
-          const { imodelConnection } = await buildIModel(async (imodel) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const childSubject = insertSubject({
-              imodel,
-              codeValue: "Test subject X",
-              parentId: rootSubject.id,
-            });
-            const model = insertPhysicalModelWithPartition({ imodel, codeValue: "model", partitionParentId: childSubject.id });
-            insertPhysicalElement({
-              imodel,
-              userLabel: `element`,
-              modelId: model.id,
-              categoryId: insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory" }).id,
-            });
-            return { model, childSubject };
-          });
+          const { imodelConnection } = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+              const childSubject = insertSubject({
+                txn,
+                codeValue: "Test subject X",
+                parentId: rootSubject.id,
+              });
+              const model = insertPhysicalModelWithPartition({ txn, codeValue: "model", partitionParentId: childSubject.id });
+              insertPhysicalElement({
+                txn,
+                userLabel: `element`,
+                modelId: model.id,
+                categoryId: insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" }).id,
+              });
+              return { model, childSubject };
+            }),
+          );
           const testViewport = getTestViewer(imodelConnection, true);
           const unifiedSelectionStorage = createStorage();
           vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
