@@ -42,7 +42,7 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>- subjectIds: Id64Arg</code>
+    <code style='display: block; text-align: left;'>- subjectIds: Id64Arg</code>
   "\]
 
   A -- modelIds --> B["<code><a href='./SharedVisibilityHandling.md#getmodelsvisibilitystatus'>getModelsVisibilityStatus</a>({ modelIds })</code>"]
@@ -75,12 +75,12 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>- subjectIds: Id64Arg<br/>- on: boolean</code>
+    <code style='display: block; text-align: left;'>- subjectIds: Id64Arg<br/>- on: boolean</code>
   "\]
 
-  A -- modelIds --> B["<code style='text-align: left;'><a href='./SharedVisibilityHandling.md#changemodelsvisibilitystatus'>changeModelsVisibilityStatus</a>({
-    <code style='padding-left: 2rem'>modelIds,
-    on</code>
+  A -- modelIds --> B["<code style='display: block; text-align: left;'><a href='./SharedVisibilityHandling.md#changemodelsvisibilitystatus'>changeModelsVisibilityStatus</a>({
+    <code style='padding-left: 2rem'>modelIds,</code>
+    <code style='padding-left: 2rem'>on</code>
   })</code>"]
   B --> RESULT_Done
 ```

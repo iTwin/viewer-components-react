@@ -47,7 +47,7 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>- categoryId: Id64String<br/> - subCategoryIds: Id64Arg</code>
+    <code style='display: block; text-align: left;'>- categoryId: Id64String<br/> - subCategoryIds: Id64Arg</code>
   "\]
 
   %% Branch No
@@ -99,7 +99,7 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>- modelIds: Id64Arg</code>
+    <code style='display: block; text-align: left;'>- modelIds: Id64Arg</code>
   "\]
 
   A -- modelId --> B{"<code>viewport.viewsModel(modelId)</code>"}
@@ -110,9 +110,9 @@ flowchart TD
   C1 -- Yes --> C12[Get categories of top most elements which exist under <code>modelId</code>.]
   C11 -- categoryIds --> D0{<code>categoryIds.size > 0<code/>}
   C12 -- categoryIds --> D0
-    D0 -- Yes --> D1["<code style='text-align: left;'><a href='#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({
-      <code style='padding-left: 2rem'>modelId,
-      categoryIds</code>
+    D0 -- Yes --> D1["<code style='display: block; text-align: left;'><a href='#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({
+      <code style='padding-left: 2rem'>modelId,</code>
+      <code style='padding-left: 2rem'>categoryIds</code>
     })</code>"]
     D0 -- No --> E1[visible]
 
@@ -165,7 +165,7 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>- modelId: Id64String | undefined <br/> - categoryIds: Id64Arg</code>
+    <code style='display: block; text-align: left;'>- modelId: Id64String | undefined <br/> - categoryIds: Id64Arg</code>
   "\]
 
   %% Branch Yes
@@ -173,15 +173,15 @@ flowchart TD
   B -- categoryId --> C1[Get sub-categories for specified category from cache]
   B -- categoryId --> C2[Get models for specified category from cache]
 
-  C1 -- subCategoryIds --> D1["<code style='text-align: left;'><a href='#getsubcategoriesvisibilitystatus'>getSubCategoriesVisibilityStatus</a>({
-    <code style='padding-left: 2rem'>subCategoryIds,
-    categoryId</code>
+  C1 -- subCategoryIds --> D1["<code style='display: block; text-align: left;'><a href='#getsubcategoriesvisibilitystatus'>getSubCategoriesVisibilityStatus</a>({
+    <code style='padding-left: 2rem'>subCategoryIds,</code>
+    <code style='padding-left: 2rem'>categoryId</code>
   })</code>"]
 
   C2 --> D2[Iterate through models]
-  D2 -- modelId --> F["<code style='text-align: left;'><a href='#getmodelwithcategoryvisibilitystatus'>getModelWithCategoryVisibilityStatus</a>({
-    <code style='padding-left: 2rem'>modelId,
-    categoryId</code>
+  D2 -- modelId --> F["<code style='display: block; text-align: left;'><a href='#getmodelwithcategoryvisibilitystatus'>getModelWithCategoryVisibilityStatus</a>({
+    <code style='padding-left: 2rem'>modelId,</code>
+    <code style='padding-left: 2rem'>categoryId</code>
   })</code>"]
 
   %% Branch No
@@ -236,7 +236,7 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>- modelId: Id64String<br/> - categoryId: Id64String</code>
+    <code style='display: block; text-align: left;'>- modelId: Id64String<br/> - categoryId: Id64String</code>
   "\]
 
   %% Branch A1
@@ -260,7 +260,7 @@ flowchart TD
           Per model category override === 'show'
           <strong style='font-weight: bold;'>OR</strong>
           Per model category override === 'none'<br/> && <code>viewport.viewsCategory(props.categoryId)</code>
-        </div>
+        </code>
       "}
 
 
@@ -280,13 +280,13 @@ flowchart TD
       F -- Yes --> G2[From cache get total count of elements under category with model]
 
       F -- Yes --> G3["Props
-    <div style='text-align: left;'>- For <code>oppositeSet</code> elements execute query (if set changed after last execution), to get their models, categories and parent elements path. <br/> - Find always/never drawn child elements (nested as well) where queried data matches <code>props.modelId</code> & <code>props.categoryId</code>. <br/> - Get count of elements under model with category in <code>oppositeSet</code>: <code>numberOfElementsInOppositeSet</code> </div>
+    <code style='display: block; text-align: left;'>- For <code>oppositeSet</code> elements execute query (if set changed after last execution), to get their models, categories and parent elements path. <br/> - Find always/never drawn child elements (nested as well) where queried data matches <code>props.modelId</code> & <code>props.categoryId</code>. <br/> - Get count of elements under model with category in <code>oppositeSet</code>: <code>numberOfElementsInOppositeSet</code> </code>
     "]
 
-      G2 -- totalCount --> H["<code style='text-align: left;'><a href='#getalwaysorneverdrawnvisibilitystatus'>getAlwaysOrNeverDrawnVisibilityStatus</a>({
-        <code style='padding-left: 2rem'>totalCount,
-        numberOfElementsInOppositeSet,
-        defaultStatus</code>
+      G2 -- totalCount --> H["<code style='display: block; text-align: left;'><a href='#getalwaysorneverdrawnvisibilitystatus'>getAlwaysOrNeverDrawnVisibilityStatus</a>({
+        <code style='padding-left: 2rem'>totalCount,</code>
+        <code style='padding-left: 2rem'>numberOfElementsInOppositeSet,</code>
+        <code style='padding-left: 2rem'>defaultStatus</code>
       })</code>"]
       G3 -- Pass down --> H
 
@@ -326,12 +326,12 @@ flowchart TD
   RESULT_Hidden[/hidden/]
 
   %% Start
-  TITLE(["<code>getElementsVisibilityStatus</code>"]) --> A1["<div style='text-align: left;'> Get modelIds from cache: <br/> 1. <code>props.elementIds</code> which are sub-models <br/> 2. Children which are sub-models (nested as well) </div>"]
+  TITLE(["<code>getElementsVisibilityStatus</code>"]) --> A1["<code style='display: block; text-align: left;'> Get modelIds from cache: <br/> 1. <code>props.elementIds</code> which are sub-models <br/> 2. Children which are sub-models (nested as well) </code>"]
   TITLE(["<code>getElementsVisibilityStatus</code>"]) --> A2{"<code>viewport.viewsModel(props.modelId)</code>"}
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>- elementIds: Id64Arg<br/> - modelId: Id64String<br/> - categoryId: Id64String<br/> - categoryOfTopMostParentElement: Id64String<br/> - parentElementIdsPath: Array(Id64Arg)<br/> - childrenCount: number | undefined</code>
+    <code style='display: block; text-align: left;'>- elementIds: Id64Arg<br/> - modelId: Id64String<br/> - categoryId: Id64String<br/> - categoryOfTopMostParentElement: Id64String<br/> - parentElementIdsPath: Array(Id64Arg)<br/> - childrenCount: number | undefined</code>
   "\]
 
   %% Branch A1
@@ -355,7 +355,7 @@ flowchart TD
           Per model category override === 'show'
           <strong style='font-weight: bold;'>OR</strong>
           Per model category override === 'none'<br/> && <code>viewport.viewsCategory(props.categoryId)</code>
-        </div>
+        </code>
       "}
 
         %% Branch No
@@ -378,7 +378,7 @@ flowchart TD
 
         %% Branch No
         G2 -- No --> H2["Props
-        <div style='text-align: left;'>- For <code>oppositeSet</code> elements execute query (if set changed after last execution), to get their models, categories and parent elements path. <br/> - Find always/never drawn child elements (nested as well) where queried data matches <code>props.modelId</code> & <code>props.categoryId</code> & <code>props.parentElementIdsPath</code>. <br/> - Get count of children in <code>oppositeSet</code>: <code>numberOfElementsInOppositeSet</code> </div>
+        <code style='display: block; text-align: left;'>- For <code>oppositeSet</code> elements execute query (if set changed after last execution), to get their models, categories and parent elements path. <br/> - Find always/never drawn child elements (nested as well) where queried data matches <code>props.modelId</code> & <code>props.categoryId</code> & <code>props.parentElementIdsPath</code>. <br/> - Get count of children in <code>oppositeSet</code>: <code>numberOfElementsInOppositeSet</code> </code>
         "]
 
 
@@ -386,10 +386,10 @@ flowchart TD
       H1 -- Pass down --> I["<code>numberOfElementsInOppositeSet</code>: <code>props.elementIds</code> in <code>oppositeSet</code> and children count in <code>oppositeSet</code> <br/> <code>totalCount</code>: <code>props.elementIds</code> + <code>props.childrenCount</code>"]
       H2 -- Pass down --> I
 
-      I -- Pass down --> J["<code style='text-align: left;'><a href='#getalwaysorneverdrawnvisibilitystatus'>getAlwaysOrNeverDrawnVisibilityStatus</a>({
-      <code style='padding-left: 2rem'>totalCount,
-      numberOfElementsInOppositeSet,
-      defaultStatus</code>
+      I -- Pass down --> J["<code style='display: block; text-align: left;'><a href='#getalwaysorneverdrawnvisibilitystatus'>getAlwaysOrNeverDrawnVisibilityStatus</a>({
+      <code style='padding-left: 2rem'>totalCount,</code>
+      <code style='padding-left: 2rem'>numberOfElementsInOppositeSet,</code>
+      <code style='padding-left: 2rem'>defaultStatus</code>
       })</code>"]
 
 
@@ -432,7 +432,7 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>
+    <code style='display: block; text-align: left;'>
       - totalCount: number
      <span style='color: #808080 !important; font-style: italic;'>Number of elements that are under node <br/> (includes node itself and its nested child elements)
      </span>
@@ -491,7 +491,7 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>- modelId: Id64String<br/> - categoryId: Id64String</code>
+    <code style='display: block; text-align: left;'>- modelId: Id64String<br/> - categoryId: Id64String</code>
   "\]
 
   A -- override --> B{"<code>override === 'show'</code>"}
@@ -526,7 +526,7 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>- modelIds: Id64Arg<br/>- on: boolean</code>
+    <code style='display: block; text-align: left;'>- modelIds: Id64Arg<br/>- on: boolean</code>
   "\]
 
   A -- Yes --> RESULT_Done
@@ -537,19 +537,19 @@ flowchart TD
   %% Branch off
   C -- false --> D["<code>viewport.changeModelDisplay({ modelIds, display: false })</code>"]
   D --> E["For each <code>modelId</code>: get sub-models from cache"]
-  E --> F["<code style='text-align: left;'><a href='#changemodelsvisibilitystatus'>changeModelsVisibilityStatus</a>({
-    <code style='padding-left: 2rem'>modelIds: subModels,
-    on: false</code>
+  E --> F["<code style='display: block; text-align: left;'><a href='#changemodelsvisibilitystatus'>changeModelsVisibilityStatus</a>({
+    <code style='padding-left: 2rem'>modelIds: subModels,</code>
+    <code style='padding-left: 2rem'>on: false</code>
   })</code>"]
   F --> RESULT_Done
 
   %% Branch on
   C -- true --> G["<code>viewport.changeModelDisplay({ modelIds, display: true })</code>"]
   G --> H["For each <code>modelId</code>: get categories from cache"]
-  H --> I["<code style='text-align: left;'><a href='#changecategoriesvisibilitystatus'>changeCategoriesVisibilityStatus</a>({
-    <code style='padding-left: 2rem'>categoryIds,
-    modelId,
-    on: true</code>
+  H --> I["<code style='display: block; text-align: left;'><a href='#changecategoriesvisibilitystatus'>changeCategoriesVisibilityStatus</a>({
+    <code style='padding-left: 2rem'>categoryIds,</code>
+    <code style='padding-left: 2rem'>modelId,</code>
+    <code style='padding-left: 2rem'>on: true</code>
   })</code>"]
   I --> RESULT_Done
 ```
@@ -574,56 +574,56 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>- categoryIds: Id64Arg<br/>- on: boolean<br/>- modelId: Id64String | undefined</code>
+    <code style='display: block; text-align: left;'>- categoryIds: Id64Arg<br/>- on: boolean<br/>- modelId: Id64String | undefined</code>
   "\]
 
   A -- Yes --> RESULT_Done
   A -- No --> B{"<code>props.modelId</code> is defined"}
 
   %% Branch with modelId
-  B -- Yes --> C["<code style='text-align: left;'><a href='#changecategoriesundermodelvisibilitystatus'>changeCategoriesUnderModelVisibilityStatus</a>({
-    <code style='padding-left: 2rem'>categoryIds,
-    modelId,
-    on</code>
+  B -- Yes --> C["<code style='display: block; text-align: left;'><a href='#changecategoriesundermodelvisibilitystatus'>changeCategoriesUnderModelVisibilityStatus</a>({
+    <code style='padding-left: 2rem'>categoryIds,</code>
+    <code style='padding-left: 2rem'>modelId,</code>
+    <code style='padding-left: 2rem'>on</code>
   })</code>"]
   C --> RESULT_Done
 
   %% Branch without modelId - run in parallel
-  B -- No --> E["<code style='text-align: left;'>viewport.changeCategoryDisplay({
-    <code style='padding-left: 2rem'>categoryIds,
-    display: on,
-    enableAllSubCategories: false</code>
+  B -- No --> E["<code style='display: block; text-align: left;'>viewport.changeCategoryDisplay({
+    <code style='padding-left: 2rem'>categoryIds,</code>
+    <code style='padding-left: 2rem'>display: on,</code>
+    <code style='padding-left: 2rem'>enableAllSubCategories: false</code>
   })
-  </div>"]
+  </code>"]
   B -- No --> D["Get models which are related to categories from cache."]
   D -- "Map(modelId, Set(modelCategoryIds))" --> F["Iterate through map entries"]
   F -- "modelId, modelCategoryIds" --> F1{"<code>hasSubModels({ modelId })</code>"}
   F1 -- No --> RESULT_Done
   F1 -- Yes --> F1_1["Iterate through <code>modelCategoryIds</code>"]
   F1_1 -- categoryId --> F1_2["Get sub-models under the model & category from cache"]
-  F1_2 -- subModels --> F1_3["<code style='text-align: left;'><a href='#changemodelsvisibilitystatus'>changeModelsVisibilityStatus</a>({
-    <code style='padding-left: 2rem'>modelIds: subModels,
-    on</code>
+  F1_2 -- subModels --> F1_3["<code style='display: block; text-align: left;'><a href='#changemodelsvisibilitystatus'>changeModelsVisibilityStatus</a>({
+    <code style='padding-left: 2rem'>modelIds: subModels,</code>
+    <code style='padding-left: 2rem'>on</code>
   })
-  </div>"]
+  </code>"]
 
   B -- No --> G{"<code>props.on</code>"}
 
-  F -- "modelId, modelCategories" --> F2["<code style='text-align: left;'>viewport.setPerModelCategoryOverride({
-    <code style='padding-left: 2rem'>modelIds: modelId,
-    categoryIds: modelCategories,
-    override: 'none'</code>
+  F -- "modelId, modelCategories" --> F2["<code style='display: block; text-align: left;'>viewport.setPerModelCategoryOverride({
+    <code style='padding-left: 2rem'>modelIds: modelId,</code>
+    <code style='padding-left: 2rem'>categoryIds: modelCategories,</code>
+    <code style='padding-left: 2rem'>override: 'none'</code>
   })</code>"]
-  F -- "modelId, modelCategories" --> F3["<code style='text-align: left;'><a href='#clearalwaysandneverdrawnelements'>clearAlwaysAndNeverDrawnElements</a>({
-    <code style='padding-left: 2rem'>categoryIds: modelCategories,
-    modelId</code>
+  F -- "modelId, modelCategories" --> F3["<code style='display: block; text-align: left;'><a href='#clearalwaysandneverdrawnelements'>clearAlwaysAndNeverDrawnElements</a>({
+    <code style='padding-left: 2rem'>categoryIds: modelCategories,</code>
+    <code style='padding-left: 2rem'>modelId</code>
   })</code>"]
 
   G -- Yes --> F4{"<code>viewport.viewsModel(modelId)</code>"}
   F4 -- Yes --> RESULT_Done
-  F4 -- No --> F5["<code style='text-align: left;'><a href='#showmodelwithoutanycategoriesorelements'>showModelWithoutAnyCategoriesOrElements</a>({
-    <code style='padding-left: 2rem'>modelId,
-    categoriesToNotOverride: modelCategories</code>
+  F4 -- No --> F5["<code style='display: block; text-align: left;'><a href='#showmodelwithoutanycategoriesorelements'>showModelWithoutAnyCategoriesOrElements</a>({
+    <code style='padding-left: 2rem'>modelId,</code>
+    <code style='padding-left: 2rem'>categoriesToNotOverride: modelCategories</code>
   })</code>"]
 
   F5 --> RESULT_Done
@@ -633,9 +633,9 @@ flowchart TD
   G2 -- subCategories --> G3["Iterate through sub-categories"]
   G3 -- subCategoryId --> G4{"<code>viewport.viewsSubCategory(subCategoryId)</code>"}
   G4 -- Yes --> RESULT_Done
-  G4 -- No --> G5["<code style='text-align: left;'>viewport.changeSubCategoryDisplay({
-    <code style='padding-left: 2rem'>subCategoryId,
-    display: true</code>
+  G4 -- No --> G5["<code style='display: block; text-align: left;'>viewport.changeSubCategoryDisplay({
+    <code style='padding-left: 2rem'>subCategoryId,</code>
+    <code style='padding-left: 2rem'>display: true</code>
   })</code>"]
   G5 --> RESULT_Done
   G -- No --> RESULT_Done
@@ -666,32 +666,32 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>- modelId: Id64String<br/>- categoryIds: Id64Arg<br/>- on: boolean</code>
+    <code style='display: block; text-align: left;'>- modelId: Id64String<br/>- categoryIds: Id64Arg<br/>- on: boolean</code>
   "\]
 
   %% All run in parallel (merge)
-  A -- Yes --> A1["<code style='text-align: left;'><a href='#showmodelwithoutanycategoriesorelements'>showModelWithoutAnyCategoriesOrElements</a>({
-  <code style='padding-left: 2rem'>modelId,
-  categoriesToNotOverride: categoryIds</code>
+  A -- Yes --> A1["<code style='display: block; text-align: left;'><a href='#showmodelwithoutanycategoriesorelements'>showModelWithoutAnyCategoriesOrElements</a>({
+  <code style='padding-left: 2rem'>modelId,</code>
+  <code style='padding-left: 2rem'>categoriesToNotOverride: categoryIds</code>
   })</code>"]
   A1 --> RESULT_Done
   A -- No --> RESULT_Done
 
-  TITLE --> B["<code style='text-align: left;'>viewport.setPerModelCategoryOverride({
-    <code style='padding-left: 2rem'>modelIds: modelId,
-    categoryIds,
-    override: on ? 'show' : 'hide'</code>
+  TITLE --> B["<code style='display: block; text-align: left;'>viewport.setPerModelCategoryOverride({
+    <code style='padding-left: 2rem'>modelIds: modelId,</code>
+    <code style='padding-left: 2rem'>categoryIds,</code>
+    <code style='padding-left: 2rem'>override: on ? 'show' : 'hide'</code>
   })</code>"]
-  TITLE --> C["<code style='text-align: left;'><a href='#clearalwaysandneverdrawnelements'>clearAlwaysAndNeverDrawnElements</a>({
-    <code style='padding-left: 2rem'>categoryIds,
-    modelId</code>
+  TITLE --> C["<code style='display: block; text-align: left;'><a href='#clearalwaysandneverdrawnelements'>clearAlwaysAndNeverDrawnElements</a>({
+    <code style='padding-left: 2rem'>categoryIds,</code>
+    <code style='padding-left: 2rem'>modelId</code>
   })</code>"]
   TITLE --> D{"<code>hasSubModels({ modelId })</code>"}
   D -- Yes --> D1["Iterate through categories"]
   D1 -- categoryId --> D2["Get sub-models under model & category"]
-  D2 -- subModels --> D3["<code style='text-align: left;'><a href='#changemodelsvisibilitystatus'>changeModelsVisibilityStatus</a>({
-    <code style='padding-left: 2rem'>modelIds: subModels,
-    on</code>
+  D2 -- subModels --> D3["<code style='display: block; text-align: left;'><a href='#changemodelsvisibilitystatus'>changeModelsVisibilityStatus</a>({
+    <code style='padding-left: 2rem'>modelIds: subModels,</code>
+    <code style='padding-left: 2rem'>on</code>
   })</code>"]
 
   B --> RESULT_Done
@@ -720,7 +720,7 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>- elementIds: Id64Arg<br/>- modelId: Id64String<br/>- categoryId: Id64String<br/>- on: boolean<br/>- children: Id64Arg | undefined</code>
+    <code style='display: block; text-align: left;'>- elementIds: Id64Arg<br/>- modelId: Id64String<br/>- categoryId: Id64String<br/>- on: boolean<br/>- children: Id64Arg | undefined</code>
   "\]
 
   A --> B{"<code>viewport.viewsModel(props.modelId)</code>"}
@@ -728,12 +728,12 @@ flowchart TD
   %% Model not visible
   B -- No --> C{"<code>props.on</code>"}
   C -- No --> D["<code>visibleByDefault = () => false</code>"]
-  D --> H["<code style='text-align: left;'><a href='#queueelementsvisibilitychange'>queueElementsVisibilityChange</a>({
-    <code style='padding-left: 2rem'>elementIds: elementsToChange,
-    on,
-    visibleByDefault</code>
+  D --> H["<code style='display: block; text-align: left;'><a href='#queueelementsvisibilitychange'>queueElementsVisibilityChange</a>({
+    <code style='padding-left: 2rem'>elementIds: elementsToChange,</code>
+    <code style='padding-left: 2rem'>on,</code>
+    <code style='padding-left: 2rem'>visibleByDefault</code>
   })</code>"]
-  C -- Yes --> E["<code style='text-align: left;'><a href='#showmodelwithoutanycategoriesorelements'>showModelWithoutAnyCategoriesOrElements</a>({
+  C -- Yes --> E["<code style='display: block; text-align: left;'><a href='#showmodelwithoutanycategoriesorelements'>showModelWithoutAnyCategoriesOrElements</a>({
   <code style='padding-left: 2rem'>modelId: props.modelId</code>
   })</code>"]
   E --> F["<code>defaultVisibility</code> = <code><a href='#getvisiblemodelcategorydirectvisibilitystatus'>getVisibleModelCategoryDirectVisibilityStatus</a>({categoryId, modelId })</code>"]
@@ -747,9 +747,9 @@ flowchart TD
 
   J -- elementId --> K["get sub-models under element (if element itself is a sub-model it is included)"]
   K -- subModels --> L{"<code> subModels.length > 0 </code>"}
-  L -- Yes -->  L1["<code style='text-align: left;'><a href='#changemodelsvisibilitystatus'>changeModelsVisibilityStatus</a>({
-    <code style='padding-left: 2rem'>modelIds: subModels,
-    on</code>
+  L -- Yes -->  L1["<code style='display: block; text-align: left;'><a href='#changemodelsvisibilitystatus'>changeModelsVisibilityStatus</a>({
+    <code style='padding-left: 2rem'>modelIds: subModels,</code>
+    <code style='padding-left: 2rem'>on</code>
   })</code>"]
 
   H --> RESULT_Done
@@ -785,7 +785,7 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>- modelId: Id64String<br/> - categoriesToNotOverride: Id64Set | undefined</code>
+    <code style='display: block; text-align: left;'>- modelId: Id64String<br/> - categoriesToNotOverride: Id64Set | undefined</code>
   "\]
 
   A -- "allModelCategories,<br/>modelAlwaysDrawnElements" --> B{"<code>viewport.viewsModel(modelId)</code>"}
@@ -795,13 +795,13 @@ flowchart TD
 
   %% Main flow
   B -- No --> C{"<code>alwaysDrawn &&  <br/> modelAlwaysDrawnElements </code>"}
-  C -- Yes --> C1["<code style='text-align: left;'>viewport.setAlwaysDrawn({
+  C -- Yes --> C1["<code style='display: block; text-align: left;'>viewport.setAlwaysDrawn({
     <code style='padding-left: 2rem'>elementIds: alwaysDrawn - modelAlwaysDrawnElements</code>
   })</code>"]
   C -- No --> RESULT_Done
-  B -- No -->  D["<code style='text-align: left;'>viewport.changeModelDisplay({
-    <code style='padding-left: 2rem'>modelIds: modelId,
-    display: true</code>
+  B -- No -->  D["<code style='display: block; text-align: left;'>viewport.changeModelDisplay({
+    <code style='padding-left: 2rem'>modelIds: modelId,</code>
+    <code style='padding-left: 2rem'>display: true</code>
   })</code>"]
 
   B -- No --> E["Iterate through <code>allModelCategories</code>"]
@@ -816,10 +816,10 @@ flowchart TD
   I1 --> K
   I2 --> K
   K -- toHide, toNone --> J{"<code>list.length > 0 </code>"}
-  J -- Yes --> J1["<code style='text-align: left'>viewport.setPerModelCategoryOverride({
-  <code style='padding-left: 2rem'>modelIds,
-  categoryIds: list,
-  override: list === toHide ? 'hide' : 'none'</code>
+  J -- Yes --> J1["<code style='display: block; text-align: left;'>viewport.setPerModelCategoryOverride({
+  <code style='padding-left: 2rem'>modelIds,</code>
+  <code style='padding-left: 2rem'>categoryIds: list,</code>
+  <code style='padding-left: 2rem'>override: list === toHide ? 'hide' : 'none'</code>
   })</code>
   <br/>
   "]
@@ -850,7 +850,7 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>- elementIds: Id64Arg<br/> - on: boolean<br/> - visibleByDefault: (elementId) => boolean</code>
+    <code style='display: block; text-align: left;'>- elementIds: Id64Arg<br/> - on: boolean<br/> - visibleByDefault: (elementId) => boolean</code>
   "\]
 
   A -- elementId --> B{"<code>props.on</code>"}
@@ -893,18 +893,18 @@ flowchart TD
 
   PROPS[\"
     <code>props</code>
-    <code style='text-align: left;'>- categoryIds: Id64Arg<br/> - modelId: Id64String</code>
+    <code style='display: block; text-align: left;'>- categoryIds: Id64Arg<br/> - modelId: Id64String</code>
   "\]
 
   A -- "alwaysDrawn" --> B1{"<code>viewport.alwaysDrawn?.size<br/> && alwaysDrawn.size </code>"}
-  B1 -- Yes --> B2["<code style='text-align: left;'>viewport.setAlwaysDrawn({
+  B1 -- Yes --> B2["<code style='display: block; text-align: left;'>viewport.setAlwaysDrawn({
     <code style='padding-left: 2rem'>elementIds: viewport.alwaysDrawn - alwaysDrawn</code>
   })</code>"]
   B1 -- No --> RESULT_Done
   B2 --> RESULT_Done
 
   A -- "neverDrawn" --> C1{"<code>viewport.neverDrawn?.size<br/> && neverDrawn.size </code>"}
-  C1 -- Yes --> C2["<code style='text-align: left;'>viewport.setNeverDrawn({
+  C1 -- Yes --> C2["<code style='display: block; text-align: left;'>viewport.setNeverDrawn({
     <code style='padding-left: 2rem'>elementIds: viewport.neverDrawn - neverDrawn</code>
   })</code>"]
   C1 -- No --> RESULT_Done
