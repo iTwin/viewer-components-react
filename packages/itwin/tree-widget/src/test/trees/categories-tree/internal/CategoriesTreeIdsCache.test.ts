@@ -48,15 +48,17 @@ describe("CategoriesTreeIdsCache", () => {
 
   describe("getDirectChildDefinitionContainersAndCategories", () => {
     it("returns empty list when definition container contains nothing", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-        return { definitionContainer };
-      }));
+          return { definitionContainer };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(
@@ -68,14 +70,16 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns empty lists when definition container contains empty definition container", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-        const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-        insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
-        return { definitionContainerRoot };
-      }));
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+          const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+          insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+          return { definitionContainerRoot };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(
@@ -87,17 +91,19 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns child definition container when definition container contains definition container, that has categories", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-        const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-        const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+          const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-        return { definitionContainerRoot, definitionContainerChild };
-      }));
+          return { definitionContainerRoot, definitionContainerChild };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(
@@ -109,15 +115,17 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns child definition container when definition container contains definition container, that has empty categories and includeEmpty is true", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-        const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-        const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
-        insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+          const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+          insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
 
-        return { definitionContainerRoot, definitionContainerChild };
-      }));
+          return { definitionContainerRoot, definitionContainerChild };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(
@@ -131,15 +139,17 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns empty when definition container contains definition container, that has empty categories and includeEmpty is false", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-        const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-        const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
-        insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+          const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+          insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
 
-        return { definitionContainerRoot, definitionContainerChild };
-      }));
+          return { definitionContainerRoot, definitionContainerChild };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(
@@ -156,15 +166,17 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns child categories when definition container contains categories", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelRoot.id });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-        return { definitionContainerRoot, category };
-      }));
+          return { definitionContainerRoot, category };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(
@@ -176,13 +188,15 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns child categories when definition container contains empty categories and includeEmpty is true", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelRoot.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelRoot.id });
 
-        return { definitionContainerRoot, category };
-      }));
+          return { definitionContainerRoot, category };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(
@@ -196,13 +210,15 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns empty when definition container contains empty categories", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelRoot.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelRoot.id });
 
-        return { definitionContainerRoot, category };
-      }));
+          return { definitionContainerRoot, category };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(
@@ -214,17 +230,19 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns only categories when definition container contains categories and definition containers that contain nothing", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-        const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-        insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelRoot.id });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+          const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+          insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-        return { definitionContainerRoot, category };
-      }));
+          return { definitionContainerRoot, category };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(
@@ -236,20 +254,22 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns child definition container and category when definition container contains categories and definition containers that contain categories", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-        const directCategory = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelRoot.id });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: directCategory.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+          const directCategory = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: directCategory.id });
 
-        const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-        const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
-        const indirectCategory = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: indirectCategory.id });
+          const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+          const indirectCategory = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: indirectCategory.id });
 
-        return { definitionContainerRoot, directCategory, definitionModelChild };
-      }));
+          return { definitionContainerRoot, directCategory, definitionModelChild };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(
@@ -261,18 +281,20 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns child categories when definition container with categories is contained by definition container", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
 
-        const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-        const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
-        const indirectCategory = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: indirectCategory.id });
+          const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+          const indirectCategory = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: indirectCategory.id });
 
-        return { definitionModelChild, indirectCategory };
-      }));
+          return { definitionModelChild, indirectCategory };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(
@@ -286,40 +308,46 @@ describe("CategoriesTreeIdsCache", () => {
 
   describe("getAllContainedCategories", () => {
     it("returns empty list when definition container contains nothing", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
 
-        return { definitionContainer };
-      }));
+          return { definitionContainer };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainer.id] }))).to.deep.eq(new Set());
     });
 
     it("returns empty list when definition container contains empty categories", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
-        insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+          insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
 
-        return { definitionContainer };
-      }));
+          return { definitionContainer };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainer.id] }))).to.deep.eq(new Set());
     });
 
     it("returns contained categories when definition container contains empty categories and includeEmptyCategories is true", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
 
-        return { definitionContainer, category };
-      }));
+          return { definitionContainer, category };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(
@@ -328,17 +356,19 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns indirectly contained categories when definition container contains definition container that has categories", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-        const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-        const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+          const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-        return { definitionContainerRoot, category };
-      }));
+          return { definitionContainerRoot, category };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainerRoot.id] }))).to.deep.eq(
@@ -347,15 +377,17 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns child categories when definition container contains categories", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-        return { definitionContainer, category };
-      }));
+          return { definitionContainer, category };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainer.id] }))).to.deep.eq(
@@ -364,20 +396,22 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns direct and indirect categories when definition container contains categories and definition containers that contain categories", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-        const directCategory = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelRoot.id });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: directCategory.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+          const directCategory = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: directCategory.id });
 
-        const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-        const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
-        const indirectCategory = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: indirectCategory.id });
+          const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+          const indirectCategory = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: indirectCategory.id });
 
-        return { definitionContainerRoot, directCategory, indirectCategory };
-      }));
+          return { definitionContainerRoot, directCategory, indirectCategory };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       const result = await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainerRoot.id] }));
@@ -389,39 +423,45 @@ describe("CategoriesTreeIdsCache", () => {
   describe("getInstanceKeyPaths", () => {
     describe("from subCategory id", () => {
       it("returns empty list when subcategory doesn't exist", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-          insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        }));
+        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          }),
+        );
         const { imodelConnection } = buildIModelResult;
         const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
         expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ subCategoryId: "0x123" }))).to.deep.eq([]);
       });
 
       it("returns path to subCategory when category has subCategory", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
-          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+            const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
+            insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-          const subCategory = insertSubCategory({ txn, parentCategoryId: category.id, codeValue: "Test SpatialSubCategory" });
-          return { subCategory, category };
-        }));
+            const subCategory = insertSubCategory({ txn, parentCategoryId: category.id, codeValue: "Test SpatialSubCategory" });
+            return { subCategory, category };
+          }),
+        );
         const { imodelConnection, ...keys } = buildIModelResult;
         const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
         expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ subCategoryId: keys.subCategory.id }))).to.deep.eq([keys.category, keys.subCategory]);
       });
 
       it("returns path to subCategory when definition container contains category that has subCategory", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-          const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
-          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
-          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+            const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+            const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+            const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
+            insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-          const subCategory = insertSubCategory({ txn, parentCategoryId: category.id, codeValue: "Test SpatialSubCategory", modelId: definitionModel.id });
-          return { subCategory, category, definitionContainer };
-        }));
+            const subCategory = insertSubCategory({ txn, parentCategoryId: category.id, codeValue: "Test SpatialSubCategory", modelId: definitionModel.id });
+            return { subCategory, category, definitionContainer };
+          }),
+        );
         const { imodelConnection, ...keys } = buildIModelResult;
         const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
         expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ subCategoryId: keys.subCategory.id }))).to.deep.eq([
@@ -432,23 +472,25 @@ describe("CategoriesTreeIdsCache", () => {
       });
 
       it("returns path to subCategory when definition container contains definition container that contains category that has subCategory", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-          const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-          const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
-          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
-          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+            const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+            const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+            const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+            const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+            const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
+            insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-          const subCategory = insertSubCategory({
-            txn,
-            parentCategoryId: category.id,
-            codeValue: "Test SpatialSubCategory",
-            modelId: definitionModelChild.id,
-          });
-          return { subCategory, category, definitionContainerChild, definitionContainerRoot };
-        }));
+            const subCategory = insertSubCategory({
+              txn,
+              parentCategoryId: category.id,
+              codeValue: "Test SpatialSubCategory",
+              modelId: definitionModelChild.id,
+            });
+            return { subCategory, category, definitionContainerChild, definitionContainerRoot };
+          }),
+        );
         const { imodelConnection, ...keys } = buildIModelResult;
         const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
         expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ subCategoryId: keys.subCategory.id }))).to.deep.eq([
@@ -462,56 +504,64 @@ describe("CategoriesTreeIdsCache", () => {
 
     describe("from category id", () => {
       it("returns empty list when category doesn't exist", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
-          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
-        }));
+        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+            const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
+            insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+          }),
+        );
         const { imodelConnection } = buildIModelResult;
         const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
         expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ categoryId: "0x123" }))).to.deep.eq([]);
       });
 
       it("returns only category when only category exists", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
-          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+            const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
+            insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-          return { category };
-        }));
+            return { category };
+          }),
+        );
         const { imodelConnection, ...keys } = buildIModelResult;
         const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
         expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ categoryId: keys.category.id }))).to.deep.eq([keys.category]);
       });
 
       it("returns path to category when definition container contains category", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-          const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
-          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
-          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+            const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+            const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+            const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
+            insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-          return { category, definitionContainer };
-        }));
+            return { category, definitionContainer };
+          }),
+        );
         const { imodelConnection, ...keys } = buildIModelResult;
         const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
         expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ categoryId: keys.category.id }))).to.deep.eq([keys.definitionContainer, keys.category]);
       });
 
       it("returns path to category when definition container contains definition container that contains category", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-          const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-          const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
-          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
-          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+            const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+            const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+            const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+            const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+            const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
+            insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-          return { category, definitionContainerChild, definitionContainerRoot };
-        }));
+            return { category, definitionContainerChild, definitionContainerRoot };
+          }),
+        );
         const { imodelConnection, ...keys } = buildIModelResult;
         const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
         expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ categoryId: keys.category.id }))).to.deep.eq([
@@ -524,24 +574,28 @@ describe("CategoriesTreeIdsCache", () => {
 
     describe("from definition container id", () => {
       it("returns empty list when definition container doesn't exist", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-          insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        }));
+        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          }),
+        );
         const { imodelConnection } = buildIModelResult;
         const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
         expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ definitionContainerId: "0x123" }))).to.deep.eq([]);
       });
 
       it("returns definition container when definition container contains category", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-          const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
-          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
-          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+            const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+            const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+            const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
+            insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-          return { category, definitionContainer };
-        }));
+            return { category, definitionContainer };
+          }),
+        );
         const { imodelConnection, ...keys } = buildIModelResult;
         const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
         expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ definitionContainerId: keys.definitionContainer.id }))).to.deep.eq([
@@ -550,17 +604,19 @@ describe("CategoriesTreeIdsCache", () => {
       });
 
       it("returns path to definition container when definition container is contained by definition container", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-          const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-          const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
-          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
-          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+            const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+            const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+            const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+            const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+            const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
+            insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-          return { category, definitionContainerChild, definitionContainerRoot };
-        }));
+            return { category, definitionContainerChild, definitionContainerRoot };
+          }),
+        );
         const { imodelConnection, ...keys } = buildIModelResult;
         const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
         expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ definitionContainerId: keys.definitionContainerChild.id }))).to.deep.eq([
@@ -573,34 +629,40 @@ describe("CategoriesTreeIdsCache", () => {
 
   describe("getAllDefinitionContainersAndCategories", () => {
     it("returns empty list when no categories or definition containers exist", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-      }));
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+        }),
+      );
       const { imodelConnection } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories())).to.deep.eq({ categories: [], definitionContainers: [] });
     });
 
     it("returns empty list when only empty categories exist", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
-        insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
-      }));
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+          insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
+        }),
+      );
       const { imodelConnection } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories())).to.deep.eq({ categories: [], definitionContainers: [] });
     });
 
     it("returns empty categories and their definitionContainers when includeEmpty is set to true", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
-        return { category, definitionContainer };
-      }));
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
+          return { category, definitionContainer };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories({ includeEmpty: true }))).to.deep.eq({
@@ -610,15 +672,17 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns category when only category and empty definition container exist", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-        return { category };
-      }));
+          return { category };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories())).to.deep.eq({
@@ -628,17 +692,19 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns category when category and definition containers (that don't contain categories) exist", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-        const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-        insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+          const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+          insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-        return { category };
-      }));
+          return { category };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories())).to.deep.eq({
@@ -648,17 +714,19 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns both definition containers and their contained category when definition container contains definition container that contains categories", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-        const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-        const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+          const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-        return { definitionContainerRoot, definitionContainerChild, category };
-      }));
+          return { definitionContainerRoot, definitionContainerChild, category };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       const result = await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories());
@@ -671,15 +739,17 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns definition container and category when definition container contains category", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelRoot.id });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-        return { definitionContainerRoot, category };
-      }));
+          return { definitionContainerRoot, category };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories())).to.deep.eq({
@@ -689,17 +759,19 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns definition container and category when definition container contains category and definition container that doesn't contain category", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-        const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-        insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelRoot.id });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+          const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+          insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-        return { definitionContainerRoot, category };
-      }));
+          return { definitionContainerRoot, category };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories())).to.deep.eq({
@@ -709,20 +781,22 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns both definition containers and categories when definition container contains categories and definition container that contain categories", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-        const directCategory = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelRoot.id });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: directCategory.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+          const directCategory = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: directCategory.id });
 
-        const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-        const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
-        const indirectCategory = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: indirectCategory.id });
+          const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+          const indirectCategory = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: indirectCategory.id });
 
-        return { definitionContainerRoot, directCategory, definitionModelChild, indirectCategory };
-      }));
+          return { definitionContainerRoot, directCategory, definitionModelChild, indirectCategory };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       const result = await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories());
@@ -737,21 +811,25 @@ describe("CategoriesTreeIdsCache", () => {
 
   describe("getRootDefinitionContainersAndCategories", () => {
     it("returns empty list when no categories or definition containers exist", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-      }));
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+        }),
+      );
       const { imodelConnection } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).to.deep.eq({ categories: [], definitionContainers: [] });
     });
 
     it("returns empty list when only empty categories exist", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
-        insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
-        insertSpatialCategory({ txn, codeValue: "Root SpatialCategory" });
-      }));
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+          insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
+          insertSpatialCategory({ txn, codeValue: "Root SpatialCategory" });
+        }),
+      );
       const { imodelConnection } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).to.deep.eq({
@@ -761,13 +839,15 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns category when only empty categories exist and includeEmpty is set to true", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
-        insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
-        const rootCategory = insertSpatialCategory({ txn, codeValue: "Root SpatialCategory" });
-        return { definitionContainer, rootCategory };
-      }));
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+          insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
+          const rootCategory = insertSpatialCategory({ txn, codeValue: "Root SpatialCategory" });
+          return { definitionContainer, rootCategory };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories({ includeEmpty: true }))).to.deep.eq({
@@ -777,15 +857,17 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns category when category and definition container that doesn't contain anything exist", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-        return { category };
-      }));
+          return { category };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).to.deep.eq({
@@ -795,17 +877,19 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns category when category and definition container that contains empty definition container exist", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-        const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-        insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+          const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+          insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-        return { category };
-      }));
+          return { category };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).to.deep.eq({
@@ -815,17 +899,19 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns only the root definition container when definition container contains definition container that contains categories", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-        const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
-        const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+          const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer", modelId: definitionModelRoot.id });
+          const definitionModelChild = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelChild.id });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-        return { definitionContainerRoot };
-      }));
+          return { definitionContainerRoot };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).to.deep.eq({
@@ -835,15 +921,17 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns definition container when definition container contains category", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelRoot.id });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
 
-        return { definitionContainerRoot };
-      }));
+          return { definitionContainerRoot };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).to.deep.eq({
@@ -853,29 +941,31 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns root categories and definition containers when root categories and definition containers exist", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-        const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainerRoot = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
+          const definitionModelRoot = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
 
-        const definitionContainerRootNoChildren = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainerNoChild" });
-        insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRootNoChildren.id });
+          const definitionContainerRootNoChildren = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainerNoChild" });
+          insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRootNoChildren.id });
 
-        const definitionContainerRoot2 = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer2" });
-        const definitionModelRoot2 = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot2.id });
+          const definitionContainerRoot2 = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer2" });
+          const definitionModelRoot2 = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot2.id });
 
-        const rootCategory1 = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: rootCategory1.id });
-        const rootCategory2 = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory2" });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: rootCategory2.id });
+          const rootCategory1 = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: rootCategory1.id });
+          const rootCategory2 = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory2" });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: rootCategory2.id });
 
-        const childCategory = insertSpatialCategory({ txn, codeValue: "Test SpatialCategoryChild", modelId: definitionModelRoot.id });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: childCategory.id });
-        const childCategory2 = insertSpatialCategory({ txn, codeValue: "Test SpatialCategoryChild2", modelId: definitionModelRoot2.id });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: childCategory2.id });
+          const childCategory = insertSpatialCategory({ txn, codeValue: "Test SpatialCategoryChild", modelId: definitionModelRoot.id });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: childCategory.id });
+          const childCategory2 = insertSpatialCategory({ txn, codeValue: "Test SpatialCategoryChild2", modelId: definitionModelRoot2.id });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: childCategory2.id });
 
-        return { definitionContainerRoot, rootCategory1, definitionContainerRoot2, rootCategory2 };
-      }));
+          return { definitionContainerRoot, rootCategory1, definitionContainerRoot2, rootCategory2 };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       const result = await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories());
@@ -897,35 +987,41 @@ describe("CategoriesTreeIdsCache", () => {
 
   describe("getSubCategories", () => {
     it("returns empty list when category doesn't exist", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-      }));
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+        }),
+      );
       const { imodelConnection } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(await firstValueFrom(idsCache.getSubCategories("0x123"))).to.deep.eq(new Set());
     });
 
     it("returns empty list when category has one subCategory", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
-        return { category };
-      }));
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+          return { category };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       expect(await firstValueFrom(idsCache.getSubCategories(keys.category.id))).to.deep.eq(new Set());
     });
 
     it("returns subCategories when category has multiple subCategories", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
-        const subCategory = insertSubCategory({ txn, parentCategoryId: category.id, codeValue: "subC 1" });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+          const subCategory = insertSubCategory({ txn, parentCategoryId: category.id, codeValue: "subC 1" });
 
-        return { subCategory, category };
-      }));
+          return { subCategory, category };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       const result = await firstValueFrom(idsCache.getSubCategories(keys.category.id));
@@ -934,18 +1030,20 @@ describe("CategoriesTreeIdsCache", () => {
     });
 
     it("returns only child subCategories when multiple categories have multiple subCategories", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => withEditTxn(imodel, (txn) => {
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-        const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
-        insertSubCategory({ txn, parentCategoryId: category.id, codeValue: "subC 1" });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+          insertSubCategory({ txn, parentCategoryId: category.id, codeValue: "subC 1" });
 
-        const category2 = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory2" });
-        insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category2.id });
-        const subCategory2 = insertSubCategory({ txn, parentCategoryId: category2.id, codeValue: "subC 2" });
+          const category2 = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory2" });
+          insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category2.id });
+          const subCategory2 = insertSubCategory({ txn, parentCategoryId: category2.id, codeValue: "subC 2" });
 
-        return { subCategory2, category2 };
-      }));
+          return { subCategory2, category2 };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodelConnection), "3d");
       const result = await firstValueFrom(idsCache.getSubCategories(keys.category2.id));
