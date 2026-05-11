@@ -668,7 +668,7 @@ export abstract class Measurement {
   protected async prepareFormatting(): Promise<void> { }
 
   private async applyDataForMeasurementWidgetHandlers(data: MeasurementWidgetData): Promise<void> {
-    for (const handler of Measurement._dataForMeasurementWidgetHandlers.sort((h) => h.priority))
+    for (const handler of Measurement._dataForMeasurementWidgetHandlers.sort((a, b) => a.priority - b.priority))
       await handler.handlerFunction(this, data);
   }
 

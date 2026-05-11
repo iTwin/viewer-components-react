@@ -302,30 +302,30 @@ export namespace FormatterUtils {
     return getDefaultBearingFormatProps();
   }
 
+  async function registerBearingFormatSpecs(bearingKoQ: string, persistenceUnitName: string): Promise<void> {
+    for (const system of bearingUnitSystems) {
+      const formatProps = await getBearingFormatProps(bearingKoQ, system);
+      await IModelApp.quantityFormatter.addFormattingSpecsToRegistry({
+        name: bearingKoQ,
+        persistenceUnitName,
+        formatProps,
+        system,
+      });
+    }
+  }
+
   export async function ensureBearingFormatSpecsRegistered(bearingKoQ: string, persistenceUnitName: string): Promise<void> {
     const key = `${bearingKoQ}|${persistenceUnitName}`;
     let promise = bearingRegistrationPromises.get(key);
     if (!promise) {
-      promise = (async () => {
-        for (const system of bearingUnitSystems) {
-          const formatProps = await getBearingFormatProps(bearingKoQ, system);
-          await IModelApp.quantityFormatter.addFormattingSpecsToRegistry({
-            name: bearingKoQ,
-            persistenceUnitName,
-            formatProps,
-            system,
-          });
-        }
-      })();
+      promise = registerBearingFormatSpecs(bearingKoQ, persistenceUnitName).catch((err) => {
+        bearingRegistrationPromises.delete(key);
+        throw err;
+      });
       bearingRegistrationPromises.set(key, promise);
     }
 
-    try {
-      await promise;
-    } catch (err) {
-      bearingRegistrationPromises.delete(key);
-      throw err;
-    }
+    await promise;
   }
 
   /**
