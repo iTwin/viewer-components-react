@@ -941,7 +941,7 @@ function MyTree() {
       {...categoriesTreeProps}
       getSchemaContext={getSchemaContext}
       selectionStorage={unifiedSelectionStorage}
-      imodel={imodel}
+      imodel={imodelConnection}
       treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
     />
   );

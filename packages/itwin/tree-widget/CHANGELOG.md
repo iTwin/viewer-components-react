@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Fri, 27 Mar 2026 09:58:42 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 07 May 2026 14:10:55 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.17.10
+
+Thu, 07 May 2026 14:10:55 GMT
+
+### Patches
+
+- Bump dependencies to resolve vulnerabilities ([#1672](https://github.com/iTwin/viewer-components-react/pull/1672))
 
 ## 3.17.9
 

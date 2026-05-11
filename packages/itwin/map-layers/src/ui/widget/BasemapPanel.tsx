@@ -12,7 +12,7 @@ import { SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react
 import { ColorBuilder, ColorInputPanel, ColorPalette, ColorPicker, ColorSwatch, ColorValue, IconButton, Popover, Select } from "@itwin/itwinui-react";
 import { BasemapColorPreferences } from "../../BasemapColorPreferences";
 import { MapLayersUI } from "../../mapLayers";
-import { useSourceMapContext } from "./MapLayerManager";
+import { useSourceMapContext } from "../contexts/SourceMapContext";
 import { TransparencyPopupButton } from "./TransparencyPopupButton";
 
 import type {

@@ -16,7 +16,8 @@ import { PropertyGrid, TelemetryContextProvider } from "@itwin/property-grid-rea
 // __PUBLISH_EXTRACT_END__
 import { act, cleanup, render, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils.js";
+import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
+import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
 import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils.js";
 
@@ -34,13 +35,13 @@ describe("Property grid", () => {
       });
 
       it("renders component with feature usage and performance tracking", async () => {
-        const { imodel, ...keys } = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        const { imodelConnection, ...keys } = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const category = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           return { category };
         });
-        vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
+        vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
         const logPerformance = vi.fn();
         const logUsage = vi.fn();
 
@@ -64,7 +65,7 @@ describe("Property grid", () => {
         using _ = { [Symbol.dispose]: cleanup };
         render(<MyPropertyGrid />);
         act(() => {
-          Presentation.selection.addToSelection("", imodel, [keys.category]);
+          Presentation.selection.addToSelection("", imodelConnection, [keys.category]);
         });
         await waitFor(() => {
           expect(logUsage).toHaveBeenCalledTimes(3);
@@ -75,13 +76,13 @@ describe("Property grid", () => {
       });
 
       it("renders property grid with telemetry context", async () => {
-        const { imodel, ...keys } = await buildIModel(async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        const { imodelConnection, ...keys } = await buildIModel(async (imodel) => {
+          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+          const category = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory" });
+          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
           return { category };
         });
-        vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
+        vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
         const logPerformance = vi.fn();
         const logUsage = vi.fn();
 
@@ -98,13 +99,13 @@ describe("Property grid", () => {
                 logUsage(feature);
               }}
             >
-              <PropertyGrid imodel={imodel} />
+              <PropertyGrid imodel={imodelConnection} />
             </TelemetryContextProvider>
           );
         }
         // __PUBLISH_EXTRACT_END__
 
-        Presentation.selection.addToSelection("", imodel, [keys.category]);
+        Presentation.selection.addToSelection("", imodelConnection, [keys.category]);
 
         using _ = { [Symbol.dispose]: cleanup };
         const user = userEvent.setup();

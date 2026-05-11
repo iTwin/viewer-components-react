@@ -3,5 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+export * from "./test-utilities/Initialize.js";
 export * from "./test-utilities/IModelUtils.js";
 export * from "./test-utilities/WaitFor.js";

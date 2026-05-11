@@ -280,7 +280,7 @@ const formatSet: FormatSet = {
       composite: { units: [{ name: "Units.M", label: "m" }] },
     },
   },
-} as FormatSet;
+};
 
 const handleFormatSelection = (_formatDef: FormatDefinition, _key: string) => {
   // Handle format selection
@@ -327,14 +327,14 @@ const formatSets: FormatSet[] = [
     unitSystem: "metric",
     description: "Standard metric unit formats",
     formats: {},
-  } as FormatSet,
+  },
   {
     name: "ImperialSet",
     label: "Imperial Formats",
     unitSystem: "imperial",
     description: "Imperial unit formats",
     formats: {},
-  } as FormatSet,
+  },
 ];
 
 const handleFormatSetChange = (_formatSet: FormatSet, _key: string) => {
@@ -391,7 +391,7 @@ const formatSet: FormatSet = {
   unitSystem: "metric",
   description: "A custom format set",
   formats: {},
-} as FormatSet;
+};
 
 const handleFormatSetChange = (_updatedFormatSet: FormatSet) => {
   // Handle format set change
@@ -417,7 +417,7 @@ const formatSet: FormatSet = {
   unitSystem: "imperial",
   description: "A read-only format set",
   formats: {},
-} as FormatSet;
+};
 
 render(<FormatSetPanel formatSet={formatSet} editable={false} />);
 ```

@@ -117,7 +117,7 @@ async function getActiveTrees(treeDefinitions: SelectableTreeDefinition[], imode
     };
   };
 
-  return (await Promise.all(treeDefinitions.map(handleDefinition))).filter((tree) => tree !== undefined) as TreeContentDefinition[];
+  return (await Promise.all(treeDefinitions.map(handleDefinition))).filter((tree) => tree !== undefined);
 }
 
 function getTreeSelectorProps(trees?: TreeContentDefinition[]): TreeSelectorProps {

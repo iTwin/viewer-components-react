@@ -2,7 +2,7 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import * as React from "react";
+import React from "react";
 import { SvgLayers } from "@itwin/itwinui-icons-react";
 import { IconButton, Popover } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
