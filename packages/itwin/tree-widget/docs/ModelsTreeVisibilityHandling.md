@@ -38,14 +38,14 @@ flowchart TD
   RESULT_Hidden[/hidden/]
 
   %% Start
-  TITLE("<code>getSubjectsVisibilityStatus</code>") --> A["Get models under <code>props.subjectIds</code> from cache. These are related models and models of child subjects (can be nested)"]
+  TITLE("<span style='font-family: monospace;'>getSubjectsVisibilityStatus</span>") --> A["Get models under <span style='font-family: monospace;'>props.subjectIds</span> from cache. These are related models and models of child subjects (can be nested)"]
 
   PROPS[\"
-    <code>props</code>
-    <code style='display: block; text-align: left;'>- subjectIds: Id64Arg</code>
+    <span style='font-family: monospace;'>props</span>
+    <span style='display: block; text-align: left; font-family: monospace;'>- subjectIds: Id64Arg</span>
   "\]
 
-  A -- modelIds --> B["<code><a href='./SharedVisibilityHandling.md#getmodelsvisibilitystatus'>getModelsVisibilityStatus</a>({ modelIds })</code>"]
+  A -- modelIds --> B["<span style='font-family: monospace;'><a href='./SharedVisibilityHandling.md#getmodelsvisibilitystatus'>getModelsVisibilityStatus</a>({ modelIds })</span>"]
 
   %% Results
   B -- partial --> RESULT_Partial
@@ -71,16 +71,16 @@ flowchart TD
   RESULT_Done([Done])
 
   %% Start
-  TITLE(["<code>changeSubjectsVisibilityStatus</code>"]) --> A["Get models under <code>props.subjectIds</code> from cache. These are related models and models of child subjects (can be nested)"]
+  TITLE(["<span style='font-family: monospace;'>changeSubjectsVisibilityStatus</span>"]) --> A["Get models under <span style='font-family: monospace;'>props.subjectIds</span> from cache. These are related models and models of child subjects (can be nested)"]
 
   PROPS[\"
-    <code>props</code>
-    <code style='display: block; text-align: left;'>- subjectIds: Id64Arg<br/>- on: boolean</code>
+    <span style='font-family: monospace;'>props</span>
+    <span style='display: block; text-align: left; font-family: monospace;'>- subjectIds: Id64Arg<br/>- on: boolean</span>
   "\]
 
-  A -- modelIds --> B["<code style='display: block; text-align: left;'><a href='./SharedVisibilityHandling.md#changemodelsvisibilitystatus'>changeModelsVisibilityStatus</a>({
-    <code style='padding-left: 2rem'>modelIds,</code>
-    <code style='padding-left: 2rem'>on</code>
-  })</code>"]
+  A -- modelIds --> B["<div style='text-align: left; font-family: monospace;'><a href='./SharedVisibilityHandling.md#changemodelsvisibilitystatus'>changeModelsVisibilityStatus</a>({
+    <span style='padding-left: 2rem;'>modelIds,</span>
+    <span style='padding-left: 2rem;'>on</span>
+    })</div>"]
   B --> RESULT_Done
 ```

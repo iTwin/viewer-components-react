@@ -37,17 +37,17 @@ flowchart TD
 
 
   %% Start
-  TITLE(["<code>getClassificationTablesVisibilityStatus</code>"]) --> A["Get categories under <code>props.classificationTableIds</code> from cache. These are categories of child classifications (can be nested)"]
+  TITLE(["<span style='font-family: monospace;'>getClassificationTablesVisibilityStatus</span>"]) --> A["Get categories under <span style='font-family: monospace;'>props.classificationTableIds</span> from cache. These are categories of child classifications (can be nested)"]
 
   PROPS[\"
-    <code>props</code>
-    <code style='display: block; text-align: left;'>- classificationTableIds: Id64Arg</code>
+    <span style='font-family: monospace;'>props</span>
+    <span style='display: block; text-align: left; font-family: monospace;'>- classificationTableIds: Id64Arg</span>
   "\]
 
-  A -- categoryIds --> B["<code style='display: block; text-align: left;'><a href='./SharedVisibilityHandling.md#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({
-    <code style='padding-left: 2rem'>categoryIds,</code>
-    <code style='padding-left: 2rem'>modelId: undefined</code>
-  })</code>"]
+  A -- categoryIds --> B["<div style='text-align: left; font-family: monospace;'><a href='./SharedVisibilityHandling.md#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({
+    <span style='padding-left: 2rem;'>categoryIds,</span>
+    <span style='padding-left: 2rem;'>modelId: undefined</span>
+    })</div>"]
 
   %% Results
   B -- partial --> RESULT_Partial
@@ -73,17 +73,17 @@ flowchart TD
   RESULT_Hidden[/hidden/]
 
   %% Start
-  TITLE(["<code>getClassificationsVisibilityStatus</code>"]) --> A["Get categories under <code>props.classificationIds</code> from cache. These are related categories and categories of child classifications (can be nested)"]
+  TITLE(["<span style='font-family: monospace;'>getClassificationsVisibilityStatus</span>"]) --> A["Get categories under <span style='font-family: monospace;'>props.classificationIds</span> from cache. These are related categories and categories of child classifications (can be nested)"]
 
   PROPS[\"
-    <code>props</code>
-    <code style='display: block; text-align: left;'>- classificationIds: Id64Arg</code>
+    <span style='font-family: monospace;'>props</span>
+    <span style='display: block; text-align: left; font-family: monospace;'>- classificationIds: Id64Arg</span>
   "\]
 
-  A -- categoryIds --> B["<code style='display: block; text-align: left;'><a href='./SharedVisibilityHandling.md#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({
-  <code style='padding-left: 2rem'>categoryIds,</code>
-  <code style='padding-left: 2rem'>modelId: undefined</code>
-  })</code>"]
+  A -- categoryIds --> B["<div style='text-align: left; font-family: monospace;'><a href='./SharedVisibilityHandling.md#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({
+    <span style='padding-left: 2rem;'>categoryIds,</span>
+    <span style='padding-left: 2rem;'>modelId: undefined</span>
+    })</div>"]
 
   %% Results
   B -- partial --> RESULT_Partial
@@ -109,18 +109,18 @@ flowchart TD
   RESULT_Done([Done])
 
   %% Start
-  TITLE(["<code>changeClassificationTablesVisibilityStatus</code>"]) --> A["Get categories under <code>props.classificationTableIds</code> from cache. These are categories of child classifications (can be nested)"]
+  TITLE(["<span style='font-family: monospace;'>changeClassificationTablesVisibilityStatus</span>"]) --> A["Get categories under <span style='font-family: monospace;'>props.classificationTableIds</span> from cache. These are categories of child classifications (can be nested)"]
 
   PROPS[\"
-    <code>props</code>
-    <code style='display: block; text-align: left;'>- classificationTableIds: Id64Arg<br/>- on: boolean</code>
+    <span style='font-family: monospace;'>props</span>
+    <span style='display: block; text-align: left; font-family: monospace;'>- classificationTableIds: Id64Arg<br/>- on: boolean</span>
   "\]
 
-  A -- categoryIds --> B["<code style='display: block; text-align: left;'><a href='./SharedVisibilityHandling.md#changecategoriesvisibilitystatus'>changeCategoriesVisibilityStatus</a>({
-    <code style='padding-left: 2rem'>categoryIds,</code>
-    <code style='padding-left: 2rem'>modelId: undefined,</code>
-    <code style='padding-left: 2rem'>on</code>
-  })</code>"]
+  A -- categoryIds --> B["<div style='text-align: left; font-family: monospace;'><a href='./SharedVisibilityHandling.md#changecategoriesvisibilitystatus'>changeCategoriesVisibilityStatus</a>({
+    <span style='padding-left: 2rem;'>categoryIds,</span>
+    <span style='padding-left: 2rem;'>modelId: undefined,</span>
+    <span style='padding-left: 2rem;'>on</span>
+    })</div>"]
   B --> RESULT_Done
 ```
 
@@ -140,17 +140,17 @@ flowchart TD
   RESULT_Done([Done])
 
   %% Start
-  TITLE(["<code>changeClassificationsVisibilityStatus</code>"]) --> A["Get categories under <code>props.classificationIds</code> from cache. These are related categories and categories of child classifications (can be nested)"]
+  TITLE(["<span style='font-family: monospace;'>changeClassificationsVisibilityStatus</span>"]) --> A["Get categories under <span style='font-family: monospace;'>props.classificationIds</span> from cache. These are related categories and categories of child classifications (can be nested)"]
 
   PROPS[\"
-    <code>props</code>
-    <code style='display: block; text-align: left;'>- classificationIds: Id64Arg<br/>- on: boolean</code>
+    <span style='font-family: monospace;'>props</span>
+    <span style='display: block; text-align: left; font-family: monospace;'>- classificationIds: Id64Arg<br/>- on: boolean</span>
   "\]
 
-  A -- categoryIds --> B["<code style='display: block; text-align: left;'><a href='./SharedVisibilityHandling.md#changecategoriesvisibilitystatus'>changeCategoriesVisibilityStatus</a>({
-    <code style='padding-left: 2rem'>categoryIds,</code>
-    <code style='padding-left: 2rem'>modelId: undefined,</code>
-    <code style='padding-left: 2rem'>on</code>
-  })</code>"]
+  A -- categoryIds --> B["<div style='text-align: left; font-family: monospace;'><a href='./SharedVisibilityHandling.md#changecategoriesvisibilitystatus'>changeCategoriesVisibilityStatus</a>({
+    <span style='padding-left: 2rem;'>categoryIds,</span>
+    <span style='padding-left: 2rem;'>modelId: undefined,</span>
+    <span style='padding-left: 2rem;'>on</span>
+    })</div>"]
   B --> RESULT_Done
 ```

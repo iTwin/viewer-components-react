@@ -39,17 +39,18 @@ flowchart TD
   RESULT_Hidden[/hidden/]
 
   %% Start
-  TITLE(["<code>getDefinitionContainersVisibilityStatus</code>"]) --> A["Get categories under <code>props.definitionContainerIds</code> from cache. These are categories whose modelId is the same as definition container or categories of child definition containers (can be nested)"]
+  TITLE(["<span style='font-family: monospace;'>getDefinitionContainersVisibilityStatus</span>"]) --> A["Get categories under <span style='font-family: monospace;'>props.definitionContainerIds</span> from cache. These are categories whose modelId is the same as definition container or categories of child definition containers (can be nested)"]
 
   PROPS[\"
-    <code>props</code>
-    <code style='display: block; text-align: left;'>- definitionContainerIds: Id64Arg</code>
+    <span style='font-family: monospace;'>props</span>
+    <span style='display: block; text-align: left; font-family: monospace;'>- definitionContainerIds: Id64Arg</span>
   "\]
 
-  A -- categoryIds --> B["<code style='display: block; text-align: left;'><a href='./SharedVisibilityHandling.md#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({
-    <code style='padding-left: 2rem'>categoryIds,</code>
-    <code style='padding-left: 2rem'>modelId: undefined</code>
-  })</code>"]
+
+  A -- categoryIds --> B["<div style='text-align: left; font-family: monospace;'><a href='./SharedVisibilityHandling.md#getcategoriesvisibilitystatus'>getCategoriesVisibilityStatus</a>({
+    <span style='padding-left: 2rem;'>categoryIds,</span>
+    <span style='padding-left: 2rem;'>modelId: undefined</span>
+    })</div>"]
 
   %% Results
   B -- partial --> RESULT_Partial
@@ -75,18 +76,18 @@ flowchart TD
   RESULT_Done([Done])
 
   %% Start
-  TITLE(["<code>changeDefinitionContainersVisibilityStatus</code>"]) --> A["Get categories under <code>props.definitionContainerIds</code> from cache. These are categories whose modelId is the same as definition container or categories of child definition containers (can be nested)"]
+  TITLE(["<span style='font-family: monospace;'>changeDefinitionContainersVisibilityStatus</span>"]) --> A["Get categories under <span style='font-family: monospace;'>props.definitionContainerIds</span> from cache. These are categories whose modelId is the same as definition container or categories of child definition containers (can be nested)"]
 
   PROPS[\"
-    <code>props</code>
-    <code style='display: block; text-align: left;'>- definitionContainerIds: Id64Arg<br/>- on: boolean</code>
+    <span style='font-family: monospace;'>props</span>
+    <span style='display: block; text-align: left; font-family: monospace;'>- definitionContainerIds: Id64Arg<br/>- on: boolean</span>
   "\]
 
-  A -- categoryIds --> B["<code style='display: block; text-align: left;'><a href='./SharedVisibilityHandling.md#changecategoriesvisibilitystatus'>changeCategoriesVisibilityStatus</a>({
-    <code style='padding-left: 2rem'>categoryIds,</code>
-    <code style='padding-left: 2rem'>modelId: undefined,</code>
-    <code style='padding-left: 2rem'>on</code>
-  })</code>"]
+  A -- categoryIds --> B["<div style='text-align: left; font-family: monospace;'><a href='./SharedVisibilityHandling.md#changecategoriesvisibilitystatus'>changeCategoriesVisibilityStatus</a>({
+    <span style='padding-left: 2rem;'>categoryIds,</span>
+    <span style='padding-left: 2rem;'>modelId: undefined,</span>
+    <span style='padding-left: 2rem;'>on</span>
+    })</div>"]
   B --> RESULT_Done
 ```
 
@@ -106,27 +107,27 @@ flowchart TD
   RESULT_Done([Done])
 
   %% Start
-  TITLE(["<code>changeSubCategoriesVisibilityStatus</code>"]) --> A{"<code>props.on</code>"}
+  TITLE(["<span style='font-family: monospace;'>changeSubCategoriesVisibilityStatus</span>"]) --> A{"<span style='font-family: monospace;'>props.on</span>"}
 
   PROPS[\"
-    <code>props</code>
-    <code style='display: block; text-align: left;'>- categoryId: Id64String<br/>- subCategoryIds: Id64Arg<br/>- on: boolean</code>
+    <span style='font-family: monospace;'>props</span>
+    <span style='display: block; text-align: left; font-family: monospace;'>- categoryId: Id64String<br/>- subCategoryIds: Id64Arg<br/>- on: boolean</span>
   "\]
 
   %% Branch on=true
-  A -- true --> B["<code><a href='#enablecategorywithoutenablingothercategories'>enableCategoryWithoutEnablingOtherCategories</a>(props.categoryId)</code>"]
+  A -- true --> B["<span style='font-family: monospace;'><a href='#enablecategorywithoutenablingothercategories'>enableCategoryWithoutEnablingOtherCategories</a>(props.categoryId)</span>"]
   B --> C["Iterate through sub-categories"]
-  C -- subCategoryId --> C1["<code style='display: block; text-align: left;'>viewport.changeSubCategoryDisplay({
-    <code style='padding-left: 2rem'>subCategoryId,</code>
-    <code style='padding-left: 2rem'>display: true</code>
-  })</code>"]
+  C -- subCategoryId --> C1["<div style='text-align: left; font-family: monospace;'>viewport.changeSubCategoryDisplay({
+    <span style='padding-left: 2rem;'>subCategoryId,</span>
+    <span style='padding-left: 2rem;'>display: true</span>
+    })</div>"]
 
   %% Branch on=false
   A -- false --> D["Iterate through sub-categories"]
-  D -- subCategoryId --> D1["<code style='display: block; text-align: left;'>viewport.changeSubCategoryDisplay({
-    <code style='padding-left: 2rem'>subCategoryId,</code>
-    <code style='padding-left: 2rem'>display: false</code>
-    })</code>"]
+  D -- subCategoryId --> D1["<div style='text-align: left; font-family: monospace;'>viewport.changeSubCategoryDisplay({
+    <span style='padding-left: 2rem;'>subCategoryId,</span>
+    <span style='padding-left: 2rem;'>display: false</span>
+    })</div>"]
 
   C1 --> RESULT_Done
   D1 --> RESULT_Done
@@ -148,39 +149,39 @@ flowchart TD
   RESULT_Done([Done])
 
   %% Start
-  TITLE(["<code>enableCategoryWithoutEnablingOtherCategories</code>"]) --> A["<code>viewport.changeCategoryDisplay({ categoryIds: categoryId, display: true })</code>"]
+  TITLE(["<span style='font-family: monospace;'>enableCategoryWithoutEnablingOtherCategories</span>"]) --> A["<span style='font-family: monospace;'>viewport.changeCategoryDisplay({ categoryIds: categoryId, display: true })</span>"]
 
   PROPS[\"
-    <code>props</code>
-    <code style='display: block; text-align: left;'>- categoryId: Id64String</code>
+    <span style='font-family: monospace;'>props</span>
+    <span style='display: block; text-align: left; font-family: monospace;'>- categoryId: Id64String</span>
   "\]
 
-  A --> B["Get all models for <code>categoryId</code> from cache (including sub-models)"]
+  A --> B["Get all models for <span style='font-family: monospace;'>categoryId</span> from cache (including sub-models)"]
   B -- modelIds --> C["Iterate through models"]
-  C -- modelId --> D1["<code style='display: block; text-align: left;'>viewport.setPerModelCategoryOverride({
-    <code style='padding-left: 2rem'>modelIds: modelId,</code>
-    <code style='padding-left: 2rem'>categoryIds: categoryId,</code>
-    <code style='padding-left: 2rem'>override: 'none'</code>
-  })</code>"]
-  C -- modelId --> D2{"<code>viewport.viewsModel(modelId)</code>"}
+  C -- modelId --> D1["<div style='text-align: left; font-family: monospace;'>viewport.setPerModelCategoryOverride({
+    <span style='padding-left: 2rem;'>modelIds: modelId,</span>
+    <span style='padding-left: 2rem;'>categoryIds: categoryId,</span>
+    <span style='padding-left: 2rem;'>override: 'none'</span>
+    })</div>"]
+  C -- modelId --> D2{"<span style='font-family: monospace;'>viewport.viewsModel(modelId)</span>"}
 
   D1 --> RESULT_Done
 
   D2 -- Yes --> RESULT_Done
-  D2 -- No --> E1["Get all categories for <code>modelId</code> from cache."]
+  D2 -- No --> E1["Get all categories for <span style='font-family: monospace;'>modelId</span> from cache."]
   D2 -- No --> E2["Collect hidden models"]
   E1 -- modelCategoryIds --> F["Iterate through model categories"]
-  F -- modelCategoryId --> G{"<code>modelCategoryId === categoryId </code>"}
-  G -- No --> G1["<code style='display: block; text-align: left;'>viewport.setPerModelCategoryOverride({
-    <code style='padding-left: 2rem'>modelIds: modelId,</code>
-    <code style='padding-left: 2rem'>categoryIds: otherCategoryId,</code>
-    <code style='padding-left: 2rem'>override: 'hide'</code>
-    })</code>"]
+  F -- modelCategoryId --> G{"<span style='font-family: monospace;'>modelCategoryId === categoryId </span>"}
+  G -- No --> G1["<div style='text-align: left; font-family: monospace;'>viewport.setPerModelCategoryOverride({
+    <span style='padding-left: 2rem;'>modelIds: modelId,</span>
+    <span style='padding-left: 2rem;'>categoryIds: otherCategoryId,</span>
+    <span style='padding-left: 2rem;'>override: 'hide'</span>
+    })</div>"]
     G1 --> RESULT_Done
   G -- Yes --> RESULT_Done
-  E2 -- hiddenModels --> H["<code style='display: block; text-align: left;'>viewport.changeModelDisplay({
-    <code style='padding-left: 2rem'>modelIds: hiddenModels,</code>
-    <code style='padding-left: 2rem'>display: true</code>
-  })</code>"]
+  E2 -- hiddenModels --> H["<div style='text-align: left; font-family: monospace;'>viewport.changeModelDisplay({
+    <span style='padding-left: 2rem;'>modelIds: hiddenModels,</span>
+    <span style='padding-left: 2rem;'>display: true</span>
+    })</div>"]
   H --> RESULT_Done
 ```
