@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { Id64String } from "@itwin/core-bentley";
+import { dispose, type Id64String } from "@itwin/core-bentley";
 import type { XYZProps } from "@itwin/core-geometry";
 import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
 import { Arc3d, IModelJson, Point3d, Ray3d, Vector3d } from "@itwin/core-geometry";
@@ -27,6 +27,7 @@ import type {
   MeasurementWidgetData,
 } from "../api/Measurement.js";
 import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
+import type { FormatSpecHandle } from "@itwin/core-quantity";
 export interface RadiusMeasurementProps extends MeasurementProps {
   startPoint?: XYZProps;
   midPoint?: XYZProps;
@@ -86,7 +87,8 @@ export class RadiusMeasurement extends Measurement {
   }
   public set lengthKoQ(value: string) {
     this._lengthKoQ = value;
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this._disposeHandles();
+    this.createTextMarker();
   }
 
   public get lengthPersistenceUnitName(): string {
@@ -94,7 +96,8 @@ export class RadiusMeasurement extends Measurement {
   }
   public set lengthPersistenceUnitName(value: string) {
     this._lengthPersistenceUnitName = value;
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this._disposeHandles();
+    this.createTextMarker();
   }
 
   constructor(props?: RadiusMeasurementProps) {
@@ -105,7 +108,7 @@ export class RadiusMeasurement extends Measurement {
     this._lengthPersistenceUnitName = "Units.M";
     if (props) this.readFromJSON(props);
 
-    this.createTextMarker().catch();
+    this.createTextMarker();
   }
 
   public get startPointRef(): Point3d | undefined {
@@ -146,7 +149,7 @@ export class RadiusMeasurement extends Measurement {
 
       if (arc !== undefined && arc instanceof Arc3d) {
         this._arc = arc;
-        this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+        this.createTextMarker();
       }
     }
   }
@@ -288,14 +291,24 @@ export class RadiusMeasurement extends Measurement {
     return undefined;
   }
 
-  public override async populateFormattingSpecsRegistry(_force?: boolean): Promise<void> {
-    const lengthEntry = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ);
-    if (_force || !lengthEntry || lengthEntry.formatterSpec.persistenceUnit?.name !== this._lengthPersistenceUnitName) {
-      const lengthFormatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
-      if (lengthFormatProps) {
-        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._lengthKoQ, this._lengthPersistenceUnitName, lengthFormatProps);
-      }
+  private _lengthHandle?: FormatSpecHandle;
+
+  private _getLengthHandle(): FormatSpecHandle {
+    if (!this._lengthHandle) {
+      this._lengthHandle = IModelApp.quantityFormatter.getFormatSpecHandle(
+        this._lengthKoQ, this._lengthPersistenceUnitName
+      );
     }
+    return this._lengthHandle;
+  }
+
+  private _disposeHandles(): void {
+    this._lengthHandle = dispose(this._lengthHandle);
+  }
+
+  public override onCleanup(): void {
+    super.onCleanup();
+    this._disposeHandles();
   }
 
   private _getSnapId(): string | undefined {
@@ -433,30 +446,18 @@ export class RadiusMeasurement extends Measurement {
     context.addDecorationFromBuilder(builder);
   }
 
-  protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, QuantityType.LengthEngineering);
+  protected override getDataForMeasurementWidgetInternal(): MeasurementWidgetData {
+    const lengthSpec = FormatterUtils.getSpecFromHandle(this._getLengthHandle(), QuantityType.LengthEngineering);
 
     const radius = this._arc?.circularRadius() ?? 0.0;
     const diameter = radius * 2;
     const length = this._arc?.curveLength() ?? 0.0;
     const circumference = 2 * Math.PI * radius;
 
-    const fRadius = await FormatterUtils.formatLength(
-      radius,
-      lengthSpec
-    );
-    const fDiameter = await FormatterUtils.formatLength(
-      diameter,
-      lengthSpec
-    );
-    const fCircumference = await FormatterUtils.formatLength(
-      circumference,
-      lengthSpec
-    );
-    const fArcLength = await FormatterUtils.formatLength(
-      length,
-      lengthSpec
-    );
+    const fRadius = FormatterUtils.formatLengthImmediate(radius, lengthSpec);
+    const fDiameter = FormatterUtils.formatLengthImmediate(diameter, lengthSpec);
+    const fCircumference = FormatterUtils.formatLengthImmediate(circumference, lengthSpec);
+    const fArcLength = FormatterUtils.formatLengthImmediate(length, lengthSpec);
 
     let title = MeasureTools.localization.getLocalizedString(
       "MeasureTools:tools.MeasureRadius.measurement"
@@ -533,14 +534,10 @@ export class RadiusMeasurement extends Measurement {
     throw Error("No arc defined for measurement");
   }
 
-  private async createTextMarker(): Promise<void> {
+  private createTextMarker(): void {
     if (this._arc !== undefined) {
-      const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, QuantityType.LengthEngineering);
       const radius = this._arc.circularRadius()!;
-      const fRadius = await FormatterUtils.formatLength(
-        radius,
-        lengthSpec
-      );
+      const fRadius = this._getLengthHandle().format(radius);
       const point = this._arc.center;
       const styleTheme = StyleSet.getOrDefault(this.activeStyle);
 
@@ -580,7 +577,7 @@ export class RadiusMeasurement extends Measurement {
   }
 
   public override onDisplayUnitsChanged(): void {
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
 
   private _handleTextMarkerButtonEvent(ev: BeButtonEvent): boolean {

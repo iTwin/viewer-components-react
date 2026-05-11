@@ -9,8 +9,10 @@ import { IModelApp, QuantityType } from "@itwin/core-frontend";
 import { FormatTraits } from "@itwin/core-quantity";
 import { MeasureTools } from "../MeasureTools.js";
 
-import type { FormatDefinition, FormatProps , FormatterSpec} from "@itwin/core-quantity";
+import type { FormatDefinition, FormatProps, FormatSpecHandle, FormatterSpec} from "@itwin/core-quantity";
 export namespace FormatterUtils {
+  const bearingUnitSystems = ["metric", "imperial", "usCustomary", "usSurvey"] as const;
+  const bearingRegistrationPromises = new Map<string, Promise<void>>();
 
   /**
    * Gets a FormatterSpec by KoQ string with fallback to QuantityType.
@@ -18,15 +20,19 @@ export namespace FormatterUtils {
    * @param fallbackQuantityType The QuantityType to use if KoQ lookup fails.
    * @returns A FormatterSpec or undefined if both lookups fail.
    */
-  export function getFormatterSpecWithFallback(koqString: string, fallbackQuantityType: QuantityType): FormatterSpec | undefined {
-    // First try to get the spec by KoQ string
-    const koqEntry = IModelApp.quantityFormatter.getSpecsByName(koqString);
+  export function getFormatterSpecWithFallback(koqString: string, persistenceUnitName: string, fallbackQuantityType: QuantityType): FormatterSpec | undefined {
+    const koqEntry = IModelApp.quantityFormatter.getSpecsByNameAndUnit({ name: koqString, persistenceUnitName });
     if (koqEntry) {
       return koqEntry.formatterSpec;
     }
 
     // Fallback to QuantityType
     return IModelApp.quantityFormatter.findFormatterSpecByQuantityType(fallbackQuantityType);
+  }
+
+  /** Returns the handle's formatterSpec, falling back to QuantityType if the handle couldn't resolve its KoQ. */
+  export function getSpecFromHandle(handle: FormatSpecHandle, fallback: QuantityType): FormatterSpec | undefined {
+    return handle.formatterSpec ?? IModelApp.quantityFormatter.findFormatterSpecByQuantityType(fallback);
   }
 
   /** Formats a sequence of values with spec without the unit label */
@@ -130,6 +136,21 @@ export namespace FormatterUtils {
           QuantityType.LatLong
         );
     }
+    return formatCartographicToLatLongImmediate(c, angleSpec);
+  }
+
+  export function formatCartographicToLatLongImmediate(
+    c: Cartographic,
+    angleSpec?: FormatterSpec
+  ): string {
+    if (!angleSpec) {
+      angleSpec =
+        IModelApp.quantityFormatter.findFormatterSpecByQuantityType(
+          QuantityType.LatLong
+        );
+    }
+    if (undefined === angleSpec) return "";
+
     const latSuffixKey =
       0 < c.latitude
         ? "MeasureTools:Generic.latitudeNorthSuffix"
@@ -177,7 +198,17 @@ export namespace FormatterUtils {
           QuantityType.Stationing
         );
     }
-    return IModelApp.quantityFormatter.formatQuantity(station, stationSpec);
+    return formatStationImmediate(station, stationSpec);
+  }
+
+  export function formatStationImmediate(station: number, stationSpec?: FormatterSpec): string {
+    if (!stationSpec) {
+      stationSpec =
+        IModelApp.quantityFormatter.findFormatterSpecByQuantityType(
+          QuantityType.Stationing
+        );
+    }
+    return stationSpec ? IModelApp.quantityFormatter.formatQuantity(station, stationSpec) : station.toString();
   }
 
   export async function formatLength(length: number, lengthSpec?: FormatterSpec): Promise<string> {
@@ -187,7 +218,17 @@ export namespace FormatterUtils {
           QuantityType.LengthEngineering
         );
     }
-    return IModelApp.quantityFormatter.formatQuantity(length, lengthSpec);
+    return formatLengthImmediate(length, lengthSpec);
+  }
+
+  export function formatLengthImmediate(length: number, lengthSpec?: FormatterSpec): string {
+    if (!lengthSpec) {
+      lengthSpec =
+        IModelApp.quantityFormatter.findFormatterSpecByQuantityType(
+          QuantityType.LengthEngineering
+        );
+    }
+    return lengthSpec ? IModelApp.quantityFormatter.formatQuantity(length, lengthSpec) : length.toString();
   }
 
   export async function formatAngle(angle: number, angleSpec?: FormatterSpec): Promise<string> {
@@ -197,7 +238,17 @@ export namespace FormatterUtils {
           QuantityType.Angle
         );
     }
-    return IModelApp.quantityFormatter.formatQuantity(angle, angleSpec);
+    return formatAngleImmediate(angle, angleSpec);
+  }
+
+  export function formatAngleImmediate(angle: number, angleSpec?: FormatterSpec): string {
+    if (!angleSpec) {
+      angleSpec =
+        IModelApp.quantityFormatter.findFormatterSpecByQuantityType(
+          QuantityType.Angle
+        );
+    }
+    return angleSpec ? IModelApp.quantityFormatter.formatQuantity(angle, angleSpec) : angle.toString();
   }
 
   export async function formatArea(area: number, areaSpec?: FormatterSpec): Promise<string> {
@@ -207,7 +258,17 @@ export namespace FormatterUtils {
           QuantityType.Area
         );
     }
-    return IModelApp.quantityFormatter.formatQuantity(area, areaSpec);
+    return formatAreaImmediate(area, areaSpec);
+  }
+
+  export function formatAreaImmediate(area: number, areaSpec?: FormatterSpec): string {
+    if (!areaSpec) {
+      areaSpec =
+        IModelApp.quantityFormatter.findFormatterSpecByQuantityType(
+          QuantityType.Area
+        );
+    }
+    return areaSpec ? IModelApp.quantityFormatter.formatQuantity(area, areaSpec) : area.toString();
   }
 
   /**
@@ -219,6 +280,54 @@ export namespace FormatterUtils {
     return bearing;
   }
 
+  async function getBearingFormatProps(bearingKoQ: string, system?: (typeof bearingUnitSystems)[number]): Promise<FormatDefinition> {
+    try {
+      const formatProps = await IModelApp.formatsProvider.getFormat(bearingKoQ, system);
+      if (formatProps) {
+        return formatProps;
+      }
+    } catch {
+      // fall through to non-system lookup / default format
+    }
+
+    try {
+      const formatProps = await IModelApp.formatsProvider.getFormat(bearingKoQ);
+      if (formatProps) {
+        return formatProps;
+      }
+    } catch {
+      // fall through to default format
+    }
+
+    return getDefaultBearingFormatProps();
+  }
+
+  async function registerBearingFormatSpecs(bearingKoQ: string, persistenceUnitName: string): Promise<void> {
+    for (const system of bearingUnitSystems) {
+      const formatProps = await getBearingFormatProps(bearingKoQ, system);
+      await IModelApp.quantityFormatter.addFormattingSpecsToRegistry({
+        name: bearingKoQ,
+        persistenceUnitName,
+        formatProps,
+        system,
+      });
+    }
+  }
+
+  export async function ensureBearingFormatSpecsRegistered(bearingKoQ: string, persistenceUnitName: string): Promise<void> {
+    const key = `${bearingKoQ}|${persistenceUnitName}`;
+    let promise = bearingRegistrationPromises.get(key);
+    if (!promise) {
+      promise = registerBearingFormatSpecs(bearingKoQ, persistenceUnitName).catch((err) => {
+        bearingRegistrationPromises.delete(key);
+        throw err;
+      });
+      bearingRegistrationPromises.set(key, promise);
+    }
+
+    await promise;
+  }
+
   /**
    * Creates a FormatterSpec for bearing using the provided KoQ string with fallback to default bearing format.
    * @param bearingKoQ The Kind of Quantity string for bearing.
@@ -226,15 +335,7 @@ export namespace FormatterUtils {
    * @returns A FormatterSpec for bearing formatting.
    */
   export async function getBearingFormatterSpec(bearingKoQ: string, persistenceUnitName: string): Promise<FormatterSpec | undefined> {
-    let formatProps: FormatDefinition;
-    try {
-      // Get format props from the formats provider using the bearingKoQ. If undefined, use default bearing format
-      const result = await IModelApp.formatsProvider.getFormat(bearingKoQ);
-      formatProps = result ?? getDefaultBearingFormatProps();
-    } catch {
-    // If an error occurs, use the default bearing format
-      formatProps = getDefaultBearingFormatProps();
-    }
+    const formatProps = await getBearingFormatProps(bearingKoQ);
 
     // Create and return the formatter spec
     return IModelApp.quantityFormatter.createFormatterSpec({

@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { IModelApp, IModelConnection } from "@itwin/core-frontend";
+import { createUnitsProvider } from "@itwin/core-quantity";
 import { SchemaFormatsProvider, SchemaUnitProvider } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { FrontendDevTools } from "@itwin/frontend-devtools";
@@ -159,8 +160,14 @@ function onIModelConnected(imodel: IModelConnection) {
   const setupFormatsProvider = async () => {
     try {
       let removeListener: () => void | undefined;
-      const schemaUnitsProvider = new SchemaUnitProvider(imodel.schemaContext);
-      IModelApp.quantityFormatter.unitsProvider = schemaUnitsProvider;
+      // QuantityFormatter already defaults to bundled BIS units in 5.9.x, but iModels may define
+      // additional schema units. Layer the schema provider on top of the bundled provider so both
+      // sets are available.
+      await IModelApp.quantityFormatter.setUnitsProvider(
+        createUnitsProvider({
+          primary: new SchemaUnitProvider(imodel.schemaContext),
+        }),
+      );
       // FormatManager will handle assigning a FormatsProvider to IModelApp.formatsProvider, if not used then init a SchemaFormatsProvider here
       if (FormatManager.instance) {
         await FormatManager.instance?.onIModelOpen(imodel);
@@ -176,7 +183,7 @@ function onIModelConnected(imodel: IModelConnection) {
         removeListener?.();
         void IModelApp.quantityFormatter.resetToUseInternalUnitsProvider();
         if (FormatManager.instance) void FormatManager.instance.onIModelClose();
-        console.log("Unregistered SchemaFormatsProvider, SchemaUnitProvider");
+        console.log("Unregistered SchemaFormatsProvider and reset QuantityFormatter units provider");
       });
     } catch (err) {
       console.error("Error while setting up formats provider:", err);

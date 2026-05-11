@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { Id64String } from "@itwin/core-bentley";
+import { dispose, type Id64String } from "@itwin/core-bentley";
 import type { XYZProps } from "@itwin/core-geometry";
 import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
 import { Angle, AngleSweep, Arc3d, AxisOrder, IModelJson, Matrix3d, Point3d, PointString3d, Vector3d } from "@itwin/core-geometry";
@@ -22,6 +22,7 @@ import type {
   MeasurementWidgetData,
 } from "../api/Measurement.js";
 import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
+import type { FormatSpecHandle } from "@itwin/core-quantity";
 export interface AngleMeasurementProps extends MeasurementProps {
   startPoint?: XYZProps;
   center?: XYZProps;
@@ -83,7 +84,7 @@ export class AngleMeasurement extends Measurement {
     this._anglePersistenceUnitName = "Units.RAD";
     if (props) this.readFromJSON(props);
 
-    this.createTextMarker().catch();
+    this.createTextMarker();
   }
 
   public get startPointRef(): Point3d | undefined {
@@ -117,14 +118,16 @@ export class AngleMeasurement extends Measurement {
   }
   public set angleKoQ(koqName: string) {
     this._angleKoQ = koqName;
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this._disposeHandles();
+    this.createTextMarker();
   }
   public get anglePersistenceUnitName(): string {
     return this._anglePersistenceUnitName;
   }
   public set anglePersistenceUnitName(unitName: string) {
     this._anglePersistenceUnitName = unitName;
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this._disposeHandles();
+    this.createTextMarker();
   }
 
   public override readFromJSON(props: AngleMeasurementProps) {
@@ -135,7 +138,7 @@ export class AngleMeasurement extends Measurement {
     if (props.formatting?.angle?.koqName) this._angleKoQ = props.formatting.angle.koqName;
     if (props.formatting?.angle?.persistenceUnitName) this._anglePersistenceUnitName = props.formatting.angle.persistenceUnitName;
 
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
 
   /**
@@ -158,21 +161,27 @@ export class AngleMeasurement extends Measurement {
   }
 
   public override onDisplayUnitsChanged(): void {
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
 
-  public override async populateFormattingSpecsRegistry(_force?: boolean): Promise<void> {
-    const angleEntry = IModelApp.quantityFormatter.getSpecsByName(this._angleKoQ);
-    if (_force || !angleEntry || angleEntry.formatterSpec.persistenceUnit?.name !== this._anglePersistenceUnitName) {
-      const angleFormatProps = await IModelApp.formatsProvider.getFormat(this._angleKoQ);
-      if (angleFormatProps) {
-        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(
-          this._angleKoQ,
-          this._anglePersistenceUnitName,
-          angleFormatProps
-        );
-      }
+  private _angleHandle?: FormatSpecHandle;
+
+  private _getAngleHandle(): FormatSpecHandle {
+    if (!this._angleHandle) {
+      this._angleHandle = IModelApp.quantityFormatter.getFormatSpecHandle(
+        this._angleKoQ, this._anglePersistenceUnitName
+      );
     }
+    return this._angleHandle;
+  }
+
+  private _disposeHandles(): void {
+    this._angleHandle = dispose(this._angleHandle);
+  }
+
+  public override onCleanup(): void {
+    super.onCleanup();
+    this._disposeHandles();
   }
   /**
    * Tests equality with another measurement.
@@ -227,23 +236,23 @@ export class AngleMeasurement extends Measurement {
         : undefined;
       this._center = other._center ? other._center.clone() : undefined;
       this._endPoint = other._endPoint ? other._endPoint.clone() : undefined;
-      this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+      this.createTextMarker();
     }
   }
 
   public setStartPoint(point: Point3d) {
     this._startPoint = point;
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
 
   public setCenter(point: Point3d) {
     this._center = point;
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
 
   public setEndPoint(point: Point3d) {
     this._endPoint = point;
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
 
   public override testDecorationHit(pickContext: MeasurementPickContext) {
@@ -387,10 +396,10 @@ export class AngleMeasurement extends Measurement {
     context.addDecorationFromBuilder(builder);
   }
 
-  protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const angleSpec = FormatterUtils.getFormatterSpecWithFallback(this._angleKoQ, QuantityType.Angle);
+  protected override getDataForMeasurementWidgetInternal(): MeasurementWidgetData {
+    const angleSpec = FormatterUtils.getSpecFromHandle(this._getAngleHandle(), QuantityType.Angle);
     const angle = this.angle ?? 0;
-    const fAngle = await FormatterUtils.formatAngle(angle, angleSpec);
+    const fAngle = FormatterUtils.formatAngleImmediate(angle, angleSpec);
 
     let title = MeasureTools.localization.getLocalizedString(
       "MeasureTools:tools.MeasureAngle.measurement"
@@ -415,14 +424,10 @@ export class AngleMeasurement extends Measurement {
     return data;
   }
 
-  private async createTextMarker(): Promise<void> {
+  private createTextMarker(): void {
     if (this._center !== undefined && this.angle !== undefined) {
-      const angleSpec = FormatterUtils.getFormatterSpecWithFallback(this._angleKoQ, QuantityType.Angle);
       const angle = this.angle;
-      const fAngle = await FormatterUtils.formatAngle(
-        angle,
-        angleSpec
-      );
+      const fAngle = this._getAngleHandle().format(angle);
       const styleTheme = StyleSet.getOrDefault(this.activeStyle);
 
       const tStyle = styleTheme.getTextStyle(
