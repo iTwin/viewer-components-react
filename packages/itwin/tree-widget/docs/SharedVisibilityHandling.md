@@ -128,7 +128,7 @@ flowchart TD
   E2 --> M
   E3 --> M
 
-  M --> N{<br/> Some 'visible' && Some 'hidden' <br/> **OR** <br/> at least one is 'partial'}
+  M --> N{<br/> Some 'visible' && Some 'hidden' <br/> <strong>OR</strong> <br/> at least one is 'partial'}
 
   N -- Yes --> RESULT_Partial
 
@@ -192,7 +192,7 @@ flowchart TD
   D1 --> M[Merge visibility statuses]
   F --> M
 
-  M --> N{<br/> Some 'visible' && Some 'hidden' <br/> **OR** <br/> at least one is 'partial'}
+  M --> N{<br/> Some 'visible' && Some 'hidden' <br/> <strong>OR</strong> <br/> at least one is 'partial'}
 
   %% Results
   N -- Yes --> RESULT_Partial
@@ -252,14 +252,13 @@ flowchart TD
     A2 -- Yes --> D{Is always drawn exclusive}
 
       %% Branch Yes
-      D -- Yes --> E1["**defaultStatus**: 'hidden' <br/> **oppositeSet**: <code>alwaysDrawn</code>"]
+      D -- Yes --> E1["<code>defaultStatus: 'hidden' <br/> oppositeSet: alwaysDrawn</code>"]
 
       %% Branch No
       D -- No --> E2{"
         <div style='padding: 20px'>
-          Per model category override === 'show' <br/>
+          Per model category override === 'show'
           <strong style='font-weight: bold;'>OR</strong>
-          <br/>
           Per model category override === 'none'<br/> && <code>viewport.viewsCategory(props.categoryId)</code>
         </div>
       "}
@@ -269,9 +268,9 @@ flowchart TD
         E2 -- No --> E1
 
         %% Branch Yes
-         E2 -- Yes --> E3["**defaultStatus**: 'visible' <br/> **oppositeSet**: <code>neverDrawn</code>"]
+         E2 -- Yes --> E3["<code>defaultStatus: 'visible' <br/> oppositeSet: neverDrawn</code>"]
 
-    E1 -- Pass down --> F{"**oppositeSet**.size > 0"}
+    E1 -- Pass down --> F{"<code>oppositeSet.size > 0</code>"}
     E3 -- Pass down --> F
 
       %% Branch No
@@ -281,7 +280,7 @@ flowchart TD
       F -- Yes --> G2[From cache get total count of elements under category with model]
 
       F -- Yes --> G3["Props
-    <div style='text-align: left;'>- For **oppositeSet** elements execute query (if set changed after last execution), to get their models, categories and parent elements path. <br/> - Find always/never drawn child elements (nested as well) where queried data matches <code>props.modelId</code> & <code>props.categoryId</code>. <br/> - Get count of elements under model with category in **oppositeSet**: numberOfElementsInOppositeSet </div>
+    <div style='text-align: left;'>- For <code>oppositeSet</code> elements execute query (if set changed after last execution), to get their models, categories and parent elements path. <br/> - Find always/never drawn child elements (nested as well) where queried data matches <code>props.modelId</code> & <code>props.categoryId</code>. <br/> - Get count of elements under model with category in <code>oppositeSet</code>: <code>numberOfElementsInOppositeSet</code> </div>
     "]
 
       G2 -- totalCount --> H["<code style='text-align: left;'><a href='#getalwaysorneverdrawnvisibilitystatus'>getAlwaysOrNeverDrawnVisibilityStatus</a>({
@@ -298,7 +297,7 @@ flowchart TD
   H --> M
   G1 --> M
 
-  M --> N{<br/> Some 'visible' && Some 'hidden' <br/> **OR** <br/> at least one is 'partial'}
+  M --> N{<br/> Some 'visible' && Some 'hidden' <br/> <strong>OR</strong> <br/> at least one is 'partial'}
 
   %% Results
   N -- Yes --> RESULT_Partial
@@ -348,14 +347,13 @@ flowchart TD
     A2 -- Yes --> D{Is always drawn exclusive}
 
       %% Branch Yes
-      D -- Yes --> E1["**defaultStatus**: 'hidden' <br/> **oppositeSet**: <code>alwaysDrawn</code>"]
+      D -- Yes --> E1["<code>defaultStatus: 'hidden' <br/> oppositeSet: alwaysDrawn</code>"]
 
       %% Branch No
       D -- No --> E2{"
         <div style='padding: 20px'>
-          Per model category override === 'show' <br/>
+          Per model category override === 'show'
           <strong style='font-weight: bold;'>OR</strong>
-          <br/>
           Per model category override === 'none'<br/> && <code>viewport.viewsCategory(props.categoryId)</code>
         </div>
       "}
@@ -364,9 +362,9 @@ flowchart TD
         E2 -- No --> E1
 
         %% Branch Yes
-         E2 -- Yes --> E3["**defaultStatus**: 'visible' <br/> **oppositeSet**: <code>neverDrawn</code>"]
+         E2 -- Yes --> E3["<code>defaultStatus: 'visible' <br/> oppositeSet: neverDrawn</code>"]
 
-    E1 -- Pass down --> F{"**oppositeSet**.size > 0"}
+    E1 -- Pass down --> F{"<code>oppositeSet.size > 0</code>"}
     E3 -- Pass down --> F
 
       %% Branch No
@@ -376,16 +374,16 @@ flowchart TD
       F -- Yes --> G2{"<code>props.childrenCount<br/> === 0 / undefined</code>"}
 
         %% Branch Yes
-        G2 -- Yes --> H1[Children count in **oppositeSet** === 0]
+        G2 -- Yes --> H1[Children count in <code>oppositeSet</code> === 0]
 
         %% Branch No
         G2 -- No --> H2["Props
-        <div style='text-align: left;'>- For **oppositeSet** elements execute query (if set changed after last execution), to get their models, categories and parent elements path. <br/> - Find always/never drawn child elements (nested as well) where queried data matches <code>props.modelId</code> & <code>props.categoryId</code> & <code>props.parentElementIdsPath</code>. <br/> - Get count of children in **oppositeSet**: numberOfElementsInOppositeSet </div>
+        <div style='text-align: left;'>- For <code>oppositeSet</code> elements execute query (if set changed after last execution), to get their models, categories and parent elements path. <br/> - Find always/never drawn child elements (nested as well) where queried data matches <code>props.modelId</code> & <code>props.categoryId</code> & <code>props.parentElementIdsPath</code>. <br/> - Get count of children in <code>oppositeSet</code>: <code>numberOfElementsInOppositeSet</code> </div>
         "]
 
 
 
-      H1 -- Pass down --> I["**numberOfElementsInOppositeSet**: <code>props.elementIds</code> in <code>oppositeSet</code> and children count in <code>oppositeSet</code> <br/> **totalCount**: <code>props.elementIds</code> + <code>props.childrenCount</code>"]
+      H1 -- Pass down --> I["<code>numberOfElementsInOppositeSet</code>: <code>props.elementIds</code> in <code>oppositeSet</code> and children count in <code>oppositeSet</code> <br/> <code>totalCount</code>: <code>props.elementIds</code> + <code>props.childrenCount</code>"]
       H2 -- Pass down --> I
 
       I -- Pass down --> J["<code style='text-align: left;'><a href='#getalwaysorneverdrawnvisibilitystatus'>getAlwaysOrNeverDrawnVisibilityStatus</a>({
@@ -401,7 +399,7 @@ flowchart TD
   G1 --> M
   J --> M
 
-  M --> N{<br/> Some 'visible' && Some 'hidden' <br/> **OR** <br/> at least one is 'partial'}
+  M --> N{<br/> Some 'visible' && Some 'hidden' <br/> <strong>OR</strong> <br/> at least one is 'partial'}
 
   %% Results
   N -- Yes --> RESULT_Partial
@@ -430,13 +428,12 @@ flowchart TD
   RESULT_Hidden[/hidden/]
 
   %% Start
-  TITLE(["<code>getAlwaysOrNeverDrawnVisibilityStatus</code>"]) --> A{"<code>props.totalCount === 0</code><br/>**OR**<br/><code>props.numberOfElementsInOppositeSet === 0</code>"}
+  TITLE(["<code>getAlwaysOrNeverDrawnVisibilityStatus</code>"]) --> A{"<code>props.totalCount === 0</code><br/><strong>OR</strong><br/><code>props.numberOfElementsInOppositeSet === 0</code>"}
 
   PROPS[\"
     <code>props</code>
     <code style='text-align: left;'>
       - totalCount: number
-      %% need !important on color since to not take the config color
      <span style='color: #808080 !important; font-style: italic;'>Number of elements that are under node <br/> (includes node itself and its nested child elements)
      </span>
       - numberOfElementsInOppositeSet: number
@@ -819,11 +816,13 @@ flowchart TD
   I1 --> K
   I2 --> K
   K -- toHide, toNone --> J{"<code>list.length > 0 </code>"}
-  J -- Yes --> J1["<code style='text-align: left;'>viewport.setPerModelCategoryOverride({
+  J -- Yes --> J1["<code style='text-align: left'>viewport.setPerModelCategoryOverride({
   <code style='padding-left: 2rem'>modelIds,
   categoryIds: list,
   override: list === toHide ? 'hide' : 'none'</code>
-  })</code>"]
+  })</code>
+  <br/>
+  "]
   J -- No --> RESULT_Done
 
   C1 --> RESULT_Done
@@ -857,16 +856,16 @@ flowchart TD
   A -- elementId --> B{"<code>props.on</code>"}
 
   %% Turn on
-  B -- true --> C1["Remove elementId from <code>neverDrawn</code>"]
+  B -- true --> C1["Remove <code>elementId</code> from <code>neverDrawn</code>"]
   C1 --> D1{"<code>!visibleByDefault(elementId)<br/> || isAlwaysDrawnExclusive</code>"}
-  D1 -- Yes --> E1["Add elementId to <code>alwaysDrawn</code>"]
+  D1 -- Yes --> E1["Add <code>elementId</code> to <code>alwaysDrawn</code>"]
   D1 -- No --> F
   E1 --> F
 
   %% Turn off
-  B -- false --> C2["Remove elementId from <code>alwaysDrawn</code>"]
+  B -- false --> C2["Remove <code>elementId</code> from <code>alwaysDrawn</code>"]
   C2 --> D2{"<code>visibleByDefault(elementId)<br/> && !isAlwaysDrawnExclusive</code>"}
-  D2 -- Yes --> E2["Add elementId to <code>neverDrawn</code>"]
+  D2 -- Yes --> E2["Add <code>elementId</code> to <code>neverDrawn</code>"]
   D2 -- No --> F
   E2 --> F
 
