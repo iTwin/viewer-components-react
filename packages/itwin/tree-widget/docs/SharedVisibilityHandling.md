@@ -279,9 +279,7 @@ flowchart TD
       %% Branch Yes
       F -- Yes --> G2[From cache get total count of elements under category with model]
 
-      F -- Yes --> G3["Props
-    <span style='display: block; text-align: left; font-family: monospace;'>- For <span style='font-family: monospace;'>oppositeSet</span> elements execute query (if set changed after last execution), to get their models, categories and parent elements path. <br/> - Find always/never drawn child elements (nested as well) where queried data matches <span style='font-family: monospace;'>props.modelId</span> & <span style='font-family: monospace;'>props.categoryId</span>. <br/> - Get count of elements under model with category in <span style='font-family: monospace;'>oppositeSet</span>: <span style='font-family: monospace;'>numberOfElementsInOppositeSet</span> </span>
-    "]
+      F -- Yes --> G3["Props<span style='display: block; text-align: left;'>- For <span style='font-family: monospace;'>oppositeSet</span> elements execute query (if set changed after last execution), to get their models, categories and parent elements path. <br/> - Find always/never drawn child elements (nested as well) where queried data matches <span style='font-family: monospace;'>props.modelId</span> & <span style='font-family: monospace;'>props.categoryId</span>. <br/> - Get count of elements under model with category in <span style='font-family: monospace;'>oppositeSet</span>: <span style='font-family: monospace;'>numberOfElementsInOppositeSet</span> </span>"]
 
       G2 -- totalCount --> H["<div style='text-align: left; font-family: monospace;'><a href='#getalwaysorneverdrawnvisibilitystatus'>getAlwaysOrNeverDrawnVisibilityStatus</a>({
     <span style='padding-left: 2rem;'>totalCount,</span>
@@ -326,7 +324,9 @@ flowchart TD
   RESULT_Hidden[/hidden/]
 
   %% Start
-  TITLE(["<span style='font-family: monospace;'>getElementsVisibilityStatus</span>"]) --> A1["<span style='display: block; text-align: left; font-family: monospace;'> Get modelIds from cache: <br/> 1. <span style='font-family: monospace;'>props.elementIds</span> which are sub-models <br/> 2. Children which are sub-models (nested as well) </span>"]
+  TITLE(["<span style='font-family: monospace;'>getElementsVisibilityStatus</span>"]) --> A1["<div style='text-align: left;'>Get modelIds from cache:
+  1. <span style='font-family: monospace;'>props.elementIds</span> which are sub-models
+  2. Children which are sub-models (nested as well)</div>"]
   TITLE(["<span style='font-family: monospace;'>getElementsVisibilityStatus</span>"]) --> A2{"<span style='font-family: monospace;'>viewport.viewsModel(props.modelId)</span>"}
 
   PROPS[\"
@@ -377,8 +377,7 @@ flowchart TD
         G2 -- Yes --> H1[Children count in <span style='font-family: monospace;'>oppositeSet</span> === 0]
 
         %% Branch No
-        G2 -- No --> H2["Props
-        <span style='display: block; text-align: left; font-family: monospace;'>- For <span style='font-family: monospace;'>oppositeSet</span> elements execute query (if set changed after last execution), to get their models, categories and parent elements path. <br/> - Find always/never drawn child elements (nested as well) where queried data matches <span style='font-family: monospace;'>props.modelId</span> & <span style='font-family: monospace;'>props.categoryId</span> & <span style='font-family: monospace;'>props.parentElementIdsPath</span>. <br/> - Get count of children in <span style='font-family: monospace;'>oppositeSet</span>: <span style='font-family: monospace;'>numberOfElementsInOppositeSet</span> </span>
+        G2 -- No --> H2["Props<span style='display: block; text-align: left;'>- For <span style='font-family: monospace;'>oppositeSet</span> elements execute query (if set changed after last execution), to get their models, categories and parent elements path. <br/> - Find always/never drawn child elements (nested as well) where queried data matches <span style='font-family: monospace;'>props.modelId</span> & <span style='font-family: monospace;'>props.categoryId</span> & <span style='font-family: monospace;'>props.parentElementIdsPath</span>. <br/> - Get count of children in <span style='font-family: monospace;'>oppositeSet</span>: <span style='font-family: monospace;'>numberOfElementsInOppositeSet</span> </span>
         "]
 
 
@@ -779,7 +778,9 @@ flowchart TD
   RESULT_Done([Done])
 
   %% Start
-  TITLE(["<span style='font-family: monospace;'>showModelWithoutAnyCategoriesOrElements</span>"]) --> A["Fetch from cache in parallel:<br/>1. All categories of model<br/>2. Always drawn elements of model"]
+  TITLE(["<span style='font-family: monospace; '>showModelWithoutAnyCategoriesOrElements</span>"]) --> A["<div style='text-align: left;'>Fetch from cache in parallel:
+  1. All categories of model
+  2. Always drawn elements of model</div>"]
 
   PROPS[\"
     <span style='font-family: monospace;'>props</span>
@@ -885,7 +886,9 @@ flowchart TD
   RESULT_Done([Done])
 
   %% Start
-  TITLE(["<span style='font-family: monospace;'>clearAlwaysAndNeverDrawnElements</span>"]) --> A["Fetch from cache in parallel:<br/>1. Always drawn elements for model & categories <br/>2. Never drawn elements for model & categories"]
+  TITLE(["<span style='font-family: monospace;'>clearAlwaysAndNeverDrawnElements</span>"]) --> A["<div style='text-align: left;'>Fetch from cache in parallel:
+  1. Always drawn elements for model & categories
+  2. Never drawn elements for model & categories</div>"]
 
   PROPS[\"
     <span style='font-family: monospace;'>props</span>
