@@ -95,6 +95,10 @@ export class BaseIdsCache {
     );
   }
 
+  public hasSubModels({ modelId }: { modelId: Id64String }): Observable<boolean> {
+    return this.#modeledElementsCache.hasModeledElements({ modelId });
+  }
+
   // Re-export cache methods
 
   // ElementModelCategoriesCache methods
@@ -196,6 +200,10 @@ export class BaseIdsCacheImpl {
     props: { modelId: Id64String; categoryId?: Id64String } | { categoryId: Id64String; modelId: Id64String | undefined },
   ): Observable<Id64Array> {
     return this.#baseIdsCache.getSubModels(props);
+  }
+
+  public hasSubModels({ modelId }: { modelId: Id64String }): Observable<boolean> {
+    return this.#baseIdsCache.hasSubModels({ modelId });
   }
 
   public getSubModelsUnderElement(

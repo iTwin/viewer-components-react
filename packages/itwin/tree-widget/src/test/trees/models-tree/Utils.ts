@@ -129,6 +129,7 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
     }),
     getSubModelsUnderElement: vi.fn(() => of([])),
     getSubModels: vi.fn(() => EMPTY),
+    hasSubModels: vi.fn(() => of(false)),
     [Symbol.dispose]: vi.fn(),
   } as unknown as ModelsTreeIdsCache;
 }

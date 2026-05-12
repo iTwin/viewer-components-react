@@ -472,7 +472,13 @@ export class BaseVisibilityHelper implements Disposable {
   }
 
   /** Turns model on and turns off elements with categories related to that model. */
-  private showModelWithoutAnyCategoriesOrElements(modelId: Id64String, categoriesToNotOverride?: Id64Set): Observable<void> {
+  private showModelWithoutAnyCategoriesOrElements({
+    modelId,
+    categoriesToNotOverride,
+  }: {
+    modelId: Id64String;
+    categoriesToNotOverride?: Id64Set;
+  }): Observable<void> {
     return forkJoin({
       allModelCategories: this.#props.baseIdsCache.getCategories({ modelId }),
       modelAlwaysDrawnElements: this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({ modelId, setType: "always" }),
@@ -549,16 +555,24 @@ export class BaseVisibilityHelper implements Disposable {
 
       const changeSubModelsObs = categoryModelsObs.pipe(
         mergeMap(([modelId, modelCategories]) =>
-          fromWithRelease({ source: modelCategories, releaseOnCount: 500 }).pipe(
-            mergeMap((modelCategoryId) => this.#props.baseIdsCache.getSubModels({ categoryId: modelCategoryId, modelId })),
-          ),
+          forkJoin({ modelId: of(modelId), modelCategories: of(modelCategories), hasSubModels: this.#props.baseIdsCache.hasSubModels({ modelId }) }),
         ),
+        mergeMap(({ modelId, modelCategories, hasSubModels }) => {
+          if (!hasSubModels) {
+            return EMPTY;
+          }
+          return fromWithRelease({ source: modelCategories, releaseOnCount: 500 }).pipe(
+            mergeMap((modelCategoryId) => this.#props.baseIdsCache.getSubModels({ categoryId: modelCategoryId, modelId })),
+          );
+        }),
         mergeMap((subModels) => this.changeModelsVisibilityStatus({ modelIds: subModels, on })),
       );
       const changeModelsObs = on
         ? categoryModelsObs.pipe(
             mergeMap(([modelId, modelCategories]) =>
-              this.#props.viewport.viewsModel(modelId) ? EMPTY : this.showModelWithoutAnyCategoriesOrElements(modelId, modelCategories),
+              this.#props.viewport.viewsModel(modelId)
+                ? EMPTY
+                : this.showModelWithoutAnyCategoriesOrElements({ modelId, categoriesToNotOverride: modelCategories }),
             ),
           )
         : EMPTY;
@@ -634,24 +648,33 @@ export class BaseVisibilityHelper implements Disposable {
     categoryIds: Id64Arg;
     on: boolean;
   }): Observable<void> {
+    this.#props.viewport.setPerModelCategoryOverride({
+      modelIds: modelId,
+      categoryIds,
+      override: on ? "show" : "hide",
+    });
+
     const changeModelsVisibilityStatusObs =
-      on && !this.#props.viewport.viewsModel(modelId) ? this.showModelWithoutAnyCategoriesOrElements(modelId, Id64.toIdSet(categoryIds)) : EMPTY;
-    const changeCategoriesVisibilityStatusObs = of(
-      this.#props.viewport.setPerModelCategoryOverride({
-        modelIds: modelId,
-        categoryIds,
-        override: on ? "show" : "hide",
-      }),
-    );
+      on && !this.#props.viewport.viewsModel(modelId)
+        ? this.showModelWithoutAnyCategoriesOrElements({ modelId, categoriesToNotOverride: Id64.toIdSet(categoryIds) })
+        : EMPTY;
+
     const changeAlwaysAndNeverDrawnElementsObs = this.clearAlwaysAndNeverDrawnElements({
       categoryIds,
       modelId,
     });
-    const changeSubModelsObs = fromWithRelease({ source: categoryIds, releaseOnCount: 200 }).pipe(
-      mergeMap((categoryId) => this.#props.baseIdsCache.getSubModels({ categoryId, modelId })),
-      mergeMap((subModels) => this.changeModelsVisibilityStatus({ modelIds: subModels, on })),
+    const changeSubModelsObs = this.#props.baseIdsCache.hasSubModels({ modelId }).pipe(
+      mergeMap((hasSubModels) => {
+        if (hasSubModels) {
+          return fromWithRelease({ source: categoryIds, releaseOnCount: 200 }).pipe(
+            mergeMap((categoryId) => this.#props.baseIdsCache.getSubModels({ categoryId, modelId })),
+            mergeMap((subModels) => this.changeModelsVisibilityStatus({ modelIds: subModels, on })),
+          );
+        }
+        return EMPTY;
+      }),
     );
-    return merge(changeModelsVisibilityStatusObs, changeCategoriesVisibilityStatusObs, changeAlwaysAndNeverDrawnElementsObs, changeSubModelsObs);
+    return merge(changeModelsVisibilityStatusObs, changeAlwaysAndNeverDrawnElementsObs, changeSubModelsObs);
   }
 
   /**
@@ -687,22 +710,30 @@ export class BaseVisibilityHelper implements Disposable {
                 };
           if (!this.#props.viewport.viewsModel(modelId)) {
             if (!on) {
-              return this.queueElementsVisibilityChange(elementsToChange, on, () => false);
+              return this.queueElementsVisibilityChange({ elementIds: elementsToChange, on, visibleByDefault: () => false });
             }
 
-            return this.showModelWithoutAnyCategoriesOrElements(modelId).pipe(
+            return this.showModelWithoutAnyCategoriesOrElements({ modelId }).pipe(
               mergeMap(() => {
                 const defaultVisibility = this.getVisibleModelCategoryDirectVisibilityStatus({
                   categoryId,
                   modelId,
                 });
-                return this.queueElementsVisibilityChange(elementsToChange, on, isDisplayedByDefault(defaultVisibility.state === "visible"));
+                return this.queueElementsVisibilityChange({
+                  elementIds: elementsToChange,
+                  on,
+                  visibleByDefault: isDisplayedByDefault(defaultVisibility.state === "visible"),
+                });
               }),
             );
           }
 
           const categoryVisibility = this.getVisibleModelCategoryDirectVisibilityStatus({ categoryId, modelId });
-          return this.queueElementsVisibilityChange(elementsToChange, on, isDisplayedByDefault(categoryVisibility.state === "visible"));
+          return this.queueElementsVisibilityChange({
+            elementIds: elementsToChange,
+            on,
+            visibleByDefault: isDisplayedByDefault(categoryVisibility.state === "visible"),
+          });
         }),
         // Change visibility of elements that are models
         fromWithRelease({ source: elementIds, releaseOnCount: 100 }).pipe(
@@ -729,7 +760,15 @@ export class BaseVisibilityHelper implements Disposable {
   }
 
   /** Queues visibility change for elements. */
-  private queueElementsVisibilityChange(elementIds: Id64Arg, on: boolean, visibleByDefault: (elementId: Id64String) => boolean) {
+  private queueElementsVisibilityChange({
+    elementIds,
+    on,
+    visibleByDefault,
+  }: {
+    elementIds: Id64Arg;
+    on: boolean;
+    visibleByDefault: (elementId: Id64String) => boolean;
+  }) {
     const finishedSubject = new Subject<boolean>();
     // observable to track if visibility change is finished/cancelled
     const changeFinished = finishedSubject.pipe(
