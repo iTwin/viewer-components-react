@@ -1,8 +1,16 @@
 # Change Log - @itwin/measure-tools-react
 
-<!-- This log was last generated on Thu, 15 Jan 2026 14:30:28 GMT and should not be manually modified. -->
+<!-- This log was last generated on Tue, 12 May 2026 16:14:28 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.33.0
+
+Tue, 12 May 2026 16:14:28 GMT
+
+### Minor changes
+
+- Update peer dependencies to iTwin.js 5.9, migrate measurement formatting to the FormatSpecHandle-based API, and fix existing measurement labels to refresh immediately after quantity format changes. ([#1659](https://github.com/iTwin/viewer-components-react/pull/1659))
 
 ## 0.32.0
 
