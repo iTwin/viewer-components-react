@@ -11,8 +11,8 @@ import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "./G
 import { TextMarker } from "./TextMarker.js";
 
 import type { DecorateContext, GraphicBuilder} from "@itwin/core-frontend";
+import type { FormatterSpec } from "@itwin/core-quantity";
 import type { TextEntry} from "./TextMarker.js";
-import type { MeasurementFormattingProps } from "./MeasurementProps.js";
 export class Polygon {
   public isSelected: boolean;
   public drawMarker: boolean;
@@ -27,8 +27,7 @@ export class Polygon {
   private _overrideText?: string[] | TextEntry[];
   private _textMarker: TextMarker;
   private _styleSet: StyleSet;
-  private _areaKoQ: string;
-  private _areaPersistenceUnitName: string;
+  private _areaFormatterSpecProvider?: () => FormatterSpec | undefined;
 
   public get points(): Point3d[] {
     return this._points;
@@ -90,27 +89,18 @@ export class Polygon {
     return this._sheetToWorldTransform;
   }
 
-  public get areaKoQ(): string {
-    return this._areaKoQ;
+  public set areaFormatterSpecProvider(provider: (() => FormatterSpec | undefined) | undefined) {
+    this._areaFormatterSpecProvider = provider;
+    this.setTextToMarker();
   }
 
-  public set areaKoQ(value: string) {
-    this._areaKoQ = value;
-    this.recomputeFromPoints();
-  }
-
-  public get areaPersistenceUnitName(): string {
-    return this._areaPersistenceUnitName;
-  }
-
-  public set areaPersistenceUnitName(value: string) {
-    this._areaPersistenceUnitName = value;
-    this.recomputeFromPoints();
-  }
-
-  constructor(points: Point3d[], copyPoints: boolean = true, styleSet?: StyleSet, formatting?: MeasurementFormattingProps) {
-    this._areaKoQ = formatting?.koqName ?? "DefaultToolsUnits.AREA";
-    this._areaPersistenceUnitName = formatting?.persistenceUnitName ?? "Units.SQ_M";
+  constructor(
+    points: Point3d[],
+    copyPoints: boolean = true,
+    styleSet?: StyleSet,
+    areaFormatterSpecProvider?: () => FormatterSpec | undefined,
+  ) {
+    this._areaFormatterSpecProvider = areaFormatterSpecProvider;
     this._styleSet = (styleSet !== undefined) ? styleSet : StyleSet.default;
     this.drawMarker = true;
     this.drawFillArea = true;
@@ -157,12 +147,16 @@ export class Polygon {
       this.recomputeFromPoints();
   }
 
-  private async setTextToMarker() {
+  public refreshTextMarker(): void {
+    this.setTextToMarker();
+  }
+
+  private setTextToMarker() {
     if (this._overrideText) {
       this._textMarker.textLines = this._overrideText;
     } else {
       const lines: string[] = [];
-      const areaFormatter = FormatterUtils.getFormatterSpecWithFallback(this._areaKoQ, QuantityType.Area);
+      const areaFormatter = this._areaFormatterSpecProvider?.() ?? FormatterUtils.getFormatterSpecWithFallback("DefaultToolsUnits.AREA", "Units.SQ_M", QuantityType.Area);
       if (undefined !== areaFormatter)
         lines.push(IModelApp.quantityFormatter.formatQuantity(this.area, areaFormatter));
 

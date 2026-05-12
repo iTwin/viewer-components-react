@@ -16,7 +16,10 @@ export function CustomizeFormatPropertyContextMenuItem({ record }: DefaultContex
     }
     const formatDefinition = await IModelApp.formatsProvider.getFormat(record.property.kindOfQuantityName);
 
-    formatDefinition && UiFramework.dialogs.modal.open(<QuantityFormatPanelDialogWithoutFormatSelector formatDefinition={formatDefinition} />);
+    formatDefinition &&
+      UiFramework.dialogs.modal.open(
+        <QuantityFormatPanelDialogWithoutFormatSelector formatDefinition={formatDefinition} formatKey={record.property.kindOfQuantityName} />,
+      );
   };
   if (!record.property.kindOfQuantityName) {
     return null;
@@ -38,7 +41,7 @@ export function CustomizeFormatPropertyActionItem({ kindOfQuantityName }: { kind
   const handleClick = async (): Promise<void> => {
     const formatDefinition = await IModelApp.formatsProvider.getFormat(kindOfQuantityName);
     if (formatDefinition) {
-      UiFramework.dialogs.modal.open(<QuantityFormatPanelDialogWithoutFormatSelector formatDefinition={formatDefinition} />);
+      UiFramework.dialogs.modal.open(<QuantityFormatPanelDialogWithoutFormatSelector formatDefinition={formatDefinition} formatKey={kindOfQuantityName} />);
     }
   };
 
@@ -47,14 +50,15 @@ export function CustomizeFormatPropertyActionItem({ kindOfQuantityName }: { kind
 
 interface QuantityFormatPanelDialogWithoutFormatSelectorProps {
   readonly formatDefinition: FormatDefinition;
+  readonly formatKey: string;
 }
 
-const QuantityFormatPanelDialogWithoutFormatSelector: React.FC<QuantityFormatPanelDialogWithoutFormatSelectorProps> = ({ formatDefinition }) => {
+const QuantityFormatPanelDialogWithoutFormatSelector: React.FC<QuantityFormatPanelDialogWithoutFormatSelectorProps> = ({ formatDefinition, formatKey }) => {
   const [isModalOpen, setIsModalOpen] = useState(true);
   const [unitsProvider, setUnitsProvider] = useState(IModelApp.quantityFormatter.unitsProvider);
 
   const handleFormatChange = async (newFormat: FormatDefinition): Promise<void> => {
-    await FormatManager.instance?.activeFormatSetFormatsProvider?.addFormat(newFormat.name ?? "", newFormat);
+    await FormatManager.instance?.updateActiveFormat(formatKey, newFormat);
   };
 
   const handleCloseModal = useCallback(() => {

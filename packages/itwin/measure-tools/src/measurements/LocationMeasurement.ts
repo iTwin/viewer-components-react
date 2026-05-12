@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { Id64String } from "@itwin/core-bentley";
+import { dispose, type Id64String } from "@itwin/core-bentley";
 import type { XYZProps } from "@itwin/core-geometry";
 import { Cartographic } from "@itwin/core-common";
 import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
@@ -28,6 +28,7 @@ import type {
   MeasurementWidgetData,
 } from "../api/Measurement.js";
 import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
+import type { FormatSpecHandle } from "@itwin/core-quantity";
 /**
  * Props for serializing a [[LocationMeasurement]].
  */
@@ -108,7 +109,7 @@ export class LocationMeasurement extends Measurement {
   }
   public set location(pt: Point3d) {
     this._location.setFrom(pt);
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
 
   public get geoLocation(): Cartographic | undefined {
@@ -154,14 +155,16 @@ export class LocationMeasurement extends Measurement {
   }
   public set coordinateKoQ(value: string) {
     this._coordinateKoQ = value;
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this._disposeHandles();
+    this.createTextMarker();
   }
   public get coordinatePersistenceUnitName(): string {
     return this._coordinatePersistenceUnitName;
   }
   public set coordinatePersistenceUnitName(value: string) {
     this._coordinatePersistenceUnitName = value;
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this._disposeHandles();
+    this.createTextMarker();
   }
 
   public get lengthKoQ(): string {
@@ -169,14 +172,16 @@ export class LocationMeasurement extends Measurement {
   }
   public set lengthKoQ(value: string) {
     this._lengthKoQ = value;
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this._disposeHandles();
+    this.createTextMarker();
   }
   public get lengthPersistenceUnitName(): string {
     return this._lengthPersistenceUnitName;
   }
   public set lengthPersistenceUnitName(value: string) {
     this._lengthPersistenceUnitName = value;
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this._disposeHandles();
+    this.createTextMarker();
   }
 
   public get stationKoQ(): string {
@@ -184,12 +189,14 @@ export class LocationMeasurement extends Measurement {
   }
   public set stationKoQ(value: string) {
     this._stationKoQ = value;
+    this._disposeHandles();
   }
   public get stationPersistenceUnitName(): string {
     return this._stationPersistenceUnitName;
   }
   public set stationPersistenceUnitName(value: string) {
     this._stationPersistenceUnitName = value;
+    this._disposeHandles();
   }
 
   public get angleKoQ(): string {
@@ -197,12 +204,14 @@ export class LocationMeasurement extends Measurement {
   }
   public set angleKoQ(value: string) {
     this._angleKoQ = value;
+    this._disposeHandles();
   }
   public get anglePersistenceUnitName(): string {
     return this._anglePersistenceUnitName;
   }
   public set anglePersistenceUnitName(value: string) {
     this._anglePersistenceUnitName = value;
+    this._disposeHandles();
   }
 
   constructor(props?: LocationMeasurementProps) {
@@ -224,7 +233,7 @@ export class LocationMeasurement extends Measurement {
       this.readFromJSON(props);
     }
 
-    this.createTextMarker().catch();
+    this.createTextMarker();
   }
 
   /** Changes the location. Only possible if the measurement is dynamic. */
@@ -278,35 +287,57 @@ export class LocationMeasurement extends Measurement {
     if (this._textMarker) this._textMarker.transientHiliteId = this.transientId;
   }
 
-  public override async populateFormattingSpecsRegistry(_force?: boolean): Promise<void> {
-    const coordinateEntry = IModelApp.quantityFormatter.getSpecsByName(this._coordinateKoQ);
-    if (_force || !coordinateEntry || coordinateEntry.formatterSpec.persistenceUnit?.name !== this._coordinatePersistenceUnitName) {
-      const coordinateFormatProps = await IModelApp.formatsProvider.getFormat(this._coordinateKoQ);
-      if (coordinateFormatProps) {
-        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._coordinateKoQ, this._coordinatePersistenceUnitName, coordinateFormatProps);
-      }
+  private _coordinateHandle?: FormatSpecHandle;
+  private _lengthHandle?: FormatSpecHandle;
+  private _stationHandle?: FormatSpecHandle;
+  private _angleHandle?: FormatSpecHandle;
+
+  private _getCoordinateHandle(): FormatSpecHandle {
+    if (!this._coordinateHandle) {
+      this._coordinateHandle = IModelApp.quantityFormatter.getFormatSpecHandle(
+        this._coordinateKoQ, this._coordinatePersistenceUnitName
+      );
     }
-    const lengthEntry = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ);
-    if (_force || !lengthEntry || lengthEntry.formatterSpec.persistenceUnit?.name !== this._lengthPersistenceUnitName) {
-      const lengthFormatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
-      if (lengthFormatProps) {
-        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._lengthKoQ, this._lengthPersistenceUnitName, lengthFormatProps);
-      }
+    return this._coordinateHandle;
+  }
+
+  private _getLengthHandle(): FormatSpecHandle {
+    if (!this._lengthHandle) {
+      this._lengthHandle = IModelApp.quantityFormatter.getFormatSpecHandle(
+        this._lengthKoQ, this._lengthPersistenceUnitName
+      );
     }
-    const stationEntry = IModelApp.quantityFormatter.getSpecsByName(this._stationKoQ);
-    if (_force || !stationEntry || stationEntry.formatterSpec.persistenceUnit?.name !== this._stationPersistenceUnitName) {
-      const stationFormatProps = await IModelApp.formatsProvider.getFormat(this._stationKoQ);
-      if (stationFormatProps) {
-        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._stationKoQ, this._stationPersistenceUnitName, stationFormatProps);
-      }
+    return this._lengthHandle;
+  }
+
+  private _getStationHandle(): FormatSpecHandle {
+    if (!this._stationHandle) {
+      this._stationHandle = IModelApp.quantityFormatter.getFormatSpecHandle(
+        this._stationKoQ, this._stationPersistenceUnitName
+      );
     }
-    const angleEntry = IModelApp.quantityFormatter.getSpecsByName(this._angleKoQ);
-    if (_force || !angleEntry || angleEntry.formatterSpec.persistenceUnit?.name !== this._anglePersistenceUnitName) {
-      const angleFormatProps = await IModelApp.formatsProvider.getFormat(this._angleKoQ);
-      if (angleFormatProps) {
-        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._angleKoQ, this._anglePersistenceUnitName, angleFormatProps);
-      }
+    return this._stationHandle;
+  }
+
+  private _getAngleHandle(): FormatSpecHandle {
+    if (!this._angleHandle) {
+      this._angleHandle = IModelApp.quantityFormatter.getFormatSpecHandle(
+        this._angleKoQ, this._anglePersistenceUnitName
+      );
     }
+    return this._angleHandle;
+  }
+
+  private _disposeHandles(): void {
+    this._coordinateHandle = dispose(this._coordinateHandle);
+    this._lengthHandle = dispose(this._lengthHandle);
+    this._stationHandle = dispose(this._stationHandle);
+    this._angleHandle = dispose(this._angleHandle);
+  }
+
+  public override onCleanup(): void {
+    super.onCleanup();
+    this._disposeHandles();
   }
 
   public override decorate(context: DecorateContext): void {
@@ -332,28 +363,28 @@ export class LocationMeasurement extends Measurement {
     context.addDecorationFromBuilder(xBuilder);
   }
 
-  private async createTextMarker(): Promise<void> {
+  private createTextMarker(): void {
     const adjustedLocation = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._location));
-    const coordinateSpec = FormatterUtils.getFormatterSpecWithFallback(this._coordinateKoQ, QuantityType.Coordinate);
+    const coordinateHandle = this._getCoordinateHandle();
 
     const entries = [
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_x"
         ),
-        value: await FormatterUtils.formatLength(adjustedLocation.x, coordinateSpec),
+        value: coordinateHandle.format(adjustedLocation.x),
       },
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_y"
         ),
-        value: await FormatterUtils.formatLength(adjustedLocation.y, coordinateSpec),
+        value: coordinateHandle.format(adjustedLocation.y),
       },
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_z"
         ),
-        value: await FormatterUtils.formatLength(adjustedLocation.z, coordinateSpec),
+        value: coordinateHandle.format(adjustedLocation.z),
       },
     ];
 
@@ -387,13 +418,11 @@ export class LocationMeasurement extends Measurement {
     }
   }
 
-  protected override async getDataForMeasurementWidgetInternal(): Promise<
-  MeasurementWidgetData | undefined
-  > {
-    const coordinateSpec = FormatterUtils.getFormatterSpecWithFallback(this._coordinateKoQ, QuantityType.Coordinate);
-    const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, QuantityType.LengthEngineering);
-    const angleSpec = FormatterUtils.getFormatterSpecWithFallback(this._angleKoQ, QuantityType.Angle);
-    const stationSpec = FormatterUtils.getFormatterSpecWithFallback(this._stationKoQ, QuantityType.Stationing);
+  protected override getDataForMeasurementWidgetInternal(): MeasurementWidgetData | undefined {
+    const coordinateSpec = FormatterUtils.getSpecFromHandle(this._getCoordinateHandle(), QuantityType.Coordinate);
+    const lengthSpec = FormatterUtils.getSpecFromHandle(this._getLengthHandle(), QuantityType.LengthEngineering);
+    const angleSpec = FormatterUtils.getSpecFromHandle(this._getAngleHandle(), QuantityType.Angle);
+    const stationSpec = FormatterUtils.getSpecFromHandle(this._getStationHandle(), QuantityType.Stationing);
 
     const adjustedLocation = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._location));
     const fCoordinates = FormatterUtils.formatCoordinatesImmediate(adjustedLocation, coordinateSpec);
@@ -420,7 +449,7 @@ export class LocationMeasurement extends Measurement {
           "MeasureTools:tools.MeasureLocation.latLong"
         ),
         name: "LocationMeasurement_LatLong",
-        value: await FormatterUtils.formatCartographicToLatLong(
+        value: FormatterUtils.formatCartographicToLatLongImmediate(
           this._geoLocation, angleSpec
         ),
       });
@@ -431,7 +460,7 @@ export class LocationMeasurement extends Measurement {
           "MeasureTools:tools.MeasureLocation.altitude"
         ),
         name: "LocationMeasurement_Altitude",
-        value: await FormatterUtils.formatLength(adjustedLocation.z, coordinateSpec),
+        value: FormatterUtils.formatLengthImmediate(adjustedLocation.z, coordinateSpec),
       });
     }
     if (this.drawingMetadata?.sheetToWorldTransformv2 === undefined) {
@@ -458,7 +487,7 @@ export class LocationMeasurement extends Measurement {
           "MeasureTools:tools.MeasureLocation.station"
         ),
         name: "LocationMeasurement_Station",
-        value: await FormatterUtils.formatStation(this._station, stationSpec),
+        value: FormatterUtils.formatStationImmediate(this._station, stationSpec),
       });
     }
 
@@ -468,7 +497,7 @@ export class LocationMeasurement extends Measurement {
           "MeasureTools:tools.MeasureLocation.offset"
         ),
         name: "LocationMeasurement_Offset",
-        value: await FormatterUtils.formatLength(this._offset, lengthSpec),
+        value: FormatterUtils.formatLengthImmediate(this._offset, lengthSpec),
       });
     }
 
@@ -495,7 +524,7 @@ export class LocationMeasurement extends Measurement {
   }
 
   public override onDisplayUnitsChanged(): void {
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
 
   private updateMarkerStyle() {
@@ -562,7 +591,7 @@ export class LocationMeasurement extends Measurement {
       this._slope = other._slope;
       this._offset = other._offset;
       this._station = other._station;
-      this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+      this.createTextMarker();
     }
   }
 
@@ -600,7 +629,7 @@ export class LocationMeasurement extends Measurement {
     this._slope = jsonLoc.slope;
     this._station = jsonLoc.station;
     this._offset = jsonLoc.offset;
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.createTextMarker();
   }
 
   /**
