@@ -22,6 +22,7 @@ import { getSchemaContext, getTestViewer, TreeWidgetTestUtils } from "../../util
 
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { Widget } from "@itwin/appui-react";
+import { withEditTxn } from "@itwin/core-backend";
 
 describe("Tree widget", () => {
   describe("Learning snippets", () => {
@@ -37,16 +38,18 @@ describe("Tree widget", () => {
       });
 
       it("registers tree widget", async () => {
-        const { imodelConnection } = await buildIModel(async (imodel) => {
-          const model = insertPhysicalModelWithPartition({ imodel, codeValue: "model" });
-          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-          const childSubject = insertSubject({
-            imodel,
-            codeValue: "test subject",
-            parentId: rootSubject.id,
-          });
-          return { model, childSubject };
-        });
+        const { imodelConnection } = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
+            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+            const childSubject = insertSubject({
+              txn,
+              codeValue: "test subject",
+              parentId: rootSubject.id,
+            });
+            return { model, childSubject };
+          }),
+        );
         const testViewport = getTestViewer(imodelConnection);
         const unifiedSelectionStorage = createStorage();
         vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);

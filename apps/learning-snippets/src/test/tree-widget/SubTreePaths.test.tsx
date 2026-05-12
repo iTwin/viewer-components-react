@@ -19,6 +19,7 @@ import type { SelectionStorage } from "@itwin/unified-selection";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { Props } from "@itwin/presentation-shared";
+import { withEditTxn } from "@itwin/core-backend";
 
 // __PUBLISH_EXTRACT_START__ TreeWidget.GetSubTreePathsComponentWithTargetItemsExample
 type UseModelsTreeProps = Props<typeof useModelsTree>;
@@ -76,15 +77,17 @@ describe("Tree widget", () => {
         });
 
         it("renders custom models tree component with filtered paths using targetItems", async () => {
-          const { imodelConnection, ...keys } = await buildIModel(async (imodel) => {
-            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
-            const physicalModel2 = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel 2" });
-            const category = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory" });
-            insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
-            const category2 = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory 2" });
-            insertPhysicalElement({ imodel, modelId: physicalModel2.id, categoryId: category2.id });
-            return { physicalModel, physicalModel2 };
-          });
+          const { imodelConnection, ...keys } = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+              const physicalModel2 = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel 2" });
+              const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
+              insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+              const category2 = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory 2" });
+              insertPhysicalElement({ txn, modelId: physicalModel2.id, categoryId: category2.id });
+              return { physicalModel, physicalModel2 };
+            }),
+          );
           const testViewport = getTestViewer(imodelConnection, true);
           const unifiedSelectionStorage = createStorage();
           vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);

@@ -20,6 +20,7 @@ import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetT
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
+import { withEditTxn } from "@itwin/core-backend";
 
 // __PUBLISH_EXTRACT_START__ TreeWidget.GetFilteredPathsComponentWithTargetItemsExample
 type UseModelsTreeProps = Parameters<typeof useModelsTree>[0];
@@ -182,15 +183,17 @@ describe("Tree widget", () => {
         });
 
         it("renders custom models tree component with filtered paths using targetItems", async () => {
-          const { imodelConnection, ...keys } = await buildIModel(async (imodel) => {
-            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
-            const physicalModel2 = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel 2" });
-            const category = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory" });
-            insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
-            const category2 = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory 2" });
-            insertPhysicalElement({ imodel, modelId: physicalModel2.id, categoryId: category2.id });
-            return { physicalModel, physicalModel2 };
-          });
+          const { imodelConnection, ...keys } = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+              const physicalModel2 = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel 2" });
+              const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
+              insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+              const category2 = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory 2" });
+              insertPhysicalElement({ txn, modelId: physicalModel2.id, categoryId: category2.id });
+              return { physicalModel, physicalModel2 };
+            }),
+          );
           const testViewport = getTestViewer(imodelConnection, true);
           const unifiedSelectionStorage = createStorage();
           vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
@@ -213,22 +216,24 @@ describe("Tree widget", () => {
         });
 
         it("renders custom models tree component with filtered paths when they are modified", async () => {
-          const { imodelConnection } = await buildIModel(async (imodel, testSchema) => {
-            const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "PhysicalModel" });
-            const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory" });
-            insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id, userLabel: "test element 1" });
-            insertPhysicalModelWithPartition({ imodel, codeValue: "PhysicalModel2" });
-            const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory 2" });
-            const element2 = insertPhysicalElement({
-              imodel,
-              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-              userLabel: `element 2`,
-              modelId: physicalModel.id,
-              categoryId: category2.id,
-            });
-            const subModel = insertPhysicalSubModel({ imodel, modeledElementId: element2.id });
-            insertPhysicalElement({ imodel, userLabel: `test modeling element`, modelId: subModel.id, categoryId: category.id });
-          });
+          const { imodelConnection } = await buildIModel(async (imodel, testSchema) =>
+            withEditTxn(imodel, (txn) => {
+              const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "PhysicalModel" });
+              const category = insertSpatialCategory({ txn, codeValue: "SpatialCategory" });
+              insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id, userLabel: "test element 1" });
+              insertPhysicalModelWithPartition({ txn, codeValue: "PhysicalModel2" });
+              const category2 = insertSpatialCategory({ txn, codeValue: "SpatialCategory 2" });
+              const element2 = insertPhysicalElement({
+                txn,
+                classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+                userLabel: `element 2`,
+                modelId: physicalModel.id,
+                categoryId: category2.id,
+              });
+              const subModel = insertPhysicalSubModel({ txn, modeledElementId: element2.id });
+              insertPhysicalElement({ txn, userLabel: `test modeling element`, modelId: subModel.id, categoryId: category.id });
+            }),
+          );
           const testViewport = getTestViewer(imodelConnection, true);
           const unifiedSelectionStorage = createStorage();
           vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
@@ -246,30 +251,32 @@ describe("Tree widget", () => {
         });
 
         it("renders custom models tree component with filtered paths when the paths are created using filter", async () => {
-          const { imodelConnection } = await buildIModel(async (imodel) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const { imodelConnection } = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
 
-            // category label will match our filter
-            const category = insertSpatialCategory({ imodel, codeValue: "category match" });
+              // category label will match our filter
+              const category = insertSpatialCategory({ txn, codeValue: "category match" });
 
-            // will match childSubject1
-            const childSubject1 = insertSubject({ imodel, codeValue: "subject 1 match", parentId: rootSubject.id });
-            const model1 = insertPhysicalModelWithPartition({ imodel, codeValue: `model 1`, partitionParentId: childSubject1.id });
-            insertPhysicalElement({ imodel, userLabel: `element 1 match`, modelId: model1.id, categoryId: category.id });
+              // will match childSubject1
+              const childSubject1 = insertSubject({ txn, codeValue: "subject 1 match", parentId: rootSubject.id });
+              const model1 = insertPhysicalModelWithPartition({ txn, codeValue: `model 1`, partitionParentId: childSubject1.id });
+              insertPhysicalElement({ txn, userLabel: `element 1 match`, modelId: model1.id, categoryId: category.id });
 
-            // will match model3
-            const childSubject2 = insertSubject({ imodel, codeValue: "subject 2", parentId: rootSubject.id });
-            const childSubject3 = insertSubject({ imodel, codeValue: "subject 3", parentId: childSubject2.id });
-            const model3 = insertPhysicalModelWithPartition({ imodel, codeValue: `model 3 match`, partitionParentId: childSubject3.id });
-            insertPhysicalElement({ imodel, userLabel: `element 3 match`, modelId: model3.id, categoryId: category.id });
+              // will match model3
+              const childSubject2 = insertSubject({ txn, codeValue: "subject 2", parentId: rootSubject.id });
+              const childSubject3 = insertSubject({ txn, codeValue: "subject 3", parentId: childSubject2.id });
+              const model3 = insertPhysicalModelWithPartition({ txn, codeValue: `model 3 match`, partitionParentId: childSubject3.id });
+              insertPhysicalElement({ txn, userLabel: `element 3 match`, modelId: model3.id, categoryId: category.id });
 
-            // will try & fail to match the element
-            const childSubject4 = insertSubject({ imodel, codeValue: "subject 4", parentId: rootSubject.id });
-            const model4 = insertPhysicalModelWithPartition({ imodel, codeValue: `model 4`, partitionParentId: childSubject4.id });
-            insertPhysicalElement({ imodel, userLabel: `element 4 match`, modelId: model4.id, categoryId: category.id });
+              // will try & fail to match the element
+              const childSubject4 = insertSubject({ txn, codeValue: "subject 4", parentId: rootSubject.id });
+              const model4 = insertPhysicalModelWithPartition({ txn, codeValue: `model 4`, partitionParentId: childSubject4.id });
+              insertPhysicalElement({ txn, userLabel: `element 4 match`, modelId: model4.id, categoryId: category.id });
 
-            return { rootSubject, childSubject1, model1, childSubject3, model3, childSubject4, model4 };
-          });
+              return { rootSubject, childSubject1, model1, childSubject3, model3, childSubject4, model4 };
+            }),
+          );
 
           const testViewport = getTestViewer(imodelConnection, true);
           const unifiedSelectionStorage = createStorage();

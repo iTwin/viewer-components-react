@@ -17,6 +17,7 @@ import {
   insertSubject,
   terminateCore,
 } from "test-utilities";
+import { withEditTxn } from "@itwin/core-backend";
 import { CompressedId64Set, Id64 } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, IModelReadRpcInterface, RenderMode } from "@itwin/core-common";
 import { IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, SpatialViewState, ViewRect } from "@itwin/core-frontend";
@@ -1965,30 +1966,32 @@ describe("ModelsTreeVisibilityHandler", () => {
       {
         describeName: "with modeled elements",
         createIModel: async function createIModel(context: Mocha.Context): Promise<{ imodelConnection: IModelConnection } & IModelWithSubModelIds> {
-          return buildIModel(context, async (imodel, testSchema) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const partition = insertPhysicalPartition({ imodel, codeValue: "model", parentId: rootSubject.id });
-            const model = insertPhysicalSubModel({ imodel, modeledElementId: partition.id });
-            const category = insertSpatialCategory({ imodel, codeValue: "category" });
-            const modeledElement = insertPhysicalElement({
-              imodel,
-              userLabel: `element`,
-              modelId: model.id,
-              categoryId: category.id,
-              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-            });
-            const subModel = insertPhysicalSubModel({ imodel, modeledElementId: modeledElement.id });
-            const subModelCategory = insertSpatialCategory({ imodel, codeValue: "category2" });
-            const subModelElement = insertPhysicalElement({ imodel, userLabel: `element2`, modelId: subModel.id, categoryId: subModelCategory.id });
-            return {
-              subjectId: rootSubject.id,
-              modeledElementId: modeledElement.id,
-              modelId: model.id,
-              categoryId: category.id,
-              subModelCategoryId: subModelCategory.id,
-              subModelElementId: subModelElement.id,
-            };
-          });
+          return buildIModel(context, async (imodel, testSchema) =>
+            withEditTxn(imodel, (txn) => {
+              const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+              const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
+              const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
+              const category = insertSpatialCategory({ txn, codeValue: "category" });
+              const modeledElement = insertPhysicalElement({
+                txn,
+                userLabel: `element`,
+                modelId: model.id,
+                categoryId: category.id,
+                classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+              });
+              const subModel = insertPhysicalSubModel({ txn, modeledElementId: modeledElement.id });
+              const subModelCategory = insertSpatialCategory({ txn, codeValue: "category2" });
+              const subModelElement = insertPhysicalElement({ txn, userLabel: `element2`, modelId: subModel.id, categoryId: subModelCategory.id });
+              return {
+                subjectId: rootSubject.id,
+                modeledElementId: modeledElement.id,
+                modelId: model.id,
+                categoryId: category.id,
+                subModelCategoryId: subModelCategory.id,
+                subModelElementId: subModelElement.id,
+              };
+            }),
+          );
         },
         cases: [
           {
@@ -2133,30 +2136,32 @@ describe("ModelsTreeVisibilityHandler", () => {
       {
         describeName: "with modeled elements that have private subModel",
         createIModel: async function createIModel(context: Mocha.Context): Promise<{ imodelConnection: IModelConnection } & IModelWithSubModelIds> {
-          return buildIModel(context, async (imodel, testSchema) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const partition = insertPhysicalPartition({ imodel, codeValue: "model", parentId: rootSubject.id });
-            const model = insertPhysicalSubModel({ imodel, modeledElementId: partition.id });
-            const category = insertSpatialCategory({ imodel, codeValue: "category" });
-            const modeledElement = insertPhysicalElement({
-              imodel,
-              userLabel: `element`,
-              modelId: model.id,
-              categoryId: category.id,
-              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-            });
-            const subModel = insertPhysicalSubModel({ imodel, modeledElementId: modeledElement.id, isPrivate: true });
-            const subModelCategory = insertSpatialCategory({ imodel, codeValue: "category2" });
-            const subModelElement = insertPhysicalElement({ imodel, userLabel: `element2`, modelId: subModel.id, categoryId: subModelCategory.id });
-            return {
-              subjectId: rootSubject.id,
-              modeledElementId: modeledElement.id,
-              modelId: model.id,
-              categoryId: category.id,
-              subModelCategoryId: subModelCategory.id,
-              subModelElementId: subModelElement.id,
-            };
-          });
+          return buildIModel(context, async (imodel, testSchema) =>
+            withEditTxn(imodel, (txn) => {
+              const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+              const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
+              const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
+              const category = insertSpatialCategory({ txn, codeValue: "category" });
+              const modeledElement = insertPhysicalElement({
+                txn,
+                userLabel: `element`,
+                modelId: model.id,
+                categoryId: category.id,
+                classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+              });
+              const subModel = insertPhysicalSubModel({ txn, modeledElementId: modeledElement.id, isPrivate: true });
+              const subModelCategory = insertSpatialCategory({ txn, codeValue: "category2" });
+              const subModelElement = insertPhysicalElement({ txn, userLabel: `element2`, modelId: subModel.id, categoryId: subModelCategory.id });
+              return {
+                subjectId: rootSubject.id,
+                modeledElementId: modeledElement.id,
+                modelId: model.id,
+                categoryId: category.id,
+                subModelCategoryId: subModelCategory.id,
+                subModelElementId: subModelElement.id,
+              };
+            }),
+          );
         },
         cases: [
           {
@@ -2209,26 +2214,28 @@ describe("ModelsTreeVisibilityHandler", () => {
       {
         describeName: "with modeled elements that have subModel with no children",
         createIModel: async function createIModel(context: Mocha.Context): Promise<{ imodelConnection: IModelConnection } & IModelWithSubModelIds> {
-          return buildIModel(context, async (imodel, testSchema) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const partition = insertPhysicalPartition({ imodel, codeValue: "model", parentId: rootSubject.id });
-            const model = insertPhysicalSubModel({ imodel, modeledElementId: partition.id });
-            const category = insertSpatialCategory({ imodel, codeValue: "category" });
-            const modeledElement = insertPhysicalElement({
-              imodel,
-              userLabel: `element`,
-              modelId: model.id,
-              categoryId: category.id,
-              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-            });
-            insertPhysicalSubModel({ imodel, modeledElementId: modeledElement.id });
-            return {
-              subjectId: rootSubject.id,
-              modeledElementId: modeledElement.id,
-              modelId: model.id,
-              categoryId: category.id,
-            };
-          });
+          return buildIModel(context, async (imodel, testSchema) =>
+            withEditTxn(imodel, (txn) => {
+              const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+              const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
+              const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
+              const category = insertSpatialCategory({ txn, codeValue: "category" });
+              const modeledElement = insertPhysicalElement({
+                txn,
+                userLabel: `element`,
+                modelId: model.id,
+                categoryId: category.id,
+                classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+              });
+              insertPhysicalSubModel({ txn, modeledElementId: modeledElement.id });
+              return {
+                subjectId: rootSubject.id,
+                modeledElementId: modeledElement.id,
+                modelId: model.id,
+                categoryId: category.id,
+              };
+            }),
+          );
         },
         cases: [
           {
@@ -2325,11 +2332,13 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     it("by default everything is hidden", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const categoryId = insertSpatialCategory({ imodel, codeValue: "category" }).id;
-        const modelId = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
-        insertPhysicalElement({ imodel, modelId, categoryId });
-      });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const categoryId = insertSpatialCategory({ txn, codeValue: "category" }).id;
+          const modelId = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+          insertPhysicalElement({ txn, modelId, categoryId });
+        }),
+      );
 
       const { imodelConnection } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -2349,11 +2358,13 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     it("showing subject makes it, all its models, categories and elements visible", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const categoryId = insertSpatialCategory({ imodel, codeValue: "category" }).id;
-        const modelId = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
-        insertPhysicalElement({ imodel, modelId, categoryId });
-      });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const categoryId = insertSpatialCategory({ txn, codeValue: "category" }).id;
+          const modelId = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+          insertPhysicalElement({ txn, modelId, categoryId });
+        }),
+      );
 
       const { imodelConnection } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -2374,15 +2385,17 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     it("showing model makes it, all its categories and elements visible and doesn't affect other models", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const categoryId = insertSpatialCategory({ imodel, codeValue: "category" }).id;
-        const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
-        insertPhysicalElement({ imodel, modelId: model, categoryId });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const categoryId = insertSpatialCategory({ txn, codeValue: "category" }).id;
+          const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+          insertPhysicalElement({ txn, modelId: model, categoryId });
 
-        const otherModel = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "2" }).id;
-        insertPhysicalElement({ imodel, modelId: otherModel, categoryId });
-        return { model };
-      });
+          const otherModel = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "2" }).id;
+          insertPhysicalElement({ txn, modelId: otherModel, categoryId });
+          return { model };
+        }),
+      );
 
       const { imodelConnection, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -2416,16 +2429,18 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     it("all parent hierarchy gets partial when it's visible and one of the elements are added to never drawn list", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const categoryId = insertSpatialCategory({ imodel, codeValue: "category" }).id;
-        const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
-        const elements = [
-          insertPhysicalElement({ imodel, modelId: model, categoryId }).id,
-          insertPhysicalElement({ imodel, modelId: model, categoryId }).id,
-          insertPhysicalElement({ imodel, modelId: model, categoryId }).id,
-        ];
-        return { model, hiddenElement: elements[0] };
-      });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const categoryId = insertSpatialCategory({ txn, codeValue: "category" }).id;
+          const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+          const elements = [
+            insertPhysicalElement({ txn, modelId: model, categoryId }).id,
+            insertPhysicalElement({ txn, modelId: model, categoryId }).id,
+            insertPhysicalElement({ txn, modelId: model, categoryId }).id,
+          ];
+          return { model, hiddenElement: elements[0] };
+        }),
+      );
 
       const { imodelConnection, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -2448,14 +2463,16 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     it("hiding parent element makes it, its children, model and category hidden", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const category = insertSpatialCategory({ imodel, codeValue: "category" }).id;
-        const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
-        const parentElement = insertPhysicalElement({ imodel, modelId: model, categoryId: category }).id;
-        const child = insertPhysicalElement({ imodel, modelId: model, categoryId: category, parentId: parentElement }).id;
-        const childOfChild = insertPhysicalElement({ imodel, modelId: model, categoryId: category, parentId: child }).id;
-        return { model, category, parentElement, child, childOfChild };
-      });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const category = insertSpatialCategory({ txn, codeValue: "category" }).id;
+          const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+          const parentElement = insertPhysicalElement({ txn, modelId: model, categoryId: category }).id;
+          const child = insertPhysicalElement({ txn, modelId: model, categoryId: category, parentId: parentElement }).id;
+          const childOfChild = insertPhysicalElement({ txn, modelId: model, categoryId: category, parentId: child }).id;
+          return { model, category, parentElement, child, childOfChild };
+        }),
+      );
 
       const { imodelConnection, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -2473,16 +2490,18 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     it("hiding parent element makes it, its children (with different categories), model and category hidden", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const category = insertSpatialCategory({ imodel, codeValue: "category" }).id;
-        const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
-        const parentElement = insertPhysicalElement({ imodel, modelId: model, categoryId: category }).id;
-        const category2 = insertSpatialCategory({ imodel, codeValue: "category2" }).id;
-        const category3 = insertSpatialCategory({ imodel, codeValue: "category3" }).id;
-        const child = insertPhysicalElement({ imodel, modelId: model, categoryId: category2, parentId: parentElement }).id;
-        const childOfChild = insertPhysicalElement({ imodel, modelId: model, categoryId: category3, parentId: child }).id;
-        return { model, category, category2, category3, parentElement, child, childOfChild };
-      });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const category = insertSpatialCategory({ txn, codeValue: "category" }).id;
+          const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+          const parentElement = insertPhysicalElement({ txn, modelId: model, categoryId: category }).id;
+          const category2 = insertSpatialCategory({ txn, codeValue: "category2" }).id;
+          const category3 = insertSpatialCategory({ txn, codeValue: "category3" }).id;
+          const child = insertPhysicalElement({ txn, modelId: model, categoryId: category2, parentId: parentElement }).id;
+          const childOfChild = insertPhysicalElement({ txn, modelId: model, categoryId: category3, parentId: child }).id;
+          return { model, category, category2, category3, parentElement, child, childOfChild };
+        }),
+      );
 
       const { imodelConnection, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -2503,16 +2522,18 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     it("showing parent element makes it, its children (with different categories), model and category visible", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const category = insertSpatialCategory({ imodel, codeValue: "category" }).id;
-        const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
-        const parentElement = insertPhysicalElement({ imodel, modelId: model, categoryId: category }).id;
-        const category2 = insertSpatialCategory({ imodel, codeValue: "category2" }).id;
-        const category3 = insertSpatialCategory({ imodel, codeValue: "category3" }).id;
-        const child = insertPhysicalElement({ imodel, modelId: model, categoryId: category2, parentId: parentElement }).id;
-        const childOfChild = insertPhysicalElement({ imodel, modelId: model, categoryId: category3, parentId: child }).id;
-        return { model, category, category2, category3, parentElement, child, childOfChild };
-      });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const category = insertSpatialCategory({ txn, codeValue: "category" }).id;
+          const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+          const parentElement = insertPhysicalElement({ txn, modelId: model, categoryId: category }).id;
+          const category2 = insertSpatialCategory({ txn, codeValue: "category2" }).id;
+          const category3 = insertSpatialCategory({ txn, codeValue: "category3" }).id;
+          const child = insertPhysicalElement({ txn, modelId: model, categoryId: category2, parentId: parentElement }).id;
+          const childOfChild = insertPhysicalElement({ txn, modelId: model, categoryId: category3, parentId: child }).id;
+          return { model, category, category2, category3, parentElement, child, childOfChild };
+        }),
+      );
 
       const { imodelConnection, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -2533,20 +2554,22 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     it("if model is hidden, showing element adds it to always drawn set and makes model and category visible in the viewport", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const category = insertSpatialCategory({ imodel, codeValue: "category" }).id;
-        const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
-        const elements = [
-          insertPhysicalElement({ imodel, modelId: model, categoryId: category }).id,
-          insertPhysicalElement({ imodel, modelId: model, categoryId: category }).id,
-          insertPhysicalElement({ imodel, modelId: model, categoryId: category }).id,
-        ];
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const category = insertSpatialCategory({ txn, codeValue: "category" }).id;
+          const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+          const elements = [
+            insertPhysicalElement({ txn, modelId: model, categoryId: category }).id,
+            insertPhysicalElement({ txn, modelId: model, categoryId: category }).id,
+            insertPhysicalElement({ txn, modelId: model, categoryId: category }).id,
+          ];
 
-        const otherCategory = insertSpatialCategory({ imodel, codeValue: "otherCategory" }).id;
-        insertPhysicalElement({ imodel, modelId: model, categoryId: otherCategory });
+          const otherCategory = insertSpatialCategory({ txn, codeValue: "otherCategory" }).id;
+          insertPhysicalElement({ txn, modelId: model, categoryId: otherCategory });
 
-        return { model, category, elementToShow: elements[0] };
-      });
+          return { model, category, elementToShow: elements[0] };
+        }),
+      );
 
       const { imodelConnection, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -2578,25 +2601,27 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     it("if model is hidden, showing element removes all other model elements from the always drawn list", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const category = insertSpatialCategory({ imodel, codeValue: "category" }).id;
-        const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
-        const otherModel = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "2" }).id;
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const category = insertSpatialCategory({ txn, codeValue: "category" }).id;
+          const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+          const otherModel = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "2" }).id;
 
-        const modelElements = [
-          insertPhysicalElement({ imodel, modelId: model, categoryId: category }).id,
-          insertPhysicalElement({ imodel, modelId: model, categoryId: category }).id,
-          insertPhysicalElement({ imodel, modelId: model, categoryId: category }).id,
-        ];
+          const modelElements = [
+            insertPhysicalElement({ txn, modelId: model, categoryId: category }).id,
+            insertPhysicalElement({ txn, modelId: model, categoryId: category }).id,
+            insertPhysicalElement({ txn, modelId: model, categoryId: category }).id,
+          ];
 
-        const otherModelElements = [
-          insertPhysicalElement({ imodel, modelId: otherModel, categoryId: category }).id,
-          insertPhysicalElement({ imodel, modelId: otherModel, categoryId: category }).id,
-          insertPhysicalElement({ imodel, modelId: otherModel, categoryId: category }).id,
-        ];
+          const otherModelElements = [
+            insertPhysicalElement({ txn, modelId: otherModel, categoryId: category }).id,
+            insertPhysicalElement({ txn, modelId: otherModel, categoryId: category }).id,
+            insertPhysicalElement({ txn, modelId: otherModel, categoryId: category }).id,
+          ];
 
-        return { model, category, modelElements, otherModelElements, allElements: [...modelElements, ...otherModelElements] };
-      });
+          return { model, category, modelElements, otherModelElements, allElements: [...modelElements, ...otherModelElements] };
+        }),
+      );
 
       const { imodelConnection, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -2636,16 +2661,18 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     it("model gets hidden when elements from other model are added to the exclusive always drawn list", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const categoryId = insertSpatialCategory({ imodel, codeValue: "category" }).id;
-        const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
-        insertPhysicalElement({ imodel, modelId: model, categoryId });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const categoryId = insertSpatialCategory({ txn, codeValue: "category" }).id;
+          const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+          insertPhysicalElement({ txn, modelId: model, categoryId });
 
-        const exclusiveModel = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "2" }).id;
-        const exclusiveElement = insertPhysicalElement({ imodel, modelId: exclusiveModel, categoryId }).id;
-        insertPhysicalElement({ imodel, modelId: exclusiveModel, categoryId });
-        return { exclusiveModel, exclusiveElement };
-      });
+          const exclusiveModel = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "2" }).id;
+          const exclusiveElement = insertPhysicalElement({ txn, modelId: exclusiveModel, categoryId }).id;
+          insertPhysicalElement({ txn, modelId: exclusiveModel, categoryId });
+          return { exclusiveModel, exclusiveElement };
+        }),
+      );
 
       const { imodelConnection, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -2677,18 +2704,20 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     it("model gets hidden when it has child only categories and elements from other model are added to the exclusive always drawn list", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const categoryId = insertSpatialCategory({ imodel, codeValue: "category" }).id;
-        const childCategoryId = insertSpatialCategory({ imodel, codeValue: "childCategory" }).id;
-        const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
-        const rootElement = insertPhysicalElement({ imodel, modelId: model, categoryId });
-        insertPhysicalElement({ imodel, modelId: model, categoryId: childCategoryId, parentId: rootElement.id });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const categoryId = insertSpatialCategory({ txn, codeValue: "category" }).id;
+          const childCategoryId = insertSpatialCategory({ txn, codeValue: "childCategory" }).id;
+          const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+          const rootElement = insertPhysicalElement({ txn, modelId: model, categoryId });
+          insertPhysicalElement({ txn, modelId: model, categoryId: childCategoryId, parentId: rootElement.id });
 
-        const exclusiveModel = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "2" }).id;
-        const exclusiveElement = insertPhysicalElement({ imodel, modelId: exclusiveModel, categoryId }).id;
-        insertPhysicalElement({ imodel, modelId: exclusiveModel, categoryId });
-        return { exclusiveModel, exclusiveElement };
-      });
+          const exclusiveModel = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "2" }).id;
+          const exclusiveElement = insertPhysicalElement({ txn, modelId: exclusiveModel, categoryId }).id;
+          insertPhysicalElement({ txn, modelId: exclusiveModel, categoryId });
+          return { exclusiveModel, exclusiveElement };
+        }),
+      );
 
       const { imodelConnection, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -2720,12 +2749,14 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     it("showing category makes its model visible in the viewport and per model override for that category is set to SHOW", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const category = insertSpatialCategory({ imodel, codeValue: "category" }).id;
-        const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
-        insertPhysicalElement({ imodel, modelId: model, categoryId: category });
-        return { model, category };
-      });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const category = insertSpatialCategory({ txn, codeValue: "category" }).id;
+          const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+          insertPhysicalElement({ txn, modelId: model, categoryId: category });
+          return { model, category };
+        }),
+      );
 
       const { imodelConnection, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -2753,15 +2784,17 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     it("hiding category visible in selector adds it to per model override list", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const category = insertSpatialCategory({ imodel, codeValue: "category" }).id;
-        const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
-        insertPhysicalElement({ imodel, modelId: model, categoryId: category });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const category = insertSpatialCategory({ txn, codeValue: "category" }).id;
+          const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+          insertPhysicalElement({ txn, modelId: model, categoryId: category });
 
-        const otherCategory = insertSpatialCategory({ imodel, codeValue: "otherCategory" }).id;
-        insertPhysicalElement({ imodel, modelId: model, categoryId: otherCategory });
-        return { model, category };
-      });
+          const otherCategory = insertSpatialCategory({ txn, codeValue: "otherCategory" }).id;
+          insertPhysicalElement({ txn, modelId: model, categoryId: otherCategory });
+          return { model, category };
+        }),
+      );
 
       const { imodelConnection, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -2797,18 +2830,20 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     it("showing grouping node makes it, its grouped elements and children visible", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const category = insertSpatialCategory({ imodel, codeValue: "category" }).id;
-        const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
-        const parentElement = insertPhysicalElement({ imodel, modelId: model, categoryId: category }).id;
-        const child = insertPhysicalElement({ imodel, modelId: model, categoryId: category, parentId: parentElement }).id;
-        const childOfChild = insertPhysicalElement({ imodel, modelId: model, categoryId: category, parentId: child }).id;
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const category = insertSpatialCategory({ txn, codeValue: "category" }).id;
+          const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+          const parentElement = insertPhysicalElement({ txn, modelId: model, categoryId: category }).id;
+          const child = insertPhysicalElement({ txn, modelId: model, categoryId: category, parentId: parentElement }).id;
+          const childOfChild = insertPhysicalElement({ txn, modelId: model, categoryId: category, parentId: child }).id;
 
-        const otherCategory = insertSpatialCategory({ imodel, codeValue: "otherCategory" }).id;
-        insertPhysicalElement({ imodel, modelId: model, categoryId: otherCategory });
+          const otherCategory = insertSpatialCategory({ txn, codeValue: "otherCategory" }).id;
+          insertPhysicalElement({ txn, modelId: model, categoryId: otherCategory });
 
-        return { model, category, parentElement, child, childOfChild };
-      });
+          return { model, category, parentElement, child, childOfChild };
+        }),
+      );
 
       const { imodelConnection, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -2841,18 +2876,20 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     it("hiding grouping node makes it, its grouped elements and children hidden", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const category = insertSpatialCategory({ imodel, codeValue: "category" }).id;
-        const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
-        const parentElement = insertPhysicalElement({ imodel, modelId: model, categoryId: category }).id;
-        const child = insertPhysicalElement({ imodel, modelId: model, categoryId: category, parentId: parentElement }).id;
-        const childOfChild = insertPhysicalElement({ imodel, modelId: model, categoryId: category, parentId: child }).id;
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const category = insertSpatialCategory({ txn, codeValue: "category" }).id;
+          const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+          const parentElement = insertPhysicalElement({ txn, modelId: model, categoryId: category }).id;
+          const child = insertPhysicalElement({ txn, modelId: model, categoryId: category, parentId: parentElement }).id;
+          const childOfChild = insertPhysicalElement({ txn, modelId: model, categoryId: category, parentId: child }).id;
 
-        const otherCategory = insertSpatialCategory({ imodel, codeValue: "otherCategory" }).id;
-        insertPhysicalElement({ imodel, modelId: model, categoryId: otherCategory });
+          const otherCategory = insertSpatialCategory({ txn, codeValue: "otherCategory" }).id;
+          insertPhysicalElement({ txn, modelId: model, categoryId: otherCategory });
 
-        return { model, category, parentElement, child, childOfChild };
-      });
+          return { model, category, parentElement, child, childOfChild };
+        }),
+      );
 
       const { imodelConnection, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -2887,14 +2924,16 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     it("changing merged category visibility changes child elements visibility", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
-        const category1 = insertSpatialCategory({ imodel, codeValue: "category1", userLabel: "SomeLabel" }).id;
-        const category2 = insertSpatialCategory({ imodel, codeValue: "category2", userLabel: "SomeLabel" }).id;
-        const element1 = insertPhysicalElement({ imodel, modelId: model, categoryId: category1 }).id;
-        const element2 = insertPhysicalElement({ imodel, modelId: model, categoryId: category2 }).id;
-        return { model, element1, element2, category1, category2 };
-      });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+          const category1 = insertSpatialCategory({ txn, codeValue: "category1", userLabel: "SomeLabel" }).id;
+          const category2 = insertSpatialCategory({ txn, codeValue: "category2", userLabel: "SomeLabel" }).id;
+          const element1 = insertPhysicalElement({ txn, modelId: model, categoryId: category1 }).id;
+          const element2 = insertPhysicalElement({ txn, modelId: model, categoryId: category2 }).id;
+          return { model, element1, element2, category1, category2 };
+        }),
+      );
 
       const { imodelConnection, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -2917,14 +2956,16 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     it("changing element visibility changes merged parent category visibility", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
-        const category1 = insertSpatialCategory({ imodel, codeValue: "category1", userLabel: "SomeLabel" }).id;
-        const category2 = insertSpatialCategory({ imodel, codeValue: "category2", userLabel: "SomeLabel" }).id;
-        const element1 = insertPhysicalElement({ imodel, modelId: model, categoryId: category1 }).id;
-        const element2 = insertPhysicalElement({ imodel, modelId: model, categoryId: category2 }).id;
-        return { model, element1, element2, category1, category2 };
-      });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+          const category1 = insertSpatialCategory({ txn, codeValue: "category1", userLabel: "SomeLabel" }).id;
+          const category2 = insertSpatialCategory({ txn, codeValue: "category2", userLabel: "SomeLabel" }).id;
+          const element1 = insertPhysicalElement({ txn, modelId: model, categoryId: category1 }).id;
+          const element2 = insertPhysicalElement({ txn, modelId: model, categoryId: category2 }).id;
+          return { model, element1, element2, category1, category2 };
+        }),
+      );
 
       const { imodelConnection, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -2961,15 +3002,17 @@ describe("ModelsTreeVisibilityHandler", () => {
 
     describe("child element category is different than parent's", () => {
       it("model visibility takes into account all element categories", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) => {
-          const parentCategory = insertSpatialCategory({ imodel, codeValue: "parentCategory" });
-          const childCategory = insertSpatialCategory({ imodel, codeValue: "childCategory" });
-          const model = insertPhysicalModelWithPartition({ imodel, codeValue: "model" });
+        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const parentCategory = insertSpatialCategory({ txn, codeValue: "parentCategory" });
+            const childCategory = insertSpatialCategory({ txn, codeValue: "childCategory" });
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
 
-          const parentElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: parentCategory.id });
-          insertPhysicalElement({ imodel, modelId: model.id, categoryId: childCategory.id, parentId: parentElement.id });
-          return { modelId: model.id, parentCategoryId: parentCategory.id, parentElementId: parentElement.id };
-        });
+            const parentElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: parentCategory.id });
+            insertPhysicalElement({ txn, modelId: model.id, categoryId: childCategory.id, parentId: parentElement.id });
+            return { modelId: model.id, parentCategoryId: parentCategory.id, parentElementId: parentElement.id };
+          }),
+        );
         const { imodelConnection, modelId, parentCategoryId, parentElementId } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodelConnection });
         const { handler, viewport, ...props } = visibilityTestData;
@@ -2995,16 +3038,18 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       it("model visibility takes into account all element categories when some elements are in always drawn list", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) => {
-          const parentCategory = insertSpatialCategory({ imodel, codeValue: "parentCategory" });
-          const childCategory = insertSpatialCategory({ imodel, codeValue: "childCategory" });
-          const model = insertPhysicalModelWithPartition({ imodel, codeValue: "model" });
+        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const parentCategory = insertSpatialCategory({ txn, codeValue: "parentCategory" });
+            const childCategory = insertSpatialCategory({ txn, codeValue: "childCategory" });
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
 
-          const parentElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: parentCategory.id });
-          insertPhysicalElement({ imodel, modelId: model.id, categoryId: parentCategory.id });
-          const childElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: childCategory.id, parentId: parentElement.id });
-          return { modelId: model.id, parentCategoryId: parentCategory.id, parentElementId: parentElement.id, childElementId: childElement.id };
-        });
+            const parentElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: parentCategory.id });
+            insertPhysicalElement({ txn, modelId: model.id, categoryId: parentCategory.id });
+            const childElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: childCategory.id, parentId: parentElement.id });
+            return { modelId: model.id, parentCategoryId: parentCategory.id, parentElementId: parentElement.id, childElementId: childElement.id };
+          }),
+        );
         const { imodelConnection, modelId, parentCategoryId, parentElementId, childElementId } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodelConnection });
         const { handler, viewport, ...props } = visibilityTestData;
@@ -3030,17 +3075,19 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       it("changing category visibility of hidden model does not turn on unrelated elements", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) => {
-          const parentCategory = insertSpatialCategory({ imodel, codeValue: "parentCategory" });
-          const parentCategory2 = insertSpatialCategory({ imodel, codeValue: "parentCategory2" });
-          const childCategory = insertSpatialCategory({ imodel, codeValue: "childCategory" });
-          const model = insertPhysicalModelWithPartition({ imodel, codeValue: "model" });
+        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const parentCategory = insertSpatialCategory({ txn, codeValue: "parentCategory" });
+            const parentCategory2 = insertSpatialCategory({ txn, codeValue: "parentCategory2" });
+            const childCategory = insertSpatialCategory({ txn, codeValue: "childCategory" });
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
 
-          const parentElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: parentCategory.id });
-          const parentElement2 = insertPhysicalElement({ imodel, modelId: model.id, categoryId: parentCategory2.id });
-          insertPhysicalElement({ imodel, modelId: model.id, categoryId: childCategory.id, parentId: parentElement2.id });
-          return { modelId: model.id, parentCategoryId: parentCategory.id, parentElementId: parentElement.id, childCategoryId: childCategory.id };
-        });
+            const parentElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: parentCategory.id });
+            const parentElement2 = insertPhysicalElement({ txn, modelId: model.id, categoryId: parentCategory2.id });
+            insertPhysicalElement({ txn, modelId: model.id, categoryId: childCategory.id, parentId: parentElement2.id });
+            return { modelId: model.id, parentCategoryId: parentCategory.id, parentElementId: parentElement.id, childCategoryId: childCategory.id };
+          }),
+        );
         const { imodelConnection, modelId, parentCategoryId, parentElementId, childCategoryId } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodelConnection });
         const { handler, viewport, ...props } = visibilityTestData;
@@ -3070,16 +3117,18 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       it("changing category visibility turns on child elements that have the same category", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) => {
-          const sharedCategory = insertSpatialCategory({ imodel, codeValue: "parentCategory" });
-          const parentCategory2 = insertSpatialCategory({ imodel, codeValue: "parentCategory2" });
-          const model = insertPhysicalModelWithPartition({ imodel, codeValue: "model" });
+        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const sharedCategory = insertSpatialCategory({ txn, codeValue: "parentCategory" });
+            const parentCategory2 = insertSpatialCategory({ txn, codeValue: "parentCategory2" });
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
 
-          insertPhysicalElement({ imodel, modelId: model.id, categoryId: sharedCategory.id });
-          const parentElement2 = insertPhysicalElement({ imodel, modelId: model.id, categoryId: parentCategory2.id });
-          insertPhysicalElement({ imodel, modelId: model.id, categoryId: sharedCategory.id, parentId: parentElement2.id });
-          return { modelId: model.id, parentCategoryId: sharedCategory.id, parentElementId: parentElement2.id };
-        });
+            insertPhysicalElement({ txn, modelId: model.id, categoryId: sharedCategory.id });
+            const parentElement2 = insertPhysicalElement({ txn, modelId: model.id, categoryId: parentCategory2.id });
+            insertPhysicalElement({ txn, modelId: model.id, categoryId: sharedCategory.id, parentId: parentElement2.id });
+            return { modelId: model.id, parentCategoryId: sharedCategory.id, parentElementId: parentElement2.id };
+          }),
+        );
         const { imodelConnection, modelId, parentCategoryId, parentElementId } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodelConnection });
         const { handler, viewport, ...props } = visibilityTestData;
@@ -3106,17 +3155,19 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       it("category visibility only takes into account element trees that start with those that have no parents", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) => {
-          const category = insertSpatialCategory({ imodel, codeValue: "parentCategory" });
-          const model = insertPhysicalModelWithPartition({ imodel, codeValue: "model" });
-          const element = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id });
+        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const category = insertSpatialCategory({ txn, codeValue: "parentCategory" });
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
+            const element = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id });
 
-          const unrelatedParentCategory = insertSpatialCategory({ imodel, codeValue: "differentParentCategory" });
-          const unrelatedParentElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: unrelatedParentCategory.id });
-          insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id, parentId: unrelatedParentElement.id });
+            const unrelatedParentCategory = insertSpatialCategory({ txn, codeValue: "differentParentCategory" });
+            const unrelatedParentElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: unrelatedParentCategory.id });
+            insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id, parentId: unrelatedParentElement.id });
 
-          return { modelId: model.id, categoryId: category.id, elementId: element.id, unrelatedCategoryId: unrelatedParentCategory.id };
-        });
+            return { modelId: model.id, categoryId: category.id, elementId: element.id, unrelatedCategoryId: unrelatedParentCategory.id };
+          }),
+        );
         const { imodelConnection, modelId, categoryId, elementId } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodelConnection });
         const { handler, viewport, ...testProps } = visibilityTestData;
@@ -3148,22 +3199,24 @@ describe("ModelsTreeVisibilityHandler", () => {
 
     describe("reacting to category selector", () => {
       async function createIModel(context: Mocha.Context) {
-        return buildIModel(context, async (imodel) => {
-          const model = insertPhysicalModelWithPartition({ imodel, codeValue: "model" });
+        return buildIModel(context, async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
 
-          const category1 = insertSpatialCategory({ imodel, codeValue: "category1" });
-          const elements1 = [
-            insertPhysicalElement({ imodel, categoryId: category1.id, modelId: model.id }).id,
-            insertPhysicalElement({ imodel, categoryId: category1.id, modelId: model.id }).id,
-          ];
+            const category1 = insertSpatialCategory({ txn, codeValue: "category1" });
+            const elements1 = [
+              insertPhysicalElement({ txn, categoryId: category1.id, modelId: model.id }).id,
+              insertPhysicalElement({ txn, categoryId: category1.id, modelId: model.id }).id,
+            ];
 
-          const category2 = insertSpatialCategory({ imodel, codeValue: "category2" });
-          const elements2 = [
-            insertPhysicalElement({ imodel, categoryId: category2.id, modelId: model.id }).id,
-            insertPhysicalElement({ imodel, categoryId: category2.id, modelId: model.id }).id,
-          ];
-          return { firstCategoryId: category1.id, secondCategoryId: category2.id, modelId: model.id, elements1, elements2 };
-        });
+            const category2 = insertSpatialCategory({ txn, codeValue: "category2" });
+            const elements2 = [
+              insertPhysicalElement({ txn, categoryId: category2.id, modelId: model.id }).id,
+              insertPhysicalElement({ txn, categoryId: category2.id, modelId: model.id }).id,
+            ];
+            return { firstCategoryId: category1.id, secondCategoryId: category2.id, modelId: model.id, elements1, elements2 };
+          }),
+        );
       }
 
       it("showing category via the selector makes category and all elements visible when it has no always or never drawn elements", async function () {
@@ -3339,51 +3392,52 @@ describe("ModelsTreeVisibilityHandler", () => {
        * out of which the first and second belong to the same custom class while the last element is of class `PhysicalObject`
        */
       async function createHierarchyConfigurationModel(context: Mocha.Context) {
-        return buildIModel(context, async (imodel, schema) => {
-          const emptyPartitionId = insertPhysicalPartition({ imodel, codeValue: "EmptyPhysicalModel", parentId: IModel.rootSubjectId }).id;
-          const emptyModelId = insertPhysicalSubModel({ imodel, modeledElementId: emptyPartitionId }).id;
+        return buildIModel(context, async (imodel, schema) =>
+          withEditTxn(imodel, (txn) => {
+            const emptyPartitionId = insertPhysicalPartition({ txn, codeValue: "EmptyPhysicalModel", parentId: IModel.rootSubjectId }).id;
+            const emptyModelId = insertPhysicalSubModel({ txn, modeledElementId: emptyPartitionId }).id;
 
-          const customClassName = schema.items.SubModelablePhysicalObject.fullName;
+            const customClassName = schema.items.SubModelablePhysicalObject.fullName;
 
-          const partitionId = insertPhysicalPartition({ imodel, codeValue: "ConfigurationPhysicalModel ", parentId: IModel.rootSubjectId }).id;
-          const configurationModelId = insertPhysicalSubModel({ imodel, modeledElementId: partitionId }).id;
-          const modelCategories = new Array<string>();
+            const partitionId = insertPhysicalPartition({ txn, codeValue: "ConfigurationPhysicalModel ", parentId: IModel.rootSubjectId }).id;
+            const configurationModelId = insertPhysicalSubModel({ txn, modeledElementId: partitionId }).id;
+            const modelCategories = new Array<string>();
 
-          const configurationCategoryId = insertSpatialCategory({ imodel, codeValue: `ConfigurationSpatialCategory` }).id;
-          modelCategories.push(configurationCategoryId);
-          const elements = new Array<Id64String>();
+            const configurationCategoryId = insertSpatialCategory({ txn, codeValue: `ConfigurationSpatialCategory` }).id;
+            modelCategories.push(configurationCategoryId);
+            const elements = new Array<Id64String>();
 
-          for (let childIdx = 0; childIdx < 3; ++childIdx) {
-            const props: GeometricElement3dProps = {
-              model: configurationModelId,
-              category: configurationCategoryId,
-              code: new Code({ scope: partitionId, spec: "", value: `Configuration_${customClassName}_${childIdx}` }),
-              classFullName: childIdx !== 2 ? customClassName : "Generic:PhysicalObject",
+            for (let childIdx = 0; childIdx < 3; ++childIdx) {
+              const props: GeometricElement3dProps = {
+                model: configurationModelId,
+                category: configurationCategoryId,
+                code: new Code({ scope: partitionId, spec: "", value: `Configuration_${customClassName}_${childIdx}` }),
+                classFullName: childIdx !== 2 ? customClassName : "Generic:PhysicalObject",
+              };
+              elements.push(txn.insertElement(props));
+            }
+            const [customClassElement1, customClassElement2, nonCustomClassElement] = elements;
+
+            const hierarchyConfig: typeof defaultHierarchyConfiguration = {
+              ...defaultHierarchyConfiguration,
+              showEmptyModels: true,
+              elementClassSpecification: customClassName,
             };
-            // eslint-disable-next-line @typescript-eslint/no-deprecated
-            elements.push(imodel.elements.insertElement(props));
-          }
-          const [customClassElement1, customClassElement2, nonCustomClassElement] = elements;
 
-          const hierarchyConfig: typeof defaultHierarchyConfiguration = {
-            ...defaultHierarchyConfiguration,
-            showEmptyModels: true,
-            elementClassSpecification: customClassName,
-          };
-
-          return {
-            configurationModelId,
-            configurationCategoryId,
-            elements,
-            customClassElement1,
-            customClassElement2,
-            nonCustomClassElement,
-            modelCategories,
-            emptyModelId,
-            customClassName,
-            hierarchyConfig,
-          };
-        });
+            return {
+              configurationModelId,
+              configurationCategoryId,
+              elements,
+              customClassElement1,
+              customClassElement2,
+              nonCustomClassElement,
+              modelCategories,
+              emptyModelId,
+              customClassName,
+              hierarchyConfig,
+            };
+          }),
+        );
       }
 
       describe("subject with empty model", () => {
@@ -3551,18 +3605,20 @@ describe("ModelsTreeVisibilityHandler", () => {
 
     describe("IsAlwaysDrawnExclusive is true", () => {
       it("changing model visibility does not affect other models", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) => {
-          const model1 = insertPhysicalModelWithPartition({ imodel, codeValue: "1" }).id;
-          const category1 = insertSpatialCategory({ imodel, codeValue: "category1" }).id;
-          const element1 = insertPhysicalElement({ imodel, modelId: model1, categoryId: category1 }).id;
-          const element2 = insertPhysicalElement({ imodel, modelId: model1, categoryId: category1 }).id;
+        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const model1 = insertPhysicalModelWithPartition({ txn, codeValue: "1" }).id;
+            const category1 = insertSpatialCategory({ txn, codeValue: "category1" }).id;
+            const element1 = insertPhysicalElement({ txn, modelId: model1, categoryId: category1 }).id;
+            const element2 = insertPhysicalElement({ txn, modelId: model1, categoryId: category1 }).id;
 
-          const otherModel = insertPhysicalModelWithPartition({ imodel, codeValue: "2" }).id;
-          const otherCategory = insertSpatialCategory({ imodel, codeValue: "category2" }).id;
-          insertPhysicalElement({ imodel, modelId: otherModel, categoryId: otherCategory });
+            const otherModel = insertPhysicalModelWithPartition({ txn, codeValue: "2" }).id;
+            const otherCategory = insertSpatialCategory({ txn, codeValue: "category2" }).id;
+            insertPhysicalElement({ txn, modelId: otherModel, categoryId: otherCategory });
 
-          return { model1, category1, element1, element2, otherModel, otherCategory };
-        });
+            return { model1, category1, element1, element2, otherModel, otherCategory };
+          }),
+        );
 
         const { imodelConnection, ...ids } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -3599,17 +3655,19 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       it("changing category visibility does not affect other categories", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) => {
-          const model = insertPhysicalModelWithPartition({ imodel, codeValue: "1" }).id;
-          const category1 = insertSpatialCategory({ imodel, codeValue: "category1" }).id;
-          const element1 = insertPhysicalElement({ imodel, modelId: model, categoryId: category1 }).id;
-          const element2 = insertPhysicalElement({ imodel, modelId: model, categoryId: category1 }).id;
+        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: "1" }).id;
+            const category1 = insertSpatialCategory({ txn, codeValue: "category1" }).id;
+            const element1 = insertPhysicalElement({ txn, modelId: model, categoryId: category1 }).id;
+            const element2 = insertPhysicalElement({ txn, modelId: model, categoryId: category1 }).id;
 
-          const otherCategory = insertSpatialCategory({ imodel, codeValue: "category2" }).id;
-          insertPhysicalElement({ imodel, modelId: model, categoryId: otherCategory });
+            const otherCategory = insertSpatialCategory({ txn, codeValue: "category2" }).id;
+            insertPhysicalElement({ txn, modelId: model, categoryId: otherCategory });
 
-          return { model, category1, element1, element2, otherCategory };
-        });
+            return { model, category1, element1, element2, otherCategory };
+          }),
+        );
 
         const { imodelConnection, ...ids } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -3646,22 +3704,24 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       it("changing class grouping node visibility does not affect other class grouping nodes", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel, testSchema) => {
-          const model = insertPhysicalModelWithPartition({ imodel, codeValue: "1" }).id;
-          const category = insertSpatialCategory({ imodel, codeValue: "category1" }).id;
-          const element1 = insertPhysicalElement({ imodel, modelId: model, categoryId: category }).id;
-          const element2 = insertPhysicalElement({ imodel, modelId: model, categoryId: category }).id;
+        await using buildIModelResult = await buildIModel(this, async (imodel, testSchema) =>
+          withEditTxn(imodel, (txn) => {
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: "1" }).id;
+            const category = insertSpatialCategory({ txn, codeValue: "category1" }).id;
+            const element1 = insertPhysicalElement({ txn, modelId: model, categoryId: category }).id;
+            const element2 = insertPhysicalElement({ txn, modelId: model, categoryId: category }).id;
 
-          insertPhysicalElement({
-            imodel,
-            userLabel: `element`,
-            modelId: model,
-            categoryId: category,
-            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-          });
+            insertPhysicalElement({
+              txn,
+              userLabel: `element`,
+              modelId: model,
+              categoryId: category,
+              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+            });
 
-          return { model, category, element1, element2 };
-        });
+            return { model, category, element1, element2 };
+          }),
+        );
 
         const { imodelConnection, ...ids } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -3701,15 +3761,17 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       it("changing element visibility does not affect other elements", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) => {
-          const model = insertPhysicalModelWithPartition({ imodel, codeValue: "1" }).id;
-          const category = insertSpatialCategory({ imodel, codeValue: "category1", userLabel: "SomeLabel" }).id;
-          const element1 = insertPhysicalElement({ imodel, modelId: model, categoryId: category }).id;
-          const element2 = insertPhysicalElement({ imodel, modelId: model, categoryId: category }).id;
-          insertPhysicalElement({ imodel, modelId: model, categoryId: category }).id;
+        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: "1" }).id;
+            const category = insertSpatialCategory({ txn, codeValue: "category1", userLabel: "SomeLabel" }).id;
+            const element1 = insertPhysicalElement({ txn, modelId: model, categoryId: category }).id;
+            const element2 = insertPhysicalElement({ txn, modelId: model, categoryId: category }).id;
+            insertPhysicalElement({ txn, modelId: model, categoryId: category }).id;
 
-          return { model, category, element1, element2 };
-        });
+            return { model, category, element1, element2 };
+          }),
+        );
 
         const { imodelConnection, ...ids } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodelConnection });
@@ -3802,22 +3864,24 @@ describe("ModelsTreeVisibilityHandler", () => {
 
       describe("single path to element", () => {
         it("showing category turns on only it and filtered children", async function () {
-          await using buildIModelResult = await buildIModel(this, async (imodel) => {
-            const category = insertSpatialCategory({ imodel, codeValue: "category" });
-            const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-            const parentElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id });
-            const filteredChildElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
-            const unfilteredChildElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
+          await using buildIModelResult = await buildIModel(this, async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const category = insertSpatialCategory({ txn, codeValue: "category" });
+              const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
+              const parentElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id });
+              const filteredChildElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
+              const unfilteredChildElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
 
-            return {
-              model,
-              category,
-              filteredChildElement,
-              unfilteredChildElement,
-              parentElement,
-              filterPaths: [[model, category, parentElement, filteredChildElement]],
-            };
-          });
+              return {
+                model,
+                category,
+                filteredChildElement,
+                unfilteredChildElement,
+                parentElement,
+                filterPaths: [[model, category, parentElement, filteredChildElement]],
+              };
+            }),
+          );
 
           const { imodelConnection, filterPaths, ...keys } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, filterPaths });
@@ -3859,22 +3923,24 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
 
         it("showing element turns on only it and filtered children", async function () {
-          await using buildIModelResult = await buildIModel(this, async (imodel) => {
-            const category = insertSpatialCategory({ imodel, codeValue: "category" });
-            const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-            const parentElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id });
-            const filteredChildElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
-            const unfilteredChildElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
+          await using buildIModelResult = await buildIModel(this, async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const category = insertSpatialCategory({ txn, codeValue: "category" });
+              const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
+              const parentElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id });
+              const filteredChildElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
+              const unfilteredChildElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
 
-            return {
-              model,
-              category,
-              filteredChildElement,
-              unfilteredChildElement,
-              parentElement,
-              filterPaths: [[model, category, parentElement, filteredChildElement]],
-            };
-          });
+              return {
+                model,
+                category,
+                filteredChildElement,
+                unfilteredChildElement,
+                parentElement,
+                filterPaths: [[model, category, parentElement, filteredChildElement]],
+              };
+            }),
+          );
 
           const { imodelConnection, filterPaths, ...keys } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, filterPaths });
@@ -3915,22 +3981,24 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
 
         it("showing class grouping node turns on only it and filtered children", async function () {
-          await using buildIModelResult = await buildIModel(this, async (imodel) => {
-            const category = insertSpatialCategory({ imodel, codeValue: "category" });
-            const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-            const parentElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id });
-            const filteredChildElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
-            const unfilteredChildElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
+          await using buildIModelResult = await buildIModel(this, async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const category = insertSpatialCategory({ txn, codeValue: "category" });
+              const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
+              const parentElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id });
+              const filteredChildElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
+              const unfilteredChildElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
 
-            return {
-              model,
-              category,
-              filteredChildElement,
-              unfilteredChildElement,
-              parentElement,
-              filterPaths: [[model, category, parentElement, filteredChildElement]],
-            };
-          });
+              return {
+                model,
+                category,
+                filteredChildElement,
+                unfilteredChildElement,
+                parentElement,
+                filterPaths: [[model, category, parentElement, filteredChildElement]],
+              };
+            }),
+          );
 
           const { imodelConnection, filterPaths, ...keys } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, filterPaths });
@@ -3960,22 +4028,24 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
 
         it("hiding category turns off only it and filtered children", async function () {
-          await using buildIModelResult = await buildIModel(this, async (imodel) => {
-            const category = insertSpatialCategory({ imodel, codeValue: "category" });
-            const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-            const parentElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id });
-            const filteredChildElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
-            const unfilteredChildElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
+          await using buildIModelResult = await buildIModel(this, async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const category = insertSpatialCategory({ txn, codeValue: "category" });
+              const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
+              const parentElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id });
+              const filteredChildElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
+              const unfilteredChildElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
 
-            return {
-              model,
-              category,
-              filteredChildElement,
-              unfilteredChildElement,
-              parentElement,
-              filterPaths: [[model, category, parentElement, filteredChildElement]],
-            };
-          });
+              return {
+                model,
+                category,
+                filteredChildElement,
+                unfilteredChildElement,
+                parentElement,
+                filterPaths: [[model, category, parentElement, filteredChildElement]],
+              };
+            }),
+          );
 
           const { imodelConnection, filterPaths, ...keys } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, filterPaths });
@@ -4018,22 +4088,24 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
 
         it("hiding element turns off only it and filtered children", async function () {
-          await using buildIModelResult = await buildIModel(this, async (imodel) => {
-            const category = insertSpatialCategory({ imodel, codeValue: "category" });
-            const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-            const parentElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id });
-            const filteredChildElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
-            const unfilteredChildElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
+          await using buildIModelResult = await buildIModel(this, async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const category = insertSpatialCategory({ txn, codeValue: "category" });
+              const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
+              const parentElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id });
+              const filteredChildElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
+              const unfilteredChildElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
 
-            return {
-              model,
-              category,
-              filteredChildElement,
-              unfilteredChildElement,
-              parentElement,
-              filterPaths: [[model, category, parentElement, filteredChildElement]],
-            };
-          });
+              return {
+                model,
+                category,
+                filteredChildElement,
+                unfilteredChildElement,
+                parentElement,
+                filterPaths: [[model, category, parentElement, filteredChildElement]],
+              };
+            }),
+          );
 
           const { imodelConnection, filterPaths, ...keys } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, filterPaths });
@@ -4082,22 +4154,24 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
 
         it("hiding class grouping node turns on only it and filtered children", async function () {
-          await using buildIModelResult = await buildIModel(this, async (imodel) => {
-            const category = insertSpatialCategory({ imodel, codeValue: "category" });
-            const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-            const parentElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id });
-            const filteredChildElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
-            const unfilteredChildElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
+          await using buildIModelResult = await buildIModel(this, async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const category = insertSpatialCategory({ txn, codeValue: "category" });
+              const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
+              const parentElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id });
+              const filteredChildElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
+              const unfilteredChildElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
 
-            return {
-              model,
-              category,
-              filteredChildElement,
-              unfilteredChildElement,
-              parentElement,
-              filterPaths: [[model, category, parentElement, filteredChildElement]],
-            };
-          });
+              return {
+                model,
+                category,
+                filteredChildElement,
+                unfilteredChildElement,
+                parentElement,
+                filterPaths: [[model, category, parentElement, filteredChildElement]],
+              };
+            }),
+          );
 
           const { imodelConnection, filterPaths, ...keys } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, filterPaths });
@@ -4131,22 +4205,24 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
 
         it("switches on only filtered hierarchy when root node is clicked", async function () {
-          await using buildIModelResult = await buildIModel(this, async (imodel) => {
-            const category = insertSpatialCategory({ imodel, codeValue: "category" });
-            const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-            const filterTargetElement = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id });
+          await using buildIModelResult = await buildIModel(this, async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const category = insertSpatialCategory({ txn, codeValue: "category" });
+              const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
+              const filterTargetElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id });
 
-            const unfilteredCategory = insertSpatialCategory({ imodel, codeValue: "otherCategory" });
-            const unfilteredModel = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
-            insertPhysicalElement({ imodel, modelId: unfilteredModel.id, categoryId: unfilteredCategory.id });
+              const unfilteredCategory = insertSpatialCategory({ txn, codeValue: "otherCategory" });
+              const unfilteredModel = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
+              insertPhysicalElement({ txn, modelId: unfilteredModel.id, categoryId: unfilteredCategory.id });
 
-            return {
-              model,
-              category,
-              filterTargetElement,
-              filterPaths: [[model, category, filterTargetElement]],
-            };
-          });
+              return {
+                model,
+                category,
+                filterTargetElement,
+                filterPaths: [[model, category, filterTargetElement]],
+              };
+            }),
+          );
 
           const { imodelConnection, filterPaths, ...keys } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, filterPaths });
@@ -4178,34 +4254,36 @@ describe("ModelsTreeVisibilityHandler", () => {
 
       describe("path to elements in different categories", () => {
         async function createIModel(context: Mocha.Context) {
-          return buildIModel(context, async (imodel) => {
-            const filteredCategories = [
-              insertSpatialCategory({ imodel, codeValue: "category1" }),
-              insertSpatialCategory({ imodel, codeValue: "category2" }),
-              insertSpatialCategory({ imodel, codeValue: "category3" }),
-            ];
-            const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-            const paths: InstanceKey[][] = [];
-            const filterTargets = new Set<Id64String>();
-            filteredCategories.forEach((category) => {
-              const filterTarget = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id });
-              paths.push([model, category, filterTarget]);
-              filterTargets.add(filterTarget.id);
+          return buildIModel(context, async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const filteredCategories = [
+                insertSpatialCategory({ txn, codeValue: "category1" }),
+                insertSpatialCategory({ txn, codeValue: "category2" }),
+                insertSpatialCategory({ txn, codeValue: "category3" }),
+              ];
+              const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
+              const paths: InstanceKey[][] = [];
+              const filterTargets = new Set<Id64String>();
+              filteredCategories.forEach((category) => {
+                const filterTarget = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id });
+                paths.push([model, category, filterTarget]);
+                filterTargets.add(filterTarget.id);
 
-              insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id });
-            });
+                insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id });
+              });
 
-            const unfilteredCategory = insertSpatialCategory({ imodel, codeValue: "otherCategory" });
-            const unfilteredModel = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
-            insertPhysicalElement({ imodel, modelId: unfilteredModel.id, categoryId: unfilteredCategory.id });
+              const unfilteredCategory = insertSpatialCategory({ txn, codeValue: "otherCategory" });
+              const unfilteredModel = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
+              insertPhysicalElement({ txn, modelId: unfilteredModel.id, categoryId: unfilteredCategory.id });
 
-            return {
-              model,
-              filteredCategories,
-              filterPaths: paths,
-              filterTargetElements: filterTargets,
-            };
-          });
+              return {
+                model,
+                filteredCategories,
+                filterPaths: paths,
+                filterTargetElements: filterTargets,
+              };
+            }),
+          );
         }
 
         it("switches on only filtered hierarchy when root node is clicked", async function () {
@@ -4279,33 +4357,35 @@ describe("ModelsTreeVisibilityHandler", () => {
 
       describe("multiple paths to a category and element under it", () => {
         async function createIModel(context: Mocha.Context) {
-          return buildIModel(context, async (imodel) => {
-            const filterPaths = new Array<InstanceKey[]>();
-            const subjectIds = new Array<Id64String>();
-            const modelIds = new Array<Id64String>();
+          return buildIModel(context, async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const filterPaths = new Array<InstanceKey[]>();
+              const subjectIds = new Array<Id64String>();
+              const modelIds = new Array<Id64String>();
 
-            const parentSubject = insertSubject({ imodel, codeValue: `parent subject`, parentId: IModel.rootSubjectId });
+              const parentSubject = insertSubject({ txn, codeValue: `parent subject`, parentId: IModel.rootSubjectId });
 
-            for (let i = 0; i < 2; ++i) {
-              const subject = insertSubject({ imodel, codeValue: `subject${i}`, parentId: parentSubject.id });
-              const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: subject.id, codeValue: `model${i}` });
-              const category = insertSpatialCategory({ imodel, codeValue: `category${i}` });
-              const elements = [
-                insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id }),
-                insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id }),
-              ];
-              subjectIds.push(subject.id);
-              modelIds.push(model.id);
-              filterPaths.push([parentSubject, subject, model, category], [parentSubject, subject, model, category, elements[0]]);
-            }
+              for (let i = 0; i < 2; ++i) {
+                const subject = insertSubject({ txn, codeValue: `subject${i}`, parentId: parentSubject.id });
+                const model = insertPhysicalModelWithPartition({ txn, partitionParentId: subject.id, codeValue: `model${i}` });
+                const category = insertSpatialCategory({ txn, codeValue: `category${i}` });
+                const elements = [
+                  insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id }),
+                  insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id }),
+                ];
+                subjectIds.push(subject.id);
+                modelIds.push(model.id);
+                filterPaths.push([parentSubject, subject, model, category], [parentSubject, subject, model, category, elements[0]]);
+              }
 
-            return {
-              parentSubject,
-              subjectIds,
-              modelIds,
-              filterPaths,
-            };
-          });
+              return {
+                parentSubject,
+                subjectIds,
+                modelIds,
+                filterPaths,
+              };
+            }),
+          );
         }
 
         it("when clicking on model turns on category and all its elements", async function () {
@@ -4372,8 +4452,9 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       it("class grouping node visibility only takes into account grouped elements", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) => {
-          const schemaContentXml = `
+        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+          withEditTxn(imodel, async (txn) => {
+            const schemaContentXml = `
             <ECSchemaReference name="BisCore" version="01.00.16" alias="bis" />
             <ECEntityClass typeName="PhysicalElement1">
               <BaseClass>bis:PhysicalElement</BaseClass>
@@ -4383,31 +4464,32 @@ describe("ModelsTreeVisibilityHandler", () => {
             </ECEntityClass>
           `;
 
-          const { PhysicalElement1, PhysicalElement2 } = (
-            await importSchema({
-              imodel,
-              schemaContentXml,
-              schemaAlias: "test1",
-              schemaName: "TestSchema1",
-            })
-          ).items;
+            const { PhysicalElement1, PhysicalElement2 } = (
+              await importSchema({
+                imodel,
+                schemaContentXml,
+                schemaAlias: "test1",
+                schemaName: "TestSchema1",
+              })
+            ).items;
 
-          const model = insertPhysicalModelWithPartition({ imodel, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-          const category = insertSpatialCategory({ imodel, codeValue: "category1" });
-          const element1 = insertPhysicalElement({ imodel, classFullName: PhysicalElement1.fullName, modelId: model.id, categoryId: category.id });
-          const element2 = insertPhysicalElement({ imodel, classFullName: PhysicalElement2.fullName, modelId: model.id, categoryId: category.id });
+            const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
+            const category = insertSpatialCategory({ txn, codeValue: "category1" });
+            const element1 = insertPhysicalElement({ txn, classFullName: PhysicalElement1.fullName, modelId: model.id, categoryId: category.id });
+            const element2 = insertPhysicalElement({ txn, classFullName: PhysicalElement2.fullName, modelId: model.id, categoryId: category.id });
 
-          const paths = [
-            [model, category, element1],
-            [model, category, element2],
-          ];
+            const paths = [
+              [model, category, element1],
+              [model, category, element2],
+            ];
 
-          return {
-            firstElement: element1.id,
-            pathToFirstElement: paths[0],
-            filterPaths: paths,
-          };
-        });
+            return {
+              firstElement: element1.id,
+              pathToFirstElement: paths[0],
+              filterPaths: paths,
+            };
+          }),
+        );
 
         const { imodelConnection, filterPaths, firstElement, pathToFirstElement } = buildIModelResult;
         using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, filterPaths });

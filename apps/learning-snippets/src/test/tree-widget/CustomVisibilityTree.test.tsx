@@ -24,6 +24,7 @@ import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetT
 
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { VisibilityStatus } from "@itwin/tree-widget-react";
+import { withEditTxn } from "@itwin/core-backend";
 
 describe("Tree widget", () => {
   mockGetBoundingClientRect();
@@ -40,12 +41,14 @@ describe("Tree widget", () => {
       });
 
       it("renders custom visibility tree", async () => {
-        const { imodelConnection } = await buildIModel(async (imodel) => {
-          const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
-          const category = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory" });
-          insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
-          return { category };
-        });
+        const { imodelConnection } = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+            const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
+            insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+            return { category };
+          }),
+        );
         const testViewport = getTestViewer(imodelConnection);
         const unifiedSelectionStorage = createStorage();
         vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);

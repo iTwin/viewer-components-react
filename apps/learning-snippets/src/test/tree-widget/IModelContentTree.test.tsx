@@ -16,6 +16,7 @@ import { insertSubject } from "test-utilities";
 import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
 import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
+import { withEditTxn } from "@itwin/core-backend";
 
 describe("Tree widget", () => {
   mockGetBoundingClientRect();
@@ -33,10 +34,12 @@ describe("Tree widget", () => {
         });
 
         it("renders <IModelContentTreeComponent />", async () => {
-          const { imodelConnection } = await buildIModel(async (imodel) => {
-            const subjectA = insertSubject({ imodel, codeValue: "Test subject A", parentId: IModel.rootSubjectId });
-            return { subjectA };
-          });
+          const { imodelConnection } = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const subjectA = insertSubject({ txn, codeValue: "Test subject A", parentId: IModel.rootSubjectId });
+              return { subjectA };
+            }),
+          );
           const testViewport = getTestViewer(imodelConnection);
           const unifiedSelectionStorage = createStorage();
           vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);

@@ -15,6 +15,7 @@ import {
   insertSubject,
   terminateCore,
 } from "test-utilities";
+import { withEditTxn } from "@itwin/core-backend";
 import { Id64 } from "@itwin/core-bentley";
 import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -29,7 +30,7 @@ import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 import { createClassGroupingHierarchyNode, createModelsTreeProvider } from "./Utils.js";
 
-import type { IModelDb } from "@itwin/core-backend";
+import type { EditTxn } from "@itwin/core-backend";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
@@ -104,31 +105,33 @@ describe("Models tree", () => {
     });
 
     it("sets auto-expand on correct nodes with merged sub-tree and filter paths", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-        const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model`, partitionParentId: rootSubject.id });
-        const category = insertSpatialCategory({ imodel, codeValue: "category" });
-        const parentElement = insertPhysicalElement({
-          imodel,
-          userLabel: `parent el`,
-          modelId: model.id,
-          categoryId: category.id,
-        });
-        const childElement = insertPhysicalElement({
-          imodel,
-          userLabel: `child el`,
-          modelId: model.id,
-          categoryId: category.id,
-          parentId: parentElement.id,
-        });
-        insertPhysicalElement({
-          imodel,
-          userLabel: `unrelated el`,
-          modelId: model.id,
-          categoryId: category.id,
-        });
-        return { rootSubject, model, category, parentElement, childElement };
-      });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const parentElement = insertPhysicalElement({
+            txn,
+            userLabel: `parent el`,
+            modelId: model.id,
+            categoryId: category.id,
+          });
+          const childElement = insertPhysicalElement({
+            txn,
+            userLabel: `child el`,
+            modelId: model.id,
+            categoryId: category.id,
+            parentId: parentElement.id,
+          });
+          insertPhysicalElement({
+            txn,
+            userLabel: `unrelated el`,
+            modelId: model.id,
+            categoryId: category.id,
+          });
+          return { rootSubject, model, category, parentElement, childElement };
+        }),
+      );
       const { imodelConnection, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodelConnection);
       const config = { ...defaultHierarchyConfiguration, hideRootSubject: true, elementClassSpecification: keys.parentElement.className };
@@ -202,17 +205,18 @@ describe("Models tree", () => {
     runTestCases(
       TreeFilteringTestCaseDefinition.create(
         "immediate Subject nodes",
-        async (imodel) => {
-          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-          const category = insertSpatialCategory({ imodel, codeValue: "category" });
-          const childSubject1 = insertSubject({ imodel, codeValue: "matching subject 1", parentId: rootSubject.id });
-          const childSubject2 = insertSubject({ imodel, codeValue: "subject 2", parentId: rootSubject.id });
-          const childSubject3 = insertSubject({ imodel, codeValue: "matching subject 3", parentId: rootSubject.id });
-          insertModelWithElements(imodel, 1, category.id, childSubject1.id);
-          insertModelWithElements(imodel, 2, category.id, childSubject2.id);
-          insertModelWithElements(imodel, 3, category.id, childSubject3.id);
-          return { rootSubject, childSubject1, childSubject2, childSubject3 };
-        },
+        async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+            const category = insertSpatialCategory({ txn, codeValue: "category" });
+            const childSubject1 = insertSubject({ txn, codeValue: "matching subject 1", parentId: rootSubject.id });
+            const childSubject2 = insertSubject({ txn, codeValue: "subject 2", parentId: rootSubject.id });
+            const childSubject3 = insertSubject({ txn, codeValue: "matching subject 3", parentId: rootSubject.id });
+            insertModelWithElements(txn, 1, category.id, childSubject1.id);
+            insertModelWithElements(txn, 2, category.id, childSubject2.id);
+            insertModelWithElements(txn, 3, category.id, childSubject3.id);
+            return { rootSubject, childSubject1, childSubject2, childSubject3 };
+          }),
         (x) => [[x.childSubject1], [x.childSubject3]],
         (x) => [x.childSubject1, x.childSubject3],
         (_x) => "matching",
@@ -263,18 +267,19 @@ describe("Models tree", () => {
       ),
       TreeFilteringTestCaseDefinition.create(
         "nested Subject nodes",
-        async (imodel) => {
-          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-          const category = insertSpatialCategory({ imodel, codeValue: "category" });
-          const intermediateSubject = insertSubject({ imodel, codeValue: `subject-x` });
-          const childSubject1 = insertSubject({ imodel, codeValue: "matching subject 1", parentId: intermediateSubject.id });
-          const childSubject2 = insertSubject({ imodel, codeValue: "subject 2", parentId: intermediateSubject.id });
-          const childSubject3 = insertSubject({ imodel, codeValue: "matching subject 3", parentId: intermediateSubject.id });
-          insertModelWithElements(imodel, 1, category.id, childSubject1.id);
-          insertModelWithElements(imodel, 2, category.id, childSubject2.id);
-          insertModelWithElements(imodel, 3, category.id, childSubject3.id);
-          return { rootSubject, intermediateSubject, childSubject1, childSubject2, childSubject3 };
-        },
+        async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+            const category = insertSpatialCategory({ txn, codeValue: "category" });
+            const intermediateSubject = insertSubject({ txn, codeValue: `subject-x` });
+            const childSubject1 = insertSubject({ txn, codeValue: "matching subject 1", parentId: intermediateSubject.id });
+            const childSubject2 = insertSubject({ txn, codeValue: "subject 2", parentId: intermediateSubject.id });
+            const childSubject3 = insertSubject({ txn, codeValue: "matching subject 3", parentId: intermediateSubject.id });
+            insertModelWithElements(txn, 1, category.id, childSubject1.id);
+            insertModelWithElements(txn, 2, category.id, childSubject2.id);
+            insertModelWithElements(txn, 3, category.id, childSubject3.id);
+            return { rootSubject, intermediateSubject, childSubject1, childSubject2, childSubject3 };
+          }),
         (x) => [
           [x.intermediateSubject, x.childSubject1],
           [x.intermediateSubject, x.childSubject3],
@@ -333,18 +338,19 @@ describe("Models tree", () => {
       ),
       TreeFilteringTestCaseDefinition.create(
         "two levels of Subject nodes",
-        async (imodel) => {
-          const category = insertSpatialCategory({ imodel, codeValue: "category" });
-          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-          const intermediateSubject1 = insertSubject({ imodel, codeValue: `matching intermediate subject 1`, parentId: rootSubject.id });
-          const intermediateSubject2 = insertSubject({ imodel, codeValue: `intermediate subject 2`, parentId: rootSubject.id });
-          insertModelWithElements(imodel, 1, category.id, intermediateSubject2.id);
-          const childSubject1 = insertSubject({ imodel, codeValue: "matching subject 1", parentId: intermediateSubject1.id });
-          const childSubject2 = insertSubject({ imodel, codeValue: "subject 2", parentId: intermediateSubject1.id });
-          insertModelWithElements(imodel, 1, category.id, childSubject1.id);
-          insertModelWithElements(imodel, 2, category.id, childSubject2.id);
-          return { rootSubject, intermediateSubject1, intermediateSubject2, childSubject1, childSubject2 };
-        },
+        async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const category = insertSpatialCategory({ txn, codeValue: "category" });
+            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+            const intermediateSubject1 = insertSubject({ txn, codeValue: `matching intermediate subject 1`, parentId: rootSubject.id });
+            const intermediateSubject2 = insertSubject({ txn, codeValue: `intermediate subject 2`, parentId: rootSubject.id });
+            insertModelWithElements(txn, 1, category.id, intermediateSubject2.id);
+            const childSubject1 = insertSubject({ txn, codeValue: "matching subject 1", parentId: intermediateSubject1.id });
+            const childSubject2 = insertSubject({ txn, codeValue: "subject 2", parentId: intermediateSubject1.id });
+            insertModelWithElements(txn, 1, category.id, childSubject1.id);
+            insertModelWithElements(txn, 2, category.id, childSubject2.id);
+            return { rootSubject, intermediateSubject1, intermediateSubject2, childSubject1, childSubject2 };
+          }),
         (x) => [[x.intermediateSubject1], [x.intermediateSubject1, x.childSubject1]],
         (x) => [x.intermediateSubject1, x.childSubject1],
         (_x) => "matching",
@@ -402,17 +408,18 @@ describe("Models tree", () => {
       ),
       TreeFilteringTestCaseDefinition.create(
         "Model nodes",
-        async (imodel) => {
-          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-          const category = insertSpatialCategory({ imodel, codeValue: "category" });
-          const model1 = insertPhysicalModelWithPartition({ imodel, codeValue: `matching model 1`, partitionParentId: rootSubject.id });
-          const model2 = insertPhysicalModelWithPartition({ imodel, codeValue: `model 2`, partitionParentId: rootSubject.id });
-          const model3 = insertPhysicalModelWithPartition({ imodel, codeValue: `matching model 3`, partitionParentId: rootSubject.id });
-          insertPhysicalElement({ imodel, userLabel: `element-1`, modelId: model1.id, categoryId: category.id });
-          insertPhysicalElement({ imodel, userLabel: `element-2`, modelId: model2.id, categoryId: category.id });
-          insertPhysicalElement({ imodel, userLabel: `element-3`, modelId: model3.id, categoryId: category.id });
-          return { rootSubject, model1, model2, model3 };
-        },
+        async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+            const category = insertSpatialCategory({ txn, codeValue: "category" });
+            const model1 = insertPhysicalModelWithPartition({ txn, codeValue: `matching model 1`, partitionParentId: rootSubject.id });
+            const model2 = insertPhysicalModelWithPartition({ txn, codeValue: `model 2`, partitionParentId: rootSubject.id });
+            const model3 = insertPhysicalModelWithPartition({ txn, codeValue: `matching model 3`, partitionParentId: rootSubject.id });
+            insertPhysicalElement({ txn, userLabel: `element-1`, modelId: model1.id, categoryId: category.id });
+            insertPhysicalElement({ txn, userLabel: `element-2`, modelId: model2.id, categoryId: category.id });
+            insertPhysicalElement({ txn, userLabel: `element-3`, modelId: model3.id, categoryId: category.id });
+            return { rootSubject, model1, model2, model3 };
+          }),
         (x) => [[adjustedModelKey(x.model1)], [adjustedModelKey(x.model3)]],
         (x) => [x.model1, x.model3],
         (_x) => "matching",
@@ -453,13 +460,14 @@ describe("Models tree", () => {
       ),
       TreeFilteringTestCaseDefinition.create(
         "Empty model nodes",
-        async (imodel) => {
-          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-          const model1 = insertPhysicalModelWithPartition({ imodel, codeValue: `matching model 1`, partitionParentId: rootSubject.id });
-          const model2 = insertPhysicalModelWithPartition({ imodel, codeValue: `model 2`, partitionParentId: rootSubject.id });
-          const model3 = insertPhysicalModelWithPartition({ imodel, codeValue: `matching model 3`, partitionParentId: rootSubject.id });
-          return { rootSubject, model1, model2, model3 };
-        },
+        async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+            const model1 = insertPhysicalModelWithPartition({ txn, codeValue: `matching model 1`, partitionParentId: rootSubject.id });
+            const model2 = insertPhysicalModelWithPartition({ txn, codeValue: `model 2`, partitionParentId: rootSubject.id });
+            const model3 = insertPhysicalModelWithPartition({ txn, codeValue: `matching model 3`, partitionParentId: rootSubject.id });
+            return { rootSubject, model1, model2, model3 };
+          }),
         (x) => [[adjustedModelKey(x.model1)], [adjustedModelKey(x.model3)]],
         (x) => [x.model1, x.model3],
         (_x) => "matching",
@@ -481,23 +489,24 @@ describe("Models tree", () => {
       ),
       TreeFilteringTestCaseDefinition.create(
         "Subject with hidden child Model node",
-        async (imodel) => {
-          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-          const childSubject = insertSubject({ imodel, codeValue: "matching child subject", parentId: rootSubject.id });
-          const category = insertSpatialCategory({ imodel, codeValue: "category" });
-          const partition = insertPhysicalPartition({
-            imodel,
-            codeValue: `matching model 1`,
-            parentId: childSubject.id,
+        async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+            const childSubject = insertSubject({ txn, codeValue: "matching child subject", parentId: rootSubject.id });
+            const category = insertSpatialCategory({ txn, codeValue: "category" });
+            const partition = insertPhysicalPartition({
+              txn,
+              codeValue: `matching model 1`,
+              parentId: childSubject.id,
 
-            jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
-          });
-          const model1 = insertPhysicalSubModel({ imodel, modeledElementId: partition.id });
-          const model2 = insertPhysicalModelWithPartition({ imodel, codeValue: `model 2`, partitionParentId: childSubject.id });
-          insertPhysicalElement({ imodel, userLabel: `element-1`, modelId: model1.id, categoryId: category.id });
-          insertPhysicalElement({ imodel, userLabel: `element-2`, modelId: model2.id, categoryId: category.id });
-          return { rootSubject, childSubject, model1, model2, category };
-        },
+              jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
+            });
+            const model1 = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
+            const model2 = insertPhysicalModelWithPartition({ txn, codeValue: `model 2`, partitionParentId: childSubject.id });
+            insertPhysicalElement({ txn, userLabel: `element-1`, modelId: model1.id, categoryId: category.id });
+            insertPhysicalElement({ txn, userLabel: `element-2`, modelId: model2.id, categoryId: category.id });
+            return { rootSubject, childSubject, model1, model2, category };
+          }),
         (x) => [[x.childSubject]],
         (x) => [x.childSubject],
         (_x) => "matching",
@@ -538,21 +547,22 @@ describe("Models tree", () => {
       ),
       TreeFilteringTestCaseDefinition.create(
         "Category nodes",
-        async (imodel) => {
-          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-          const model1 = insertPhysicalModelWithPartition({ imodel, codeValue: `model-1`, partitionParentId: rootSubject.id });
-          const model2 = insertPhysicalModelWithPartition({ imodel, codeValue: `model-2`, partitionParentId: rootSubject.id });
+        async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+            const model1 = insertPhysicalModelWithPartition({ txn, codeValue: `model-1`, partitionParentId: rootSubject.id });
+            const model2 = insertPhysicalModelWithPartition({ txn, codeValue: `model-2`, partitionParentId: rootSubject.id });
 
-          const category1 = insertSpatialCategory({ imodel, codeValue: "matching category 1" });
-          const category2 = insertSpatialCategory({ imodel, codeValue: "category-2" });
-          const category3 = insertSpatialCategory({ imodel, codeValue: "matching category 3" });
+            const category1 = insertSpatialCategory({ txn, codeValue: "matching category 1" });
+            const category2 = insertSpatialCategory({ txn, codeValue: "category-2" });
+            const category3 = insertSpatialCategory({ txn, codeValue: "matching category 3" });
 
-          insertPhysicalElement({ imodel, userLabel: `element-1`, modelId: model1.id, categoryId: category1.id });
-          insertPhysicalElement({ imodel, userLabel: `element-2`, modelId: model1.id, categoryId: category2.id });
-          insertPhysicalElement({ imodel, userLabel: `element-3`, modelId: model2.id, categoryId: category3.id });
+            insertPhysicalElement({ txn, userLabel: `element-1`, modelId: model1.id, categoryId: category1.id });
+            insertPhysicalElement({ txn, userLabel: `element-2`, modelId: model1.id, categoryId: category2.id });
+            insertPhysicalElement({ txn, userLabel: `element-3`, modelId: model2.id, categoryId: category3.id });
 
-          return { rootSubject, model1, model2, category1, category2, category3 };
-        },
+            return { rootSubject, model1, model2, category1, category2, category3 };
+          }),
         (x) => [
           [adjustedModelKey(x.model1), x.category1],
           [adjustedModelKey(x.model2), x.category3],
@@ -600,22 +610,23 @@ describe("Models tree", () => {
       ),
       TreeFilteringTestCaseDefinition.create(
         "root Element nodes",
-        async (imodel) => {
-          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-          const model1 = insertPhysicalModelWithPartition({ imodel, codeValue: `model-1`, partitionParentId: rootSubject.id });
-          const model2 = insertPhysicalModelWithPartition({ imodel, codeValue: `model-2`, partitionParentId: rootSubject.id });
+        async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+            const model1 = insertPhysicalModelWithPartition({ txn, codeValue: `model-1`, partitionParentId: rootSubject.id });
+            const model2 = insertPhysicalModelWithPartition({ txn, codeValue: `model-2`, partitionParentId: rootSubject.id });
 
-          const category1 = insertSpatialCategory({ imodel, codeValue: "category-1" });
-          const category2 = insertSpatialCategory({ imodel, codeValue: "category-2" });
+            const category1 = insertSpatialCategory({ txn, codeValue: "category-1" });
+            const category2 = insertSpatialCategory({ txn, codeValue: "category-2" });
 
-          const element11 = insertPhysicalElement({ imodel, userLabel: `matching element 11`, modelId: model1.id, categoryId: category1.id });
-          const element12 = insertPhysicalElement({ imodel, userLabel: `element 12`, modelId: model1.id, categoryId: category1.id });
+            const element11 = insertPhysicalElement({ txn, userLabel: `matching element 11`, modelId: model1.id, categoryId: category1.id });
+            const element12 = insertPhysicalElement({ txn, userLabel: `element 12`, modelId: model1.id, categoryId: category1.id });
 
-          const element21 = insertPhysicalElement({ imodel, userLabel: `element 21`, modelId: model2.id, categoryId: category2.id });
-          const element22 = insertPhysicalElement({ imodel, userLabel: `matching element 22`, modelId: model2.id, categoryId: category2.id });
+            const element21 = insertPhysicalElement({ txn, userLabel: `element 21`, modelId: model2.id, categoryId: category2.id });
+            const element22 = insertPhysicalElement({ txn, userLabel: `matching element 22`, modelId: model2.id, categoryId: category2.id });
 
-          return { rootSubject, model1, model2, category1, category2, element11, element12, element21, element22 };
-        },
+            return { rootSubject, model1, model2, category1, category2, element11, element12, element21, element22 };
+          }),
         (x) => [
           [adjustedModelKey(x.model1), x.category1, adjustedElementKey(x.element11)],
           [adjustedModelKey(x.model2), x.category2, adjustedElementKey(x.element22)],
@@ -661,22 +672,23 @@ describe("Models tree", () => {
       ),
       TreeFilteringTestCaseDefinition.create(
         "category and element nodes",
-        async (imodel) => {
-          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-          const model1 = insertPhysicalModelWithPartition({ imodel, codeValue: `model-1`, partitionParentId: rootSubject.id });
-          const model2 = insertPhysicalModelWithPartition({ imodel, codeValue: `model-2`, partitionParentId: rootSubject.id });
+        async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+            const model1 = insertPhysicalModelWithPartition({ txn, codeValue: `model-1`, partitionParentId: rootSubject.id });
+            const model2 = insertPhysicalModelWithPartition({ txn, codeValue: `model-2`, partitionParentId: rootSubject.id });
 
-          const category1 = insertSpatialCategory({ imodel, codeValue: "matching category-1" });
-          const category2 = insertSpatialCategory({ imodel, codeValue: "category-2" });
+            const category1 = insertSpatialCategory({ txn, codeValue: "matching category-1" });
+            const category2 = insertSpatialCategory({ txn, codeValue: "category-2" });
 
-          const element11 = insertPhysicalElement({ imodel, userLabel: `matching element 11`, modelId: model1.id, categoryId: category1.id });
-          const element12 = insertPhysicalElement({ imodel, userLabel: `element 12`, modelId: model1.id, categoryId: category1.id });
+            const element11 = insertPhysicalElement({ txn, userLabel: `matching element 11`, modelId: model1.id, categoryId: category1.id });
+            const element12 = insertPhysicalElement({ txn, userLabel: `element 12`, modelId: model1.id, categoryId: category1.id });
 
-          const element21 = insertPhysicalElement({ imodel, userLabel: `element 21`, modelId: model2.id, categoryId: category2.id });
-          const element22 = insertPhysicalElement({ imodel, userLabel: `element 22`, modelId: model2.id, categoryId: category2.id });
+            const element21 = insertPhysicalElement({ txn, userLabel: `element 21`, modelId: model2.id, categoryId: category2.id });
+            const element22 = insertPhysicalElement({ txn, userLabel: `element 22`, modelId: model2.id, categoryId: category2.id });
 
-          return { rootSubject, model1, model2, category1, category2, element11, element12, element21, element22 };
-        },
+            return { rootSubject, model1, model2, category1, category2, element11, element12, element21, element22 };
+          }),
         (x) => [
           [adjustedModelKey(x.model1), x.category1],
           [adjustedModelKey(x.model1), x.category1, adjustedElementKey(x.element11)],
@@ -708,34 +720,35 @@ describe("Models tree", () => {
       ),
       TreeFilteringTestCaseDefinition.create(
         "child Element nodes",
-        async (imodel) => {
-          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-          const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model-x`, partitionParentId: rootSubject.id });
-          const category = insertSpatialCategory({ imodel, codeValue: "category-x" });
-          const rootElement = insertPhysicalElement({ imodel, userLabel: `root element 0`, modelId: model.id, categoryId: category.id });
-          const childElement1 = insertPhysicalElement({
-            imodel,
-            userLabel: `matching element 1`,
-            modelId: model.id,
-            categoryId: category.id,
-            parentId: rootElement.id,
-          });
-          const childElement2 = insertPhysicalElement({
-            imodel,
-            userLabel: `element 2`,
-            modelId: model.id,
-            categoryId: category.id,
-            parentId: rootElement.id,
-          });
-          const childElement3 = insertPhysicalElement({
-            imodel,
-            userLabel: `matching element 3`,
-            modelId: model.id,
-            categoryId: category.id,
-            parentId: rootElement.id,
-          });
-          return { rootSubject, model, category, rootElement, childElement1, childElement2, childElement3 };
-        },
+        async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: `model-x`, partitionParentId: rootSubject.id });
+            const category = insertSpatialCategory({ txn, codeValue: "category-x" });
+            const rootElement = insertPhysicalElement({ txn, userLabel: `root element 0`, modelId: model.id, categoryId: category.id });
+            const childElement1 = insertPhysicalElement({
+              txn,
+              userLabel: `matching element 1`,
+              modelId: model.id,
+              categoryId: category.id,
+              parentId: rootElement.id,
+            });
+            const childElement2 = insertPhysicalElement({
+              txn,
+              userLabel: `element 2`,
+              modelId: model.id,
+              categoryId: category.id,
+              parentId: rootElement.id,
+            });
+            const childElement3 = insertPhysicalElement({
+              txn,
+              userLabel: `matching element 3`,
+              modelId: model.id,
+              categoryId: category.id,
+              parentId: rootElement.id,
+            });
+            return { rootSubject, model, category, rootElement, childElement1, childElement2, childElement3 };
+          }),
         (x) => [
           [adjustedModelKey(x.model), x.category, adjustedElementKey(x.rootElement), adjustedElementKey(x.childElement1)],
           [adjustedModelKey(x.model), x.category, adjustedElementKey(x.rootElement), adjustedElementKey(x.childElement3)],
@@ -792,32 +805,33 @@ describe("Models tree", () => {
       ),
       TreeFilteringTestCaseDefinition.create(
         "child Element nodes when custom element specification class is used",
-        async (imodel, testSchema) => {
-          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-          const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model-x`, partitionParentId: rootSubject.id });
-          const category = insertSpatialCategory({ imodel, codeValue: "category-x" });
-          const rootElement1 = insertPhysicalElement({
-            imodel,
-            userLabel: `matching element 1`,
-            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-            modelId: model.id,
-            categoryId: category.id,
-          });
-          const rootElement2 = insertPhysicalElement({
-            imodel,
-            userLabel: `element 2`,
-            modelId: model.id,
-            categoryId: category.id,
-          });
-          const rootElement3 = insertPhysicalElement({
-            imodel,
-            userLabel: `matching element 3`,
-            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-            modelId: model.id,
-            categoryId: category.id,
-          });
-          return { rootSubject, model, category, rootElement1, rootElement2, rootElement3 };
-        },
+        async (imodel, testSchema) =>
+          withEditTxn(imodel, (txn) => {
+            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: `model-x`, partitionParentId: rootSubject.id });
+            const category = insertSpatialCategory({ txn, codeValue: "category-x" });
+            const rootElement1 = insertPhysicalElement({
+              txn,
+              userLabel: `matching element 1`,
+              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+              modelId: model.id,
+              categoryId: category.id,
+            });
+            const rootElement2 = insertPhysicalElement({
+              txn,
+              userLabel: `element 2`,
+              modelId: model.id,
+              categoryId: category.id,
+            });
+            const rootElement3 = insertPhysicalElement({
+              txn,
+              userLabel: `matching element 3`,
+              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+              modelId: model.id,
+              categoryId: category.id,
+            });
+            return { rootSubject, model, category, rootElement1, rootElement2, rootElement3 };
+          }),
         (x) => [
           [adjustedModelKey(x.model), x.category, { ...x.rootElement1, className: "TestSchema.SubModelablePhysicalObject" }],
           [adjustedModelKey(x.model), x.category, { ...x.rootElement3, className: "TestSchema.SubModelablePhysicalObject" }],
@@ -862,23 +876,24 @@ describe("Models tree", () => {
       ),
       TreeFilteringTestCaseDefinition.create(
         "sub-modeled Element nodes",
-        async (imodel, testSchema) => {
-          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-          const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model`, partitionParentId: rootSubject.id });
-          const category = insertSpatialCategory({ imodel, codeValue: "category" });
-          const rootElement = insertPhysicalElement({
-            imodel,
-            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-            userLabel: `root element`,
-            modelId: model.id,
-            categoryId: category.id,
-          });
-          const subModel = insertPhysicalSubModel({ imodel, modeledElementId: rootElement.id });
-          const subModeledElement1 = insertPhysicalElement({ imodel, userLabel: `matching element 1`, modelId: subModel.id, categoryId: category.id });
-          const subModeledElement2 = insertPhysicalElement({ imodel, userLabel: `element 2`, modelId: subModel.id, categoryId: category.id });
-          const subModeledElement3 = insertPhysicalElement({ imodel, userLabel: `matching element 3`, modelId: subModel.id, categoryId: category.id });
-          return { rootSubject, model, category, rootElement, subModel, subModeledElement1, subModeledElement2, subModeledElement3 };
-        },
+        async (imodel, testSchema) =>
+          withEditTxn(imodel, (txn) => {
+            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
+            const category = insertSpatialCategory({ txn, codeValue: "category" });
+            const rootElement = insertPhysicalElement({
+              txn,
+              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+              userLabel: `root element`,
+              modelId: model.id,
+              categoryId: category.id,
+            });
+            const subModel = insertPhysicalSubModel({ txn, modeledElementId: rootElement.id });
+            const subModeledElement1 = insertPhysicalElement({ txn, userLabel: `matching element 1`, modelId: subModel.id, categoryId: category.id });
+            const subModeledElement2 = insertPhysicalElement({ txn, userLabel: `element 2`, modelId: subModel.id, categoryId: category.id });
+            const subModeledElement3 = insertPhysicalElement({ txn, userLabel: `matching element 3`, modelId: subModel.id, categoryId: category.id });
+            return { rootSubject, model, category, rootElement, subModel, subModeledElement1, subModeledElement2, subModeledElement3 };
+          }),
         (x) => [
           [
             adjustedModelKey(x.model),
@@ -956,28 +971,29 @@ describe("Models tree", () => {
       ),
       TreeFilteringTestCaseDefinition.create(
         "Element node through hidden ancestors",
-        async (imodel) => {
-          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-          const hiddenChildSubject = insertSubject({
-            imodel,
-            codeValue: `hidden-subject`,
-            parentId: rootSubject.id,
+        async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+            const hiddenChildSubject = insertSubject({
+              txn,
+              codeValue: `hidden-subject`,
+              parentId: rootSubject.id,
 
-            jsonProperties: { Subject: { Job: { Bridge: "Test" } } },
-          });
-          const partition = insertPhysicalPartition({
-            imodel,
-            codeValue: `hidden-model`,
-            parentId: hiddenChildSubject.id,
+              jsonProperties: { Subject: { Job: { Bridge: "Test" } } },
+            });
+            const partition = insertPhysicalPartition({
+              txn,
+              codeValue: `hidden-model`,
+              parentId: hiddenChildSubject.id,
 
-            jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
-          });
-          const model = insertPhysicalSubModel({ imodel, modeledElementId: partition.id });
-          const category = insertSpatialCategory({ imodel, codeValue: "category" });
-          const element1 = insertPhysicalElement({ imodel, userLabel: `matching element 1`, modelId: model.id, categoryId: category.id });
-          const element2 = insertPhysicalElement({ imodel, userLabel: `element 2`, modelId: model.id, categoryId: category.id });
-          return { rootSubject, model, category, element1, element2 };
-        },
+              jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
+            });
+            const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
+            const category = insertSpatialCategory({ txn, codeValue: "category" });
+            const element1 = insertPhysicalElement({ txn, userLabel: `matching element 1`, modelId: model.id, categoryId: category.id });
+            const element2 = insertPhysicalElement({ txn, userLabel: `element 2`, modelId: model.id, categoryId: category.id });
+            return { rootSubject, model, category, element1, element2 };
+          }),
         (x) => [[adjustedModelKey(x.model), x.category, adjustedElementKey(x.element1)]],
         (x) => [x.element1],
         (_x) => "matching",
@@ -1001,35 +1017,36 @@ describe("Models tree", () => {
       runTestCases(
         TreeFilteringTestCaseDefinition.create(
           "grouped root element",
-          async (imodel) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const model1 = insertPhysicalModelWithPartition({ imodel, codeValue: `model-1`, partitionParentId: rootSubject.id });
-            const model2 = insertPhysicalModelWithPartition({ imodel, codeValue: `model-2`, partitionParentId: rootSubject.id });
-            const category = insertSpatialCategory({ imodel, codeValue: "category-x" });
-            insertPhysicalElement({ imodel, userLabel: `element 1-1`, modelId: model1.id, categoryId: category.id });
-            insertPhysicalElement({
-              imodel,
-              userLabel: `element 1-2`,
-              modelId: model1.id,
-              categoryId: category.id,
-            });
-            const physicalElement21 = insertPhysicalElement({ imodel, userLabel: `element 2-1`, modelId: model2.id, categoryId: category.id });
-            const physicalElement22 = insertPhysicalElement({
-              imodel,
-              userLabel: `element 2-2`,
-              modelId: model2.id,
-              categoryId: category.id,
-            });
-            const pathUntilTargetElement = [adjustedModelKey(model2), category];
-            const groupingNode = createClassGroupingHierarchyNode({
-              className: physicalElement21.className,
-              modelId: model2.id,
-              categoryId: category.id,
-              elements: [physicalElement21.id, physicalElement22.id],
-              parentKeys: pathUntilTargetElement.map((key) => ({ type: "instances", instanceKeys: [key] })),
-            });
-            return { rootSubject, model2, category, physicalElement21, physicalElement22, pathUntilTargetElement, groupingNode };
-          },
+          async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+              const model1 = insertPhysicalModelWithPartition({ txn, codeValue: `model-1`, partitionParentId: rootSubject.id });
+              const model2 = insertPhysicalModelWithPartition({ txn, codeValue: `model-2`, partitionParentId: rootSubject.id });
+              const category = insertSpatialCategory({ txn, codeValue: "category-x" });
+              insertPhysicalElement({ txn, userLabel: `element 1-1`, modelId: model1.id, categoryId: category.id });
+              insertPhysicalElement({
+                txn,
+                userLabel: `element 1-2`,
+                modelId: model1.id,
+                categoryId: category.id,
+              });
+              const physicalElement21 = insertPhysicalElement({ txn, userLabel: `element 2-1`, modelId: model2.id, categoryId: category.id });
+              const physicalElement22 = insertPhysicalElement({
+                txn,
+                userLabel: `element 2-2`,
+                modelId: model2.id,
+                categoryId: category.id,
+              });
+              const pathUntilTargetElement = [adjustedModelKey(model2), category];
+              const groupingNode = createClassGroupingHierarchyNode({
+                className: physicalElement21.className,
+                modelId: model2.id,
+                categoryId: category.id,
+                elements: [physicalElement21.id, physicalElement22.id],
+                parentKeys: pathUntilTargetElement.map((key) => ({ type: "instances", instanceKeys: [key] })),
+              });
+              return { rootSubject, model2, category, physicalElement21, physicalElement22, pathUntilTargetElement, groupingNode };
+            }),
           (x) =>
             x.groupingNode.groupedInstanceKeys.map((elementKey) => ({
               path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
@@ -1069,63 +1086,64 @@ describe("Models tree", () => {
         ),
         TreeFilteringTestCaseDefinition.create(
           "grouped child element",
-          async (imodel, testSchema) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model-x`, partitionParentId: rootSubject.id });
-            const category = insertSpatialCategory({ imodel, codeValue: "category-x" });
-            const rootElement = insertPhysicalElement({ imodel, userLabel: `root element`, modelId: model.id, categoryId: category.id });
-            insertPhysicalElement({
-              imodel,
-              userLabel: `element 1`,
-              modelId: model.id,
-              categoryId: category.id,
-              parentId: rootElement.id,
-            });
-            insertPhysicalElement({
-              imodel,
-              userLabel: `element 2`,
-              modelId: model.id,
-              categoryId: category.id,
-              parentId: rootElement.id,
-            });
-            const testElement1 = insertPhysicalElement({
-              imodel,
-              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-              userLabel: `test element 1`,
-              modelId: model.id,
-              categoryId: category.id,
-              parentId: rootElement.id,
-            });
-            const testElement2 = insertPhysicalElement({
-              imodel,
-              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-              userLabel: `test element 2`,
-              modelId: model.id,
-              categoryId: category.id,
-              parentId: rootElement.id,
-            });
-            const pathUntilTargetElement = [adjustedModelKey(model), category, adjustedElementKey(rootElement)];
-            const groupingNode = createClassGroupingHierarchyNode({
-              className: rootElement.className,
-              modelId: model.id,
-              categoryId: category.id,
-              elements: [rootElement.id],
-              parentKeys: [adjustedModelKey(model), category].map((key) => ({ type: "instances", instanceKeys: [key] })),
-            });
-            const targetGroupingNode = createClassGroupingHierarchyNode({
-              className: testElement1.className,
-              modelId: model.id,
-              categoryId: category.id,
-              elements: [testElement1.id, testElement2.id],
-              parentKeys: [adjustedModelKey(model), category, groupingNode, adjustedElementKey(rootElement)].map((key) => {
-                if ("key" in key) {
-                  return key.key;
-                }
-                return { type: "instances", instanceKeys: [key] };
-              }),
-            });
-            return { rootSubject, model, category, rootElement, testElement1, testElement2, pathUntilTargetElement, targetGroupingNode };
-          },
+          async (imodel, testSchema) =>
+            withEditTxn(imodel, (txn) => {
+              const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+              const model = insertPhysicalModelWithPartition({ txn, codeValue: `model-x`, partitionParentId: rootSubject.id });
+              const category = insertSpatialCategory({ txn, codeValue: "category-x" });
+              const rootElement = insertPhysicalElement({ txn, userLabel: `root element`, modelId: model.id, categoryId: category.id });
+              insertPhysicalElement({
+                txn,
+                userLabel: `element 1`,
+                modelId: model.id,
+                categoryId: category.id,
+                parentId: rootElement.id,
+              });
+              insertPhysicalElement({
+                txn,
+                userLabel: `element 2`,
+                modelId: model.id,
+                categoryId: category.id,
+                parentId: rootElement.id,
+              });
+              const testElement1 = insertPhysicalElement({
+                txn,
+                classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+                userLabel: `test element 1`,
+                modelId: model.id,
+                categoryId: category.id,
+                parentId: rootElement.id,
+              });
+              const testElement2 = insertPhysicalElement({
+                txn,
+                classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+                userLabel: `test element 2`,
+                modelId: model.id,
+                categoryId: category.id,
+                parentId: rootElement.id,
+              });
+              const pathUntilTargetElement = [adjustedModelKey(model), category, adjustedElementKey(rootElement)];
+              const groupingNode = createClassGroupingHierarchyNode({
+                className: rootElement.className,
+                modelId: model.id,
+                categoryId: category.id,
+                elements: [rootElement.id],
+                parentKeys: [adjustedModelKey(model), category].map((key) => ({ type: "instances", instanceKeys: [key] })),
+              });
+              const targetGroupingNode = createClassGroupingHierarchyNode({
+                className: testElement1.className,
+                modelId: model.id,
+                categoryId: category.id,
+                elements: [testElement1.id, testElement2.id],
+                parentKeys: [adjustedModelKey(model), category, groupingNode, adjustedElementKey(rootElement)].map((key) => {
+                  if ("key" in key) {
+                    return key.key;
+                  }
+                  return { type: "instances", instanceKeys: [key] };
+                }),
+              });
+              return { rootSubject, model, category, rootElement, testElement1, testElement2, pathUntilTargetElement, targetGroupingNode };
+            }),
           (x) =>
             x.targetGroupingNode.groupedInstanceKeys.map((elementKey) => ({
               path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
@@ -1184,88 +1202,89 @@ describe("Models tree", () => {
         ),
         TreeFilteringTestCaseDefinition.create(
           "grouped child elements of different classes",
-          async (imodel, testSchema) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model-x`, partitionParentId: rootSubject.id });
-            const category = insertSpatialCategory({ imodel, codeValue: "category-x" });
-            const rootElement = insertPhysicalElement({ imodel, userLabel: `root element`, modelId: model.id, categoryId: category.id });
-            const physicalElement1 = insertPhysicalElement({
-              imodel,
-              userLabel: `element 1`,
-              modelId: model.id,
-              categoryId: category.id,
-              parentId: rootElement.id,
-            });
-            const physicalElement2 = insertPhysicalElement({
-              imodel,
-              userLabel: `element 2`,
-              modelId: model.id,
-              categoryId: category.id,
-              parentId: rootElement.id,
-            });
-            const testElement1 = insertPhysicalElement({
-              imodel,
-              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-              userLabel: `test element 1`,
-              modelId: model.id,
-              categoryId: category.id,
-              parentId: rootElement.id,
-            });
-            const testElement2 = insertPhysicalElement({
-              imodel,
-              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-              userLabel: `test element 2`,
-              modelId: model.id,
-              categoryId: category.id,
-              parentId: rootElement.id,
-            });
+          async (imodel, testSchema) =>
+            withEditTxn(imodel, (txn) => {
+              const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+              const model = insertPhysicalModelWithPartition({ txn, codeValue: `model-x`, partitionParentId: rootSubject.id });
+              const category = insertSpatialCategory({ txn, codeValue: "category-x" });
+              const rootElement = insertPhysicalElement({ txn, userLabel: `root element`, modelId: model.id, categoryId: category.id });
+              const physicalElement1 = insertPhysicalElement({
+                txn,
+                userLabel: `element 1`,
+                modelId: model.id,
+                categoryId: category.id,
+                parentId: rootElement.id,
+              });
+              const physicalElement2 = insertPhysicalElement({
+                txn,
+                userLabel: `element 2`,
+                modelId: model.id,
+                categoryId: category.id,
+                parentId: rootElement.id,
+              });
+              const testElement1 = insertPhysicalElement({
+                txn,
+                classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+                userLabel: `test element 1`,
+                modelId: model.id,
+                categoryId: category.id,
+                parentId: rootElement.id,
+              });
+              const testElement2 = insertPhysicalElement({
+                txn,
+                classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+                userLabel: `test element 2`,
+                modelId: model.id,
+                categoryId: category.id,
+                parentId: rootElement.id,
+              });
 
-            const pathUntilTargetElement = [adjustedModelKey(model), category, adjustedElementKey(rootElement)];
-            const groupingNode = createClassGroupingHierarchyNode({
-              className: rootElement.className,
-              modelId: model.id,
-              categoryId: category.id,
-              elements: [rootElement.id],
-              parentKeys: [adjustedModelKey(model), category].map((key) => ({ type: "instances", instanceKeys: [key] })),
-            });
-            const physicalElementGroupingNode = createClassGroupingHierarchyNode({
-              className: physicalElement1.className,
-              modelId: model.id,
-              categoryId: category.id,
-              elements: [physicalElement1.id, physicalElement2.id],
-              parentKeys: [adjustedModelKey(model), category, groupingNode, adjustedElementKey(rootElement)].map((key) => {
-                if ("key" in key) {
-                  return key.key;
-                }
-                return { type: "instances", instanceKeys: [key] };
-              }),
-            });
-            const testElementGroupingNode = createClassGroupingHierarchyNode({
-              className: testElement1.className,
-              modelId: model.id,
-              categoryId: category.id,
-              elements: [testElement1.id, testElement2.id],
-              parentKeys: [adjustedModelKey(model), category, groupingNode, adjustedElementKey(rootElement)].map((key) => {
-                if ("key" in key) {
-                  return key.key;
-                }
-                return { type: "instances", instanceKeys: [key] };
-              }),
-            });
-            return {
-              rootSubject,
-              model,
-              category,
-              rootElement,
-              physicalElement1,
-              physicalElement2,
-              testElement1,
-              testElement2,
-              pathUntilTargetElement,
-              physicalElementGroupingNode,
-              testElementGroupingNode,
-            };
-          },
+              const pathUntilTargetElement = [adjustedModelKey(model), category, adjustedElementKey(rootElement)];
+              const groupingNode = createClassGroupingHierarchyNode({
+                className: rootElement.className,
+                modelId: model.id,
+                categoryId: category.id,
+                elements: [rootElement.id],
+                parentKeys: [adjustedModelKey(model), category].map((key) => ({ type: "instances", instanceKeys: [key] })),
+              });
+              const physicalElementGroupingNode = createClassGroupingHierarchyNode({
+                className: physicalElement1.className,
+                modelId: model.id,
+                categoryId: category.id,
+                elements: [physicalElement1.id, physicalElement2.id],
+                parentKeys: [adjustedModelKey(model), category, groupingNode, adjustedElementKey(rootElement)].map((key) => {
+                  if ("key" in key) {
+                    return key.key;
+                  }
+                  return { type: "instances", instanceKeys: [key] };
+                }),
+              });
+              const testElementGroupingNode = createClassGroupingHierarchyNode({
+                className: testElement1.className,
+                modelId: model.id,
+                categoryId: category.id,
+                elements: [testElement1.id, testElement2.id],
+                parentKeys: [adjustedModelKey(model), category, groupingNode, adjustedElementKey(rootElement)].map((key) => {
+                  if ("key" in key) {
+                    return key.key;
+                  }
+                  return { type: "instances", instanceKeys: [key] };
+                }),
+              });
+              return {
+                rootSubject,
+                model,
+                category,
+                rootElement,
+                physicalElement1,
+                physicalElement2,
+                testElement1,
+                testElement2,
+                pathUntilTargetElement,
+                physicalElementGroupingNode,
+                testElementGroupingNode,
+              };
+            }),
           (x) => [
             ...x.physicalElementGroupingNode.groupedInstanceKeys.map((elementKey) => ({
               path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
@@ -1334,70 +1353,71 @@ describe("Models tree", () => {
         ),
         TreeFilteringTestCaseDefinition.create(
           "hierarchy of grouped elements",
-          async (imodel) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model-x`, partitionParentId: rootSubject.id });
-            const category = insertSpatialCategory({ imodel, codeValue: "category-x" });
-            const parentElement = insertPhysicalElement({ imodel, userLabel: `parent element`, modelId: model.id, categoryId: category.id });
-            const middleElement = insertPhysicalElement({
-              imodel,
-              userLabel: `middle element`,
-              modelId: model.id,
-              categoryId: category.id,
-              parentId: parentElement.id,
-            });
-            const childElement = insertPhysicalElement({
-              imodel,
-              userLabel: `element 1`,
-              modelId: model.id,
-              categoryId: category.id,
-              parentId: middleElement.id,
-            });
-            const pathUntilParentElement = [adjustedModelKey(model), category];
-            const parentElementGroupingNode = createClassGroupingHierarchyNode({
-              className: parentElement.className,
-              modelId: model.id,
-              categoryId: category.id,
-              elements: [parentElement.id],
-              parentKeys: pathUntilParentElement.map((key) => ({ type: "instances", instanceKeys: [key] })),
-            });
-            const middleElementGroupingNode = createClassGroupingHierarchyNode({
-              className: middleElement.className,
-              modelId: model.id,
-              categoryId: category.id,
-              elements: [middleElement.id],
-              parentKeys: [...pathUntilParentElement, parentElementGroupingNode, parentElement].map((key) => {
-                if ("key" in key) {
-                  return key.key;
-                }
-                return { type: "instances", instanceKeys: [key] };
-              }),
-            });
-            const childElementGroupingNode = createClassGroupingHierarchyNode({
-              className: childElement.className,
-              modelId: model.id,
-              categoryId: category.id,
-              elements: [childElement.id],
-              parentKeys: [...pathUntilParentElement, parentElementGroupingNode, parentElement, middleElementGroupingNode, middleElement].map((key) => {
-                if ("key" in key) {
-                  return key.key;
-                }
-                return { type: "instances", instanceKeys: [key] };
-              }),
-            });
-            return {
-              rootSubject,
-              model,
-              category,
-              parentElement,
-              middleElement,
-              childElement,
-              pathUntilParentElement,
-              parentElementGroupingNode,
-              middleElementGroupingNode,
-              childElementGroupingNode,
-            };
-          },
+          async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+              const model = insertPhysicalModelWithPartition({ txn, codeValue: `model-x`, partitionParentId: rootSubject.id });
+              const category = insertSpatialCategory({ txn, codeValue: "category-x" });
+              const parentElement = insertPhysicalElement({ txn, userLabel: `parent element`, modelId: model.id, categoryId: category.id });
+              const middleElement = insertPhysicalElement({
+                txn,
+                userLabel: `middle element`,
+                modelId: model.id,
+                categoryId: category.id,
+                parentId: parentElement.id,
+              });
+              const childElement = insertPhysicalElement({
+                txn,
+                userLabel: `element 1`,
+                modelId: model.id,
+                categoryId: category.id,
+                parentId: middleElement.id,
+              });
+              const pathUntilParentElement = [adjustedModelKey(model), category];
+              const parentElementGroupingNode = createClassGroupingHierarchyNode({
+                className: parentElement.className,
+                modelId: model.id,
+                categoryId: category.id,
+                elements: [parentElement.id],
+                parentKeys: pathUntilParentElement.map((key) => ({ type: "instances", instanceKeys: [key] })),
+              });
+              const middleElementGroupingNode = createClassGroupingHierarchyNode({
+                className: middleElement.className,
+                modelId: model.id,
+                categoryId: category.id,
+                elements: [middleElement.id],
+                parentKeys: [...pathUntilParentElement, parentElementGroupingNode, parentElement].map((key) => {
+                  if ("key" in key) {
+                    return key.key;
+                  }
+                  return { type: "instances", instanceKeys: [key] };
+                }),
+              });
+              const childElementGroupingNode = createClassGroupingHierarchyNode({
+                className: childElement.className,
+                modelId: model.id,
+                categoryId: category.id,
+                elements: [childElement.id],
+                parentKeys: [...pathUntilParentElement, parentElementGroupingNode, parentElement, middleElementGroupingNode, middleElement].map((key) => {
+                  if ("key" in key) {
+                    return key.key;
+                  }
+                  return { type: "instances", instanceKeys: [key] };
+                }),
+              });
+              return {
+                rootSubject,
+                model,
+                category,
+                parentElement,
+                middleElement,
+                childElement,
+                pathUntilParentElement,
+                parentElementGroupingNode,
+                middleElementGroupingNode,
+                childElementGroupingNode,
+              };
+            }),
           (x) => [
             {
               path: [...x.pathUntilParentElement, adjustedElementKey(x.parentElement)],
@@ -1477,21 +1497,22 @@ describe("Models tree", () => {
         ),
         TreeFilteringTestCaseDefinition.create(
           "grouped element with auto expansion to the grouping node and to the element",
-          async (imodel) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model-x`, partitionParentId: rootSubject.id });
-            const category = insertSpatialCategory({ imodel, codeValue: "category-x" });
-            const element = insertPhysicalElement({ imodel, userLabel: `parent element`, modelId: model.id, categoryId: category.id });
-            const pathUntilTargetElement = [adjustedModelKey(model), category];
-            const groupingNode = createClassGroupingHierarchyNode({
-              className: element.className,
-              modelId: model.id,
-              categoryId: category.id,
-              elements: [element.id],
-              parentKeys: pathUntilTargetElement.map((key) => ({ type: "instances", instanceKeys: [key] })),
-            });
-            return { rootSubject, model, category, element, pathUntilTargetElement, groupingNode };
-          },
+          async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+              const model = insertPhysicalModelWithPartition({ txn, codeValue: `model-x`, partitionParentId: rootSubject.id });
+              const category = insertSpatialCategory({ txn, codeValue: "category-x" });
+              const element = insertPhysicalElement({ txn, userLabel: `parent element`, modelId: model.id, categoryId: category.id });
+              const pathUntilTargetElement = [adjustedModelKey(model), category];
+              const groupingNode = createClassGroupingHierarchyNode({
+                className: element.className,
+                modelId: model.id,
+                categoryId: category.id,
+                elements: [element.id],
+                parentKeys: pathUntilTargetElement.map((key) => ({ type: "instances", instanceKeys: [key] })),
+              });
+              return { rootSubject, model, category, element, pathUntilTargetElement, groupingNode };
+            }),
           (x) => [
             [...x.pathUntilTargetElement, adjustedElementKey(x.element)],
             {
@@ -1535,38 +1556,39 @@ describe("Models tree", () => {
         ),
         TreeFilteringTestCaseDefinition.create(
           "grouped elements under different categories",
-          async (imodel) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model-x`, partitionParentId: rootSubject.id });
-            const category1 = insertSpatialCategory({ imodel, codeValue: "category-1" });
-            const category2 = insertSpatialCategory({ imodel, codeValue: "category-2" });
-            const element1 = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category1.id });
-            const element2 = insertPhysicalElement({ imodel, modelId: model.id, categoryId: category2.id });
-            const groupingNode1 = createClassGroupingHierarchyNode({
-              className: element1.className,
-              modelId: model.id,
-              categoryId: category1.id,
-              elements: [element1.id],
-              parentKeys: [model, category1].map((key) => ({ type: "instances", instanceKeys: [key] })),
-            });
-            const groupingNode2 = createClassGroupingHierarchyNode({
-              className: element2.className,
-              modelId: model.id,
-              categoryId: category2.id,
-              elements: [element2.id],
-              parentKeys: [model, category2].map((key) => ({ type: "instances", instanceKeys: [key] })),
-            });
-            return {
-              rootSubject,
-              model,
-              category1,
-              category2,
-              element1,
-              element2,
-              groupingNode1,
-              groupingNode2,
-            };
-          },
+          async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+              const model = insertPhysicalModelWithPartition({ txn, codeValue: `model-x`, partitionParentId: rootSubject.id });
+              const category1 = insertSpatialCategory({ txn, codeValue: "category-1" });
+              const category2 = insertSpatialCategory({ txn, codeValue: "category-2" });
+              const element1 = insertPhysicalElement({ txn, modelId: model.id, categoryId: category1.id });
+              const element2 = insertPhysicalElement({ txn, modelId: model.id, categoryId: category2.id });
+              const groupingNode1 = createClassGroupingHierarchyNode({
+                className: element1.className,
+                modelId: model.id,
+                categoryId: category1.id,
+                elements: [element1.id],
+                parentKeys: [model, category1].map((key) => ({ type: "instances", instanceKeys: [key] })),
+              });
+              const groupingNode2 = createClassGroupingHierarchyNode({
+                className: element2.className,
+                modelId: model.id,
+                categoryId: category2.id,
+                elements: [element2.id],
+                parentKeys: [model, category2].map((key) => ({ type: "instances", instanceKeys: [key] })),
+              });
+              return {
+                rootSubject,
+                model,
+                category1,
+                category2,
+                element1,
+                element2,
+                groupingNode1,
+                groupingNode2,
+              };
+            }),
           (x) => [
             {
               path: [adjustedModelKey(x.model), x.category1, adjustedElementKey(x.element1)],
@@ -1702,18 +1724,20 @@ describe("Models tree", () => {
     });
 
     it("finds elements by base36 ECInstanceId suffix", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-        const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model`, partitionParentId: rootSubject.id });
-        const category = insertSpatialCategory({ imodel, codeValue: "category" });
-        const element = insertPhysicalElement({ imodel, userLabel: `element 21`, modelId: model.id, categoryId: category.id });
-        const elementBriefcaseId = Id64.getBriefcaseId(element.id).toString(36).toLocaleUpperCase();
-        const elementLocalId = Id64.getLocalId(element.id).toString(36).toLocaleUpperCase();
-        return {
-          formattedECInstanceId: `[${elementBriefcaseId}-${elementLocalId}]`,
-          expectedPaths: [[adjustedModelKey(model), category, { ...element, className: "BisCore.GeometricElement3d" }]].sort(instanceKeyPathSorter),
-        };
-      });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const element = insertPhysicalElement({ txn, userLabel: `element 21`, modelId: model.id, categoryId: category.id });
+          const elementBriefcaseId = Id64.getBriefcaseId(element.id).toString(36).toLocaleUpperCase();
+          const elementLocalId = Id64.getLocalId(element.id).toString(36).toLocaleUpperCase();
+          return {
+            formattedECInstanceId: `[${elementBriefcaseId}-${elementLocalId}]`,
+            expectedPaths: [[adjustedModelKey(model), category, { ...element, className: "BisCore.GeometricElement3d" }]].sort(instanceKeyPathSorter),
+          };
+        }),
+      );
       const { imodelConnection, expectedPaths, formattedECInstanceId } = buildIModelResult;
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
 
@@ -1731,13 +1755,15 @@ describe("Models tree", () => {
     });
 
     it("filtering by label aborts when abort signal fires", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-        const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model`, partitionParentId: rootSubject.id });
-        const category = insertSpatialCategory({ imodel, codeValue: "category", userLabel: "Test" });
-        insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id });
-        return { model, category };
-      });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
+          const category = insertSpatialCategory({ txn, codeValue: "category", userLabel: "Test" });
+          insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id });
+          return { model, category };
+        }),
+      );
       const { imodelConnection, ...ids } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodelConnection);
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
@@ -1773,13 +1799,15 @@ describe("Models tree", () => {
     });
 
     it("filtering by target items aborts when abort signal fires", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-        const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model`, partitionParentId: rootSubject.id });
-        const category = insertSpatialCategory({ imodel, codeValue: "category", userLabel: "Test" });
-        insertPhysicalElement({ imodel, modelId: model.id, categoryId: category.id });
-        return { model, category };
-      });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
+          const category = insertSpatialCategory({ txn, codeValue: "category", userLabel: "Test" });
+          insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id });
+          return { model, category };
+        }),
+      );
       const { imodelConnection, ...ids } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodelConnection);
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
@@ -1815,24 +1843,26 @@ describe("Models tree", () => {
     });
 
     it("finds elements by label containing special SQLite characters", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) => {
-        const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-        const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model`, partitionParentId: rootSubject.id });
-        const category = insertSpatialCategory({ imodel, codeValue: "category" });
-        const element1 = insertPhysicalElement({ imodel, userLabel: `elem_ent 1`, modelId: model.id, categoryId: category.id });
-        const element2 = insertPhysicalElement({ imodel, userLabel: `elem%ent 2`, modelId: model.id, categoryId: category.id });
-        const element3 = insertPhysicalElement({ imodel, userLabel: `elem\\ent 3`, modelId: model.id, categoryId: category.id });
-        return {
-          keys: {
-            rootSubject,
-            model,
-            category,
-            element1,
-            element2,
-            element3,
-          },
-        };
-      });
+      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const element1 = insertPhysicalElement({ txn, userLabel: `elem_ent 1`, modelId: model.id, categoryId: category.id });
+          const element2 = insertPhysicalElement({ txn, userLabel: `elem%ent 2`, modelId: model.id, categoryId: category.id });
+          const element3 = insertPhysicalElement({ txn, userLabel: `elem\\ent 3`, modelId: model.id, categoryId: category.id });
+          return {
+            keys: {
+              rootSubject,
+              model,
+              category,
+              element1,
+              element2,
+              element3,
+            },
+          };
+        }),
+      );
       const { imodelConnection, keys } = buildIModelResult;
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
 
@@ -1875,9 +1905,9 @@ describe("Models tree", () => {
   }
 });
 
-function insertModelWithElements(imodel: IModelDb, modelNo: number, elementsCategoryId: Id64String, parentId?: Id64String) {
-  const modelKey = insertPhysicalModelWithPartition({ imodel, codeValue: `model-${modelNo}`, partitionParentId: parentId });
-  insertPhysicalElement({ imodel, userLabel: `element-${modelNo}`, modelId: modelKey.id, categoryId: elementsCategoryId });
+function insertModelWithElements(txn: EditTxn, modelNo: number, elementsCategoryId: Id64String, parentId?: Id64String) {
+  const modelKey = insertPhysicalModelWithPartition({ txn, codeValue: `model-${modelNo}`, partitionParentId: parentId });
+  insertPhysicalElement({ txn, userLabel: `element-${modelNo}`, modelId: modelKey.id, categoryId: elementsCategoryId });
   return modelKey;
 }
 

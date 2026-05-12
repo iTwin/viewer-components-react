@@ -13,6 +13,7 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
 import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
+import { withEditTxn } from "@itwin/core-backend";
 
 describe("Tree widget", () => {
   describe("Learning snippets", () => {
@@ -27,12 +28,14 @@ describe("Tree widget", () => {
         });
 
         it("returns schema context", async () => {
-          const { imodelConnection } = await buildIModel(async (imodel) => {
-            const model = insertPhysicalModelWithPartition({ imodel, codeValue: "model", partitionParentId: IModel.rootSubjectId });
-            const category = insertSpatialCategory({ imodel, codeValue: "Test SpatialCategory" });
-            insertPhysicalElement({ imodel, userLabel: `element`, modelId: model.id, categoryId: category.id });
-            return { model, category };
-          });
+          const { imodelConnection } = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertPhysicalModelWithPartition({ txn, codeValue: "model", partitionParentId: IModel.rootSubjectId });
+              const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
+              insertPhysicalElement({ txn, userLabel: `element`, modelId: model.id, categoryId: category.id });
+              return { model, category };
+            }),
+          );
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.GetSchemaContextExample
           const schemaContextCache = new Map<string, SchemaContext>();
