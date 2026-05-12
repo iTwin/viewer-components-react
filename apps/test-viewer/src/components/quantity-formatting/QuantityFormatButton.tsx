@@ -28,9 +28,13 @@ export const QuantityFormatButton: React.FC = () => {
   const handleFormatChange = useCallback(
     async (newFormat: FormatDefinition) => {
       setFormatDefinition(newFormat);
-      await formatManager?.activeFormatSetFormatsProvider?.addFormat(newFormat.name ?? "", newFormat);
+      const formatKey = activeFormatDefinitionKey ?? newFormat.name;
+      if (!formatKey) {
+        return;
+      }
+      await formatManager?.updateActiveFormat(formatKey, newFormat);
     },
-    [formatManager],
+    [activeFormatDefinitionKey, formatManager],
   );
 
   const handleFormatSelectorChange = useCallback((formatDef: FormatDefinition, key: string) => {

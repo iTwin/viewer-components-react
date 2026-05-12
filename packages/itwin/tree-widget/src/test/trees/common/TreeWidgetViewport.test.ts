@@ -13,6 +13,7 @@ import {
   terminateCore,
 } from "test-utilities";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { withEditTxn } from "@itwin/core-backend";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { createTreeWidgetViewport } from "../../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
@@ -42,18 +43,20 @@ describe("TreeWidgetViewport", () => {
   });
 
   it("triggers onChange events when visibility changes", async () => {
-    await using buildIModelResult = await buildIModel(async (imodel) => {
-      const physicalModel = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel" });
+    await using buildIModelResult = await buildIModel(async (imodel) =>
+      withEditTxn(imodel, (txn) => {
+        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
 
-      const category = insertSpatialCategory({ imodel, codeValue: "SpatialCategory1" });
-      const element = insertPhysicalElement({ imodel, modelId: physicalModel.id, categoryId: category.id });
-      const subCategory = insertSubCategory({
-        imodel,
-        parentCategoryId: category.id,
-        codeValue: "subCategory",
-      });
-      return { category, model: physicalModel, subCategory, element };
-    });
+        const category = insertSpatialCategory({ txn, codeValue: "SpatialCategory1" });
+        const element = insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+        const subCategory = insertSubCategory({
+          txn,
+          parentCategoryId: category.id,
+          codeValue: "subCategory",
+        });
+        return { category, model: physicalModel, subCategory, element };
+      }),
+    );
 
     const { imodelConnection, ...keys } = buildIModelResult;
 

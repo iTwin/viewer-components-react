@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { Id64String } from "@itwin/core-bentley";
+import { dispose, type Id64String } from "@itwin/core-bentley";
 import type { XYZProps } from "@itwin/core-geometry";
 import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
 import { Geometry, IModelJson, Point3d, PointString3d, PolygonOps, Transform } from "@itwin/core-geometry";
@@ -29,6 +29,7 @@ import type {
   MeasurementWidgetData,
 } from "../api/Measurement.js";
 import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
+import type { FormatSpecHandle } from "@itwin/core-quantity";
 /**
  * Props for serializing a [[AreaMeasurement]].
  */
@@ -127,6 +128,7 @@ export class AreaMeasurement extends Measurement {
   }
   public set lengthKoQ(value: string) {
     this._lengthKoQ = value;
+    this._disposeHandles();
     this._polygon.recomputeFromPoints();
   }
 
@@ -135,6 +137,7 @@ export class AreaMeasurement extends Measurement {
   }
   public set lengthPersistenceUnitName(value: string) {
     this._lengthPersistenceUnitName = value;
+    this._disposeHandles();
     this._polygon.recomputeFromPoints();
   }
 
@@ -144,6 +147,7 @@ export class AreaMeasurement extends Measurement {
 
   public set areaKoQ(value: string) {
     this._areaKoQ = value;
+    this._disposeHandles();
     this._polygon.recomputeFromPoints();
   }
 
@@ -153,20 +157,26 @@ export class AreaMeasurement extends Measurement {
 
   public set areaPersistenceUnitName(value: string) {
     this._areaPersistenceUnitName = value;
+    this._disposeHandles();
     this._polygon.recomputeFromPoints();
   }
 
   constructor(props?: AreaMeasurementProps) {
     super(props);
 
-    this._polygon = new Polygon([], false, undefined, props?.formatting?.area);
+    this._lengthKoQ = props?.formatting?.length?.koqName ?? "DefaultToolsUnits.LENGTH";
+    this._lengthPersistenceUnitName = props?.formatting?.length?.persistenceUnitName ?? "Units.M";
+    this._areaKoQ = props?.formatting?.area?.koqName ?? "DefaultToolsUnits.AREA";
+    this._areaPersistenceUnitName = props?.formatting?.area?.persistenceUnitName ?? "Units.SQ_M";
+    this._polygon = new Polygon(
+      [],
+      false,
+      undefined,
+      () => FormatterUtils.getSpecFromHandle(this._getAreaHandle(), QuantityType.Area),
+    );
     this._polygon.textMarker.setMouseButtonHandler(
       this.handleTextMarkerButtonEvent.bind(this)
     );
-    this._lengthKoQ = "DefaultToolsUnits.LENGTH";
-    this._lengthPersistenceUnitName = "Units.M";
-    this._areaKoQ = "DefaultToolsUnits.AREA";
-    this._areaPersistenceUnitName = "Units.SQ_M";
     this._polygon.textMarker.transientHiliteId = this.transientId;
     this._polygon.makeSelectable(true);
     this._isDynamic = false;
@@ -185,21 +195,30 @@ export class AreaMeasurement extends Measurement {
     return true;
   }
 
-  public override async populateFormattingSpecsRegistry(_force?: boolean): Promise<void> {
-    const lengthEntry = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ);
-    if (_force || !lengthEntry || lengthEntry.formatterSpec.persistenceUnit?.name !== this._lengthPersistenceUnitName) {
-      const lengthFormatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
-      if (lengthFormatProps) {
-        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._lengthKoQ, this._lengthPersistenceUnitName, lengthFormatProps);
-      }
+  private _lengthHandle?: FormatSpecHandle;
+  private _areaHandle?: FormatSpecHandle;
+
+  private _getLengthHandle(): FormatSpecHandle {
+    if (!this._lengthHandle) {
+      this._lengthHandle = IModelApp.quantityFormatter.getFormatSpecHandle(
+        this._lengthKoQ, this._lengthPersistenceUnitName
+      );
     }
-    const areaEntry = IModelApp.quantityFormatter.getSpecsByName(this._areaKoQ);
-    if (_force || !areaEntry || areaEntry.formatterSpec.persistenceUnit?.name !== this._areaPersistenceUnitName) {
-      const areaFormatProps = await IModelApp.formatsProvider.getFormat(this._areaKoQ);
-      if (areaFormatProps) {
-        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._areaKoQ, this._areaPersistenceUnitName, areaFormatProps);
-      }
+    return this._lengthHandle;
+  }
+
+  private _getAreaHandle(): FormatSpecHandle {
+    if (!this._areaHandle) {
+      this._areaHandle = IModelApp.quantityFormatter.getFormatSpecHandle(
+        this._areaKoQ, this._areaPersistenceUnitName
+      );
     }
+    return this._areaHandle;
+  }
+
+  private _disposeHandles(): void {
+    this._lengthHandle = dispose(this._lengthHandle);
+    this._areaHandle = dispose(this._areaHandle);
   }
 
   public addPointToDynamicPolygon(point: Point3d): boolean {
@@ -331,6 +350,7 @@ export class AreaMeasurement extends Measurement {
 
   public override onCleanup() {
     this.clearCachedGraphics();
+    this._disposeHandles();
   }
 
   protected override onTransientIdChanged(_prevId: Id64String) {
@@ -461,22 +481,13 @@ export class AreaMeasurement extends Measurement {
     }
   }
 
-  protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, QuantityType.LengthEngineering);
-    const areaSpec = FormatterUtils.getFormatterSpecWithFallback(this._areaKoQ, QuantityType.Area);
+  protected override getDataForMeasurementWidgetInternal(): MeasurementWidgetData {
+    const lengthSpec = FormatterUtils.getSpecFromHandle(this._getLengthHandle(), QuantityType.LengthEngineering);
+    const areaSpec = FormatterUtils.getSpecFromHandle(this._getAreaHandle(), QuantityType.Area);
 
-    const fPerimeter = await FormatterUtils.formatLength(
-      this._polygon.perimeter,
-      lengthSpec
-    );
-    const fArea = await FormatterUtils.formatArea(
-      this._polygon.area,
-      areaSpec
-    );
-    const fAreaXY = await FormatterUtils.formatArea(
-      this._polygon.areaXY,
-      areaSpec
-    );
+    const fPerimeter = FormatterUtils.formatLengthImmediate(this._polygon.perimeter, lengthSpec);
+    const fArea = FormatterUtils.formatAreaImmediate(this._polygon.area, areaSpec);
+    const fAreaXY = FormatterUtils.formatAreaImmediate(this._polygon.areaXY, areaSpec);
     const fEdgeCount = (this._polygon.points.length - 1).toFixed();
 
     let title = MeasureTools.localization.getLocalizedString(
@@ -559,7 +570,7 @@ export class AreaMeasurement extends Measurement {
   }
 
   public override onDisplayUnitsChanged(): void {
-    this._polygon.recomputeFromPoints();
+    this._polygon.refreshTextMarker();
   }
 
   /**
@@ -625,11 +636,9 @@ export class AreaMeasurement extends Measurement {
     const jsonArea = json as AreaMeasurementProps;
     if (jsonArea.formatting?.area?.koqName) {
       this._areaKoQ = jsonArea.formatting.area.koqName;
-      this._polygon.areaKoQ = this._areaKoQ;
     }
     if (jsonArea.formatting?.area?.persistenceUnitName) {
       this._areaPersistenceUnitName = jsonArea.formatting.area.persistenceUnitName;
-      this._polygon.areaPersistenceUnitName = this._areaPersistenceUnitName;
     }
     if (jsonArea.formatting?.length?.koqName) this._lengthKoQ = jsonArea.formatting.length.koqName;
     if (jsonArea.formatting?.length?.persistenceUnitName) this._lengthPersistenceUnitName = jsonArea.formatting.length.persistenceUnitName;

@@ -13,6 +13,7 @@ import {
   terminateCore,
 } from "test-utilities";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { withEditTxn } from "@itwin/core-backend";
 import { IModelReadRpcInterface, SubCategoryAppearance } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -128,21 +129,23 @@ describe("CategoryVisibilityUtils", () => {
     let subCategoryIds: Array<Id64String>;
     let nonMockedViewport: TreeWidgetTestingViewport;
     async function createIModel(): Promise<{ imodelConnection: IModelConnection } & { models: Id64Array; categories: Id64Array; subCategories: Id64Array }> {
-      return buildIModel(async (imodel) => {
-        const physicalModel1 = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel1" }).id;
-        const physicalModel2 = insertPhysicalModelWithPartition({ imodel, codeValue: "TestPhysicalModel2" }).id;
-        const category1 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory1" }).id;
-        const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2" }).id;
-        const subCategory1 = insertSubCategory({ imodel, codeValue: "SubCategory1", parentCategoryId: category1 }).id;
-        const subCategory2 = insertSubCategory({ imodel, codeValue: "SubCategory2", parentCategoryId: category2 }).id;
-        insertPhysicalElement({ imodel, codeValue: "element1", categoryId: category1, modelId: physicalModel1 }).id;
-        insertPhysicalElement({ imodel, codeValue: "element2", categoryId: category2, modelId: physicalModel2 }).id;
-        return {
-          models: [physicalModel1, physicalModel2],
-          categories: [category1, category2],
-          subCategories: [subCategory1, subCategory2],
-        };
-      });
+      return buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel1 = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel1" }).id;
+          const physicalModel2 = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel2" }).id;
+          const category1 = insertSpatialCategory({ txn, codeValue: "SpatialCategory1" }).id;
+          const category2 = insertSpatialCategory({ txn, codeValue: "SpatialCategory2" }).id;
+          const subCategory1 = insertSubCategory({ txn, codeValue: "SubCategory1", parentCategoryId: category1 }).id;
+          const subCategory2 = insertSubCategory({ txn, codeValue: "SubCategory2", parentCategoryId: category2 }).id;
+          insertPhysicalElement({ txn, codeValue: "element1", categoryId: category1, modelId: physicalModel1 }).id;
+          insertPhysicalElement({ txn, codeValue: "element2", categoryId: category2, modelId: physicalModel2 }).id;
+          return {
+            models: [physicalModel1, physicalModel2],
+            categories: [category1, category2],
+            subCategories: [subCategory1, subCategory2],
+          };
+        }),
+      );
     }
     beforeAll(async () => {
       await initializeCore({

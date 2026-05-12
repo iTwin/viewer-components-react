@@ -12,6 +12,7 @@ import {
   terminateCore,
 } from "test-utilities";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { withEditTxn } from "@itwin/core-backend";
 import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
@@ -59,13 +60,15 @@ describe("useModelsTree", () => {
   });
 
   it("preserves cache when search changes", async () => {
-    await using buildIModelResult = await buildIModel(async (imodel) => {
-      const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-      const model = insertPhysicalModelWithPartition({ imodel, codeValue: `model`, partitionParentId: rootSubject.id });
-      const category = insertSpatialCategory({ imodel, codeValue: "category" });
-      insertPhysicalElement({ imodel, userLabel: `element`, modelId: model.id, categoryId: category.id });
-      return { modelId: model.id, categoryId: category.id, rootSubjectId: rootSubject.id };
-    });
+    await using buildIModelResult = await buildIModel(async (imodel) =>
+      withEditTxn(imodel, (txn) => {
+        const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+        const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
+        const category = insertSpatialCategory({ txn, codeValue: "category" });
+        insertPhysicalElement({ txn, userLabel: `element`, modelId: model.id, categoryId: category.id });
+        return { modelId: model.id, categoryId: category.id, rootSubjectId: rootSubject.id };
+      }),
+    );
     const { imodelConnection, ...keys } = buildIModelResult;
     const queryHandler = vi.fn(() => []);
     using viewport = createFakeViewport({ queryHandler });
@@ -134,22 +137,24 @@ describe("useModelsTree", () => {
       async function createIModel(): Promise<
         { imodelConnection: IModelConnection } & { models: Id64Array; categories: Id64Array; elements: Id64Array } & AsyncDisposable
       > {
-        return buildIModel(async (imodel) => {
-          const physicalModel1 = insertPhysicalModelWithPartition({ imodel, codeValue: "Model1" }).id;
-          const physicalModel2 = insertPhysicalModelWithPartition({ imodel, codeValue: "Model2" }).id;
-          const physicalModel3 = insertPhysicalModelWithPartition({ imodel, codeValue: "Model3" }).id;
-          const category1 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory1", userLabel: "Category1" }).id;
-          const category2 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory2", userLabel: "Category2" }).id;
-          const category3 = insertSpatialCategory({ imodel, codeValue: "SpatialCategory3", userLabel: "Category3" }).id;
-          const element1 = insertPhysicalElement({ imodel, codeValue: "element1", categoryId: category1, modelId: physicalModel1, userLabel: "Element1" }).id;
-          const element2 = insertPhysicalElement({ imodel, codeValue: "element2", categoryId: category2, modelId: physicalModel2, userLabel: "Element2" }).id;
-          const element3 = insertPhysicalElement({ imodel, codeValue: "element3", categoryId: category3, modelId: physicalModel3, userLabel: "Element3" }).id;
-          return {
-            models: [physicalModel1, physicalModel2, physicalModel3],
-            categories: [category1, category2, category3],
-            elements: [element1, element2, element3],
-          };
-        });
+        return buildIModel(async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const physicalModel1 = insertPhysicalModelWithPartition({ txn, codeValue: "Model1" }).id;
+            const physicalModel2 = insertPhysicalModelWithPartition({ txn, codeValue: "Model2" }).id;
+            const physicalModel3 = insertPhysicalModelWithPartition({ txn, codeValue: "Model3" }).id;
+            const category1 = insertSpatialCategory({ txn, codeValue: "SpatialCategory1", userLabel: "Category1" }).id;
+            const category2 = insertSpatialCategory({ txn, codeValue: "SpatialCategory2", userLabel: "Category2" }).id;
+            const category3 = insertSpatialCategory({ txn, codeValue: "SpatialCategory3", userLabel: "Category3" }).id;
+            const element1 = insertPhysicalElement({ txn, codeValue: "element1", categoryId: category1, modelId: physicalModel1, userLabel: "Element1" }).id;
+            const element2 = insertPhysicalElement({ txn, codeValue: "element2", categoryId: category2, modelId: physicalModel2, userLabel: "Element2" }).id;
+            const element3 = insertPhysicalElement({ txn, codeValue: "element3", categoryId: category3, modelId: physicalModel3, userLabel: "Element3" }).id;
+            return {
+              models: [physicalModel1, physicalModel2, physicalModel3],
+              categories: [category1, category2, category3],
+              elements: [element1, element2, element3],
+            };
+          }),
+        );
       }
       beforeAll(async () => {
         // eslint-disable-next-line @itwin/no-internal

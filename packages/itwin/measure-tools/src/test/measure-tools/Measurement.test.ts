@@ -4,10 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { assert } from "chai";
+import { vi } from "vitest";
 import { Measurement } from "../../api/Measurement.js";
 import { WellKnownMeasurementStyle, WellKnownViewType } from "../../api/MeasurementEnums.js";
 import { MeasurementManager } from "../../api/MeasurementManager.js";
 import { MeasurementPreferences } from "../../api/MeasurementPreferences.js";
+import { MeasurementUIEvents } from "../../api/MeasurementUIEvents.js";
 import type { DistanceMeasurementProps } from "../../measurements/DistanceMeasurement.js";
 import { DistanceMeasurement } from "../../measurements/DistanceMeasurement.js";
 import { DistanceMeasurementSubClass } from "./MeasurementSerialization.test.js";
@@ -191,6 +193,37 @@ describe("Measurement tests", () => {
     assert.isTrue(MeasurementManager.instance.measurements.length === 0);
   });
 
+  it("Test measurement manager refreshes measurements before invalidating", () => {
+    const manager = MeasurementManager.instance as any;
+    const fakeMeasurement = {
+      onDisplayUnitsChanged: vi.fn(() => {
+        refreshed = true;
+      }),
+    };
+    let refreshed = false;
+
+    const invalidateSpy = vi.spyOn(MeasurementManager.instance, "invalidateDecorations").mockImplementation(() => {
+      assert.isTrue(refreshed, "Decorations should invalidate after measurements finish refreshing");
+    });
+    const notifySpy = vi.spyOn(MeasurementUIEvents, "notifyMeasurementPropertiesChanged").mockImplementation((measurements) => {
+      assert.isTrue(refreshed, "UI notifications should fire after measurements finish refreshing");
+      assert.deepEqual(measurements, [fakeMeasurement as any]);
+    });
+
+    manager._measurements = [fakeMeasurement];
+
+    try {
+      manager._onFormattingRefresh();
+      assert.strictEqual(fakeMeasurement.onDisplayUnitsChanged.mock.calls.length, 1);
+      assert.strictEqual(invalidateSpy.mock.calls.length, 1);
+      assert.strictEqual(notifySpy.mock.calls.length, 1);
+    } finally {
+      manager._measurements = [];
+      invalidateSpy.mockRestore();
+      notifySpy.mockRestore();
+    }
+  });
+
   it("Test measurement manager, onCleanup for dropped measurements", () => {
     const test = new CleanupDistanceMeasurement();
 
@@ -213,6 +246,18 @@ describe("Measurement tests", () => {
     });
 
     assert.isTrue(test.cleanupCalled);
+  });
+
+  it("Test measurement manager, stopDecorator does not cleanup managed measurements", () => {
+    const test = new CleanupDistanceMeasurement();
+
+    MeasurementManager.instance.clear();
+    MeasurementManager.instance.addMeasurement(test);
+    MeasurementManager.instance.stopDecorator();
+
+    assert.isFalse(test.cleanupCalled);
+
+    MeasurementManager.instance.clear();
   });
 
   it("Test measurement allowActions", () => {

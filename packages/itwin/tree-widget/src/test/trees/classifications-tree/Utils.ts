@@ -14,7 +14,7 @@ import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common
 import { CLASS_NAME_GeometricElement3d } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { createIModelAccess } from "../Common.js";
 
-import type { IModelDb } from "@itwin/core-backend";
+import type { EditTxn, IModelDb } from "@itwin/core-backend";
 import type { Id64String } from "@itwin/core-bentley";
 import type { DefinitionElementProps } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -55,18 +55,17 @@ export function createClassificationsTreeProvider(
 
 export function insertClassificationSystem(
   props: {
-    imodel: IModelDb;
+    txn: EditTxn;
     modelId?: Id64String;
     codeValue?: string;
   } & Partial<Omit<DefinitionElementProps, "id" | "parent" | "code" | "model">>,
 ) {
-  const { imodel, codeValue, modelId, ...elementProps } = props;
+  const { txn, codeValue, modelId, ...elementProps } = props;
   const className: EC.FullClassName = `ClassificationSystems.ClassificationSystem`;
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  const id = imodel.elements.insertElement({
+  const id = txn.insertElement({
     classFullName: className,
     model: modelId ?? IModel.dictionaryId,
-    code: codeValue ? createCode({ imodel, scopeId: modelId ?? IModel.dictionaryId, codeValue }) : Code.createEmpty(),
+    code: codeValue ? createCode({ imodel: txn.iModel, scopeId: modelId ?? IModel.dictionaryId, codeValue }) : Code.createEmpty(),
     ...elementProps,
   });
   return { className, id };
@@ -74,19 +73,18 @@ export function insertClassificationSystem(
 
 export function insertClassificationTable(
   props: {
-    imodel: IModelDb;
+    txn: EditTxn;
     modelId?: Id64String;
     parentId?: Id64String;
     codeValue?: string;
   } & Partial<Omit<DefinitionElementProps, "id" | "parent" | "code" | "model">>,
 ) {
-  const { imodel, codeValue, modelId, parentId, ...elementProps } = props;
+  const { txn, codeValue, modelId, parentId, ...elementProps } = props;
   const className: EC.FullClassName = `ClassificationSystems.ClassificationTable`;
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  const id = imodel.elements.insertElement({
+  const id = txn.insertElement({
     classFullName: className,
     model: modelId ?? IModel.dictionaryId,
-    code: codeValue ? createCode({ imodel, scopeId: parentId ?? modelId ?? IModel.dictionaryId, codeValue }) : Code.createEmpty(),
+    code: codeValue ? createCode({ imodel: txn.iModel, scopeId: parentId ?? modelId ?? IModel.dictionaryId, codeValue }) : Code.createEmpty(),
     parent: parentId
       ? {
           id: parentId,
@@ -96,7 +94,7 @@ export function insertClassificationTable(
     ...elementProps,
   });
   insertDefinitionSubModel({
-    imodel,
+    txn,
     modeledElementId: id,
     relationshipName: "ClassificationSystems.DefinitionModelBreaksDownClassificationTable",
   });
@@ -105,19 +103,18 @@ export function insertClassificationTable(
 
 export function insertClassification(
   props: {
-    imodel: IModelDb;
+    txn: EditTxn;
     modelId: Id64String;
     parentId?: Id64String;
     codeValue?: string;
   } & Partial<Omit<DefinitionElementProps, "id" | "parent" | "code" | "model">>,
 ) {
-  const { imodel, codeValue, modelId, parentId, ...elementProps } = props;
+  const { txn, codeValue, modelId, parentId, ...elementProps } = props;
   const className: EC.FullClassName = `ClassificationSystems.Classification`;
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  const id = imodel.elements.insertElement({
+  const id = txn.insertElement({
     classFullName: className,
     model: modelId,
-    code: codeValue ? createCode({ imodel, scopeId: parentId ?? modelId, codeValue }) : Code.createEmpty(),
+    code: codeValue ? createCode({ imodel: txn.iModel, scopeId: parentId ?? modelId, codeValue }) : Code.createEmpty(),
     parent: parentId
       ? {
           id: parentId,
@@ -129,10 +126,9 @@ export function insertClassification(
   return { className, id };
 }
 
-export function insertElementHasClassificationsRelationship(props: { imodel: IModelDb; elementId: Id64String; classificationId: Id64String }) {
-  const { imodel, elementId, classificationId } = props;
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  return imodel.relationships.insertInstance({
+export function insertElementHasClassificationsRelationship(props: { txn: EditTxn; elementId: Id64String; classificationId: Id64String }) {
+  const { txn, elementId, classificationId } = props;
+  return txn.insertRelationship({
     classFullName: "ClassificationSystems.ElementHasClassifications",
     sourceId: elementId,
     targetId: classificationId,
@@ -146,10 +142,9 @@ export async function importClassificationSchema(imodel: IModelDb) {
   await imodel.importSchemaStrings([schemaXml]);
 }
 
-export function insertCategorySymbolizesClassificationRelationship(props: { imodel: IModelDb; categoryId: Id64String; classificationId: Id64String }) {
-  const { imodel, categoryId, classificationId } = props;
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  return imodel.relationships.insertInstance({
+export function insertCategorySymbolizesClassificationRelationship(props: { txn: EditTxn; categoryId: Id64String; classificationId: Id64String }) {
+  const { txn, categoryId, classificationId } = props;
+  return txn.insertRelationship({
     classFullName: `${CATEGORY_SYMBOLIZES_CLASSIFICATION_RELATIONSHIP_SCHEMA}.CategorySymbolizesClassification`,
     sourceId: categoryId,
     targetId: classificationId,
