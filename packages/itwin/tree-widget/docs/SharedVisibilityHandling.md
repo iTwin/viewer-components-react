@@ -736,7 +736,7 @@ flowchart TD
     })</div>"]
   E --> F["<span style='font-family: monospace;'>defaultVisibility</span> = <span style='font-family: monospace;'><a href='#getvisiblemodelcategorydirectvisibilitystatus'>getVisibleModelCategoryDirectVisibilityStatus</a>({categoryId, modelId })</span>"]
   B -- Yes --> F
-  F -- defaultVisibility --> G1["<span style='font-family: monospace;'>visibleByDefault = (elementId) => { elementIds.has(elementId) ? defaultVisibility : !on }</span>"]
+  F -- defaultVisibility --> G1["<span style='font-family: monospace;'>visibleByDefault = (elementId) => (elementIds.has(elementId) ? defaultVisibility : !on)</span>"]
 
   G1 --> H
 
