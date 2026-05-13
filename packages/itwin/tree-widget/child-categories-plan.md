@@ -378,16 +378,34 @@ Rename `ModelCategoryElementsCountCache` → `DescendantsCountCache`. Implement 
 4. **Don't match** → `NestedChildrenCache({ modelId, parentElementId: el1, categoryId: catB, childCategoryIds: [catX] })` → fetch descendant IDs, add to always/never drawn
 5. **Match** → `AlwaysAndNeverDrawnElementInfoCache({ modelId, categoryOfTopMostParentElement, categoryId: catB, elementCategoryPath: [path-to-el1], setType })` → get those category's descendant IDs, then remove them from both always and never drawn sets via viewport API
 
-### Phase 4: Fix SearchResultsTree for Models tree
+### Phase 4: Fix SearchResultsTree for all trees
 
-**Files:** `models-tree/internal/visibility/SearchResultsTree.ts`
+**Files:**
+- `models-tree/internal/visibility/SearchResultsTree.ts`
+- `categories-tree/internal/visibility/SearchResultsTree.ts`
+- `classifications-tree/internal/visibility/SearchResultsTree.ts`
 
-**What:**
-- Currently: child element nodes inherit `categoryId` from parent element (line 277: `categoryId: parent.categoryId`)
-- With intermediate category nodes in the tree, the search/filter path will naturally include the correct category node
-- The `createSearchResultsTreeNode` method should handle the new intermediate category node type
-- If a child element has a different category, the filter path includes: `... → Parent Element → Category B → Child Element`
-- The `categoryId` is then correctly taken from the intermediate category node
+**Background:** With intermediate category nodes added to hierarchies (Phase 2), the search/filter path for a child element with a different category now includes: `... → Parent Element → Category B → Child Element`. All three trees' `SearchResultsTree` must be updated to handle this new intermediate category node type.
+
+**Models tree** (`models-tree/.../SearchResultsTree.ts`):
+- **Bug** (line 278): `categoryId: parent.categoryId` — when parent is an element, child blindly inherits parent's `categoryId`
+- **Fix `createSearchResultsTreeNode`:** add a case for when parent is an intermediate category node (under an element): set `categoryId: parent.id` and `modelId: parent.modelId`
+- **Fix `getType`:** recognize the intermediate category class (e.g., `SpatialCategory`) so it returns a category-like type
+- **Update `SearchResultsTreeNode` types:** add an intermediate category variant (category node that also carries `modelId` and sits under an element), or extend existing `CategorySearchResultsTreeNode` to handle this case
+
+**Categories tree** (`categories-tree/.../SearchResultsTree.ts`):
+- **Bug** (line 397): `categoryId: parent.categoryId` — same inheritance pattern as Models tree
+- **Fix `createSearchResultsTreeNode`:** same approach — when parent is intermediate category under element, set `categoryId: parent.id`
+- **Fix `getType`:** recognize the intermediate category class for the categories tree (may differ from models tree depending on category element class used)
+- **Update node types** similarly to Models tree
+
+**Classifications tree** (`classifications-tree/.../SearchResultsTree.ts`):
+- **No `categoryId: parent.categoryId` bug** — elements start with `categoryId: undefined` then resolve via `getFilteredElementsData` query which correctly returns each element's own `Category.Id`
+- **Still needs structural changes:**
+  - `createSearchResultsTreeNode` must handle intermediate category nodes as valid parents of element nodes
+  - `getType` (currently knows only `classificationTable`, `classification`, `element`) must recognize the intermediate category class
+  - Node type definitions must include the new intermediate category variant
+- `getFilteredElementsData` already returns correct per-element `categoryId` — no query changes needed
 
 ### Phase 5: Extend `AlwaysAndNeverDrawnElementInfoCache`
 
