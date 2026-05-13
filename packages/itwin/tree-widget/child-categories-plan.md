@@ -410,25 +410,25 @@ Rename `ModelCategoryElementsCountCache` → `DescendantsCountCache`. Implement 
 ### Phase 4: Fix SearchResultsTree for all trees
 
 **Files:**
-- `models-tree/internal/visibility/SearchResultsTree.ts`
-- `categories-tree/internal/visibility/SearchResultsTree.ts`
-- `classifications-tree/internal/visibility/SearchResultsTree.ts`
+- `src/tree-widget-react/components/trees/models-tree/internal/visibility/SearchResultsTree.ts`
+- `src/tree-widget-react/components/trees/categories-tree/internal/visibility/SearchResultsTree.ts`
+- `src/tree-widget-react/components/trees/classifications-tree/internal/visibility/SearchResultsTree.ts`
 
 **Background:** With intermediate category nodes added to hierarchies (Phase 2), the search/filter path for a child element with a different category now includes: `... → Parent Element → Category B → Child Element`. All three trees' `SearchResultsTree` must be updated to handle this new intermediate category node type.
 
-**Models tree** (`models-tree/.../SearchResultsTree.ts`):
+**Models tree**
 - **Bug** (line 278): `categoryId: parent.categoryId` — when parent is an element, child blindly inherits parent's `categoryId`
 - **Fix `createSearchResultsTreeNode`:** add a case for when parent is an intermediate category node (under an element): set `categoryId: parent.id` and `modelId: parent.modelId`
 - **Fix `getType`:** recognize the intermediate category class (e.g., `SpatialCategory`) so it returns a category-like type
 - **Update `SearchResultsTreeNode` types:** add an intermediate category variant (category node that also carries `modelId` and sits under an element), or extend existing `CategorySearchResultsTreeNode` to handle this case
 
-**Categories tree** (`categories-tree/.../SearchResultsTree.ts`):
+**Categories tree**:
 - **Bug** (line 397): `categoryId: parent.categoryId` — same inheritance pattern as Models tree
 - **Fix `createSearchResultsTreeNode`:** same approach — when parent is intermediate category under element, set `categoryId: parent.id`
 - **Fix `getType`:** recognize the intermediate category class for the categories tree (may differ from models tree depending on category element class used)
 - **Update node types** similarly to Models tree
 
-**Classifications tree** (`classifications-tree/.../SearchResultsTree.ts`):
+**Classifications tree**:
 - **No `categoryId: parent.categoryId` bug** — elements start with `categoryId: undefined` then resolve via `getFilteredElementsData` query which correctly returns each element's own `Category.Id`
 - **Still needs structural changes:**
   - `createSearchResultsTreeNode` must handle intermediate category nodes as valid parents of element nodes
