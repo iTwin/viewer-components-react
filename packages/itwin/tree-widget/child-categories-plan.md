@@ -62,7 +62,7 @@ interface DescendantsCountElementRequest extends DescendantsCountBaseRequest {
 }
 ```
 
-Single method: `getDescendantsCounts(props: DescendantsCountCategoryRequest | DescendantsCountElementRequest)` → `Array<{ categoryId: CategoryId; count: number }>`
+Single method: `getDescendantsCounts(props: DescendantsCountCategoryRequest | DescendantsCountElementRequest)` → `Observable<Array<{ categoryId: CategoryId; count: number }>>`
 
 When `DescendantsCountCategoryRequest`: returns that category's self count + child categories in its subtree.
 When `DescendantsCountElementRequest`: returns all child categories under that element.
@@ -256,7 +256,7 @@ interface NestedChildrenElementRequest extends NestedChildrenBaseRequest {
 }
 ```
 
-Single method: `getNestedChildren(props: NestedChildrenCategoryRequest | NestedChildrenElementRequest)` → `Id64Array`
+Single method: `getNestedChildren(props: NestedChildrenCategoryRequest | NestedChildrenElementRequest)` → `Observable<Id64Array>`
 
 When `categoryId` is provided: recursive walk starts from direct children of `parentElementId` that have `categoryId`, results filtered by `childCategoryIds`.
 When `categoryId` is omitted: recursive walk starts from children of `parentElementId`, results filtered by `childCategoryIds`.
