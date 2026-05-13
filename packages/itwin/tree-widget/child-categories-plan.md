@@ -445,7 +445,7 @@ Rename `ModelCategoryElementsCountCache` → `DescendantsCountCache`. Implement 
 - Unify request interface with base + category/element split (same pattern as other caches)
 - Add `elementCategoryPath` to category requests (for intermediate categories under elements). This path alternates element→category→element→... and includes categories even when same as parent.
 - Change return type from `Set<ElementId>` to `Map<CategoryId, Set<ElementId>>` — group by element's own category
-- The existing CTE query is modified: add a `topCategoryId` column and use `e.topCategoryId` (the child's category) in the recursive step to interleave each element's own `Category.Id` into the `elementsPath` string (see Architecture section for full CTE and trace)
+- The existing CTE query is modified: the single `categoryId` column is reused — the recursive step inserts `e.categoryId` (the child's category) into the path and overwrites `categoryId` to `p.Category.Id`, so at the final level it equals `categoryOfTopMostParentElement` (see Architecture section for full CTE and trace)
 - Caller filters the returned map as needed
 - Note: `getParentElementsIdsPath` no longer needs to filter out category IDs — the `elementCategoryPath` naturally includes them
 
