@@ -417,13 +417,13 @@ Rename `ModelCategoryElementsCountCache` → `DescendantsCountCache`. Implement 
 **Background:** With intermediate category nodes added to hierarchies (Phase 2), the search/filter path for a child element with a different category now includes: `... → Parent Element → Category B → Child Element`. All three trees' `SearchResultsTree` must be updated to handle this new intermediate category node type.
 
 **Models tree**
-- **Bug** (line 278): `categoryId: parent.categoryId` — when parent is an element, child blindly inherits parent's `categoryId`
+- **Bug:** in `createSearchResultsTreeNode`, when parent is an element node: `categoryId: parent.categoryId` — child blindly inherits parent's `categoryId`
 - **Fix `createSearchResultsTreeNode`:** add a case for when parent is an intermediate category node (under an element): set `categoryId: parent.id` and `modelId: parent.modelId`
 - **Fix `getType`:** recognize the intermediate category class (e.g., `SpatialCategory`) so it returns a category-like type
 - **Update `SearchResultsTreeNode` types:** add an intermediate category variant (category node that also carries `modelId` and sits under an element), or extend existing `CategorySearchResultsTreeNode` to handle this case
 
 **Categories tree**:
-- **Bug** (line 397): `categoryId: parent.categoryId` — same inheritance pattern as Models tree
+- **Bug:** in `createSearchResultsTreeNode`, when parent is an element node: `categoryId: parent.categoryId` — same inheritance pattern as Models tree
 - **Fix `createSearchResultsTreeNode`:** same approach — when parent is intermediate category under element, set `categoryId: parent.id`
 - **Fix `getType`:** recognize the intermediate category class for the categories tree (may differ from models tree depending on category element class used)
 - **Update node types** similarly to Models tree
