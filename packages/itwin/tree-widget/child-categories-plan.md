@@ -233,7 +233,20 @@ interface AlwaysNeverElementProps extends AlwaysNeverBaseProps {
 
 **Return type:** `Map<CategoryId, Set<ElementId>>` — elements grouped by their own category. Caller filters as needed.
 
-No additional queries needed — grouping the existing cached data by `entry.categoryId` during tree traversal.
+**Query change required:** The current CTE builds `elementsPath` as a chain of element IDs only (`el1;el1_1;el1_1_1`) and carries only the leaf's `categoryId` and the root's `rootCategoryId`. To build the interleaved cache tree, the CTE must interleave each element's `Category.Id` into the path string. Changed `elementsPath` format:
+- Current: `el1;el1_1;el1_1_1`
+- New: `el1;catA;el1_1;catB;el1_1_1`
+
+The recursive step changes from:
+```sql
+CAST(IdToHex(p.ECInstanceId) AS TEXT) || ';' || e.elementsPath
+```
+to:
+```sql
+CAST(IdToHex(p.ECInstanceId) AS TEXT) || ';' || CAST(IdToHex(p.Category.Id) AS TEXT) || ';' || e.elementsPath
+```
+
+This gives the tree-building logic everything it needs to insert category nodes at every level. No separate query — just richer data from the same CTE.
 
 ### Modified: `ElementChildrenCache` → renamed `NestedChildrenCache`
 
@@ -390,7 +403,7 @@ Rename `ModelCategoryElementsCountCache` → `DescendantsCountCache`. Implement 
 - Unify request interface with base + category/element split (same pattern as other caches)
 - Add `elementCategoryPath` to category requests (for intermediate categories under elements). This path alternates element→category→element→... and includes categories even when same as parent.
 - Change return type from `Set<ElementId>` to `Map<CategoryId, Set<ElementId>>` — group by element's own category
-- No additional DB queries — grouping existing cached data by `entry.categoryId` during tree traversal
+- The existing CTE query is modified to interleave each element's `Category.Id` into the `elementsPath` string (no separate query needed, just richer data from the same CTE)
 - Caller filters the returned map as needed
 - Note: `getParentElementsIdsPath` no longer needs to filter out category IDs — the `elementCategoryPath` naturally includes them
 
