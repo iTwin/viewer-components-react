@@ -384,7 +384,7 @@ Rename `ModelCategoryElementsCountCache` → `DescendantsCountCache`. Implement 
 
 **GET visibility for an element node** (e.g., el1_1):
 1. `DescendantsCountCache({ modelId, parentElementId: el1_1 })` — element request → per-category counts of all descendants under el1_1
-2. `AlwaysAndNeverDrawnElementInfoCache({ modelId, categoryOfTopMostParentElement, elementCategoryPath: [path-to-el1_1], setType })` — element request → navigates cache tree (model → categoryOfTopMostParentElement → ... → el1_1), walks all children, returns `Map<CategoryId, Set<ElementId>>`
+2. `AlwaysAndNeverDrawnElementInfoCache({ modelId, categoryOfTopMostParentElement, elementCategoryPath: [path-to-el1_1], setType })` — element request → navigates the cache tree from the model, through the top-most parent element's category, and along el1_1's element/category path; then walks all children and returns `Map<CategoryId, Set<ElementId>>`
 3. For each category: compare descendant count vs always/never drawn count → per-category status
 4. Merge per-category statuses → overall visibility
 
