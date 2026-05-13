@@ -635,19 +635,22 @@ Currently, searching for a category by name only finds top-level occurrences (ca
      path.push({ elementId: topMostElement, categoryId: topMostElementCategory })
      lastWasElement = true
      for each id in parentInstanceKeys after topMostElement:
-       if lastWasElement:
-         if id in allCategories:
-           prevCat = id
-           lastWasElement = false
-         else:
-           // same category as parent — insert category-only entry then element entry
-           path.push({ elementId: id, categoryId: prevCat })
+       if id in allCategories:
+         prevCat = id
+         lastWasElement = false
        else:
+         // element entry — uses current prevCat (same as parent, or updated by preceding category key)
          path.push({ elementId: id, categoryId: prevCat })
          lastWasElement = true
+     // if path ends on a category (request is for an intermediate category scope), emit category-only entry
+     if not lastWasElement:
+       path.push({ categoryId: prevCat })
      return path
    ```
-   Example: `[..., catA, el1, el1_1, catB, el1_1_1, el1_1_1_1]` →
-   `[{ elementId: el1, categoryId: catA }, { elementId: el1_1, categoryId: catA }, { elementId: el1_1_1, categoryId: catB }, { elementId: el1_1_1_1, categoryId: catB }]`
+   Examples:
+   - Element path: `[..., catA, el1, el1_1, catB, el1_1_1, el1_1_1_1]` →
+     `[{ elementId: el1, categoryId: catA }, { elementId: el1_1, categoryId: catA }, { elementId: el1_1_1, categoryId: catB }, { elementId: el1_1_1_1, categoryId: catB }]`
+   - Intermediate category path: `[..., catA, el1, catB]` →
+     `[{ elementId: el1, categoryId: catA }, { categoryId: catB }]`
 
 ---
