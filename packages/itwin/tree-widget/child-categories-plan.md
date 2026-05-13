@@ -187,11 +187,13 @@ catA
 
 ### Extended: `AlwaysAndNeverDrawnElementInfoCache`
 
-The cache stores `{ isInAlwaysOrNeverDrawnSet: true, categoryId }` for each element in the always/never drawn sets. The tree now includes intermediate category levels to enable correct subtree scoping:
+The cache stores `{ isInAlwaysOrNeverDrawnSet: boolean }` for each element. The tree now includes intermediate category levels to enable correct subtree scoping:
 
 **Current tree structure:** `model → categoryOfTopMostParentElement → element1 → element2 → ...`
+**Current map entry:** `{ isInAlwaysOrNeverDrawnSet: true; categoryId: Id64String } | { isInAlwaysOrNeverDrawnSet: false }`
 
 **New tree structure:** `model → categoryOfTopMostParentElement → element1 → category → element2 → category → element3 → ...`
+**New map entry:** `{ isInAlwaysOrNeverDrawnSet: boolean }` — `categoryId` is no longer needed on the entry because the element's category is its parent node in the cache tree.
 
 The cache tree **always** interleaves categories between elements — every element is placed under its own category, regardless of whether it matches the parent's category. This differs from the display tree (which only shows intermediate category nodes when the category changes). The cache tree must be uniform so that navigation is consistent and we can scope to any category's subtree.
 
@@ -225,22 +227,49 @@ interface AlwaysNeverElementProps extends AlwaysNeverBaseProps {
 }
 ```
 
-**Return type:** `Map<CategoryId, Set<ElementId>>` — elements grouped by their own category. Caller filters as needed.
+**Return type:** `Map<CategoryId, Set<ElementId>>` — elements grouped by their own category (derived from the parent category node in the cache tree). Caller filters as needed.
 
-**Query change required:** The current CTE builds `elementsPath` as a chain of element IDs only (`el1;el1_1;el1_1_1`) and carries only the leaf's `categoryId` and the root's `rootCategoryId`. To build the interleaved cache tree, the CTE must interleave each element's `Category.Id` into the path string. Changed `elementsPath` format:
+**Query change required:** The current CTE builds `elementsPath` as a chain of element IDs only (`el1;el1_1;el1_1_1`) and carries both the leaf's `categoryId` and the root's `rootCategoryId` separately. The new CTE simplifies to a single `categoryId` column and interleaves child categories into the path. Changed `elementsPath` format:
 - Current: `el1;el1_1;el1_1_1`
-- New: `el1;catA;el1_1;catB;el1_1_1`
+- New: `el1;catB;el1_1;catC;el1_1_1` (each intermediate category is the FOLLOWING element's own category)
 
-The recursive step changes from:
+For the example `el1(catA) → el1_1(catB) → el1_1_1(catC)`: the path `el1;catB;el1_1;catC;el1_1_1` means navigate `el1 → catB → el1_1 → catC → el1_1_1` — each element is correctly placed under its own category node.
+
+**CTE changes:** The single `categoryId` column serves double duty — in the recursive step it's `e.categoryId` (the child's own category, inserted into the path), and it's overwritten to `p.Category.Id` (the current ancestor). At the final level (parentId IS NULL), `categoryId` = root ancestor's category = `categoryOfTopMostParentElement`. No separate `rootCategoryId` or `topCategoryId` columns needed:
+
 ```sql
-CAST(IdToHex(p.ECInstanceId) AS TEXT) || ';' || e.elementsPath
-```
-to:
-```sql
-CAST(IdToHex(p.ECInstanceId) AS TEXT) || ';' || CAST(IdToHex(p.Category.Id) AS TEXT) || ';' || e.elementsPath
+ElementInfo(modelId, categoryId, parentId, elementsPath) AS (
+  -- Base case: leaf element
+  SELECT
+    Model.Id modelId,
+    Category.Id categoryId,       -- leaf's own category
+    Parent.Id parentId,
+    CAST(IdToHex(ECInstanceId) AS TEXT) elementsPath
+  FROM ...
+
+  UNION ALL
+
+  -- Recursive step: prepend parent element + child's category
+  SELECT
+    e.modelId modelId,
+    p.Category.Id categoryId,     -- overwrite: now tracks current ancestor's category
+    p.Parent.Id parentId,
+    CAST(IdToHex(p.ECInstanceId) AS TEXT) || ';' || CAST(IdToHex(e.categoryId) AS TEXT) || ';' || e.elementsPath
+  FROM ... p
+  JOIN ElementInfo e ON p.ECInstanceId = e.parentId
+)
 ```
 
-This gives the tree-building logic everything it needs to insert category nodes at every level. No separate query — just richer data from the same CTE.
+The recursive step inserts `e.categoryId` (the child's category) between parent and child in the path, then overwrites `categoryId` to `p.Category.Id`. This naturally produces the correct interleaving: each element sits under its own category.
+
+**Trace example** for `el1(catA) → el1_1(catB) → el1_1_1(catC)`:
+1. Base (el1_1_1): `elementsPath="el1_1_1"`, `categoryId=catC`
+2. Recursive (p=el1_1): `elementsPath="el1_1;catC;el1_1_1"`, `categoryId=catB`
+3. Recursive (p=el1): `elementsPath="el1;catB;el1_1;catC;el1_1_1"`, `categoryId=catA`
+
+Final result: `elementsPath="el1;catB;el1_1;catC;el1_1_1"`, `categoryId=catA` (= categoryOfTopMostParentElement). ✅
+
+For root-level elements (no parent), the path is just `"el1"` and `categoryId` = the element's own category = `categoryOfTopMostParentElement`.
 
 ### Modified: `ElementChildrenCache` → renamed `NestedChildrenCache`
 
@@ -416,7 +445,7 @@ Rename `ModelCategoryElementsCountCache` → `DescendantsCountCache`. Implement 
 - Unify request interface with base + category/element split (same pattern as other caches)
 - Add `elementCategoryPath` to category requests (for intermediate categories under elements). This path alternates element→category→element→... and includes categories even when same as parent.
 - Change return type from `Set<ElementId>` to `Map<CategoryId, Set<ElementId>>` — group by element's own category
-- The existing CTE query is modified to interleave each element's `Category.Id` into the `elementsPath` string (no separate query needed, just richer data from the same CTE)
+- The existing CTE query is modified: add a `topCategoryId` column and use `e.topCategoryId` (the child's category) in the recursive step to interleave each element's own `Category.Id` into the `elementsPath` string (see Architecture section for full CTE and trace)
 - Caller filters the returned map as needed
 - Note: `getParentElementsIdsPath` no longer needs to filter out category IDs — the `elementCategoryPath` naturally includes them
 
