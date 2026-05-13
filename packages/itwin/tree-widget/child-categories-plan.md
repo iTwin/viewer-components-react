@@ -21,19 +21,19 @@ Issues: [#1100](https://github.com/iTwin/viewer-components-react/issues/1100), [
 
 **Before:**
 ```
-Category A
-  → Element A
-    → Child Element B (Category B)
-    → Child Element C (Category A)
+catA
+└── elA
+    ├── elB (catB)
+    └── elC (catA)
 ```
 
 **After:**
 ```
-Category A
-  → Element A
-    → Child Element C (same category as parent → no intermediate node)
-    → Category B (intermediate category node, shown because B ≠ A)
-      → Child Element B
+catA
+└── elA
+    ├── elC (same category as parent → no intermediate node)
+    └── catB (intermediate category node, shown because B ≠ A)
+        └── elB
 ```
 
 Intermediate category nodes are only shown when a child's category **differs** from the parent's category. Children whose category matches the parent appear directly under the parent (current behavior preserved).
@@ -192,84 +192,91 @@ The cache stores `{ isInAlwaysOrNeverDrawnSet: boolean }` for each element. The 
 **Current tree structure:** `model → categoryOfTopMostParentElement → element1 → element2 → ...`
 **Current map entry:** `{ isInAlwaysOrNeverDrawnSet: true; categoryId: Id64String } | { isInAlwaysOrNeverDrawnSet: false }`
 
-**New tree structure:** `model → categoryOfTopMostParentElement → element1 → category → element2 → category → element3 → ...`
+**New tree structure:** `model → category → element1 → category → element2 → category → element3 → ...`
 **New map entry:** `{ isInAlwaysOrNeverDrawnSet: boolean }` — `categoryId` is no longer needed on the entry because the element's category is its parent node in the cache tree.
 
 The cache tree **always** interleaves categories between elements — every element is placed under its own category, regardless of whether it matches the parent's category. This differs from the display tree (which only shows intermediate category nodes when the category changes). The cache tree must be uniform so that navigation is consistent and we can scope to any category's subtree.
 
 **Example:** `el1(catA) → el1_1(catB), el1_2(catC) → el1_2_1(catB)`, all in always drawn.
 
-With intermediate categories:
+**Cache tree** (intermediate category nodes at every level):
 ```
-M → catA → el1 → catB → el1_1
-               → catC → el1_2 → catB → el1_2_1
+M
+├── catA
+│   └── el1
+│       ├── catB
+│       │   └── el1_1
+│       └── catC
+│           └── el1_2
+│               └── catB
+│                   └── el1_2_1
 ```
 Navigate `M → catA → el1 → catB` → only el1_1. Correct.
 
 
-This replaces the old `parentElementIdsPath` (which only contained element IDs and required filtering out category IDs).
+This replaces the old `parentElementIdsPath`. Currently, `getParentElementsIdsPath` (in `Utils.ts`) just slices instance keys from the top-most element — the path contains only element IDs and no categories. With intermediate category nodes appearing in the hierarchy, the path will naturally include category instance keys. The replacement `getElementPath` is moved into `AlwaysAndNeverDrawnElementInfoCache` (since it's the only consumer and knows the path structure it needs) and produces the structured `elementPath` array directly (see Key Decision #8).
 
-**Request types:**
+**Request type:**
 ```typescript
-interface AlwaysNeverBaseProps {
+interface AlwaysNeverDrawnProps {
   modelId: Id64String;
-  categoryOfTopMostParentElement: CategoryId;  // to navigate cache tree (model → category → ...)
   setType: SetType;
-}
-
-interface AlwaysNeverCategoryProps extends AlwaysNeverBaseProps {
-  categoryId: CategoryId;
-  elementCategoryPath?: Array<Id64Arg>;  // undefined = top-level category
-}
-
-interface AlwaysNeverElementProps extends AlwaysNeverBaseProps {
-  elementCategoryPath: Array<Id64Arg>;
+  elementPath: Array<{ elementId?: Id64Arg; categoryId: Id64String }>;
 }
 ```
 
+**`elementPath` semantics:** Each entry pairs an optional element with its category. The path encodes the full navigation through the cache tree starting from the model:
+- `[]` → model level (all elements in the model)
+- `[{ categoryId: catA }]` → root category catA's subtree
+- `[{ elementId: el1, categoryId: catA }]` → element el1's subtree (el1 belongs to catA)
+- `[{ elementId: el1, categoryId: catA }, { categoryId: catB }]` → intermediate catB under el1
+- `[{ elementId: el1, categoryId: catA }, { elementId: el1_1, categoryId: catB }]` → element el1_1's subtree
+
+No separate `categoryOfTopMostParentElement` field needed — it's `elementPath[0].categoryId` when the path is non-empty.
+
 **Return type:** `Map<CategoryId, Set<ElementId>>` — elements grouped by their own category (derived from the parent category node in the cache tree). Caller filters as needed.
 
-**Query change required:** The current CTE builds `elementsPath` as a chain of element IDs only (`el1;el1_1;el1_1_1`) and carries both the leaf's `categoryId` and the root's `rootCategoryId` separately. The new CTE simplifies to a single `categoryId` column and interleaves child categories into the path. Changed `elementsPath` format:
-- Current: `el1;el1_1;el1_1_1`
-- New: `el1;catB;el1_1;catC;el1_1_1` (each intermediate category is the FOLLOWING element's own category)
+**Query change required:** The current CTE builds `elementsPath` as a chain of element IDs only (`el1;el1_1;el1_1_1`) and carries `modelId`, `categoryId`, and `rootCategoryId` as separate columns. The new CTE returns only `modelId` and `elementsPath`, with every element's category interleaved into the path whenever an element is inserted. Changed `elementsPath` format:
+- Current: `el1;el1_1;el1_1_1` (elements only, category in separate columns)
+- New: `catA;el1;catB;el1_1;catC;el1_1_1` (each element is preceded by its own category)
 
-For the example `el1(catA) → el1_1(catB) → el1_1_1(catC)`: the path `el1;catB;el1_1;catC;el1_1_1` means navigate `el1 → catB → el1_1 → catC → el1_1_1` — each element is correctly placed under its own category node.
+For the example `el1(catA) → el1_1(catB) → el1_1_1(catC)`: the path `catA;el1;catB;el1_1;catC;el1_1_1` means navigate `catA → el1 → catB → el1_1 → catC → el1_1_1` — each element is correctly placed under its own category node.
 
-**CTE changes:** The single `categoryId` column serves double duty — in the recursive step it's `e.categoryId` (the child's own category, inserted into the path), and it's overwritten to `p.Category.Id` (the current ancestor). At the final level (parentId IS NULL), `categoryId` = root ancestor's category = `categoryOfTopMostParentElement`. No separate `rootCategoryId` or `topCategoryId` columns needed:
+**CTE changes:** Returns `modelId` and `elementsPath`. Every element inserted into the path is paired with its category (`category;element`). No separate `categoryId` or `rootCategoryId` columns needed:
 
 ```sql
-ElementInfo(modelId, categoryId, parentId, elementsPath) AS (
-  -- Base case: leaf element
+ElementInfo(modelId, parentId, elementsPath) AS (
+  -- Base case: leaf element — include its category
   SELECT
     Model.Id modelId,
-    Category.Id categoryId,       -- leaf's own category
     Parent.Id parentId,
-    CAST(IdToHex(ECInstanceId) AS TEXT) elementsPath
+    CAST(IdToHex(Category.Id) AS TEXT) || ';' || CAST(IdToHex(ECInstanceId) AS TEXT) elementsPath
   FROM ...
 
   UNION ALL
 
-  -- Recursive step: prepend parent element + child's category
+  -- Recursive step: prepend parent element + parent's category
   SELECT
     e.modelId modelId,
-    p.Category.Id categoryId,     -- overwrite: now tracks current ancestor's category
     p.Parent.Id parentId,
-    CAST(IdToHex(p.ECInstanceId) AS TEXT) || ';' || CAST(IdToHex(e.categoryId) AS TEXT) || ';' || e.elementsPath
+    CAST(IdToHex(p.Category.Id) AS TEXT) || ';' || CAST(IdToHex(p.ECInstanceId) AS TEXT) || ';' || e.elementsPath
   FROM ... p
   JOIN ElementInfo e ON p.ECInstanceId = e.parentId
 )
+
+SELECT modelId, elementsPath FROM ElementInfo WHERE parentId IS NULL
 ```
 
-The recursive step inserts `e.categoryId` (the child's category) between parent and child in the path, then overwrites `categoryId` to `p.Category.Id`. This naturally produces the correct interleaving: each element sits under its own category.
+Each recursive step prepends `category;element` for the current ancestor. The base case also includes `category;element` for the leaf. This uniformly pairs every element with its category.
 
 **Trace example** for `el1(catA) → el1_1(catB) → el1_1_1(catC)`:
-1. Base (el1_1_1): `elementsPath="el1_1_1"`, `categoryId=catC`
-2. Recursive (p=el1_1): `elementsPath="el1_1;catC;el1_1_1"`, `categoryId=catB`
-3. Recursive (p=el1): `elementsPath="el1;catB;el1_1;catC;el1_1_1"`, `categoryId=catA`
+1. Base (el1_1_1): `elementsPath="catC;el1_1_1"`
+2. Recursive (p=el1_1): `elementsPath="catB;el1_1;catC;el1_1_1"`
+3. Recursive (p=el1): `elementsPath="catA;el1;catB;el1_1;catC;el1_1_1"`
 
-Final result: `elementsPath="el1;catB;el1_1;catC;el1_1_1"`, `categoryId=catA` (= categoryOfTopMostParentElement). ✅
+Final result: `modelId=M`, `elementsPath="catA;el1;catB;el1_1;catC;el1_1_1"`. ✅
 
-For root-level elements (no parent), the path is just `"el1"` and `categoryId` = the element's own category = `categoryOfTopMostParentElement`.
+The path always alternates `category;element` pairs. The first category in the path is the root element's category (= `categoryOfTopMostParentElement`). For root-level elements (no parent), the path is `"catA;el1"` — just one pair.
 
 ### Modified: `ElementChildrenCache` → renamed `NestedChildrenCache`
 
@@ -380,61 +387,215 @@ Rename `ModelCategoryElementsCountCache` → `DescendantsCountCache`. Implement 
 
 ### Phase 3: Unified visibility logic for categories and elements
 
-**Files:** All visibility handlers and helpers, node types
+**Files:** `BaseVisibilityHelper.ts`, `VisibilityUtils.ts`, all visibility handlers and helpers, node types
 
-**GET visibility for an element node** (e.g., el1_1):
-1. `DescendantsCountCache({ modelId, parentElementId: el1_1 })` — element request → per-category counts of all descendants under el1_1
-2. `AlwaysAndNeverDrawnElementInfoCache({ modelId, categoryOfTopMostParentElement, elementCategoryPath: [path-to-el1_1], setType })` — element request → navigates the cache tree from the model, through the top-most parent element's category, and along el1_1's element/category path; then walks all children and returns `Map<CategoryId, Set<ElementId>>`
-3. For each category: compare descendant count vs always/never drawn count → per-category status
-4. Merge per-category statuses → overall visibility
+#### Phase 3a: GET element visibility
 
-**GET visibility for a category node** (e.g., intermediate catB under el1):
-1. `DescendantsCountCache({ modelId, parentElementId: el1, categoryId: catB })` — category request → per-category counts in catB's subtree
-2. `AlwaysAndNeverDrawnElementInfoCache({ modelId, categoryOfTopMostParentElement, categoryId: catB, elementCategoryPath: [path-to-el1], setType })` — category request → navigates to el1, only traverses children with catB, returns `Map<CategoryId, Set<ElementId>>` scoped to catB's subtree
-3. For each category: compare descendant count vs always/never drawn count → per-category status
-4. Merge per-category statuses → overall visibility
+**Current behavior** (`getElementsVisibilityStatus` + `getVisibilityFromAlwaysAndNeverDrawnElements`):
+1. If model is hidden → return `hidden`
+2. Compute `defaultStatus` from `getVisibleModelCategoryDirectVisibilityStatus({ categoryId, modelId })` — checks per-model category override, falls back to `viewsCategory()`
+3. If `isAlwaysDrawnExclusive` → override `defaultStatus` to `hidden`
+4. Determine `oppositeSet`: if default is visible → check `neverDrawn`; if hidden → check `alwaysDrawn`
+5. If no children (`childrenCount === 0`): count how many of the element IDs are in `oppositeSet` → compute status
+6. If has children: query `AlwaysAndNeverDrawnElementInfoCache` for child elements in the opposite set → combine with element's own count → compute status via `getVisibilityFromAlwaysAndNeverDrawnElementsImpl({ totalCount, numberOfElementsInOppositeSet })`
+7. Also merge with sub-model visibility (elements that are models)
 
-**CHANGE visibility for an element node** (e.g., el1_1 → turn on):
-1. `DescendantsCountCache({ modelId, parentElementId: el1_1 })` → per-category counts
-2. For each category, check if that category's default visibility matches desired state
-3. **Don't match** → `NestedChildrenCache({ modelId, parentElementId: el1_1, childCategoryIds: [catX] })` → fetch descendant IDs, add to always/never drawn
-4. **Match** → `AlwaysAndNeverDrawnElementInfoCache({ modelId, categoryOfTopMostParentElement, elementCategoryPath: [path-to-el1_1], setType })` → get those category's descendant IDs, then remove them from both always and never drawn sets via viewport API
+**Bug:** Steps 2 and 6 use a single `categoryId` for ALL descendants — ignoring children in different categories.
 
-**CHANGE visibility for a category node** (e.g., intermediate catB under el1 → turn on):
-1. Set per-model category override for catB
-2. `DescendantsCountCache({ modelId, parentElementId: el1, categoryId: catB })` → per-category counts in catB's subtree
-3. For each category, check if that category's default visibility matches desired state
-4. **Don't match** → `NestedChildrenCache({ modelId, parentElementId: el1, categoryId: catB, childCategoryIds: [catX] })` → fetch descendant IDs, add to always/never drawn
-5. **Match** → `AlwaysAndNeverDrawnElementInfoCache({ modelId, categoryOfTopMostParentElement, categoryId: catB, elementCategoryPath: [path-to-el1], setType })` → get those category's descendant IDs, then remove them from both always and never drawn sets via viewport API
+**New behavior:**
+
+New parameter: `ignoreDescendants?: boolean` — when `true`, skip descendant computation (steps 3–6) and return only the element's own status. Used by SearchResultsTree where descendant visibility is not needed.
+
+The function no longer receives `childrenCount` — it computes descendant counts itself via `DescendantsCountCache`.
+
+1. If model is hidden → return `hidden`
+2. **Compute the element's own visibility independently:**
+   a. Check if the element is in the always/never drawn set
+   b. `defaultStatus` = `getVisibleModelCategoryDirectVisibilityStatus({ categoryId: element's own category, modelId })`
+   c. If `isAlwaysDrawnExclusive` → override `defaultStatus` to `hidden`
+   d. Determine element's own status from its `defaultStatus` and whether it's in always/never drawn
+3. If `ignoreDescendants` → return element's own status (step 2d)
+4. Get per-category descendant counts: `DescendantsCountCache({ modelId, parentElementId: el1_1 })` → `Array<{ categoryId, count }>` (descendants only, does not include the element itself)
+5. **Group descendant categories by default visibility:**
+   a. For each category in the counts array: `defaultStatus` = `getVisibleModelCategoryDirectVisibilityStatus({ categoryId, modelId })`
+   b. If `isAlwaysDrawnExclusive` → override all `defaultStatus` to `hidden`
+   c. Split into `visibleCategories` (defaultStatus = visible) and `hiddenCategories` (defaultStatus = hidden)
+6. **Query always/never drawn per group** (the `elementPath` includes the element itself, e.g. `[{ elementId: el1, categoryId: catA }, { elementId: el1_1, categoryId: catB }]`, so the cache will return only its descendants):
+   a. For `visibleCategories` → `AlwaysAndNeverDrawnElementInfoCache({ modelId, setType: neverDrawn, elementPath })` → `Map<CategoryId, Set<ElementId>>`
+   b. For `hiddenCategories` → `AlwaysAndNeverDrawnElementInfoCache({ modelId, setType: alwaysDrawn, elementPath })` → `Map<CategoryId, Set<ElementId>>`
+7. **Per-category visibility computation:** For each category in descendant counts:
+   a. Get the count of elements from that category in its opposite set (from the appropriate map in step 6)
+   b. Compute per-category status via `getVisibilityFromAlwaysAndNeverDrawnElementsImpl({ totalCount: categoryCount, numberOfElementsInOppositeSet })`
+8. Merge element's own status (step 2) + all per-category descendant statuses (step 7) + sub-model visibility → overall status
+
+#### Phase 3b: GET category visibility
+
+**Current behavior** (`getVisibilityFromAlwaysAndNeverDrawnElements` with `categoryId` branch):
+1. Get total element count for this category in model: `baseIdsCache.getElementsCount({ modelId, categoryId })`
+2. Get always/never drawn elements for this category: `AlwaysAndNeverDrawnElementInfoCache({ modelId, categoryIds, setType })`
+3. Compute status via `getVisibilityFromAlwaysAndNeverDrawnElementsImpl({ totalCount, numberOfElementsInOppositeSet })`
+
+**Bug:** Child elements might have different category from their parents, that has to be taken into consideration.
+
+**New behavior** (same logic for top-level and intermediate categories — only the path differs):
+1. Get per-category descendant counts: `DescendantsCountCache({ modelId, [parentElementId], categoryId })`
+2. **Group categories by default visibility:**
+   a. For each category in descendant counts: `defaultStatus` = `getVisibleModelCategoryDirectVisibilityStatus({ categoryId, modelId })`
+   b. If `isAlwaysDrawnExclusive` → override all `defaultStatus` to `hidden`
+   c. Split into `visibleCategories` / `hiddenCategories`
+3. **Query always/never drawn per group:**
+   a. For `visibleCategories` → `AlwaysAndNeverDrawnElementInfoCache({ modelId, setType: neverDrawn, elementPath })`
+   b. For `hiddenCategories` → `AlwaysAndNeverDrawnElementInfoCache({ modelId, setType: alwaysDrawn, elementPath })`
+4. Per-category computation (same as 3a step 6) → merge → overall status
+
+**Path examples:**
+- Top-level category (catA): `elementPath: [{ categoryId: catA }]`
+- Intermediate category (catB under el1): `elementPath: [{ elementId: el1, categoryId: catA }, { categoryId: catB }]`
+
+#### Phase 3c: CHANGE element visibility
+
+**Current behavior** (`changeElementsVisibilityStatus`):
+1. Get child elements from `elementChildrenCache`.
+2. Collect all element IDs: `[...elementIds, ...children]` (children is a flat list, all treated with same `categoryId`)
+3. If model not visible and turning on → `showModelWithoutAnyCategoriesOrElements({ modelId })`
+4. For each element, we'll check if by default it matches the desired state (by default means without taking always/never drawn lists into consideration). For children always assume that they don't match the desired state.
+5. Queue visibility change: for each element add to always drawn or never drawn list if they don't match the desired state.
+6. Also change sub-model visibility
+
+**Bug:** All children are put into the set which matches the desired state. That is not necessary if child elements categories already match that state.
+
+**New behavior:**
+1. Get per-category descendant counts: `DescendantsCountCache({ modelId, parentElementId })` → know which child categories exist
+2. If model not visible and turning on → `showModelWithoutAnyCategoriesOrElements({ modelId })`
+3. For the element(s) themselves: check if by default (based on element's own category) it matches the desired state. If not → add to always/never drawn. If matches → remove from always/never drawn.
+4. For each child category:
+   a. `defaultStatus` = `getVisibleModelCategoryDirectVisibilityStatus({ categoryId: childCategory, modelId })`
+   b. If `isAlwaysDrawnExclusive` → override `defaultStatus` to `hidden`
+   c. If `defaultStatus` matches desired state → remove those elements from both always AND never drawn sets:
+      - `AlwaysAndNeverDrawnElementInfoCache({ modelId, setType: "always", elementPath })` → get IDs → remove from viewport always drawn
+      - `AlwaysAndNeverDrawnElementInfoCache({ modelId, setType: "never", elementPath })` → get IDs → remove from viewport never drawn
+   d. If `defaultStatus` does NOT match desired state → fetch descendant IDs and add to appropriate set:
+      - `NestedChildrenCache({ modelId, parentElementId, childCategoryIds: [childCategory] })` → get IDs
+      - Add to always drawn (if turning on) or never drawn (if turning off)
+5. Also change sub-model visibility
+
+#### Phase 3d: CHANGE category visibility
+
+**Current behavior** (`changeCategoriesVisibilityStatus` / `changeCategoriesUnderModelVisibilityStatus`):
+- **Top-level (no modelId):** change category selector display, remove per-model overrides across all models, clear always/never drawn, change sub-models, enable sub-categories if turning on
+- **Under model:** set per-model category override (show/hide), clear always/never drawn for that category, change sub-models, turn on model if needed
+
+**Bug:** Nested children might have different category than the category of whose visibility is being changed. Right now we assume that setting override will change visibility for those elements, which is not correct.
+
+**New behavior** (same logic for top-level and intermediate categories — only the path/scope differs):
+1. Set per-model category override for the target category (or change category selector display if top-level without modelId)
+2. Turn on model if needed (turning on and model not visible)
+3. For elements directly in the target category (within scope): remove from both always AND never drawn sets — they now follow the new category default which matches the desired state
+   - `AlwaysAndNeverDrawnElementInfoCache({ modelId, setType: "always", elementPath })` → get IDs → remove from viewport always drawn
+   - `AlwaysAndNeverDrawnElementInfoCache({ modelId, setType: "never", elementPath })` → get IDs → remove from viewport never drawn
+4. Get per-category descendant counts: `DescendantsCountCache({ modelId, [parentElementId], categoryId })` → find which other categories exist in the subtree
+5. For each other child category (not the target category):
+   a. `defaultStatus` = `getVisibleModelCategoryDirectVisibilityStatus({ categoryId: childCategory, modelId })`
+   b. If `isAlwaysDrawnExclusive` → override `defaultStatus` to `hidden`
+   c. If `defaultStatus` matches desired state → remove those elements from both always AND never drawn sets (via `AlwaysAndNeverDrawnElementInfoCache`)
+   d. If `defaultStatus` does NOT match desired state → fetch descendant IDs via `NestedChildrenCache({ modelId, [parentElementId], childCategoryIds: [childCategory] })` → add to always drawn (turning on) or never drawn (turning off)
+6. Change sub-models visibility, enable sub-categories if turning on
+
+**Path examples:**
+- Top-level category (catA): `elementPath: [{ categoryId: catA }]`
+- Intermediate category (catB under el1): `elementPath: [{ elementId: el1, categoryId: catA }, { categoryId: catB }]`
 
 ### Phase 4: Fix SearchResultsTree for all trees
 
 **Files:**
-- `src/tree-widget-react/components/trees/models-tree/internal/visibility/SearchResultsTree.ts`
-- `src/tree-widget-react/components/trees/categories-tree/internal/visibility/SearchResultsTree.ts`
-- `src/tree-widget-react/components/trees/classifications-tree/internal/visibility/SearchResultsTree.ts`
+- `src/tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.ts` — `createGeometricElementInstanceKeyPaths` (line ~689)
+- `src/tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.ts` — `createGeometricElementInstanceKeyPaths` (line ~1036)
+- `src/tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.ts` — `createGeometricElementInstanceKeyPaths` (line ~669)
+- Plus each tree's `SearchResultsTree.ts` for node handling
 
-**Background:** With intermediate category nodes added to hierarchies (Phase 2), the search/filter path for a child element with a different category now includes: `... → Parent Element → Category B → Child Element`. All three trees' `SearchResultsTree` must be updated to handle this new intermediate category node type.
+**Background:** Search paths are constructed inside the tree definitions via `createGeometricElementInstanceKeyPaths`. Each uses a recursive CTE that builds the path bottom-up (from target leaf to root). Currently, the CTE only includes a category in the path for the root-level element (`Parent.Id IS NULL`). Non-root elements are always emitted as `Element;elementId` — their category is never inserted even when it differs from the parent's.
 
-**Models tree**
-- **Bug:** in `createSearchResultsTreeNode`, when parent is an element node: `categoryId: parent.categoryId` — child blindly inherits parent's `categoryId`
-- **Fix `createSearchResultsTreeNode`:** add a case for when parent is an intermediate category node (under an element): set `categoryId: parent.id` and `modelId: parent.modelId`
-- **Fix `getType`:** recognize the intermediate category class (e.g., `SpatialCategory`) so it returns a category-like type
-- **Update `SearchResultsTreeNode` types:** add an intermediate category variant (category node that also carries `modelId` and sits under an element), or extend existing `CategorySearchResultsTreeNode` to handle this case
+Once search paths include intermediate categories, `categoryId: parent.categoryId` in `createSearchResultsTreeNode` (when parent is an element) is **not a bug** — if the parent node is an element, the child element will always have the same category.
 
-**Categories tree**:
-- **Bug:** in `createSearchResultsTreeNode`, when parent is an element node: `categoryId: parent.categoryId` — same inheritance pattern as Models tree
-- **Fix `createSearchResultsTreeNode`:** same approach — when parent is intermediate category under element, set `categoryId: parent.id`
-- **Fix `getType`:** recognize the intermediate category class for the categories tree (may differ from models tree depending on category element class used)
-- **Update node types** similarly to Models tree
+**CTE fix (same pattern for all trees):**
 
-**Classifications tree**:
-- **No `categoryId: parent.categoryId` bug** — elements start with `categoryId: undefined` then resolve via `getFilteredElementsData` query which correctly returns each element's own `Category.Id`
-- **Still needs structural changes:**
-  - `createSearchResultsTreeNode` must handle intermediate category nodes as valid parents of element nodes
-  - `getType` (currently knows only `classificationTable`, `classification`, `element`) must recognize the intermediate category class
-  - Node type definitions must include the new intermediate category variant
-- `getFilteredElementsData` already returns correct per-element `categoryId` — no query changes needed
+The CTE needs a `CategoryId` column so the recursive step can compare child vs parent category. When they differ, insert a `Category;childCatId` segment before the element in the path.
+
+Current CTE structure (Models tree as example):
+```sql
+ModelsCategoriesElementsHierarchy(ECInstanceId, ParentId, ModelId, GroupingNodeIndex, Path) AS (
+  -- Base: target leaf
+  SELECT e.ECInstanceId, e.ParentId, e.ModelId, ...,
+    IIF(e.ParentId IS NULL,
+      'Model;' || modelId || ';Category;' || catId || ';Element;' || elementId,
+      'Element;' || elementId
+    )
+  -- Recursive: prepend parent
+  SELECT pe.ECInstanceId, pe.Parent.Id, pe.Model.Id, ...,
+    IIF(pe.Parent.Id IS NULL,
+      'Model;' || modelId || ';Category;' || peCatId || ';Element;' || peId || ';' || ce.Path,
+      'Element;' || peId || ';' || ce.Path
+    )
+)
+```
+
+New CTE structure:
+```sql
+ModelsCategoriesElementsHierarchy(ECInstanceId, ParentId, ModelId, CategoryId, GroupingNodeIndex, Path) AS (
+  -- Base: target leaf (track its CategoryId)
+  SELECT e.ECInstanceId, e.ParentId, e.ModelId, e.CategoryId, ...,
+    IIF(e.ParentId IS NULL,
+      'Model;' || modelId || ';Category;' || catId || ';Element;' || elementId,
+      'Element;' || elementId
+    )
+  -- Recursive: prepend parent, insert intermediate category if child's category ≠ parent's
+  SELECT pe.ECInstanceId, pe.Parent.Id, pe.Model.Id, pe.Category.Id, ...,
+    IIF(pe.Parent.Id IS NULL,
+      'Model;' || modelId || ';Category;' || peCatId || ';Element;' || peId || ';'
+        || IIF(ce.CategoryId <> pe.Category.Id, 'Category;' || ce.CategoryId || ';', '')
+        || ce.Path,
+      'Element;' || peId || ';'
+        || IIF(ce.CategoryId <> pe.Category.Id, 'Category;' || ce.CategoryId || ';', '')
+        || ce.Path
+    )
+)
+```
+
+Key change: `IIF(ce.CategoryId <> pe.Category.Id, 'Category;' || ce.CategoryId || ';', '')` — conditionally inserts the intermediate category segment when child and parent categories differ.
+
+**Per-tree specifics:**
+
+**Models tree** (`ModelsTreeDefinition.ts`):
+- CTE `ModelsCategoriesElementsHierarchy` — add `CategoryId` column, insert intermediate category as above
+- Category class in path: `SpatialCategory` (`CATEGORY_CLASS_NAME_QUERY_ALIAS`)
+- `parseQueryRow` already handles `CATEGORY_CLASS_NAME_QUERY_ALIAS` — no changes needed
+
+**Categories tree** (`CategoriesTreeDefinition.ts`):
+- CTE `CategoriesElementsHierarchy` — same fix, add `CategoryId`, insert intermediate category
+- Category class depends on view type (2d/3d)
+- `parseQueryRow` already handles `CATEGORY_CLASS_NAME_QUERY_ALIAS` — no changes needed
+
+**Classifications tree** (`ClassificationsTreeDefinition.ts`):
+- CTE `ElementsHierarchy` — currently has no category at all in the path (just elements). Need to add `CategoryId` column and insert `Category;catId` when child's category ≠ parent's category
+- Need to add `CATEGORY_CLASS_NAME_QUERY_ALIAS` handling to `parseQueryRow`
+
+**SearchResultsTree.ts changes (all trees):**
+- **Fix `createSearchResultsTreeNode`:** extend `CategorySearchResultsTreeNode` with optional `parentElementId` (`undefined` for top-level, set when parent is an element)
+- **Fix `getType`:** recognize the intermediate category class so it returns a category-like type
+
+**Category search paths — intermediate occurrences:**
+
+Currently, searching for a category by name only finds top-level occurrences (categories as direct children of models). With intermediate category nodes now visible in the tree, searching should also find intermediate occurrences (e.g., catB appearing under el1 because el1's children belong to catB).
+
+**Models tree** — `createCategoryInstanceKeyPaths` (`ModelsTreeIdsCache.ts`):
+- Currently produces paths only for models where the searched category is a top-level category (category of root-level elements)
+- **Needs extension:** also find elements whose direct children have the searched category AND that category ≠ the element's own category → build element paths up to root → append the intermediate category node. This requires a new query.
+
+**Categories tree** — `getCategoriesSearchPaths` (`CategoriesTreeIdsCache.ts`, line ~452):
+- Same issue — currently only top-level paths
+- **Needs same extension:** find parent elements with children in the searched category (where category differs) → build paths → append intermediate category
+
+**Classifications tree** — currently doesn't search for categories at all (only classification tables, classifications, elements). Needs to add category search with both top-level and intermediate paths.
 
 ### Phase 5: Extend `AlwaysAndNeverDrawnElementInfoCache`
 
@@ -442,12 +603,13 @@ Rename `ModelCategoryElementsCountCache` → `DescendantsCountCache`. Implement 
 
 **What:**
 - Insert intermediate category nodes into the cache tree for **every** element (not just when category differs from parent). The cache tree always alternates element→category→element→category, so navigation is uniform.
-- Unify request interface with base + category/element split (same pattern as other caches)
-- Add `elementCategoryPath` to category requests (for intermediate categories under elements). This path alternates element→category→element→... and includes categories even when same as parent.
-- Change return type from `Set<ElementId>` to `Map<CategoryId, Set<ElementId>>` — group by element's own category
-- The existing CTE query is modified: the single `categoryId` column is reused — the recursive step inserts `e.categoryId` (the child's category) into the path and overwrites `categoryId` to `p.Category.Id`, so at the final level it equals `categoryOfTopMostParentElement` (see Architecture section for full CTE and trace)
+- Single request interface: `AlwaysNeverDrawnProps { modelId, setType, elementPath }` — no base/category/element split needed
+- `elementPath: Array<{ elementId?, categoryId }>` encodes the full navigation path; the last entry determines scope (element vs category vs model)
+- Cache entry simplifies to `{ isInAlwaysOrNeverDrawnSet: boolean }` — no `categoryId` on entries (the element's category is its parent node in the tree)
+- Change return type from `Set<ElementId>` to `Map<CategoryId, Set<ElementId>>` — group by element's own category (derived from parent category node)
+- The existing CTE query is modified: the single `categoryId` column is reused — the recursive step inserts `e.categoryId` (the child's category) into the path and overwrites `categoryId` to `p.Category.Id`, so at the final level it equals the root ancestor's category (see Architecture section for full CTE and trace)
 - Caller filters the returned map as needed
-- Note: `getParentElementsIdsPath` no longer needs to filter out category IDs — the `elementCategoryPath` naturally includes them
+- Note: `getParentElementsIdsPath` is replaced by `getElementPath` which produces the structured `elementPath` array directly
 
 ---
 
@@ -462,26 +624,30 @@ Rename `ModelCategoryElementsCountCache` → `DescendantsCountCache`. Implement 
    - Child categories with visibility different from desired state → query descendants via `NestedChildrenCache`, add to always/never drawn
    - Child categories with visibility matching desired state → remove their elements from both always and never drawn sets
 6. ✅ **Drop `childrenCount` from element extended data** — `DescendantsCountCache` provides per-category counts;
-7. ✅ **Keep `categoryOfTopMostParentElement` in extended data** — both element and category nodes need it to navigate the `AlwaysAndNeverDrawnElementInfoCache` tree
-8. ✅ **`elementCategoryPath` replaces `parentElementIdsPath`** — `getParentElementsIdsPath` renamed to `getElementCategoryPath`:
+7. ✅ **`categoryOfTopMostParentElement` no longer needed in `AlwaysAndNeverDrawnElementInfoCache`** — the new `elementPath` encodes the root category as `elementPath[0].categoryId`. May still be kept in extendedData if other caches/visibility helpers need it.
+8. ✅ **`elementPath` replaces `parentElementIdsPath` and `elementCategoryPath`** — `getParentElementsIdsPath` renamed to `getElementPath`, produces structured entries:
    ```
-   getElementCategoryPath(topMostElement, topMostElementCategory, allCategories, parentInstanceKeys):
-     path = [topMostElement]
+   getElementPath(topMostElement, topMostElementCategory, allCategories, parentInstanceKeys):
+     path = []
      prevCat = topMostElementCategory
+     lastWasElement = false
+     // first entry: topMostElement with its category
+     path.push({ elementId: topMostElement, categoryId: topMostElementCategory })
      lastWasElement = true
      for each id in parentInstanceKeys after topMostElement:
        if lastWasElement:
          if id in allCategories:
-           path.push(id)
            prevCat = id
            lastWasElement = false
          else:
-           path.push(prevCat, id)  // insert missing same-category
+           // same category as parent — insert category-only entry then element entry
+           path.push({ elementId: id, categoryId: prevCat })
        else:
-         path.push(id)
+         path.push({ elementId: id, categoryId: prevCat })
          lastWasElement = true
      return path
    ```
-   Example: `[..., catA, el1, el1_1, catB, el1_1_1, el1_1_1_1]` → `[el1, catA, el1_1, catB, el1_1_1, catB, el1_1_1_1]`
+   Example: `[..., catA, el1, el1_1, catB, el1_1_1, el1_1_1_1]` →
+   `[{ elementId: el1, categoryId: catA }, { elementId: el1_1, categoryId: catA }, { elementId: el1_1_1, categoryId: catB }, { elementId: el1_1_1_1, categoryId: catB }]`
 
 ---
