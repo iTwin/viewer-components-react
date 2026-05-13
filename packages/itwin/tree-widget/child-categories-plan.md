@@ -385,7 +385,7 @@ Rename `ModelCategoryElementsCountCache` → `DescendantsCountCache`. Implement 
 
 ### Phase 4: Fix SearchResultsTree for Models tree
 
-**Files:** `ModelsTreeSearchResultsTree.ts`
+**Files:** `models-tree/internal/visibility/SearchResultsTree.ts`
 
 **What:**
 - Currently: child element nodes inherit `categoryId` from parent element (line 277: `categoryId: parent.categoryId`)
