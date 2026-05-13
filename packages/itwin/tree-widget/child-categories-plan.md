@@ -14,7 +14,7 @@ Issues: [#1100](https://github.com/iTwin/viewer-components-react/issues/1100), [
 ### Core Idea
 1. **Show intermediate category nodes** in the tree for child elements whose category differs from parent (via hierarchy definition, as normal category instance nodes)
 2. **Rename `ModelCategoryElementsCountCache` → `DescendantsCountCache`** — add `parentElementId` and optional `categoryId` dimensions to get per-category descendant counts on demand
-3. **Extend `AlwaysAndNeverDrawnElementInfoCache`** — filter by element's own `categoryId` (data already exists, just needs filtering)
+3. **Extend `AlwaysAndNeverDrawnElementInfoCache`** — modify the CTE to interleave each element's `Category.Id` into the path, enabling category-aware cache tree navigation and grouped return type
 4. **Modify `ElementChildrenCache` → `NestedChildrenCache`** — when changing visibility, fetch nested descendant IDs grouped by category
 
 ### Tree Structure Change (Before → After)
@@ -197,7 +197,6 @@ The cache tree **always** interleaves categories between elements — every elem
 
 **Example:** `el1(catA) → el1_1(catB), el1_2(catC) → el1_2_1(catB)`, all in always drawn.
 
-Without intermediate categories in cache: filtering catB under el1 returns el1_1 AND el1_2_1 — wrong (el1_2_1 is under catC's subtree).
 With intermediate categories:
 ```
 M → catA → el1 → catB → el1_1
@@ -205,13 +204,8 @@ M → catA → el1 → catB → el1_1
 ```
 Navigate `M → catA → el1 → catB` → only el1_1. Correct.
 
-**Another example (same category as parent):** `el1(catA) → el1_1(catA) → el1_1_1(catA) → el1_1_1_1(catB)`
-```
-M → catA → el1 → catA → el1_1 → catA → el1_1_1 → catB → el1_1_1_1
-```
-Navigate `M → catA → el1 → catA` → get el1_1. The path `elementCategoryPath` for el1_1_1_1 would be `[el1, catA, el1_1, catA, el1_1_1, catB]`.
 
-**`elementCategoryPath`:** The navigation path through this cache tree, from the first element under the root category down to the current node. It alternates `element → category → element → category → ...` Always includes categories even when they match the parent's. This replaces the old `parentElementIdsPath` (which only contained element IDs and required filtering out category IDs).
+This replaces the old `parentElementIdsPath` (which only contained element IDs and required filtering out category IDs).
 
 **Request types:**
 ```typescript
@@ -325,6 +319,7 @@ WHERE ownCategory IN (${missingChildCategoryIds})
 - Incremental: only queries child categories not yet cached
 - Flat list storage — lighter than current tree structure
 - Subsequent requests with overlapping child categories reuse cached results
+- Same caching approach as current `ElementChildrenCache` (not batched like `DescendantsCountCache`)
 
 ---
 
@@ -374,14 +369,14 @@ Rename `ModelCategoryElementsCountCache` → `DescendantsCountCache`. Implement 
 1. `DescendantsCountCache({ modelId, parentElementId: el1_1 })` → per-category counts
 2. For each category, check if that category's default visibility matches desired state
 3. **Don't match** → `NestedChildrenCache({ modelId, parentElementId: el1_1, childCategoryIds: [catX] })` → fetch descendant IDs, add to always/never drawn
-4. **Match** → `AlwaysAndNeverDrawnElementInfoCache({ modelId, categoryOfTopMostParentElement, elementCategoryPath: [path-to-el1_1], setType })` → remove those category's descendants from both always and never drawn sets
+4. **Match** → `AlwaysAndNeverDrawnElementInfoCache({ modelId, categoryOfTopMostParentElement, elementCategoryPath: [path-to-el1_1], setType })` → get those category's descendant IDs, then remove them from both always and never drawn sets via viewport API
 
 **CHANGE visibility for a category node** (e.g., intermediate catB under el1 → turn on):
 1. Set per-model category override for catB
 2. `DescendantsCountCache({ modelId, parentElementId: el1, categoryId: catB })` → per-category counts in catB's subtree
 3. For each category, check if that category's default visibility matches desired state
 4. **Don't match** → `NestedChildrenCache({ modelId, parentElementId: el1, categoryId: catB, childCategoryIds: [catX] })` → fetch descendant IDs, add to always/never drawn
-5. **Match** → `AlwaysAndNeverDrawnElementInfoCache({ modelId, categoryOfTopMostParentElement, categoryId: catB, elementCategoryPath: [path-to-el1], setType })` → remove those category's descendants from both always and never drawn sets
+5. **Match** → `AlwaysAndNeverDrawnElementInfoCache({ modelId, categoryOfTopMostParentElement, categoryId: catB, elementCategoryPath: [path-to-el1], setType })` → get those category's descendant IDs, then remove them from both always and never drawn sets via viewport API
 
 ### Phase 4: Fix SearchResultsTree for Models tree
 
@@ -413,7 +408,7 @@ Rename `ModelCategoryElementsCountCache` → `DescendantsCountCache`. Implement 
 
 1. ✅ **Intermediate categories shown only when child's category differs from parent's**
 2. ✅ **Intermediate category nodes are normal category instance nodes** (category class depends on tree)
-3. ✅ **Rename `ElementChildrenCache` → `NestedChildrenCache`** — returns `Map<CategoryId, Id64Array>` (mirrors DescendantsCountCache structure). **Rename `ModelCategoryElementsCountCache` → `DescendantsCountCache`** — unified request interface for counts
+3. ✅ **Rename `ElementChildrenCache` → `NestedChildrenCache`** — accepts `childCategoryIds`, returns `Observable<Id64Array>` (flat, filtered), caches per child category internally. **Rename `ModelCategoryElementsCountCache` → `DescendantsCountCache`** — unified request interface for counts
 4. ✅ **No `isChildElementCategory` flag** — use `parentElementId` in extendedData (`undefined` = top-level, value = intermediate). Visibility logic is the same for both.
 5. ✅ **Category visibility change is always global** — toggling any category node (top-level or intermediate) sets the per-model category override. Always/never drawn handles scoping. Flow:
    - Set per-model category override for that category
