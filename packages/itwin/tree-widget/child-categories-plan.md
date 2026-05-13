@@ -15,7 +15,7 @@ Issues: [#1100](https://github.com/iTwin/viewer-components-react/issues/1100), [
 1. **Show intermediate category nodes** in the tree for child elements whose category differs from parent (via hierarchy definition, as normal category instance nodes)
 2. **Rename `ModelCategoryElementsCountCache` → `DescendantsCountCache`** — add `parentElementId` and optional `categoryId` dimensions to get per-category descendant counts on demand
 3. **Extend `AlwaysAndNeverDrawnElementInfoCache`** — filter by element's own `categoryId` (data already exists, just needs filtering)
-4. **Modify `ElementChildrenCache` → `NestedChildrenCache`** — when changing visibility, fetch only nested descendant IDs filtered by specific categories, stored as flat lists
+4. **Modify `ElementChildrenCache` → `NestedChildrenCache`** — when changing visibility, fetch nested descendant IDs grouped by category
 
 ### Tree Structure Change (Before → After)
 
@@ -237,13 +237,13 @@ No additional queries needed — grouping the existing cached data by `entry.cat
 
 ### Modified: `ElementChildrenCache` → renamed `NestedChildrenCache`
 
-**Purpose:** When changing visibility, retrieve IDs of nested descendants filtered by category. Replaces the current `ElementChildrenCache` which loads all descendants into a tree structure.
+**Purpose:** When changing visibility, retrieve IDs of nested descendants for specific categories. Replaces the current `ElementChildrenCache` which loads all descendants into a tree structure.
 
 **Request types:**
 ```typescript
 interface NestedChildrenBaseRequest {
   modelId: ModelId;
-  childCategoryIds: CategoryId[];  // filter: only return descendants with these categories
+  childCategoryIds: CategoryId[];  // which child categories to fetch descendants for
 }
 
 interface NestedChildrenCategoryRequest extends NestedChildrenBaseRequest {
@@ -258,10 +258,24 @@ interface NestedChildrenElementRequest extends NestedChildrenBaseRequest {
 
 Single method: `getNestedChildren(props: NestedChildrenCategoryRequest | NestedChildrenElementRequest)` → `Observable<Id64Array>`
 
-When `categoryId` is provided: recursive walk starts from direct children of `parentElementId` that have `categoryId`, results filtered by `childCategoryIds`.
-When `categoryId` is omitted: recursive walk starts from children of `parentElementId`, results filtered by `childCategoryIds`.
+Returns a flat array of all descendant IDs matching the requested `childCategoryIds`.
 
-**Storage:** `Map<ModelId, Map<ParentId | undefined, Map<CategoryId, Id64Array>>>` — flat lists of element IDs per (model, parent, category) tuple.
+**Incremental caching:** The cache stores results per individual child category. When a request arrives:
+1. Check which `childCategoryIds` are already cached for this `(modelId, parentElementId, categoryId)` key
+2. Query only the missing child categories (filter: `WHERE ownCategory IN (missingCategoryIds)`)
+3. Store each child category's results separately in the cache
+4. Merge all (cached + newly fetched) into flat `Id64Array` and return
+
+**Storage:**
+```typescript
+Map<ModelId, Map<
+  ElementId | undefined,       // parentElementId
+  Map<
+    CategoryId | undefined,    // categoryId (undefined = element request)
+    Map<CategoryId, Id64Array> // childCategoryId → descendant IDs
+  >
+>>
+```
 
 **Query:**
 ```sql
@@ -285,19 +299,19 @@ Descendants(id, modelId, reqParent, reqCategory, ownCategory) AS (
   FROM ${elementClassName} c
   JOIN Descendants p ON c.Parent.Id = p.id
 )
-SELECT modelId, reqParent, reqCategory, id
+SELECT modelId, reqParent, reqCategory, ownCategory, id
 FROM Descendants
-WHERE ownCategory IN (${childCategoryIds})
+WHERE ownCategory IN (${missingChildCategoryIds})
 ```
 
 - Same CTE structure as `DescendantsCountCache`
-- Outer query filters by `childCategoryIds` and returns element IDs instead of counting
+- Outer query filters by only the **missing** child categories and returns element IDs
+- Results stored per child category: `cache[M][reqParent][reqCategory][ownCategory].push(id)`
 
 **Characteristics:**
-- Recursive CTE walks descendants in DB, filters by `childCategoryIds` before returning
+- Incremental: only queries child categories not yet cached
 - Flat list storage — lighter than current tree structure
-- Only fetches descendants of needed categories, not all
-- Worst case (all categories need action) is equivalent to current behavior
+- Subsequent requests with overlapping child categories reuse cached results
 
 ---
 
@@ -386,7 +400,7 @@ Rename `ModelCategoryElementsCountCache` → `DescendantsCountCache`. Implement 
 
 1. ✅ **Intermediate categories shown only when child's category differs from parent's**
 2. ✅ **Intermediate category nodes are normal category instance nodes** (category class depends on tree)
-3. ✅ **Rename `ElementChildrenCache` → `NestedChildrenCache`** — category-filtered flat list storage. **Rename `ModelCategoryElementsCountCache` → `DescendantsCountCache`** — unified request interface for counts
+3. ✅ **Rename `ElementChildrenCache` → `NestedChildrenCache`** — returns `Map<CategoryId, Id64Array>` (mirrors DescendantsCountCache structure). **Rename `ModelCategoryElementsCountCache` → `DescendantsCountCache`** — unified request interface for counts
 4. ✅ **No `isChildElementCategory` flag** — use `parentElementId` in extendedData (`undefined` = top-level, value = intermediate). Visibility logic is the same for both.
 5. ✅ **Category visibility change is always global** — toggling any category node (top-level or intermediate) sets the per-model category override. Always/never drawn handles scoping. Flow:
    - Set per-model category override for that category
