@@ -76,7 +76,7 @@ describe("DescendantsCountCache", () => {
 
     it("returns results for one category and default for another", async () => {
       using vp = createFakeViewport({
-        queryHandler: () => [{ modelId: "0x1", reqParent: undefined, reqCategory: "0x2", ownCategory: "0x2", cnt: 3 }],
+        queryHandler: () => [{ modelId: "0x1", reqParent: null, reqCategory: "0x2", ownCategory: "0x2", cnt: 3 }],
       });
       const cache = createFakeCache(vp);
 
@@ -123,25 +123,8 @@ describe("DescendantsCountCache", () => {
     it("batches mixed category and element requests into single query", async () => {
       using vp = createFakeViewport({
         queryHandler: () => [
-          { modelId: "0x1", reqParent: undefined, reqCategory: "0x2", ownCategory: "0x2", cnt: 2 },
-          { modelId: "0x1", reqParent: "0x10", reqCategory: undefined, ownCategory: "0x3", cnt: 5 },
-        ],
-      });
-      const cache = createFakeCache(vp);
-
-      const promise1 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
-      const promise2 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", parentElementId: "0x10" }));
-      const [result1, result2] = await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(20)]);
-      expect(result1).toEqual([{ categoryId: "0x2", count: 2 }]);
-      expect(result2).toEqual([{ categoryId: "0x3", count: 5 }]);
-      expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
-    });
-
-    it("handles element and category requests for the same parent without dropping categories", async () => {
-      using vp = createFakeViewport({
-        queryHandler: () => [
-          { modelId: "0x1", reqParent: undefined, reqCategory: "0x2", ownCategory: "0x2", cnt: 2 },
-          { modelId: "0x1", reqParent: "0x10", reqCategory: undefined, ownCategory: "0x3", cnt: 5 },
+          { modelId: "0x1", reqParent: null, reqCategory: "0x2", ownCategory: "0x2", cnt: 2 },
+          { modelId: "0x1", reqParent: "0x10", reqCategory: null, ownCategory: "0x3", cnt: 5 },
         ],
       });
       const cache = createFakeCache(vp);
@@ -165,7 +148,7 @@ describe("DescendantsCountCache", () => {
 
     it("caches values returned by query", async () => {
       using vp = createFakeViewport({
-        queryHandler: () => [{ modelId: "0x1", reqParent: undefined, reqCategory: "0x2", ownCategory: "0x2", cnt: 2 }],
+        queryHandler: () => [{ modelId: "0x1", reqParent: null, reqCategory: "0x2", ownCategory: "0x2", cnt: 2 }],
       });
       const cache = createFakeCache(vp);
 
@@ -178,7 +161,7 @@ describe("DescendantsCountCache", () => {
 
     it("caches element request values", async () => {
       using vp = createFakeViewport({
-        queryHandler: () => [{ modelId: "0x1", reqParent: "0x10", reqCategory: undefined, ownCategory: "0x2", cnt: 3 }],
+        queryHandler: () => [{ modelId: "0x1", reqParent: "0x10", reqCategory: null, ownCategory: "0x2", cnt: 3 }],
       });
       const cache = createFakeCache(vp);
 

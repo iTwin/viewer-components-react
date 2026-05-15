@@ -189,20 +189,22 @@ export class DescendantsCountCache {
           return this.executeBatchQuery(valuesToRequest.values).pipe(
             // Cache each row as it arrives, use reduce to emit one value when query completes
             reduce((acc, row) => {
+              const reqParent = row.reqParent ?? undefined;
+              const reqCategory = row.reqCategory ?? undefined;
               let modelEntry = this.#cachedValues.get(row.modelId);
               if (!modelEntry) {
                 modelEntry = new Map();
                 this.#cachedValues.set(row.modelId, modelEntry);
               }
-              let parentEntry = modelEntry.get(row.reqParent);
+              let parentEntry = modelEntry.get(reqParent);
               if (!parentEntry) {
                 parentEntry = new Map();
-                modelEntry.set(row.reqParent, parentEntry);
+                modelEntry.set(reqParent, parentEntry);
               }
-              let categoryEntry = parentEntry.get(row.reqCategory);
+              let categoryEntry = parentEntry.get(reqCategory);
               if (!categoryEntry) {
                 categoryEntry = [];
-                parentEntry.set(row.reqCategory, categoryEntry);
+                parentEntry.set(reqCategory, categoryEntry);
               }
               categoryEntry.push({ categoryId: row.ownCategory, count: row.cnt });
               return acc;
