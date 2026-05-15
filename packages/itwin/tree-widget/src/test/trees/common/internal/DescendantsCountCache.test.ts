@@ -6,11 +6,11 @@
 import { firstValueFrom } from "rxjs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { ModelCategoryElementsCountCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/ModelCategoryElementsCountCache.js";
+import { DescendantsCountCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/DescendantsCountCache.js";
 import { CLASS_NAME_GeometricElement3d } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { createFakeViewport } from "../../Common.js";
 
-describe("ModelCategoryElementsCountCache", () => {
+describe("DescendantsCountCache", () => {
   beforeEach(() => {
     // Use fake timers to reliably advance time in tests
     vi.useFakeTimers();
@@ -21,7 +21,7 @@ describe("ModelCategoryElementsCountCache", () => {
   });
 
   function createCache(viewport: ReturnType<typeof createFakeViewport>) {
-    return new ModelCategoryElementsCountCache({
+    return new DescendantsCountCache({
       queryExecutor: createECSqlQueryExecutor(viewport.iModel),
       componentId: "test",
       elementClassName: CLASS_NAME_GeometricElement3d,
@@ -37,10 +37,7 @@ describe("ModelCategoryElementsCountCache", () => {
     using vp = createFakeViewport();
     const cache = createCache(vp);
 
-    const [result] = await Promise.all([
-      firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" })),
-      vi.advanceTimersByTimeAsync(20),
-    ]);
+    const [result] = await Promise.all([firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" })), vi.advanceTimersByTimeAsync(20)]);
     expect(result).toBe(0);
     expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
   });
@@ -49,10 +46,7 @@ describe("ModelCategoryElementsCountCache", () => {
     using vp = createFakeViewport({ queryHandler: defaultQueryHandler });
     const cache = createCache(vp);
 
-    const [result] = await Promise.all([
-      firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" })),
-      vi.advanceTimersByTimeAsync(20),
-    ]);
+    const [result] = await Promise.all([firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" })), vi.advanceTimersByTimeAsync(20)]);
     expect(result).toBe(2);
     expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
   });
@@ -61,8 +55,8 @@ describe("ModelCategoryElementsCountCache", () => {
     using vp = createFakeViewport({ queryHandler: () => [{ modelId: "0x1", categoryId: "0x2", elementsCount: 3 }] });
     const cache = createCache(vp);
 
-    const promise1 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
-    const promise2 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x3" }));
+    const promise1 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
+    const promise2 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x3" }));
     const [result1, result2] = await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(20)]);
     expect(result1).toBe(3);
     expect(result2).toBe(0);
@@ -73,8 +67,8 @@ describe("ModelCategoryElementsCountCache", () => {
     using vp = createFakeViewport({ queryHandler: defaultQueryHandler });
     const cache = createCache(vp);
 
-    const promise1 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
-    const promise2 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x3" }));
+    const promise1 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
+    const promise2 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x3" }));
     const [result1, result2] = await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(20)]);
     expect(result1).toBe(2);
     expect(result2).toBe(2);
@@ -85,9 +79,9 @@ describe("ModelCategoryElementsCountCache", () => {
     using vp = createFakeViewport({ queryHandler: defaultQueryHandler });
     const cache = createCache(vp);
 
-    const promise1 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
+    const promise1 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
     await vi.advanceTimersByTimeAsync(19);
-    const promise2 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x3" }));
+    const promise2 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x3" }));
     const [result1, result2] = await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(2)]);
     expect(result1).toBe(2);
     expect(result2).toBe(2);
@@ -98,9 +92,9 @@ describe("ModelCategoryElementsCountCache", () => {
     using vp = createFakeViewport({ queryHandler: defaultQueryHandler });
     const cache = createCache(vp);
 
-    const promise1 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
+    const promise1 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
     await vi.advanceTimersByTimeAsync(21);
-    const promise2 = firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x3" }));
+    const promise2 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x3" }));
     const [result1, result2] = await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(20)]);
     expect(result1).toBe(2);
     expect(result2).toBe(2);
@@ -111,11 +105,8 @@ describe("ModelCategoryElementsCountCache", () => {
     using vp = createFakeViewport();
     const cache = createCache(vp);
 
-    const [result1] = await Promise.all([
-      firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" })),
-      vi.advanceTimersByTimeAsync(20),
-    ]);
-    const result2 = await firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
+    const [result1] = await Promise.all([firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" })), vi.advanceTimersByTimeAsync(20)]);
+    const result2 = await firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
     expect(result1).toBe(0);
     expect(result2).toBe(0);
     expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
@@ -125,11 +116,8 @@ describe("ModelCategoryElementsCountCache", () => {
     using vp = createFakeViewport({ queryHandler: defaultQueryHandler });
     const cache = createCache(vp);
 
-    const [result1] = await Promise.all([
-      firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" })),
-      vi.advanceTimersByTimeAsync(20),
-    ]);
-    const result2 = await firstValueFrom(cache.getCategoryElementsCount({ modelId: "0x1", categoryId: "0x2" }));
+    const [result1] = await Promise.all([firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" })), vi.advanceTimersByTimeAsync(20)]);
+    const result2 = await firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
     expect(result1).toBe(2);
     expect(result2).toBe(2);
     expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
@@ -140,7 +128,7 @@ describe("ModelCategoryElementsCountCache", () => {
     const cache = createCache(vp);
     const promises = new Array<Promise<number>>();
     for (let i = 1; i <= 100; ++i) {
-      promises.push(firstValueFrom(cache.getCategoryElementsCount({ modelId: `0x${i}`, categoryId: "0x1000" })));
+      promises.push(firstValueFrom(cache.getDescendantsCounts({ modelId: `0x${i}`, categoryId: "0x1000" })));
     }
     await Promise.all([...promises, vi.advanceTimersByTimeAsync(20)]);
     expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
@@ -151,7 +139,7 @@ describe("ModelCategoryElementsCountCache", () => {
     const cache = createCache(vp);
     const promises = new Array<Promise<number>>();
     for (let i = 1; i <= 101; ++i) {
-      promises.push(firstValueFrom(cache.getCategoryElementsCount({ modelId: `0x${i}`, categoryId: "0x1000" })));
+      promises.push(firstValueFrom(cache.getDescendantsCounts({ modelId: `0x${i}`, categoryId: "0x1000" })));
     }
     await Promise.all([...promises, vi.advanceTimersByTimeAsync(20)]);
     expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);

@@ -16,14 +16,14 @@ import type { ChildrenTree } from "../Utils.js";
 type ChildElementsMap = Map<Id64String, { children: Id64Array | undefined }>;
 type ChildElementsLoadingMap = Map<Id64String, Promise<void>>;
 
-interface ElementChildrenCacheProps {
+interface ChildElementsCacheProps {
   queryExecutor: LimitingECSqlQueryExecutor;
   elementClassName: string;
   componentId: GuidString;
 }
 
 /** @internal */
-export class ElementChildrenCache {
+export class ChildElementsCache {
   #queryExecutor: LimitingECSqlQueryExecutor;
   readonly #elementClassName: string;
   #componentId: GuidString;
@@ -32,11 +32,11 @@ export class ElementChildrenCache {
   /** Stores element ids which have children query scheduled to execute. */
   #childElementsLoadingMap: ChildElementsLoadingMap;
 
-  constructor(props: ElementChildrenCacheProps) {
+  constructor(props: ChildElementsCacheProps) {
     this.#queryExecutor = props.queryExecutor;
     this.#elementClassName = props.elementClassName;
     this.#componentId = props.componentId;
-    this.#componentName = "ElementChildrenCache";
+    this.#componentName = "ChildElementsCache";
     this.#childElementsMap = new Map();
     this.#childElementsLoadingMap = new Map();
   }
