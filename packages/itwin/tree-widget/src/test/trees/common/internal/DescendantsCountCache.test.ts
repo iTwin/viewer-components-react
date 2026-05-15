@@ -20,7 +20,7 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { DescendantsCountCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/DescendantsCountCache1.js";
+import { DescendantsCountCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/DescendantsCountCache.js";
 import { CLASS_NAME_GeometricElement3d } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { buildIModel } from "../../../IModelUtils.js";
 import { createFakeViewport } from "../../Common.js";
