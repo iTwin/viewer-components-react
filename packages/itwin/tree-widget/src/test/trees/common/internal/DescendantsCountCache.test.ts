@@ -314,7 +314,7 @@ describe("DescendantsCountCache", () => {
             { categoryId: keys.catA.id, count: 1 },
           ]),
         );
-        // Even though there are nested children el1 with catA, but they it does not have any direct children with catA, so count is 0
+        // Even though el1 has nested children with catA, it does not have any direct children with catA, so count is 0
         expect(resultCatA).toEqual([{ categoryId: keys.catA.id, count: 0 }]);
       });
     });
