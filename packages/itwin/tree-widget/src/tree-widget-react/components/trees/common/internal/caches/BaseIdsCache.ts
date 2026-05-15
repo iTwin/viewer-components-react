@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { mergeAll, mergeMap, of, toArray } from "rxjs";
+import { map, mergeAll, mergeMap, of, toArray } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
 import { ChildElementsCache } from "./ChildElementsCache.js";
 import { DescendantsCountCache } from "./DescendantsCountCache.js";
@@ -131,9 +131,9 @@ export class BaseIdsCache {
     return this.#descendantsCountCache.getDescendantsCounts(props);
   }
 
-  // public getElementsCount(props: { modelId: Id64String; categoryId: Id64String }): Observable<number> {
-  //   return this.#descendantsCountCache.getDescendantsCounts(props).pipe(map((counts) => counts.reduce((sum, entry) => sum + entry.count, 0)));
-  // }
+  public getElementsCount(props: { modelId: Id64String; categoryId: Id64String }): Observable<number> {
+    return this.#descendantsCountCache.getDescendantsCounts(props).pipe(map((counts) => counts.reduce((sum, entry) => sum + entry.count, 0)));
+  }
 
   // ChildElementsCache methods
 
@@ -210,12 +210,12 @@ export class BaseIdsCacheImpl {
     return this.#baseIdsCache.getSubModelsUnderElement(props);
   }
 
-  // public getDescendantsCounts(props: Props<DescendantsCountCache["getDescendantsCounts"]>): ReturnType<DescendantsCountCache["getDescendantsCounts"]> {
-  //   return this.#baseIdsCache.getDescendantsCounts(props);
-  // }
+  public getDescendantsCounts(props: Props<DescendantsCountCache["getDescendantsCounts"]>): ReturnType<DescendantsCountCache["getDescendantsCounts"]> {
+    return this.#baseIdsCache.getDescendantsCounts(props);
+  }
 
   public getElementsCount(props: { modelId: Id64String; categoryId: Id64String }): Observable<number> {
-    return this.#baseIdsCache.getDescendantsCounts(props);
+    return this.#baseIdsCache.getElementsCount(props);
   }
 
   public getCategories(props: Props<ElementModelCategoriesCache["getModelCategoryIds"]>): ReturnType<ElementModelCategoriesCache["getModelCategoryIds"]> {
