@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, defer, from, map, mergeMap, of, reduce, shareReplay, switchMap, tap, timer } from "rxjs";
+import { bufferCount, defer, EMPTY, from, map, mergeMap, of, reduce, shareReplay, switchMap, tap, timer } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
 import { releaseMainThreadOnItemsCount } from "../Utils.js";
@@ -122,7 +122,7 @@ export class DescendantsCountCache {
         }
 
         if (baseCases.length === 0) {
-          return of();
+          return EMPTY;
         }
 
         return defer(() =>
