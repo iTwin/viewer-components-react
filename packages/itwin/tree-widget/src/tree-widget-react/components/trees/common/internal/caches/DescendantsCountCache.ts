@@ -81,16 +81,20 @@ export class DescendantsCountCache {
     return from(valuesToRequest.entries()).pipe(
       mergeMap(([modelId, parentMap]) =>
         from(parentMap.entries()).pipe(
-          map(([parentElementId, categoryIds]) => {
+          mergeMap(([parentElementId, categoryIds]) => {
+            const clauses: Array<{ whereClause: string; type: "element" | "category" }> = [];
             if (categoryIds.has(undefined)) {
               assert(parentElementId !== undefined);
-              return { whereClause: `Model.Id = ${modelId} AND Parent.Id = ${parentElementId}`, type: "element" as const };
+              clauses.push({ whereClause: `Model.Id = ${modelId} AND Parent.Id = ${parentElementId}`, type: "element" });
             }
-            assert(categoryIds.has(undefined) === false);
-            return {
-              whereClause: `Model.Id = ${modelId} AND Category.Id IN (${[...categoryIds].join(", ")}) ${parentElementId === undefined ? "AND Parent.Id IS NULL" : `AND Parent.Id = ${parentElementId}`}`,
-              type: "category" as const,
-            };
+            const concreteCategoryIds = [...categoryIds].filter((id): id is CategoryId => id !== undefined);
+            if (concreteCategoryIds.length > 0) {
+              clauses.push({
+                whereClause: `Model.Id = ${modelId} AND Category.Id IN (${concreteCategoryIds.join(", ")}) ${parentElementId === undefined ? "AND Parent.Id IS NULL" : `AND Parent.Id = ${parentElementId}`}`,
+                type: "category",
+              });
+            }
+            return from(clauses);
           }),
         ),
       ),

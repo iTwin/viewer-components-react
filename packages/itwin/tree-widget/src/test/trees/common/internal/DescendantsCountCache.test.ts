@@ -137,6 +137,21 @@ describe("DescendantsCountCache", () => {
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
     });
 
+    it("handles element and category requests for the same parent without dropping categories", async () => {
+      using vp = createFakeViewport({
+        queryHandler: () => [
+          { modelId: "0x1", reqParent: undefined, reqCategory: "0x2", ownCategory: "0x2", cnt: 2 },
+          { modelId: "0x1", reqParent: "0x10", reqCategory: undefined, ownCategory: "0x3", cnt: 5 },
+        ],
+      });
+      const cache = createFakeCache(vp);
+
+      const promise1 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
+      const promise2 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", parentElementId: "0x10" }));
+      await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(20)]);
+      expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
+    });
+
     it("caches empty values", async () => {
       using vp = createFakeViewport();
       const cache = createFakeCache(vp);
@@ -390,6 +405,38 @@ describe("DescendantsCountCache", () => {
             { categoryId: keys.catB.id, count: 2 },
           ]),
         );
+      });
+
+      it("handles concurrent element and category requests for the same parent", async () => {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
+            const catA = insertSpatialCategory({ txn, codeValue: "catA" });
+            const catB = insertSpatialCategory({ txn, codeValue: "catB" });
+            const el1 = insertPhysicalElement({ txn, modelId: model.id, categoryId: catA.id });
+            // children under el1
+            insertPhysicalElement({ txn, modelId: model.id, categoryId: catA.id, parentId: el1.id });
+            insertPhysicalElement({ txn, modelId: model.id, categoryId: catB.id, parentId: el1.id });
+            insertPhysicalElement({ txn, modelId: model.id, categoryId: catB.id, parentId: el1.id });
+            return { model, catA, catB, el1 };
+          }),
+        );
+        const { imodelConnection, ...keys } = buildIModelResult;
+        const cache = createCache(imodelConnection);
+
+        // Request both element counts and a specific category count for the same parent simultaneously
+        const [elementResult, categoryResult] = await Promise.all([
+          firstValueFrom(cache.getDescendantsCounts({ modelId: keys.model.id, parentElementId: keys.el1.id })),
+          firstValueFrom(cache.getDescendantsCounts({ modelId: keys.model.id, categoryId: keys.catA.id, parentElementId: keys.el1.id })),
+        ]);
+
+        expect(elementResult).toEqual(
+          expect.arrayContaining([
+            { categoryId: keys.catA.id, count: 1 },
+            { categoryId: keys.catB.id, count: 2 },
+          ]),
+        );
+        expect(categoryResult).toEqual(expect.arrayContaining([{ categoryId: keys.catA.id, count: 1 }]));
       });
     });
   });
