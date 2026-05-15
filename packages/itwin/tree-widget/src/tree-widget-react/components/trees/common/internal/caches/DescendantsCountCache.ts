@@ -21,7 +21,7 @@ type RequestId = string;
  * Cache makes requests in batches of 20ms.
  * @internal
  */
-export class ModelCategoryElementsCountCache {
+export class DescendantsCountCache {
   // When a new request is made:
   // - If the value is already cached (#cachedValues), returns it.
   // - If it's already requested (#requestedValues), pipe through the observable. When observable emits, the cached value can be retrieved,
@@ -41,7 +41,7 @@ export class ModelCategoryElementsCountCache {
     this.#componentId = props.componentId;
     this.#queryExecutor = props.queryExecutor;
     this.#elementClassName = props.elementClassName;
-    this.#componentName = "ModelCategoryElementsCountCache";
+    this.#componentName = "DescendantsCountCache";
   }
 
   private getCachedValueAfterObservable({
@@ -100,7 +100,7 @@ export class ModelCategoryElementsCountCache {
             {
               rowFormat: "ECSqlPropertyNames",
               limit: "unbounded",
-              restartToken: `${this.#componentName}/${this.#componentId}/category-element-counts/${Guid.createValue()}`,
+              restartToken: `${this.#componentName}/${this.#componentId}/descendants-counts/${Guid.createValue()}`,
             },
           ),
         ).pipe(catchBeSQLiteInterrupts),
@@ -109,7 +109,7 @@ export class ModelCategoryElementsCountCache {
     );
   }
 
-  public getCategoryElementsCount({ modelId, categoryId }: { modelId: Id64String; categoryId: Id64String }): Observable<number> {
+  public getDescendantsCounts({ modelId, categoryId }: { modelId: Id64String; categoryId: Id64String }): Observable<number> {
     const cachedValue = this.#cachedValues.get(modelId)?.get(categoryId);
     // Cached values can be returned immediately
     if (cachedValue !== undefined) {
