@@ -3,20 +3,36 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, defer, from, map, mergeMap, of, reduce, shareReplay, switchMap, tap, timer } from "rxjs";
+import { bufferCount, defer, EMPTY, from, map, mergeMap, of, reduce, shareReplay, switchMap, tap, timer } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
 import { releaseMainThreadOnItemsCount } from "../Utils.js";
 
 import type { Observable } from "rxjs";
-import type { GuidString, Id64String } from "@itwin/core-bentley";
+import type { GuidString } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { CategoryId, ModelId } from "../Types.js";
+import type { CategoryId, ElementId, ModelId } from "../Types.js";
 
 type RequestId = string;
 
+interface DescendantsCountBaseRequest {
+  modelId: ModelId;
+}
+
+interface DescendantsCountCategoryRequest extends DescendantsCountBaseRequest {
+  categoryId: CategoryId;
+  parentElementId?: ElementId; // undefined = root level
+}
+
+interface DescendantsCountElementRequest extends DescendantsCountBaseRequest {
+  parentElementId: ElementId;
+  categoryId?: undefined;
+}
+
+type RequestEntry = Map<ModelId, Map<ElementId | undefined, Set<CategoryId | undefined>>>;
+
 /**
- * Cache used to store count of elements under root categories.
+ * Cache used to store count of descendants grouped by category.
  *
  * Cache makes requests in batches of 20ms.
  * @internal
@@ -29,9 +45,9 @@ export class DescendantsCountCache {
   // #valuesToRequest observable waits for 20ms, then adds the observable value to #requestedValues and starts the query.
   // When the query completes the observable removes the value from #requestedValues.
 
-  #cachedValues = new Map<ModelId, Map<CategoryId, number>>();
-  #valuesToRequest: { values: Map<ModelId, Set<CategoryId>>; sharedObs: Observable<void> } | undefined;
-  #requestedValues = new Map<RequestId, { values: Map<ModelId, Set<CategoryId>>; sharedObs: Observable<void> }>();
+  #cachedValues = new Map<ModelId, Map<ElementId | undefined, Map<CategoryId | undefined, Array<{ categoryId: CategoryId; count: number }>>>>();
+  #valuesToRequest: { values: RequestEntry; sharedObs: Observable<void> } | undefined;
+  #requestedValues = new Map<RequestId, { values: RequestEntry; sharedObs: Observable<void> }>();
   #queryExecutor: LimitingECSqlQueryExecutor;
   #elementClassName: string;
   #componentId: GuidString;
@@ -47,54 +63,88 @@ export class DescendantsCountCache {
   private getCachedValueAfterObservable({
     modelId,
     categoryId,
+    parentElementId,
     observable,
   }: {
-    modelId: ModelId;
-    categoryId: CategoryId;
     observable: Observable<void>;
-  }): Observable<number> {
+  } & (DescendantsCountElementRequest | DescendantsCountCategoryRequest)): Observable<Array<{ categoryId: CategoryId; count: number }>> {
     return observable.pipe(
       map(() => {
-        const entry = this.#cachedValues.get(modelId)?.get(categoryId);
+        const entry = this.#cachedValues.get(modelId)?.get(parentElementId)?.get(categoryId);
         assert(entry !== undefined);
         return entry;
       }),
     );
   }
 
-  private executeBatchQuery(valuesToRequest: Map<ModelId, Set<CategoryId>>) {
+  private executeBatchQuery(valuesToRequest: RequestEntry) {
     return from(valuesToRequest.entries()).pipe(
-      map(([modelId, categoryIds]) => `Model.Id = ${modelId} AND Category.Id IN (${[...categoryIds].join(", ")})`),
-      // we may have thousands of where clauses here, and sending a single query with all of them could take a
-      // long time - instead, split it into smaller chunks
+      mergeMap(([modelId, parentMap]) =>
+        from(parentMap.entries()).pipe(
+          mergeMap(([parentElementId, categoryIds]) => {
+            const clauses: Array<{ whereClause: string; type: "element" | "category" }> = [];
+            if (categoryIds.has(undefined)) {
+              assert(parentElementId !== undefined);
+              clauses.push({ whereClause: `Model.Id = ${modelId} AND Parent.Id = ${parentElementId}`, type: "element" });
+            }
+            const concreteCategoryIds = [...categoryIds].filter((id): id is CategoryId => id !== undefined);
+            if (concreteCategoryIds.length > 0) {
+              clauses.push({
+                whereClause: `Model.Id = ${modelId} AND Category.Id IN (${concreteCategoryIds.join(", ")}) ${parentElementId === undefined ? "AND Parent.Id IS NULL" : `AND Parent.Id = ${parentElementId}`}`,
+                type: "category",
+              });
+            }
+            return from(clauses);
+          }),
+        ),
+      ),
       bufferCount(100),
-      mergeMap((whereClauses) =>
-        defer(() =>
+      mergeMap((whereClauses) => {
+        const categoryWhereClauses = whereClauses.filter((c) => c.type === "category").map((c) => c.whereClause);
+        const elementWhereClauses = whereClauses.filter((c) => c.type === "element").map((c) => c.whereClause);
+
+        const baseCases: string[] = [];
+
+        if (categoryWhereClauses.length > 0) {
+          baseCases.push(`
+            SELECT ECInstanceId, Model.Id, Parent.Id, Category.Id, Category.Id
+            FROM ${this.#elementClassName}
+            WHERE ${categoryWhereClauses.join(" OR ")}
+          `);
+        }
+
+        if (elementWhereClauses.length > 0) {
+          baseCases.push(`
+            SELECT ECInstanceId, Model.Id, Parent.Id, CAST(NULL AS TEXT), Category.Id
+            FROM ${this.#elementClassName}
+            WHERE ${elementWhereClauses.join(" OR ")}
+          `);
+        }
+
+        if (baseCases.length === 0) {
+          return EMPTY;
+        }
+
+        return defer(() =>
           this.#queryExecutor.createQueryReader(
             {
               ctes: [
                 `
-                CategoryElements(id, modelId, categoryId) AS (
-                  SELECT ECInstanceId, Model.Id, Category.Id
-                  FROM ${this.#elementClassName}
-                  WHERE
-                    Parent.Id IS NULL
-                    AND (
-                      ${whereClauses.join(" OR ")}
-                    )
+                Descendants(id, modelId, reqParent, reqCategory, ownCategory) AS (
+                  ${baseCases.join(" UNION ALL ")}
 
                   UNION ALL
 
-                  SELECT c.ECInstanceId, p.modelId, p.categoryId
+                  SELECT c.ECInstanceId, p.modelId, p.reqParent, p.reqCategory, c.Category.Id
                   FROM ${this.#elementClassName} c
-                  JOIN CategoryElements p ON c.Parent.Id = p.id
+                  JOIN Descendants p ON c.Parent.Id = p.id
                 )
-              `,
+                `,
               ],
               ecsql: `
-                SELECT modelId, categoryId, COUNT(id) elementsCount
-                FROM (SELECT * FROM CategoryElements)
-                GROUP BY modelId, categoryId
+                SELECT modelId, reqParent, reqCategory, ownCategory, COUNT(*) as cnt
+                FROM Descendants
+                GROUP BY modelId, reqParent, reqCategory, ownCategory
               `,
             },
             {
@@ -103,14 +153,16 @@ export class DescendantsCountCache {
               restartToken: `${this.#componentName}/${this.#componentId}/descendants-counts/${Guid.createValue()}`,
             },
           ),
-        ).pipe(catchBeSQLiteInterrupts),
-      ),
+        ).pipe(catchBeSQLiteInterrupts);
+      }),
       releaseMainThreadOnItemsCount(500),
     );
   }
 
-  public getDescendantsCounts({ modelId, categoryId }: { modelId: Id64String; categoryId: Id64String }): Observable<number> {
-    const cachedValue = this.#cachedValues.get(modelId)?.get(categoryId);
+  public getDescendantsCounts(
+    props: DescendantsCountCategoryRequest | DescendantsCountElementRequest,
+  ): Observable<Array<{ categoryId: CategoryId; count: number }>> {
+    const cachedValue = this.#cachedValues.get(props.modelId)?.get(props.parentElementId)?.get(props.categoryId);
     // Cached values can be returned immediately
     if (cachedValue !== undefined) {
       return of(cachedValue);
@@ -118,8 +170,8 @@ export class DescendantsCountCache {
 
     // Check if value was already requested. If it was, wait for requested observable to emit and then return the value from cache
     for (const { values, sharedObs: obs } of this.#requestedValues.values()) {
-      if (values.get(modelId)?.has(categoryId)) {
-        return this.getCachedValueAfterObservable({ modelId, categoryId, observable: obs });
+      if (values.get(props.modelId)?.get(props.parentElementId)?.has(props.categoryId)) {
+        return this.getCachedValueAfterObservable({ ...props, observable: obs });
       }
     }
 
@@ -137,25 +189,43 @@ export class DescendantsCountCache {
           return this.executeBatchQuery(valuesToRequest.values).pipe(
             // Cache each row as it arrives, use reduce to emit one value when query completes
             reduce((acc, row) => {
-              const modelEntry = this.#cachedValues.get(row.modelId);
-              if (modelEntry) {
-                modelEntry.set(row.categoryId, row.elementsCount);
-              } else {
-                this.#cachedValues.set(row.modelId, new Map([[row.categoryId, row.elementsCount]]));
+              const reqParent = row.reqParent ?? undefined;
+              const reqCategory = row.reqCategory ?? undefined;
+              let modelEntry = this.#cachedValues.get(row.modelId);
+              if (!modelEntry) {
+                modelEntry = new Map();
+                this.#cachedValues.set(row.modelId, modelEntry);
               }
+              let parentEntry = modelEntry.get(reqParent);
+              if (!parentEntry) {
+                parentEntry = new Map();
+                modelEntry.set(reqParent, parentEntry);
+              }
+              let categoryEntry = parentEntry.get(reqCategory);
+              if (!categoryEntry) {
+                categoryEntry = [];
+                parentEntry.set(reqCategory, categoryEntry);
+              }
+              categoryEntry.push({ categoryId: row.ownCategory, count: row.cnt });
               return acc;
             }, undefined),
             tap(() => {
-              for (const [entryModelId, entryCategoryIds] of valuesToRequest.values.entries()) {
+              for (const [entryModelId, parentMap] of valuesToRequest.values.entries()) {
                 let modelEntry = this.#cachedValues.get(entryModelId);
                 if (!modelEntry) {
                   modelEntry = new Map();
                   this.#cachedValues.set(entryModelId, modelEntry);
                 }
-                for (const entryCategoryId of entryCategoryIds) {
-                  // Make sure that all requested categories have an entry in the cache
-                  if (!modelEntry.has(entryCategoryId)) {
-                    modelEntry.set(entryCategoryId, 0);
+                for (const [parentElementId, categoryIds] of parentMap) {
+                  let parentEntry = modelEntry.get(parentElementId);
+                  if (!parentEntry) {
+                    parentEntry = new Map();
+                    modelEntry.set(parentElementId, parentEntry);
+                  }
+                  for (const entryCategoryId of categoryIds) {
+                    if (!parentEntry.has(entryCategoryId)) {
+                      parentEntry.set(entryCategoryId, entryCategoryId === undefined ? [] : [{ categoryId: entryCategoryId, count: 0 }]);
+                    }
                   }
                 }
               }
@@ -170,18 +240,21 @@ export class DescendantsCountCache {
         }),
         shareReplay(1),
       );
-      this.#valuesToRequest = { values: new Map([[modelId, new Set([categoryId])]]), sharedObs };
-      return this.getCachedValueAfterObservable({ modelId, categoryId, observable: this.#valuesToRequest.sharedObs });
+      this.#valuesToRequest = { values: new Map([[props.modelId, new Map([[props.parentElementId, new Set([props.categoryId])]])]]), sharedObs };
+      return this.getCachedValueAfterObservable({ ...props, observable: this.#valuesToRequest.sharedObs });
     }
 
-    let categoryIds = this.#valuesToRequest.values.get(modelId);
-    if (!categoryIds) {
-      categoryIds = new Set([categoryId]);
-      this.#valuesToRequest.values.set(modelId, categoryIds);
-    } else {
-      categoryIds.add(categoryId);
+    let existingModelEntry = this.#valuesToRequest.values.get(props.modelId);
+    if (!existingModelEntry) {
+      existingModelEntry = new Map();
+      this.#valuesToRequest.values.set(props.modelId, existingModelEntry);
     }
-
-    return this.getCachedValueAfterObservable({ modelId, categoryId, observable: this.#valuesToRequest.sharedObs });
+    let existingParentEntry = existingModelEntry.get(props.parentElementId);
+    if (!existingParentEntry) {
+      existingParentEntry = new Set();
+      existingModelEntry.set(props.parentElementId, existingParentEntry);
+    }
+    existingParentEntry.add(props.categoryId);
+    return this.getCachedValueAfterObservable({ ...props, observable: this.#valuesToRequest.sharedObs });
   }
 }

@@ -28,17 +28,17 @@ describe("ModelsTreeIdsCache", () => {
   it("caches category element count", async () => {
     const modelId = "0x1";
     const categoryId = "0x2";
-    const elementIds = ["0x10", "0x20", "0x30"];
+    const elementCount = 3;
     const stub = vi.fn((query: string) => {
-      if (query.includes(`WHERE Parent.Id IS NULL AND (Model.Id = ${modelId} AND Category.Id IN (${categoryId}))`)) {
-        return [{ modelId, categoryId, elementsCount: elementIds.length }];
+      if (query.includes("Descendants") && query.includes(`Model.Id = ${modelId} AND Category.Id IN (${categoryId}) AND Parent.Id IS NULL `)) {
+        return [{ modelId, reqParent: null, reqCategory: categoryId, ownCategory: categoryId, cnt: elementCount }];
       }
       throw new Error(`Unexpected query: ${query}`);
     });
     const cache = createIdsCache(stub);
-    await expect(firstValueFrom(cache.getElementsCount({ modelId, categoryId }))).resolves.toBe(elementIds.length);
+    await expect(firstValueFrom(cache.getElementsCount({ modelId, categoryId }))).resolves.toBe(elementCount);
     expect(stub).toHaveBeenCalledOnce();
-    await expect(firstValueFrom(cache.getElementsCount({ modelId, categoryId }))).resolves.toBe(elementIds.length);
+    await expect(firstValueFrom(cache.getElementsCount({ modelId, categoryId }))).resolves.toBe(elementCount);
     expect(stub).toHaveBeenCalledOnce();
   });
 
@@ -46,12 +46,13 @@ describe("ModelsTreeIdsCache", () => {
     const modelId = "0x1";
     const categoryId = "0x2";
     const categoryId2 = "0x3";
-    const elementIds = ["0x10", "0x20", "0x30"];
+    const elementCount1 = 3;
+    const elementCount2 = 4;
     const stub = vi.fn((query: string) => {
-      if (query.includes(`WHERE Parent.Id IS NULL AND (Model.Id = ${modelId} AND Category.Id IN (${categoryId}, ${categoryId2}))`)) {
+      if (query.includes("Descendants") && query.includes(`Model.Id = ${modelId} AND Category.Id IN (${categoryId}, ${categoryId2}) AND Parent.Id IS NULL`)) {
         return [
-          { modelId, categoryId, elementsCount: elementIds.length },
-          { modelId, categoryId: categoryId2, elementsCount: elementIds.length + 1 },
+          { modelId, reqParent: null, reqCategory: categoryId, ownCategory: categoryId, cnt: elementCount1 },
+          { modelId, reqParent: null, reqCategory: categoryId2, ownCategory: categoryId2, cnt: elementCount2 },
         ];
       }
       throw new Error(`Unexpected query: ${query}`);
@@ -60,8 +61,8 @@ describe("ModelsTreeIdsCache", () => {
     const obs1 = cache.getElementsCount({ modelId, categoryId });
     const obs2 = cache.getElementsCount({ modelId, categoryId: categoryId2 });
     const [count1, count2] = await Promise.all([firstValueFrom(obs1), firstValueFrom(obs2)]);
-    expect(count1).toBe(elementIds.length);
-    expect(count2).toBe(elementIds.length + 1);
+    expect(count1).toBe(elementCount1);
+    expect(count2).toBe(elementCount2);
     expect(stub).toHaveBeenCalledOnce();
   });
 });
