@@ -80,10 +80,10 @@ export interface FavoritePropertiesContextMenuItemProps extends DefaultContextMe
 }
 
 // @public
-export interface FilteringPropertyGridProps extends React.ComponentProps<typeof VirtualizedPropertyGridWithDataProvider> {
+export type FilteringPropertyGridProps = React.ComponentProps<typeof VirtualizedPropertyGridWithDataProvider> & {
     autoExpandChildCategories?: boolean;
     filterer: IPropertyDataFilterer;
-}
+};
 
 // @public
 export class IModelAppUserPreferencesStorage implements PreferencesStorage {
