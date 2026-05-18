@@ -31,12 +31,12 @@ import type {
  * Properties for rendering a `FilteringPropertyGrid`.
  * @public
  */
-export interface FilteringPropertyGridProps extends React.ComponentProps<typeof VirtualizedPropertyGridWithDataProvider> {
+export type FilteringPropertyGridProps = React.ComponentProps<typeof VirtualizedPropertyGridWithDataProvider> & {
   /** Specifies whether child categories should be auto expanded or not. */
   autoExpandChildCategories?: boolean;
   /** Filterer used to filter data. */
   filterer: IPropertyDataFilterer;
-}
+};
 
 /**
  * Creates a filtered data provider before rendering a `VirtualizedPropertyGridWithDataProvider`.
