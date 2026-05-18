@@ -72,11 +72,14 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
     return entry;
   }
 
-  protected getValuesToRequest(request: DescendantsCountRequest, batch: Batch): DescendantsCountRequest | undefined {
+  protected getValuesNotInBatch(
+    request: DescendantsCountRequest,
+    batch: Batch,
+  ): { valuesNotInBatch: DescendantsCountRequest; batchContainsValues: boolean } | { valuesNotInBatch: undefined; batchContainsValues: true } {
     if (batch.get(request.modelId)?.get(request.parentElementId)?.has(request.categoryId)) {
-      return undefined;
+      return { valuesNotInBatch: undefined, batchContainsValues: true };
     }
-    return request;
+    return { valuesNotInBatch: request, batchContainsValues: false };
   }
 
   protected createBatch(): Batch {
