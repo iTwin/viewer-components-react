@@ -121,8 +121,11 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
     getElementsCount: vi.fn(({ categoryId }: { modelId: Id64String; categoryId: Id64String }) => {
       return of(props?.categoryElements?.get(categoryId)?.length ?? 0);
     }),
-    getChildElementsTree: vi.fn(() => {
-      return of(new Map());
+    getDescendantsCounts: vi.fn(() => {
+      return of([]);
+    }),
+    getChildElements: vi.fn(() => {
+      return of([]);
     }),
     getAllChildElementsCount: vi.fn(() => {
       return of(new Map());
