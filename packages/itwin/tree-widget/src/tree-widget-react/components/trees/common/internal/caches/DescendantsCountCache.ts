@@ -66,12 +66,6 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
     return this.#cachedValues.get(request.modelId)?.get(request.parentElementId)?.get(request.categoryId);
   }
 
-  protected getGuaranteedCachedValue(request: DescendantsCountRequest): DescendantsCountResult {
-    const entry = this.#cachedValues.get(request.modelId)?.get(request.parentElementId)?.get(request.categoryId);
-    assert(entry !== undefined);
-    return entry;
-  }
-
   protected getValuesNotInBatch(
     request: DescendantsCountRequest,
     batch: Batch,

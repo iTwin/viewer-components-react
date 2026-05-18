@@ -53,9 +53,6 @@ export abstract class BatchingCache<TRequest, TBatch, TResult, TItem, TRow> {
   /** Return the cached result if available, or `undefined` if not cached. */
   protected abstract getCachedValue(request: TRequest): TResult | undefined;
 
-  /** Return the result from cache. Called after the batch observable has completed - value is guaranteed to be cached. */
-  protected abstract getGuaranteedCachedValue(request: TRequest): TResult;
-
   /**
    * Return the portion of the request which needs to be requested (not in batch or cache).
    * Returns `undefined` if the entire request is already in the batch.
@@ -153,6 +150,12 @@ export abstract class BatchingCache<TRequest, TBatch, TResult, TItem, TRow> {
   }
 
   private getResultAfterObservable(request: TRequest, observable: Observable<void>): Observable<TResult> {
-    return observable.pipe(map(() => this.getGuaranteedCachedValue(request)));
+    return observable.pipe(
+      map(() => {
+        const cachedValue = this.getCachedValue(request);
+        assert(cachedValue !== undefined);
+        return cachedValue;
+      }),
+    );
   }
 }
