@@ -118,35 +118,43 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
           from(searchTargetElements).pipe(
             mergeMap(({ modelId, elementId }) =>
               forkJoin({
-                modelId: of(modelId),
                 elementId: of(elementId),
                 childCategoryIds: this.#props.idsCache
                   .getDescendantsCounts({ parentElementId: elementId, modelId })
                   .pipe(map((countsArr) => countsArr.map(({ categoryId }) => categoryId))),
-              }),
+              }).pipe(
+                mergeMap(({ elementId: eid, childCategoryIds }) =>
+                  this.#props.idsCache
+                    .getChildElements({ parentElementId: eid, modelId, childCategoryIds })
+                    .pipe(map((children) => ({ elementId: eid, children }))),
+                ),
+              ),
             ),
-            mergeMap(({ modelId, elementId, childCategoryIds }) =>
-              this.#props.idsCache.getChildElements({ parentElementId: elementId, modelId, childCategoryIds }),
-            ),
-            reduce((acc, childElements) => {
-              acc.push(...childElements);
+            reduce((acc, { elementId, children }) => {
+              acc.set(elementId, children);
               return acc;
-            }, new Array<ElementId>()),
-            // Need to filter out and keep only those children ids that are not part of elements that are present in search paths.
-            // Elements in search paths will have their visibility changed directly: they will be provided as elementIds to changeElementsVisibilityStatus.
-            map((childElements) => ({
-              childrenNotInSearchPaths: setDifference(new Set(childElements), elementIdsSet),
-            })),
-            mergeMap(({ childrenNotInSearchPaths }) =>
+            }, new Map<ElementId, Array<ElementId>>()),
+            mergeMap((childrenByElement) =>
               fromWithRelease({ source: modelCategoryElementMap.entries(), size: modelCategoryElementMap.size, releaseOnCount: 50 }).pipe(
                 mergeMap(([key, elementsInSearchPathsGroupedByModelAndCategory]) => {
                   const [modelId, categoryId] = key.split("-");
+                  // Union only the children of elements that belong to this group.
+                  const childrenIds = new Set<Id64String>();
+                  for (const elementId of elementsInSearchPathsGroupedByModelAndCategory) {
+                    const elementChildren = childrenByElement.get(elementId);
+                    if (!elementChildren) {
+                      continue;
+                    }
+                    for (const childId of elementChildren) {
+                      childrenIds.add(childId);
+                    }
+                  }
                   return this.#visibilityHelper.changeElementsVisibilityStatus({
                     modelId,
                     categoryId,
                     elementIds: elementsInSearchPathsGroupedByModelAndCategory,
                     // Pass only those children that are not part of search paths.
-                    children: childrenNotInSearchPaths,
+                    children: setDifference(childrenIds, elementIdsSet),
                     on,
                   });
                 }),
