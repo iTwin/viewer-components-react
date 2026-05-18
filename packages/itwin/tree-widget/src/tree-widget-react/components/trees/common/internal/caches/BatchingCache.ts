@@ -32,14 +32,14 @@ export interface BatchingCacheProps {
  *
  * @internal
  */
-export abstract class BatchingCache<TRequest, TBatch, TResult, TItem, TRow> {
+export abstract class BatchingCache<TRequest, TResult, TItem, TRow> {
   // When a new request is made:
   // - If the value is already cached, returns it immediately.
   // - If it's already in-flight (#requestedValues), subscribes to the same observable.
   // - Otherwise, adds to #valuesToRequest. After timer fires, the batch executes and caches results.
 
-  #valuesToRequest: { values: TBatch; sharedObs: Observable<void> } | undefined;
-  #requestedValues = new Map<RequestId, { values: TBatch; sharedObs: Observable<void> }>();
+  #valuesToRequest: { values: TRequest[]; sharedObs: Observable<void> } | undefined;
+  #requestedValues = new Map<RequestId, { values: TRequest[]; sharedObs: Observable<void> }>();
   #bufferSize: number;
   #timerDelay: number;
   #releaseOnCount: number;
@@ -60,17 +60,11 @@ export abstract class BatchingCache<TRequest, TBatch, TResult, TItem, TRow> {
    */
   protected abstract getValuesNotInBatch(
     request: TRequest,
-    batch: TBatch,
+    batch: TRequest[],
   ): { valuesNotInBatch: TRequest; batchContainsValues: boolean } | { valuesNotInBatch: undefined; batchContainsValues: true };
 
-  /** Create a new empty batch. */
-  protected abstract createBatch(): TBatch;
-
-  /** Add a request to an existing batch. */
-  protected abstract addRequestToBatch(request: TRequest, batch: TBatch): void;
-
   /** Produce the items from a batch that will be buffered and passed to `executeQuery`. */
-  protected abstract getIterable(batch: TBatch): Observable<TItem>;
+  protected abstract getIterable(batch: TRequest[]): Observable<TItem>;
 
   /** Execute a query for a buffer of items. Returns an observable of result rows. */
   protected abstract executeQuery(items: TItem[]): Observable<TRow>;
@@ -79,7 +73,7 @@ export abstract class BatchingCache<TRequest, TBatch, TResult, TItem, TRow> {
   protected abstract insertRow(row: TRow): void;
 
   /** Ensure default/empty cache entries exist for all values in the batch (called after query completes). */
-  protected abstract ensureDefaultCacheEntries(batch: TBatch): void;
+  protected abstract ensureDefaultCacheEntries(batch: TRequest[]): void;
 
   public get(request: TRequest): Observable<TResult> {
     const cachedValue = this.getCachedValue(request);
@@ -130,18 +124,17 @@ export abstract class BatchingCache<TRequest, TBatch, TResult, TItem, TRow> {
         }),
         shareReplay(1),
       );
-      this.#valuesToRequest = { values: this.createBatch(), sharedObs };
-      this.addRequestToBatch(requestNotInBatch, this.#valuesToRequest.values);
+      this.#valuesToRequest = { values: [requestNotInBatch], sharedObs };
       // Some values might be requested in sharedObsArray while waiting for the timer, so merge those in as well
       return this.getResultAfterObservable(request, merge(...[...sharedObsArray, this.#valuesToRequest.sharedObs]).pipe(last()));
     }
 
-    this.addRequestToBatch(requestNotInBatch, this.#valuesToRequest.values);
+    this.#valuesToRequest.values.push(requestNotInBatch);
     // Some values might be requested in sharedObsArray while waiting for the timer, so merge those in as well
     return this.getResultAfterObservable(request, merge(...[...sharedObsArray, this.#valuesToRequest.sharedObs]).pipe(last()));
   }
 
-  private executeBatchQuery(batch: TBatch): Observable<TRow> {
+  private executeBatchQuery(batch: TRequest[]): Observable<TRow> {
     return this.getIterable(batch).pipe(
       bufferCount(this.#bufferSize),
       mergeMap((items: TItem[]) => this.executeQuery(items).pipe(catchBeSQLiteInterrupts)),

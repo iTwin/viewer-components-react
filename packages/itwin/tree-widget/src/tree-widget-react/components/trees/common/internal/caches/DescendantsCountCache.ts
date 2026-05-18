@@ -28,7 +28,6 @@ interface DescendantsCountElementRequest extends DescendantsCountBaseRequest {
 
 type DescendantsCountRequest = DescendantsCountCategoryRequest | DescendantsCountElementRequest;
 type DescendantsCountResult = Array<{ categoryId: CategoryId; count: number }>;
-type Batch = Map<ModelId, Map<ElementId | undefined, Set<CategoryId | undefined>>>;
 interface WhereClause {
   whereClause: string;
   type: "element" | "category";
@@ -47,7 +46,7 @@ interface Row {
  * Cache makes requests in batches of 20ms.
  * @internal
  */
-export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest, Batch, DescendantsCountResult, WhereClause, Row> {
+export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest, DescendantsCountResult, WhereClause, Row> {
   #cachedValues = new Map<ModelId, Map<ElementId | undefined, Map<CategoryId | undefined, DescendantsCountResult>>>();
   #queryExecutor: LimitingECSqlQueryExecutor;
   #elementClassName: string;
@@ -68,34 +67,30 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
 
   protected getValuesNotInBatch(
     request: DescendantsCountRequest,
-    batch: Batch,
+    batch: DescendantsCountRequest[],
   ): { valuesNotInBatch: DescendantsCountRequest; batchContainsValues: boolean } | { valuesNotInBatch: undefined; batchContainsValues: true } {
-    if (batch.get(request.modelId)?.get(request.parentElementId)?.has(request.categoryId)) {
+    if (batch.some((r) => r.modelId === request.modelId && r.parentElementId === request.parentElementId && r.categoryId === request.categoryId)) {
       return { valuesNotInBatch: undefined, batchContainsValues: true };
     }
     return { valuesNotInBatch: request, batchContainsValues: false };
   }
 
-  protected createBatch(): Batch {
-    return new Map();
-  }
-
-  protected addRequestToBatch(request: DescendantsCountRequest, batch: Batch): void {
-    let modelEntry = batch.get(request.modelId);
-    if (!modelEntry) {
-      modelEntry = new Map();
-      batch.set(request.modelId, modelEntry);
+  protected getIterable(batch: DescendantsCountRequest[]): Observable<WhereClause> {
+    const groupedValues = new Map<ModelId, Map<ElementId | undefined, Set<CategoryId | undefined>>>();
+    for (const { modelId, parentElementId, categoryId } of batch) {
+      let modelEntry = groupedValues.get(modelId);
+      if (!modelEntry) {
+        modelEntry = new Map();
+        groupedValues.set(modelId, modelEntry);
+      }
+      let parentEntry = modelEntry.get(parentElementId);
+      if (!parentEntry) {
+        parentEntry = new Set();
+        modelEntry.set(parentElementId, parentEntry);
+      }
+      parentEntry.add(categoryId);
     }
-    let parentEntry = modelEntry.get(request.parentElementId);
-    if (!parentEntry) {
-      parentEntry = new Set();
-      modelEntry.set(request.parentElementId, parentEntry);
-    }
-    parentEntry.add(request.categoryId);
-  }
-
-  protected getIterable(batch: Batch): Observable<WhereClause> {
-    return from(batch.entries()).pipe(
+    return from(groupedValues.entries()).pipe(
       mergeMap(([modelId, parentMap]) =>
         from(parentMap.entries()).pipe(
           mergeMap(([parentElementId, categoryIds]) => {
@@ -198,24 +193,20 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
     categoryEntry.push({ categoryId: row.ownCategory, count: row.cnt });
   }
 
-  protected ensureDefaultCacheEntries(batch: Batch): void {
-    for (const [entryModelId, parentMap] of batch.entries()) {
-      let modelEntry = this.#cachedValues.get(entryModelId);
+  protected ensureDefaultCacheEntries(batch: DescendantsCountRequest[]): void {
+    for (const { modelId, categoryId, parentElementId } of batch) {
+      let modelEntry = this.#cachedValues.get(modelId);
       if (!modelEntry) {
         modelEntry = new Map();
-        this.#cachedValues.set(entryModelId, modelEntry);
+        this.#cachedValues.set(modelId, modelEntry);
       }
-      for (const [parentElementId, categoryIds] of parentMap) {
-        let parentEntry = modelEntry.get(parentElementId);
-        if (!parentEntry) {
-          parentEntry = new Map();
-          modelEntry.set(parentElementId, parentEntry);
-        }
-        for (const entryCategoryId of categoryIds) {
-          if (!parentEntry.has(entryCategoryId)) {
-            parentEntry.set(entryCategoryId, entryCategoryId === undefined ? [] : [{ categoryId: entryCategoryId, count: 0 }]);
-          }
-        }
+      let parentEntry = modelEntry.get(parentElementId);
+      if (!parentEntry) {
+        parentEntry = new Map();
+        modelEntry.set(parentElementId, parentEntry);
+      }
+      if (!parentEntry.has(categoryId)) {
+        parentEntry.set(categoryId, categoryId === undefined ? [] : [{ categoryId, count: 0 }]);
       }
     }
   }
