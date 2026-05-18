@@ -87,6 +87,7 @@ interface IdsCacheMockProps {
   subjectModels?: Map<Id64String, Id64String[]>;
   modelCategories?: Map<Id64String, Id64Array>;
   categoryElements?: Map<Id64String, Id64Array>;
+  elementChildren?: Map<Id64String, Id64Array>;
 }
 
 export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCache {
@@ -118,8 +119,14 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       }
       return of(result);
     }),
-    getElementsCount: vi.fn(({ categoryId }: { modelId: Id64String; categoryId: Id64String }) => {
-      return of(props?.categoryElements?.get(categoryId)?.length ?? 0);
+    getElementsCount: vi.fn(({ categoryId, parentElementId }: { modelId: Id64String; categoryId?: Id64String; parentElementId?: Id64String }) => {
+      if (parentElementId) {
+        return of(props?.elementChildren?.get(parentElementId)?.length ?? 0);
+      }
+      if (categoryId) {
+        return of(props?.categoryElements?.get(categoryId)?.length ?? 0);
+      }
+      return of(0);
     }),
     getDescendantsCounts: vi.fn(() => {
       return of([]);
