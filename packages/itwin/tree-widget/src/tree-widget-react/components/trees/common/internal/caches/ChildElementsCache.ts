@@ -168,7 +168,12 @@ export class ChildElementsCache extends BatchingCache<ChildElementsRequest, Id64
   protected executeQuery(clauses: WhereClause[]): Observable<Row> {
     const categoryWhereClauses = clauses.filter((c) => c.type === "category").map((c) => c.whereClause);
     const elementWhereClauses = clauses.filter((c) => c.type === "element").map((c) => c.whereClause);
-    const allChildCategoryIds = new Set(...clauses.map(({ childCategoryIds }) => childCategoryIds));
+    const allChildCategoryIds = new Set<CategoryId>();
+    for (const { childCategoryIds } of clauses) {
+      for (const childCategoryId of childCategoryIds) {
+        allChildCategoryIds.add(childCategoryId);
+      }
+    }
 
     const baseCases: string[] = [];
 
