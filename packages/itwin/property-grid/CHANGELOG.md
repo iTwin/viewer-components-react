@@ -1,8 +1,16 @@
 # Change Log - @itwin/property-grid-react
 
-<!-- This log was last generated on Thu, 07 May 2026 14:10:55 GMT and should not be manually modified. -->
+<!-- This log was last generated on Mon, 18 May 2026 18:26:36 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 1.19.8
+
+Mon, 18 May 2026 18:26:36 GMT
+
+### Patches
+
+- [property-grid] convert `FilteringPropertyGridProps` from interface to type ([#1684](https://github.com/iTwin/viewer-components-react/pull/1684))
 
 ## 1.19.7
 

@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "[property-grid] convert `FilteringPropertyGridProps` from interface to type",
-  "packageName": "@itwin/property-grid-react",
-  "email": "carlos.dm.menezes@gmail.com",
-  "dependentChangeType": "patch"
-}

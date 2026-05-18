@@ -2,6 +2,21 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Mon, 18 May 2026 18:26:36 GMT",
+      "version": "1.19.8",
+      "tag": "@itwin/property-grid-react_v1.19.8",
+      "comments": {
+        "patch": [
+          {
+            "author": "carlos.dm.menezes@gmail.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "7d4ca29c2e9c86fcf7dbebf5c7a3da859e533807",
+            "comment": "[property-grid] convert `FilteringPropertyGridProps` from interface to type"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 07 May 2026 14:10:55 GMT",
       "version": "1.19.7",
       "tag": "@itwin/property-grid-react_v1.19.7",
