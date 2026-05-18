@@ -10,7 +10,7 @@ public;function;createPropertyGrid
 public;interface;DataProviderProps
 public;interface;DefaultContextMenuItemProps
 public;interface;FavoritePropertiesContextMenuItemProps
-public;interface;FilteringPropertyGridProps
+public;type;FilteringPropertyGridProps
 public;class;IModelAppUserPreferencesStorage
 public;function;MultiElementPropertyGrid
 public;interface;MultiElementPropertyGridProps
