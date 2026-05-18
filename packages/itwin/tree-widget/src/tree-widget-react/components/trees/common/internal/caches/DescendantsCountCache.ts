@@ -75,7 +75,7 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
     return { valuesNotInBatch: request, batchContainsValues: false };
   }
 
-  protected getIterable(batch: DescendantsCountRequest[]): Observable<WhereClause> {
+  protected getQueryData(batch: DescendantsCountRequest[]): Observable<WhereClause> {
     const groupedValues = new Map<ModelId, Map<ElementId | undefined, Set<CategoryId | undefined>>>();
     for (const { modelId, parentElementId, categoryId } of batch) {
       let modelEntry = groupedValues.get(modelId);
