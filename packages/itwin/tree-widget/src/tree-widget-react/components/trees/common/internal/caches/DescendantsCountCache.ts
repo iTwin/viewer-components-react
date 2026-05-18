@@ -113,9 +113,9 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
     );
   }
 
-  protected executeQuery(items: WhereClause[]): Observable<Row> {
-    const categoryWhereClauses = items.filter((c) => c.type === "category").map((c) => c.whereClause);
-    const elementWhereClauses = items.filter((c) => c.type === "element").map((c) => c.whereClause);
+  protected executeQuery(clauses: WhereClause[]): Observable<Row> {
+    const categoryWhereClauses = clauses.filter((c) => c.type === "category").map((c) => c.whereClause);
+    const elementWhereClauses = clauses.filter((c) => c.type === "element").map((c) => c.whereClause);
 
     const baseCases: string[] = [];
 

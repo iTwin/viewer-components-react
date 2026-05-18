@@ -25,14 +25,24 @@ export interface BatchingCacheProps {
 /**
  * Abstract base class that provides timer-based batching, deduplication, and caching.
  *
- * Subclasses define:
- * - How requests map to cached values
- * - How batches are built from requests
- * - How to produce query items from a batch, execute queries, and cache rows
+ * @template TRequest - A single logical request made by a consumer (e.g. `{ modelId, categoryId, parentElementId }`).
+ * @template TResult - The value returned to the consumer for a given request (e.g. `Id64Array`).
+ * @template TQueryData - Query data produced by decomposing a batch of requests via `getIterable`
+ *   (e.g. a WHERE clause fragment). Items are buffered (up to `bufferSize`) and passed to `executeQuery`.
+ * @template TRow - A single result row emitted by `executeQuery`, cached via `insertRow`
+ *   (e.g. `{ modelId, reqParent, reqCategory, ownCategory, count }`).
+ *
+ * Pipeline:
+ * 1. Requests arriving within `timerDelay` ms are collected into a batch (`TRequest[]`).
+ * 2. `getIterable(batch)` decomposes the batch into a stream of `TQueryData` items.
+ * 3. Items are buffered (up to `bufferSize`) and passed to `executeQuery(items)`.
+ * 4. Each `TRow` emitted by `executeQuery` is cached via `insertRow`.
+ * 5. After completion, `ensureDefaultCacheEntries` fills in empty entries for
+ *    requests that produced no rows, and `getCachedValue` returns the result.
  *
  * @internal
  */
-export abstract class BatchingCache<TRequest, TResult, TItem, TRow> {
+export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
   // When a new request is made:
   // - If the value is already cached, returns it immediately.
   // - If it's already in-flight (#requestedValues), subscribes to the same observable.
@@ -63,11 +73,16 @@ export abstract class BatchingCache<TRequest, TResult, TItem, TRow> {
     batch: TRequest[],
   ): { valuesNotInBatch: TRequest; batchContainsValues: boolean } | { valuesNotInBatch: undefined; batchContainsValues: true };
 
-  /** Produce the items from a batch that will be buffered and passed to `executeQuery`. */
-  protected abstract getIterable(batch: TRequest[]): Observable<TItem>;
+  /**
+   * Convert batched requests into units of data which are used to execute the query.
+   * For example, TRequest might be an object containing various request values, when converted to TQueryData,
+   * those values take shape of a WHERE clause fragments.
+   * These TQueryData items are buffered and passed to `executeQuery`.
+   */
+  protected abstract getIterable(batch: TRequest[]): Observable<TQueryData>;
 
-  /** Execute a query for a buffer of items. Returns an observable of result rows. */
-  protected abstract executeQuery(items: TItem[]): Observable<TRow>;
+  /** Execute a query for the given query data buffer. Returns an observable of result rows. */
+  protected abstract executeQuery(queryData: TQueryData[]): Observable<TRow>;
 
   /** Cache a single row returned by `executeQuery`. */
   protected abstract insertRow(row: TRow): void;
@@ -137,7 +152,7 @@ export abstract class BatchingCache<TRequest, TResult, TItem, TRow> {
   private executeBatchQuery(batch: TRequest[]): Observable<TRow> {
     return this.getIterable(batch).pipe(
       bufferCount(this.#bufferSize),
-      mergeMap((items: TItem[]) => this.executeQuery(items).pipe(catchBeSQLiteInterrupts)),
+      mergeMap((queryData: TQueryData[]) => this.executeQuery(queryData).pipe(catchBeSQLiteInterrupts)),
       releaseMainThreadOnItemsCount(this.#releaseOnCount),
     );
   }
