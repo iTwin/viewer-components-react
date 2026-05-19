@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, from, mergeMap } from "rxjs";
-import { assert, Guid } from "@itwin/core-bentley";
+import { defer, EMPTY, from, map, merge, mergeMap } from "rxjs";
+import { Guid } from "@itwin/core-bentley";
 import { BatchingCache } from "./BatchingCache.js";
 
 import type { Observable } from "rxjs";
@@ -76,12 +76,23 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
   }
 
   protected getQueryData(batch: DescendantsCountRequest[]): Observable<WhereClause> {
-    const groupedValues = new Map<ModelId, Map<ElementId | undefined, Set<CategoryId | undefined>>>();
-    for (const { modelId, parentElementId, categoryId } of batch) {
-      let modelEntry = groupedValues.get(modelId);
+    const groupedCategoryValues = new Map<ModelId, Map<ElementId | undefined, Set<CategoryId>>>();
+    const groupedElementValues = new Map<ModelId, Set<ElementId>>();
+    for (const batchEntry of batch) {
+      if (batchEntry.categoryId === undefined) {
+        let groupedElementsModelEntry = groupedElementValues.get(batchEntry.modelId);
+        if (!groupedElementsModelEntry) {
+          groupedElementsModelEntry = new Set();
+          groupedElementValues.set(batchEntry.modelId, groupedElementsModelEntry);
+        }
+        groupedElementsModelEntry.add(batchEntry.parentElementId);
+        continue;
+      }
+      const { modelId, parentElementId, categoryId } = batchEntry;
+      let modelEntry = groupedCategoryValues.get(modelId);
       if (!modelEntry) {
         modelEntry = new Map();
-        groupedValues.set(modelId, modelEntry);
+        groupedCategoryValues.set(modelId, modelEntry);
       }
       let parentEntry = modelEntry.get(parentElementId);
       if (!parentEntry) {
@@ -90,26 +101,31 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
       }
       parentEntry.add(categoryId);
     }
-    return from(groupedValues.entries()).pipe(
-      mergeMap(([modelId, parentMap]) =>
-        from(parentMap.entries()).pipe(
-          mergeMap(([parentElementId, categoryIds]) => {
-            const clauses = new Array<WhereClause>();
-            if (categoryIds.has(undefined)) {
-              assert(parentElementId !== undefined);
-              clauses.push({ whereClause: `Model.Id = ${modelId} AND Parent.Id = ${parentElementId}`, type: "element" });
-            }
-            const concreteCategoryIds = [...categoryIds].filter((id): id is CategoryId => id !== undefined);
-            if (concreteCategoryIds.length > 0) {
-              clauses.push({
-                whereClause: `Model.Id = ${modelId} AND Category.Id IN (${concreteCategoryIds.join(", ")}) ${parentElementId === undefined ? "AND Parent.Id IS NULL" : `AND Parent.Id = ${parentElementId}`}`,
-                type: "category",
-              });
-            }
-            return from(clauses);
-          }),
-        ),
-      ),
+    return merge(
+      groupedCategoryValues.size > 0
+        ? from(groupedCategoryValues.entries()).pipe(
+            mergeMap(([modelId, parentMap]) =>
+              from(parentMap.entries()).pipe(
+                map(([parentElementId, categoryIds]) => {
+                  return {
+                    whereClause: `Model.Id = ${modelId} AND Category.Id IN (${[...categoryIds].join(", ")}) ${parentElementId === undefined ? "AND Parent.Id IS NULL" : `AND Parent.Id = ${parentElementId}`}`,
+                    type: "category" as const,
+                  };
+                }),
+              ),
+            ),
+          )
+        : EMPTY,
+      groupedElementValues.size > 0
+        ? from(groupedElementValues.entries()).pipe(
+            map(([modelId, parentElementIds]) => {
+              return {
+                whereClause: `Model.Id = ${modelId} AND Parent.Id IN (${[...parentElementIds].join(", ")})`,
+                type: "element" as const,
+              };
+            }),
+          )
+        : EMPTY,
     );
   }
 
@@ -213,5 +229,10 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
 
   public getDescendantsCounts(props: DescendantsCountRequest): Observable<DescendantsCountResult> {
     return this.get(props);
+  }
+
+  /** Pre-warms the cache by queuing a request into the next batch without subscribing to results. */
+  public storeRequest(request: DescendantsCountRequest): void {
+    return this.store(request);
   }
 }

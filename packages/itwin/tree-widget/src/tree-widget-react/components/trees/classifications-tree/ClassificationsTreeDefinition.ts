@@ -20,6 +20,7 @@ import {
 import { catchBeSQLiteInterrupts } from "../common/internal/UseErrorState.js";
 import { fromWithRelease, getOptimalBatchSize, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../common/TreeErrors.js";
+import { ClassificationsTreeNode } from "./ClassificationsTreeNode.js";
 
 import type { Observable, ObservedValueOf, OperatorFunction } from "rxjs";
 import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
@@ -32,6 +33,7 @@ import type {
   HierarchyNodeIdentifiersPath,
   InstancesNodeKey,
   LimitingECSqlQueryExecutor,
+  NodePostProcessor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlQueryRow, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
@@ -79,6 +81,18 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
   #impl: HierarchyDefinition;
   #props: ClassificationsTreeDefinitionProps;
   static #componentName = "ClassificationsTreeDefinition";
+  public postProcessNode: NodePostProcessor = async ({ node }) => {
+    // Pre-warm descendants count cache for element nodes
+    if (ClassificationsTreeNode.isGeometricElementNode(node)) {
+      for (const { id, imodelKey } of node.key.instanceKeys) {
+        if (!imodelKey) {
+          continue;
+        }
+        this.#props.getIdsCache(imodelKey).storeRequest({ modelId: node.extendedData.modelId, categoryId: id });
+      }
+    }
+    return node;
+  };
 
   public constructor(props: ClassificationsTreeDefinitionProps) {
     this.#props = props;
@@ -358,24 +372,6 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
         type: elementClassName,
         modelId: { selector: "IdToHex(this.Model.Id)" },
         categoryId: { selector: "IdToHex(this.Category.Id)" },
-        childrenCount: {
-          selector: `
-            (
-              WITH RECURSIVE
-                ElementWithParent(id) AS (
-                  SELECT e.ECInstanceId
-                  FROM ${CLASS_NAME_GeometricElement3d} e
-                  WHERE e.ECInstanceId = this.ECInstanceId
-                  UNION ALL
-                  SELECT c.ECInstanceId
-                  FROM ${CLASS_NAME_GeometricElement3d} c
-                  JOIN ElementWithParent p ON p.id = c.Parent.Id
-                )
-              SELECT COUNT(1) - 1
-              FROM ElementWithParent
-            )
-          `,
-        },
         categoryOfTopMostParentElement: {
           selector: `IdToHex(${categoryOfTopMostParentElement ?? "this.Category.Id"})`,
         },

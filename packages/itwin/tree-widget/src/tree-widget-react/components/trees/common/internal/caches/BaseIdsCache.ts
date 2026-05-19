@@ -131,6 +131,10 @@ export class BaseIdsCache {
     return this.#descendantsCountCache.getDescendantsCounts(props);
   }
 
+  public storeRequest(props: Props<DescendantsCountCache["storeRequest"]>): ReturnType<DescendantsCountCache["storeRequest"]> {
+    return this.#descendantsCountCache.storeRequest(props);
+  }
+
   public getElementsCount(props: Props<DescendantsCountCache["getDescendantsCounts"]>): Observable<number> {
     return this.#descendantsCountCache.getDescendantsCounts(props).pipe(map((counts) => counts.reduce((sum, entry) => sum + entry.count, 0)));
   }
@@ -204,6 +208,10 @@ export class BaseIdsCacheImpl {
 
   public getDescendantsCounts(props: Props<DescendantsCountCache["getDescendantsCounts"]>): ReturnType<DescendantsCountCache["getDescendantsCounts"]> {
     return this.#baseIdsCache.getDescendantsCounts(props);
+  }
+
+  public storeRequest(props: Props<DescendantsCountCache["storeRequest"]>): ReturnType<DescendantsCountCache["storeRequest"]> {
+    return this.#baseIdsCache.storeRequest(props);
   }
 
   public getElementsCount(props: Props<DescendantsCountCache["getDescendantsCounts"]>): Observable<number> {

@@ -44,6 +44,7 @@ import {
   releaseMainThreadOnItemsCount,
 } from "../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../common/TreeErrors.js";
+import { CategoriesTreeNode } from "./CategoriesTreeNode.js";
 
 import type { Observable, ObservedValueOf, OperatorFunction } from "rxjs";
 import type { GuidString, Id64Array, Id64String, MarkRequired } from "@itwin/core-bentley";
@@ -162,13 +163,15 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
           };
           modelElementsMap.set(child.extendedData?.modelId, modelEntry);
         }
-        assert(child.key.type === "instances");
+        assert(CategoriesTreeNode.isElementNode(child));
         for (const { id } of child.key.instanceKeys) {
           modelEntry.elementIds.add(id);
+          // Pre-warm descendants count cache for grouped element nodes
+          this.#idsCache.storeRequest({ modelId: child.extendedData?.modelId, parentElementId: id });
         }
       }
 
-      const { hasSearchTargetAncestor, hasDirectNonSearchTargets, childrenCount, searchTargets } = groupingNodeDataFromChildren(node.children);
+      const { hasSearchTargetAncestor, hasDirectNonSearchTargets } = groupingNodeDataFromChildren(node.children);
       const firstChild = node.children[0];
       assert(HierarchyNode.isInstancesNode(firstChild));
       return {
@@ -182,8 +185,6 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
           // add `categoryId` from the first grouped element
           categoryId: firstChild.extendedData?.categoryId,
           modelElementsMap,
-          childrenCount,
-          ...(!!searchTargets?.size ? { searchTargets } : {}),
           ...(hasDirectNonSearchTargets ? { hasDirectNonSearchTargets } : {}),
           ...(hasSearchTargetAncestor ? { hasSearchTargetAncestor } : {}),
           // `imageId` is assigned to instance nodes at query time, but grouping ones need to
@@ -558,23 +559,6 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  private createElementChildrenCountSelector(props: { elementIdSelector: string }): string {
-    return `(
-      WITH RECURSIVE
-        ElementWithParent(id) AS (
-          SELECT e.ECInstanceId
-          FROM ${this.#categoryElementClass} e
-          WHERE e.ECInstanceId = ${props.elementIdSelector}
-          UNION ALL
-          SELECT c.ECInstanceId
-          FROM ${this.#categoryElementClass} c
-          JOIN ElementWithParent p ON p.id = c.Parent.Id
-        )
-      SELECT COUNT(1) - 1
-      FROM ElementWithParent
-    )`;
-  }
-
   private async createCategoryElementsQuery({
     parentNodeInstanceIds: categoryIds,
     instanceFilter,
@@ -648,7 +632,6 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 categoryId: { selector: "IdToHex(this.Category.Id)" },
                 imageId: "icon-item",
                 isElement: true,
-                childrenCount: { selector: this.createElementChildrenCountSelector({ elementIdSelector: "this.ECInstanceId" }) },
                 categoryOfTopMostParentElement: { selector: "IdToHex(this.Category.Id)" },
                 topMostParentElementId: { selector: "IdToHex(this.ECInstanceId)" },
               },
@@ -719,7 +702,6 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                   categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
                   isElement: true,
-                  childrenCount: { selector: this.createElementChildrenCountSelector({ elementIdSelector: "this.ECInstanceId" }) },
                   categoryOfTopMostParentElement: {
                     selector: `IdToHex(${parentNode.extendedData?.categoryOfTopMostParentElement})`,
                   },

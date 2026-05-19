@@ -104,7 +104,6 @@ export function createClassGroupingHierarchyNode({
   parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   hasDirectNonSearchTargets?: boolean;
   hasSearchTargetAncestor?: boolean;
-  childrenCount?: number;
 }): GroupingHierarchyNode & { key: ClassGroupingNodeKey } {
   const className = props.className ?? CLASS_NAME_Element;
   return {
@@ -122,7 +121,6 @@ export function createClassGroupingHierarchyNode({
     extendedData: {
       categoryId: props.categoryId,
       modelElementsMap,
-      childrenCount: props.childrenCount !== undefined ? props.childrenCount : 0,
       ...(props.hasDirectNonSearchTargets ? { hasDirectNonSearchTargets: props.hasDirectNonSearchTargets } : {}),
       ...(props.hasSearchTargetAncestor ? { hasSearchTargetAncestor: props.hasSearchTargetAncestor } : {}),
     },
@@ -158,7 +156,6 @@ export function createElementHierarchyNode(props: {
   elementId: Id64String;
   viewType?: "2d" | "3d";
   parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
-  childrenCount?: number;
   search?: NonGroupingHierarchyNode["search"];
 }): NonGroupingHierarchyNode {
   const { elementClass } = getClassesByView(props.viewType ?? "3d");
@@ -177,7 +174,6 @@ export function createElementHierarchyNode(props: {
       modelId: props.modelId,
       categoryId: props.categoryId,
       isElement: true,
-      childrenCount: props.childrenCount !== undefined ? props.childrenCount : 0,
     },
   };
 }

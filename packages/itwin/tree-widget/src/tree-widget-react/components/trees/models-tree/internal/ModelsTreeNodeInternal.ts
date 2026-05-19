@@ -29,7 +29,6 @@ export namespace ModelsTreeNodeInternal {
     extendedData: {
       modelId: Id64String;
       categoryId: Id64String;
-      childrenCount: number;
       categoryOfTopMostParentElement: CategoryId;
       topMostParentElementId: Id64String;
     };
@@ -41,8 +40,6 @@ export namespace ModelsTreeNodeInternal {
     extendedData: {
       modelId: Id64String;
       categoryId: Id64String;
-      childrenCount: number;
-      searchTargets?: Map<Id64String, { childrenCount: number }>;
       categoryOfTopMostParentElement: CategoryId;
       topMostParentElementId?: Id64String;
     };
