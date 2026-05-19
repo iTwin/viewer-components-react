@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { FormatSetPanel } from "../../components/quantityformat/FormatSetPanel.js";
+import { TelemetryContextProvider } from "../../hooks/UseTelemetryContext.js";
 
 import type { FormatSet } from "@itwin/ecschema-metadata";
 // Mock the useTranslation hook
@@ -205,6 +206,52 @@ describe("FormatSetPanel", () => {
       expect(container.querySelector(".quantityFormat--formatSetPanel-container")).toBeTruthy();
       expect(container.querySelector(".quantityFormat--formatSetPanel-inputRow")).toBeTruthy();
       expect(container.querySelector(".quantityFormat--formatSetPanel-inputRow-descr")).toBeTruthy();
+    });
+  });
+
+  describe("Telemetry", () => {
+    it("should report 'unit-system-change' when unit system is changed", async () => {
+      const onFeatureUsedSpy = vi.fn();
+
+      render(
+        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
+          <FormatSetPanel
+            formatSet={mockFormatSet}
+            editable={true}
+            onFormatSetChange={mockOnFormatSetChange}
+          />
+        </TelemetryContextProvider>
+      );
+
+      // Get the unit system select and open it
+      const unitSystemSelect = screen.queryAllByLabelText("Unit System")[1] as HTMLInputElement;
+      await user.click(unitSystemSelect);
+
+      // Select a different unit system
+      const imperialOption = await screen.findByRole("option", { name: "Imperial" });
+      await user.click(imperialOption);
+
+      expect(onFeatureUsedSpy).toHaveBeenCalledWith("unit-system-change");
+    });
+
+    it("should not report telemetry when unit system select is disabled", async () => {
+      const onFeatureUsedSpy = vi.fn();
+
+      render(
+        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
+          <FormatSetPanel
+            formatSet={mockFormatSet}
+            editable={false}
+          />
+        </TelemetryContextProvider>
+      );
+
+      // Unit system select should be disabled
+      const unitSystemSelect = screen.queryAllByLabelText("Unit System")[1] as HTMLInputElement;
+      expect(unitSystemSelect.disabled).toBe(true);
+
+      // No telemetry should be reported
+      expect(onFeatureUsedSpy).not.toHaveBeenCalled();
     });
   });
 });

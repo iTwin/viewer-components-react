@@ -9,6 +9,7 @@ import type { FormatProps } from "@itwin/core-quantity";
 import { parseShowSignOption, type ShowSignOption } from "@itwin/core-quantity";
 import { SignOptionSelector } from "./misc/SignOption.js";
 import { useTranslation } from "../../../useTranslation.js";
+import { useTelemetryContext } from "../../../hooks/UseTelemetryContext.js";
 import { IconButton, Label } from "@itwin/itwinui-react";
 import { SvgHelpCircularHollow } from "@itwin/itwinui-icons-react";
 import "../FormatPanel.scss";
@@ -27,6 +28,7 @@ export interface SignOptionProps {
 export function SignOption(props: SignOptionProps) {
   const { formatProps, onChange } = props;
   const { translate } = useTranslation();
+  const { onFeatureUsed } = useTelemetryContext();
   const showSignOptionId = React.useId();
 
   const showSignOption = React.useMemo(
@@ -54,7 +56,10 @@ export function SignOption(props: SignOptionProps) {
       <SignOptionSelector
         aria-labelledby={showSignOptionId}
         signOption={showSignOption}
-        onChange={(value: ShowSignOption) => onChange({ ...formatProps, showSignOption: value })}
+        onChange={(value: ShowSignOption) => {
+          onFeatureUsed("sign-option-change");
+          onChange({ ...formatProps, showSignOption: value });
+        }}
       />
     </div>
   );

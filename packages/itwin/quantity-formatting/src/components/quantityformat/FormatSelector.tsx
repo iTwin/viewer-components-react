@@ -6,6 +6,7 @@
 import * as React from "react";
 import { Flex, Input, List, ListItem, Text } from "@itwin/itwinui-react";
 import { useTranslation } from "../../useTranslation.js";
+import { useTelemetryContext } from "../../hooks/UseTelemetryContext.js";
 
 import type { FormatDefinition } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
@@ -32,6 +33,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
   onListItemChange,
 }) => {
   const { translate } = useTranslation();
+  const { onFeatureUsed } = useTelemetryContext();
   const [searchTerm, setSearchTerm] = React.useState("");
 
   // Prepare format entries
@@ -65,6 +67,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
     (key: string) => {
       const formatEntry = formatEntries.find(entry => entry.key === key);
       if (formatEntry) {
+        onFeatureUsed("format-select");
         onListItemChange(formatEntry.formatDef, key);
       } else {
         Logger.logWarning(logCategory,`Format entry not found for key: ${key}`, {
@@ -74,14 +77,18 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
         });
       }
     },
-    [onListItemChange, formatEntries]
+    [onListItemChange, formatEntries, onFeatureUsed, activeFormatSet?.name]
   );
 
   const handleSearchChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchTerm(event.target.value);
+      const value = event.target.value;
+      if (value && !searchTerm) {
+        onFeatureUsed("format-search");
+      }
+      setSearchTerm(value);
     },
-    []
+    [onFeatureUsed, searchTerm]
   );
 
   return (

@@ -10,6 +10,7 @@ import { vi, describe, it, expect, beforeEach } from "vitest";
 import type { FormatDefinition, UnitsProvider, UnitProps } from "@itwin/core-quantity";
 import { QuantityFormatPanel } from "../../components/quantityformat/QuantityFormatPanel.js";
 import { QuantityFormatting } from "../../QuantityFormatting.js";
+import { TelemetryContextProvider } from "../../hooks/UseTelemetryContext.js";
 
 // Mock the useTranslation hook
 vi.mock("../../useTranslation.js", () => ({
@@ -233,5 +234,76 @@ describe("QuantityFormatPanel", () => {
     );
 
     expect(screen.getByTestId("format-sample")).toBeDefined();
+  });
+
+  describe("telemetry", () => {
+    it("should report 'format-apply' when Apply button is clicked", async () => {
+      const onFeatureUsedSpy = vi.fn();
+
+      render(
+        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
+          <QuantityFormatPanel
+            formatDefinition={mockFormatDefinition}
+            unitsProvider={mockUnitsProvider}
+            onFormatChange={mockOnFormatChange}
+          />
+        </TelemetryContextProvider>
+      );
+
+      const applyButton = screen.getByRole("button", { name: "Apply" });
+      const triggerChangeButton = screen.getByTestId("trigger-format-change");
+
+      // Trigger format change to enable Apply button
+      await user.click(triggerChangeButton);
+      // Click Apply button
+      await user.click(applyButton);
+
+      expect(onFeatureUsedSpy).toHaveBeenCalledWith("format-apply");
+    });
+
+    it("should report 'format-clear' when Clear button is clicked", async () => {
+      const onFeatureUsedSpy = vi.fn();
+
+      render(
+        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
+          <QuantityFormatPanel
+            formatDefinition={mockFormatDefinition}
+            unitsProvider={mockUnitsProvider}
+            onFormatChange={mockOnFormatChange}
+          />
+        </TelemetryContextProvider>
+      );
+
+      const clearButton = screen.getByRole("button", { name: "Clear" });
+      const triggerChangeButton = screen.getByTestId("trigger-format-change");
+
+      // Trigger format change to enable Clear button
+      await user.click(triggerChangeButton);
+      // Click Clear button
+      await user.click(clearButton);
+
+      expect(onFeatureUsedSpy).toHaveBeenCalledWith("format-clear");
+    });
+
+    it("should not report telemetry when Apply button is disabled", async () => {
+      const onFeatureUsedSpy = vi.fn();
+
+      render(
+        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
+          <QuantityFormatPanel
+            formatDefinition={mockFormatDefinition}
+            unitsProvider={mockUnitsProvider}
+            onFormatChange={mockOnFormatChange}
+          />
+        </TelemetryContextProvider>
+      );
+
+      const applyButton = screen.getByRole("button", { name: "Apply" });
+
+      // Click disabled Apply button
+      await user.click(applyButton);
+
+      expect(onFeatureUsedSpy).not.toHaveBeenCalled();
+    });
   });
 });
