@@ -10,6 +10,7 @@ import { TelemetryContextProvider } from "./hooks/UseTelemetryContext.js";
 import { PreferencesContextProvider } from "./PropertyGridPreferencesContext.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { OmitOverUnion } from "@itwin/presentation-shared";
 import type { PreferencesStorage } from "./api/PreferencesStorage.js";
 import type { MultiElementPropertyGridProps } from "./components/MultiElementPropertyGrid.js";
 import type { TelemetryContextProviderProps } from "./hooks/UseTelemetryContext.js";
@@ -18,13 +19,14 @@ import type { TelemetryContextProviderProps } from "./hooks/UseTelemetryContext.
  * Props for `PropertyGridComponent`.
  * @public
  */
-export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGridProps, "imodel">, TelemetryContextProviderProps {
-  /**
-   * Custom storage that should be used for persisting preferences.
-   * Defaults to `IModelAppUserPreferencesStorage` that uses `IModelApp.userPreferences`.
-   */
-  preferencesStorage?: PreferencesStorage;
-}
+export type PropertyGridComponentProps = OmitOverUnion<MultiElementPropertyGridProps, "imodel"> &
+  TelemetryContextProviderProps & {
+    /**
+     * Custom storage that should be used for persisting preferences.
+     * Defaults to `IModelAppUserPreferencesStorage` that uses `IModelApp.userPreferences`.
+     */
+    preferencesStorage?: PreferencesStorage;
+  };
 
 /**
  * Component that renders `MultiElementPropertyGrid` if there is active iModel connection.

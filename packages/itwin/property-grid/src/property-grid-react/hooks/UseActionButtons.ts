@@ -10,10 +10,10 @@ import type { ActionButtonRendererProps } from "@itwin/components-react";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 
 /** @public */
-interface PropertyGridActionButtonRendererProps extends ActionButtonRendererProps {
+type PropertyGridActionButtonRendererProps = ActionButtonRendererProps & {
   /** Data provider used by the property grid. */
   dataProvider: IPresentationPropertyDataProvider;
-}
+};
 
 /**
  * Action button with extended properties

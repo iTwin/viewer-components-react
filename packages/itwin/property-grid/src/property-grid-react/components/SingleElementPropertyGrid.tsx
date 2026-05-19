@@ -10,6 +10,7 @@ import { PropertyGridContent } from "./PropertyGridContent.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
+import type { OmitOverUnion } from "@itwin/presentation-shared";
 import type { DataProviderProps } from "../hooks/UseDataProvider.js";
 import type { PropertyGridContentProps } from "./PropertyGridContent.js";
 
@@ -26,7 +27,7 @@ export interface SingleElementDataProviderProps extends DataProviderProps {
  * Props for `SingleElementPropertyGrid` component.
  * @public
  */
-export type SingleElementPropertyGridProps = Omit<PropertyGridContentProps, "dataProvider" | "dataRenderer"> & SingleElementDataProviderProps;
+export type SingleElementPropertyGridProps = OmitOverUnion<PropertyGridContentProps, "dataProvider" | "dataRenderer"> & SingleElementDataProviderProps;
 
 /**
  * Component that renders property grid for single instance.

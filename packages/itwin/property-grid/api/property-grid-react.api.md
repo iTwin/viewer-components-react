@@ -5,6 +5,7 @@
 ```ts
 
 import type { ActionButtonRendererProps } from '@itwin/components-react';
+import type { ComponentProps } from 'react';
 import { FavoritePropertiesScope } from '@itwin/presentation-frontend';
 import type { Field } from '@itwin/presentation-common';
 import type { IModelConnection } from '@itwin/core-frontend';
@@ -14,6 +15,7 @@ import type { IPropertyDataFilterer } from '@itwin/components-react';
 import { JSX as JSX_2 } from 'react/jsx-runtime';
 import { KeySet } from '@itwin/presentation-common';
 import type { Localization } from '@itwin/core-common';
+import type { OmitOverUnion } from '@itwin/presentation-shared';
 import type { PropertyCategory } from '@itwin/components-react';
 import type { PropertyRecord } from '@itwin/appui-abstract';
 import type { PropertyUpdatedArgs } from '@itwin/components-react';
@@ -80,7 +82,7 @@ export interface FavoritePropertiesContextMenuItemProps extends DefaultContextMe
 }
 
 // @public
-export type FilteringPropertyGridProps = React.ComponentProps<typeof VirtualizedPropertyGridWithDataProvider> & {
+export type FilteringPropertyGridProps = ComponentProps<typeof VirtualizedPropertyGridWithDataProvider> & {
     autoExpandChildCategories?: boolean;
     filterer: IPropertyDataFilterer;
 };
@@ -98,10 +100,10 @@ export class IModelAppUserPreferencesStorage implements PreferencesStorage {
 export function MultiElementPropertyGrid(input: MultiElementPropertyGridProps): JSX_2.Element;
 
 // @public
-export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "headerControls" | "onBackButton"> {
+export type MultiElementPropertyGridProps = OmitOverUnion<PropertyGridProps, "headerControls" | "onBackButton"> & {
     ancestorsNavigationControls?: (props: AncestorsNavigationControlsProps) => ReactNode;
     getParentInstanceKey?: (key: InstanceKey) => Promise<InstanceKey | undefined>;
-}
+};
 
 // @public
 export function NullValueSettingContext(input: PropsWithChildren<object>): JSX_2.Element;
@@ -124,37 +126,29 @@ export function PropertyGrid(input: PropertyGridProps): JSX_2.Element | null;
 type PropertyGridActionButtonRenderer = (props: PropertyGridActionButtonRendererProps) => ReactNode;
 
 // @public (undocumented)
-interface PropertyGridActionButtonRendererProps extends ActionButtonRendererProps {
+type PropertyGridActionButtonRendererProps = ActionButtonRendererProps & {
     dataProvider: IPresentationPropertyDataProvider;
-}
+};
 
 // @public
 export function PropertyGridComponent(input: PropertyGridComponentProps): JSX_2.Element | null;
 
 // @public
-export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGridProps, "imodel">, TelemetryContextProviderProps {
+export type PropertyGridComponentProps = OmitOverUnion<MultiElementPropertyGridProps, "imodel"> & TelemetryContextProviderProps & {
     preferencesStorage?: PreferencesStorage;
-}
+};
 
 // @public
-export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height" | "onPropertyUpdated" | "actionButtonRenderers"> {
-    // (undocumented)
-    actionButtonRenderers?: PropertyGridActionButtonRenderer[];
-    // (undocumented)
-    className?: string;
-    // (undocumented)
-    dataProvider: IPresentationPropertyDataProvider;
-    // (undocumented)
-    dataRenderer?: (props: FilteringPropertyGridProps) => ReactNode;
-    // (undocumented)
-    headerControls?: ReactNode;
-    // (undocumented)
+export type PropertyGridContentBaseProps = OmitOverUnion<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height" | "onPropertyUpdated" | "actionButtonRenderers"> & {
     imodel: IModelConnection;
-    // (undocumented)
+    className?: string;
     onBackButton?: () => void;
-    // (undocumented)
+    headerControls?: ReactNode;
     onPropertyUpdated?: (args: PropertyGridPropertyUpdatedArgs, category: PropertyCategory) => Promise<boolean>;
-}
+    dataProvider: IPresentationPropertyDataProvider;
+    dataRenderer?: (props: FilteringPropertyGridProps) => ReactNode;
+    actionButtonRenderers?: PropertyGridActionButtonRenderer[];
+};
 
 // @public
 export type PropertyGridContentProps = PropertyGridContentBaseProps & ContextMenuProps & SettingsMenuProps;
@@ -179,12 +173,12 @@ export class PropertyGridManager {
 }
 
 // @public
-export interface PropertyGridPropertyUpdatedArgs extends PropertyUpdatedArgs {
+export type PropertyGridPropertyUpdatedArgs = PropertyUpdatedArgs & {
     dataProvider: IPresentationPropertyDataProvider;
-}
+};
 
 // @public
-export type PropertyGridProps = Omit<PropertyGridContentProps, "dataProvider" | "dataRenderer"> & DataProviderProps & {
+export type PropertyGridProps = OmitOverUnion<PropertyGridContentProps, "dataProvider" | "dataRenderer"> & DataProviderProps & {
     selectionStorage?: SelectionStorage;
 };
 
@@ -266,7 +260,7 @@ export interface SingleElementDataProviderProps extends DataProviderProps {
 export function SingleElementPropertyGrid(input: SingleElementPropertyGridProps): JSX_2.Element | null;
 
 // @public
-export type SingleElementPropertyGridProps = Omit<PropertyGridContentProps, "dataProvider" | "dataRenderer"> & SingleElementDataProviderProps;
+export type SingleElementPropertyGridProps = OmitOverUnion<PropertyGridContentProps, "dataProvider" | "dataRenderer"> & SingleElementDataProviderProps;
 
 // @public
 export function TelemetryContextProvider(input: PropsWithChildren<TelemetryContextProviderProps>): JSX_2.Element;

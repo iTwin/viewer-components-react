@@ -20,6 +20,7 @@ import { SingleElementPropertyGrid as SingleElementPropertyGridComponent } from 
 
 import type { ReactNode } from "react";
 import type { InstanceKey } from "@itwin/presentation-common";
+import type { OmitOverUnion } from "@itwin/presentation-shared";
 import type { UsageTrackedFeatures } from "../hooks/UseTelemetryContext.js";
 import type { ElementListProps } from "./ElementList.js";
 import type { PropertyGridProps } from "./PropertyGrid.js";
@@ -35,7 +36,7 @@ enum MultiElementPropertyContent {
  * Props for `MultiElementPropertyGrid` component.
  * @public
  */
-export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "headerControls" | "onBackButton"> {
+export type MultiElementPropertyGridProps = OmitOverUnion<PropertyGridProps, "headerControls" | "onBackButton"> & {
   /** Renders controls for ancestors navigation. If set to `undefined`, ancestors navigation is disabled. */
   ancestorsNavigationControls?: (props: AncestorsNavigationControlsProps) => ReactNode;
 
@@ -45,7 +46,7 @@ export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "
    * memoized to avoid unnecessary re-renders.
    */
   getParentInstanceKey?: (key: InstanceKey) => Promise<InstanceKey | undefined>;
-}
+};
 
 /**
  * Component that renders property grid for instances in `UnifiedSelection`.
