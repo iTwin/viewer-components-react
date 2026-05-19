@@ -363,7 +363,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
                       elementIds: searchTargetIds,
                       parentElementsIdsPath,
                       // Search results tree is created on search paths. Since search paths contain only categories that are directly under models
-                      // or at the root, categoryId can be used here here.
+                      // or at the root, categoryId can be used here.
                       categoryOfTopMostParentElement: categoryId,
                     })
                   : EMPTY,
@@ -373,7 +373,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
                       modelId,
                       categoryId,
                       elementIds: nonSearchTargetIds,
-                      ignoreDescendants: true,
+                      computeOnlyOwnStatus: true,
                     })
                   : EMPTY,
               );

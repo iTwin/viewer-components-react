@@ -300,7 +300,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
                 modelId,
                 categoryId,
                 elementIds: nonSearchTargetIds,
-                ignoreDescendants: true,
+                computeOnlyOwnStatus: true,
               })
             : EMPTY,
         );

@@ -315,13 +315,13 @@ export class BaseVisibilityHelper implements Disposable {
       elementIds: Id64Arg;
       modelId: Id64String;
       categoryId: Id64String;
-    } & ({ ignoreDescendants: true } | { ignoreDescendants?: false; categoryOfTopMostParentElement: CategoryId; parentElementsIdsPath: Array<Id64Arg> }),
+    } & ({ computeOnlyOwnStatus: true } | { computeOnlyOwnStatus?: false; categoryOfTopMostParentElement: CategoryId; parentElementsIdsPath: Array<Id64Arg> }),
   ): Observable<VisibilityStatus> {
     const result = defer(() => {
-      const { elementIds, modelId, categoryId, ignoreDescendants } = props;
+      const { elementIds, modelId, categoryId, computeOnlyOwnStatus } = props;
       // Compute element's own visibility
       const elementsOwnStatus = this.getElementsOwnVisibilityStatus({ elementIds, modelId, categoryId });
-      if (ignoreDescendants) {
+      if (computeOnlyOwnStatus) {
         return elementsOwnStatus;
       }
       const subModelsVisibilityStatus = this.#props.baseIdsCache.hasSubModels({ modelId }).pipe(
@@ -394,7 +394,7 @@ export class BaseVisibilityHelper implements Disposable {
     if (!this.#props.viewport.viewsModel(modelId)) {
       return of(createVisibilityStatus("hidden"));
     }
-    return from(Id64.iterable(elementIds)).pipe(
+    return fromWithRelease({ source: elementIds, releaseOnCount: 500 }).pipe(
       mergeMap((elementId) => this.#props.baseIdsCache.getDescendantsCounts({ parentElementId: elementId, modelId })),
       reduce(
         (acc, descendantsCounts) => {
