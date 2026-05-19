@@ -59,7 +59,7 @@ importers:
         version: 9.0.7
       lodash:
         specifier: ^4.17.21
-        version: 4.17.21
+        version: 4.18.1
       react-split:
         specifier: 2.0.14
         version: 2.0.14(react@17.0.2)
@@ -619,6 +619,7 @@ packages:
   '@faker-js/faker@7.5.0':
     resolution: {integrity: sha512-8wNUCCUHvfvI0gQpDUho/3gPzABffnCn5um65F8dzQ86zz6dlt4+nmAA7PQUc8L+eH+9RgR/qzy5N/8kN0Ozdw==}
     engines: {node: '>=14.0.0', npm: '>=6.0.0'}
+    deprecated: Please update to a newer version.
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -832,6 +833,7 @@ packages:
 
   '@itwin/itwinui-react@2.12.18':
     resolution: {integrity: sha512-M14g7su8Nv69znAnf7ix659xOO+X/i6RsCERiz7FhbJR/krDS9/9DV0nT6XR8FYKlOLWGyi+zC3TijmkjmxdUA==}
+    deprecated: iTwinUI v2 has reached end-of-life. Please upgrade to the latest version.
     peerDependencies:
       react: '>=16.8.6 < 19.0.0'
       react-dom: '>=16.8.6 < 19.0.0'
@@ -1261,6 +1263,9 @@ packages:
 
   '@sinonjs/text-encoding@0.7.2':
     resolution: {integrity: sha512-sXXKG+uL9IrKqViTtao2Ws6dy0znu9sOaP1di/jKGW1M6VssO8vlpXCQcpZ+jisQ1tTFAC5Jo/EOzFbggBagFQ==}
+    deprecated: |-
+      Deprecated: no longer maintained and no longer used by Sinon packages. See
+        https://github.com/sinonjs/nise/issues/243 for replacement details.
 
   '@svgdotjs/svg.js@3.0.16':
     resolution: {integrity: sha512-yZ4jfP/SeLHEnCi9PIrzienKCrA4vW9+jm5uUV3N5DG2e9zgXLY5FgywK2u8/gMFIeKO0HuqTLFFfWJj+MfMLA==}
@@ -2422,7 +2427,7 @@ packages:
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Glob versions prior to v9 are no longer supported
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   globals@14.0.0:
     resolution: {integrity: sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==}
@@ -2907,8 +2912,11 @@ packages:
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
 
-  lodash@4.17.21:
-    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
+  lodash@4.17.23:
+    resolution: {integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==}
+
+  lodash@4.18.1:
+    resolution: {integrity: sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==}
 
   log-symbols@4.1.0:
     resolution: {integrity: sha512-8XPvpAA8uyhfteu8pIvQxpJZ7SYYdpUivZpGy6sFsBuKRY/7rQGavedeB8aK+Zkyq6upMFVL/9AW6vOYzfRyLg==}
@@ -4664,7 +4672,7 @@ snapshots:
       '@itwin/itwinui-react': 2.12.18(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       classnames: 2.5.1
       immer: 10.2.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
       react-error-boundary: 5.0.0(react@17.0.2)
@@ -4708,7 +4716,7 @@ snapshots:
       classnames: 2.5.1
       immer: 10.2.0
       linkify-it: 2.2.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
       react-window: 1.8.10(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
@@ -4779,7 +4787,7 @@ snapshots:
       '@itwin/itwinui-react': 2.12.18(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       classnames: 2.5.1
       dompurify: 3.3.1
-      lodash: 4.17.21
+      lodash: 4.18.1
       react: 17.0.2
       react-autosuggest: 10.1.0(react@17.0.2)
       react-dom: 17.0.2(react@17.0.2)
@@ -5034,7 +5042,7 @@ snapshots:
       '@rushstack/rig-package': 0.5.3
       '@rushstack/terminal': 0.18.0(@types/node@14.14.20)
       '@rushstack/ts-command-line': 5.0.5(@types/node@14.14.20)
-      lodash: 4.17.21
+      lodash: 4.17.23
       minimatch: 10.0.3
       resolve: 1.22.8
       semver: 7.5.4
@@ -5349,7 +5357,7 @@ snapshots:
       chalk: 3.0.0
       css.escape: 1.5.1
       dom-accessibility-api: 0.5.16
-      lodash: 4.17.21
+      lodash: 4.18.1
       redent: 3.0.0
     optionalDependencies:
       vitest: 3.0.0(@types/node@14.14.20)(jsdom@25.0.0)(sass-embedded@1.97.3)(sass@1.97.3)(yaml@2.8.2)
@@ -7289,7 +7297,9 @@ snapshots:
 
   lodash.merge@4.6.2: {}
 
-  lodash@4.17.21: {}
+  lodash@4.17.23: {}
+
+  lodash@4.18.1: {}
 
   log-symbols@4.1.0:
     dependencies:
@@ -8464,7 +8474,7 @@ snapshots:
   typemoq@2.1.0:
     dependencies:
       circular-json: 0.3.3
-      lodash: 4.17.21
+      lodash: 4.18.1
       postinstall-build: 5.0.3
 
   typescript@5.6.2: {}
