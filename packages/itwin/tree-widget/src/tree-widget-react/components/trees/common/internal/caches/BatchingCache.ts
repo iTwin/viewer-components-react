@@ -43,12 +43,15 @@ export interface BatchingCacheProps {
  * @internal
  */
 export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
-  // When a new request is made:
-  // - If the value is already cached, returns it immediately.
-  // - If it's already in-flight (#requestedValues), subscribes to the same observable.
-  // - Otherwise, adds to #valuesToRequest. After timer fires, the batch executes and caches results.
+  // When a new request is made (via `get`) or stored (via `store`):
+  // - If the value is already cached, returns it immediately (get) or skips (store).
+  // - If it's already in-flight (#requestedValues), subscribes to the same observable (get) or skips (store).
+  // - Otherwise, adds to #valuesToRequest. For `get`, a timer is started if not already running;
+  //   after the timer fires, the batch executes and caches results. For `store`, the request
+  //   is only queued — the batch executes when a subsequent `get` triggers the timer.
 
-  #valuesToRequest: { values: TRequest[]; sharedObs: Observable<void> } | undefined;
+  /** Pending requests buffer. `sharedObs` is created lazily on the first `get` call. */
+  #valuesToRequest: { values: TRequest[]; sharedObs?: Observable<void> } = { values: [] };
   #requestedValues = new Map<RequestId, { values: TRequest[]; sharedObs: Observable<void> }>();
   #bufferSize: number;
   #timerDelay: number;
@@ -90,6 +93,31 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
   /** Ensure default/empty cache entries exist for all values in the batch (called after query completes). */
   protected abstract ensureDefaultCacheEntries(batch: TRequest[]): void;
 
+  /**
+   * Queues a request into the next batch without subscribing to results.
+   * Used to pre-warm the cache - the request will be included in the next batch query
+   * triggered by a subsequent `get` call.
+   */
+  public store(request: TRequest): void {
+    const cachedValue = this.getCachedValue(request);
+    if (cachedValue !== undefined) {
+      return;
+    }
+    let requestNotInBatch: TRequest = request;
+    for (const { values } of this.#requestedValues.values()) {
+      const { valuesNotInBatch } = this.getValuesNotInBatch(requestNotInBatch, values);
+      if (valuesNotInBatch === undefined) {
+        return;
+      }
+      requestNotInBatch = valuesNotInBatch;
+    }
+    this.#valuesToRequest.values.push(requestNotInBatch);
+  }
+
+  /**
+   * Queues a request and returns an observable that emits the result once the batch query completes.
+   * If no batch timer is running, creates one. The request is included in the current batch.
+   */
   public get(request: TRequest): Observable<TResult> {
     const cachedValue = this.getCachedValue(request);
     if (cachedValue !== undefined) {
@@ -110,43 +138,44 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
       requestNotInBatch = valuesNotInBatch;
     }
 
-    if (this.#valuesToRequest === undefined) {
-      const requestId = Guid.createValue();
-      const sharedObs = timer(this.#timerDelay).pipe(
-        switchMap(() => {
-          assert(this.#valuesToRequest !== undefined);
-          // After timer delay ms, assign the observable in #valuesToRequest to the #requestedValues
-          const valuesToRequest = this.#valuesToRequest;
-          this.#requestedValues.set(requestId, valuesToRequest);
-          // Clear #valuesToRequest so new requests can be collected while the query is executing
-          this.#valuesToRequest = undefined;
-          return this.executeBatchQuery(valuesToRequest.values).pipe(
-            reduce((_acc, row: TRow) => {
-              // Cache each row as it arrives, use reduce to emit one value when query completes
-              this.insertRow(row);
-              return undefined;
-            }, undefined),
-            tap(() => {
-              this.ensureDefaultCacheEntries(valuesToRequest.values);
-            }),
-          );
-        }),
-        tap({
-          finalize: () => {
-            // Remove requestedValues entry when the query completes.
-            this.#requestedValues.delete(requestId);
-          },
-        }),
-        shareReplay(1),
-      );
-      this.#valuesToRequest = { values: [requestNotInBatch], sharedObs };
-      // Some values might be requested in sharedObsArray while waiting for the timer, so merge those in as well
-      return this.getResultAfterObservable(request, merge(...[...sharedObsArray, this.#valuesToRequest.sharedObs]).pipe(last()));
+    if (this.#valuesToRequest.sharedObs === undefined) {
+      this.#valuesToRequest.sharedObs = this.createSharedObs();
     }
 
     this.#valuesToRequest.values.push(requestNotInBatch);
     // Some values might be requested in sharedObsArray while waiting for the timer, so merge those in as well
     return this.getResultAfterObservable(request, merge(...[...sharedObsArray, this.#valuesToRequest.sharedObs]).pipe(last()));
+  }
+
+  private createSharedObs(): Observable<void> {
+    const requestId = Guid.createValue();
+    return timer(this.#timerDelay).pipe(
+      switchMap(() => {
+        // After timer delay ms, assign the observable in #valuesToRequest to the #requestedValues
+        const { values, sharedObs } = this.#valuesToRequest;
+        assert(sharedObs !== undefined);
+        this.#requestedValues.set(requestId, { values, sharedObs });
+        // Clear #valuesToRequest so new requests can be collected while the query is executing
+        this.#valuesToRequest = { values: [] };
+        return this.executeBatchQuery(values).pipe(
+          reduce((_acc, row: TRow) => {
+            // Cache each row as it arrives, use reduce to emit one value when query completes
+            this.insertRow(row);
+            return undefined;
+          }, undefined),
+          tap(() => {
+            this.ensureDefaultCacheEntries(values);
+          }),
+        );
+      }),
+      tap({
+        finalize: () => {
+          // Remove requestedValues entry when the query completes.
+          this.#requestedValues.delete(requestId);
+        },
+      }),
+      shareReplay(1),
+    );
   }
 
   private executeBatchQuery(batch: TRequest[]): Observable<TRow> {

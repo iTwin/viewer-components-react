@@ -44,6 +44,7 @@ import {
   releaseMainThreadOnItemsCount,
 } from "../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../common/TreeErrors.js";
+import { CategoriesTreeNode } from "./CategoriesTreeNode.js";
 
 import type { Observable, ObservedValueOf, OperatorFunction } from "rxjs";
 import type { GuidString, Id64Array, Id64String, MarkRequired } from "@itwin/core-bentley";
@@ -162,9 +163,11 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
           };
           modelElementsMap.set(child.extendedData?.modelId, modelEntry);
         }
-        assert(child.key.type === "instances");
+        assert(CategoriesTreeNode.isElementNode(child));
         for (const { id } of child.key.instanceKeys) {
           modelEntry.elementIds.add(id);
+          // Pre-warm descendants count cache for grouped element nodes
+          this.#idsCache.storeRequest({ modelId: child.extendedData?.modelId, parentElementId: id });
         }
       }
 

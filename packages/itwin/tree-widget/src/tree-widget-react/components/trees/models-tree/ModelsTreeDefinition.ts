@@ -20,7 +20,7 @@ import {
   takeUntil,
   toArray,
 } from "rxjs";
-import { Guid } from "@itwin/core-bentley";
+import { assert, Guid } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { createPredicateBasedHierarchyDefinition, NodeSelectClauseColumnNames, ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
@@ -45,6 +45,7 @@ import {
   releaseMainThreadOnItemsCount,
 } from "../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../common/TreeErrors.js";
+import { ModelsTreeNode } from "./ModelsTreeNode.js";
 
 import type { Observable, ObservedValueOf, OperatorFunction } from "rxjs";
 import type { GuidString, Id64String } from "@itwin/core-bentley";
@@ -213,8 +214,25 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   };
 
   public postProcessNode: NodePostProcessor = async ({ node }) => {
+    if (ModelsTreeNode.isCategoryNode(node)) {
+      // Pre-warm descendants count cache for category nodes — when visibility is computed,
+      // descendant counts per category will already be batched.
+      for (const modelId of node.extendedData.modelIds) {
+        for (const { id } of node.key.instanceKeys) {
+          this.#idsCache.storeRequest({ modelId, categoryId: id });
+        }
+      }
+    }
+
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
       const { hasSearchTargetAncestor, hasDirectNonSearchTargets } = groupingNodeDataFromChildren(node.children);
+      // Pre-warm descendants count cache for grouped element nodes
+      for (const child of node.children) {
+        assert(ModelsTreeNode.isElementNode(child));
+        for (const { id } of child.key.instanceKeys) {
+          this.#idsCache.storeRequest({ modelId: child.extendedData.modelId, parentElementId: id });
+        }
+      }
       return {
         ...node,
         label: this.#hierarchyConfig.elementClassGrouping === "enableWithCounts" ? `${node.label} (${node.children.length})` : node.label,
