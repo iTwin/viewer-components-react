@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Update prop types to use `type` instead of `interface` when building types on top of types comming from dependencies.",
+  "packageName": "@itwin/property-grid-react",
+  "email": "24278440+saskliutas@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
