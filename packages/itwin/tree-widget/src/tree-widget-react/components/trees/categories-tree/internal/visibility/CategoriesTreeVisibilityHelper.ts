@@ -3,9 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, concat, concatMap, delay, EMPTY, from, map, mergeAll, mergeMap, toArray } from "rxjs";
+import { bufferCount, concat, concatMap, delay, EMPTY, forkJoin, from, map, mergeAll, mergeMap, of, reduce, toArray } from "rxjs";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import { getIdsFromChildrenTree, getOptimalBatchSize, getParentElementsIdsPath } from "../../../common/internal/Utils.js";
+import { getOptimalBatchSize, getParentElementsIdsPath } from "../../../common/internal/Utils.js";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 
@@ -124,25 +124,31 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
     categoryId: Id64String;
     on: boolean;
   }): Observable<void> {
-    const elementIds = new Array<ElementId>();
-    for (const { elementIds: ids } of props.modelElementsMap.values()) {
-      for (const id of ids) {
-        elementIds.push(id);
-      }
-    }
-    return this.#props.idsCache.getChildElementsTree({ elementIds }).pipe(
-      map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ depth }) => depth > 0 })),
-      mergeMap((children) =>
-        from(props.modelElementsMap).pipe(
-          mergeMap(([modelId, { elementIds: modelElementIds }]) => {
-            return this.changeElementsVisibilityStatus({
+    return from(props.modelElementsMap).pipe(
+      mergeMap(([modelId, { elementIds: modelElementIds }]) =>
+        from(modelElementIds).pipe(
+          mergeMap((elementId) =>
+            forkJoin({
+              elementId: of(elementId),
+              childCategoryIds: this.#props.idsCache
+                .getDescendantsCounts({ parentElementId: elementId, modelId })
+                .pipe(map((counts) => counts.map((entry) => entry.categoryId))),
+            }),
+          ),
+          mergeMap(({ elementId, childCategoryIds }) => this.#props.idsCache.getChildElements({ parentElementId: elementId, modelId, childCategoryIds })),
+          reduce((acc, childElements) => {
+            acc.push(...childElements);
+            return acc;
+          }, new Array<ElementId>()),
+          mergeMap((children) =>
+            this.changeElementsVisibilityStatus({
               modelId,
               elementIds: modelElementIds,
               categoryId: props.categoryId,
               on: props.on,
               children,
-            });
-          }),
+            }),
+          ),
         ),
       ),
     );
