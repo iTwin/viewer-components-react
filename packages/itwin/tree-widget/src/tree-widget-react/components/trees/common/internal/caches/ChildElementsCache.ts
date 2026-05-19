@@ -226,9 +226,9 @@ export class ChildElementsCache extends BatchingCache<ChildElementsRequest, Id64
             // 4. { modelId, reqParent: element1, reqCategory: undefined, ownCategory: childCategoryId2, id: element1_2 } -> Request2
             // The saved counts will be correct, and returned results from the public functions will also be correct, but there will be additional data cached.
             ecsql: `
-              SELECT modelId, reqParent, reqCategory, ownCategory, id
-              FROM Descendants
-              JOIN IdSet(?) allChildCategoryIdSet ON ownCategory = allChildCategoryIdSet.id
+              SELECT d.modelId modelId, d.reqParent reqParent, d.reqCategory reqCategory, d.ownCategory ownCategory, d.id id
+              FROM Descendants d
+              JOIN IdSet(?) allChildCategoryIdSet ON d.ownCategory = allChildCategoryIdSet.id
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
             bindings: [{ type: "idset", value: [...allChildCategoryIds] }],

@@ -14,6 +14,7 @@ import {
 } from "test-utilities";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { withEditTxn } from "@itwin/core-backend";
+import { CompressedId64Set } from "@itwin/core-bentley";
 import { IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
@@ -211,10 +212,11 @@ describe("ChildElementsCache", () => {
       expect(result2).toEqual(expect.arrayContaining(["0x100"]));
       // Both requests are served by a single query since they're in the same batch
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
-      const query = vi.mocked(vp.iModel.createQueryReader).mock.calls[0][0];
+      const params = vi.mocked(vp.iModel.createQueryReader).mock.calls[0][1];
+      const ids = CompressedId64Set.decompressSet((params?.serialize() as any)[1].value);
 
-      expect(query.split("0x3")).toHaveLength(2); // "0x3" appears once
-      expect(query.split("0x4")).toHaveLength(2); // "0x4" appears once
+      expect(ids.has("0x3")).toBe(true);
+      expect(ids.has("0x4")).toBe(true);
     });
 
     it("only requests missing childCategoryIds on subsequent calls", async () => {
@@ -237,9 +239,10 @@ describe("ChildElementsCache", () => {
       ]);
       expect(result2).toEqual(expect.arrayContaining(["0x100"]));
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
-      const secondQuery = vi.mocked(vp.iModel.createQueryReader).mock.calls[1][0];
-      expect(secondQuery.split("0x3")).toHaveLength(1); // "0x3" does not appear
-      expect(secondQuery.split("0x4")).toHaveLength(2); // "0x4" appears once
+      const secondParams = vi.mocked(vp.iModel.createQueryReader).mock.calls[1][1];
+      const secondIds = CompressedId64Set.decompressSet((secondParams?.serialize() as any)[1].value);
+      expect(secondIds.has("0x3")).toBe(false); // "0x3" does not appear
+      expect(secondIds.has("0x4")).toBe(true); // "0x4" appears
     });
 
     it("returns combined results from multiple childCategoryIds", async () => {
