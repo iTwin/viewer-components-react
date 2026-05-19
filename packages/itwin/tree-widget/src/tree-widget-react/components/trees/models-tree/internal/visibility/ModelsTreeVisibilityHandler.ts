@@ -376,6 +376,13 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
               acc.set(elementId, childrenCount);
               return acc;
             }, new Map<Id64String, number>()),
+            map((elementCountMap) => {
+              // Direct children search targets already have children count stored in grouping nodes extended data.
+              for (const [key, value] of node.extendedData.searchTargets ?? []) {
+                elementCountMap.set(key, value.childrenCount);
+              }
+              return elementCountMap;
+            }),
           );
         } else {
           childrenCountMapObs = from(searchTargetElements).pipe(
