@@ -359,11 +359,8 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
           }
         }
         let childrenCountMapObs: Observable<Map<Id64String, number>>;
-        if (ModelsTreeNodeInternal.isElementClassGroupingNode(node)) {
-          const groupingNodesSearchTargets: Map<Id64String, { childrenCount: number }> | undefined = node.extendedData.searchTargets;
-          const nestedSearchTargetElements = searchTargetElements.filter((searchTarget) => !groupingNodesSearchTargets?.has(searchTarget.elementId));
-          // Only need to request children count for indirect children search targets.
-          childrenCountMapObs = from(nestedSearchTargetElements).pipe(
+        const getChildrenCountMapObs = (elementsWithModels: Array<{ elementId: Id64String; modelId: Id64String }>) => {
+          return from(elementsWithModels).pipe(
             mergeMap(({ elementId, modelId }) =>
               forkJoin({
                 elementId: of(elementId),
@@ -374,6 +371,14 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
               acc.set(elementId, childrenCount);
               return acc;
             }, new Map<Id64String, number>()),
+          );
+        };
+
+        if (ModelsTreeNodeInternal.isElementClassGroupingNode(node)) {
+          const groupingNodesSearchTargets: Map<Id64String, { childrenCount: number }> | undefined = node.extendedData.searchTargets;
+          const nestedSearchTargetElements = searchTargetElements.filter((searchTarget) => !groupingNodesSearchTargets?.has(searchTarget.elementId));
+          // Only need to request children count for indirect children search targets.
+          childrenCountMapObs = getChildrenCountMapObs(nestedSearchTargetElements).pipe(
             map((elementCountMap) => {
               // Direct children search targets already have children count stored in grouping nodes extended data.
               for (const [key, value] of node.extendedData.searchTargets ?? []) {
@@ -383,18 +388,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
             }),
           );
         } else {
-          childrenCountMapObs = from(searchTargetElements).pipe(
-            mergeMap(({ elementId, modelId }) =>
-              forkJoin({
-                elementId: of(elementId),
-                childrenCount: this.#props.idsCache.getElementsCount({ parentElementId: elementId, modelId }),
-              }),
-            ),
-            reduce((acc, { elementId, childrenCount }) => {
-              acc.set(elementId, childrenCount);
-              return acc;
-            }, new Map<Id64String, number>()),
-          );
+          childrenCountMapObs = getChildrenCountMapObs(searchTargetElements);
         }
         observables.push(
           childrenCountMapObs.pipe(
