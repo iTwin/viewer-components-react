@@ -318,13 +318,13 @@ export class ChildElementsCache extends BatchingCache<ChildElementsRequest, Id64
 
   public getChildElements(props: ChildElementsRequest): Observable<Id64Array> {
     const { cached, notCached } = this.getNotCachedRequestValues(props);
-    const cachedResult = cached ? this.getCachedValue(cached) : undefined;
+    const cachedResult: Id64Array = (cached && this.getCachedValue(cached)) || [];
     if (!notCached) {
-      return of(cachedResult ?? []);
+      return of(cachedResult);
     }
     return this.get(notCached).pipe(
       map((notCachedValuesResult) => {
-        return [...(cachedResult ?? []), ...notCachedValuesResult];
+        return [...cachedResult, ...notCachedValuesResult];
       }),
     );
   }
