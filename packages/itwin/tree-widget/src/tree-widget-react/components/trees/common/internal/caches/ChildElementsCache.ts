@@ -228,8 +228,10 @@ export class ChildElementsCache extends BatchingCache<ChildElementsRequest, Id64
             ecsql: `
               SELECT modelId, reqParent, reqCategory, ownCategory, id
               FROM Descendants
-              WHERE ownCategory IN (${[...allChildCategoryIds].join(", ")})
+              JOIN IdSet(?) allChildCategoryIdSet ON ownCategory = allChildCategoryIdSet.id
+              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
+            bindings: [{ type: "idset", value: [...allChildCategoryIds] }],
           },
           {
             rowFormat: "ECSqlPropertyNames",
