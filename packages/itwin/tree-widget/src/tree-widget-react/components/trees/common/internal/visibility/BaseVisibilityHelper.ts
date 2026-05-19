@@ -307,6 +307,7 @@ export class BaseVisibilityHelper implements Disposable {
    * Determines visibility status by checking:
    * - Elements in the viewports' always/never drawn lists;
    * - Related categories and models visibility status;
+   * - Descendant elements grouped by their actual categories;
    * - Sub-models that are related to the specified elements.
    */
   public getElementsVisibilityStatus(
@@ -377,9 +378,11 @@ export class BaseVisibilityHelper implements Disposable {
   }
 
   /**
-   * Computes descendant visibility per category.
-   * Groups categories by default visibility, queries always/never drawn per group,
-   * and computes per-category status.
+   * Gets visibility status of descendants by:
+   * 1. Retrieves counts of descendant elements grouped by their actual categories;
+   * 2. Groups categories into visible/hidden based on per-model category overrides and category selector;
+   * 3. For visible categories, retrieves never-drawn descendants; for hidden categories, retrieves always-drawn descendants;
+   * 4. Computes visibility status per group based on total count and number of elements in opposite set.
    */
   private getDescendantsVisibilityStatus(props: {
     elementIds: Id64Arg;
