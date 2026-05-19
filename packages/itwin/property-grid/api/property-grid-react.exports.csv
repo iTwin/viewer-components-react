@@ -19,13 +19,13 @@ public;type;PerformanceTrackedFeatures
 public;interface;PreferencesStorage
 public;function;PropertyGrid
 public;function;PropertyGridComponent
-public;interface;PropertyGridComponentProps
+public;type;PropertyGridComponentProps
 public;type;PropertyGridContentBaseProps
 public;type;PropertyGridContentProps
 public;function;PropertyGridContextMenuItem
 public;interface;PropertyGridContextMenuItemProps
 public;class;PropertyGridManager
-public;interface;PropertyGridPropertyUpdatedArgs
+public;type;PropertyGridPropertyUpdatedArgs
 public;type;PropertyGridProps
 public;function;PropertyGridSettingsMenuItem
 public;interface;PropertyGridSettingsMenuItemProps

@@ -5,6 +5,7 @@
 ```ts
 
 import type { ActionButtonRendererProps } from '@itwin/components-react';
+import type { ComponentProps } from 'react';
 import { FavoritePropertiesScope } from '@itwin/presentation-frontend';
 import type { Field } from '@itwin/presentation-common';
 import type { IModelConnection } from '@itwin/core-frontend';
@@ -81,7 +82,7 @@ export interface FavoritePropertiesContextMenuItemProps extends DefaultContextMe
 }
 
 // @public
-export type FilteringPropertyGridProps = React.ComponentProps<typeof VirtualizedPropertyGridWithDataProvider> & {
+export type FilteringPropertyGridProps = ComponentProps<typeof VirtualizedPropertyGridWithDataProvider> & {
     autoExpandChildCategories?: boolean;
     filterer: IPropertyDataFilterer;
 };
@@ -125,17 +126,17 @@ export function PropertyGrid(input: PropertyGridProps): JSX_2.Element | null;
 type PropertyGridActionButtonRenderer = (props: PropertyGridActionButtonRendererProps) => ReactNode;
 
 // @public (undocumented)
-interface PropertyGridActionButtonRendererProps extends ActionButtonRendererProps {
+type PropertyGridActionButtonRendererProps = ActionButtonRendererProps & {
     dataProvider: IPresentationPropertyDataProvider;
-}
+};
 
 // @public
 export function PropertyGridComponent(input: PropertyGridComponentProps): JSX_2.Element | null;
 
 // @public
-export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGridProps, "imodel">, TelemetryContextProviderProps {
+export type PropertyGridComponentProps = OmitOverUnion<MultiElementPropertyGridProps, "imodel"> & TelemetryContextProviderProps & {
     preferencesStorage?: PreferencesStorage;
-}
+};
 
 // @public
 export type PropertyGridContentBaseProps = OmitOverUnion<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height" | "onPropertyUpdated" | "actionButtonRenderers"> & {
@@ -172,9 +173,9 @@ export class PropertyGridManager {
 }
 
 // @public
-export interface PropertyGridPropertyUpdatedArgs extends PropertyUpdatedArgs {
+export type PropertyGridPropertyUpdatedArgs = PropertyUpdatedArgs & {
     dataProvider: IPresentationPropertyDataProvider;
-}
+};
 
 // @public
 export type PropertyGridProps = OmitOverUnion<PropertyGridContentProps, "dataProvider" | "dataRenderer"> & DataProviderProps & {
