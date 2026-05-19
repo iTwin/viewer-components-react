@@ -32,6 +32,7 @@ import type { PropertyRecord } from "@itwin/appui-abstract";
 import type { PropertyCategory, PropertyUpdatedArgs } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
+import type { OmitOverUnion } from "@itwin/presentation-shared";
 import type { PropertyGridActionButtonRenderer } from "../hooks/UseActionButtons.js";
 import type { ContextMenuProps } from "../hooks/UseContextMenu.js";
 import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid.js";
@@ -41,16 +42,16 @@ import type { SettingsDropdownMenuProps, SettingsMenuProps } from "./SettingsDro
  * Arguments for the `onPropertyUpdated` callback.
  * @public
  */
-export interface PropertyGridPropertyUpdatedArgs extends PropertyUpdatedArgs {
+export type PropertyGridPropertyUpdatedArgs = PropertyUpdatedArgs & {
   /** Data provider used by property grid. */
   dataProvider: IPresentationPropertyDataProvider;
-}
+};
 
 /**
  * Base props for rendering `PropertyGridContent` component.
  * @public
  */
-export interface PropertyGridContentBaseProps extends Omit<
+export type PropertyGridContentBaseProps = OmitOverUnion<
   FilteringPropertyGridProps,
   | "dataProvider"
   | "filterer"
@@ -61,7 +62,7 @@ export interface PropertyGridContentBaseProps extends Omit<
   | "height"
   | "onPropertyUpdated"
   | "actionButtonRenderers"
-> {
+> & {
   imodel: IModelConnection;
   className?: string;
   onBackButton?: () => void;
@@ -70,7 +71,7 @@ export interface PropertyGridContentBaseProps extends Omit<
   dataProvider: IPresentationPropertyDataProvider;
   dataRenderer?: (props: FilteringPropertyGridProps) => ReactNode;
   actionButtonRenderers?: PropertyGridActionButtonRenderer[];
-}
+};
 
 /**
  * Props for `PropertyGridContent` component.

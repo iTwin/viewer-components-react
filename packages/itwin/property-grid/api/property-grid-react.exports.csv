@@ -13,14 +13,14 @@ public;interface;FavoritePropertiesContextMenuItemProps
 public;type;FilteringPropertyGridProps
 public;class;IModelAppUserPreferencesStorage
 public;function;MultiElementPropertyGrid
-public;interface;MultiElementPropertyGridProps
+public;type;MultiElementPropertyGridProps
 public;function;NullValueSettingContext
 public;type;PerformanceTrackedFeatures
 public;interface;PreferencesStorage
 public;function;PropertyGrid
 public;function;PropertyGridComponent
 public;interface;PropertyGridComponentProps
-public;interface;PropertyGridContentBaseProps
+public;type;PropertyGridContentBaseProps
 public;type;PropertyGridContentProps
 public;function;PropertyGridContextMenuItem
 public;interface;PropertyGridContextMenuItemProps
