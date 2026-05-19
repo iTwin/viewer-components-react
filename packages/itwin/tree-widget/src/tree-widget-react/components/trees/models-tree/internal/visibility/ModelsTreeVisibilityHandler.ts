@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, defer, EMPTY, forkJoin, from, map, merge, mergeAll, mergeMap, of, reduce, Subject } from "rxjs";
+import { concat, defer, EMPTY, forkJoin, from, map, merge, mergeAll, mergeMap, of, reduce, Subject, toArray } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
@@ -296,10 +296,8 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
         mergeMap(({ elementId, childCategoryIds }) =>
           this.#props.idsCache.getChildElements({ parentElementId: elementId, modelId: node.extendedData.modelId, childCategoryIds }),
         ),
-        reduce((acc, childElements) => {
-          acc.push(...childElements);
-          return acc;
-        }, new Array<ElementId>()),
+        toArray(),
+        map((childElements) => ([] as ElementId[]).concat(...childElements)),
         mergeMap((children) =>
           this.#visibilityHelper.changeElementsVisibilityStatus({
             elementIds,
