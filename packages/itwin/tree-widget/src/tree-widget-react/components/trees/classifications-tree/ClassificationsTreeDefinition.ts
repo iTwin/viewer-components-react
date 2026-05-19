@@ -358,24 +358,6 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
         type: elementClassName,
         modelId: { selector: "IdToHex(this.Model.Id)" },
         categoryId: { selector: "IdToHex(this.Category.Id)" },
-        childrenCount: {
-          selector: `
-            (
-              WITH RECURSIVE
-                ElementWithParent(id) AS (
-                  SELECT e.ECInstanceId
-                  FROM ${CLASS_NAME_GeometricElement3d} e
-                  WHERE e.ECInstanceId = this.ECInstanceId
-                  UNION ALL
-                  SELECT c.ECInstanceId
-                  FROM ${CLASS_NAME_GeometricElement3d} c
-                  JOIN ElementWithParent p ON p.id = c.Parent.Id
-                )
-              SELECT COUNT(1) - 1
-              FROM ElementWithParent
-            )
-          `,
-        },
         categoryOfTopMostParentElement: {
           selector: `IdToHex(${categoryOfTopMostParentElement ?? "this.Category.Id"})`,
         },

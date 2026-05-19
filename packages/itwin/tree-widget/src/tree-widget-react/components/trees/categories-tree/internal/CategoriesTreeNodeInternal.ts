@@ -44,7 +44,6 @@ export namespace CategoriesTreeNodeInternal {
     extendedData: {
       modelId: Id64String;
       categoryId: Id64String;
-      childrenCount: number;
       categoryOfTopMostParentElement: Id64String;
       topMostParentElementId: Id64String;
     };
@@ -57,8 +56,6 @@ export namespace CategoriesTreeNodeInternal {
       categoryId: Id64String;
       topMostParentElementId?: Id64String;
       modelElementsMap: Map<Id64String, { elementIds: Set<Id64String>; categoryOfTopMostParentElement: Id64String }>;
-      childrenCount: number;
-      searchTargets?: Map<Id64String, { childrenCount: number }>;
     };
   } => CategoriesTreeNode.isElementClassGroupingNode(node);
 

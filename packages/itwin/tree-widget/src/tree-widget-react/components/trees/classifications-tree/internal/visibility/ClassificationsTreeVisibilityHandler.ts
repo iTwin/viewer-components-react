@@ -183,7 +183,6 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       modelId: node.extendedData.modelId,
       categoryId: node.extendedData.categoryId,
       parentElementsIdsPath,
-      childrenCount: node.extendedData.childrenCount,
       categoryOfTopMostParentElement: node.extendedData.categoryOfTopMostParentElement,
     });
   }
@@ -268,76 +267,44 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
   }: {
     elements: Required<ClassificationsTreeSearchTargets>["elements"];
   }): Observable<VisibilityStatus> {
-    const searchTargetElements = new Array<{ elementId: Id64String; modelId: Id64String }>();
-    for (const { elements: elementsMap, modelId } of elements) {
-      for (const [elementId, { isSearchTarget }] of elementsMap) {
-        if (isSearchTarget) {
-          searchTargetElements.push({ elementId, modelId });
+    return fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
+      mergeMap(({ modelId, categoryId, elements: elementsMap, pathToElements, categoryOfTopMostParentElement, topMostParentElementId }) => {
+        const parentElementsIdsPath = topMostParentElementId
+          ? getParentElementsIdsPath({
+              parentInstanceKeys: pathToElements.map((instanceKey) => [instanceKey]),
+              topMostParentElementId,
+            })
+          : [];
+        const nonSearchTargetIds = new Array<Id64String>();
+        const searchTargetIds = new Array<Id64String>();
+        for (const [elementId, { isSearchTarget }] of elementsMap) {
+          if (!isSearchTarget) {
+            nonSearchTargetIds.push(elementId);
+            continue;
+          }
+          searchTargetIds.push(elementId);
         }
-      }
-    }
-    return from(searchTargetElements).pipe(
-      mergeMap(({ elementId, modelId }) =>
-        forkJoin({
-          elementId: of(elementId),
-          childrenCount: this.#props.idsCache.getElementsCount({ parentElementId: elementId, modelId }),
-        }),
-      ),
-      reduce((acc, { elementId, childrenCount }) => {
-        acc.set(elementId, childrenCount);
-        return acc;
-      }, new Map<Id64String, number>()),
-      mergeMap((elementsChildrenCountMap) =>
-        fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
-          mergeMap(({ modelId, categoryId, elements: elementsMap, pathToElements, categoryOfTopMostParentElement, topMostParentElementId }) => {
-            const parentElementsIdsPath = topMostParentElementId
-              ? getParentElementsIdsPath({
-                  parentInstanceKeys: pathToElements.map((instanceKey) => [instanceKey]),
-                  topMostParentElementId,
-                })
-              : [];
-            let totalSearchTargetsChildrenCount = 0;
-            const nonSearchTargetIds = new Array<Id64String>();
-            const searchTargetIds = new Array<Id64String>();
-            for (const [elementId, { isSearchTarget }] of elementsMap) {
-              if (!isSearchTarget) {
-                nonSearchTargetIds.push(elementId);
-                continue;
-              }
-              searchTargetIds.push(elementId);
-              const childCount = elementsChildrenCountMap.get(elementId);
-              if (childCount) {
-                totalSearchTargetsChildrenCount += childCount;
-              }
-            }
-            return merge(
-              searchTargetIds.length > 0
-                ? this.#visibilityHelper.getElementsVisibilityStatus({
-                    modelId,
-                    categoryId,
-                    elementIds: searchTargetIds,
-                    parentElementsIdsPath,
-                    childrenCount: totalSearchTargetsChildrenCount,
-                    categoryOfTopMostParentElement,
-                  })
-                : EMPTY,
-              // Set childrenCount to undefined for non search targets, as some of their child elements might be filtered out.
-              // Since childrenCount is set to undefined, these elements won't check child always/never drawn child elements status.
-              // Child always/never drawn elements will be in search paths, and their visibility status will be handled separately.
-              nonSearchTargetIds.length > 0
-                ? this.#visibilityHelper.getElementsVisibilityStatus({
-                    modelId,
-                    categoryId,
-                    elementIds: nonSearchTargetIds,
-                    parentElementsIdsPath,
-                    childrenCount: undefined,
-                    categoryOfTopMostParentElement,
-                  })
-                : EMPTY,
-            ).pipe(mergeVisibilityStatuses());
-          }),
-        ),
-      ),
+        return merge(
+          searchTargetIds.length > 0
+            ? this.#visibilityHelper.getElementsVisibilityStatus({
+                modelId,
+                categoryId,
+                elementIds: searchTargetIds,
+                parentElementsIdsPath,
+                categoryOfTopMostParentElement,
+              })
+            : EMPTY,
+          // Child always/never drawn elements will be in search paths, and their visibility status will be handled separately.
+          nonSearchTargetIds.length > 0
+            ? this.#visibilityHelper.getElementsVisibilityStatus({
+                modelId,
+                categoryId,
+                elementIds: nonSearchTargetIds,
+                ignoreDescendants: true,
+              })
+            : EMPTY,
+        );
+      }),
     );
   }
 }
