@@ -18,6 +18,7 @@ import { Flex, Text } from "@itwin/itwinui-react";
 import { safeDispose } from "../hooks/UseDataProvider.js";
 import { PropertyGridManager } from "../PropertyGridManager.js";
 
+import type { ComponentProps } from "react";
 import type {
   FilteredPropertyData,
   IPropertyDataFilterer,
@@ -31,7 +32,7 @@ import type {
  * Properties for rendering a `FilteringPropertyGrid`.
  * @public
  */
-export type FilteringPropertyGridProps = React.ComponentProps<typeof VirtualizedPropertyGridWithDataProvider> & {
+export type FilteringPropertyGridProps = ComponentProps<typeof VirtualizedPropertyGridWithDataProvider> & {
   /** Specifies whether child categories should be auto expanded or not. */
   autoExpandChildCategories?: boolean;
   /** Filterer used to filter data. */

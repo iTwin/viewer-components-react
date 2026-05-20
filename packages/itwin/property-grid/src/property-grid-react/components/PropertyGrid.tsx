@@ -10,6 +10,7 @@ import { PropertyGridManager } from "../PropertyGridManager.js";
 import { FilteringPropertyGrid } from "./FilteringPropertyGrid.js";
 import { PropertyGridContent } from "./PropertyGridContent.js";
 
+import type { OmitOverUnion } from "@itwin/presentation-shared";
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { DataProviderProps } from "../hooks/UseDataProvider.js";
 import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid.js";
@@ -19,7 +20,7 @@ import type { PropertyGridContentProps } from "./PropertyGridContent.js";
  * Props for `PropertyGrid` component.
  * @public
  */
-export type PropertyGridProps = Omit<PropertyGridContentProps, "dataProvider" | "dataRenderer"> &
+export type PropertyGridProps = OmitOverUnion<PropertyGridContentProps, "dataProvider" | "dataRenderer"> &
   DataProviderProps & {
     /**
      * Unified selection storage to use for listening and getting active selection.
