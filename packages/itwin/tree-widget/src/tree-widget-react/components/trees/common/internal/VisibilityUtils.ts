@@ -53,19 +53,18 @@ export function mergeVisibilityStatuses(): OperatorFunction<VisibilityStatus, Vi
 /** @internal */
 export function changeElementStateNoChildrenOperator(props: {
   on: boolean;
-  isDisplayedByDefault: (elementId: Id64String) => boolean;
   viewport: TreeWidgetViewport;
-}): OperatorFunction<string, void> {
-  return (elementIds: Observable<Id64String>) => {
-    const { on, isDisplayedByDefault } = props;
+}): OperatorFunction<{ elementId: ElementId; matchesDesiredState: boolean }, void> {
+  return (elementIds: Observable<{ elementId: ElementId; matchesDesiredState: boolean }>) => {
+    const { on } = props;
     const isAlwaysDrawnExclusive = props.viewport.isAlwaysDrawnExclusive;
     return elementIds.pipe(
       releaseMainThreadOnItemsCount(500),
       reduce<
-        string,
+        { elementId: ElementId; matchesDesiredState: boolean },
         { changedNeverDrawn: boolean; changedAlwaysDrawn: boolean; neverDrawn: Set<ElementId> | undefined; alwaysDrawn: Set<ElementId> | undefined }
       >(
-        (acc, elementId) => {
+        (acc, { elementId, matchesDesiredState }) => {
           if (acc.alwaysDrawn === undefined || acc.neverDrawn === undefined) {
             acc.alwaysDrawn = new Set(props.viewport.alwaysDrawn || []);
             acc.neverDrawn = new Set(props.viewport.neverDrawn || []);
@@ -74,7 +73,7 @@ export function changeElementStateNoChildrenOperator(props: {
             const wasRemoved = acc.neverDrawn.delete(elementId);
             acc.changedNeverDrawn ||= wasRemoved;
             // If exclusive mode is enabled, we must add the element to the always drawn list.
-            if ((!isDisplayedByDefault(elementId) || isAlwaysDrawnExclusive) && !acc.alwaysDrawn.has(elementId)) {
+            if ((!matchesDesiredState || isAlwaysDrawnExclusive) && !acc.alwaysDrawn.has(elementId)) {
               acc.alwaysDrawn.add(elementId);
               acc.changedAlwaysDrawn = true;
             }
@@ -82,7 +81,7 @@ export function changeElementStateNoChildrenOperator(props: {
             const wasRemoved = acc.alwaysDrawn.delete(elementId);
             acc.changedAlwaysDrawn ||= wasRemoved;
             // If exclusive mode is not enabled, we have to add the element to the never drawn list.
-            if (isDisplayedByDefault(elementId) && !isAlwaysDrawnExclusive && !acc.neverDrawn.has(elementId)) {
+            if (!matchesDesiredState && !isAlwaysDrawnExclusive && !acc.neverDrawn.has(elementId)) {
               acc.neverDrawn.add(elementId);
               acc.changedNeverDrawn = true;
             }

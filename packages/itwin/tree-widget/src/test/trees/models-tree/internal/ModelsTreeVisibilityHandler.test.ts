@@ -2374,7 +2374,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       const { handler, provider, viewport } = visibilityTestData;
       viewport.changeModelDisplay({ modelIds: ids.model, display: true });
       viewport.setNeverDrawn({ elementIds: new Set([ids.parentElement, ids.child, ids.childOfChild]) });
-      viewport.changeCategoryDisplay({ categoryIds: [ids.category2, ids.category3], display: true, enableAllSubCategories: true });
+      viewport.changeCategoryDisplay({ categoryIds: [ids.category, ids.category2, ids.category3], display: true, enableAllSubCategories: true });
       viewport.renderFrame();
 
       await handler.changeVisibility(createElementHierarchyNode({ modelId: ids.model, categoryId: ids.category, elementId: ids.parentElement }), true);
@@ -2385,6 +2385,40 @@ describe("ModelsTreeVisibilityHandler", () => {
         viewport,
         expectations: "all-visible",
       });
+    });
+
+    it("showing parent element only adds children with non-matching categories to always drawn", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const visibleCategory = insertSpatialCategory({ txn, codeValue: "visibleCategory" }).id;
+          const hiddenCategory = insertSpatialCategory({ txn, codeValue: "hiddenCategory" }).id;
+          const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+          const parentElement = insertPhysicalElement({ txn, modelId: model, categoryId: visibleCategory }).id;
+          const childInVisibleCategory = insertPhysicalElement({ txn, modelId: model, categoryId: visibleCategory, parentId: parentElement }).id;
+          const childInHiddenCategory = insertPhysicalElement({ txn, modelId: model, categoryId: hiddenCategory, parentId: parentElement }).id;
+          return { model, visibleCategory, hiddenCategory, parentElement, childInVisibleCategory, childInHiddenCategory };
+        }),
+      );
+
+      const { imodelConnection, ...ids } = buildIModelResult;
+      using visibilityTestData = createVisibilityTestData({ imodelConnection });
+      const { handler, viewport } = visibilityTestData;
+      viewport.changeModelDisplay({ modelIds: ids.model, display: true });
+      // visibleCategory is shown, hiddenCategory is hidden
+      viewport.changeCategoryDisplay({ categoryIds: ids.visibleCategory, display: true, enableAllSubCategories: true });
+      // All elements start in never drawn
+      viewport.setNeverDrawn({ elementIds: new Set([ids.parentElement, ids.childInVisibleCategory, ids.childInHiddenCategory]) });
+      viewport.renderFrame();
+
+      await handler.changeVisibility(
+        createElementHierarchyNode({ modelId: ids.model, categoryId: ids.visibleCategory, elementId: ids.parentElement }),
+        true,
+      );
+
+      // parentElement and childInVisibleCategory: their category is visible, on=true matches default → removed from neverDrawn
+      // childInHiddenCategory: its category is hidden, on=true doesn't match → added to alwaysDrawn
+      expect(viewport.neverDrawn?.size ?? 0).toBe(0);
+      expect(viewport.alwaysDrawn).toEqual(new Set([ids.childInHiddenCategory]));
     });
 
     it("if model is hidden, showing element adds it to always drawn set and makes model and category visible in the viewport", async () => {

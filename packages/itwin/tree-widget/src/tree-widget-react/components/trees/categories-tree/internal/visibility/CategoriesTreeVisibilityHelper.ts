@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, concat, concatMap, delay, EMPTY, forkJoin, from, map, mergeAll, mergeMap, of, reduce, toArray } from "rxjs";
+import { bufferCount, concat, concatMap, delay, EMPTY, from, map, mergeAll, mergeMap, toArray } from "rxjs";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { getOptimalBatchSize, getParentElementsIdsPath } from "../../../common/internal/Utils.js";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
@@ -118,37 +118,30 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
 
   /** Changes grouped elements visibility status. */
   public changeGroupedElementsVisibilityStatus(props: {
-    modelElementsMap: Map<ModelId, { elementIds: Set<ElementId> }>;
+    modelElementsMap: Map<ModelId, { elementIds: Set<ElementId>; categoryOfTopMostParentElement: CategoryId }>;
     categoryId: Id64String;
+    parentKeys: HierarchyNodeKey[];
+    topMostParentElementId?: ElementId;
     on: boolean;
   }): Observable<void> {
-    return from(props.modelElementsMap).pipe(
-      mergeMap(([modelId, { elementIds: modelElementIds }]) =>
-        from(modelElementIds).pipe(
-          mergeMap((elementId) =>
-            forkJoin({
-              elementId: of(elementId),
-              childCategoryIds: this.#props.idsCache
-                .getDescendantsCounts({ parentElementId: elementId, modelId })
-                .pipe(map((counts) => counts.map((entry) => entry.categoryId))),
-            }),
-          ),
-          mergeMap(({ elementId, childCategoryIds }) => this.#props.idsCache.getChildElements({ parentElementId: elementId, modelId, childCategoryIds })),
-          reduce((acc, childElements) => {
-            acc.push(...childElements);
-            return acc;
-          }, new Array<ElementId>()),
-          mergeMap((children) =>
-            this.changeElementsVisibilityStatus({
-              modelId,
-              elementIds: modelElementIds,
-              categoryId: props.categoryId,
-              on: props.on,
-              children,
-            }),
-          ),
-        ),
-      ),
+    const { modelElementsMap, categoryId, topMostParentElementId, on } = props;
+    const parentElementsIdsPath = topMostParentElementId
+      ? getParentElementsIdsPath({
+          parentInstanceKeys: props.parentKeys.filter((key) => HierarchyNodeKey.isInstances(key)).map((key) => key.instanceKeys),
+          topMostParentElementId,
+        })
+      : [];
+    return from(modelElementsMap).pipe(
+      mergeMap(([modelId, { elementIds, categoryOfTopMostParentElement }]) => {
+        return this.changeElementsVisibilityStatus({
+          modelId,
+          elementIds,
+          categoryId,
+          on,
+          categoryOfTopMostParentElement,
+          parentElementsIdsPath,
+        });
+      }),
     );
   }
 
