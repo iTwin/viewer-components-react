@@ -166,8 +166,6 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         assert(CategoriesTreeNode.isElementNode(child));
         for (const { id } of child.key.instanceKeys) {
           modelEntry.elementIds.add(id);
-          // Pre-warm descendants count cache for grouped element nodes
-          this.#idsCache.storeRequest({ modelId: child.extendedData?.modelId, parentElementId: id });
         }
       }
 

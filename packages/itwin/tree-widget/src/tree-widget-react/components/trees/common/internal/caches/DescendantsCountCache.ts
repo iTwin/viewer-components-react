@@ -10,6 +10,7 @@ import { BatchingCache } from "./BatchingCache.js";
 import type { Observable } from "rxjs";
 import type { GuidString } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { ECSqlBinding } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId } from "../Types.js";
 
 interface DescendantsCountBaseRequest {
@@ -31,6 +32,7 @@ type DescendantsCountResult = Array<{ categoryId: CategoryId; count: number }>;
 interface WhereClause {
   whereClause: string;
   type: "element" | "category";
+  bindings?: ECSqlBinding[];
 }
 interface Row {
   modelId: ModelId;
@@ -102,58 +104,60 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
       parentEntry.add(categoryId);
     }
     return merge(
-      groupedCategoryValues.size > 0
-        ? from(groupedCategoryValues.entries()).pipe(
-            mergeMap(([modelId, parentMap]) =>
-              from(parentMap.entries()).pipe(
-                map(([parentElementId, categoryIds]) => {
-                  return {
-                    whereClause: `Model.Id = ${modelId} AND Category.Id IN (${[...categoryIds].join(", ")}) ${parentElementId === undefined ? "AND Parent.Id IS NULL" : `AND Parent.Id = ${parentElementId}`}`,
-                    type: "category" as const,
-                  };
-                }),
-              ),
-            ),
-          )
-        : EMPTY,
-      groupedElementValues.size > 0
-        ? from(groupedElementValues.entries()).pipe(
-            map(([modelId, parentElementIds]) => {
+      from(groupedCategoryValues.entries()).pipe(
+        mergeMap(([modelId, parentMap]) =>
+          from(parentMap.entries()).pipe(
+            map(([parentElementId, categoryIds], idx): WhereClause => {
               return {
-                whereClause: `Model.Id = ${modelId} AND Parent.Id IN (${[...parentElementIds].join(", ")})`,
-                type: "element" as const,
+                whereClause: `Model.Id = ${modelId} AND Category.Id IN (SELECT categoryIdSet${idx}.id FROM IdSet(?) categoryIdSet${idx} ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES) ${parentElementId === undefined ? "AND Parent.Id IS NULL" : `AND Parent.Id = ${parentElementId}`}`,
+                type: "category" as const,
+                bindings: [{ type: "idset" as const, value: [...categoryIds] }],
               };
             }),
-          )
-        : EMPTY,
+          ),
+        ),
+      ),
+      from(groupedElementValues.entries()).pipe(
+        map(([modelId, parentElementIds], idx): WhereClause => {
+          return {
+            whereClause: `Model.Id = ${modelId} AND Parent.Id IN (SELECT elementIdSet${idx}.id FROM IdSet(?) elementIdSet${idx} ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES)`,
+            type: "element" as const,
+            bindings: [{ type: "idset" as const, value: [...parentElementIds] }],
+          };
+        }),
+      ),
     );
   }
 
   protected executeQuery(clauses: WhereClause[]): Observable<Row> {
-    const categoryWhereClauses = clauses.filter((c) => c.type === "category").map((c) => c.whereClause);
-    const elementWhereClauses = clauses.filter((c) => c.type === "element").map((c) => c.whereClause);
+    const categoryClauses = clauses.filter((c) => c.type === "category");
+    const elementClauses = clauses.filter((c) => c.type === "element");
 
     const baseCases: string[] = [];
 
-    if (categoryWhereClauses.length > 0) {
+    if (categoryClauses.length > 0) {
       baseCases.push(`
         SELECT ECInstanceId, Model.Id, Parent.Id, Category.Id, Category.Id
         FROM ${this.#elementClassName}
-        WHERE ${categoryWhereClauses.join(" OR ")}
+        WHERE ${categoryClauses.map((c) => c.whereClause).join(" OR ")}
       `);
     }
 
-    if (elementWhereClauses.length > 0) {
+    if (elementClauses.length > 0) {
       baseCases.push(`
         SELECT ECInstanceId, Model.Id, Parent.Id, CAST(NULL AS TEXT), Category.Id
         FROM ${this.#elementClassName}
-        WHERE ${elementWhereClauses.join(" OR ")}
+        WHERE ${elementClauses.map((c) => c.whereClause).join(" OR ")}
       `);
     }
 
     if (baseCases.length === 0) {
       return EMPTY;
     }
+    const bindings: ECSqlBinding[] = categoryClauses
+      .map((c) => c.bindings ?? [])
+      .flat()
+      .concat(elementClauses.map((c) => c.bindings ?? []).flat());
 
     return defer(
       () =>
@@ -161,22 +165,23 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
           {
             ctes: [
               `
-            Descendants(id, modelId, reqParent, reqCategory, ownCategory) AS (
-              ${baseCases.join(" UNION ALL ")}
+              Descendants(id, modelId, reqParent, reqCategory, ownCategory) AS (
+                ${baseCases.join(" UNION ALL ")}
 
-              UNION ALL
+                UNION ALL
 
-              SELECT c.ECInstanceId, p.modelId, p.reqParent, p.reqCategory, c.Category.Id
-              FROM ${this.#elementClassName} c
-              JOIN Descendants p ON c.Parent.Id = p.id
-            )
-            `,
+                SELECT c.ECInstanceId, p.modelId, p.reqParent, p.reqCategory, c.Category.Id
+                FROM ${this.#elementClassName} c
+                JOIN Descendants p ON c.Parent.Id = p.id
+              )
+              `,
             ],
             ecsql: `
-            SELECT modelId, reqParent, reqCategory, ownCategory, COUNT(*) as cnt
-            FROM Descendants
-            GROUP BY modelId, reqParent, reqCategory, ownCategory
-          `,
+              SELECT modelId, reqParent, reqCategory, ownCategory, COUNT(*) as cnt
+              FROM Descendants
+              GROUP BY modelId, reqParent, reqCategory, ownCategory
+            `,
+            bindings: bindings.length > 0 ? bindings : undefined,
           },
           {
             rowFormat: "ECSqlPropertyNames",
@@ -229,10 +234,5 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
 
   public getDescendantsCounts(props: DescendantsCountRequest): Observable<DescendantsCountResult> {
     return this.get(props);
-  }
-
-  /** Pre-warms the cache by queuing a request into the next batch without subscribing to results. */
-  public storeRequest(request: DescendantsCountRequest): void {
-    return this.store(request);
   }
 }

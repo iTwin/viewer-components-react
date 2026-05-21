@@ -28,7 +28,7 @@ import {
 import { assert, Id64 } from "@itwin/core-bentley";
 import { createVisibilityStatus } from "../Tooltip.js";
 import { countInSet, fromWithRelease, releaseMainThreadOnItemsCount, setDifference } from "../Utils.js";
-import { changeElementStateNoChildrenOperator, getVisibilityFromAlwaysAndNeverDrawnElementsImpl, mergeVisibilityStatuses } from "../VisibilityUtils.js";
+import { changeElementStateNoChildrenOperator, getCategoryVisibilityFromAlwaysAndNeverDrawnElementsImpl, mergeVisibilityStatuses } from "../VisibilityUtils.js";
 
 import type { Observable, Subscription } from "rxjs";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -265,7 +265,7 @@ export class BaseVisibilityHelper implements Disposable {
   private getModelWithCategoryVisibilityStatus({ modelId, categoryId }: { modelId: Id64String; categoryId: Id64String }): Observable<VisibilityStatus> {
     const modelVisibilityStatus = this.#props.viewport.viewsModel(modelId)
       ? // For visible model need to check category and always/never drawn elements
-        this.getVisibilityFromAlwaysAndNeverDrawnElements({
+        this.getCategoryVisibilityFromAlwaysAndNeverDrawnElements({
           modelId,
           categoryId,
           defaultStatus: this.getVisibleModelCategoryDirectVisibilityStatus({ modelId, categoryId }),
@@ -363,7 +363,7 @@ export class BaseVisibilityHelper implements Disposable {
       return of(defaultStatus);
     }
     return of(
-      getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
+      getCategoryVisibilityFromAlwaysAndNeverDrawnElementsImpl({
         defaultStatus,
         numberOfElementsInOppositeSet: countInSet(elementIds, oppositeSet),
         totalCount: Id64.sizeOf(elementIds),
@@ -434,7 +434,7 @@ export class BaseVisibilityHelper implements Disposable {
                 })
                 .pipe(
                   map((elementsInOppositeSet) =>
-                    getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
+                    getCategoryVisibilityFromAlwaysAndNeverDrawnElementsImpl({
                       defaultStatus: createVisibilityStatus("visible"),
                       numberOfElementsInOppositeSet: elementsInOppositeSet.size,
                       totalCount: visibleCategoriesDescendantsCount,
@@ -453,7 +453,7 @@ export class BaseVisibilityHelper implements Disposable {
                 })
                 .pipe(
                   map((elementsInOppositeSet) =>
-                    getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
+                    getCategoryVisibilityFromAlwaysAndNeverDrawnElementsImpl({
                       defaultStatus: createVisibilityStatus("hidden"),
                       numberOfElementsInOppositeSet: elementsInOppositeSet.size,
                       totalCount: hiddenCategoriesDescendantsCount,
@@ -467,7 +467,7 @@ export class BaseVisibilityHelper implements Disposable {
   }
 
   /** Gets visibility status of a category based on viewport's always/never drawn elements. */
-  private getVisibilityFromAlwaysAndNeverDrawnElements({
+  private getCategoryVisibilityFromAlwaysAndNeverDrawnElements({
     modelId,
     ...props
   }: {
@@ -502,7 +502,7 @@ export class BaseVisibilityHelper implements Disposable {
       // Result will be "partial" because CategoryB will return hidden visibility, even though all elements are visible
       // TODO fix with: https://github.com/iTwin/viewer-components-react/issues/1100
       map((state) =>
-        getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
+        getCategoryVisibilityFromAlwaysAndNeverDrawnElementsImpl({
           defaultStatus,
           totalCount: state.totalCount,
           numberOfElementsInOppositeSet: state.relatedElementsInOppositeSet.size,
