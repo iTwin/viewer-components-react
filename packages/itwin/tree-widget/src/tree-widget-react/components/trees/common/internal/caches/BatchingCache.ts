@@ -117,7 +117,21 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
     }
 
     if (this.#valuesToRequest.sharedObs === undefined) {
-      this.#valuesToRequest.sharedObs = this.createSharedObs();
+      const requestId = Guid.createValue();
+      this.#valuesToRequest.sharedObs = this.createSharedObs({
+        values: this.#valuesToRequest.values,
+        onStart: () => {
+          const { sharedObs } = this.#valuesToRequest;
+          assert(sharedObs !== undefined);
+          // After when start happens, assign the observable in #valuesToRequest to the #requestedValues
+          this.#requestedValues.set(requestId, { values: this.#valuesToRequest.values, sharedObs });
+          // Clear #valuesToRequest so new requests can be collected while the query is executing
+          this.#valuesToRequest = { values: [] };
+        },
+        onDone: () => {
+          this.#requestedValues.delete(requestId);
+        },
+      });
     }
 
     this.#valuesToRequest.values.push(requestNotInBatch);
@@ -125,16 +139,10 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
     return this.getResultAfterObservable(request, merge(...[...sharedObsArray, this.#valuesToRequest.sharedObs]).pipe(last()));
   }
 
-  private createSharedObs(): Observable<void> {
-    const requestId = Guid.createValue();
+  private createSharedObs({ values, onStart, onDone }: { values: TRequest[]; onStart: () => void; onDone: () => void }): Observable<void> {
     return timer(this.#timerDelay).pipe(
       switchMap(() => {
-        // After timer delay ms, assign the observable in #valuesToRequest to the #requestedValues
-        const { values, sharedObs } = this.#valuesToRequest;
-        assert(sharedObs !== undefined);
-        this.#requestedValues.set(requestId, { values, sharedObs });
-        // Clear #valuesToRequest so new requests can be collected while the query is executing
-        this.#valuesToRequest = { values: [] };
+        onStart();
         return this.executeBatchQuery(values).pipe(
           reduce((_acc, row: TRow) => {
             // Cache each row as it arrives, use reduce to emit one value when query completes
@@ -147,10 +155,7 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
         );
       }),
       tap({
-        finalize: () => {
-          // Remove requestedValues entry when the query completes.
-          this.#requestedValues.delete(requestId);
-        },
+        finalize: onDone,
       }),
       shareReplay(1),
     );
