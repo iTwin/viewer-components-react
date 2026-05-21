@@ -230,9 +230,4 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
   public getDescendantsCounts(props: DescendantsCountRequest): Observable<DescendantsCountResult> {
     return this.get(props);
   }
-
-  /** Pre-warms the cache by queuing a request into the next batch without subscribing to results. */
-  public storeRequest(request: DescendantsCountRequest): void {
-    return this.store(request);
-  }
 }

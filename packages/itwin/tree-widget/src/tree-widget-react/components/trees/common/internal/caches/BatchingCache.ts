@@ -43,12 +43,11 @@ export interface BatchingCacheProps {
  * @internal
  */
 export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
-  // When a new request is made (via `get`) or stored (via `store`):
-  // - If the value is already cached, returns it immediately (get) or skips (store).
-  // - If it's already in-flight (#requestedValues), subscribes to the same observable (get) or skips (store).
-  // - Otherwise, adds to #valuesToRequest. For `get`, a timer is started if not already running;
-  //   after the timer fires, the batch executes and caches results. For `store`, the request
-  //   is only queued — the batch executes when a subsequent `get` triggers the timer.
+  // When a new request is made via `get`:
+  // - If the value is already cached, returns it immediately.
+  // - If it's already in-flight (#requestedValues), subscribes to the same observable.
+  // - Otherwise, adds to #valuesToRequest. A timer is started if not already running;
+  //   after the timer fires, the batch executes and caches results.
 
   /** Pending requests buffer. `sharedObs` is created lazily on the first `get` call. */
   #valuesToRequest: { values: TRequest[]; sharedObs?: Observable<void> } = { values: [] };
@@ -92,27 +91,6 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
 
   /** Ensure default/empty cache entries exist for all values in the batch (called after query completes). */
   protected abstract ensureDefaultCacheEntries(batch: TRequest[]): void;
-
-  /**
-   * Queues a request into the next batch without subscribing to results.
-   * Used to pre-warm the cache - the request will be included in the next batch query
-   * triggered by a subsequent `get` call.
-   */
-  public store(request: TRequest): void {
-    const cachedValue = this.getCachedValue(request);
-    if (cachedValue !== undefined) {
-      return;
-    }
-    let requestNotInBatch: TRequest = request;
-    for (const { values } of this.#requestedValues.values()) {
-      const { valuesNotInBatch } = this.getValuesNotInBatch(requestNotInBatch, values);
-      if (valuesNotInBatch === undefined) {
-        return;
-      }
-      requestNotInBatch = valuesNotInBatch;
-    }
-    this.#valuesToRequest.values.push(requestNotInBatch);
-  }
 
   /**
    * Queues a request and returns an observable that emits the result once the batch query completes.
