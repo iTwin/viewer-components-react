@@ -124,8 +124,8 @@ export async function validateHierarchyVisibility(
         const isDelayed = nodes.length === releaseAfterCount || index > 0;
         return of(nodes).pipe(isDelayed ? delay(0) : identity);
       }),
-      mergeMap((delayedNodes) => {
-        return from(delayedNodes).pipe(mergeMap(async (node) => validateNodeVisibility({ ...props, node })));
+      mergeMap((bufferedNodes) => {
+        return from(bufferedNodes).pipe(mergeMap(async (node) => validateNodeVisibility({ ...props, node })));
       }),
     ),
   );
