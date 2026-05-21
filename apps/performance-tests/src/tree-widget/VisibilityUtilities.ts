@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, concatMap, defaultIfEmpty, delay, firstValueFrom, from, identity, mergeMap, of, takeLast, toArray } from "rxjs";
+import { bufferCount, concatMap, delay, firstValueFrom, from, identity, mergeMap, of, toArray } from "rxjs";
 import { expect } from "vitest";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
@@ -122,16 +122,10 @@ export async function validateHierarchyVisibility(
       bufferCount(releaseAfterCount),
       concatMap((nodes, index) => {
         const isDelayed = nodes.length === releaseAfterCount || index > 0;
-        return of({ nodes, isDelayed }).pipe(isDelayed ? delay(0) : identity);
+        return of(nodes).pipe(isDelayed ? delay(0) : identity);
       }),
-      concatMap(({ nodes: delayedNodes, isDelayed }) => {
-        return from(delayedNodes).pipe(
-          mergeMap(async (node) => validateNodeVisibility({ ...props, node })),
-          takeLast(1),
-          defaultIfEmpty(undefined),
-          // Release again after validating the delayed nodes.
-          isDelayed ? delay(0) : identity,
-        );
+      mergeMap((bufferedNodes) => {
+        return from(bufferedNodes).pipe(mergeMap(async (node) => validateNodeVisibility({ ...props, node })));
       }),
     ),
   );
