@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { firstValueFrom, from, mergeMap, toArray } from "rxjs";
+import { bufferCount, concatMap, delay, firstValueFrom, from, identity, mergeMap, of, toArray } from "rxjs";
 import { expect } from "vitest";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
@@ -112,27 +112,21 @@ export async function validateHierarchyVisibility(
     releaseOn?: number;
   },
 ) {
-  // const releaseAfterCount = 100;
+  const releaseAfterCount = 100;
   props.viewport.renderFrame();
   // This promise allows handler change event to fire if it was scheduled.
   await new Promise((resolve) => setTimeout(resolve));
   await toVoidPromise(
     from(props.hierarchyNodes).pipe(
-      // // Custom releaseMainThreadOnItemsCount
-      // bufferCount(releaseAfterCount),
-      // concatMap((nodes, index) => {
-      //   const isDelayed = nodes.length === releaseAfterCount || index > 0;
-      //   return of({ nodes, isDelayed }).pipe(isDelayed ? delay(0) : identity);
-      // }),
-      // concatMap(({ nodes: delayedNodes, isDelayed }) => {
-      //   return from(delayedNodes).pipe(
-      mergeMap(async (node) => validateNodeVisibility({ ...props, node })),
-      // takeLast(1),
-      // defaultIfEmpty(undefined),
-      // // Release again after validating the delayed nodes.
-      // isDelayed ? delay(0) : identity,
-      //   );
-      // }),
+      // Custom releaseMainThreadOnItemsCount
+      bufferCount(releaseAfterCount),
+      concatMap((nodes, index) => {
+        const isDelayed = nodes.length === releaseAfterCount || index > 0;
+        return of(nodes).pipe(isDelayed ? delay(0) : identity);
+      }),
+      mergeMap((delayedNodes) => {
+        return from(delayedNodes).pipe(mergeMap(async (node) => validateNodeVisibility({ ...props, node })));
+      }),
     ),
   );
 }
