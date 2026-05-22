@@ -9,9 +9,8 @@ import { fileURLToPath } from "url";
 import { defineConfig } from "vitest/config";
 import TestReporter from "./src/util/TestReporter.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const treeWidgetRoot = path.resolve(__dirname, "../../packages/itwin/tree-widget");
+const rootDir = path.dirname(fileURLToPath(import.meta.url));
+const treeWidgetRoot = path.resolve(rootDir, "../../packages/itwin/tree-widget");
 const treeWidgetSrc = path.resolve(treeWidgetRoot, "src");
 
 function collectDepsFromPackage(...packageDirs: string[]): string[] {
@@ -35,7 +34,7 @@ export default defineConfig({
     ],
     // Dedupe ensures that shared dependencies (e.g. @itwin/core-frontend) resolve from this app's
     // node_modules rather than the tree-widget package's node_modules, preventing duplicate package errors.
-    dedupe: collectDepsFromPackage(treeWidgetRoot, __dirname),
+    dedupe: collectDepsFromPackage(treeWidgetRoot, rootDir),
   },
   test: {
     environment: "happy-dom",

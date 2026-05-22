@@ -10,11 +10,11 @@ import { defineConfig, loadEnv } from "vite";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import react from "@vitejs/plugin-react";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const ENV_PREFIX = "IMJS_";
 
-const treeWidgetRoot = path.resolve(__dirname, "../../packages/itwin/tree-widget");
-const treeWidgetSrc = path.resolve(__dirname, "../../packages/itwin/tree-widget/src");
+const treeWidgetRoot = path.resolve(rootDir, "../../packages/itwin/tree-widget");
+const treeWidgetSrc = path.resolve(rootDir, "../../packages/itwin/tree-widget/src");
 
 function collectDepsFromPackage(...packageDirs: string[]): string[] {
   const deps = new Set<string>();
