@@ -2410,10 +2410,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       viewport.setNeverDrawn({ elementIds: new Set([ids.parentElement, ids.childInVisibleCategory, ids.childInHiddenCategory]) });
       viewport.renderFrame();
 
-      await handler.changeVisibility(
-        createElementHierarchyNode({ modelId: ids.model, categoryId: ids.visibleCategory, elementId: ids.parentElement }),
-        true,
-      );
+      await handler.changeVisibility(createElementHierarchyNode({ modelId: ids.model, categoryId: ids.visibleCategory, elementId: ids.parentElement }), true);
 
       // parentElement and childInVisibleCategory: their category is visible, on=true matches default → removed from neverDrawn
       // childInHiddenCategory: its category is hidden, on=true doesn't match → added to alwaysDrawn
