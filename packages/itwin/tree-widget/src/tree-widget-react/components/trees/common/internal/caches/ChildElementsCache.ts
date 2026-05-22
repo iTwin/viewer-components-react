@@ -10,6 +10,7 @@ import { BatchingCache } from "./BatchingCache.js";
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { ECSqlBinding } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId } from "../Types.js";
 
 interface ChildElementsBaseRequest {
@@ -39,6 +40,7 @@ interface WhereClause {
   whereClause: string;
   type: "element" | "category";
   childCategoryIds: Set<CategoryId>;
+  bindings?: ECSqlBinding[];
 }
 
 interface Row {
@@ -134,7 +136,7 @@ export class ChildElementsCache extends BatchingCache<ChildElementsRequest, Id64
     return from(groupedValues.entries()).pipe(
       mergeMap(([modelId, parentMap]) =>
         from(parentMap.entries()).pipe(
-          mergeMap(([parentElementId, categoryMap]) => {
+          mergeMap(([parentElementId, categoryMap], idx) => {
             const clauses: WhereClause[] = [];
             const undefinedEntry = categoryMap.get(undefined);
             if (undefinedEntry) {
@@ -153,9 +155,10 @@ export class ChildElementsCache extends BatchingCache<ChildElementsRequest, Id64
             }
             if (categoryMapKeys.length > 0) {
               clauses.push({
-                whereClause: `Model.Id = ${modelId} AND Category.Id IN (${categoryMapKeys.join(", ")}) ${parentElementId === undefined ? "AND Parent.Id IS NULL" : `AND Parent.Id = ${parentElementId}`}`,
+                whereClause: `Model.Id = ${modelId} AND Category.Id IN (SELECT categoryIdSet${idx}.id FROM IdSet(?) categoryIdSet${idx} ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES) ${parentElementId === undefined ? "AND Parent.Id IS NULL" : `AND Parent.Id = ${parentElementId}`}`,
                 type: "category",
                 childCategoryIds: allChildCategoryIds,
+                bindings: [{ type: "idset", value: categoryMapKeys }],
               });
             }
             return from(clauses);
@@ -166,8 +169,8 @@ export class ChildElementsCache extends BatchingCache<ChildElementsRequest, Id64
   }
 
   protected executeQuery(clauses: WhereClause[]): Observable<Row> {
-    const categoryWhereClauses = clauses.filter((c) => c.type === "category").map((c) => c.whereClause);
-    const elementWhereClauses = clauses.filter((c) => c.type === "element").map((c) => c.whereClause);
+    const categoryClauses = clauses.filter((c) => c.type === "category");
+    const elementClauses = clauses.filter((c) => c.type === "element");
     const allChildCategoryIds = new Set<CategoryId>();
     for (const { childCategoryIds } of clauses) {
       for (const childCategoryId of childCategoryIds) {
@@ -177,19 +180,19 @@ export class ChildElementsCache extends BatchingCache<ChildElementsRequest, Id64
 
     const baseCases: string[] = [];
 
-    if (categoryWhereClauses.length > 0) {
+    if (categoryClauses.length > 0) {
       baseCases.push(`
         SELECT ECInstanceId, Model.Id, Parent.Id, Category.Id, Category.Id
         FROM ${this.#elementClassName}
-        WHERE ${categoryWhereClauses.join(" OR ")}
+        WHERE ${categoryClauses.map((c) => c.whereClause).join(" OR ")}
       `);
     }
 
-    if (elementWhereClauses.length > 0) {
+    if (elementClauses.length > 0) {
       baseCases.push(`
         SELECT ECInstanceId, Model.Id, Parent.Id, CAST(NULL AS TEXT), Category.Id
         FROM ${this.#elementClassName}
-        WHERE ${elementWhereClauses.join(" OR ")}
+        WHERE ${elementClauses.map((c) => c.whereClause).join(" OR ")}
       `);
     }
 
@@ -231,7 +234,11 @@ export class ChildElementsCache extends BatchingCache<ChildElementsRequest, Id64
               JOIN IdSet(?) allChildCategoryIdSet ON d.ownCategory = allChildCategoryIdSet.id
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
-            bindings: [{ type: "idset", value: [...allChildCategoryIds] }],
+            bindings: [
+              ...categoryClauses.map((c) => c.bindings ?? []).flat(),
+              ...elementClauses.map((c) => c.bindings ?? []).flat(),
+              { type: "idset", value: [...allChildCategoryIds] },
+            ],
           },
           {
             rowFormat: "ECSqlPropertyNames",

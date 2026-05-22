@@ -214,7 +214,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
 
   public postProcessNode: NodePostProcessor = async ({ node }) => {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
-      const { hasSearchTargetAncestor, hasDirectNonSearchTargets, childrenCount, searchTargets } = groupingNodeDataFromChildren(node.children);
+      const { hasSearchTargetAncestor, hasDirectNonSearchTargets } = groupingNodeDataFromChildren(node.children);
       return {
         ...node,
         label: this.#hierarchyConfig.elementClassGrouping === "enableWithCounts" ? `${node.label} (${node.children.length})` : node.label,
@@ -225,8 +225,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           modelId: node.children[0].extendedData?.modelId,
           categoryOfTopMostParentElement: node.children[0].extendedData?.categoryOfTopMostParentElement,
           topMostParentElementId: node.children[0].extendedData?.topMostParentElementId,
-          childrenCount,
-          ...(!!searchTargets?.size ? { searchTargets } : {}),
           ...(hasDirectNonSearchTargets ? { hasDirectNonSearchTargets } : {}),
           ...(hasSearchTargetAncestor ? { hasSearchTargetAncestor } : {}),
           // `imageId` is assigned to instance nodes at query time, but grouping ones need to
@@ -459,23 +457,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  private createElementChildrenCountSelector(props: { elementIdSelector: string }): string {
-    return `(
-      WITH RECURSIVE
-        ElementWithParent(id) AS (
-          SELECT e.ECInstanceId
-          FROM ${this.#hierarchyConfig.elementClassSpecification} e
-          WHERE e.ECInstanceId = ${props.elementIdSelector}
-          UNION ALL
-          SELECT c.ECInstanceId
-          FROM ${this.#hierarchyConfig.elementClassSpecification} c
-          JOIN ElementWithParent p ON p.id = c.Parent.Id
-        )
-      SELECT COUNT(1) - 1
-      FROM ElementWithParent
-    )`;
-  }
-
   private async createSpatialCategoryChildrenQuery({
     parentNodeInstanceIds: categoryIds,
     parentNode,
@@ -539,7 +520,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   modelId: { selector: "IdToHex(this.Model.Id)" },
                   categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
-                  childrenCount: { selector: this.createElementChildrenCountSelector({ elementIdSelector: "this.ECInstanceId" }) },
                   categoryOfTopMostParentElement: { selector: "IdToHex(this.Category.Id)" },
                   topMostParentElementId: { selector: "IdToHex(this.ECInstanceId)" },
                 },
@@ -609,7 +589,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   modelId: { selector: "IdToHex(this.Model.Id)" },
                   categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
-                  childrenCount: { selector: this.createElementChildrenCountSelector({ elementIdSelector: "this.ECInstanceId" }) },
                   categoryOfTopMostParentElement: {
                     selector: `IdToHex(${parentNode.extendedData?.categoryOfTopMostParentElement})`,
                   },

@@ -2874,7 +2874,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               [modelId]: "partial",
                 // Only categories of elements without parents are shown in the tree
                 [`${modelId}-${parentCategoryId}`]: "visible",
-                  [parentElementId]: "visible",
+                  [parentElementId]: "partial",
                     [childElementWithDifferentCategoryId]: "hidden",
 
           },
@@ -2920,7 +2920,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             [IModel.rootSubjectId]: "partial",
               [modelId]: "partial",
                 [`${modelId}-${parentCategoryId}`]: "visible",
-                  [parentElementId]: "visible",
+                  [parentElementId]: "partial",
                     [childElementId]: "visible",
                     [childElementWithDifferentCategoryId]: "hidden",
           },
@@ -2978,7 +2978,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             [IModel.rootSubjectId]: "partial",
               [modelId]: "partial",
                 [`${modelId}-${category1Id}`]: "visible",
-                  [parentElementId]: "visible",
+                  [parentElementId]: "partial",
                     [childElementWithDifferentCategoryId]: "hidden",
 
                 [`${modelId}-${category2Id}`]: "hidden",
@@ -3044,7 +3044,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                   [elementWithSharedCategoryId]: "visible",
 
                 [`${modelId}-${parentCategoryId}`]: "hidden",
-                  [parentElementId]: "hidden",
+                  [parentElementId]: "partial",
                     [childElementWithSharedCategoryId]: "visible",
           },
         });
@@ -3097,6 +3097,54 @@ describe("ModelsTreeVisibilityHandler", () => {
                 [`${modelId}-${unrelatedCategoryId}`]: "hidden",
                   [unrelatedParentElementId]: "hidden",
                     [childOfUnrelatedElementId]: "hidden",
+          },
+        });
+      });
+
+      it("parent element visibility is partial when its category is hidden but child element category is visible", async () => {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const parentCategory = insertSpatialCategory({ txn, codeValue: "parentCategory" });
+            const childCategory = insertSpatialCategory({ txn, codeValue: "childCategory" });
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
+
+            const parentElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: parentCategory.id });
+            const childElementWithDifferentCategory = insertPhysicalElement({
+              txn,
+              modelId: model.id,
+              categoryId: childCategory.id,
+              parentId: parentElement.id,
+            });
+            return {
+              modelId: model.id,
+              parentCategoryId: parentCategory.id,
+              childCategoryId: childCategory.id,
+              parentElementId: parentElement.id,
+              childElementWithDifferentCategoryId: childElementWithDifferentCategory.id,
+            };
+          }),
+        );
+        const { imodelConnection, modelId, parentCategoryId, childCategoryId, parentElementId, childElementWithDifferentCategoryId } = buildIModelResult;
+        using visibilityTestData = createVisibilityTestData({ imodelConnection });
+        const { handler, viewport, ...props } = visibilityTestData;
+
+        viewport.changeModelDisplay({ modelIds: modelId, display: true });
+        viewport.clearPerModelCategoryOverrides();
+        viewport.changeCategoryDisplay({ categoryIds: parentCategoryId, display: false });
+        viewport.changeCategoryDisplay({ categoryIds: childCategoryId, display: true });
+        viewport.clearNeverDrawn();
+        viewport.clearAlwaysDrawn();
+        await validateModelsTreeHierarchyVisibility({
+          ...props,
+          handler,
+          viewport,
+          // prettier-ignore
+          expectations: {
+            [IModel.rootSubjectId]: "partial",
+              [modelId]: "partial",
+                [`${modelId}-${parentCategoryId}`]: "hidden",
+                  [parentElementId]: "partial",
+                    [childElementWithDifferentCategoryId]: "visible",
           },
         });
       });

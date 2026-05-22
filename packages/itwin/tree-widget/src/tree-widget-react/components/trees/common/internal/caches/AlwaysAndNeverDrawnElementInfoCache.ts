@@ -34,7 +34,7 @@ import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
 import { getClassesByView, getIdsFromChildrenTree, getOptimalBatchSize, releaseMainThreadOnItemsCount, updateChildrenTree } from "../Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
-import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
 import type { ElementId } from "../Types.js";
 import type { ChildrenTree } from "../Utils.js";
@@ -376,13 +376,21 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
     );
   }
 
-  public getAlwaysOrNeverDrawnElements(props: GetElementsTreeProps) {
+  public getAlwaysOrNeverDrawnElements(props: GetElementsTreeProps & { childCategoryIds?: Id64Set }) {
     const cache = props.setType === "always" ? this.#viewport.alwaysDrawn : this.#viewport.neverDrawn;
     if (!cache?.size) {
       return of(new Set<ElementId>());
     }
+    const childCategoryIds = props.childCategoryIds;
     return this.getElementsTree(props).pipe(
-      map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet })),
+      map((childrenTree) =>
+        getIdsFromChildrenTree({
+          tree: childrenTree,
+          predicate: childCategoryIds?.size
+            ? ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet && childCategoryIds.has(treeEntry.categoryId)
+            : ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet,
+        }),
+      ),
     );
   }
 }

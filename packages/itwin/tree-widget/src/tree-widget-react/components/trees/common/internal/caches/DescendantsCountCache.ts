@@ -3,13 +3,14 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, from, mergeMap } from "rxjs";
-import { assert, Guid } from "@itwin/core-bentley";
+import { defer, EMPTY, from, map, merge, mergeMap } from "rxjs";
+import { Guid } from "@itwin/core-bentley";
 import { BatchingCache } from "./BatchingCache.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { ECSqlBinding } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId } from "../Types.js";
 
 interface DescendantsCountBaseRequest {
@@ -31,6 +32,7 @@ type DescendantsCountResult = Array<{ categoryId: CategoryId; count: number }>;
 interface WhereClause {
   whereClause: string;
   type: "element" | "category";
+  bindings?: ECSqlBinding[];
 }
 interface Row {
   modelId: ModelId;
@@ -76,12 +78,23 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
   }
 
   protected getQueryData(batch: DescendantsCountRequest[]): Observable<WhereClause> {
-    const groupedValues = new Map<ModelId, Map<ElementId | undefined, Set<CategoryId | undefined>>>();
-    for (const { modelId, parentElementId, categoryId } of batch) {
-      let modelEntry = groupedValues.get(modelId);
+    const groupedCategoryValues = new Map<ModelId, Map<ElementId | undefined, Set<CategoryId>>>();
+    const groupedElementValues = new Map<ModelId, Set<ElementId>>();
+    for (const batchEntry of batch) {
+      if (batchEntry.categoryId === undefined) {
+        let groupedElementsModelEntry = groupedElementValues.get(batchEntry.modelId);
+        if (!groupedElementsModelEntry) {
+          groupedElementsModelEntry = new Set();
+          groupedElementValues.set(batchEntry.modelId, groupedElementsModelEntry);
+        }
+        groupedElementsModelEntry.add(batchEntry.parentElementId);
+        continue;
+      }
+      const { modelId, parentElementId, categoryId } = batchEntry;
+      let modelEntry = groupedCategoryValues.get(modelId);
       if (!modelEntry) {
         modelEntry = new Map();
-        groupedValues.set(modelId, modelEntry);
+        groupedCategoryValues.set(modelId, modelEntry);
       }
       let parentEntry = modelEntry.get(parentElementId);
       if (!parentEntry) {
@@ -90,54 +103,61 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
       }
       parentEntry.add(categoryId);
     }
-    return from(groupedValues.entries()).pipe(
-      mergeMap(([modelId, parentMap]) =>
-        from(parentMap.entries()).pipe(
-          mergeMap(([parentElementId, categoryIds]) => {
-            const clauses = new Array<WhereClause>();
-            if (categoryIds.has(undefined)) {
-              assert(parentElementId !== undefined);
-              clauses.push({ whereClause: `Model.Id = ${modelId} AND Parent.Id = ${parentElementId}`, type: "element" });
-            }
-            const concreteCategoryIds = [...categoryIds].filter((id): id is CategoryId => id !== undefined);
-            if (concreteCategoryIds.length > 0) {
-              clauses.push({
-                whereClause: `Model.Id = ${modelId} AND Category.Id IN (${concreteCategoryIds.join(", ")}) ${parentElementId === undefined ? "AND Parent.Id IS NULL" : `AND Parent.Id = ${parentElementId}`}`,
-                type: "category",
-              });
-            }
-            return from(clauses);
-          }),
+    return merge(
+      from(groupedCategoryValues.entries()).pipe(
+        mergeMap(([modelId, parentMap]) =>
+          from(parentMap.entries()).pipe(
+            map(([parentElementId, categoryIds], idx): WhereClause => {
+              return {
+                whereClause: `Model.Id = ${modelId} AND Category.Id IN (SELECT categoryIdSet${idx}.id FROM IdSet(?) categoryIdSet${idx} ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES) ${parentElementId === undefined ? "AND Parent.Id IS NULL" : `AND Parent.Id = ${parentElementId}`}`,
+                type: "category" as const,
+                bindings: [{ type: "idset" as const, value: [...categoryIds] }],
+              };
+            }),
+          ),
         ),
+      ),
+      from(groupedElementValues.entries()).pipe(
+        map(([modelId, parentElementIds], idx): WhereClause => {
+          return {
+            whereClause: `Model.Id = ${modelId} AND Parent.Id IN (SELECT elementIdSet${idx}.id FROM IdSet(?) elementIdSet${idx} ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES)`,
+            type: "element" as const,
+            bindings: [{ type: "idset" as const, value: [...parentElementIds] }],
+          };
+        }),
       ),
     );
   }
 
   protected executeQuery(clauses: WhereClause[]): Observable<Row> {
-    const categoryWhereClauses = clauses.filter((c) => c.type === "category").map((c) => c.whereClause);
-    const elementWhereClauses = clauses.filter((c) => c.type === "element").map((c) => c.whereClause);
+    const categoryClauses = clauses.filter((c) => c.type === "category");
+    const elementClauses = clauses.filter((c) => c.type === "element");
 
     const baseCases: string[] = [];
 
-    if (categoryWhereClauses.length > 0) {
+    if (categoryClauses.length > 0) {
       baseCases.push(`
         SELECT ECInstanceId, Model.Id, Parent.Id, Category.Id, Category.Id
         FROM ${this.#elementClassName}
-        WHERE ${categoryWhereClauses.join(" OR ")}
+        WHERE ${categoryClauses.map((c) => c.whereClause).join(" OR ")}
       `);
     }
 
-    if (elementWhereClauses.length > 0) {
+    if (elementClauses.length > 0) {
       baseCases.push(`
         SELECT ECInstanceId, Model.Id, Parent.Id, CAST(NULL AS TEXT), Category.Id
         FROM ${this.#elementClassName}
-        WHERE ${elementWhereClauses.join(" OR ")}
+        WHERE ${elementClauses.map((c) => c.whereClause).join(" OR ")}
       `);
     }
 
     if (baseCases.length === 0) {
       return EMPTY;
     }
+    const bindings: ECSqlBinding[] = categoryClauses
+      .map((c) => c.bindings ?? [])
+      .flat()
+      .concat(elementClauses.map((c) => c.bindings ?? []).flat());
 
     return defer(
       () =>
@@ -145,22 +165,23 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
           {
             ctes: [
               `
-            Descendants(id, modelId, reqParent, reqCategory, ownCategory) AS (
-              ${baseCases.join(" UNION ALL ")}
+              Descendants(id, modelId, reqParent, reqCategory, ownCategory) AS (
+                ${baseCases.join(" UNION ALL ")}
 
-              UNION ALL
+                UNION ALL
 
-              SELECT c.ECInstanceId, p.modelId, p.reqParent, p.reqCategory, c.Category.Id
-              FROM ${this.#elementClassName} c
-              JOIN Descendants p ON c.Parent.Id = p.id
-            )
-            `,
+                SELECT c.ECInstanceId, p.modelId, p.reqParent, p.reqCategory, c.Category.Id
+                FROM ${this.#elementClassName} c
+                JOIN Descendants p ON c.Parent.Id = p.id
+              )
+              `,
             ],
             ecsql: `
-            SELECT modelId, reqParent, reqCategory, ownCategory, COUNT(*) as cnt
-            FROM Descendants
-            GROUP BY modelId, reqParent, reqCategory, ownCategory
-          `,
+              SELECT modelId, reqParent, reqCategory, ownCategory, COUNT(*) as cnt
+              FROM Descendants
+              GROUP BY modelId, reqParent, reqCategory, ownCategory
+            `,
+            bindings: bindings.length > 0 ? bindings : undefined,
           },
           {
             rowFormat: "ECSqlPropertyNames",
