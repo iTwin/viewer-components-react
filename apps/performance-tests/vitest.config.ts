@@ -21,9 +21,6 @@ function collectDepsFromPackage(...packageDirs: string[]): string[] {
     for (const dep of Object.keys(pkg.peerDependencies ?? {})) {
       deps.add(dep);
     }
-    for (const dep of Object.keys(pkg.dependencies ?? {})) {
-      deps.add(dep);
-    }
   }
   return [...deps];
 }

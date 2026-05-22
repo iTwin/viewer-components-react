@@ -23,9 +23,6 @@ function collectDepsFromPackage(...packageDirs: string[]): string[] {
     for (const dep of Object.keys(pkg.peerDependencies ?? {})) {
       deps.add(dep);
     }
-    for (const dep of Object.keys(pkg.dependencies ?? {})) {
-      deps.add(dep);
-    }
   }
   return [...deps];
 }
@@ -70,7 +67,8 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       alias: [
-        // Resolve tree-widget to source for debugging (breakpoints + source maps).
+        // Debugging dependencies (in this case tree-widget) is not easy since source maps don't seem to work.
+        // Adding these aliases allows adding breakpoints straight into the source code and it does not need to be built.
         { find: "@itwin/tree-widget-react", replacement: path.resolve(treeWidgetSrc, "tree-widget-react.ts") },
         {
           // Resolve SASS tilde imports.
