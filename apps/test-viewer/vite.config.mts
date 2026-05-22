@@ -3,12 +3,29 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import { defineConfig, loadEnv } from "vite";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import react from "@vitejs/plugin-react";
 
+const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const ENV_PREFIX = "IMJS_";
 
+const treeWidgetRoot = path.resolve(rootDir, "../../packages/itwin/tree-widget");
+const treeWidgetSrc = path.resolve(rootDir, "../../packages/itwin/tree-widget/src");
+
+function collectDepsFromPackage(...packageDirs: string[]): string[] {
+  const deps = new Set<string>();
+  for (const dir of packageDirs) {
+    const pkg = JSON.parse(fs.readFileSync(path.resolve(dir, "package.json"), "utf-8"));
+    for (const dep of Object.keys(pkg.peerDependencies ?? {})) {
+      deps.add(dep);
+    }
+  }
+  return [...deps];
+}
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), ENV_PREFIX);
@@ -50,12 +67,18 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       alias: [
+        // Debugging dependencies (in this case tree-widget) is not easy since source maps don't seem to work.
+        // Adding these aliases allows adding breakpoints straight into the source code and it does not need to be built.
+        { find: "@itwin/tree-widget-react", replacement: path.resolve(treeWidgetSrc, "tree-widget-react.ts") },
         {
           // Resolve SASS tilde imports.
           find: /^~(.*)$/,
           replacement: "$1",
         },
       ],
+      // Dedupe only tree-widget's deps so its source imports resolve from this app's node_modules
+      // rather than tree-widget's own node_modules, preventing duplicate package instances.
+      dedupe: collectDepsFromPackage(treeWidgetRoot),
     },
     envPrefix: ENV_PREFIX,
     define: {
