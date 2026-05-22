@@ -907,13 +907,16 @@ export class BaseVisibilityHelper implements Disposable {
       ),
       mergeMap(({ matchingCategories, elementsWithNonMatchingCategories }) => {
         return forkJoin({
-          matchingDesiredState: this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({
-            modelId,
-            parentElementIdsPath,
-            categoryIds: categoryOfTopMostParentElement,
-            setType: on ? "never" : "always",
-            childCategoryIds: matchingCategories,
-          }),
+          matchingDesiredState:
+            matchingCategories.size > 0
+              ? this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({
+                  modelId,
+                  parentElementIdsPath,
+                  categoryIds: categoryOfTopMostParentElement,
+                  setType: on ? "never" : "always",
+                  childCategoryIds: matchingCategories,
+                })
+              : of(new Set<Id64String>()),
           notMatchingDesiredState: from(elementsWithNonMatchingCategories).pipe(
             mergeMap(({ elementId, categoryIds }) =>
               this.#props.baseIdsCache.getChildElements({
