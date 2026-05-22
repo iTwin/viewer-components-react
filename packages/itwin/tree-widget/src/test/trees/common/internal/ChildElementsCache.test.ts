@@ -213,8 +213,7 @@ describe("ChildElementsCache", () => {
       // Both requests are served by a single query since they're in the same batch
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
       const params = vi.mocked(vp.iModel.createQueryReader).mock.calls[0][1];
-      const ids = CompressedId64Set.decompressSet((params?.serialize() as any)[1].value);
-
+      const ids = CompressedId64Set.decompressSet((params?.serialize() as any)[2].value);
       expect(ids.has("0x3")).toBe(true);
       expect(ids.has("0x4")).toBe(true);
     });
@@ -240,7 +239,7 @@ describe("ChildElementsCache", () => {
       expect(result2).toEqual(expect.arrayContaining(["0x100"]));
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
       const secondParams = vi.mocked(vp.iModel.createQueryReader).mock.calls[1][1];
-      const secondIds = CompressedId64Set.decompressSet((secondParams?.serialize() as any)[1].value);
+      const secondIds = CompressedId64Set.decompressSet((secondParams?.serialize() as any)[2].value);
       expect(secondIds.has("0x3")).toBe(false); // "0x3" does not appear
       expect(secondIds.has("0x4")).toBe(true); // "0x4" appears
     });

@@ -107,7 +107,7 @@ export function changeElementStateNoChildrenOperator(props: {
 }
 
 /** @internal */
-export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(props: {
+export function getCategoryVisibilityFromAlwaysAndNeverDrawnElementsImpl(props: {
   numberOfElementsInOppositeSet: number;
   totalCount: number;
   defaultStatus: NonPartialVisibilityStatus;

@@ -67,7 +67,6 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
     modelElementsMap: Map<ModelId, { elementIds: Set<ElementId>; categoryOfTopMostParentElement: CategoryId }>;
     categoryId: Id64String;
     parentKeys: HierarchyNodeKey[];
-    childrenCount: number;
     topMostParentElementId?: ElementId;
   }): Observable<VisibilityStatus> {
     const { modelElementsMap, categoryId, topMostParentElementId } = props;
@@ -83,7 +82,6 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
                 topMostParentElementId,
               })
             : [],
-          childrenCount: props.childrenCount,
           categoryOfTopMostParentElement,
         }),
       ),
