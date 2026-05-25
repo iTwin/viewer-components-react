@@ -220,6 +220,7 @@ export function createElementHierarchyNode(props: {
   parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   search?: NonGroupingHierarchyNode["search"];
   topMostParentElementId?: Id64String;
+  categoryOfTopMostParentElement?: Id64String;
 }): NonGroupingHierarchyNode {
   return {
     key: {
@@ -237,6 +238,7 @@ export function createElementHierarchyNode(props: {
       modelId: props.modelId,
       categoryId: props.categoryId,
       topMostParentElementId: props.topMostParentElementId ?? props.elementId,
+      categoryOfTopMostParentElement: props.categoryOfTopMostParentElement ?? props.categoryId,
     },
   };
 }

@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defaultIfEmpty, defer, forkJoin, from, map, mergeMap, of, reduce } from "rxjs";
-import { Id64 } from "@itwin/core-bentley";
+import { defaultIfEmpty, defer, mergeMap } from "rxjs";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { getParentElementsIdsPath } from "../../../common/internal/Utils.js";
@@ -107,23 +106,22 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
   }
 
   /** Changes visibility of grouped elements. */
-  public changeGroupedElementsVisibilityStatus(props: { modelId: Id64String; categoryId: Id64String; elementIds: Id64Arg; on: boolean }): Observable<void> {
-    const { modelId, categoryId, elementIds, on } = props;
-    return from(Id64.iterable(elementIds)).pipe(
-      mergeMap((elementId) =>
-        forkJoin({
-          elementId: of(elementId),
-          childCategoryIds: this.#props.idsCache
-            .getDescendantsCounts({ parentElementId: elementId, modelId })
-            .pipe(map((counts) => counts.map((entry) => entry.categoryId))),
-        }),
-      ),
-      mergeMap(({ elementId, childCategoryIds }) => this.#props.idsCache.getChildElements({ parentElementId: elementId, modelId, childCategoryIds })),
-      reduce((acc, childElements) => {
-        acc.push(...childElements);
-        return acc;
-      }, new Array<ElementId>()),
-      mergeMap((children) => this.changeElementsVisibilityStatus({ modelId, elementIds, categoryId, on, children })),
-    );
+  public changeGroupedElementsVisibilityStatus(props: {
+    modelId: Id64String;
+    categoryId: Id64String;
+    elementIds: Id64Arg;
+    on: boolean;
+    parentKeys: HierarchyNodeKey[];
+    categoryOfTopMostParentElement: CategoryId;
+    topMostParentElementId?: ElementId;
+  }): Observable<void> {
+    const { modelId, categoryId, elementIds, on, parentKeys, categoryOfTopMostParentElement, topMostParentElementId } = props;
+    const parentElementsIdsPath = topMostParentElementId
+      ? getParentElementsIdsPath({
+          parentInstanceKeys: parentKeys.filter((key) => HierarchyNodeKey.isInstances(key)).map((key) => key.instanceKeys),
+          topMostParentElementId,
+        })
+      : [];
+    return this.changeElementsVisibilityStatus({ modelId, elementIds, categoryId, on, categoryOfTopMostParentElement, parentElementsIdsPath });
   }
 }
