@@ -1,6 +1,6 @@
 {
   "type": "major",
-  "comment": "Removed deprecated `PropertyGridUiItemsProvider` API.",
+  "comment": "Removed deprecated `PropertyGridUiItemsProvider` API. Removed `shouldShow` callback using `Readonly<KeySet>` from `createPropertyGrid` API. `createPropertyGrid` now requires `selectionStorage` to be passed in.",
   "packageName": "@itwin/property-grid-react",
   "email": "24278440+saskliutas@users.noreply.github.com",
   "dependentChangeType": "patch"
