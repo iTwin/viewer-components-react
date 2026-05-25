@@ -33,7 +33,7 @@ In [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) based appl
 import { createPropertyGrid } from "@itwin/property-grid-react";
 import { UiItemsManager } from "@itwin/appui-react";
 
-UiItemsManager.register({ id: "property-grid-provider", getWidgets: () => [createPropertyGrid({})] });
+UiItemsManager.register({ id: "property-grid-provider", getWidgets: () => [createPropertyGrid({ selectionStorage: getGlobalSelectionStorage() })] });
 ```
 
 <!-- END EXTRACTION -->
