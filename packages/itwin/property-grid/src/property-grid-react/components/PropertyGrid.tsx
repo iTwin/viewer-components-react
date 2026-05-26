@@ -24,11 +24,8 @@ export type PropertyGridProps = OmitOverUnion<PropertyGridContentProps, "dataPro
   DataProviderProps & {
     /**
      * Unified selection storage to use for listening and getting active selection.
-     *
-     * When not specified, the deprecated `SelectionManager` from `@itwin/presentation-frontend` package
-     * is used.
      */
-    selectionStorage?: SelectionStorage;
+    selectionStorage: SelectionStorage;
   };
 
 /**

@@ -205,7 +205,7 @@ Provide it to the widget:
 import { PropertyGridComponent } from "@itwin/property-grid-react";
 
 function MyPropertyGrid() {
-  return <PropertyGridComponent contextMenuItems={[(props) => <ExampleContextMenuItem {...props} />]} />;
+  return <PropertyGridComponent selectionStorage={selectionStorage} contextMenuItems={[(props) => <ExampleContextMenuItem {...props} />]} />;
 }
 ```
 
@@ -269,7 +269,7 @@ Provide it to the widget:
 import { PropertyGridComponent } from "@itwin/property-grid-react";
 
 function MyPropertyGrid() {
-  return <PropertyGridComponent settingsMenuItems={[() => <ExampleSettingsMenuItem />]} />;
+  return <PropertyGridComponent selectionStorage={selectionStorage} settingsMenuItems={[() => <ExampleSettingsMenuItem />]} />;
 }
 ```
 
@@ -333,6 +333,7 @@ import { PropertyGridComponent } from "@itwin/property-grid-react";
 function MyPropertyGrid() {
   return (
     <PropertyGridComponent
+      selectionStorage={selectionStorage}
       onPerformanceMeasured={(feature, elapsedTime) => {
         // user-defined function to handle performance logging.
         logPerformance(feature, elapsedTime);
@@ -368,7 +369,7 @@ function ExampleComponent() {
         logUsage(feature);
       }}
     >
-      <PropertyGrid imodel={imodelConnection} />
+      <PropertyGrid selectionStorage={selectionStorage} imodel={imodelConnection} />
     </TelemetryContextProvider>
   );
 }

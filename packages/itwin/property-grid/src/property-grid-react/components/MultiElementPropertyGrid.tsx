@@ -12,7 +12,6 @@ import { IconButton } from "@itwin/itwinui-react";
 import { useInstanceSelection } from "../hooks/UseInstanceSelection.js";
 import { NullValueSettingContext } from "../hooks/UseNullValuesSetting.js";
 import { useTelemetryContext } from "../hooks/UseTelemetryContext.js";
-import { useSelectionHandler } from "../hooks/UseUnifiedSelectionHandler.js";
 import { PropertyGridManager } from "../PropertyGridManager.js";
 import { ElementList as ElementListComponent } from "./ElementList.js";
 import { PropertyGrid as PropertyGridComponent } from "./PropertyGrid.js";
@@ -55,7 +54,6 @@ export type MultiElementPropertyGridProps = OmitOverUnion<PropertyGridProps, "he
  * @public
  */
 export function MultiElementPropertyGrid({ ancestorsNavigationControls, getParentInstanceKey, ...props }: MultiElementPropertyGridProps) {
-  const { selectionChange } = useSelectionHandler({ selectionStorage: props.selectionStorage });
   const { selectedKeys, focusedInstanceKey, focusInstance, ancestorsNavigationProps } = useInstanceSelection({
     imodel: props.imodel,
     selectionStorage: props.selectionStorage,
@@ -63,6 +61,7 @@ export function MultiElementPropertyGrid({ ancestorsNavigationControls, getParen
   });
   const [content, setContent] = useState<MultiElementPropertyContent>(MultiElementPropertyContent.PropertyGrid);
   const { onFeatureUsed } = useTelemetryContext();
+  const selectionStorage = props.selectionStorage;
 
   useEffect(() => {
     const feature = featureFromSelectedCount(selectedKeys.length);
@@ -71,10 +70,10 @@ export function MultiElementPropertyGrid({ ancestorsNavigationControls, getParen
 
   useEffect(() => {
     // show standard property grid when selection changes
-    return selectionChange.addListener(() => {
+    return selectionStorage.selectionChangeEvent.addListener(() => {
       setContent(MultiElementPropertyContent.PropertyGrid);
     });
-  }, [selectionChange]);
+  }, [selectionStorage]);
 
   const openElementList = () => {
     onFeatureUsed("elements-list");
