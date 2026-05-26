@@ -1,6 +1,6 @@
 {
   "type": "major",
-  "comment": "Updated property grid component to use `new` editor system by default. If for some reason `legacy` editor system should be used pass in `editorSystem: \"legacy\" prop.",
+  "comment": "Updated property grid component to use `new` editor system by default. If, for some reason, `legacy` editor system should be used, pass in `editorSystem: \"legacy\"` prop.",
   "packageName": "@itwin/property-grid-react",
   "email": "24278440+saskliutas@users.noreply.github.com",
   "dependentChangeType": "patch"
