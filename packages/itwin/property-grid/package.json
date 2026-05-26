@@ -19,33 +19,27 @@
     "url": "http://www.bentley.com"
   },
   "type": "module",
-  "main": "lib/cjs/property-grid-react.js",
-  "types": "lib/cjs/property-grid-react",
-  "module": "lib/esm/property-grid-react.js",
+  "types": "lib/property-grid-react",
+  "module": "lib/property-grid-react.js",
   "exports": {
     ".": {
-      "import": "./lib/esm/property-grid-react.js",
-      "require": "./lib/cjs/property-grid-react.js"
+      "import": "./lib/property-grid-react.js"
     },
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "npm run -s dual-build && npm run -s copy:assets",
-    "dual-build": "npm run -s build:cjs && npm run -s build:esm",
-    "build:cjs": "node ../../../scripts/package-cjs.js ./lib/cjs && tsc -p tsconfig.cjs.json",
-    "build:esm": "tsc -p tsconfig.esm.json",
-    "copy:assets": "npm run -s copy:public && npm run -s copy:cjs && npm run -s copy:esm",
+    "build": "npm run -s build:lib && npm run -s copy:assets",
+    "build:lib": "tsc -p tsconfig.lib.json",
+    "copy:assets": "npm run -s copy:public && npm run -s copy:styles",
     "copy:public": "cpx \"./public/**/*\" ./lib/public",
-    "copy:cjs": "cpx \"./src/**/*.scss\" ./lib/cjs",
-    "copy:esm": "cpx \"./src/**/*.scss\" ./lib/esm",
+    "copy:styles": "cpx \"./src/**/*.scss\" ./lib",
     "cover": "vitest run --coverage",
-    "extract-api": "betools extract-api --entry=lib/esm/property-grid-react --apiReportFolder=./api --apiReportTempFolder=./api/temp --apiSummaryFolder=./api --includeUnexportedApis",
+    "extract-api": "betools extract-api --entry=lib/property-grid-react --apiReportFolder=./api --apiReportTempFolder=./api/temp --apiSummaryFolder=./api --includeUnexportedApis",
     "check-internal": "node ../../../scripts/checkInternal.js --apiSummary ./api/property-grid-react.api.md",
     "lint": "npm run lint:eslint && npm run lint:stylelint",
     "lint:eslint": "eslint \"./src/**/*.{ts,tsx}\"",
     "lint:stylelint": "stylelint \"./src/**/*.scss\"",
     "lint:fix": "npm run lint:eslint -- --fix && npm run lint:stylelint -- --fix",
-    "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
     "test": "vitest run",
     "test:e2e": "node ../../../scripts/run-e2e-with-docker.js property-grid",
     "test:e2e:local": "node ../../../scripts/run-e2e-tests.js",
