@@ -117,7 +117,7 @@ export function PropertyGridWidget({
     }
 
     let isDisposed = false;
-    const predicate = shouldShow ? shouldShow : defaultWidgetShowPredicate;
+    const predicate = shouldShow ?? defaultWidgetShowPredicate;
 
     const toggleWidget = async (selectables: Selectables) => {
       const predicateResult = await predicate(selectables);
