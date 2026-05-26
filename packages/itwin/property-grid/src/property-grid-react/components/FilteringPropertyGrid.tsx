@@ -82,6 +82,8 @@ export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildC
   return (
     <VirtualizedPropertyGridWithDataProvider
       {...props}
+      // eslint-disable-next-line @typescript-eslint/no-deprecated
+      editorSystem={props.editorSystem ?? "new"}
       minLabelWidth={10}
       minValueWidth={10}
       actionButtonWidth={actionButtonWidth}
