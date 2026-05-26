@@ -25,6 +25,9 @@ import type { IModelConnection } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_END__
 import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils.js";
 
+const selectionStorage = createStorage();
+const getGlobalSelectionStorage = () => selectionStorage;
+
 describe("Property grid", () => {
   describe("Learning snippets", () => {
     describe("Usage", () => {
@@ -40,7 +43,7 @@ describe("Property grid", () => {
 
       it("registers property grid", async () => {
         // __PUBLISH_EXTRACT_START__ PropertyGrid.RegisterPropertyGridWidget
-        UiItemsManager.register({ id: "property-grid-provider", getWidgets: () => [createPropertyGrid({})] });
+        UiItemsManager.register({ id: "property-grid-provider", getWidgets: () => [createPropertyGrid({ selectionStorage: getGlobalSelectionStorage() })] });
         // __PUBLISH_EXTRACT_END__
 
         expect(UiItemsManager.getWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End)).not.toHaveLength(0);
@@ -48,9 +51,6 @@ describe("Property grid", () => {
 
       it("registers customizable property grid", async () => {
         const MY_CUSTOM_RULESET = undefined;
-
-        const selectionStorage = createStorage();
-        const getGlobalSelectionStorage = () => selectionStorage;
 
         // __PUBLISH_EXTRACT_START__ PropertyGrid.RegisterCustomPropertyGridWidget
         UiItemsManager.register({

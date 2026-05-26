@@ -12,12 +12,7 @@ import { Presentation } from "@itwin/presentation-frontend";
 import { Selectables, TRANSIENT_ELEMENT_CLASSNAME } from "@itwin/unified-selection";
 import { createKeysFromSelectable } from "../property-grid-react/hooks/UseUnifiedSelectionHandler.js";
 import { PropertyGridManager } from "../property-grid-react/PropertyGridManager.js";
-import {
-  createPropertyGrid,
-  PropertyGridUiItemsProvider,
-  PropertyGridWidget,
-  PropertyGridWidgetId,
-} from "../property-grid-react/PropertyGridUiItemsProvider.js";
+import { createPropertyGrid, PropertyGridWidget, PropertyGridWidgetId } from "../property-grid-react/PropertyGridUiItemsProvider.js";
 import { act, render, stubSelectionManager, stubSelectionStorage, waitFor } from "./TestUtils.js";
 
 import type { ReactElement } from "react";
@@ -27,49 +22,6 @@ import type { ECClassGroupingNodeKey } from "@itwin/presentation-common";
 import type { EventArgs, Props } from "@itwin/presentation-shared";
 import type { Selectable } from "@itwin/unified-selection";
 import type { PropertyGridWidgetProps } from "../property-grid-react/PropertyGridUiItemsProvider.js";
-
-/* eslint-disable @typescript-eslint/no-deprecated */
-describe("PropertyGridUiItemsProvider", () => {
-  beforeAll(async () => {
-    await PropertyGridManager.initialize(new EmptyLocalization());
-  });
-
-  afterAll(() => {
-    PropertyGridManager.terminate();
-  });
-
-  it("provides widgets to default location", () => {
-    const provider = new PropertyGridUiItemsProvider();
-
-    expect(
-      provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Right, appuiReactModule.StagePanelSection.End),
-    ).not.toHaveLength(0);
-    expect(
-      provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Right, appuiReactModule.StagePanelSection.Start),
-    ).toHaveLength(0);
-    expect(
-      provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Left, appuiReactModule.StagePanelSection.Start),
-    ).toHaveLength(0);
-  });
-
-  it("provides widgets to preferred location", () => {
-    const provider = new PropertyGridUiItemsProvider({
-      defaultPanelLocation: appuiReactModule.StagePanelLocation.Left,
-      defaultPanelSection: appuiReactModule.StagePanelSection.End,
-    });
-
-    expect(
-      provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Right, appuiReactModule.StagePanelSection.End),
-    ).toHaveLength(0);
-    expect(
-      provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Left, appuiReactModule.StagePanelSection.End),
-    ).not.toHaveLength(0);
-    expect(
-      provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Left, appuiReactModule.StagePanelSection.Start),
-    ).toHaveLength(0);
-  });
-});
-/* eslint-enable @typescript-eslint/no-deprecated */
 
 describe("createPropertyGrid", () => {
   function TestPropertyGridComponent() {
@@ -93,12 +45,12 @@ describe("createPropertyGrid", () => {
   });
 
   it("creates a basic widget", async () => {
-    const widget = createPropertyGrid({});
+    const widget = createPropertyGrid({ selectionStorage });
     expect(widget.content).toBeDefined();
   });
 
   it("renders property grid component", async () => {
-    const { getByText } = render(<PropertyGridWidget widgetId="x" propertyGridComponent={<TestPropertyGridComponent />} />);
+    const { getByText } = render(<PropertyGridWidget widgetId="x" selectionStorage={selectionStorage} propertyGridComponent={<TestPropertyGridComponent />} />);
     await waitFor(() => getByText("Test PropertyGridComponent"));
   });
 
@@ -107,7 +59,7 @@ describe("createPropertyGrid", () => {
     function ThrowingComponent(): ReactElement | null {
       throw new Error("Test error");
     }
-    const { getByText } = render(<PropertyGridWidget widgetId="x" propertyGridComponent={<ThrowingComponent />} />);
+    const { getByText } = render(<PropertyGridWidget widgetId="x" selectionStorage={selectionStorage} propertyGridComponent={<ThrowingComponent />} />);
     await waitFor(() => getByText("error"));
     errorStub.mockRestore();
   });
@@ -156,7 +108,7 @@ describe("createPropertyGrid", () => {
         },
       },
     ].forEach(({ name, getProps, setupSelection, triggerSelectionChange }) => {
-      function renderWidget(widgetProps?: PropertyGridWidgetProps) {
+      function renderWidget(widgetProps?: Partial<PropertyGridWidgetProps>) {
         const props = {
           widgetId: "test",
           widgetDef: widgetDef as unknown as WidgetDef,
@@ -259,7 +211,7 @@ describe("createPropertyGrid", () => {
 
         it("opens widget if unified selection non-empty with instance keys and `shouldShow` return true", async () => {
           await setupSelection([{ id: "0x1", className: "TestSchema.TestClass" }]);
-          renderWidget({ shouldShow: () => true });
+          renderWidget({ shouldShow: async () => true });
 
           await waitFor(() => {
             expect(widgetDef.setWidgetState).toHaveBeenCalled();
@@ -278,7 +230,7 @@ describe("createPropertyGrid", () => {
             version: 2,
           };
           await setupSelection([{ identifier: "class grouping node", data: key, async *loadInstanceKeys() {} }]);
-          renderWidget({ shouldShow: () => true });
+          renderWidget({ shouldShow: async () => true });
 
           await waitFor(() => {
             expect(widgetDef.setWidgetState).toHaveBeenCalled();
@@ -289,7 +241,7 @@ describe("createPropertyGrid", () => {
         it("hides widget if unified selection changes non-empty and `shouldShow` returns false", async () => {
           widgetDef.state = appuiReactModule.WidgetState.Open;
           await setupSelection([{ id: "0x1", className: "TestSchema.TestClass" }]);
-          renderWidget({ shouldShow: () => false });
+          renderWidget({ shouldShow: async () => false });
 
           await waitFor(() => {
             expect(widgetDef.setWidgetState).toHaveBeenCalled();
