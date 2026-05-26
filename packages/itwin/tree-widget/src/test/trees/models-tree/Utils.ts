@@ -128,7 +128,23 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       }
       return of(0);
     }),
-    getDescendantsCounts: vi.fn(() => {
+    getDescendantsCounts: vi.fn(({ categoryId, parentElementId }: { modelId: Id64String; categoryId?: Id64String; parentElementId?: Id64String }) => {
+      if (parentElementId) {
+        const children = props?.elementChildren?.get(parentElementId) ?? [];
+        if (children.length === 0) {
+          return of(categoryId ? [{ categoryId, count: 0 }] : []);
+        }
+        // When querying by parentElementId, return all children grouped under the parent's category
+        const parentCategory = [...(props?.categoryElements?.entries() ?? [])].find(([, elements]) => elements.includes(parentElementId))?.[0];
+        return of([{ categoryId: parentCategory ?? categoryId ?? "0x0", count: children.length }]);
+      }
+      if (categoryId) {
+        const count = props?.categoryElements?.get(categoryId)?.length ?? 0;
+        if (count === 0) {
+          return of([{ categoryId, count: 0 }]);
+        }
+        return of([{ categoryId, count }]);
+      }
       return of([]);
     }),
     getChildElements: vi.fn(() => {

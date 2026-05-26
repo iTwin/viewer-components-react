@@ -2886,7 +2886,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             };
           }),
         );
-        const { imodelConnection, modelId, parentCategoryId, parentElementId, childElementWithDifferentCategoryId } = buildIModelResult;
+        const { imodelConnection, modelId, parentCategoryId } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodelConnection });
         const { handler, viewport, ...props } = visibilityTestData;
         const parentCategoryNode = createCategoryHierarchyNode({
@@ -2899,16 +2899,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           ...props,
           handler,
           viewport,
-          // prettier-ignore
-          expectations: {
-            [IModel.rootSubjectId]: "partial",
-              [modelId]: "partial",
-                // Only categories of elements without parents are shown in the tree
-                [`${modelId}-${parentCategoryId}`]: "visible",
-                  [parentElementId]: "partial",
-                    [childElementWithDifferentCategoryId]: "hidden",
-
-          },
+          expectations: "all-visible",
         });
       });
 
@@ -2936,7 +2927,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             };
           }),
         );
-        const { imodelConnection, modelId, parentCategoryId, parentElementId, childElementId, childElementWithDifferentCategoryId } = buildIModelResult;
+        const { imodelConnection, modelId, parentCategoryId, parentElementId } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodelConnection });
         const { handler, viewport, ...props } = visibilityTestData;
         const parentCategoryNode = createCategoryHierarchyNode({ modelId, categoryId: parentCategoryId, hasChildren: true });
@@ -2946,15 +2937,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           ...props,
           handler,
           viewport,
-          // prettier-ignore
-          expectations: {
-            [IModel.rootSubjectId]: "partial",
-              [modelId]: "partial",
-                [`${modelId}-${parentCategoryId}`]: "visible",
-                  [parentElementId]: "partial",
-                    [childElementId]: "visible",
-                    [childElementWithDifferentCategoryId]: "hidden",
-          },
+          expectations: "all-visible",
         });
       });
 
@@ -3009,8 +2992,8 @@ describe("ModelsTreeVisibilityHandler", () => {
             [IModel.rootSubjectId]: "partial",
               [modelId]: "partial",
                 [`${modelId}-${category1Id}`]: "visible",
-                  [parentElementId]: "partial",
-                    [childElementWithDifferentCategoryId]: "hidden",
+                  [parentElementId]: "visible",
+                    [childElementWithDifferentCategoryId]: "visible",
 
                 [`${modelId}-${category2Id}`]: "hidden",
                   [element2Id]: "hidden",
@@ -3074,7 +3057,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 [`${modelId}-${sharedCategoryId}`]: "visible",
                   [elementWithSharedCategoryId]: "visible",
 
-                [`${modelId}-${parentCategoryId}`]: "hidden",
+                [`${modelId}-${parentCategoryId}`]: "partial",
                   [parentElementId]: "partial",
                     [childElementWithSharedCategoryId]: "visible",
           },
@@ -3173,7 +3156,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           expectations: {
             [IModel.rootSubjectId]: "partial",
               [modelId]: "partial",
-                [`${modelId}-${parentCategoryId}`]: "hidden",
+                [`${modelId}-${parentCategoryId}`]: "partial",
                   [parentElementId]: "partial",
                     [childElementWithDifferentCategoryId]: "visible",
           },
