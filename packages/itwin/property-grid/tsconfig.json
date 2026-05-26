@@ -9,7 +9,7 @@
     "esModuleInterop": true,
     "noImplicitOverride": false,
     "resolveJsonModule": true,
-    "lib": ["DOM", "ES2019"]
+    "lib": ["DOM", "ESNext"]
   },
   "include": ["src"]
 }

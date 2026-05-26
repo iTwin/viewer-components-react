@@ -15,14 +15,13 @@ import { Button, NonIdealState } from "@itwin/itwinui-react";
 import { createIModelKey } from "@itwin/presentation-core-interop";
 import { Selectable, Selectables } from "@itwin/unified-selection";
 import { usePropertyGridTransientState } from "./hooks/UsePropertyGridTransientState.js";
-import { useSelectionHandler } from "./hooks/UseUnifiedSelectionHandler.js";
 import { PropertyGridComponent } from "./PropertyGridComponent.js";
 import { PropertyGridManager } from "./PropertyGridManager.js";
 
 import type { ReactNode } from "react";
 import type { FallbackProps } from "react-error-boundary";
 import type { Widget, WidgetDef } from "@itwin/appui-react";
-import type { SelectionStorage } from "./hooks/UseUnifiedSelectionHandler.js";
+import type { SelectionStorage } from "@itwin/unified-selection";
 import type { PropertyGridComponentProps } from "./PropertyGridComponent.js";
 
 /**
@@ -107,7 +106,6 @@ export function PropertyGridWidget({
   const ref = usePropertyGridTransientState<HTMLDivElement>();
   const appuiWidgetDef = useSpecificWidgetDef(widgetId);
   const widgetDef = widgetDefOverride ?? appuiWidgetDef;
-  const { selectionChange, getSelection } = useSelectionHandler({ selectionStorage });
   const imodel = useActiveIModelConnection();
 
   useEffect(() => {
@@ -134,20 +132,20 @@ export function PropertyGridWidget({
       }
     };
 
-    const unregisterListener = selectionChange.addListener(async (args) => {
+    const unregisterListener = selectionStorage.selectionChangeEvent.addListener(async (args) => {
       if (args.imodelKey !== createIModelKey(imodel)) {
         return;
       }
-      await toggleWidget(args.getSelection());
+      await toggleWidget(selectionStorage.getSelection({ imodelKey: createIModelKey(imodel), level: 0 }));
     });
 
-    void toggleWidget(getSelection({ imodel, level: 0 }));
+    void toggleWidget(selectionStorage.getSelection({ imodelKey: createIModelKey(imodel), level: 0 }));
 
     return () => {
       unregisterListener();
       isDisposed = true;
     };
-  }, [shouldShow, widgetDef, selectionChange, selectionStorage, getSelection, imodel]);
+  }, [shouldShow, widgetDef, selectionStorage, imodel]);
 
   return (
     <div ref={ref} className="property-grid-widget">
