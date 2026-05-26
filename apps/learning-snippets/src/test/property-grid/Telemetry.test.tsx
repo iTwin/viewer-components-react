@@ -21,6 +21,9 @@ import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
 import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils.js";
 import { withEditTxn } from "@itwin/core-backend";
+import { createStorage } from "@itwin/unified-selection";
+
+const selectionStorage = createStorage();
 
 describe("Property grid", () => {
   describe("Learning snippets", () => {
@@ -52,6 +55,7 @@ describe("Property grid", () => {
         function MyPropertyGrid() {
           return (
             <PropertyGridComponent
+              selectionStorage={selectionStorage}
               onPerformanceMeasured={(feature, elapsedTime) => {
                 // user-defined function to handle performance logging.
                 logPerformance(feature, elapsedTime);
@@ -104,7 +108,7 @@ describe("Property grid", () => {
                 logUsage(feature);
               }}
             >
-              <PropertyGrid imodel={imodelConnection} />
+              <PropertyGrid selectionStorage={selectionStorage} imodel={imodelConnection} />
             </TelemetryContextProvider>
           );
         }

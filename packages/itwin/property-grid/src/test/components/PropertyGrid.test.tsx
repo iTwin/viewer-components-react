@@ -5,21 +5,22 @@
 
 import { beforeEach, describe, it, vi } from "vitest";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
-import { KeySet } from "@itwin/presentation-common";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
+import { createStorage } from "@itwin/unified-selection";
 import { PropertyGrid } from "../../property-grid-react/components/PropertyGrid.js";
 import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
-import { createPropertyRecord, render, stubFavoriteProperties, stubPresentation, stubSelectionManager, waitFor } from "../TestUtils.js";
+import { createPropertyRecord, render, stubFavoriteProperties, stubPresentation, waitFor } from "../TestUtils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 
 describe("<PropertyGrid />", () => {
-  let selectionManager: ReturnType<typeof stubSelectionManager>;
+  const imodelKey = "test-imodel";
+  const imodel = { key: imodelKey } as IModelConnection;
+  const selectionStorage = createStorage();
 
   beforeEach(() => {
     vi.spyOn(PropertyGridManager, "translate").mockImplementation((key) => key);
 
-    selectionManager = stubSelectionManager();
     stubPresentation();
     stubFavoriteProperties();
 
@@ -37,37 +38,34 @@ describe("<PropertyGrid />", () => {
         },
       };
     });
+
+    selectionStorage.clearStorage({ imodelKey });
   });
 
   it("renders content", async () => {
-    const imodel = {} as IModelConnection;
-    selectionManager.getSelection.mockReturnValue(new KeySet());
-
-    const { getByText } = render(<PropertyGrid imodel={imodel} />);
+    const { getByText } = render(<PropertyGrid imodel={imodel} selectionStorage={selectionStorage} />);
 
     await waitFor(() => getByText("Test Prop"));
   });
 
   it("renders info message when too many elements selected", async () => {
-    const imodel = {} as IModelConnection;
     const keys = Array(500)
       .fill(0)
       .map((_, i) => ({ id: `0x${i}`, className: "TestClass" }));
-    selectionManager.getSelection.mockReturnValue(new KeySet(keys));
+    selectionStorage.addToSelection({ imodelKey, selectables: keys, level: 0, source: "test" });
 
-    const { getByText } = render(<PropertyGrid imodel={imodel} />);
+    const { getByText } = render(<PropertyGrid imodel={imodel} selectionStorage={selectionStorage} />);
 
     await waitFor(() => getByText("selection.too-many-elements-selected"));
   });
 
   it("renders header controls when too many elements selected", async () => {
-    const imodel = {} as IModelConnection;
     const keys = Array(500)
       .fill(0)
       .map((_, i) => ({ id: `0x${i}`, className: "TestClass" }));
-    selectionManager.getSelection.mockReturnValue(new KeySet(keys));
+    selectionStorage.addToSelection({ imodelKey, selectables: keys, level: 0, source: "test" });
 
-    const { getByText } = render(<PropertyGrid imodel={imodel} headerControls={[<div key={1}>TestControl</div>]} />);
+    const { getByText } = render(<PropertyGrid imodel={imodel} selectionStorage={selectionStorage} headerControls={[<div key={1}>TestControl</div>]} />);
 
     await waitFor(() => getByText("TestControl"));
   });

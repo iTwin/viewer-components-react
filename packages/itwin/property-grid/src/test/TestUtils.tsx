@@ -7,8 +7,7 @@ import { createElement, Fragment, StrictMode } from "react";
 import { vi } from "vitest";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { BeEvent } from "@itwin/core-bentley";
-import { KeySet } from "@itwin/presentation-common";
-import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
+import { Presentation } from "@itwin/presentation-frontend";
 import { Selectables } from "@itwin/unified-selection";
 import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
@@ -16,7 +15,7 @@ import { userEvent } from "@testing-library/user-event";
 import type { PropsWithChildren, ReactElement } from "react";
 import type { Mock, Mocked } from "vitest";
 import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
-import type { FavoritePropertiesManager, SelectionManager } from "@itwin/presentation-frontend";
+import type { FavoritePropertiesManager } from "@itwin/presentation-frontend";
 import type { SelectionStorage, StorageSelectionChangesListener } from "@itwin/unified-selection";
 import type { RenderHookOptions, RenderHookResult, RenderOptions, RenderResult } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
@@ -29,22 +28,6 @@ export function createPropertyRecord(value: PropertyValue, description: Partial<
     ...description,
   };
   return new PropertyRecord(value, propertyDescription);
-}
-
-export function stubSelectionManager(presentationSingleton?: typeof Presentation) {
-  const selectionManagerStub = {
-    // eslint-disable-next-line @typescript-eslint/no-deprecated
-    selectionChange: new SelectionChangeEvent(),
-    // eslint-disable-next-line @typescript-eslint/no-deprecated
-    getSelectionLevels: createFunctionStub<SelectionManager["getSelectionLevels"]>().mockReturnValue([0]),
-    // eslint-disable-next-line @typescript-eslint/no-deprecated
-    getSelection: createFunctionStub<SelectionManager["getSelection"]>().mockReturnValue(new KeySet()),
-    // eslint-disable-next-line @typescript-eslint/no-deprecated
-    replaceSelection: createFunctionStub<SelectionManager["replaceSelection"]>(),
-  };
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  vi.spyOn(presentationSingleton ?? Presentation, "selection", "get").mockReturnValue(selectionManagerStub as unknown as SelectionManager);
-  return selectionManagerStub;
 }
 
 export function stubSelectionStorage(): Mocked<SelectionStorage> & { selectionChangeEvent: BeEvent<StorageSelectionChangesListener> } {

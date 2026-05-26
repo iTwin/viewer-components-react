@@ -6,17 +6,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { UiFramework } from "@itwin/appui-react";
 import { Guid, Id64 } from "@itwin/core-bentley";
-import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
+import { createECSqlQueryExecutor, createIModelKey } from "@itwin/presentation-core-interop";
 import { normalizeFullClassName } from "@itwin/presentation-shared";
 import { computeSelection, Selectables } from "@itwin/unified-selection";
 import { useTelemetryContext } from "./UseTelemetryContext.js";
-import { useSelectionHandler } from "./UseUnifiedSelectionHandler.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { ECSqlQueryExecutor } from "@itwin/presentation-shared";
-import type { SelectableInstanceKey } from "@itwin/unified-selection";
-import type { SelectionStorage } from "./UseUnifiedSelectionHandler.js";
+import type { SelectableInstanceKey, SelectionStorage } from "@itwin/unified-selection";
 
 const PropertyGridSelectionScope = "Property Grid";
 
@@ -26,7 +24,7 @@ const PropertyGridSelectionScope = "Property Grid";
  */
 export interface InstanceSelectionProps {
   imodel: IModelConnection;
-  selectionStorage?: SelectionStorage;
+  selectionStorage: SelectionStorage;
   getParentInstanceKey?: (key: InstanceKey) => Promise<InstanceKey | undefined>;
 }
 
@@ -62,7 +60,6 @@ export function useInstanceSelection(props: InstanceSelectionProps) {
   });
   const { selectedKeys, previousKeys, canNavigateUp, focusedInstanceKey } = state;
   const { onFeatureUsed } = useTelemetryContext();
-  const { selectionChange, getSelection, replaceSelection } = useSelectionHandler({ selectionStorage });
 
   const [queryExecutor, setQueryExecutor] = useState(createECSqlQueryExecutor(imodel));
   useEffect(() => {
@@ -88,7 +85,7 @@ export function useInstanceSelection(props: InstanceSelectionProps) {
       await updateStateAsync(
         async () => {
           const allInstanceKeys = [];
-          for await (const key of Selectables.load(getSelection({ imodel, level: 0 }))) {
+          for await (const key of Selectables.load(selectionStorage.getSelection({ imodelKey: createIModelKey(imodel), level: 0 }))) {
             allInstanceKeys.push(key);
           }
           const selectedInstanceKeys = omitTransientKeys(allInstanceKeys);
@@ -113,7 +110,7 @@ export function useInstanceSelection(props: InstanceSelectionProps) {
     // ensure this selection handling runs if component mounts after the selection event fires.
     void onSelectionChange();
 
-    const removePresentationListener = selectionChange.addListener(async (args) => onSelectionChange(args.source));
+    const removePresentationListener = selectionStorage.selectionChangeEvent.addListener(async (args) => onSelectionChange(args.source));
     // if the frontstage changes and a selection set is already active we need to resync this widget's state with that selection
     /* c8 ignore next */
     const removeFrontstageReadyListener = UiFramework.frontstages.onFrontstageReadyEvent.addListener(async () => onSelectionChange());
@@ -121,7 +118,7 @@ export function useInstanceSelection(props: InstanceSelectionProps) {
       removePresentationListener();
       removeFrontstageReadyListener();
     };
-  }, [imodel, queryExecutor, selectionChange, getSelection, updateStateAsync, getParentInstanceKey]);
+  }, [imodel, queryExecutor, selectionStorage, updateStateAsync, getParentInstanceKey]);
 
   const navigateUp = async () => {
     if (!canNavigateUp || selectedKeys.length !== 1) {
@@ -138,7 +135,12 @@ export function useInstanceSelection(props: InstanceSelectionProps) {
         const parentInstanceKeys = parentInstanceKey ? omitTransientKeys([parentInstanceKey]) : [];
         const hasGrandParent = parentInstanceKeys.length === 1 && (await getParentInstanceKey(parentInstanceKeys[0])) !== undefined;
 
-        replaceSelection({ source: PropertyGridSelectionScope, imodel, selectables: parentInstanceKeys, level: 0 });
+        selectionStorage.replaceSelection({
+          source: PropertyGridSelectionScope,
+          imodelKey: createIModelKey(imodel),
+          selectables: parentInstanceKeys,
+          level: 0,
+        });
         return {
           parentInstanceKeys,
           hasGrandParent,
@@ -161,7 +163,7 @@ export function useInstanceSelection(props: InstanceSelectionProps) {
     const newPreviousKeys = [...previousKeys];
     const currentKey = newPreviousKeys.pop() as InstanceKey;
     // select the current instance key
-    replaceSelection({ source: PropertyGridSelectionScope, imodel, selectables: [currentKey], level: 0 });
+    selectionStorage.replaceSelection({ source: PropertyGridSelectionScope, imodelKey: createIModelKey(imodel), selectables: [currentKey], level: 0 });
 
     onFeatureUsed("ancestor-navigation");
     updateStateImmediate(() => ({

@@ -175,7 +175,7 @@ export type PropertyGridPropertyUpdatedArgs = PropertyUpdatedArgs & {
 
 // @public
 export type PropertyGridProps = OmitOverUnion<PropertyGridContentProps, "dataProvider" | "dataRenderer"> & DataProviderProps & {
-    selectionStorage?: SelectionStorage;
+    selectionStorage: SelectionStorage;
 };
 
 // @public
@@ -193,7 +193,7 @@ export const PropertyGridWidgetId = "vcr:PropertyGridComponent";
 
 // @public (undocumented)
 interface PropertyGridWidgetOwnProps {
-    selectionStorage: SelectionStorage_2;
+    selectionStorage: SelectionStorage;
     shouldShow?: (selection: Selectables) => Promise<boolean>;
     widgetId?: string;
 }
@@ -203,9 +203,6 @@ export type PropertyGridWidgetProps = PropertyGridComponentProps & PropertyGridW
 
 // @public
 export function RemoveFavoritePropertyContextMenuItem(input: FavoritePropertiesContextMenuItemProps): JSX_2.Element | null;
-
-// @public (undocumented)
-type SelectionStorage_2 = Pick<SelectionStorage, "getSelection" | "replaceSelection" | "selectionChangeEvent">;
 
 // @public
 export interface SettingsMenuItemProps {

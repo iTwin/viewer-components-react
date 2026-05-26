@@ -23,6 +23,9 @@ import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
 import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils.js";
 import { withEditTxn } from "@itwin/core-backend";
+import { createStorage } from "@itwin/unified-selection";
+
+const selectionStorage = createStorage();
 
 describe("Property grid", () => {
   describe("Learning snippets", () => {
@@ -68,7 +71,7 @@ describe("Property grid", () => {
 
         // __PUBLISH_EXTRACT_START__ PropertyGrid.PropertyGridWithContextMenuItem
         function MyPropertyGrid() {
-          return <PropertyGridComponent contextMenuItems={[(props) => <ExampleContextMenuItem {...props} />]} />;
+          return <PropertyGridComponent selectionStorage={selectionStorage} contextMenuItems={[(props) => <ExampleContextMenuItem {...props} />]} />;
         }
         // __PUBLISH_EXTRACT_END__
 
