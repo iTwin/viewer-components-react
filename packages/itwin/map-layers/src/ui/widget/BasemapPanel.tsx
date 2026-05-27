@@ -408,6 +408,8 @@ export function BasemapPanel(props: BasemapPanelProps) {
           onChange={handleBaseMapSelection}
           size="small"
           disabled={props.disabled}
+          // Use key to reset internal state of Select when disabled changes, ensuring the dropdown menu is responsive.
+          key={String(props.disabled)}
         />
         {baseIsColor && (
           <Popover
