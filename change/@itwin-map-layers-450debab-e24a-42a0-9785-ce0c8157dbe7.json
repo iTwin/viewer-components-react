@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Add key prop to Select component for responsive dropdown menu on disabled state change",
+  "packageName": "@itwin/map-layers",
+  "email": "wil.maier@bentley.com",
+  "dependentChangeType": "patch"
+}
