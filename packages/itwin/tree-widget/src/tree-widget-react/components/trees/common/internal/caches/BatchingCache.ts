@@ -9,8 +9,36 @@ import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
 import { releaseMainThreadOnItemsCount } from "../Utils.js";
 
 import type { Observable } from "rxjs";
+import type { Listener } from "@itwin/core-bentley";
 
 type RequestId = string;
+
+/**
+ * A BeEvent that fires at most once and replays to late listeners.
+ * If `addOnce` is called after the event has already been raised,
+ * the listener is invoked immediately with the stored arguments.
+ */
+class OneShotEvent<T extends Listener> extends BeEvent<T> {
+  #firedWithArgs?:
+    | {
+        fired: true;
+        args: Parameters<T>;
+      }
+    | { fired: false };
+
+  public override raiseEvent(...props: Parameters<T>): ReturnType<BeEvent<T>["raiseEvent"]> {
+    this.#firedWithArgs = { fired: true, args: props };
+    return super.raiseEvent(...props);
+  }
+
+  public override addOnce(listener: T, scope?: any): ReturnType<BeEvent<T>["addOnce"]> {
+    if (this.#firedWithArgs?.fired) {
+      listener(...this.#firedWithArgs.args);
+      return () => {};
+    }
+    return super.addOnce(listener, scope);
+  }
+}
 
 /** @internal */
 export interface BatchingCacheProps {
@@ -50,8 +78,8 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
   //   after the timer fires, the batch executes and caches results.
 
   /** Pending requests buffer. `event` is created lazily on the first `get` call of each batch cycle. */
-  #valuesToRequest: { values: TRequest[]; event?: BeEvent<(error?: Error) => void> } = { values: [] };
-  #requestedValues = new Map<RequestId, { values: TRequest[]; event: BeEvent<(error?: Error) => void> }>();
+  #valuesToRequest: { values: TRequest[]; event?: OneShotEvent<(error?: Error) => void> } = { values: [] };
+  #requestedValues = new Map<RequestId, { values: TRequest[]; event: OneShotEvent<(error?: Error) => void> }>();
   #bufferSize: number;
   #timerDelay: number;
   #releaseOnCount: number;
@@ -104,7 +132,7 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
 
     // Check if request is fully covered by an in-flight batch
     let requestNotInBatch: TRequest = request;
-    const events: Array<BeEvent<(error?: Error) => void>> = [];
+    const events: Array<OneShotEvent<(error?: Error) => void>> = [];
     for (const { values, event } of this.#requestedValues.values()) {
       const { valuesNotInBatch, batchContainsValues } = this.getValuesNotInBatch(requestNotInBatch, values);
       if (batchContainsValues) {
@@ -118,7 +146,7 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
 
     if (this.#valuesToRequest.event === undefined) {
       const requestId = Guid.createValue();
-      const newEvent = new BeEvent<(error?: Error) => void>();
+      const newEvent = new OneShotEvent<(error?: Error) => void>();
       this.#valuesToRequest.event = newEvent;
       this.scheduleBatchExecution({
         values: this.#valuesToRequest.values,
@@ -171,7 +199,7 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
     );
   }
 
-  private getResultAfterEvents(request: TRequest, events: Array<BeEvent<(error?: Error) => void>>): Observable<TResult> {
+  private getResultAfterEvents(request: TRequest, events: Array<OneShotEvent<(error?: Error) => void>>): Observable<TResult> {
     return forkJoin(
       events.map((event) =>
         fromEventPattern<Error | undefined>((handler) => {
