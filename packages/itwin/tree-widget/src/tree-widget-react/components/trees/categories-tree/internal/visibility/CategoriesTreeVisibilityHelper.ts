@@ -83,7 +83,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
               })
             : [],
           categoryOfTopMostParentElement,
-          computeOnlyOwnStatus: childrenWhichAreParents.size ? (elementId) => !childrenWhichAreParents.has(elementId) : undefined,
+          computeOnlyOwnStatus: childrenWhichAreParents.size ? (elementId) => !childrenWhichAreParents.has(elementId) : true,
         }),
       ),
       mergeVisibilityStatuses(),
