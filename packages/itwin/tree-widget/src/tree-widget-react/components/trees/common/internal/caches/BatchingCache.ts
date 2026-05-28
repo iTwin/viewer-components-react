@@ -77,9 +77,9 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
   // - Otherwise, adds to #valuesToRequest. A timer is started if not already running;
   //   after the timer fires, the batch executes and caches results.
 
-  /** Pending requests buffer. `event` is created lazily on the first `get` call of each batch cycle. */
-  #valuesToRequest: { values: TRequest[]; event?: OneShotEvent<(error?: Error) => void> } = { values: [] };
-  #requestedValues = new Map<RequestId, { values: TRequest[]; event: OneShotEvent<(error?: Error) => void> }>();
+  /** Pending requests buffer. `batchCompleted` is created lazily on the first `get` call of each batch cycle. */
+  #valuesToRequest: { values: TRequest[]; batchCompleted?: OneShotEvent<(error?: Error) => void> } = { values: [] };
+  #requestedValues = new Map<RequestId, { values: TRequest[]; batchCompleted: OneShotEvent<(error?: Error) => void> }>();
   #bufferSize: number;
   #timerDelay: number;
   #releaseOnCount: number;
@@ -133,10 +133,10 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
     // Check if request is fully covered by an in-flight batch
     let requestNotInBatch: TRequest = request;
     const events: Array<OneShotEvent<(error?: Error) => void>> = [];
-    for (const { values, event } of this.#requestedValues.values()) {
+    for (const { values, batchCompleted } of this.#requestedValues.values()) {
       const { valuesNotInBatch, batchContainsValues } = this.getValuesNotInBatch(requestNotInBatch, values);
       if (batchContainsValues) {
-        events.push(event);
+        events.push(batchCompleted);
       }
       if (valuesNotInBatch === undefined) {
         return this.getResultAfterEvents(request, events);
@@ -144,15 +144,15 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
       requestNotInBatch = valuesNotInBatch;
     }
 
-    if (this.#valuesToRequest.event === undefined) {
+    if (this.#valuesToRequest.batchCompleted === undefined) {
       const requestId = Guid.createValue();
       const newEvent = new OneShotEvent<(error?: Error) => void>();
-      this.#valuesToRequest.event = newEvent;
+      this.#valuesToRequest.batchCompleted = newEvent;
       this.scheduleBatchExecution({
         values: this.#valuesToRequest.values,
         onStart: () => {
           // Move the pending buffer into #requestedValues so in-flight lookups find it
-          this.#requestedValues.set(requestId, { values: this.#valuesToRequest.values, event: newEvent });
+          this.#requestedValues.set(requestId, { values: this.#valuesToRequest.values, batchCompleted: newEvent });
           // Reset #valuesToRequest so new requests can be collected while the query is executing
           this.#valuesToRequest = { values: [] };
         },
@@ -165,7 +165,7 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
     }
 
     this.#valuesToRequest.values.push(requestNotInBatch);
-    return this.getResultAfterEvents(request, [...events, this.#valuesToRequest.event]);
+    return this.getResultAfterEvents(request, [...events, this.#valuesToRequest.batchCompleted]);
   }
 
   private scheduleBatchExecution({ values, onStart, onDone }: { values: TRequest[]; onStart: () => void; onDone: (error?: Error) => void }): void {
