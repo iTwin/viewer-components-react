@@ -4,12 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
-  bufferCount,
   concatAll,
-  concatMap,
   defaultIfEmpty,
   defer,
-  delay,
   EMPTY,
   filter,
   forkJoin,
@@ -18,7 +15,6 @@ import {
   merge,
   mergeAll,
   mergeMap,
-  Observable,
   of,
   reduce,
   shareReplay,
@@ -31,11 +27,12 @@ import {
   toArray,
 } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
+import { subscribeAll } from "../Rxjs.js";
 import { createVisibilityStatus } from "../Tooltip.js";
-import { countInSet, fromWithRelease, getOptimalBatchSize, releaseMainThreadOnItemsCount, setDifference } from "../Utils.js";
+import { countInSet, fromWithRelease, releaseMainThreadOnItemsCount, setDifference } from "../Utils.js";
 import { changeElementStateNoChildrenOperator, getCategoryVisibilityFromAlwaysAndNeverDrawnElementsImpl, mergeVisibilityStatuses } from "../VisibilityUtils.js";
 
-import type { Subscription } from "rxjs";
+import type { Observable, Subscription } from "rxjs";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
@@ -1108,66 +1105,4 @@ export class BaseVisibilityHelper implements Disposable {
       map(() => undefined),
     );
   }
-}
-
-/**
- * Subscribes to all observables at once and emits `{ sourceId, result }` for each.
- * Uses a plain array for tracking instead of RxJS's Subscription parent-child tracking,
- * avoiding O(n²) `arrRemove` overhead when many inner observables complete simultaneously.
- */
-function subscribeAll<TResult>({
-  ids,
-  getObservable,
-  batchSize = 10_000,
-}: {
-  ids: Id64Arg;
-  getObservable: (id: Id64String) => Observable<TResult>;
-  batchSize?: number;
-}): Observable<{ sourceId: Id64String; result: TResult }> {
-  const totalSize = Id64.sizeOf(ids);
-  if (totalSize < batchSize) {
-    return subscribeAllBatch({ ids, getObservable });
-  }
-  return from(Id64.iterable(ids)).pipe(
-    bufferCount(getOptimalBatchSize({ totalSize, maximumBatchSize: batchSize })),
-    concatMap((batch) => {
-      return of(undefined).pipe(
-        delay(0),
-        mergeMap(() => subscribeAllBatch({ ids: batch, getObservable })),
-      );
-    }),
-  );
-}
-
-// Inner helper — same O(1) counter logic, but only for one batch
-function subscribeAllBatch<TResult>({
-  ids,
-  getObservable,
-}: {
-  ids: Id64Arg;
-  getObservable: (id: Id64String) => Observable<TResult>;
-}): Observable<{ sourceId: Id64String; result: TResult }> {
-  return new Observable((subscriber) => {
-    let completed = 0;
-    const total = Id64.sizeOf(ids);
-    const subscriptions: Subscription[] = [];
-    for (const id of Id64.iterable(ids)) {
-      const sub = getObservable(id).subscribe({
-        next: (result) => subscriber.next({ sourceId: id, result }),
-        error: (e) => subscriber.error(e),
-        complete: () => {
-          ++completed;
-          if (completed === total) {
-            subscriber.complete();
-          }
-        },
-      });
-      subscriptions.push(sub);
-    }
-    return () => {
-      for (const sub of subscriptions) {
-        sub.unsubscribe();
-      }
-    };
-  });
 }
