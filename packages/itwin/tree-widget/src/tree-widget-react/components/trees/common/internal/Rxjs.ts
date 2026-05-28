@@ -101,6 +101,10 @@ function subscribeAllBatch<TResult>({
   return new Observable((subscriber) => {
     let completed = 0;
     const total = Id64.sizeOf(ids);
+    if (total === 0) {
+      subscriber.complete();
+      return;
+    }
     const subscriptions: Subscription[] = [];
     for (const id of Id64.iterable(ids)) {
       const sub = getObservable(id).subscribe({
