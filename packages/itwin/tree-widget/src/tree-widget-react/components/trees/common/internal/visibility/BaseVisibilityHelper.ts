@@ -415,9 +415,9 @@ export class BaseVisibilityHelper implements Disposable {
    * visible/hidden, then queries always/never drawn per group to compute overall status.
    */
   private getCategoryVisibilityFromAlwaysAndNeverDrawnElements(props: { modelId: Id64String; categoryId: Id64String }): Observable<VisibilityStatus> {
-    return this.#props.baseIdsCache.categoryHasIndirectChildren(props.categoryId).pipe(
-      mergeMap((hasIndirectChildren) => {
-        if (!hasIndirectChildren) {
+    return this.#props.baseIdsCache.categoryHasParentElements(props.categoryId).pipe(
+      mergeMap((hasParentElements) => {
+        if (!hasParentElements) {
           const categoryVisibility = this.getVisibleModelCategoryDirectVisibilityStatus({ modelId: props.modelId, categoryId: props.categoryId });
           const oppositeSet = categoryVisibility.state === "visible" ? this.#props.viewport.neverDrawn : this.#props.viewport.alwaysDrawn;
           if (!oppositeSet?.size) {
@@ -969,9 +969,9 @@ export class BaseVisibilityHelper implements Disposable {
             source: subscribeAll({
               ids: props.categoryIds,
               getObservable: (categoryId) =>
-                this.#props.baseIdsCache.categoryHasIndirectChildren(categoryId).pipe(
-                  mergeMap((hasIndirectChildren) => {
-                    if (!hasIndirectChildren) {
+                this.#props.baseIdsCache.categoryHasParentElements(categoryId).pipe(
+                  mergeMap((hasParentElements) => {
+                    if (!hasParentElements) {
                       return of([]);
                     }
                     return this.#props.baseIdsCache.getDescendantsCounts({ modelId, categoryId });

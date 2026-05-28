@@ -31,7 +31,7 @@ export class ElementModelCategoriesCache {
   #cachedData:
     | Observable<{
         modelsCategoriesInfo: Map<ModelId, { categoriesOfTopMostElements: Set<CategoryId>; allCategories: Set<CategoryId>; isSubModel: boolean }>;
-        categoriesWithIndirectChildren: Set<CategoryId>;
+        categoriesWithParentElements: Set<CategoryId>;
       }>
     | undefined;
 
@@ -47,7 +47,7 @@ export class ElementModelCategoriesCache {
     modelId: Id64String;
     categoryId: Id64String;
     isTopMostElementCategory: boolean;
-    hasIndirectChildren: boolean;
+    hasParentElements: boolean;
   }> {
     return defer(() => {
       const query = `
@@ -55,7 +55,7 @@ export class ElementModelCategoriesCache {
             this.Model.Id modelId,
             this.Category.Id categoryId,
             MAX(IIF(this.Parent.Id IS NULL, 1, 0)) isTopMostElementCategory,
-            MAX(IIF((SELECT 1 FROM ${this.#elementClassName} ce WHERE ce.Parent.Id = this.ECInstanceId LIMIT 1), 1, 0)) hasIndirectChildren
+            MAX(IIF((SELECT 1 FROM ${this.#elementClassName} ce WHERE ce.Parent.Id = this.ECInstanceId LIMIT 1), 1, 0)) hasParentElements
           FROM ${CLASS_NAME_Model} m
           JOIN ${this.#elementClassName} this ON m.ECInstanceId = this.Model.Id
           WHERE m.IsPrivate = false
@@ -72,7 +72,7 @@ export class ElementModelCategoriesCache {
           modelId: row.modelId,
           categoryId: row.categoryId,
           isTopMostElementCategory: !!row.isTopMostElementCategory,
-          hasIndirectChildren: !!row.hasIndirectChildren,
+          hasParentElements: !!row.hasParentElements,
         };
       }),
     );
@@ -92,14 +92,14 @@ export class ElementModelCategoriesCache {
             if (queriedCategory.isTopMostElementCategory) {
               modelEntry.categoriesOfTopMostElements.add(queriedCategory.categoryId);
             }
-            if (queriedCategory.hasIndirectChildren) {
-              acc.categoriesWithIndirectChildren.add(queriedCategory.categoryId);
+            if (queriedCategory.hasParentElements) {
+              acc.categoriesWithParentElements.add(queriedCategory.categoryId);
             }
             return acc;
           },
           {
             modelsCategoriesInfo: new Map<ModelId, { categoriesOfTopMostElements: Set<CategoryId>; allCategories: Set<CategoryId> }>(),
-            categoriesWithIndirectChildren: new Set<CategoryId>(),
+            categoriesWithParentElements: new Set<CategoryId>(),
           },
         ),
       ),
@@ -116,7 +116,7 @@ export class ElementModelCategoriesCache {
             isSubModel,
           });
         }
-        return { modelsCategoriesInfo, categoriesWithIndirectChildren: modelCategories.categoriesWithIndirectChildren };
+        return { modelsCategoriesInfo, categoriesWithParentElements: modelCategories.categoriesWithParentElements };
       }),
       shareReplay(),
     );
@@ -188,7 +188,7 @@ export class ElementModelCategoriesCache {
     return this.getCachedData().pipe(map(({ modelsCategoriesInfo }) => [...modelsCategoriesInfo.keys()]));
   }
 
-  public categoryHasIndirectChildren(categoryId: Id64String): Observable<boolean> {
-    return this.getCachedData().pipe(map(({ categoriesWithIndirectChildren }) => categoriesWithIndirectChildren.has(categoryId)));
+  public categoryHasParentElements(categoryId: Id64String): Observable<boolean> {
+    return this.getCachedData().pipe(map(({ categoriesWithParentElements }) => categoriesWithParentElements.has(categoryId)));
   }
 }

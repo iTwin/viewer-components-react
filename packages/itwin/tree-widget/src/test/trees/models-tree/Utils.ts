@@ -150,7 +150,7 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
     getChildElements: vi.fn(() => {
       return of([]);
     }),
-    categoryHasIndirectChildren: vi.fn(() => of(false)),
+    categoryHasParentElements: vi.fn(() => of(false)),
     getSubModelsUnderElement: vi.fn(() => of([])),
     getSubModels: vi.fn(() => EMPTY),
     hasSubModels: vi.fn(() => of(false)),

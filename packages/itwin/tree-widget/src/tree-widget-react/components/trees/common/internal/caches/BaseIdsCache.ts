@@ -125,10 +125,10 @@ export class BaseIdsCache {
     return this.#elementModelCategoriesCache.getCategoriesOfModelsTopMostElements(props);
   }
 
-  public categoryHasIndirectChildren(
-    props: Parameters<ElementModelCategoriesCache["categoryHasIndirectChildren"]>[0],
-  ): ReturnType<ElementModelCategoriesCache["categoryHasIndirectChildren"]> {
-    return this.#elementModelCategoriesCache.categoryHasIndirectChildren(props);
+  public categoryHasParentElements(
+    props: Parameters<ElementModelCategoriesCache["categoryHasParentElements"]>[0],
+  ): ReturnType<ElementModelCategoriesCache["categoryHasParentElements"]> {
+    return this.#elementModelCategoriesCache.categoryHasParentElements(props);
   }
 
   // DescendantsCountCache methods
@@ -224,10 +224,10 @@ export class BaseIdsCacheImpl {
     return this.#baseIdsCache.getModels(props);
   }
 
-  public categoryHasIndirectChildren(
-    props: Parameters<ElementModelCategoriesCache["categoryHasIndirectChildren"]>[0],
-  ): ReturnType<ElementModelCategoriesCache["categoryHasIndirectChildren"]> {
-    return this.#baseIdsCache.categoryHasIndirectChildren(props);
+  public categoryHasParentElements(
+    props: Parameters<ElementModelCategoriesCache["categoryHasParentElements"]>[0],
+  ): ReturnType<ElementModelCategoriesCache["categoryHasParentElements"]> {
+    return this.#baseIdsCache.categoryHasParentElements(props);
   }
 
   public getAllCategoriesOfElements(): ReturnType<ElementModelCategoriesCache["getAllCategoriesOfElements"]> {
