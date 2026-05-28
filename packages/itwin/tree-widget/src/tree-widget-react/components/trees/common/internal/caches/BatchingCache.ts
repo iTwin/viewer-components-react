@@ -50,8 +50,8 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
   //   after the timer fires, the batch executes and caches results.
 
   /** Pending requests buffer. `event` is created lazily on the first `get` call of each batch cycle. */
-  #valuesToRequest: { values: TRequest[]; event?: BeEvent<() => void> } = { values: [] };
-  #requestedValues = new Map<RequestId, { values: TRequest[]; event: BeEvent<() => void> }>();
+  #valuesToRequest: { values: TRequest[]; event?: BeEvent<(error?: Error) => void> } = { values: [] };
+  #requestedValues = new Map<RequestId, { values: TRequest[]; event: BeEvent<(error?: Error) => void> }>();
   #bufferSize: number;
   #timerDelay: number;
   #releaseOnCount: number;
@@ -104,7 +104,7 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
 
     // Check if request is fully covered by an in-flight batch
     let requestNotInBatch: TRequest = request;
-    const events: Array<BeEvent<() => void>> = [];
+    const events: Array<BeEvent<(error?: Error) => void>> = [];
     for (const { values, event } of this.#requestedValues.values()) {
       const { valuesNotInBatch, batchContainsValues } = this.getValuesNotInBatch(requestNotInBatch, values);
       if (batchContainsValues) {
@@ -118,7 +118,7 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
 
     if (this.#valuesToRequest.event === undefined) {
       const requestId = Guid.createValue();
-      const newEvent = new BeEvent<() => void>();
+      const newEvent = new BeEvent<(error?: Error) => void>();
       this.#valuesToRequest.event = newEvent;
       this.scheduleBatchExecution({
         values: this.#valuesToRequest.values,
@@ -128,8 +128,8 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
           // Reset #valuesToRequest so new requests can be collected while the query is executing
           this.#valuesToRequest = { values: [] };
         },
-        onDone: () => {
-          newEvent.raiseEvent();
+        onDone: (error?: Error) => {
+          newEvent.raiseEvent(error);
           newEvent.clear();
           this.#requestedValues.delete(requestId);
         },
@@ -140,7 +140,7 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
     return this.getResultAfterEvents(request, [...events, this.#valuesToRequest.event]);
   }
 
-  private scheduleBatchExecution({ values, onStart, onDone }: { values: TRequest[]; onStart: () => void; onDone: () => void }): void {
+  private scheduleBatchExecution({ values, onStart, onDone }: { values: TRequest[]; onStart: () => void; onDone: (error?: Error) => void }): void {
     timer(this.#timerDelay)
       .pipe(
         switchMap(() => {
@@ -156,14 +156,10 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
             }),
           );
         }),
-        tap({
-          finalize: onDone,
-        }),
       )
       .subscribe({
-        error: () => {
-          onDone();
-        },
+        complete: () => onDone(),
+        error: (e) => (e instanceof Error ? onDone(e) : onDone(new Error(JSON.stringify(e)))),
       });
   }
 
@@ -175,15 +171,19 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
     );
   }
 
-  private getResultAfterEvents(request: TRequest, events: Array<BeEvent<() => void>>): Observable<TResult> {
+  private getResultAfterEvents(request: TRequest, events: Array<BeEvent<(error?: Error) => void>>): Observable<TResult> {
     return forkJoin(
       events.map((event) =>
-        fromEventPattern((handler) => {
+        fromEventPattern<Error | undefined>((handler) => {
           event.addOnce(handler);
         }).pipe(take(1)),
       ),
     ).pipe(
-      map(() => {
+      map((results) => {
+        const error = results.find((r) => r !== undefined);
+        if (error !== undefined) {
+          throw error;
+        }
         const cachedValue = this.getCachedValue(request);
         assert(cachedValue !== undefined);
         return cachedValue;
