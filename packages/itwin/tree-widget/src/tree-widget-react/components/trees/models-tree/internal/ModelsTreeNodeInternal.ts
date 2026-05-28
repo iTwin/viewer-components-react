@@ -7,7 +7,7 @@ import { ModelsTreeNode } from "../ModelsTreeNode.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, GroupingHierarchyNode, HierarchyNode, InstancesNodeKey, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
-import type { CategoryId } from "../../common/internal/Types.js";
+import type { CategoryId, ElementId } from "../../common/internal/Types.js";
 
 /**
  * Contains utility functions for working with Models Tree nodes.
@@ -42,6 +42,7 @@ export namespace ModelsTreeNodeInternal {
       categoryId: Id64String;
       categoryOfTopMostParentElement: CategoryId;
       topMostParentElementId?: Id64String;
+      childrenWhichAreParents: Set<ElementId>;
     };
   } => ModelsTreeNode.isElementClassGroupingNode(node);
 

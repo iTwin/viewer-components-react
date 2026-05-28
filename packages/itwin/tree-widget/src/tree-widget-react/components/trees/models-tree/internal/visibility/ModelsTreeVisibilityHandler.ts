@@ -174,6 +174,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
         parentKeys: node.parentKeys,
         categoryOfTopMostParentElement: node.extendedData.categoryOfTopMostParentElement,
         topMostParentElementId: node.extendedData.topMostParentElementId,
+        childrenWhichAreParents: node.extendedData.childrenWhichAreParents,
       });
       return this.#props.overrideHandler.createVisibilityHandlerResult({
         overrideProps: { node },
@@ -209,6 +210,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       categoryId: node.extendedData.categoryId,
       parentElementsIdsPath,
       categoryOfTopMostParentElement: node.extendedData.categoryOfTopMostParentElement,
+      computeOnlyOwnStatus: node.children ? undefined : true,
     });
   }
 

@@ -7,6 +7,7 @@ import { CategoriesTreeNode } from "../CategoriesTreeNode.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, GroupingHierarchyNode, HierarchyNode, InstancesNodeKey, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { ElementId } from "../../common/internal/Types.js";
 
 /**
  * Contains utility functions for working with Models Tree nodes.
@@ -55,7 +56,7 @@ export namespace CategoriesTreeNodeInternal {
     extendedData: {
       categoryId: Id64String;
       topMostParentElementId?: Id64String;
-      modelElementsMap: Map<Id64String, { elementIds: Set<Id64String>; categoryOfTopMostParentElement: Id64String }>;
+      modelElementsMap: Map<Id64String, { elementIds: Set<Id64String>; categoryOfTopMostParentElement: Id64String; childrenWhichAreParents: Set<ElementId> }>;
     };
   } => CategoriesTreeNode.isElementClassGroupingNode(node);
 

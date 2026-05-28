@@ -64,14 +64,14 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
 
   /** Gets grouped elements visibility status. */
   public getGroupedElementsVisibilityStatus(props: {
-    modelElementsMap: Map<ModelId, { elementIds: Set<ElementId>; categoryOfTopMostParentElement: CategoryId }>;
+    modelElementsMap: Map<ModelId, { elementIds: Set<ElementId>; categoryOfTopMostParentElement: CategoryId; childrenWhichAreParents: Set<ElementId> }>;
     categoryId: Id64String;
     parentKeys: HierarchyNodeKey[];
     topMostParentElementId?: ElementId;
   }): Observable<VisibilityStatus> {
     const { modelElementsMap, categoryId, topMostParentElementId } = props;
     return from(modelElementsMap).pipe(
-      mergeMap(([modelId, { elementIds, categoryOfTopMostParentElement }]) =>
+      mergeMap(([modelId, { elementIds, categoryOfTopMostParentElement, childrenWhichAreParents }]) =>
         this.getElementsVisibilityStatus({
           elementIds,
           modelId,
@@ -83,6 +83,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
               })
             : [],
           categoryOfTopMostParentElement,
+          computeOnlyOwnStatus: childrenWhichAreParents.size ? (elementId) => !childrenWhichAreParents.has(elementId) : undefined,
         }),
       ),
       mergeVisibilityStatuses(),
