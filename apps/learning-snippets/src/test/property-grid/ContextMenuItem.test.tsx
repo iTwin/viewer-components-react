@@ -4,11 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable unused-imports/no-unused-vars */
 /* eslint-disable import/no-duplicates */
-/* eslint-disable @typescript-eslint/no-deprecated */
 
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
-import { Presentation } from "@itwin/presentation-frontend";
 // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleContextMenuItemImports
 import { PropertyGridContextMenuItem } from "@itwin/property-grid-react";
 import type { ContextMenuItemProps } from "@itwin/property-grid-react";
@@ -75,7 +73,11 @@ describe("Property grid", () => {
         }
         // __PUBLISH_EXTRACT_END__
 
-        Presentation.selection.addToSelection("", imodelConnection, [keys.category]);
+        selectionStorage.addToSelection({
+          source: "test",
+          imodelKey: imodelConnection.key,
+          selectables: [keys.category],
+        });
 
         using _ = { [Symbol.dispose]: cleanup };
         const { baseElement, getAllByText } = render(<MyPropertyGrid />);
