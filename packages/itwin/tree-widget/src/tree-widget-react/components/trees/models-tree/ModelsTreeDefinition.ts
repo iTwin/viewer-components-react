@@ -20,7 +20,7 @@ import {
   takeUntil,
   toArray,
 } from "rxjs";
-import { Guid } from "@itwin/core-bentley";
+import { assert, Guid } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { createPredicateBasedHierarchyDefinition, NodeSelectClauseColumnNames, ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
@@ -215,6 +215,16 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   public postProcessNode: NodePostProcessor = async ({ node }) => {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
       const { hasSearchTargetAncestor, hasDirectNonSearchTargets } = groupingNodeDataFromChildren(node.children);
+      const childrenWhichAreParents = new Set(
+        node.children
+          .filter((child) => !!child.children)
+          .map((child) => {
+            assert(!ProcessedHierarchyNode.isGroupingNode(child), "Expected only non-grouping nodes as children");
+            return child.key.instanceKeys.map(({ id }) => id);
+          })
+          .flat(),
+      );
+
       return {
         ...node,
         label: this.#hierarchyConfig.elementClassGrouping === "enableWithCounts" ? `${node.label} (${node.children.length})` : node.label,
@@ -225,6 +235,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           modelId: node.children[0].extendedData?.modelId,
           categoryOfTopMostParentElement: node.children[0].extendedData?.categoryOfTopMostParentElement,
           topMostParentElementId: node.children[0].extendedData?.topMostParentElementId,
+          childrenWhichAreParents,
           ...(hasDirectNonSearchTargets ? { hasDirectNonSearchTargets } : {}),
           ...(hasSearchTargetAncestor ? { hasSearchTargetAncestor } : {}),
           // `imageId` is assigned to instance nodes at query time, but grouping ones need to

@@ -153,19 +153,33 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
 
   public postProcessNode: NodePostProcessor = async ({ node }) => {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
-      const modelElementsMap = new Map<ModelId, { elementIds: Set<ElementId>; categoryOfTopMostParentElement: CategoryId }>();
+      const modelElementsMap = new Map<
+        ModelId,
+        {
+          elementIds: Set<ElementId>;
+          categoryOfTopMostParentElement: CategoryId;
+          childrenWhichAreParents: Set<ElementId>;
+        }
+      >();
       for (const child of node.children) {
         let modelEntry = modelElementsMap.get(child.extendedData?.modelId);
         if (!modelEntry) {
           modelEntry = {
             elementIds: new Set(),
             categoryOfTopMostParentElement: child.extendedData?.categoryOfTopMostParentElement,
+            childrenWhichAreParents: new Set<ElementId>(),
           };
           modelElementsMap.set(child.extendedData?.modelId, modelEntry);
         }
         assert(CategoriesTreeNode.isElementNode(child));
+        const addId = child.children
+          ? (id: Id64String) => {
+              modelEntry.elementIds.add(id);
+              modelEntry.childrenWhichAreParents.add(id);
+            }
+          : (id: Id64String) => modelEntry.elementIds.add(id);
         for (const { id } of child.key.instanceKeys) {
-          modelEntry.elementIds.add(id);
+          addId(id);
         }
       }
 

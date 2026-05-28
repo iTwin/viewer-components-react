@@ -125,6 +125,12 @@ export class BaseIdsCache {
     return this.#elementModelCategoriesCache.getCategoriesOfModelsTopMostElements(props);
   }
 
+  public categoryHasIndirectChildren(
+    props: Parameters<ElementModelCategoriesCache["categoryHasIndirectChildren"]>[0],
+  ): ReturnType<ElementModelCategoriesCache["categoryHasIndirectChildren"]> {
+    return this.#elementModelCategoriesCache.categoryHasIndirectChildren(props);
+  }
+
   // DescendantsCountCache methods
 
   public getDescendantsCounts(props: Props<DescendantsCountCache["getDescendantsCounts"]>): ReturnType<DescendantsCountCache["getDescendantsCounts"]> {
@@ -216,6 +222,12 @@ export class BaseIdsCacheImpl {
 
   public getModels(props: Props<ElementModelCategoriesCache["getCategoryElementModels"]>): ReturnType<ElementModelCategoriesCache["getCategoryElementModels"]> {
     return this.#baseIdsCache.getModels(props);
+  }
+
+  public categoryHasIndirectChildren(
+    props: Parameters<ElementModelCategoriesCache["categoryHasIndirectChildren"]>[0],
+  ): ReturnType<ElementModelCategoriesCache["categoryHasIndirectChildren"]> {
+    return this.#baseIdsCache.categoryHasIndirectChildren(props);
   }
 
   public getAllCategoriesOfElements(): ReturnType<ElementModelCategoriesCache["getAllCategoriesOfElements"]> {

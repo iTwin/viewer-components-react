@@ -156,6 +156,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       categoryId: node.extendedData.categoryId,
       parentElementsIdsPath,
       categoryOfTopMostParentElement: node.extendedData.categoryOfTopMostParentElement,
+      computeOnlyOwnStatus: node.children ? undefined : true,
     });
   }
 

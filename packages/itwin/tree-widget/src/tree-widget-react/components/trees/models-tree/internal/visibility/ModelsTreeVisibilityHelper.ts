@@ -69,8 +69,9 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
     parentKeys: HierarchyNodeKey[];
     categoryOfTopMostParentElement: CategoryId;
     topMostParentElementId?: ElementId;
+    childrenWhichAreParents: Set<ElementId>;
   }): Observable<VisibilityStatus> {
-    const { modelId, categoryId, elementIds, parentKeys, categoryOfTopMostParentElement, topMostParentElementId } = props;
+    const { modelId, categoryId, elementIds, parentKeys, categoryOfTopMostParentElement, topMostParentElementId, childrenWhichAreParents } = props;
     const parentElementsIdsPath = topMostParentElementId
       ? getParentElementsIdsPath({
           parentInstanceKeys: parentKeys.filter((key) => HierarchyNodeKey.isInstances(key)).map((key) => key.instanceKeys),
@@ -83,6 +84,7 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
       categoryId,
       parentElementsIdsPath,
       categoryOfTopMostParentElement,
+      computeOnlyOwnStatus: childrenWhichAreParents.size === 0 ? true : (elementId) => !childrenWhichAreParents.has(elementId),
     });
   }
 

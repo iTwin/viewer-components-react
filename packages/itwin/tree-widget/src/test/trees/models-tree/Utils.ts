@@ -150,6 +150,7 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
     getChildElements: vi.fn(() => {
       return of([]);
     }),
+    categoryHasIndirectChildren: vi.fn(() => of(false)),
     getSubModelsUnderElement: vi.fn(() => of([])),
     getSubModels: vi.fn(() => EMPTY),
     hasSubModels: vi.fn(() => of(false)),
@@ -273,6 +274,7 @@ export function createClassGroupingHierarchyNode({
   hasDirectNonSearchTargets?: boolean;
   hasSearchTargetAncestor?: boolean;
   topMostParentElementId?: Id64String;
+  childrenWhichAreParents?: Set<Id64String>;
 }): GroupingHierarchyNode & { key: ClassGroupingNodeKey } {
   const className = props.className ?? CLASS_NAME_Element;
   return {
@@ -289,6 +291,7 @@ export function createClassGroupingHierarchyNode({
       modelId,
       categoryOfTopMostParentElement: categoryId,
       topMostParentElementId: props.topMostParentElementId,
+      childrenWhichAreParents: props.childrenWhichAreParents ?? new Set(),
       ...(props.hasDirectNonSearchTargets ? { hasDirectNonSearchTargets: props.hasDirectNonSearchTargets } : {}),
       ...(props.hasSearchTargetAncestor ? { hasSearchTargetAncestor: props.hasSearchTargetAncestor } : {}),
     },

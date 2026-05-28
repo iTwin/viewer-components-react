@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, last, map, merge, mergeMap, of, reduce, shareReplay, switchMap, tap, timer } from "rxjs";
-import { assert, Guid } from "@itwin/core-bentley";
+import { bufferCount, forkJoin, fromEventPattern, map, mergeMap, of, reduce, switchMap, take, tap, timer } from "rxjs";
+import { assert, BeEvent, Guid } from "@itwin/core-bentley";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
 import { releaseMainThreadOnItemsCount } from "../Utils.js";
 
@@ -45,13 +45,13 @@ export interface BatchingCacheProps {
 export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
   // When a new request is made via `get`:
   // - If the value is already cached, returns it immediately.
-  // - If it's already in-flight (#requestedValues), subscribes to the same observable.
+  // - If it's already in-flight (#requestedValues), subscribes to the same completion event.
   // - Otherwise, adds to #valuesToRequest. A timer is started if not already running;
   //   after the timer fires, the batch executes and caches results.
 
-  /** Pending requests buffer. `sharedObs` is created lazily on the first `get` call. */
-  #valuesToRequest: { values: TRequest[]; sharedObs?: Observable<void> } = { values: [] };
-  #requestedValues = new Map<RequestId, { values: TRequest[]; sharedObs: Observable<void> }>();
+  /** Pending requests buffer. `event` is created lazily on the first `get` call of each batch cycle. */
+  #valuesToRequest: { values: TRequest[]; event?: BeEvent<() => void> } = { values: [] };
+  #requestedValues = new Map<RequestId, { values: TRequest[]; event: BeEvent<() => void> }>();
   #bufferSize: number;
   #timerDelay: number;
   #releaseOnCount: number;
@@ -66,9 +66,9 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
   protected abstract getCachedValue(request: TRequest): TResult | undefined;
 
   /**
-   * Return the portion of the request which needs to be requested (not in batch or cache).
-   * Returns `undefined` if the entire request is already in the batch.
-   * For caches without partial requests, return `undefined` if in batch, or the full request if not.
+   * Return the portion of the request not already covered by the given set of values.
+   * Returns `undefined` for `valuesNotInBatch` if the request is fully covered.
+   * For caches without partial requests, return `undefined` if covered, or the full request otherwise.
    */
   protected abstract getValuesNotInBatch(
     request: TRequest,
@@ -76,10 +76,10 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
   ): { valuesNotInBatch: TRequest; batchContainsValues: boolean } | { valuesNotInBatch: undefined; batchContainsValues: true };
 
   /**
-   * Convert batched requests into units of data which are used to execute the query.
-   * For example, TRequest might be an object containing various request values, when converted to TQueryData,
-   * those values take shape of a WHERE clause fragments.
-   * These TQueryData items are buffered and passed to `executeQuery`.
+   * Convert batched requests into query data items.
+   * For example, TRequest might be an object containing various request values; when converted to TQueryData,
+   * those values take the shape of WHERE clause fragments.
+   * The resulting items are buffered (up to `bufferSize`) and passed to `executeQuery`.
    */
   protected abstract getQueryData(batch: TRequest[]): Observable<TQueryData>;
 
@@ -104,61 +104,67 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
 
     // Check if request is fully covered by an in-flight batch
     let requestNotInBatch: TRequest = request;
-    const sharedObsArray: Array<Observable<void>> = [];
-    for (const { values, sharedObs } of this.#requestedValues.values()) {
+    const events: Array<BeEvent<() => void>> = [];
+    for (const { values, event } of this.#requestedValues.values()) {
       const { valuesNotInBatch, batchContainsValues } = this.getValuesNotInBatch(requestNotInBatch, values);
       if (batchContainsValues) {
-        sharedObsArray.push(sharedObs);
+        events.push(event);
       }
       if (valuesNotInBatch === undefined) {
-        return this.getResultAfterObservable(request, merge(...sharedObsArray).pipe(last()));
+        return this.getResultAfterEvents(request, events);
       }
       requestNotInBatch = valuesNotInBatch;
     }
 
-    if (this.#valuesToRequest.sharedObs === undefined) {
+    if (this.#valuesToRequest.event === undefined) {
       const requestId = Guid.createValue();
-      this.#valuesToRequest.sharedObs = this.createSharedObs({
+      const newEvent = new BeEvent<() => void>();
+      this.#valuesToRequest.event = newEvent;
+      this.scheduleBatchExecution({
         values: this.#valuesToRequest.values,
         onStart: () => {
-          const { sharedObs } = this.#valuesToRequest;
-          assert(sharedObs !== undefined);
-          // After when start happens, assign the observable in #valuesToRequest to the #requestedValues
-          this.#requestedValues.set(requestId, { values: this.#valuesToRequest.values, sharedObs });
-          // Clear #valuesToRequest so new requests can be collected while the query is executing
+          // Move the pending buffer into #requestedValues so in-flight lookups find it
+          this.#requestedValues.set(requestId, { values: this.#valuesToRequest.values, event: newEvent });
+          // Reset #valuesToRequest so new requests can be collected while the query is executing
           this.#valuesToRequest = { values: [] };
         },
         onDone: () => {
+          newEvent.raiseEvent();
+          newEvent.clear();
           this.#requestedValues.delete(requestId);
         },
       });
     }
 
     this.#valuesToRequest.values.push(requestNotInBatch);
-    // Some values might be requested in sharedObsArray while waiting for the timer, so merge those in as well
-    return this.getResultAfterObservable(request, merge(...[...sharedObsArray, this.#valuesToRequest.sharedObs]).pipe(last()));
+    return this.getResultAfterEvents(request, [...events, this.#valuesToRequest.event]);
   }
 
-  private createSharedObs({ values, onStart, onDone }: { values: TRequest[]; onStart: () => void; onDone: () => void }): Observable<void> {
-    return timer(this.#timerDelay).pipe(
-      switchMap(() => {
-        onStart();
-        return this.executeBatchQuery(values).pipe(
-          reduce((_acc, row: TRow) => {
-            // Cache each row as it arrives, use reduce to emit one value when query completes
-            this.insertRow(row);
-            return undefined;
-          }, undefined),
-          tap(() => {
-            this.ensureDefaultCacheEntries(values);
-          }),
-        );
-      }),
-      tap({
-        finalize: onDone,
-      }),
-      shareReplay(1),
-    );
+  private scheduleBatchExecution({ values, onStart, onDone }: { values: TRequest[]; onStart: () => void; onDone: () => void }): void {
+    timer(this.#timerDelay)
+      .pipe(
+        switchMap(() => {
+          onStart();
+          return this.executeBatchQuery(values).pipe(
+            reduce((_acc, row: TRow) => {
+              // Cache each row inside the reducer; reduce emits a single value once the query completes
+              this.insertRow(row);
+              return undefined;
+            }, undefined),
+            tap(() => {
+              this.ensureDefaultCacheEntries(values);
+            }),
+          );
+        }),
+        tap({
+          finalize: onDone,
+        }),
+      )
+      .subscribe({
+        error: () => {
+          onDone();
+        },
+      });
   }
 
   private executeBatchQuery(batch: TRequest[]): Observable<TRow> {
@@ -169,8 +175,14 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
     );
   }
 
-  private getResultAfterObservable(request: TRequest, observable: Observable<void>): Observable<TResult> {
-    return observable.pipe(
+  private getResultAfterEvents(request: TRequest, events: Array<BeEvent<() => void>>): Observable<TResult> {
+    return forkJoin(
+      events.map((event) =>
+        fromEventPattern((handler) => {
+          event.addOnce(handler);
+        }).pipe(take(1)),
+      ),
+    ).pipe(
       map(() => {
         const cachedValue = this.getCachedValue(request);
         assert(cachedValue !== undefined);
