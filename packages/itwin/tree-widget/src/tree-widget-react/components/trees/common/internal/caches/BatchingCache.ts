@@ -4,21 +4,21 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { bufferCount, forkJoin, fromEventPattern, map, mergeMap, of, reduce, switchMap, take, tap, timer } from "rxjs";
-import { assert, BeEvent, Guid } from "@itwin/core-bentley";
+import { assert, Guid } from "@itwin/core-bentley";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
 import { releaseMainThreadOnItemsCount } from "../Utils.js";
 
 import type { Observable } from "rxjs";
-import type { Listener } from "@itwin/core-bentley";
 
 type RequestId = string;
 
 /**
- * A BeEvent that fires at most once and replays to late listeners.
+ * A single-fire event that replays to late listeners.
  * If `addOnce` is called after the event has already been raised,
  * the listener is invoked immediately with the stored arguments.
  */
-class OneShotEvent<T extends Listener> extends BeEvent<T> {
+class OneShotEvent<T extends (...args: any[]) => void> {
+  #listeners: Set<T> = new Set();
   #firedWithArgs?:
     | {
         fired: true;
@@ -26,17 +26,29 @@ class OneShotEvent<T extends Listener> extends BeEvent<T> {
       }
     | { fired: false };
 
-  public override raiseEvent(...props: Parameters<T>): ReturnType<BeEvent<T>["raiseEvent"]> {
-    this.#firedWithArgs = { fired: true, args: props };
-    return super.raiseEvent(...props);
+  public raiseEvent(...args: Parameters<T>): void {
+    this.#firedWithArgs = { fired: true, args };
+    const listeners = this.#listeners;
+    this.#listeners = new Set();
+    for (const listener of listeners) {
+      listener(...args);
+    }
+    listeners.clear();
   }
 
-  public override addOnce(listener: T, scope?: any): ReturnType<BeEvent<T>["addOnce"]> {
+  public addOnce(listener: T): () => void {
     if (this.#firedWithArgs?.fired) {
       listener(...this.#firedWithArgs.args);
       return () => {};
     }
-    return super.addOnce(listener, scope);
+    this.#listeners.add(listener);
+    return () => {
+      this.#listeners.delete(listener);
+    };
+  }
+
+  public clear(): void {
+    this.#listeners = new Set();
   }
 }
 
