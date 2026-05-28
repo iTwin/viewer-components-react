@@ -6,10 +6,10 @@
 import type { Point3d, XAndY } from "@itwin/core-geometry";
 import type { Cartographic } from "@itwin/core-common";
 import { IModelApp, QuantityType } from "@itwin/core-frontend";
-import { FormatTraits, Units } from "@itwin/core-quantity";
+import { FormatTraits, UnitConversions, Units } from "@itwin/core-quantity";
 import { MeasureTools } from "../MeasureTools.js";
 
-import type { FormatDefinition, FormatProps, FormatSpecHandle, FormatterSpec} from "@itwin/core-quantity";
+import type { FormatDefinition, FormatProps, FormatSpecHandle, FormatterSpec, UnitName } from "@itwin/core-quantity";
 export namespace FormatterUtils {
   const bearingUnitSystems = ["metric", "imperial", "usCustomary", "usSurvey"] as const;
   const bearingRegistrationPromises = new Map<string, Promise<void>>();
@@ -280,7 +280,7 @@ export namespace FormatterUtils {
     return bearing;
   }
 
-  async function getBearingFormatProps(bearingKoQ: string, system?: (typeof bearingUnitSystems)[number]): Promise<FormatDefinition> {
+  async function getBearingFormatProps(bearingKoQ: string, persistenceUnitName: string, system?: (typeof bearingUnitSystems)[number]): Promise<FormatDefinition> {
     try {
       const formatProps = await IModelApp.formatsProvider.getFormat(bearingKoQ, system);
       if (formatProps) {
@@ -299,12 +299,12 @@ export namespace FormatterUtils {
       // fall through to default format
     }
 
-    return getDefaultBearingFormatProps();
+    return getDefaultBearingFormatProps(persistenceUnitName);
   }
 
   async function registerBearingFormatSpecs(bearingKoQ: string, persistenceUnitName: string): Promise<void> {
     for (const system of bearingUnitSystems) {
-      const formatProps = await getBearingFormatProps(bearingKoQ, system);
+      const formatProps = await getBearingFormatProps(bearingKoQ, persistenceUnitName, system);
       await IModelApp.quantityFormatter.addFormattingSpecsToRegistry({
         name: bearingKoQ,
         persistenceUnitName,
@@ -335,7 +335,7 @@ export namespace FormatterUtils {
    * @returns A FormatterSpec for bearing formatting.
    */
   export async function getBearingFormatterSpec(bearingKoQ: string, persistenceUnitName: string): Promise<FormatterSpec | undefined> {
-    const formatProps = await getBearingFormatProps(bearingKoQ);
+    const formatProps = await getBearingFormatProps(bearingKoQ, persistenceUnitName);
 
     // Create and return the formatter spec
     return IModelApp.quantityFormatter.createFormatterSpec({
@@ -344,22 +344,44 @@ export namespace FormatterUtils {
     });
   }
 
-  export function getDefaultBearingFormatProps(): FormatProps {
+  function pickBearingUnits(persistenceUnitName: string) {
+    try {
+      if (UnitConversions.isCompatible(persistenceUnitName as UnitName, Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_RAD)) {
+        return {
+          revolutionUnit: Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_REVOLUTION,
+          units: [
+            { name: Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_ARC_DEG, label: "°" },
+            { name: Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_ARC_MINUTE, label: "'" },
+            { name: Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_ARC_SECOND, label: "\"" },
+          ],
+        };
+      }
+    } catch {
+      // unknown persistence unit - fall through to ANGLE default
+    }
+    return {
+      revolutionUnit: Units.ANGLE.REVOLUTION,
+      units: [
+        { name: Units.ANGLE.ARC_DEG, label: "°" },
+        { name: Units.ANGLE.ARC_MINUTE, label: "'" },
+        { name: Units.ANGLE.ARC_SECOND, label: "\"" },
+      ],
+    };
+  }
+
+  export function getDefaultBearingFormatProps(persistenceUnitName: string): FormatProps {
+    const { revolutionUnit, units } = pickBearingUnits(persistenceUnitName);
     return {
       minWidth: 2,
       precision: 0,
       type: "Bearing",
-      revolutionUnit: Units.ANGLE.REVOLUTION,
+      revolutionUnit,
       formatTraits: ["showUnitLabel"],
       uomSeparator: "",
       composite: {
         includeZero: true,
         spacer: "",
-        units: [
-          { name: Units.ANGLE.ARC_DEG, label: "°" },
-          { name: Units.ANGLE.ARC_MINUTE, label: "'" },
-          { name: Units.ANGLE.ARC_SECOND, label: "\"" },
-        ],
+        units,
       },
     };
   }

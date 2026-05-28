@@ -6,6 +6,7 @@
 import { Cartographic } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 import { Point3d } from "@itwin/core-geometry";
+import { Units } from "@itwin/core-quantity";
 import { assert } from "chai";
 import { FormatterUtils } from "../../api/FormatterUtils.js";
 
@@ -98,6 +99,34 @@ describe("FormatterUtils", () => {
 
     fLatLong = await FormatterUtils.formatCartographicToLatLong(Cartographic.fromDegrees({ latitude: -1.23456, longitude: 0.123456 }));
     assert.strictEqual(fLatLong, `1${Symbols.Deg}14${Symbols.Min}4.416${Symbols.Sec}${Symbols.S}, 0${Symbols.Deg}7${Symbols.Min}24.4416${Symbols.Sec}${Symbols.E}`);
+  });
+
+  it("getDefaultBearingFormatProps returns ANGLE-phenomenon composite for Units.RAD", () => {
+    const props = FormatterUtils.getDefaultBearingFormatProps(Units.ANGLE.RAD);
+    assert.strictEqual(props.type, "Bearing");
+    assert.strictEqual(props.revolutionUnit, Units.ANGLE.REVOLUTION);
+    assert.deepStrictEqual(props.composite?.units.map((u) => u.name), [
+      Units.ANGLE.ARC_DEG,
+      Units.ANGLE.ARC_MINUTE,
+      Units.ANGLE.ARC_SECOND,
+    ]);
+  });
+
+  it("getDefaultBearingFormatProps returns HORIZONTAL_DIRECTION-phenomenon composite for Units.HORIZONTAL_DIR_RAD", () => {
+    const props = FormatterUtils.getDefaultBearingFormatProps(Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_RAD);
+    assert.strictEqual(props.type, "Bearing");
+    assert.strictEqual(props.revolutionUnit, Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_REVOLUTION);
+    assert.deepStrictEqual(props.composite?.units.map((u) => u.name), [
+      Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_ARC_DEG,
+      Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_ARC_MINUTE,
+      Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_ARC_SECOND,
+    ]);
+  });
+
+  it("getDefaultBearingFormatProps falls back to ANGLE composite for unknown persistence unit", () => {
+    const props = FormatterUtils.getDefaultBearingFormatProps("Units.NOT_A_REAL_UNIT");
+    assert.strictEqual(props.revolutionUnit, Units.ANGLE.REVOLUTION);
+    assert.strictEqual(props.composite?.units[0].name, Units.ANGLE.ARC_DEG);
   });
 
   it("test formatSlope", () => {
