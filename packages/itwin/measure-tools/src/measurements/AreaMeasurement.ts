@@ -42,9 +42,9 @@ export interface AreaMeasurementProps extends MeasurementProps {
 
 /** Formatting properties for area measurement. */
 export interface AreaMeasurementFormattingProps {
-  /** Defaults to "DefaultToolsUnits.LENGTH" and "Units.M" */
+  /** Defaults to "DefaultToolsUnits.LENGTH" and `Units.LENGTH.M` */
   length?: MeasurementFormattingProps;
-  /** Defaults to "DefaultToolsUnits.AREA" and "Units.SQ_M" */
+  /** Defaults to "DefaultToolsUnits.AREA" and `Units.AREA.SQ_M` */
   area? : MeasurementFormattingProps;
 }
 

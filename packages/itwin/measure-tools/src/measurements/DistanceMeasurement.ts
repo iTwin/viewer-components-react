@@ -41,11 +41,11 @@ export interface DistanceMeasurementProps extends MeasurementProps {
 
 /** Formatting properties for distance measurement. */
 export interface DistanceMeasurementFormattingProps {
-  /** Defaults to "DefaultToolsUnits.LENGTH" and "Units.M" */
+  /** Defaults to "DefaultToolsUnits.LENGTH" and `Units.LENGTH.M` */
   length?: MeasurementFormattingProps;
-  /** Defaults to "CivilUnits.BEARING" and "Units.RAD" */
+  /** Optional and opt-in: no default is applied. When set, bearing is shown using this KoQ; a typical persistence unit is `Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_RAD`. */
   bearing? : MeasurementFormattingProps;
-  /** Defaults to "DefaultToolsUnits.LENGTH_COORDINATE" and "Units.M" */
+  /** Defaults to "DefaultToolsUnits.LENGTH_COORDINATE" and `Units.LENGTH.M` */
   coordinate?: MeasurementFormattingProps;
 }
 

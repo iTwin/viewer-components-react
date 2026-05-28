@@ -34,7 +34,7 @@ export interface AngleMeasurementProps extends MeasurementProps {
 
 /** Formatting properties for angle measurement. */
 export interface AngleMeasurementFormattingProps {
-  /** Defaults to "DefaultToolsUnits.ANGLE" and "Units.RAD" */
+  /** Defaults to "DefaultToolsUnits.ANGLE" and `Units.ANGLE.RAD` */
   angle?: MeasurementFormattingProps;
 }
 

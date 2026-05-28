@@ -45,13 +45,13 @@ export interface LocationMeasurementProps extends MeasurementProps {
 
 /** Formatting properties for location measurement. */
 export interface LocationMeasurementFormattingProps {
-  /** Defaults to "DefaultToolsUnits.LENGTH_COORDINATE" and "Units.M" */
+  /** Defaults to "DefaultToolsUnits.LENGTH_COORDINATE" and `Units.LENGTH.M` */
   coordinate?: MeasurementFormattingProps;
-  /** Defaults to "DefaultToolsUnits.LENGTH" and "Units.M" */
+  /** Defaults to "DefaultToolsUnits.LENGTH" and `Units.LENGTH.M` */
   length?: MeasurementFormattingProps;
-  /** Defaults to "CivilUnits.STATION" and "Units.M" */
+  /** Defaults to "CivilUnits.STATION" and `Units.LENGTH.M` */
   station?: MeasurementFormattingProps;
-  /** Defaults to "DefaultToolsUnits.ANGLE" and "Units.RAD" */
+  /** Defaults to "DefaultToolsUnits.ANGLE" and `Units.ANGLE.RAD` */
   angle?: MeasurementFormattingProps;
 }
 /** Serializer for a [[LocationMeasurement]]. */

@@ -39,7 +39,7 @@ export interface RadiusMeasurementProps extends MeasurementProps {
 
 /** Formatting properties for Radius measurement. */
 export interface RadiusMeasurementFormattingProps {
-  /** Defaults to "DefaultToolsUnits.LENGTH" and "Units.M" */
+  /** Defaults to "DefaultToolsUnits.LENGTH" and `Units.LENGTH.M` */
   length?: MeasurementFormattingProps;
 }
 

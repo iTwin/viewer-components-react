@@ -344,33 +344,47 @@ export namespace FormatterUtils {
     });
   }
 
-  function pickBearingUnits(persistenceUnitName: string) {
-    try {
-      if (UnitConversions.isCompatible(persistenceUnitName as UnitName, Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_RAD)) {
-        return {
-          revolutionUnit: Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_REVOLUTION,
-          units: [
-            { name: Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_ARC_DEG, label: "°" },
-            { name: Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_ARC_MINUTE, label: "'" },
-            { name: Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_ARC_SECOND, label: "\"" },
-          ],
-        };
-      }
-    } catch {
-      // unknown persistence unit - fall through to ANGLE default
-    }
-    return {
-      revolutionUnit: Units.ANGLE.REVOLUTION,
-      units: [
-        { name: Units.ANGLE.ARC_DEG, label: "°" },
-        { name: Units.ANGLE.ARC_MINUTE, label: "'" },
-        { name: Units.ANGLE.ARC_SECOND, label: "\"" },
+  // DMS glyphs; same across phenomena.
+  const BEARING_COMPOSITE_LABELS = ["°", "'", "\""] as const;
+
+  // Bearing composite + revolutionUnit must match the persistence unit's phenomenon.
+  // revolutionUnit doubles as the phenomenon probe. ANGLE is the default (`?? fallback`).
+  const BEARING_UNITS_BY_PHENOMENON: ReadonlyArray<{
+    revolutionUnit: UnitName;
+    compositeUnitNames: readonly [UnitName, UnitName, UnitName];
+  }> = [
+    {
+      revolutionUnit: Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_REVOLUTION,
+      compositeUnitNames: [
+        Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_ARC_DEG,
+        Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_ARC_MINUTE,
+        Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_ARC_SECOND,
       ],
+    },
+  ];
+
+  const DEFAULT_BEARING_UNITS = {
+    revolutionUnit: Units.ANGLE.REVOLUTION,
+    compositeUnitNames: [Units.ANGLE.ARC_DEG, Units.ANGLE.ARC_MINUTE, Units.ANGLE.ARC_SECOND] as const,
+  };
+
+  function pickBearingUnits(persistenceUnitName: string) {
+    // Callers may pass non-canonical units, so cast `string` -> `UnitName`; isCompatible
+    // throws for unknown units, which we treat as "no match".
+    const matchesPhenomenon = (phenomenonUnit: UnitName): boolean => {
+      try {
+        return UnitConversions.isCompatible(persistenceUnitName as UnitName, phenomenonUnit);
+      } catch {
+        return false;
+      }
     };
+
+    return BEARING_UNITS_BY_PHENOMENON.find((entry) => matchesPhenomenon(entry.revolutionUnit)) ?? DEFAULT_BEARING_UNITS;
   }
 
+  /** Fallback Bearing `FormatProps` matching the phenomenon of `persistenceUnitName`; unknown units default to ANGLE. */
   export function getDefaultBearingFormatProps(persistenceUnitName: string): FormatProps {
-    const { revolutionUnit, units } = pickBearingUnits(persistenceUnitName);
+    const { revolutionUnit, compositeUnitNames } = pickBearingUnits(persistenceUnitName);
     return {
       minWidth: 2,
       precision: 0,
@@ -381,7 +395,7 @@ export namespace FormatterUtils {
       composite: {
         includeZero: true,
         spacer: "",
-        units,
+        units: compositeUnitNames.map((name, i) => ({ name, label: BEARING_COMPOSITE_LABELS[i] })),
       },
     };
   }
