@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Bump @itwin/core-* peer dependencies to ^5.10.0 and replace magic unit strings with generated Units.* identifiers from @itwin/core-quantity. Notably, Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_RAD is now canonical for bearing persistence units.",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "HoangNam.Le@bentley.com",
+  "dependentChangeType": "patch"
+}

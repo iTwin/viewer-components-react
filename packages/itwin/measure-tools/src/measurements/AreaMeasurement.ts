@@ -29,6 +29,8 @@ import type {
   MeasurementWidgetData,
 } from "../api/Measurement.js";
 import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
+import { Units } from "@itwin/core-quantity";
+
 import type { FormatSpecHandle } from "@itwin/core-quantity";
 /**
  * Props for serializing a [[AreaMeasurement]].
@@ -165,9 +167,9 @@ export class AreaMeasurement extends Measurement {
     super(props);
 
     this._lengthKoQ = props?.formatting?.length?.koqName ?? "DefaultToolsUnits.LENGTH";
-    this._lengthPersistenceUnitName = props?.formatting?.length?.persistenceUnitName ?? "Units.M";
+    this._lengthPersistenceUnitName = props?.formatting?.length?.persistenceUnitName ?? Units.LENGTH.M;
     this._areaKoQ = props?.formatting?.area?.koqName ?? "DefaultToolsUnits.AREA";
-    this._areaPersistenceUnitName = props?.formatting?.area?.persistenceUnitName ?? "Units.SQ_M";
+    this._areaPersistenceUnitName = props?.formatting?.area?.persistenceUnitName ?? Units.AREA.SQ_M;
     this._polygon = new Polygon(
       [],
       false,

@@ -6,7 +6,7 @@
 import type { Point3d, XAndY } from "@itwin/core-geometry";
 import type { Cartographic } from "@itwin/core-common";
 import { IModelApp, QuantityType } from "@itwin/core-frontend";
-import { FormatTraits } from "@itwin/core-quantity";
+import { FormatTraits, Units } from "@itwin/core-quantity";
 import { MeasureTools } from "../MeasureTools.js";
 
 import type { FormatDefinition, FormatProps, FormatSpecHandle, FormatterSpec} from "@itwin/core-quantity";
@@ -349,16 +349,16 @@ export namespace FormatterUtils {
       minWidth: 2,
       precision: 0,
       type: "Bearing",
-      revolutionUnit: "Units.REVOLUTION",
+      revolutionUnit: Units.ANGLE.REVOLUTION,
       formatTraits: ["showUnitLabel"],
       uomSeparator: "",
       composite: {
         includeZero: true,
         spacer: "",
         units: [
-          { name: "Units.ARC_DEG", label: "°" },
-          { name: "Units.ARC_MINUTE", label: "'" },
-          { name: "Units.ARC_SECOND", label: "\"" },
+          { name: Units.ANGLE.ARC_DEG, label: "°" },
+          { name: Units.ANGLE.ARC_MINUTE, label: "'" },
+          { name: Units.ANGLE.ARC_SECOND, label: "\"" },
         ],
       },
     };

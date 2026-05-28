@@ -11,6 +11,8 @@ import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "./G
 import { TextMarker } from "./TextMarker.js";
 
 import type { DecorateContext, GraphicBuilder} from "@itwin/core-frontend";
+import { Units } from "@itwin/core-quantity";
+
 import type { FormatterSpec } from "@itwin/core-quantity";
 import type { TextEntry} from "./TextMarker.js";
 export class Polygon {
@@ -156,7 +158,7 @@ export class Polygon {
       this._textMarker.textLines = this._overrideText;
     } else {
       const lines: string[] = [];
-      const areaFormatter = this._areaFormatterSpecProvider?.() ?? FormatterUtils.getFormatterSpecWithFallback("DefaultToolsUnits.AREA", "Units.SQ_M", QuantityType.Area);
+      const areaFormatter = this._areaFormatterSpecProvider?.() ?? FormatterUtils.getFormatterSpecWithFallback("DefaultToolsUnits.AREA", Units.AREA.SQ_M, QuantityType.Area);
       if (undefined !== areaFormatter)
         lines.push(IModelApp.quantityFormatter.formatQuantity(this.area, areaFormatter));
 

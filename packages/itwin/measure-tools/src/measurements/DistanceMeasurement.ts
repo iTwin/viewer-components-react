@@ -25,6 +25,8 @@ import type {
   MeasurementWidgetData,
 } from "../api/Measurement.js";
 import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
+import { Units } from "@itwin/core-quantity";
+
 import type { FormatSpecHandle } from "@itwin/core-quantity";
 
 /**
@@ -202,9 +204,9 @@ export class DistanceMeasurement extends Measurement {
     this._showAxes = MeasurementPreferences.current.displayMeasurementAxes;
     this._runRiseAxes = [];
     this._lengthKoQ = "DefaultToolsUnits.LENGTH";
-    this._lengthPersistenceUnitName = "Units.M";
+    this._lengthPersistenceUnitName = Units.LENGTH.M;
     this._coordinateKoQ = "DefaultToolsUnits.LENGTH_COORDINATE";
-    this._coordinatePersistenceUnitName = "Units.M";
+    this._coordinatePersistenceUnitName = Units.LENGTH.M;
 
     if (props) this.readFromJSON(props);
 
