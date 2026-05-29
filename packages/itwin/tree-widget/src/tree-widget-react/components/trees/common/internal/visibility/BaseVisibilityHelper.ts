@@ -807,11 +807,10 @@ export class BaseVisibilityHelper implements Disposable {
         if (!hasSubModels) {
           return EMPTY;
         }
-        return fromWithRelease({ source: categoryIds, releaseOnCount: 200 }).pipe(
-          mergeMap((categoryId) => this.#props.baseIdsCache.getSubModels({ categoryId, modelId })),
-          mergeMap((subModels) => this.changeModelsVisibilityStatus({ modelIds: subModels, on })),
-        );
+        return fromWithRelease({ source: categoryIds, releaseOnCount: 200 });
       }),
+      mergeMap((categoryId) => this.#props.baseIdsCache.getSubModels({ categoryId, modelId })),
+      mergeMap((subModels) => this.changeModelsVisibilityStatus({ modelIds: subModels, on })),
     );
     return merge(
       changeModelsVisibilityStatusObs.pipe(
@@ -900,18 +899,14 @@ export class BaseVisibilityHelper implements Disposable {
             if (!hasSubModels) {
               return EMPTY;
             }
-            return fromWithRelease({ source: elementIds, releaseOnCount: 100 }).pipe(
-              mergeMap((elementId) =>
-                this.#props.baseIdsCache.getSubModelsUnderElement(elementId).pipe(
-                  mergeMap((subModelsUnderElement) => {
-                    if (subModelsUnderElement.length > 0) {
-                      return this.changeModelsVisibilityStatus({ modelIds: subModelsUnderElement, on });
-                    }
-                    return EMPTY;
-                  }),
-                ),
-              ),
-            );
+            return fromWithRelease({ source: elementIds, releaseOnCount: 100 });
+          }),
+          mergeMap((elementId) => this.#props.baseIdsCache.getSubModelsUnderElement(elementId)),
+          mergeMap((subModelsUnderElement) => {
+            if (subModelsUnderElement.length > 0) {
+              return this.changeModelsVisibilityStatus({ modelIds: subModelsUnderElement, on });
+            }
+            return EMPTY;
           }),
         ),
       );
