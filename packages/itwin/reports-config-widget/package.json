@@ -99,7 +99,7 @@
     "typemoq": "^2.1.0",
     "typescript": "~5.6.0",
     "@vitest/coverage-v8": "^3.0.0",
-    "vitest": "^3.0.0"
+    "vitest": "^4.1.0"
   },
   "peerDependencies": {
     "@itwin/appui-abstract": "^5.0.0",
