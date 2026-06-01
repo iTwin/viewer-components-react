@@ -28,8 +28,11 @@ export class ElementModelCategoriesCache {
   #componentName: string;
   #elementClassName: string;
   #modeledElementsCache: ModeledElementsCache;
-  #modelsCategoriesInfo:
-    | Observable<Map<ModelId, { categoriesOfTopMostElements: Set<CategoryId>; allCategories: Set<CategoryId>; isSubModel: boolean }>>
+  #cachedData:
+    | Observable<{
+        modelsCategoriesInfo: Map<ModelId, { categoriesOfTopMostElements: Set<CategoryId>; allCategories: Set<CategoryId>; isSubModel: boolean }>;
+        categoriesWithParentElements: Set<CategoryId>;
+      }>
     | undefined;
 
   constructor(props: ElementModelCategoriesCacheProps) {
@@ -44,19 +47,19 @@ export class ElementModelCategoriesCache {
     modelId: Id64String;
     categoryId: Id64String;
     isTopMostElementCategory: boolean;
+    hasParentElements: boolean;
   }> {
     return defer(() => {
       const query = `
-          SELECT * FROM (
-            SELECT
-              this.Model.Id modelId,
-              this.Category.Id categoryId,
-              MAX(IIF(this.Parent.Id IS NULL, 1, 0)) isTopMostElementCategory
-            FROM ${CLASS_NAME_Model} m
-            JOIN ${this.#elementClassName} this ON m.ECInstanceId = this.Model.Id
-            WHERE m.IsPrivate = false
-            GROUP BY modelId, categoryId
-          )
+          SELECT
+            this.Model.Id modelId,
+            this.Category.Id categoryId,
+            MAX(IIF(this.Parent.Id IS NULL, 1, 0)) isTopMostElementCategory,
+            MAX(IIF((SELECT 1 FROM ${this.#elementClassName} ce WHERE ce.Parent.Id = this.ECInstanceId LIMIT 1), 1, 0)) hasParentElements
+          FROM ${CLASS_NAME_Model} m
+          JOIN ${this.#elementClassName} this ON m.ECInstanceId = this.Model.Id
+          WHERE m.IsPrivate = false
+          GROUP BY modelId, categoryId
         `;
       return this.#queryExecutor.createQueryReader(
         { ecsql: query },
@@ -65,45 +68,59 @@ export class ElementModelCategoriesCache {
     }).pipe(
       catchBeSQLiteInterrupts,
       map((row) => {
-        return { modelId: row.modelId, categoryId: row.categoryId, isTopMostElementCategory: !!row.isTopMostElementCategory };
+        return {
+          modelId: row.modelId,
+          categoryId: row.categoryId,
+          isTopMostElementCategory: !!row.isTopMostElementCategory,
+          hasParentElements: !!row.hasParentElements,
+        };
       }),
     );
   }
 
-  private getModelsCategoriesInfo() {
-    this.#modelsCategoriesInfo ??= forkJoin({
+  private getCachedData() {
+    this.#cachedData ??= forkJoin({
       modelCategories: this.queryElementModelCategories().pipe(
-        reduce((acc, queriedCategory) => {
-          let modelEntry = acc.get(queriedCategory.modelId);
-          if (modelEntry === undefined) {
-            modelEntry = { categoriesOfTopMostElements: new Set(), allCategories: new Set() };
-            acc.set(queriedCategory.modelId, modelEntry);
-          }
-          modelEntry.allCategories.add(queriedCategory.categoryId);
-          if (queriedCategory.isTopMostElementCategory) {
-            modelEntry.categoriesOfTopMostElements.add(queriedCategory.categoryId);
-          }
-          return acc;
-        }, new Map<ModelId, { categoriesOfTopMostElements: Set<CategoryId>; allCategories: Set<CategoryId> }>()),
+        reduce(
+          (acc, queriedCategory) => {
+            let modelEntry = acc.modelsCategoriesInfo.get(queriedCategory.modelId);
+            if (modelEntry === undefined) {
+              modelEntry = { categoriesOfTopMostElements: new Set(), allCategories: new Set() };
+              acc.modelsCategoriesInfo.set(queriedCategory.modelId, modelEntry);
+            }
+            modelEntry.allCategories.add(queriedCategory.categoryId);
+            if (queriedCategory.isTopMostElementCategory) {
+              modelEntry.categoriesOfTopMostElements.add(queriedCategory.categoryId);
+            }
+            if (queriedCategory.hasParentElements) {
+              acc.categoriesWithParentElements.add(queriedCategory.categoryId);
+            }
+            return acc;
+          },
+          {
+            modelsCategoriesInfo: new Map<ModelId, { categoriesOfTopMostElements: Set<CategoryId>; allCategories: Set<CategoryId> }>(),
+            categoriesWithParentElements: new Set<CategoryId>(),
+          },
+        ),
       ),
       allSubModels: this.#modeledElementsCache.getModeledElementsInfo().pipe(map(({ allSubModels }) => allSubModels)),
     }).pipe(
       releaseMainThreadOnItemsCount(1),
       map(({ modelCategories, allSubModels }) => {
-        const result = new Map<ModelId, { categoriesOfTopMostElements: Set<CategoryId>; allCategories: Set<CategoryId>; isSubModel: boolean }>();
-        for (const [modelId, { categoriesOfTopMostElements, allCategories }] of modelCategories) {
+        const modelsCategoriesInfo = new Map<ModelId, { categoriesOfTopMostElements: Set<CategoryId>; allCategories: Set<CategoryId>; isSubModel: boolean }>();
+        for (const [modelId, { categoriesOfTopMostElements, allCategories }] of modelCategories.modelsCategoriesInfo) {
           const isSubModel = allSubModels.has(modelId);
-          result.set(modelId, {
+          modelsCategoriesInfo.set(modelId, {
             categoriesOfTopMostElements,
             allCategories,
             isSubModel,
           });
         }
-        return result;
+        return { modelsCategoriesInfo, categoriesWithParentElements: modelCategories.categoriesWithParentElements };
       }),
       shareReplay(),
     );
-    return this.#modelsCategoriesInfo;
+    return this.#cachedData;
   }
 
   public getCategoryElementModels(props: {
@@ -112,10 +129,10 @@ export class ElementModelCategoriesCache {
     includeOnlyIfCategoryOfTopMostElement?: boolean;
   }): Observable<Array<ModelId>> {
     const { categoryId, subModels } = props;
-    return this.getModelsCategoriesInfo().pipe(
-      map((modelCategories) => {
+    return this.getCachedData().pipe(
+      map(({ modelsCategoriesInfo }) => {
         const categoryModels = new Array<ModelId>();
-        for (const [modelId, { allCategories, categoriesOfTopMostElements, isSubModel }] of modelCategories) {
+        for (const [modelId, { allCategories, categoriesOfTopMostElements, isSubModel }] of modelsCategoriesInfo) {
           if (
             (subModels === "include" || (subModels === "only" && isSubModel) || (subModels === "exclude" && !isSubModel)) &&
             (props.includeOnlyIfCategoryOfTopMostElement ? categoriesOfTopMostElements.has(categoryId) : allCategories.has(categoryId))
@@ -135,18 +152,19 @@ export class ElementModelCategoriesCache {
     modelId: Id64String;
     includeOnlyIfCategoryOfTopMostElement?: boolean;
   }): Observable<Id64Set> {
-    return this.getModelsCategoriesInfo().pipe(
+    return this.getCachedData().pipe(
       map(
-        (modelCategories) =>
-          (includeOnlyIfCategoryOfTopMostElement ? modelCategories.get(modelId)?.categoriesOfTopMostElements : modelCategories.get(modelId)?.allCategories) ??
-          new Set(),
+        ({ modelsCategoriesInfo }) =>
+          (includeOnlyIfCategoryOfTopMostElement
+            ? modelsCategoriesInfo.get(modelId)?.categoriesOfTopMostElements
+            : modelsCategoriesInfo.get(modelId)?.allCategories) ?? new Set(),
       ),
     );
   }
 
   public getCategoriesOfModelsTopMostElements(modelIds: Id64Array): Observable<Id64Set> {
-    return this.getModelsCategoriesInfo().pipe(
-      mergeMap((modelCategories) => from(modelIds).pipe(mergeMap((modelId) => modelCategories.get(modelId)?.categoriesOfTopMostElements ?? []))),
+    return this.getCachedData().pipe(
+      mergeMap(({ modelsCategoriesInfo }) => from(modelIds).pipe(mergeMap((modelId) => modelsCategoriesInfo.get(modelId)?.categoriesOfTopMostElements ?? []))),
       reduce((acc, categoryId) => {
         acc.add(categoryId);
         return acc;
@@ -155,8 +173,8 @@ export class ElementModelCategoriesCache {
   }
 
   public getAllCategoriesOfElements(): Observable<Id64Set> {
-    return this.getModelsCategoriesInfo().pipe(
-      mergeMap((modelCategories) => modelCategories.values()),
+    return this.getCachedData().pipe(
+      mergeMap(({ modelsCategoriesInfo }) => from(modelsCategoriesInfo.values())),
       reduce((acc, { allCategories }) => {
         for (const categoryId of allCategories) {
           acc.add(categoryId);
@@ -167,6 +185,10 @@ export class ElementModelCategoriesCache {
   }
 
   public getAllModels(): Observable<Array<ModelId>> {
-    return this.getModelsCategoriesInfo().pipe(map((modelCategories) => [...modelCategories.keys()]));
+    return this.getCachedData().pipe(map(({ modelsCategoriesInfo }) => [...modelsCategoriesInfo.keys()]));
+  }
+
+  public categoryHasParentElements(categoryId: Id64String): Observable<boolean> {
+    return this.getCachedData().pipe(map(({ categoriesWithParentElements }) => categoriesWithParentElements.has(categoryId)));
   }
 }
