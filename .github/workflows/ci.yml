@@ -18,7 +18,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 24.15.0
           cache: "pnpm"
 
       - run: pnpm install
@@ -37,7 +37,7 @@ jobs:
       - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 24.15.0
           cache: 'pnpm'
 
       - run: pnpm install
@@ -58,7 +58,7 @@ jobs:
       - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 24.15.0
           cache: 'pnpm'
 
       - run: pnpm install
@@ -79,7 +79,7 @@ jobs:
       - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 24.15.0
           cache: 'pnpm'
 
       - run: pnpm install
@@ -109,7 +109,7 @@ jobs:
       - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 24.15.0
           cache: 'pnpm'
 
       - run: pnpm install
