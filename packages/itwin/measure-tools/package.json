@@ -107,7 +107,7 @@
     "sass-embedded": "^1.93.3",
     "typescript": "~5.7.3",
     "vite": "^5.4.21",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.0"
   },
   "dependencies": {
     "@bentley/icons-generic-webfont": "^1.0.34",
