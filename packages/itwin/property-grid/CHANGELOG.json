@@ -2,6 +2,21 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Mon, 01 Jun 2026 13:08:04 GMT",
+      "version": "1.19.9",
+      "tag": "@itwin/property-grid-react_v1.19.9",
+      "comments": {
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "556c99eeee855588034395d6ce01f1862039a671",
+            "comment": "Update prop types to use `type` instead of `interface` when building types on top of types coming from dependencies."
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 18 May 2026 18:26:36 GMT",
       "version": "1.19.8",
       "tag": "@itwin/property-grid-react_v1.19.8",

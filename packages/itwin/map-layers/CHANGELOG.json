@@ -2,6 +2,21 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "date": "Mon, 01 Jun 2026 13:08:04 GMT",
+      "version": "7.0.1",
+      "tag": "@itwin/map-layers_v7.0.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "wil.maier@bentley.com",
+            "package": "@itwin/map-layers",
+            "commit": "43f174c073f5eaa594ce233cf0e7175f581e0c78",
+            "comment": "Add key prop to Select component for responsive dropdown menu on disabled state change"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 07 May 2026 07:30:42 GMT",
       "version": "7.0.0",
       "tag": "@itwin/map-layers_v7.0.0",

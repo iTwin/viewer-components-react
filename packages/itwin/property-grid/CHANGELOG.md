@@ -1,8 +1,16 @@
 # Change Log - @itwin/property-grid-react
 
-<!-- This log was last generated on Mon, 18 May 2026 18:26:36 GMT and should not be manually modified. -->
+<!-- This log was last generated on Mon, 01 Jun 2026 13:08:04 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 1.19.9
+
+Mon, 01 Jun 2026 13:08:04 GMT
+
+### Patches
+
+- Update prop types to use `type` instead of `interface` when building types on top of types coming from dependencies. ([#1685](https://github.com/iTwin/viewer-components-react/pull/1685))
 
 ## 1.19.8
 
