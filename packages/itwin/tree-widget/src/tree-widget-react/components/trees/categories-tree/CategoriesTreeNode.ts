@@ -23,8 +23,7 @@ export namespace CategoriesTreeNode {
    * If it does, the node's `extendedData` will contain the following properties:
    * - `description`: Optional description of the category
    * - `hasSubCategories`: Indicates whether the category has sub-categories
-   * - `isCategoryOfSubModel`: Indicates that this node is located under a SubModel
-   * - `modelIds`: (only if `isCategoryOfSubModel` is true) Ids of models that this category node is contained under
+   * - `modelIds`: Ids of models that this category node is contained under
    */
   export const isCategoryNode = (
     node: Pick<HierarchyNode, "extendedData">,
@@ -32,16 +31,9 @@ export namespace CategoriesTreeNode {
     extendedData: {
       description?: string;
       hasSubCategories?: boolean;
-    } & (
-      | {
-          isCategoryOfSubModel?: false;
-        }
-      | {
-          /** Ids of models that this category node is contained under. */
-          modelIds: Id64Array;
-          isCategoryOfSubModel: true;
-        }
-    );
+      /** Ids of models that this category node is contained under. */
+      modelIds: Id64Array;
+    };
   } => !!node.extendedData && "isCategory" in node.extendedData && !!node.extendedData.isCategory;
 
   /** Checks if the given node represents a `BisCore.Model`. */

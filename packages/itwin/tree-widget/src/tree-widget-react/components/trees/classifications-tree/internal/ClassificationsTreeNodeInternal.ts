@@ -7,6 +7,7 @@ import { ClassificationsTreeNode } from "../ClassificationsTreeNode.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode, InstancesNodeKey, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { CategoryId, ElementId } from "../../common/internal/Types.js";
 
 /**
  * Contains utility functions for working with Classifications Tree nodes.
@@ -23,11 +24,15 @@ export namespace ClassificationsTreeNodeInternal {
   export const isGeometricElementNode = (
     node: Pick<HierarchyNode, "extendedData">,
   ): node is Omit<NonGroupingHierarchyNode, "extendedData"> & { key: InstancesNodeKey } & {
-    extendedData: {
-      modelId: Id64String;
-      categoryId: Id64String;
-      categoryOfTopMostParentElement: Id64String;
-      topMostParentElementId: Id64String;
-    };
+    extendedData: ElementNodeProps;
   } => ClassificationsTreeNode.isGeometricElementNode(node);
+}
+
+/**
+ * @internal
+ */
+export interface ElementNodeProps {
+  modelId: Id64String;
+  categoryId: Id64String;
+  parentElementsPath: Array<{ parentIds: Array<ElementId>; parentCategoryId: CategoryId }>;
 }
