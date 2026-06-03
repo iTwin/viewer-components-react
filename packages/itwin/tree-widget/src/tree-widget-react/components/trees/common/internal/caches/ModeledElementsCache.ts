@@ -6,6 +6,7 @@
 import { defer, map, mergeMap, reduce, shareReplay } from "rxjs";
 import { CLASS_NAME_Model } from "../ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
+import { getOrCreate } from "../Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
@@ -91,25 +92,13 @@ export class ModeledElementsCache {
     this.#modeledElementsInfo ??= this.queryModeledElements().pipe(
       reduce(
         (acc, { modelId, categoryId, modeledElementId, parentElements }) => {
-          let modelEntry = acc.modelWithCategoryModeledElements.get(modelId);
-          if (!modelEntry) {
-            modelEntry = new Map();
-            acc.modelWithCategoryModeledElements.set(modelId, modelEntry);
-          }
-          const categoryEntry = modelEntry.get(categoryId);
-          if (!categoryEntry) {
-            modelEntry.set(categoryId, new Set([modeledElementId]));
-          } else {
-            categoryEntry.add(modeledElementId);
-          }
+          const modelEntry = getOrCreate({ map: acc.modelWithCategoryModeledElements, key: modelId, createFunc: () => new Map<CategoryId, Set<ElementId>>() });
+          const categoryEntry = getOrCreate({ map: modelEntry, key: categoryId, createFunc: () => new Set<ElementId>() });
+          categoryEntry.add(modeledElementId);
           acc.allSubModels.add(modeledElementId);
           parentElements.forEach((parentElementId) => {
-            const entry = acc.childSubModels.get(parentElementId);
-            if (!entry) {
-              acc.childSubModels.set(parentElementId, new Set([modeledElementId]));
-            } else {
-              entry.add(modeledElementId);
-            }
+            const parentEntry = getOrCreate({ map: acc.childSubModels, key: parentElementId, createFunc: () => new Set<ElementId>() });
+            parentEntry.add(modeledElementId);
           });
           return acc;
         },

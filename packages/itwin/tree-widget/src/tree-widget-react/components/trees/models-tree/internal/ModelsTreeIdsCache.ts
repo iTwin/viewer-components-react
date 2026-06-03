@@ -14,7 +14,7 @@ import {
   CLASS_NAME_Subject,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
-import { fromWithRelease, pushToMap } from "../../common/internal/Utils.js";
+import { fromWithRelease, getOrCreate, pushToMap } from "../../common/internal/Utils.js";
 import { createGeometricElementInstanceKeyPaths } from "../ModelsTreeDefinition.js";
 
 import type { Observable } from "rxjs";
@@ -304,17 +304,17 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
   }
 
   public createUpToModelInstanceKeyPaths(modelId: Id64String): Observable<HierarchyNodeIdentifiersPath> {
-    let entry = this.#upToModelInstanceKeyPaths.get(modelId);
-    if (!entry) {
-      entry = this.getSubjectInfos().pipe(
-        mergeMap((subjectInfos) => subjectInfos.entries()),
-        filter(([_, subjectInfo]) => subjectInfo.childModelIds.has(modelId)),
-        mergeMap(([modelSubjectId]) => this.createSubjectInstanceKeysPath(modelSubjectId)),
-        shareReplay(),
-      );
-      this.#upToModelInstanceKeyPaths.set(modelId, entry);
-    }
-    return entry;
+    return getOrCreate({
+      map: this.#upToModelInstanceKeyPaths,
+      key: modelId,
+      createFunc: () =>
+        this.getSubjectInfos().pipe(
+          mergeMap((subjectInfos) => subjectInfos.entries()),
+          filter(([_, subjectInfo]) => subjectInfo.childModelIds.has(modelId)),
+          mergeMap(([modelSubjectId]) => this.createSubjectInstanceKeysPath(modelSubjectId)),
+          shareReplay(),
+        ),
+    });
   }
 
   public createCategoryInstanceKeyPaths({ categoryIds }: { categoryIds: Id64Array }): Observable<HierarchyNodeIdentifiersPath> {
@@ -322,12 +322,7 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
       mergeMap((id) => forkJoin({ id: of(id), subModels: this.getModels({ subModels: "only", categoryId: id, includeOnlyIfCategoryOfTopMostElement: true }) })),
       reduce((acc, { id, subModels }) => {
         for (const subModelId of subModels) {
-          const entry = acc.get(subModelId);
-          if (!entry) {
-            acc.set(subModelId, new Set([id]));
-            continue;
-          }
-          entry.add(id);
+          getOrCreate({ map: acc, key: subModelId, createFunc: () => new Set<CategoryId>() }).add(id);
         }
         return acc;
       }, new Map<ModelId, Set<CategoryId>>()),

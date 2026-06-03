@@ -5,6 +5,7 @@
 
 import { assert } from "@itwin/core-bentley";
 import { CLASS_NAME_Category, CLASS_NAME_GeometricElement3d, CLASS_NAME_Model, CLASS_NAME_Subject } from "../../../common/internal/ClassNameDefinitions.js";
+import { getOrCreate } from "../../../common/internal/Utils.js";
 import { createSearchResultsTree, SearchResultsNodesHandler } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
@@ -173,12 +174,8 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<void
         (searchTargets.modelIds ??= new Set()).add(node.id);
         return;
       case "category":
-        const categories = (searchTargets.categories ??= new Map()).get(node.modelId);
-        if (categories) {
-          categories.add(node.id);
-          return;
-        }
-        searchTargets.categories.set(node.modelId, new Set([node.id]));
+        const categories = getOrCreate({ map: (searchTargets.categories ??= new Map()), key: node.modelId, createFunc: () => new Set<CategoryId>() });
+        categories.add(node.id);
         return;
       case "element":
         // Internal search target elements need to have path saved in some way.
@@ -192,12 +189,7 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<void
             topMostParentElementId = node.pathToNode[i].id;
           }
           const identifierAsString = this.convertSearchResultsNodeIdentifierToString(node.pathToNode[i]);
-          let identifierEntry = entry.get(identifierAsString);
-          // create a new entry for parent node if it does not exist
-          if (!identifierEntry) {
-            identifierEntry = { topMostParentElementId };
-            entry.set(identifierAsString, identifierEntry);
-          }
+          const identifierEntry = getOrCreate({ map: entry, key: identifierAsString, createFunc: () => ({ topMostParentElementId }) });
           // last entry in the path don't need to have children
           if (i < node.pathToNode.length - 1) {
             identifierEntry.children ??= new Map();
@@ -206,12 +198,13 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<void
           }
 
           // Add elements who share the same path to the modelCategoryElements map
-          const elements = (identifierEntry.modelCategoryElements ??= new Map()).get(modelCategoryKey);
-          if (elements) {
-            elements.set(node.id, { isSearchTarget: node.isSearchTarget });
-          } else {
-            identifierEntry.modelCategoryElements.set(modelCategoryKey, new Map([[node.id, { isSearchTarget: node.isSearchTarget }]]));
-          }
+          identifierEntry.modelCategoryElements ??= new Map();
+          const elements = getOrCreate({
+            map: identifierEntry.modelCategoryElements,
+            key: modelCategoryKey,
+            createFunc: () => new Map<ElementId, { isSearchTarget: boolean }>(),
+          });
+          elements.set(node.id, { isSearchTarget: node.isSearchTarget });
         }
     }
   }

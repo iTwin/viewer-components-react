@@ -39,6 +39,7 @@ import {
   createIdsSelector,
   getClassesByView,
   getOptimalBatchSize,
+  getOrCreate,
   groupingNodeDataFromChildren,
   parseIdsSelectorResult,
   releaseMainThreadOnItemsCount,
@@ -162,15 +163,15 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         }
       >();
       for (const child of node.children) {
-        let modelEntry = modelElementsMap.get(child.extendedData?.modelId);
-        if (!modelEntry) {
-          modelEntry = {
+        const modelEntry = getOrCreate({
+          map: modelElementsMap,
+          key: child.extendedData?.modelId,
+          createFunc: () => ({
             elementIds: new Set(),
             categoryOfTopMostParentElement: child.extendedData?.categoryOfTopMostParentElement,
             childrenWhichAreParents: new Set<ElementId>(),
-          };
-          modelElementsMap.set(child.extendedData?.modelId, modelEntry);
-        }
+          }),
+        });
         assert(CategoriesTreeNode.isElementNode(child));
         const addId = child.children
           ? (id: Id64String) => {

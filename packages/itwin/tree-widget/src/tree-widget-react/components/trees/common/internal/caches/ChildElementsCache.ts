@@ -5,6 +5,7 @@
 
 import { defer, EMPTY, from, map, mergeMap, of } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
+import { getOrCreate } from "../Utils.js";
 import { BatchingCache } from "./BatchingCache.js";
 
 import type { Observable } from "rxjs";
@@ -113,21 +114,9 @@ export class ChildElementsCache extends BatchingCache<ChildElementsRequest, Id64
   protected getQueryData(batch: ChildElementsRequest[]): Observable<WhereClause> {
     const groupedValues = new Map<ModelId, Map<ElementId | undefined, Map<CategoryId | undefined, Set<CategoryId>>>>();
     for (const { modelId, parentElementId, categoryId, childCategoryIds } of batch) {
-      let modelEntry = groupedValues.get(modelId);
-      if (!modelEntry) {
-        modelEntry = new Map();
-        groupedValues.set(modelId, modelEntry);
-      }
-      let parentEntry = modelEntry.get(parentElementId);
-      if (!parentEntry) {
-        parentEntry = new Map();
-        modelEntry.set(parentElementId, parentEntry);
-      }
-      let categoryEntry = parentEntry.get(categoryId);
-      if (!categoryEntry) {
-        categoryEntry = new Set();
-        parentEntry.set(categoryId, categoryEntry);
-      }
+      const modelEntry = getOrCreate({ map: groupedValues, key: modelId, createFunc: () => new Map() });
+      const parentEntry = getOrCreate({ map: modelEntry, key: parentElementId, createFunc: () => new Map() });
+      const categoryEntry = getOrCreate({ map: parentEntry, key: categoryId, createFunc: () => new Set<CategoryId>() });
       for (const childCategoryId of childCategoryIds) {
         categoryEntry.add(childCategoryId);
       }
@@ -253,47 +242,18 @@ export class ChildElementsCache extends BatchingCache<ChildElementsRequest, Id64
   protected insertRow(row: Row): void {
     const reqParent = row.reqParent ?? undefined;
     const reqCategory = row.reqCategory ?? undefined;
-    let modelEntry = this.#cachedValues.get(row.modelId);
-    if (!modelEntry) {
-      modelEntry = new Map();
-      this.#cachedValues.set(row.modelId, modelEntry);
-    }
-    let parentEntry = modelEntry.get(reqParent);
-    if (!parentEntry) {
-      parentEntry = new Map();
-      modelEntry.set(reqParent, parentEntry);
-    }
-    let categoryEntry = parentEntry.get(reqCategory);
-    if (!categoryEntry) {
-      categoryEntry = new Map();
-      parentEntry.set(reqCategory, categoryEntry);
-    }
-
-    let ids = categoryEntry.get(row.ownCategory);
-    if (!ids) {
-      ids = [];
-      categoryEntry.set(row.ownCategory, ids);
-    }
+    const modelEntry = getOrCreate({ map: this.#cachedValues, key: row.modelId, createFunc: () => new Map() });
+    const parentEntry = getOrCreate({ map: modelEntry, key: reqParent, createFunc: () => new Map() });
+    const categoryEntry = getOrCreate({ map: parentEntry, key: reqCategory, createFunc: () => new Map() });
+    const ids = getOrCreate({ map: categoryEntry, key: row.ownCategory, createFunc: () => new Array<Id64String>() });
     ids.push(row.id);
   }
 
   protected ensureDefaultCacheEntries(batch: ChildElementsRequest[]): void {
     for (const { modelId, categoryId, parentElementId, childCategoryIds } of batch) {
-      let modelEntry = this.#cachedValues.get(modelId);
-      if (!modelEntry) {
-        modelEntry = new Map();
-        this.#cachedValues.set(modelId, modelEntry);
-      }
-      let parentEntry = modelEntry.get(parentElementId);
-      if (!parentEntry) {
-        parentEntry = new Map();
-        modelEntry.set(parentElementId, parentEntry);
-      }
-      let categoryEntry = parentEntry.get(categoryId);
-      if (!categoryEntry) {
-        categoryEntry = new Map();
-        parentEntry.set(categoryId, categoryEntry);
-      }
+      const modelEntry = getOrCreate({ map: this.#cachedValues, key: modelId, createFunc: () => new Map() });
+      const parentEntry = getOrCreate({ map: modelEntry, key: parentElementId, createFunc: () => new Map() });
+      const categoryEntry = getOrCreate({ map: parentEntry, key: categoryId, createFunc: () => new Map() });
       for (const childCategoryId of childCategoryIds) {
         if (!categoryEntry.has(childCategoryId)) {
           categoryEntry.set(childCategoryId, []);

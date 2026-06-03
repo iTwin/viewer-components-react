@@ -6,6 +6,7 @@
 import { firstValueFrom } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable, CLASS_NAME_GeometricElement3d } from "../../../common/internal/ClassNameDefinitions.js";
+import { getOrCreate } from "../../../common/internal/Utils.js";
 import { createSearchResultsTree, SearchResultsNodesHandler } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
@@ -235,12 +236,7 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
         topMostParentElementId = node.pathToNode[i].id;
       }
       const identifierAsString = this.convertSearchResultsNodeIdentifierToString(node.pathToNode[i]);
-      let identifierEntry = entry.get(identifierAsString);
-      // create a new entry for parent node if it does not exist
-      if (!identifierEntry) {
-        identifierEntry = { topMostParentElementId };
-        entry.set(identifierAsString, identifierEntry);
-      }
+      const identifierEntry = getOrCreate({ map: entry, key: identifierAsString, createFunc: () => ({ topMostParentElementId }) });
       // last entry in the path don't need to have children
       if (i < node.pathToNode.length - 1) {
         identifierEntry.children ??= new Map();
@@ -248,16 +244,17 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
         continue;
       }
 
-      const elements = (identifierEntry.modelCategoryElements ??= new Map()).get(modelCategoryKey);
-      // Add elements who share the same path to the modelCategoryElements map
-      if (elements) {
-        elements.set(node.id, { isSearchTarget: node.isSearchTarget });
-      } else {
-        identifierEntry.modelCategoryElements.set(modelCategoryKey, {
-          elementsMap: new Map([[node.id, { isSearchTarget: node.isSearchTarget }]]),
+      identifierEntry.modelCategoryElements ??= new Map();
+      const elements = getOrCreate({
+        key: modelCategoryKey,
+        map: identifierEntry.modelCategoryElements,
+        createFunc: () => ({
+          elementsMap: new Map<ElementId, { isSearchTarget: boolean }>(),
           categoryOfTopMostParentElement: node.categoryOfTopMostParentElement,
-        });
-      }
+        }),
+      });
+      // Add elements who share the same path to the modelCategoryElements map
+      elements.elementsMap.set(node.id, { isSearchTarget: node.isSearchTarget });
     }
   }
 

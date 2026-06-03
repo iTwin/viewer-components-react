@@ -7,6 +7,7 @@ import { defer, EMPTY, expand, map, reduce, shareReplay } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
 import { CLASS_NAME_SubCategory } from "../ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
+import { getOrCreate } from "../Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64String } from "@itwin/core-bentley";
@@ -79,12 +80,8 @@ export class SubCategoriesCache {
         reduce(
           (acc, queriedSubCategory) => {
             acc.subCategoryCategories.set(queriedSubCategory.id, queriedSubCategory.parentId);
-            const entry = acc.categorySubCategories.get(queriedSubCategory.parentId);
-            if (entry) {
-              entry.push(queriedSubCategory.id);
-            } else {
-              acc.categorySubCategories.set(queriedSubCategory.parentId, [queriedSubCategory.id]);
-            }
+            const entry = getOrCreate({ map: acc.categorySubCategories, key: queriedSubCategory.parentId, createFunc: () => new Array<SubCategoryId>() });
+            entry.push(queriedSubCategory.id);
             return acc;
           },
           { subCategoryCategories: new Map<SubCategoryId, CategoryId>(), categorySubCategories: new Map<CategoryId, Array<SubCategoryId>>() },

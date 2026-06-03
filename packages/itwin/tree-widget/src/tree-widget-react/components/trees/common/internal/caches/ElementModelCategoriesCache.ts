@@ -6,7 +6,7 @@
 import { defer, forkJoin, from, map, mergeMap, reduce, shareReplay } from "rxjs";
 import { CLASS_NAME_Model } from "../ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
-import { releaseMainThreadOnItemsCount } from "../Utils.js";
+import { getOrCreate, releaseMainThreadOnItemsCount } from "../Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -83,11 +83,11 @@ export class ElementModelCategoriesCache {
       modelCategories: this.queryElementModelCategories().pipe(
         reduce(
           (acc, queriedCategory) => {
-            let modelEntry = acc.modelsCategoriesInfo.get(queriedCategory.modelId);
-            if (modelEntry === undefined) {
-              modelEntry = { categoriesOfTopMostElements: new Set(), allCategories: new Set() };
-              acc.modelsCategoriesInfo.set(queriedCategory.modelId, modelEntry);
-            }
+            const modelEntry = getOrCreate({
+              map: acc.modelsCategoriesInfo,
+              key: queriedCategory.modelId,
+              createFunc: () => ({ categoriesOfTopMostElements: new Set<string>(), allCategories: new Set<string>() }),
+            });
             modelEntry.allCategories.add(queriedCategory.categoryId);
             if (queriedCategory.isTopMostElementCategory) {
               modelEntry.categoriesOfTopMostElements.add(queriedCategory.categoryId);
