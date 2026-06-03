@@ -322,7 +322,8 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
       mergeMap((id) => forkJoin({ id: of(id), subModels: this.getModels({ subModels: "only", categoryId: id, includeOnlyIfCategoryOfTopMostElement: true }) })),
       reduce((acc, { id, subModels }) => {
         for (const subModelId of subModels) {
-          getOrCreate({ map: acc, key: subModelId, createFunc: () => new Set<CategoryId>() }).add(id);
+          const entry = getOrCreate({ map: acc, key: subModelId, createFunc: () => new Set<CategoryId>() });
+          entry.add(id);
         }
         return acc;
       }, new Map<ModelId, Set<CategoryId>>()),
