@@ -262,12 +262,12 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
         return;
       case "subCategory":
         searchTargets.subCategories ??= new Map();
-        const subCategories = getOrCreate({ map: searchTargets.subCategories, key: node.categoryId, createFunc: () => new Set<string>() });
+        const subCategories = getOrCreate({ map: searchTargets.subCategories, key: node.categoryId, createFunc: () => new Set<SubCategoryId>() });
         subCategories.add(node.id);
         return;
       case "category":
         searchTargets.categories ??= new Map();
-        const categories = getOrCreate({ map: searchTargets.categories, key: node.modelId, createFunc: () => new Set<string>() });
+        const categories = getOrCreate({ map: searchTargets.categories, key: node.modelId, createFunc: () => new Set<CategoryId>() });
         categories.add(node.id);
         return;
       case "element":

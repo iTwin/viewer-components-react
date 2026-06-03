@@ -265,9 +265,10 @@ export function getParentElementsIdsPath({
   return [];
 }
 
+/** @internal */
 export function getOrCreate<TKey, TValue>({ map, key, createFunc }: { map: Map<TKey, TValue>; key: TKey; createFunc: () => TValue }): TValue {
   let entry = map.get(key);
-  if (!entry) {
+  if (entry === undefined) {
     entry = createFunc();
     map.set(key, entry);
   }

@@ -156,7 +156,7 @@ async function getCategoriesFromPaths(
 
     if (identifier.className === CLASS_NAME_SubCategory) {
       assert(!!parent);
-      const entry = getOrCreate({ map: categories, key: parent.id, createFunc: () => [] as string[] });
+      const entry = getOrCreate({ map: categories, key: parent.id, createFunc: () => new Array<SubCategoryId>() });
       entry.push(identifier.id);
       return;
     }
