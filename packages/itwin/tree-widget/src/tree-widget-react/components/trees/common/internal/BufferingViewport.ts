@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Id64 } from "@itwin/core-bentley";
+import { getOrCreate } from "./Utils.js";
 
 import type { BeEvent, Id64Arg, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -157,11 +158,7 @@ export class BufferingViewport implements TreeWidgetViewport {
 
   public setPerModelCategoryOverride(props: { modelIds: Id64Arg; categoryIds: Id64Arg; override: PerModelCategoryOverride }): void {
     for (const modelId of Id64.iterable(props.modelIds)) {
-      let modelEntry = this.#changedPerModelCategoryOverrides.get(modelId);
-      if (!modelEntry) {
-        modelEntry = new Map();
-        this.#changedPerModelCategoryOverrides.set(modelId, modelEntry);
-      }
+      const modelEntry = getOrCreate({ map: this.#changedPerModelCategoryOverrides, key: modelId, createFunc: () => new Map() });
       for (const categoryId of Id64.iterable(props.categoryIds)) {
         modelEntry.set(categoryId, props.override);
       }

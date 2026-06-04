@@ -8,7 +8,7 @@ import { Guid, Id64 } from "@itwin/core-bentley";
 import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
-import { fromWithRelease, getClassesByView } from "../../common/internal/Utils.js";
+import { fromWithRelease, getClassesByView, getOrCreate } from "../../common/internal/Utils.js";
 import { createGeometricElementInstanceKeyPaths } from "../CategoriesTreeDefinition.js";
 
 import type { Observable } from "rxjs";
@@ -262,11 +262,14 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
     this.#modelsCategoriesInfo ??= this.queryCategories()
       .pipe(
         reduce((acc, queriedCategory) => {
-          let modelCategories = acc.get(queriedCategory.modelId);
-          if (modelCategories === undefined) {
-            modelCategories = { parentDefinitionContainerExists: queriedCategory.parentDefinitionContainerExists, childCategories: [] };
-            acc.set(queriedCategory.modelId, modelCategories);
-          }
+          const modelCategories = getOrCreate({
+            map: acc,
+            key: queriedCategory.modelId,
+            createFunc: () => ({
+              parentDefinitionContainerExists: queriedCategory.parentDefinitionContainerExists,
+              childCategories: [] as { id: string; subCategoryChildCount: number; hasElements: boolean }[],
+            }),
+          });
           modelCategories.childCategories.push({
             id: queriedCategory.id,
             subCategoryChildCount: queriedCategory.subCategoryChildCount,
@@ -463,11 +466,7 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
           ),
           reduce((acc, { id, subModels }) => {
             for (const subModelId of subModels) {
-              const entry = acc.get(subModelId);
-              if (!entry) {
-                acc.set(subModelId, new Set([id]));
-                continue;
-              }
+              const entry = getOrCreate({ map: acc, key: subModelId, createFunc: () => new Set<CategoryId>() });
               entry.add(id);
             }
             return acc;

@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { BeEvent, Id64 } from "@itwin/core-bentley";
+import { getOrCreate } from "../../tree-widget-react/components/trees/common/internal/Utils.js";
 
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
 import type { NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
@@ -138,11 +139,7 @@ export function createTreeWidgetTestingViewport({
     },
     setPerModelCategoryOverride: (props) => {
       for (const modelId of Id64.iterable(props.modelIds)) {
-        let entry = perModelCategoryOverrides.get(modelId);
-        if (!entry) {
-          entry = new Map();
-          perModelCategoryOverrides.set(modelId, entry);
-        }
+        const entry = getOrCreate({ map: perModelCategoryOverrides, key: modelId, createFunc: () => new Map() });
         for (const categoryId of Id64.iterable(props.categoryIds)) {
           entry.set(categoryId, { override: props.override });
         }

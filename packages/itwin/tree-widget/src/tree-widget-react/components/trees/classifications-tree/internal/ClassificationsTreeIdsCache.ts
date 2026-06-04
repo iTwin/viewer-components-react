@@ -16,7 +16,7 @@ import {
   CLASS_NAME_SpatialCategory,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
-import { fromWithRelease } from "../../common/internal/Utils.js";
+import { fromWithRelease, getOrCreate } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
@@ -176,19 +176,18 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
     this.#classificationInfos ??= this.queryClassifications().pipe(
       reduce((acc, { id, tableId, parentId, relatedCategories }) => {
         const tableOrParentId = tableId ?? parentId;
-        let parentInfo = acc.get(tableOrParentId);
-        if (!parentInfo) {
-          parentInfo = { childClassificationIds: [], relatedCategories: [], parentClassificationOrTableId: undefined };
-          acc.set(tableOrParentId, parentInfo);
-        }
+        const parentInfo = getOrCreate({
+          map: acc,
+          key: tableOrParentId,
+          createFunc: () => ({ childClassificationIds: [], relatedCategories: [], parentClassificationOrTableId: undefined }),
+        });
         parentInfo.childClassificationIds.push(id);
-        let classificationEntry = acc.get(id);
-        if (!classificationEntry) {
-          classificationEntry = { childClassificationIds: [], relatedCategories, parentClassificationOrTableId: tableOrParentId };
-          acc.set(id, classificationEntry);
-        } else {
-          classificationEntry.parentClassificationOrTableId = tableOrParentId;
-        }
+        const classificationEntry = getOrCreate({
+          map: acc,
+          key: id,
+          createFunc: () => ({ childClassificationIds: [], relatedCategories, parentClassificationOrTableId: tableOrParentId }),
+        });
+        classificationEntry.parentClassificationOrTableId = tableOrParentId;
         return acc;
       }, new Map<ClassificationId | ClassificationTableId, ClassificationInfo>()),
       shareReplay(),

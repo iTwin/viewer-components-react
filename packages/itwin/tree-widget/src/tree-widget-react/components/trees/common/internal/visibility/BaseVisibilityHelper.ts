@@ -29,7 +29,7 @@ import {
 import { assert, Id64 } from "@itwin/core-bentley";
 import { subscribeAll } from "../Rxjs.js";
 import { createVisibilityStatus } from "../Tooltip.js";
-import { countInSet, fromWithRelease, releaseMainThreadOnItemsCount, setDifference } from "../Utils.js";
+import { countInSet, fromWithRelease, getOrCreate, releaseMainThreadOnItemsCount, setDifference } from "../Utils.js";
 import { changeElementStateNoChildrenOperator, getCategoryVisibilityFromAlwaysAndNeverDrawnElementsImpl, mergeVisibilityStatuses } from "../VisibilityUtils.js";
 
 import type { Observable, Subscription } from "rxjs";
@@ -628,11 +628,7 @@ export class BaseVisibilityHelper implements Disposable {
         mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), models: this.#props.baseIdsCache.getModels({ categoryId, subModels: "include" }) })),
         reduce((acc, { models, categoryId }) => {
           for (const modelId of Id64.iterable(models)) {
-            let entry = acc.get(modelId);
-            if (!entry) {
-              entry = new Set();
-              acc.set(modelId, entry);
-            }
+            const entry = getOrCreate({ map: acc, key: modelId, createFunc: () => new Set<CategoryId>() });
             entry.add(categoryId);
           }
           return acc;
