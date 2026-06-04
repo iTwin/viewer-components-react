@@ -14,6 +14,7 @@ import { Spinner } from "@stratakit/bricks";
 import { Delayed } from "../components/Delayed.js";
 import { useTranslation } from "../components/LocalizationContext.js";
 import { useTelemetryContext } from "../UseTelemetryContext.js";
+import { getOrCreate } from "./Utils.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -166,11 +167,7 @@ async function countInstanceKeys(iterator: AsyncIterableIterator<InstanceKey>) {
 async function collectInstanceKeys(iterator: AsyncIterableIterator<InstanceKey>) {
   const idsByClassName = new Map<Id64String, Id64Array>();
   for await (const { className, id } of iterator) {
-    let idSet = idsByClassName.get(className);
-    if (!idSet) {
-      idSet = [];
-      idsByClassName.set(className, idSet);
-    }
+    const idSet = getOrCreate({ map: idsByClassName, key: className, createFunc: () => new Array<Id64String>() });
     idSet.push(id);
   }
 

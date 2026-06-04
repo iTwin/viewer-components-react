@@ -624,11 +624,7 @@ export class BaseVisibilityHelper implements Disposable {
         mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), models: this.#props.baseIdsCache.getModels({ categoryId, subModels: "include" }) })),
         reduce((acc, { models, categoryId }) => {
           for (const modelId of Id64.iterable(models)) {
-            let entry = acc.get(modelId);
-            if (!entry) {
-              entry = new Set();
-              acc.set(modelId, entry);
-            }
+            const entry = getOrCreate({ map: acc, key: modelId, createFunc: () => new Set<CategoryId>() });
             entry.add(categoryId);
           }
           return acc;

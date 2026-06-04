@@ -5,6 +5,7 @@
 
 import { defer, EMPTY, from, map, merge, mergeMap } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
+import { getOrCreate } from "../Utils.js";
 import { BatchingCache } from "./BatchingCache.js";
 
 import type { Observable } from "rxjs";
@@ -82,25 +83,13 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
     const groupedElementValues = new Map<ModelId, Set<ElementId>>();
     for (const batchEntry of batch) {
       if (batchEntry.categoryId === undefined) {
-        let groupedElementsModelEntry = groupedElementValues.get(batchEntry.modelId);
-        if (!groupedElementsModelEntry) {
-          groupedElementsModelEntry = new Set();
-          groupedElementValues.set(batchEntry.modelId, groupedElementsModelEntry);
-        }
+        const groupedElementsModelEntry = getOrCreate({ map: groupedElementValues, key: batchEntry.modelId, createFunc: () => new Set<ElementId>() });
         groupedElementsModelEntry.add(batchEntry.parentElementId);
         continue;
       }
       const { modelId, parentElementId, categoryId } = batchEntry;
-      let modelEntry = groupedCategoryValues.get(modelId);
-      if (!modelEntry) {
-        modelEntry = new Map();
-        groupedCategoryValues.set(modelId, modelEntry);
-      }
-      let parentEntry = modelEntry.get(parentElementId);
-      if (!parentEntry) {
-        parentEntry = new Set();
-        modelEntry.set(parentElementId, parentEntry);
-      }
+      const modelEntry = getOrCreate({ map: groupedCategoryValues, key: modelId, createFunc: () => new Map<ElementId | undefined, Set<CategoryId>>() });
+      const parentEntry = getOrCreate({ map: modelEntry, key: parentElementId, createFunc: () => new Set<CategoryId>() });
       parentEntry.add(categoryId);
     }
     return merge(
@@ -196,36 +185,16 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
   protected insertRow(row: Row): void {
     const reqParent = row.reqParent ?? undefined;
     const reqCategory = row.reqCategory ?? undefined;
-    let modelEntry = this.#cachedValues.get(row.modelId);
-    if (!modelEntry) {
-      modelEntry = new Map();
-      this.#cachedValues.set(row.modelId, modelEntry);
-    }
-    let parentEntry = modelEntry.get(reqParent);
-    if (!parentEntry) {
-      parentEntry = new Map();
-      modelEntry.set(reqParent, parentEntry);
-    }
-    let categoryEntry = parentEntry.get(reqCategory);
-    if (!categoryEntry) {
-      categoryEntry = [];
-      parentEntry.set(reqCategory, categoryEntry);
-    }
+    const modelEntry = getOrCreate({ map: this.#cachedValues, key: row.modelId, createFunc: () => new Map() });
+    const parentEntry = getOrCreate({ map: modelEntry, key: reqParent, createFunc: () => new Map() });
+    const categoryEntry = getOrCreate({ map: parentEntry, key: reqCategory, createFunc: () => new Array<{ categoryId: CategoryId; count: number }>() });
     categoryEntry.push({ categoryId: row.ownCategory, count: row.cnt });
   }
 
   protected ensureDefaultCacheEntries(batch: DescendantsCountRequest[]): void {
     for (const { modelId, categoryId, parentElementId } of batch) {
-      let modelEntry = this.#cachedValues.get(modelId);
-      if (!modelEntry) {
-        modelEntry = new Map();
-        this.#cachedValues.set(modelId, modelEntry);
-      }
-      let parentEntry = modelEntry.get(parentElementId);
-      if (!parentEntry) {
-        parentEntry = new Map();
-        modelEntry.set(parentElementId, parentEntry);
-      }
+      const modelEntry = getOrCreate({ map: this.#cachedValues, key: modelId, createFunc: () => new Map() });
+      const parentEntry = getOrCreate({ map: modelEntry, key: parentElementId, createFunc: () => new Map() });
       if (!parentEntry.has(categoryId)) {
         parentEntry.set(categoryId, categoryId === undefined ? [] : [{ categoryId, count: 0 }]);
       }

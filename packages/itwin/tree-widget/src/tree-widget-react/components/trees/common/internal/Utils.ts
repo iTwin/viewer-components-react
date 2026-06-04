@@ -96,11 +96,7 @@ export function parseIdsSelectorResult(selectorResult: any): Id64Array {
 
 /** @internal */
 export function pushToMap<TKey, TValue>(targetMap: Map<TKey, Set<TValue>>, key: TKey, value: TValue) {
-  let set = targetMap.get(key);
-  if (!set) {
-    set = new Set();
-    targetMap.set(key, set);
-  }
+  const set = getOrCreate({ map: targetMap, key, createFunc: () => new Set<TValue>() });
   set.add(value);
 }
 
@@ -286,4 +282,14 @@ function getId64Array(ids: Id64Arg): Id64Array {
 /** @internal */
 export function getId64Spreadable(ids: Id64Arg): Id64Array | Id64Set {
   return typeof ids === "string" ? [ids] : ids;
+}
+
+/** @internal */
+export function getOrCreate<TKey, TValue>({ map, key, createFunc }: { map: Map<TKey, TValue>; key: TKey; createFunc: () => TValue }): TValue {
+  let entry = map.get(key);
+  if (entry === undefined) {
+    entry = createFunc();
+    map.set(key, entry);
+  }
+  return entry;
 }

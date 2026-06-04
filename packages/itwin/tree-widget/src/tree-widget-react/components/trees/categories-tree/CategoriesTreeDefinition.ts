@@ -24,7 +24,7 @@ import {
   toArray,
 } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
-import { createPredicateBasedHierarchyDefinition, HierarchyNode, ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
+import { createPredicateBasedHierarchyDefinition, ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { eachValueFrom } from "../../utils/EachValueFrom.js";
 import {
@@ -230,14 +230,14 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
 
     const { hasSearchTargetAncestor, hasDirectNonSearchTargets } = groupingNodeDataFromChildren(node.children);
     const firstChild = node.children[0];
-    assert(HierarchyNode.isInstancesNode(firstChild));
+    assert(CategoriesTreeNodeInternal.isRawCategoryNode(firstChild));
     return {
       ...node,
       label: node.label,
       extendedData: {
         ...node.extendedData,
         // add `categoryId` from the first grouped element
-        categoryId: firstChild.extendedData?.categoryId,
+        categoryId: firstChild.extendedData.categoryId,
         modelElementsMap,
         ...(hasDirectNonSearchTargets ? { hasDirectNonSearchTargets } : {}),
         ...(hasSearchTargetAncestor ? { hasSearchTargetAncestor } : {}),
