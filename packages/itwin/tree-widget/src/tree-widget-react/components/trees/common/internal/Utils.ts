@@ -283,13 +283,3 @@ function getId64Array(ids: Id64Arg): Id64Array {
 export function getId64Spreadable(ids: Id64Arg): Id64Array | Id64Set {
   return typeof ids === "string" ? [ids] : ids;
 }
-
-/** @internal */
-export function getOrCreate<TKey, TValue>({ map, key, createFunc }: { map: Map<TKey, TValue>; key: TKey; createFunc: () => TValue }): TValue {
-  let entry = map.get(key);
-  if (entry === undefined) {
-    entry = createFunc();
-    map.set(key, entry);
-  }
-  return entry;
-}
