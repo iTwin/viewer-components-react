@@ -45,8 +45,6 @@ export interface BaseSearchResultsTreeNode<TSearchResultsTreeNode extends BaseSe
   id: Id64String;
   children?: SearchResultsTreeNodeChildren<TSearchResultsTreeNode>;
   isSearchTarget: boolean;
-  /** Represents the path from the root to this node. It depends on the hierarchy structure. */
-  pathToNode: Array<SearchResultsNodeIdentifier>;
 }
 
 /**
@@ -61,19 +59,20 @@ export abstract class SearchResultsNodesHandler<
   TProcessedSearchResultsNodes,
   TSearchTargets,
   TSearchResultsTreeNode extends BaseSearchResultsTreeNode<TSearchResultsTreeNode>,
+  TTemporarySearchResultsTreeNode extends BaseSearchResultsTreeNode<TTemporarySearchResultsTreeNode>,
 > {
-  public readonly root: SearchResultsTreeRootNode<TSearchResultsTreeNode> = {
+  public readonly root: SearchResultsTreeRootNode<TTemporarySearchResultsTreeNode> = {
     children: new Map(),
   };
-  public readonly searchResultsNodesArr = new Array<TSearchResultsTreeNode>();
+  public readonly searchResultsNodesArr = new Array<TTemporarySearchResultsTreeNode>();
 
   /** Returns search results tree node type based on its' className */
-  public abstract getType(className: EC.FullClassName): Promise<TSearchResultsTreeNode["type"]>;
+  public abstract getType(className: EC.FullClassName): Promise<TTemporarySearchResultsTreeNode["type"]>;
   /** Returns search results tree node className based on its' type */
-  public abstract getClassName(type: TSearchResultsTreeNode["type"]): EC.FullClassName;
+  public abstract getClassName(type: TTemporarySearchResultsTreeNode["type"]): EC.FullClassName;
   /** Converts nodes to search targets */
   public abstract convertNodesToSearchTargets(
-    searchResultsNodes: TSearchResultsTreeNode[],
+    searchResultsNodes: TTemporarySearchResultsTreeNode[],
     processedSearchResultsNodes: TProcessedSearchResultsNodes,
   ): TSearchTargets | undefined;
   /**
@@ -84,19 +83,19 @@ export abstract class SearchResultsNodesHandler<
    *
    * E.g. Retrieving categoryId of elements can't be done using search paths.
    */
-  public abstract getProcessedSearchResultsNodes(): Promise<TProcessedSearchResultsNodes>;
-  /** Creates search results nodes  */
-  public abstract createSearchResultsTreeNode(props: {
-    type: TSearchResultsTreeNode["type"];
+  public abstract getProcessedNodes(): Promise<TProcessedSearchResultsNodes>;
+  /** Creates temporary search results nodes  */
+  public abstract createTemporaryNode(props: {
+    type: TTemporarySearchResultsTreeNode["type"];
     id: Id64String;
     isSearchTarget: boolean;
-    parent: TSearchResultsTreeNode | SearchResultsTreeRootNode<TSearchResultsTreeNode>;
-  }): TSearchResultsTreeNode;
+    parent: TTemporarySearchResultsTreeNode | SearchResultsTreeRootNode<TTemporarySearchResultsTreeNode>;
+  }): TTemporarySearchResultsTreeNode;
 
   public async processSearchResultsNodes(): Promise<{
     getNodeSearchTargets: (node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) => TSearchTargets | undefined;
   }> {
-    const processedSearchResultsNodes = await this.getProcessedSearchResultsNodes();
+    const processedSearchResultsNodes = await this.getProcessedNodes();
     return {
       getNodeSearchTargets: (node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) =>
         this.getNodeSearchTargets(node, processedSearchResultsNodes),
@@ -117,13 +116,13 @@ export abstract class SearchResultsNodesHandler<
   /** Takes a new node and adds it to the tree structure. */
   public async accept(props: {
     instanceKey: InstanceKey;
-    parentNode: TSearchResultsTreeNode | SearchResultsTreeRootNode<TSearchResultsTreeNode>;
+    parentNode: TTemporarySearchResultsTreeNode | SearchResultsTreeRootNode<TTemporarySearchResultsTreeNode>;
     isSearchTarget: boolean;
-  }): Promise<TSearchResultsTreeNode> {
+  }): Promise<TTemporarySearchResultsTreeNode> {
     const { instanceKey, parentNode, isSearchTarget } = props;
     const type = await this.getType(instanceKey.className);
 
-    const newNode = this.createSearchResultsTreeNode({
+    const newNode = this.createTemporaryNode({
       type,
       id: instanceKey.id,
       isSearchTarget,
@@ -139,7 +138,7 @@ export abstract class SearchResultsNodesHandler<
     node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey },
     processedSearchResultsNodes: TProcessedSearchResultsNodes,
   ): TSearchTargets | undefined {
-    let lookupParents: Array<SearchResultsTreeRootNode<TSearchResultsTreeNode> | TSearchResultsTreeNode> = [this.root];
+    let lookupParents: Array<SearchResultsTreeRootNode<TTemporarySearchResultsTreeNode> | TTemporarySearchResultsTreeNode> = [this.root];
 
     // find the search results parent nodes of the `node`
     for (const parentKey of node.parentKeys) {
@@ -170,9 +169,12 @@ export abstract class SearchResultsNodesHandler<
   }
 
   /** Finds search results nodes that match the given keys. */
-  private findMatchingSearchResultsNodes(lookupParents: Array<SearchResultsTreeRootNode<TSearchResultsTreeNode> | TSearchResultsTreeNode>, ids: Id64Arg) {
+  private findMatchingSearchResultsNodes(
+    lookupParents: Array<SearchResultsTreeRootNode<TTemporarySearchResultsTreeNode> | TTemporarySearchResultsTreeNode>,
+    ids: Id64Arg,
+  ) {
     return lookupParents.flatMap((lookup) => {
-      const childrenArray = Array<TSearchResultsTreeNode>();
+      const childrenArray = Array<TTemporarySearchResultsTreeNode>();
       for (const id of Id64.iterable(ids)) {
         const node = lookup.children?.get(id);
         if (node) {
@@ -194,8 +196,9 @@ export interface CreateSearchResultsTreeProps<
   TProcessedSearchResultsNodes,
   TSearchTargets,
   TSearchResultsTreeNode extends BaseSearchResultsTreeNode<TSearchResultsTreeNode>,
+  TTemporarySearchResultsTreeNode extends BaseSearchResultsTreeNode<TTemporarySearchResultsTreeNode>,
 > {
-  searchResultsNodesHandler: SearchResultsNodesHandler<TProcessedSearchResultsNodes, TSearchTargets, TSearchResultsTreeNode>;
+  searchResultsNodesHandler: SearchResultsNodesHandler<TProcessedSearchResultsNodes, TSearchTargets, TSearchResultsTreeNode, TTemporarySearchResultsTreeNode>;
   searchPaths: HierarchySearchTree[];
 }
 
@@ -207,12 +210,15 @@ export async function createSearchResultsTree<
   TProcessedSearchResultsNodes,
   TSearchTargets,
   TSearchResultsTreeNode extends BaseSearchResultsTreeNode<TSearchResultsTreeNode>,
->(props: CreateSearchResultsTreeProps<TProcessedSearchResultsNodes, TSearchTargets, TSearchResultsTreeNode>): Promise<SearchResultsTree<TSearchTargets>> {
+  TTemporarySearchResultsTreeNode extends BaseSearchResultsTreeNode<TTemporarySearchResultsTreeNode>,
+>(
+  props: CreateSearchResultsTreeProps<TProcessedSearchResultsNodes, TSearchTargets, TSearchResultsTreeNode, TTemporarySearchResultsTreeNode>,
+): Promise<SearchResultsTree<TSearchTargets>> {
   const { searchPaths, searchResultsNodesHandler } = props;
 
   async function traverseTree(
     tree: HierarchySearchTree,
-    parentNode: SearchResultsTreeRootNode<TSearchResultsTreeNode> | TSearchResultsTreeNode,
+    parentNode: SearchResultsTreeRootNode<TTemporarySearchResultsTreeNode> | TTemporarySearchResultsTreeNode,
   ): Promise<void> {
     // If parent is already a search target, skip deeper nodes - we want to load all children for them.
     if ("type" in parentNode && "isSearchTarget" in parentNode && parentNode.isSearchTarget) {

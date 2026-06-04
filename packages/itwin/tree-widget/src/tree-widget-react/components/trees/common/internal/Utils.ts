@@ -17,9 +17,8 @@ import {
 } from "./ClassNameDefinitions.js";
 
 import type { Observable } from "rxjs";
-import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
-import type { InstanceKey } from "@itwin/presentation-shared";
-import type { ElementId } from "./Types.js";
+import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { CategoryId, ElementId } from "./Types.js";
 
 /** @internal */
 export function setDifference<T>(lhs: ReadonlySet<T>, rhs: ReadonlySet<T>): Set<T> {
@@ -251,20 +250,40 @@ export function groupingNodeDataFromChildren(children: ProcessedHierarchyNode[])
 }
 
 /** @internal */
-export function getParentElementsIdsPath({
-  parentInstanceKeys,
-  topMostParentElementId,
-}: {
-  parentInstanceKeys: Array<Array<InstanceKey>>;
-  topMostParentElementId: ElementId;
-}): Array<Id64Arg> {
-  for (let i = 0; i < parentInstanceKeys.length; ++i) {
-    const instanceKeys = parentInstanceKeys[i];
-    for (const instanceKey of instanceKeys) {
-      if (instanceKey.id === topMostParentElementId) {
-        return parentInstanceKeys.slice(i).map((keys) => keys.map((key) => key.id));
-      }
-    }
+export type ParentElementsPath = Array<{ parentIds: Array<ElementId>; parentCategoryId: CategoryId }>;
+
+/** @internal */
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export namespace ParentElementsPath {
+  export function getSingleLastParentId(path: ParentElementsPath): ElementId | undefined {
+    const lastParentIds = ParentElementsPath.getLastParentIds(path);
+    assert(lastParentIds === undefined || lastParentIds.length === 1);
+    const lastParentId = lastParentIds ? lastParentIds[0] : undefined;
+    return lastParentId;
   }
-  return [];
+  export function getLastParentIds(path: ParentElementsPath): Id64Array | undefined {
+    return path.length > 0 ? path[path.length - 1].parentIds : undefined;
+  }
+  export function appendToPath({ path, ids, categoryId }: { path: ParentElementsPath; ids: Id64Arg; categoryId: CategoryId }): ParentElementsPath {
+    return [...path, { parentIds: getId64Array(ids), parentCategoryId: categoryId }];
+  }
+}
+
+/** @internal */
+export function getOrCreate<TKey, TValue>({ map, key, createFunc }: { map: Map<TKey, TValue>; key: TKey; createFunc: () => TValue }): TValue {
+  let entry = map.get(key);
+  if (entry === undefined) {
+    entry = createFunc();
+    map.set(key, entry);
+  }
+  return entry;
+}
+
+function getId64Array(ids: Id64Arg): Id64Array {
+  return typeof ids === "string" ? [ids] : Array.isArray(ids) ? ids : [...ids];
+}
+
+/** @internal */
+export function getId64Spreadable(ids: Id64Arg): Id64Array | Id64Set {
+  return typeof ids === "string" ? [ids] : ids;
 }

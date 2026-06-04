@@ -12,7 +12,7 @@ import { ModeledElementsCache } from "./ModeledElementsCache.js";
 import { SubCategoriesCache } from "./SubCategoriesCache.js";
 
 import type { Observable } from "rxjs";
-import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { Props } from "@itwin/presentation-shared";
 
@@ -64,7 +64,6 @@ export class BaseIdsCache {
   }
 
   // Implement get sub-models method
-
   public getSubModels(
     props: { modelId: Id64String; categoryId?: Id64String } | { categoryId: Id64String; modelId: Id64String | undefined },
   ): Observable<Id64Array> {
@@ -93,6 +92,10 @@ export class BaseIdsCache {
       mergeMap((categoryModelId) => this.#modeledElementsCache.getCategoryModeledElements({ modelId: categoryModelId, categoryId: props.categoryId! })),
       toArray(),
     );
+  }
+
+  public getAllSubModels(): Observable<Id64Set> {
+    return this.#modeledElementsCache.getModeledElementsInfo().pipe(map(({ allSubModels }) => allSubModels));
   }
 
   public hasSubModels({ modelId }: { modelId: Id64String }): Observable<boolean> {
@@ -196,6 +199,10 @@ export class BaseIdsCacheImpl {
     props: { modelId: Id64String; categoryId?: Id64String } | { categoryId: Id64String; modelId: Id64String | undefined },
   ): Observable<Id64Array> {
     return this.#baseIdsCache.getSubModels(props);
+  }
+
+  public getAllSubModels(): Observable<Id64Set> {
+    return this.#baseIdsCache.getAllSubModels();
   }
 
   public hasSubModels({ modelId }: { modelId: Id64String }): Observable<boolean> {

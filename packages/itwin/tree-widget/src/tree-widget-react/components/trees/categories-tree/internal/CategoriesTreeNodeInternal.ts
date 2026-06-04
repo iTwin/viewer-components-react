@@ -7,7 +7,8 @@ import { CategoriesTreeNode } from "../CategoriesTreeNode.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, GroupingHierarchyNode, HierarchyNode, InstancesNodeKey, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
-import type { CategoryId, ElementId } from "../../common/internal/Types.js";
+import type { ElementId } from "../../common/internal/Types.js";
+import type { ParentElementsPath } from "../../common/internal/Utils.js";
 
 /**
  * Contains utility functions for working with Models Tree nodes.
@@ -25,6 +26,12 @@ export namespace CategoriesTreeNodeInternal {
     extendedData: CategoryNodeProps;
   } => CategoriesTreeNode.isCategoryNode(node);
 
+  export const isRawCategoryNode = (
+    node: Pick<HierarchyNode, "extendedData">,
+  ): node is Omit<NonGroupingHierarchyNode, "extendedData"> & { key: InstancesNodeKey } & {
+    extendedData: Pick<CategoryNodeProps, "description" | "hasSubCategories"> & { [key: string]: any };
+  } => CategoriesTreeNode.isCategoryNode(node);
+
   export const isModelNode = (node: Pick<HierarchyNode, "extendedData">): node is NonGroupingHierarchyNode & { key: InstancesNodeKey } =>
     CategoriesTreeNode.isModelNode(node);
 
@@ -34,22 +41,32 @@ export namespace CategoriesTreeNodeInternal {
     extendedData: ElementNodeProps;
   } => CategoriesTreeNode.isElementNode(node);
 
+  export const isRawElementNode = (
+    node: Pick<HierarchyNode, "extendedData">,
+  ): node is Omit<NonGroupingHierarchyNode, "extendedData"> & { key: InstancesNodeKey } & {
+    extendedData: Pick<ElementNodeProps, "categoryId" | "modelId"> & { [key: string]: any };
+  } => CategoriesTreeNode.isElementNode(node);
+
   export const isElementClassGroupingNode = (
     node: Pick<HierarchyNode, "key">,
   ): node is Omit<GroupingHierarchyNode, "extendedData"> & { key: ClassGroupingNodeKey } & {
     extendedData: ElementClassGroupingNodeProps;
   } => CategoriesTreeNode.isElementClassGroupingNode(node);
 
+  export const isRawElementClassGroupingNode = (
+    node: Pick<HierarchyNode, "key">,
+  ): node is Omit<GroupingHierarchyNode, "extendedData"> & { key: ClassGroupingNodeKey } & {
+    extendedData: Pick<ElementClassGroupingNodeProps, "categoryId"> & { [key: string]: any };
+  } => CategoriesTreeNode.isElementClassGroupingNode(node);
+
   export const isSubCategoryNode = CategoriesTreeNode.isSubCategoryNode;
 }
 
-/**
- * @internal
- */
+/** @internal */
 export interface CategoryNodeProps {
   description?: string;
   hasSubCategories?: boolean;
-  parentElementsPath: Array<{ parentIds: Array<ElementId>; parentCategoryId: CategoryId }>;
+  parentElementsPath: ParentElementsPath;
   modelIds: Id64Array;
 }
 
@@ -59,7 +76,7 @@ export interface CategoryNodeProps {
 export interface ElementNodeProps {
   modelId: Id64String;
   categoryId: Id64String;
-  parentElementsPath: Array<{ parentIds: Array<ElementId>; parentCategoryId: CategoryId }>;
+  parentElementsPath: ParentElementsPath;
 }
 
 /**
@@ -67,7 +84,7 @@ export interface ElementNodeProps {
  */
 export interface ElementClassGroupingNodeProps {
   categoryId: Id64String;
-  parentElementsPath: Array<{ parentIds: Array<ElementId>; parentCategoryId: CategoryId }>;
+  parentElementsPath: ParentElementsPath;
   modelElementsMap: Map<Id64String, { elementIds: Set<Id64String>; childrenWhichAreParents: Set<ElementId> }>;
   hasDirectNonSearchTargets?: boolean;
   hasSearchTargetAncestor?: boolean;

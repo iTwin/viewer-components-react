@@ -56,7 +56,7 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
   }
   if (CategoriesTreeNode.isCategoryNode(node)) {
     const { id } = node.key.instanceKeys[0];
-    const modelIds: Id64Array | undefined = node.extendedData.isCategoryOfSubModel ? node.extendedData.modelIds : undefined;
+    const modelIds: Id64Array | undefined = node.extendedData.modelIds.length > 0 ? node.extendedData.modelIds : undefined;
     let idToUse = id;
     if (modelIds !== undefined) {
       idToUse = `${modelIds[0]}-${id}`;

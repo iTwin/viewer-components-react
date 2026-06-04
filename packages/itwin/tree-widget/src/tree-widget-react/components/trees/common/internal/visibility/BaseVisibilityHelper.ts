@@ -29,7 +29,7 @@ import {
 import { assert, Id64 } from "@itwin/core-bentley";
 import { subscribeAll } from "../Rxjs.js";
 import { createVisibilityStatus } from "../Tooltip.js";
-import { countInSet, fromWithRelease, releaseMainThreadOnItemsCount, setDifference } from "../Utils.js";
+import { countInSet, fromWithRelease, getId64Spreadable, ParentElementsPath, releaseMainThreadOnItemsCount, setDifference } from "../Utils.js";
 import { changeElementStateNoChildrenOperator, getCategoryVisibilityFromAlwaysAndNeverDrawnElementsImpl, mergeVisibilityStatuses } from "../VisibilityUtils.js";
 
 import type { Observable, Subscription } from "rxjs";
@@ -312,10 +312,7 @@ export class BaseVisibilityHelper implements Disposable {
       elementIds: Id64Arg;
       modelId: Id64String;
       categoryId: Id64String;
-    } & (
-      | { computeOnlyOwnStatus: true }
-      | { computeOnlyOwnStatus?: (elementId: Id64String) => boolean; categoryOfTopMostParentElement: CategoryId; parentElementsIdsPath: Array<Id64Arg> }
-    ),
+    } & ({ computeOnlyOwnStatus: true } | { computeOnlyOwnStatus?: (elementId: Id64String) => boolean; parentElementsPath: ParentElementsPath }),
   ): Observable<VisibilityStatus> {
     const result = defer(() => {
       const { elementIds, modelId, categoryId, computeOnlyOwnStatus } = props;
@@ -336,13 +333,10 @@ export class BaseVisibilityHelper implements Disposable {
           );
         }),
       );
-
       const descendantsVisibilityStatus = this.getDescendantsVisibilityStatus({
         elementIds,
         modelId,
-        categoryOfTopMostParentElement: props.categoryOfTopMostParentElement,
-        // For descendants path includes elementIds
-        parentElementIdsPath: [...props.parentElementsIdsPath, elementIds],
+        parentElementsPath: ParentElementsPath.appendToPath({ path: props.parentElementsPath, ids: elementIds, categoryId }),
         computeOnlyOwnStatus,
       });
 
@@ -388,11 +382,10 @@ export class BaseVisibilityHelper implements Disposable {
   private getDescendantsVisibilityStatus(props: {
     elementIds: Id64Arg;
     modelId: Id64String;
-    categoryOfTopMostParentElement: CategoryId;
-    parentElementIdsPath: Array<Id64Arg>;
+    parentElementsPath: ParentElementsPath;
     computeOnlyOwnStatus?: (elementId: Id64String) => boolean;
   }): Observable<VisibilityStatus> {
-    const { elementIds, modelId, categoryOfTopMostParentElement, parentElementIdsPath } = props;
+    const { elementIds, modelId, parentElementsPath } = props;
     if (!this.#props.viewport.viewsModel(modelId)) {
       return of(createVisibilityStatus("hidden"));
     }
@@ -404,8 +397,9 @@ export class BaseVisibilityHelper implements Disposable {
     return this.getVisibilityFromGroupedDescendants({
       modelId,
       descendantsCounts,
-      categoryIds: categoryOfTopMostParentElement,
-      parentElementIdsPath,
+      // TODO: FIXME
+      categoryIds: parentElementsPath[0].parentCategoryId,
+      parentElementsPath,
     });
   }
 
@@ -443,9 +437,9 @@ export class BaseVisibilityHelper implements Disposable {
     modelId: Id64String;
     descendantsCounts: Observable<Array<{ categoryId: CategoryId; count: number }>>;
     categoryIds: Id64Arg;
-    parentElementIdsPath?: Array<Id64Arg>;
+    parentElementsPath?: ParentElementsPath;
   }): Observable<VisibilityStatus> {
-    const { modelId, categoryIds, parentElementIdsPath } = props;
+    const { modelId, categoryIds, parentElementsPath } = props;
     return props.descendantsCounts.pipe(
       reduce(
         (acc, descendantsCounts) => {
@@ -481,7 +475,8 @@ export class BaseVisibilityHelper implements Disposable {
             ? this.#alwaysAndNeverDrawnElements
                 .getAlwaysOrNeverDrawnElements({
                   modelId,
-                  parentElementIdsPath,
+                  // TODO: FIXME
+                  parentElementIdsPath: parentElementsPath?.map(({ parentIds }) => parentIds),
                   categoryIds,
                   setType: "never",
                   childCategoryIds: visibleCategories,
@@ -500,7 +495,8 @@ export class BaseVisibilityHelper implements Disposable {
             ? this.#alwaysAndNeverDrawnElements
                 .getAlwaysOrNeverDrawnElements({
                   modelId,
-                  parentElementIdsPath,
+                  // TODO: FIXME
+                  parentElementIdsPath: parentElementsPath?.map(({ parentIds }) => parentIds),
                   categoryIds,
                   setType: "always",
                   childCategoryIds: hiddenCategories,
@@ -680,9 +676,8 @@ export class BaseVisibilityHelper implements Disposable {
       const changeChildElementsInDifferentCategoriesObs = categoryModelsObs.pipe(
         mergeMap(([modelId, modelCategories]) =>
           // Descendants need to be changed only when model is visible, if it's hidden, any changes to A/N drawn won't have any effect.
-          this.#props.viewport.viewsModel(modelId)
-            ? this.getDescendantsToChange({ modelId, categoryIds: modelCategories, on, parentElementIdsPath: [] })
-            : EMPTY,
+          // TODO: FIXME
+          this.#props.viewport.viewsModel(modelId) ? this.getDescendantsToChange({ modelId, categoryIds: modelCategories, on, parentElementsPath: [] }) : EMPTY,
         ),
         reduce(
           (acc, { matchingDesiredState, notMatchingDesiredState }) => {
@@ -790,7 +785,8 @@ export class BaseVisibilityHelper implements Disposable {
       modelId,
     });
 
-    const changeChildElementsInDifferentCategoriesObs = this.getDescendantsToChange({ modelId, categoryIds, on, parentElementIdsPath: [] }).pipe(
+    // TODO: FIXME
+    const changeChildElementsInDifferentCategoriesObs = this.getDescendantsToChange({ modelId, categoryIds, on, parentElementsPath: [] }).pipe(
       mergeMap(({ matchingDesiredState, notMatchingDesiredState }) => {
         return matchingDesiredState.size > 0 || notMatchingDesiredState.length > 0
           ? this.queueElementsVisibilityChange({
@@ -840,7 +836,10 @@ export class BaseVisibilityHelper implements Disposable {
       on: boolean;
     } & (
       | { ignoreDescendants: true }
-      | { ignoreDescendants?: (elementId: Id64String) => boolean; categoryOfTopMostParentElement: CategoryId; parentElementsIdsPath: Array<Id64Arg> }
+      | {
+          ignoreDescendants?: (elementId: Id64String) => boolean;
+          parentElementsPath: ParentElementsPath;
+        }
     ),
   ): Observable<void> {
     const result = defer(() => {
@@ -874,17 +873,20 @@ export class BaseVisibilityHelper implements Disposable {
               elementIds,
               modelId,
               on,
-              categoryOfTopMostParentElement: props.categoryOfTopMostParentElement,
-              parentElementIdsPath: [...props.parentElementsIdsPath, elementIds],
+              parentElementsPath: ParentElementsPath.appendToPath({
+                path: props.parentElementsPath,
+                ids: elementIds,
+                categoryId,
+              }),
               ignoreDescendants,
             }).pipe(
               mergeMap(({ matchingDesiredState: descendantsMatching, notMatchingDesiredState: descendantsNotMatching }) => {
                 const elementsMatchingDesiredState = elementsMatchDesiredState
-                  ? [...descendantsMatching, ...(typeof elementIds === "string" ? [elementIds] : elementIds)]
+                  ? [...descendantsMatching, ...getId64Spreadable(elementIds)]
                   : descendantsMatching;
                 const elementsNotMatchingDesiredState = elementsMatchDesiredState
                   ? descendantsNotMatching
-                  : [...descendantsNotMatching, ...(typeof elementIds === "string" ? [elementIds] : elementIds)];
+                  : [...descendantsNotMatching, ...getId64Spreadable(elementIds)];
                 return this.queueElementsVisibilityChange({
                   elementsMatchingDesiredState: Id64.sizeOf(elementsMatchingDesiredState) > 0 ? elementsMatchingDesiredState : undefined,
                   elementsNotMatchingDesiredState: Id64.sizeOf(elementsNotMatchingDesiredState) > 0 ? elementsNotMatchingDesiredState : undefined,
@@ -933,13 +935,10 @@ export class BaseVisibilityHelper implements Disposable {
     props: {
       modelId: Id64String;
       on: boolean;
-      parentElementIdsPath: Array<Id64Arg>;
-    } & (
-      | { elementIds: Id64Arg; categoryOfTopMostParentElement: CategoryId; ignoreDescendants?: (elementId: Id64String) => boolean }
-      | { categoryIds: Id64Arg }
-    ),
+      parentElementsPath: ParentElementsPath;
+    } & ({ elementIds: Id64Arg; ignoreDescendants?: (elementId: Id64String) => boolean } | { categoryIds: Id64Arg }),
   ): Observable<{ matchingDesiredState: Id64Set; notMatchingDesiredState: Id64Array }> {
-    const { modelId, on, parentElementIdsPath } = props;
+    const { modelId, on, parentElementsPath } = props;
     const categoryIdsSet = "categoryIds" in props ? Id64.toIdSet(props.categoryIds) : new Set<CategoryId>();
     const {
       source,
@@ -1017,8 +1016,9 @@ export class BaseVisibilityHelper implements Disposable {
             matchingCategories.size > 0
               ? this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({
                   modelId,
-                  parentElementIdsPath,
-                  categoryIds: "categoryIds" in props ? props.categoryIds : props.categoryOfTopMostParentElement,
+                  parentElementIdsPath: parentElementsPath.map(({ parentIds }) => parentIds),
+                  // TODO: FIXME
+                  categoryIds: "categoryIds" in props ? props.categoryIds : parentElementsPath[0].parentCategoryId,
                   setType: on ? "never" : "always",
                   childCategoryIds: matchingCategories,
                 })

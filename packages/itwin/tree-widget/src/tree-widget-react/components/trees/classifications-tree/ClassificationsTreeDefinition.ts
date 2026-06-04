@@ -18,7 +18,7 @@ import {
   CLASS_NAME_GeometricElement3d,
 } from "../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../common/internal/UseErrorState.js";
-import { fromWithRelease, getOptimalBatchSize, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
+import { fromWithRelease, getOptimalBatchSize, ParentElementsPath, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../common/TreeErrors.js";
 import { ClassificationsTreeNodeInternal } from "./internal/ClassificationsTreeNodeInternal.js";
 
@@ -122,10 +122,11 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     assert(ClassificationsTreeNodeInternal.isGeometricElementNode(parentNode));
     node.extendedData = {
       ...node.extendedData,
-      parentElementsPath: [
-        ...parentNode.extendedData.parentElementsPath,
-        { parentIds: parentNode.key.instanceKeys.map(({ id }) => id), parentCategoryId: parentNode.extendedData.categoryId },
-      ],
+      parentElementsPath: ParentElementsPath.appendToPath({
+        path: parentNode.extendedData.parentElementsPath,
+        ids: parentNode.key.instanceKeys.map(({ id }) => id),
+        categoryId: parentNode.extendedData.categoryId,
+      }),
     };
     return node;
   };

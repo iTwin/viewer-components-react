@@ -121,6 +121,7 @@ export function createClassGroupingHierarchyNode({
     extendedData: {
       categoryId: props.categoryId,
       modelElementsMap,
+      parentElementsPath: [],
       ...(props.hasDirectNonSearchTargets ? { hasDirectNonSearchTargets: props.hasDirectNonSearchTargets } : {}),
       ...(props.hasSearchTargetAncestor ? { hasSearchTargetAncestor: props.hasSearchTargetAncestor } : {}),
     },
@@ -174,6 +175,7 @@ export function createElementHierarchyNode(props: {
       modelId: props.modelId,
       categoryId: props.categoryId,
       isElement: true,
+      parentElementsPath: [],
     },
   };
 }
