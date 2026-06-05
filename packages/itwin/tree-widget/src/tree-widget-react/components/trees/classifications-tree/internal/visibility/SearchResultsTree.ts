@@ -190,13 +190,13 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
   }
 
   private convertInternalSearchTargets(searchTargets: InternalSearchTargets): ClassificationsTreeSearchTargets | undefined {
-    if (!searchTargets.classificationIds && !searchTargets.classificationIds && !searchTargets.elements) {
+    if (!searchTargets.classificationTableIds && !searchTargets.classificationIds && !searchTargets.elements) {
       return undefined;
     }
 
     return {
       classificationIds: searchTargets.classificationIds,
-      classificationTableIds: searchTargets.classificationIds,
+      classificationTableIds: searchTargets.classificationTableIds,
       elements: searchTargets.elements ? this.convertInternalSearchTargetElementsRecursively(searchTargets.elements, []) : undefined,
     };
   }
