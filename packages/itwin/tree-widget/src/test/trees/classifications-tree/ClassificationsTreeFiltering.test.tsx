@@ -463,7 +463,7 @@ describe("Classifications tree", () => {
         ]);
       });
 
-      it.only("finds 3d element by base36 ECInstanceId suffix", async function () {
+      it("finds 3d element by base36 ECInstanceId suffix", async function () {
         await using buildIModelResult = await buildIModel(async (imodel) =>
           withEditTxn(imodel, async (txn) => {
             await importClassificationSchema(imodel);
