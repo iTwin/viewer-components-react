@@ -41,7 +41,7 @@ export function PropertyGrid({ createDataProvider, ...props }: PropertyGridProps
   return <UnifiedSelectionPropertyGrid {...props} dataProvider={dataProvider} />;
 }
 
-function UnifiedSelectionPropertyGrid({ selectionStorage, ...props }: PropertyGridContentProps & { selectionStorage?: SelectionStorage }) {
+function UnifiedSelectionPropertyGrid({ selectionStorage, ...props }: PropertyGridContentProps & { selectionStorage: SelectionStorage }) {
   const { isOverLimit } = usePropertyDataProviderWithUnifiedSelection({ dataProvider: props.dataProvider, selectionStorage });
 
   const dataRenderer = (dataRendererProps: FilteringPropertyGridProps) => {
