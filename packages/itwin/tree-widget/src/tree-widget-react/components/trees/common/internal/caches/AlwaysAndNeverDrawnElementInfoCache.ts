@@ -31,13 +31,12 @@ import {
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
-import { getClassesByView, getIdsFromChildrenTree, getOptimalBatchSize, releaseMainThreadOnItemsCount, updateChildrenTree } from "../Utils.js";
+import { ChildrenTree, getClassesByView, getOptimalBatchSize, releaseMainThreadOnItemsCount } from "../Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
 import type { ElementId } from "../Types.js";
-import type { ChildrenTree } from "../Utils.js";
 
 /** @internal */
 export const SET_CHANGE_DEBOUNCE_TIME = 20;
@@ -302,16 +301,19 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
     return elementInfo.pipe(
       releaseMainThreadOnItemsCount(500),
       reduce((acc: CachedNodesMap, { categoryId, rootCategoryId, modelId, elementsPath }) => {
-        const elementIdInList = elementsPath[elementsPath.length - 1];
-        const additionalPropsGetter = (id: Id64String, additionalProps?: MapEntry): MapEntry => {
-          if (id === elementIdInList) {
-            // Last element in elementsPath is in always/never drawn set. We want to mark, that it is in the set, and save it's categoryId.
-            return { isInAlwaysOrNeverDrawnSet: true, categoryId };
-          }
-          // Existing entries can keep their value, if it's a new entry it's not in the list.
-          return additionalProps ?? { isInAlwaysOrNeverDrawnSet: false };
-        };
-        updateChildrenTree({ tree: acc, idsToAdd: [modelId, rootCategoryId, ...elementsPath], additionalPropsGetter });
+        const lastElementId = elementsPath[elementsPath.length - 1];
+        ChildrenTree.update({
+          tree: acc,
+          idsToAdd: [modelId, rootCategoryId, ...elementsPath],
+          additionalPropsGetter: ({ id, additionalProps }): MapEntry => {
+            if (id === lastElementId) {
+              // Last element in elementsPath is in always/never drawn set. We want to mark, that it is in the set, and save it's categoryId.
+              return { isInAlwaysOrNeverDrawnSet: true, categoryId };
+            }
+            // Existing entries can keep their value, if it's a new entry it's not in the list.
+            return additionalProps ?? { isInAlwaysOrNeverDrawnSet: false };
+          },
+        });
         return acc;
       }, new Map()),
     );
@@ -383,14 +385,21 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
     }
     const childCategoryIds = props.childCategoryIds;
     return this.getElementsTree(props).pipe(
-      map((childrenTree) =>
-        getIdsFromChildrenTree({
+      map((childrenTree) => {
+        const result = new Set<ElementId>();
+        ChildrenTree.collect({
           tree: childrenTree,
-          predicate: childCategoryIds?.size
-            ? ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet && childCategoryIds.has(treeEntry.categoryId)
-            : ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet,
-        }),
-      ),
+          addToAccumulator: ({ treeEntry, key }) => {
+            if (treeEntry.isInAlwaysOrNeverDrawnSet) {
+              if (!childCategoryIds?.size || childCategoryIds.has(treeEntry.categoryId)) {
+                result.add(key);
+              }
+            }
+            return { ignoreChildren: false };
+          },
+        });
+        return result;
+      }),
     );
   }
 }

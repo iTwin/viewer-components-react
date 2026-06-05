@@ -84,9 +84,9 @@ export abstract class SearchResultsNodesHandler<
    *
    * E.g. Retrieving categoryId of elements can't be done using search paths.
    */
-  public abstract getProcessedSearchResultsNodes(): Promise<TProcessedSearchResultsNodes>;
+  public abstract getProcessedNodes(): Promise<TProcessedSearchResultsNodes>;
   /** Creates search results nodes  */
-  public abstract createSearchResultsTreeNode(props: {
+  public abstract createNode(props: {
     type: TSearchResultsTreeNode["type"];
     id: Id64String;
     isSearchTarget: boolean;
@@ -96,7 +96,7 @@ export abstract class SearchResultsNodesHandler<
   public async processSearchResultsNodes(): Promise<{
     getNodeSearchTargets: (node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) => TSearchTargets | undefined;
   }> {
-    const processedSearchResultsNodes = await this.getProcessedSearchResultsNodes();
+    const processedSearchResultsNodes = await this.getProcessedNodes();
     return {
       getNodeSearchTargets: (node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) =>
         this.getNodeSearchTargets(node, processedSearchResultsNodes),
@@ -123,7 +123,7 @@ export abstract class SearchResultsNodesHandler<
     const { instanceKey, parentNode, isSearchTarget } = props;
     const type = await this.getType(instanceKey.className);
 
-    const newNode = this.createSearchResultsTreeNode({
+    const newNode = this.createNode({
       type,
       id: instanceKey.id,
       isSearchTarget,

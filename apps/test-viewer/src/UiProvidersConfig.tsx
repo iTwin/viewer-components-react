@@ -138,6 +138,7 @@ const configuredUiItems = new Map<string, UiItem>([
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
                     treeLabel={props.treeLabel}
+                    hierarchyConfig={{ showElements: true }}
                   />
                 ),
               },
