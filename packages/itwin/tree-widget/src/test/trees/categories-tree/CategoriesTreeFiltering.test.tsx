@@ -19,6 +19,7 @@ import {
 } from "test-utilities";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { withEditTxn } from "@itwin/core-backend";
+import { Id64 } from "@itwin/core-bentley";
 import { IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
@@ -26,6 +27,10 @@ import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { act, renderHook } from "@testing-library/react";
 import { defaultHierarchyConfiguration } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { useCategoriesTree } from "../../../tree-widget-react/components/trees/categories-tree/UseCategoriesTree.js";
+import {
+  CLASS_NAME_GeometricElement2d,
+  CLASS_NAME_GeometricElement3d,
+} from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { SharedTreeContextProvider } from "../../../tree-widget-react/components/trees/common/SharedTreeContextProvider.js";
 import { buildIModel } from "../../IModelUtils.js";
 import { createFakeViewport, createIModelAccess } from "../Common.js";
@@ -498,6 +503,93 @@ describe("Categories tree", () => {
           identifier: keys.category,
           options: { autoExpand: true },
           children: [{ identifier: keys.subCategory2, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } }],
+        },
+      ]);
+    });
+
+    it("finds 3d element by base36 ECInstanceId suffix", async function () {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "TestDefinitionContainer" });
+          const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+          const category = insertSpatialCategory({ txn, codeValue: "SpatialCategory", modelId: definitionModel.id });
+          const element = insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+
+          return { definitionContainer, element, category };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+
+      const briefcaseId = Id64.getBriefcaseId(keys.element.id).toString(36).toLocaleUpperCase();
+      const localId = Id64.getLocalId(keys.element.id).toString(36).toLocaleUpperCase();
+      const imodelAccess = createIModelAccess(imodelConnection);
+      using hook = renderUseCategoriesTreeHook({
+        imodelConnection,
+        hierarchyConfig: { ...defaultHierarchyConfiguration, showElements: true },
+        searchText: `[${briefcaseId}-${localId}]`,
+        viewType: "3d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
+        {
+          identifier: keys.definitionContainer,
+          options: { autoExpand: true },
+          children: [
+            {
+              identifier: keys.category,
+              options: { autoExpand: true },
+              children: [
+                {
+                  identifier: { ...keys.element, className: CLASS_NAME_GeometricElement3d },
+                  options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+    });
+
+    it("finds 2d element by base36 ECInstanceId suffix", async function () {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "TestDefinitionContainer" });
+          const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+          const drawingModel = insertDrawingModelWithPartition({ txn, codeValue: "TestDrawingModel" });
+
+          const category = insertDrawingCategory({ txn, codeValue: "Test Drawing Category", modelId: definitionModel.id });
+          const element = insertDrawingGraphic({ txn, modelId: drawingModel.id, categoryId: category.id });
+
+          return { definitionContainer, element, category };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+
+      const briefcaseId = Id64.getBriefcaseId(keys.element.id).toString(36).toLocaleUpperCase();
+      const localId = Id64.getLocalId(keys.element.id).toString(36).toLocaleUpperCase();
+      const imodelAccess = createIModelAccess(imodelConnection);
+      using hook = renderUseCategoriesTreeHook({
+        imodelConnection,
+        hierarchyConfig: { ...defaultHierarchyConfiguration, showElements: true },
+        searchText: `[${briefcaseId}-${localId}]`,
+        viewType: "2d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
+        {
+          identifier: keys.definitionContainer,
+          options: { autoExpand: true },
+          children: [
+            {
+              identifier: keys.category,
+              options: { autoExpand: true },
+              children: [
+                {
+                  identifier: { ...keys.element, className: CLASS_NAME_GeometricElement2d },
+                  options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                },
+              ],
+            },
+          ],
         },
       ]);
     });

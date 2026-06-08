@@ -263,8 +263,12 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
 
   private async createISubModeledElementChildrenQuery({
     parentNodeInstanceIds: elementIds,
+    parentNode,
     nodeSelectClauseFactory,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
+    if (CategoriesTreeNode.isDefinitionContainerNode(parentNode)) {
+      return [];
+    }
     // note: we do not apply hierarchy level filtering on this hierarchy level, because it's always
     // hidden - the filter will get applied on the child hierarchy levels
     return [
@@ -786,7 +790,8 @@ function createInstanceKeyPathsFromInstanceLabel(
         }
         const [categoryLabelSelectClause, subCategoryLabelSelectClause, elementLabelSelectClause, definitionContainerLabelSelectClause] = await Promise.all(
           [categoryClass, CLASS_NAME_SubCategory, elementClass, ...(definitionContainers.length > 0 ? [CLASS_NAME_DefinitionContainer] : [])].map(
-            async (className) => labelsFactory.createSelectClause({ classAlias: "this", className }),
+            async (className) =>
+              labelsFactory.createSelectClause({ classAlias: "this", className, selectorsConcatenator: ECSql.createConcatenatedValueStringSelector }),
           ),
         );
         const ctes = [
