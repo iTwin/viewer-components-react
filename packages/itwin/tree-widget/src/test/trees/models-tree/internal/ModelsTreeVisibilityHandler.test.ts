@@ -370,7 +370,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 alwaysDrawn: new Set([...categoryElements.values()].flat()),
                 queryHandler: () =>
                   [...categoryElements].flatMap(([categoryId, elements]) => {
-                    return elements.map((elementId) => ({ rootCategoryId: categoryId, categoryId, modelId, elementsPath: elementId }));
+                    return elements.map((elementId) => ({ categoryElementPath: `${categoryId};${elementId}`, modelId }));
                   }),
               }),
             });
@@ -475,7 +475,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 neverDrawn: new Set([...categoryElements.values()].flat()),
                 queryHandler: () =>
                   [...categoryElements].flatMap(([categoryId, elements]) => {
-                    return elements.map((elementId) => ({ rootCategoryId: categoryId, categoryId, modelId, elementsPath: elementId }));
+                    return elements.map((elementId) => ({ categoryElementPath: `${categoryId};${elementId}`, modelId }));
                   }),
               }),
             });
@@ -589,7 +589,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               idsCache,
               viewport: createFakeViewport({
                 neverDrawn: new Set(["0x100"]),
-                queryHandler: () => [{ rootCategoryId: "0x10", elementsPath: "0x100", modelId, categoryId: "0x10" }],
+                queryHandler: () => [{ categoryElementPath: "0x10;0x100", modelId }],
               }),
             });
             const { handler } = handlerResult;
@@ -612,7 +612,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport: createFakeViewport({
                 isAlwaysDrawnExclusive: true,
                 alwaysDrawn: new Set(["0x100"]),
-                queryHandler: () => [{ rootCategoryId: "0x10", elementsPath: "0x100", modelId, categoryId: "0x10" }],
+                queryHandler: () => [{ categoryElementPath: "0x10;0x100", modelId }],
               }),
             });
             const { handler } = handlerResult;
@@ -750,7 +750,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 alwaysDrawn: new Set(["0x4"]),
                 isAlwaysDrawnExclusive: true,
                 viewsCategory: vi.fn(() => true),
-                queryHandler: () => [{ rootCategoryId: "0xff", elementsPath: "0x4", modelId: "0xff", categoryId: "0xff" }],
+                queryHandler: () => [{ categoryElementPath: "0xff;0x4", modelId: "0xff" }],
               }),
             });
             const { handler } = handlerResult;
@@ -771,7 +771,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport: createFakeViewport({
                 neverDrawn: new Set(elements),
                 viewsCategory: vi.fn(() => true),
-                queryHandler: () => elements.map((elementId) => ({ rootCategoryId: categoryId, elementsPath: elementId, modelId, categoryId })),
+                queryHandler: () => elements.map((elementId) => ({ categoryElementPath: `${categoryId};${elementId}`, modelId })),
               }),
             });
             const { handler } = handlerResult;
@@ -810,7 +810,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 alwaysDrawn: new Set(["0x4"]),
                 isAlwaysDrawnExclusive: true,
                 getPerModelCategoryOverride: vi.fn(() => "show" as const),
-                queryHandler: () => [{ rootCategoryId: "0xff", elementsPath: "0x4", modelId: "0xff", categoryId: "0xff" }],
+                queryHandler: () => [{ categoryElementPath: "0xff;0x4", modelId: "0xff" }],
               }),
             });
             const { handler } = handlerResult;
@@ -833,7 +833,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport: createFakeViewport({
                 neverDrawn: new Set([elements[0]]),
                 viewsCategory: vi.fn(() => true),
-                queryHandler: () => [{ elementsPath: elements[0], modelId, rootCategoryId: categoryId, categoryId }],
+                queryHandler: () => [{ categoryElementPath: `${categoryId};${elements[0]}`, modelId }],
               }),
             });
             const { handler } = handlerResult;
@@ -854,7 +854,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport: createFakeViewport({
                 alwaysDrawn: new Set([elements[0]]),
                 viewsCategory: vi.fn(() => false),
-                queryHandler: () => [{ rootCategoryId: categoryId, elementsPath: elements[0], modelId, categoryId }],
+                queryHandler: () => [{ categoryElementPath: `${categoryId};${elements[0]}`, modelId }],
               }),
             });
             const { handler } = handlerResult;
@@ -875,7 +875,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport: createFakeViewport({
                 neverDrawn: new Set([elements[0]]),
                 getPerModelCategoryOverride: vi.fn(() => "show" as const),
-                queryHandler: () => [{ rootCategoryId: categoryId, elementsPath: elements[0], modelId, categoryId }],
+                queryHandler: () => [{ categoryElementPath: `${categoryId};${elements[0]}`, modelId }],
               }),
             });
             const { handler } = handlerResult;
@@ -896,7 +896,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport: createFakeViewport({
                 alwaysDrawn: new Set([elements[0]]),
                 getPerModelCategoryOverride: vi.fn(() => "hide" as const),
-                queryHandler: () => [{ rootCategoryId: categoryId, elementsPath: elements[0], modelId, categoryId }],
+                queryHandler: () => [{ categoryElementPath: `${categoryId};${elements[0]}`, modelId }],
               }),
             });
             const { handler } = handlerResult;
@@ -1335,15 +1335,15 @@ describe("ModelsTreeVisibilityHandler", () => {
                 const ids = CompressedId64Set.decompressSet((binder?.serialize() as any)[1].value);
                 if (ids.size === 2 && alwaysDrawnElements.every((id) => ids.has(id))) {
                   return [
-                    ...alwaysDrawnElements.map((elementId) => ({ rootCategoryId: categoryId, elementsPath: elementId, modelId, categoryId })),
-                    { rootCategoryId: otherCategoryId, elementsPath: otherAlwaysDrawnElement, modelId: otherModelId, categoryId: otherCategoryId },
+                    ...alwaysDrawnElements.map((elementId) => ({ categoryElementPath: `${categoryId};${elementId}`, modelId })),
+                    { categoryElementPath: `${otherCategoryId};${otherAlwaysDrawnElement}`, modelId: otherModelId },
                   ];
                 }
 
                 if (ids.size === 2 && neverDrawnElements.every((id) => ids.has(id))) {
                   return [
-                    ...neverDrawnElements.map((elementId) => ({ rootCategoryId: categoryId, elementsPath: elementId, modelId, categoryId })),
-                    { rootCategoryId: otherCategoryId, elementsPath: otherNeverDrawnElement, modelId: otherModelId, categoryId: otherCategoryId },
+                    ...neverDrawnElements.map((elementId) => ({ categoryElementPath: `${categoryId};${elementId}`, modelId })),
+                    { categoryElementPath: `${otherCategoryId};${otherNeverDrawnElement}`, modelId: otherModelId },
                   ];
                 }
 
@@ -2584,7 +2584,7 @@ describe("ModelsTreeVisibilityHandler", () => {
 
           const otherModel = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "2" }).id;
           const otherElement = insertPhysicalElement({ txn, modelId: otherModel, categoryId }).id;
-          return { model, categoryId, exclusiveElement, childElement, otherModel, otherElement };
+          return { model, categoryId, exclusiveElement, childElement, otherModel, otherElement, childCategoryId };
         }),
       );
 
@@ -2603,7 +2603,8 @@ describe("ModelsTreeVisibilityHandler", () => {
             [ids.model]: "partial",
               [`${ids.model}-${ids.categoryId}`]: "partial",
                 [ids.exclusiveElement]: "partial",
-                  [ids.childElement]: "hidden",
+                  [`${ids.exclusiveElement}-${ids.childCategoryId}`]: "hidden",
+                    [ids.childElement]: "hidden",
 
             [ids.otherModel]: "hidden",
               [`${ids.otherModel}-${ids.categoryId}`]: "hidden",
@@ -2993,7 +2994,8 @@ describe("ModelsTreeVisibilityHandler", () => {
               [modelId]: "partial",
                 [`${modelId}-${category1Id}`]: "visible",
                   [parentElementId]: "visible",
-                    [childElementWithDifferentCategoryId]: "visible",
+                    [`${parentElementId}-${childCategoryId}`]: "visible",
+                      [childElementWithDifferentCategoryId]: "visible",
 
                 [`${modelId}-${category2Id}`]: "hidden",
                   [element2Id]: "hidden",
@@ -3059,7 +3061,8 @@ describe("ModelsTreeVisibilityHandler", () => {
 
                 [`${modelId}-${parentCategoryId}`]: "partial",
                   [parentElementId]: "partial",
-                    [childElementWithSharedCategoryId]: "visible",
+                    [`${parentElementId}-${sharedCategoryId}`]: "visible",
+                      [childElementWithSharedCategoryId]: "visible",
           },
         });
       });
@@ -3110,7 +3113,8 @@ describe("ModelsTreeVisibilityHandler", () => {
 
                 [`${modelId}-${unrelatedCategoryId}`]: "hidden",
                   [unrelatedParentElementId]: "hidden",
-                    [childOfUnrelatedElementId]: "hidden",
+                    [`${unrelatedParentElementId}-${categoryId}`]: "hidden",
+                      [childOfUnrelatedElementId]: "hidden",
           },
         });
       });
@@ -3158,7 +3162,8 @@ describe("ModelsTreeVisibilityHandler", () => {
               [modelId]: "partial",
                 [`${modelId}-${parentCategoryId}`]: "partial",
                   [parentElementId]: "partial",
-                    [childElementWithDifferentCategoryId]: "visible",
+                    [`${parentElementId}-${childCategoryId}`]: "visible",
+                      [childElementWithDifferentCategoryId]: "visible",
           },
         });
       });

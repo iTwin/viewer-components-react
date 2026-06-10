@@ -129,20 +129,14 @@ describe("Models tree", () => {
                                 instanceKeys: [keys.rootElement2],
                                 supportsFiltering: true,
                                 children: [
-                                  NodeValidators.createForInstanceNode({
-                                    instanceKeys: [keys.category],
-                                    supportsFiltering: true,
+                                  NodeValidators.createForClassGroupingNode({
+                                    className: keys.modelingElement.className,
+                                    label: "Physical Object",
                                     children: [
-                                      NodeValidators.createForClassGroupingNode({
-                                        className: keys.modelingElement.className,
-                                        label: "Physical Object",
-                                        children: [
-                                          NodeValidators.createForInstanceNode({
-                                            instanceKeys: [keys.modelingElement],
-                                            supportsFiltering: true,
-                                            children: false,
-                                          }),
-                                        ],
+                                      NodeValidators.createForInstanceNode({
+                                        instanceKeys: [keys.modelingElement],
+                                        supportsFiltering: true,
+                                        children: false,
                                       }),
                                     ],
                                   }),
@@ -578,19 +572,13 @@ describe("Models tree", () => {
                                   instanceKeys: [keys.childElement],
                                   supportsFiltering: true,
                                   children: [
-                                    NodeValidators.createForInstanceNode({
-                                      instanceKeys: [keys.category],
-                                      supportsFiltering: true,
+                                    NodeValidators.createForClassGroupingNode({
+                                      className: keys.childOfChild.className,
                                       children: [
-                                        NodeValidators.createForClassGroupingNode({
-                                          className: keys.childOfChild.className,
-                                          children: [
-                                            NodeValidators.createForInstanceNode({
-                                              instanceKeys: [keys.childOfChild],
-                                              supportsFiltering: true,
-                                              children: false,
-                                            }),
-                                          ],
+                                        NodeValidators.createForInstanceNode({
+                                          instanceKeys: [keys.childOfChild],
+                                          supportsFiltering: true,
+                                          children: false,
                                         }),
                                       ],
                                     }),
@@ -794,19 +782,13 @@ describe("Models tree", () => {
                           instanceKeys: [keys.rootElement],
                           supportsFiltering: true,
                           children: [
-                            NodeValidators.createForInstanceNode({
-                              instanceKeys: [keys.category],
-                              supportsFiltering: true,
+                            NodeValidators.createForClassGroupingNode({
+                              className: keys.childElement.className,
                               children: [
-                                NodeValidators.createForClassGroupingNode({
-                                  className: keys.childElement.className,
-                                  children: [
-                                    NodeValidators.createForInstanceNode({
-                                      instanceKeys: [keys.childElement],
-                                      supportsFiltering: true,
-                                      children: false,
-                                    }),
-                                  ],
+                                NodeValidators.createForInstanceNode({
+                                  instanceKeys: [keys.childElement],
+                                  supportsFiltering: true,
+                                  children: false,
                                 }),
                               ],
                             }),
@@ -1072,15 +1054,9 @@ describe("Models tree", () => {
                           supportsFiltering: true,
                           children: [
                             NodeValidators.createForInstanceNode({
-                              instanceKeys: [keys.category],
+                              instanceKeys: [keys.modelingElement],
                               supportsFiltering: true,
-                              children: [
-                                NodeValidators.createForInstanceNode({
-                                  instanceKeys: [keys.modelingElement],
-                                  supportsFiltering: true,
-                                  children: false,
-                                }),
-                              ],
+                              children: false,
                             }),
                           ],
                         }),
@@ -1181,20 +1157,14 @@ describe("Models tree", () => {
                               instanceKeys: [keys.rootElement2],
                               supportsFiltering: true,
                               children: [
-                                NodeValidators.createForInstanceNode({
-                                  instanceKeys: [keys.category],
-                                  supportsFiltering: true,
+                                NodeValidators.createForClassGroupingNode({
+                                  className: keys.modelingElement.className,
+                                  label: "Physical Object (1)",
                                   children: [
-                                    NodeValidators.createForClassGroupingNode({
-                                      className: keys.modelingElement.className,
-                                      label: "Physical Object (1)",
-                                      children: [
-                                        NodeValidators.createForInstanceNode({
-                                          instanceKeys: [keys.modelingElement],
-                                          supportsFiltering: true,
-                                          children: false,
-                                        }),
-                                      ],
+                                    NodeValidators.createForInstanceNode({
+                                      instanceKeys: [keys.modelingElement],
+                                      supportsFiltering: true,
+                                      children: false,
                                     }),
                                   ],
                                 }),

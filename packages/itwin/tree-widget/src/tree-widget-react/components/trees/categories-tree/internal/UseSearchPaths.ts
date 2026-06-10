@@ -4,10 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useMemo, useState } from "react";
-import { firstValueFrom } from "rxjs";
+import { filter, firstValueFrom, identity, tap } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { HierarchyNodeIdentifier, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
+import { toVoidPromise } from "../../common/internal/Rxjs.js";
 import { getClassesByView, getOrCreate } from "../../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../../common/TreeErrors.js";
 import { useTelemetryContext } from "../../common/UseTelemetryContext.js";
@@ -143,14 +144,16 @@ async function getCategoriesFromPaths(
     }
 
     if (identifier.className === CLASS_NAME_DefinitionContainer) {
-      const definitionContainerCategories = await firstValueFrom(
-        idsCache.getAllContainedCategories({ definitionContainerIds: identifier.id, includeEmptyCategories: hierarchyConfig.showEmptyCategories }),
+      await toVoidPromise(
+        idsCache.getAllContainedCategories({ definitionContainerIds: identifier.id }).pipe(
+          hierarchyConfig.showEmptyCategories ? filter(({ hasElements }) => hasElements) : identity,
+          tap(({ id }) => {
+            if (!categories.has(id)) {
+              categories.set(id, []);
+            }
+          }),
+        ),
       );
-      for (const categoryId of definitionContainerCategories) {
-        if (!categories.has(categoryId)) {
-          categories.set(categoryId, []);
-        }
-      }
       return;
     }
 

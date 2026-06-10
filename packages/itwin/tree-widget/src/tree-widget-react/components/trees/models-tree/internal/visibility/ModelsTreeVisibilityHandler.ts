@@ -97,11 +97,12 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       if (categories?.length) {
         observables.push(
           from(categories).pipe(
-            mergeMap(({ modelId, categoryIds }) =>
+            mergeMap(({ modelId, categoryIds, parentElementsPath }) =>
               this.#visibilityHelper.changeCategoriesVisibilityStatus({
                 categoryIds,
                 modelId,
                 on,
+                parentElementsPath,
               }),
             ),
           ),
@@ -172,10 +173,18 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
     }
 
     if (ModelsTreeNodeInternal.isCategoryNode(node)) {
-      return this.#visibilityHelper.getCategoriesVisibilityStatus({
-        categoryIds: node.key.instanceKeys.map(({ id }) => id),
-        modelId: node.extendedData.modelIds[0],
-      });
+      const categoryIds = node.key.instanceKeys.map(({ id }) => id);
+      const modelIds = node.extendedData.modelIds.length > 0 ? node.extendedData.modelIds : [undefined];
+      return from(modelIds).pipe(
+        mergeMap((modelId) =>
+          this.#visibilityHelper.getCategoriesVisibilityStatus({
+            categoryIds,
+            modelId,
+            parentElementsPath: node.extendedData.parentElementsPath,
+          }),
+        ),
+        mergeVisibilityStatuses(),
+      );
     }
 
     assert(ModelsTreeNodeInternal.isElementNode(node));
@@ -221,11 +230,18 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       }
 
       if (ModelsTreeNodeInternal.isCategoryNode(node)) {
-        return this.#visibilityHelper.changeCategoriesVisibilityStatus({
-          categoryIds: node.key.instanceKeys.map(({ id }) => id),
-          modelId: node.extendedData.modelIds[0],
-          on,
-        });
+        const categoryIds = node.key.instanceKeys.map(({ id }) => id);
+        const modelIds = node.extendedData.modelIds.length > 0 ? node.extendedData.modelIds : [undefined];
+        return from(modelIds).pipe(
+          mergeMap((modelId) =>
+            this.#visibilityHelper.changeCategoriesVisibilityStatus({
+              categoryIds,
+              modelId,
+              on,
+              parentElementsPath: node.extendedData.parentElementsPath,
+            }),
+          ),
+        );
       }
 
       assert(ModelsTreeNodeInternal.isElementNode(node));
@@ -264,10 +280,11 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       if (categories?.length) {
         observables.push(
           from(categories).pipe(
-            mergeMap(({ modelId, categoryIds }) =>
+            mergeMap(({ modelId, categoryIds, parentElementsPath }) =>
               this.#visibilityHelper.getCategoriesVisibilityStatus({
                 categoryIds,
                 modelId,
+                parentElementsPath,
               }),
             ),
           ),

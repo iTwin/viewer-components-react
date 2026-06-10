@@ -70,7 +70,11 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
 
       if (categories?.length) {
         observables.push(
-          from(categories).pipe(mergeMap(({ modelId, categoryIds }) => this.#visibilityHelper.changeCategoriesVisibilityStatus({ categoryIds, modelId, on }))),
+          from(categories).pipe(
+            mergeMap(({ modelId, categoryIds, parentElementsPath }) =>
+              this.#visibilityHelper.changeCategoriesVisibilityStatus({ categoryIds, modelId, on, parentElementsPath }),
+            ),
+          ),
         );
       }
 
@@ -149,6 +153,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
           this.#visibilityHelper.getCategoriesVisibilityStatus({
             categoryIds,
             modelId,
+            parentElementsPath: node.extendedData.parentElementsPath,
           }),
         ),
         mergeVisibilityStatuses(),
@@ -210,6 +215,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
               categoryIds,
               modelId,
               on,
+              parentElementsPath: node.extendedData.parentElementsPath,
             }),
           ),
         );
@@ -254,10 +260,11 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       if (categories?.length) {
         observables.push(
           from(categories).pipe(
-            mergeMap(({ modelId, categoryIds }) =>
+            mergeMap(({ modelId, categoryIds, parentElementsPath }) =>
               this.#visibilityHelper.getCategoriesVisibilityStatus({
                 categoryIds,
                 modelId,
+                parentElementsPath,
               }),
             ),
           ),
@@ -322,13 +329,14 @@ export function createCategoriesTreeVisibilityHandler(props: {
       if (!props.searchPaths) {
         return undefined;
       }
-      const { categoryClass, elementClass } = getClassesByView(props.viewport.viewType === "2d" ? "2d" : "3d");
+      const { categoryClass, elementClass, modelClass } = getClassesByView(props.viewport.viewType === "2d" ? "2d" : "3d");
       return createCategoriesSearchResultsTree({
         idsCache: props.idsCache,
         searchPaths: props.searchPaths,
         imodelAccess: props.imodelAccess,
         categoryClassName: categoryClass,
         categoryElementClassName: elementClass,
+        categoryModelClassName: modelClass,
       });
     },
     getTreeSpecificVisibilityHandler: ({ info, viewport }) => {

@@ -5,7 +5,7 @@
 
 import { firstValueFrom, forkJoin } from "rxjs";
 import { assert } from "@itwin/core-bentley";
-import { CLASS_NAME_DefinitionContainer, CLASS_NAME_SubCategory } from "../../../common/internal/ClassNameDefinitions.js";
+import { CLASS_NAME_SubCategory } from "../../../common/internal/ClassNameDefinitions.js";
 import { getOrCreate, ParentElementsPath } from "../../../common/internal/Utils.js";
 import { createSearchResultsTree, SearchResultsNodesHandler } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 
@@ -41,15 +41,17 @@ export async function createCategoriesSearchResultsTree(props: {
   searchPaths: HierarchySearchTree[];
   categoryClassName: EC.FullClassName;
   categoryElementClassName: EC.FullClassName;
+  categoryModelClassName: EC.FullClassName;
   idsCache: CategoriesTreeIdsCache;
 }): Promise<SearchResultsTree<CategoriesTreeSearchTargets>> {
-  const { imodelAccess, searchPaths, categoryClassName, categoryElementClassName, idsCache } = props;
+  const { imodelAccess, searchPaths, categoryClassName, categoryElementClassName, categoryModelClassName, idsCache } = props;
   return createSearchResultsTree({
-    searchResultsNodesHandler: new CategoriesTreeNodesHandler({
+    searchResultsNodesHandler: new CategoriesTreeSearchResultsNodesHandler({
       idsCache,
       imodelAccess,
       categoryClassName,
       categoryElementClassName,
+      categoryModelClassName,
     }),
     searchPaths,
   });
@@ -61,6 +63,11 @@ interface CategoryNode extends BaseSearchResultsTreeNode<Node> {
   modelId?: Id64String;
 }
 
+interface SubModelNode extends BaseSearchResultsTreeNode<Node> {
+  type: "subModel";
+  modelId: Id64String;
+  categoryId: Id64String;
+}
 interface SubCategoryNode extends BaseSearchResultsTreeNode<Node> {
   type: "subCategory";
   categoryId: Id64String;
@@ -77,28 +84,33 @@ interface ElementNode extends BaseSearchResultsTreeNode<Node> {
   parentElementsPath: ParentElementsPath;
 }
 
-type Node = DefinitionContainerNode | SubCategoryNode | CategoryNode | ElementNode;
+type Node = DefinitionContainerNode | SubCategoryNode | CategoryNode | ElementNode | SubModelNode;
 
-type TemporaryDefinitionContainerNode = Omit<DefinitionContainerNode, "children"> & {
-  children?: SearchResultsTreeNodeChildren<TemporaryNode>;
+type RawDefinitionContainerNode = Omit<DefinitionContainerNode, "children"> & {
+  children?: SearchResultsTreeNodeChildren<RawNode>;
 };
 
-type TemporarySubCategoryNode = Omit<SubCategoryNode, "children"> & {
-  children?: SearchResultsTreeNodeChildren<TemporaryNode>;
-};
-
-type TemporaryElementNode = Omit<ElementNode, "modelId" | "children" | "parentElementsPath"> & {
+type RawSubModelNode = Omit<SubModelNode, "children" | "modelId"> & {
   modelId: undefined;
-  potentialParentElementsPath: ParentElementsPath;
-  children?: SearchResultsTreeNodeChildren<TemporaryNode>;
+  children?: SearchResultsTreeNodeChildren<RawNode>;
 };
 
-type TemporaryCategoryNode = Omit<CategoryNode, "children" | "parentElementsPath"> & {
-  potentialParentElementsPath: ParentElementsPath;
-  children?: SearchResultsTreeNodeChildren<TemporaryNode>;
+type RawSubCategoryNode = Omit<SubCategoryNode, "children"> & {
+  children?: SearchResultsTreeNodeChildren<RawNode>;
 };
 
-type TemporaryNode = TemporaryDefinitionContainerNode | TemporarySubCategoryNode | TemporaryCategoryNode | TemporaryElementNode;
+type RawElementNode = Omit<ElementNode, "modelId" | "children" | "parentElementsPath"> & {
+  modelId: ModelId | undefined;
+  potentialParentElementsPath: ParentElementsPath;
+  children?: SearchResultsTreeNodeChildren<RawNode>;
+};
+
+type RawCategoryNode = Omit<CategoryNode, "children" | "parentElementsPath"> & {
+  potentialParentElementsPath: ParentElementsPath;
+  children?: SearchResultsTreeNodeChildren<RawNode>;
+};
+
+type RawNode = RawDefinitionContainerNode | RawSubCategoryNode | RawCategoryNode | RawElementNode | RawSubModelNode;
 
 type InternalSearchTargetElements = Map<
   ModelId,
@@ -128,35 +140,36 @@ interface InternalSearchTargets {
   subCategories?: Map<CategoryId, Set<SubCategoryId>>;
 }
 
-interface CategoriesTreeNodesHandlerProps {
-  idsCache: CategoriesTreeIdsCache;
-  imodelAccess: ECClassHierarchyInspector;
-  categoryClassName: EC.FullClassName;
-  categoryElementClassName: EC.FullClassName;
-}
-
 interface ProcessedNodes {
   searchResultsElements: Map<ElementId, Omit<ElementNode, "children">>;
   searchTargetCategories: Map<CategoryId, Omit<CategoryNode, "children">>;
 }
 
-class CategoriesTreeNodesHandler extends SearchResultsNodesHandler<ProcessedNodes, CategoriesTreeSearchTargets, Node, TemporaryNode> {
-  readonly #props: CategoriesTreeNodesHandlerProps;
-  constructor(props: CategoriesTreeNodesHandlerProps) {
+interface CategoriesTreeSearchResultsNodesHandlerProps {
+  idsCache: CategoriesTreeIdsCache;
+  imodelAccess: ECClassHierarchyInspector;
+  categoryClassName: EC.FullClassName;
+  categoryElementClassName: EC.FullClassName;
+  categoryModelClassName: EC.FullClassName;
+}
+
+class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<ProcessedNodes, CategoriesTreeSearchTargets, RawNode> {
+  readonly #props: CategoriesTreeSearchResultsNodesHandlerProps;
+  constructor(props: CategoriesTreeSearchResultsNodesHandlerProps) {
     super();
     this.#props = props;
   }
 
   public async getProcessedNodes(): Promise<ProcessedNodes> {
-    const temporaryElementsArray = new Array<Omit<TemporaryElementNode, "children">>();
-    const searchTargetCategories = new Array<TemporaryCategoryNode>();
+    const rawElementsArray = new Array<Omit<RawElementNode, "children">>();
+    const searchTargetCategories = new Array<RawCategoryNode>();
     const result: ProcessedNodes = {
       searchResultsElements: new Map(),
       searchTargetCategories: new Map(),
     };
     for (const node of this.searchResultsNodesArr) {
       if (node.type === "element") {
-        temporaryElementsArray.push(node);
+        rawElementsArray.push(node);
         continue;
       }
       if (node.type === "category" && node.isSearchTarget) {
@@ -165,11 +178,11 @@ class CategoriesTreeNodesHandler extends SearchResultsNodesHandler<ProcessedNode
     }
 
     const { searchResultsElementsModels, subModels } =
-      temporaryElementsArray.length === 0
+      rawElementsArray.length === 0
         ? { searchResultsElementsModels: new Map<ElementId, ModelId>(), subModels: new Set<Id64String>() }
         : await firstValueFrom(
             forkJoin({
-              searchResultsElementsModels: this.#props.idsCache.getFilteredElementsModels(temporaryElementsArray.map((element) => element.id)),
+              searchResultsElementsModels: this.#props.idsCache.getFilteredElementsModels(rawElementsArray.map((element) => element.id)),
               subModels: this.#props.idsCache.getAllSubModels(),
             }),
           );
@@ -177,14 +190,14 @@ class CategoriesTreeNodesHandler extends SearchResultsNodesHandler<ProcessedNode
       subModels.size > 0
         ? (potentialPath: ParentElementsPath): ParentElementsPath => {
             for (let i = potentialPath.length - 1; i >= 0; --i) {
-              if (potentialPath[i].parentIds.some((parentId) => subModels.has(parentId))) {
+              if (potentialPath[i].elementIds.some((parentId) => subModels.has(parentId))) {
                 return potentialPath.slice(i + 1);
               }
             }
             return potentialPath;
           }
         : (potentialPath: ParentElementsPath): ParentElementsPath => potentialPath;
-    for (const element of temporaryElementsArray) {
+    for (const element of rawElementsArray) {
       const modelId = searchResultsElementsModels.get(element.id);
       assert(modelId !== undefined);
       result.searchResultsElements.set(element.id, {
@@ -229,10 +242,10 @@ class CategoriesTreeNodesHandler extends SearchResultsNodesHandler<ProcessedNode
     return { parentElementsPath, modelId };
   }
 
-  public convertNodesToSearchTargets(temporaryNodes: TemporaryNode[], processedNodes: ProcessedNodes): CategoriesTreeSearchTargets | undefined {
+  public convertNodesToSearchTargets(rawNodes: RawNode[], processedNodes: ProcessedNodes): CategoriesTreeSearchTargets | undefined {
     const internalSearchTargets: InternalSearchTargets = {};
 
-    temporaryNodes.forEach((temporaryNode) => this.collectSearchTargets(internalSearchTargets, temporaryNode, processedNodes));
+    rawNodes.forEach((rawNode) => this.collectSearchTargets(internalSearchTargets, rawNode, processedNodes));
 
     return this.convertInternalSearchTargets(internalSearchTargets);
   }
@@ -298,7 +311,7 @@ class CategoriesTreeNodesHandler extends SearchResultsNodesHandler<ProcessedNode
     };
   }
 
-  private collectSearchTargets(internalSearchTargets: InternalSearchTargets, node: TemporaryNode, processedNodes: ProcessedNodes) {
+  private collectSearchTargets(internalSearchTargets: InternalSearchTargets, node: RawNode, processedNodes: ProcessedNodes) {
     const searchResultsNode = node.type === "element" ? processedNodes.searchResultsElements.get(node.id) : node;
     assert(searchResultsNode !== undefined);
     if (searchResultsNode.isSearchTarget) {
@@ -329,11 +342,15 @@ class CategoriesTreeNodesHandler extends SearchResultsNodesHandler<ProcessedNode
 
   private addInternalTarget(
     internalSearchTargets: InternalSearchTargets,
-    node: TemporaryDefinitionContainerNode | TemporarySubCategoryNode | CategoryNode | ElementNode,
+    node: RawDefinitionContainerNode | RawSubCategoryNode | RawSubModelNode | CategoryNode | ElementNode,
   ) {
     switch (node.type) {
       case "definitionContainer": {
         (internalSearchTargets.definitionContainerIds ??= new Set()).add(node.id);
+        return;
+      }
+      case "subModel": {
+        // sub-models are hidden in hierarchy, they can not be search targets.
         return;
       }
       case "subCategory": {
@@ -377,17 +394,17 @@ class CategoriesTreeNodesHandler extends SearchResultsNodesHandler<ProcessedNode
     }
   }
 
-  public createTemporaryNode({
+  public createNode({
     type,
     id,
     isSearchTarget,
     parent,
   }: {
-    type: TemporaryNode["type"];
+    type: RawNode["type"];
     id: Id64String;
     isSearchTarget: boolean;
-    parent: TemporaryNode | SearchResultsTreeRootNode<TemporaryNode>;
-  }): TemporaryNode {
+    parent: RawNode | SearchResultsTreeRootNode<RawNode>;
+  }): RawNode {
     if (type === "definitionContainer") {
       return {
         id,
@@ -426,6 +443,17 @@ class CategoriesTreeNodesHandler extends SearchResultsNodesHandler<ProcessedNode
       };
     }
 
+    if (type === "subModel") {
+      assert("type" in parent && parent.type === "element");
+      return {
+        type,
+        categoryId: parent.categoryId,
+        id,
+        modelId: undefined,
+        isSearchTarget: false,
+      };
+    }
+
     if ("type" in parent) {
       if (parent.type === "category") {
         return {
@@ -435,6 +463,16 @@ class CategoriesTreeNodesHandler extends SearchResultsNodesHandler<ProcessedNode
           categoryId: parent.id,
           modelId: undefined,
           potentialParentElementsPath: parent.potentialParentElementsPath,
+        };
+      }
+      if (parent.type === "subModel") {
+        return {
+          id,
+          isSearchTarget,
+          type,
+          categoryId: parent.categoryId,
+          modelId: parent.id,
+          potentialParentElementsPath: [],
         };
       }
       assert(parent.type === "element");
@@ -456,7 +494,7 @@ class CategoriesTreeNodesHandler extends SearchResultsNodesHandler<ProcessedNode
     throw new Error("Invalid parent node type");
   }
 
-  public async getType(className: EC.FullClassName): Promise<TemporaryNode["type"]> {
+  public async getType(className: EC.FullClassName): Promise<RawNode["type"]> {
     if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_SubCategory)) {
       return "subCategory";
     }
@@ -466,19 +504,9 @@ class CategoriesTreeNodesHandler extends SearchResultsNodesHandler<ProcessedNode
     if (await this.#props.imodelAccess.classDerivesFrom(className, this.#props.categoryClassName)) {
       return "category";
     }
-    return "definitionContainer";
-  }
-
-  public getClassName(type: TemporaryNode["type"]): EC.FullClassName {
-    switch (type) {
-      case "definitionContainer":
-        return CLASS_NAME_DefinitionContainer;
-      case "subCategory":
-        return CLASS_NAME_SubCategory;
-      case "category":
-        return this.#props.categoryClassName;
-      default:
-        return this.#props.categoryElementClassName;
+    if (await this.#props.imodelAccess.classDerivesFrom(className, this.#props.categoryModelClassName)) {
+      return "subModel";
     }
+    return "definitionContainer";
   }
 }

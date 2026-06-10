@@ -1002,14 +1002,8 @@ describe("Models tree", () => {
                         identifier: adjustedModelKey(x.subModel),
                         options: { autoExpand: true },
                         children: [
-                          {
-                            identifier: x.category,
-                            options: { autoExpand: true },
-                            children: [
-                              { identifier: adjustedElementKey(x.subModeledElement1), options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
-                              { identifier: adjustedElementKey(x.subModeledElement3), options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
-                            ],
-                          },
+                          { identifier: adjustedElementKey(x.subModeledElement1), options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
+                          { identifier: adjustedElementKey(x.subModeledElement3), options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
                         ],
                       },
                     ],
@@ -1041,28 +1035,21 @@ describe("Models tree", () => {
                         label: /^root element/,
                         autoExpand: true,
                         children: [
-                          NodeValidators.createForInstanceNode({
-                            instanceKeys: [x.category],
-                            label: "category",
+                          NodeValidators.createForClassGroupingNode({
+                            label: "Physical Object",
                             autoExpand: true,
                             children: [
-                              NodeValidators.createForClassGroupingNode({
-                                label: "Physical Object",
-                                autoExpand: true,
-                                children: [
-                                  NodeValidators.createForInstanceNode({
-                                    instanceKeys: [x.subModeledElement1],
-                                    label: /^matching element 1/,
-                                    autoExpand: false,
-                                    children: false,
-                                  }),
-                                  NodeValidators.createForInstanceNode({
-                                    instanceKeys: [x.subModeledElement3],
-                                    label: /^matching element 3/,
-                                    autoExpand: false,
-                                    children: false,
-                                  }),
-                                ],
+                              NodeValidators.createForInstanceNode({
+                                instanceKeys: [x.subModeledElement1],
+                                label: /^matching element 1/,
+                                autoExpand: false,
+                                children: false,
+                              }),
+                              NodeValidators.createForInstanceNode({
+                                instanceKeys: [x.subModeledElement3],
+                                label: /^matching element 3/,
+                                autoExpand: false,
+                                children: false,
                               }),
                             ],
                           }),

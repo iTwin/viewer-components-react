@@ -48,7 +48,6 @@ import {
   createElementHierarchyNode,
   createModelHierarchyNode,
   createSubCategoryHierarchyNode,
-  createSubModelCategoryHierarchyNode,
 } from "./Utils.js";
 import { validateNodeVisibility } from "./VisibilityValidation.js";
 
@@ -2051,15 +2050,16 @@ describe("CategoriesTreeVisibilityHandler", () => {
             },
             {
               name: "modeled element, its model and category have partial visibility when its sub-model element's category display is turned on",
-              getTargetNode: (ids: IModelWithSubModelIds) => createSubModelCategoryHierarchyNode(ids.modeledElement.id, ids.subModelCategory?.id, true),
+              getTargetNode: (ids: IModelWithSubModelIds) =>
+                createCategoryHierarchyNode({ modelIds: [ids.modeledElement.id], id: ids.subModelCategory!.id, hasChildren: true }),
               // prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
-                [ids.subModelCategory?.id ?? ""]: "visible",
+                [ids.subModelCategory!.id]: "partial",
 
                 [ids.category.id]: "partial",
                   [ids.modeledElement.id]: "partial",
-                    [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
-                      [ids.subModelElement?.id ?? ""]: "visible",
+                    [`${ids.modeledElement.id}-${ids.subModelCategory!.id}`]: "visible",
+                      [ids.subModelElement!.id]: "visible",
               }),
             },
             {
@@ -4331,7 +4331,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           createCategoryHierarchyNode({
             id: subModelCategory.id,
             parentKeys: [category, modeledElement],
-            isCategoryOfSubModel: true,
             modelIds: [subModel.id],
             search: {
               isSearchTarget: false,

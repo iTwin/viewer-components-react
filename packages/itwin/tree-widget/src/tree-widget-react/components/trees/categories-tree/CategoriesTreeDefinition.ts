@@ -5,19 +5,16 @@
 
 import {
   bufferCount,
-  defer,
   distinct,
   EMPTY,
+  filter,
   firstValueFrom,
-  forkJoin,
   from,
   fromEvent,
   identity,
   map,
   merge,
-  mergeAll,
   mergeMap,
-  of,
   reduce,
   switchMap,
   takeUntil,
@@ -36,6 +33,7 @@ import {
 import { catchBeSQLiteInterrupts } from "../common/internal/UseErrorState.js";
 import {
   createIdsSelector,
+  fromWithRelease,
   getClassesByView,
   getOptimalBatchSize,
   getOrCreate,
@@ -230,7 +228,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
 
     const { hasSearchTargetAncestor, hasDirectNonSearchTargets } = groupingNodeDataFromChildren(node.children);
     const firstChild = node.children[0];
-    assert(CategoriesTreeNodeInternal.isRawCategoryNode(firstChild));
+    assert(CategoriesTreeNodeInternal.isRawElementNode(firstChild));
     return {
       ...node,
       label: node.label,
@@ -712,8 +710,9 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         ? parseIdsSelectorResult(parentNode.extendedData.modelIds)
         : await firstValueFrom(
             from(categoryIds).pipe(
-              mergeMap((categoryId) => this.#idsCache.getModels({ categoryId, subModels: "exclude" })),
-              mergeAll(),
+              mergeMap((categoryId) => this.#idsCache.getModels({ categoryId })),
+              filter(({ isSubModel }) => !isSubModel), // sub-models are handled as separate nodes, so we need to filter them out here
+              map(({ id }) => id),
               distinct(),
               toArray(),
             ),
@@ -870,7 +869,8 @@ function createInstanceKeyPathsFromInstanceLabel(
         }
         const [categoryLabelSelectClause, subCategoryLabelSelectClause, elementLabelSelectClause, definitionContainerLabelSelectClause] = await Promise.all(
           [categoryClass, CLASS_NAME_SubCategory, elementClass, ...(definitionContainers.length > 0 ? [CLASS_NAME_DefinitionContainer] : [])].map(
-            async (className) => labelsFactory.createSelectClause({ classAlias: "this", className }),
+            async (className) =>
+              labelsFactory.createSelectClause({ classAlias: "this", className, selectorsConcatenator: ECSql.createConcatenatedValueStringSelector }),
           ),
         );
         const ctes = [
@@ -1083,9 +1083,15 @@ function createSearchPathsForDifferentTypes(
           idsCache
             .getDefinitionContainersSearchPaths({ definitionContainerIds: ids.definitionContainerIds })
             .pipe(map((path) => ({ path, target: path[path.length - 1].id }))),
-          idsCache
-            .getCategoriesSearchPaths({ categoryIds: ids.categoryIds, includePathsWithSubModels: props.hierarchyConfig.showElements })
-            .pipe(map((path) => ({ path, target: path[path.length - 1].id }))),
+          createCategoriesSearchPaths({
+            queryExecutor: imodelAccess,
+            targetCategoryIds: ids.categoryIds,
+            componentId,
+            componentName,
+            idsCache,
+            viewType: props.viewType,
+            showElements: props.hierarchyConfig.showElements,
+          }),
           idsCache.getSubCategoriesSearchPaths({ subCategoryIds: ids.subCategoryIds }).pipe(map((path) => ({ path, target: path[path.length - 1].id }))),
           props.hierarchyConfig.showElements
             ? from(ids.elementIds).pipe(
@@ -1128,66 +1134,179 @@ export function createGeometricElementInstanceKeyPaths(props: {
     return EMPTY;
   }
 
-  return defer(() => {
-    const ctes = [
-      `CategoriesElementsHierarchy(ECInstanceId, ParentId, ModelId, CategoryId, Path) AS (
-        SELECT
-          e.ECInstanceId,
-          e.Parent.Id,
-          e.Model.Id,
-          e.Category.Id,
-          IIF(e.Parent.Id IS NULL,
-            '${MODEL_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([m].[ECInstanceId]) AS TEXT) || '${separator}${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT),
+  return props.idsCache.getAllSubModels().pipe(
+    mergeMap((subModelIds) => {
+      const ctes = [
+        `CategoriesElementsHierarchy(ECInstanceId, ParentId, ModelId, CategoryId, Path) AS (
+          SELECT
+            e.ECInstanceId,
+            e.Parent.Id,
+            e.Model.Id,
+            e.Category.Id,
             '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT)
-          )
-        FROM ${elementClass} e
-        JOIN IdSet(?) targetItemIdSet ON e.ECInstanceId = targetItemIdSet.id
-        LEFT JOIN ${modelClass} m ON (e.Parent.Id IS NULL AND m.ECInstanceId = e.Model.Id)
-        LEFT JOIN ${categoryClass} c ON (e.Parent.Id IS NULL AND c.ECInstanceId = e.Category.Id)
-        ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+          FROM ${elementClass} e
+          JOIN IdSet(?) targetItemIdSet ON e.ECInstanceId = targetItemIdSet.id
+          ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
-        UNION ALL
+          UNION ALL
 
-        SELECT
-          pe.ECInstanceId,
-          pe.Parent.Id,
-          pe.Model.Id,
-          pe.Category.Id,
-          IIF(pe.Parent.Id IS NULL,
-            '${MODEL_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([m].[ECInstanceId]) AS TEXT) || '${separator}${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || IIF(ce.CategoryId <> pe.Category.Id, '${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex(ce.CategoryId) AS TEXT) || '${separator}', '') || ce.Path,
-            '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || IIF(ce.CategoryId <> pe.Category.Id, '${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex(ce.CategoryId) AS TEXT) || '${separator}', '') || ce.Path
-          )
-        FROM CategoriesElementsHierarchy ce
-        JOIN ${elementClass} pe ON (pe.ECInstanceId = ce.ParentId OR pe.ECInstanceId = ce.ModelId AND ce.ParentId IS NULL)
-        LEFT JOIN ${modelClass} m ON (pe.Parent.Id IS NULL AND m.ECInstanceId = pe.Model.Id)
-        LEFT JOIN ${categoryClass} c ON (pe.Parent.Id IS NULL AND c.ECInstanceId = pe.Category.Id)
-      )`,
-    ];
-    const ecsql = `
-      SELECT mce.Path
-      FROM CategoriesElementsHierarchy mce
-      WHERE mce.ParentId IS NULL
-    `;
+          SELECT
+            pe.ECInstanceId,
+            pe.Parent.Id,
+            pe.Model.Id,
+            pe.Category.Id,
+            (
+              '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}'
+              || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT)
+              || IIF(ce.ParentId IS NULL,
+                  '${separator}${MODEL_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([ce].[ModelId]) AS TEXT),
+                  ''
+                )
+              || IIF(ce.CategoryId <> pe.Category.Id,
+                  '${separator}${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex(ce.CategoryId) AS TEXT),
+                  ''
+                )
+              || '${separator}'
+              || ce.Path
+          FROM CategoriesElementsHierarchy ce
+          JOIN ${elementClass} pe ON (pe.ECInstanceId = ce.ParentId OR pe.ECInstanceId = ce.ModelId AND ce.ParentId IS NULL)
+        )`,
+      ];
+      const ecsql = `
+        SELECT '${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([mce].[CategoryId]) AS TEXT) || '${separator}' || mce.Path
+        FROM CategoriesElementsHierarchy mce
+        WHERE mce.ParentId IS NULL ${subModelIds.size > 0 ? `AND NOT InVirtualSet(?, mce.ModelId)` : ""}
+      `;
 
-    return queryExecutor.createQueryReader(
-      { ctes, ecsql, bindings: [{ type: "idset", value: targetItems }] },
-      { rowFormat: "Indexes", limit: "unbounded", restartToken: `${componentName}/${componentId}/element-paths/${chunkIndex}` },
-    );
-  }).pipe(
+      return queryExecutor.createQueryReader(
+        {
+          ctes,
+          ecsql,
+          bindings: [{ type: "idset", value: targetItems }, ...(subModelIds.size > 0 ? [{ type: "idset" as const, value: [...subModelIds] }] : [])],
+        },
+        { rowFormat: "Indexes", limit: "unbounded", restartToken: `${componentName}/${componentId}/element-paths/${chunkIndex}` },
+      );
+    }),
     catchBeSQLiteInterrupts,
     targetItems.length > 300 ? releaseMainThreadOnItemsCount(300) : identity,
     map((row) => parseQueryRow(row, separator, elementClass, categoryClass, modelClass)),
     mergeMap((elementHierarchyPath) =>
-      forkJoin({
-        elementHierarchyPath: of(elementHierarchyPath),
-        pathToCategory: idsCache.getCategoriesSearchPaths({ categoryIds: elementHierarchyPath[0].id, includePathsWithSubModels: false }),
-      }),
+      idsCache.getSearchPathsUpToRootCategory({ categoryId: elementHierarchyPath[0].id }).pipe(
+        map((pathUpToCategory) => {
+          const path = [...pathUpToCategory, ...elementHierarchyPath];
+          return { path, target: elementHierarchyPath[elementHierarchyPath.length - 1].id };
+        }),
+      ),
     ),
-    map(({ elementHierarchyPath, pathToCategory }) => {
-      pathToCategory.pop(); // category is already included in the element hierarchy path
-      const path = [...pathToCategory, ...elementHierarchyPath];
-      return { path, target: elementHierarchyPath[elementHierarchyPath.length - 1].id };
-    }),
+  );
+}
+
+/** @internal */
+export function createCategoriesSearchPaths(props: {
+  queryExecutor: LimitingECSqlQueryExecutor;
+  idsCache: CategoriesTreeIdsCache;
+  viewType: "2d" | "3d";
+  targetCategoryIds: Id64Array;
+  componentId: GuidString;
+  componentName: string;
+  showElements: boolean;
+}): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String }> {
+  const separator = ";";
+  const { targetCategoryIds, componentId, componentName, idsCache, queryExecutor, viewType } = props;
+  const { categoryClass, elementClass, modelClass } = getClassesByView(viewType);
+  if (targetCategoryIds.length === 0) {
+    return EMPTY;
+  }
+  const rootCategoriesSearchPaths = fromWithRelease({ source: targetCategoryIds, releaseOnCount: 300 }).pipe(
+    mergeMap((categoryId) =>
+      idsCache
+        .getSearchPathsUpToRootCategory({ categoryId })
+        .pipe(map((path) => ({ path: [...path, { id: categoryId, className: categoryClass }], target: categoryId }))),
+    ),
+  );
+  if (!props.showElements) {
+    return rootCategoriesSearchPaths;
+  }
+
+  return merge(
+    rootCategoriesSearchPaths,
+    props.idsCache.getAllSubModels().pipe(
+      mergeMap((subModelIds) => {
+        const ctes = [
+          `CategoriesParentsHierarchy(ECInstanceId, ParentId, ModelId, CategoryId, Path) AS (
+            SELECT
+              pe.ECInstanceId,
+              pe.Parent.Id,
+              pe.Model.Id,
+              pe.Category.Id,
+              (
+                '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}'
+                || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT)
+                || IIF(e.Parent.Id IS NULL,
+                    '${separator}${MODEL_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([e].[Model].[Id]) AS TEXT),
+                    ''
+                    )
+                || '${separator}${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}'
+                || CAST(IdToHex([e].[Category].[Id]) AS TEXT)
+              )
+            FROM ${elementClass} e
+            JOIN IdSet(?) categoryIdSet ON e.Category.Id = categoryIdSet.id
+            JOIN ${elementClass} pe ON (pe.ECInstanceId = e.Parent.Id OR (pe.ECInstanceId = e.Model.Id AND e.Parent.Id IS NULL))
+            WHERE pe.Category.Id <> e.Category.Id
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+
+            UNION ALL
+
+            SELECT
+              pe.ECInstanceId,
+              pe.Parent.Id,
+              pe.Model.Id,
+              pe.Category.Id,
+              (
+                '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}'
+                || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT)
+                || IIF(ce.ParentId IS NULL,
+                    '${separator}${MODEL_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([ce].[ModelId]) AS TEXT),
+                    ''
+                  )
+                || IIF(ce.CategoryId <> pe.Category.Id,
+                    '${separator}${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex(ce.CategoryId) AS TEXT),
+                    ''
+                    )
+                || '${separator}'
+                || ce.Path
+              )
+            FROM CategoriesParentsHierarchy ce
+            JOIN ${elementClass} pe ON (pe.ECInstanceId = ce.ParentId OR (pe.ECInstanceId = ce.ModelId AND ce.ParentId IS NULL))
+          )`,
+        ];
+        const ecsql = `
+          SELECT '${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([mce].[CategoryId]) AS TEXT) || '${separator}' || mce.Path
+          FROM CategoriesParentsHierarchy mce
+          WHERE mce.ParentId IS NULL ${subModelIds.size > 0 ? `AND NOT InVirtualSet(?, mce.ModelId)` : ""}
+        `;
+
+        return queryExecutor.createQueryReader(
+          {
+            ctes,
+            ecsql,
+            bindings: [{ type: "idset", value: targetCategoryIds }, ...(subModelIds.size > 0 ? [{ type: "idset" as const, value: [...subModelIds] }] : [])],
+          },
+          { rowFormat: "Indexes", limit: "unbounded", restartToken: `${componentName}/${componentId}/categories-paths` },
+        );
+      }),
+      catchBeSQLiteInterrupts,
+      targetCategoryIds.length > 300 ? releaseMainThreadOnItemsCount(300) : identity,
+      map((row) => parseQueryRow(row, separator, elementClass, categoryClass, modelClass)),
+      mergeMap((categoryHierarchyPath) =>
+        idsCache.getSearchPathsUpToRootCategory({ categoryId: categoryHierarchyPath[0].id }).pipe(
+          map((pathUpToCategory) => {
+            const path = [...pathUpToCategory, ...categoryHierarchyPath];
+            return { path, target: categoryHierarchyPath[categoryHierarchyPath.length - 1].id };
+          }),
+        ),
+      ),
+    ),
   );
 }
 
@@ -1198,22 +1317,18 @@ function parseQueryRow(
   categoryClassName: EC.FullClassName,
   modelClassName: EC.FullClassName,
 ) {
-  const rowElements: string[] = row[0].split(separator);
+  const queriedPath: string[] = row[0].split(separator);
   const path = new Array<InstanceKey>();
-  for (let i = 0; i < rowElements.length; i += 2) {
-    switch (rowElements[i]) {
+  for (let i = 0; i < queriedPath.length; i += 2) {
+    switch (queriedPath[i]) {
       case ELEMENT_CLASS_NAME_QUERY_ALIAS:
-        path.push({ className: elementClassName, id: rowElements[i + 1] });
+        path.push({ className: elementClassName, id: queriedPath[i + 1] });
         break;
       case CATEGORY_CLASS_NAME_QUERY_ALIAS:
-        path.push({ className: categoryClassName, id: rowElements[i + 1] });
+        path.push({ className: categoryClassName, id: queriedPath[i + 1] });
         break;
       case MODEL_CLASS_NAME_QUERY_ALIAS:
-        // Ignore first model since it isn't in hierarchy
-        if (i === 0) {
-          break;
-        }
-        path.push({ className: modelClassName, id: rowElements[i + 1] });
+        path.push({ className: modelClassName, id: queriedPath[i + 1] });
         break;
     }
   }

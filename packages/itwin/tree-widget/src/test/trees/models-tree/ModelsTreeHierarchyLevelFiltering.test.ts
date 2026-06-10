@@ -356,7 +356,9 @@ describe("Models tree", () => {
           },
         ],
         extendedData: {
+          isCategory: true,
           modelIds: [keys.model.id],
+          parentElementsPath: [],
         },
         label: "",
       };
@@ -439,8 +441,10 @@ describe("Models tree", () => {
           instanceKeys: [keys.parentElement],
         },
         extendedData: {
-          categoryOfTopMostParentElement: keys.category.id,
-          topMostParentElementId: keys.parentElement.id,
+          parentElementsPath: [],
+          categoryId: keys.category.id,
+          modelId: keys.model.id,
+          isElement: true,
         },
         parentKeys: [
           {
@@ -517,6 +521,7 @@ describe("Models tree", () => {
         withEditTxn(imodel, (txn) => {
           const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
           const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const modelingElementCategory = insertSpatialCategory({ txn, codeValue: "category2" });
           const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
           const modeledElement = insertPhysicalElement({
             txn,
@@ -530,9 +535,9 @@ describe("Models tree", () => {
             txn,
             userLabel: `modeling element`,
             modelId: subModel.id,
-            categoryId: category.id,
+            categoryId: modelingElementCategory.id,
           });
-          return { rootSubject, model, category, modeledElement, modelingElement };
+          return { rootSubject, model, category, modelingElementCategory, modeledElement, modelingElement };
         }),
       );
       const { imodelConnection, ...keys } = buildIModelResult;
@@ -543,8 +548,10 @@ describe("Models tree", () => {
           instanceKeys: [keys.modeledElement],
         },
         extendedData: {
-          categoryOfTopMostParentElement: keys.category.id,
-          topMostParentElementId: keys.modeledElement.id,
+          parentElementsPath: [],
+          categoryId: keys.category.id,
+          modelId: keys.model.id,
+          isElement: true,
         },
         parentKeys: [
           {
@@ -566,7 +573,7 @@ describe("Models tree", () => {
       // validate hierarchy level without filter
       validateHierarchyLevel({
         nodes: await collect(provider.getNodes({ parentNode })),
-        expect: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.category] })],
+        expect: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.modelingElementCategory] })],
       });
 
       // validate descriptor, that is required for creating the filter
@@ -589,22 +596,22 @@ describe("Models tree", () => {
         nodes: await collect(
           provider.getNodes({
             parentNode,
-            instanceFilter: createInstanceFilter(keys.category.className, {
+            instanceFilter: createInstanceFilter(keys.modelingElementCategory.className, {
               sourceAlias: "",
               propertyName: "CodeValue",
               propertyTypeName: "string",
               operator: "is-equal",
-              value: { rawValue: "category", displayValue: "" },
+              value: { rawValue: "category2", displayValue: "" },
             }),
           }),
         ),
-        expect: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.category] })],
+        expect: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.modelingElementCategory] })],
       });
       validateHierarchyLevel({
         nodes: await collect(
           provider.getNodes({
             parentNode,
-            instanceFilter: createInstanceFilter(keys.category.className, {
+            instanceFilter: createInstanceFilter(keys.modelingElementCategory.className, {
               sourceAlias: "",
               propertyName: "UserLabel",
               propertyTypeName: "string",
@@ -612,7 +619,7 @@ describe("Models tree", () => {
             }),
           }),
         ),
-        expect: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.category] })],
+        expect: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.modelingElementCategory] })],
       });
     });
 
@@ -646,6 +653,8 @@ describe("Models tree", () => {
         ],
         extendedData: {
           modelIds: [keys.model.id],
+          isCategory: true,
+          parentElementsPath: [],
         },
         label: "",
       };
@@ -797,6 +806,8 @@ describe("Models tree", () => {
           ],
           extendedData: {
             modelIds: [keys.model.id],
+            parentElementsPath: [],
+            isCategory: true,
           },
           label: "",
         };

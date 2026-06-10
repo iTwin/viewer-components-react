@@ -14,17 +14,19 @@ import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, GroupingHierarchyNode, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { EC, InstanceKey } from "@itwin/presentation-shared";
 import type { ElementId, ModelId } from "../../../../tree-widget-react/components/trees/common/internal/Types.js";
+import type { ParentElementsPath } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
 
 /** @internal */
-export function createCategoryHierarchyNode(
-  props: {
-    id: Id64String;
-    hasChildren?: boolean;
-    viewType?: "2d" | "3d";
-    parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
-    search?: NonGroupingHierarchyNode["search"];
-  } & ({ isCategoryOfSubModel?: false; hasSubCategories?: boolean } | { isCategoryOfSubModel: true; modelIds: Id64Array }),
-): NonGroupingHierarchyNode {
+export function createCategoryHierarchyNode(props: {
+  id: Id64String;
+  hasChildren?: boolean;
+  viewType?: "2d" | "3d";
+  parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
+  search?: NonGroupingHierarchyNode["search"];
+  modelIds?: Id64Array;
+  hasSubCategories?: boolean;
+  parentElementsPath?: ParentElementsPath;
+}): NonGroupingHierarchyNode {
   const { categoryClass } = getClassesByView(props.viewType ?? "3d");
   return {
     key: {
@@ -39,37 +41,13 @@ export function createCategoryHierarchyNode(
       : [],
     extendedData: {
       isCategory: true,
-      modelIds: props.isCategoryOfSubModel ? props.modelIds : undefined,
-      categoryId: props.id,
-      isCategoryOfSubModel: !!props.isCategoryOfSubModel,
-      hasSubCategories: !props.isCategoryOfSubModel ? !!props.hasSubCategories : undefined,
+      parentElementsPath: props.parentElementsPath ?? [],
+      modelIds: props.modelIds ?? [],
+      hasSubCategories: props.hasSubCategories,
     },
   };
 }
 
-/** @internal */
-export function createSubModelCategoryHierarchyNode(
-  modelId?: Id64String,
-  categoryId?: Id64String,
-  hasChildren?: boolean,
-  viewType: "2d" | "3d" = "3d",
-): NonGroupingHierarchyNode {
-  const { categoryClass } = getClassesByView(viewType);
-  return {
-    key: {
-      type: "instances",
-      instanceKeys: [{ className: categoryClass, id: categoryId ?? "" }],
-    },
-    children: !!hasChildren,
-    label: "",
-    parentKeys: [],
-    extendedData: {
-      isCategory: true,
-      modelId: modelId ?? "0x1",
-      categoryId: categoryId ?? "0x2",
-    },
-  };
-}
 /** @internal */
 export function createSubCategoryHierarchyNode(props: {
   id: Id64String;
@@ -157,6 +135,7 @@ export function createElementHierarchyNode(props: {
   elementId: Id64String;
   viewType?: "2d" | "3d";
   parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
+  parentElementsPath?: ParentElementsPath;
   search?: NonGroupingHierarchyNode["search"];
 }): NonGroupingHierarchyNode {
   const { elementClass } = getClassesByView(props.viewType ?? "3d");
@@ -175,7 +154,7 @@ export function createElementHierarchyNode(props: {
       modelId: props.modelId,
       categoryId: props.categoryId,
       isElement: true,
-      parentElementsPath: [],
+      parentElementsPath: props.parentElementsPath ?? [],
     },
   };
 }

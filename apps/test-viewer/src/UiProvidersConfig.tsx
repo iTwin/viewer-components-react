@@ -108,6 +108,22 @@ const configuredUiItems = new Map<string, UiItem>([
           getWidgets: () => {
             const trees: TreeDefinition[] = [
               {
+                id: CategoriesTreeComponent.id,
+                // eslint-disable-next-line @typescript-eslint/unbound-method
+                getLabel: CategoriesTreeComponent.getLabel,
+                isSearchable: true,
+                render: (props) => (
+                  <CategoriesTreeComponent
+                    searchText={props.searchText}
+                    selectionStorage={unifiedSelectionStorage}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
+                    treeLabel={props.treeLabel}
+                    hierarchyConfig={{ showElements: true }}
+                  />
+                ),
+              },
+              {
                 id: ModelsTreeComponent.id,
                 // eslint-disable-next-line @typescript-eslint/unbound-method
                 getLabel: ModelsTreeComponent.getLabel,
@@ -120,21 +136,6 @@ const configuredUiItems = new Map<string, UiItem>([
                     searchText={props.searchText}
                     selectionStorage={unifiedSelectionStorage}
                     selectionMode={"extended"}
-                    onPerformanceMeasured={props.onPerformanceMeasured}
-                    onFeatureUsed={props.onFeatureUsed}
-                    treeLabel={props.treeLabel}
-                  />
-                ),
-              },
-              {
-                id: CategoriesTreeComponent.id,
-                // eslint-disable-next-line @typescript-eslint/unbound-method
-                getLabel: CategoriesTreeComponent.getLabel,
-                isSearchable: true,
-                render: (props) => (
-                  <CategoriesTreeComponent
-                    searchText={props.searchText}
-                    selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
                     treeLabel={props.treeLabel}

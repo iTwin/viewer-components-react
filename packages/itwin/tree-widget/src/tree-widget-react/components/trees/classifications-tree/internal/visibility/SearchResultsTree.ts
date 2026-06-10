@@ -5,7 +5,7 @@
 
 import { firstValueFrom } from "rxjs";
 import { assert } from "@itwin/core-bentley";
-import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable, CLASS_NAME_GeometricElement3d } from "../../../common/internal/ClassNameDefinitions.js";
+import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable } from "../../../common/internal/ClassNameDefinitions.js";
 import { getOrCreate, ParentElementsPath } from "../../../common/internal/Utils.js";
 import { createSearchResultsTree, SearchResultsNodesHandler } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 
@@ -42,7 +42,7 @@ export async function createClassificationsSearchResultsTree(props: {
 }): Promise<SearchResultsTree<ClassificationsTreeSearchTargets>> {
   const { imodelAccess, searchPaths, idsCache } = props;
   return createSearchResultsTree({
-    searchResultsNodesHandler: new ClassificationsTreeNodesHandler({ idsCache, imodelAccess }),
+    searchResultsNodesHandler: new ClassificationsTreeSearchResultsNodesHandler({ idsCache, imodelAccess }),
     searchPaths,
   });
 }
@@ -64,22 +64,22 @@ interface ElementNode extends BaseSearchResultsTreeNode<Node> {
 
 type Node = ClassificationTableNode | ClassificationNode | ElementNode;
 
-type TemporaryClassificationTableNode = Omit<ClassificationTableNode, "children"> & {
-  children?: SearchResultsTreeNodeChildren<TemporaryNode>;
+type RawClassificationTableNode = Omit<ClassificationTableNode, "children"> & {
+  children?: SearchResultsTreeNodeChildren<RawNode>;
 };
 
-type TemporaryClassificationNode = Omit<ClassificationNode, "children"> & {
-  children?: SearchResultsTreeNodeChildren<TemporaryNode>;
+type RawClassificationNode = Omit<ClassificationNode, "children"> & {
+  children?: SearchResultsTreeNodeChildren<RawNode>;
 };
 
-type TemporaryElementNode = Omit<ElementNode, "modelId" | "categoryId" | "children" | "parentElementsPath"> & {
+type RawElementNode = Omit<ElementNode, "modelId" | "categoryId" | "children" | "parentElementsPath"> & {
   modelId: Id64String | undefined;
   categoryId: Id64String | undefined;
   parentElementPathWithoutCategories: ParentElementsPath;
-  children?: SearchResultsTreeNodeChildren<TemporaryNode>;
+  children?: SearchResultsTreeNodeChildren<RawNode>;
 };
 
-type TemporaryNode = TemporaryClassificationTableNode | TemporaryClassificationNode | TemporaryElementNode;
+type RawNode = RawClassificationTableNode | RawClassificationNode | RawElementNode;
 
 type InternalSearchTargetElements = Map<
   ModelId,
@@ -98,49 +98,49 @@ interface InternalSearchTargets {
   classificationIds?: Id64Set;
 }
 
-interface ClassificationsTreeNodesHandlerProps {
-  idsCache: ClassificationsTreeIdsCache;
-  imodelAccess: ECClassHierarchyInspector;
-}
-
 interface ProcessedNodes {
   searchResultsElements: Map<ElementId, Omit<ElementNode, "children">>;
 }
 
-class ClassificationsTreeNodesHandler extends SearchResultsNodesHandler<ProcessedNodes, ClassificationsTreeSearchTargets, Node, TemporaryNode> {
-  readonly #props: ClassificationsTreeNodesHandlerProps;
-  constructor(props: ClassificationsTreeNodesHandlerProps) {
+interface ClassificationsTreeSearchResultsNodesHandlerProps {
+  idsCache: ClassificationsTreeIdsCache;
+  imodelAccess: ECClassHierarchyInspector;
+}
+
+class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<ProcessedNodes, ClassificationsTreeSearchTargets, RawNode> {
+  readonly #props: ClassificationsTreeSearchResultsNodesHandlerProps;
+  constructor(props: ClassificationsTreeSearchResultsNodesHandlerProps) {
     super();
     this.#props = props;
   }
 
   public async getProcessedNodes(): Promise<ProcessedNodes> {
-    const temporaryElementsArray = new Array<Omit<TemporaryElementNode, "children">>();
+    const rawElementsArray = new Array<Omit<RawElementNode, "children">>();
     const result: ProcessedNodes = {
       searchResultsElements: new Map(),
     };
     for (const node of this.searchResultsNodesArr) {
       if (node.type === "element") {
-        temporaryElementsArray.push(node);
+        rawElementsArray.push(node);
       }
     }
 
     const searchResultsElementsData = await firstValueFrom(
       this.#props.idsCache.getFilteredElementsData({
-        elementIds: temporaryElementsArray.map((element) => element.id),
+        elementIds: rawElementsArray.map((element) => element.id),
       }),
     );
-    for (const element of temporaryElementsArray) {
+    for (const element of rawElementsArray) {
       const entry = searchResultsElementsData.get(element.id);
       assert(entry !== undefined);
-      const parentElementsPath: ParentElementsPath = [];
-      for (const { parentIds } of element.parentElementPathWithoutCategories) {
-        assert(parentIds.length === 1);
-        const categoryId = searchResultsElementsData.get(parentIds[0])?.categoryId;
+      let parentElementsPath: ParentElementsPath = [];
+      for (const { elementIds } of element.parentElementPathWithoutCategories) {
+        assert(elementIds.length === 1);
+        const categoryId = searchResultsElementsData.get(elementIds[0])?.categoryId;
         assert(categoryId !== undefined);
-        ParentElementsPath.appendToPath({
+        parentElementsPath = ParentElementsPath.appendToPath({
           path: parentElementsPath,
-          ids: parentIds[0],
+          ids: elementIds[0],
           categoryId,
         });
       }
@@ -154,10 +154,10 @@ class ClassificationsTreeNodesHandler extends SearchResultsNodesHandler<Processe
     return result;
   }
 
-  public convertNodesToSearchTargets(temporaryNodes: TemporaryNode[], processedNodes: ProcessedNodes): ClassificationsTreeSearchTargets | undefined {
+  public convertNodesToSearchTargets(rawNodes: RawNode[], processedNodes: ProcessedNodes): ClassificationsTreeSearchTargets | undefined {
     const internalSearchTargets: InternalSearchTargets = {};
 
-    temporaryNodes.forEach((temporaryNode) => this.collectSearchTargets(internalSearchTargets, temporaryNode, processedNodes));
+    rawNodes.forEach((rawNode) => this.collectSearchTargets(internalSearchTargets, rawNode, processedNodes));
 
     return this.convertInternalSearchTargets(internalSearchTargets);
   }
@@ -203,7 +203,7 @@ class ClassificationsTreeNodesHandler extends SearchResultsNodesHandler<Processe
     };
   }
 
-  private collectSearchTargets(internalSearchTargets: InternalSearchTargets, node: TemporaryNode, processedNodes: ProcessedNodes) {
+  private collectSearchTargets(internalSearchTargets: InternalSearchTargets, node: RawNode, processedNodes: ProcessedNodes) {
     const searchResultsNode = node.type === "element" ? processedNodes.searchResultsElements.get(node.id) : node;
     assert(searchResultsNode !== undefined);
     if (searchResultsNode.isSearchTarget) {
@@ -225,10 +225,7 @@ class ClassificationsTreeNodesHandler extends SearchResultsNodesHandler<Processe
     }
   }
 
-  private addInternalTarget(
-    internalSearchTargets: InternalSearchTargets,
-    node: { type: "classificationTable" | "classification"; id: Id64String; isSearchTarget: boolean } | Omit<ElementNode, "children">,
-  ) {
+  private addInternalTarget(internalSearchTargets: InternalSearchTargets, node: RawClassificationTableNode | RawClassificationNode | ElementNode) {
     switch (node.type) {
       case "classificationTable":
         (internalSearchTargets.classificationTableIds ??= new Set()).add(node.id);
@@ -254,17 +251,17 @@ class ClassificationsTreeNodesHandler extends SearchResultsNodesHandler<Processe
     }
   }
 
-  public createTemporaryNode({
+  public createNode({
     type,
     id,
     isSearchTarget,
     parent,
   }: {
-    type: TemporaryNode["type"];
+    type: RawNode["type"];
     id: Id64String;
     isSearchTarget: boolean;
-    parent: TemporaryNode | SearchResultsTreeRootNode<TemporaryNode>;
-  }): TemporaryNode {
+    parent: RawNode | SearchResultsTreeRootNode<RawNode>;
+  }): RawNode {
     if (type === "classificationTable" || type === "classification") {
       return {
         id,
@@ -284,7 +281,7 @@ class ClassificationsTreeNodesHandler extends SearchResultsNodesHandler<Processe
         parentElementPathWithoutCategories: ParentElementsPath.appendToPath({
           path: parent.parentElementPathWithoutCategories,
           ids: parent.id,
-          categoryId: "",
+          categoryId: "", // Placeholder categoryId - real categories are resolved in getProcessedNodes() using searchResultsElementsData
         }),
       };
     }
@@ -299,7 +296,7 @@ class ClassificationsTreeNodesHandler extends SearchResultsNodesHandler<Processe
     };
   }
 
-  public async getType(className: EC.FullClassName): Promise<TemporaryNode["type"]> {
+  public async getType(className: EC.FullClassName): Promise<RawNode["type"]> {
     if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_ClassificationTable)) {
       return "classificationTable";
     }
@@ -307,16 +304,5 @@ class ClassificationsTreeNodesHandler extends SearchResultsNodesHandler<Processe
       return "classification";
     }
     return "element";
-  }
-
-  public getClassName(type: TemporaryNode["type"]): EC.FullClassName {
-    switch (type) {
-      case "classificationTable":
-        return CLASS_NAME_ClassificationTable;
-      case "classification":
-        return CLASS_NAME_Classification;
-      case "element":
-        return CLASS_NAME_GeometricElement3d;
-    }
   }
 }

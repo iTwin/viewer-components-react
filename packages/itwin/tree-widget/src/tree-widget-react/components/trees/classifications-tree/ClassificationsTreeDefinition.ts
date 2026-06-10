@@ -446,7 +446,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
   return defer(async () => {
     const [classificationTableLabelSelectClause, classificationLabelSelectClause, elementLabelSelectClause] = await Promise.all(
       [CLASS_NAME_ClassificationTable, CLASS_NAME_Classification, CLASS_NAME_GeometricElement3d].map(async (className) =>
-        props.labelsFactory.createSelectClause({ classAlias: "this", className }),
+        props.labelsFactory.createSelectClause({ classAlias: "this", className, selectorsConcatenator: ECSql.createConcatenatedValueStringSelector }),
       ),
     );
     const classificationIds = await firstValueFrom(props.idsCache.getAllClassifications());

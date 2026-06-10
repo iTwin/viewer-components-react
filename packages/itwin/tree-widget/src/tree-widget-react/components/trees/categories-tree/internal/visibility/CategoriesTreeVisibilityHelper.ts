@@ -3,7 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, concat, concatMap, delay, EMPTY, from, map, mergeAll, mergeMap, toArray } from "rxjs";
+import { bufferCount, concat, concatMap, delay, EMPTY, from, map, merge, mergeMap, reduce, toArray } from "rxjs";
+import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { getOptimalBatchSize } from "../../../common/internal/Utils.js";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
@@ -44,20 +45,35 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
     return this.#props.idsCache
       .getAllContainedCategories({
         definitionContainerIds: props.definitionContainerIds,
-        includeEmptyCategories: this.#props.hierarchyConfig.showEmptyCategories,
       })
       .pipe(
-        mergeMap((categoryIds) => {
-          if (categoryIds.size < 1001) {
-            return this.getCategoriesVisibilityStatus({ categoryIds, modelId: undefined });
-          }
-          const optimalBatchSize = getOptimalBatchSize({ totalSize: categoryIds.size, maximumBatchSize: 1001 });
-          return from(categoryIds).pipe(
-            bufferCount(optimalBatchSize),
-            concatMap((categoryIdsBatch) => this.getCategoriesVisibilityStatus({ categoryIds: categoryIdsBatch, modelId: undefined }).pipe(delay(0))),
-            mergeVisibilityStatuses(),
+        reduce(
+          (acc, { id, hasElements, isTopMostElementCategory }) => {
+            if (isTopMostElementCategory) {
+              acc.topMostElementCategories.push(id);
+              return acc;
+            }
+            if (this.#props.hierarchyConfig.showEmptyCategories && !hasElements) {
+              acc.emptyCategories.push(id);
+            }
+            return acc;
+          },
+          { emptyCategories: new Array<Id64String>(), topMostElementCategories: new Array<Id64String>() },
+        ),
+        mergeMap(({ emptyCategories, topMostElementCategories }) => {
+          return merge(
+            from(emptyCategories).pipe(
+              map((id) => (this.#props.viewport.viewsCategory(id) ? createVisibilityStatus("visible") : createVisibilityStatus("hidden"))),
+            ),
+            topMostElementCategories.length < 1001
+              ? this.getCategoriesVisibilityStatus({ categoryIds: topMostElementCategories, modelId: undefined })
+              : from(topMostElementCategories).pipe(
+                  bufferCount(getOptimalBatchSize({ totalSize: topMostElementCategories.length, maximumBatchSize: 1001 })),
+                  concatMap((categoryIdsBatch) => this.getCategoriesVisibilityStatus({ categoryIds: categoryIdsBatch, modelId: undefined }).pipe(delay(0))),
+                ),
           );
         }),
+        mergeVisibilityStatuses(),
       );
   }
 
@@ -91,9 +107,26 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
     return this.#props.idsCache
       .getAllContainedCategories({
         definitionContainerIds: props.definitionContainerIds,
-        includeEmptyCategories: this.#props.hierarchyConfig.showEmptyCategories,
       })
-      .pipe(mergeMap((categoryIds) => this.changeCategoriesVisibilityStatus({ categoryIds, modelId: undefined, on: props.on })));
+      .pipe(
+        reduce(
+          (acc, { id, hasElements, isTopMostElementCategory }) => {
+            if (isTopMostElementCategory) {
+              acc.topMostElementCategories.push(id);
+              return acc;
+            }
+            if (this.#props.hierarchyConfig.showEmptyCategories && !hasElements) {
+              acc.emptyCategories.push(id);
+            }
+            return acc;
+          },
+          { emptyCategories: new Array<Id64String>(), topMostElementCategories: new Array<Id64String>() },
+        ),
+        mergeMap(({ emptyCategories, topMostElementCategories }) => {
+          this.#props.viewport.changeCategoryDisplay({ categoryIds: emptyCategories, display: props.on });
+          return this.changeCategoriesVisibilityStatus({ categoryIds: topMostElementCategories, modelId: undefined, on: props.on });
+        }),
+      );
   }
 
   /**
@@ -133,9 +166,8 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
   /** Turns on category and its' related models. Does not turn on other categories contained in those models.*/
   private enableCategoryWithoutEnablingOtherCategories({ categoryId }: { categoryId: Id64String }): Observable<void> {
     this.#props.viewport.changeCategoryDisplay({ categoryIds: categoryId, display: true });
-    return this.#props.idsCache.getModels({ categoryId, subModels: "include" }).pipe(
-      mergeAll(),
-      mergeMap((modelId) => {
+    return this.#props.idsCache.getModels({ categoryId }).pipe(
+      mergeMap(({ id: modelId }) => {
         this.#props.viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: categoryId, override: "none" });
         return this.#props.viewport.viewsModel(modelId)
           ? EMPTY

@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "vitest";
+import { ModelsTreeNodeInternal } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeNodeInternal.js";
 import { ModelsTreeNode } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeNode.js";
 
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
@@ -53,10 +54,14 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
     return;
   }
 
-  if (ModelsTreeNode.isCategoryNode(node)) {
+  if (ModelsTreeNodeInternal.isCategoryNode(node)) {
     const { id } = node.key.instanceKeys[0];
     const modelId = node.extendedData.modelIds[0];
-    const idToUse = `${modelId}-${id}`;
+    const lastParentId =
+      node.extendedData.parentElementsPath.length > 0
+        ? node.extendedData.parentElementsPath[node.extendedData.parentElementsPath.length - 1].elementIds[0]
+        : undefined;
+    const idToUse = `${lastParentId ?? modelId}-${id}`;
     if (expectations[idToUse] === "disabled") {
       expect(actualVisibility.isDisabled, `Node, ${JSON.stringify(node)}`).toBe(true);
     } else {

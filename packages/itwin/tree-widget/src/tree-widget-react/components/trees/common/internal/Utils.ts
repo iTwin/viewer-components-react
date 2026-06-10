@@ -161,61 +161,64 @@ export function fromWithRelease(props: {
 export type ChildrenTree<T extends object = {}> = Map<string, T & { children?: ChildrenTree<T> }>;
 
 /** @internal */
-export function getIdsFromChildrenTree<T extends object = {}>({
-  tree,
-  predicate,
-}: {
-  tree: ChildrenTree<T>;
-  predicate?: (props: { depth: number; treeEntry: T }) => boolean;
-}): Set<string> {
-  function getIdsInternal({ childrenTree, depth, resultAccumulator }: { childrenTree: ChildrenTree<T>; depth: number; resultAccumulator: Set<string> }): void {
-    for (const [id, entry] of childrenTree) {
-      if (!predicate || predicate({ depth, treeEntry: entry })) {
-        resultAccumulator.add(id);
-      }
-      if (entry.children) {
-        getIdsInternal({ childrenTree: entry.children, depth: depth + 1, resultAccumulator });
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export namespace ChildrenTree {
+  /** @internal*/
+  export function collect<T extends object = {}>({
+    tree,
+    addToAccumulator,
+  }: {
+    tree: ChildrenTree<T>;
+    addToAccumulator: (props: { depth: number; treeEntry: T; key: string }) => { ignoreChildren: boolean };
+  }): void {
+    function getIdsInternal({ childrenTree, depth }: { childrenTree: ChildrenTree<T>; depth: number }): void {
+      for (const [id, entry] of childrenTree) {
+        const { ignoreChildren } = addToAccumulator({ depth, treeEntry: entry, key: id });
+        if (ignoreChildren) {
+          continue;
+        }
+        if (entry.children) {
+          getIdsInternal({ childrenTree: entry.children, depth: depth + 1 });
+        }
       }
     }
+    getIdsInternal({ childrenTree: tree, depth: 0 });
   }
-  const result = new Set<string>();
-  getIdsInternal({ childrenTree: tree, depth: 0, resultAccumulator: result });
-  return result;
-}
 
-/**
- * Updates children tree with provided `idsToAdd`:
- * - All Ids are added (if they are not yet added) to children tree in the same order they appear in `idsToAdd` array.
- * - `T` is assigned to each entry using the `additionalPropsGetter` function.
- * @internal
- */
-export function updateChildrenTree<T extends object = {}>({
-  tree,
-  additionalPropsGetter,
-  idsToAdd,
-}: {
-  tree: ChildrenTree<T>;
-  idsToAdd: Id64Array;
-  additionalPropsGetter: (id: Id64String, additionalProps?: T) => T;
-}) {
-  let currentTree: ChildrenTree<T> = tree;
-  for (let i = 0; i < idsToAdd.length; ++i) {
-    const id = idsToAdd[i];
-    let entry = currentTree.get(id);
-    entry = {
-      // Whoever calls this function knows how to assign the `T` to entry.
-      ...additionalPropsGetter(id, entry),
-      // If children already exists, we reuse it.
-      // If children do not exist and there are still ids left in the `idsToAdd` array, create a new Map, it will have the next id.
-      ...(entry?.children || i + 1 < idsToAdd.length ? { children: entry?.children ?? new Map() } : {}),
-    };
-    // Always update the set with updated entry.
-    currentTree.set(id, entry);
-    // This will only happen if it's the last id in `idsToAdd` array. In such case loop can be exited.
-    if (!entry.children) {
-      break;
+  /**
+   * Updates children tree with provided `idsToAdd`:
+   * - All Ids are added (if they are not yet added) to children tree in the same order they appear in `idsToAdd` array.
+   * - `T` is assigned to each entry using the `additionalPropsGetter` function.
+   * @internal
+   */
+  export function update<T extends object = {}>({
+    tree,
+    additionalPropsGetter,
+    idsToAdd,
+  }: {
+    tree: ChildrenTree<T>;
+    idsToAdd: Id64Array;
+    additionalPropsGetter: ({ id, additionalProps, depth }: { id: Id64String; additionalProps?: T; depth: number }) => T;
+  }) {
+    let currentTree: ChildrenTree<T> = tree;
+    for (let i = 0; i < idsToAdd.length; ++i) {
+      const id = idsToAdd[i];
+      let entry = currentTree.get(id);
+      entry = {
+        // Whoever calls this function knows how to assign the `T` to entry.
+        ...additionalPropsGetter({ id, additionalProps: entry, depth: i }),
+        // If children already exists, we reuse it.
+        // If children do not exist and there are still ids left in the `idsToAdd` array, create a new Map, it will have the next id.
+        ...(entry?.children || i + 1 < idsToAdd.length ? { children: entry?.children ?? new Map() } : {}),
+      };
+      // Always update the set with updated entry.
+      currentTree.set(id, entry);
+      // This will only happen if it's the last id in `idsToAdd` array. In such case loop can be exited.
+      if (!entry.children) {
+        break;
+      }
+      currentTree = entry.children;
     }
-    currentTree = entry.children;
   }
 }
 
@@ -246,22 +249,24 @@ export function groupingNodeDataFromChildren(children: ProcessedHierarchyNode[])
 }
 
 /** @internal */
-export type ParentElementsPath = Array<{ parentIds: Array<ElementId>; parentCategoryId: CategoryId }>;
+export type ParentElementsPath = Array<{ elementIds: Id64Array; categoryIds: Id64String }>;
 
 /** @internal */
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export namespace ParentElementsPath {
   export function getSingleLastParentId(path: ParentElementsPath): ElementId | undefined {
     const lastParentIds = ParentElementsPath.getLastParentIds(path);
-    assert(lastParentIds === undefined || lastParentIds.length === 1);
-    const lastParentId = lastParentIds ? lastParentIds[0] : undefined;
-    return lastParentId;
+    assert(
+      () => lastParentIds === undefined || lastParentIds.length === 1,
+      `Expected exactly one parent id at end of path, got ${lastParentIds?.length}. Path: ${JSON.stringify(path)}`,
+    );
+    return lastParentIds?.[0];
   }
   export function getLastParentIds(path: ParentElementsPath): Id64Array | undefined {
-    return path.length > 0 ? path[path.length - 1].parentIds : undefined;
+    return path.length > 0 ? path[path.length - 1].elementIds : undefined;
   }
   export function appendToPath({ path, ids, categoryId }: { path: ParentElementsPath; ids: Id64Arg; categoryId: CategoryId }): ParentElementsPath {
-    return [...path, { parentIds: getId64Array(ids), parentCategoryId: categoryId }];
+    return [...path, { elementIds: getId64Array(ids), categoryIds: categoryId }];
   }
 }
 
@@ -275,7 +280,8 @@ export function getOrCreate<TKey, TValue>({ map, key, createFunc }: { map: Map<T
   return entry;
 }
 
-function getId64Array(ids: Id64Arg): Id64Array {
+/** @internal */
+export function getId64Array(ids: Id64Arg): Id64Array {
   return typeof ids === "string" ? [ids] : Array.isArray(ids) ? ids : [...ids];
 }
 
