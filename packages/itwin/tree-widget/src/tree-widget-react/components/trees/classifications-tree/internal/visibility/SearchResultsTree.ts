@@ -235,7 +235,7 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
     let entry = searchTargetElementsMap;
     let topMostParentElementId: Id64String | undefined;
     for (let i = 0; i < node.pathToNode.length; ++i) {
-      if (topMostParentElementId === undefined && node.type === "element") {
+      if (topMostParentElementId === undefined && node.pathToNode[i].type === "element") {
         topMostParentElementId = node.pathToNode[i].id;
       }
       const identifierAsString = this.convertSearchResultsNodeIdentifierToString(node.pathToNode[i]);

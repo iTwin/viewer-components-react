@@ -387,9 +387,9 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
     return this.getElementsTree(props).pipe(
       map((childrenTree) => {
         const result = new Set<ElementId>();
-        ChildrenTree.collect({
+        ChildrenTree.visit({
           tree: childrenTree,
-          addToAccumulator: ({ treeEntry, key }) => {
+          accept: ({ treeEntry, key }) => {
             if (treeEntry.isInAlwaysOrNeverDrawnSet) {
               if (!childCategoryIds?.size || childCategoryIds.has(treeEntry.categoryId)) {
                 result.add(key);
