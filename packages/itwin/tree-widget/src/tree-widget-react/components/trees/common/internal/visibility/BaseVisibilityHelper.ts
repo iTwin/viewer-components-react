@@ -251,7 +251,7 @@ export class BaseVisibilityHelper implements Disposable {
           mergeMap((categoryId) =>
             merge(
               this.#props.baseIdsCache.getModels({ categoryId }).pipe(
-                filter(({ categoryIsOfTopMostElement }) => categoryIsOfTopMostElement),
+                filter(({ categoryIsOfTopMostElement, isSubModel }) => categoryIsOfTopMostElement && !isSubModel),
                 mergeMap(({ id: modelId }) =>
                   this.#props.viewport.viewsModel(modelId)
                     ? this.getCategoryVisibilityFromAlwaysAndNeverDrawnElements({
@@ -698,6 +698,7 @@ export class BaseVisibilityHelper implements Disposable {
       const categoryModelsObs = fromWithRelease({ source: categoryIds, releaseOnCount: 500 }).pipe(
         mergeMap((categoryId) =>
           this.#props.baseIdsCache.getModels({ categoryId }).pipe(
+            filter(({ categoryIsOfTopMostElement, isSubModel }) => categoryIsOfTopMostElement && !isSubModel),
             map(({ id }) => {
               return { modelId: id, categoryId };
             }),

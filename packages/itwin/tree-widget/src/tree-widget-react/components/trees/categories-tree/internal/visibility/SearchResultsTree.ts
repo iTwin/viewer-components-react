@@ -421,6 +421,15 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
       };
     }
     if (type === "category") {
+      if ("type" in parent && parent.type === "subModel") {
+        return {
+          id,
+          isSearchTarget,
+          type,
+          modelId: parent.id,
+          potentialParentElementsPath: [],
+        };
+      }
       if ("type" in parent && parent.type === "element") {
         return {
           id,
