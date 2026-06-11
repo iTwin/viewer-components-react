@@ -240,7 +240,9 @@ export function insertPhysicalPartition(
 }
 
 export function insertPhysicalSubModel(
-  props: { modeledElementId: Id64String; relationshipName?: EC.FullClassName } & BaseInstanceInsertProps & Partial<Omit<GeometricModel3dProps, "id" | "modeledElement" | "parentModel">>,
+  props: BaseInstanceInsertProps & { modeledElementId: Id64String; relationshipName?: EC.FullClassName } & Partial<
+      Omit<GeometricModel3dProps, "id" | "modeledElement" | "parentModel">
+    >,
 ) {
   return insertSubModel({
     classFullName: `BisCore${props.fullClassNameSeparator ?? "."}PhysicalModel`,
@@ -266,7 +268,9 @@ export function insertDrawingPartition(
 }
 
 export function insertDrawingSubModel(
-  props: { modeledElementId: Id64String; relationshipName?: EC.FullClassName } & BaseInstanceInsertProps & Partial<Omit<GeometricModel2dProps, "id" | "modeledElement" | "parentModel">>,
+  props: BaseInstanceInsertProps & { modeledElementId: Id64String; relationshipName?: EC.FullClassName } & Partial<
+      Omit<GeometricModel2dProps, "id" | "modeledElement" | "parentModel">
+    >,
 ) {
   return insertSubModel({
     classFullName: `BisCore${props.fullClassNameSeparator ?? "."}DrawingModel`,
