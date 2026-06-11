@@ -6,6 +6,7 @@
 import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { withEditTxn } from "@itwin/core-backend";
+import { Id64 } from "@itwin/core-bentley";
 import { act, renderHook } from "@testing-library/react";
 import { useClassificationsTreeDefinition } from "../../../tree-widget-react/components/trees/classifications-tree/UseClassificationsTreeDefinition.js";
 import {
@@ -454,6 +455,56 @@ describe("Classifications tree", () => {
                         options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
                       },
                     ],
+                  },
+                ],
+              },
+            ],
+          },
+        ]);
+      });
+
+      it("finds 3d element by base36 ECInstanceId suffix", async function () {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, async (txn) => {
+            await importClassificationSchema(imodel);
+
+            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable" });
+            const classification = insertClassification({ txn, modelId: table.id, codeValue: "Classification" });
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Model" });
+            const spatialCategory = insertSpatialCategory({ txn, codeValue: "Category" });
+            const element = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "Element",
+            });
+            insertElementHasClassificationsRelationship({ txn, elementId: element.id, classificationId: classification.id });
+
+            return { table, classification, element };
+          }),
+        );
+        const { imodelConnection, ...keys } = buildIModelResult;
+
+        const briefcaseId = Id64.getBriefcaseId(keys.element.id).toString(36).toLocaleUpperCase();
+        const localId = Id64.getLocalId(keys.element.id).toString(36).toLocaleUpperCase();
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodelConnection],
+          hierarchyConfig: defaultHierarchyConfiguration,
+          search: { searchText: `[${briefcaseId}-${localId}]` },
+        });
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
+          {
+            identifier: keys.table,
+            options: { autoExpand: true },
+            children: [
+              {
+                identifier: keys.classification,
+                options: { autoExpand: true },
+                children: [
+                  {
+                    identifier: { ...keys.element, className: CLASS_NAME_GeometricElement3d },
+                    options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
                   },
                 ],
               },

@@ -312,7 +312,7 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
   }
 
   private collectSearchTargets(internalSearchTargets: InternalSearchTargets, node: RawNode, processedNodes: ProcessedNodes) {
-    const searchResultsNode = node.type === "element" ? processedNodes.searchResultsElements.get(node.id) : node;
+    const searchResultsNode = node.type !== "element" ? node : processedNodes.searchResultsElements.get(node.id);
     assert(searchResultsNode !== undefined);
     if (searchResultsNode.isSearchTarget) {
       if (searchResultsNode.type !== "category") {
@@ -442,7 +442,6 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
         potentialParentElementsPath: [],
       };
     }
-
     if (type === "subModel") {
       assert("type" in parent && parent.type === "element");
       return {
