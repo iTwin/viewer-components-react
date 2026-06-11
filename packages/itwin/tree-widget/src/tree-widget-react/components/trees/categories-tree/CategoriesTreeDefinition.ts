@@ -39,11 +39,13 @@ import {
   createIdsSelector,
   getClassesByView,
   getOptimalBatchSize,
+  getOrCreate,
   groupingNodeDataFromChildren,
   parseIdsSelectorResult,
   releaseMainThreadOnItemsCount,
 } from "../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../common/TreeErrors.js";
+import { CategoriesTreeNode } from "./CategoriesTreeNode.js";
 
 import type { Observable, ObservedValueOf, OperatorFunction } from "rxjs";
 import type { GuidString, Id64Array, Id64String, MarkRequired } from "@itwin/core-bentley";
@@ -152,23 +154,37 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
 
   public postProcessNode: NodePostProcessor = async ({ node }) => {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
-      const modelElementsMap = new Map<ModelId, { elementIds: Set<ElementId>; categoryOfTopMostParentElement: CategoryId }>();
+      const modelElementsMap = new Map<
+        ModelId,
+        {
+          elementIds: Set<ElementId>;
+          categoryOfTopMostParentElement: CategoryId;
+          childrenWhichAreParents: Set<ElementId>;
+        }
+      >();
       for (const child of node.children) {
-        let modelEntry = modelElementsMap.get(child.extendedData?.modelId);
-        if (!modelEntry) {
-          modelEntry = {
+        const modelEntry = getOrCreate({
+          map: modelElementsMap,
+          key: child.extendedData?.modelId,
+          createFunc: () => ({
             elementIds: new Set(),
             categoryOfTopMostParentElement: child.extendedData?.categoryOfTopMostParentElement,
-          };
-          modelElementsMap.set(child.extendedData?.modelId, modelEntry);
-        }
-        assert(child.key.type === "instances");
+            childrenWhichAreParents: new Set<ElementId>(),
+          }),
+        });
+        assert(CategoriesTreeNode.isElementNode(child));
+        const addId = child.children
+          ? (id: Id64String) => {
+              modelEntry.elementIds.add(id);
+              modelEntry.childrenWhichAreParents.add(id);
+            }
+          : (id: Id64String) => modelEntry.elementIds.add(id);
         for (const { id } of child.key.instanceKeys) {
-          modelEntry.elementIds.add(id);
+          addId(id);
         }
       }
 
-      const { hasSearchTargetAncestor, hasDirectNonSearchTargets, childrenCount, searchTargets } = groupingNodeDataFromChildren(node.children);
+      const { hasSearchTargetAncestor, hasDirectNonSearchTargets } = groupingNodeDataFromChildren(node.children);
       const firstChild = node.children[0];
       assert(HierarchyNode.isInstancesNode(firstChild));
       return {
@@ -182,8 +198,6 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
           // add `categoryId` from the first grouped element
           categoryId: firstChild.extendedData?.categoryId,
           modelElementsMap,
-          childrenCount,
-          ...(!!searchTargets?.size ? { searchTargets } : {}),
           ...(hasDirectNonSearchTargets ? { hasDirectNonSearchTargets } : {}),
           ...(hasSearchTargetAncestor ? { hasSearchTargetAncestor } : {}),
           // `imageId` is assigned to instance nodes at query time, but grouping ones need to
@@ -249,8 +263,12 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
 
   private async createISubModeledElementChildrenQuery({
     parentNodeInstanceIds: elementIds,
+    parentNode,
     nodeSelectClauseFactory,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
+    if (CategoriesTreeNode.isDefinitionContainerNode(parentNode)) {
+      return [];
+    }
     // note: we do not apply hierarchy level filtering on this hierarchy level, because it's always
     // hidden - the filter will get applied on the child hierarchy levels
     return [
@@ -558,23 +576,6 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  private createElementChildrenCountSelector(props: { elementIdSelector: string }): string {
-    return `(
-      WITH RECURSIVE
-        ElementWithParent(id) AS (
-          SELECT e.ECInstanceId
-          FROM ${this.#categoryElementClass} e
-          WHERE e.ECInstanceId = ${props.elementIdSelector}
-          UNION ALL
-          SELECT c.ECInstanceId
-          FROM ${this.#categoryElementClass} c
-          JOIN ElementWithParent p ON p.id = c.Parent.Id
-        )
-      SELECT COUNT(1) - 1
-      FROM ElementWithParent
-    )`;
-  }
-
   private async createCategoryElementsQuery({
     parentNodeInstanceIds: categoryIds,
     instanceFilter,
@@ -648,7 +649,6 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 categoryId: { selector: "IdToHex(this.Category.Id)" },
                 imageId: "icon-item",
                 isElement: true,
-                childrenCount: { selector: this.createElementChildrenCountSelector({ elementIdSelector: "this.ECInstanceId" }) },
                 categoryOfTopMostParentElement: { selector: "IdToHex(this.Category.Id)" },
                 topMostParentElementId: { selector: "IdToHex(this.ECInstanceId)" },
               },
@@ -719,7 +719,6 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                   categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
                   isElement: true,
-                  childrenCount: { selector: this.createElementChildrenCountSelector({ elementIdSelector: "this.ECInstanceId" }) },
                   categoryOfTopMostParentElement: {
                     selector: `IdToHex(${parentNode.extendedData?.categoryOfTopMostParentElement})`,
                   },
@@ -791,7 +790,8 @@ function createInstanceKeyPathsFromInstanceLabel(
         }
         const [categoryLabelSelectClause, subCategoryLabelSelectClause, elementLabelSelectClause, definitionContainerLabelSelectClause] = await Promise.all(
           [categoryClass, CLASS_NAME_SubCategory, elementClass, ...(definitionContainers.length > 0 ? [CLASS_NAME_DefinitionContainer] : [])].map(
-            async (className) => labelsFactory.createSelectClause({ classAlias: "this", className }),
+            async (className) =>
+              labelsFactory.createSelectClause({ classAlias: "this", className, selectorsConcatenator: ECSql.createConcatenatedValueStringSelector }),
           ),
         );
         const ctes = [

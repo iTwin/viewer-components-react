@@ -26,7 +26,6 @@ export namespace ClassificationsTreeNodeInternal {
     extendedData: {
       modelId: Id64String;
       categoryId: Id64String;
-      childrenCount: number;
       categoryOfTopMostParentElement: Id64String;
       topMostParentElementId: Id64String;
     };

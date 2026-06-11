@@ -29,7 +29,7 @@ This document explains visibility handling across tree types (Models, Categories
 
 - Caching:
   - [`BaseIdsCache`](../src/tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.ts) - stores data that is relevant to models/categories/classifications trees (e.g. model <-> category relationship).
-    - This cache is composed of other caches ([`ElementChildrenCache`](../src/tree-widget-react/components/trees/common/internal/caches/ElementChildrenCache.ts), [`SubCategoriesCache`](../src/tree-widget-react/components/trees/common/internal/caches/SubCategoriesCache.ts) and others).
+    - This cache is composed of other caches ([`ChildElementsCache`](../src/tree-widget-react/components/trees/common/internal/caches/ChildElementsCache.ts), [`SubCategoriesCache`](../src/tree-widget-react/components/trees/common/internal/caches/SubCategoriesCache.ts) and others).
     - Data stored in this cache is requested only once, because it does not change.
   - Tree-specific id caches ([`CategoriesTreeIdsCache`](../src/tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.ts), [`ClassificationsTreeIdsCache`](../src/tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.ts), [`ModelsTreeIdsCache`](../src/tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.ts)):
     - Store various tree-specific relationships, (e.g. models tree ids cache stores element's model <-> subject relationship).
@@ -39,7 +39,7 @@ This document explains visibility handling across tree types (Models, Categories
     - Always and never drawn caches are reset when always and never drawn sets change respectively.
     - Child always and never drawn elements can be retrieved for models, categories and parent elements.
 
-  - [`ElementChildrenCache`](../src/tree-widget-react/components/trees/common/internal/caches/ElementChildrenCache.ts) — cache for retrieving elements' children.
+  - [`ChildElementsCache`](../src/tree-widget-react/components/trees/common/internal/caches/ChildElementsCache.ts) — cache for retrieving elements' children.
     - When changing element or element grouping nodes' visibility, need to put all children (nested as well) into always/never drawn list. This cache is used to retrieve child nodes' ids in such cases.
     - It is not used (and should not be used) when getting visibility status:
       - Only total children counts (this is stored on nodes `extendedData` property) and child always/never drawn elements (these are retrieved from [`AlwaysAndNeverDrawnElementInfoCache`](../src/tree-widget-react/components/trees/common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.ts)) are needed for determining visibility.

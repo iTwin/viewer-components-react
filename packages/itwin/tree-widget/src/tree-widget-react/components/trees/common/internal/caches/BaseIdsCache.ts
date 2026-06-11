@@ -3,11 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { mergeAll, mergeMap, of, toArray } from "rxjs";
+import { map, mergeAll, mergeMap, of, toArray } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
-import { ElementChildrenCache } from "./ElementChildrenCache.js";
+import { ChildElementsCache } from "./ChildElementsCache.js";
+import { DescendantsCountCache } from "./DescendantsCountCache.js";
 import { ElementModelCategoriesCache } from "./ElementModelCategoriesCache.js";
-import { ModelCategoryElementsCountCache } from "./ModelCategoryElementsCountCache.js";
 import { ModeledElementsCache } from "./ModeledElementsCache.js";
 import { SubCategoriesCache } from "./SubCategoriesCache.js";
 
@@ -27,8 +27,8 @@ export interface BaseIdsCacheProps {
 export class BaseIdsCache {
   #queryExecutor: LimitingECSqlQueryExecutor;
   #componentId: GuidString;
-  readonly #categoryElementCounts: ModelCategoryElementsCountCache;
-  readonly #elementChildrenCache: ElementChildrenCache;
+  readonly #descendantsCountCache: DescendantsCountCache;
+  readonly #childElementsCache: ChildElementsCache;
   readonly #subCategoriesCache: SubCategoriesCache;
   readonly #modeledElementsCache: ModeledElementsCache;
   readonly #elementModelCategoriesCache: ElementModelCategoriesCache;
@@ -36,12 +36,12 @@ export class BaseIdsCache {
   constructor(props: BaseIdsCacheProps) {
     this.#queryExecutor = props.queryExecutor;
     this.#componentId = Guid.createValue();
-    this.#categoryElementCounts = new ModelCategoryElementsCountCache({
+    this.#descendantsCountCache = new DescendantsCountCache({
       elementClassName: props.elementClassName,
       componentId: this.#componentId,
       queryExecutor: this.#queryExecutor,
     });
-    this.#elementChildrenCache = new ElementChildrenCache({
+    this.#childElementsCache = new ChildElementsCache({
       queryExecutor: this.#queryExecutor,
       elementClassName: props.elementClassName,
       componentId: this.#componentId,
@@ -125,24 +125,26 @@ export class BaseIdsCache {
     return this.#elementModelCategoriesCache.getCategoriesOfModelsTopMostElements(props);
   }
 
-  // ModelCategoryElementsCountCache methods
-
-  public getElementsCount(
-    props: Props<ModelCategoryElementsCountCache["getCategoryElementsCount"]>,
-  ): ReturnType<ModelCategoryElementsCountCache["getCategoryElementsCount"]> {
-    return this.#categoryElementCounts.getCategoryElementsCount(props);
+  public categoryHasParentElements(
+    props: Parameters<ElementModelCategoriesCache["categoryHasParentElements"]>[0],
+  ): ReturnType<ElementModelCategoriesCache["categoryHasParentElements"]> {
+    return this.#elementModelCategoriesCache.categoryHasParentElements(props);
   }
 
-  // ElementChildrenCache methods
+  // DescendantsCountCache methods
 
-  public getChildElementsTree(props: Props<ElementChildrenCache["getChildElementsTree"]>): ReturnType<ElementChildrenCache["getChildElementsTree"]> {
-    return this.#elementChildrenCache.getChildElementsTree(props);
+  public getDescendantsCounts(props: Props<DescendantsCountCache["getDescendantsCounts"]>): ReturnType<DescendantsCountCache["getDescendantsCounts"]> {
+    return this.#descendantsCountCache.getDescendantsCounts(props);
   }
 
-  public getAllChildElementsCount(
-    props: Props<ElementChildrenCache["getAllChildElementsCount"]>,
-  ): ReturnType<ElementChildrenCache["getAllChildElementsCount"]> {
-    return this.#elementChildrenCache.getAllChildElementsCount(props);
+  public getElementsCount(props: Props<DescendantsCountCache["getDescendantsCounts"]>): Observable<number> {
+    return this.#descendantsCountCache.getDescendantsCounts(props).pipe(map((counts) => counts.reduce((sum, entry) => sum + entry.count, 0)));
+  }
+
+  // ChildElementsCache methods
+
+  public getChildElements(props: Props<ChildElementsCache["getChildElements"]>): ReturnType<ChildElementsCache["getChildElements"]> {
+    return this.#childElementsCache.getChildElements(props);
   }
 
   // SubCategoriesCache methods
@@ -182,14 +184,8 @@ export class BaseIdsCacheImpl {
 
   // Implement IBaseIdsCache by re-exporting BaseIdsCache methods
 
-  public getChildElementsTree(props: Props<ElementChildrenCache["getChildElementsTree"]>): ReturnType<ElementChildrenCache["getChildElementsTree"]> {
-    return this.#baseIdsCache.getChildElementsTree(props);
-  }
-
-  public getAllChildElementsCount(
-    props: Props<ElementChildrenCache["getAllChildElementsCount"]>,
-  ): ReturnType<ElementChildrenCache["getAllChildElementsCount"]> {
-    return this.#baseIdsCache.getAllChildElementsCount(props);
+  public getChildElements(props: Props<ChildElementsCache["getChildElements"]>): ReturnType<ChildElementsCache["getChildElements"]> {
+    return this.#baseIdsCache.getChildElements(props);
   }
 
   public getSubCategories(props: Props<SubCategoriesCache["getSubCategories"]>): ReturnType<SubCategoriesCache["getSubCategories"]> {
@@ -212,9 +208,11 @@ export class BaseIdsCacheImpl {
     return this.#baseIdsCache.getSubModelsUnderElement(props);
   }
 
-  public getElementsCount(
-    props: Props<ModelCategoryElementsCountCache["getCategoryElementsCount"]>,
-  ): ReturnType<ModelCategoryElementsCountCache["getCategoryElementsCount"]> {
+  public getDescendantsCounts(props: Props<DescendantsCountCache["getDescendantsCounts"]>): ReturnType<DescendantsCountCache["getDescendantsCounts"]> {
+    return this.#baseIdsCache.getDescendantsCounts(props);
+  }
+
+  public getElementsCount(props: Props<DescendantsCountCache["getDescendantsCounts"]>): Observable<number> {
     return this.#baseIdsCache.getElementsCount(props);
   }
 
@@ -224,6 +222,12 @@ export class BaseIdsCacheImpl {
 
   public getModels(props: Props<ElementModelCategoriesCache["getCategoryElementModels"]>): ReturnType<ElementModelCategoriesCache["getCategoryElementModels"]> {
     return this.#baseIdsCache.getModels(props);
+  }
+
+  public categoryHasParentElements(
+    props: Parameters<ElementModelCategoriesCache["categoryHasParentElements"]>[0],
+  ): ReturnType<ElementModelCategoriesCache["categoryHasParentElements"]> {
+    return this.#baseIdsCache.categoryHasParentElements(props);
   }
 
   public getAllCategoriesOfElements(): ReturnType<ElementModelCategoriesCache["getAllCategoriesOfElements"]> {

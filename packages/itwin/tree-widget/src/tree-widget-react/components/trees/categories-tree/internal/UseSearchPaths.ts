@@ -8,7 +8,7 @@ import { firstValueFrom } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { HierarchyNodeIdentifier, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
-import { getClassesByView } from "../../common/internal/Utils.js";
+import { getClassesByView, getOrCreate } from "../../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../../common/TreeErrors.js";
 import { useTelemetryContext } from "../../common/UseTelemetryContext.js";
 import { CategoriesTreeDefinition } from "../CategoriesTreeDefinition.js";
@@ -156,11 +156,7 @@ async function getCategoriesFromPaths(
 
     if (identifier.className === CLASS_NAME_SubCategory) {
       assert(!!parent);
-      let entry = categories.get(parent.id);
-      if (entry === undefined) {
-        entry = [];
-        categories.set(parent.id, entry);
-      }
+      const entry = getOrCreate({ map: categories, key: parent.id, createFunc: () => new Array<SubCategoryId>() });
       entry.push(identifier.id);
       return;
     }

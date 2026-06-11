@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
-  concat,
   concatAll,
   defaultIfEmpty,
   defer,
@@ -22,23 +21,26 @@ import {
   startWith,
   Subject,
   take,
+  takeLast,
   takeUntil,
   tap,
+  toArray,
 } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
+import { subscribeAll } from "../Rxjs.js";
 import { createVisibilityStatus } from "../Tooltip.js";
-import { countInSet, fromWithRelease, releaseMainThreadOnItemsCount, setDifference } from "../Utils.js";
-import { changeElementStateNoChildrenOperator, getVisibilityFromAlwaysAndNeverDrawnElementsImpl, mergeVisibilityStatuses } from "../VisibilityUtils.js";
+import { countInSet, fromWithRelease, getId64Spreadable, getOrCreate, releaseMainThreadOnItemsCount, setDifference } from "../Utils.js";
+import { changeElementStateNoChildrenOperator, getCategoryVisibilityFromAlwaysAndNeverDrawnElementsImpl, mergeVisibilityStatuses } from "../VisibilityUtils.js";
 
 import type { Observable, Subscription } from "rxjs";
-import type { Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { ClassGroupingNodeKey, HierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
+import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
 import type { HierarchyVisibilityHandlerOverridableMethod, HierarchyVisibilityOverrideHandler, VisibilityStatus } from "../../UseHierarchyVisibility.js";
 import type { AlwaysAndNeverDrawnElementInfoCache } from "../caches/AlwaysAndNeverDrawnElementInfoCache.js";
 import type { BaseIdsCacheImpl } from "../caches/BaseIdsCache.js";
 import type { NonPartialVisibilityStatus } from "../Tooltip.js";
-import type { CategoryId, ModelId } from "../Types.js";
+import type { CategoryId, ElementId, ModelId } from "../Types.js";
 
 /**
  * Functionality of tree visibility handler methods that can be overridden.
@@ -70,12 +72,7 @@ export interface BaseTreeVisibilityHandlerOverrides {
 export interface TreeSpecificVisibilityHandler<TSearchTargets> {
   getVisibilityStatus: (node: HierarchyNode) => Observable<VisibilityStatus>;
   changeVisibilityStatus: (node: HierarchyNode, on: boolean) => Observable<void>;
-  getSearchTargetsVisibilityStatus: (
-    targets: TSearchTargets,
-    node: HierarchyNode & {
-      key: ClassGroupingNodeKey | InstancesNodeKey;
-    },
-  ) => Observable<VisibilityStatus>;
+  getSearchTargetsVisibilityStatus: (targets: TSearchTargets) => Observable<VisibilityStatus>;
   changeSearchTargetsVisibilityStatus: (targets: TSearchTargets, on: boolean) => Observable<void>;
 }
 
@@ -147,21 +144,17 @@ export class BaseVisibilityHelper implements Disposable {
           // For hidden models we only need to check subModels
           if (!this.#props.viewport.viewsModel(modelId)) {
             return this.#props.baseIdsCache.getSubModels({ modelId }).pipe(
-              mergeMap((subModels) =>
-                this.getModelsVisibilityStatus({ modelIds: subModels }).pipe(
-                  map((subModelsVisibilityStatus) =>
-                    subModelsVisibilityStatus.state !== "hidden" ? createVisibilityStatus("partial") : subModelsVisibilityStatus,
-                  ),
-                ),
+              mergeMap((subModels) => this.getModelsVisibilityStatus({ modelIds: subModels })),
+              map((subModelsVisibilityStatus) =>
+                subModelsVisibilityStatus.state !== "hidden" ? createVisibilityStatus("partial") : subModelsVisibilityStatus,
               ),
               defaultIfEmpty(createVisibilityStatus("hidden")),
             );
           }
           // For visible models we need to check all categories.
           // getCategoriesVisibilityStatus already checks subModels, no need to do that
-          // Take top most element categories when always drawn exclusive mode is on, because only top most categories are used to get always/never drawn elements.
-          // This means that non top most categories should not affect visibility in any way until https://github.com/iTwin/viewer-components-react/issues/1100 is resolved.
-          return this.#props.baseIdsCache.getCategories({ modelId, includeOnlyIfCategoryOfTopMostElement: this.#props.viewport.isAlwaysDrawnExclusive }).pipe(
+          // Only need to take top-most categories, they take into account all descendants.
+          return this.#props.baseIdsCache.getCategories({ modelId, includeOnlyIfCategoryOfTopMostElement: true }).pipe(
             mergeMap((categories) => this.getCategoriesVisibilityStatus({ modelId, categoryIds: categories })),
             defaultIfEmpty(createVisibilityStatus("visible")),
           );
@@ -235,12 +228,8 @@ export class BaseVisibilityHelper implements Disposable {
             this.#props.baseIdsCache
               .getModels({ categoryId, includeOnlyIfCategoryOfTopMostElement: this.#props.viewport.isAlwaysDrawnExclusive, subModels: "include" })
               .pipe(
-                mergeMap((models) =>
-                  from(Id64.iterable(models)).pipe(
-                    mergeMap((modelId) => this.getModelWithCategoryVisibilityStatus({ modelId, categoryId })),
-                    mergeVisibilityStatuses(),
-                  ),
-                ),
+                mergeAll(),
+                mergeMap((modelId) => this.getModelWithCategoryVisibilityStatus({ modelId, categoryId })),
               ),
             // For category not under specific model, need to check subCategories as well
             this.#props.baseIdsCache
@@ -277,10 +266,9 @@ export class BaseVisibilityHelper implements Disposable {
   private getModelWithCategoryVisibilityStatus({ modelId, categoryId }: { modelId: Id64String; categoryId: Id64String }): Observable<VisibilityStatus> {
     const modelVisibilityStatus = this.#props.viewport.viewsModel(modelId)
       ? // For visible model need to check category and always/never drawn elements
-        this.getVisibilityFromAlwaysAndNeverDrawnElements({
+        this.getCategoryVisibilityFromAlwaysAndNeverDrawnElements({
           modelId,
           categoryId,
-          defaultStatus: this.getVisibleModelCategoryDirectVisibilityStatus({ modelId, categoryId }),
         })
       : of(createVisibilityStatus("hidden"));
 
@@ -297,8 +285,12 @@ export class BaseVisibilityHelper implements Disposable {
    * Determines visibility status by checking:
    * - Per model category visibility overrides;
    * - Category selector visibility in the viewport.
+   * - Always drawn exclusive flag.
    */
   public getVisibleModelCategoryDirectVisibilityStatus({ modelId, categoryId }: { categoryId: Id64String; modelId: Id64String }): NonPartialVisibilityStatus {
+    if (this.#props.viewport.isAlwaysDrawnExclusive) {
+      return createVisibilityStatus("hidden");
+    }
     const override = this.#props.viewport.getPerModelCategoryOverride({ modelId, categoryId });
     if (override === "show" || (override === "none" && this.#props.viewport.viewsCategory(categoryId))) {
       return createVisibilityStatus("visible");
@@ -312,36 +304,49 @@ export class BaseVisibilityHelper implements Disposable {
    * Determines visibility status by checking:
    * - Elements in the viewports' always/never drawn lists;
    * - Related categories and models visibility status;
+   * - Descendant elements grouped by their actual categories;
    * - Sub-models that are related to the specified elements.
    */
-  public getElementsVisibilityStatus(props: {
-    elementIds: Id64Arg;
-    modelId: Id64String;
-    categoryId: Id64String;
-    categoryOfTopMostParentElement: CategoryId;
-    parentElementsIdsPath: Array<Id64Arg>;
-    childrenCount: number | undefined;
-  }): Observable<VisibilityStatus> {
+  public getElementsVisibilityStatus(
+    props: {
+      elementIds: Id64Arg;
+      modelId: Id64String;
+      categoryId: Id64String;
+    } & (
+      | { computeOnlyOwnStatus: true }
+      | { computeOnlyOwnStatus?: (elementId: Id64String) => boolean; categoryOfTopMostParentElement: CategoryId; parentElementsIdsPath: Array<Id64Arg> }
+    ),
+  ): Observable<VisibilityStatus> {
     const result = defer(() => {
-      const { elementIds, modelId, categoryId, parentElementsIdsPath, childrenCount, categoryOfTopMostParentElement } = props;
-      const elementsVisibilityStatus = this.#props.viewport.viewsModel(modelId)
-        ? // For visible model need to check category and always/never drawn elements
-          this.getVisibilityFromAlwaysAndNeverDrawnElements({
-            elements: elementIds,
-            defaultStatus: this.getVisibleModelCategoryDirectVisibilityStatus({ categoryId, modelId }),
-            parentElementsIdsPath,
-            modelId,
-            categoryOfTopMostParentElement,
-            childrenCount,
-          })
-        : of(createVisibilityStatus("hidden"));
+      const { elementIds, modelId, categoryId, computeOnlyOwnStatus } = props;
+      // Compute element's own visibility
+      const elementsOwnStatus = this.getElementsOwnVisibilityStatus({ elementIds, modelId, categoryId });
+      if (computeOnlyOwnStatus === true) {
+        return elementsOwnStatus;
+      }
 
-      const subModelsVisibilityStatus = fromWithRelease({ source: elementIds, releaseOnCount: 100 }).pipe(
-        mergeMap((elementId) => this.#props.baseIdsCache.getSubModelsUnderElement(elementId)),
-        mergeMap((subModelsUnderElement) => this.getModelsVisibilityStatus({ modelIds: subModelsUnderElement })),
+      const subModelsVisibilityStatus = this.#props.baseIdsCache.hasSubModels({ modelId }).pipe(
+        mergeMap((hasSubModels) => {
+          if (!hasSubModels) {
+            return EMPTY;
+          }
+          return fromWithRelease({ source: elementIds, releaseOnCount: 100 }).pipe(
+            mergeMap((elementId) => (computeOnlyOwnStatus?.(elementId) ? EMPTY : this.#props.baseIdsCache.getSubModelsUnderElement(elementId))),
+            mergeMap((subModelsUnderElement) => this.getModelsVisibilityStatus({ modelIds: subModelsUnderElement })),
+          );
+        }),
       );
 
-      return merge(elementsVisibilityStatus, subModelsVisibilityStatus).pipe(mergeVisibilityStatuses());
+      const descendantsVisibilityStatus = this.getDescendantsVisibilityStatus({
+        elementIds,
+        modelId,
+        categoryOfTopMostParentElement: props.categoryOfTopMostParentElement,
+        // For descendants path includes elementIds
+        parentElementIdsPath: [...props.parentElementsIdsPath, elementIds],
+        computeOnlyOwnStatus,
+      });
+
+      return merge(elementsOwnStatus, descendantsVisibilityStatus, subModelsVisibilityStatus).pipe(mergeVisibilityStatuses());
     });
 
     return this.#props.overrideHandler
@@ -353,84 +358,165 @@ export class BaseVisibilityHelper implements Disposable {
       : result;
   }
 
-  /** Gets visibility status of elements based on viewport's always/never drawn elements and related categories and models. */
-  private getVisibilityFromAlwaysAndNeverDrawnElements({
-    modelId,
-    ...props
-  }: { defaultStatus: NonPartialVisibilityStatus; modelId: Id64String } & (
-    | {
-        elements: Id64Arg;
-        parentElementsIdsPath: Array<Id64Arg>;
-        categoryOfTopMostParentElement: Id64String;
-        childrenCount: number | undefined;
-      }
-    | { categoryId: Id64String }
-  )): Observable<VisibilityStatus> {
-    const defaultStatus = this.#props.viewport.isAlwaysDrawnExclusive ? createVisibilityStatus("hidden") : props.defaultStatus;
-    const { oppositeSet, setType } =
-      defaultStatus.state === "visible"
-        ? { oppositeSet: this.#props.viewport.neverDrawn, setType: "never" as const }
-        : { oppositeSet: this.#props.viewport.alwaysDrawn, setType: "always" as const };
+  /** Computes only the element's own visibility (without descendants). */
+  public getElementsOwnVisibilityStatus(props: { elementIds: Id64Arg; modelId: Id64String; categoryId: Id64String }): Observable<VisibilityStatus> {
+    const { elementIds, modelId, categoryId } = props;
+    if (!this.#props.viewport.viewsModel(modelId)) {
+      return of(createVisibilityStatus("hidden"));
+    }
+    const defaultStatus = this.getVisibleModelCategoryDirectVisibilityStatus({ categoryId, modelId });
+    const oppositeSet = defaultStatus.state === "visible" ? this.#props.viewport.neverDrawn : this.#props.viewport.alwaysDrawn;
     if (!oppositeSet?.size) {
       return of(defaultStatus);
     }
-
-    if ("elements" in props) {
-      const { childrenCount } = props;
-      // When elements children count is 0 or undefined, no need to query for child always/never drawn elements.
-      if (!childrenCount) {
-        return of(
-          getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
-            defaultStatus,
-            numberOfElementsInOppositeSet: countInSet(props.elements, oppositeSet),
-            totalCount: Id64.sizeOf(props.elements),
-          }),
-        );
-      }
-      const parentElementIdsPath = [...props.parentElementsIdsPath, props.elements];
-      // Get child always/never drawn elements.
-      return this.#alwaysAndNeverDrawnElements
-        .getAlwaysOrNeverDrawnElements({
-          modelId,
-          categoryIds: props.categoryOfTopMostParentElement,
-          parentElementIdsPath,
-          setType,
-        })
-        .pipe(
-          map((childElementsInOppositeSet) =>
-            // Combine child always/never drawn count with the props.elements count in always/never drawn sets.
-            getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
-              defaultStatus,
-              numberOfElementsInOppositeSet: countInSet(props.elements, oppositeSet) + childElementsInOppositeSet.size,
-              totalCount: childrenCount + Id64.sizeOf(props.elements),
-            }),
-          ),
-        );
-    }
-    const { categoryId } = props;
-    return forkJoin({
-      totalCount: this.#props.baseIdsCache.getElementsCount({ modelId, categoryId }),
-      relatedElementsInOppositeSet: this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({
-        modelId,
-        categoryIds: categoryId,
-        setType,
+    return of(
+      getCategoryVisibilityFromAlwaysAndNeverDrawnElementsImpl({
+        defaultStatus,
+        numberOfElementsInOppositeSet: countInSet(elementIds, oppositeSet),
+        totalCount: Id64.sizeOf(elementIds),
       }),
-    }).pipe(
-      // There is a known bug:
-      // Categories that don't have root elements will make visibility result incorrect
-      // E.g.:
-      // - CategoryA
-      //  - ElementA (CategoryA is visible)
-      //    - ChildElementB (CategoryB is hidden) ChildElementB is in always drawn list
-      // Result will be "partial" because CategoryB will return hidden visibility, even though all elements are visible
-      // TODO fix with: https://github.com/iTwin/viewer-components-react/issues/1100
-      map((state) =>
-        getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
-          defaultStatus,
-          totalCount: state.totalCount,
-          numberOfElementsInOppositeSet: state.relatedElementsInOppositeSet.size,
-        }),
+    );
+  }
+
+  /**
+   * Gets visibility status of descendants by:
+   * 1. Retrieves counts of descendant elements grouped by their actual categories;
+   * 2. Groups categories into visible/hidden based on per-model category overrides and category selector;
+   * 3. For visible categories, retrieves never-drawn descendants; for hidden categories, retrieves always-drawn descendants;
+   * 4. Computes visibility status per group based on total count and number of elements in opposite set.
+   */
+  private getDescendantsVisibilityStatus(props: {
+    elementIds: Id64Arg;
+    modelId: Id64String;
+    categoryOfTopMostParentElement: CategoryId;
+    parentElementIdsPath: Array<Id64Arg>;
+    computeOnlyOwnStatus?: (elementId: Id64String) => boolean;
+  }): Observable<VisibilityStatus> {
+    const { elementIds, modelId, categoryOfTopMostParentElement, parentElementIdsPath } = props;
+    if (!this.#props.viewport.viewsModel(modelId)) {
+      return of(createVisibilityStatus("hidden"));
+    }
+    const descendantsCounts = fromWithRelease({ source: elementIds, releaseOnCount: 500 }).pipe(
+      mergeMap((elementId) =>
+        props.computeOnlyOwnStatus?.(elementId) ? EMPTY : this.#props.baseIdsCache.getDescendantsCounts({ parentElementId: elementId, modelId }),
       ),
+    );
+    return this.getVisibilityFromGroupedDescendants({
+      modelId,
+      descendantsCounts,
+      categoryIds: categoryOfTopMostParentElement,
+      parentElementIdsPath,
+    });
+  }
+
+  /**
+   * Gets visibility status of a category based on viewport's always/never drawn elements.
+   * Groups descendant elements by their actual categories, checks which categories are
+   * visible/hidden, then queries always/never drawn per group to compute overall status.
+   */
+  private getCategoryVisibilityFromAlwaysAndNeverDrawnElements(props: { modelId: Id64String; categoryId: Id64String }): Observable<VisibilityStatus> {
+    return this.#props.baseIdsCache.categoryHasParentElements(props.categoryId).pipe(
+      mergeMap((hasParentElements) => {
+        if (!hasParentElements) {
+          const categoryVisibility = this.getVisibleModelCategoryDirectVisibilityStatus({ modelId: props.modelId, categoryId: props.categoryId });
+          const oppositeSet = categoryVisibility.state === "visible" ? this.#props.viewport.neverDrawn : this.#props.viewport.alwaysDrawn;
+          if (!oppositeSet?.size) {
+            return of(categoryVisibility);
+          }
+        }
+        return this.getVisibilityFromGroupedDescendants({
+          modelId: props.modelId,
+          descendantsCounts: this.#props.baseIdsCache.getDescendantsCounts({ modelId: props.modelId, categoryId: props.categoryId }),
+          categoryIds: props.categoryId,
+        });
+      }),
+    );
+  }
+
+  /**
+   * Shared logic for computing visibility from per-category descendant counts.
+   * 1. Accumulates counts grouped into visible/hidden categories;
+   * 2. For visible categories, retrieves never-drawn descendants; for hidden, retrieves always-drawn;
+   * 3. Computes visibility status per group and emits each.
+   */
+  private getVisibilityFromGroupedDescendants(props: {
+    modelId: Id64String;
+    descendantsCounts: Observable<Array<{ categoryId: CategoryId; count: number }>>;
+    categoryIds: Id64Arg;
+    parentElementIdsPath?: Array<Id64Arg>;
+  }): Observable<VisibilityStatus> {
+    const { modelId, categoryIds, parentElementIdsPath } = props;
+    return props.descendantsCounts.pipe(
+      reduce(
+        (acc, descendantsCounts) => {
+          for (const { categoryId, count } of descendantsCounts) {
+            if (acc.visibleCategories.has(categoryId)) {
+              acc.visibleCategoriesDescendantsCount += count;
+              continue;
+            }
+            if (acc.hiddenCategories.has(categoryId)) {
+              acc.hiddenCategoriesDescendantsCount += count;
+              continue;
+            }
+            if (this.getVisibleModelCategoryDirectVisibilityStatus({ categoryId, modelId }).state === "visible") {
+              acc.visibleCategoriesDescendantsCount += count;
+              acc.visibleCategories.add(categoryId);
+            } else {
+              acc.hiddenCategoriesDescendantsCount += count;
+              acc.hiddenCategories.add(categoryId);
+            }
+          }
+          return acc;
+        },
+        {
+          visibleCategoriesDescendantsCount: 0,
+          hiddenCategoriesDescendantsCount: 0,
+          visibleCategories: new Set<CategoryId>(),
+          hiddenCategories: new Set<CategoryId>(),
+        },
+      ),
+      mergeMap(({ hiddenCategories, visibleCategories, visibleCategoriesDescendantsCount, hiddenCategoriesDescendantsCount }) => {
+        return merge(
+          visibleCategories.size > 0
+            ? this.#alwaysAndNeverDrawnElements
+                .getAlwaysOrNeverDrawnElements({
+                  modelId,
+                  parentElementIdsPath,
+                  categoryIds,
+                  setType: "never",
+                  childCategoryIds: visibleCategories,
+                })
+                .pipe(
+                  map((elementsInOppositeSet) =>
+                    getCategoryVisibilityFromAlwaysAndNeverDrawnElementsImpl({
+                      defaultStatus: createVisibilityStatus("visible"),
+                      numberOfElementsInOppositeSet: elementsInOppositeSet.size,
+                      totalCount: visibleCategoriesDescendantsCount,
+                    }),
+                  ),
+                )
+            : EMPTY,
+          hiddenCategories.size > 0
+            ? this.#alwaysAndNeverDrawnElements
+                .getAlwaysOrNeverDrawnElements({
+                  modelId,
+                  parentElementIdsPath,
+                  categoryIds,
+                  setType: "always",
+                  childCategoryIds: hiddenCategories,
+                })
+                .pipe(
+                  map((elementsInOppositeSet) =>
+                    getCategoryVisibilityFromAlwaysAndNeverDrawnElementsImpl({
+                      defaultStatus: createVisibilityStatus("hidden"),
+                      numberOfElementsInOppositeSet: elementsInOppositeSet.size,
+                      totalCount: hiddenCategoriesDescendantsCount,
+                    }),
+                  ),
+                )
+            : EMPTY,
+        );
+      }),
     );
   }
 
@@ -458,7 +544,9 @@ export class BaseVisibilityHelper implements Disposable {
 
       this.#props.viewport.changeModelDisplay({ modelIds, display: true });
       return from(Id64.iterable(modelIds)).pipe(
-        mergeMap((modelId) => forkJoin({ categoryIds: this.#props.baseIdsCache.getCategories({ modelId }), modelId: of(modelId) })),
+        mergeMap((modelId) =>
+          forkJoin({ categoryIds: this.#props.baseIdsCache.getCategories({ modelId, includeOnlyIfCategoryOfTopMostElement: true }), modelId: of(modelId) }),
+        ),
         mergeMap(({ categoryIds, modelId }) => this.changeCategoriesVisibilityStatus({ categoryIds, modelId, on })),
       );
     });
@@ -540,11 +628,7 @@ export class BaseVisibilityHelper implements Disposable {
         mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), models: this.#props.baseIdsCache.getModels({ categoryId, subModels: "include" }) })),
         reduce((acc, { models, categoryId }) => {
           for (const modelId of Id64.iterable(models)) {
-            let entry = acc.get(modelId);
-            if (!entry) {
-              entry = new Set();
-              acc.set(modelId, entry);
-            }
+            const entry = getOrCreate({ map: acc, key: modelId, createFunc: () => new Set<CategoryId>() });
             entry.add(categoryId);
           }
           return acc;
@@ -589,6 +673,32 @@ export class BaseVisibilityHelper implements Disposable {
         mergeMap(([modelId, modelCategories]) => this.clearAlwaysAndNeverDrawnElements({ categoryIds: modelCategories, modelId })),
       );
 
+      const changeChildElementsInDifferentCategoriesObs = categoryModelsObs.pipe(
+        mergeMap(([modelId, modelCategories]) =>
+          // Descendants need to be changed only when model is visible, if it's hidden, any changes to A/N drawn won't have any effect.
+          this.#props.viewport.viewsModel(modelId)
+            ? this.getDescendantsToChange({ modelId, categoryIds: modelCategories, on, parentElementIdsPath: [] })
+            : EMPTY,
+        ),
+        reduce(
+          (acc, { matchingDesiredState, notMatchingDesiredState }) => {
+            acc.matchingDesiredState.push(...matchingDesiredState);
+            acc.notMatchingDesiredState.push(...notMatchingDesiredState);
+            return acc;
+          },
+          { matchingDesiredState: Array<ElementId>(), notMatchingDesiredState: Array<ElementId>() },
+        ),
+        mergeMap(({ matchingDesiredState, notMatchingDesiredState }) =>
+          matchingDesiredState.length > 0 || notMatchingDesiredState.length > 0
+            ? this.queueElementsVisibilityChange({
+                elementsMatchingDesiredState: matchingDesiredState.length > 0 ? matchingDesiredState : undefined,
+                elementsNotMatchingDesiredState: notMatchingDesiredState.length > 0 ? notMatchingDesiredState : undefined,
+                on,
+              })
+            : EMPTY,
+        ),
+      );
+
       const changeSubCategoriesObs = on
         ? fromWithRelease({ source: categoryIds, releaseOnCount: 200 }).pipe(
             mergeMap((categoryId) => this.#props.baseIdsCache.getSubCategories({ categoryId })),
@@ -602,7 +712,17 @@ export class BaseVisibilityHelper implements Disposable {
           )
         : EMPTY;
 
-      return merge(changeSubModelsObs, changeModelsObs, removeCategoriesOverridesObs, changeAlwaysAndNeverDrawnElementsObs, changeSubCategoriesObs);
+      return merge(
+        changeSubModelsObs,
+        changeModelsObs.pipe(
+          defaultIfEmpty(undefined),
+          takeLast(1),
+          mergeMap(() => changeChildElementsInDifferentCategoriesObs),
+        ),
+        removeCategoriesOverridesObs,
+        changeAlwaysAndNeverDrawnElementsObs,
+        changeSubCategoriesObs,
+      );
     });
 
     return this.#props.overrideHandler
@@ -635,8 +755,10 @@ export class BaseVisibilityHelper implements Disposable {
    * Changes categories under specific model visibility status.
    *
    * - Turns on model without affecting it's elements or categories
-   * - sets per-model category overrides for specified categories.
-   * - Clears always and never drawn elements related to those categories
+   * - Sets per-model category overrides for specified categories.
+   * - Clears always and never drawn elements in the target category
+   * - For descendant elements in other categories: clears A/N drawn if their category matches
+   *   desired state, or adds them to A/N drawn if it doesn't.
    * - Changes sub-models visibility status that are related to specified categories in the model.
    */
   private changeCategoriesUnderModelVisibilityStatus({
@@ -663,93 +785,129 @@ export class BaseVisibilityHelper implements Disposable {
       categoryIds,
       modelId,
     });
-    const changeSubModelsObs = this.#props.baseIdsCache.hasSubModels({ modelId }).pipe(
-      mergeMap((hasSubModels) => {
-        if (hasSubModels) {
-          return fromWithRelease({ source: categoryIds, releaseOnCount: 200 }).pipe(
-            mergeMap((categoryId) => this.#props.baseIdsCache.getSubModels({ categoryId, modelId })),
-            mergeMap((subModels) => this.changeModelsVisibilityStatus({ modelIds: subModels, on })),
-          );
-        }
-        return EMPTY;
+
+    const changeChildElementsInDifferentCategoriesObs = this.getDescendantsToChange({ modelId, categoryIds, on, parentElementIdsPath: [] }).pipe(
+      mergeMap(({ matchingDesiredState, notMatchingDesiredState }) => {
+        return matchingDesiredState.size > 0 || notMatchingDesiredState.length > 0
+          ? this.queueElementsVisibilityChange({
+              elementsMatchingDesiredState: matchingDesiredState.size > 0 ? matchingDesiredState : undefined,
+              elementsNotMatchingDesiredState: notMatchingDesiredState.length > 0 ? notMatchingDesiredState : undefined,
+              on,
+            })
+          : EMPTY;
       }),
     );
-    return merge(changeModelsVisibilityStatusObs, changeAlwaysAndNeverDrawnElementsObs, changeSubModelsObs);
+
+    const changeSubModelsObs = this.#props.baseIdsCache.hasSubModels({ modelId }).pipe(
+      mergeMap((hasSubModels) => {
+        if (!hasSubModels) {
+          return EMPTY;
+        }
+        return fromWithRelease({ source: categoryIds, releaseOnCount: 200 });
+      }),
+      mergeMap((categoryId) => this.#props.baseIdsCache.getSubModels({ categoryId, modelId })),
+      mergeMap((subModels) => this.changeModelsVisibilityStatus({ modelIds: subModels, on })),
+    );
+    return merge(
+      changeModelsVisibilityStatusObs.pipe(
+        defaultIfEmpty(undefined),
+        takeLast(1),
+        // Descendants need to be changed only when model is visible, if it's hidden, any changes to A/N drawn won't have any effect.
+        mergeMap(() => (this.#props.viewport.viewsModel(modelId) ? changeChildElementsInDifferentCategoriesObs : EMPTY)),
+      ),
+      changeAlwaysAndNeverDrawnElementsObs,
+      changeSubModelsObs,
+    );
   }
 
   /**
    * Changes visibility status of elements by adding them to the viewport's always/never drawn elements.
    *
-   * Also, changes visibility status of specified elements that are models.
+   * For the elements themselves, checks if their category default matches the desired state.
+   * For descendants, groups by category and either clears from always/never drawn (if category default
+   * matches desired state) or fetches child IDs and adds to the appropriate set.
+   * Also changes visibility of sub-models.
    */
-  public changeElementsVisibilityStatus(props: {
-    elementIds: Id64Arg;
-    modelId: Id64String;
-    categoryId: Id64String;
-    on: boolean;
-    children: Id64Arg | undefined;
-  }): Observable<void> {
+  public changeElementsVisibilityStatus(
+    props: {
+      elementIds: Id64Arg;
+      modelId: Id64String;
+      categoryId: Id64String;
+      on: boolean;
+    } & (
+      | { ignoreDescendants: true }
+      | { ignoreDescendants?: (elementId: Id64String) => boolean; categoryOfTopMostParentElement: CategoryId; parentElementsIdsPath: Array<Id64Arg> }
+    ),
+  ): Observable<void> {
     const result = defer(() => {
-      const { modelId, categoryId, elementIds, on, children } = props;
-      // TODO: determine which child elements to change based on their categories https://github.com/iTwin/viewer-components-react/issues/1561
-      return concat(
-        // Change elements state
-        defer(() => {
-          const elementIdsSet = Id64.toIdSet(elementIds);
-          const elementsToChange = children ? [...elementIdsSet, ...(typeof children === "string" ? [children] : children)] : elementIdsSet;
-          const isDisplayedByDefault = (isCategoryVisible: boolean) =>
-            // When category is visible and elements need to be turned off, or when category is hidden and elements need to be turned on,
-            // We can set isDisplayedByDefault to isCategoryVisible. This allows to not check if each element is in the elementIds list or not.
-            isCategoryVisible === !on
-              ? () => isCategoryVisible
-              : (elementId: Id64String) => {
-                  if (elementIdsSet.has(elementId)) {
-                    return isCategoryVisible;
-                  }
-                  return !on;
-                };
-          if (!this.#props.viewport.viewsModel(modelId)) {
-            if (!on) {
-              return this.queueElementsVisibilityChange({ elementIds: elementsToChange, on, visibleByDefault: () => false });
+      const { modelId, categoryId, elementIds, on, ignoreDescendants } = props;
+      // Make sure model visibility is on if elements should be turned on
+      const prepareModelObs = on && !this.#props.viewport.viewsModel(modelId) ? this.showModelWithoutAnyCategoriesOrElements({ modelId }) : of(undefined);
+      if (ignoreDescendants === true) {
+        return prepareModelObs.pipe(
+          mergeMap(() => {
+            if (!this.#props.viewport.viewsModel(modelId)) {
+              return EMPTY;
             }
+            const elementsMatchDesiredState = this.getVisibleModelCategoryDirectVisibilityStatus({ categoryId, modelId }).state === (on ? "visible" : "hidden");
+            return this.queueElementsVisibilityChange({
+              elementsMatchingDesiredState: elementsMatchDesiredState ? elementIds : undefined,
+              elementsNotMatchingDesiredState: elementsMatchDesiredState ? undefined : elementIds,
+              on,
+            });
+          }),
+        );
+      }
 
-            return this.showModelWithoutAnyCategoriesOrElements({ modelId }).pipe(
-              mergeMap(() => {
-                const defaultVisibility = this.getVisibleModelCategoryDirectVisibilityStatus({
-                  categoryId,
-                  modelId,
-                });
+      return merge(
+        prepareModelObs.pipe(
+          mergeMap(() => {
+            if (!this.#props.viewport.viewsModel(modelId)) {
+              return EMPTY;
+            }
+            const elementsMatchDesiredState = this.getVisibleModelCategoryDirectVisibilityStatus({ categoryId, modelId }).state === (on ? "visible" : "hidden");
+            return this.getDescendantsToChange({
+              elementIds,
+              modelId,
+              on,
+              categoryOfTopMostParentElement: props.categoryOfTopMostParentElement,
+              parentElementIdsPath: [...props.parentElementsIdsPath, elementIds],
+              ignoreDescendants,
+            }).pipe(
+              mergeMap(({ matchingDesiredState: descendantsMatching, notMatchingDesiredState: descendantsNotMatching }) => {
+                const elementsMatchingDesiredState = elementsMatchDesiredState
+                  ? [...descendantsMatching, ...getId64Spreadable(elementIds)]
+                  : descendantsMatching;
+                const elementsNotMatchingDesiredState = elementsMatchDesiredState
+                  ? descendantsNotMatching
+                  : [...descendantsNotMatching, ...getId64Spreadable(elementIds)];
                 return this.queueElementsVisibilityChange({
-                  elementIds: elementsToChange,
+                  elementsMatchingDesiredState: Id64.sizeOf(elementsMatchingDesiredState) > 0 ? elementsMatchingDesiredState : undefined,
+                  elementsNotMatchingDesiredState: Id64.sizeOf(elementsNotMatchingDesiredState) > 0 ? elementsNotMatchingDesiredState : undefined,
                   on,
-                  visibleByDefault: isDisplayedByDefault(defaultVisibility.state === "visible"),
                 });
               }),
             );
-          }
-
-          const categoryVisibility = this.getVisibleModelCategoryDirectVisibilityStatus({ categoryId, modelId });
-          return this.queueElementsVisibilityChange({
-            elementIds: elementsToChange,
-            on,
-            visibleByDefault: isDisplayedByDefault(categoryVisibility.state === "visible"),
-          });
-        }),
-        // Change visibility of elements that are models
-        fromWithRelease({ source: elementIds, releaseOnCount: 100 }).pipe(
-          mergeMap((elementId) =>
-            this.#props.baseIdsCache.getSubModelsUnderElement(elementId).pipe(
-              mergeMap((subModelsUnderElement) => {
-                if (subModelsUnderElement.length > 0) {
-                  return this.changeModelsVisibilityStatus({ modelIds: subModelsUnderElement, on });
-                }
-                return EMPTY;
-              }),
-            ),
-          ),
+          }),
+        ),
+        this.#props.baseIdsCache.hasSubModels({ modelId }).pipe(
+          mergeMap((hasSubModels) => {
+            if (!hasSubModels) {
+              return EMPTY;
+            }
+            return fromWithRelease({ source: elementIds, releaseOnCount: 100 });
+          }),
+          mergeMap((elementId) => this.#props.baseIdsCache.getSubModelsUnderElement(elementId)),
+          mergeMap((subModelsUnderElement) => {
+            if (subModelsUnderElement.length > 0) {
+              return this.changeModelsVisibilityStatus({ modelIds: subModelsUnderElement, on });
+            }
+            return EMPTY;
+          }),
         ),
       );
     });
+
     return this.#props.overrideHandler
       ? this.#props.overrideHandler.createVisibilityHandlerResult({
           overrideProps: props,
@@ -759,15 +917,134 @@ export class BaseVisibilityHelper implements Disposable {
       : result;
   }
 
+  /**
+   * Gets descendant elements grouped by whether their category matches the desired visibility state.
+   * Can operate from either element scope (parentElementIds) or category scope (categoryIds).
+   *
+   * For each descendant category:
+   * - If category matches desired state: retrieves those elements from opposite set (to be removed from it).
+   * - If category does NOT match desired state: fetches child element IDs (to be added to the appropriate set)
+   */
+  private getDescendantsToChange(
+    props: {
+      modelId: Id64String;
+      on: boolean;
+      parentElementIdsPath: Array<Id64Arg>;
+    } & (
+      | { elementIds: Id64Arg; categoryOfTopMostParentElement: CategoryId; ignoreDescendants?: (elementId: Id64String) => boolean }
+      | { categoryIds: Id64Arg }
+    ),
+  ): Observable<{ matchingDesiredState: Id64Set; notMatchingDesiredState: Id64Array }> {
+    const { modelId, on, parentElementIdsPath } = props;
+    const categoryIdsSet = "categoryIds" in props ? Id64.toIdSet(props.categoryIds) : new Set<CategoryId>();
+    const {
+      source,
+      isSourceElement,
+      ignoreChildCategory,
+    }: {
+      source: Observable<{ sourceId: ElementId | CategoryId; result: Array<{ categoryId: CategoryId; count: number }> }>;
+      isSourceElement: boolean;
+      ignoreChildCategory: (childCategoryId: CategoryId) => boolean;
+    } =
+      "elementIds" in props
+        ? {
+            source: subscribeAll({
+              ids: props.elementIds,
+              getObservable: (elementId) =>
+                props.ignoreDescendants?.(elementId) ? of([]) : this.#props.baseIdsCache.getDescendantsCounts({ parentElementId: elementId, modelId }),
+            }),
+            isSourceElement: true,
+            ignoreChildCategory: () => false,
+          }
+        : {
+            source: subscribeAll({
+              ids: props.categoryIds,
+              getObservable: (categoryId) =>
+                this.#props.baseIdsCache.categoryHasParentElements(categoryId).pipe(
+                  mergeMap((hasParentElements) => {
+                    if (!hasParentElements) {
+                      return of([]);
+                    }
+                    return this.#props.baseIdsCache.getDescendantsCounts({ modelId, categoryId });
+                  }),
+                ),
+            }),
+            isSourceElement: false,
+            ignoreChildCategory: (childCategoryId: CategoryId) => categoryIdsSet.has(childCategoryId),
+          };
+    return source.pipe(
+      reduce(
+        (acc, { sourceId, result: descendantsCounts }) => {
+          const nonMatchingCategoriesForElement = new Array<CategoryId>();
+          for (const { categoryId: childCategoryId } of descendantsCounts) {
+            if (ignoreChildCategory(childCategoryId)) {
+              continue;
+            }
+            if (acc.matchingCategories.has(childCategoryId)) {
+              continue;
+            }
+            if (acc.nonMatchingCategories.has(childCategoryId)) {
+              nonMatchingCategoriesForElement.push(childCategoryId);
+              continue;
+            }
+            const categoryMatchesDesiredState =
+              this.getVisibleModelCategoryDirectVisibilityStatus({ categoryId: childCategoryId, modelId }).state === (on ? "visible" : "hidden");
+            if (categoryMatchesDesiredState) {
+              acc.matchingCategories.add(childCategoryId);
+            } else {
+              acc.nonMatchingCategories.add(childCategoryId);
+              nonMatchingCategoriesForElement.push(childCategoryId);
+            }
+          }
+          if (nonMatchingCategoriesForElement.length > 0) {
+            acc.sourceWithNonMatchingCategories.push({ sourceId, categoryIds: nonMatchingCategoriesForElement });
+          }
+          return acc;
+        },
+        {
+          matchingCategories: new Set<CategoryId>(),
+          nonMatchingCategories: new Set<CategoryId>(),
+          sourceWithNonMatchingCategories: new Array<{ sourceId: Id64String; categoryIds: Id64Array }>(),
+        },
+      ),
+      mergeMap(({ matchingCategories, sourceWithNonMatchingCategories }) => {
+        return forkJoin({
+          matchingDesiredState:
+            matchingCategories.size > 0
+              ? this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({
+                  modelId,
+                  parentElementIdsPath,
+                  categoryIds: "categoryIds" in props ? props.categoryIds : props.categoryOfTopMostParentElement,
+                  setType: on ? "never" : "always",
+                  childCategoryIds: matchingCategories,
+                })
+              : of(new Set<Id64String>()),
+          notMatchingDesiredState: from(sourceWithNonMatchingCategories).pipe(
+            mergeMap(({ sourceId, categoryIds }) =>
+              this.#props.baseIdsCache.getChildElements({
+                modelId,
+                childCategoryIds: categoryIds,
+                ...(isSourceElement ? { parentElementId: sourceId } : { categoryId: sourceId }),
+              }),
+            ),
+            toArray(),
+            map((childElements) => ([] as ElementId[]).concat(...childElements)),
+            defaultIfEmpty([]),
+          ),
+        });
+      }),
+    );
+  }
+
   /** Queues visibility change for elements. */
   private queueElementsVisibilityChange({
-    elementIds,
+    elementsMatchingDesiredState,
+    elementsNotMatchingDesiredState,
     on,
-    visibleByDefault,
   }: {
-    elementIds: Id64Arg;
     on: boolean;
-    visibleByDefault: (elementId: Id64String) => boolean;
+    elementsMatchingDesiredState?: Id64Arg;
+    elementsNotMatchingDesiredState?: Id64Arg;
   }) {
     const finishedSubject = new Subject<boolean>();
     // observable to track if visibility change is finished/cancelled
@@ -777,10 +1054,25 @@ export class BaseVisibilityHelper implements Disposable {
       filter((finished) => finished),
     );
 
-    const changeObservable = from(Id64.iterable(elementIds)).pipe(
+    const changeObservable = merge(
+      elementsMatchingDesiredState
+        ? from(Id64.iterable(elementsMatchingDesiredState)).pipe(
+            map((elementId) => {
+              return { elementId, matchesDesiredState: true };
+            }),
+          )
+        : EMPTY,
+      elementsNotMatchingDesiredState
+        ? from(Id64.iterable(elementsNotMatchingDesiredState)).pipe(
+            map((elementId) => {
+              return { elementId, matchesDesiredState: false };
+            }),
+          )
+        : EMPTY,
+    ).pipe(
       // check if visibility change is not finished (cancelled) due to change overall change request being cancelled
       takeUntil(changeFinished),
-      changeElementStateNoChildrenOperator({ on, isDisplayedByDefault: visibleByDefault, viewport: this.#props.viewport }),
+      changeElementStateNoChildrenOperator({ on, viewport: this.#props.viewport }),
       tap({
         next: () => {
           // notify that visibility change is finished

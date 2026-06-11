@@ -6,7 +6,7 @@
 import { useEffect, useRef } from "react";
 import { bufferCount, concatAll, concatMap, delay, from, of } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
-import { HierarchyNodeKey, ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
+import { ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
 import {
   CLASS_NAME_DrawingCategory,
   CLASS_NAME_GeometricElement2d,
@@ -17,7 +17,7 @@ import {
 } from "./ClassNameDefinitions.js";
 
 import type { Observable } from "rxjs";
-import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ElementId } from "./Types.js";
 
@@ -97,11 +97,7 @@ export function parseIdsSelectorResult(selectorResult: any): Id64Array {
 
 /** @internal */
 export function pushToMap<TKey, TValue>(targetMap: Map<TKey, Set<TValue>>, key: TKey, value: TValue) {
-  let set = targetMap.get(key);
-  if (!set) {
-    set = new Set();
-    targetMap.set(key, set);
-  }
+  const set = getOrCreate({ map: targetMap, key, createFunc: () => new Set<TValue>() });
   set.add(value);
 }
 
@@ -166,61 +162,64 @@ export function fromWithRelease(props: {
 export type ChildrenTree<T extends object = {}> = Map<string, T & { children?: ChildrenTree<T> }>;
 
 /** @internal */
-export function getIdsFromChildrenTree<T extends object = {}>({
-  tree,
-  predicate,
-}: {
-  tree: ChildrenTree<T>;
-  predicate?: (props: { depth: number; treeEntry: T }) => boolean;
-}): Set<string> {
-  function getIdsInternal({ childrenTree, depth, resultAccumulator }: { childrenTree: ChildrenTree<T>; depth: number; resultAccumulator: Set<string> }): void {
-    for (const [id, entry] of childrenTree) {
-      if (!predicate || predicate({ depth, treeEntry: entry })) {
-        resultAccumulator.add(id);
-      }
-      if (entry.children) {
-        getIdsInternal({ childrenTree: entry.children, depth: depth + 1, resultAccumulator });
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export namespace ChildrenTree {
+  /** @internal*/
+  export function visit<T extends object = {}>({
+    tree,
+    accept,
+  }: {
+    tree: ChildrenTree<T>;
+    accept: (props: { depth: number; treeEntry: T; key: string }) => { ignoreChildren: boolean };
+  }): void {
+    function getIdsInternal({ childrenTree, depth }: { childrenTree: ChildrenTree<T>; depth: number }): void {
+      for (const [id, entry] of childrenTree) {
+        const { ignoreChildren } = accept({ depth, treeEntry: entry, key: id });
+        if (ignoreChildren) {
+          continue;
+        }
+        if (entry.children) {
+          getIdsInternal({ childrenTree: entry.children, depth: depth + 1 });
+        }
       }
     }
+    getIdsInternal({ childrenTree: tree, depth: 0 });
   }
-  const result = new Set<string>();
-  getIdsInternal({ childrenTree: tree, depth: 0, resultAccumulator: result });
-  return result;
-}
 
-/**
- * Updates children tree with provided `idsToAdd`:
- * - All Ids are added (if they are not yet added) to children tree in the same order they appear in `idsToAdd` array.
- * - `T` is assigned to each entry using the `additionalPropsGetter` function.
- * @internal
- */
-export function updateChildrenTree<T extends object = {}>({
-  tree,
-  additionalPropsGetter,
-  idsToAdd,
-}: {
-  tree: ChildrenTree<T>;
-  idsToAdd: Id64Array;
-  additionalPropsGetter: (id: Id64String, additionalProps?: T) => T;
-}) {
-  let currentTree: ChildrenTree<T> = tree;
-  for (let i = 0; i < idsToAdd.length; ++i) {
-    const id = idsToAdd[i];
-    let entry = currentTree.get(id);
-    entry = {
-      // Whoever calls this function knows how to assign the `T` to entry.
-      ...additionalPropsGetter(id, entry),
-      // If children already exists, we reuse it.
-      // If children do not exist and there are still ids left in the `idsToAdd` array, create a new Map, it will have the next id.
-      ...(entry?.children || i + 1 < idsToAdd.length ? { children: entry?.children ?? new Map() } : {}),
-    };
-    // Always update the set with updated entry.
-    currentTree.set(id, entry);
-    // This will only happen if it's the last id in `idsToAdd` array. In such case loop can be exited.
-    if (!entry.children) {
-      break;
+  /**
+   * Updates children tree with provided `idsToAdd`:
+   * - All Ids are added (if they are not yet added) to children tree in the same order they appear in `idsToAdd` array.
+   * - `T` is assigned to each entry using the `additionalPropsGetter` function.
+   * @internal
+   */
+  export function update<T extends object = {}>({
+    tree,
+    additionalPropsGetter,
+    idsToAdd,
+  }: {
+    tree: ChildrenTree<T>;
+    idsToAdd: Id64Array;
+    additionalPropsGetter: ({ id, additionalProps, depth }: { id: Id64String; additionalProps?: T; depth: number }) => T;
+  }) {
+    let currentTree: ChildrenTree<T> = tree;
+    for (let i = 0; i < idsToAdd.length; ++i) {
+      const id = idsToAdd[i];
+      let entry = currentTree.get(id);
+      entry = {
+        // Whoever calls this function knows how to assign the `T` to entry.
+        ...additionalPropsGetter({ id, additionalProps: entry, depth: i }),
+        // If children already exists, we reuse it.
+        // If children do not exist and there are still ids left in the `idsToAdd` array, create a new Map, it will have the next id.
+        ...(entry?.children || i + 1 < idsToAdd.length ? { children: entry?.children ?? new Map() } : {}),
+      };
+      // Always update the set with updated entry.
+      currentTree.set(id, entry);
+      // This will only happen if it's the last id in `idsToAdd` array. In such case loop can be exited.
+      if (!entry.children) {
+        break;
+      }
+      currentTree = entry.children;
     }
-    currentTree = entry.children;
   }
 }
 
@@ -229,44 +228,25 @@ export function groupingNodeDataFromChildren(children: ProcessedHierarchyNode[])
   | {
       hasSearchTargetAncestor: true;
       hasDirectNonSearchTargets: undefined;
-      childrenCount: number;
-      searchTargets: undefined;
     }
   | {
       hasSearchTargetAncestor: false;
       hasDirectNonSearchTargets: boolean;
-      childrenCount: number;
-      searchTargets: Map<Id64String, { childrenCount: number }>;
     } {
-  let childrenCount = 0;
-  const searchTargets = new Map<Id64String, { childrenCount: number }>();
-  let hasDirectNonSearchTargets = false;
-  let hasSearchTargetAncestor = false;
+  if (children.length > 0) {
+    assert(!ProcessedHierarchyNode.isGroupingNode(children[0]), "Expected only non-grouping nodes as children");
+    if (children[0].search?.hasSearchTargetAncestor) {
+      return { hasSearchTargetAncestor: true, hasDirectNonSearchTargets: undefined };
+    }
+  }
   for (const child of children) {
     assert(!ProcessedHierarchyNode.isGroupingNode(child), "Expected only non-grouping nodes as children");
-    if (child.extendedData?.childrenCount) {
-      childrenCount += child.extendedData.childrenCount;
-    }
-    if (!hasSearchTargetAncestor && child.search) {
-      if (child.search.hasSearchTargetAncestor) {
-        hasSearchTargetAncestor = true;
-        continue;
-      }
-      if (!child.search.isSearchTarget) {
-        hasDirectNonSearchTargets = true;
-        if (!child.search.childrenTargetPaths?.length || child.search.isSearchTarget) {
-          assert(HierarchyNodeKey.isInstances(child.key));
-          for (const key of child.key.instanceKeys) {
-            searchTargets.set(key.id, { childrenCount: child.extendedData?.childrenCount ?? 0 });
-          }
-        }
-      }
+    if (child.search && !child.search.isSearchTarget) {
+      return { hasSearchTargetAncestor: false, hasDirectNonSearchTargets: true };
     }
   }
 
-  return hasSearchTargetAncestor
-    ? { hasSearchTargetAncestor, hasDirectNonSearchTargets: undefined, childrenCount, searchTargets: undefined }
-    : { hasSearchTargetAncestor, hasDirectNonSearchTargets, childrenCount, searchTargets };
+  return { hasSearchTargetAncestor: false, hasDirectNonSearchTargets: false };
 }
 
 /** @internal */
@@ -286,4 +266,19 @@ export function getParentElementsIdsPath({
     }
   }
   return [];
+}
+
+/** @internal */
+export function getOrCreate<TKey, TValue>({ map, key, createFunc }: { map: Map<TKey, TValue>; key: TKey; createFunc: () => TValue }): TValue {
+  let entry = map.get(key);
+  if (entry === undefined) {
+    entry = createFunc();
+    map.set(key, entry);
+  }
+  return entry;
+}
+
+/** @internal */
+export function getId64Spreadable(ids: Id64Arg): Id64Array | Id64Set {
+  return typeof ids === "string" ? [ids] : ids;
 }

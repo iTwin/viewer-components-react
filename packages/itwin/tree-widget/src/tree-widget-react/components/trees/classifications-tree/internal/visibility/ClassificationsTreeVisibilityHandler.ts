@@ -3,24 +3,21 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, defer, EMPTY, from, map, merge, mergeAll, mergeMap, of, Subject } from "rxjs";
+import { concat, defer, EMPTY, from, merge, mergeAll, mergeMap, of, Subject } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { fromWithRelease, getIdsFromChildrenTree, getParentElementsIdsPath, setDifference, setIntersection } from "../../../common/internal/Utils.js";
+import { fromWithRelease, getParentElementsIdsPath } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 import { ClassificationsTreeNodeInternal } from "../ClassificationsTreeNodeInternal.js";
 import { ClassificationsTreeVisibilityHelper } from "./ClassificationsTreeVisibilityHelper.js";
 import { createClassificationsSearchResultsTree } from "./SearchResultsTree.js";
 
 import type { Observable } from "rxjs";
-import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfoCache } from "../../../common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
-import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
-import type { ChildrenTree } from "../../../common/internal/Utils.js";
 import type { SearchResultsTree } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeSpecificVisibilityHandler } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
@@ -89,62 +86,38 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
     elements: Required<ClassificationsTreeSearchTargets>["elements"];
     on: boolean;
   }): Observable<void> {
-    const searchTargetElements = new Array<Id64String>();
-    const elementIdsSet = new Set<Id64String>();
-    const modelCategoryElementMap = new Map<`${ModelId}-${CategoryId}`, Array<ElementId>>();
-    // elements is an array that stores elements grouped by:
-    // 1. Their path
-    // 2. Their modelId and categoryId
-    // When changing visibility of elements, visibility handler does not care about the path.
-    // So we can first get all elements and group them only by modelId and categoryId.
-    for (const { elements: elementsMap, categoryId, modelId } of elements) {
-      const key: `${ModelId}-${CategoryId}` = `${modelId}-${categoryId}`;
-      let mapEntry = modelCategoryElementMap.get(key);
-      if (!mapEntry) {
-        mapEntry = [];
-        modelCategoryElementMap.set(key, mapEntry);
-      }
-      for (const [elementId, { isSearchTarget }] of elementsMap) {
-        mapEntry.push(elementId);
-        elementIdsSet.add(elementId);
-        if (isSearchTarget) {
-          searchTargetElements.push(elementId);
-        }
-      }
-    }
-    // Get children for search targets, since non search targets don't have all the children present in the hierarchy.
-    return this.#props.idsCache.getChildElementsTree({ elementIds: searchTargetElements }).pipe(
-      // Need to filter out and keep only those children ids that are not part of elements that are present in search paths.
-      // Elements in search paths will have their visibility changed directly: they will be provided as elementIds to changeElementsVisibilityStatus.
-      map((childrenTree) => ({
-        childrenNotInSearchPaths: setDifference(getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ depth }) => depth > 0 }), elementIdsSet),
-        childrenTree,
-      })),
-      mergeMap(({ childrenNotInSearchPaths, childrenTree }) =>
-        fromWithRelease({ source: modelCategoryElementMap.entries(), size: modelCategoryElementMap.size, releaseOnCount: 50 }).pipe(
-          mergeMap(([key, elementsInSearchPathsGroupedByModelAndCategory]) => {
-            const [modelId, categoryId] = key.split("-");
-            const childrenIds = new Set<Id64String>();
-            // A shared children tree was created, need to get the children for each element in the group.
-            for (const elementId of elementsInSearchPathsGroupedByModelAndCategory) {
-              const elementChildrenTree: ChildrenTree | undefined = childrenTree.get(elementId)?.children;
-              if (!elementChildrenTree) {
-                continue;
-              }
-              for (const childId of getIdsFromChildrenTree({ tree: elementChildrenTree })) {
-                childrenIds.add(childId);
-              }
-            }
-            return this.#visibilityHelper.changeElementsVisibilityStatus({
-              modelId,
-              categoryId,
-              elementIds: elementsInSearchPathsGroupedByModelAndCategory,
-              // Pass only those children that are not part of search paths.
-              children: setIntersection(childrenIds, childrenNotInSearchPaths),
-              on,
-            });
-          }),
-        ),
+    return fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
+      mergeMap(
+        ({ modelId, categoryId, searchTargetElements, nonSearchTargetElements, pathToElements, categoryOfTopMostParentElement, topMostParentElementId }) => {
+          const parentElementsIdsPath = topMostParentElementId
+            ? getParentElementsIdsPath({
+                parentInstanceKeys: pathToElements.map((instanceKey) => [instanceKey]),
+                topMostParentElementId,
+              })
+            : [];
+          return merge(
+            searchTargetElements.length > 0
+              ? this.#visibilityHelper.changeElementsVisibilityStatus({
+                  modelId,
+                  categoryId,
+                  elementIds: searchTargetElements,
+                  parentElementsIdsPath,
+                  categoryOfTopMostParentElement,
+                  on,
+                })
+              : EMPTY,
+            // Child always/never drawn elements will be in search paths, and their visibility status will be handled separately.
+            nonSearchTargetElements.length > 0
+              ? this.#visibilityHelper.changeElementsVisibilityStatus({
+                  modelId,
+                  categoryId,
+                  elementIds: nonSearchTargetElements,
+                  on,
+                  ignoreDescendants: true,
+                })
+              : EMPTY,
+          );
+        },
       ),
     );
   }
@@ -174,8 +147,8 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       modelId: node.extendedData.modelId,
       categoryId: node.extendedData.categoryId,
       parentElementsIdsPath,
-      childrenCount: node.extendedData.childrenCount,
       categoryOfTopMostParentElement: node.extendedData.categoryOfTopMostParentElement,
+      computeOnlyOwnStatus: node.children ? undefined : true,
     });
   }
 
@@ -200,22 +173,19 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       }
       assert(ClassificationsTreeNodeInternal.isGeometricElementNode(node));
       const elementIds = node.key.instanceKeys.map(({ id }) => id);
-      return this.#props.idsCache.getChildElementsTree({ elementIds }).pipe(
-        map((childrenTree): Id64Set => {
-          // Children tree contains provided elementIds, they are at the root of this tree.
-          // We want to skip them and only get ids of children.
-          return getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ depth }) => depth > 0 });
-        }),
-        mergeMap((children) =>
-          this.#visibilityHelper.changeElementsVisibilityStatus({
-            elementIds,
-            modelId: node.extendedData.modelId,
-            categoryId: node.extendedData.categoryId,
-            children: children.size > 0 ? children : undefined,
-            on,
-          }),
-        ),
-      );
+      const parentElementsIdsPath = getParentElementsIdsPath({
+        parentInstanceKeys: node.parentKeys.filter((parentKey) => HierarchyNodeKey.isInstances(parentKey)).map((parentKey) => parentKey.instanceKeys),
+        topMostParentElementId: node.extendedData.topMostParentElementId,
+      });
+
+      return this.#visibilityHelper.changeElementsVisibilityStatus({
+        elementIds,
+        modelId: node.extendedData.modelId,
+        categoryId: node.extendedData.categoryId,
+        on,
+        categoryOfTopMostParentElement: node.extendedData.categoryOfTopMostParentElement,
+        parentElementsIdsPath,
+      });
     });
 
     if (this.#props.viewport.isAlwaysDrawnExclusive) {
@@ -251,65 +221,36 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
   }: {
     elements: Required<ClassificationsTreeSearchTargets>["elements"];
   }): Observable<VisibilityStatus> {
-    const searchTargetElements = new Array<Id64String>();
-    for (const { elements: elementsMap } of elements) {
-      for (const [elementId, { isSearchTarget }] of elementsMap) {
-        if (isSearchTarget) {
-          searchTargetElements.push(elementId);
-        }
-      }
-    }
-    return this.#props.idsCache.getAllChildElementsCount({ elementIds: searchTargetElements }).pipe(
-      mergeMap((elementsChildrenCountMap) =>
-        fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
-          mergeMap(({ modelId, categoryId, elements: elementsMap, pathToElements, categoryOfTopMostParentElement, topMostParentElementId }) => {
-            const parentElementsIdsPath = topMostParentElementId
-              ? getParentElementsIdsPath({
-                  parentInstanceKeys: pathToElements.map((instanceKey) => [instanceKey]),
-                  topMostParentElementId,
+    return fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
+      mergeMap(
+        ({ modelId, categoryId, searchTargetElements, nonSearchTargetElements, pathToElements, categoryOfTopMostParentElement, topMostParentElementId }) => {
+          const parentElementsIdsPath = topMostParentElementId
+            ? getParentElementsIdsPath({
+                parentInstanceKeys: pathToElements.map((instanceKey) => [instanceKey]),
+                topMostParentElementId,
+              })
+            : [];
+          return merge(
+            searchTargetElements.length > 0
+              ? this.#visibilityHelper.getElementsVisibilityStatus({
+                  modelId,
+                  categoryId,
+                  elementIds: searchTargetElements,
+                  parentElementsIdsPath,
+                  categoryOfTopMostParentElement,
                 })
-              : [];
-            let totalSearchTargetsChildrenCount = 0;
-            const nonSearchTargetIds = new Array<Id64String>();
-            const searchTargetIds = new Array<Id64String>();
-            for (const [elementId, { isSearchTarget }] of elementsMap) {
-              if (!isSearchTarget) {
-                nonSearchTargetIds.push(elementId);
-                continue;
-              }
-              searchTargetIds.push(elementId);
-              const childCount = elementsChildrenCountMap.get(elementId);
-              if (childCount) {
-                totalSearchTargetsChildrenCount += childCount;
-              }
-            }
-            return merge(
-              searchTargetIds.length > 0
-                ? this.#visibilityHelper.getElementsVisibilityStatus({
-                    modelId,
-                    categoryId,
-                    elementIds: searchTargetIds,
-                    parentElementsIdsPath,
-                    childrenCount: totalSearchTargetsChildrenCount,
-                    categoryOfTopMostParentElement,
-                  })
-                : EMPTY,
-              // Set childrenCount to undefined for non search targets, as some of their child elements might be filtered out.
-              // Since childrenCount is set to undefined, these elements won't check child always/never drawn child elements status.
-              // Child always/never drawn elements will be in search paths, and their visibility status will be handled separately.
-              nonSearchTargetIds.length > 0
-                ? this.#visibilityHelper.getElementsVisibilityStatus({
-                    modelId,
-                    categoryId,
-                    elementIds: nonSearchTargetIds,
-                    parentElementsIdsPath,
-                    childrenCount: undefined,
-                    categoryOfTopMostParentElement,
-                  })
-                : EMPTY,
-            ).pipe(mergeVisibilityStatuses());
-          }),
-        ),
+              : EMPTY,
+            // Child always/never drawn elements will be in search paths, and their visibility status will be handled separately.
+            nonSearchTargetElements.length > 0
+              ? this.#visibilityHelper.getElementsVisibilityStatus({
+                  modelId,
+                  categoryId,
+                  elementIds: nonSearchTargetElements,
+                  computeOnlyOwnStatus: true,
+                })
+              : EMPTY,
+          );
+        },
       ),
     );
   }

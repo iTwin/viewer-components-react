@@ -5,7 +5,7 @@
 
 import { bufferCount, concat, concatMap, delay, EMPTY, from, map, mergeAll, mergeMap, toArray } from "rxjs";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import { getIdsFromChildrenTree, getOptimalBatchSize, getParentElementsIdsPath } from "../../../common/internal/Utils.js";
+import { getOptimalBatchSize, getParentElementsIdsPath } from "../../../common/internal/Utils.js";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 
@@ -64,15 +64,14 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
 
   /** Gets grouped elements visibility status. */
   public getGroupedElementsVisibilityStatus(props: {
-    modelElementsMap: Map<ModelId, { elementIds: Set<ElementId>; categoryOfTopMostParentElement: CategoryId }>;
+    modelElementsMap: Map<ModelId, { elementIds: Set<ElementId>; categoryOfTopMostParentElement: CategoryId; childrenWhichAreParents: Set<ElementId> }>;
     categoryId: Id64String;
     parentKeys: HierarchyNodeKey[];
-    childrenCount: number;
     topMostParentElementId?: ElementId;
   }): Observable<VisibilityStatus> {
     const { modelElementsMap, categoryId, topMostParentElementId } = props;
     return from(modelElementsMap).pipe(
-      mergeMap(([modelId, { elementIds, categoryOfTopMostParentElement }]) =>
+      mergeMap(([modelId, { elementIds, categoryOfTopMostParentElement, childrenWhichAreParents }]) =>
         this.getElementsVisibilityStatus({
           elementIds,
           modelId,
@@ -83,8 +82,8 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
                 topMostParentElementId,
               })
             : [],
-          childrenCount: props.childrenCount,
           categoryOfTopMostParentElement,
+          computeOnlyOwnStatus: childrenWhichAreParents.size ? (elementId) => !childrenWhichAreParents.has(elementId) : true,
         }),
       ),
       mergeVisibilityStatuses(),
@@ -120,31 +119,30 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
 
   /** Changes grouped elements visibility status. */
   public changeGroupedElementsVisibilityStatus(props: {
-    modelElementsMap: Map<ModelId, { elementIds: Set<ElementId> }>;
+    modelElementsMap: Map<ModelId, { elementIds: Set<ElementId>; categoryOfTopMostParentElement: CategoryId }>;
     categoryId: Id64String;
+    parentKeys: HierarchyNodeKey[];
+    topMostParentElementId?: ElementId;
     on: boolean;
   }): Observable<void> {
-    const elementIds = new Array<ElementId>();
-    for (const { elementIds: ids } of props.modelElementsMap.values()) {
-      for (const id of ids) {
-        elementIds.push(id);
-      }
-    }
-    return this.#props.idsCache.getChildElementsTree({ elementIds }).pipe(
-      map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ depth }) => depth > 0 })),
-      mergeMap((children) =>
-        from(props.modelElementsMap).pipe(
-          mergeMap(([modelId, { elementIds: modelElementIds }]) => {
-            return this.changeElementsVisibilityStatus({
-              modelId,
-              elementIds: modelElementIds,
-              categoryId: props.categoryId,
-              on: props.on,
-              children,
-            });
-          }),
-        ),
-      ),
+    const { modelElementsMap, categoryId, topMostParentElementId, on } = props;
+    const parentElementsIdsPath = topMostParentElementId
+      ? getParentElementsIdsPath({
+          parentInstanceKeys: props.parentKeys.filter((key) => HierarchyNodeKey.isInstances(key)).map((key) => key.instanceKeys),
+          topMostParentElementId,
+        })
+      : [];
+    return from(modelElementsMap).pipe(
+      mergeMap(([modelId, { elementIds, categoryOfTopMostParentElement }]) => {
+        return this.changeElementsVisibilityStatus({
+          modelId,
+          elementIds,
+          categoryId,
+          on,
+          categoryOfTopMostParentElement,
+          parentElementsIdsPath,
+        });
+      }),
     );
   }
 

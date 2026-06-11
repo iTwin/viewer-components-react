@@ -358,24 +358,6 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
         type: elementClassName,
         modelId: { selector: "IdToHex(this.Model.Id)" },
         categoryId: { selector: "IdToHex(this.Category.Id)" },
-        childrenCount: {
-          selector: `
-            (
-              WITH RECURSIVE
-                ElementWithParent(id) AS (
-                  SELECT e.ECInstanceId
-                  FROM ${CLASS_NAME_GeometricElement3d} e
-                  WHERE e.ECInstanceId = this.ECInstanceId
-                  UNION ALL
-                  SELECT c.ECInstanceId
-                  FROM ${CLASS_NAME_GeometricElement3d} c
-                  JOIN ElementWithParent p ON p.id = c.Parent.Id
-                )
-              SELECT COUNT(1) - 1
-              FROM ElementWithParent
-            )
-          `,
-        },
         categoryOfTopMostParentElement: {
           selector: `IdToHex(${categoryOfTopMostParentElement ?? "this.Category.Id"})`,
         },
@@ -446,7 +428,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
   return defer(async () => {
     const [classificationTableLabelSelectClause, classificationLabelSelectClause, elementLabelSelectClause] = await Promise.all(
       [CLASS_NAME_ClassificationTable, CLASS_NAME_Classification, CLASS_NAME_GeometricElement3d].map(async (className) =>
-        props.labelsFactory.createSelectClause({ classAlias: "this", className }),
+        props.labelsFactory.createSelectClause({ classAlias: "this", className, selectorsConcatenator: ECSql.createConcatenatedValueStringSelector }),
       ),
     );
     const classificationIds = await firstValueFrom(props.idsCache.getAllClassifications());

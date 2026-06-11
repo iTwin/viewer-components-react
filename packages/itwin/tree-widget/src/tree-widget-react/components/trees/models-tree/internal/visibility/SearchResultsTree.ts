@@ -5,6 +5,7 @@
 
 import { assert } from "@itwin/core-bentley";
 import { CLASS_NAME_Category, CLASS_NAME_GeometricElement3d, CLASS_NAME_Model, CLASS_NAME_Subject } from "../../../common/internal/ClassNameDefinitions.js";
+import { getOrCreate } from "../../../common/internal/Utils.js";
 import { createSearchResultsTree, SearchResultsNodesHandler } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
@@ -15,25 +16,9 @@ import type {
   BaseSearchResultsTreeNode,
   SearchResultsNodeIdentifierAsString,
   SearchResultsTree,
+  SearchResultsTreeNodeChildren,
   SearchResultsTreeRootNode,
 } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
-
-interface GenericSearchResultsTreeNode extends BaseSearchResultsTreeNode<GenericSearchResultsTreeNode> {
-  type: "subject" | "model";
-}
-
-interface CategorySearchResultsTreeNode extends BaseSearchResultsTreeNode<CategorySearchResultsTreeNode> {
-  type: "category";
-  modelId: Id64String;
-}
-
-interface ElementSearchResultsTreeNode extends BaseSearchResultsTreeNode<ElementSearchResultsTreeNode> {
-  type: "element";
-  modelId: Id64String;
-  categoryId: Id64String;
-}
-
-type SearchResultsTreeNode = GenericSearchResultsTreeNode | CategorySearchResultsTreeNode | ElementSearchResultsTreeNode;
 
 /** @internal */
 export interface ModelsTreeSearchTargets {
@@ -44,7 +29,8 @@ export interface ModelsTreeSearchTargets {
     pathToElements: InstanceKey[];
     modelId: Id64String;
     categoryId: Id64String;
-    elements: Map<ElementId, { isSearchTarget: boolean }>;
+    searchTargetElements: Array<ElementId>;
+    nonSearchTargetElements: Array<ElementId>;
     topMostParentElementId?: Id64String;
   }>;
 }
@@ -61,61 +47,96 @@ export async function createModelsSearchResultsTree(props: {
   });
 }
 
-type SearchTargetsInternalElements = Map<
+interface SubjectNode extends BaseSearchResultsTreeNode<Node> {
+  type: "subject";
+}
+
+interface ModelNode extends BaseSearchResultsTreeNode<Node> {
+  type: "model";
+}
+interface CategoryNode extends BaseSearchResultsTreeNode<Node> {
+  type: "category";
+  modelId: Id64String;
+}
+
+interface ElementNode extends BaseSearchResultsTreeNode<Node> {
+  type: "element";
+  modelId: Id64String;
+  categoryId: Id64String;
+}
+
+type Node = SubjectNode | ModelNode | CategoryNode | ElementNode;
+
+type RawSubjectNode = Omit<SubjectNode, "children"> & {
+  children?: SearchResultsTreeNodeChildren<RawNode>;
+};
+type RawModelNode = Omit<ModelNode, "children"> & {
+  children?: SearchResultsTreeNodeChildren<RawNode>;
+};
+type RawCategoryNode = Omit<CategoryNode, "children"> & {
+  children?: SearchResultsTreeNodeChildren<RawNode>;
+};
+type RawElementNode = Omit<ElementNode, "children"> & {
+  children?: SearchResultsTreeNodeChildren<RawNode>;
+};
+
+type RawNode = RawElementNode | RawModelNode | RawSubjectNode | RawCategoryNode;
+
+type InternalSearchTargetElements = Map<
   SearchResultsNodeIdentifierAsString,
   {
-    children?: SearchTargetsInternalElements;
+    children?: InternalSearchTargetElements;
     topMostParentElementId?: Id64String;
-    modelCategoryElements?: Map<ModelCategoryKey, Map<ElementId, { isSearchTarget: boolean }>>;
+    modelCategoryElements?: Map<ModelCategoryKey, { searchTargets: Array<ElementId>; nonSearchTargets: Array<ElementId> }>;
   }
 >;
-
-interface SearchTargetsInternal {
+interface InternalSearchTargets {
   subjectIds?: Id64Set;
   modelIds?: Id64Set;
   categories?: Map<ModelId, Set<CategoryId>>;
-  elements?: SearchTargetsInternalElements;
+  elements?: InternalSearchTargetElements;
 }
+
+type ModelCategoryKey = `${ModelId}-${CategoryId}`;
 
 interface ModelsTreeSearchResultsNodesHandlerProps {
   imodelAccess: ECClassHierarchyInspector;
 }
 
-type ModelCategoryKey = `${ModelId}-${CategoryId}`;
-
-class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<void, ModelsTreeSearchTargets, SearchResultsTreeNode> {
+class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<void, ModelsTreeSearchTargets, RawNode> {
   readonly #props: ModelsTreeSearchResultsNodesHandlerProps;
   constructor(props: ModelsTreeSearchResultsNodesHandlerProps) {
     super();
     this.#props = props;
   }
 
-  public convertNodesToSearchTargets(searchResultsNodes: SearchResultsTreeNode[]): ModelsTreeSearchTargets | undefined {
-    const searchTargets: SearchTargetsInternal = {};
+  public convertNodesToSearchTargets(rawNodes: RawNode[]): ModelsTreeSearchTargets | undefined {
+    const internalSearchTargets: InternalSearchTargets = {};
 
-    searchResultsNodes.forEach((searchResultsNode) => this.collectSearchTargets(searchTargets, searchResultsNode));
+    rawNodes.forEach((rawNode) => this.collectSearchTargets(internalSearchTargets, rawNode));
 
-    return this.convertInternalSearchTargets(searchTargets);
+    return this.convertInternalSearchTargets(internalSearchTargets);
   }
 
-  public async getProcessedSearchResultsNodes(): Promise<void> {}
+  public async getProcessedNodes(): Promise<void> {}
 
   private convertInternalSearchTargetElementsRecursively(
-    searchTargetsInternalElements: SearchTargetsInternalElements,
+    internalSearchTargetElements: InternalSearchTargetElements,
     currentPath: InstanceKey[],
   ): Required<ModelsTreeSearchTargets>["elements"] {
     const result: Required<ModelsTreeSearchTargets>["elements"] = [];
     // Internal search target elements are stored in a tree structure, need to convert that to array structure.
-    for (const [identifierAsString, entry] of searchTargetsInternalElements) {
+    for (const [identifierAsString, entry] of internalSearchTargetElements) {
       const identifier = this.convertSearchResultsNodeIdentifierStringToHierarchyNodeIdentifier(identifierAsString);
       if (entry.modelCategoryElements) {
-        for (const [modelCategoryKey, elements] of entry.modelCategoryElements) {
+        for (const [modelCategoryKey, { searchTargets, nonSearchTargets }] of entry.modelCategoryElements) {
           const { modelId, categoryId } = this.parseModelCategoryKey(modelCategoryKey);
           result.push({
             pathToElements: [...currentPath, identifier],
             modelId,
             categoryId,
-            elements,
+            nonSearchTargetElements: nonSearchTargets,
+            searchTargetElements: searchTargets,
             topMostParentElementId: entry.topMostParentElementId,
           });
         }
@@ -127,7 +148,7 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<void
     return result;
   }
 
-  private convertInternalSearchTargets(searchTargets: SearchTargetsInternal): ModelsTreeSearchTargets | undefined {
+  private convertInternalSearchTargets(searchTargets: InternalSearchTargets): ModelsTreeSearchTargets | undefined {
     if (!searchTargets.categories && !searchTargets.subjectIds && !searchTargets.elements && !searchTargets.modelIds) {
       return undefined;
     }
@@ -144,60 +165,54 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<void
     };
   }
 
-  private collectSearchTargets(searchTargets: SearchTargetsInternal, searchResultsNode: SearchResultsTreeNode) {
-    if (searchResultsNode.isSearchTarget) {
-      this.addTarget(searchTargets, searchResultsNode);
+  private collectSearchTargets(internalSearchTargets: InternalSearchTargets, rawNode: RawNode) {
+    if (rawNode.isSearchTarget) {
+      this.addInternalTarget(internalSearchTargets, rawNode);
       return;
     }
 
-    if (searchResultsNode.type === "element") {
+    if (rawNode.type === "element") {
       // need to add parent ids as search target will be an element
-      this.addTarget(searchTargets, searchResultsNode);
+      this.addInternalTarget(internalSearchTargets, rawNode);
     }
 
-    if (!searchResultsNode.children) {
+    if (!rawNode.children) {
       return;
     }
 
-    for (const child of searchResultsNode.children.values()) {
-      this.collectSearchTargets(searchTargets, child);
+    for (const child of rawNode.children.values()) {
+      this.collectSearchTargets(internalSearchTargets, child);
     }
   }
 
-  private addTarget(searchTargets: SearchTargetsInternal, node: SearchResultsTreeNode) {
+  private addInternalTarget(internalSearchTargets: InternalSearchTargets, node: RawSubjectNode | RawModelNode | RawCategoryNode | RawElementNode) {
     switch (node.type) {
-      case "subject":
-        (searchTargets.subjectIds ??= new Set()).add(node.id);
+      case "subject": {
+        (internalSearchTargets.subjectIds ??= new Set()).add(node.id);
         return;
-      case "model":
-        (searchTargets.modelIds ??= new Set()).add(node.id);
+      }
+      case "model": {
+        (internalSearchTargets.modelIds ??= new Set()).add(node.id);
         return;
-      case "category":
-        const categories = (searchTargets.categories ??= new Map()).get(node.modelId);
-        if (categories) {
-          categories.add(node.id);
-          return;
-        }
-        searchTargets.categories.set(node.modelId, new Set([node.id]));
+      }
+      case "category": {
+        const categories = getOrCreate({ map: (internalSearchTargets.categories ??= new Map()), key: node.modelId, createFunc: () => new Set<CategoryId>() });
+        categories.add(node.id);
         return;
-      case "element":
+      }
+      case "element": {
         // Internal search target elements need to have path saved in some way.
         // For this, a tree structure is used, where keys are stringified identifiers of parent nodes depending on the hierarchy.
         const modelCategoryKey = this.createModelCategoryKey(node.modelId, node.categoryId);
-        searchTargets.elements ??= new Map();
-        let entry = searchTargets.elements;
+        internalSearchTargets.elements ??= new Map();
+        let entry = internalSearchTargets.elements;
         let topMostParentElementId: Id64String | undefined;
         for (let i = 0; i < node.pathToNode.length; ++i) {
           if (topMostParentElementId === undefined && node.pathToNode[i].type === "element") {
             topMostParentElementId = node.pathToNode[i].id;
           }
           const identifierAsString = this.convertSearchResultsNodeIdentifierToString(node.pathToNode[i]);
-          let identifierEntry = entry.get(identifierAsString);
-          // create a new entry for parent node if it does not exist
-          if (!identifierEntry) {
-            identifierEntry = { topMostParentElementId };
-            entry.set(identifierAsString, identifierEntry);
-          }
+          const identifierEntry = getOrCreate({ map: entry, key: identifierAsString, createFunc: () => ({ topMostParentElementId }) });
           // last entry in the path don't need to have children
           if (i < node.pathToNode.length - 1) {
             identifierEntry.children ??= new Map();
@@ -206,13 +221,19 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<void
           }
 
           // Add elements who share the same path to the modelCategoryElements map
-          const elements = (identifierEntry.modelCategoryElements ??= new Map()).get(modelCategoryKey);
-          if (elements) {
-            elements.set(node.id, { isSearchTarget: node.isSearchTarget });
+          identifierEntry.modelCategoryElements ??= new Map();
+          const elements = getOrCreate({
+            map: identifierEntry.modelCategoryElements,
+            key: modelCategoryKey,
+            createFunc: () => ({ searchTargets: [], nonSearchTargets: [] }),
+          });
+          if (node.isSearchTarget) {
+            elements.searchTargets.push(node.id);
           } else {
-            identifierEntry.modelCategoryElements.set(modelCategoryKey, new Map([[node.id, { isSearchTarget: node.isSearchTarget }]]));
+            elements.nonSearchTargets.push(node.id);
           }
         }
+      }
     }
   }
 
@@ -225,17 +246,17 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<void
     return { modelId, categoryId };
   }
 
-  public createSearchResultsTreeNode({
+  public createNode({
     type,
     id,
     isSearchTarget,
     parent,
   }: {
-    type: SearchResultsTreeNode["type"];
-    id: string;
+    type: RawNode["type"];
+    id: Id64String;
     isSearchTarget: boolean;
-    parent: SearchResultsTreeNode | SearchResultsTreeRootNode<SearchResultsTreeNode>;
-  }): SearchResultsTreeNode {
+    parent: RawNode | SearchResultsTreeRootNode<RawNode>;
+  }): RawNode {
     const pathToNode = "pathToNode" in parent ? [...parent.pathToNode, { type: parent.type, id: parent.id }] : [];
     if (type === "subject" || type === "model") {
       return {
@@ -283,7 +304,7 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<void
     throw new Error("Invalid parent node type");
   }
 
-  public async getType(className: EC.FullClassName): Promise<SearchResultsTreeNode["type"]> {
+  public async getType(className: EC.FullClassName): Promise<Node["type"]> {
     if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Subject)) {
       return "subject";
     }
@@ -296,7 +317,7 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<void
     return "element";
   }
 
-  public getClassName(type: SearchResultsTreeNode["type"]): EC.FullClassName {
+  public getClassName(type: Node["type"]): EC.FullClassName {
     switch (type) {
       case "subject":
         return CLASS_NAME_Subject;

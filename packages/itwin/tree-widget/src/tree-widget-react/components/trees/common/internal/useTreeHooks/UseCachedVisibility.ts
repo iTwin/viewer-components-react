@@ -296,7 +296,7 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
         if (!targets) {
           return EMPTY;
         }
-        return treeSpecificVisibilityHandler.getSearchTargetsVisibilityStatus(targets, node);
+        return treeSpecificVisibilityHandler.getSearchTargetsVisibilityStatus(targets);
       }),
     );
   }
