@@ -167,9 +167,9 @@ export class ModeledElementsCache {
           childrenTreeAsArray.push(new Set(elementIds));
         }
         childrenTreeAsArray.push(categoryIds);
-        ChildrenTree.collect({
+        ChildrenTree.visit({
           tree: subModelsTree,
-          addToAccumulator: ({ treeEntry, key, depth }) => {
+          accept: ({ treeEntry, key, depth }) => {
             if (depth < childrenTreeAsArray.length) {
               // when entry in children tree does not exist in the childrenTreeAsArray
               // it means that this branch of the tree is not in the path specified by parentElementsPath

@@ -383,9 +383,9 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
       }
     }
     const accumulator = new Map<CategoryId, Array<ElementId>>();
-    ChildrenTree.collect({
+    ChildrenTree.visit({
       tree: childrenTree,
-      addToAccumulator: ({ treeEntry, key, depth }) => {
+      accept: ({ treeEntry, key, depth }) => {
         if (depth < childrenTreeAsArray.length) {
           // when entry in children tree does not exist in the childrenTreeAsArray
           // it means that this branch of the tree is not in the path specified by elementCategoryPath

@@ -164,16 +164,16 @@ export type ChildrenTree<T extends object = {}> = Map<string, T & { children?: C
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export namespace ChildrenTree {
   /** @internal*/
-  export function collect<T extends object = {}>({
+  export function visit<T extends object = {}>({
     tree,
-    addToAccumulator,
+    accept,
   }: {
     tree: ChildrenTree<T>;
-    addToAccumulator: (props: { depth: number; treeEntry: T; key: string }) => { ignoreChildren: boolean };
+    accept: (props: { depth: number; treeEntry: T; key: string }) => { ignoreChildren: boolean };
   }): void {
     function getIdsInternal({ childrenTree, depth }: { childrenTree: ChildrenTree<T>; depth: number }): void {
       for (const [id, entry] of childrenTree) {
-        const { ignoreChildren } = addToAccumulator({ depth, treeEntry: entry, key: id });
+        const { ignoreChildren } = accept({ depth, treeEntry: entry, key: id });
         if (ignoreChildren) {
           continue;
         }
