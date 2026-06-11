@@ -364,7 +364,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     }
     const categoriesToShow = categoryIds.filter((categoryId) => categoryId !== categoryOfSubModel);
     const definitions: HierarchyLevelDefinition = [];
-    // Show categories which don't match sub-model elements category
+    // Show categories which don't match modeled elements category
     if (categoriesToShow.length > 0) {
       definitions.push({
         fullClassName: this.#categoryClass,
@@ -382,7 +382,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         },
       });
     }
-    // Show elements which match sub-model elements category
+    // Show elements which match modeled elements category
     if (categoriesToShow.length !== categoryIds.length) {
       definitions.push({
         fullClassName: this.#categoryElementClass,
