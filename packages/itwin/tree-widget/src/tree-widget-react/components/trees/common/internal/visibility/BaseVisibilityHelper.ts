@@ -29,7 +29,7 @@ import {
 import { assert, Id64 } from "@itwin/core-bentley";
 import { subscribeAll } from "../Rxjs.js";
 import { createVisibilityStatus } from "../Tooltip.js";
-import { countInSet, fromWithRelease, getOrCreate, releaseMainThreadOnItemsCount, setDifference } from "../Utils.js";
+import { countInSet, fromWithRelease, getId64Spreadable, getOrCreate, releaseMainThreadOnItemsCount, setDifference } from "../Utils.js";
 import { changeElementStateNoChildrenOperator, getCategoryVisibilityFromAlwaysAndNeverDrawnElementsImpl, mergeVisibilityStatuses } from "../VisibilityUtils.js";
 
 import type { Observable, Subscription } from "rxjs";
@@ -876,11 +876,11 @@ export class BaseVisibilityHelper implements Disposable {
             }).pipe(
               mergeMap(({ matchingDesiredState: descendantsMatching, notMatchingDesiredState: descendantsNotMatching }) => {
                 const elementsMatchingDesiredState = elementsMatchDesiredState
-                  ? [...descendantsMatching, ...(typeof elementIds === "string" ? [elementIds] : elementIds)]
+                  ? [...descendantsMatching, ...getId64Spreadable(elementIds)]
                   : descendantsMatching;
                 const elementsNotMatchingDesiredState = elementsMatchDesiredState
                   ? descendantsNotMatching
-                  : [...descendantsNotMatching, ...(typeof elementIds === "string" ? [elementIds] : elementIds)];
+                  : [...descendantsNotMatching, ...getId64Spreadable(elementIds)];
                 return this.queueElementsVisibilityChange({
                   elementsMatchingDesiredState: Id64.sizeOf(elementsMatchingDesiredState) > 0 ? elementsMatchingDesiredState : undefined,
                   elementsNotMatchingDesiredState: Id64.sizeOf(elementsNotMatchingDesiredState) > 0 ? elementsNotMatchingDesiredState : undefined,
