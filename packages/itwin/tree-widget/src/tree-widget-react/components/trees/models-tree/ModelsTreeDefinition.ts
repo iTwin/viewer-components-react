@@ -447,7 +447,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 hasChildren: true,
                 extendedData: {
                   isModel: true,
-                  categoryOfSubModel: { selector: `IdToHex(${parentNode.extendedData.categoryId})` },
+                  modeledElementCategory: { selector: `IdToHex(${parentNode.extendedData.categoryId})` },
                 },
               })}
             FROM ${CLASS_NAME_GeometricModel3d} this
@@ -470,7 +470,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     nodeSelectClauseFactory,
     instanceLabelSelectClauseFactory,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const categoryOfSubModel = parentNode.extendedData?.categoryOfSubModel;
+    const modeledElementCategory = parentNode.extendedData?.modeledElementCategory;
     const [categoryInstanceFilterClauses, elementInstanceFilterClauses, categoryIds] = await Promise.all([
       nodeSelectClauseFactory.createFilterClauses({
         filter: instanceFilter,
@@ -488,7 +488,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     // For top-level models show all categories of the top-most elements. For sub-models show only the categories
     // that don't match the sub-model element's category as intermediate category nodes - the elements matching
     // that category are shown directly (see below).
-    const categoriesToShow = categoryOfSubModel === undefined ? categoryIds : categoryIds.filter((categoryId) => categoryId !== categoryOfSubModel);
+    const categoriesToShow = modeledElementCategory === undefined ? categoryIds : categoryIds.filter((categoryId) => categoryId !== modeledElementCategory);
     const definitions: HierarchyLevelDefinition = [];
     if (categoriesToShow.length > 0) {
       definitions.push({
@@ -525,7 +525,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             ${elementInstanceFilterClauses.joins}
             WHERE
               this.Parent.Id IS NULL
-              AND this.Category.Id = ${categoryOfSubModel}
+              AND this.Category.Id = ${modeledElementCategory}
               ${elementInstanceFilterClauses.where ? `AND ${elementInstanceFilterClauses.where}` : ""}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
