@@ -7,7 +7,7 @@ import { Id64 } from "@itwin/core-bentley";
 import { HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { getOrCreate, ParentElementsPath } from "../Utils.js";
 
-import type { Id64Arg, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, HierarchySearchTree, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { EC, InstanceKey } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId } from "../Types.js";
@@ -315,4 +315,47 @@ export function addElementToInternalSearchTargets(
   } else {
     categoryEntry.nonSearchTargets.push(node.id);
   }
+}
+
+/**
+ * Shared type for internal category search targets, keyed by model ID.
+ * Generic over `TModelId` to support both `ModelId` (models tree) and `ModelId | undefined` (categories tree).
+ * @internal
+ */
+export type InternalSearchTargetCategories<TModelId extends Id64String | undefined = Id64String> = Map<
+  TModelId,
+  Map<
+    ElementId | undefined,
+    {
+      parentElementsPath: ParentElementsPath;
+      searchTargets: Array<CategoryId>;
+    }
+  >
+>;
+
+/** @internal */
+export interface SearchTargetCategoryEntry<TModelId extends Id64String | undefined = Id64String> {
+  modelId: TModelId;
+  categoryIds: Id64Set;
+  parentElementsPath: ParentElementsPath;
+}
+
+/**
+ * Converts internal category search targets into a flat array.
+ * @internal
+ */
+export function convertInternalSearchTargetCategories<TModelId extends Id64String | undefined>(
+  internalSearchTargetCategories: InternalSearchTargetCategories<TModelId>,
+): Array<SearchTargetCategoryEntry<TModelId>> {
+  const result: Array<SearchTargetCategoryEntry<TModelId>> = [];
+  for (const [modelId, modelEntry] of internalSearchTargetCategories) {
+    for (const { parentElementsPath, searchTargets } of modelEntry.values()) {
+      result.push({
+        categoryIds: new Set(searchTargets),
+        modelId,
+        parentElementsPath,
+      });
+    }
+  }
+  return result;
 }

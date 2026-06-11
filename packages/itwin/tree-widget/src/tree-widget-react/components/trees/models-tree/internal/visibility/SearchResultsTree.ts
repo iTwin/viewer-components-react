@@ -9,6 +9,7 @@ import { CLASS_NAME_Category, CLASS_NAME_Model, CLASS_NAME_Subject } from "../..
 import { getOrCreate, ParentElementsPath } from "../../../common/internal/Utils.js";
 import {
   addElementToInternalSearchTargets,
+  convertInternalSearchTargetCategories,
   convertInternalSearchTargetElements,
   createSearchResultsTree,
   SearchResultsNodesHandler,
@@ -17,9 +18,10 @@ import {
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { EC, ECClassHierarchyInspector } from "@itwin/presentation-shared";
-import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
+import type { CategoryId, ElementId } from "../../../common/internal/Types.js";
 import type {
   BaseSearchResultsTreeNode,
+  InternalSearchTargetCategories,
   InternalSearchTargetElements,
   SearchResultsTree,
   SearchResultsTreeNodeChildren,
@@ -95,17 +97,6 @@ type RawElementNode = Omit<ElementNode, "children" | "modelId" | "parentElements
 };
 
 type RawNode = RawElementNode | RawModelNode | RawSubjectNode | RawCategoryNode;
-
-type InternalSearchTargetCategories = Map<
-  ModelId,
-  Map<
-    ElementId | undefined,
-    {
-      parentElementsPath: ParentElementsPath;
-      searchTargets: Array<CategoryId>;
-    }
-  >
->;
 
 interface InternalSearchTargets {
   subjectIds?: Id64Set;
@@ -213,30 +204,13 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<Proc
     return this.convertInternalSearchTargets(internalSearchTargets);
   }
 
-  private convertInternalSearchTargetCategories(
-    internalSearchTargetCategories: InternalSearchTargetCategories,
-  ): Required<ModelsTreeSearchTargets>["categories"] {
-    const result: Required<ModelsTreeSearchTargets>["categories"] = [];
-    // Internal search target elements are stored in a tree structure, need to convert that to array structure.
-    for (const [modelId, modelEntry] of internalSearchTargetCategories) {
-      for (const { parentElementsPath, searchTargets } of modelEntry.values()) {
-        result.push({
-          categoryIds: new Set(searchTargets),
-          modelId,
-          parentElementsPath,
-        });
-      }
-    }
-    return result;
-  }
-
   private convertInternalSearchTargets(searchTargets: InternalSearchTargets): ModelsTreeSearchTargets | undefined {
     if (!searchTargets.categories && !searchTargets.subjectIds && !searchTargets.elements && !searchTargets.modelIds) {
       return undefined;
     }
 
     return {
-      categories: searchTargets.categories ? this.convertInternalSearchTargetCategories(searchTargets.categories) : undefined,
+      categories: searchTargets.categories ? convertInternalSearchTargetCategories(searchTargets.categories) : undefined,
       elements: searchTargets.elements ? convertInternalSearchTargetElements(searchTargets.elements) : undefined,
       modelIds: searchTargets.modelIds,
       subjectIds: searchTargets.subjectIds,
