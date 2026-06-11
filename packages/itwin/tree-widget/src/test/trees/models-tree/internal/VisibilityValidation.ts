@@ -56,12 +56,11 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
 
   if (ModelsTreeNodeInternal.isCategoryNode(node)) {
     const { id } = node.key.instanceKeys[0];
-    const modelId = node.extendedData.modelIds[0];
-    const lastParentId =
+    const parentOrModelId =
       node.extendedData.parentElementsPath.length > 0
         ? node.extendedData.parentElementsPath[node.extendedData.parentElementsPath.length - 1].elementIds[0]
-        : undefined;
-    const idToUse = `${lastParentId ?? modelId}-${id}`;
+        : node.extendedData.modelIds[0];
+    const idToUse = `${parentOrModelId}-${id}`;
     if (expectations[idToUse] === "disabled") {
       expect(actualVisibility.isDisabled, `Node, ${JSON.stringify(node)}`).toBe(true);
     } else {

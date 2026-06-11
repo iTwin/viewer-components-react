@@ -1996,7 +1996,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 [keys.categoryA.id]: "partial",
                   [getDefaultSubCategoryId(keys.categoryA.id)]: "hidden",
                   [keys.parentElement.id]: "partial",
-                    [`${keys.elementsModel.id}-${keys.categoryB.id}`]: "visible",
+                    [`${keys.parentElement.id}-${keys.categoryB.id}`]: "visible",
                       [keys.childElement.id]: "visible",
 
                 [keys.categoryB.id]: "hidden",
@@ -2028,7 +2028,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 [keys.categoryA.id]: "partial",
                   [getDefaultSubCategoryId(keys.categoryA.id)]: "hidden",
                   [keys.parentElement.id]: "partial",
-                    [`${keys.elementsModel.id}-${keys.categoryB.id}`]: "visible",
+                    [`${keys.parentElement.id}-${keys.categoryB.id}`]: "visible",
                       [keys.childElement.id]: "visible",
 
                 [keys.categoryB.id]: "hidden",
@@ -2060,7 +2060,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 [keys.categoryA.id]: "partial",
                   [getDefaultSubCategoryId(keys.categoryA.id)]: "hidden",
                   [keys.parentElement.id]: "visible",
-                    [`${keys.elementsModel.id}-${keys.categoryB.id}`]: "visible",
+                    [`${keys.parentElement.id}-${keys.categoryB.id}`]: "visible",
                       [keys.childElement.id]: "visible",
 
                 [keys.categoryB.id]: "hidden",
@@ -3419,7 +3419,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 [keys.categoryA.id]: "partial",
                   [getDefaultSubCategoryId(keys.categoryA.id)]: "visible",
                   [keys.parentElement.id]: "partial",
-                    [`${keys.elementsModel.id}-${keys.categoryB.id}`]: "hidden",
+                    [`${keys.parentElement.id}-${keys.categoryB.id}`]: "hidden",
                       [keys.childElement.id]: "hidden",
 
                 [keys.categoryB.id]: "visible",
@@ -3451,7 +3451,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 [keys.categoryA.id]: "partial",
                   [getDefaultSubCategoryId(keys.categoryA.id)]: "visible",
                   [keys.parentElement.id]: "partial",
-                    [`${keys.elementsModel.id}-${keys.categoryB.id}`]: "hidden",
+                    [`${keys.parentElement.id}-${keys.categoryB.id}`]: "hidden",
                       [keys.childElement.id]: "hidden",
 
                 [keys.categoryB.id]: "visible",
@@ -3483,7 +3483,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 [keys.categoryA.id]: "partial",
                   [getDefaultSubCategoryId(keys.categoryA.id)]: "visible",
                   [keys.parentElement.id]: "hidden",
-                    [`${keys.elementsModel.id}-${keys.categoryB.id}`]: "hidden",
+                    [`${keys.parentElement.id}-${keys.categoryB.id}`]: "hidden",
                       [keys.childElement.id]: "hidden",
 
                 [keys.categoryB.id]: "visible",
@@ -4645,16 +4645,16 @@ describe("CategoriesTreeVisibilityHandler", () => {
         async function createIModel() {
           return buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
-              const physicalModel = insertElementsModel({ txn, codeValue: "elements model" });
+              const elementsModel = insertElementsModel({ txn, codeValue: "elements model" });
 
               const categoryA = insertCategory({ txn, codeValue: "categoryA" });
               const defaultSubCategoryA = { id: getDefaultSubCategoryId(categoryA.id), className: CLASS_NAME_SubCategory };
               const categoryB = insertCategory({ txn, codeValue: "categoryB" });
               const defaultSubCategoryB = { id: getDefaultSubCategoryId(categoryB.id), className: CLASS_NAME_SubCategory };
-              const parentElement = insertElement({ txn, modelId: physicalModel.id, categoryId: categoryA.id });
-              const childElement1 = insertElement({ txn, modelId: physicalModel.id, categoryId: categoryB.id, parentId: parentElement.id });
-              const childElement2 = insertElement({ txn, modelId: physicalModel.id, categoryId: categoryB.id, parentId: parentElement.id });
-              const siblingElement = insertElement({ txn, modelId: physicalModel.id, categoryId: categoryA.id });
+              const parentElement = insertElement({ txn, modelId: elementsModel.id, categoryId: categoryA.id });
+              const childElement1 = insertElement({ txn, modelId: elementsModel.id, categoryId: categoryB.id, parentId: parentElement.id });
+              const childElement2 = insertElement({ txn, modelId: elementsModel.id, categoryId: categoryB.id, parentId: parentElement.id });
+              const siblingElement = insertElement({ txn, modelId: elementsModel.id, categoryId: categoryA.id });
 
               return {
                 categoryA,
@@ -4665,7 +4665,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 childElement1,
                 childElement2,
                 siblingElement,
-                physicalModel,
+                elementsModel,
                 searchPaths: [
                   {
                     identifier: categoryA,
@@ -4717,12 +4717,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
         it("showing intermediate category changes visibility for related nodes in search paths", async () => {
           const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-          const { categoryA, categoryB, defaultSubCategoryA, defaultSubCategoryB, parentElement, childElement1, childElement2, siblingElement, physicalModel } =
+          const { categoryA, categoryB, defaultSubCategoryA, defaultSubCategoryB, parentElement, childElement1, childElement2, siblingElement, elementsModel } =
             createIModelResult;
           await visibilityHandlerWithSearchPaths.changeVisibility(
             createCategoryHierarchyNode({
               id: categoryB.id,
-              modelIds: [physicalModel.id],
+              modelIds: [elementsModel.id],
               hasChildren: true,
               parentKeys: [categoryA, parentElement],
               parentElementsPath: [{ elementIds: [parentElement.id], categoryIds: categoryA.id }],
@@ -4742,7 +4742,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             expectations: {
               [categoryA.id]: "partial",
                 [parentElement.id]: "partial",
-                  [`${physicalModel.id}-${categoryB.id}`]: "visible",
+                  [`${parentElement.id}-${categoryB.id}`]: "visible",
                     [childElement1.id]: "visible",
             },
           });
@@ -4756,7 +4756,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               [categoryA.id]: "partial",
                 [defaultSubCategoryA.id]: "hidden",
                 [parentElement.id]: "partial",
-                  [`${physicalModel.id}-${categoryB.id}`]: "partial",
+                  [`${parentElement.id}-${categoryB.id}`]: "partial",
                     [childElement1.id]: "visible",
                     [childElement2.id]: "hidden",
                 [siblingElement.id]: "hidden",
@@ -4769,12 +4769,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
         it("showing child element under intermediate category changes visibility for related nodes in search paths", async () => {
           const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-          const { categoryA, categoryB, defaultSubCategoryA, defaultSubCategoryB, parentElement, childElement1, childElement2, siblingElement, physicalModel } =
+          const { categoryA, categoryB, defaultSubCategoryA, defaultSubCategoryB, parentElement, childElement1, childElement2, siblingElement, elementsModel } =
             createIModelResult;
           await visibilityHandlerWithSearchPaths.changeVisibility(
             createElementHierarchyNode({
               elementId: childElement1.id,
-              modelId: physicalModel.id,
+              modelId: elementsModel.id,
               categoryId: categoryB.id,
               parentKeys: [categoryA, parentElement, categoryB],
               parentElementsPath: [{ elementIds: [parentElement.id], categoryIds: categoryA.id }],
@@ -4791,7 +4791,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             expectations: {
               [categoryA.id]: "partial",
                 [parentElement.id]: "partial",
-                  [`${physicalModel.id}-${categoryB.id}`]: "visible",
+                  [`${parentElement.id}-${categoryB.id}`]: "visible",
                     [childElement1.id]: "visible",
             },
           });
@@ -4805,7 +4805,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               [categoryA.id]: "partial",
                 [defaultSubCategoryA.id]: "hidden",
                 [parentElement.id]: "partial",
-                  [`${physicalModel.id}-${categoryB.id}`]: "partial",
+                  [`${parentElement.id}-${categoryB.id}`]: "partial",
                     [childElement1.id]: "visible",
                     [childElement2.id]: "hidden",
                 [siblingElement.id]: "hidden",
@@ -4818,12 +4818,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
         it("showing parent element changes visibility for intermediate category children in search paths", async () => {
           const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-          const { categoryA, categoryB, defaultSubCategoryA, defaultSubCategoryB, parentElement, childElement1, childElement2, siblingElement, physicalModel } =
+          const { categoryA, categoryB, defaultSubCategoryA, defaultSubCategoryB, parentElement, childElement1, childElement2, siblingElement, elementsModel } =
             createIModelResult;
           await visibilityHandlerWithSearchPaths.changeVisibility(
             createElementHierarchyNode({
               elementId: parentElement.id,
-              modelId: physicalModel.id,
+              modelId: elementsModel.id,
               categoryId: categoryA.id,
               parentKeys: [categoryA],
               hasChildren: true,
@@ -4843,7 +4843,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             expectations: {
               [categoryA.id]: "visible",
                 [parentElement.id]: "visible",
-                  [`${physicalModel.id}-${categoryB.id}`]: "visible",
+                  [`${parentElement.id}-${categoryB.id}`]: "visible",
                     [childElement1.id]: "visible",
             },
           });
@@ -4857,7 +4857,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               [categoryA.id]: "partial",
                 [defaultSubCategoryA.id]: "hidden",
                 [parentElement.id]: "partial",
-                  [`${physicalModel.id}-${categoryB.id}`]: "partial",
+                  [`${parentElement.id}-${categoryB.id}`]: "partial",
                     [childElement1.id]: "visible",
                     [childElement2.id]: "hidden",
                 [siblingElement.id]: "hidden",
@@ -4870,7 +4870,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
         it("showing root category changes visibility for intermediate category children in search paths", async () => {
           const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-          const { categoryA, categoryB, defaultSubCategoryA, defaultSubCategoryB, parentElement, childElement1, childElement2, siblingElement, physicalModel } =
+          const { categoryA, categoryB, defaultSubCategoryA, defaultSubCategoryB, parentElement, childElement1, childElement2, siblingElement } =
             createIModelResult;
           await visibilityHandlerWithSearchPaths.changeVisibility(
             createCategoryHierarchyNode({
@@ -4892,7 +4892,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             expectations: {
               [categoryA.id]: "visible",
                 [parentElement.id]: "visible",
-                  [`${physicalModel.id}-${categoryB.id}`]: "visible",
+                  [`${parentElement.id}-${categoryB.id}`]: "visible",
                     [childElement1.id]: "visible",
             },
           });
@@ -4906,7 +4906,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               [categoryA.id]: "partial",
                 [defaultSubCategoryA.id]: "hidden",
                 [parentElement.id]: "partial",
-                  [`${physicalModel.id}-${categoryB.id}`]: "partial",
+                  [`${parentElement.id}-${categoryB.id}`]: "partial",
                     [childElement1.id]: "visible",
                     [childElement2.id]: "hidden",
                 [siblingElement.id]: "hidden",
@@ -4924,7 +4924,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         async function createIModel() {
           return buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
-              const physicalModel = insertElementsModel({ txn, codeValue: "elements model" });
+              const elementsModel = insertElementsModel({ txn, codeValue: "elements model" });
 
               const categoryA = insertCategory({ txn, codeValue: "categoryA" });
               const defaultSubCategoryA = { id: getDefaultSubCategoryId(categoryA.id), className: CLASS_NAME_SubCategory };
@@ -4932,7 +4932,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               const defaultSubCategoryB = { id: getDefaultSubCategoryId(categoryB.id), className: CLASS_NAME_SubCategory };
               const modeledElement = insertModeledElement({
                 txn,
-                modelId: physicalModel.id,
+                modelId: elementsModel.id,
                 categoryId: categoryA.id,
               });
               const subModel = insertElementsSubModel({ txn, modeledElementId: modeledElement.id });
@@ -4948,7 +4948,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 subModel,
                 subModelElement1,
                 subModelElement2,
-                physicalModel,
+                elementsModel,
                 searchPaths: [
                   {
                     identifier: categoryA,
@@ -5094,12 +5094,21 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
         it("showing modeled element changes visibility for intermediate category children in search paths", async () => {
           const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-          const { categoryA, categoryB, defaultSubCategoryA, defaultSubCategoryB, modeledElement, subModel, subModelElement1, subModelElement2 } =
-            createIModelResult;
+          const {
+            categoryA,
+            categoryB,
+            defaultSubCategoryA,
+            defaultSubCategoryB,
+            modeledElement,
+            subModel,
+            subModelElement1,
+            subModelElement2,
+            elementsModel,
+          } = createIModelResult;
           await visibilityHandlerWithSearchPaths.changeVisibility(
             createElementHierarchyNode({
               elementId: modeledElement.id,
-              modelId: createIModelResult.physicalModel.id,
+              modelId: elementsModel.id,
               categoryId: categoryA.id,
               parentKeys: [categoryA],
               hasChildren: true,

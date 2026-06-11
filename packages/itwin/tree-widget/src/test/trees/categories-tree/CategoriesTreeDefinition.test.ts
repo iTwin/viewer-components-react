@@ -671,13 +671,13 @@ describe("Categories tree", () => {
         it("does not show intermediate category when child element has same category as parent", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
-              const physicalModel = insertElementsModel({ txn, codeValue: "Elements Model" });
+              const elementsModel = insertElementsModel({ txn, codeValue: "Elements Model" });
               const category = insertCategory({ txn, codeValue: "category" });
-              const parentElement = insertElement({ txn, userLabel: "parent element", modelId: physicalModel.id, categoryId: category.id });
+              const parentElement = insertElement({ txn, userLabel: "parent element", modelId: elementsModel.id, categoryId: category.id });
               const childElement = insertElement({
                 txn,
                 userLabel: "child element",
-                modelId: physicalModel.id,
+                modelId: elementsModel.id,
                 categoryId: category.id,
                 parentId: parentElement.id,
               });
@@ -722,14 +722,14 @@ describe("Categories tree", () => {
         it("shows intermediate category when child element has different category than parent", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
-              const physicalModel = insertElementsModel({ txn, codeValue: "Elements Model" });
+              const elementsModel = insertElementsModel({ txn, codeValue: "Elements Model" });
               const categoryA = insertCategory({ txn, codeValue: "category A" });
               const categoryB = insertCategory({ txn, codeValue: "category B" });
-              const parentElement = insertElement({ txn, userLabel: "parent element", modelId: physicalModel.id, categoryId: categoryA.id });
+              const parentElement = insertElement({ txn, userLabel: "parent element", modelId: elementsModel.id, categoryId: categoryA.id });
               const childElement = insertElement({
                 txn,
                 userLabel: "child element",
-                modelId: physicalModel.id,
+                modelId: elementsModel.id,
                 categoryId: categoryB.id,
                 parentId: parentElement.id,
               });
@@ -783,11 +783,11 @@ describe("Categories tree", () => {
         it("does not show intermediate category when modeling element has the same category as modeled element", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
-              const physicalModel = insertElementsModel({ txn, codeValue: "Elements Model" });
+              const elementsModel = insertElementsModel({ txn, codeValue: "Elements Model" });
               const categoryA = insertCategory({ txn, codeValue: "category A" });
               const modeledElement = insertModeledElement({
                 txn,
-                modelId: physicalModel.id,
+                modelId: elementsModel.id,
                 categoryId: categoryA.id,
               });
               const subModel = insertElementsSubModel({ txn, modeledElementId: modeledElement.id });
@@ -837,13 +837,13 @@ describe("Categories tree", () => {
         it("shows intermediate category when modeling element has different category than modeled element", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
-              const physicalModel = insertElementsModel({ txn, codeValue: "Elements Model" });
+              const elementsModel = insertElementsModel({ txn, codeValue: "Elements Model" });
               const categoryA = insertCategory({ txn, codeValue: "category A" });
               const categoryB = insertCategory({ txn, codeValue: "category B" });
               const modeledElement = insertModeledElement({
                 txn,
                 userLabel: "modeled element",
-                modelId: physicalModel.id,
+                modelId: elementsModel.id,
                 categoryId: categoryA.id,
               });
               const subModel = insertElementsSubModel({ txn, modeledElementId: modeledElement.id });
@@ -903,21 +903,21 @@ describe("Categories tree", () => {
         it("shows intermediate category for deeply nested elements with different categories", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
-              const physicalModel = insertElementsModel({ txn, codeValue: "Elements Model" });
+              const elementsModel = insertElementsModel({ txn, codeValue: "Elements Model" });
               const categoryA = insertCategory({ txn, codeValue: "category A" });
               const categoryB = insertCategory({ txn, codeValue: "category B" });
-              const parentElement = insertElement({ txn, userLabel: "parent element", modelId: physicalModel.id, categoryId: categoryA.id });
+              const parentElement = insertElement({ txn, userLabel: "parent element", modelId: elementsModel.id, categoryId: categoryA.id });
               const childElement = insertElement({
                 txn,
                 userLabel: "child element",
-                modelId: physicalModel.id,
+                modelId: elementsModel.id,
                 categoryId: categoryB.id,
                 parentId: parentElement.id,
               });
               const grandchildElement = insertElement({
                 txn,
                 userLabel: "grandchild element",
-                modelId: physicalModel.id,
+                modelId: elementsModel.id,
                 categoryId: categoryA.id,
                 parentId: childElement.id,
               });
