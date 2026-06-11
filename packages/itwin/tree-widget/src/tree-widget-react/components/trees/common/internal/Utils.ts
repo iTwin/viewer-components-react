@@ -249,7 +249,14 @@ export function groupingNodeDataFromChildren(children: ProcessedHierarchyNode[])
 }
 
 /** @internal */
-export type ParentElementsPath = Array<{ elementIds: Id64Array; categoryIds: Id64String }>;
+export type ParentElementsPath = Array<{
+  elementIds: Id64Array;
+  /**
+   * Single category ID; named plural to mirror ElementPathSegment.categoryIds for easy mapping.
+   * A specific categoryId should be known any time such path is created, as all parents should be grouped under a single category.
+   */
+  categoryIds: Id64String;
+}>;
 
 /** @internal */
 // eslint-disable-next-line @typescript-eslint/no-redeclare
