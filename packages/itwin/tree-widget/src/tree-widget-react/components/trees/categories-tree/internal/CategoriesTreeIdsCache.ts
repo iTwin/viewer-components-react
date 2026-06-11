@@ -49,7 +49,7 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
   #cachedCategoryData:
     | Observable<{
         categoriesGroupedByModel: Map<ModelId, CategoriesInfo>;
-        categoriesDefinitionContainers: Map<CategoryId, { modelId: ModelId; isDefinitionContainer: boolean }>;
+        categoriesWithModel: Map<CategoryId, { modelId: ModelId; isDefinitionContainer: boolean }>;
       }>
     | undefined;
   #definitionContainerInstanceKeyPaths: Map<DefinitionContainerId, Observable<HierarchyNodeIdentifiersPath>> = new Map();
@@ -284,7 +284,7 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
               hasElements: queriedCategory.hasElements,
               isTopMostElementCategory: queriedCategory.isTopMostElementCategory,
             });
-            acc.categoriesDefinitionContainers.set(queriedCategory.id, {
+            acc.categoriesWithModel.set(queriedCategory.id, {
               modelId: queriedCategory.modelId,
               isDefinitionContainer: queriedCategory.parentDefinitionContainerExists,
             });
@@ -292,7 +292,7 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
           },
           {
             categoriesGroupedByModel: new Map<ModelId, CategoriesInfo>(),
-            categoriesDefinitionContainers: new Map<CategoryId, { modelId: ModelId; isDefinitionContainer: boolean }>(),
+            categoriesWithModel: new Map<CategoryId, { modelId: ModelId; isDefinitionContainer: boolean }>(),
           },
         ),
       )
@@ -459,14 +459,14 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
 
   public getSearchPathsUpToRootCategory({ categoryId }: { categoryId: Id64String }): Observable<HierarchyNodeIdentifiersPath> {
     return this.getCachedCategoryData().pipe(
-      mergeMap(({ categoriesDefinitionContainers, categoriesGroupedByModel }) => {
+      mergeMap(({ categoriesWithModel, categoriesGroupedByModel }) => {
         if (categoriesGroupedByModel.size === 0) {
           return EMPTY;
         }
-        if (categoriesDefinitionContainers.size === 0) {
+        if (categoriesWithModel.size === 0) {
           return EMPTY;
         }
-        const entry = categoriesDefinitionContainers.get(categoryId);
+        const entry = categoriesWithModel.get(categoryId);
         if (!entry) {
           return EMPTY;
         }
