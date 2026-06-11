@@ -2025,15 +2025,15 @@ describe("CategoriesTreeVisibilityHandler", () => {
               viewport,
               // prettier-ignore
               expectations: {
-              [keys.categoryA.id]: "partial",
-                [getDefaultSubCategoryId(keys.categoryA.id)]: "hidden",
-                [keys.parentElement.id]: "partial",
-                  [`${keys.elementsModel.id}-${keys.categoryB.id}`]: "visible",
-                    [keys.childElement.id]: "visible",
+                [keys.categoryA.id]: "partial",
+                  [getDefaultSubCategoryId(keys.categoryA.id)]: "hidden",
+                  [keys.parentElement.id]: "partial",
+                    [`${keys.elementsModel.id}-${keys.categoryB.id}`]: "visible",
+                      [keys.childElement.id]: "visible",
 
-              [keys.categoryB.id]: "hidden",
-                [getDefaultSubCategoryId(keys.categoryB.id)]: "hidden",
-            },
+                [keys.categoryB.id]: "hidden",
+                  [getDefaultSubCategoryId(keys.categoryB.id)]: "hidden",
+              },
             });
           });
 
