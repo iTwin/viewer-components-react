@@ -42,7 +42,7 @@ import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { CategoriesTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 
 describe("Categories tree", () => {
-  describe("CategoriesTreeDefinition", () => {
+  describe("Hierarchy definition", () => {
     beforeAll(async () => {
       await initializeCore({
         backendProps: {
