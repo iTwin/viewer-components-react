@@ -250,8 +250,8 @@ interface GetElementsTreeProps {
 
 ```typescript
 interface ElementPathSegment {
-  categoryIds: Id64Arg;  // category node(s) to descend into
-  elementIds?: Id64Arg;  // element node(s) to descend into after the category (omit to stop at category level)
+  categoryIds: Id64Arg; // category node(s) to descend into
+  elementIds?: Id64Arg; // element node(s) to descend into after the category (omit to stop at category level)
 }
 ```
 
@@ -703,15 +703,16 @@ Currently, searching for a category by name only finds top-level occurrences (ca
 6. ✅ **Drop `childrenCount` from element extended data** — `DescendantsCountCache` provides per-category counts; `computeOnlyOwnStatus` parameter (GET) and `ignoreDescendants` parameter (CHANGE) control whether descendants are processed.
 7. ✅ **`categoryOfTopMostParentElement` no longer needed in `AlwaysAndNeverDrawnElementInfoCache`** — the new `elementCategoryPath` encodes the root category as `elementCategoryPath[0].categoryIds` when the path is non-empty. May still be kept in extendedData if other caches/visibility helpers need it.
 8. ✅ **`ParentElementsPath` replaces `parentElementIdsPath`** — instead of a `getElementPath` utility, paths are built incrementally at each hierarchy level via `ParentElementsPath.appendToPath({ path, ids, categoryId })`. `ParentElementsPath` is structurally compatible with `ElementPathSegment[]` (can be spread directly into it). The key difference: `ParentElementsPath` uses exact single values (`Id64String`, `Id64Array`) while `ElementPathSegment` uses `Id64Arg` for multi-value lookups.
-   
+
    `ParentElementsPath` type:
+
    ```typescript
    type ParentElementsPath = Array<{
      elementIds: Id64Array;
      categoryIds: Id64String; // single category, named plural for structural compatibility
    }>;
    ```
-   
+
    Examples of `elementCategoryPath` construction:
    - Element scope: `[...parentElementsPath, { categoryIds: catA, elementIds: [el1] }]`
    - Category scope: `[...parentElementsPath, { categoryIds: catB }]`
