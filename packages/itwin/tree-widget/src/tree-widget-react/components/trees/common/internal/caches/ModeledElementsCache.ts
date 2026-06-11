@@ -51,7 +51,6 @@ export class ModeledElementsCache {
   }
 
   private queryModeledElements(): Observable<QueriedRow> {
-    // TODO two sub-models nested under one another. Might not work with pare
     return defer(() => {
       const query = `
         SELECT

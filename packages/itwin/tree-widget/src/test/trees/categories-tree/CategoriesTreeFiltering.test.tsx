@@ -26,10 +26,12 @@ import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { act, renderHook } from "@testing-library/react";
 import { defaultHierarchyConfiguration } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { useCategoriesTree } from "../../../tree-widget-react/components/trees/categories-tree/UseCategoriesTree.js";
+import { getClassesByView } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
 import { SharedTreeContextProvider } from "../../../tree-widget-react/components/trees/common/SharedTreeContextProvider.js";
 import { buildIModel } from "../../IModelUtils.js";
 import { createFakeViewport, createIModelAccess } from "../Common.js";
 import { CLASS_NAME_DefinitionModel } from "../TreeUtils.js";
+import { getInsertFunctionByViewType } from "./internal/Utils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { Props } from "@itwin/presentation-shared";
@@ -500,6 +502,327 @@ describe("Categories tree", () => {
           children: [{ identifier: keys.subCategory2, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } }],
         },
       ]);
+    });
+
+    ["2d" as const, "3d" as const].forEach((viewType) => {
+      describe(`intermediate ${viewType} categories`, () => {
+        const showElementsConfig = { ...defaultHierarchyConfiguration, showElements: true };
+        const { insertCategory, insertElement, insertElementsModel, insertElementsSubModel, insertModeledElement } = getInsertFunctionByViewType(viewType);
+        const { elementClass, modelClass } = getClassesByView(viewType);
+        it("finds child element with different category than parent (intermediate category in path)", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertElementsModel({ txn, codeValue: "TestModel" });
+              const categoryA = insertCategory({ txn, codeValue: "category-a" });
+              const categoryB = insertCategory({ txn, codeValue: "category-b" });
+              const parentElement = insertElement({ txn, userLabel: "parent element", modelId: model.id, categoryId: categoryA.id });
+              const childElement = insertElement({
+                txn,
+                userLabel: "child",
+                modelId: model.id,
+                categoryId: categoryB.id,
+                parentId: parentElement.id,
+              });
+              return { categoryA, categoryB, parentElement, childElement };
+            }),
+          );
+          const { imodelConnection, ...keys } = buildIModelResult;
+          const imodelAccess = createIModelAccess(imodelConnection);
+          using hook = renderUseCategoriesTreeHook({
+            imodelConnection,
+            hierarchyConfig: showElementsConfig,
+            searchText: "child",
+            viewType,
+          });
+          expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
+            {
+              identifier: keys.categoryA,
+              options: { autoExpand: true },
+              children: [
+                {
+                  identifier: { className: elementClass, id: keys.parentElement.id },
+                  options: { autoExpand: true },
+                  children: [
+                    {
+                      identifier: keys.categoryB,
+                      options: { autoExpand: true },
+                      children: [
+                        {
+                          identifier: { className: elementClass, id: keys.childElement.id },
+                          options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ]);
+        });
+
+        it("finds child element with same category as parent (no intermediate category in path)", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertElementsModel({ txn, codeValue: "TestModel" });
+              const category = insertCategory({ txn, codeValue: "category" });
+              const parentElement = insertElement({ txn, userLabel: "parent element", modelId: model.id, categoryId: category.id });
+              const childElement = insertElement({
+                txn,
+                userLabel: "child",
+                modelId: model.id,
+                categoryId: category.id,
+                parentId: parentElement.id,
+              });
+              return { category, parentElement, childElement };
+            }),
+          );
+          const { imodelConnection, ...keys } = buildIModelResult;
+          const imodelAccess = createIModelAccess(imodelConnection);
+          using hook = renderUseCategoriesTreeHook({
+            imodelConnection,
+            hierarchyConfig: showElementsConfig,
+            searchText: "child",
+            viewType,
+          });
+          expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
+            {
+              identifier: keys.category,
+              options: { autoExpand: true },
+              children: [
+                {
+                  identifier: { className: elementClass, id: keys.parentElement.id },
+                  options: { autoExpand: true },
+                  children: [
+                    {
+                      identifier: { className: elementClass, id: keys.childElement.id },
+                      options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                    },
+                  ],
+                },
+              ],
+            },
+          ]);
+        });
+
+        it("finds category that appears as intermediate category", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertElementsModel({ txn, codeValue: "TestModel" });
+              const categoryA = insertCategory({ txn, codeValue: "category-a" });
+              const categoryB = insertCategory({ txn, codeValue: "category-b" });
+              const parentElement = insertElement({ txn, userLabel: "parent element", modelId: model.id, categoryId: categoryA.id });
+              insertElement({
+                txn,
+                userLabel: "child element",
+                modelId: model.id,
+                categoryId: categoryB.id,
+                parentId: parentElement.id,
+              });
+              return { categoryA, categoryB, parentElement };
+            }),
+          );
+          const { imodelConnection, ...keys } = buildIModelResult;
+          const imodelAccess = createIModelAccess(imodelConnection);
+          using hook = renderUseCategoriesTreeHook({
+            imodelConnection,
+            hierarchyConfig: showElementsConfig,
+            searchText: "category-b",
+            viewType,
+          });
+          const paths = await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }));
+          // Should find the category as an intermediate category path (under parentElement)
+          expect(paths).toEqual([
+            {
+              identifier: keys.categoryA,
+              options: { autoExpand: true },
+              children: [
+                {
+                  identifier: { className: elementClass, id: keys.parentElement.id },
+                  options: { autoExpand: true },
+                  children: [{ identifier: keys.categoryB, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } }],
+                },
+              ],
+            },
+            {
+              identifier: keys.categoryB,
+              options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+            },
+          ]);
+        });
+
+        it("finds sub-model element with different category than modeled element (intermediate category in path)", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertElementsModel({ txn, codeValue: "TestModel" });
+              const categoryA = insertCategory({ txn, codeValue: "category-a" });
+              const categoryB = insertCategory({ txn, codeValue: "category-b" });
+              const modeledElement = insertModeledElement({
+                txn,
+                userLabel: "modeled element",
+                modelId: model.id,
+                categoryId: categoryA.id,
+              });
+              const subModel = insertElementsSubModel({ txn, modeledElementId: modeledElement.id });
+              const modelingElement = insertElement({
+                txn,
+                userLabel: "modeling element",
+                modelId: subModel.id,
+                categoryId: categoryB.id,
+              });
+              return { categoryA, categoryB, modeledElement, subModel, modelingElement };
+            }),
+          );
+          const { imodelConnection, ...keys } = buildIModelResult;
+          const imodelAccess = createIModelAccess(imodelConnection);
+          using hook = renderUseCategoriesTreeHook({
+            imodelConnection,
+            hierarchyConfig: showElementsConfig,
+            searchText: "modeling element",
+            viewType,
+          });
+          expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
+            {
+              identifier: keys.categoryA,
+              options: { autoExpand: true },
+              children: [
+                {
+                  identifier: { className: elementClass, id: keys.modeledElement.id },
+                  options: { autoExpand: true },
+                  children: [
+                    {
+                      identifier: { className: modelClass, id: keys.subModel.id },
+                      options: { autoExpand: true },
+                      children: [
+                        {
+                          identifier: keys.categoryB,
+                          options: { autoExpand: true },
+                          children: [
+                            {
+                              identifier: { className: elementClass, id: keys.modelingElement.id },
+                              options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ]);
+        });
+
+        it("finds sub-model element with same category as modeled element (no intermediate category in path)", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertElementsModel({ txn, codeValue: "TestModel" });
+              const category = insertCategory({ txn, codeValue: "category" });
+              const modeledElement = insertModeledElement({
+                txn,
+                userLabel: "modeled element",
+                modelId: model.id,
+                categoryId: category.id,
+              });
+              const subModel = insertElementsSubModel({ txn, modeledElementId: modeledElement.id });
+              const modelingElement = insertElement({
+                txn,
+                userLabel: "modeling element",
+                modelId: subModel.id,
+                categoryId: category.id,
+              });
+              return { category, modeledElement, subModel, modelingElement };
+            }),
+          );
+          const { imodelConnection, ...keys } = buildIModelResult;
+          const imodelAccess = createIModelAccess(imodelConnection);
+          using hook = renderUseCategoriesTreeHook({
+            imodelConnection,
+            hierarchyConfig: showElementsConfig,
+            searchText: "modeling element",
+            viewType,
+          });
+          expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
+            {
+              identifier: keys.category,
+              options: { autoExpand: true },
+              children: [
+                {
+                  identifier: { className: elementClass, id: keys.modeledElement.id },
+                  options: { autoExpand: true },
+                  children: [
+                    {
+                      identifier: { className: modelClass, id: keys.subModel.id },
+                      options: { autoExpand: true },
+                      children: [
+                        {
+                          identifier: { className: elementClass, id: keys.modelingElement.id },
+                          options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ]);
+        });
+
+        it("finds category that appears as intermediate category under sub-model", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertElementsModel({ txn, codeValue: "TestModel" });
+              const categoryA = insertCategory({ txn, codeValue: "category-a" });
+              const categoryB = insertCategory({ txn, codeValue: "category-b" });
+              const modeledElement = insertModeledElement({
+                txn,
+                userLabel: "modeled element",
+                modelId: model.id,
+                categoryId: categoryA.id,
+              });
+              const subModel = insertElementsSubModel({ txn, modeledElementId: modeledElement.id });
+              insertElement({
+                txn,
+                userLabel: "modeling element",
+                modelId: subModel.id,
+                categoryId: categoryB.id,
+              });
+              return { categoryA, categoryB, modeledElement, subModel };
+            }),
+          );
+          const { imodelConnection, ...keys } = buildIModelResult;
+          const imodelAccess = createIModelAccess(imodelConnection);
+          using hook = renderUseCategoriesTreeHook({
+            imodelConnection,
+            hierarchyConfig: showElementsConfig,
+            searchText: "category-b",
+            viewType,
+          });
+          const paths = await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }));
+          expect(paths).toEqual([
+            {
+              identifier: keys.categoryA,
+              options: { autoExpand: true },
+              children: [
+                {
+                  identifier: { className: elementClass, id: keys.modeledElement.id },
+                  options: { autoExpand: true },
+                  children: [
+                    {
+                      identifier: { className: modelClass, id: keys.subModel.id },
+                      options: { autoExpand: true },
+                      children: [{ identifier: keys.categoryB, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } }],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              identifier: keys.categoryB,
+              options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+            },
+          ]);
+        });
+      });
     });
   });
 });

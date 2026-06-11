@@ -4,12 +4,24 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
+  insertDrawingCategory,
+  insertDrawingGraphic,
+  insertDrawingModelWithPartition,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
+  insertPhysicalSubModel,
+  insertSpatialCategory,
+  insertSubModel,
+} from "test-utilities";
+import {
   CLASS_NAME_DefinitionContainer,
   CLASS_NAME_Element,
   CLASS_NAME_SubCategory,
 } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { getClassesByView } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
+import { TestSchema } from "../../../IModelUtils.js";
 
+import type { EditTxn } from "@itwin/core-backend";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, GroupingHierarchyNode, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { EC, InstanceKey } from "@itwin/presentation-shared";
@@ -175,4 +187,24 @@ export function createModelHierarchyNode(props: { id: Id64String; hasChildren?: 
       modelId: props.id,
     },
   };
+}
+
+export function getInsertFunctionByViewType(viewType: "2d" | "3d") {
+  const insertCategory = viewType === "3d" ? insertSpatialCategory : insertDrawingCategory;
+  const insertElement = viewType === "3d" ? insertPhysicalElement : insertDrawingGraphic;
+  const insertElementsModel = viewType === "3d" ? insertPhysicalModelWithPartition : insertDrawingModelWithPartition;
+  const insertElementsSubModel =
+    viewType === "3d"
+      ? insertPhysicalSubModel
+      : (props: { txn: EditTxn; modeledElementId: string }) =>
+          insertSubModel({
+            ...props,
+            classFullName: `${TestSchema.Name}.${TestSchema.SubModel2dClassName}`,
+          });
+  const insertModeledElement = (props: { txn: EditTxn; modelId: Id64String; categoryId: Id64String; parentId?: ElementId; userLabel?: string }) =>
+    insertElement({
+      ...props,
+      classFullName: `${TestSchema.Name}.${viewType === "3d" ? TestSchema.ModeledElement3dClassName : TestSchema.ModeledElement2dClassName}`,
+    });
+  return { insertCategory, insertElement, insertElementsModel, insertElementsSubModel, insertModeledElement };
 }

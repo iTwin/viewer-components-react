@@ -138,13 +138,9 @@ export namespace CategoriesTreeNode {
     } & {
         extendedData: {
             description?: string;
-            hasSubCategories?: boolean;
-        } & ({
-            isCategoryOfSubModel?: false;
-        } | {
+            hasSubCategories?: boolean; /** Ids of models that this category node is contained under. */
             modelIds: Id64Array;
-            isCategoryOfSubModel: true;
-        });
+        };
     };
     const isModelNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is NonGroupingHierarchyNode & {
         key: InstancesNodeKey;

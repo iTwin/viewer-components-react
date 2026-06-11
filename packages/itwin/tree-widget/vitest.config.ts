@@ -5,11 +5,7 @@
 
 import { coverageConfigDefaults, defineConfig } from "vitest/config";
 
-const logsToIgnore = [
-  "CSS variable not found",
-  // TODO: Should be removed after core 5.8 is consumed
-  "there are no unsaved changes",
-];
+const logsToIgnore = ["CSS variable not found", "ECClass 'PresentationRules.Ruleset' does not exist or could not be loaded."];
 
 export default defineConfig({
   test: {

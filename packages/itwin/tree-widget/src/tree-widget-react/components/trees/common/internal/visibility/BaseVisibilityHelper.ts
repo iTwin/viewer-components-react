@@ -228,8 +228,9 @@ export class BaseVisibilityHelper implements Disposable {
       | {
           modelId: Id64String;
           parentElementsPath: ParentElementsPath;
+          ignoreSubCategories?: undefined;
         }
-      | { modelId: undefined }
+      | { modelId: undefined; ignoreSubCategories?: boolean }
     ),
   ): Observable<VisibilityStatus> {
     const result = defer(() => {
@@ -249,9 +250,6 @@ export class BaseVisibilityHelper implements Disposable {
         fromWithRelease({ source: categoryIds, releaseOnCount: 100 }).pipe(
           mergeMap((categoryId) =>
             merge(
-              // When always drawn exclusive mode is enabled need to get only models for which category has top most element.
-              // This is because always/never drawn elements can be retrieved using top most category.
-              // TODO fix with: https://github.com/iTwin/viewer-components-react/issues/1100
               this.#props.baseIdsCache.getModels({ categoryId }).pipe(
                 filter(({ categoryIsOfTopMostElement }) => categoryIsOfTopMostElement),
                 mergeMap(({ id: modelId }) =>
@@ -265,9 +263,11 @@ export class BaseVisibilityHelper implements Disposable {
                 ),
               ),
               // For category not under specific model, need to check subCategories as well
-              this.#props.baseIdsCache
-                .getSubCategories({ categoryId })
-                .pipe(mergeMap((subCategoryIds) => this.getSubCategoriesVisibilityStatus({ categoryId, subCategoryIds }))),
+              props.ignoreSubCategories
+                ? EMPTY
+                : this.#props.baseIdsCache
+                    .getSubCategories({ categoryId })
+                    .pipe(mergeMap((subCategoryIds) => this.getSubCategoriesVisibilityStatus({ categoryId, subCategoryIds }))),
             ).pipe(
               // This can happen when category does not have any geometric elements or sub-categories
               defaultIfEmpty(

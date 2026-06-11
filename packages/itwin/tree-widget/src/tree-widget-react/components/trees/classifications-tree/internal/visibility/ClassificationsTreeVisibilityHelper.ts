@@ -42,12 +42,13 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
         return this.#props.idsCache.getAllContainedCategories(props.classificationTableIds).pipe(filter((categoryId) => topMostCategories.has(categoryId)));
       }),
       toArray(),
-      mergeMap((categories) =>
-        this.getCategoriesVisibilityStatus({
+      mergeMap((categories) => {
+        return this.getCategoriesVisibilityStatus({
           modelId: undefined,
           categoryIds: categories,
-        }),
-      ),
+          ignoreSubCategories: true,
+        });
+      }),
       defaultIfEmpty(createVisibilityStatus("disabled")),
     );
   }
@@ -67,6 +68,7 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
         this.getCategoriesVisibilityStatus({
           modelId: undefined,
           categoryIds: categories,
+          ignoreSubCategories: true,
         }),
       ),
       defaultIfEmpty(createVisibilityStatus("disabled")),

@@ -35,13 +35,14 @@ import { buildIModel } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 import { CLASS_NAME_DefinitionModel } from "../TreeUtils.js";
+import { getInsertFunctionByViewType } from "./internal/Utils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { CategoriesTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 
 describe("Categories tree", () => {
-  describe("Hierarchy definition", () => {
+  describe("CategoriesTreeDefinition", () => {
     beforeAll(async () => {
       await initializeCore({
         backendProps: {
@@ -661,6 +662,326 @@ describe("Categories tree", () => {
             ],
           }),
         ],
+      });
+    });
+
+    ["3d" as const, "2d" as const].forEach((viewType) => {
+      const { insertCategory, insertElement, insertElementsModel, insertElementsSubModel, insertModeledElement } = getInsertFunctionByViewType(viewType);
+      describe(`Intermediate ${viewType} categories`, () => {
+        it("does not show intermediate category when child element has same category as parent", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const physicalModel = insertElementsModel({ txn, codeValue: "Elements Model" });
+              const category = insertCategory({ txn, codeValue: "category" });
+              const parentElement = insertElement({ txn, userLabel: "parent element", modelId: physicalModel.id, categoryId: category.id });
+              const childElement = insertElement({
+                txn,
+                userLabel: "child element",
+                modelId: physicalModel.id,
+                categoryId: category.id,
+                parentId: parentElement.id,
+              });
+              return { category, parentElement, childElement };
+            }),
+          );
+
+          const { imodelConnection, ...keys } = buildIModelResult;
+          using provider = createCategoryTreeProvider(imodelConnection, viewType, { showElements: true });
+
+          await validateHierarchy({
+            provider,
+            expect: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.category],
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.parentElement.className,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.parentElement],
+                        children: [
+                          NodeValidators.createForClassGroupingNode({
+                            className: keys.childElement.className,
+                            children: [
+                              NodeValidators.createForInstanceNode({
+                                instanceKeys: [keys.childElement],
+                                children: false,
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          });
+        });
+
+        it("shows intermediate category when child element has different category than parent", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const physicalModel = insertElementsModel({ txn, codeValue: "Elements Model" });
+              const categoryA = insertCategory({ txn, codeValue: "category A" });
+              const categoryB = insertCategory({ txn, codeValue: "category B" });
+              const parentElement = insertElement({ txn, userLabel: "parent element", modelId: physicalModel.id, categoryId: categoryA.id });
+              const childElement = insertElement({
+                txn,
+                userLabel: "child element",
+                modelId: physicalModel.id,
+                categoryId: categoryB.id,
+                parentId: parentElement.id,
+              });
+              return { categoryA, categoryB, parentElement, childElement };
+            }),
+          );
+
+          const { imodelConnection, ...keys } = buildIModelResult;
+          using provider = createCategoryTreeProvider(imodelConnection, viewType, { showElements: true });
+
+          await validateHierarchy({
+            provider,
+            expect: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.categoryA],
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.parentElement.className,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.parentElement],
+                        children: [
+                          NodeValidators.createForInstanceNode({
+                            instanceKeys: [keys.categoryB],
+                            children: [
+                              NodeValidators.createForClassGroupingNode({
+                                className: keys.childElement.className,
+                                children: [
+                                  NodeValidators.createForInstanceNode({
+                                    instanceKeys: [keys.childElement],
+                                    children: false,
+                                  }),
+                                ],
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.categoryB],
+                children: false,
+              }),
+            ],
+          });
+        });
+
+        it("does not show intermediate category when modeling element has the same category as modeled element", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const physicalModel = insertElementsModel({ txn, codeValue: "Elements Model" });
+              const categoryA = insertCategory({ txn, codeValue: "category A" });
+              const modeledElement = insertModeledElement({
+                txn,
+                modelId: physicalModel.id,
+                categoryId: categoryA.id,
+              });
+              const subModel = insertElementsSubModel({ txn, modeledElementId: modeledElement.id });
+              const modelingElement = insertElement({
+                txn,
+                modelId: subModel.id,
+                categoryId: categoryA.id,
+              });
+              return { categoryA, modeledElement, modelingElement };
+            }),
+          );
+
+          const { imodelConnection, ...keys } = buildIModelResult;
+          using provider = createCategoryTreeProvider(imodelConnection, viewType, { showElements: true });
+
+          await validateHierarchy({
+            provider,
+            expect: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.categoryA],
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.modeledElement.className,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.modeledElement],
+                        children: [
+                          NodeValidators.createForClassGroupingNode({
+                            className: keys.modelingElement.className,
+                            children: [
+                              NodeValidators.createForInstanceNode({
+                                instanceKeys: [keys.modelingElement],
+                                children: false,
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          });
+        });
+
+        it("shows intermediate category when modeling element has different category than modeled element", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const physicalModel = insertElementsModel({ txn, codeValue: "Elements Model" });
+              const categoryA = insertCategory({ txn, codeValue: "category A" });
+              const categoryB = insertCategory({ txn, codeValue: "category B" });
+              const modeledElement = insertModeledElement({
+                txn,
+                userLabel: "modeled element",
+                modelId: physicalModel.id,
+                categoryId: categoryA.id,
+              });
+              const subModel = insertElementsSubModel({ txn, modeledElementId: modeledElement.id });
+              const modelingElement = insertElement({
+                txn,
+                userLabel: "modeling element",
+                modelId: subModel.id,
+                categoryId: categoryB.id,
+              });
+              return { categoryA, categoryB, modeledElement, modelingElement };
+            }),
+          );
+
+          const { imodelConnection, ...keys } = buildIModelResult;
+          using provider = createCategoryTreeProvider(imodelConnection, viewType, { showElements: true });
+
+          await validateHierarchy({
+            provider,
+            expect: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.categoryA],
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.modeledElement.className,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.modeledElement],
+                        children: [
+                          NodeValidators.createForInstanceNode({
+                            instanceKeys: [keys.categoryB],
+                            children: [
+                              NodeValidators.createForClassGroupingNode({
+                                className: keys.modelingElement.className,
+                                children: [
+                                  NodeValidators.createForInstanceNode({
+                                    instanceKeys: [keys.modelingElement],
+                                    children: false,
+                                  }),
+                                ],
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.categoryB],
+                children: false,
+              }),
+            ],
+          });
+        });
+
+        it("shows intermediate category for deeply nested elements with different categories", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const physicalModel = insertElementsModel({ txn, codeValue: "Elements Model" });
+              const categoryA = insertCategory({ txn, codeValue: "category A" });
+              const categoryB = insertCategory({ txn, codeValue: "category B" });
+              const parentElement = insertElement({ txn, userLabel: "parent element", modelId: physicalModel.id, categoryId: categoryA.id });
+              const childElement = insertElement({
+                txn,
+                userLabel: "child element",
+                modelId: physicalModel.id,
+                categoryId: categoryB.id,
+                parentId: parentElement.id,
+              });
+              const grandchildElement = insertElement({
+                txn,
+                userLabel: "grandchild element",
+                modelId: physicalModel.id,
+                categoryId: categoryA.id,
+                parentId: childElement.id,
+              });
+              return { categoryA, categoryB, parentElement, childElement, grandchildElement };
+            }),
+          );
+
+          const { imodelConnection, ...keys } = buildIModelResult;
+          using provider = createCategoryTreeProvider(imodelConnection, viewType, { showElements: true });
+
+          await validateHierarchy({
+            provider,
+            expect: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.categoryA],
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.parentElement.className,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.parentElement],
+                        children: [
+                          NodeValidators.createForInstanceNode({
+                            instanceKeys: [keys.categoryB],
+                            children: [
+                              NodeValidators.createForClassGroupingNode({
+                                className: keys.childElement.className,
+                                children: [
+                                  NodeValidators.createForInstanceNode({
+                                    instanceKeys: [keys.childElement],
+                                    children: [
+                                      NodeValidators.createForInstanceNode({
+                                        instanceKeys: [keys.categoryA],
+                                        children: [
+                                          NodeValidators.createForClassGroupingNode({
+                                            className: keys.grandchildElement.className,
+                                            children: [
+                                              NodeValidators.createForInstanceNode({
+                                                instanceKeys: [keys.grandchildElement],
+                                                children: false,
+                                              }),
+                                            ],
+                                          }),
+                                        ],
+                                      }),
+                                    ],
+                                  }),
+                                ],
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.categoryB],
+                children: false,
+              }),
+            ],
+          });
+        });
       });
     });
 

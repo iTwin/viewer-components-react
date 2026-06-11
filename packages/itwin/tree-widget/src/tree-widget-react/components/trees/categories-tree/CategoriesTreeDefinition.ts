@@ -421,8 +421,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     );
     const hierarchyDefinition = new Array<HierarchyNodesDefinition>();
     if (categories.length > 0) {
-      const modelIds = new Array<Id64String>();
-      (await this.createCategoriesQuery({ categories, instanceFilter, instanceLabelSelectClauseFactory, nodeSelectClauseFactory, modelIds })).forEach((def) =>
+      (await this.createTopMostCategoriesQuery({ categories, instanceFilter, instanceLabelSelectClauseFactory, nodeSelectClauseFactory })).forEach((def) =>
         hierarchyDefinition.push(def),
       );
     }
@@ -489,23 +488,24 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  private async createCategoriesQuery({
+  private async createTopMostCategoriesQuery({
     categories,
     instanceFilter,
-    modelIds,
     instanceLabelSelectClauseFactory,
     nodeSelectClauseFactory,
   }: {
     categories: Array<CategoryInfo>;
     instanceFilter?: GenericInstanceFilter;
-    modelIds: Id64Array;
     instanceLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
     nodeSelectClauseFactory: NodesQueryClauseFactory;
   }): Promise<HierarchyLevelDefinition> {
-    const instanceFilterClauses = await nodeSelectClauseFactory.createFilterClauses({
-      filter: instanceFilter,
-      contentClass: { fullName: this.#categoryClass, alias: "this" },
-    });
+    const [instanceFilterClauses, subModels] = await Promise.all([
+      nodeSelectClauseFactory.createFilterClauses({
+        filter: instanceFilter,
+        contentClass: { fullName: this.#categoryClass, alias: "this" },
+      }),
+      this.#hierarchyConfig.showElements ? firstValueFrom(this.#idsCache.getAllSubModels()) : new Set<ModelId>(),
+    ]);
     const categoriesWithMultipleSubCategories = categories
       .filter((categoryInfo) => categoryInfo.subCategoryChildCount > 1)
       .map((categoryInfo) => categoryInfo.id);
@@ -521,7 +521,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             FROM ${this.#categoryElementClass} e
             WHERE
               e.Parent.Id IS NULL
-              AND e.ECInstanceId NOT IN (SELECT m.ECInstanceId FROM ${this.#categoryModelClass} m)
+              ${subModels.size > 0 ? `AND NOT InVirtualSet(?, e.Model.Id)` : ""}
           )`);
     }
 
@@ -544,7 +544,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 hasChildren,
                 extendedData: {
                   description: { selector: "this.Description" },
-                  modelIds: { selector: createIdsSelector(modelIds) },
+                  modelIds: { selector: createIdsSelector(new Array<ModelId>()) },
                   hasSubCategories:
                     categoriesWithMultipleSubCategories.length > 0 ? { selector: "IIF(InVirtualSet(?, this.ECInstanceId), true, false)" } : false,
                 },
@@ -559,6 +559,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             ...(!this.#hierarchyConfig.hideSubCategories && categoriesWithMultipleSubCategories.length > 0
               ? [{ type: "idset" as const, value: categoriesWithMultipleSubCategories }]
               : []),
+            ...(subModels.size > 0 ? [{ type: "idset" as const, value: [...subModels] }] : []),
             ...(categoriesWithMultipleSubCategories.length > 0 ? [{ type: "idset" as const, value: categoriesWithMultipleSubCategories }] : []),
             { type: "idset", value: categories.map((category) => category.id) },
           ],
@@ -1168,6 +1169,7 @@ export function createGeometricElementInstanceKeyPaths(props: {
                 )
               || '${separator}'
               || ce.Path
+            )
           FROM CategoriesElementsHierarchy ce
           JOIN ${elementClass} pe ON (pe.ECInstanceId = ce.ParentId OR pe.ECInstanceId = ce.ModelId AND ce.ParentId IS NULL)
         )`,
