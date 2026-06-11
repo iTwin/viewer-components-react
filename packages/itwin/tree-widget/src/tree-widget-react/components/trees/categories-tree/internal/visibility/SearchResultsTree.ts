@@ -118,7 +118,7 @@ type InternalSearchTargetElements = Map<
     ElementId | undefined,
     {
       parentElementsPath: ParentElementsPath;
-      elements: Map<CategoryId, Map<ElementId, { isSearchTarget: boolean }>>;
+      elements: Map<CategoryId, { searchTargets: Array<ElementId>; nonSearchTargets: Array<ElementId> }>;
     }
   >
 >;
@@ -255,16 +255,7 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
     // Internal search target elements are stored in a tree structure, need to convert that to array structure.
     for (const [modelId, modelEntry] of internalSearchTargetElements) {
       for (const { parentElementsPath, elements } of modelEntry.values()) {
-        for (const [categoryId, categoryEntry] of elements) {
-          const searchTargets = new Array<ElementId>();
-          const nonSearchTargets = new Array<ElementId>();
-          for (const [elementId, { isSearchTarget }] of categoryEntry) {
-            if (isSearchTarget) {
-              searchTargets.push(elementId);
-            } else {
-              nonSearchTargets.push(elementId);
-            }
-          }
+        for (const [categoryId, { searchTargets, nonSearchTargets }] of elements) {
           result.push({
             categoryId,
             modelId,
@@ -377,18 +368,39 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
         // Internal search target elements need to have path saved in some way.
         // For this, a tree structure is used, where keys are stringified identifiers of parent nodes depending on the hierarchy.
         internalSearchTargets.elements ??= new Map();
-        const modelEntry = getOrCreate({ map: internalSearchTargets.elements, key: node.modelId, createFunc: () => new Map() });
+        const modelEntry = getOrCreate({
+          map: internalSearchTargets.elements,
+          key: node.modelId,
+          createFunc: () =>
+            new Map<
+              ElementId | undefined,
+              {
+                parentElementsPath: ParentElementsPath;
+                elements: Map<CategoryId, { searchTargets: Array<ElementId>; nonSearchTargets: Array<ElementId> }>;
+              }
+            >(),
+        });
         const lastParentId = ParentElementsPath.getSingleLastParentId(node.parentElementsPath);
         const parentEntry = getOrCreate({
           map: modelEntry,
           key: lastParentId,
           createFunc: () => ({
             parentElementsPath: node.parentElementsPath,
-            elements: new Map(),
+            elements: new Map<
+              CategoryId,
+              {
+                searchTargets: Array<ElementId>;
+                nonSearchTargets: Array<ElementId>;
+              }
+            >(),
           }),
         });
-        const categoryEntry = getOrCreate({ map: parentEntry.elements, key: node.categoryId, createFunc: () => new Map() });
-        categoryEntry.set(node.id, { isSearchTarget: node.isSearchTarget });
+        const categoryEntry = getOrCreate({ map: parentEntry.elements, key: node.categoryId, createFunc: () => ({ searchTargets: [], nonSearchTargets: [] }) });
+        if (node.isSearchTarget) {
+          categoryEntry.searchTargets.push(node.id);
+        } else {
+          categoryEntry.nonSearchTargets.push(node.id);
+        }
       }
     }
   }
