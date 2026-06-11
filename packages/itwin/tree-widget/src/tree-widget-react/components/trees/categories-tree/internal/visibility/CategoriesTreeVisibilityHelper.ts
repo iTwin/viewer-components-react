@@ -123,7 +123,9 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
           { emptyCategories: new Array<Id64String>(), topMostElementCategories: new Array<Id64String>() },
         ),
         mergeMap(({ emptyCategories, topMostElementCategories }) => {
-          this.#props.viewport.changeCategoryDisplay({ categoryIds: emptyCategories, display: props.on });
+          if (emptyCategories.length > 0) {
+            this.#props.viewport.changeCategoryDisplay({ categoryIds: emptyCategories, display: props.on });
+          }
           return this.changeCategoriesVisibilityStatus({ categoryIds: topMostElementCategories, modelId: undefined, on: props.on });
         }),
       );
