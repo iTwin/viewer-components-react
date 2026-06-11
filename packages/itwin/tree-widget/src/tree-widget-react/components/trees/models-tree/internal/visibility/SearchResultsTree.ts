@@ -276,7 +276,6 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<Proc
       }
       const categoryTargetNode = processedNodes.searchTargetCategories.get(rawNode.id);
       assert(categoryTargetNode !== undefined);
-      // If category is a search target, all elements under it are also search targets, so no need to go through children.
       this.addInternalTarget(internalSearchTargets, categoryTargetNode);
       return;
     }
