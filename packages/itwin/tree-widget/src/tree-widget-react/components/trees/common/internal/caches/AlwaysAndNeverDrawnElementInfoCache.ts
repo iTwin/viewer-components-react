@@ -285,7 +285,7 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
             if (id === modelId) {
               return { isInAlwaysOrNeverDrawnSet: false, type: "model" };
             }
-            // idsToAdd looks something like: [model, catA, el1, catB, el2, ...]. So categories are on even indexes and elements are on odd indexes.
+            // idsToAdd looks something like: [model, catA, el1, catB, el2, ...]. So categories are on odd indexes and elements are on even indexes.
             return additionalProps ?? { isInAlwaysOrNeverDrawnSet: false, type: depth % 2 === 1 ? "category" : "element" };
           },
         });
