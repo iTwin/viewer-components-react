@@ -248,13 +248,18 @@ export function groupingNodeDataFromChildren(children: ProcessedHierarchyNode[])
   return { hasSearchTargetAncestor: false, hasDirectNonSearchTargets: false };
 }
 
-/** @internal */
+/**
+ * Path describing a chain of parent elements, where each segment is one category + its elements.
+ *
+ * Structurally compatible with `ElementPathSegment[]` — can be spread directly into it.
+ * The difference: this type uses exact single values (`Id64String`, `Id64Array`) because each
+ * segment is known precisely, while `ElementPathSegment` uses `Id64Arg` to allow multi-value
+ * cache lookups.
+ * @internal
+ */
 export type ParentElementsPath = Array<{
   elementIds: Id64Array;
-  /**
-   * Single category ID; named plural to mirror ElementPathSegment.categoryIds for easy mapping.
-   * A specific categoryId should be known any time such path is created, as all parents should be grouped under a single category.
-   */
+  /** Single category ID. Named plural for structural compatibility with `ElementPathSegment.categoryIds`. */
   categoryIds: Id64String;
 }>;
 

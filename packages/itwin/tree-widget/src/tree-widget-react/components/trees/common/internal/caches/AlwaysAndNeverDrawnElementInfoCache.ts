@@ -46,10 +46,13 @@ export const ALWAYS_NEVER_BUFFER_THRESHOLD = 5000;
 type SetType = "always" | "never";
 
 /**
- * Represents a segment in the element path used to navigate the cache tree.
- * The cache tree alternates category/element levels: model -> cat1 -> el1 -> cat2 -> el2 -> ...
- * - `categoryIds`: category node(s) to navigate through
- * - `elementIds`: optional element node(s) to navigate through after the category. When absent, navigation stops at the category level.
+ * A segment for navigating the cache tree (model -> cat -> el -> cat -> el -> ...).
+ * - `categoryIds`: category node(s) to descend into.
+ * - `elementIds`: element node(s) to descend into after the category. Omit to stop at category level.
+ *
+ * Uses `Id64Arg` so a single segment can fan out across multiple categories/elements.
+ * `ParentElementsPath` is the narrower counterpart (single values per segment) and can be
+ * spread directly into `ElementPathSegment[]`.
  * @internal
  */
 export interface ElementPathSegment {
