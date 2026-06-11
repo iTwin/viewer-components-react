@@ -735,13 +735,14 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             JOIN IdSet(?) modelIdSet ON this.Model.Id = modelIdSet.id
             ${instanceFilterClauses.joins}
             WHERE
-              this.Parent.Id ${parentIds === undefined ? "IS NULL" : `IN (${parentIds.join(", ")})`}
+              ${parentIds === undefined ? "this.Parent.Id IS NULL" : `InVirtualSet(?, this.Parent.Id)`}
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
           bindings: [
             { type: "idset", value: categoryIds },
             { type: "idset", value: modelIds },
+            ...(parentIds ? [{ type: "idset" as const, value: parentIds }] : []),
           ],
         },
       },

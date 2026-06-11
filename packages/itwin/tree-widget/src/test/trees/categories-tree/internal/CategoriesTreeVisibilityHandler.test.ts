@@ -2136,7 +2136,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                     [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "visible",
                       [keys.subModelElement.id]: "visible",
 
-                [keys.categoryB.id]: "partial",
+                [keys.categoryB.id]: "hidden",
                   [getDefaultSubCategoryId(keys.categoryB.id)]: "hidden",
               },
             });
@@ -2167,7 +2167,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                     [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "visible",
                       [keys.subModelElement.id]: "visible",
 
-                [keys.categoryB.id]: "partial",
+                [keys.categoryB.id]: "hidden",
                   [getDefaultSubCategoryId(keys.categoryB.id)]: "hidden",
               },
             });
@@ -2199,7 +2199,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                     [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "visible",
                       [keys.subModelElement.id]: "visible",
 
-                [keys.categoryB.id]: "partial",
+                [keys.categoryB.id]: "hidden",
                   [getDefaultSubCategoryId(keys.categoryB.id)]: "hidden",
               },
             });
@@ -2264,10 +2264,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
               expectations: (ids) => ({
                 [ids.category.id]: "visible",
                   [ids.modeledElement.id]: "visible",
-                    [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
-                      [ids.subModelElement?.id ?? ""]: "visible",
+                    [`${ids.modeledElement.id}-${ids.subModelCategory!.id}`]: "visible",
+                      [ids.subModelElement!.id]: "visible",
 
-                [ids.subModelCategory?.id ?? ""]: "partial",
+                [ids.subModelCategory!.id]: "hidden",
               }),
             },
             {
@@ -2281,12 +2281,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 }),
               // prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
-                [ids.subModelCategory?.id ?? ""]: "partial",
+                [ids.subModelCategory!.id]: "hidden",
 
                 [ids.category.id]: "partial",
                   [ids.modeledElement.id]: "visible",
-                    [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
-                      [ids.subModelElement?.id ?? ""]: "visible",
+                    [`${ids.modeledElement.id}-${ids.subModelCategory!.id}`]: "visible",
+                      [ids.subModelElement!.id]: "visible",
               }),
             },
             {
@@ -2300,12 +2300,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 }),
               // prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
-                [ids.subModelCategory?.id ?? ""]: "partial",
+                [ids.subModelCategory!.id]: "hidden",
 
                 [ids.category.id]: "partial",
                   [ids.modeledElement.id]: "visible",
-                    [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
-                      [ids.subModelElement?.id ?? ""]: "visible",
+                    [`${ids.modeledElement.id}-${ids.subModelCategory!.id}`]: "visible",
+                      [ids.subModelElement!.id]: "visible",
               }),
             },
             {
@@ -2313,12 +2313,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
               getTargetNode: (ids: IModelWithSubModelIds) => createModelHierarchyNode({ id: ids.modeledElement.id, hasChildren: true }),
               // prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
-                [ids.subModelCategory?.id ?? ""]: "partial",
+                [ids.subModelCategory!.id]: "hidden",
 
                 [ids.category.id]: "partial",
                   [ids.modeledElement.id]: "partial",
-                    [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
-                      [ids.subModelElement?.id ?? ""]: "visible",
+                    [`${ids.modeledElement.id}-${ids.subModelCategory!.id}`]: "visible",
+                      [ids.subModelElement!.id]: "visible",
               }),
             },
             {
@@ -2327,8 +2327,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 createCategoryHierarchyNode({ modelIds: [ids.modeledElement.id], id: ids.subModelCategory!.id, hasChildren: true }),
               // prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
-                // category of sub-model is partial, because its sub-category is hidden.
-                [ids.subModelCategory!.id]: "partial",
+                [ids.subModelCategory!.id]: "hidden",
 
                 [ids.category.id]: "partial",
                   [ids.modeledElement.id]: "partial",
@@ -2341,17 +2340,17 @@ describe("CategoriesTreeVisibilityHandler", () => {
               getTargetNode: (ids: IModelWithSubModelIds) =>
                 createElementHierarchyNode({
                   modelId: ids.modeledElement.id,
-                  categoryId: ids.subModelCategory?.id,
+                  categoryId: ids.subModelCategory!.id,
                   elementId: ids.subModelElement!.id,
                 }),
               // prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
-                [ids.subModelCategory?.id ?? ""]: "partial",
+                [ids.subModelCategory!.id]: "hidden",
 
                 [ids.category.id]: "partial",
                   [ids.modeledElement.id]: "partial",
-                    [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
-                      [ids.subModelElement?.id ?? ""]: "visible",
+                    [`${ids.modeledElement.id}-${ids.subModelCategory!.id}`]: "visible",
+                      [ids.subModelElement!.id]: "visible",
               }),
             },
           ],
@@ -3560,7 +3559,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                     [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "hidden",
                       [keys.subModelElement.id]: "hidden",
 
-                [keys.categoryB.id]: "partial",
+                [keys.categoryB.id]: "visible",
                   [getDefaultSubCategoryId(keys.categoryB.id)]: "visible",
               },
             });
@@ -3591,7 +3590,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                     [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "hidden",
                       [keys.subModelElement.id]: "hidden",
 
-                [keys.categoryB.id]: "partial",
+                [keys.categoryB.id]: "visible",
                   [getDefaultSubCategoryId(keys.categoryB.id)]: "visible",
               },
             });
@@ -3623,7 +3622,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                     [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "hidden",
                       [keys.subModelElement.id]: "hidden",
 
-                [keys.categoryB.id]: "partial",
+                [keys.categoryB.id]: "visible",
                   [getDefaultSubCategoryId(keys.categoryB.id)]: "visible",
               },
             });
@@ -5038,7 +5037,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                     [subModelElement1.id]: "visible",
                     [subModelElement2.id]: "hidden",
 
-              [categoryB.id]: "partial",
+              [categoryB.id]: "hidden",
                 [defaultSubCategoryB.id]: "hidden",
             },
           });
@@ -5086,7 +5085,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                     [subModelElement1.id]: "visible",
                     [subModelElement2.id]: "hidden",
 
-              [categoryB.id]: "partial",
+              [categoryB.id]: "hidden",
                 [defaultSubCategoryB.id]: "hidden",
             },
           });
@@ -5147,7 +5146,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                     [subModelElement1.id]: "visible",
                     [subModelElement2.id]: "hidden",
 
-              [categoryB.id]: "partial",
+              [categoryB.id]: "hidden",
                 [defaultSubCategoryB.id]: "hidden",
             },
           });
