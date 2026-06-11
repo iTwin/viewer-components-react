@@ -1030,7 +1030,7 @@ export class BaseVisibilityHelper implements Disposable {
       getObservable: (elementId) =>
         props.ignoreDescendants?.(elementId) ? of([]) : this.#props.baseIdsCache.getDescendantsCounts({ parentElementId: elementId, modelId: props.modelId }),
     });
-    return this.groupDescendantsByVisibilityState({
+    return this.collectDescendantElementsToChange({
       source,
       modelId: props.modelId,
       on: props.on,
@@ -1060,7 +1060,7 @@ export class BaseVisibilityHelper implements Disposable {
           }),
         ),
     });
-    return this.groupDescendantsByVisibilityState({
+    return this.collectDescendantElementsToChange({
       source,
       modelId: props.modelId,
       on: props.on,
@@ -1071,13 +1071,14 @@ export class BaseVisibilityHelper implements Disposable {
   }
 
   /**
-   * Shared logic for grouping descendant elements by whether their category matches the desired visibility state.
+   * Collects descendant element IDs that need visibility changes, split by whether their
+   * category's default visibility already matches the desired state.
    *
-   * For each descendant category:
-   * - If category matches desired state: retrieves those elements from opposite always/never drawn set.
-   * - If category does NOT match desired state: fetches child element IDs directly.
+   * 1. Groups descendant categories into matching/non-matching based on per-model category overrides.
+   * 2. For matching categories: fetches elements from the opposite A/N drawn set (to be removed).
+   * 3. For non-matching categories: fetches all child element IDs (to be added to A/N drawn).
    */
-  private groupDescendantsByVisibilityState(props: {
+  private collectDescendantElementsToChange(props: {
     source: Observable<{ sourceId: Id64String; result: Array<{ categoryId: CategoryId; count: number }> }>;
     modelId: Id64String;
     on: boolean;
