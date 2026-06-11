@@ -146,7 +146,7 @@ async function getCategoriesFromPaths(
     if (identifier.className === CLASS_NAME_DefinitionContainer) {
       await toVoidPromise(
         idsCache.getAllContainedCategories({ definitionContainerIds: identifier.id }).pipe(
-          hierarchyConfig.showEmptyCategories ? filter(({ hasElements }) => hasElements) : identity,
+          hierarchyConfig.showEmptyCategories ? identity : filter(({ hasElements }) => hasElements),
           tap(({ id }) => {
             if (!categories.has(id)) {
               categories.set(id, []);

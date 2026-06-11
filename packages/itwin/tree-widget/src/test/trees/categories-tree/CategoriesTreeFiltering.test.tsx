@@ -40,6 +40,7 @@ import { getInsertFunctionByViewType } from "./internal/Utils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { Props } from "@itwin/presentation-shared";
+import type { CategoryInfo } from "../../../tree-widget-react/components/trees/common/CategoriesVisibilityUtils.js";
 
 // cspell:words egory
 // cspell complains about Cat_egory and Cat%egory
@@ -596,9 +597,9 @@ describe("Categories tree", () => {
       ]);
     });
     ["2d" as const, "3d" as const].forEach((viewType) => {
+      const { insertCategory, insertElement, insertElementsModel, insertElementsSubModel, insertModeledElement } = getInsertFunctionByViewType(viewType);
       describe(`intermediate ${viewType} categories`, () => {
         const showElementsConfig = { ...defaultHierarchyConfiguration, showElements: true };
-        const { insertCategory, insertElement, insertElementsModel, insertElementsSubModel, insertModeledElement } = getInsertFunctionByViewType(viewType);
         const { elementClass, modelClass } = getClassesByView(viewType);
         it("finds child element with different category than parent (intermediate category in path)", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
@@ -912,6 +913,56 @@ describe("Categories tree", () => {
               options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
             },
           ]);
+        });
+      });
+
+      describe(`'onCategoriesFiltered' callback with ${viewType} categories`, () => {
+        it("is called with empty categories when `showEmptyCategories` flag is set", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const physicalModel = insertElementsModel({ txn, codeValue: "TestPhysicalModel" });
+              const definitionContainer = insertDefinitionContainer({ txn, codeValue: "DefinitionContainer", userLabel: "TestDC" });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const categoryWithElements = insertCategory({ txn, codeValue: "CategoryWithElements", modelId: definitionModel.id });
+              const categoryWithoutElements = insertCategory({ txn, codeValue: "CategoryWithoutElements", modelId: definitionModel.id });
+              insertElement({ txn, modelId: physicalModel.id, categoryId: categoryWithElements.id });
+
+              return { definitionContainer, categoryWithElements, categoryWithoutElements };
+            }),
+          );
+          const { imodelConnection, ...keys } = buildIModelResult;
+          const imodelAccess = createIModelAccess(imodelConnection);
+
+          let filteredCategories: { categories: CategoryInfo[] | undefined } | undefined;
+          const onCategoriesFiltered = (props: { categories: CategoryInfo[] | undefined }) => {
+            filteredCategories = props;
+          };
+
+          using hook = renderUseCategoriesTreeHook({
+            imodelConnection,
+            hierarchyConfig: { ...defaultHierarchyConfiguration, showEmptyCategories: true },
+            searchText: "TestDC",
+            viewType,
+            onCategoriesFiltered,
+          });
+          await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }));
+
+          // When showEmptyCategories is true, both categories should be reported (including the one without elements)
+          expect(filteredCategories?.categories).toEqual([
+            { categoryId: keys.categoryWithElements.id, subCategoryIds: undefined },
+            { categoryId: keys.categoryWithoutElements.id, subCategoryIds: undefined },
+          ]);
+          hook.rerender({
+            imodelConnection,
+            hierarchyConfig: { ...defaultHierarchyConfiguration, showEmptyCategories: false },
+            searchText: "TestDC",
+            viewType,
+            onCategoriesFiltered,
+          });
+          await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }));
+
+          // When showEmptyCategories is false, only the category with elements should be reported
+          expect(filteredCategories?.categories).toEqual([{ categoryId: keys.categoryWithElements.id, subCategoryIds: undefined }]);
         });
       });
     });
