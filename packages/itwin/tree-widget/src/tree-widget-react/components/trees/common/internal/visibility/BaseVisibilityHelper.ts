@@ -464,6 +464,9 @@ export class BaseVisibilityHelper implements Disposable {
         if (!hasParentElements) {
           const categoryVisibility = this.getVisibleModelCategoryDirectVisibilityStatus({ modelId: props.modelId, categoryId: props.categoryId });
           const oppositeSet = categoryVisibility.state === "visible" ? this.#props.viewport.neverDrawn : this.#props.viewport.alwaysDrawn;
+          // If no elements could override category visibility (opposite A/N drawn set is empty), return early
+          // without the descendant grouping query. Otherwise, fall through, some elements in
+          // this or child categories may be in the A/N drawn set and need to be counted.
           if (!oppositeSet?.size) {
             return of(categoryVisibility);
           }
