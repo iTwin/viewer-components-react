@@ -5,10 +5,12 @@
 
 import { Id64 } from "@itwin/core-bentley";
 import { HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { getOrCreate, ParentElementsPath } from "../Utils.js";
 
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, HierarchySearchTree, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { EC, InstanceKey } from "@itwin/presentation-shared";
+import type { CategoryId, ElementId, ModelId } from "../Types.js";
 
 /** @internal */
 export type SearchResultsTreeNodeChildren<TSearchResultsTreeNode> = Map<Id64String, TSearchResultsTreeNode>;
@@ -223,4 +225,94 @@ export async function createSearchResultsTree<
   return {
     getSearchTargets: (node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) => processedSearchResultsNodes.getNodeSearchTargets(node),
   };
+}
+
+/**
+ * Shared type representing internal element search targets stored in a tree structure.
+ * Used across models, categories, and classifications search results trees.
+ * @internal
+ */
+export type InternalSearchTargetElements = Map<
+  ModelId,
+  Map<
+    ElementId | undefined,
+    {
+      parentElementsPath: ParentElementsPath;
+      elements: Map<CategoryId, { searchTargets: Array<ElementId>; nonSearchTargets: Array<ElementId> }>;
+    }
+  >
+>;
+
+/** @internal */
+export interface SearchTargetElementEntry {
+  modelId: Id64String;
+  categoryId: Id64String;
+  searchTargetElements: Array<ElementId>;
+  nonSearchTargetElements: Array<ElementId>;
+  parentElementsPath: ParentElementsPath;
+}
+
+/**
+ * Converts the internal tree-structured element search targets into a flat array.
+ * @internal
+ */
+export function convertInternalSearchTargetElements(internalSearchTargetElements: InternalSearchTargetElements): Array<SearchTargetElementEntry> {
+  const result: Array<SearchTargetElementEntry> = [];
+  for (const [modelId, modelEntry] of internalSearchTargetElements) {
+    for (const { parentElementsPath, elements } of modelEntry.values()) {
+      for (const [categoryId, { searchTargets, nonSearchTargets }] of elements) {
+        result.push({
+          categoryId,
+          modelId,
+          parentElementsPath,
+          nonSearchTargetElements: nonSearchTargets,
+          searchTargetElements: searchTargets,
+        });
+      }
+    }
+  }
+  return result;
+}
+
+/**
+ * Adds an element node to the internal search targets element map.
+ * @internal
+ */
+export function addElementToInternalSearchTargets(
+  internalSearchTargetElements: InternalSearchTargetElements,
+  node: { id: ElementId; modelId: Id64String; categoryId: Id64String; parentElementsPath: ParentElementsPath; isSearchTarget: boolean },
+): void {
+  const modelEntry = getOrCreate({
+    map: internalSearchTargetElements,
+    key: node.modelId,
+    createFunc: () =>
+      new Map<
+        ElementId | undefined,
+        {
+          parentElementsPath: ParentElementsPath;
+          elements: Map<CategoryId, { searchTargets: Array<ElementId>; nonSearchTargets: Array<ElementId> }>;
+        }
+      >(),
+  });
+  const lastParentId = ParentElementsPath.getSingleLastParentId(node.parentElementsPath);
+  const parentEntry = getOrCreate({
+    map: modelEntry,
+    key: lastParentId,
+    createFunc: () => ({
+      parentElementsPath: node.parentElementsPath,
+      elements: new Map<
+        CategoryId,
+        {
+          searchTargets: Array<ElementId>;
+          nonSearchTargets: Array<ElementId>;
+        }
+      >(),
+    }),
+  });
+  const categoryEntry = getOrCreate({ map: parentEntry.elements, key: node.categoryId, createFunc: () => ({ searchTargets: [], nonSearchTargets: [] }) });
+  if (node.isSearchTarget) {
+    categoryEntry.searchTargets.push(node.id);
+  } else {
+    categoryEntry.nonSearchTargets.push(node.id);
+  }
 }
