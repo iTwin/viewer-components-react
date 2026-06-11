@@ -525,7 +525,11 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(
-        info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [{ categoryIds: categoryId, elementIds: elementId }, { categoryIds: categoryId }] }),
+        info.getAlwaysOrNeverDrawnElements({
+          setType,
+          modelId,
+          elementCategoryPath: [{ categoryIds: categoryId, elementIds: elementId }, { categoryIds: categoryId }],
+        }),
       );
       expect(result).toEqual(new Map([[categoryId, [childElementId]]]));
     });

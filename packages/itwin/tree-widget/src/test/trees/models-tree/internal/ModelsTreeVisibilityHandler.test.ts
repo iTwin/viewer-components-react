@@ -5430,7 +5430,9 @@ describe("ModelsTreeVisibilityHandler", () => {
               hasChildren: true,
               search: {
                 isSearchTarget: false,
-                childrenTargetPaths: [{ identifier: keys.subModel, children: [{ identifier: keys.categoryB, children: [{ identifier: keys.subModelElement1 }] }] }],
+                childrenTargetPaths: [
+                  { identifier: keys.subModel, children: [{ identifier: keys.categoryB, children: [{ identifier: keys.subModelElement1 }] }] },
+                ],
               },
             }),
             true,
