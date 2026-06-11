@@ -138,7 +138,7 @@ export namespace CategoriesTreeNode {
     } & {
         extendedData: {
             description?: string;
-            hasSubCategories?: boolean; /** Ids of models that this category node is contained under. */
+            hasSubCategories?: boolean;
             modelIds: Id64Array;
         };
     };

@@ -31,7 +31,6 @@ export namespace CategoriesTreeNode {
     extendedData: {
       description?: string;
       hasSubCategories?: boolean;
-      /** Ids of models that this category node is contained under. */
       modelIds: Id64Array;
     };
   } => !!node.extendedData && "isCategory" in node.extendedData && !!node.extendedData.isCategory;
