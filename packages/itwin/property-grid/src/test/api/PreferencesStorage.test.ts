@@ -18,19 +18,22 @@ describe("IModelAppUserPreferencesStorage", () => {
   };
 
   let userPreferencesStub: ReturnType<typeof vi.spyOn>;
-  let loggerStub: ReturnType<typeof vi.spyOn>;
+  let logErrorStub: ReturnType<typeof vi.spyOn>;
+  let logWarningStub: ReturnType<typeof vi.spyOn>;
   let storage: IModelAppUserPreferencesStorage;
 
   beforeEach(() => {
     userPreferencesStub = vi.spyOn(IModelApp, "userPreferences", "get");
-    loggerStub = vi.spyOn(Logger, "logError");
+    logErrorStub = vi.spyOn(Logger, "logError");
+    logWarningStub = vi.spyOn(Logger, "logWarning");
     userPreferencesStub.mockReturnValue(imodelUserPreferences);
     storage = new IModelAppUserPreferencesStorage();
   });
 
   afterEach(() => {
     userPreferencesStub.mockReset();
-    loggerStub.mockReset();
+    logErrorStub.mockReset();
+    logWarningStub.mockReset();
     imodelUserPreferences.get.mockReset();
     imodelUserPreferences.save.mockReset();
   });
@@ -46,14 +49,22 @@ describe("IModelAppUserPreferencesStorage", () => {
         throw new Error("Invalid Key");
       });
       await storage.set("test-key", "test-value");
-      expect(loggerStub).toHaveBeenCalledWith("PropertyGrid", expect.stringContaining("Invalid Key"));
+      expect(logErrorStub).toHaveBeenCalledWith("PropertyGrid", expect.stringContaining("Invalid Key"));
     });
 
-    it("logs error if `IModelApp.userPreferences` not defined", async () => {
+    it("logs warning if `IModelApp.userPreferences` not defined", async () => {
       userPreferencesStub.mockReset();
       userPreferencesStub.mockReturnValue(undefined);
       await storage.set("test-key", "test-value");
-      expect(loggerStub).toHaveBeenCalledWith("PropertyGrid", expect.stringContaining("'IModelApp.userPreferences' not defined"));
+      expect(logWarningStub).toHaveBeenCalledWith("PropertyGrid", expect.stringContaining("'IModelApp.userPreferences' not defined"));
+    });
+
+    it("logs warning only once if `IModelApp.userPreferences` not defined", async () => {
+      userPreferencesStub.mockReset();
+      userPreferencesStub.mockReturnValue(undefined);
+      await storage.set("test-key", "test-value");
+      await storage.set("test-key-2", "test-value-2");
+      expect(logWarningStub).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -68,14 +79,22 @@ describe("IModelAppUserPreferencesStorage", () => {
         throw new Error("Invalid Key");
       });
       await storage.get("test-key");
-      expect(loggerStub).toHaveBeenCalledWith("PropertyGrid", expect.stringContaining("Invalid Key"));
+      expect(logErrorStub).toHaveBeenCalledWith("PropertyGrid", expect.stringContaining("Invalid Key"));
     });
 
-    it("logs error if `IModelApp.userPreferences` not defined", async () => {
+    it("logs warning if `IModelApp.userPreferences` not defined", async () => {
       userPreferencesStub.mockReset();
       userPreferencesStub.mockReturnValue(undefined);
       expect(await storage.get("test-key")).toBeUndefined();
-      expect(loggerStub).toHaveBeenCalledWith("PropertyGrid", expect.stringContaining("'IModelApp.userPreferences' not defined"));
+      expect(logWarningStub).toHaveBeenCalledWith("PropertyGrid", expect.stringContaining("'IModelApp.userPreferences' not defined"));
+    });
+
+    it("logs warning only once if `IModelApp.userPreferences` not defined", async () => {
+      userPreferencesStub.mockReset();
+      userPreferencesStub.mockReturnValue(undefined);
+      await storage.get("test-key");
+      await storage.get("test-key-2");
+      expect(logWarningStub).toHaveBeenCalledTimes(1);
     });
   });
 });

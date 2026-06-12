@@ -25,13 +25,14 @@ export interface PreferencesStorage {
  */
 export class IModelAppUserPreferencesStorage implements PreferencesStorage {
   #nameSpace = PROPERTY_GRID_NAMESPACE;
+  #warnedAboutMissingPreferences = false;
   constructor(nameSpace = PROPERTY_GRID_NAMESPACE) {
     this.#nameSpace = nameSpace;
   }
 
   public async set(key: string, value: string): Promise<void> {
     if (!IModelApp.userPreferences) {
-      Logger.logError(LOGGER_CATEGORY, `Cannot save user preference ${key} because 'IModelApp.userPreferences' not defined.`);
+      this.logMissingPreferencesWarning(key, "save");
       return;
     }
 
@@ -51,7 +52,7 @@ export class IModelAppUserPreferencesStorage implements PreferencesStorage {
 
   public async get(key: string): Promise<string | undefined> {
     if (!IModelApp.userPreferences) {
-      Logger.logError(LOGGER_CATEGORY, `Cannot get persisted user preference ${key} because 'IModelApp.userPreferences' not defined.`);
+      this.logMissingPreferencesWarning(key, "get");
       return undefined;
     }
 
@@ -67,5 +68,12 @@ export class IModelAppUserPreferencesStorage implements PreferencesStorage {
       Logger.logError(LOGGER_CATEGORY, `Error getting ${key} user preference: ${message}`);
     }
     return undefined;
+  }
+
+  private logMissingPreferencesWarning(key: string, action: string) {
+    if (!this.#warnedAboutMissingPreferences) {
+      Logger.logWarning(LOGGER_CATEGORY, `Cannot ${action} persisted user preference ${key} because 'IModelApp.userPreferences' not defined.`);
+      this.#warnedAboutMissingPreferences = true;
+    }
   }
 }
