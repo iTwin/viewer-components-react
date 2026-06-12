@@ -71,8 +71,9 @@ export class IModelAppUserPreferencesStorage implements PreferencesStorage {
   }
 
   private logMissingPreferencesWarning(key: string, action: "save" | "get") {
-    if (this.#warnedAboutMissingPreferences)
+    if (this.#warnedAboutMissingPreferences) {
       return;
+    }
     const subject = action === "get" ? "persisted user preference" : "user preference";
     Logger.logWarning(LOGGER_CATEGORY, `Cannot ${action} ${subject} ${key} because 'IModelApp.userPreferences' not defined.`);
     this.#warnedAboutMissingPreferences = true;
