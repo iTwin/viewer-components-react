@@ -12,7 +12,6 @@ import {
   defaultModelsTreeHierarchyConfiguration,
   ModelsTreeDefinition,
   ModelsTreeIdsCache,
-  ModelsTreeNodeInternal,
 } from "@itwin/tree-widget-react/internal";
 import { act, renderHook } from "@testing-library/react";
 import { Datasets } from "../util/Datasets.js";
@@ -471,18 +470,6 @@ describe("models tree", () => {
         name: "collect nodes",
         callBack: async (ctx) => {
           ctx.hierarchyNodes = await collectNodes({ provider: ctx.provider });
-        },
-      },
-      {
-        name: "filter out intermediate categories",
-        ignoreMeasurement: true,
-        callBack: async (ctx) => {
-          ctx.hierarchyNodes = ctx.hierarchyNodes.filter((node) => {
-            if (ModelsTreeNodeInternal.isCategoryNode(node) && node.extendedData.parentElementsPath.length > 0) {
-              return false;
-            }
-            return true;
-          });
         },
       },
       {
