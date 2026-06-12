@@ -650,10 +650,10 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             FROM ${instanceFilterClauses.from} this
             JOIN IdSet(?) categoryIdSet ON this.Category.Id = categoryIdSet.id
             JOIN IdSet(?) modelIdSet ON this.Model.Id = modelIdSet.id
+            ${parentIds ? `JOIN IdSet(?) parentIdSet ON this.Parent.Id = parentIdSet.id` : ""}
             ${instanceFilterClauses.joins}
-            WHERE
-              ${parentIds === undefined ? "this.Parent.Id IS NULL" : `InVirtualSet(?, this.Parent.Id)`}
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ${parentIds ? "" : "WHERE this.Parent.Id IS NULL"}
+            ${instanceFilterClauses.where ? `${parentIds ? "WHERE" : "AND"} ${instanceFilterClauses.where}` : ""}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [

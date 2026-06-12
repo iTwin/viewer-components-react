@@ -13,6 +13,7 @@ export {
   defaultHierarchyConfiguration as defaultModelsTreeHierarchyConfiguration,
 } from "./tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 export { ModelsTreeIdsCache } from "./tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
+export { ModelsTreeNodeInternal } from "./tree-widget-react/components/trees/models-tree/internal/ModelsTreeNodeInternal.js";
 export { createModelsTreeVisibilityHandler } from "./tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 
 export {
