@@ -70,10 +70,11 @@ export class IModelAppUserPreferencesStorage implements PreferencesStorage {
     return undefined;
   }
 
-  private logMissingPreferencesWarning(key: string, action: string) {
-    if (!this.#warnedAboutMissingPreferences) {
-      Logger.logWarning(LOGGER_CATEGORY, `Cannot ${action} persisted user preference ${key} because 'IModelApp.userPreferences' not defined.`);
-      this.#warnedAboutMissingPreferences = true;
-    }
+  private logMissingPreferencesWarning(key: string, action: "save" | "get") {
+    if (this.#warnedAboutMissingPreferences)
+      return;
+    const subject = action === "get" ? "persisted user preference" : "user preference";
+    Logger.logWarning(LOGGER_CATEGORY, `Cannot ${action} ${subject} ${key} because 'IModelApp.userPreferences' not defined.`);
+    this.#warnedAboutMissingPreferences = true;
   }
 }
