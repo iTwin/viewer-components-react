@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Downgrade missing `IModelApp.userPreferences` log from error to warning and deduplicate",
+  "packageName": "@itwin/property-grid-react",
+  "email": "AzureDevOps@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
