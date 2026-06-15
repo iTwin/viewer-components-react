@@ -36,7 +36,7 @@ import { ChildrenTree, getClassesByView, getOptimalBatchSize, getOrCreate, relea
 import type { Observable, Subscription } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
-import type { CategoryId, ElementId, ModelId } from "../Types.js";
+import type { CategoryId, ElementId } from "../Types.js";
 
 /** @internal */
 export const SET_CHANGE_DEBOUNCE_TIME = 20;
@@ -97,6 +97,13 @@ export type MapEntry =
     };
 
 type CachedNodesMap = ChildrenTree<MapEntry>;
+
+type GetAlwaysOrNeverDrawnElementsResult = Map<CategoryId, Array<ElementId>>;
+
+/** @internal */
+export interface AlwaysAndNeverDrawnElementsAccessor {
+  getAlwaysOrNeverDrawnElements: (segment?: ElementPathSegment) => GetAlwaysOrNeverDrawnElementsResult;
+}
 
 interface AlwaysAndNeverDrawnElementInfoCacheProps {
   viewport: TreeWidgetViewport;
@@ -350,63 +357,100 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
     );
   }
 
-  public getAlwaysOrNeverDrawnElements(props: GetElementsTreeProps): Observable<Map<CategoryId, Array<ElementId>>> {
+  public getAlwaysAndNeverDrawnElementsAccessor(props: GetElementsTreeProps): Observable<AlwaysAndNeverDrawnElementsAccessor> {
     const cache = props.setType === "always" ? this.#viewport.alwaysDrawn : this.#viewport.neverDrawn;
     if (!cache?.size) {
-      return of(new Map<CategoryId, Array<ElementId>>());
+      return of({ getAlwaysOrNeverDrawnElements: (): GetAlwaysOrNeverDrawnElementsResult => new Map() });
     }
-
     return this.getCachedNodesMap(props).pipe(
       map((cachedNodesMap) => {
-        return this.getChildElements({
-          childrenTree: cachedNodesMap,
-          elementCategoryPath: props.elementCategoryPath,
-          modelId: props.modelId,
-        });
+        const modelTree = cachedNodesMap.get(props.modelId)?.children;
+        if (!modelTree) {
+          return { getAlwaysOrNeverDrawnElements: (): GetAlwaysOrNeverDrawnElementsResult => new Map() };
+        }
+        const subTreesAtPath = this.getSubTreesForPath({ childrenTree: modelTree, elementCategoryPath: props.elementCategoryPath });
+        return {
+          getAlwaysOrNeverDrawnElements: (segment?: ElementPathSegment) => this.collectAlwaysOrNeverDrawnElements({ segment, subTreesAtPath }),
+        };
       }),
+      shareReplay(),
     );
   }
 
-  private getChildElements({
+  private getSubTreesForPath({
     childrenTree,
     elementCategoryPath,
-    modelId,
   }: {
     childrenTree: CachedNodesMap;
     elementCategoryPath: ElementPathSegment[];
-    modelId: Id64String;
-  }): Map<CategoryId, Array<ElementId>> {
-    // Create the same structure that childrenTree has, just in array form
-    const childrenTreeAsArray = new Array<Set<ElementId | CategoryId | ModelId>>();
-    childrenTreeAsArray.push(new Set([modelId]));
-    for (const segment of elementCategoryPath) {
-      childrenTreeAsArray.push(Id64.toIdSet(segment.categoryIds));
-      if (segment.elementIds && Id64.sizeOf(segment.elementIds) > 0) {
-        childrenTreeAsArray.push(Id64.toIdSet(segment.elementIds));
+  }): CachedNodesMap[] {
+    if (elementCategoryPath.length === 0) {
+      return [childrenTree];
+    }
+    const { categoryIds, elementIds } = elementCategoryPath[0];
+    const remainderPath = elementCategoryPath.slice(1);
+    const subTreesAtPath: CachedNodesMap[] = [];
+    for (const categoryId of Id64.iterable(categoryIds)) {
+      const catEntry = childrenTree.get(categoryId);
+      if (!catEntry?.children) {
+        continue;
+      }
+      if (!elementIds) {
+        // if elementIds is not specified, then the path ends here.
+        subTreesAtPath.push(catEntry.children);
+        continue;
+      }
+      for (const elementId of Id64.iterable(elementIds)) {
+        const elEntry = catEntry.children.get(elementId);
+        if (!elEntry?.children) {
+          continue;
+        }
+        const childSubTrees = this.getSubTreesForPath({ childrenTree: elEntry.children, elementCategoryPath: remainderPath });
+        subTreesAtPath.push(...childSubTrees);
       }
     }
-    const accumulator = new Map<CategoryId, Array<ElementId>>();
-    ChildrenTree.visit({
-      tree: childrenTree,
-      accept: ({ treeEntry, key, depth }) => {
-        if (depth < childrenTreeAsArray.length) {
-          // when entry in children tree does not exist in the childrenTreeAsArray
-          // it means that this branch of the tree is not in the path specified by elementCategoryPath
-          // children can be ignored
-          if (!childrenTreeAsArray[depth].has(key)) {
-            return { ignoreChildren: true };
+    return subTreesAtPath;
+  }
+
+  private collectAlwaysOrNeverDrawnElements(props: { segment?: ElementPathSegment; subTreesAtPath: CachedNodesMap[] }): GetAlwaysOrNeverDrawnElementsResult {
+    const acc: GetAlwaysOrNeverDrawnElementsResult = new Map();
+    const visitTree = (tree: CachedNodesMap) => {
+      ChildrenTree.visit({
+        tree,
+        accept: ({ treeEntry, key }) => {
+          if (treeEntry.isInAlwaysOrNeverDrawnSet) {
+            const elements = getOrCreate({ map: acc, key: treeEntry.categoryId, createFunc: () => [] });
+            elements.push(key);
           }
           return { ignoreChildren: false };
+        },
+      });
+    };
+    if (!props.segment) {
+      for (const subTree of props.subTreesAtPath) {
+        visitTree(subTree);
+      }
+      return acc;
+    }
+    for (const subTree of props.subTreesAtPath) {
+      for (const categoryId of Id64.iterable(props.segment.categoryIds)) {
+        const catEntry = subTree.get(categoryId);
+        if (!catEntry?.children) {
+          continue;
         }
-
-        // Add entries which are in always/never drawn set
-        if (treeEntry.isInAlwaysOrNeverDrawnSet) {
-          const elements = getOrCreate({ map: accumulator, key: treeEntry.categoryId, createFunc: () => [] });
-          elements.push(key);
+        if (props.segment.elementIds === undefined) {
+          visitTree(catEntry.children);
+          continue;
         }
-        return { ignoreChildren: false };
-      },
-    });
-    return accumulator;
+        for (const elementId of Id64.iterable(props.segment.elementIds)) {
+          const elEntry = catEntry.children.get(elementId);
+          if (!elEntry?.children) {
+            continue;
+          }
+          visitTree(elEntry.children);
+        }
+      }
+    }
+    return acc;
   }
 }

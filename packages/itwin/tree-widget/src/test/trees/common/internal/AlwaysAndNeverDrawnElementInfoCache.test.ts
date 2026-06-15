@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { firstValueFrom } from "rxjs";
+import { firstValueFrom, map } from "rxjs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ALWAYS_NEVER_BUFFER_THRESHOLD,
@@ -15,6 +15,7 @@ import { createFakeViewport } from "../../Common.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { TreeWidgetViewport } from "../../../../tree-widget-react.js";
+import type { ElementPathSegment } from "../../../../tree-widget-react/components/trees/common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
 
 describe("AlwaysAndNeverDrawnElementInfoCache", () => {
   beforeEach(() => {
@@ -25,6 +26,17 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
   afterEach(() => {
     vi.useRealTimers();
   });
+
+  function getElements(
+    info: AlwaysAndNeverDrawnElementInfoCache,
+    props: { setType: "always" | "never"; modelId: Id64String; elementCategoryPath: ElementPathSegment[] },
+  ) {
+    const parentPath = props.elementCategoryPath.slice(0, -1);
+    const lastSegment: ElementPathSegment = props.elementCategoryPath[props.elementCategoryPath.length - 1];
+    return info
+      .getAlwaysAndNeverDrawnElementsAccessor({ ...props, elementCategoryPath: parentPath })
+      .pipe(map(({ getAlwaysOrNeverDrawnElements }) => getAlwaysOrNeverDrawnElements(lastSegment)));
+  }
 
   function runTests(setType: "always" | "never", setterFunction: (ids: Set<Id64String>, vp: TreeWidgetViewport) => void) {
     it(`subscribes to ${setType}Drawn list changes and unsubscribes on dispose`, async () => {
@@ -46,7 +58,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(result).toEqual(new Map());
       expect(vp.iModel.createQueryReader).not.toHaveBeenCalled();
     });
@@ -60,7 +72,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(result).toEqual(new Map());
       expect(vp.iModel.createQueryReader).not.toHaveBeenCalled();
     });
@@ -81,7 +93,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       const expectedResult = new Map([[categoryId, [elementId]]]);
       expect(result).toEqual(expectedResult);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
@@ -102,12 +114,12 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       const expectedResult = new Map([[categoryId, [elementId]]]);
       expect(result).toEqual(expectedResult);
 
       // second request is not delayed because value is cached
-      const result2 = await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      const result2 = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(result2).toEqual(expectedResult);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
     });
@@ -127,14 +139,14 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       const expectedResult = new Map([[categoryId, [elementId]]]);
       expect(result).toEqual(expectedResult);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
 
       setterFunction(new Set(["0x4"]), vp);
 
-      const resultPromise2 = firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      const resultPromise2 = firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result2 = await resultPromise2;
       expect(result2).toEqual(expectedResult);
@@ -150,9 +162,9 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId: "0x2", elementCategoryPath: [] }));
+      await firstValueFrom(getElements(info, { setType, modelId: "0x2", elementCategoryPath: [] }));
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
-      const resultPromise2 = firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId: "0x2", elementCategoryPath: [] }));
+      const resultPromise2 = firstValueFrom(getElements(info, { setType, modelId: "0x2", elementCategoryPath: [] }));
       setterFunction(new Set(["0x2"]), vp);
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       await resultPromise2;
@@ -176,19 +188,19 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result1 = await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      const result1 = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(result1).toEqual(new Map([[categoryId, [elementId]]]));
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
 
       setterFunction(new Set(["0x4"]), vp);
 
       info.suppressChangeEvents();
-      const promiseResult2 = firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      const promiseResult2 = firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result2 = await promiseResult2;
       const expectedResult2 = new Map([[categoryId, ["0x4"]]]);
       info.resumeChangeEvents();
-      const result3 = await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      const result3 = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(result2).toEqual(expectedResult2);
       expect(result3).toEqual(expectedResult2);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
@@ -210,13 +222,13 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result1 = await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      const result1 = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       const expectedResult = new Map([[categoryId, [elementId]]]);
       expect(result1).toEqual(expectedResult);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
       info.suppressChangeEvents();
       info.resumeChangeEvents();
-      const result2 = await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      const result2 = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
       expect(result2).toEqual(expectedResult);
     });
@@ -236,7 +248,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       });
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result1 = await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      const result1 = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       const expectedResult = new Map([[categoryId, [elementId]]]);
       expect(result1).toEqual(expectedResult);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
@@ -244,7 +256,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       setterFunction(new Set(["0x4"]), vp);
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
       expect(result1).toEqual(expectedResult);
       info.resumeChangeEvents();
@@ -269,7 +281,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
         [`${setType}Drawn`]: set,
       });
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
-      await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       // First time the set is just above the threshold, so there should be 2 queries
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
       const newSet = new Set(
@@ -279,7 +291,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       );
       setterFunction(newSet, vp);
       // Second set contains more than twice the threshold, so there should be 3 new queries
-      await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(5); // 2 previous + 3 new
     });
 
@@ -312,7 +324,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       });
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
-      const firstPromise = firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      const firstPromise = firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       await queryStartedPromise.promise;
       // Before making the changes make sure that the first query has started,
       // Since cache is executing two queries at the same time, 2 queries should have been started by now
@@ -333,7 +345,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(5); // 2 on the first run, 3 after the change
 
       // Second request should not make any new requests
-      const secondResult = await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      const secondResult = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       const expectedResult = new Map([["0x5", ["0x4"]]]);
       expect(secondResult).toEqual(expectedResult);
       expect(firstResult).toEqual(expectedResult);
@@ -376,7 +388,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       });
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
-      const resultPromise = firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      const resultPromise = firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       await queryStartedPromise.promise;
       // At first there should have been 2 queries started,
       // Since the first query is paused, the 3rd query should not have been called
@@ -435,7 +447,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       await queryStartedPromise.promise;
       info.suppressChangeEvents();
       // Request is made when suppress is active, so changes to always/never drawn set should not affect the result
-      const resultPromise = firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      const resultPromise = firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       info.resumeChangeEvents();
 
       // New set requires 3 queries
@@ -461,13 +473,13 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       });
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId: "0x2", elementCategoryPath: [] }));
+      await firstValueFrom(getElements(info, { setType, modelId: "0x2", elementCategoryPath: [] }));
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
       info.suppressChangeEvents();
 
       setterFunction(new Set(["0x2"]), vp);
       info.resumeChangeEvents();
-      const resultPromise2 = firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId: "0x2", elementCategoryPath: [] }));
+      const resultPromise2 = firstValueFrom(getElements(info, { setType, modelId: "0x2", elementCategoryPath: [] }));
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       await resultPromise2;
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
@@ -484,7 +496,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       });
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [] }));
+      const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(result).toEqual(new Map());
     });
 
@@ -506,7 +518,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       });
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [{ categoryIds: categoryId }] }));
+      const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [{ categoryIds: categoryId }] }));
       expect(result).toEqual(new Map([[categoryId, [elementId]]]));
     });
 
@@ -525,7 +537,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(
-        info.getAlwaysOrNeverDrawnElements({
+        getElements(info, {
           setType,
           modelId,
           elementCategoryPath: [{ categoryIds: categoryId, elementIds: elementId }, { categoryIds: categoryId }],
@@ -547,7 +559,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       });
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId, elementCategoryPath: [{ categoryIds: categoryId }] }));
+      const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [{ categoryIds: categoryId }] }));
       expect(result).toEqual(new Map());
     });
   }

@@ -3,8 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { EMPTY, forkJoin, from, map, mergeMap, of, reduce, toArray } from "rxjs";
+import { EMPTY, filter, forkJoin, from, map, mergeMap, of, reduce } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
+import { fromWithRelease } from "../Utils.js";
 import { ChildElementsCache } from "./ChildElementsCache.js";
 import { DescendantsCountCache } from "./DescendantsCountCache.js";
 import { ElementModelCategoriesCache } from "./ElementModelCategoriesCache.js";
@@ -12,7 +13,7 @@ import { ModeledElementsCache } from "./ModeledElementsCache.js";
 import { SubCategoriesCache } from "./SubCategoriesCache.js";
 
 import type { Observable } from "rxjs";
-import type { GuidString, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { Props } from "@itwin/presentation-shared";
 import type { CategoryId, ModelId } from "../Types.js";
@@ -71,12 +72,14 @@ export class BaseIdsCache {
       | { modelIds: Id64Set; categoryIds?: undefined }
       | { categoryIds: Id64Set; modelIds?: undefined }
       | { modelIds: Id64Set; categoryIds: Id64Set; parentElementsPath: ParentElementsPath },
-  ): Observable<Id64Array> {
+  ): Observable<Id64String> {
     if (props.modelIds) {
       if (props.categoryIds) {
-        return this.#modeledElementsCache
-          .getCategoryModeledElements({ modelIds: props.modelIds, categoryIds: props.categoryIds, parentElementsPath: props.parentElementsPath })
-          .pipe(toArray());
+        return this.#modeledElementsCache.getCategoryModeledElements({
+          modelIds: props.modelIds,
+          categoryIds: props.categoryIds,
+          parentElementsPath: props.parentElementsPath,
+        });
       }
       return from(props.modelIds).pipe(
         mergeMap((modelId) =>
@@ -101,13 +104,13 @@ export class BaseIdsCache {
           }
           return this.#modeledElementsCache.getCategoryModeledElements({ modelIds: props.modelIds, categoryIds, parentElementsPath: [] });
         }),
-        toArray(),
       );
     }
 
-    return from(props.categoryIds).pipe(
+    return fromWithRelease({ source: props.categoryIds, releaseOnCount: 100 }).pipe(
       mergeMap((categoryId) =>
         this.#elementModelCategoriesCache.getCategoryElementModels({ categoryId }).pipe(
+          filter(({ isSubModel, categoryIsOfTopMostElement }) => !isSubModel && categoryIsOfTopMostElement),
           mergeMap(({ id }) => forkJoin({ hasModeledElements: this.#modeledElementsCache.hasModeledElements({ modelId: id }), modelId: of(id) })),
           reduce((acc, { hasModeledElements, modelId }) => {
             if (hasModeledElements) {
@@ -123,7 +126,6 @@ export class BaseIdsCache {
           }),
         ),
       ),
-      toArray(),
     );
   }
 
@@ -237,7 +239,7 @@ export class BaseIdsCacheImpl {
       | { modelIds: Id64Set; categoryIds: Id64Set; parentElementsPath: ParentElementsPath }
       | { modelIds: Id64Set; categoryIds?: undefined }
       | { categoryIds: Id64Set; modelIds?: undefined },
-  ): Observable<Id64Array> {
+  ): Observable<Id64String> {
     return this.#baseIdsCache.getSubModels(props);
   }
 

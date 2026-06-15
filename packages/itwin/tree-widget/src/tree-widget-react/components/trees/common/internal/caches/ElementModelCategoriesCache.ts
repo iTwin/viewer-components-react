@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, forkJoin, from, map, mergeMap, of, reduce, shareReplay } from "rxjs";
+import { defer, delay, forkJoin, from, map, mergeMap, reduce, shareReplay, tap } from "rxjs";
 import { CLASS_NAME_Model } from "../ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
 import { getOrCreate, releaseMainThreadOnItemsCount } from "../Utils.js";
@@ -21,6 +21,14 @@ interface ElementModelCategoriesCacheProps {
   modeledElementsCache: ModeledElementsCache;
 }
 
+interface CachedData {
+  modelsCategoriesInfo: Map<ModelId, { categoriesOfTopMostElements: Set<CategoryId>; allCategories: Set<CategoryId>; isSubModel: boolean }>;
+  categoryModelsInfo: Map<CategoryId, Array<{ id: ModelId; isSubModel: boolean; categoryIsOfTopMostElement: boolean }>>;
+  categoriesWithParentElements: Set<CategoryId>;
+  allCategories: Set<CategoryId>;
+  allTopMostElementCategories: Set<CategoryId>;
+}
+
 /** @internal */
 export class ElementModelCategoriesCache {
   #queryExecutor: LimitingECSqlQueryExecutor;
@@ -28,14 +36,9 @@ export class ElementModelCategoriesCache {
   #componentName: string;
   #elementClassName: string;
   #modeledElementsCache: ModeledElementsCache;
-  #cachedData:
-    | Observable<{
-        modelsCategoriesInfo: Map<ModelId, { categoriesOfTopMostElements: Set<CategoryId>; allCategories: Set<CategoryId>; isSubModel: boolean }>;
-        categoriesWithParentElements: Set<CategoryId>;
-        allCategories: Set<CategoryId>;
-        allTopMostElementCategories: Set<CategoryId>;
-      }>
-    | undefined;
+  #cachedData: Observable<CachedData> | undefined;
+  #dataResolved = false;
+  #subscriberBatches: Array<{ obs: Observable<CachedData>; subscriberCount: number }> = [];
 
   constructor(props: ElementModelCategoriesCacheProps) {
     this.#queryExecutor = props.queryExecutor;
@@ -86,6 +89,16 @@ export class ElementModelCategoriesCache {
         reduce(
           (acc, queriedCategory) => {
             acc.allCategories.add(queriedCategory.categoryId);
+            const categoryModelsEntry = getOrCreate({
+              map: acc.categoryModelsInfo,
+              key: queriedCategory.categoryId,
+              createFunc: () => new Array<{ id: ModelId; isSubModel: boolean; categoryIsOfTopMostElement: boolean }>(),
+            });
+            categoryModelsEntry.push({
+              id: queriedCategory.modelId,
+              isSubModel: false,
+              categoryIsOfTopMostElement: queriedCategory.isTopMostElementCategory,
+            });
             const modelEntry = getOrCreate({
               map: acc.modelsCategoriesInfo,
               key: queriedCategory.modelId,
@@ -106,6 +119,7 @@ export class ElementModelCategoriesCache {
             categoriesWithParentElements: new Set<CategoryId>(),
             allTopMostElementCategories: new Set<CategoryId>(),
             allCategories: new Set<CategoryId>(),
+            categoryModelsInfo: new Map<CategoryId, Array<{ id: ModelId; categoryIsOfTopMostElement: boolean; isSubModel: boolean }>>(),
           },
         ),
       ),
@@ -122,28 +136,59 @@ export class ElementModelCategoriesCache {
             isSubModel,
           });
         }
+        if (allSubModels.size > 0) {
+          for (const categoryModels of modelCategories.categoryModelsInfo.values()) {
+            for (const categoryModelEntry of categoryModels) {
+              if (allSubModels.has(categoryModelEntry.id)) {
+                categoryModelEntry.isSubModel = true;
+              }
+            }
+          }
+        }
+
         return {
           modelsCategoriesInfo,
           categoriesWithParentElements: modelCategories.categoriesWithParentElements,
           allTopMostElementCategories: modelCategories.allTopMostElementCategories,
           allCategories: modelCategories.allCategories,
+          categoryModelsInfo: modelCategories.categoryModelsInfo,
         };
+      }),
+      tap(() => {
+        this.#dataResolved = true;
+        this.#subscriberBatches = [];
       }),
       shareReplay(),
     );
-    return this.#cachedData;
+
+    // Once the data is resolved, every subscriber gets a synchronous replay, so batching is no longer needed.
+    if (this.#dataResolved) {
+      return this.#cachedData;
+    }
+
+    // While the data is still loading, group subscribers into batches. The first batch subscribes directly to the
+    // shared source; each subsequent batch chains off the previous one through a `delay(0)`, so
+    // when the source resolves the batches are notified with a slight delay between each batch.
+    // This prevents main thread blocking.
+    if (this.#subscriberBatches.length === 0) {
+      this.#subscriberBatches.push({ obs: this.#cachedData, subscriberCount: 1 });
+      return this.#cachedData;
+    }
+
+    let lastBatch = this.#subscriberBatches[this.#subscriberBatches.length - 1];
+
+    const maxSubscribersPerBatch = 400;
+    if (lastBatch.subscriberCount >= maxSubscribersPerBatch) {
+      lastBatch = { obs: lastBatch.obs.pipe(delay(0), shareReplay({ refCount: true })), subscriberCount: 1 };
+      this.#subscriberBatches.push(lastBatch);
+    } else {
+      ++lastBatch.subscriberCount;
+    }
+    return lastBatch.obs;
   }
 
   public getCategoryElementModels(props: { categoryId: Id64String }): Observable<{ id: ModelId; isSubModel: boolean; categoryIsOfTopMostElement: boolean }> {
-    return this.getCachedData().pipe(
-      mergeMap(({ modelsCategoriesInfo }) => modelsCategoriesInfo.entries()),
-      mergeMap(([modelId, modelEntry]) => {
-        if (!modelEntry.allCategories.has(props.categoryId)) {
-          return EMPTY;
-        }
-        return of({ id: modelId, isSubModel: modelEntry.isSubModel, categoryIsOfTopMostElement: modelEntry.categoriesOfTopMostElements.has(props.categoryId) });
-      }),
-    );
+    return this.getCachedData().pipe(mergeMap(({ categoryModelsInfo }) => categoryModelsInfo.get(props.categoryId) ?? []));
   }
 
   public getModelCategoryIds({
