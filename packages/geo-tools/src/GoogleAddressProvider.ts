@@ -73,8 +73,10 @@ export class GoogleAddressProvider implements AddressProvider {
       } });
     const json: any = await response.json();
 
-    const lat = json?.location?.geometry?.latitude
-    const long = json?.location?.geometry?.longitude
+    // Accept either top-level `location`, nested geometry paths depending on API variant
+    // or original code
+    const lat = json?.location?.latitude ?? json?.result?.geometry?.location?.lat ?? json?.location?.geometry?.latitude;
+    const long = json?.location?.longitude ?? json?.result?.geometry?.location?.lng ?? json?.location?.geometry?.longitude;
     if (lat === undefined || long === undefined) {
       throw new Error("Invalid location data");
     }
