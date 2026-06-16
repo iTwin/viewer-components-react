@@ -685,7 +685,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   }: {
     nodeSelectClauseFactory: DefineInstanceNodeChildHierarchyLevelProps["nodeSelectClauseFactory"];
     instanceLabelSelectClauseFactory: DefineInstanceNodeChildHierarchyLevelProps["instanceLabelSelectClauseFactory"];
-    extendedData: Props<typeof nodeSelectClauseFactory.createSelectClause>["extendedData"];
+    extendedData: Props<DefineInstanceNodeChildHierarchyLevelProps["nodeSelectClauseFactory"]["createSelectClause"]>["extendedData"];
     hasChildren: boolean | { selector: string };
   }): Promise<string> {
     return nodeSelectClauseFactory.createSelectClause({
