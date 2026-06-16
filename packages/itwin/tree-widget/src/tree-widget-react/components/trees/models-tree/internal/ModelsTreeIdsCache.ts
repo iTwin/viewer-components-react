@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, filter, forkJoin, from, map, merge, mergeAll, mergeMap, of, reduce, shareReplay } from "rxjs";
+import { defer, EMPTY, filter, forkJoin, from, map, merge, mergeAll, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
@@ -319,7 +319,16 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
 
   public createCategoryInstanceKeyPaths({ categoryIds }: { categoryIds: Id64Array }): Observable<HierarchyNodeIdentifiersPath> {
     const pathsWithSubModels = fromWithRelease({ source: categoryIds, releaseOnCount: 200 }).pipe(
-      mergeMap((id) => forkJoin({ id: of(id), subModels: this.getModels({ subModels: "only", categoryId: id, includeOnlyIfCategoryOfTopMostElement: true }) })),
+      mergeMap((id) =>
+        forkJoin({
+          id: of(id),
+          subModels: this.getModels({ categoryId: id }).pipe(
+            filter(({ categoryIsOfTopMostElement, isSubModel }) => categoryIsOfTopMostElement && isSubModel),
+            map(({ id: modelId }) => modelId),
+            toArray(),
+          ),
+        }),
+      ),
       reduce((acc, { id, subModels }) => {
         for (const subModelId of subModels) {
           const entry = getOrCreate({ map: acc, key: subModelId, createFunc: () => new Set<CategoryId>() });
@@ -360,9 +369,9 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
     );
     const pathsWithoutSubModels = from(categoryIds).pipe(
       mergeMap((categoryId) =>
-        this.getModels({ categoryId, subModels: "exclude", includeOnlyIfCategoryOfTopMostElement: true }).pipe(
-          mergeAll(),
-          mergeMap((categoryModelId) =>
+        this.getModels({ categoryId }).pipe(
+          filter(({ categoryIsOfTopMostElement, isSubModel }) => categoryIsOfTopMostElement && !isSubModel),
+          mergeMap(({ id: categoryModelId }) =>
             this.createUpToModelInstanceKeyPaths(categoryModelId).pipe(
               map((modelPath) => [
                 ...modelPath,

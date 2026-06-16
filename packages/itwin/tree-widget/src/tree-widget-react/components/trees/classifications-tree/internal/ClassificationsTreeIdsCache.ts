@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, expand, from, map, mergeMap, of, reduce, shareReplay } from "rxjs";
+import { defer, EMPTY, expand, from, map, merge, mergeMap, of, reduce, shareReplay } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { normalizeFullClassName } from "@itwin/presentation-shared";
 import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
@@ -195,36 +195,19 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
     return this.#classificationInfos;
   }
 
-  public getAllContainedCategories(classificationOrTableIds: Id64Arg): Observable<Id64Array> {
-    const result = new Array<CategoryId>();
+  public getAllContainedCategories(classificationOrTableIds: Id64Arg): Observable<CategoryId> {
     if (Id64.sizeOf(classificationOrTableIds) === 0) {
-      return of(result);
+      return EMPTY;
     }
     return this.getClassificationsInfo().pipe(
       mergeMap((classificationsInfo) =>
         from(Id64.iterable(classificationOrTableIds)).pipe(
-          reduce(
-            (acc, classificationOrTableId) => {
-              const classificationInfo = classificationsInfo.get(classificationOrTableId);
-              if (classificationInfo === undefined) {
-                return acc;
-              }
-              classificationInfo.relatedCategories.forEach((id) => acc.categories.push(id));
-              classificationInfo.childClassificationIds.forEach((id) => acc.childClassifications.push(id));
-              return acc;
-            },
-            { categories: new Array<CategoryId>(), childClassifications: new Array<Id64String>() },
-          ),
-          mergeMap(({ categories, childClassifications }) => {
-            if (childClassifications.length === 0) {
-              return of(categories);
+          mergeMap((classificationOrTableId) => {
+            const classificationInfo = classificationsInfo.get(classificationOrTableId);
+            if (classificationInfo === undefined) {
+              return EMPTY;
             }
-            return this.getAllContainedCategories(childClassifications).pipe(
-              map((childCategories) => {
-                childCategories.forEach((id) => categories.push(id));
-                return categories;
-              }),
-            );
+            return merge(from(classificationInfo.relatedCategories), this.getAllContainedCategories(classificationInfo.childClassificationIds));
           }),
         ),
       ),

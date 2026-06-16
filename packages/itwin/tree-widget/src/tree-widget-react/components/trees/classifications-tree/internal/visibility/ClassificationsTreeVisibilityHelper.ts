@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defaultIfEmpty, mergeMap } from "rxjs";
+import { defaultIfEmpty, filter, mergeMap, toArray } from "rxjs";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 
@@ -37,13 +37,18 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
    * Determines visibility status by checking visibility status of related categories.
    */
   public getClassificationTablesVisibilityStatus(props: { classificationTableIds: Id64Arg }): Observable<VisibilityStatus> {
-    return this.#props.idsCache.getAllContainedCategories(props.classificationTableIds).pipe(
-      mergeMap((categories) =>
-        this.getCategoriesVisibilityStatus({
+    return this.#props.idsCache.getAllTopMostElementCategories().pipe(
+      mergeMap((topMostCategories) => {
+        return this.#props.idsCache.getAllContainedCategories(props.classificationTableIds).pipe(filter((categoryId) => topMostCategories.has(categoryId)));
+      }),
+      toArray(),
+      mergeMap((categories) => {
+        return this.getCategoriesVisibilityStatus({
           modelId: undefined,
           categoryIds: categories,
-        }),
-      ),
+          ignoreSubCategories: true,
+        });
+      }),
       defaultIfEmpty(createVisibilityStatus("disabled")),
     );
   }
@@ -54,11 +59,16 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
    * Determines visibility status by checking visibility status of related categories.
    */
   public getClassificationsVisibilityStatus(props: { classificationIds: Id64Arg }): Observable<VisibilityStatus> {
-    return this.#props.idsCache.getAllContainedCategories(props.classificationIds).pipe(
+    return this.#props.idsCache.getAllTopMostElementCategories().pipe(
+      mergeMap((topMostCategories) => {
+        return this.#props.idsCache.getAllContainedCategories(props.classificationIds).pipe(filter((categoryId) => topMostCategories.has(categoryId)));
+      }),
+      toArray(),
       mergeMap((categories) =>
         this.getCategoriesVisibilityStatus({
           modelId: undefined,
           categoryIds: categories,
+          ignoreSubCategories: true,
         }),
       ),
       defaultIfEmpty(createVisibilityStatus("disabled")),
@@ -71,7 +81,11 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
    * Does this by changing visibility status of related categories.
    */
   public changeClassificationTablesVisibilityStatus(props: { classificationTableIds: Id64Arg; on: boolean }): Observable<void> {
-    return this.#props.idsCache.getAllContainedCategories(props.classificationTableIds).pipe(
+    return this.#props.idsCache.getAllTopMostElementCategories().pipe(
+      mergeMap((topMostCategories) => {
+        return this.#props.idsCache.getAllContainedCategories(props.classificationTableIds).pipe(filter((categoryId) => topMostCategories.has(categoryId)));
+      }),
+      toArray(),
       mergeMap((categories) =>
         this.changeCategoriesVisibilityStatus({
           modelId: undefined,
@@ -88,7 +102,11 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
    * Does this by changing visibility status of related categories.
    */
   public changeClassificationsVisibilityStatus(props: { classificationIds: Id64Arg; on: boolean }): Observable<void> {
-    return this.#props.idsCache.getAllContainedCategories(props.classificationIds).pipe(
+    return this.#props.idsCache.getAllTopMostElementCategories().pipe(
+      mergeMap((topMostCategories) => {
+        return this.#props.idsCache.getAllContainedCategories(props.classificationIds).pipe(filter((categoryId) => topMostCategories.has(categoryId)));
+      }),
+      toArray(),
       mergeMap((categories) =>
         this.changeCategoriesVisibilityStatus({
           modelId: undefined,

@@ -116,15 +116,13 @@ export class ModeledElementsCache {
   public getSubModelsUnderElement(elementId: Id64String): Observable<Id64Array> {
     return this.getModeledElementsInfo().pipe(
       map(({ allSubModels, childSubModels }) => {
-        const subModels = new Array<ElementId>();
         if (allSubModels.has(elementId)) {
-          subModels.push(elementId);
+          // If element is a sub-model, it can not be a parent.
+          return [elementId];
         }
-        const elementEntry = childSubModels.get(elementId);
-        for (const childSubModelId of elementEntry ?? []) {
-          subModels.push(childSubModelId);
-        }
-        return subModels;
+        // Convert sub-models set into array.
+        // When element does not contain sub-model, return empty array.
+        return [...(childSubModels.get(elementId) ?? [])];
       }),
     );
   }

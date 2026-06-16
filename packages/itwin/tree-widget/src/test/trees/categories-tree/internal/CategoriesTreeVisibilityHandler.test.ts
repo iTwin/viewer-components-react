@@ -48,7 +48,6 @@ import {
   createElementHierarchyNode,
   createModelHierarchyNode,
   createSubCategoryHierarchyNode,
-  createSubModelCategoryHierarchyNode,
 } from "./Utils.js";
 import { validateNodeVisibility } from "./VisibilityValidation.js";
 
@@ -1992,10 +1991,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
               expectations: (ids) => ({
                 [ids.category.id]: "visible",
                   [ids.modeledElement.id]: "visible",
-                    [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
-                      [ids.subModelElement?.id ?? ""]: "visible",
+                    [`${ids.modeledElement.id}-${ids.subModelCategory!.id}`]: "visible",
+                      [ids.subModelElement!.id]: "visible",
 
-                [ids.subModelCategory?.id ?? ""]: "partial",
+                [ids.subModelCategory!.id]: "hidden",
               }),
             },
             {
@@ -2009,12 +2008,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 }),
               // prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
-                [ids.subModelCategory?.id ?? ""]: "partial",
+                [ids.subModelCategory!.id]: "hidden",
 
                 [ids.category.id]: "partial",
                   [ids.modeledElement.id]: "visible",
-                    [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
-                      [ids.subModelElement?.id ?? ""]: "visible",
+                    [`${ids.modeledElement.id}-${ids.subModelCategory!.id}`]: "visible",
+                      [ids.subModelElement!.id]: "visible",
               }),
             },
             {
@@ -2028,12 +2027,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 }),
               // prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
-                [ids.subModelCategory?.id ?? ""]: "partial",
+                [ids.subModelCategory!.id]: "hidden",
 
                 [ids.category.id]: "partial",
                   [ids.modeledElement.id]: "visible",
-                    [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
-                      [ids.subModelElement?.id ?? ""]: "visible",
+                    [`${ids.modeledElement.id}-${ids.subModelCategory!.id}`]: "visible",
+                      [ids.subModelElement!.id]: "visible",
               }),
             },
             {
@@ -2041,25 +2040,26 @@ describe("CategoriesTreeVisibilityHandler", () => {
               getTargetNode: (ids: IModelWithSubModelIds) => createModelHierarchyNode({ id: ids.modeledElement.id, hasChildren: true }),
               // prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
-                [ids.subModelCategory?.id ?? ""]: "partial",
+                [ids.subModelCategory!.id]: "hidden",
 
                 [ids.category.id]: "partial",
                   [ids.modeledElement.id]: "partial",
-                    [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
-                      [ids.subModelElement?.id ?? ""]: "visible",
+                    [`${ids.modeledElement.id}-${ids.subModelCategory!.id}`]: "visible",
+                      [ids.subModelElement!.id]: "visible",
               }),
             },
             {
               name: "modeled element, its model and category have partial visibility when its sub-model element's category display is turned on",
-              getTargetNode: (ids: IModelWithSubModelIds) => createSubModelCategoryHierarchyNode(ids.modeledElement.id, ids.subModelCategory?.id, true),
+              getTargetNode: (ids: IModelWithSubModelIds) =>
+                createCategoryHierarchyNode({ id: ids.subModelCategory!.id, isCategoryOfSubModel: true, modelIds: [ids.modeledElement.id] }),
               // prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
-                [ids.subModelCategory?.id ?? ""]: "visible",
+                [ids.subModelCategory!.id]: "hidden",
 
                 [ids.category.id]: "partial",
                   [ids.modeledElement.id]: "partial",
-                    [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
-                      [ids.subModelElement?.id ?? ""]: "visible",
+                    [`${ids.modeledElement.id}-${ids.subModelCategory!.id}`]: "visible",
+                      [ids.subModelElement!.id]: "visible",
               }),
             },
             {
@@ -2067,17 +2067,17 @@ describe("CategoriesTreeVisibilityHandler", () => {
               getTargetNode: (ids: IModelWithSubModelIds) =>
                 createElementHierarchyNode({
                   modelId: ids.modeledElement.id,
-                  categoryId: ids.subModelCategory?.id,
+                  categoryId: ids.subModelCategory!.id,
                   elementId: ids.subModelElement!.id,
                 }),
               // prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
-                [ids.subModelCategory?.id ?? ""]: "partial",
+                [ids.subModelCategory!.id]: "hidden",
 
                 [ids.category.id]: "partial",
                   [ids.modeledElement.id]: "partial",
-                    [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
-                      [ids.subModelElement?.id ?? ""]: "visible",
+                    [`${ids.modeledElement.id}-${ids.subModelCategory!.id}`]: "visible",
+                      [ids.subModelElement!.id]: "visible",
               }),
             },
           ],

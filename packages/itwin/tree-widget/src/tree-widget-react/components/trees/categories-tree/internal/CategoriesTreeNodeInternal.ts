@@ -22,18 +22,13 @@ export namespace CategoriesTreeNodeInternal {
   export const isCategoryNode = (
     node: Pick<HierarchyNode, "extendedData">,
   ): node is Omit<NonGroupingHierarchyNode, "extendedData"> & { key: InstancesNodeKey } & {
-    extendedData: {
-      description?: string;
-      hasSubCategories?: boolean;
-    } & (
-      | {
-          isCategoryOfSubModel?: false;
-        }
-      | {
-          modelIds: Id64Array;
-          isCategoryOfSubModel: true;
-        }
-    );
+    extendedData: CategoryNodeProps;
+  } => CategoriesTreeNode.isCategoryNode(node);
+
+  export const isRawCategoryNode = (
+    node: Pick<HierarchyNode, "extendedData">,
+  ): node is Omit<NonGroupingHierarchyNode, "extendedData"> & { key: InstancesNodeKey } & {
+    extendedData: Pick<CategoryNodeProps, "description" | "hasSubCategories"> & { [key: string]: any };
   } => CategoriesTreeNode.isCategoryNode(node);
 
   export const isModelNode = (node: Pick<HierarchyNode, "extendedData">): node is NonGroupingHierarchyNode & { key: InstancesNodeKey } =>
@@ -42,23 +37,49 @@ export namespace CategoriesTreeNodeInternal {
   export const isElementNode = (
     node: Pick<HierarchyNode, "extendedData">,
   ): node is Omit<NonGroupingHierarchyNode, "extendedData"> & { key: InstancesNodeKey } & {
-    extendedData: {
-      modelId: Id64String;
-      categoryId: Id64String;
-      categoryOfTopMostParentElement: Id64String;
-      topMostParentElementId: Id64String;
-    };
+    extendedData: ElementNodeProps;
+  } => CategoriesTreeNode.isElementNode(node);
+
+  export const isRawElementNode = (
+    node: Pick<HierarchyNode, "extendedData">,
+  ): node is Omit<NonGroupingHierarchyNode, "extendedData"> & { key: InstancesNodeKey } & {
+    extendedData: ElementNodeProps & { [key: string]: any };
   } => CategoriesTreeNode.isElementNode(node);
 
   export const isElementClassGroupingNode = (
     node: Pick<HierarchyNode, "key">,
   ): node is Omit<GroupingHierarchyNode, "extendedData"> & { key: ClassGroupingNodeKey } & {
-    extendedData: {
-      categoryId: Id64String;
-      topMostParentElementId?: Id64String;
-      modelElementsMap: Map<Id64String, { elementIds: Set<Id64String>; categoryOfTopMostParentElement: Id64String; childrenWhichAreParents: Set<ElementId> }>;
-    };
+    extendedData: ElementClassGroupingNodeProps;
   } => CategoriesTreeNode.isElementClassGroupingNode(node);
 
   export const isSubCategoryNode = CategoriesTreeNode.isSubCategoryNode;
+}
+
+/** @internal */
+export interface CategoryNodeProps {
+  description?: string;
+  hasSubCategories?: boolean;
+  modelIds: Id64Array;
+  isCategoryOfSubModel: boolean;
+}
+
+/**
+ * @internal
+ */
+export interface ElementNodeProps {
+  modelId: Id64String;
+  categoryId: Id64String;
+  categoryOfTopMostParentElement: Id64String;
+  topMostParentElementId: Id64String;
+}
+
+/**
+ * @internal
+ */
+export interface ElementClassGroupingNodeProps {
+  categoryId: Id64String;
+  topMostParentElementId?: Id64String;
+  modelElementsMap: Map<Id64String, { elementIds: Set<Id64String>; categoryOfTopMostParentElement: Id64String; childrenWhichAreParents: Set<ElementId> }>;
+  hasDirectNonSearchTargets?: boolean;
+  hasSearchTargetAncestor?: boolean;
 }

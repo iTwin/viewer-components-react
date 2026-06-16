@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, forkJoin, from, map, merge, mergeAll, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
+import { defer, EMPTY, filter, forkJoin, from, map, merge, mergeAll, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
@@ -12,7 +12,7 @@ import { fromWithRelease, getClassesByView, getOrCreate } from "../../common/int
 import { createGeometricElementInstanceKeyPaths } from "../CategoriesTreeDefinition.js";
 
 import type { Observable } from "rxjs";
-import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { EC } from "@itwin/presentation-shared";
 import type { BaseIdsCacheImplProps } from "../../common/internal/caches/BaseIdsCache.js";
@@ -36,6 +36,7 @@ export interface CategoryInfo {
   id: CategoryId;
   subCategoryChildCount: number;
   hasElements: boolean;
+  isTopMostElementCategory: boolean;
 }
 
 interface CategoriesTreeIdsCacheProps extends BaseIdsCacheImplProps {
@@ -46,7 +47,12 @@ interface CategoriesTreeIdsCacheProps extends BaseIdsCacheImplProps {
 /** @internal */
 export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
   #definitionContainersInfo: Observable<Map<DefinitionContainerId, DefinitionContainerInfo>> | undefined;
-  #modelsCategoriesInfo: Observable<Map<ModelId, CategoriesInfo>> | undefined;
+  #cachedCategoryData:
+    | Observable<{
+        categoriesGroupedByModel: Map<ModelId, CategoriesInfo>;
+        categoriesWithModel: Map<CategoryId, { modelId: ModelId; isDefinitionContainer: boolean }>;
+      }>
+    | undefined;
   #definitionContainerInstanceKeyPaths: Map<DefinitionContainerId, Observable<HierarchyNodeIdentifiersPath>> = new Map();
   #categoryClass: EC.FullClassName;
   #categoryElementClass: EC.FullClassName;
@@ -122,6 +128,7 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
     parentDefinitionContainerExists: boolean;
     subCategoryChildCount: number;
     hasElements: boolean;
+    isTopMostElementCategory: boolean;
   }> {
     return this.getIsDefinitionContainerSupported().pipe(
       mergeMap((isDefinitionContainerSupported) =>
@@ -143,7 +150,11 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
               IFNULL(
                 (SELECT 1 FROM ${this.#categoryElementClass} e WHERE e.Category.Id = this.ECInstanceId LIMIT 1),
                 0
-              ) hasElements
+              ) hasElements,
+              IFNULL(
+                (SELECT 1 FROM ${this.#categoryElementClass} e WHERE e.Category.Id = this.ECInstanceId AND e.Parent.Id IS NULL LIMIT 1),
+                0
+              ) isTopMostElementCategory
             FROM
               ${this.#categoryClass} this
               JOIN ${CLASS_NAME_SubCategory} sc ON sc.Parent.Id = this.ECInstanceId
@@ -166,6 +177,7 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
               parentDefinitionContainerExists: row.parentDefinitionContainerExists,
               subCategoryChildCount: row.subCategoryChildCount,
               hasElements: !!row.hasElements,
+              isTopMostElementCategory: !!row.isTopMostElementCategory,
             };
           }),
         ),
@@ -258,44 +270,56 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
     );
   }
 
-  private getModelsCategoriesInfo() {
-    this.#modelsCategoriesInfo ??= this.queryCategories()
+  private getCachedCategoryData() {
+    this.#cachedCategoryData ??= this.queryCategories()
       .pipe(
-        reduce((acc, queriedCategory) => {
-          const modelCategories = getOrCreate({
-            map: acc,
-            key: queriedCategory.modelId,
-            createFunc: () => ({
-              parentDefinitionContainerExists: queriedCategory.parentDefinitionContainerExists,
-              childCategories: [] as { id: string; subCategoryChildCount: number; hasElements: boolean }[],
-            }),
-          });
-          modelCategories.childCategories.push({
-            id: queriedCategory.id,
-            subCategoryChildCount: queriedCategory.subCategoryChildCount,
-            hasElements: queriedCategory.hasElements,
-          });
-          return acc;
-        }, new Map<ModelId, CategoriesInfo>()),
+        reduce(
+          (acc, queriedCategory) => {
+            const modelCategories = getOrCreate({
+              map: acc.categoriesGroupedByModel,
+              key: queriedCategory.modelId,
+              createFunc: () => ({
+                parentDefinitionContainerExists: queriedCategory.parentDefinitionContainerExists,
+                childCategories: new Array<CategoryInfo>(),
+              }),
+            });
+            modelCategories.childCategories.push({
+              id: queriedCategory.id,
+              subCategoryChildCount: queriedCategory.subCategoryChildCount,
+              hasElements: queriedCategory.hasElements,
+              isTopMostElementCategory: queriedCategory.isTopMostElementCategory,
+            });
+            acc.categoriesWithModel.set(queriedCategory.id, {
+              modelId: queriedCategory.modelId,
+              isDefinitionContainer: queriedCategory.parentDefinitionContainerExists,
+            });
+            return acc;
+          },
+          {
+            categoriesGroupedByModel: new Map<ModelId, CategoriesInfo>(),
+            categoriesWithModel: new Map<CategoryId, { modelId: ModelId; isDefinitionContainer: boolean }>(),
+          },
+        ),
       )
       .pipe(shareReplay());
-    return this.#modelsCategoriesInfo;
+    return this.#cachedCategoryData;
   }
 
   private getDefinitionContainersInfo() {
     this.#definitionContainersInfo ??= forkJoin({
       isDefinitionContainerSupported: this.getIsDefinitionContainerSupported(),
-      modelsCategoriesInfo: this.getModelsCategoriesInfo(),
+      cachedCategoryData: this.getCachedCategoryData(),
     })
       .pipe(
-        mergeMap(({ isDefinitionContainerSupported, modelsCategoriesInfo }) => {
+        mergeMap(({ isDefinitionContainerSupported, cachedCategoryData }) => {
           const definitionContainersInfo = new Map<DefinitionContainerId, DefinitionContainerInfo>();
-          if (!isDefinitionContainerSupported || modelsCategoriesInfo.size === 0) {
+          const categoriesGroupedByModel = cachedCategoryData.categoriesGroupedByModel;
+          if (!isDefinitionContainerSupported || categoriesGroupedByModel.size === 0) {
             return of(definitionContainersInfo);
           }
           return this.queryDefinitionContainers().pipe(
             reduce((acc, queriedDefinitionContainer) => {
-              const modelCategoriesInfo = modelsCategoriesInfo.get(queriedDefinitionContainer.id);
+              const modelCategoriesInfo = categoriesGroupedByModel.get(queriedDefinitionContainer.id);
               acc.set(queriedDefinitionContainer.id, {
                 childCategories: modelCategoriesInfo?.childCategories ?? [],
                 modelId: queriedDefinitionContainer.modelId,
@@ -354,45 +378,27 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
 
   public getAllContainedCategories({
     definitionContainerIds,
-    includeEmptyCategories,
   }: {
     definitionContainerIds: Id64Arg;
-    includeEmptyCategories?: boolean;
-  }): Observable<Id64Set> {
+  }): Observable<{ id: CategoryId; hasElements: boolean; isTopMostElementCategory: boolean }> {
     return this.getDefinitionContainersInfo().pipe(
       mergeMap((definitionContainersInfo) =>
         from(Id64.iterable(definitionContainerIds)).pipe(
-          mergeMap((definitionContainerId) => {
+          mergeMap((definitionContainerId): Observable<{ id: CategoryId; hasElements: boolean; isTopMostElementCategory: boolean }> => {
             const definitionContainerInfo = definitionContainersInfo.get(definitionContainerId);
             if (definitionContainerInfo === undefined) {
-              return of({ directCategories: undefined, indirectCategories: undefined });
+              return EMPTY;
             }
             const childDefinitionContainerIds = definitionContainerInfo.childDefinitionContainers.map(({ id }) => id);
-            return (
+            return merge(
               childDefinitionContainerIds.length > 0
                 ? this.getAllContainedCategories({
                     definitionContainerIds: childDefinitionContainerIds,
-                    includeEmptyCategories,
                   })
-                : of(new Set<CategoryId>())
-            ).pipe(
-              map((indirectCategories) => {
-                return {
-                  directCategories: applyElementsFilter(definitionContainerInfo.childCategories, includeEmptyCategories).map((category) => category.id),
-                  indirectCategories,
-                };
-              }),
+                : EMPTY,
+              from(definitionContainerInfo.childCategories),
             );
           }),
-          reduce((acc, { directCategories, indirectCategories }) => {
-            for (const categoryId of directCategories ?? []) {
-              acc.add(categoryId);
-            }
-            for (const categoryId of indirectCategories ?? []) {
-              acc.add(categoryId);
-            }
-            return acc;
-          }, new Set<CategoryId>()),
         ),
       ),
     );
@@ -411,8 +417,12 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
             if (!subCategories || subCategories.length <= 1) {
               return of([]);
             }
-            return this.getCategoriesSearchPaths({ categoryIds: categoryOfSubCategory, includePathsWithSubModels: false }).pipe(
-              map((pathToCategory) => [...pathToCategory, { id: subCategoryId, className: CLASS_NAME_SubCategory }]),
+            return this.getSearchPathsUpToRootCategory({ categoryId: categoryOfSubCategory }).pipe(
+              map((pathsUpToCategory) => [
+                ...pathsUpToCategory,
+                { id: categoryOfSubCategory, className: this.#categoryClass },
+                { id: subCategoryId, className: CLASS_NAME_SubCategory },
+              ]),
             );
           }),
         ),
@@ -452,6 +462,27 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
     );
   }
 
+  public getSearchPathsUpToRootCategory({ categoryId }: { categoryId: Id64String }): Observable<HierarchyNodeIdentifiersPath> {
+    return this.getCachedCategoryData().pipe(
+      mergeMap(({ categoriesWithModel, categoriesGroupedByModel }) => {
+        if (categoriesGroupedByModel.size === 0) {
+          return EMPTY;
+        }
+        if (categoriesWithModel.size === 0) {
+          return EMPTY;
+        }
+        const entry = categoriesWithModel.get(categoryId);
+        if (!entry) {
+          return EMPTY;
+        }
+        if (!entry.isDefinitionContainer) {
+          return of([]);
+        }
+        return this.getDefinitionContainersSearchPaths({ definitionContainerIds: entry.modelId });
+      }),
+    );
+  }
+
   public getCategoriesSearchPaths({
     categoryIds,
     includePathsWithSubModels,
@@ -462,7 +493,14 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
     const pathsWithSubModels = includePathsWithSubModels
       ? fromWithRelease({ source: categoryIds, releaseOnCount: 200 }).pipe(
           mergeMap((id) =>
-            forkJoin({ id: of(id), subModels: this.getModels({ subModels: "only", categoryId: id, includeOnlyIfCategoryOfTopMostElement: true }) }),
+            forkJoin({
+              id: of(id),
+              subModels: this.getModels({ categoryId: id }).pipe(
+                filter(({ categoryIsOfTopMostElement, isSubModel }) => isSubModel && categoryIsOfTopMostElement),
+                map(({ id: modelId }) => modelId),
+                toArray(),
+              ),
+            }),
           ),
           reduce((acc, { id, subModels }) => {
             for (const subModelId of subModels) {
@@ -500,11 +538,11 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
         )
       : EMPTY;
 
-    const pathsWithoutSubModels = this.getModelsCategoriesInfo().pipe(
-      mergeMap((modelsCategoriesInfo) =>
+    const pathsWithoutSubModels = this.getCachedCategoryData().pipe(
+      mergeMap(({ categoriesGroupedByModel }) =>
         fromWithRelease({ source: categoryIds, releaseOnCount: 200 }).pipe(
           mergeMap((categoryId) => {
-            for (const [modelId, modelCategoriesInfo] of modelsCategoriesInfo) {
+            for (const [modelId, modelCategoriesInfo] of categoriesGroupedByModel) {
               if (modelCategoriesInfo.childCategories.find((childCategory) => childCategory.id === categoryId)) {
                 const instanceKey = { id: categoryId, className: this.#categoryClass };
                 if (!modelCategoriesInfo.parentDefinitionContainerExists) {
@@ -528,8 +566,8 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
     includeEmpty?: boolean;
   }): Observable<{ categories: Array<CategoryId>; definitionContainers: Array<DefinitionContainerId> }> {
     return forkJoin({
-      categories: this.getModelsCategoriesInfo().pipe(
-        mergeMap((modelsCategoriesInfo) => modelsCategoriesInfo.values()),
+      categories: this.getCachedCategoryData().pipe(
+        mergeMap(({ categoriesGroupedByModel }) => categoriesGroupedByModel.values()),
         reduce((acc, modelCategoriesInfo) => {
           applyElementsFilter(modelCategoriesInfo.childCategories, props?.includeEmpty).forEach((categoryInfo) => acc.push(categoryInfo.id));
           return acc;
@@ -551,8 +589,8 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
     includeEmpty?: boolean;
   }): Observable<{ categories: CategoryInfo[]; definitionContainers: Array<DefinitionContainerId> }> {
     return forkJoin({
-      categories: this.getModelsCategoriesInfo().pipe(
-        mergeMap((modelsCategoriesInfo) => modelsCategoriesInfo.values()),
+      categories: this.getCachedCategoryData().pipe(
+        mergeMap(({ categoriesGroupedByModel }) => categoriesGroupedByModel.values()),
         reduce((acc, modelCategoriesInfo) => {
           if (!modelCategoriesInfo.parentDefinitionContainerExists) {
             applyElementsFilter(modelCategoriesInfo.childCategories, props?.includeEmpty).forEach((categoryInfo) => acc.push(categoryInfo));
