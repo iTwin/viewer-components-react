@@ -160,6 +160,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       {
         elementIds: Set<ElementId>;
         childrenWhichAreParents: Set<ElementId>;
+        categoryOfTopMostParentElement: CategoryId;
       }
     >();
     for (const child of node.children) {
@@ -569,7 +570,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     nodeSelectClauseFactory: DefineInstanceNodeChildHierarchyLevelProps["nodeSelectClauseFactory"];
     instanceLabelSelectClauseFactory: DefineInstanceNodeChildHierarchyLevelProps["instanceLabelSelectClauseFactory"];
     allSubModels: Id64String[];
-    extendedData: Props<typeof nodeSelectClauseFactory.createSelectClause>["extendedData"];
+    extendedData: Props<DefineInstanceNodeChildHierarchyLevelProps["nodeSelectClauseFactory"]["createSelectClause"]>["extendedData"];
   }): Promise<{ selectClause: string; bindings: ECSqlBinding[] }> {
     const selectClause = await nodeSelectClauseFactory.createSelectClause({
       ecClassId: { selector: "this.ECClassId" },
@@ -617,7 +618,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   }: {
     nodeSelectClauseFactory: DefineInstanceNodeChildHierarchyLevelProps["nodeSelectClauseFactory"];
     instanceLabelSelectClauseFactory: DefineInstanceNodeChildHierarchyLevelProps["instanceLabelSelectClauseFactory"];
-    extendedData: Props<typeof nodeSelectClauseFactory.createSelectClause>["extendedData"];
+    extendedData: Props<DefineInstanceNodeChildHierarchyLevelProps["nodeSelectClauseFactory"]["createSelectClause"]>["extendedData"];
     hasChildren: boolean | { selector: string };
   }): Promise<string> {
     return nodeSelectClauseFactory.createSelectClause({
@@ -634,6 +635,8 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       extendedData: {
         imageId: "icon-layers",
         isCategory: true,
+        isCategoryOfSubModel: false,
+        modelIds: { selector: createIdsSelector(new Array<ModelId>()) },
         ...extendedData,
       },
       supportsFiltering: true,
