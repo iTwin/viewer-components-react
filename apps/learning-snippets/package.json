@@ -62,7 +62,7 @@
     "sass-embedded": "1.98.0",
     "test-utilities": "workspace:*",
     "typescript": "~5.9.3",
-    "vite": "^8.0.11",
+    "vite": "^8.0.16",
     "vitest": "^4.1.5"
   },
   "eslintConfig": {
