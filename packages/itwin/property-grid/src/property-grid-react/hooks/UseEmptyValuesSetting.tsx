@@ -10,7 +10,7 @@ import { useTelemetryContext } from "./UseTelemetryContext.js";
 import type { PropsWithChildren } from "react";
 
 /**
- * Provides context for `Show\Hide Empty Values` setting.
+ * Provides context for `Show/Hide Empty Values` setting.
  * @public
  */
 export function EmptyValuesSettingContext({ children }: PropsWithChildren<object>) {
@@ -20,7 +20,7 @@ export function EmptyValuesSettingContext({ children }: PropsWithChildren<object
 }
 
 /**
- * Provides context for `Show\Hide Empty Values` setting.
+ * Provides context for `Show/Hide Empty Values` setting.
  * @deprecated in 1.20. Use `EmptyValuesSettingContext` instead.
  * @public
  */
