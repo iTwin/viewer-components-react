@@ -99,7 +99,8 @@ type ElementsAccessor = (setType: SetType) => Observable<AlwaysAndNeverDrawnElem
  *
  * It provides methods that help retrieve and change visibility status of models, categories, elements.
  * @internal
- */ export class BaseVisibilityHelper implements Disposable {
+ */
+export class BaseVisibilityHelper implements Disposable {
   readonly #props: BaseVisibilityHelperProps;
   readonly #alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfoCache;
   #elementChangeQueue = new Subject<Observable<void>>();
