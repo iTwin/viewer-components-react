@@ -130,8 +130,8 @@ export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFilter
       };
     }
 
-    // merged values are not empty (the value differs between instances), so they should always match the filter.
-    // empty string values are considered empty, but `false`/`0` are valid non-empty values.
+    // merged primitive values are not empty (the value differs between instances), so they should always match the filter.
+    // empty string primitive values are considered empty, but `false`/`0` are valid non-empty values.
     const hasValue = node.isMerged || (node.value.value !== undefined && node.value.value !== "");
     return {
       filteredTypes: [FilteredType.Value],
