@@ -691,9 +691,7 @@ export class BaseVisibilityHelper implements Disposable {
         mergeMap((categoryId) =>
           this.#props.baseIdsCache.getModels({ categoryId }).pipe(
             filter(({ categoryIsOfTopMostElement, isSubModel }) => categoryIsOfTopMostElement && !isSubModel),
-            map(({ id }) => {
-              return { modelId: id, categoryId };
-            }),
+            map(({ id }) => ({ modelId: id, categoryId })),
           ),
         ),
         reduce((acc, { modelId, categoryId }) => {
