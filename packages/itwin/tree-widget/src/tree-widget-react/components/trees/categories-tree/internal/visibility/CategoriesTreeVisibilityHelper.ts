@@ -43,39 +43,22 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
    * Determines visibility status by checking visibility status of related categories.
    */
   public getDefinitionContainersVisibilityStatus(props: { definitionContainerIds: Id64Arg }): Observable<VisibilityStatus> {
-    return this.#props.idsCache
-      .getAllContainedCategories({
-        definitionContainerIds: props.definitionContainerIds,
-      })
-      .pipe(
-        reduce(
-          (acc, { id, hasElements, isTopMostElementCategory }) => {
-            if (isTopMostElementCategory) {
-              acc.topMostElementCategories.push(id);
-              return acc;
-            }
-            if (this.#props.hierarchyConfig.showEmptyCategories && !hasElements) {
-              acc.emptyCategories.push(id);
-            }
-            return acc;
-          },
-          { emptyCategories: new Array<Id64String>(), topMostElementCategories: new Array<Id64String>() },
-        ),
-        mergeMap(({ emptyCategories, topMostElementCategories }) => {
-          return merge(
-            from(emptyCategories).pipe(
-              map((id) => (this.#props.viewport.viewsCategory(id) ? createVisibilityStatus("visible") : createVisibilityStatus("hidden"))),
-            ),
-            topMostElementCategories.length < 1001
-              ? this.getCategoriesVisibilityStatus({ categoryIds: topMostElementCategories, modelId: undefined })
-              : from(topMostElementCategories).pipe(
-                  bufferCount(getOptimalBatchSize({ totalSize: topMostElementCategories.length, maximumBatchSize: 1001 })),
-                  concatMap((categoryIdsBatch) => this.getCategoriesVisibilityStatus({ categoryIds: categoryIdsBatch, modelId: undefined }).pipe(delay(0))),
-                ),
-          );
-        }),
-        mergeVisibilityStatuses(),
-      );
+    return this.getCategorizedContainedCategories(props.definitionContainerIds).pipe(
+      mergeMap(({ emptyCategories, topMostElementCategories }) => {
+        return merge(
+          from(emptyCategories).pipe(
+            map((id) => (this.#props.viewport.viewsCategory(id) ? createVisibilityStatus("visible") : createVisibilityStatus("hidden"))),
+          ),
+          topMostElementCategories.length < 1001
+            ? this.getCategoriesVisibilityStatus({ categoryIds: topMostElementCategories, modelId: undefined })
+            : from(topMostElementCategories).pipe(
+                bufferCount(getOptimalBatchSize({ totalSize: topMostElementCategories.length, maximumBatchSize: 1001 })),
+                concatMap((categoryIdsBatch) => this.getCategoriesVisibilityStatus({ categoryIds: categoryIdsBatch, modelId: undefined }).pipe(delay(0))),
+              ),
+        );
+      }),
+      mergeVisibilityStatuses(),
+    );
   }
 
   /** Gets grouped elements visibility status. */
@@ -112,31 +95,14 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
    * Does this by changing visibility status of related categories.
    */
   public changeDefinitionContainersVisibilityStatus(props: { definitionContainerIds: Id64Arg; on: boolean }): Observable<void> {
-    return this.#props.idsCache
-      .getAllContainedCategories({
-        definitionContainerIds: props.definitionContainerIds,
-      })
-      .pipe(
-        reduce(
-          (acc, { id, hasElements, isTopMostElementCategory }) => {
-            if (isTopMostElementCategory) {
-              acc.topMostElementCategories.push(id);
-              return acc;
-            }
-            if (this.#props.hierarchyConfig.showEmptyCategories && !hasElements) {
-              acc.emptyCategories.push(id);
-            }
-            return acc;
-          },
-          { emptyCategories: new Array<Id64String>(), topMostElementCategories: new Array<Id64String>() },
-        ),
-        mergeMap(({ emptyCategories, topMostElementCategories }) => {
-          if (emptyCategories.length > 0) {
-            this.#props.viewport.changeCategoryDisplay({ categoryIds: emptyCategories, display: props.on });
-          }
-          return this.changeCategoriesVisibilityStatus({ categoryIds: topMostElementCategories, modelId: undefined, on: props.on });
-        }),
-      );
+    return this.getCategorizedContainedCategories(props.definitionContainerIds).pipe(
+      mergeMap(({ emptyCategories, topMostElementCategories }) => {
+        if (emptyCategories.length > 0) {
+          this.#props.viewport.changeCategoryDisplay({ categoryIds: emptyCategories, display: props.on });
+        }
+        return this.changeCategoriesVisibilityStatus({ categoryIds: topMostElementCategories, modelId: undefined, on: props.on });
+      }),
+    );
   }
 
   /**
@@ -178,6 +144,27 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
           parentElementsIdsPath,
         });
       }),
+    );
+  }
+
+  /** Gets categories contained in the given definition containers, split into empty and top most element categories. */
+  private getCategorizedContainedCategories(
+    definitionContainerIds: Id64Arg,
+  ): Observable<{ emptyCategories: Id64String[]; topMostElementCategories: Id64String[] }> {
+    return this.#props.idsCache.getAllContainedCategories({ definitionContainerIds }).pipe(
+      reduce(
+        (acc, { id, hasElements, isTopMostElementCategory }) => {
+          if (isTopMostElementCategory) {
+            acc.topMostElementCategories.push(id);
+            return acc;
+          }
+          if (this.#props.hierarchyConfig.showEmptyCategories && !hasElements) {
+            acc.emptyCategories.push(id);
+          }
+          return acc;
+        },
+        { emptyCategories: new Array<Id64String>(), topMostElementCategories: new Array<Id64String>() },
+      ),
     );
   }
 
