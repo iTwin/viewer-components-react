@@ -81,7 +81,7 @@ describe("Property grid", () => {
                   (props) => <ShowHideEmptyValuesSettingsMenuItem {...props} persist={true} />,
                 ],
 
-                // supply an optional custom storage for user preferences, e.g. the show/hide null values used above
+                // supply an optional custom storage for user preferences, e.g. the show/hide empty values used above
                 preferencesStorage: new IModelAppUserPreferencesStorage("my-favorites-namespace"),
 
                 // supply the global selection storage that the widget will use to listen to selection

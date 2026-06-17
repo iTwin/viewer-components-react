@@ -9,7 +9,7 @@ import { PropertyDataChangeEvent } from "@itwin/components-react";
 import { KeySet } from "@itwin/presentation-common";
 import { PropertyGridContent } from "../../property-grid-react/components/PropertyGridContent.js";
 import { PropertyGridSettingsMenuItem, ShowHideEmptyValuesSettingsMenuItem } from "../../property-grid-react/components/SettingsDropdownMenu.js";
-import { NullValueSettingContext } from "../../property-grid-react/hooks/UseNullValuesSetting.js";
+import { EmptyValuesSettingContext } from "../../property-grid-react/hooks/UseEmptyValuesSetting.js";
 import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTelemetryContext.js";
 import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
 import { createPropertyRecord, render, stubSelectionManager, waitFor } from "../TestUtils.js";
@@ -54,7 +54,7 @@ describe("<PropertyGridContent />", () => {
     }) as unknown as IPresentationPropertyDataProvider;
 
   function renderWithContext(ui: ReactElement) {
-    return render(<NullValueSettingContext>{ui}</NullValueSettingContext>);
+    return render(<EmptyValuesSettingContext>{ui}</EmptyValuesSettingContext>);
   }
 
   it("renders header with instance label", async () => {

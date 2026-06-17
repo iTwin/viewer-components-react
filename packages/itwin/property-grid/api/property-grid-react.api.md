@@ -77,6 +77,9 @@ export interface DefaultContextMenuItemProps extends ContextMenuItemProps {
 }
 
 // @public
+export function EmptyValuesSettingContext(input: PropsWithChildren<object>): JSX_2.Element;
+
+// @public
 export interface FavoritePropertiesContextMenuItemProps extends DefaultContextMenuItemProps {
     scope?: FavoritePropertiesScope;
 }
@@ -105,8 +108,8 @@ export type MultiElementPropertyGridProps = OmitOverUnion<PropertyGridProps, "he
     getParentInstanceKey?: (key: InstanceKey) => Promise<InstanceKey | undefined>;
 };
 
-// @public
-export function NullValueSettingContext(input: PropsWithChildren<object>): JSX_2.Element;
+// @public @deprecated
+export const NullValueSettingContext: typeof EmptyValuesSettingContext;
 
 // @public
 export type PerformanceTrackedFeatures = "properties-load" | "elements-list-load";

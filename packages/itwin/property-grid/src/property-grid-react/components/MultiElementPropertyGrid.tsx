@@ -9,8 +9,8 @@ import classnames from "classnames";
 import { useEffect, useState } from "react";
 import { SvgArrowDown, SvgArrowUp, SvgPropertiesList } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
+import { EmptyValuesSettingContext } from "../hooks/UseEmptyValuesSetting.js";
 import { useInstanceSelection } from "../hooks/UseInstanceSelection.js";
-import { NullValueSettingContext } from "../hooks/UseNullValuesSetting.js";
 import { useTelemetryContext } from "../hooks/UseTelemetryContext.js";
 import { useSelectionHandler } from "../hooks/UseUnifiedSelectionHandler.js";
 import { PropertyGridManager } from "../PropertyGridManager.js";
@@ -127,7 +127,7 @@ export function MultiElementPropertyGrid({ ancestorsNavigationControls, getParen
   return (
     <div className="property-grid-react-transition-container">
       <div className="property-grid-react-transition-container-inner">
-        <NullValueSettingContext>
+        <EmptyValuesSettingContext>
           {items.map((component, idx) => (
             <div
               key={component.key}
@@ -140,7 +140,7 @@ export function MultiElementPropertyGrid({ ancestorsNavigationControls, getParen
               {component}
             </div>
           ))}
-        </NullValueSettingContext>
+        </EmptyValuesSettingContext>
       </div>
     </div>
   );

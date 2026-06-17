@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { useNullValueSetting } from "../../property-grid-react/hooks/UseNullValuesSetting.js";
+import { useEmptyValuesSetting } from "../../property-grid-react/hooks/UseEmptyValuesSetting.js";
 import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTelemetryContext.js";
 import { PreferencesContextProvider } from "../../property-grid-react/PropertyGridPreferencesContext.js";
 import { createFunctionStub, render, waitFor } from "../TestUtils.js";
@@ -18,16 +18,16 @@ function renderWithContext(element: ReactNode, contextProps: Partial<Preferences
 }
 
 function TestComponent({ persistOnClick }: { persistOnClick?: boolean }) {
-  const { showNullValues, setShowNullValues } = useNullValueSetting();
+  const { showEmptyValues, setShowEmptyValues } = useEmptyValuesSetting();
 
-  const toggleShowNullValues = async () => {
-    await setShowNullValues(!showNullValues, { persist: persistOnClick });
+  const toggleShowEmptyValues = async () => {
+    await setShowEmptyValues(!showEmptyValues, { persist: persistOnClick });
   };
 
-  return <button onClick={toggleShowNullValues}>{showNullValues ? "Hide Null Values" : "Show Null Values"}</button>;
+  return <button onClick={toggleShowEmptyValues}>{showEmptyValues ? "Hide Empty Values" : "Show Empty Values"}</button>;
 }
 
-describe("useNullValuesSetting", () => {
+describe("useEmptyValuesSetting", () => {
   const storage = {
     get: createFunctionStub<PreferencesStorage["get"]>(),
     set: createFunctionStub<PreferencesStorage["set"]>(),
@@ -41,16 +41,16 @@ describe("useNullValuesSetting", () => {
   it("defaults to `true`", async () => {
     const { getByRole } = renderWithContext(<TestComponent />, { storage });
 
-    await waitFor(() => getByRole("button", { name: "Hide Null Values" }));
+    await waitFor(() => getByRole("button", { name: "Hide Empty Values" }));
   });
 
   it("updates value", async () => {
     const { getByRole, user } = renderWithContext(<TestComponent />, { storage });
 
-    const button = await waitFor(() => getByRole("button", { name: "Hide Null Values" }));
+    const button = await waitFor(() => getByRole("button", { name: "Hide Empty Values" }));
     await user.click(button);
 
-    await waitFor(() => getByRole("button", { name: "Show Null Values" }));
+    await waitFor(() => getByRole("button", { name: "Show Empty Values" }));
   });
 
   describe("with persistence", () => {
@@ -59,7 +59,7 @@ describe("useNullValuesSetting", () => {
 
       const { getByRole } = renderWithContext(<TestComponent />, { storage });
 
-      await waitFor(() => getByRole("button", { name: "Show Null Values" }));
+      await waitFor(() => getByRole("button", { name: "Show Empty Values" }));
     });
 
     it("defaults to `true` if there is no persisted value", async () => {
@@ -67,7 +67,7 @@ describe("useNullValuesSetting", () => {
 
       const { getByRole } = renderWithContext(<TestComponent />, { storage });
 
-      await waitFor(() => getByRole("button", { name: "Hide Null Values" }));
+      await waitFor(() => getByRole("button", { name: "Hide Empty Values" }));
     });
 
     it("stores persisted value", async () => {
@@ -75,11 +75,11 @@ describe("useNullValuesSetting", () => {
 
       const { getByRole, user } = renderWithContext(<TestComponent persistOnClick={true} />, { storage });
 
-      const button = await waitFor(() => getByRole("button", { name: "Show Null Values" }));
+      const button = await waitFor(() => getByRole("button", { name: "Show Empty Values" }));
       await user.click(button);
 
-      await waitFor(() => getByRole("button", { name: "Hide Null Values" }));
-      expect(storage.set).toHaveBeenCalledWith("showNullValues", JSON.stringify(true));
+      await waitFor(() => getByRole("button", { name: "Hide Empty Values" }));
+      expect(storage.set).toHaveBeenCalledWith("showEmptyValues", JSON.stringify(true));
     });
   });
 
@@ -95,7 +95,7 @@ describe("useNullValuesSetting", () => {
         { storage },
       );
 
-      await waitFor(() => getByRole("button", { name: "Show Null Values" }));
+      await waitFor(() => getByRole("button", { name: "Show Empty Values" }));
       expect(onFeatureUsedSpy).toHaveBeenCalledWith("hide-empty-values-enabled");
     });
   });
@@ -109,16 +109,16 @@ describe("useNullValuesSetting", () => {
       { storage },
     );
 
-    const hideButton = await waitFor(() => getByRole("button", { name: "Hide Null Values" }));
+    const hideButton = await waitFor(() => getByRole("button", { name: "Hide Empty Values" }));
     await user.click(hideButton);
 
-    await waitFor(() => getByRole("button", { name: "Show Null Values" }));
+    await waitFor(() => getByRole("button", { name: "Show Empty Values" }));
     expect(onFeatureUsedSpy).toHaveBeenCalledWith("hide-empty-values-enabled");
 
-    const showButton = await waitFor(() => getByRole("button", { name: "Show Null Values" }));
+    const showButton = await waitFor(() => getByRole("button", { name: "Show Empty Values" }));
     await user.click(showButton);
 
-    await waitFor(() => getByRole("button", { name: "Hide Null Values" }));
+    await waitFor(() => getByRole("button", { name: "Hide Empty Values" }));
     expect(onFeatureUsedSpy).toHaveBeenCalledWith("hide-empty-values-disabled");
   });
 });

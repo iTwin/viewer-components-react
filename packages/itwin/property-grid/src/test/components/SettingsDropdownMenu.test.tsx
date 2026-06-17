@@ -5,7 +5,7 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SettingsDropdownMenu, ShowHideEmptyValuesSettingsMenuItem } from "../../property-grid-react/components/SettingsDropdownMenu.js";
-import { NullValueSettingContext, SHOWNULL_KEY } from "../../property-grid-react/hooks/UseNullValuesSetting.js";
+import { EmptyValuesSettingContext, SHOW_EMPTY_KEY } from "../../property-grid-react/hooks/UseEmptyValuesSetting.js";
 import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
 import { PreferencesContextProvider } from "../../property-grid-react/PropertyGridPreferencesContext.js";
 import { createFunctionStub, render, waitFor } from "../TestUtils.js";
@@ -90,7 +90,7 @@ describe("Default settings", () => {
   function renderWithContext(ui: ReactElement) {
     return render(
       <PreferencesContextProvider storage={storage}>
-        <NullValueSettingContext>{ui}</NullValueSettingContext>
+        <EmptyValuesSettingContext>{ui}</EmptyValuesSettingContext>
       </PreferencesContextProvider>,
     );
   }
@@ -134,7 +134,7 @@ describe("Default settings", () => {
 
       // wait until empty values are hidden
       await waitFor(() => expect(queryByText("settings.show-null.label")).not.toBeNull());
-      expect(storage.set).toHaveBeenCalledExactlyOnceWith(SHOWNULL_KEY, JSON.stringify(false));
+      expect(storage.set).toHaveBeenCalledExactlyOnceWith(SHOW_EMPTY_KEY, JSON.stringify(false));
     });
   });
 
@@ -165,7 +165,7 @@ describe("Default settings", () => {
 
       // wait until empty values are shown
       await waitFor(() => expect(queryByText("settings.hide-null.label")).not.toBeNull());
-      expect(storage.set).toHaveBeenCalledExactlyOnceWith(SHOWNULL_KEY, JSON.stringify(true));
+      expect(storage.set).toHaveBeenCalledExactlyOnceWith(SHOW_EMPTY_KEY, JSON.stringify(true));
     });
   });
 });

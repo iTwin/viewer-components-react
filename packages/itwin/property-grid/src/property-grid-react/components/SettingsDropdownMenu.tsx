@@ -6,7 +6,7 @@
 import { Fragment } from "react";
 import { SvgMoreVertical } from "@itwin/itwinui-icons-react";
 import { DropdownMenu, IconButton, MenuItem } from "@itwin/itwinui-react";
-import { useNullValueSettingContext } from "../hooks/UseNullValuesSetting.js";
+import { useEmptyValuesSettingContext } from "../hooks/UseEmptyValuesSetting.js";
 import { PropertyGridManager } from "../PropertyGridManager.js";
 
 import type { PropsWithChildren, ReactNode } from "react";
@@ -71,10 +71,10 @@ export interface ShowHideEmptyValuesSettingsMenuItemProps extends SettingsMenuIt
  * @public
  */
 export function ShowHideEmptyValuesSettingsMenuItem({ close, persist }: ShowHideEmptyValuesSettingsMenuItemProps) {
-  const { showNullValues, setShowNullValues } = useNullValueSettingContext();
+  const { showEmptyValues, setShowEmptyValues } = useEmptyValuesSettingContext();
 
-  const label = showNullValues ? PropertyGridManager.translate("settings.hide-null.label") : PropertyGridManager.translate("settings.show-null.label");
-  const description = showNullValues
+  const label = showEmptyValues ? PropertyGridManager.translate("settings.hide-null.label") : PropertyGridManager.translate("settings.show-null.label");
+  const description = showEmptyValues
     ? PropertyGridManager.translate("settings.hide-null.description")
     : PropertyGridManager.translate("settings.show-null.description");
 
@@ -83,7 +83,7 @@ export function ShowHideEmptyValuesSettingsMenuItem({ close, persist }: ShowHide
       id="show-hide-null-values"
       title={description}
       onClick={() => {
-        void setShowNullValues(!showNullValues, { persist });
+        void setShowEmptyValues(!showEmptyValues, { persist });
         close();
       }}
     >

@@ -9,12 +9,14 @@ public;function;CopyPropertyTextContextMenuItem
 public;function;createPropertyGrid
 public;interface;DataProviderProps
 public;interface;DefaultContextMenuItemProps
+public;function;EmptyValuesSettingContext
 public;interface;FavoritePropertiesContextMenuItemProps
 public;type;FilteringPropertyGridProps
 public;class;IModelAppUserPreferencesStorage
 public;function;MultiElementPropertyGrid
 public;type;MultiElementPropertyGridProps
-public;function;NullValueSettingContext
+public;const;NullValueSettingContext
+deprecated;const;NullValueSettingContext
 public;type;PerformanceTrackedFeatures
 public;interface;PreferencesStorage
 public;function;PropertyGrid
