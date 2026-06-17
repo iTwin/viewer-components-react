@@ -153,10 +153,17 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
     }
 
     if (CategoriesTreeNodeInternal.isCategoryNode(node)) {
-      return this.#visibilityHelper.getCategoriesVisibilityStatus({
-        categoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
-        modelId: node.extendedData.isCategoryOfSubModel ? node.extendedData.modelIds[0] : undefined,
-      });
+      const modelIds = node.extendedData.modelIds.length > 0 ? node.extendedData.modelIds : [undefined];
+      const categoryIds = node.key.instanceKeys.map((instanceKey) => instanceKey.id);
+      return from(modelIds).pipe(
+        mergeMap((modelId) =>
+          this.#visibilityHelper.getCategoriesVisibilityStatus({
+            categoryIds,
+            modelId,
+          }),
+        ),
+        mergeVisibilityStatuses(),
+      );
     }
 
     if (CategoriesTreeNodeInternal.isSubCategoryNode(node)) {
@@ -212,11 +219,17 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       }
 
       if (CategoriesTreeNodeInternal.isCategoryNode(node)) {
-        return this.#visibilityHelper.changeCategoriesVisibilityStatus({
-          categoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
-          modelId: node.extendedData.isCategoryOfSubModel ? node.extendedData.modelIds[0] : undefined,
-          on,
-        });
+        const categoryIds = node.key.instanceKeys.map((instanceKey) => instanceKey.id);
+        const modelIds = node.extendedData.modelIds.length > 0 ? node.extendedData.modelIds : [undefined];
+        return from(modelIds).pipe(
+          mergeMap((modelId) =>
+            this.#visibilityHelper.changeCategoriesVisibilityStatus({
+              categoryIds,
+              modelId,
+              on,
+            }),
+          ),
+        );
       }
 
       if (CategoriesTreeNodeInternal.isSubCategoryNode(node)) {

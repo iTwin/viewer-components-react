@@ -14,6 +14,13 @@ function getTestName(): string {
   return expect.getState().currentTestName?.replace(/[^\w]/gi, "-").replace(/-+/g, "-").toLowerCase() ?? "unknown";
 }
 
+export namespace TestSchema {
+  export const Name = "TestSchema";
+  export const ModeledElement2dClassName = "SubModelableDrawingGraphic";
+  export const SubModel2dClassName = "DrawingGraphicModel";
+  export const ModeledElement3dClassName = "SubModelablePhysicalObject";
+}
+
 export async function buildIModel(
   setup?: (imodel: IModelDb, testSchema: TestSchemaDefinition) => Promise<void>,
 ): Promise<{ imodelConnection: IModelConnection } & AsyncDisposable>;
@@ -27,12 +34,28 @@ export async function buildIModel<TResult extends object | undefined>(setup?: (i
       imodel,
       schemaContentXml: `
         <ECSchemaReference name="BisCore" version="01.00.16" alias="bis" />
-        <ECEntityClass typeName="SubModelablePhysicalObject" displayLabel="Test Physical Object" modifier="Sealed" description="Similar to generic:PhysicalObject but also sub-modelable.">
+        <ECEntityClass typeName="${TestSchema.ModeledElement3dClassName}" displayLabel="Test Physical Object" modifier="Sealed" description="Similar to generic:PhysicalObject but also sub-modelable.">
           <BaseClass>bis:PhysicalElement</BaseClass>
           <BaseClass>bis:ISubModeledElement</BaseClass>
         </ECEntityClass>
+        <ECEntityClass typeName="${TestSchema.ModeledElement2dClassName}" displayLabel="Test Drawing Graphic" modifier="Sealed" description="Similar to generic:DrawingGraphic but also sub-modelable.">
+          <BaseClass>bis:DrawingGraphic</BaseClass>
+          <BaseClass>bis:ISubModeledElement</BaseClass>
+        </ECEntityClass>
+        <ECEntityClass typeName="${TestSchema.SubModel2dClassName}" displayLabel="Drawing Graphic Model" modifier="Sealed" description="A 2d geometric model that can sub-model a DrawingGraphic element.">
+          <BaseClass>bis:GraphicalModel2d</BaseClass>
+        </ECEntityClass>
+        <ECRelationshipClass typeName="DrawingGraphicModelBreaksDownSubModelableDrawingGraphic" strength="embedding" strengthDirection="backward" modifier="None">
+          <BaseClass>bis:ModelModelsElement</BaseClass>
+          <Source multiplicity="(0..1)" roleLabel="models" polymorphic="true">
+              <Class class="DrawingGraphicModel"/>
+          </Source>
+          <Target multiplicity="(0..1)" roleLabel="is modeled by" polymorphic="true">
+              <Class class="SubModelableDrawingGraphic"/>
+          </Target>
+        </ECRelationshipClass>
       `,
-      schemaName: "TestSchema",
+      schemaName: TestSchema.Name,
       schemaAlias: "test",
     })) as TestSchemaDefinition;
     const setupResult = setup ? await setup(imodel, testSchema) : undefined;
@@ -47,5 +70,9 @@ export async function buildIModel<TResult extends object | undefined>(setup?: (i
 }
 
 interface TestSchemaDefinition extends ImportSchemaResult {
-  items: { SubModelablePhysicalObject: { name: string; fullName: string; label: string } };
+  items: {
+    [TestSchema.ModeledElement3dClassName]: { name: string; fullName: string; label: string };
+    [TestSchema.ModeledElement2dClassName]: { name: string; fullName: string; label: string };
+    [TestSchema.SubModel2dClassName]: { name: string; fullName: string; label: string };
+  };
 }

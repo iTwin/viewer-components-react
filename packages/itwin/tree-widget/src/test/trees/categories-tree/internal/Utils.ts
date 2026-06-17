@@ -39,34 +39,10 @@ export function createCategoryHierarchyNode(
       : [],
     extendedData: {
       isCategory: true,
-      modelIds: props.isCategoryOfSubModel ? props.modelIds : undefined,
+      modelIds: props.isCategoryOfSubModel ? props.modelIds : [],
       categoryId: props.id,
       isCategoryOfSubModel: !!props.isCategoryOfSubModel,
       hasSubCategories: !props.isCategoryOfSubModel ? !!props.hasSubCategories : undefined,
-    },
-  };
-}
-
-/** @internal */
-export function createSubModelCategoryHierarchyNode(
-  modelId?: Id64String,
-  categoryId?: Id64String,
-  hasChildren?: boolean,
-  viewType: "2d" | "3d" = "3d",
-): NonGroupingHierarchyNode {
-  const { categoryClass } = getClassesByView(viewType);
-  return {
-    key: {
-      type: "instances",
-      instanceKeys: [{ className: categoryClass, id: categoryId ?? "" }],
-    },
-    children: !!hasChildren,
-    label: "",
-    parentKeys: [],
-    extendedData: {
-      isCategory: true,
-      modelId: modelId ?? "0x1",
-      categoryId: categoryId ?? "0x2",
     },
   };
 }

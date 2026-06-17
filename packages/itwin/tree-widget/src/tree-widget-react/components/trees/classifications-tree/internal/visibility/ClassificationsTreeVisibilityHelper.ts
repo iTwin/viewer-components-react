@@ -3,12 +3,13 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defaultIfEmpty, mergeMap } from "rxjs";
+import { defaultIfEmpty, filter, mergeMap, toArray } from "rxjs";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 
 import type { Observable } from "rxjs";
 import type { Id64Arg } from "@itwin/core-bentley";
+import type { CategoryId } from "../../../common/internal/Types.js";
 import type { BaseVisibilityHelperProps } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { ClassificationsTreeIdsCache } from "../ClassificationsTreeIdsCache.js";
@@ -37,13 +38,14 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
    * Determines visibility status by checking visibility status of related categories.
    */
   public getClassificationTablesVisibilityStatus(props: { classificationTableIds: Id64Arg }): Observable<VisibilityStatus> {
-    return this.#props.idsCache.getAllContainedCategories(props.classificationTableIds).pipe(
-      mergeMap((categories) =>
-        this.getCategoriesVisibilityStatus({
+    return this.getTopMostContainedCategories(props.classificationTableIds).pipe(
+      mergeMap((categories) => {
+        return this.getCategoriesVisibilityStatus({
           modelId: undefined,
           categoryIds: categories,
-        }),
-      ),
+          ignoreSubCategories: true,
+        });
+      }),
       defaultIfEmpty(createVisibilityStatus("disabled")),
     );
   }
@@ -54,11 +56,12 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
    * Determines visibility status by checking visibility status of related categories.
    */
   public getClassificationsVisibilityStatus(props: { classificationIds: Id64Arg }): Observable<VisibilityStatus> {
-    return this.#props.idsCache.getAllContainedCategories(props.classificationIds).pipe(
+    return this.getTopMostContainedCategories(props.classificationIds).pipe(
       mergeMap((categories) =>
         this.getCategoriesVisibilityStatus({
           modelId: undefined,
           categoryIds: categories,
+          ignoreSubCategories: true,
         }),
       ),
       defaultIfEmpty(createVisibilityStatus("disabled")),
@@ -71,7 +74,7 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
    * Does this by changing visibility status of related categories.
    */
   public changeClassificationTablesVisibilityStatus(props: { classificationTableIds: Id64Arg; on: boolean }): Observable<void> {
-    return this.#props.idsCache.getAllContainedCategories(props.classificationTableIds).pipe(
+    return this.getTopMostContainedCategories(props.classificationTableIds).pipe(
       mergeMap((categories) =>
         this.changeCategoriesVisibilityStatus({
           modelId: undefined,
@@ -88,7 +91,7 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
    * Does this by changing visibility status of related categories.
    */
   public changeClassificationsVisibilityStatus(props: { classificationIds: Id64Arg; on: boolean }): Observable<void> {
-    return this.#props.idsCache.getAllContainedCategories(props.classificationIds).pipe(
+    return this.getTopMostContainedCategories(props.classificationIds).pipe(
       mergeMap((categories) =>
         this.changeCategoriesVisibilityStatus({
           modelId: undefined,
@@ -96,6 +99,16 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
           on: props.on,
         }),
       ),
+    );
+  }
+
+  /** Gets top most element categories contained in the given classification tables or classifications. */
+  private getTopMostContainedCategories(classificationOrTableIds: Id64Arg): Observable<CategoryId[]> {
+    return this.#props.idsCache.getAllTopMostElementCategories().pipe(
+      mergeMap((topMostCategories) => {
+        return this.#props.idsCache.getAllContainedCategories(classificationOrTableIds).pipe(filter((categoryId) => topMostCategories.has(categoryId)));
+      }),
+      toArray(),
     );
   }
 }

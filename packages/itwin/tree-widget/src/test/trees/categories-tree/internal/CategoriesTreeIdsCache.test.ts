@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { firstValueFrom, toArray } from "rxjs";
+import { firstValueFrom } from "rxjs";
 import {
   HierarchyCacheMode,
   initializeCore,
@@ -24,6 +24,7 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import { BaseIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
+import { collect } from "../../../../tree-widget-react/components/trees/common/internal/Rxjs.js";
 import { getClassesByView } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
 import { buildIModel } from "../../../IModelUtils.js";
 import { createIModelAccess } from "../../Common.js";
@@ -193,7 +194,7 @@ describe("CategoriesTreeIdsCache", () => {
       expect(
         await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] })),
       ).toEqual({
-        categories: [{ id: keys.category.id, subCategoryChildCount: 1, hasElements: true }],
+        categories: [{ id: keys.category.id, subCategoryChildCount: 1, isTopMostElementCategory: true, hasElements: true }],
         definitionContainers: [],
       });
     });
@@ -216,7 +217,7 @@ describe("CategoriesTreeIdsCache", () => {
           idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id], includeEmpty: true }),
         ),
       ).toEqual({
-        categories: [{ id: keys.category.id, subCategoryChildCount: 1, hasElements: false }],
+        categories: [{ id: keys.category.id, subCategoryChildCount: 1, isTopMostElementCategory: false, hasElements: false }],
         definitionContainers: [],
       });
     });
@@ -262,7 +263,7 @@ describe("CategoriesTreeIdsCache", () => {
       expect(
         await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] })),
       ).toEqual({
-        categories: [{ id: keys.category.id, subCategoryChildCount: 1, hasElements: true }],
+        categories: [{ id: keys.category.id, subCategoryChildCount: 1, isTopMostElementCategory: true, hasElements: true }],
         definitionContainers: [],
       });
     });
@@ -291,7 +292,7 @@ describe("CategoriesTreeIdsCache", () => {
       expect(
         await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] })),
       ).toEqual({
-        categories: [{ id: keys.directCategory.id, subCategoryChildCount: 1, hasElements: true }],
+        categories: [{ id: keys.directCategory.id, subCategoryChildCount: 1, isTopMostElementCategory: true, hasElements: true }],
         definitionContainers: [keys.definitionModelChild.id],
       });
     });
@@ -317,7 +318,7 @@ describe("CategoriesTreeIdsCache", () => {
       expect(
         await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionModelChild.id] })),
       ).toEqual({
-        categories: [{ id: keys.indirectCategory.id, subCategoryChildCount: 1, hasElements: true }],
+        categories: [{ id: keys.indirectCategory.id, subCategoryChildCount: 1, isTopMostElementCategory: true, hasElements: true }],
         definitionContainers: [],
       });
     });
@@ -337,29 +338,13 @@ describe("CategoriesTreeIdsCache", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-      expect(await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainer.id] }))).toEqual(new Set());
+      expect(await collect(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainer.id] }))).toEqual([]);
     });
 
-    it("returns empty list when definition container contains empty categories", async () => {
+    it("returns empty categories when definition container contains them", async () => {
       await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
           insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
-          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
-          const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
-          insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
-          return { definitionContainer };
-        }),
-      );
-      const { imodelConnection, ...keys } = buildIModelResult;
-      const imodelAccess = createIModelAccess(imodelConnection);
-      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
-      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-      expect(await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainer.id] }))).toEqual(new Set());
-    });
-
-    it("returns contained categories when definition container contains empty categories and includeEmptyCategories is true", async () => {
-      await using buildIModelResult = await buildIModel(async (imodel) =>
-        withEditTxn(imodel, (txn) => {
           const definitionContainer = insertDefinitionContainer({ txn, codeValue: "Test DefinitionContainer" });
           const definitionModel = insertSubModel({ txn, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
           const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory", modelId: definitionModel.id });
@@ -370,9 +355,14 @@ describe("CategoriesTreeIdsCache", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-      expect(
-        await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainer.id], includeEmptyCategories: true })),
-      ).toEqual(new Set([keys.category.id]));
+      expect(await collect(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainer.id] }))).toEqual([
+        {
+          hasElements: false,
+          id: keys.category.id,
+          isTopMostElementCategory: false,
+          subCategoryChildCount: 1,
+        },
+      ]);
     });
 
     it("returns indirectly contained categories when definition container contains definition container that has categories", async () => {
@@ -392,9 +382,14 @@ describe("CategoriesTreeIdsCache", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-      expect(await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainerRoot.id] }))).toEqual(
-        new Set([keys.category.id]),
-      );
+      expect(await collect(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainerRoot.id] }))).toEqual([
+        {
+          hasElements: true,
+          id: keys.category.id,
+          isTopMostElementCategory: true,
+          subCategoryChildCount: 1,
+        },
+      ]);
     });
 
     it("returns child categories when definition container contains categories", async () => {
@@ -412,9 +407,14 @@ describe("CategoriesTreeIdsCache", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-      expect(await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainer.id] }))).toEqual(
-        new Set([keys.category.id]),
-      );
+      expect(await collect(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainer.id] }))).toEqual([
+        {
+          hasElements: true,
+          id: keys.category.id,
+          isTopMostElementCategory: true,
+          subCategoryChildCount: 1,
+        },
+      ]);
     });
 
     it("returns direct and indirect categories when definition container contains categories and definition containers that contain categories", async () => {
@@ -438,9 +438,9 @@ describe("CategoriesTreeIdsCache", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-      const result = await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainerRoot.id] }));
+      const result = await collect(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainerRoot.id] }));
       const expectedResult = [keys.indirectCategory.id, keys.directCategory.id];
-      expect(expectedResult.every((id) => result.has(id))).toBe(true);
+      expect(expectedResult.every((id) => result.some(({ id: categoryId }) => categoryId === id))).toBe(true);
     });
   });
 
@@ -533,8 +533,8 @@ describe("CategoriesTreeIdsCache", () => {
     });
   });
 
-  describe("getCategoriesSearchPaths", () => {
-    it("returns empty list when category doesn't exist", async () => {
+  describe("getSearchPathsUpToRootCategory", () => {
+    it("returns no paths when category doesn't exist", async () => {
       await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
           const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
@@ -546,10 +546,10 @@ describe("CategoriesTreeIdsCache", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-      expect(await firstValueFrom(idsCache.getCategoriesSearchPaths({ categoryIds: "0x123", includePathsWithSubModels: false }))).toEqual([]);
+      expect(await collect(idsCache.getSearchPathsUpToRootCategory({ categoryId: "0x123" }))).toEqual([]);
     });
 
-    it("returns only category when only category exists", async () => {
+    it("returns empty list when category does not have definition container", async () => {
       await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
           const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
@@ -562,12 +562,10 @@ describe("CategoriesTreeIdsCache", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-      expect(await firstValueFrom(idsCache.getCategoriesSearchPaths({ categoryIds: keys.category.id, includePathsWithSubModels: false }))).toEqual([
-        keys.category,
-      ]);
+      expect(await collect(idsCache.getSearchPathsUpToRootCategory({ categoryId: keys.category.id }))).toEqual([[]]);
     });
 
-    it("returns category path when it exist under sub-model", async () => {
+    it("returns up to category path when it exist under sub-model", async () => {
       await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
         withEditTxn(imodel, (txn) => {
           const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
@@ -596,26 +594,10 @@ describe("CategoriesTreeIdsCache", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-      expect(
-        await firstValueFrom(idsCache.getCategoriesSearchPaths({ categoryIds: keys.category.id, includePathsWithSubModels: false }).pipe(toArray())),
-      ).toEqual([[keys.definitionContainer, keys.category]]);
-      expect(
-        (await firstValueFrom(idsCache.getCategoriesSearchPaths({ categoryIds: keys.category.id, includePathsWithSubModels: true }).pipe(toArray()))).sort(
-          (path1, path2) => path1.length - path2.length,
-        ),
-      ).toEqual([
-        [keys.definitionContainer, keys.category],
-        [
-          keys.definitionContainer,
-          keys.category,
-          { className: getClassesByView("3d").elementClass, id: keys.modeledElement.id },
-          { className: getClassesByView("3d").modelClass, id: keys.subModel.id },
-          keys.category,
-        ],
-      ]);
+      expect(await collect(idsCache.getSearchPathsUpToRootCategory({ categoryId: keys.category.id }))).toEqual([[keys.definitionContainer]]);
     });
 
-    it("returns path to category when definition container contains category", async () => {
+    it("returns path up to category when definition container contains category", async () => {
       await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
           const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
@@ -630,13 +612,10 @@ describe("CategoriesTreeIdsCache", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-      expect(await firstValueFrom(idsCache.getCategoriesSearchPaths({ categoryIds: keys.category.id, includePathsWithSubModels: false }))).toEqual([
-        keys.definitionContainer,
-        keys.category,
-      ]);
+      expect(await collect(idsCache.getSearchPathsUpToRootCategory({ categoryId: keys.category.id }))).toEqual([[keys.definitionContainer]]);
     });
 
-    it("returns path to category when definition container contains definition container that contains category", async () => {
+    it("returns path up to category when definition container contains definition container that contains category", async () => {
       await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
           const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
@@ -653,10 +632,8 @@ describe("CategoriesTreeIdsCache", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-      expect(await firstValueFrom(idsCache.getCategoriesSearchPaths({ categoryIds: keys.category.id, includePathsWithSubModels: false }))).toEqual([
-        keys.definitionContainerRoot,
-        keys.definitionContainerChild,
-        keys.category,
+      expect(await collect(idsCache.getSearchPathsUpToRootCategory({ categoryId: keys.category.id }))).toEqual([
+        [keys.definitionContainerRoot, keys.definitionContainerChild],
       ]);
     });
   });
@@ -962,7 +939,7 @@ describe("CategoriesTreeIdsCache", () => {
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories({ includeEmpty: true }))).toEqual({
-        categories: [{ id: keys.rootCategory.id, subCategoryChildCount: 1, hasElements: false }],
+        categories: [{ id: keys.rootCategory.id, subCategoryChildCount: 1, isTopMostElementCategory: false, hasElements: false }],
         definitionContainers: [keys.definitionContainer.id],
       });
     });
@@ -983,7 +960,7 @@ describe("CategoriesTreeIdsCache", () => {
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).toEqual({
-        categories: [{ id: keys.category.id, subCategoryChildCount: 1, hasElements: true }],
+        categories: [{ id: keys.category.id, subCategoryChildCount: 1, isTopMostElementCategory: true, hasElements: true }],
         definitionContainers: [],
       });
     });
@@ -1006,7 +983,7 @@ describe("CategoriesTreeIdsCache", () => {
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, type: "3d", elementClassName: getClassesByView("3d").elementClass });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).toEqual({
-        categories: [{ id: keys.category.id, subCategoryChildCount: 1, hasElements: true }],
+        categories: [{ id: keys.category.id, subCategoryChildCount: 1, isTopMostElementCategory: true, hasElements: true }],
         definitionContainers: [],
       });
     });
@@ -1088,8 +1065,8 @@ describe("CategoriesTreeIdsCache", () => {
       const result = await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories());
       const expectedResult = {
         categories: [
-          { id: keys.rootCategory1.id, subCategoryChildCount: 1, hasElements: true },
-          { id: keys.rootCategory2.id, subCategoryChildCount: 1, hasElements: true },
+          { id: keys.rootCategory1.id, subCategoryChildCount: 1, isTopMostElementCategory: true, hasElements: true },
+          { id: keys.rootCategory2.id, subCategoryChildCount: 1, isTopMostElementCategory: true, hasElements: true },
         ],
         definitionContainers: [keys.definitionContainerRoot.id, keys.definitionContainerRoot2.id],
       };
