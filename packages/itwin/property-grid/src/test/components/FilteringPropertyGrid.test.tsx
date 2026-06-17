@@ -8,7 +8,7 @@ import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { PropertyDataChangeEvent } from "@itwin/components-react";
 import {
   FilteringPropertyGrid,
-  NonNullValuesPropertyDataFilterer,
+  NonEmptyValuesPropertyDataFilterer,
   NoopPropertyDataFilterer,
 } from "../../property-grid-react/components/FilteringPropertyGrid.js";
 import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
@@ -91,9 +91,9 @@ describe("<FilteringPropertyGrid />", () => {
     expect(queryByText("Child Prop")).toBeNull();
   });
 
-  describe("with `NonNullValuesPropertyDataFilterer`", () => {
+  describe("with `NonEmptyValuesPropertyDataFilterer`", () => {
     it("filters out `null` primitive properties", async () => {
-      const filterer = new NonNullValuesPropertyDataFilterer();
+      const filterer = new NonEmptyValuesPropertyDataFilterer();
 
       const { getByText, queryByText } = render(<FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={provider} />);
 
@@ -101,8 +101,42 @@ describe("<FilteringPropertyGrid />", () => {
       expect(queryByText("Null Prop")).toBeNull();
     });
 
+    it("filters out empty string primitive properties", async () => {
+      const filterer = new NonEmptyValuesPropertyDataFilterer();
+      const dataProvider = {
+        onDataChanged: new PropertyDataChangeEvent(),
+        getData: async () => ({
+          categories: [
+            {
+              expand: true,
+              label: "Test Category",
+              name: "test-category",
+            },
+          ],
+          label: PropertyRecord.fromString("Test Instance"),
+          records: {
+            ["test-category"]: [
+              createPropertyRecord(
+                { valueFormat: PropertyValueFormat.Primitive, value: "Non-empty Value", displayValue: "Non-empty Value" },
+                { name: "test-prop1", displayLabel: "Non-empty String Prop" },
+              ),
+              createPropertyRecord(
+                { valueFormat: PropertyValueFormat.Primitive, value: "", displayValue: "" },
+                { name: "test-prop2", displayLabel: "Empty String Prop" },
+              ),
+            ],
+          },
+        }),
+      } as IPropertyDataProvider;
+
+      const { getByText, queryByText } = render(<FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={dataProvider} />);
+
+      await waitFor(() => getByText("Non-empty String Prop"));
+      expect(queryByText("Empty String Prop")).toBeNull();
+    });
+
     it("does not filter out `false` boolean primitive properties", async () => {
-      const filterer = new NonNullValuesPropertyDataFilterer();
+      const filterer = new NonEmptyValuesPropertyDataFilterer();
       const dataProvider = {
         onDataChanged: new PropertyDataChangeEvent(),
         getData: async () => ({
@@ -131,7 +165,7 @@ describe("<FilteringPropertyGrid />", () => {
     });
 
     it("does not filter out merged primitive properties", async () => {
-      const filterer = new NonNullValuesPropertyDataFilterer();
+      const filterer = new NonEmptyValuesPropertyDataFilterer();
       const mergedRecord = createPropertyRecord(
         { valueFormat: PropertyValueFormat.Primitive, value: undefined, displayValue: undefined },
         { name: "test-prop1", displayLabel: "Merged Prop" },
@@ -160,7 +194,7 @@ describe("<FilteringPropertyGrid />", () => {
     });
 
     it("filters out empty array properties", async () => {
-      const filterer = new NonNullValuesPropertyDataFilterer();
+      const filterer = new NonEmptyValuesPropertyDataFilterer();
       const dataProvider = {
         onDataChanged: new PropertyDataChangeEvent(),
         getData: async () => {
@@ -209,7 +243,7 @@ describe("<FilteringPropertyGrid />", () => {
     });
 
     it("filters out array properties with empty items", async () => {
-      const filterer = new NonNullValuesPropertyDataFilterer();
+      const filterer = new NonEmptyValuesPropertyDataFilterer();
       const dataProvider = {
         onDataChanged: new PropertyDataChangeEvent(),
         getData: async () => {
@@ -265,7 +299,7 @@ describe("<FilteringPropertyGrid />", () => {
     });
 
     it("filters out empty struct properties", async () => {
-      const filterer = new NonNullValuesPropertyDataFilterer();
+      const filterer = new NonEmptyValuesPropertyDataFilterer();
       const dataProvider = {
         onDataChanged: new PropertyDataChangeEvent(),
         getData: async () => {
@@ -310,7 +344,7 @@ describe("<FilteringPropertyGrid />", () => {
     });
 
     it("filters out struct properties with empty members", async () => {
-      const filterer = new NonNullValuesPropertyDataFilterer();
+      const filterer = new NonEmptyValuesPropertyDataFilterer();
       const dataProvider = {
         onDataChanged: new PropertyDataChangeEvent(),
         getData: async () => {
@@ -370,7 +404,7 @@ describe("<FilteringPropertyGrid />", () => {
     });
 
     it("re-renders when underlying data changes", async () => {
-      const filterer = new NonNullValuesPropertyDataFilterer();
+      const filterer = new NonEmptyValuesPropertyDataFilterer();
 
       const nullPropertyRecord = createPropertyRecord(
         { valueFormat: PropertyValueFormat.Primitive, value: undefined, displayValue: undefined },

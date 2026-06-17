@@ -58,10 +58,10 @@ export function PropertyGridSettingsMenuItem({ id, onClick, title, children }: P
 }
 
 /**
- * Props for `ShowHideNullValuesSettingsMenuItem`.
+ * Props for `ShowHideEmptyValuesSettingsMenuItem`.
  * @public
  */
-export interface ShowHideNullValuesSettingsMenuItemProps extends SettingsMenuItemProps {
+export interface ShowHideEmptyValuesSettingsMenuItemProps extends SettingsMenuItemProps {
   /** Specifies whether setting value should be persisted on change. */
   persist?: boolean;
 }
@@ -70,7 +70,7 @@ export interface ShowHideNullValuesSettingsMenuItemProps extends SettingsMenuIte
  * Renders `Show/Hide Empty Values` setting.
  * @public
  */
-export function ShowHideNullValuesSettingsMenuItem({ close, persist }: ShowHideNullValuesSettingsMenuItemProps) {
+export function ShowHideEmptyValuesSettingsMenuItem({ close, persist }: ShowHideEmptyValuesSettingsMenuItemProps) {
   const { showNullValues, setShowNullValues } = useNullValueSettingContext();
 
   const label = showNullValues ? PropertyGridManager.translate("settings.hide-null.label") : PropertyGridManager.translate("settings.show-null.label");
@@ -91,6 +91,20 @@ export function ShowHideNullValuesSettingsMenuItem({ close, persist }: ShowHideN
     </PropertyGridSettingsMenuItem>
   );
 }
+
+/**
+ * Props for `ShowHideNullValuesSettingsMenuItem`.
+ * @deprecated in 1.20. Use `ShowHideEmptyValuesSettingsMenuItemProps` instead.
+ * @public
+ */
+export type ShowHideNullValuesSettingsMenuItemProps = ShowHideEmptyValuesSettingsMenuItemProps;
+
+/**
+ * Renders `Show/Hide Empty Values` setting.
+ * @deprecated in 1.20. Use `ShowHideEmptyValuesSettingsMenuItem` instead.
+ * @public
+ */
+export const ShowHideNullValuesSettingsMenuItem = ShowHideEmptyValuesSettingsMenuItem;
 
 /**
  * Props for `SettingsDropdownMenu`.

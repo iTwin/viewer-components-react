@@ -115,10 +115,10 @@ export class NoopPropertyDataFilterer extends PropertyRecordDataFiltererBase {
 }
 
 /**
- * Filter that hides null property data.
+ * Filter that hides empty property data.
  * @internal
  */
-export class NonNullValuesPropertyDataFilterer extends PropertyRecordDataFiltererBase {
+export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFiltererBase {
   public get isActive() {
     return true;
   }
@@ -130,8 +130,9 @@ export class NonNullValuesPropertyDataFilterer extends PropertyRecordDataFiltere
       };
     }
 
-    // merged values are not null, so they should always match the filter
-    const hasValue = node.isMerged || node.value.value !== undefined;
+    // merged values are not empty (the value differs between instances), so they should always match the filter.
+    // empty string values are considered empty, but `false`/`0` are valid non-empty values.
+    const hasValue = node.isMerged || (node.value.value !== undefined && node.value.value !== "");
     return {
       filteredTypes: [FilteredType.Value],
       matchesFilter: hasValue,

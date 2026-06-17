@@ -1,6 +1,6 @@
 {
-  "type": "patch",
-  "comment": "Fix `ShowHideNullValuesSettingsMenuItem` incorrectly hiding boolean and merged properties.",
+  "type": "minor",
+  "comment": "Added `ShowHideEmptyValuesSettingsMenuItem` whose name matches the rendered `Show/Hide Empty Values` setting and deprecated `ShowHideNullValuesSettingsMenuItem` in favor of it. Also fixed the setting incorrectly hiding boolean and merged properties.",
   "packageName": "@itwin/property-grid-react",
   "email": "AzureDevOps@users.noreply.github.com",
   "dependentChangeType": "patch"

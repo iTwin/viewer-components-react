@@ -244,12 +244,18 @@ export interface SettingsMenuProps {
 }
 
 // @public
-export function ShowHideNullValuesSettingsMenuItem(input: ShowHideNullValuesSettingsMenuItemProps): JSX_2.Element;
+export function ShowHideEmptyValuesSettingsMenuItem(input: ShowHideEmptyValuesSettingsMenuItemProps): JSX_2.Element;
 
 // @public
-export interface ShowHideNullValuesSettingsMenuItemProps extends SettingsMenuItemProps {
+export interface ShowHideEmptyValuesSettingsMenuItemProps extends SettingsMenuItemProps {
     persist?: boolean;
 }
+
+// @public @deprecated
+export const ShowHideNullValuesSettingsMenuItem: typeof ShowHideEmptyValuesSettingsMenuItem;
+
+// @public @deprecated
+export type ShowHideNullValuesSettingsMenuItemProps = ShowHideEmptyValuesSettingsMenuItemProps;
 
 // @public
 export interface SingleElementDataProviderProps extends DataProviderProps {

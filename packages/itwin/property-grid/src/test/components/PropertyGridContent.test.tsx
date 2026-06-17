@@ -8,7 +8,7 @@ import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { PropertyDataChangeEvent } from "@itwin/components-react";
 import { KeySet } from "@itwin/presentation-common";
 import { PropertyGridContent } from "../../property-grid-react/components/PropertyGridContent.js";
-import { PropertyGridSettingsMenuItem, ShowHideNullValuesSettingsMenuItem } from "../../property-grid-react/components/SettingsDropdownMenu.js";
+import { PropertyGridSettingsMenuItem, ShowHideEmptyValuesSettingsMenuItem } from "../../property-grid-react/components/SettingsDropdownMenu.js";
 import { NullValueSettingContext } from "../../property-grid-react/hooks/UseNullValuesSetting.js";
 import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTelemetryContext.js";
 import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
@@ -125,7 +125,7 @@ describe("<PropertyGridContent />", () => {
     const provider = createProvider();
 
     const { getByText, getByRole, queryByText, user } = renderWithContext(
-      <PropertyGridContent dataProvider={provider} imodel={imodel} settingsMenuItems={[(props) => <ShowHideNullValuesSettingsMenuItem {...props} />]} />,
+      <PropertyGridContent dataProvider={provider} imodel={imodel} settingsMenuItems={[(props) => <ShowHideEmptyValuesSettingsMenuItem {...props} />]} />,
     );
 
     await waitFor(() => {

@@ -19,7 +19,7 @@ import {
   CopyPropertyTextContextMenuItem,
   IModelAppUserPreferencesStorage,
   RemoveFavoritePropertyContextMenuItem,
-  ShowHideNullValuesSettingsMenuItem,
+  ShowHideEmptyValuesSettingsMenuItem,
 } from "@itwin/property-grid-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_END__
@@ -78,7 +78,7 @@ describe("Property grid", () => {
                 // the list populates the settings menu
                 settingsMenuItems: [
                   // allows hiding properties without values
-                  (props) => <ShowHideNullValuesSettingsMenuItem {...props} persist={true} />,
+                  (props) => <ShowHideEmptyValuesSettingsMenuItem {...props} persist={true} />,
                 ],
 
                 // supply an optional custom storage for user preferences, e.g. the show/hide null values used above

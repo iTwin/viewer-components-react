@@ -30,7 +30,11 @@ export {
   SettingsMenuProps,
   PropertyGridSettingsMenuItemProps,
   PropertyGridSettingsMenuItem,
+  ShowHideEmptyValuesSettingsMenuItemProps,
+  ShowHideEmptyValuesSettingsMenuItem,
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   ShowHideNullValuesSettingsMenuItemProps,
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   ShowHideNullValuesSettingsMenuItem,
 } from "./property-grid-react/components/SettingsDropdownMenu.js";
 
