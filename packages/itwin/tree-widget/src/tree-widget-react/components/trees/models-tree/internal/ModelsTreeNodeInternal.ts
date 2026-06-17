@@ -34,6 +34,8 @@ export namespace ModelsTreeNodeInternal {
     extendedData: { [key: string]: any };
   } => ModelsTreeNode.isCategoryNode(node);
 
+  export const isRawCategoryNode = ModelsTreeNode.isCategoryNode;
+
   export const isElementNode = (
     node: Pick<HierarchyNode, "extendedData">,
   ): node is Omit<NonGroupingHierarchyNode, "extendedData"> & { key: InstancesNodeKey } & {

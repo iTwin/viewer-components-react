@@ -282,12 +282,7 @@ type ElementsAccessor = (setType: SetType) => Observable<AlwaysAndNeverDrawnElem
         mergeMap((categoryId) =>
           this.#props.baseIdsCache.getModels({ categoryId }).pipe(
             filter(({ categoryIsOfTopMostElement, isSubModel }) => categoryIsOfTopMostElement && !isSubModel),
-            map(({ id: modelId }) => {
-              return {
-                modelId,
-                categoryId,
-              };
-            }),
+            map(({ id: modelId }) => ({ modelId, categoryId })),
           ),
         ),
         shareReplay({ refCount: true }),
@@ -770,9 +765,7 @@ type ElementsAccessor = (setType: SetType) => Observable<AlwaysAndNeverDrawnElem
         mergeMap((categoryId) =>
           this.#props.baseIdsCache.getModels({ categoryId }).pipe(
             filter(({ categoryIsOfTopMostElement, isSubModel }) => categoryIsOfTopMostElement && !isSubModel),
-            map(({ id }) => {
-              return { modelId: id, categoryId };
-            }),
+            map(({ id }) => ({ modelId: id, categoryId })),
           ),
         ),
         reduce((acc, { modelId, categoryId }) => {

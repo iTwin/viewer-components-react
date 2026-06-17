@@ -2323,8 +2323,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             },
             {
               name: "modeled element, its model and category have partial visibility when its sub-model element's category display is turned on",
-              getTargetNode: (ids: IModelWithSubModelIds) =>
-                createCategoryHierarchyNode({ modelIds: [ids.modeledElement.id], id: ids.subModelCategory!.id, hasChildren: true }),
+              getTargetNode: (ids: IModelWithSubModelIds) => createCategoryHierarchyNode({ id: ids.subModelCategory!.id, modelIds: [ids.modeledElement.id] }),
               // prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
                 [ids.subModelCategory!.id]: "hidden",
