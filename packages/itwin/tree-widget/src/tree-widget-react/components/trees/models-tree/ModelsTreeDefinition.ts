@@ -724,6 +724,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
               extendedData: { modelIds: { selector: createIdsSelector([parentModelId]) } },
             })}
           FROM ${categoryInstanceFilterClauses.from} this
+          ${categoryInstanceFilterClauses.joins ? `${categoryInstanceFilterClauses.joins}` : ""}
           WHERE
             this.ECInstanceId <> ${parentCategoryId}
             AND this.ECInstanceId IN (
@@ -732,7 +733,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
               JOIN IdSet(?) parentIdSet ON ce.Parent.Id = parentIdSet.id
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             )
-            ${categoryInstanceFilterClauses.joins ? `${categoryInstanceFilterClauses.joins}` : ""}
             ${categoryInstanceFilterClauses.where ? `AND ${categoryInstanceFilterClauses.where}` : ""}
         `,
           bindings: [{ type: "idset", value: elementIds }],
