@@ -62,6 +62,7 @@ interface SubjectNode extends BaseSearchResultsTreeNode<Node> {
 
 interface ModelNode extends BaseSearchResultsTreeNode<Node> {
   type: "model";
+  parentCategoryId?: Id64String;
 }
 interface CategoryNode extends BaseSearchResultsTreeNode<Node> {
   type: "category";
@@ -288,7 +289,23 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<Proc
     isSearchTarget: boolean;
     parent: RawNode | SearchResultsTreeRootNode<RawNode>;
   }): RawNode {
-    if (type === "subject" || type === "model") {
+    if (type === "subject") {
+      return {
+        id,
+        isSearchTarget,
+        type,
+      };
+    }
+    if (type === "model") {
+      if ("type" in parent && parent.type === "element") {
+        // This is a sub-model
+        return {
+          type,
+          parentCategoryId: parent.categoryId,
+          id,
+          isSearchTarget: false,
+        };
+      }
       return {
         id,
         isSearchTarget,
@@ -321,7 +338,8 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<Proc
       };
     }
 
-    if ("type" in parent && parent.type === "category") {
+    assert("type" in parent, "element nodes must have a parent");
+    if (parent.type === "category") {
       return {
         id,
         isSearchTarget,
@@ -331,24 +349,32 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<Proc
         potentialParentElementsPath: parent.potentialParentElementsPath,
       };
     }
-
-    if ("type" in parent && parent.type === "element") {
+    if (parent.type === "model") {
+      // In this case parent is a sub-model
       return {
         id,
         isSearchTarget,
         type,
-        potentialModelId: parent.potentialModelId,
-        categoryId: parent.categoryId,
-        potentialParentElementsPath: ParentElementsPath.appendToPath({
-          path: parent.potentialParentElementsPath,
-          // Append a single id, there are assertions that check this
-          ids: parent.id,
-          categoryId: parent.categoryId,
-        }),
+        potentialModelId: parent.id,
+        categoryId: parent.parentCategoryId!,
+        potentialParentElementsPath: [],
       };
     }
 
-    throw new Error("Invalid parent node type");
+    assert(parent.type === "element", "element nodes must have a parent of type 'category' | 'model' or 'element'");
+    return {
+      id,
+      isSearchTarget,
+      type,
+      potentialModelId: parent.potentialModelId,
+      categoryId: parent.categoryId,
+      potentialParentElementsPath: ParentElementsPath.appendToPath({
+        path: parent.potentialParentElementsPath,
+        // Append a single id, there are assertions that check this
+        ids: parent.id,
+        categoryId: parent.categoryId,
+      }),
+    };
   }
 
   public async getType(className: EC.FullClassName): Promise<Node["type"]> {
