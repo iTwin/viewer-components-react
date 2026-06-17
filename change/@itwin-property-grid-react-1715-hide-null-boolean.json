@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fix `ShowHideNullValuesSettingsMenuItem` incorrectly hiding boolean and merged properties.",
+  "packageName": "@itwin/property-grid-react",
+  "email": "AzureDevOps@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

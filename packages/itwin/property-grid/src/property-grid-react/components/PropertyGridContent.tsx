@@ -23,7 +23,7 @@ import { useLoadedInstanceInfo } from "../hooks/UseInstanceInfo.js";
 import { useNullValueSettingContext } from "../hooks/UseNullValuesSetting.js";
 import { useResizeObserver } from "../hooks/UseResizeObserver.js";
 import { useTelemetryContext } from "../hooks/UseTelemetryContext.js";
-import { FilteringPropertyGrid, NonEmptyValuesPropertyDataFilterer } from "./FilteringPropertyGrid.js";
+import { FilteringPropertyGrid, NonNullValuesPropertyDataFilterer } from "./FilteringPropertyGrid.js";
 import { Header } from "./Header.js";
 import { SettingsDropdownMenu } from "./SettingsDropdownMenu.js";
 
@@ -192,7 +192,7 @@ interface UseFiltererProps {
 
 function useFilterer({ showNullValues, filterText }: UseFiltererProps) {
   const [defaultFilterers] = useState(() => ({
-    nonEmpty: new NonEmptyValuesPropertyDataFilterer(),
+    nonNull: new NonNullValuesPropertyDataFilterer(),
   }));
 
   const compositeFilterer = useMemo(() => {
@@ -203,11 +203,11 @@ function useFilterer({ showNullValues, filterText }: UseFiltererProps) {
     const textFilterer = new CompositePropertyDataFilterer(valueAndRecordFilterer, CompositeFilterType.Or, categoryFilterer);
 
     if (!showNullValues) {
-      return new CompositePropertyDataFilterer(textFilterer, CompositeFilterType.And, defaultFilterers.nonEmpty);
+      return new CompositePropertyDataFilterer(textFilterer, CompositeFilterType.And, defaultFilterers.nonNull);
     }
 
     return textFilterer;
-  }, [defaultFilterers.nonEmpty, filterText, showNullValues]);
+  }, [defaultFilterers.nonNull, filterText, showNullValues]);
 
   return compositeFilterer;
 }

@@ -115,10 +115,10 @@ export class NoopPropertyDataFilterer extends PropertyRecordDataFiltererBase {
 }
 
 /**
- * Filter that hides empty property data.
+ * Filter that hides null property data.
  * @internal
  */
-export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFiltererBase {
+export class NonNullValuesPropertyDataFilterer extends PropertyRecordDataFiltererBase {
   public get isActive() {
     return true;
   }
@@ -130,10 +130,12 @@ export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFilter
       };
     }
 
+    // merged values are not null, so they should always match the filter
+    const hasValue = node.isMerged || node.value.value !== undefined;
     return {
       filteredTypes: [FilteredType.Value],
-      matchesFilter: !!node.value.displayValue,
-      matchesCount: node.value.displayValue ? 1 : 0,
+      matchesFilter: hasValue,
+      matchesCount: hasValue ? 1 : 0,
     };
   }
 }
