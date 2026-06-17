@@ -43,7 +43,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
    * Determines visibility status by checking visibility status of related categories.
    */
   public getDefinitionContainersVisibilityStatus(props: { definitionContainerIds: Id64Arg }): Observable<VisibilityStatus> {
-    return this.getCategorizedContainedCategories(props.definitionContainerIds).pipe(
+    return this.getGroupedContainedCategories(props.definitionContainerIds).pipe(
       mergeMap(({ emptyCategories, topMostElementCategories }) => {
         return merge(
           from(emptyCategories).pipe(
@@ -95,7 +95,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
    * Does this by changing visibility status of related categories.
    */
   public changeDefinitionContainersVisibilityStatus(props: { definitionContainerIds: Id64Arg; on: boolean }): Observable<void> {
-    return this.getCategorizedContainedCategories(props.definitionContainerIds).pipe(
+    return this.getGroupedContainedCategories(props.definitionContainerIds).pipe(
       mergeMap(({ emptyCategories, topMostElementCategories }) => {
         if (emptyCategories.length > 0) {
           this.#props.viewport.changeCategoryDisplay({ categoryIds: emptyCategories, display: props.on });
@@ -148,7 +148,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
   }
 
   /** Gets categories contained in the given definition containers, split into empty and top most element categories. */
-  private getCategorizedContainedCategories(
+  private getGroupedContainedCategories(
     definitionContainerIds: Id64Arg,
   ): Observable<{ emptyCategories: Id64String[]; topMostElementCategories: Id64String[] }> {
     return this.#props.idsCache.getAllContainedCategories({ definitionContainerIds }).pipe(
