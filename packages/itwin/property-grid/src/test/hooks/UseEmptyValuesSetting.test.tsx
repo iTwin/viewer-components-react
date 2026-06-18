@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { useEmptyValuesSetting } from "../../property-grid-react/hooks/UseEmptyValuesSetting.js";
+import { SHOW_EMPTY_KEY, useEmptyValuesSetting } from "../../property-grid-react/hooks/UseEmptyValuesSetting.js";
 import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTelemetryContext.js";
 import { PreferencesContextProvider } from "../../property-grid-react/PropertyGridPreferencesContext.js";
 import { createFunctionStub, render, waitFor } from "../TestUtils.js";
@@ -79,7 +79,7 @@ describe("useEmptyValuesSetting", () => {
       await user.click(button);
 
       await waitFor(() => getByRole("button", { name: "Hide Empty Values" }));
-      expect(storage.set).toHaveBeenCalledWith("showEmptyValues", JSON.stringify(true));
+      expect(storage.set).toHaveBeenCalledWith(SHOW_EMPTY_KEY, JSON.stringify(true));
     });
   });
 
