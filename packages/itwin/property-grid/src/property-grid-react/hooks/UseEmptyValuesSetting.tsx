@@ -75,6 +75,12 @@ function useEmptyValuesStorage() {
     if (serializedValue !== undefined) {
       return JSON.parse(serializedValue);
     }
+    // Backward-compatibility: prior versions persisted this setting under "showNullValues".
+    const legacySerializedValue = await storage.get("showNullValues");
+    if (legacySerializedValue !== undefined) {
+      await storage.set(SHOW_EMPTY_KEY, legacySerializedValue);
+      return JSON.parse(legacySerializedValue);
+    }
     // default to `true`
     return true;
   }, [storage]);
