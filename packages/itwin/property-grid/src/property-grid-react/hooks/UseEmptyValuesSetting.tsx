@@ -65,7 +65,7 @@ export function useEmptyValuesSetting() {
 }
 
 /** @internal */
-export const SHOW_EMPTY_KEY = "showEmptyValues";
+export const SHOW_EMPTY_KEY = "@itwin/property-grid-react/showEmptyValues";
 
 function useEmptyValuesStorage() {
   const { storage } = usePreferencesContext();
