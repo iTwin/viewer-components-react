@@ -9,9 +9,9 @@ import { CLASS_NAME_Category, CLASS_NAME_Model, CLASS_NAME_Subject } from "../..
 import { getOrCreate, ParentElementsPath } from "../../../common/internal/Utils.js";
 import {
   addElementToInternalSearchTargets,
-  convertInternalSearchTargetCategories,
-  convertInternalSearchTargetElements,
   createSearchResultsTree,
+  flattenInternalSearchTargetCategories,
+  flattenInternalSearchTargetElements,
   SearchResultsNodesHandler,
 } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 
@@ -211,8 +211,8 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<Proc
     }
 
     return {
-      categories: searchTargets.categories ? convertInternalSearchTargetCategories(searchTargets.categories) : undefined,
-      elements: searchTargets.elements ? convertInternalSearchTargetElements(searchTargets.elements) : undefined,
+      categories: searchTargets.categories ? flattenInternalSearchTargetCategories(searchTargets.categories) : undefined,
+      elements: searchTargets.elements ? flattenInternalSearchTargetElements(searchTargets.elements) : undefined,
       modelIds: searchTargets.modelIds,
       subjectIds: searchTargets.subjectIds,
     };

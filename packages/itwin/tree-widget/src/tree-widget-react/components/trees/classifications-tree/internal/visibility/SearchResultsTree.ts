@@ -9,8 +9,8 @@ import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable } from "../..
 import { ParentElementsPath } from "../../../common/internal/Utils.js";
 import {
   addElementToInternalSearchTargets,
-  convertInternalSearchTargetElements,
   createSearchResultsTree,
+  flattenInternalSearchTargetElements,
   SearchResultsNodesHandler,
 } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 
@@ -165,7 +165,7 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
     return {
       classificationTableIds: searchTargets.classificationTableIds,
       classificationIds: searchTargets.classificationIds,
-      elements: searchTargets.elements ? convertInternalSearchTargetElements(searchTargets.elements) : undefined,
+      elements: searchTargets.elements ? flattenInternalSearchTargetElements(searchTargets.elements) : undefined,
     };
   }
 

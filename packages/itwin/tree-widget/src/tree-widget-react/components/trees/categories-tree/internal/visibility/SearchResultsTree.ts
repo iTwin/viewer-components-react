@@ -9,9 +9,9 @@ import { CLASS_NAME_SubCategory } from "../../../common/internal/ClassNameDefini
 import { getOrCreate, ParentElementsPath } from "../../../common/internal/Utils.js";
 import {
   addElementToInternalSearchTargets,
-  convertInternalSearchTargetCategories,
-  convertInternalSearchTargetElements,
   createSearchResultsTree,
+  flattenInternalSearchTargetCategories,
+  flattenInternalSearchTargetElements,
   SearchResultsNodesHandler,
 } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 
@@ -242,8 +242,8 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
       return undefined;
     }
     return {
-      categories: searchTargets.categories ? convertInternalSearchTargetCategories(searchTargets.categories) : undefined,
-      elements: searchTargets.elements ? convertInternalSearchTargetElements(searchTargets.elements) : undefined,
+      categories: searchTargets.categories ? flattenInternalSearchTargetCategories(searchTargets.categories) : undefined,
+      elements: searchTargets.elements ? flattenInternalSearchTargetElements(searchTargets.elements) : undefined,
       definitionContainerIds: searchTargets.definitionContainerIds,
       subCategories: searchTargets.subCategories
         ? [...searchTargets.subCategories.entries()].map(([categoryId, subCategoryIds]) => {

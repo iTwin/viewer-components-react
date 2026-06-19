@@ -256,7 +256,7 @@ export interface SearchTargetElementEntry {
  * Converts the internal tree-structured element search targets into a flat array.
  * @internal
  */
-export function convertInternalSearchTargetElements(internalSearchTargetElements: InternalSearchTargetElements): Array<SearchTargetElementEntry> {
+export function flattenInternalSearchTargetElements(internalSearchTargetElements: InternalSearchTargetElements): Array<SearchTargetElementEntry> {
   const result: Array<SearchTargetElementEntry> = [];
   for (const [modelId, modelEntry] of internalSearchTargetElements) {
     for (const { parentElementsPath, elements } of modelEntry.values()) {
@@ -344,7 +344,7 @@ export interface SearchTargetCategoryEntry<TModelId extends Id64String | undefin
  * Converts internal category search targets into a flat array.
  * @internal
  */
-export function convertInternalSearchTargetCategories<TModelId extends Id64String | undefined>(
+export function flattenInternalSearchTargetCategories<TModelId extends Id64String | undefined>(
   internalSearchTargetCategories: InternalSearchTargetCategories<TModelId>,
 ): Array<SearchTargetCategoryEntry<TModelId>> {
   const result: Array<SearchTargetCategoryEntry<TModelId>> = [];
