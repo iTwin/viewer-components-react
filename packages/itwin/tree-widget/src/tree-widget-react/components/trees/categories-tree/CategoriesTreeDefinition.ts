@@ -166,7 +166,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     if (CategoriesTreeNodeInternal.isElementClassGroupingNode(parentNode) || CategoriesTreeNodeInternal.isCategoryNode(parentNode)) {
       return parentNode.extendedData.parentElementsPath;
     }
-    throw new Error("Expected node's parent to be category, element, or class grouping node");
+    throw new Error("Expected node's parent to be category, or class grouping node");
   }
 
   private assignParentElementsPath({ node, parentNode }: Pick<Props<NodePostProcessor>, "node" | "parentNode">): ProcessedHierarchyNode {
