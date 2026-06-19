@@ -2,6 +2,29 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Fri, 19 Jun 2026 07:57:27 GMT",
+      "version": "1.20.0",
+      "tag": "@itwin/property-grid-react_v1.20.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "AzureDevOps@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "39a5632ba67358bce575729253de80bba996904b",
+            "comment": "Downgrade missing `IModelApp.userPreferences` log from error to warning and deduplicate"
+          }
+        ],
+        "minor": [
+          {
+            "author": "AzureDevOps@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "6a9a3b95dc7ef5969647cb035562401d1d8b89f1",
+            "comment": "Added `ShowHideEmptyValuesSettingsMenuItem` and `EmptyValuesSettingContext` whose names match the rendered `Show/Hide Empty Values` setting and deprecated `ShowHideNullValuesSettingsMenuItem` and `NullValueSettingContext` in favor of them. Also fixed the setting incorrectly hiding boolean and merged properties."
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 01 Jun 2026 13:08:04 GMT",
       "version": "1.19.9",
       "tag": "@itwin/property-grid-react_v1.19.9",
