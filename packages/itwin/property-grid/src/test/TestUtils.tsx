@@ -20,14 +20,22 @@ import type { SelectionStorage, StorageSelectionChangesListener } from "@itwin/u
 import type { RenderHookOptions, RenderHookResult, RenderOptions, RenderResult } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
 
-export function createPropertyRecord(value: PropertyValue, description: Partial<PropertyDescription>) {
+export function createPropertyRecord(
+  value: PropertyValue,
+  description: Partial<PropertyDescription>,
+  props?: Pick<PropertyRecord, "isMerged">,
+): PropertyRecord {
   const propertyDescription: PropertyDescription = {
     displayLabel: "Test Property",
     name: "test-prop",
     typename: "string",
     ...description,
   };
-  return new PropertyRecord(value, propertyDescription);
+  const record = new PropertyRecord(value, propertyDescription);
+  if (props?.isMerged !== undefined) {
+    record.isMerged = props.isMerged;
+  }
+  return record;
 }
 
 export function stubSelectionStorage(): Mocked<SelectionStorage> & { selectionChangeEvent: BeEvent<StorageSelectionChangesListener> } {

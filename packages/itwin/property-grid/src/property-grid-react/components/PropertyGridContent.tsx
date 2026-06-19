@@ -19,8 +19,8 @@ import {
 import { Text } from "@itwin/itwinui-react";
 import { useActionButtons } from "../hooks/UseActionButtons.js";
 import { useContextMenu } from "../hooks/UseContextMenu.js";
+import { useEmptyValuesSettingContext } from "../hooks/UseEmptyValuesSetting.js";
 import { useLoadedInstanceInfo } from "../hooks/UseInstanceInfo.js";
-import { useNullValueSettingContext } from "../hooks/UseNullValuesSetting.js";
 import { useResizeObserver } from "../hooks/UseResizeObserver.js";
 import { useTelemetryContext } from "../hooks/UseTelemetryContext.js";
 import { FilteringPropertyGrid, NonEmptyValuesPropertyDataFilterer } from "./FilteringPropertyGrid.js";
@@ -105,9 +105,9 @@ export function PropertyGridContent({
   });
 
   const [filterText, setFilterText] = useState<string>("");
-  const { showNullValues } = useNullValueSettingContext();
+  const { showEmptyValues } = useEmptyValuesSettingContext();
   const { onFeatureUsed } = useTelemetryContext();
-  const filterer = useFilterer({ showNullValues, filterText });
+  const filterer = useFilterer({ showEmptyValues, filterText });
   const { ref, height, width } = useResizeObserver();
 
   const reportFiltering = useDebounced(() => onFeatureUsed("filter-properties"), 1000);
@@ -186,11 +186,11 @@ function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick, 
 }
 
 interface UseFiltererProps {
-  showNullValues: boolean;
+  showEmptyValues: boolean;
   filterText: string;
 }
 
-function useFilterer({ showNullValues, filterText }: UseFiltererProps) {
+function useFilterer({ showEmptyValues, filterText }: UseFiltererProps) {
   const [defaultFilterers] = useState(() => ({
     nonEmpty: new NonEmptyValuesPropertyDataFilterer(),
   }));
@@ -202,12 +202,12 @@ function useFilterer({ showNullValues, filterText }: UseFiltererProps) {
     const valueAndRecordFilterer = new CompositePropertyDataFilterer(valueFilterer, CompositeFilterType.Or, labelFilterer);
     const textFilterer = new CompositePropertyDataFilterer(valueAndRecordFilterer, CompositeFilterType.Or, categoryFilterer);
 
-    if (!showNullValues) {
+    if (!showEmptyValues) {
       return new CompositePropertyDataFilterer(textFilterer, CompositeFilterType.And, defaultFilterers.nonEmpty);
     }
 
     return textFilterer;
-  }, [defaultFilterers.nonEmpty, filterText, showNullValues]);
+  }, [defaultFilterers.nonEmpty, filterText, showEmptyValues]);
 
   return compositeFilterer;
 }

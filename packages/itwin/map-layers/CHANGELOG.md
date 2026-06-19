@@ -1,8 +1,16 @@
 # Change Log - @itwin/map-layers
 
-<!-- This log was last generated on Thu, 07 May 2026 07:30:42 GMT and should not be manually modified. -->
+<!-- This log was last generated on Mon, 01 Jun 2026 13:08:04 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 7.0.1
+
+Mon, 01 Jun 2026 13:08:04 GMT
+
+### Patches
+
+- Add key prop to Select component for responsive dropdown menu on disabled state change ([#1698](https://github.com/iTwin/viewer-components-react/pull/1698))
 
 ## 7.0.0
 

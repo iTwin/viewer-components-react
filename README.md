@@ -30,18 +30,6 @@ Each one has it's own folder and README describing the package.
 | @itwin/property-grid-react | [property-grid](./packages/itwin/property-grid) | [changelog](./packages/itwin/property-grid/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40itwin%2Fproperty-grid-react.svg)](https://badge.fury.io/js/%40itwin%2Fproperty-grid-react) |
 | @itwin/ec3-widget-react    | [ec3-widget](./packages/itwin/ec3-widget)       | [changelog](./packages/itwin/ec3-widget/CHANGELOG.md)    | [![npm version](https://badge.fury.io/js/%40itwin%2Fec3-widget-react.svg)](https://badge.fury.io/js/%40itwin%2Fec3-widget-react)       |
 
-## Archived
-
-The following packages have been deprecated and will no longer be maintained:
-
-| Name                             | Folder                                                      | Changelog                                                       | Version                                                                                                                                            | Replacement                                                                              |
-| -------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| @bentley/imodel-select-react     | [imodel-select](./packages/archive/imodel-select/)          | [changelog](./packages/archive/imodel-select/CHANGELOG.md)      | [![npm version](https://badge.fury.io/js/%40bentley%2Fimodel-select-react.svg)](https://badge.fury.io/js/%40bentley%2Fimodel-select-react)         | [@itwin/imodel-browser-react](https://www.npmjs.com/package/@itwin/imodel-browser-react) |
-| @bentley/markup-frontstage-react | [markup-frontstage](./packages/archive/markup-frontstage/)  | [changelog](./packages/archive/markup-frontstage/CHANGELOG.md)  | [![npm version](https://badge.fury.io/js/%40bentley%2Fmarkup-frontstage-react.svg)](https://badge.fury.io/js/%40bentley%2Fmarkup-frontstage-react) | N/A                                                                                      |
-| @itwin/infrastructure-iot-react  | [infrastructure-iot](./packages/archive/infrastructure-iot) | [changelog](./packages/archive/infrastructure-iot/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40itwin%2Finfrastructure-iot-react.svg)](https://badge.fury.io/js/%40itwin%2Finfrastructure-iot-react)   | N/A                                                                                      |
-| @itwin/imodel-react-hooks        | [imodel-react-hooks](./packages/archive/imodel-react-hooks) | [changelog](./packages/archive/imodel-react-hooks/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40itwin%2Fimodel-react-hooks.svg)](https://badge.fury.io/js/%40itwin%2Fimodel-react-hooks)               | N/A                                                                                      |
-| @itwin/breakdown-trees-react     | [breakdown-trees](./packages/archive/breakdown-trees)       | [changelog](./packages/archive/breakdown-trees/CHANGELOG.md)    | [![npm version](https://badge.fury.io/js/%40itwin%2Fbreakdown-trees-react.svg)](https://badge.fury.io/js/%40itwin%2Fbreakdown-trees-react)         | N/A                                                                                      |
-
 ## Adding a new "project"
 
 Please refer to the [section](CONTRIBUTING.md#adding-a-new-project) in the contributing guide.

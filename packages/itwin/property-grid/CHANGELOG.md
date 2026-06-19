@@ -1,8 +1,28 @@
 # Change Log - @itwin/property-grid-react
 
-<!-- This log was last generated on Mon, 18 May 2026 18:26:36 GMT and should not be manually modified. -->
+<!-- This log was last generated on Fri, 19 Jun 2026 07:57:27 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 1.20.0
+
+Fri, 19 Jun 2026 07:57:27 GMT
+
+### Minor changes
+
+- Added `ShowHideEmptyValuesSettingsMenuItem` and `EmptyValuesSettingContext` whose names match the rendered `Show/Hide Empty Values` setting and deprecated `ShowHideNullValuesSettingsMenuItem` and `NullValueSettingContext` in favor of them. Also fixed the setting incorrectly hiding boolean and merged properties. ([#1724](https://github.com/iTwin/viewer-components-react/pull/1724))
+
+### Patches
+
+- Downgrade missing `IModelApp.userPreferences` log from error to warning and deduplicate ([#1718](https://github.com/iTwin/viewer-components-react/pull/1718))
+
+## 1.19.9
+
+Mon, 01 Jun 2026 13:08:04 GMT
+
+### Patches
+
+- Update prop types to use `type` instead of `interface` when building types on top of types coming from dependencies. ([#1685](https://github.com/iTwin/viewer-components-react/pull/1685))
 
 ## 1.19.8
 
