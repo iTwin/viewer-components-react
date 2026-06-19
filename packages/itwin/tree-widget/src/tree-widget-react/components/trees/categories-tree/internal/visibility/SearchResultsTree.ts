@@ -8,10 +8,9 @@ import { assert } from "@itwin/core-bentley";
 import { CLASS_NAME_SubCategory } from "../../../common/internal/ClassNameDefinitions.js";
 import { getOrCreate, ParentElementsPath } from "../../../common/internal/Utils.js";
 import {
-  addElementToInternalSearchTargets,
   createSearchResultsTree,
-  flattenInternalSearchTargetCategories,
-  flattenInternalSearchTargetElements,
+  InternalSearchTargetCategories,
+  InternalSearchTargetElements,
   SearchResultsNodesHandler,
 } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 
@@ -21,8 +20,6 @@ import type { EC, ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../../common/internal/Types.js";
 import type {
   BaseSearchResultsTreeNode,
-  InternalSearchTargetCategories,
-  InternalSearchTargetElements,
   SearchResultsTree,
   SearchResultsTreeNodeChildren,
   SearchResultsTreeRootNode,
@@ -242,8 +239,8 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
       return undefined;
     }
     return {
-      categories: searchTargets.categories ? flattenInternalSearchTargetCategories(searchTargets.categories) : undefined,
-      elements: searchTargets.elements ? flattenInternalSearchTargetElements(searchTargets.elements) : undefined,
+      categories: searchTargets.categories ? InternalSearchTargetCategories.flatten(searchTargets.categories) : undefined,
+      elements: searchTargets.elements ? InternalSearchTargetElements.flatten(searchTargets.elements) : undefined,
       definitionContainerIds: searchTargets.definitionContainerIds,
       subCategories: searchTargets.subCategories
         ? [...searchTargets.subCategories.entries()].map(([categoryId, subCategoryIds]) => {
@@ -319,7 +316,7 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
         // Internal search target elements need to have path saved in some way.
         // For this, a tree structure is used, where keys are stringified identifiers of parent nodes depending on the hierarchy.
         internalSearchTargets.elements ??= new Map();
-        addElementToInternalSearchTargets(internalSearchTargets.elements, node);
+        InternalSearchTargetElements.addElement(internalSearchTargets.elements, node);
       }
     }
   }

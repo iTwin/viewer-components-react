@@ -7,12 +7,7 @@ import { firstValueFrom } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable } from "../../../common/internal/ClassNameDefinitions.js";
 import { ParentElementsPath } from "../../../common/internal/Utils.js";
-import {
-  addElementToInternalSearchTargets,
-  createSearchResultsTree,
-  flattenInternalSearchTargetElements,
-  SearchResultsNodesHandler,
-} from "../../../common/internal/visibility/BaseSearchResultsTree.js";
+import { createSearchResultsTree, InternalSearchTargetElements, SearchResultsNodesHandler } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
@@ -20,7 +15,6 @@ import type { EC, ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { ElementId } from "../../../common/internal/Types.js";
 import type {
   BaseSearchResultsTreeNode,
-  InternalSearchTargetElements,
   SearchResultsTree,
   SearchResultsTreeNodeChildren,
   SearchResultsTreeRootNode,
@@ -165,7 +159,7 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
     return {
       classificationTableIds: searchTargets.classificationTableIds,
       classificationIds: searchTargets.classificationIds,
-      elements: searchTargets.elements ? flattenInternalSearchTargetElements(searchTargets.elements) : undefined,
+      elements: searchTargets.elements ? InternalSearchTargetElements.flatten(searchTargets.elements) : undefined,
     };
   }
 
@@ -203,7 +197,7 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
         // Internal search target elements need to have path saved in some way.
         // For this, a tree structure is used, where keys are stringified identifiers of parent nodes depending on the hierarchy.
         internalSearchTargets.elements ??= new Map();
-        addElementToInternalSearchTargets(internalSearchTargets.elements, node);
+        InternalSearchTargetElements.addElement(internalSearchTargets.elements, node);
       }
     }
   }

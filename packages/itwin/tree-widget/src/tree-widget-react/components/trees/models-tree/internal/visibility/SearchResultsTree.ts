@@ -8,10 +8,9 @@ import { assert } from "@itwin/core-bentley";
 import { CLASS_NAME_Category, CLASS_NAME_Model, CLASS_NAME_Subject } from "../../../common/internal/ClassNameDefinitions.js";
 import { getOrCreate, ParentElementsPath } from "../../../common/internal/Utils.js";
 import {
-  addElementToInternalSearchTargets,
   createSearchResultsTree,
-  flattenInternalSearchTargetCategories,
-  flattenInternalSearchTargetElements,
+  InternalSearchTargetCategories,
+  InternalSearchTargetElements,
   SearchResultsNodesHandler,
 } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 
@@ -21,8 +20,6 @@ import type { EC, ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId } from "../../../common/internal/Types.js";
 import type {
   BaseSearchResultsTreeNode,
-  InternalSearchTargetCategories,
-  InternalSearchTargetElements,
   SearchResultsTree,
   SearchResultsTreeNodeChildren,
   SearchResultsTreeRootNode,
@@ -211,8 +208,8 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<Proc
     }
 
     return {
-      categories: searchTargets.categories ? flattenInternalSearchTargetCategories(searchTargets.categories) : undefined,
-      elements: searchTargets.elements ? flattenInternalSearchTargetElements(searchTargets.elements) : undefined,
+      categories: searchTargets.categories ? InternalSearchTargetCategories.flatten(searchTargets.categories) : undefined,
+      elements: searchTargets.elements ? InternalSearchTargetElements.flatten(searchTargets.elements) : undefined,
       modelIds: searchTargets.modelIds,
       subjectIds: searchTargets.subjectIds,
     };
@@ -273,7 +270,7 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<Proc
       }
       case "element": {
         internalSearchTargets.elements ??= new Map();
-        addElementToInternalSearchTargets(internalSearchTargets.elements, node);
+        InternalSearchTargetElements.addElement(internalSearchTargets.elements, node);
       }
     }
   }

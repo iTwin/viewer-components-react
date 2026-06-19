@@ -244,77 +244,81 @@ export type InternalSearchTargetElements = Map<
 >;
 
 /** @internal */
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export namespace InternalSearchTargetElements {
+  /**
+   * Converts the internal tree-structured element search targets into a flat array.
+   * @internal
+   */
+  export function flatten(internalSearchTargetElements: InternalSearchTargetElements): Array<SearchTargetElementEntry> {
+    const result: Array<SearchTargetElementEntry> = [];
+    for (const [modelId, modelEntry] of internalSearchTargetElements) {
+      for (const { parentElementsPath, elements } of modelEntry.values()) {
+        for (const [categoryId, { searchTargets, nonSearchTargets }] of elements) {
+          result.push({
+            categoryId,
+            modelId,
+            parentElementsPath,
+            nonSearchTargetElements: nonSearchTargets,
+            searchTargetElements: searchTargets,
+          });
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Adds an element node to the internal search targets element map.
+   * @internal
+   */
+  export function addElement(
+    internalSearchTargetElements: InternalSearchTargetElements,
+    node: { id: ElementId; modelId: Id64String; categoryId: Id64String; parentElementsPath: ParentElementsPath; isSearchTarget: boolean },
+  ): void {
+    const modelEntry = getOrCreate({
+      map: internalSearchTargetElements,
+      key: node.modelId,
+      createFunc: () =>
+        new Map<
+          ElementId | undefined,
+          {
+            parentElementsPath: ParentElementsPath;
+            elements: Map<CategoryId, { searchTargets: Array<ElementId>; nonSearchTargets: Array<ElementId> }>;
+          }
+        >(),
+    });
+    const lastParentId = ParentElementsPath.getSingleLastParentId(node.parentElementsPath);
+    const parentEntry = getOrCreate({
+      map: modelEntry,
+      key: lastParentId,
+      createFunc: () => ({
+        parentElementsPath: node.parentElementsPath,
+        elements: new Map<
+          CategoryId,
+          {
+            searchTargets: Array<ElementId>;
+            nonSearchTargets: Array<ElementId>;
+          }
+        >(),
+      }),
+    });
+    const categoryEntry = getOrCreate({ map: parentEntry.elements, key: node.categoryId, createFunc: () => ({ searchTargets: [], nonSearchTargets: [] }) });
+    if (node.isSearchTarget) {
+      categoryEntry.searchTargets.push(node.id);
+    } else {
+      categoryEntry.nonSearchTargets.push(node.id);
+    }
+  }
+}
+
+/** @internal */
 export interface SearchTargetElementEntry {
   modelId: Id64String;
   categoryId: Id64String;
   searchTargetElements: Array<ElementId>;
   nonSearchTargetElements: Array<ElementId>;
   parentElementsPath: ParentElementsPath;
-}
-
-/**
- * Converts the internal tree-structured element search targets into a flat array.
- * @internal
- */
-export function flattenInternalSearchTargetElements(internalSearchTargetElements: InternalSearchTargetElements): Array<SearchTargetElementEntry> {
-  const result: Array<SearchTargetElementEntry> = [];
-  for (const [modelId, modelEntry] of internalSearchTargetElements) {
-    for (const { parentElementsPath, elements } of modelEntry.values()) {
-      for (const [categoryId, { searchTargets, nonSearchTargets }] of elements) {
-        result.push({
-          categoryId,
-          modelId,
-          parentElementsPath,
-          nonSearchTargetElements: nonSearchTargets,
-          searchTargetElements: searchTargets,
-        });
-      }
-    }
-  }
-  return result;
-}
-
-/**
- * Adds an element node to the internal search targets element map.
- * @internal
- */
-export function addElementToInternalSearchTargets(
-  internalSearchTargetElements: InternalSearchTargetElements,
-  node: { id: ElementId; modelId: Id64String; categoryId: Id64String; parentElementsPath: ParentElementsPath; isSearchTarget: boolean },
-): void {
-  const modelEntry = getOrCreate({
-    map: internalSearchTargetElements,
-    key: node.modelId,
-    createFunc: () =>
-      new Map<
-        ElementId | undefined,
-        {
-          parentElementsPath: ParentElementsPath;
-          elements: Map<CategoryId, { searchTargets: Array<ElementId>; nonSearchTargets: Array<ElementId> }>;
-        }
-      >(),
-  });
-  const lastParentId = ParentElementsPath.getSingleLastParentId(node.parentElementsPath);
-  const parentEntry = getOrCreate({
-    map: modelEntry,
-    key: lastParentId,
-    createFunc: () => ({
-      parentElementsPath: node.parentElementsPath,
-      elements: new Map<
-        CategoryId,
-        {
-          searchTargets: Array<ElementId>;
-          nonSearchTargets: Array<ElementId>;
-        }
-      >(),
-    }),
-  });
-  const categoryEntry = getOrCreate({ map: parentEntry.elements, key: node.categoryId, createFunc: () => ({ searchTargets: [], nonSearchTargets: [] }) });
-  if (node.isSearchTarget) {
-    categoryEntry.searchTargets.push(node.id);
-  } else {
-    categoryEntry.nonSearchTargets.push(node.id);
-  }
 }
 
 /**
@@ -334,28 +338,32 @@ export type InternalSearchTargetCategories<TModelId extends Id64String | undefin
 >;
 
 /** @internal */
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export namespace InternalSearchTargetCategories {
+  /**
+   * Converts internal category search targets into a flat array.
+   * @internal
+   */
+  export function flatten<TModelId extends Id64String | undefined>(
+    internalSearchTargetCategories: InternalSearchTargetCategories<TModelId>,
+  ): Array<SearchTargetCategoryEntry<TModelId>> {
+    const result: Array<SearchTargetCategoryEntry<TModelId>> = [];
+    for (const [modelId, modelEntry] of internalSearchTargetCategories) {
+      for (const { parentElementsPath, searchTargets } of modelEntry.values()) {
+        result.push({
+          categoryIds: new Set(searchTargets),
+          modelId,
+          parentElementsPath,
+        });
+      }
+    }
+    return result;
+  }
+}
+
+/** @internal */
 export interface SearchTargetCategoryEntry<TModelId extends Id64String | undefined = Id64String> {
   modelId: TModelId;
   categoryIds: Id64Set;
   parentElementsPath: ParentElementsPath;
-}
-
-/**
- * Converts internal category search targets into a flat array.
- * @internal
- */
-export function flattenInternalSearchTargetCategories<TModelId extends Id64String | undefined>(
-  internalSearchTargetCategories: InternalSearchTargetCategories<TModelId>,
-): Array<SearchTargetCategoryEntry<TModelId>> {
-  const result: Array<SearchTargetCategoryEntry<TModelId>> = [];
-  for (const [modelId, modelEntry] of internalSearchTargetCategories) {
-    for (const { parentElementsPath, searchTargets } of modelEntry.values()) {
-      result.push({
-        categoryIds: new Set(searchTargets),
-        modelId,
-        parentElementsPath,
-      });
-    }
-  }
-  return result;
 }
