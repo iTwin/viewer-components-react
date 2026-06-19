@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { SettingsDropdownMenu, ShowHideNullValuesSettingsMenuItem } from "../../property-grid-react/components/SettingsDropdownMenu.js";
-import { NullValueSettingContext, SHOWNULL_KEY } from "../../property-grid-react/hooks/UseNullValuesSetting.js";
+import { SettingsDropdownMenu, ShowHideEmptyValuesSettingsMenuItem } from "../../property-grid-react/components/SettingsDropdownMenu.js";
+import { EmptyValuesSettingContext, SHOW_EMPTY_KEY } from "../../property-grid-react/hooks/UseEmptyValuesSetting.js";
 import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
 import { PreferencesContextProvider } from "../../property-grid-react/PropertyGridPreferencesContext.js";
 import { createFunctionStub, render, waitFor } from "../TestUtils.js";
@@ -90,7 +90,7 @@ describe("Default settings", () => {
   function renderWithContext(ui: ReactElement) {
     return render(
       <PreferencesContextProvider storage={storage}>
-        <NullValueSettingContext>{ui}</NullValueSettingContext>
+        <EmptyValuesSettingContext>{ui}</EmptyValuesSettingContext>
       </PreferencesContextProvider>,
     );
   }
@@ -113,12 +113,12 @@ describe("Default settings", () => {
     });
 
     it("renders", async () => {
-      const { queryByText } = renderWithContext(<ShowHideNullValuesSettingsMenuItem {...settingProps} />);
+      const { queryByText } = renderWithContext(<ShowHideEmptyValuesSettingsMenuItem {...settingProps} />);
       await waitFor(() => expect(queryByText("settings.hide-null.label")).not.toBeNull());
     });
 
     it("does not persist new value by default", async () => {
-      const { getByText, queryByText, user } = renderWithContext(<ShowHideNullValuesSettingsMenuItem {...settingProps} />);
+      const { getByText, queryByText, user } = renderWithContext(<ShowHideEmptyValuesSettingsMenuItem {...settingProps} />);
       const item = await waitFor(() => getByText("settings.hide-null.label"));
       await user.click(item);
 
@@ -128,13 +128,13 @@ describe("Default settings", () => {
     });
 
     it("persist new value", async () => {
-      const { getByText, queryByText, user } = renderWithContext(<ShowHideNullValuesSettingsMenuItem {...settingProps} persist={true} />);
+      const { getByText, queryByText, user } = renderWithContext(<ShowHideEmptyValuesSettingsMenuItem {...settingProps} persist={true} />);
       const item = await waitFor(() => getByText("settings.hide-null.label"));
       await user.click(item);
 
       // wait until empty values are hidden
       await waitFor(() => expect(queryByText("settings.show-null.label")).not.toBeNull());
-      expect(storage.set).toHaveBeenCalledExactlyOnceWith(SHOWNULL_KEY, JSON.stringify(false));
+      expect(storage.set).toHaveBeenCalledExactlyOnceWith(SHOW_EMPTY_KEY, JSON.stringify(false));
     });
   });
 
@@ -144,12 +144,12 @@ describe("Default settings", () => {
     });
 
     it("renders", async () => {
-      const { queryByText } = renderWithContext(<ShowHideNullValuesSettingsMenuItem {...settingProps} />);
+      const { queryByText } = renderWithContext(<ShowHideEmptyValuesSettingsMenuItem {...settingProps} />);
       await waitFor(() => expect(queryByText("settings.show-null.label")).not.toBeNull());
     });
 
     it("does not persist new value by default", async () => {
-      const { getByText, queryByText, user } = renderWithContext(<ShowHideNullValuesSettingsMenuItem {...settingProps} />);
+      const { getByText, queryByText, user } = renderWithContext(<ShowHideEmptyValuesSettingsMenuItem {...settingProps} />);
       const item = await waitFor(() => getByText("settings.show-null.label"));
       await user.click(item);
 
@@ -159,13 +159,13 @@ describe("Default settings", () => {
     });
 
     it("persist new value", async () => {
-      const { getByText, queryByText, user } = renderWithContext(<ShowHideNullValuesSettingsMenuItem {...settingProps} persist={true} />);
+      const { getByText, queryByText, user } = renderWithContext(<ShowHideEmptyValuesSettingsMenuItem {...settingProps} persist={true} />);
       const item = await waitFor(() => getByText("settings.show-null.label"));
       await user.click(item);
 
       // wait until empty values are shown
       await waitFor(() => expect(queryByText("settings.hide-null.label")).not.toBeNull());
-      expect(storage.set).toHaveBeenCalledExactlyOnceWith(SHOWNULL_KEY, JSON.stringify(true));
+      expect(storage.set).toHaveBeenCalledExactlyOnceWith(SHOW_EMPTY_KEY, JSON.stringify(true));
     });
   });
 });

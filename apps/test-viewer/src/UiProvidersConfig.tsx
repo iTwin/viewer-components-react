@@ -27,7 +27,7 @@ import {
   createPropertyGrid,
   PropertyGridManager,
   RemoveFavoritePropertyContextMenuItem,
-  ShowHideNullValuesSettingsMenuItem,
+  ShowHideEmptyValuesSettingsMenuItem,
 } from "@itwin/property-grid-react";
 import { REPORTS_CONFIG_BASE_URL, ReportsConfigProvider, ReportsConfigWidget } from "@itwin/reports-config-widget-react";
 import {
@@ -225,7 +225,7 @@ const configuredUiItems = new Map<string, UiItem>([
                   (props) => <CopyPropertyTextContextMenuItem {...props} />,
                   (props) => <CustomizeFormatPropertyContextMenuItem {...props} />,
                 ],
-                settingsMenuItems: [(props) => <ShowHideNullValuesSettingsMenuItem {...props} persist={true} />],
+                settingsMenuItems: [(props) => <ShowHideEmptyValuesSettingsMenuItem {...props} persist={true} />],
                 onPerformanceMeasured: (feature, elapsedTime) => {
                   console.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
                 },

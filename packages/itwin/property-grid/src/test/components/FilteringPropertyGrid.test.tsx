@@ -101,6 +101,98 @@ describe("<FilteringPropertyGrid />", () => {
       expect(queryByText("Null Prop")).toBeNull();
     });
 
+    it("filters out empty string primitive properties", async () => {
+      const filterer = new NonEmptyValuesPropertyDataFilterer();
+      const dataProvider = {
+        onDataChanged: new PropertyDataChangeEvent(),
+        getData: async () => ({
+          categories: [
+            {
+              expand: true,
+              label: "Test Category",
+              name: "test-category",
+            },
+          ],
+          label: PropertyRecord.fromString("Test Instance"),
+          records: {
+            ["test-category"]: [
+              createPropertyRecord(
+                { valueFormat: PropertyValueFormat.Primitive, value: "Non-empty Value", displayValue: "Non-empty Value" },
+                { name: "test-prop1", displayLabel: "Non-empty String Prop" },
+              ),
+              createPropertyRecord(
+                { valueFormat: PropertyValueFormat.Primitive, value: "", displayValue: "" },
+                { name: "test-prop2", displayLabel: "Empty String Prop" },
+              ),
+            ],
+          },
+        }),
+      } as IPropertyDataProvider;
+
+      const { getByText, queryByText } = render(<FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={dataProvider} />);
+
+      await waitFor(() => getByText("Non-empty String Prop"));
+      expect(queryByText("Empty String Prop")).toBeNull();
+    });
+
+    it("does not filter out `false` boolean primitive properties", async () => {
+      const filterer = new NonEmptyValuesPropertyDataFilterer();
+      const dataProvider = {
+        onDataChanged: new PropertyDataChangeEvent(),
+        getData: async () => ({
+          categories: [
+            {
+              expand: true,
+              label: "Test Category",
+              name: "test-category",
+            },
+          ],
+          label: PropertyRecord.fromString("Test Instance"),
+          records: {
+            ["test-category"]: [
+              createPropertyRecord(
+                { valueFormat: PropertyValueFormat.Primitive, value: false, displayValue: "" },
+                { name: "test-prop1", displayLabel: "False Boolean Prop" },
+              ),
+            ],
+          },
+        }),
+      } as IPropertyDataProvider;
+
+      const { getByText } = render(<FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={dataProvider} />);
+
+      await waitFor(() => getByText("False Boolean Prop"));
+    });
+
+    it("does not filter out merged primitive properties", async () => {
+      const filterer = new NonEmptyValuesPropertyDataFilterer();
+      const mergedRecord = createPropertyRecord(
+        { valueFormat: PropertyValueFormat.Primitive, value: undefined, displayValue: undefined },
+        { name: "test-prop1", displayLabel: "Merged Prop" },
+        { isMerged: true },
+      );
+      const dataProvider = {
+        onDataChanged: new PropertyDataChangeEvent(),
+        getData: async () => ({
+          categories: [
+            {
+              expand: true,
+              label: "Test Category",
+              name: "test-category",
+            },
+          ],
+          label: PropertyRecord.fromString("Test Instance"),
+          records: {
+            ["test-category"]: [mergedRecord],
+          },
+        }),
+      } as IPropertyDataProvider;
+
+      const { getByText } = render(<FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={dataProvider} />);
+
+      await waitFor(() => getByText("Merged Prop"));
+    });
+
     it("filters out empty array properties", async () => {
       const filterer = new NonEmptyValuesPropertyDataFilterer();
       const dataProvider = {

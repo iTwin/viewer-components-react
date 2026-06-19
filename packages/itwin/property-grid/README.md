@@ -52,7 +52,7 @@ import {
   CopyPropertyTextContextMenuItem,
   IModelAppUserPreferencesStorage,
   RemoveFavoritePropertyContextMenuItem,
-  ShowHideNullValuesSettingsMenuItem,
+  ShowHideEmptyValuesSettingsMenuItem,
 } from "@itwin/property-grid-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 
@@ -81,10 +81,10 @@ UiItemsManager.register({
         // the list populates the settings menu
         settingsMenuItems: [
           // allows hiding properties without values
-          (props) => <ShowHideNullValuesSettingsMenuItem {...props} persist={true} />,
+          (props) => <ShowHideEmptyValuesSettingsMenuItem {...props} persist={true} />,
         ],
 
-        // supply an optional custom storage for user preferences, e.g. the show/hide null values used above
+        // supply an optional custom storage for user preferences, e.g. the show/hide empty values used above
         preferencesStorage: new IModelAppUserPreferencesStorage("my-favorites-namespace"),
 
         // supply the global selection storage that the widget will use to listen to selection
@@ -225,7 +225,7 @@ The entry point is only rendered if there's at least one settings menu item prov
 
 ### Hiding empty values
 
-The package delivers `ShowHideNullValuesSettingsMenuItem` that allows users to hide / show properties that don't have values:
+The package delivers `ShowHideEmptyValuesSettingsMenuItem` that allows users to hide / show properties that don't have values:
 
 | Empty values displayed                                            | Empty values hidden                                           |
 | ----------------------------------------------------------------- | ------------------------------------------------------------- |

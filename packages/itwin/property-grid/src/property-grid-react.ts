@@ -30,12 +30,20 @@ export {
   SettingsMenuProps,
   PropertyGridSettingsMenuItemProps,
   PropertyGridSettingsMenuItem,
+  ShowHideEmptyValuesSettingsMenuItemProps,
+  ShowHideEmptyValuesSettingsMenuItem,
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   ShowHideNullValuesSettingsMenuItemProps,
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   ShowHideNullValuesSettingsMenuItem,
 } from "./property-grid-react/components/SettingsDropdownMenu.js";
 
 export { DataProviderProps } from "./property-grid-react/hooks/UseDataProvider.js";
-export { NullValueSettingContext } from "./property-grid-react/hooks/UseNullValuesSetting.js";
+export {
+  EmptyValuesSettingContext,
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  NullValueSettingContext,
+} from "./property-grid-react/hooks/UseEmptyValuesSetting.js";
 export { TelemetryContextProvider, PerformanceTrackedFeatures } from "./property-grid-react/hooks/UseTelemetryContext.js";
 export * from "./property-grid-react/hooks/UsePropertyGridTransientState.js";
 export {
