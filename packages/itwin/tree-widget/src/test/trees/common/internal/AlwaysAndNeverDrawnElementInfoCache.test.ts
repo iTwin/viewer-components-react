@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { firstValueFrom } from "rxjs";
+import { firstValueFrom, map } from "rxjs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ALWAYS_NEVER_BUFFER_THRESHOLD,
@@ -15,8 +15,7 @@ import { createFakeViewport } from "../../Common.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { TreeWidgetViewport } from "../../../../tree-widget-react.js";
-import type { MapEntry } from "../../../../tree-widget-react/components/trees/common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
-import type { ChildrenTree } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
+import type { ElementPathSegment } from "../../../../tree-widget-react/components/trees/common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
 
 describe("AlwaysAndNeverDrawnElementInfoCache", () => {
   beforeEach(() => {
@@ -27,6 +26,17 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
   afterEach(() => {
     vi.useRealTimers();
   });
+
+  function getElements(
+    info: AlwaysAndNeverDrawnElementInfoCache,
+    props: { setType: "always" | "never"; modelId: Id64String; elementCategoryPath: ElementPathSegment[] },
+  ) {
+    const parentPath = props.elementCategoryPath.slice(0, -1);
+    const lastSegment: ElementPathSegment = props.elementCategoryPath[props.elementCategoryPath.length - 1];
+    return info
+      .getAlwaysAndNeverDrawnElementsAccessor({ ...props, elementCategoryPath: parentPath })
+      .pipe(map(({ getAlwaysOrNeverDrawnElements }) => getAlwaysOrNeverDrawnElements(lastSegment)));
+  }
 
   function runTests(setType: "always" | "never", setterFunction: (ids: Set<Id64String>, vp: TreeWidgetViewport) => void) {
     it(`subscribes to ${setType}Drawn list changes and unsubscribes on dispose`, async () => {
@@ -48,7 +58,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getElementsTree({ setType, modelId }));
+      const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(result).toEqual(new Map());
       expect(vp.iModel.createQueryReader).not.toHaveBeenCalled();
     });
@@ -62,7 +72,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getElementsTree({ setType, modelId }));
+      const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(result).toEqual(new Map());
       expect(vp.iModel.createQueryReader).not.toHaveBeenCalled();
     });
@@ -73,7 +83,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const elementId = "0x3";
       const set = new Set([elementId]);
       const queryHandler = vi.fn(() => {
-        return [{ rootCategoryId: categoryId, modelId, categoryId, elementsPath: elementId }];
+        return [{ categoryElementPath: `${categoryId};${elementId}`, modelId }];
       });
 
       using vp = createFakeViewport({
@@ -83,9 +93,8 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getElementsTree({ setType, modelId }));
-      const expectedResult: ChildrenTree<MapEntry> = new Map();
-      expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInAlwaysOrNeverDrawnSet: true }]]), isInAlwaysOrNeverDrawnSet: false });
+      const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
+      const expectedResult = new Map([[categoryId, [elementId]]]);
       expect(result).toEqual(expectedResult);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
     });
@@ -96,7 +105,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const elementId = "0x3";
       const set = new Set([elementId]);
       const queryHandler = vi.fn(() => {
-        return [{ rootCategoryId: categoryId, modelId, categoryId, elementsPath: elementId }];
+        return [{ categoryElementPath: `${categoryId};${elementId}`, modelId }];
       });
       using vp = createFakeViewport({
         [`${setType}Drawn`]: set,
@@ -105,13 +114,12 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getElementsTree({ setType, modelId }));
-      const expectedResult: ChildrenTree<MapEntry> = new Map();
-      expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInAlwaysOrNeverDrawnSet: true }]]), isInAlwaysOrNeverDrawnSet: false });
+      const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
+      const expectedResult = new Map([[categoryId, [elementId]]]);
       expect(result).toEqual(expectedResult);
 
       // second request is not delayed because value is cached
-      const result2 = await firstValueFrom(info.getElementsTree({ setType, modelId }));
+      const result2 = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(result2).toEqual(expectedResult);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
     });
@@ -122,7 +130,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const elementId = "0x3";
       const set = new Set([elementId]);
       const queryHandler = vi.fn(() => {
-        return [{ rootCategoryId: categoryId, modelId, categoryId, elementsPath: elementId }];
+        return [{ categoryElementPath: `${categoryId};${elementId}`, modelId }];
       });
       using vp = createFakeViewport({
         [`${setType}Drawn`]: set,
@@ -131,15 +139,14 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getElementsTree({ setType, modelId }));
-      const expectedResult: ChildrenTree<MapEntry> = new Map();
-      expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInAlwaysOrNeverDrawnSet: true }]]), isInAlwaysOrNeverDrawnSet: false });
+      const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
+      const expectedResult = new Map([[categoryId, [elementId]]]);
       expect(result).toEqual(expectedResult);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
 
       setterFunction(new Set(["0x4"]), vp);
 
-      const resultPromise2 = firstValueFrom(info.getElementsTree({ setType, modelId }));
+      const resultPromise2 = firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result2 = await resultPromise2;
       expect(result2).toEqual(expectedResult);
@@ -155,9 +162,9 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      await firstValueFrom(info.getElementsTree({ setType, modelId: "0x2" }));
+      await firstValueFrom(getElements(info, { setType, modelId: "0x2", elementCategoryPath: [] }));
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
-      const resultPromise2 = firstValueFrom(info.getElementsTree({ setType, modelId: "0x2" }));
+      const resultPromise2 = firstValueFrom(getElements(info, { setType, modelId: "0x2", elementCategoryPath: [] }));
       setterFunction(new Set(["0x2"]), vp);
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       await resultPromise2;
@@ -171,8 +178,8 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const set = new Set([elementId]);
       const queryHandler = vi
         .fn()
-        .mockReturnValueOnce([{ rootCategoryId: categoryId, modelId, categoryId, elementsPath: elementId }])
-        .mockReturnValueOnce([{ rootCategoryId: categoryId, modelId, categoryId, elementsPath: "0x4" }]);
+        .mockReturnValueOnce([{ categoryElementPath: `${categoryId};${elementId}`, modelId }])
+        .mockReturnValueOnce([{ categoryElementPath: `${categoryId};0x4`, modelId }]);
 
       using vp = createFakeViewport({
         [`${setType}Drawn`]: set,
@@ -181,23 +188,21 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result1 = await firstValueFrom(info.getElementsTree({ setType, modelId }));
-      const expectedResult: ChildrenTree<MapEntry> = new Map();
-      expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInAlwaysOrNeverDrawnSet: true }]]), isInAlwaysOrNeverDrawnSet: false });
-      expect(result1).toEqual(expectedResult);
+      const result1 = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
+      expect(result1).toEqual(new Map([[categoryId, [elementId]]]));
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
 
       setterFunction(new Set(["0x4"]), vp);
 
       info.suppressChangeEvents();
-      const promiseResult2 = firstValueFrom(info.getElementsTree({ setType, modelId }));
+      const promiseResult2 = firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result2 = await promiseResult2;
-      expectedResult.set(categoryId, { children: new Map([["0x4", { categoryId, isInAlwaysOrNeverDrawnSet: true }]]), isInAlwaysOrNeverDrawnSet: false });
+      const expectedResult2 = new Map([[categoryId, ["0x4"]]]);
       info.resumeChangeEvents();
-      const result3 = await firstValueFrom(info.getElementsTree({ setType, modelId }));
-      expect(result2).toEqual(expectedResult);
-      expect(result3).toEqual(expectedResult);
+      const result3 = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
+      expect(result2).toEqual(expectedResult2);
+      expect(result3).toEqual(expectedResult2);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
     });
 
@@ -207,7 +212,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const elementId = "0x3";
       const set = new Set([elementId]);
       const queryHandler = vi.fn(() => {
-        return [{ rootCategoryId: categoryId, modelId, categoryId, elementsPath: elementId }];
+        return [{ categoryElementPath: `${categoryId};${elementId}`, modelId }];
       });
 
       using vp = createFakeViewport({
@@ -217,14 +222,13 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result1 = await firstValueFrom(info.getElementsTree({ setType, modelId }));
-      const expectedResult: ChildrenTree<MapEntry> = new Map();
-      expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInAlwaysOrNeverDrawnSet: true }]]), isInAlwaysOrNeverDrawnSet: false });
+      const result1 = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
+      const expectedResult = new Map([[categoryId, [elementId]]]);
       expect(result1).toEqual(expectedResult);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
       info.suppressChangeEvents();
       info.resumeChangeEvents();
-      const result2 = await firstValueFrom(info.getElementsTree({ setType, modelId }));
+      const result2 = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
       expect(result2).toEqual(expectedResult);
     });
@@ -235,7 +239,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const elementId = "0x3";
       const set = new Set([elementId]);
       const queryHandler = vi.fn(() => {
-        return [{ rootCategoryId: categoryId, modelId, categoryId, elementsPath: elementId }];
+        return [{ categoryElementPath: `${categoryId};${elementId}`, modelId }];
       });
 
       using vp = createFakeViewport({
@@ -244,16 +248,15 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       });
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result1 = await firstValueFrom(info.getElementsTree({ setType, modelId }));
-      const expectedResult: ChildrenTree<MapEntry> = new Map();
-      expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInAlwaysOrNeverDrawnSet: true }]]), isInAlwaysOrNeverDrawnSet: false });
+      const result1 = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
+      const expectedResult = new Map([[categoryId, [elementId]]]);
       expect(result1).toEqual(expectedResult);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
       info.suppressChangeEvents();
 
       setterFunction(new Set(["0x4"]), vp);
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      await firstValueFrom(info.getElementsTree({ setType, modelId }));
+      await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
       expect(result1).toEqual(expectedResult);
       info.resumeChangeEvents();
@@ -278,7 +281,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
         [`${setType}Drawn`]: set,
       });
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
-      await firstValueFrom(info.getElementsTree({ setType, modelId }));
+      await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       // First time the set is just above the threshold, so there should be 2 queries
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
       const newSet = new Set(
@@ -288,7 +291,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       );
       setterFunction(newSet, vp);
       // Second set contains more than twice the threshold, so there should be 3 new queries
-      await firstValueFrom(info.getElementsTree({ setType, modelId }));
+      await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(5); // 2 previous + 3 new
     });
 
@@ -313,16 +316,15 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
           .mockImplementationOnce(async () => {
             queryStartedPromise.resolve();
             await queryPausePromise.promise;
-
-            return [{ rootCategoryId: "0x2", categoryId: "0x2", modelId: "0x1", elementsPath: "0x3" }];
+            return [{ categoryElementPath: "0x2;0x3", modelId: "0x1" }];
           })
           .mockImplementation(() => {
-            return [{ rootCategoryId: "0x5", categoryId: "0x5", modelId: "0x1", elementsPath: "0x4" }];
+            return [{ categoryElementPath: "0x5;0x4", modelId: "0x1" }];
           }),
       });
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
-      const firstPromise = firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId }));
+      const firstPromise = firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       await queryStartedPromise.promise;
       // Before making the changes make sure that the first query has started,
       // Since cache is executing two queries at the same time, 2 queries should have been started by now
@@ -343,8 +345,8 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(5); // 2 on the first run, 3 after the change
 
       // Second request should not make any new requests
-      const secondResult = await firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId }));
-      const expectedResult = new Set(["0x4"]);
+      const secondResult = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
+      const expectedResult = new Map([["0x5", ["0x4"]]]);
       expect(secondResult).toEqual(expectedResult);
       expect(firstResult).toEqual(expectedResult);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(5);
@@ -371,22 +373,22 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
           .mockImplementationOnce(async () => {
             queryStartedPromise.resolve();
             await queryPausePromise.promise;
-            return [{ rootCategoryId: "0x2", categoryId: "0x2", modelId: "0x1", elementsPath: "0x3" }];
+            return [{ categoryElementPath: "0x2;0x3", modelId: "0x1" }];
           })
           .mockImplementation((...args) => {
             const restartToken = args[2].restartToken as string;
             if (restartToken.endsWith("-0")) {
-              return [{ rootCategoryId: "0x2", categoryId: "0x2", modelId: "0x1", elementsPath: "0x4" }];
+              return [{ categoryElementPath: "0x2;0x4", modelId: "0x1" }];
             }
             if (restartToken.endsWith("-1")) {
-              return [{ rootCategoryId: "0x2", categoryId: "0x2", modelId: "0x1", elementsPath: "0x5" }];
+              return [{ categoryElementPath: "0x2;0x5", modelId: "0x1" }];
             }
-            return [{ rootCategoryId: "0x2", categoryId: "0x2", modelId: "0x1", elementsPath: "0x6" }];
+            return [{ categoryElementPath: "0x2;0x6", modelId: "0x1" }];
           }),
       });
 
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
-      const resultPromise = firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId }));
+      const resultPromise = firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       await queryStartedPromise.promise;
       // At first there should have been 2 queries started,
       // Since the first query is paused, the 3rd query should not have been called
@@ -403,7 +405,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       // Set has changed during execution, since the new set contains more than the threshold,
       // There should be 2 new queries executed
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(4); // 2 on first run, 2 after the change
-      expect(result).toEqual(new Set(["0x4", "0x5"]));
+      expect(result).toEqual(new Map([["0x2", ["0x4", "0x5"]]]));
     });
 
     it(`returns values that were at the time of the call when suppress is active and ${setType}Drawn changes during query execution`, async () => {
@@ -427,17 +429,17 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
           .mockImplementationOnce(async () => {
             queryStartedPromise.resolve();
             await queryPausePromise.promise;
-            return [{ rootCategoryId: "0x2", categoryId: "0x2", modelId: "0x1", elementsPath: "0x3" }];
+            return [{ categoryElementPath: "0x2;0x3", modelId: "0x1" }];
           })
           .mockImplementation((...args) => {
             const restartToken = args[2].restartToken as string;
             if (restartToken.endsWith("-0")) {
-              return [{ rootCategoryId: "0x2", categoryId: "0x2", modelId: "0x1", elementsPath: "0x4" }];
+              return [{ categoryElementPath: "0x2;0x4", modelId: "0x1" }];
             }
             if (restartToken.endsWith("-1")) {
-              return [{ rootCategoryId: "0x2", categoryId: "0x2", modelId: "0x1", elementsPath: "0x5" }];
+              return [{ categoryElementPath: "0x2;0x5", modelId: "0x1" }];
             }
-            return [{ rootCategoryId: "0x2", categoryId: "0x2", modelId: "0x1", elementsPath: "0x6" }];
+            return [{ categoryElementPath: "0x2;0x6", modelId: "0x1" }];
           }),
       });
 
@@ -445,7 +447,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       await queryStartedPromise.promise;
       info.suppressChangeEvents();
       // Request is made when suppress is active, so changes to always/never drawn set should not affect the result
-      const resultPromise = firstValueFrom(info.getAlwaysOrNeverDrawnElements({ setType, modelId }));
+      const resultPromise = firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       info.resumeChangeEvents();
 
       // New set requires 3 queries
@@ -460,7 +462,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       // Changed values have not been requested yet. The initial set required 3 queries,
       // results can be checked: 0x3 - first query, 0x5 - second query, 0x6 - third query.
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(3);
-      expect(result).toEqual(new Set(["0x3", "0x5", "0x6"]));
+      expect(result).toEqual(new Map([["0x2", ["0x5", "0x3", "0x6"]]]));
     });
 
     it(`requeries when suppression is removed and ${setType}Drawn changes`, async () => {
@@ -471,13 +473,13 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       });
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      await firstValueFrom(info.getElementsTree({ setType, modelId: "0x2" }));
+      await firstValueFrom(getElements(info, { setType, modelId: "0x2", elementCategoryPath: [] }));
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
       info.suppressChangeEvents();
 
       setterFunction(new Set(["0x2"]), vp);
       info.resumeChangeEvents();
-      const resultPromise2 = firstValueFrom(info.getElementsTree({ setType, modelId: "0x2" }));
+      const resultPromise2 = firstValueFrom(getElements(info, { setType, modelId: "0x2", elementCategoryPath: [] }));
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       await resultPromise2;
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
@@ -486,7 +488,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
     it(`returns empty set when model has no ${setType}Drawn elements`, async () => {
       const modelId = "0x1";
       const queryHandler = vi.fn(() => {
-        return [{ rootCategoryId: "0x40", categoryId: "0x40", modelId: "0x50", elementsPath: "0x30" }];
+        return [{ categoryElementPath: "0x40;0x30", modelId: "0x50" }];
       });
       using viewport = createFakeViewport({
         [`${setType}Drawn`]: new Set(["0x30"]),
@@ -494,7 +496,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       });
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getElementsTree({ setType, modelId }));
+      const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(result).toEqual(new Map());
     });
 
@@ -506,8 +508,8 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const element2Id = "0x5";
       const queryHandler = vi.fn(() => {
         return [
-          { rootCategoryId: categoryId, modelId, categoryId, elementsPath: elementId },
-          { rootCategoryId: category2Id, modelId, categoryId: category2Id, elementsPath: element2Id },
+          { categoryElementPath: `${categoryId};${elementId}`, modelId },
+          { categoryElementPath: `${category2Id};${element2Id}`, modelId },
         ];
       });
       using viewport = createFakeViewport({
@@ -516,10 +518,8 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       });
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getElementsTree({ setType, modelId, categoryIds: categoryId }));
-      const expectedResult: ChildrenTree<MapEntry> = new Map();
-      expectedResult.set(elementId, { categoryId, isInAlwaysOrNeverDrawnSet: true });
-      expect(result).toEqual(expectedResult);
+      const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [{ categoryIds: categoryId }] }));
+      expect(result).toEqual(new Map([[categoryId, [elementId]]]));
     });
 
     it(`retrieves and caches ${setType}Drawn elements by parent element`, async () => {
@@ -528,7 +528,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const elementId = "0x3";
       const childElementId = "0x4";
       const queryHandler = vi.fn(() => {
-        return [{ rootCategoryId: categoryId, modelId, categoryId, elementsPath: `${elementId};${childElementId}` }];
+        return [{ categoryElementPath: `${categoryId};${elementId};${categoryId};${childElementId}`, modelId }];
       });
       using viewport = createFakeViewport({
         [`${setType}Drawn`]: new Set([elementId, childElementId]),
@@ -536,10 +536,14 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       });
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getElementsTree({ setType, modelId, categoryIds: categoryId, parentElementIdsPath: [elementId] }));
-      const expectedResult: ChildrenTree<MapEntry> = new Map();
-      expectedResult.set(childElementId, { categoryId, isInAlwaysOrNeverDrawnSet: true });
-      expect(result).toEqual(expectedResult);
+      const result = await firstValueFrom(
+        getElements(info, {
+          setType,
+          modelId,
+          elementCategoryPath: [{ categoryIds: categoryId, elementIds: elementId }, { categoryIds: categoryId }],
+        }),
+      );
+      expect(result).toEqual(new Map([[categoryId, [childElementId]]]));
     });
 
     it(`returns empty set when category has no ${setType}Drawn elements`, async () => {
@@ -547,7 +551,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const categoryId = "0x2";
       const elementId = "0x3";
       const queryHandler = vi.fn(() => {
-        return [{ rootCategoryId: "0x15", categoryId: "0x15", modelId, elementsPath: elementId }];
+        return [{ categoryElementPath: `0x15;${elementId}`, modelId }];
       });
       using viewport = createFakeViewport({
         [`${setType}Drawn`]: new Set([elementId]),
@@ -555,7 +559,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       });
       using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
-      const result = await firstValueFrom(info.getElementsTree({ setType, modelId, categoryIds: categoryId }));
+      const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [{ categoryIds: categoryId }] }));
       expect(result).toEqual(new Map());
     });
   }

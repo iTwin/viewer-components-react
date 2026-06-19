@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, defer, firstValueFrom, forkJoin, from, fromEvent, identity, map, merge, mergeMap, reduce, switchMap, takeUntil } from "rxjs";
+import { bufferCount, defer, EMPTY, firstValueFrom, forkJoin, from, fromEvent, identity, map, merge, mergeMap, reduce, switchMap, takeUntil } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { createPredicateBasedHierarchyDefinition, NodeSelectClauseColumnNames, ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
@@ -25,6 +25,7 @@ import {
   fromWithRelease,
   getOptimalBatchSize,
   groupingNodeDataFromChildren,
+  ParentElementsPath,
   parseIdsSelectorResult,
   releaseMainThreadOnItemsCount,
 } from "../common/internal/Utils.js";
@@ -32,7 +33,7 @@ import { SearchLimitExceededError } from "../common/TreeErrors.js";
 import { ModelsTreeNodeInternal } from "./internal/ModelsTreeNodeInternal.js";
 
 import type { Observable, ObservedValueOf, OperatorFunction } from "rxjs";
-import type { GuidString, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
 import type {
   ClassGroupingNodeKey,
   DefineHierarchyLevelProps,
@@ -42,6 +43,7 @@ import type {
   HierarchyLevelDefinition,
   HierarchyNodeIdentifiersPath,
   HierarchyNodesDefinition,
+  InstancesNodeKey,
   LimitingECSqlQueryExecutor,
   NodePostProcessor,
   NodePreProcessor,
@@ -58,6 +60,7 @@ import type {
   Props,
 } from "@itwin/presentation-shared";
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
+import type { CategoryNodeProps, ElementNodeProps } from "./internal/ModelsTreeNodeInternal.js";
 
 /** @beta */
 export type ClassGroupingHierarchyNode = GroupingHierarchyNode & { key: ClassGroupingNodeKey };
@@ -198,7 +201,58 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     return node;
   };
 
-  public postProcessNode: NodePostProcessor = async ({ node }) => {
+  private static extendPathWithElement(elementNode: { key: InstancesNodeKey; extendedData: ElementNodeProps }): ParentElementsPath {
+    return ParentElementsPath.appendToPath({
+      path: elementNode.extendedData.parentElementsPath,
+      ids: elementNode.key.instanceKeys.map(({ id }) => id),
+      categoryId: elementNode.extendedData.categoryId,
+    });
+  }
+
+  private static getInheritedParentElementsPath(parentNode: NonNullable<Props<NodePostProcessor>["parentNode"]>): ParentElementsPath {
+    if (ModelsTreeNodeInternal.isElementClassGroupingNode(parentNode) || ModelsTreeNodeInternal.isCategoryNode(parentNode)) {
+      return parentNode.extendedData.parentElementsPath;
+    }
+    throw new Error("Expected node's parent to be category, or class grouping node");
+  }
+
+  private assignParentElementsPath({ node, parentNode }: Pick<Props<NodePostProcessor>, "node" | "parentNode">): ProcessedHierarchyNode {
+    if (ModelsTreeNodeInternal.isRawCategoryNode(node)) {
+      const modelIds: CategoryNodeProps["modelIds"] = node.extendedData.modelIds;
+      if (parentNode === undefined) {
+        // If subjects are not shown and model has PhysicalPartition.Model.Content or GraphicalPartition3d.Model.Content property,
+        // then such models are not shown and category might have no parent node
+        node.extendedData = {
+          ...node.extendedData,
+          parentElementsPath: [],
+        };
+        return node;
+      }
+      // When the parent is an element that actually contains this category, the category continues the element path.
+      // Otherwise (parent is a model, or a sub-model boundary) the path is reset.
+      const parentIsContainingElement =
+        ModelsTreeNodeInternal.isElementNode(parentNode) && parentNode.key.instanceKeys.every(({ id }) => !modelIds.includes(id));
+      node.extendedData = {
+        ...node.extendedData,
+        parentElementsPath: parentIsContainingElement ? ModelsTreeDefinition.extendPathWithElement(parentNode) : [],
+      };
+      return node;
+    }
+    if (ModelsTreeNodeInternal.isRawElementNode(node) || ModelsTreeNodeInternal.isRawElementClassGroupingNode(node)) {
+      assert(parentNode !== undefined, "Expected node to have a parent node");
+      node.extendedData = {
+        ...node.extendedData,
+        parentElementsPath: ModelsTreeNodeInternal.isElementNode(parentNode)
+          ? ModelsTreeDefinition.extendPathWithElement(parentNode)
+          : ModelsTreeDefinition.getInheritedParentElementsPath(parentNode),
+      };
+      return node;
+    }
+    return node;
+  }
+
+  public postProcessNode: NodePostProcessor = async ({ node, parentNode }) => {
+    node = this.assignParentElementsPath({ node, parentNode });
     if (!ProcessedHierarchyNode.isGroupingNode(node)) {
       return node;
     }
@@ -220,11 +274,9 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       label: this.#hierarchyConfig.elementClassGrouping === "enableWithCounts" ? `${node.label} (${node.children.length})` : node.label,
       extendedData: {
         ...node.extendedData,
-        // `modelId`, `categoryId`, `categoryOfTopMostParentElement`, `topMostParentElementId` are shared by all grouped elements.
+        // `modelId`, `categoryId` are shared by all grouped elements.
         categoryId: firstChild.extendedData.categoryId,
         modelId: firstChild.extendedData.modelId,
-        categoryOfTopMostParentElement: firstChild.extendedData.categoryOfTopMostParentElement,
-        topMostParentElementId: firstChild.extendedData.topMostParentElementId,
         childrenWhichAreParents,
         ...(hasDirectNonSearchTargets ? { hasDirectNonSearchTargets } : {}),
         ...(hasSearchTargetAncestor ? { hasSearchTargetAncestor } : {}),
@@ -375,8 +427,10 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
 
   private async createISubModeledElementChildrenQuery({
     parentNodeInstanceIds: elementIds,
+    parentNode,
     nodeSelectClauseFactory,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
+    assert(ModelsTreeNodeInternal.isElementNode(parentNode), "Expected parent node to be element node");
     // note: we do not apply hierarchy level filtering on this hierarchy level, because it's always
     // hidden - the filter will get applied on the child hierarchy levels
     return [
@@ -390,6 +444,11 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 ecInstanceId: { selector: "this.ECInstanceId" },
                 nodeLabel: "", // doesn't matter - the node is always hidden
                 hideNodeInHierarchy: true,
+                hasChildren: true,
+                extendedData: {
+                  isModel: true,
+                  modeledElementCategory: { selector: `IdToHex(${parentNode.extendedData.categoryId})` },
+                },
               })}
             FROM ${CLASS_NAME_GeometricModel3d} this
             JOIN IdSet(?) elementIdSet ON this.ModeledElement.Id = elementIdSet.id
@@ -406,22 +465,34 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
 
   private async createGeometricModel3dChildrenQuery({
     parentNodeInstanceIds: modelIds,
+    parentNode,
     instanceFilter,
     nodeSelectClauseFactory,
     instanceLabelSelectClauseFactory,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const [categoryInstanceFilterClauses, categoryIds] = await Promise.all([
+    const modeledElementCategory = parentNode.extendedData?.modeledElementCategory;
+    const [categoryInstanceFilterClauses, elementInstanceFilterClauses, allSubModels, categoryIds] = await Promise.all([
       nodeSelectClauseFactory.createFilterClauses({
         filter: instanceFilter,
         contentClass: { fullName: CLASS_NAME_SpatialCategory, alias: "this" },
       }),
+      nodeSelectClauseFactory.createFilterClauses({
+        filter: instanceFilter,
+        contentClass: { fullName: this.#hierarchyConfig.elementClassSpecification, alias: "this" },
+      }),
+      firstValueFrom(this.#idsCache.getAllSubModels()),
       firstValueFrom(this.#idsCache.getCategoriesOfModelsTopMostElements(modelIds).pipe(map((categoriesSet) => [...categoriesSet]))),
     ]);
     if (categoryIds.length === 0) {
       return [];
     }
-    return [
-      {
+    // For top-level models show all categories of the top-most elements. For sub-models show only the categories
+    // that don't match the sub-model element's category as intermediate category nodes - the elements matching
+    // that category are shown directly (see below).
+    const categoriesToShow = modeledElementCategory === undefined ? categoryIds : categoryIds.filter((categoryId) => categoryId !== modeledElementCategory);
+    const definitions: HierarchyLevelDefinition = [];
+    if (categoriesToShow.length > 0) {
+      definitions.push({
         fullClassName: CLASS_NAME_SpatialCategory,
         query: {
           ecsql: `
@@ -437,22 +508,47 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             ${categoryInstanceFilterClauses.where ? `WHERE ${categoryInstanceFilterClauses.where}` : ""}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
-          bindings: [{ type: "idset", value: categoryIds }],
+          bindings: [{ type: "idset", value: categoriesToShow }],
         },
-      },
-    ];
+      });
+    }
+    // Show elements which match the sub-model element's category directly under the (hidden) sub-model node.
+    if (categoriesToShow.length !== categoryIds.length) {
+      const { selectClause, bindings } = await this.createElementNodeSelectClause({
+        nodeSelectClauseFactory,
+        instanceLabelSelectClauseFactory,
+        allSubModels: [...allSubModels],
+      });
+      definitions.push({
+        fullClassName: this.#hierarchyConfig.elementClassSpecification,
+        query: {
+          ecsql: `
+            SELECT
+              ${selectClause}
+            FROM ${elementInstanceFilterClauses.from} this
+            JOIN IdSet(?) modelIdSet ON this.Model.Id = modelIdSet.id
+            ${elementInstanceFilterClauses.joins}
+            WHERE
+              this.Parent.Id IS NULL
+              AND this.Category.Id = ${modeledElementCategory}
+              ${elementInstanceFilterClauses.where ? `AND ${elementInstanceFilterClauses.where}` : ""}
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+          `,
+          bindings: [...bindings, { type: "idset", value: modelIds }],
+        },
+      });
+    }
+    return definitions;
   }
 
   private async createElementNodeSelectClause({
     nodeSelectClauseFactory,
     instanceLabelSelectClauseFactory,
     allSubModels,
-    extendedData,
   }: {
     nodeSelectClauseFactory: DefineInstanceNodeChildHierarchyLevelProps["nodeSelectClauseFactory"];
     instanceLabelSelectClauseFactory: DefineInstanceNodeChildHierarchyLevelProps["instanceLabelSelectClauseFactory"];
     allSubModels: Id64String[];
-    extendedData: Props<DefineInstanceNodeChildHierarchyLevelProps["nodeSelectClauseFactory"]["createSelectClause"]>["extendedData"];
   }): Promise<{ selectClause: string; bindings: ECSqlBinding[] }> {
     const selectClause = await nodeSelectClauseFactory.createSelectClause({
       ecClassId: { selector: "this.ECClassId" },
@@ -484,7 +580,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         modelId: { selector: "IdToHex(this.Model.Id)" },
         categoryId: { selector: "IdToHex(this.Category.Id)" },
         imageId: "icon-item",
-        ...extendedData,
       },
       supportsFiltering: this.supportsFiltering(),
     });
@@ -539,14 +634,11 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       }),
       firstValueFrom(this.#idsCache.getAllSubModels()),
     ]);
+    const parentIds = ParentElementsPath.getLastParentIds(parentNode.extendedData.parentElementsPath);
     const { selectClause, bindings } = await this.createElementNodeSelectClause({
       nodeSelectClauseFactory,
       instanceLabelSelectClauseFactory,
       allSubModels: [...allSubModels],
-      extendedData: {
-        categoryOfTopMostParentElement: { selector: "IdToHex(this.Category.Id)" },
-        topMostParentElementId: { selector: "IdToHex(this.ECInstanceId)" },
-      },
     });
     return [
       {
@@ -558,13 +650,18 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             FROM ${instanceFilterClauses.from} this
             JOIN IdSet(?) categoryIdSet ON this.Category.Id = categoryIdSet.id
             JOIN IdSet(?) modelIdSet ON this.Model.Id = modelIdSet.id
+            ${parentIds ? `JOIN IdSet(?) parentIdSet ON this.Parent.Id = parentIdSet.id` : ""}
             ${instanceFilterClauses.joins}
-            WHERE
-              this.Parent.Id IS NULL
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ${parentIds ? "" : "WHERE this.Parent.Id IS NULL"}
+            ${instanceFilterClauses.where ? `${parentIds ? "WHERE" : "AND"} ${instanceFilterClauses.where}` : ""}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
-          bindings: [...bindings, { type: "idset", value: categoryIds }, { type: "idset", value: modelIds }],
+          bindings: [
+            ...bindings,
+            { type: "idset", value: categoryIds },
+            { type: "idset", value: modelIds },
+            ...(parentIds ? [{ type: "idset" as const, value: parentIds }] : []),
+          ],
         },
       },
     ];
@@ -578,10 +675,17 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     instanceLabelSelectClauseFactory,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     assert(ModelsTreeNodeInternal.isElementNode(parentNode), "Expected parent node to be element node");
-    const [elementInstanceFilterClauses, allSubModels] = await Promise.all([
+    const parentCategoryId = parentNode.extendedData.categoryId;
+    const parentModelId = parentNode.extendedData.modelId;
+
+    const [elementInstanceFilterClauses, categoryInstanceFilterClauses, allSubModels] = await Promise.all([
       nodeSelectClauseFactory.createFilterClauses({
         filter: instanceFilter,
         contentClass: { fullName: this.#hierarchyConfig.elementClassSpecification, alias: "this" },
+      }),
+      nodeSelectClauseFactory.createFilterClauses({
+        filter: instanceFilter,
+        contentClass: { fullName: CLASS_NAME_SpatialCategory, alias: "this" },
       }),
       firstValueFrom(this.#idsCache.getAllSubModels()),
     ]);
@@ -590,12 +694,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       nodeSelectClauseFactory,
       instanceLabelSelectClauseFactory,
       allSubModels: [...allSubModels],
-      extendedData: {
-        categoryOfTopMostParentElement: {
-          selector: `IdToHex(${parentNode.extendedData.categoryOfTopMostParentElement})`,
-        },
-        topMostParentElementId: { selector: `IdToHex(${parentNode.extendedData.topMostParentElementId})` },
-      },
     });
     return [
       {
@@ -607,10 +705,37 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           FROM ${elementInstanceFilterClauses.from} this
           JOIN IdSet(?) elementIdSet ON this.Parent.Id = elementIdSet.id
           ${elementInstanceFilterClauses.joins}
-          ${elementInstanceFilterClauses.where ? `WHERE ${elementInstanceFilterClauses.where}` : ""}
+          WHERE
+            this.Category.Id = ${parentCategoryId}
+            ${elementInstanceFilterClauses.where ? `AND ${elementInstanceFilterClauses.where}` : ""}
           ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
           bindings: [...bindings, { type: "idset", value: elementIds }],
+        },
+      },
+      {
+        fullClassName: CLASS_NAME_SpatialCategory,
+        query: {
+          ecsql: `
+          SELECT
+            ${await this.createCategoryNodeSelectClause({
+              nodeSelectClauseFactory,
+              instanceLabelSelectClauseFactory,
+              extendedData: { modelIds: { selector: createIdsSelector([parentModelId]) } },
+            })}
+          FROM ${categoryInstanceFilterClauses.from} this
+          ${categoryInstanceFilterClauses.joins ? `${categoryInstanceFilterClauses.joins}` : ""}
+          WHERE
+            this.ECInstanceId <> ${parentCategoryId}
+            AND this.ECInstanceId IN (
+              SELECT DISTINCT ce.Category.Id
+              FROM ${this.#hierarchyConfig.elementClassSpecification} ce
+              JOIN IdSet(?) parentIdSet ON ce.Parent.Id = parentIdSet.id
+              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+            )
+            ${categoryInstanceFilterClauses.where ? `AND ${categoryInstanceFilterClauses.where}` : ""}
+        `,
+          bindings: [{ type: "idset", value: elementIds }],
         },
       },
     ];
@@ -748,11 +873,11 @@ export function createGeometricElementInstanceKeyPaths(props: {
               '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}'
               || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT)
               || IIF(ce.ParentId IS NULL,
-                  '${separator}${MODEL_CLASS_NAME_QUERY_ALIAS}${separator}'
-                  || CAST(IdToHex([ce].[ModelId]) AS TEXT)
-                  || '${separator}${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}'
-                  || CAST(IdToHex(ce.CategoryId) AS TEXT)
-                  ,
+                  '${separator}${MODEL_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([ce].[ModelId]) AS TEXT),
+                  ''
+                  )
+              || IIF(ce.CategoryId <> pe.Category.Id,
+                  '${separator}${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex(ce.CategoryId) AS TEXT),
                   ''
                   )
               || '${separator}'
@@ -771,7 +896,7 @@ export function createGeometricElementInstanceKeyPaths(props: {
             || CAST(IdToHex([mce].[CategoryId]) AS TEXT)
             || '${separator}'
             || mce.Path
-          ),
+        ),
           mce.GroupingNodeIndex
         FROM ModelsCategoriesElementsHierarchy mce
         WHERE mce.ParentId IS NULL
@@ -805,6 +930,119 @@ function parseElementsQueryRow(row: ECSqlQueryRow, groupInfos: ElementsGroupInfo
     elementHierarchyPath: path,
     groupingInfo: row[1] === -1 ? undefined : groupInfos[row[1]],
   };
+}
+
+/** @internal */
+export function createCategoriesSearchPaths(props: {
+  queryExecutor: LimitingECSqlQueryExecutor;
+  idsCache: ModelsTreeIdsCache;
+  targetCategoryIds: Id64Array;
+  componentId: GuidString;
+  componentName: string;
+  elementClassName: EC.FullClassName;
+}): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String }> {
+  const separator = ";";
+  const { targetCategoryIds, componentId, componentName, idsCache, queryExecutor, elementClassName } = props;
+  if (targetCategoryIds.length === 0) {
+    return EMPTY;
+  }
+
+  return merge(
+    fromWithRelease({ source: targetCategoryIds, releaseOnCount: 300 }).pipe(
+      mergeMap((categoryId) =>
+        idsCache
+          .getSearchPathsUpToRootCategory({ categoryId })
+          .pipe(map((path) => ({ path: [...path, { id: categoryId, className: CLASS_NAME_SpatialCategory }], target: categoryId }))),
+      ),
+    ),
+    props.idsCache.getAllSubModels().pipe(
+      mergeMap((subModelIds) => {
+        const ctes = [
+          `CategoriesParentsHierarchy(ECInstanceId, ParentId, ModelId, CategoryId, Path) AS (
+            SELECT
+              pe.ECInstanceId,
+              pe.Parent.Id,
+              pe.Model.Id,
+              pe.Category.Id,
+              (
+                '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}'
+                || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT)
+                || IIF(e.Parent.Id IS NULL,
+                    '${separator}${MODEL_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([e].[Model].[Id]) AS TEXT),
+                    ''
+                    )
+                || '${separator}${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}'
+                || CAST(IdToHex([e].[Category].[Id]) AS TEXT)
+              )
+            FROM ${elementClassName} e
+            JOIN IdSet(?) categoryIdSet ON e.Category.Id = categoryIdSet.id
+            JOIN ${elementClassName} pe ON (pe.ECInstanceId = e.Parent.Id OR (pe.ECInstanceId = e.Model.Id AND e.Parent.Id IS NULL))
+            WHERE pe.Category.Id <> e.Category.Id
+            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+
+            UNION ALL
+
+            SELECT
+              pe.ECInstanceId,
+              pe.Parent.Id,
+              pe.Model.Id,
+              pe.Category.Id,
+              (
+                '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}'
+                || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT)
+                || IIF(ce.ParentId IS NULL,
+                    '${separator}${MODEL_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([ce].[ModelId]) AS TEXT),
+                    ''
+                    )
+                || IIF(ce.CategoryId <> pe.Category.Id,
+                    '${separator}${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex(ce.CategoryId) AS TEXT),
+                    ''
+                    )
+                || '${separator}'
+                || ce.Path
+              )
+            FROM CategoriesParentsHierarchy ce
+            JOIN ${elementClassName} pe ON (pe.ECInstanceId = ce.ParentId OR (pe.ECInstanceId = ce.ModelId AND ce.ParentId IS NULL))
+          )`,
+        ];
+        const ecsql = `
+          SELECT
+            (
+              '${MODEL_CLASS_NAME_QUERY_ALIAS}${separator}'
+              || CAST(IdToHex([mce].[ModelId]) AS TEXT)
+              || '${separator}${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}'
+              || CAST(IdToHex([mce].[CategoryId]) AS TEXT)
+              || '${separator}'
+              || mce.Path
+            )
+          FROM CategoriesParentsHierarchy mce
+          WHERE mce.ParentId IS NULL ${subModelIds.size > 0 ? `AND NOT InVirtualSet(?, mce.ModelId)` : ""}
+        `;
+
+        return queryExecutor.createQueryReader(
+          {
+            ctes,
+            ecsql,
+            bindings: [{ type: "idset", value: targetCategoryIds }, ...(subModelIds.size > 0 ? [{ type: "idset" as const, value: [...subModelIds] }] : [])],
+          },
+          { rowFormat: "Indexes", limit: "unbounded", restartToken: `${componentName}/${componentId}/categories-paths` },
+        );
+      }),
+      catchBeSQLiteInterrupts,
+      targetCategoryIds.length > 300 ? releaseMainThreadOnItemsCount(300) : identity,
+      map((row) => {
+        return parseQueriedPath({ queriedPathRaw: row[0], elementClassName, separator });
+      }),
+      mergeMap((categoryHierarchyPath) =>
+        idsCache.createUpToModelInstanceKeyPaths(categoryHierarchyPath[0].id).pipe(
+          map((pathUpToCategory) => {
+            const path = [...pathUpToCategory, ...categoryHierarchyPath];
+            return { path, target: categoryHierarchyPath[categoryHierarchyPath.length - 1].id };
+          }),
+        ),
+      ),
+    ),
+  );
 }
 
 function parseQueriedPath({
@@ -921,7 +1159,14 @@ function createSearchPathsForDifferentTypes(
                 .pipe(map((path) => ({ path: [...path, { className: CLASS_NAME_GeometricModel3d, id }], target: id }))),
             ),
           ),
-          idsCache.createCategoryInstanceKeyPaths({ categoryIds: ids.categoryIds }).pipe(map((path) => ({ path, target: path[path.length - 1].id }))),
+          createCategoriesSearchPaths({
+            targetCategoryIds: ids.categoryIds,
+            idsCache,
+            queryExecutor: imodelAccess,
+            elementClassName: hierarchyConfig.elementClassSpecification,
+            componentId,
+            componentName,
+          }),
           from(ids.elementIds).pipe(
             bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),
             releaseMainThreadOnItemsCount(1),

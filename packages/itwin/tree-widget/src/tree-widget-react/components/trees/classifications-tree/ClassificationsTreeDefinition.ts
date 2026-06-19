@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { bufferCount, defer, EMPTY, firstValueFrom, from, fromEvent, identity, map, merge, mergeMap, of, reduce, switchMap, takeUntil } from "rxjs";
-import { Guid } from "@itwin/core-bentley";
+import { assert, Guid } from "@itwin/core-bentley";
 import { createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql, parseFullClassName } from "@itwin/presentation-shared";
 import { eachValueFrom } from "../../utils/EachValueFrom.js";
@@ -18,8 +18,9 @@ import {
   CLASS_NAME_GeometricElement3d,
 } from "../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../common/internal/UseErrorState.js";
-import { fromWithRelease, getOptimalBatchSize, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
+import { fromWithRelease, getOptimalBatchSize, ParentElementsPath, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../common/TreeErrors.js";
+import { ClassificationsTreeNodeInternal } from "./internal/ClassificationsTreeNodeInternal.js";
 
 import type { Observable, ObservedValueOf, OperatorFunction } from "rxjs";
 import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
@@ -32,6 +33,7 @@ import type {
   HierarchyNodeIdentifiersPath,
   InstancesNodeKey,
   LimitingECSqlQueryExecutor,
+  NodePostProcessor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlQueryRow, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
@@ -103,6 +105,31 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
       },
     });
   }
+
+  public postProcessNode: NodePostProcessor = async ({ node, parentNode }) => {
+    if (!ClassificationsTreeNodeInternal.isGeometricElementNode(node)) {
+      return node;
+    }
+    assert(parentNode !== undefined);
+
+    if (ClassificationsTreeNodeInternal.isClassificationNode(parentNode)) {
+      node.extendedData = {
+        ...node.extendedData,
+        parentElementsPath: [],
+      };
+      return node;
+    }
+    assert(ClassificationsTreeNodeInternal.isGeometricElementNode(parentNode));
+    node.extendedData = {
+      ...node.extendedData,
+      parentElementsPath: ParentElementsPath.appendToPath({
+        path: parentNode.extendedData.parentElementsPath,
+        ids: parentNode.key.instanceKeys.map(({ id }) => id),
+        categoryId: parentNode.extendedData.categoryId,
+      }),
+    };
+    return node;
+  };
 
   public async defineHierarchyLevel(props: DefineHierarchyLevelProps) {
     return this.#impl.defineHierarchyLevel(props);
@@ -297,7 +324,6 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
   async #createGeometricElementChildrenQuery({
     parentNodeInstanceIds: parentElementIds,
     instanceFilter,
-    parentNode,
     nodeSelectClauseFactory,
     instanceLabelSelectClauseFactory,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
@@ -310,7 +336,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
         fullClassName: CLASS_NAME_GeometricElement3d,
         query: {
           ecsql: `
-          SELECT ${await this.#createElementSelectClause({ categoryOfTopMostParentElement: parentNode.extendedData?.categoryOfTopMostParentElement, topMostParentElementId: parentNode.extendedData?.topMostParentElementId, nodeSelectClauseFactory, instanceLabelSelectClauseFactory })}
+          SELECT ${await this.#createElementSelectClause({ nodeSelectClauseFactory, instanceLabelSelectClauseFactory })}
           FROM ${instanceFilterClauses.from} this
           JOIN IdSet(?) parentElementIdSet ON this.Parent.Id = parentElementIdSet.id
           ${instanceFilterClauses.joins}
@@ -324,13 +350,9 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
   }
 
   async #createElementSelectClause({
-    categoryOfTopMostParentElement,
-    topMostParentElementId,
     nodeSelectClauseFactory,
     instanceLabelSelectClauseFactory,
   }: {
-    categoryOfTopMostParentElement?: string;
-    topMostParentElementId?: string;
     nodeSelectClauseFactory: NodesQueryClauseFactory;
     instanceLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
   }): Promise<string> {
@@ -358,10 +380,6 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
         type: elementClassName,
         modelId: { selector: "IdToHex(this.Model.Id)" },
         categoryId: { selector: "IdToHex(this.Category.Id)" },
-        categoryOfTopMostParentElement: {
-          selector: `IdToHex(${categoryOfTopMostParentElement ?? "this.Category.Id"})`,
-        },
-        topMostParentElementId: { selector: `IdToHex(${topMostParentElementId ?? "this.ECInstanceId"})` },
       },
       supportsFiltering: true,
     });

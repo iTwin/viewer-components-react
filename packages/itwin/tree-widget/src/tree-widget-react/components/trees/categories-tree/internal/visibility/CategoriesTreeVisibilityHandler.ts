@@ -5,10 +5,9 @@
 
 import { concat, defer, EMPTY, from, merge, mergeAll, mergeMap, of, Subject } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
-import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { fromWithRelease, getClassesByView, getParentElementsIdsPath } from "../../../common/internal/Utils.js";
+import { fromWithRelease, getClassesByView } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 import { CategoriesTreeNodeInternal } from "../../internal/CategoriesTreeNodeInternal.js";
 import { CategoriesTreeVisibilityHelper } from "./CategoriesTreeVisibilityHelper.js";
@@ -71,7 +70,11 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
 
       if (categories?.length) {
         observables.push(
-          from(categories).pipe(mergeMap(({ modelId, categoryIds }) => this.#visibilityHelper.changeCategoriesVisibilityStatus({ categoryIds, modelId, on }))),
+          from(categories).pipe(
+            mergeMap(({ modelId, categoryIds, parentElementsPath }) =>
+              this.#visibilityHelper.changeCategoriesVisibilityStatus({ categoryIds, modelId, on, parentElementsPath }),
+            ),
+          ),
         );
       }
 
@@ -86,23 +89,14 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       if (elements?.length) {
         observables.push(
           fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
-            mergeMap(({ modelId, searchTargetElements, nonSearchTargetElements, categoryId, pathToElements, topMostParentElementId }) => {
-              const parentElementsIdsPath = topMostParentElementId
-                ? getParentElementsIdsPath({
-                    parentInstanceKeys: pathToElements.map((instanceKey) => [instanceKey]),
-                    topMostParentElementId,
-                  })
-                : [];
+            mergeMap(({ modelId, nonSearchTargetElements, searchTargetElements, categoryId, parentElementsPath }) => {
               return merge(
                 searchTargetElements.length > 0
                   ? this.#visibilityHelper.changeElementsVisibilityStatus({
                       modelId,
                       categoryId,
                       elementIds: searchTargetElements,
-                      parentElementsIdsPath,
-                      // Search results tree is created on search paths. Since search paths contain only categories that are directly under models
-                      // or at the root, categoryId can be used here.
-                      categoryOfTopMostParentElement: categoryId,
+                      parentElementsPath,
                       on,
                     })
                   : EMPTY,
@@ -135,8 +129,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       return this.#visibilityHelper.getGroupedElementsVisibilityStatus({
         categoryId: node.extendedData.categoryId,
         modelElementsMap: node.extendedData.modelElementsMap,
-        parentKeys: node.parentKeys,
-        topMostParentElementId: node.extendedData.topMostParentElementId,
+        parentElementsPath: node.extendedData.parentElementsPath,
       });
     }
 
@@ -160,6 +153,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
           this.#visibilityHelper.getCategoriesVisibilityStatus({
             categoryIds,
             modelId,
+            parentElementsPath: node.extendedData.parentElementsPath,
           }),
         ),
         mergeVisibilityStatuses(),
@@ -174,16 +168,11 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
     }
 
     assert(CategoriesTreeNodeInternal.isElementNode(node));
-    const parentElementsIdsPath = getParentElementsIdsPath({
-      parentInstanceKeys: node.parentKeys.filter((parentKey) => HierarchyNodeKey.isInstances(parentKey)).map((key) => key.instanceKeys),
-      topMostParentElementId: node.extendedData.topMostParentElementId,
-    });
     return this.#visibilityHelper.getElementsVisibilityStatus({
       elementIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
       modelId: node.extendedData.modelId,
       categoryId: node.extendedData.categoryId,
-      parentElementsIdsPath,
-      categoryOfTopMostParentElement: node.extendedData.categoryOfTopMostParentElement,
+      parentElementsPath: node.extendedData.parentElementsPath,
       computeOnlyOwnStatus: node.children ? undefined : true,
     });
   }
@@ -198,8 +187,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
         return this.#visibilityHelper.changeGroupedElementsVisibilityStatus({
           categoryId: node.extendedData.categoryId,
           modelElementsMap: node.extendedData.modelElementsMap,
-          parentKeys: node.parentKeys,
-          topMostParentElementId: node.extendedData.topMostParentElementId,
+          parentElementsPath: node.extendedData.parentElementsPath,
           on,
         });
       }
@@ -227,6 +215,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
               categoryIds,
               modelId,
               on,
+              parentElementsPath: node.extendedData.parentElementsPath,
             }),
           ),
         );
@@ -242,18 +231,12 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       assert(CategoriesTreeNodeInternal.isElementNode(node));
 
       const elementIds = node.key.instanceKeys.map(({ id }) => id);
-      const parentElementsIdsPath = getParentElementsIdsPath({
-        parentInstanceKeys: node.parentKeys.filter((key) => HierarchyNodeKey.isInstances(key)).map((key) => key.instanceKeys),
-        topMostParentElementId: node.extendedData.topMostParentElementId,
-      });
-
       return this.#visibilityHelper.changeElementsVisibilityStatus({
         elementIds,
         modelId: node.extendedData.modelId,
         categoryId: node.extendedData.categoryId,
         on,
-        categoryOfTopMostParentElement: node.extendedData.categoryOfTopMostParentElement,
-        parentElementsIdsPath,
+        parentElementsPath: node.extendedData.parentElementsPath,
       });
     });
 
@@ -277,10 +260,11 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       if (categories?.length) {
         observables.push(
           from(categories).pipe(
-            mergeMap(({ modelId, categoryIds }) =>
+            mergeMap(({ modelId, categoryIds, parentElementsPath }) =>
               this.#visibilityHelper.getCategoriesVisibilityStatus({
                 categoryIds,
                 modelId,
+                parentElementsPath,
               }),
             ),
           ),
@@ -298,23 +282,14 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       if (elements?.length) {
         observables.push(
           fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
-            mergeMap(({ modelId, searchTargetElements, nonSearchTargetElements, categoryId, pathToElements, topMostParentElementId }) => {
-              const parentElementsIdsPath = topMostParentElementId
-                ? getParentElementsIdsPath({
-                    parentInstanceKeys: pathToElements.map((instanceKey) => [instanceKey]),
-                    topMostParentElementId,
-                  })
-                : [];
+            mergeMap(({ modelId, searchTargetElements, nonSearchTargetElements, categoryId, parentElementsPath }) => {
               return merge(
                 searchTargetElements.length > 0
                   ? this.#visibilityHelper.getElementsVisibilityStatus({
                       modelId,
                       categoryId,
                       elementIds: searchTargetElements,
-                      parentElementsIdsPath,
-                      // Search results tree is created on search paths. Since search paths contain only categories that are directly under models
-                      // or at the root, categoryId can be used here.
-                      categoryOfTopMostParentElement: categoryId,
+                      parentElementsPath,
                     })
                   : EMPTY,
                 // Child always/never drawn elements will be in search paths, and their visibility status will be handled separately.

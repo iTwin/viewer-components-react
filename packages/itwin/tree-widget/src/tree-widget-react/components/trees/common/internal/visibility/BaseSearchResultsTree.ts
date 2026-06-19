@@ -5,10 +5,12 @@
 
 import { Id64 } from "@itwin/core-bentley";
 import { HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { getOrCreate, ParentElementsPath } from "../Utils.js";
 
-import type { Id64Arg, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, HierarchySearchTree, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { EC, InstanceKey } from "@itwin/presentation-shared";
+import type { CategoryId, ElementId, ModelId } from "../Types.js";
 
 /** @internal */
 export type SearchResultsTreeNodeChildren<TSearchResultsTreeNode> = Map<Id64String, TSearchResultsTreeNode>;
@@ -23,17 +25,6 @@ export interface SearchResultsTreeRootNode<TSearchResultsTreeNode extends BaseSe
   children: SearchResultsTreeNodeChildren<TSearchResultsTreeNode>;
 }
 
-type SearchResultsNodeType = string;
-type SearchResultsNodeId = Id64String;
-
-/** @internal */
-export interface SearchResultsNodeIdentifier {
-  type: SearchResultsNodeType;
-  id: SearchResultsNodeId;
-}
-/** @internal */
-export type SearchResultsNodeIdentifierAsString = `${SearchResultsNodeType}-${SearchResultsNodeId}`;
-
 /**
  * A generic interface for a search results tree node.
  *
@@ -45,8 +36,6 @@ export interface BaseSearchResultsTreeNode<TSearchResultsTreeNode extends BaseSe
   id: Id64String;
   children?: SearchResultsTreeNodeChildren<TSearchResultsTreeNode>;
   isSearchTarget: boolean;
-  /** Represents the path from the root to this node. It depends on the hierarchy structure. */
-  pathToNode: Array<SearchResultsNodeIdentifier>;
 }
 
 /**
@@ -69,8 +58,6 @@ export abstract class SearchResultsNodesHandler<
 
   /** Returns search results tree node type based on its' className */
   public abstract getType(className: EC.FullClassName): Promise<TSearchResultsTreeNode["type"]>;
-  /** Returns search results tree node className based on its' type */
-  public abstract getClassName(type: TSearchResultsTreeNode["type"]): EC.FullClassName;
   /** Converts nodes to search targets */
   public abstract convertNodesToSearchTargets(
     searchResultsNodes: TSearchResultsTreeNode[],
@@ -101,17 +88,6 @@ export abstract class SearchResultsNodesHandler<
       getNodeSearchTargets: (node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) =>
         this.getNodeSearchTargets(node, processedSearchResultsNodes),
     };
-  }
-
-  /** Converts a search results node identifier to a string representation. */
-  public convertSearchResultsNodeIdentifierToString(identifier: SearchResultsNodeIdentifier): SearchResultsNodeIdentifierAsString {
-    return `${identifier.type}-${identifier.id}`;
-  }
-
-  /** Converts a string representation of a search results node identifier back to a hierarchy node identifier. */
-  public convertSearchResultsNodeIdentifierStringToHierarchyNodeIdentifier(identifier: SearchResultsNodeIdentifierAsString): InstanceKey {
-    const [type, id] = identifier.split("-");
-    return { className: this.getClassName(type), id };
   }
 
   /** Takes a new node and adds it to the tree structure. */
@@ -249,4 +225,145 @@ export async function createSearchResultsTree<
   return {
     getSearchTargets: (node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) => processedSearchResultsNodes.getNodeSearchTargets(node),
   };
+}
+
+/**
+ * Shared type representing internal element search targets stored in a tree structure.
+ * Used across models, categories, and classifications search results trees.
+ * @internal
+ */
+export type InternalSearchTargetElements = Map<
+  ModelId,
+  Map<
+    ElementId | undefined,
+    {
+      parentElementsPath: ParentElementsPath;
+      elements: Map<CategoryId, { searchTargets: Array<ElementId>; nonSearchTargets: Array<ElementId> }>;
+    }
+  >
+>;
+
+/** @internal */
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export namespace InternalSearchTargetElements {
+  /**
+   * Converts the internal tree-structured element search targets into a flat array.
+   * @internal
+   */
+  export function flatten(internalSearchTargetElements: InternalSearchTargetElements): Array<SearchTargetElementEntry> {
+    const result: Array<SearchTargetElementEntry> = [];
+    for (const [modelId, modelEntry] of internalSearchTargetElements) {
+      for (const { parentElementsPath, elements } of modelEntry.values()) {
+        for (const [categoryId, { searchTargets, nonSearchTargets }] of elements) {
+          result.push({
+            categoryId,
+            modelId,
+            parentElementsPath,
+            nonSearchTargetElements: nonSearchTargets,
+            searchTargetElements: searchTargets,
+          });
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Adds an element node to the internal search targets element map.
+   * @internal
+   */
+  export function addElement(
+    internalSearchTargetElements: InternalSearchTargetElements,
+    node: { id: ElementId; modelId: Id64String; categoryId: Id64String; parentElementsPath: ParentElementsPath; isSearchTarget: boolean },
+  ): void {
+    const modelEntry = getOrCreate({
+      map: internalSearchTargetElements,
+      key: node.modelId,
+      createFunc: () =>
+        new Map<
+          ElementId | undefined,
+          {
+            parentElementsPath: ParentElementsPath;
+            elements: Map<CategoryId, { searchTargets: Array<ElementId>; nonSearchTargets: Array<ElementId> }>;
+          }
+        >(),
+    });
+    const lastParentId = ParentElementsPath.getSingleLastParentId(node.parentElementsPath);
+    const parentEntry = getOrCreate({
+      map: modelEntry,
+      key: lastParentId,
+      createFunc: () => ({
+        parentElementsPath: node.parentElementsPath,
+        elements: new Map<
+          CategoryId,
+          {
+            searchTargets: Array<ElementId>;
+            nonSearchTargets: Array<ElementId>;
+          }
+        >(),
+      }),
+    });
+    const categoryEntry = getOrCreate({ map: parentEntry.elements, key: node.categoryId, createFunc: () => ({ searchTargets: [], nonSearchTargets: [] }) });
+    if (node.isSearchTarget) {
+      categoryEntry.searchTargets.push(node.id);
+    } else {
+      categoryEntry.nonSearchTargets.push(node.id);
+    }
+  }
+}
+
+/** @internal */
+export interface SearchTargetElementEntry {
+  modelId: Id64String;
+  categoryId: Id64String;
+  searchTargetElements: Array<ElementId>;
+  nonSearchTargetElements: Array<ElementId>;
+  parentElementsPath: ParentElementsPath;
+}
+
+/**
+ * Shared type for internal category search targets, keyed by model ID.
+ * Generic over `TModelId` to support both `ModelId` (models tree) and `ModelId | undefined` (categories tree).
+ * @internal
+ */
+export type InternalSearchTargetCategories<TModelId extends Id64String | undefined = Id64String> = Map<
+  TModelId,
+  Map<
+    ElementId | undefined,
+    {
+      parentElementsPath: ParentElementsPath;
+      searchTargets: Array<CategoryId>;
+    }
+  >
+>;
+
+/** @internal */
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export namespace InternalSearchTargetCategories {
+  /**
+   * Converts internal category search targets into a flat array.
+   * @internal
+   */
+  export function flatten<TModelId extends Id64String | undefined>(
+    internalSearchTargetCategories: InternalSearchTargetCategories<TModelId>,
+  ): Array<SearchTargetCategoryEntry<TModelId>> {
+    const result: Array<SearchTargetCategoryEntry<TModelId>> = [];
+    for (const [modelId, modelEntry] of internalSearchTargetCategories) {
+      for (const { parentElementsPath, searchTargets } of modelEntry.values()) {
+        result.push({
+          categoryIds: new Set(searchTargets),
+          modelId,
+          parentElementsPath,
+        });
+      }
+    }
+    return result;
+  }
+}
+
+/** @internal */
+export interface SearchTargetCategoryEntry<TModelId extends Id64String | undefined = Id64String> {
+  modelId: TModelId;
+  categoryIds: Id64Set;
+  parentElementsPath: ParentElementsPath;
 }

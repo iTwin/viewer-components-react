@@ -3,26 +3,20 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, filter, forkJoin, from, map, merge, mergeAll, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
+import { defer, filter, forkJoin, map, mergeMap, of, reduce, shareReplay } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
-import {
-  CLASS_NAME_GeometricModel3d,
-  CLASS_NAME_InformationPartitionElement,
-  CLASS_NAME_SpatialCategory,
-  CLASS_NAME_Subject,
-} from "../../common/internal/ClassNameDefinitions.js";
+import { CLASS_NAME_GeometricModel3d, CLASS_NAME_InformationPartitionElement, CLASS_NAME_Subject } from "../../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
-import { fromWithRelease, getOrCreate, pushToMap } from "../../common/internal/Utils.js";
-import { createGeometricElementInstanceKeyPaths } from "../ModelsTreeDefinition.js";
+import { getOrCreate, pushToMap } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { EC, InstanceKey } from "@itwin/presentation-shared";
 import type { BaseIdsCacheImplProps } from "../../common/internal/caches/BaseIdsCache.js";
-import type { CategoryId, ModelId, SubjectId } from "../../common/internal/Types.js";
+import type { ModelId, SubjectId } from "../../common/internal/Types.js";
 import type { ModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
 
 /**
@@ -317,73 +311,15 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
     });
   }
 
-  public createCategoryInstanceKeyPaths({ categoryIds }: { categoryIds: Id64Array }): Observable<HierarchyNodeIdentifiersPath> {
-    const pathsWithSubModels = fromWithRelease({ source: categoryIds, releaseOnCount: 200 }).pipe(
-      mergeMap((id) =>
-        forkJoin({
-          id: of(id),
-          subModels: this.getModels({ categoryId: id }).pipe(
-            filter(({ categoryIsOfTopMostElement, isSubModel }) => categoryIsOfTopMostElement && isSubModel),
-            map(({ id: modelId }) => modelId),
-            toArray(),
-          ),
-        }),
-      ),
-      reduce((acc, { id, subModels }) => {
-        for (const subModelId of subModels) {
-          const entry = getOrCreate({ map: acc, key: subModelId, createFunc: () => new Set<CategoryId>() });
-          entry.add(id);
-        }
-        return acc;
-      }, new Map<ModelId, Set<CategoryId>>()),
-      mergeMap((subModelCategoriesMap) => {
-        if (subModelCategoriesMap.size === 0) {
-          return EMPTY;
-        }
-        return createGeometricElementInstanceKeyPaths({
-          queryExecutor: this.#queryExecutor,
-          idsCache: this,
-          elementClassName: this.#elementClassName,
-          targetItems: [...subModelCategoriesMap.keys()],
-          componentId: Guid.createValue(),
-          componentName: "ModelsTreeIdsCache-categoryInstanceKeyPaths",
-          chunkIndex: -1,
-        }).pipe(
-          map((normalizedPath) => {
-            const categories = subModelCategoriesMap.get(normalizedPath.path[normalizedPath.path.length - 1].id);
-            const paths = new Array<HierarchyNodeIdentifiersPath>();
-            for (const categoryId of categories ?? []) {
-              // Paths for modeled elements are created, but category is under sub-model, so need to
-              // add sub-model and category to the path.
-              paths.push([
-                ...normalizedPath.path,
-                { className: CLASS_NAME_GeometricModel3d, id: normalizedPath.path[normalizedPath.path.length - 1].id },
-                { className: CLASS_NAME_SpatialCategory, id: categoryId },
-              ]);
-            }
-            return paths;
-          }),
-          mergeAll(),
-        );
-      }),
-    );
-    const pathsWithoutSubModels = from(categoryIds).pipe(
-      mergeMap((categoryId) =>
-        this.getModels({ categoryId }).pipe(
-          filter(({ categoryIsOfTopMostElement, isSubModel }) => categoryIsOfTopMostElement && !isSubModel),
-          mergeMap(({ id: categoryModelId }) =>
-            this.createUpToModelInstanceKeyPaths(categoryModelId).pipe(
-              map((modelPath) => [
-                ...modelPath,
-                { className: CLASS_NAME_GeometricModel3d, id: categoryModelId },
-                { className: CLASS_NAME_SpatialCategory, id: categoryId },
-              ]),
-            ),
-          ),
+  public getSearchPathsUpToRootCategory({ categoryId }: { categoryId: Id64String }): Observable<HierarchyNodeIdentifiersPath> {
+    return this.getModels({ categoryId }).pipe(
+      filter(({ isSubModel, categoryIsOfTopMostElement }) => !isSubModel && categoryIsOfTopMostElement),
+      mergeMap(({ id: categoryModelId }) =>
+        this.createUpToModelInstanceKeyPaths(categoryModelId).pipe(
+          map((modelPath) => [...modelPath, { className: CLASS_NAME_GeometricModel3d, id: categoryModelId }]),
         ),
       ),
     );
-    return merge(pathsWithSubModels, pathsWithoutSubModels);
   }
 }
 

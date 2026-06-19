@@ -226,10 +226,11 @@ export function useModelsTree({
 }
 
 async function createSearchResultsTree(props: CreateSearchResultsTreeProps<ModelsTreeIdsCache>): Promise<SearchResultsTree<ModelsTreeSearchTargets>> {
-  const { searchPaths, imodelAccess } = props;
+  const { searchPaths, imodelAccess, idsCache } = props;
   return createModelsSearchResultsTree({
     imodelAccess,
     searchPaths,
+    idsCache,
   });
 }
 

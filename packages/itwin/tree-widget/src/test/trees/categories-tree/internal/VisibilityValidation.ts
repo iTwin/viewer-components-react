@@ -5,8 +5,8 @@
 
 import { expect } from "vitest";
 import { CategoriesTreeNode } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeNode.js";
+import { CategoriesTreeNodeInternal } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeNodeInternal.js";
 
-import type { Id64Array } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ValidateNodeProps } from "../../common/VisibilityValidation.js";
 
@@ -54,12 +54,17 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
     }
     return;
   }
-  if (CategoriesTreeNode.isCategoryNode(node)) {
+  if (CategoriesTreeNodeInternal.isCategoryNode(node)) {
     const { id } = node.key.instanceKeys[0];
-    const modelIds: Id64Array | undefined = node.extendedData.isCategoryOfSubModel ? node.extendedData.modelIds : undefined;
     let idToUse = id;
-    if (modelIds !== undefined) {
-      idToUse = `${modelIds[0]}-${id}`;
+    const parentOrModelId =
+      node.extendedData.parentElementsPath.length > 0
+        ? node.extendedData.parentElementsPath[node.extendedData.parentElementsPath.length - 1].elementIds[0]
+        : node.extendedData.modelIds.length > 0
+          ? node.extendedData.modelIds[0]
+          : undefined;
+    if (parentOrModelId !== undefined) {
+      idToUse = `${parentOrModelId}-${id}`;
     }
     if (expectations[idToUse] === "disabled") {
       expect(actualVisibility.isDisabled, `Node, ${JSON.stringify(node)}`).toBe(true);

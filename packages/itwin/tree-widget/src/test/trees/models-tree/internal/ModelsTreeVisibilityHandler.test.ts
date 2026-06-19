@@ -15,7 +15,7 @@ import {
   insertSubject,
   terminateCore,
 } from "test-utilities";
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { withEditTxn } from "@itwin/core-backend";
 import { CompressedId64Set, Id64 } from "@itwin/core-bentley";
 import { Code, IModel, IModelReadRpcInterface } from "@itwin/core-common";
@@ -35,7 +35,7 @@ import { createVisibilityStatus } from "../../../../tree-widget-react/components
 import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
-import { buildIModel } from "../../../IModelUtils.js";
+import { buildIModel, TestSchema } from "../../../IModelUtils.js";
 import { TestUtils } from "../../../TestUtils.js";
 import { createFakeViewport, createIModelAccess } from "../../Common.js";
 import { validateHierarchyVisibility } from "../../common/VisibilityValidation.js";
@@ -370,7 +370,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 alwaysDrawn: new Set([...categoryElements.values()].flat()),
                 queryHandler: () =>
                   [...categoryElements].flatMap(([categoryId, elements]) => {
-                    return elements.map((elementId) => ({ rootCategoryId: categoryId, categoryId, modelId, elementsPath: elementId }));
+                    return elements.map((elementId) => ({ categoryElementPath: `${categoryId};${elementId}`, modelId }));
                   }),
               }),
             });
@@ -475,7 +475,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 neverDrawn: new Set([...categoryElements.values()].flat()),
                 queryHandler: () =>
                   [...categoryElements].flatMap(([categoryId, elements]) => {
-                    return elements.map((elementId) => ({ rootCategoryId: categoryId, categoryId, modelId, elementsPath: elementId }));
+                    return elements.map((elementId) => ({ categoryElementPath: `${categoryId};${elementId}`, modelId }));
                   }),
               }),
             });
@@ -589,7 +589,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               idsCache,
               viewport: createFakeViewport({
                 neverDrawn: new Set(["0x100"]),
-                queryHandler: () => [{ rootCategoryId: "0x10", elementsPath: "0x100", modelId, categoryId: "0x10" }],
+                queryHandler: () => [{ categoryElementPath: "0x10;0x100", modelId }],
               }),
             });
             const { handler } = handlerResult;
@@ -612,7 +612,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport: createFakeViewport({
                 isAlwaysDrawnExclusive: true,
                 alwaysDrawn: new Set(["0x100"]),
-                queryHandler: () => [{ rootCategoryId: "0x10", elementsPath: "0x100", modelId, categoryId: "0x10" }],
+                queryHandler: () => [{ categoryElementPath: "0x10;0x100", modelId }],
               }),
             });
             const { handler } = handlerResult;
@@ -750,7 +750,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 alwaysDrawn: new Set(["0x4"]),
                 isAlwaysDrawnExclusive: true,
                 viewsCategory: vi.fn(() => true),
-                queryHandler: () => [{ rootCategoryId: "0xff", elementsPath: "0x4", modelId: "0xff", categoryId: "0xff" }],
+                queryHandler: () => [{ categoryElementPath: "0xff;0x4", modelId: "0xff" }],
               }),
             });
             const { handler } = handlerResult;
@@ -771,7 +771,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport: createFakeViewport({
                 neverDrawn: new Set(elements),
                 viewsCategory: vi.fn(() => true),
-                queryHandler: () => elements.map((elementId) => ({ rootCategoryId: categoryId, elementsPath: elementId, modelId, categoryId })),
+                queryHandler: () => elements.map((elementId) => ({ categoryElementPath: `${categoryId};${elementId}`, modelId })),
               }),
             });
             const { handler } = handlerResult;
@@ -810,7 +810,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 alwaysDrawn: new Set(["0x4"]),
                 isAlwaysDrawnExclusive: true,
                 getPerModelCategoryOverride: vi.fn(() => "show" as const),
-                queryHandler: () => [{ rootCategoryId: "0xff", elementsPath: "0x4", modelId: "0xff", categoryId: "0xff" }],
+                queryHandler: () => [{ categoryElementPath: "0xff;0x4", modelId: "0xff" }],
               }),
             });
             const { handler } = handlerResult;
@@ -833,7 +833,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport: createFakeViewport({
                 neverDrawn: new Set([elements[0]]),
                 viewsCategory: vi.fn(() => true),
-                queryHandler: () => [{ elementsPath: elements[0], modelId, rootCategoryId: categoryId, categoryId }],
+                queryHandler: () => [{ categoryElementPath: `${categoryId};${elements[0]}`, modelId }],
               }),
             });
             const { handler } = handlerResult;
@@ -854,7 +854,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport: createFakeViewport({
                 alwaysDrawn: new Set([elements[0]]),
                 viewsCategory: vi.fn(() => false),
-                queryHandler: () => [{ rootCategoryId: categoryId, elementsPath: elements[0], modelId, categoryId }],
+                queryHandler: () => [{ categoryElementPath: `${categoryId};${elements[0]}`, modelId }],
               }),
             });
             const { handler } = handlerResult;
@@ -875,7 +875,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport: createFakeViewport({
                 neverDrawn: new Set([elements[0]]),
                 getPerModelCategoryOverride: vi.fn(() => "show" as const),
-                queryHandler: () => [{ rootCategoryId: categoryId, elementsPath: elements[0], modelId, categoryId }],
+                queryHandler: () => [{ categoryElementPath: `${categoryId};${elements[0]}`, modelId }],
               }),
             });
             const { handler } = handlerResult;
@@ -896,7 +896,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport: createFakeViewport({
                 alwaysDrawn: new Set([elements[0]]),
                 getPerModelCategoryOverride: vi.fn(() => "hide" as const),
-                queryHandler: () => [{ rootCategoryId: categoryId, elementsPath: elements[0], modelId, categoryId }],
+                queryHandler: () => [{ categoryElementPath: `${categoryId};${elements[0]}`, modelId }],
               }),
             });
             const { handler } = handlerResult;
@@ -1335,15 +1335,15 @@ describe("ModelsTreeVisibilityHandler", () => {
                 const ids = CompressedId64Set.decompressSet((binder?.serialize() as any)[1].value);
                 if (ids.size === 2 && alwaysDrawnElements.every((id) => ids.has(id))) {
                   return [
-                    ...alwaysDrawnElements.map((elementId) => ({ rootCategoryId: categoryId, elementsPath: elementId, modelId, categoryId })),
-                    { rootCategoryId: otherCategoryId, elementsPath: otherAlwaysDrawnElement, modelId: otherModelId, categoryId: otherCategoryId },
+                    ...alwaysDrawnElements.map((elementId) => ({ categoryElementPath: `${categoryId};${elementId}`, modelId })),
+                    { categoryElementPath: `${otherCategoryId};${otherAlwaysDrawnElement}`, modelId: otherModelId },
                   ];
                 }
 
                 if (ids.size === 2 && neverDrawnElements.every((id) => ids.has(id))) {
                   return [
-                    ...neverDrawnElements.map((elementId) => ({ rootCategoryId: categoryId, elementsPath: elementId, modelId, categoryId })),
-                    { rootCategoryId: otherCategoryId, elementsPath: otherNeverDrawnElement, modelId: otherModelId, categoryId: otherCategoryId },
+                    ...neverDrawnElements.map((elementId) => ({ categoryElementPath: `${categoryId};${elementId}`, modelId })),
+                    { categoryElementPath: `${otherCategoryId};${otherNeverDrawnElement}`, modelId: otherModelId },
                   ];
                 }
 
@@ -2584,7 +2584,7 @@ describe("ModelsTreeVisibilityHandler", () => {
 
           const otherModel = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "2" }).id;
           const otherElement = insertPhysicalElement({ txn, modelId: otherModel, categoryId }).id;
-          return { model, categoryId, exclusiveElement, childElement, otherModel, otherElement };
+          return { model, categoryId, exclusiveElement, childElement, otherModel, otherElement, childCategoryId };
         }),
       );
 
@@ -2603,7 +2603,8 @@ describe("ModelsTreeVisibilityHandler", () => {
             [ids.model]: "partial",
               [`${ids.model}-${ids.categoryId}`]: "partial",
                 [ids.exclusiveElement]: "partial",
-                  [ids.childElement]: "hidden",
+                  [`${ids.exclusiveElement}-${ids.childCategoryId}`]: "hidden",
+                    [ids.childElement]: "hidden",
 
             [ids.otherModel]: "hidden",
               [`${ids.otherModel}-${ids.categoryId}`]: "hidden",
@@ -2993,7 +2994,8 @@ describe("ModelsTreeVisibilityHandler", () => {
               [modelId]: "partial",
                 [`${modelId}-${category1Id}`]: "visible",
                   [parentElementId]: "visible",
-                    [childElementWithDifferentCategoryId]: "visible",
+                    [`${parentElementId}-${childCategoryId}`]: "visible",
+                      [childElementWithDifferentCategoryId]: "visible",
 
                 [`${modelId}-${category2Id}`]: "hidden",
                   [element2Id]: "hidden",
@@ -3059,7 +3061,8 @@ describe("ModelsTreeVisibilityHandler", () => {
 
                 [`${modelId}-${parentCategoryId}`]: "partial",
                   [parentElementId]: "partial",
-                    [childElementWithSharedCategoryId]: "visible",
+                    [`${parentElementId}-${sharedCategoryId}`]: "visible",
+                      [childElementWithSharedCategoryId]: "visible",
           },
         });
       });
@@ -3110,7 +3113,8 @@ describe("ModelsTreeVisibilityHandler", () => {
 
                 [`${modelId}-${unrelatedCategoryId}`]: "hidden",
                   [unrelatedParentElementId]: "hidden",
-                    [childOfUnrelatedElementId]: "hidden",
+                    [`${unrelatedParentElementId}-${categoryId}`]: "hidden",
+                      [childOfUnrelatedElementId]: "hidden",
           },
         });
       });
@@ -3158,8 +3162,412 @@ describe("ModelsTreeVisibilityHandler", () => {
               [modelId]: "partial",
                 [`${modelId}-${parentCategoryId}`]: "partial",
                   [parentElementId]: "partial",
-                    [childElementWithDifferentCategoryId]: "visible",
+                    [`${parentElementId}-${childCategoryId}`]: "visible",
+                      [childElementWithDifferentCategoryId]: "visible",
           },
+        });
+      });
+    });
+
+    describe("intermediate categories", () => {
+      describe("enabling visibility", () => {
+        it("showing intermediate category makes its elements visible", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
+              const categoryA = insertSpatialCategory({ txn, codeValue: "categoryA" });
+              const categoryB = insertSpatialCategory({ txn, codeValue: "categoryB" });
+              const parentElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: categoryA.id });
+              const childElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: categoryB.id, parentId: parentElement.id });
+              return {
+                modelId: model.id,
+                categoryAId: categoryA.id,
+                categoryBId: categoryB.id,
+                parentElementId: parentElement.id,
+                childElementId: childElement.id,
+              };
+            }),
+          );
+
+          const { imodelConnection, ...ids } = buildIModelResult;
+          using visibilityTestData = createVisibilityTestData({ imodelConnection });
+          const { handler, provider, viewport } = visibilityTestData;
+
+          await handler.changeVisibility(
+            createCategoryHierarchyNode({
+              modelId: ids.modelId,
+              categoryId: ids.categoryBId,
+              hasChildren: true,
+              parentElementsPath: [{ elementIds: [ids.parentElementId], categoryIds: ids.categoryAId }],
+            }),
+            true,
+          );
+
+          await validateModelsTreeHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            // prettier-ignore
+            expectations: {
+              [IModel.rootSubjectId]: "partial",
+                [ids.modelId]: "partial",
+                  [`${ids.modelId}-${ids.categoryAId}`]: "partial",
+                    [ids.parentElementId]: "partial",
+                      [`${ids.parentElementId}-${ids.categoryBId}`]: "visible",
+                        [ids.childElementId]: "visible",
+            },
+          });
+        });
+
+        it("showing element under intermediate category makes it visible", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
+              const categoryA = insertSpatialCategory({ txn, codeValue: "categoryA" });
+              const categoryB = insertSpatialCategory({ txn, codeValue: "categoryB" });
+              const parentElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: categoryA.id });
+              const childElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: categoryB.id, parentId: parentElement.id });
+              return {
+                modelId: model.id,
+                categoryAId: categoryA.id,
+                categoryBId: categoryB.id,
+                parentElementId: parentElement.id,
+                childElementId: childElement.id,
+              };
+            }),
+          );
+
+          const { imodelConnection, ...ids } = buildIModelResult;
+          using visibilityTestData = createVisibilityTestData({ imodelConnection });
+          const { handler, provider, viewport } = visibilityTestData;
+
+          await handler.changeVisibility(
+            createElementHierarchyNode({
+              modelId: ids.modelId,
+              categoryId: ids.categoryBId,
+              elementId: ids.childElementId,
+              parentElementsPath: [{ elementIds: [ids.parentElementId], categoryIds: ids.categoryAId }],
+            }),
+            true,
+          );
+
+          await validateModelsTreeHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            // prettier-ignore
+            expectations: {
+              [IModel.rootSubjectId]: "partial",
+                [ids.modelId]: "partial",
+                  [`${ids.modelId}-${ids.categoryAId}`]: "partial",
+                    [ids.parentElementId]: "partial",
+                      [`${ids.parentElementId}-${ids.categoryBId}`]: "visible",
+                        [ids.childElementId]: "visible",
+            },
+          });
+        });
+
+        it("showing parent element makes children under intermediate category visible", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
+              const categoryA = insertSpatialCategory({ txn, codeValue: "categoryA" });
+              const categoryB = insertSpatialCategory({ txn, codeValue: "categoryB" });
+              const parentElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: categoryA.id });
+              const childElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: categoryB.id, parentId: parentElement.id });
+              return {
+                modelId: model.id,
+                categoryAId: categoryA.id,
+                categoryBId: categoryB.id,
+                parentElementId: parentElement.id,
+                childElementId: childElement.id,
+              };
+            }),
+          );
+
+          const { imodelConnection, ...ids } = buildIModelResult;
+          using visibilityTestData = createVisibilityTestData({ imodelConnection });
+          const { handler, provider, viewport } = visibilityTestData;
+
+          await handler.changeVisibility(
+            createElementHierarchyNode({
+              modelId: ids.modelId,
+              categoryId: ids.categoryAId,
+              elementId: ids.parentElementId,
+              hasChildren: true,
+            }),
+            true,
+          );
+
+          await validateModelsTreeHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectations: "all-visible",
+          });
+        });
+      });
+
+      describe("disabling visibility", () => {
+        it("hiding intermediate category makes its elements hidden", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
+              const categoryA = insertSpatialCategory({ txn, codeValue: "categoryA" });
+              const categoryB = insertSpatialCategory({ txn, codeValue: "categoryB" });
+              const parentElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: categoryA.id });
+              const childElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: categoryB.id, parentId: parentElement.id });
+              return {
+                modelId: model.id,
+                categoryAId: categoryA.id,
+                categoryBId: categoryB.id,
+                parentElementId: parentElement.id,
+                childElementId: childElement.id,
+              };
+            }),
+          );
+
+          const { imodelConnection, ...ids } = buildIModelResult;
+          using visibilityTestData = createVisibilityTestData({ imodelConnection, visibleByDefault: true });
+          const { handler, provider, viewport } = visibilityTestData;
+
+          await handler.changeVisibility(
+            createCategoryHierarchyNode({
+              modelId: ids.modelId,
+              categoryId: ids.categoryBId,
+              hasChildren: true,
+              parentElementsPath: [{ elementIds: [ids.parentElementId], categoryIds: ids.categoryAId }],
+            }),
+            false,
+          );
+
+          await validateModelsTreeHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            // prettier-ignore
+            expectations: {
+              [IModel.rootSubjectId]: "partial",
+                [ids.modelId]: "partial",
+                  [`${ids.modelId}-${ids.categoryAId}`]: "partial",
+                    [ids.parentElementId]: "partial",
+                      [`${ids.parentElementId}-${ids.categoryBId}`]: "hidden",
+                        [ids.childElementId]: "hidden",
+            },
+          });
+        });
+
+        it("hiding element under intermediate category makes it hidden", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
+              const categoryA = insertSpatialCategory({ txn, codeValue: "categoryA" });
+              const categoryB = insertSpatialCategory({ txn, codeValue: "categoryB" });
+              const parentElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: categoryA.id });
+              const childElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: categoryB.id, parentId: parentElement.id });
+              return {
+                modelId: model.id,
+                categoryAId: categoryA.id,
+                categoryBId: categoryB.id,
+                parentElementId: parentElement.id,
+                childElementId: childElement.id,
+              };
+            }),
+          );
+
+          const { imodelConnection, ...ids } = buildIModelResult;
+          using visibilityTestData = createVisibilityTestData({ imodelConnection, visibleByDefault: true });
+          const { handler, provider, viewport } = visibilityTestData;
+
+          await handler.changeVisibility(
+            createElementHierarchyNode({
+              modelId: ids.modelId,
+              categoryId: ids.categoryBId,
+              elementId: ids.childElementId,
+              parentElementsPath: [{ elementIds: [ids.parentElementId], categoryIds: ids.categoryAId }],
+            }),
+            false,
+          );
+
+          await validateModelsTreeHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            // prettier-ignore
+            expectations: {
+              [IModel.rootSubjectId]: "partial",
+                [ids.modelId]: "partial",
+                  [`${ids.modelId}-${ids.categoryAId}`]: "partial",
+                    [ids.parentElementId]: "partial",
+                      [`${ids.parentElementId}-${ids.categoryBId}`]: "hidden",
+                        [ids.childElementId]: "hidden",
+            },
+          });
+        });
+      });
+
+      describe("under sub-model", () => {
+        describe("enabling visibility", () => {
+          it("showing intermediate category under sub-model makes its elements visible", async () => {
+            await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
+              withEditTxn(imodel, (txn) => {
+                const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
+                const categoryA = insertSpatialCategory({ txn, codeValue: "categoryA" });
+                const categoryB = insertSpatialCategory({ txn, codeValue: "categoryB" });
+                const modeledElement = insertPhysicalElement({
+                  txn,
+                  modelId: model.id,
+                  categoryId: categoryA.id,
+                  classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+                });
+                const subModel = insertPhysicalSubModel({ txn, modeledElementId: modeledElement.id });
+                const subModelElement = insertPhysicalElement({ txn, modelId: subModel.id, categoryId: categoryB.id });
+                return {
+                  modelId: model.id,
+                  categoryAId: categoryA.id,
+                  categoryBId: categoryB.id,
+                  modeledElementId: modeledElement.id,
+                  subModelElementId: subModelElement.id,
+                };
+              }),
+            );
+
+            const { imodelConnection, ...ids } = buildIModelResult;
+            using visibilityTestData = createVisibilityTestData({ imodelConnection });
+            const { handler, provider, viewport } = visibilityTestData;
+
+            await handler.changeVisibility(
+              createCategoryHierarchyNode({
+                modelId: ids.modeledElementId,
+                categoryId: ids.categoryBId,
+                hasChildren: true,
+              }),
+              true,
+            );
+
+            await validateModelsTreeHierarchyVisibility({
+              provider,
+              handler,
+              viewport,
+              // prettier-ignore
+              expectations: {
+                [IModel.rootSubjectId]: "partial",
+                  [ids.modelId]: "partial",
+                    [`${ids.modelId}-${ids.categoryAId}`]: "partial",
+                      [ids.modeledElementId]: "partial",
+                        [`${ids.modeledElementId}-${ids.categoryBId}`]: "visible",
+                          [ids.subModelElementId]: "visible",
+              },
+            });
+          });
+
+          it("showing element under intermediate category in sub-model makes it visible", async () => {
+            await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
+              withEditTxn(imodel, (txn) => {
+                const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
+                const categoryA = insertSpatialCategory({ txn, codeValue: "categoryA" });
+                const categoryB = insertSpatialCategory({ txn, codeValue: "categoryB" });
+                const modeledElement = insertPhysicalElement({
+                  txn,
+                  modelId: model.id,
+                  categoryId: categoryA.id,
+                  classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+                });
+                const subModel = insertPhysicalSubModel({ txn, modeledElementId: modeledElement.id });
+                const subModelElement = insertPhysicalElement({ txn, modelId: subModel.id, categoryId: categoryB.id });
+                return {
+                  modelId: model.id,
+                  categoryAId: categoryA.id,
+                  categoryBId: categoryB.id,
+                  modeledElementId: modeledElement.id,
+                  subModelElementId: subModelElement.id,
+                };
+              }),
+            );
+
+            const { imodelConnection, ...ids } = buildIModelResult;
+            using visibilityTestData = createVisibilityTestData({ imodelConnection });
+            const { handler, provider, viewport } = visibilityTestData;
+
+            await handler.changeVisibility(
+              createElementHierarchyNode({
+                modelId: ids.modeledElementId,
+                categoryId: ids.categoryBId,
+                elementId: ids.subModelElementId,
+              }),
+              true,
+            );
+
+            await validateModelsTreeHierarchyVisibility({
+              provider,
+              handler,
+              viewport,
+              // prettier-ignore
+              expectations: {
+                [IModel.rootSubjectId]: "partial",
+                  [ids.modelId]: "partial",
+                    [`${ids.modelId}-${ids.categoryAId}`]: "partial",
+                      [ids.modeledElementId]: "partial",
+                        [`${ids.modeledElementId}-${ids.categoryBId}`]: "visible",
+                          [ids.subModelElementId]: "visible",
+              },
+            });
+          });
+        });
+
+        describe("disabling visibility", () => {
+          it("hiding intermediate category under sub-model makes its elements hidden", async () => {
+            await using buildIModelResult = await buildIModel(async (imodel) =>
+              withEditTxn(imodel, (txn) => {
+                const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
+                const categoryA = insertSpatialCategory({ txn, codeValue: "categoryA" });
+                const categoryB = insertSpatialCategory({ txn, codeValue: "categoryB" });
+                const modeledElement = insertPhysicalElement({
+                  txn,
+                  modelId: model.id,
+                  categoryId: categoryA.id,
+                  classFullName: `${TestSchema.Name}.${TestSchema.ModeledElement3dClassName}`,
+                });
+                const subModel = insertPhysicalSubModel({ txn, modeledElementId: modeledElement.id });
+                const subModelElement = insertPhysicalElement({ txn, modelId: subModel.id, categoryId: categoryB.id });
+                return {
+                  modelId: model.id,
+                  categoryAId: categoryA.id,
+                  categoryBId: categoryB.id,
+                  modeledElementId: modeledElement.id,
+                  subModelElementId: subModelElement.id,
+                };
+              }),
+            );
+
+            const { imodelConnection, ...ids } = buildIModelResult;
+            using visibilityTestData = createVisibilityTestData({ imodelConnection, visibleByDefault: true });
+            const { handler, provider, viewport } = visibilityTestData;
+
+            await handler.changeVisibility(
+              createCategoryHierarchyNode({
+                modelId: ids.modeledElementId,
+                categoryId: ids.categoryBId,
+                hasChildren: true,
+              }),
+              false,
+            );
+
+            await validateModelsTreeHierarchyVisibility({
+              provider,
+              handler,
+              viewport,
+              // prettier-ignore
+              expectations: {
+                [IModel.rootSubjectId]: "partial",
+                  [ids.modelId]: "partial",
+                    [`${ids.modelId}-${ids.categoryAId}`]: "partial",
+                      [ids.modeledElementId]: "partial",
+                        [`${ids.modeledElementId}-${ids.categoryBId}`]: "hidden",
+                          [ids.subModelElementId]: "hidden",
+              },
+            });
+          });
         });
       });
     });
@@ -4634,6 +5042,424 @@ describe("ModelsTreeVisibilityHandler", () => {
                   [keys.firstElement]: "visible",
                   [keys.element2]: "hidden",
           },
+        });
+      });
+
+      describe("path with intermediate categories", () => {
+        let buildIModelResult: Awaited<ReturnType<typeof createIntermediateCategoriesIModel>>;
+        let visibilityTestData: ReturnType<typeof createFilteredVisibilityTestData>;
+
+        async function createIntermediateCategoriesIModel() {
+          return buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "model" });
+              const categoryA = insertSpatialCategory({ txn, codeValue: "categoryA" });
+              const categoryB = insertSpatialCategory({ txn, codeValue: "categoryB" });
+              const parentElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: categoryA.id });
+              const childElement1 = insertPhysicalElement({ txn, modelId: model.id, categoryId: categoryB.id, parentId: parentElement.id });
+              const childElement2 = insertPhysicalElement({ txn, modelId: model.id, categoryId: categoryB.id, parentId: parentElement.id });
+
+              return {
+                model,
+                categoryA,
+                categoryB,
+                parentElement,
+                childElement1,
+                childElement2,
+                searchPaths: [
+                  {
+                    identifier: model,
+                    children: [
+                      {
+                        identifier: categoryA,
+                        children: [{ identifier: parentElement, children: [{ identifier: categoryB, children: [{ identifier: childElement1 }] }] }],
+                      },
+                    ],
+                  },
+                ],
+              };
+            }),
+          );
+        }
+
+        beforeAll(async () => {
+          buildIModelResult = await createIntermediateCategoriesIModel();
+        });
+
+        beforeEach(() => {
+          visibilityTestData = createFilteredVisibilityTestData({
+            imodelConnection: buildIModelResult.imodelConnection,
+            searchPaths: buildIModelResult.searchPaths,
+          });
+          visibilityTestData.viewport.setNeverDrawn({
+            elementIds: new Set([buildIModelResult.parentElement.id, buildIModelResult.childElement1.id, buildIModelResult.childElement2.id]),
+          });
+          visibilityTestData.viewport.renderFrame();
+        });
+
+        afterEach(() => {
+          visibilityTestData[Symbol.dispose]();
+        });
+
+        afterAll(async () => {
+          await buildIModelResult.imodelConnection.close();
+        });
+
+        it("showing intermediate category changes visibility for related nodes in search paths", async () => {
+          const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
+          const keys = buildIModelResult;
+
+          await visibilityHandlerWithSearchPaths.changeVisibility(
+            createCategoryHierarchyNode({
+              modelId: keys.model.id,
+              categoryId: keys.categoryB.id,
+              hasChildren: true,
+              parentKeys: [keys.model, keys.categoryA, keys.parentElement],
+              parentElementsPath: [{ elementIds: [keys.parentElement.id], categoryIds: keys.categoryA.id }],
+              search: {
+                isSearchTarget: false,
+                childrenTargetPaths: [{ identifier: keys.childElement1 }],
+              },
+            }),
+            true,
+          );
+
+          await validateModelsTreeHierarchyVisibility({
+            provider: providerWithSearchPaths,
+            handler: visibilityHandlerWithSearchPaths,
+            viewport,
+            // prettier-ignore
+            expectations: {
+              [IModel.rootSubjectId]: "partial",
+                [keys.model.id]: "partial",
+                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                    [keys.parentElement.id]: "partial",
+                      [`${keys.parentElement.id}-${keys.categoryB.id}`]: "visible",
+                        [keys.childElement1.id]: "visible",
+            },
+          });
+
+          await validateModelsTreeHierarchyVisibility({
+            provider: defaultProvider,
+            handler: defaultVisibilityHandler,
+            viewport,
+            // prettier-ignore
+            expectations: {
+              [IModel.rootSubjectId]: "partial",
+                [keys.model.id]: "partial",
+                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                    [keys.parentElement.id]: "partial",
+                      [`${keys.parentElement.id}-${keys.categoryB.id}`]: "partial",
+                        [keys.childElement1.id]: "visible",
+                        [keys.childElement2.id]: "hidden",
+            },
+          });
+        });
+
+        it("showing child element under intermediate category changes visibility for related nodes in search paths", async () => {
+          const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
+          const keys = buildIModelResult;
+
+          await visibilityHandlerWithSearchPaths.changeVisibility(
+            createElementHierarchyNode({
+              elementId: keys.childElement1.id,
+              modelId: keys.model.id,
+              categoryId: keys.categoryB.id,
+              parentKeys: [keys.model, keys.categoryA, keys.parentElement, keys.categoryB],
+              parentElementsPath: [{ elementIds: [keys.parentElement.id], categoryIds: keys.categoryA.id }],
+              search: { isSearchTarget: true },
+            }),
+            true,
+          );
+
+          await validateModelsTreeHierarchyVisibility({
+            provider: providerWithSearchPaths,
+            handler: visibilityHandlerWithSearchPaths,
+            viewport,
+            // prettier-ignore
+            expectations: {
+              [IModel.rootSubjectId]: "partial",
+                [keys.model.id]: "partial",
+                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                    [keys.parentElement.id]: "partial",
+                      [`${keys.parentElement.id}-${keys.categoryB.id}`]: "visible",
+                        [keys.childElement1.id]: "visible",
+            },
+          });
+
+          await validateModelsTreeHierarchyVisibility({
+            provider: defaultProvider,
+            handler: defaultVisibilityHandler,
+            viewport,
+            // prettier-ignore
+            expectations: {
+              [IModel.rootSubjectId]: "partial",
+                [keys.model.id]: "partial",
+                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                    [keys.parentElement.id]: "partial",
+                      [`${keys.parentElement.id}-${keys.categoryB.id}`]: "partial",
+                        [keys.childElement1.id]: "visible",
+                        [keys.childElement2.id]: "hidden",
+            },
+          });
+        });
+
+        it("showing parent element changes visibility for intermediate category children in search paths", async () => {
+          const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
+          const keys = buildIModelResult;
+
+          await visibilityHandlerWithSearchPaths.changeVisibility(
+            createElementHierarchyNode({
+              elementId: keys.parentElement.id,
+              modelId: keys.model.id,
+              categoryId: keys.categoryA.id,
+              parentKeys: [keys.model, keys.categoryA],
+              hasChildren: true,
+              search: {
+                isSearchTarget: false,
+                childrenTargetPaths: [{ identifier: keys.categoryB, children: [{ identifier: keys.childElement1 }] }],
+              },
+            }),
+            true,
+          );
+
+          await validateModelsTreeHierarchyVisibility({
+            provider: providerWithSearchPaths,
+            handler: visibilityHandlerWithSearchPaths,
+            viewport,
+            expectations: "all-visible",
+          });
+
+          await validateModelsTreeHierarchyVisibility({
+            provider: defaultProvider,
+            handler: defaultVisibilityHandler,
+            viewport,
+            // prettier-ignore
+            expectations: {
+              [IModel.rootSubjectId]: "partial",
+                [keys.model.id]: "partial",
+                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                    [keys.parentElement.id]: "partial",
+                      [`${keys.parentElement.id}-${keys.categoryB.id}`]: "partial",
+                        [keys.childElement1.id]: "visible",
+                        [keys.childElement2.id]: "hidden",
+            },
+          });
+        });
+      });
+
+      describe("path with intermediate categories under sub-model", () => {
+        let buildIModelResult: Awaited<ReturnType<typeof createSubModelIntermediateCategoriesIModel>>;
+        let visibilityTestData: ReturnType<typeof createFilteredVisibilityTestData>;
+
+        async function createSubModelIntermediateCategoriesIModel() {
+          return buildIModel(async (imodel, testSchema) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "model" });
+              const categoryA = insertSpatialCategory({ txn, codeValue: "categoryA" });
+              const categoryB = insertSpatialCategory({ txn, codeValue: "categoryB" });
+              const modeledElement = insertPhysicalElement({
+                txn,
+                modelId: model.id,
+                categoryId: categoryA.id,
+                classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+              });
+              const subModel = insertPhysicalSubModel({ txn, modeledElementId: modeledElement.id });
+              const subModelElement1 = insertPhysicalElement({ txn, modelId: subModel.id, categoryId: categoryB.id });
+              const subModelElement2 = insertPhysicalElement({ txn, modelId: subModel.id, categoryId: categoryB.id });
+
+              return {
+                model,
+                categoryA,
+                categoryB,
+                modeledElement,
+                subModel,
+                subModelElement1,
+                subModelElement2,
+                searchPaths: [
+                  {
+                    identifier: model,
+                    children: [
+                      {
+                        identifier: categoryA,
+                        children: [
+                          {
+                            identifier: modeledElement,
+                            children: [{ identifier: subModel, children: [{ identifier: categoryB, children: [{ identifier: subModelElement1 }] }] }],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              };
+            }),
+          );
+        }
+
+        beforeAll(async () => {
+          buildIModelResult = await createSubModelIntermediateCategoriesIModel();
+        });
+
+        beforeEach(() => {
+          visibilityTestData = createFilteredVisibilityTestData({
+            imodelConnection: buildIModelResult.imodelConnection,
+            searchPaths: buildIModelResult.searchPaths,
+          });
+          visibilityTestData.viewport.setNeverDrawn({
+            elementIds: new Set([buildIModelResult.modeledElement.id, buildIModelResult.subModelElement1.id, buildIModelResult.subModelElement2.id]),
+          });
+          visibilityTestData.viewport.renderFrame();
+        });
+
+        afterEach(() => {
+          visibilityTestData[Symbol.dispose]();
+        });
+
+        afterAll(async () => {
+          await buildIModelResult.imodelConnection.close();
+        });
+
+        it("showing intermediate category under sub-model changes visibility for related nodes in search paths", async () => {
+          const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
+          const keys = buildIModelResult;
+
+          await visibilityHandlerWithSearchPaths.changeVisibility(
+            createCategoryHierarchyNode({
+              modelId: keys.modeledElement.id,
+              categoryId: keys.categoryB.id,
+              hasChildren: true,
+              parentKeys: [keys.model, keys.categoryA, keys.modeledElement, keys.subModel],
+              search: {
+                isSearchTarget: false,
+                childrenTargetPaths: [{ identifier: keys.subModelElement1 }],
+              },
+            }),
+            true,
+          );
+
+          await validateModelsTreeHierarchyVisibility({
+            provider: providerWithSearchPaths,
+            handler: visibilityHandlerWithSearchPaths,
+            viewport,
+            // prettier-ignore
+            expectations: {
+              [IModel.rootSubjectId]: "partial",
+                [keys.model.id]: "partial",
+                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                    [keys.modeledElement.id]: "partial",
+                      [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "visible",
+                        [keys.subModelElement1.id]: "visible",
+            },
+          });
+
+          await validateModelsTreeHierarchyVisibility({
+            provider: defaultProvider,
+            handler: defaultVisibilityHandler,
+            viewport,
+            // prettier-ignore
+            expectations: {
+              [IModel.rootSubjectId]: "partial",
+                [keys.model.id]: "partial",
+                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                    [keys.modeledElement.id]: "partial",
+                      [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "partial",
+                        [keys.subModelElement1.id]: "visible",
+                        [keys.subModelElement2.id]: "hidden",
+            },
+          });
+        });
+
+        it("showing element under intermediate category in sub-model changes visibility for related nodes in search paths", async () => {
+          const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
+          const keys = buildIModelResult;
+
+          await visibilityHandlerWithSearchPaths.changeVisibility(
+            createElementHierarchyNode({
+              elementId: keys.subModelElement1.id,
+              modelId: keys.modeledElement.id,
+              categoryId: keys.categoryB.id,
+              parentKeys: [keys.model, keys.categoryA, keys.modeledElement, keys.subModel, keys.categoryB],
+              search: { isSearchTarget: true },
+            }),
+            true,
+          );
+
+          await validateModelsTreeHierarchyVisibility({
+            provider: providerWithSearchPaths,
+            handler: visibilityHandlerWithSearchPaths,
+            viewport,
+            // prettier-ignore
+            expectations: {
+              [IModel.rootSubjectId]: "partial",
+                [keys.model.id]: "partial",
+                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                    [keys.modeledElement.id]: "partial",
+                      [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "visible",
+                        [keys.subModelElement1.id]: "visible",
+            },
+          });
+
+          await validateModelsTreeHierarchyVisibility({
+            provider: defaultProvider,
+            handler: defaultVisibilityHandler,
+            viewport,
+            // prettier-ignore
+            expectations: {
+              [IModel.rootSubjectId]: "partial",
+                [keys.model.id]: "partial",
+                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                    [keys.modeledElement.id]: "partial",
+                      [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "partial",
+                        [keys.subModelElement1.id]: "visible",
+                        [keys.subModelElement2.id]: "hidden",
+            },
+          });
+        });
+
+        it("showing modeled element changes visibility for intermediate category children in search paths", async () => {
+          const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
+          const keys = buildIModelResult;
+
+          await visibilityHandlerWithSearchPaths.changeVisibility(
+            createElementHierarchyNode({
+              elementId: keys.modeledElement.id,
+              modelId: keys.model.id,
+              categoryId: keys.categoryA.id,
+              parentKeys: [keys.model, keys.categoryA],
+              hasChildren: true,
+              search: {
+                isSearchTarget: false,
+                childrenTargetPaths: [
+                  { identifier: keys.subModel, children: [{ identifier: keys.categoryB, children: [{ identifier: keys.subModelElement1 }] }] },
+                ],
+              },
+            }),
+            true,
+          );
+
+          await validateModelsTreeHierarchyVisibility({
+            provider: providerWithSearchPaths,
+            handler: visibilityHandlerWithSearchPaths,
+            viewport,
+            expectations: "all-visible",
+          });
+
+          await validateModelsTreeHierarchyVisibility({
+            provider: defaultProvider,
+            handler: defaultVisibilityHandler,
+            viewport,
+            // prettier-ignore
+            expectations: {
+              [IModel.rootSubjectId]: "partial",
+                [keys.model.id]: "partial",
+                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                    [keys.modeledElement.id]: "partial",
+                      [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "partial",
+                        [keys.subModelElement1.id]: "visible",
+                        [keys.subModelElement2.id]: "hidden",
+            },
+          });
         });
       });
     });

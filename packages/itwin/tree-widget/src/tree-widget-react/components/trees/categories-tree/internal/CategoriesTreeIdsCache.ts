@@ -3,13 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, filter, forkJoin, from, map, merge, mergeAll, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
+import { defer, EMPTY, forkJoin, from, map, merge, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
 import { fromWithRelease, getClassesByView, getOrCreate } from "../../common/internal/Utils.js";
-import { createGeometricElementInstanceKeyPaths } from "../CategoriesTreeDefinition.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
@@ -56,8 +55,6 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
   #definitionContainerInstanceKeyPaths: Map<DefinitionContainerId, Observable<HierarchyNodeIdentifiersPath>> = new Map();
   #categoryClass: EC.FullClassName;
   #categoryElementClass: EC.FullClassName;
-  #modelClass: EC.FullClassName;
-  #type: "2d" | "3d";
   #isDefinitionContainerSupported: Observable<boolean> | undefined;
   #filteredElementsModels: Observable<Map<ElementId, ModelId>> | undefined;
   #queryExecutor: LimitingECSqlQueryExecutor;
@@ -67,11 +64,9 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
   constructor(props: CategoriesTreeIdsCacheProps) {
     super(props);
     this.#queryExecutor = props.queryExecutor;
-    const { categoryClass, elementClass, modelClass } = getClassesByView(props.type);
+    const { categoryClass, elementClass } = getClassesByView(props.type);
     this.#categoryClass = categoryClass;
     this.#categoryElementClass = elementClass;
-    this.#modelClass = modelClass;
-    this.#type = props.type;
     this.#componentId = Guid.createValue();
     this.#componentName = "CategoriesTreeIdsCache";
   }
@@ -481,85 +476,6 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
         return this.getDefinitionContainersSearchPaths({ definitionContainerIds: entry.modelId });
       }),
     );
-  }
-
-  public getCategoriesSearchPaths({
-    categoryIds,
-    includePathsWithSubModels,
-  }: {
-    categoryIds: Id64Arg;
-    includePathsWithSubModels: boolean;
-  }): Observable<HierarchyNodeIdentifiersPath> {
-    const pathsWithSubModels = includePathsWithSubModels
-      ? fromWithRelease({ source: categoryIds, releaseOnCount: 200 }).pipe(
-          mergeMap((id) =>
-            forkJoin({
-              id: of(id),
-              subModels: this.getModels({ categoryId: id }).pipe(
-                filter(({ categoryIsOfTopMostElement, isSubModel }) => isSubModel && categoryIsOfTopMostElement),
-                map(({ id: modelId }) => modelId),
-                toArray(),
-              ),
-            }),
-          ),
-          reduce((acc, { id, subModels }) => {
-            for (const subModelId of subModels) {
-              const entry = getOrCreate({ map: acc, key: subModelId, createFunc: () => new Set<CategoryId>() });
-              entry.add(id);
-            }
-            return acc;
-          }, new Map<ModelId, Set<CategoryId>>()),
-          mergeMap((subModelCategoriesMap) => {
-            if (subModelCategoriesMap.size === 0) {
-              return EMPTY;
-            }
-            return createGeometricElementInstanceKeyPaths({
-              queryExecutor: this.#queryExecutor,
-              idsCache: this,
-              viewType: this.#type,
-              targetItems: [...subModelCategoriesMap.keys()],
-              componentId: Guid.createValue(),
-              componentName: "CategoriesTreeIdsCache-categoryInstanceKeyPaths",
-              chunkIndex: -1,
-            }).pipe(
-              map(({ path }) => {
-                const categories = subModelCategoriesMap.get(path[path.length - 1].id);
-                const paths = new Array<HierarchyNodeIdentifiersPath>();
-                for (const categoryId of categories ?? []) {
-                  // Paths for modeled elements are created, but category is under sub-model, so need to
-                  // add sub-model and category to the path.
-                  paths.push([...path, { className: this.#modelClass, id: path[path.length - 1].id }, { className: this.#categoryClass, id: categoryId }]);
-                }
-                return paths;
-              }),
-              mergeAll(),
-            );
-          }),
-        )
-      : EMPTY;
-
-    const pathsWithoutSubModels = this.getCachedCategoryData().pipe(
-      mergeMap(({ categoriesGroupedByModel }) =>
-        fromWithRelease({ source: categoryIds, releaseOnCount: 200 }).pipe(
-          mergeMap((categoryId) => {
-            for (const [modelId, modelCategoriesInfo] of categoriesGroupedByModel) {
-              if (modelCategoriesInfo.childCategories.find((childCategory) => childCategory.id === categoryId)) {
-                const instanceKey = { id: categoryId, className: this.#categoryClass };
-                if (!modelCategoriesInfo.parentDefinitionContainerExists) {
-                  return of([instanceKey]);
-                }
-
-                return this.getDefinitionContainersSearchPaths({ definitionContainerIds: modelId }).pipe(
-                  map((pathToDefinitionContainer) => [...pathToDefinitionContainer, instanceKey]),
-                );
-              }
-            }
-            return of([]);
-          }),
-        ),
-      ),
-    );
-    return merge(pathsWithSubModels, pathsWithoutSubModels);
   }
 
   public getAllDefinitionContainersAndCategories(props?: {

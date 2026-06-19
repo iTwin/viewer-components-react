@@ -4,18 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { defaultIfEmpty, defer, mergeMap } from "rxjs";
-import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
-import { getParentElementsIdsPath } from "../../../common/internal/Utils.js";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 
 import type { Observable } from "rxjs";
-import type { Id64Arg, Id64String } from "@itwin/core-bentley";
-import type { CategoryId, ElementId } from "../../../common/internal/Types.js";
+import type { Id64Arg } from "@itwin/core-bentley";
 import type { BaseVisibilityHelperProps } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { ModelsTreeIdsCache } from "../ModelsTreeIdsCache.js";
+import type { ElementClassGroupingNodeProps } from "../ModelsTreeNodeInternal.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./ModelsTreeVisibilityHandler.js";
 
 /** @internal */
@@ -62,28 +60,17 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
   }
 
   /** Gets visibility status of grouped elements */
-  public getGroupedElementsVisibilityStatus(props: {
-    modelId: Id64String;
-    categoryId: Id64String;
-    elementIds: Id64Arg;
-    parentKeys: HierarchyNodeKey[];
-    categoryOfTopMostParentElement: CategoryId;
-    topMostParentElementId?: ElementId;
-    childrenWhichAreParents: Set<ElementId>;
-  }): Observable<VisibilityStatus> {
-    const { modelId, categoryId, elementIds, parentKeys, categoryOfTopMostParentElement, topMostParentElementId, childrenWhichAreParents } = props;
-    const parentElementsIdsPath = topMostParentElementId
-      ? getParentElementsIdsPath({
-          parentInstanceKeys: parentKeys.filter((key) => HierarchyNodeKey.isInstances(key)).map((key) => key.instanceKeys),
-          topMostParentElementId,
-        })
-      : [];
+  public getGroupedElementsVisibilityStatus(
+    props: Pick<ElementClassGroupingNodeProps, "parentElementsPath" | "modelId" | "categoryId" | "childrenWhichAreParents"> & {
+      elementIds: Id64Arg;
+    },
+  ): Observable<VisibilityStatus> {
+    const { modelId, categoryId, elementIds, parentElementsPath, childrenWhichAreParents } = props;
     return this.getElementsVisibilityStatus({
       elementIds,
       modelId,
       categoryId,
-      parentElementsIdsPath,
-      categoryOfTopMostParentElement,
+      parentElementsPath,
       computeOnlyOwnStatus: childrenWhichAreParents.size === 0 ? true : (elementId) => !childrenWhichAreParents.has(elementId),
     });
   }
@@ -108,22 +95,13 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
   }
 
   /** Changes visibility of grouped elements. */
-  public changeGroupedElementsVisibilityStatus(props: {
-    modelId: Id64String;
-    categoryId: Id64String;
-    elementIds: Id64Arg;
-    on: boolean;
-    parentKeys: HierarchyNodeKey[];
-    categoryOfTopMostParentElement: CategoryId;
-    topMostParentElementId?: ElementId;
-  }): Observable<void> {
-    const { modelId, categoryId, elementIds, on, parentKeys, categoryOfTopMostParentElement, topMostParentElementId } = props;
-    const parentElementsIdsPath = topMostParentElementId
-      ? getParentElementsIdsPath({
-          parentInstanceKeys: parentKeys.filter((key) => HierarchyNodeKey.isInstances(key)).map((key) => key.instanceKeys),
-          topMostParentElementId,
-        })
-      : [];
-    return this.changeElementsVisibilityStatus({ modelId, elementIds, categoryId, on, categoryOfTopMostParentElement, parentElementsIdsPath });
+  public changeGroupedElementsVisibilityStatus(
+    props: Pick<ElementClassGroupingNodeProps, "parentElementsPath" | "modelId" | "categoryId"> & {
+      elementIds: Id64Arg;
+      on: boolean;
+    },
+  ): Observable<void> {
+    const { modelId, categoryId, elementIds, on, parentElementsPath } = props;
+    return this.changeElementsVisibilityStatus({ modelId, elementIds, categoryId, on, parentElementsPath });
   }
 }

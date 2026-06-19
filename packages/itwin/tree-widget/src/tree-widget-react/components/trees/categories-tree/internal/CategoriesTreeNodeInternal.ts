@@ -8,6 +8,7 @@ import { CategoriesTreeNode } from "../CategoriesTreeNode.js";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, GroupingHierarchyNode, HierarchyNode, InstancesNodeKey, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ElementId } from "../../common/internal/Types.js";
+import type { ParentElementsPath } from "../../common/internal/Utils.js";
 
 /**
  * Contains utility functions for working with Models Tree nodes.
@@ -43,13 +44,19 @@ export namespace CategoriesTreeNodeInternal {
   export const isRawElementNode = (
     node: Pick<HierarchyNode, "extendedData">,
   ): node is Omit<NonGroupingHierarchyNode, "extendedData"> & { key: InstancesNodeKey } & {
-    extendedData: ElementNodeProps & { [key: string]: any };
+    extendedData: Pick<ElementNodeProps, "categoryId" | "modelId"> & { [key: string]: any };
   } => CategoriesTreeNode.isElementNode(node);
 
   export const isElementClassGroupingNode = (
     node: Pick<HierarchyNode, "key">,
   ): node is Omit<GroupingHierarchyNode, "extendedData"> & { key: ClassGroupingNodeKey } & {
     extendedData: ElementClassGroupingNodeProps;
+  } => CategoriesTreeNode.isElementClassGroupingNode(node);
+
+  export const isRawElementClassGroupingNode = (
+    node: Pick<HierarchyNode, "key">,
+  ): node is Omit<GroupingHierarchyNode, "extendedData"> & { key: ClassGroupingNodeKey } & {
+    extendedData: Pick<ElementClassGroupingNodeProps, "categoryId"> & { [key: string]: any };
   } => CategoriesTreeNode.isElementClassGroupingNode(node);
 
   export const isSubCategoryNode = CategoriesTreeNode.isSubCategoryNode;
@@ -59,8 +66,8 @@ export namespace CategoriesTreeNodeInternal {
 export interface CategoryNodeProps {
   description?: string;
   hasSubCategories?: boolean;
+  parentElementsPath: ParentElementsPath;
   modelIds: Id64Array;
-  isCategoryOfSubModel: boolean;
 }
 
 /**
@@ -69,8 +76,7 @@ export interface CategoryNodeProps {
 export interface ElementNodeProps {
   modelId: Id64String;
   categoryId: Id64String;
-  categoryOfTopMostParentElement: Id64String;
-  topMostParentElementId: Id64String;
+  parentElementsPath: ParentElementsPath;
 }
 
 /**
@@ -78,8 +84,8 @@ export interface ElementNodeProps {
  */
 export interface ElementClassGroupingNodeProps {
   categoryId: Id64String;
-  topMostParentElementId?: Id64String;
-  modelElementsMap: Map<Id64String, { elementIds: Set<Id64String>; categoryOfTopMostParentElement: Id64String; childrenWhichAreParents: Set<ElementId> }>;
+  parentElementsPath: ParentElementsPath;
+  modelElementsMap: Map<Id64String, { elementIds: Set<Id64String>; childrenWhichAreParents: Set<ElementId> }>;
   hasDirectNonSearchTargets?: boolean;
   hasSearchTargetAncestor?: boolean;
 }

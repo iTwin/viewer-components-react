@@ -4,19 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { bufferCount, concat, concatMap, delay, EMPTY, from, map, merge, mergeMap, reduce, toArray } from "rxjs";
-import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
-import { getOptimalBatchSize, getParentElementsIdsPath } from "../../../common/internal/Utils.js";
+import { getOptimalBatchSize } from "../../../common/internal/Utils.js";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 
 import type { Observable } from "rxjs";
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
-import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
 import type { BaseVisibilityHelperProps } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { CategoriesTreeHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
 import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
+import type { ElementClassGroupingNodeProps } from "../CategoriesTreeNodeInternal.js";
 
 /** @internal */
 export type CategoriesTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
@@ -63,25 +62,18 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
 
   /** Gets grouped elements visibility status. */
   public getGroupedElementsVisibilityStatus(props: {
-    modelElementsMap: Map<ModelId, { elementIds: Set<ElementId>; categoryOfTopMostParentElement: CategoryId; childrenWhichAreParents: Set<ElementId> }>;
+    modelElementsMap: ElementClassGroupingNodeProps["modelElementsMap"];
     categoryId: Id64String;
-    parentKeys: HierarchyNodeKey[];
-    topMostParentElementId?: ElementId;
+    parentElementsPath: ElementClassGroupingNodeProps["parentElementsPath"];
   }): Observable<VisibilityStatus> {
-    const { modelElementsMap, categoryId, topMostParentElementId } = props;
+    const { modelElementsMap, categoryId, parentElementsPath } = props;
     return from(modelElementsMap).pipe(
-      mergeMap(([modelId, { elementIds, categoryOfTopMostParentElement, childrenWhichAreParents }]) =>
+      mergeMap(([modelId, { elementIds, childrenWhichAreParents }]) =>
         this.getElementsVisibilityStatus({
           elementIds,
           modelId,
           categoryId,
-          parentElementsIdsPath: topMostParentElementId
-            ? getParentElementsIdsPath({
-                parentInstanceKeys: props.parentKeys.filter((key) => HierarchyNodeKey.isInstances(key)).map((key) => key.instanceKeys),
-                topMostParentElementId,
-              })
-            : [],
-          categoryOfTopMostParentElement,
+          parentElementsPath,
           computeOnlyOwnStatus: childrenWhichAreParents.size ? (elementId) => !childrenWhichAreParents.has(elementId) : true,
         }),
       ),
@@ -120,28 +112,20 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
 
   /** Changes grouped elements visibility status. */
   public changeGroupedElementsVisibilityStatus(props: {
-    modelElementsMap: Map<ModelId, { elementIds: Set<ElementId>; categoryOfTopMostParentElement: CategoryId }>;
+    modelElementsMap: ElementClassGroupingNodeProps["modelElementsMap"];
     categoryId: Id64String;
-    parentKeys: HierarchyNodeKey[];
-    topMostParentElementId?: ElementId;
+    parentElementsPath: ElementClassGroupingNodeProps["parentElementsPath"];
     on: boolean;
   }): Observable<void> {
-    const { modelElementsMap, categoryId, topMostParentElementId, on } = props;
-    const parentElementsIdsPath = topMostParentElementId
-      ? getParentElementsIdsPath({
-          parentInstanceKeys: props.parentKeys.filter((key) => HierarchyNodeKey.isInstances(key)).map((key) => key.instanceKeys),
-          topMostParentElementId,
-        })
-      : [];
+    const { modelElementsMap, categoryId, parentElementsPath, on } = props;
     return from(modelElementsMap).pipe(
-      mergeMap(([modelId, { elementIds, categoryOfTopMostParentElement }]) => {
+      mergeMap(([modelId, { elementIds }]) => {
         return this.changeElementsVisibilityStatus({
           modelId,
           elementIds,
           categoryId,
           on,
-          categoryOfTopMostParentElement,
-          parentElementsIdsPath,
+          parentElementsPath,
         });
       }),
     );

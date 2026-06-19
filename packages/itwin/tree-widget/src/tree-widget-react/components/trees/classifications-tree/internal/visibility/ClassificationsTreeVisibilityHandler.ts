@@ -5,10 +5,9 @@
 
 import { concat, defer, EMPTY, from, merge, mergeAll, mergeMap, of, Subject } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
-import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { fromWithRelease, getParentElementsIdsPath } from "../../../common/internal/Utils.js";
+import { fromWithRelease } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 import { ClassificationsTreeNodeInternal } from "../ClassificationsTreeNodeInternal.js";
 import { ClassificationsTreeVisibilityHelper } from "./ClassificationsTreeVisibilityHelper.js";
@@ -87,38 +86,29 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
     on: boolean;
   }): Observable<void> {
     return fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
-      mergeMap(
-        ({ modelId, categoryId, searchTargetElements, nonSearchTargetElements, pathToElements, categoryOfTopMostParentElement, topMostParentElementId }) => {
-          const parentElementsIdsPath = topMostParentElementId
-            ? getParentElementsIdsPath({
-                parentInstanceKeys: pathToElements.map((instanceKey) => [instanceKey]),
-                topMostParentElementId,
+      mergeMap(({ modelId, categoryId, nonSearchTargetElements, searchTargetElements, parentElementsPath }) => {
+        return merge(
+          searchTargetElements.length > 0
+            ? this.#visibilityHelper.changeElementsVisibilityStatus({
+                modelId,
+                categoryId,
+                elementIds: searchTargetElements,
+                parentElementsPath,
+                on,
               })
-            : [];
-          return merge(
-            searchTargetElements.length > 0
-              ? this.#visibilityHelper.changeElementsVisibilityStatus({
-                  modelId,
-                  categoryId,
-                  elementIds: searchTargetElements,
-                  parentElementsIdsPath,
-                  categoryOfTopMostParentElement,
-                  on,
-                })
-              : EMPTY,
-            // Child always/never drawn elements will be in search paths, and their visibility status will be handled separately.
-            nonSearchTargetElements.length > 0
-              ? this.#visibilityHelper.changeElementsVisibilityStatus({
-                  modelId,
-                  categoryId,
-                  elementIds: nonSearchTargetElements,
-                  on,
-                  ignoreDescendants: true,
-                })
-              : EMPTY,
-          );
-        },
-      ),
+            : EMPTY,
+          // Child always/never drawn elements will be in search paths, and their visibility status will be handled separately.
+          nonSearchTargetElements.length > 0
+            ? this.#visibilityHelper.changeElementsVisibilityStatus({
+                modelId,
+                categoryId,
+                elementIds: nonSearchTargetElements,
+                on,
+                ignoreDescendants: true,
+              })
+            : EMPTY,
+        );
+      }),
     );
   }
 
@@ -138,16 +128,11 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       });
     }
     assert(ClassificationsTreeNodeInternal.isGeometricElementNode(node));
-    const parentElementsIdsPath = getParentElementsIdsPath({
-      parentInstanceKeys: node.parentKeys.filter((parentKey) => HierarchyNodeKey.isInstances(parentKey)).map((parentKey) => parentKey.instanceKeys),
-      topMostParentElementId: node.extendedData.topMostParentElementId,
-    });
     return this.#visibilityHelper.getElementsVisibilityStatus({
       elementIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
       modelId: node.extendedData.modelId,
       categoryId: node.extendedData.categoryId,
-      parentElementsIdsPath,
-      categoryOfTopMostParentElement: node.extendedData.categoryOfTopMostParentElement,
+      parentElementsPath: node.extendedData.parentElementsPath,
       computeOnlyOwnStatus: node.children ? undefined : true,
     });
   }
@@ -173,18 +158,13 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       }
       assert(ClassificationsTreeNodeInternal.isGeometricElementNode(node));
       const elementIds = node.key.instanceKeys.map(({ id }) => id);
-      const parentElementsIdsPath = getParentElementsIdsPath({
-        parentInstanceKeys: node.parentKeys.filter((parentKey) => HierarchyNodeKey.isInstances(parentKey)).map((parentKey) => parentKey.instanceKeys),
-        topMostParentElementId: node.extendedData.topMostParentElementId,
-      });
 
       return this.#visibilityHelper.changeElementsVisibilityStatus({
         elementIds,
         modelId: node.extendedData.modelId,
         categoryId: node.extendedData.categoryId,
         on,
-        categoryOfTopMostParentElement: node.extendedData.categoryOfTopMostParentElement,
-        parentElementsIdsPath,
+        parentElementsPath: node.extendedData.parentElementsPath,
       });
     });
 
@@ -222,36 +202,27 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
     elements: Required<ClassificationsTreeSearchTargets>["elements"];
   }): Observable<VisibilityStatus> {
     return fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
-      mergeMap(
-        ({ modelId, categoryId, searchTargetElements, nonSearchTargetElements, pathToElements, categoryOfTopMostParentElement, topMostParentElementId }) => {
-          const parentElementsIdsPath = topMostParentElementId
-            ? getParentElementsIdsPath({
-                parentInstanceKeys: pathToElements.map((instanceKey) => [instanceKey]),
-                topMostParentElementId,
+      mergeMap(({ modelId, categoryId, searchTargetElements, nonSearchTargetElements, parentElementsPath }) => {
+        return merge(
+          searchTargetElements.length > 0
+            ? this.#visibilityHelper.getElementsVisibilityStatus({
+                modelId,
+                categoryId,
+                elementIds: searchTargetElements,
+                parentElementsPath,
               })
-            : [];
-          return merge(
-            searchTargetElements.length > 0
-              ? this.#visibilityHelper.getElementsVisibilityStatus({
-                  modelId,
-                  categoryId,
-                  elementIds: searchTargetElements,
-                  parentElementsIdsPath,
-                  categoryOfTopMostParentElement,
-                })
-              : EMPTY,
-            // Child always/never drawn elements will be in search paths, and their visibility status will be handled separately.
-            nonSearchTargetElements.length > 0
-              ? this.#visibilityHelper.getElementsVisibilityStatus({
-                  modelId,
-                  categoryId,
-                  elementIds: nonSearchTargetElements,
-                  computeOnlyOwnStatus: true,
-                })
-              : EMPTY,
-          );
-        },
-      ),
+            : EMPTY,
+          // Child always/never drawn elements will be in search paths, and their visibility status will be handled separately.
+          nonSearchTargetElements.length > 0
+            ? this.#visibilityHelper.getElementsVisibilityStatus({
+                modelId,
+                categoryId,
+                elementIds: nonSearchTargetElements,
+                computeOnlyOwnStatus: true,
+              })
+            : EMPTY,
+        );
+      }),
     );
   }
 }

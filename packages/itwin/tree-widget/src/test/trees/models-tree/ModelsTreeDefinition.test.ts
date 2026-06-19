@@ -21,7 +21,7 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { CLASS_NAME_GeometricElement2d, CLASS_NAME_Subject } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
-import { buildIModel } from "../../IModelUtils.js";
+import { buildIModel, TestSchema } from "../../IModelUtils.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 import { createModelsTreeProvider } from "./Utils.js";
 
@@ -129,20 +129,14 @@ describe("Models tree", () => {
                                 instanceKeys: [keys.rootElement2],
                                 supportsFiltering: true,
                                 children: [
-                                  NodeValidators.createForInstanceNode({
-                                    instanceKeys: [keys.category],
-                                    supportsFiltering: true,
+                                  NodeValidators.createForClassGroupingNode({
+                                    className: keys.modelingElement.className,
+                                    label: "Physical Object",
                                     children: [
-                                      NodeValidators.createForClassGroupingNode({
-                                        className: keys.modelingElement.className,
-                                        label: "Physical Object",
-                                        children: [
-                                          NodeValidators.createForInstanceNode({
-                                            instanceKeys: [keys.modelingElement],
-                                            supportsFiltering: true,
-                                            children: false,
-                                          }),
-                                        ],
+                                      NodeValidators.createForInstanceNode({
+                                        instanceKeys: [keys.modelingElement],
+                                        supportsFiltering: true,
+                                        children: false,
                                       }),
                                     ],
                                   }),
@@ -578,19 +572,13 @@ describe("Models tree", () => {
                                   instanceKeys: [keys.childElement],
                                   supportsFiltering: true,
                                   children: [
-                                    NodeValidators.createForInstanceNode({
-                                      instanceKeys: [keys.category],
-                                      supportsFiltering: true,
+                                    NodeValidators.createForClassGroupingNode({
+                                      className: keys.childOfChild.className,
                                       children: [
-                                        NodeValidators.createForClassGroupingNode({
-                                          className: keys.childOfChild.className,
-                                          children: [
-                                            NodeValidators.createForInstanceNode({
-                                              instanceKeys: [keys.childOfChild],
-                                              supportsFiltering: true,
-                                              children: false,
-                                            }),
-                                          ],
+                                        NodeValidators.createForInstanceNode({
+                                          instanceKeys: [keys.childOfChild],
+                                          supportsFiltering: true,
+                                          children: false,
                                         }),
                                       ],
                                     }),
@@ -794,19 +782,13 @@ describe("Models tree", () => {
                           instanceKeys: [keys.rootElement],
                           supportsFiltering: true,
                           children: [
-                            NodeValidators.createForInstanceNode({
-                              instanceKeys: [keys.category],
-                              supportsFiltering: true,
+                            NodeValidators.createForClassGroupingNode({
+                              className: keys.childElement.className,
                               children: [
-                                NodeValidators.createForClassGroupingNode({
-                                  className: keys.childElement.className,
-                                  children: [
-                                    NodeValidators.createForInstanceNode({
-                                      instanceKeys: [keys.childElement],
-                                      supportsFiltering: true,
-                                      children: false,
-                                    }),
-                                  ],
+                                NodeValidators.createForInstanceNode({
+                                  instanceKeys: [keys.childElement],
+                                  supportsFiltering: true,
+                                  children: false,
                                 }),
                               ],
                             }),
@@ -986,6 +968,351 @@ describe("Models tree", () => {
           ],
         });
       });
+
+      it("does not show intermediate category when child element has same category as parent", async () => {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
+            const category = insertSpatialCategory({ txn, codeValue: "category" });
+            const parentElement = insertPhysicalElement({ txn, userLabel: "parent element", modelId: model.id, categoryId: category.id });
+            const childElement = insertPhysicalElement({
+              txn,
+              userLabel: "child element",
+              modelId: model.id,
+              categoryId: category.id,
+              parentId: parentElement.id,
+            });
+            return { rootSubject, model, category, parentElement, childElement };
+          }),
+        );
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createModelsTreeProvider({ imodelConnection });
+        await validateHierarchy({
+          provider,
+          expect: [
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.model],
+              supportsFiltering: true,
+              children: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.category],
+                  supportsFiltering: true,
+                  children: [
+                    NodeValidators.createForClassGroupingNode({
+                      className: keys.parentElement.className,
+                      children: [
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.parentElement],
+                          supportsFiltering: true,
+                          children: [
+                            NodeValidators.createForClassGroupingNode({
+                              className: keys.childElement.className,
+                              children: [
+                                NodeValidators.createForInstanceNode({
+                                  instanceKeys: [keys.childElement],
+                                  supportsFiltering: true,
+                                  children: false,
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+      });
+
+      it("shows intermediate category when child element has different category than parent", async () => {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
+            const categoryA = insertSpatialCategory({ txn, codeValue: "category A" });
+            const categoryB = insertSpatialCategory({ txn, codeValue: "category B" });
+            const parentElement = insertPhysicalElement({ txn, userLabel: "parent element", modelId: model.id, categoryId: categoryA.id });
+            const childElement = insertPhysicalElement({
+              txn,
+              userLabel: "child element",
+              modelId: model.id,
+              categoryId: categoryB.id,
+              parentId: parentElement.id,
+            });
+            return { rootSubject, model, categoryA, categoryB, parentElement, childElement };
+          }),
+        );
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createModelsTreeProvider({ imodelConnection });
+        await validateHierarchy({
+          provider,
+          expect: [
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.model],
+              supportsFiltering: true,
+              children: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.categoryA],
+                  supportsFiltering: true,
+                  children: [
+                    NodeValidators.createForClassGroupingNode({
+                      className: keys.parentElement.className,
+                      children: [
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.parentElement],
+                          supportsFiltering: true,
+                          children: [
+                            NodeValidators.createForInstanceNode({
+                              instanceKeys: [keys.categoryB],
+                              supportsFiltering: true,
+                              children: [
+                                NodeValidators.createForClassGroupingNode({
+                                  className: keys.childElement.className,
+                                  children: [
+                                    NodeValidators.createForInstanceNode({
+                                      instanceKeys: [keys.childElement],
+                                      supportsFiltering: true,
+                                      children: false,
+                                    }),
+                                  ],
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+      });
+
+      it("does not show intermediate category when modeling element has the same category as modeled element", async () => {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Elements Model" });
+            const categoryA = insertSpatialCategory({ txn, codeValue: "category A" });
+            const modeledElement = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: categoryA.id,
+              classFullName: `${TestSchema.Name}.${TestSchema.ModeledElement3dClassName}`,
+            });
+            const subModel = insertPhysicalSubModel({ txn, modeledElementId: modeledElement.id });
+            const modelingElement = insertPhysicalElement({
+              txn,
+              modelId: subModel.id,
+              categoryId: categoryA.id,
+            });
+            return { categoryA, modeledElement, modelingElement, physicalModel };
+          }),
+        );
+
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createModelsTreeProvider({ imodelConnection });
+
+        await validateHierarchy({
+          provider,
+          expect: [
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.physicalModel],
+              supportsFiltering: true,
+              children: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.categoryA],
+                  children: [
+                    NodeValidators.createForClassGroupingNode({
+                      className: keys.modeledElement.className,
+                      children: [
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.modeledElement],
+                          children: [
+                            NodeValidators.createForClassGroupingNode({
+                              className: keys.modelingElement.className,
+                              children: [
+                                NodeValidators.createForInstanceNode({
+                                  instanceKeys: [keys.modelingElement],
+                                  children: false,
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+      });
+
+      it("shows intermediate category when modeling element has different category than modeled element", async () => {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Elements Model" });
+            const categoryA = insertSpatialCategory({ txn, codeValue: "category A" });
+            const categoryB = insertSpatialCategory({ txn, codeValue: "category B" });
+            const modeledElement = insertPhysicalElement({
+              txn,
+              userLabel: "modeled element",
+              modelId: physicalModel.id,
+              categoryId: categoryA.id,
+              classFullName: `${TestSchema.Name}.${TestSchema.ModeledElement3dClassName}`,
+            });
+            const subModel = insertPhysicalSubModel({ txn, modeledElementId: modeledElement.id });
+            const modelingElement = insertPhysicalElement({
+              txn,
+              userLabel: "modeling element",
+              modelId: subModel.id,
+              categoryId: categoryB.id,
+            });
+            return { categoryA, categoryB, modeledElement, modelingElement, physicalModel };
+          }),
+        );
+
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createModelsTreeProvider({ imodelConnection });
+
+        await validateHierarchy({
+          provider,
+          expect: [
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.physicalModel],
+              supportsFiltering: true,
+              children: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.categoryA],
+                  children: [
+                    NodeValidators.createForClassGroupingNode({
+                      className: keys.modeledElement.className,
+                      children: [
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.modeledElement],
+                          children: [
+                            NodeValidators.createForInstanceNode({
+                              instanceKeys: [keys.categoryB],
+                              children: [
+                                NodeValidators.createForClassGroupingNode({
+                                  className: keys.modelingElement.className,
+                                  children: [
+                                    NodeValidators.createForInstanceNode({
+                                      instanceKeys: [keys.modelingElement],
+                                      children: false,
+                                    }),
+                                  ],
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+      });
+
+      it("shows intermediate category for deeply nested elements with different categories", async () => {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
+            const categoryA = insertSpatialCategory({ txn, codeValue: "category A" });
+            const categoryB = insertSpatialCategory({ txn, codeValue: "category B" });
+            const parentElement = insertPhysicalElement({ txn, userLabel: "parent element", modelId: model.id, categoryId: categoryA.id });
+            const childElement = insertPhysicalElement({
+              txn,
+              userLabel: "child element",
+              modelId: model.id,
+              categoryId: categoryB.id,
+              parentId: parentElement.id,
+            });
+            const grandchildElement = insertPhysicalElement({
+              txn,
+              userLabel: "grandchild element",
+              modelId: model.id,
+              categoryId: categoryA.id,
+              parentId: childElement.id,
+            });
+            return { rootSubject, model, categoryA, categoryB, parentElement, childElement, grandchildElement };
+          }),
+        );
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using provider = createModelsTreeProvider({ imodelConnection });
+        await validateHierarchy({
+          provider,
+          expect: [
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.model],
+              supportsFiltering: true,
+              children: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.categoryA],
+                  supportsFiltering: true,
+                  children: [
+                    NodeValidators.createForClassGroupingNode({
+                      className: keys.parentElement.className,
+                      children: [
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.parentElement],
+                          supportsFiltering: true,
+                          children: [
+                            NodeValidators.createForInstanceNode({
+                              instanceKeys: [keys.categoryB],
+                              supportsFiltering: true,
+                              children: [
+                                NodeValidators.createForClassGroupingNode({
+                                  className: keys.childElement.className,
+                                  children: [
+                                    NodeValidators.createForInstanceNode({
+                                      instanceKeys: [keys.childElement],
+                                      supportsFiltering: true,
+                                      children: [
+                                        NodeValidators.createForInstanceNode({
+                                          instanceKeys: [keys.categoryA],
+                                          supportsFiltering: true,
+                                          children: [
+                                            NodeValidators.createForClassGroupingNode({
+                                              className: keys.grandchildElement.className,
+                                              children: [
+                                                NodeValidators.createForInstanceNode({
+                                                  instanceKeys: [keys.grandchildElement],
+                                                  supportsFiltering: true,
+                                                  children: false,
+                                                }),
+                                              ],
+                                            }),
+                                          ],
+                                        }),
+                                      ],
+                                    }),
+                                  ],
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+      });
     });
 
     describe("Hierarchy customization", () => {
@@ -1072,15 +1399,9 @@ describe("Models tree", () => {
                           supportsFiltering: true,
                           children: [
                             NodeValidators.createForInstanceNode({
-                              instanceKeys: [keys.category],
+                              instanceKeys: [keys.modelingElement],
                               supportsFiltering: true,
-                              children: [
-                                NodeValidators.createForInstanceNode({
-                                  instanceKeys: [keys.modelingElement],
-                                  supportsFiltering: true,
-                                  children: false,
-                                }),
-                              ],
+                              children: false,
                             }),
                           ],
                         }),
@@ -1181,20 +1502,14 @@ describe("Models tree", () => {
                               instanceKeys: [keys.rootElement2],
                               supportsFiltering: true,
                               children: [
-                                NodeValidators.createForInstanceNode({
-                                  instanceKeys: [keys.category],
-                                  supportsFiltering: true,
+                                NodeValidators.createForClassGroupingNode({
+                                  className: keys.modelingElement.className,
+                                  label: "Physical Object (1)",
                                   children: [
-                                    NodeValidators.createForClassGroupingNode({
-                                      className: keys.modelingElement.className,
-                                      label: "Physical Object (1)",
-                                      children: [
-                                        NodeValidators.createForInstanceNode({
-                                          instanceKeys: [keys.modelingElement],
-                                          supportsFiltering: true,
-                                          children: false,
-                                        }),
-                                      ],
+                                    NodeValidators.createForInstanceNode({
+                                      instanceKeys: [keys.modelingElement],
+                                      supportsFiltering: true,
+                                      children: false,
                                     }),
                                   ],
                                 }),

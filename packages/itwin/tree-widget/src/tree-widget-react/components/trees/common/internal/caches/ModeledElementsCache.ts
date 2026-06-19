@@ -6,17 +6,26 @@
 import { defer, map, mergeMap, reduce, shareReplay } from "rxjs";
 import { CLASS_NAME_Model } from "../ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
-import { getOrCreate } from "../Utils.js";
+import { ChildrenTree, getOrCreate } from "../Utils.js";
 
 import type { Observable } from "rxjs";
-import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { CategoryId, ElementId, ModelId } from "../Types.js";
+import type { ParentElementsPath } from "../Utils.js";
 
 interface ModeledElementsCacheProps {
   queryExecutor: LimitingECSqlQueryExecutor;
   componentId: GuidString;
   elementClassName: string;
+}
+type SubModelsTree = ChildrenTree<{ type: "model" | "category" | "element"; directSubModels: Array<ElementId> }>;
+
+interface QueriedRow {
+  modelId: Id64String;
+  modeledElementId: Id64String;
+  categoryId: Id64String;
+  categoryElementPath: Id64Array;
 }
 
 /** @internal */
@@ -28,7 +37,7 @@ export class ModeledElementsCache {
   // ElementId here is also a ModelId, since those elements are sub models.
   #modeledElementsInfo:
     | Observable<{
-        modelWithCategoryModeledElements: Map<ModelId, Map<CategoryId, Set<ElementId>>>;
+        subModelsTree: SubModelsTree;
         allSubModels: Set<ElementId>;
         childSubModels: Map<ElementId, Set<ElementId>>;
       }>
@@ -41,12 +50,7 @@ export class ModeledElementsCache {
     this.#componentName = "ModeledElementsCache";
   }
 
-  private queryModeledElements(): Observable<{
-    modelId: Id64String;
-    modeledElementId: Id64String;
-    categoryId: Id64String;
-    parentElements: Id64Array;
-  }> {
+  private queryModeledElements(): Observable<QueriedRow> {
     return defer(() => {
       const query = `
         SELECT
@@ -57,11 +61,11 @@ export class ModeledElementsCache {
             '',
             (
               WITH RECURSIVE ModeledElementParents(parentId, parentPath) AS (
-                SELECT p.Parent.Id, CAST(IdToHex(p.ECInstanceId) AS TEXT)
+                SELECT p.Parent.Id, CAST(IdToHex(p.Category.Id) AS TEXT) || ';' || CAST(IdToHex(p.ECInstanceId) AS TEXT)
                 FROM ${this.#elementClassName} p
                 WHERE p.ECInstanceId = me.Parent.Id
                 UNION ALL
-                SELECT pOfp.Parent.Id, CAST(IdToHex(pOfp.ECInstanceId) AS TEXT) || ';' || c.parentPath
+                SELECT pOfp.Parent.Id, CAST(IdToHex(pOfp.Category.Id) AS TEXT) || ';' || CAST(IdToHex(pOfp.ECInstanceId) AS TEXT) || ';' || c.parentPath
                 FROM ${this.#elementClassName} pOfp
                 JOIN ModeledElementParents c ON c.parentId = pOfp.ECInstanceId
               )
@@ -69,7 +73,7 @@ export class ModeledElementsCache {
               FROM ModeledElementParents
               WHERE parentId IS NULL
             )
-          ) parentElements
+          ) categoryElementPath
         FROM ${CLASS_NAME_Model} m
         JOIN ${this.#elementClassName} me ON me.ECInstanceId = m.ModeledElement.Id
         WHERE
@@ -82,28 +86,45 @@ export class ModeledElementsCache {
       );
     }).pipe(
       catchBeSQLiteInterrupts,
-      map((row) => {
-        return { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId, parentElements: row.parentElements.split(";") };
+      map((row): QueriedRow => {
+        return {
+          modelId: row.modelId,
+          categoryId: row.categoryId,
+          modeledElementId: row.modeledElementId,
+          categoryElementPath: row.categoryElementPath === "" ? [] : row.categoryElementPath.split(";"),
+        };
       }),
     );
   }
 
   public getModeledElementsInfo() {
     this.#modeledElementsInfo ??= this.queryModeledElements().pipe(
-      reduce(
-        (acc, { modelId, categoryId, modeledElementId, parentElements }) => {
-          const modelEntry = getOrCreate({ map: acc.modelWithCategoryModeledElements, key: modelId, createFunc: () => new Map<CategoryId, Set<ElementId>>() });
-          const categoryEntry = getOrCreate({ map: modelEntry, key: categoryId, createFunc: () => new Set<ElementId>() });
-          categoryEntry.add(modeledElementId);
-          acc.allSubModels.add(modeledElementId);
-          parentElements.forEach((parentElementId) => {
-            const parentEntry = getOrCreate({ map: acc.childSubModels, key: parentElementId, createFunc: () => new Set<ElementId>() });
-            parentEntry.add(modeledElementId);
+      reduce<QueriedRow, { subModelsTree: SubModelsTree; allSubModels: Set<ElementId>; childSubModels: Map<ElementId, Set<ElementId>> }>(
+        (acc, { modelId, categoryId, modeledElementId, categoryElementPath }) => {
+          ChildrenTree.update({
+            tree: acc.subModelsTree,
+            idsToAdd: [modelId, ...categoryElementPath, categoryId],
+            additionalPropsGetter: ({ id, additionalProps, depth }) => {
+              let newAdditionalProps = additionalProps;
+              if (!newAdditionalProps) {
+                newAdditionalProps = { type: id === modelId ? "model" : depth % 2 === 1 ? "category" : "element", directSubModels: [] };
+              }
+              if (id === categoryId) {
+                newAdditionalProps.directSubModels.push(modeledElementId);
+              }
+              return newAdditionalProps;
+            },
           });
+          for (let i = 1; i < categoryElementPath.length; i += 2) {
+            const elementId = categoryElementPath[i];
+            const childSubModelsEntry = getOrCreate({ map: acc.childSubModels, key: elementId, createFunc: () => new Set<ElementId>() });
+            childSubModelsEntry.add(modeledElementId);
+          }
+          acc.allSubModels.add(modeledElementId);
           return acc;
         },
         {
-          modelWithCategoryModeledElements: new Map<ModelId, Map<CategoryId, Set<ElementId>>>(),
+          subModelsTree: new Map(),
           allSubModels: new Set<ElementId>(),
           childSubModels: new Map<ElementId, Set<ElementId>>(),
         },
@@ -127,13 +148,51 @@ export class ModeledElementsCache {
     );
   }
 
-  public getCategoryModeledElements({ modelId, categoryId }: { modelId: Id64String; categoryId: Id64String }): Observable<Id64String> {
+  public getCategoryModeledElements({
+    modelIds,
+    categoryIds,
+    parentElementsPath,
+  }: {
+    modelIds: Id64Set;
+    categoryIds: Id64Set;
+    parentElementsPath: ParentElementsPath;
+  }): Observable<Id64String> {
     return this.getModeledElementsInfo().pipe(
-      mergeMap(({ modelWithCategoryModeledElements }) => modelWithCategoryModeledElements.get(modelId)?.get(categoryId) ?? new Set<Id64String>()),
+      mergeMap(({ subModelsTree }) => {
+        const accumulator = new Array<ElementId>();
+        const childrenTreeAsArray = new Array<Set<ElementId | CategoryId | ModelId>>();
+        childrenTreeAsArray.push(modelIds);
+        for (const { categoryIds: parentCategoryId, elementIds } of parentElementsPath) {
+          childrenTreeAsArray.push(new Set([parentCategoryId]));
+          childrenTreeAsArray.push(new Set(elementIds));
+        }
+        childrenTreeAsArray.push(categoryIds);
+        ChildrenTree.visit({
+          tree: subModelsTree,
+          accept: ({ treeEntry, key, depth }) => {
+            if (depth < childrenTreeAsArray.length) {
+              // when entry in children tree does not exist in the childrenTreeAsArray
+              // it means that this branch of the tree is not in the path specified by parentElementsPath
+              // children can be ignored
+              if (!childrenTreeAsArray[depth].has(key)) {
+                return { ignoreChildren: true };
+              }
+              if (depth === childrenTreeAsArray.length - 1) {
+                accumulator.push(...treeEntry.directSubModels);
+              }
+              return { ignoreChildren: false };
+            }
+            accumulator.push(...treeEntry.directSubModels);
+            return { ignoreChildren: false };
+          },
+        });
+        return accumulator;
+      }),
     );
   }
 
   public hasModeledElements({ modelId }: { modelId: Id64String }): Observable<boolean> {
-    return this.getModeledElementsInfo().pipe(map(({ modelWithCategoryModeledElements }) => !!modelWithCategoryModeledElements.get(modelId)?.size));
+    // subModelsTree contains modelId only when it has a modeled element.
+    return this.getModeledElementsInfo().pipe(map(({ subModelsTree }) => subModelsTree.has(modelId)));
   }
 }

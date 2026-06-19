@@ -8,6 +8,7 @@ import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable } from "../..
 import type { Id64String } from "@itwin/core-bentley";
 import type { NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
+import type { ParentElementsPath } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
 
 export function createClassificationTableHierarchyNode({
   id,
@@ -65,12 +66,14 @@ export function createPhysicalElementHierarchyNode({
   categoryId,
   search,
   parentKeys,
+  parentElementsPath,
 }: {
   id: Id64String;
   modelId: Id64String;
   categoryId: Id64String;
   search?: NonGroupingHierarchyNode["search"];
   parentKeys?: InstanceKey[];
+  parentElementsPath?: ParentElementsPath;
 }): NonGroupingHierarchyNode {
   return {
     key: {
@@ -84,6 +87,7 @@ export function createPhysicalElementHierarchyNode({
       type: "GeometricElement3d",
       modelId,
       categoryId,
+      parentElementsPath: parentElementsPath ?? [],
     },
     search,
   };

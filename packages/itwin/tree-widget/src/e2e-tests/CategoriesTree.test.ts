@@ -159,7 +159,7 @@ test.describe("Categories tree", () => {
     const node = locateNode(treeWidget, "Equipment");
     await node.waitFor({ state: "visible" });
     await node.getByRole("button", { name: "Determining visibility..." }).waitFor({ state: "detached" });
-    await node.getByRole("button", { name: "Hide", includeHidden: true }).waitFor({ state: "attached" });
+    await node.getByRole("button", { name: "Show" }).waitFor({ state: "attached" });
     await takeScreenshot(page, treeWidget);
   });
 });

@@ -337,6 +337,7 @@ export function createCategoryHierarchyNode(categoryId: Id64String, modelId: Id6
     extendedData: {
       isCategory: true,
       modelIds: [modelId],
+      parentElementsPath: [],
     },
   };
 }
@@ -374,6 +375,7 @@ export function createElementHierarchyNode(props: {
       isElement: true,
       modelId: props.modelId,
       categoryId: props.categoryId,
+      parentElementsPath: [],
     },
   };
 }

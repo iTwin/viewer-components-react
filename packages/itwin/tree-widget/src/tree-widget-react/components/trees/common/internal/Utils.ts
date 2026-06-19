@@ -18,8 +18,7 @@ import {
 
 import type { Observable } from "rxjs";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { InstanceKey } from "@itwin/presentation-shared";
-import type { ElementId } from "./Types.js";
+import type { CategoryId, ElementId } from "./Types.js";
 
 /** @internal */
 export function setDifference<T>(lhs: ReadonlySet<T>, rhs: ReadonlySet<T>): Set<T> {
@@ -249,23 +248,38 @@ export function groupingNodeDataFromChildren(children: ProcessedHierarchyNode[])
   return { hasSearchTargetAncestor: false, hasDirectNonSearchTargets: false };
 }
 
+/**
+ * Path describing a chain of parent elements, where each segment is one category + its elements.
+ *
+ * Structurally compatible with `ElementPathSegment[]` — can be spread directly into it.
+ * The difference: this type uses exact single values (`Id64String`, `Id64Array`) because each
+ * segment is known precisely, while `ElementPathSegment` uses `Id64Arg` to allow multi-value
+ * cache lookups.
+ * @internal
+ */
+export type ParentElementsPath = Array<{
+  elementIds: Id64Array;
+  /** Single category ID. Named plural for structural compatibility with `ElementPathSegment.categoryIds`. */
+  categoryIds: Id64String;
+}>;
+
 /** @internal */
-export function getParentElementsIdsPath({
-  parentInstanceKeys,
-  topMostParentElementId,
-}: {
-  parentInstanceKeys: Array<Array<InstanceKey>>;
-  topMostParentElementId: ElementId;
-}): Array<Id64Arg> {
-  for (let i = 0; i < parentInstanceKeys.length; ++i) {
-    const instanceKeys = parentInstanceKeys[i];
-    for (const instanceKey of instanceKeys) {
-      if (instanceKey.id === topMostParentElementId) {
-        return parentInstanceKeys.slice(i).map((keys) => keys.map((key) => key.id));
-      }
-    }
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export namespace ParentElementsPath {
+  export function getSingleLastParentId(path: ParentElementsPath): ElementId | undefined {
+    const lastParentIds = ParentElementsPath.getLastParentIds(path);
+    assert(
+      () => lastParentIds === undefined || lastParentIds.length === 1,
+      `Expected exactly one parent id at end of path, got ${lastParentIds?.length}. Path: ${JSON.stringify(path)}`,
+    );
+    return lastParentIds?.[0];
   }
-  return [];
+  export function getLastParentIds(path: ParentElementsPath): Id64Array | undefined {
+    return path.length > 0 ? path[path.length - 1].elementIds : undefined;
+  }
+  export function appendToPath({ path, ids, categoryId }: { path: ParentElementsPath; ids: Id64Arg; categoryId: CategoryId }): ParentElementsPath {
+    return [...path, { elementIds: getId64Array(ids), categoryIds: categoryId }];
+  }
 }
 
 /** @internal */
@@ -276,6 +290,11 @@ export function getOrCreate<TKey, TValue>({ map, key, createFunc }: { map: Map<T
     map.set(key, entry);
   }
   return entry;
+}
+
+/** @internal */
+export function getId64Array(ids: Id64Arg): Id64Array {
+  return typeof ids === "string" ? [ids] : Array.isArray(ids) ? ids : [...ids];
 }
 
 /** @internal */

@@ -29,6 +29,7 @@ import type {
   NonGroupingHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import type { EC, InstanceKey } from "@itwin/presentation-shared";
+import type { ParentElementsPath } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
@@ -203,12 +204,14 @@ export function createCategoryHierarchyNode({
   hasChildren,
   parentKeys,
   search,
+  parentElementsPath,
 }: {
   modelId?: Id64String;
   categoryId?: Id64Arg;
   hasChildren?: boolean;
   parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   search?: NonGroupingHierarchyNode["search"];
+  parentElementsPath?: ParentElementsPath;
 }): NonGroupingHierarchyNode {
   return {
     key: {
@@ -225,7 +228,7 @@ export function createCategoryHierarchyNode({
     extendedData: {
       isCategory: true,
       modelIds: [modelId ?? "0x1"],
-      categoryId: categoryId ?? "0x2",
+      parentElementsPath: parentElementsPath ?? [],
     },
   };
 }
@@ -236,8 +239,7 @@ export function createElementHierarchyNode(props: {
   elementId?: Id64String;
   parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   search?: NonGroupingHierarchyNode["search"];
-  topMostParentElementId?: Id64String;
-  categoryOfTopMostParentElement?: Id64String;
+  parentElementsPath?: ParentElementsPath;
 }): NonGroupingHierarchyNode {
   return {
     key: {
@@ -254,8 +256,7 @@ export function createElementHierarchyNode(props: {
       isElement: true,
       modelId: props.modelId,
       categoryId: props.categoryId,
-      topMostParentElementId: props.topMostParentElementId ?? props.elementId,
-      categoryOfTopMostParentElement: props.categoryOfTopMostParentElement ?? props.categoryId,
+      parentElementsPath: props.parentElementsPath ?? [],
     },
   };
 }
@@ -273,7 +274,7 @@ export function createClassGroupingHierarchyNode({
   categoryId: Id64String;
   hasDirectNonSearchTargets?: boolean;
   hasSearchTargetAncestor?: boolean;
-  topMostParentElementId?: Id64String;
+  parentElementsPath?: ParentElementsPath;
   childrenWhichAreParents?: Set<Id64String>;
 }): GroupingHierarchyNode & { key: ClassGroupingNodeKey } {
   const className = props.className ?? CLASS_NAME_Element;
@@ -289,8 +290,7 @@ export function createClassGroupingHierarchyNode({
     extendedData: {
       categoryId,
       modelId,
-      categoryOfTopMostParentElement: categoryId,
-      topMostParentElementId: props.topMostParentElementId,
+      parentElementsPath: props.parentElementsPath ?? [],
       childrenWhichAreParents: props.childrenWhichAreParents ?? new Set(),
       ...(props.hasDirectNonSearchTargets ? { hasDirectNonSearchTargets: props.hasDirectNonSearchTargets } : {}),
       ...(props.hasSearchTargetAncestor ? { hasSearchTargetAncestor: props.hasSearchTargetAncestor } : {}),
