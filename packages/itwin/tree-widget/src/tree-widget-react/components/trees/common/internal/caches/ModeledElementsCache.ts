@@ -79,7 +79,7 @@ export class ModeledElementsCache {
             )
           ) categoryElementPath
         FROM ${this.#elementClassName} me
-        JOIN IdSet(?) modelIdSet ON modelIdSet.Id = me.ECInstanceId
+        JOIN IdSet(?) modelIdSet ON modelIdSet.id = me.ECInstanceId
       `;
       return this.#queryExecutor.createQueryReader(
         { ecsql: query, bindings: [{ type: "idset", value: this.#nonEmptyModelIds }] },
