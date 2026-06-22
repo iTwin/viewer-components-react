@@ -5,6 +5,7 @@
 
 import { firstValueFrom, map } from "rxjs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { CompressedId64Set, Id64 } from "@itwin/core-bentley";
 import {
   ALWAYS_NEVER_BUFFER_THRESHOLD,
   AlwaysAndNeverDrawnElementInfoCache,
@@ -14,6 +15,7 @@ import { createResolvablePromise } from "../../../TestUtils.js";
 import { createFakeViewport } from "../../Common.js";
 
 import type { Id64String } from "@itwin/core-bentley";
+import type { QueryBinder } from "@itwin/core-common";
 import type { TreeWidgetViewport } from "../../../../tree-widget-react.js";
 import type { ElementPathSegment } from "../../../../tree-widget-react/components/trees/common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
 
@@ -75,6 +77,47 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(result).toEqual(new Map());
       expect(vp.iModel.createQueryReader).not.toHaveBeenCalled();
+    });
+
+    it(`does not query ${setType}Drawn set contains only transient elements`, async () => {
+      const modelId = "0x1";
+      const transientElementId = "0xffffff0000000001";
+      expect(Id64.isTransient(transientElementId)).toBe(true);
+      const set = new Set([transientElementId]);
+
+      using vp = createFakeViewport({
+        [`${setType}Drawn`]: set,
+      });
+      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
+      const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
+      expect(result).toEqual(new Map());
+      expect(vp.iModel.createQueryReader).not.toHaveBeenCalled();
+    });
+
+    it(`omits transient elements from query when ${setType}Drawn set contains them`, async () => {
+      const modelId = "0x1";
+      const categoryId = "0x2";
+      const transientElementId = "0xffffff0000000001";
+      const nonTransientElementId = "0x3";
+      expect(Id64.isTransient(transientElementId)).toBe(true);
+      expect(Id64.isTransient(nonTransientElementId)).toBe(false);
+      const set = new Set([transientElementId, nonTransientElementId]);
+      const queryHandler = vi.fn(async (_query: string, binder?: QueryBinder) => {
+        const idsInBinding = CompressedId64Set.decompressSet((binder?.serialize() as any)[1].value);
+        expect(idsInBinding).toEqual(new Set([nonTransientElementId]));
+        return [{ categoryElementPath: `${categoryId};${nonTransientElementId}`, modelId }];
+      });
+      using vp = createFakeViewport({
+        [`${setType}Drawn`]: set,
+        queryHandler,
+      });
+      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
+      const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
+      const expectedResult = new Map([[categoryId, [nonTransientElementId]]]);
+      expect(result).toEqual(expectedResult);
+      expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
     });
 
     it(`gets correct elements when ${setType}Drawn set is not empty`, async () => {

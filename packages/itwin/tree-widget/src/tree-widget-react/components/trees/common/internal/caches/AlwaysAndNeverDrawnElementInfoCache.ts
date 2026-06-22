@@ -252,7 +252,8 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
       latestCacheEntry.invalidateValue.next();
     }
     const set = setType === "always" ? this.#viewport.alwaysDrawn : this.#viewport.neverDrawn;
-    const queryObservable = this.queryAlwaysOrNeverDrawnElementInfo(set, setType).pipe(
+    const setWithoutTransientElements = set ? [...set].filter((id) => !Id64.isTransient(id)) : undefined;
+    const queryObservable = this.queryAlwaysOrNeverDrawnElementInfo(setWithoutTransientElements, setType).pipe(
       takeUntil(latestCacheEntry.invalidateValue),
       takeUntil(this.#disposeSubject),
       shareReplay(),
@@ -268,16 +269,16 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
     this.#disposeSubject.next();
   }
 
-  private queryAlwaysOrNeverDrawnElementInfo(set: ReadonlySet<Id64String> | undefined, setType: SetType): Observable<CachedNodesMap> {
-    const elementInfo = set?.size
-      ? set.size > ALWAYS_NEVER_BUFFER_THRESHOLD
+  private queryAlwaysOrNeverDrawnElementInfo(setWithoutTransientElements: Array<ElementId> | undefined, setType: SetType): Observable<CachedNodesMap> {
+    const elementInfo = setWithoutTransientElements?.length
+      ? setWithoutTransientElements.length > ALWAYS_NEVER_BUFFER_THRESHOLD
         ? // When set is larger, buffer helps to not block main thread for long periods of time
-          from(set).pipe(
-            bufferCount(getOptimalBatchSize({ totalSize: set.size, maximumBatchSize: ALWAYS_NEVER_BUFFER_THRESHOLD })),
+          from(setWithoutTransientElements).pipe(
+            bufferCount(getOptimalBatchSize({ totalSize: setWithoutTransientElements.length, maximumBatchSize: ALWAYS_NEVER_BUFFER_THRESHOLD })),
             releaseMainThreadOnItemsCount(2),
             mergeMap((block, index) => this.queryElementInfo(block, `${setType}-${index}`), 2),
           )
-        : this.queryElementInfo([...set], `${setType}-0`)
+        : this.queryElementInfo(setWithoutTransientElements, `${setType}-0`)
       : EMPTY;
     return elementInfo.pipe(
       releaseMainThreadOnItemsCount(500),
