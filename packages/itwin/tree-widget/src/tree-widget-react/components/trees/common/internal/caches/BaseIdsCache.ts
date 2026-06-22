@@ -3,9 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { EMPTY, filter, forkJoin, from, map, mergeMap, of, reduce } from "rxjs";
+import { EMPTY, filter, forkJoin, from, identity, map, mergeMap, of, reduce, shareReplay } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
-import { fromWithRelease } from "../Utils.js";
+import { ChildrenTree, fromWithRelease } from "../Utils.js";
 import { ChildElementsCache } from "./ChildElementsCache.js";
 import { DescendantsCountCache } from "./DescendantsCountCache.js";
 import { ElementModelCategoriesCache } from "./ElementModelCategoriesCache.js";
@@ -16,7 +16,7 @@ import type { Observable } from "rxjs";
 import type { GuidString, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { Props } from "@itwin/presentation-shared";
-import type { CategoryId, ModelId } from "../Types.js";
+import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../Types.js";
 import type { ParentElementsPath } from "../Utils.js";
 
 /** @internal */
@@ -33,11 +33,13 @@ export class BaseIdsCache {
   readonly #descendantsCountCache: DescendantsCountCache;
   readonly #childElementsCache: ChildElementsCache;
   readonly #subCategoriesCache: SubCategoriesCache;
-  readonly #modeledElementsCache: ModeledElementsCache;
+  #elementClassName: string;
+  #modeledElementsCache: Observable<ModeledElementsCache> | undefined;
   readonly #elementModelCategoriesCache: ElementModelCategoriesCache;
 
   constructor(props: BaseIdsCacheProps) {
     this.#queryExecutor = props.queryExecutor;
+    this.#elementClassName = props.elementClassName;
     this.#componentId = Guid.createValue();
     this.#descendantsCountCache = new DescendantsCountCache({
       elementClassName: props.elementClassName,
@@ -53,29 +55,106 @@ export class BaseIdsCache {
       queryExecutor: this.#queryExecutor,
       componentId: this.#componentId,
     });
-    this.#modeledElementsCache = new ModeledElementsCache({
-      queryExecutor: this.#queryExecutor,
-      componentId: this.#componentId,
-      elementClassName: props.elementClassName,
-    });
     this.#elementModelCategoriesCache = new ElementModelCategoriesCache({
       queryExecutor: this.#queryExecutor,
       componentId: this.#componentId,
       elementClassName: props.elementClassName,
-      modeledElementsCache: this.#modeledElementsCache,
     });
   }
 
-  // Implement get sub-models method
+  private getModeledElementsInfo(): ReturnType<ModeledElementsCache["getModeledElementsInfo"]> {
+    this.#modeledElementsCache ??= this.getAllModels().pipe(
+      map(
+        (allModels) =>
+          new ModeledElementsCache({
+            queryExecutor: this.#queryExecutor,
+            componentId: this.#componentId,
+            elementClassName: this.#elementClassName,
+            nonEmptyModelIds: allModels,
+          }),
+      ),
+      shareReplay(),
+    );
+    return this.#modeledElementsCache.pipe(mergeMap((modeledElementsCache) => modeledElementsCache.getModeledElementsInfo()));
+  }
+
+  // Implement methods using each cache
+
+  // ModeledElementsCache methods
+  public getCategoryModeledElements({
+    modelIds,
+    categoryIds,
+    parentElementsPath,
+  }: {
+    modelIds: Id64Set;
+    categoryIds: Id64Set;
+    parentElementsPath: ParentElementsPath;
+  }): Observable<Id64String> {
+    return this.getModeledElementsInfo().pipe(
+      mergeMap(({ subModelsTree }) => {
+        const accumulator = new Array<ElementId>();
+        const childrenTreeAsArray = new Array<Set<ElementId | CategoryId | ModelId>>();
+        childrenTreeAsArray.push(modelIds);
+        for (const { categoryIds: parentCategoryId, elementIds } of parentElementsPath) {
+          childrenTreeAsArray.push(new Set([parentCategoryId]));
+          childrenTreeAsArray.push(new Set(elementIds));
+        }
+        childrenTreeAsArray.push(categoryIds);
+        ChildrenTree.visit({
+          tree: subModelsTree,
+          accept: ({ treeEntry, key, depth }) => {
+            if (depth < childrenTreeAsArray.length) {
+              // when entry in children tree does not exist in the childrenTreeAsArray
+              // it means that this branch of the tree is not in the path specified by parentElementsPath
+              // children can be ignored
+              if (!childrenTreeAsArray[depth].has(key)) {
+                return { ignoreChildren: true };
+              }
+              if (depth === childrenTreeAsArray.length - 1) {
+                accumulator.push(...treeEntry.directSubModels);
+              }
+              return { ignoreChildren: false };
+            }
+            accumulator.push(...treeEntry.directSubModels);
+            return { ignoreChildren: false };
+          },
+        });
+        return accumulator;
+      }),
+    );
+  }
+
+  public hasSubModels({ modelId }: { modelId: Id64String }): Observable<boolean> {
+    return this.getModeledElementsInfo().pipe(map(({ subModelsTree }) => subModelsTree.has(modelId)));
+  }
+
+  public getAllSubModels(): Observable<Id64Set> {
+    return this.getModeledElementsInfo().pipe(map(({ allSubModels }) => allSubModels));
+  }
+
   public getSubModels(
     props:
+      | { elementId: Id64String }
       | { modelIds: Id64Set; categoryIds?: undefined }
       | { categoryIds: Id64Set; modelIds?: undefined }
       | { modelIds: Id64Set; categoryIds: Id64Set; parentElementsPath: ParentElementsPath },
   ): Observable<Id64String> {
+    if ("elementId" in props) {
+      return this.getModeledElementsInfo().pipe(
+        mergeMap(({ allSubModels, childSubModels }) => {
+          if (allSubModels.has(props.elementId)) {
+            // If element is a sub-model, it can not be a parent.
+            return of(props.elementId);
+          }
+          // Convert sub-models set into array.
+          // When element does not contain sub-model, return empty array.
+          return childSubModels.get(props.elementId) ?? EMPTY;
+        }),
+      );
+    }
     if (props.modelIds) {
       if (props.categoryIds) {
-        return this.#modeledElementsCache.getCategoryModeledElements({
+        return this.getCategoryModeledElements({
           modelIds: props.modelIds,
           categoryIds: props.categoryIds,
           parentElementsPath: props.parentElementsPath,
@@ -83,12 +162,12 @@ export class BaseIdsCache {
       }
       return from(props.modelIds).pipe(
         mergeMap((modelId) =>
-          this.#modeledElementsCache.hasModeledElements({ modelId }).pipe(
+          this.hasSubModels({ modelId }).pipe(
             mergeMap((hasModeledElements) => {
               if (!hasModeledElements) {
                 return of([]);
               }
-              return this.#elementModelCategoriesCache.getModelCategoryIds({ modelId });
+              return this.getCategories({ modelId });
             }),
           ),
         ),
@@ -102,16 +181,15 @@ export class BaseIdsCache {
           if (categoryIds.size === 0) {
             return EMPTY;
           }
-          return this.#modeledElementsCache.getCategoryModeledElements({ modelIds: props.modelIds, categoryIds, parentElementsPath: [] });
+          return this.getCategoryModeledElements({ modelIds: props.modelIds, categoryIds, parentElementsPath: [] });
         }),
       );
     }
 
     return fromWithRelease({ source: props.categoryIds, releaseOnCount: 100 }).pipe(
       mergeMap((categoryId) =>
-        this.#elementModelCategoriesCache.getCategoryElementModels({ categoryId }).pipe(
-          filter(({ isSubModel, categoryIsOfTopMostElement }) => !isSubModel && categoryIsOfTopMostElement),
-          mergeMap(({ id }) => forkJoin({ hasModeledElements: this.#modeledElementsCache.hasModeledElements({ modelId: id }), modelId: of(id) })),
+        this.getModels({ categoryId, excludeSubModels: true, includeOnlyTopMostElementCategory: true }).pipe(
+          mergeMap((modelId) => forkJoin({ hasModeledElements: this.hasSubModels({ modelId }), modelId: of(modelId) })),
           reduce((acc, { hasModeledElements, modelId }) => {
             if (hasModeledElements) {
               acc.add(modelId);
@@ -122,65 +200,84 @@ export class BaseIdsCache {
             if (modelIds.size === 0) {
               return EMPTY;
             }
-            return this.#modeledElementsCache.getCategoryModeledElements({ modelIds, categoryIds: new Set([categoryId]), parentElementsPath: [] });
+            return this.getCategoryModeledElements({ modelIds, categoryIds: new Set([categoryId]), parentElementsPath: [] });
           }),
         ),
       ),
     );
   }
 
-  public getAllSubModels(): Observable<Id64Set> {
-    return this.#modeledElementsCache.getModeledElementsInfo().pipe(map(({ allSubModels }) => allSubModels));
-  }
-
-  public hasSubModels({ modelId }: { modelId: Id64String }): Observable<boolean> {
-    return this.#modeledElementsCache.hasModeledElements({ modelId });
-  }
-
-  // Re-export cache methods
-
   // ElementModelCategoriesCache methods
 
-  public getAllModels(): ReturnType<ElementModelCategoriesCache["getAllModels"]> {
-    return this.#elementModelCategoriesCache.getAllModels();
+  public getAllModels(): Observable<Array<ModelId>> {
+    return this.#elementModelCategoriesCache.getCachedData().pipe(map(({ modelsCategoriesInfo }) => [...modelsCategoriesInfo.keys()]));
   }
 
-  public getCategories(props: Props<ElementModelCategoriesCache["getModelCategoryIds"]>): ReturnType<ElementModelCategoriesCache["getModelCategoryIds"]> {
-    return this.#elementModelCategoriesCache.getModelCategoryIds(props);
+  public getCategories({
+    modelId,
+    includeOnlyIfCategoryOfTopMostElement,
+  }: {
+    modelId: Id64String;
+    includeOnlyIfCategoryOfTopMostElement?: boolean;
+  }): Observable<Id64Set> {
+    return this.#elementModelCategoriesCache
+      .getCachedData()
+      .pipe(
+        map(
+          ({ modelsCategoriesInfo }) =>
+            (includeOnlyIfCategoryOfTopMostElement
+              ? modelsCategoriesInfo.get(modelId)?.categoriesOfTopMostElements
+              : modelsCategoriesInfo.get(modelId)?.allCategories) ?? new Set(),
+        ),
+      );
   }
 
-  public getAllCategoriesOfElements(): ReturnType<ElementModelCategoriesCache["getAllCategoriesOfElements"]> {
-    return this.#elementModelCategoriesCache.getAllCategoriesOfElements();
+  public getAllCategoriesOfElements(props?: { onlyTopMostElementCategories?: boolean }): Observable<Id64Set> {
+    return this.#elementModelCategoriesCache
+      .getCachedData()
+      .pipe(map(({ allCategories, allTopMostElementCategories }) => (props?.onlyTopMostElementCategories ? allTopMostElementCategories : allCategories)));
   }
 
-  public getAllTopMostElementCategories(): ReturnType<ElementModelCategoriesCache["getAllTopMostElementCategories"]> {
-    return this.#elementModelCategoriesCache.getAllTopMostElementCategories();
+  public getModels({
+    categoryId,
+    excludeSubModels,
+    includeOnlyTopMostElementCategory,
+  }: {
+    categoryId: Id64String;
+    excludeSubModels?: boolean;
+    includeOnlyTopMostElementCategory?: boolean;
+  }): Observable<ModelId> {
+    return this.#elementModelCategoriesCache.getCachedData().pipe(
+      mergeMap(({ categoryModelsInfo }) => {
+        const categoryModels = categoryModelsInfo.get(categoryId);
+        if (!categoryModels) {
+          return EMPTY;
+        }
+        if (excludeSubModels) {
+          return this.getAllSubModels().pipe(
+            mergeMap((allSubModels) => {
+              if (allSubModels.size === 0) {
+                return categoryModels;
+              }
+              return from(categoryModels).pipe(filter(({ id }) => !allSubModels.has(id)));
+            }),
+          );
+        }
+        return categoryModels;
+      }),
+      includeOnlyTopMostElementCategory ? filter(({ categoryIsOfTopMostElement }) => categoryIsOfTopMostElement) : identity,
+      map(({ id }) => id),
+    );
   }
 
-  public getModels(props: Props<ElementModelCategoriesCache["getCategoryElementModels"]>): ReturnType<ElementModelCategoriesCache["getCategoryElementModels"]> {
-    return this.#elementModelCategoriesCache.getCategoryElementModels(props);
-  }
-
-  public getCategoriesOfModelsTopMostElements(
-    props: Props<ElementModelCategoriesCache["getCategoriesOfModelsTopMostElements"]>,
-  ): ReturnType<ElementModelCategoriesCache["getCategoriesOfModelsTopMostElements"]> {
-    return this.#elementModelCategoriesCache.getCategoriesOfModelsTopMostElements(props);
-  }
-
-  public categoryHasParentElements(
-    props: Parameters<ElementModelCategoriesCache["categoryHasParentElements"]>[0],
-  ): ReturnType<ElementModelCategoriesCache["categoryHasParentElements"]> {
-    return this.#elementModelCategoriesCache.categoryHasParentElements(props);
+  public categoryHasParentElements({ categoryId }: { categoryId: Id64String }): Observable<boolean> {
+    return this.#elementModelCategoriesCache.getCachedData().pipe(map(({ categoriesWithParentElements }) => categoriesWithParentElements.has(categoryId)));
   }
 
   // DescendantsCountCache methods
 
   public getDescendantsCounts(props: Props<DescendantsCountCache["getDescendantsCounts"]>): ReturnType<DescendantsCountCache["getDescendantsCounts"]> {
     return this.#descendantsCountCache.getDescendantsCounts(props);
-  }
-
-  public getElementsCount(props: Props<DescendantsCountCache["getDescendantsCounts"]>): Observable<number> {
-    return this.#descendantsCountCache.getDescendantsCounts(props).pipe(map((counts) => counts.reduce((sum, entry) => sum + entry.count, 0)));
   }
 
   // ChildElementsCache methods
@@ -190,25 +287,12 @@ export class BaseIdsCache {
   }
 
   // SubCategoriesCache methods
-
-  public getSubCategories(props: Props<SubCategoriesCache["getSubCategories"]>): ReturnType<SubCategoriesCache["getSubCategories"]> {
-    return this.#subCategoriesCache.getSubCategories(props);
+  public getSubCategories(props: { categoryId: Id64String }): Observable<Array<SubCategoryId>> {
+    return this.#subCategoriesCache.getSubCategoriesInfo().pipe(map(({ categorySubCategories }) => categorySubCategories.get(props.categoryId) ?? []));
   }
 
-  public getSubCategoriesInfo(): ReturnType<SubCategoriesCache["getSubCategoriesInfo"]> {
-    return this.#subCategoriesCache.getSubCategoriesInfo();
-  }
-
-  // ModeledElementsCache methods
-
-  public getSubModelsUnderElement(
-    props: Parameters<ModeledElementsCache["getSubModelsUnderElement"]>[0],
-  ): ReturnType<ModeledElementsCache["getSubModelsUnderElement"]> {
-    return this.#modeledElementsCache.getSubModelsUnderElement(props);
-  }
-
-  public getModeledElementsInfo(): ReturnType<ModeledElementsCache["getModeledElementsInfo"]> {
-    return this.#modeledElementsCache.getModeledElementsInfo();
+  public getCategoryId(props: { subCategoryId: Id64String }): Observable<CategoryId | undefined> {
+    return this.#subCategoriesCache.getSubCategoriesInfo().pipe(map(({ subCategoryCategories }) => subCategoryCategories.get(props.subCategoryId)));
   }
 }
 
@@ -226,73 +310,47 @@ export class BaseIdsCacheImpl {
 
   // Implement IBaseIdsCache by re-exporting BaseIdsCache methods
 
-  public getChildElements(props: Props<ChildElementsCache["getChildElements"]>): ReturnType<ChildElementsCache["getChildElements"]> {
+  public getChildElements(props: Props<BaseIdsCache["getChildElements"]>): ReturnType<BaseIdsCache["getChildElements"]> {
     return this.#baseIdsCache.getChildElements(props);
   }
 
-  public getSubCategories(props: Props<SubCategoriesCache["getSubCategories"]>): ReturnType<SubCategoriesCache["getSubCategories"]> {
+  public getSubCategories(props: Props<BaseIdsCache["getSubCategories"]>): ReturnType<BaseIdsCache["getSubCategories"]> {
     return this.#baseIdsCache.getSubCategories(props);
   }
 
-  public getSubModels(
-    props:
-      | { modelIds: Id64Set; categoryIds: Id64Set; parentElementsPath: ParentElementsPath }
-      | { modelIds: Id64Set; categoryIds?: undefined }
-      | { categoryIds: Id64Set; modelIds?: undefined },
-  ): Observable<Id64String> {
+  public getCategoryId(props: Props<BaseIdsCache["getCategoryId"]>): ReturnType<BaseIdsCache["getCategoryId"]> {
+    return this.#baseIdsCache.getCategoryId(props);
+  }
+
+  public getSubModels(props: Props<BaseIdsCache["getSubModels"]>): ReturnType<BaseIdsCache["getSubModels"]> {
     return this.#baseIdsCache.getSubModels(props);
   }
 
-  public getAllSubModels(): Observable<Id64Set> {
+  public getAllSubModels(): ReturnType<BaseIdsCache["getAllSubModels"]> {
     return this.#baseIdsCache.getAllSubModels();
   }
 
-  public hasSubModels({ modelId }: { modelId: Id64String }): Observable<boolean> {
-    return this.#baseIdsCache.hasSubModels({ modelId });
+  public hasSubModels(props: Props<BaseIdsCache["hasSubModels"]>): ReturnType<BaseIdsCache["hasSubModels"]> {
+    return this.#baseIdsCache.hasSubModels(props);
   }
 
-  public getSubModelsUnderElement(
-    props: Parameters<ModeledElementsCache["getSubModelsUnderElement"]>[0],
-  ): ReturnType<ModeledElementsCache["getSubModelsUnderElement"]> {
-    return this.#baseIdsCache.getSubModelsUnderElement(props);
-  }
-
-  public getDescendantsCounts(props: Props<DescendantsCountCache["getDescendantsCounts"]>): ReturnType<DescendantsCountCache["getDescendantsCounts"]> {
+  public getDescendantsCounts(props: Props<BaseIdsCache["getDescendantsCounts"]>): ReturnType<BaseIdsCache["getDescendantsCounts"]> {
     return this.#baseIdsCache.getDescendantsCounts(props);
   }
 
-  public getElementsCount(props: Props<DescendantsCountCache["getDescendantsCounts"]>): Observable<number> {
-    return this.#baseIdsCache.getElementsCount(props);
-  }
-
-  public getCategories(props: Props<ElementModelCategoriesCache["getModelCategoryIds"]>): ReturnType<ElementModelCategoriesCache["getModelCategoryIds"]> {
+  public getCategories(props: Props<BaseIdsCache["getCategories"]>): ReturnType<BaseIdsCache["getCategories"]> {
     return this.#baseIdsCache.getCategories(props);
   }
 
-  public getModels(props: Props<ElementModelCategoriesCache["getCategoryElementModels"]>): ReturnType<ElementModelCategoriesCache["getCategoryElementModels"]> {
+  public getModels(props: Props<BaseIdsCache["getModels"]>): ReturnType<BaseIdsCache["getModels"]> {
     return this.#baseIdsCache.getModels(props);
   }
 
-  public categoryHasParentElements(
-    props: Parameters<ElementModelCategoriesCache["categoryHasParentElements"]>[0],
-  ): ReturnType<ElementModelCategoriesCache["categoryHasParentElements"]> {
+  public categoryHasParentElements(props: Props<BaseIdsCache["categoryHasParentElements"]>): ReturnType<BaseIdsCache["categoryHasParentElements"]> {
     return this.#baseIdsCache.categoryHasParentElements(props);
   }
 
-  public getAllCategoriesOfElements(): ReturnType<ElementModelCategoriesCache["getAllCategoriesOfElements"]> {
-    return this.#baseIdsCache.getAllCategoriesOfElements();
-  }
-
-  public getAllTopMostElementCategories(): ReturnType<ElementModelCategoriesCache["getAllTopMostElementCategories"]> {
-    return this.#baseIdsCache.getAllTopMostElementCategories();
-  }
-
-  public getCategoriesOfModelsTopMostElements(
-    props: Props<BaseIdsCache["getCategoriesOfModelsTopMostElements"]>,
-  ): ReturnType<BaseIdsCache["getCategoriesOfModelsTopMostElements"]> {
-    return this.#baseIdsCache.getCategoriesOfModelsTopMostElements(props);
-  }
-  public getSubCategoriesInfo(): ReturnType<SubCategoriesCache["getSubCategoriesInfo"]> {
-    return this.#baseIdsCache.getSubCategoriesInfo();
+  public getAllCategoriesOfElements(props?: Props<BaseIdsCache["getAllCategoriesOfElements"]>): ReturnType<BaseIdsCache["getAllCategoriesOfElements"]> {
+    return this.#baseIdsCache.getAllCategoriesOfElements(props);
   }
 }

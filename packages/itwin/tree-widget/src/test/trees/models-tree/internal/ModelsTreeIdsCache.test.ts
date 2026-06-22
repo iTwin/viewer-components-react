@@ -36,9 +36,9 @@ describe("ModelsTreeIdsCache", () => {
       throw new Error(`Unexpected query: ${query}`);
     });
     const cache = createIdsCache(stub);
-    await expect(firstValueFrom(cache.getElementsCount({ modelId, categoryId }))).resolves.toBe(elementCount);
+    await expect(firstValueFrom(cache.getDescendantsCounts({ modelId, categoryId }))).resolves.toEqual([{ categoryId, count: elementCount }]);
     expect(stub).toHaveBeenCalledOnce();
-    await expect(firstValueFrom(cache.getElementsCount({ modelId, categoryId }))).resolves.toBe(elementCount);
+    await expect(firstValueFrom(cache.getDescendantsCounts({ modelId, categoryId }))).resolves.toEqual([{ categoryId, count: elementCount }]);
     expect(stub).toHaveBeenCalledOnce();
   });
 
@@ -58,11 +58,21 @@ describe("ModelsTreeIdsCache", () => {
       throw new Error(`Unexpected query: ${query}`);
     });
     const cache = createIdsCache(stub);
-    const obs1 = cache.getElementsCount({ modelId, categoryId });
-    const obs2 = cache.getElementsCount({ modelId, categoryId: categoryId2 });
+    const obs1 = cache.getDescendantsCounts({ modelId, categoryId });
+    const obs2 = cache.getDescendantsCounts({ modelId, categoryId: categoryId2 });
     const [count1, count2] = await Promise.all([firstValueFrom(obs1), firstValueFrom(obs2)]);
-    expect(count1).toBe(elementCount1);
-    expect(count2).toBe(elementCount2);
+    expect(count1).toEqual([
+      {
+        categoryId,
+        count: elementCount1,
+      },
+    ]);
+    expect(count2).toEqual([
+      {
+        categoryId: categoryId2,
+        count: elementCount2,
+      },
+    ]);
     expect(stub).toHaveBeenCalledOnce();
   });
 });

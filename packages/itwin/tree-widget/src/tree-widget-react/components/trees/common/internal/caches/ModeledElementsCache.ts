@@ -3,21 +3,20 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, map, mergeMap, reduce, shareReplay } from "rxjs";
-import { CLASS_NAME_Model } from "../ClassNameDefinitions.js";
+import { defer, EMPTY, map, reduce, shareReplay } from "rxjs";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
 import { ChildrenTree, getOrCreate } from "../Utils.js";
 
 import type { Observable } from "rxjs";
-import type { GuidString, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { CategoryId, ElementId, ModelId } from "../Types.js";
-import type { ParentElementsPath } from "../Utils.js";
+import type { ElementId, ModelId } from "../Types.js";
 
 interface ModeledElementsCacheProps {
   queryExecutor: LimitingECSqlQueryExecutor;
   componentId: GuidString;
   elementClassName: string;
+  nonEmptyModelIds: Array<ModelId>;
 }
 type SubModelsTree = ChildrenTree<{ type: "model" | "category" | "element"; directSubModels: Array<ElementId> }>;
 
@@ -34,6 +33,7 @@ export class ModeledElementsCache {
   #componentId: GuidString;
   #componentName: string;
   #elementClassName: string;
+  #nonEmptyModelIds: Array<ModelId>;
   // ElementId here is also a ModelId, since those elements are sub models.
   #modeledElementsInfo:
     | Observable<{
@@ -48,9 +48,13 @@ export class ModeledElementsCache {
     this.#componentId = props.componentId;
     this.#elementClassName = props.elementClassName;
     this.#componentName = "ModeledElementsCache";
+    this.#nonEmptyModelIds = props.nonEmptyModelIds;
   }
 
   private queryModeledElements(): Observable<QueriedRow> {
+    if (this.#nonEmptyModelIds.length === 0) {
+      return EMPTY;
+    }
     return defer(() => {
       const query = `
         SELECT
@@ -74,14 +78,11 @@ export class ModeledElementsCache {
               WHERE parentId IS NULL
             )
           ) categoryElementPath
-        FROM ${CLASS_NAME_Model} m
-        JOIN ${this.#elementClassName} me ON me.ECInstanceId = m.ModeledElement.Id
-        WHERE
-          m.IsPrivate = false
-          AND m.ECInstanceId IN (SELECT Model.Id FROM ${this.#elementClassName})
+        FROM ${this.#elementClassName} me
+        JOIN IdSet(?) modelIdSet ON modelIdSet.Id = me.ECInstanceId
       `;
       return this.#queryExecutor.createQueryReader(
-        { ecsql: query },
+        { ecsql: query, bindings: [{ type: "idset", value: this.#nonEmptyModelIds }] },
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/modeled-elements` },
       );
     }).pipe(
@@ -132,67 +133,5 @@ export class ModeledElementsCache {
       shareReplay(),
     );
     return this.#modeledElementsInfo;
-  }
-
-  public getSubModelsUnderElement(elementId: Id64String): Observable<Id64Array> {
-    return this.getModeledElementsInfo().pipe(
-      map(({ allSubModels, childSubModels }) => {
-        if (allSubModels.has(elementId)) {
-          // If element is a sub-model, it can not be a parent.
-          return [elementId];
-        }
-        // Convert sub-models set into array.
-        // When element does not contain sub-model, return empty array.
-        return [...(childSubModels.get(elementId) ?? [])];
-      }),
-    );
-  }
-
-  public getCategoryModeledElements({
-    modelIds,
-    categoryIds,
-    parentElementsPath,
-  }: {
-    modelIds: Id64Set;
-    categoryIds: Id64Set;
-    parentElementsPath: ParentElementsPath;
-  }): Observable<Id64String> {
-    return this.getModeledElementsInfo().pipe(
-      mergeMap(({ subModelsTree }) => {
-        const accumulator = new Array<ElementId>();
-        const childrenTreeAsArray = new Array<Set<ElementId | CategoryId | ModelId>>();
-        childrenTreeAsArray.push(modelIds);
-        for (const { categoryIds: parentCategoryId, elementIds } of parentElementsPath) {
-          childrenTreeAsArray.push(new Set([parentCategoryId]));
-          childrenTreeAsArray.push(new Set(elementIds));
-        }
-        childrenTreeAsArray.push(categoryIds);
-        ChildrenTree.visit({
-          tree: subModelsTree,
-          accept: ({ treeEntry, key, depth }) => {
-            if (depth < childrenTreeAsArray.length) {
-              // when entry in children tree does not exist in the childrenTreeAsArray
-              // it means that this branch of the tree is not in the path specified by parentElementsPath
-              // children can be ignored
-              if (!childrenTreeAsArray[depth].has(key)) {
-                return { ignoreChildren: true };
-              }
-              if (depth === childrenTreeAsArray.length - 1) {
-                accumulator.push(...treeEntry.directSubModels);
-              }
-              return { ignoreChildren: false };
-            }
-            accumulator.push(...treeEntry.directSubModels);
-            return { ignoreChildren: false };
-          },
-        });
-        return accumulator;
-      }),
-    );
-  }
-
-  public hasModeledElements({ modelId }: { modelId: Id64String }): Observable<boolean> {
-    // subModelsTree contains modelId only when it has a modeled element.
-    return this.getModeledElementsInfo().pipe(map(({ subModelsTree }) => subModelsTree.has(modelId)));
   }
 }

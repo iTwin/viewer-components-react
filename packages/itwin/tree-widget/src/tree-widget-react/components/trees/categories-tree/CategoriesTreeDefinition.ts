@@ -3,23 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  bufferCount,
-  distinct,
-  EMPTY,
-  filter,
-  firstValueFrom,
-  from,
-  fromEvent,
-  identity,
-  map,
-  merge,
-  mergeMap,
-  reduce,
-  switchMap,
-  takeUntil,
-  toArray,
-} from "rxjs";
+import { bufferCount, distinct, EMPTY, firstValueFrom, from, fromEvent, identity, map, merge, mergeMap, reduce, switchMap, takeUntil, toArray } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
 import { createPredicateBasedHierarchyDefinition, ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
@@ -359,7 +343,18 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         contentClass: { fullName: this.#categoryElementClass, alias: "this" },
       }),
       firstValueFrom(this.#idsCache.getAllSubModels()),
-      firstValueFrom(this.#idsCache.getCategoriesOfModelsTopMostElements(modelIds).pipe(map((categoriesSet) => [...categoriesSet]))),
+      firstValueFrom(
+        from(modelIds).pipe(
+          mergeMap((modelId) => this.#idsCache.getCategories({ modelId, includeOnlyIfCategoryOfTopMostElement: true })),
+          reduce((acc, modelCategories) => {
+            for (const categoryId of modelCategories) {
+              acc.add(categoryId);
+            }
+            return acc;
+          }, new Set<CategoryId>()),
+          map((categoryIdsSet) => [...categoryIdsSet]),
+        ),
+      ),
     ]);
     if (categoryIds.length === 0) {
       return [];
@@ -729,9 +724,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         ? parseIdsSelectorResult(parentNode.extendedData.modelIds)
         : await firstValueFrom(
             from(categoryIds).pipe(
-              mergeMap((categoryId) => this.#idsCache.getModels({ categoryId })),
-              filter(({ isSubModel }) => !isSubModel), // sub-models are handled as separate nodes, so we need to filter them out here
-              map(({ id }) => id),
+              mergeMap((categoryId) => this.#idsCache.getModels({ categoryId, excludeSubModels: true })),
               distinct(),
               toArray(),
             ),

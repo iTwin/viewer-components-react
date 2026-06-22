@@ -10,7 +10,7 @@ import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
 import { getOrCreate } from "../Utils.js";
 
 import type { Observable } from "rxjs";
-import type { GuidString, Id64String } from "@itwin/core-bentley";
+import type { GuidString } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { CategoryId, SubCategoryId } from "../Types.js";
 
@@ -89,9 +89,5 @@ export class SubCategoriesCache {
       )
       .pipe(shareReplay());
     return this.#subCategoriesInfo;
-  }
-
-  public getSubCategories(props: { categoryId: Id64String }): Observable<Array<SubCategoryId>> {
-    return this.getSubCategoriesInfo().pipe(map(({ categorySubCategories }) => categorySubCategories.get(props.categoryId) ?? []));
   }
 }
