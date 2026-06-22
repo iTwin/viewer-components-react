@@ -79,7 +79,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       expect(vp.iModel.createQueryReader).not.toHaveBeenCalled();
     });
 
-    it(`does not query ${setType}Drawn set contains only transient elements`, async () => {
+    it(`does not query when ${setType}Drawn set contains only transient elements`, async () => {
       const modelId = "0x1";
       const transientElementId = "0xffffff0000000001";
       expect(Id64.isTransient(transientElementId)).toBe(true);
