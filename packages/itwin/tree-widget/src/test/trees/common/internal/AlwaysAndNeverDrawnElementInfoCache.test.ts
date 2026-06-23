@@ -5,7 +5,7 @@
 
 import { firstValueFrom, map } from "rxjs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { CompressedId64Set, Id64 } from "@itwin/core-bentley";
+import { CompressedId64Set } from "@itwin/core-bentley";
 import {
   ALWAYS_NEVER_BUFFER_THRESHOLD,
   AlwaysAndNeverDrawnElementInfoCache,
@@ -82,7 +82,6 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
     it(`does not query when ${setType}Drawn set contains only transient elements`, async () => {
       const modelId = "0x1";
       const transientElementId = "0xffffff0000000001";
-      expect(Id64.isTransient(transientElementId)).toBe(true);
       const set = new Set([transientElementId]);
 
       using vp = createFakeViewport({
@@ -100,8 +99,6 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const categoryId = "0x2";
       const transientElementId = "0xffffff0000000001";
       const nonTransientElementId = "0x3";
-      expect(Id64.isTransient(transientElementId)).toBe(true);
-      expect(Id64.isTransient(nonTransientElementId)).toBe(false);
       const set = new Set([transientElementId, nonTransientElementId]);
       const queryHandler = vi.fn(async (_query: string, binder?: QueryBinder) => {
         const idsInBinding = CompressedId64Set.decompressSet((binder?.serialize() as any)[1].value);
