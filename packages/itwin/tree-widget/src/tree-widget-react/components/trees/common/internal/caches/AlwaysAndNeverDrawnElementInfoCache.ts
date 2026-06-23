@@ -273,11 +273,15 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
       ? set.size > ALWAYS_NEVER_BUFFER_THRESHOLD
         ? // When set is larger, buffer helps to not block main thread for long periods of time
           from(set).pipe(
+            filter((id) => !Id64.isTransient(id)),
             bufferCount(getOptimalBatchSize({ totalSize: set.size, maximumBatchSize: ALWAYS_NEVER_BUFFER_THRESHOLD })),
             releaseMainThreadOnItemsCount(2),
             mergeMap((block, index) => this.queryElementInfo(block, `${setType}-${index}`), 2),
           )
-        : this.queryElementInfo([...set], `${setType}-0`)
+        : this.queryElementInfo(
+            [...set].filter((id) => !Id64.isTransient(id)),
+            `${setType}-0`,
+          )
       : EMPTY;
     return elementInfo.pipe(
       releaseMainThreadOnItemsCount(500),
@@ -312,6 +316,9 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
     categoryElementPath: Id64Array;
   }> {
     return defer(() => {
+      if (elementIds.length === 0) {
+        return EMPTY;
+      }
       const executor = createECSqlQueryExecutor(this.#viewport.iModel);
       return executor.createQueryReader(
         {
