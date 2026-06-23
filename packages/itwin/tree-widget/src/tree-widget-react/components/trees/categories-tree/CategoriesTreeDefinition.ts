@@ -3,7 +3,25 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, distinct, EMPTY, firstValueFrom, from, fromEvent, identity, map, merge, mergeMap, reduce, switchMap, takeUntil, toArray } from "rxjs";
+import {
+  bufferCount,
+  defaultIfEmpty,
+  distinct,
+  EMPTY,
+  firstValueFrom,
+  from,
+  fromEvent,
+  identity,
+  map,
+  merge,
+  mergeMap,
+  of,
+  reduce,
+  switchMap,
+  take,
+  takeUntil,
+  toArray,
+} from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
 import { createPredicateBasedHierarchyDefinition, ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
@@ -421,23 +439,23 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             includeEmpty: this.#hierarchyConfig.showEmptyCategories,
           }),
     );
-    const hierarchyDefinition = new Array<HierarchyNodesDefinition>();
+    const hierarchyDefinitionPromises = new Array<Promise<HierarchyNodesDefinition>>();
     if (categories.length > 0) {
-      (await this.createTopMostCategoriesQuery({ categories, instanceFilter, instanceLabelSelectClauseFactory, nodeSelectClauseFactory })).forEach((def) =>
-        hierarchyDefinition.push(def),
+      hierarchyDefinitionPromises.push(
+        this.createTopMostCategoriesQuery({ categories, instanceFilter, instanceLabelSelectClauseFactory, nodeSelectClauseFactory }),
       );
     }
     if (definitionContainers.length > 0) {
-      (
-        await this.createDefinitionContainersQuery({
+      hierarchyDefinitionPromises.push(
+        this.createDefinitionContainersQuery({
           definitionContainerIds: definitionContainers,
           instanceFilter,
           nodeSelectClauseFactory,
           instanceLabelSelectClauseFactory,
-        })
-      ).forEach((def) => hierarchyDefinition.push(def));
+        }),
+      );
     }
-    return hierarchyDefinition;
+    return Promise.all(hierarchyDefinitionPromises);
   }
 
   private async createDefinitionContainersQuery({
@@ -450,44 +468,42 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     instanceFilter?: GenericInstanceFilter;
     nodeSelectClauseFactory: NodesQueryClauseFactory;
     instanceLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
-  }): Promise<HierarchyLevelDefinition> {
+  }): Promise<HierarchyNodesDefinition> {
     const instanceFilterClauses = await nodeSelectClauseFactory.createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: CLASS_NAME_DefinitionContainer, alias: "this" },
     });
 
-    return [
-      {
-        fullClassName: CLASS_NAME_DefinitionContainer,
-        query: {
-          ecsql: `
-            SELECT
-              ${await nodeSelectClauseFactory.createSelectClause({
-                ecClassId: { selector: ECSql.createRawPropertyValueSelector("this", "ECClassId") },
-                ecInstanceId: { selector: "this.ECInstanceId" },
-                nodeLabel: {
-                  selector: await instanceLabelSelectClauseFactory.createSelectClause({
-                    classAlias: "this",
-                    className: CLASS_NAME_DefinitionContainer,
-                  }),
-                },
-                extendedData: {
-                  isDefinitionContainer: true,
-                  imageId: "icon-definition-container",
-                },
-                hasChildren: true,
-                supportsFiltering: true,
-              })}
-            FROM ${instanceFilterClauses.from} this
-            JOIN IdSet(?) definitionContainerIdSet ON this.ECInstanceId = definitionContainerIdSet.id
-            ${instanceFilterClauses.joins}
-            ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
-            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
-          `,
-          bindings: [{ type: "idset", value: definitionContainerIds }],
-        },
+    return {
+      fullClassName: CLASS_NAME_DefinitionContainer,
+      query: {
+        ecsql: `
+          SELECT
+            ${await nodeSelectClauseFactory.createSelectClause({
+              ecClassId: { selector: ECSql.createRawPropertyValueSelector("this", "ECClassId") },
+              ecInstanceId: { selector: "this.ECInstanceId" },
+              nodeLabel: {
+                selector: await instanceLabelSelectClauseFactory.createSelectClause({
+                  classAlias: "this",
+                  className: CLASS_NAME_DefinitionContainer,
+                }),
+              },
+              extendedData: {
+                isDefinitionContainer: true,
+                imageId: "icon-definition-container",
+              },
+              hasChildren: true,
+              supportsFiltering: true,
+            })}
+          FROM ${instanceFilterClauses.from} this
+          JOIN IdSet(?) definitionContainerIdSet ON this.ECInstanceId = definitionContainerIdSet.id
+          ${instanceFilterClauses.joins}
+          ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+          ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+        `,
+        bindings: [{ type: "idset", value: definitionContainerIds }],
       },
-    ];
+    };
   }
 
   private async createTopMostCategoriesQuery({
@@ -500,74 +516,95 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     instanceFilter?: GenericInstanceFilter;
     instanceLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
     nodeSelectClauseFactory: NodesQueryClauseFactory;
-  }): Promise<HierarchyLevelDefinition> {
-    const [instanceFilterClauses, subModels] = await Promise.all([
+  }): Promise<HierarchyNodesDefinition> {
+    const [instanceFilterClauses, categoriesWithChildElements] = await Promise.all([
       nodeSelectClauseFactory.createFilterClauses({
         filter: instanceFilter,
         contentClass: { fullName: this.#categoryClass, alias: "this" },
       }),
-      this.#hierarchyConfig.showElements ? firstValueFrom(this.#idsCache.getAllSubModels()) : new Set<ModelId>(),
+      this.#hierarchyConfig.showElements
+        ? firstValueFrom(
+            // Iterate over categories which will be returned by the query
+            from(categories).pipe(
+              mergeMap(({ id: categoryId }) =>
+                // when category has element models, then it has element children
+                this.#idsCache.getModels({ categoryId, excludeSubModels: true, includeOnlyTopMostElementCategory: true }).pipe(
+                  take(1),
+                  defaultIfEmpty(undefined),
+                  mergeMap((modelId) => (modelId ? of(categoryId) : EMPTY)),
+                ),
+              ),
+              toArray(),
+            ),
+          )
+        : new Array<CategoryId>(),
     ]);
     const categoriesWithMultipleSubCategories = categories
       .filter((categoryInfo) => categoryInfo.subCategoryChildCount > 1)
       .map((categoryInfo) => categoryInfo.id);
 
-    const conditions = new Array<string>();
-    if (!this.#hierarchyConfig.hideSubCategories && categoriesWithMultipleSubCategories.length > 0) {
-      conditions.push(`InVirtualSet(?, this.ECInstanceId)`);
-    }
-    if (this.#hierarchyConfig.showElements) {
-      conditions.push(`
-          this.ECInstanceId IN (
-            SELECT e.Category.Id
-            FROM ${this.#categoryElementClass} e
-            WHERE
-              e.Parent.Id IS NULL
-              ${subModels.size > 0 ? `AND NOT InVirtualSet(?, e.Model.Id)` : ""}
-          )`);
-    }
+    const categoriesWithChildren =
+      !this.#hierarchyConfig.hideSubCategories && categoriesWithMultipleSubCategories.length > 0
+        ? categoriesWithChildElements.length > 0
+          ? // Want to filter out duplicate entries
+            [...new Set(categoriesWithChildElements.concat(categoriesWithMultipleSubCategories))]
+          : categoriesWithMultipleSubCategories
+        : categoriesWithChildElements;
 
-    const hasChildren =
-      conditions.length > 0
-        ? {
-            selector: `IIF(${conditions.join(" OR ")}, 1, 0)`,
-          }
-        : false;
-
-    return [
-      {
-        fullClassName: this.#categoryClass,
-        query: {
-          ecsql: `
-            SELECT
-              ${await this.createCategoryNodeSelectClause({
-                nodeSelectClauseFactory,
-                instanceLabelSelectClauseFactory,
-                hasChildren,
-                extendedData: {
-                  description: { selector: "this.Description" },
-                  modelIds: { selector: createIdsSelector(new Array<ModelId>()) },
-                  hasSubCategories:
-                    categoriesWithMultipleSubCategories.length > 0 ? { selector: "IIF(InVirtualSet(?, this.ECInstanceId), true, false)" } : false,
-                },
-              })}
-            FROM ${instanceFilterClauses.from} this
-            JOIN IdSet(?) categoryIdSet ON this.ECInstanceId = categoryIdSet.id
-            ${instanceFilterClauses.joins}
-            ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
-            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
-          `,
-          bindings: [
-            ...(!this.#hierarchyConfig.hideSubCategories && categoriesWithMultipleSubCategories.length > 0
-              ? [{ type: "idset" as const, value: categoriesWithMultipleSubCategories }]
-              : []),
-            ...(subModels.size > 0 ? [{ type: "idset" as const, value: [...subModels] }] : []),
-            ...(categoriesWithMultipleSubCategories.length > 0 ? [{ type: "idset" as const, value: categoriesWithMultipleSubCategories }] : []),
-            { type: "idset", value: categories.map((category) => category.id) },
-          ],
-        },
+    return {
+      fullClassName: this.#categoryClass,
+      query: {
+        ecsql: `
+          SELECT
+            ${await this.createCategoryNodeSelectClause({
+              nodeSelectClauseFactory,
+              instanceLabelSelectClauseFactory,
+              hasChildren:
+                categoriesWithChildren.length > 0
+                  ? {
+                      selector: `IFNULL(
+                        (
+                          SELECT 1
+                          FROM IdSet(?) hasChildrenIdSet
+                          WHERE hasChildrenIdSet.id = this.ECInstanceId
+                          LIMIT 1
+                        ),
+                        0
+                      )`,
+                    }
+                  : false,
+              extendedData: {
+                description: { selector: "this.Description" },
+                modelIds: { selector: createIdsSelector(new Array<ModelId>()) },
+                hasSubCategories:
+                  categoriesWithMultipleSubCategories.length > 0
+                    ? {
+                        selector: `IFNULL(
+                          (
+                            SELECT 1
+                            FROM IdSet(?) hasSubCategoriesIdSet
+                            WHERE hasSubCategoriesIdSet.id = this.ECInstanceId
+                            LIMIT 1
+                          ),
+                          0
+                        )`,
+                      }
+                    : false,
+              },
+            })}
+          FROM ${instanceFilterClauses.from} this
+          JOIN IdSet(?) categoryIdSet ON this.ECInstanceId = categoryIdSet.id
+          ${instanceFilterClauses.joins}
+          ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+          ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+        `,
+        bindings: [
+          ...(categoriesWithChildren.length > 0 ? [{ type: "idset" as const, value: categoriesWithChildren }] : []),
+          ...(categoriesWithMultipleSubCategories.length > 0 ? [{ type: "idset" as const, value: categoriesWithMultipleSubCategories }] : []),
+          { type: "idset", value: categories.map((category) => category.id) },
+        ],
       },
-    ];
+    };
   }
 
   private async createCategoryChildrenQuery(props: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
@@ -653,8 +690,21 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
               WHERE ce.Parent.Id = this.ECInstanceId
               LIMIT 1
             ),
-            ${allSubModels.length ? "InVirtualSet(?, this.ECInstanceId)" : `0`}
-            )
+            ${
+              allSubModels.length
+                ? `IFNULL(
+                    (
+                      SELECT 1
+                      FROM IdSet(?) subModelIdSet
+                      WHERE this.ECInstanceId = subModelIdSet.id
+                      LIMIT 1
+                      ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+                    ),
+                    0
+                  )`
+                : "0"
+            }
+          )
         `,
       },
       grouping: { byClass: true },
@@ -1201,7 +1251,20 @@ export function createGeometricElementInstanceKeyPaths(props: {
       const ecsql = `
         SELECT '${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([mce].[CategoryId]) AS TEXT) || '${separator}' || mce.Path
         FROM CategoriesElementsHierarchy mce
-        WHERE mce.ParentId IS NULL ${subModelIds.size > 0 ? `AND NOT InVirtualSet(?, mce.ModelId)` : ""}
+        WHERE mce.ParentId IS NULL
+        ${
+          subModelIds.size > 0
+            ? `AND NOT IFNULL(
+                (
+                  SELECT 1
+                  FROM IdSet(?) subModelIdSet
+                  WHERE mce.ModelId = subModelIdSet.id
+                  LIMIT 1
+                ),
+                0
+              )`
+            : ""
+        }
       `;
 
       return queryExecutor.createQueryReader(
@@ -1309,7 +1372,20 @@ export function createCategoriesSearchPaths(props: {
         const ecsql = `
           SELECT '${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([mce].[CategoryId]) AS TEXT) || '${separator}' || mce.Path
           FROM CategoriesParentsHierarchy mce
-          WHERE mce.ParentId IS NULL ${subModelIds.size > 0 ? `AND NOT InVirtualSet(?, mce.ModelId)` : ""}
+          WHERE mce.ParentId IS NULL
+          ${
+            subModelIds.size > 0
+              ? `AND NOT IFNULL(
+                  (
+                    SELECT 1
+                    FROM IdSet(?) subModelIdSet
+                    WHERE mce.ModelId = subModelIdSet.id
+                    LIMIT 1
+                  ),
+                  0
+                )`
+              : ""
+          }
         `;
 
         return queryExecutor.createQueryReader(

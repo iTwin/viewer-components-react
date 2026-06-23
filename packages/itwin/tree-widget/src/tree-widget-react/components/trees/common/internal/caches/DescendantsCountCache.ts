@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, from, map, merge, mergeMap } from "rxjs";
+import { defer, EMPTY, from, map, merge, of } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
 import { getOrCreate } from "../Utils.js";
 import { BatchingCache } from "./BatchingCache.js";
@@ -79,42 +79,50 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
   }
 
   protected getQueryData(batch: DescendantsCountRequest[]): Observable<WhereClause> {
-    const groupedCategoryValues = new Map<ModelId, Map<ElementId | undefined, Set<CategoryId>>>();
-    const groupedElementValues = new Map<ModelId, Set<ElementId>>();
+    const groupedCategoryValues = new Map<ElementId, Set<CategoryId>>();
+    const rootCategoryValues = new Set<CategoryId>();
+    const elementValues = new Set<ElementId>();
+    // Requests contain modelId, but there is no need to include them in the query:
+    // - When making element request: it can only exist within a single model;
+    // - When making category request: if count for category under one model is requested, then it will be requested for other models also,
+    // so there is no need to include them in the query.
     for (const batchEntry of batch) {
       if (batchEntry.categoryId === undefined) {
-        const groupedElementsModelEntry = getOrCreate({ map: groupedElementValues, key: batchEntry.modelId, createFunc: () => new Set<ElementId>() });
-        groupedElementsModelEntry.add(batchEntry.parentElementId);
+        elementValues.add(batchEntry.parentElementId);
         continue;
       }
-      const { modelId, parentElementId, categoryId } = batchEntry;
-      const modelEntry = getOrCreate({ map: groupedCategoryValues, key: modelId, createFunc: () => new Map<ElementId | undefined, Set<CategoryId>>() });
-      const parentEntry = getOrCreate({ map: modelEntry, key: parentElementId, createFunc: () => new Set<CategoryId>() });
+      const { parentElementId, categoryId } = batchEntry;
+      if (!parentElementId) {
+        rootCategoryValues.add(categoryId);
+        continue;
+      }
+      const parentEntry = getOrCreate({ map: groupedCategoryValues, key: parentElementId, createFunc: () => new Set<CategoryId>() });
       parentEntry.add(categoryId);
     }
     return merge(
       from(groupedCategoryValues.entries()).pipe(
-        mergeMap(([modelId, parentMap]) =>
-          from(parentMap.entries()).pipe(
-            map(([parentElementId, categoryIds], idx): WhereClause => {
-              return {
-                whereClause: `Model.Id = ${modelId} AND Category.Id IN (SELECT categoryIdSet${idx}.id FROM IdSet(?) categoryIdSet${idx} ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES) ${parentElementId === undefined ? "AND Parent.Id IS NULL" : `AND Parent.Id = ${parentElementId}`}`,
-                type: "category" as const,
-                bindings: [{ type: "idset" as const, value: [...categoryIds] }],
-              };
-            }),
-          ),
-        ),
-      ),
-      from(groupedElementValues.entries()).pipe(
-        map(([modelId, parentElementIds], idx): WhereClause => {
+        map(([parentElementId, categoryIds], idx): WhereClause => {
           return {
-            whereClause: `Model.Id = ${modelId} AND Parent.Id IN (SELECT elementIdSet${idx}.id FROM IdSet(?) elementIdSet${idx} ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES)`,
-            type: "element" as const,
-            bindings: [{ type: "idset" as const, value: [...parentElementIds] }],
+            whereClause: `Category.Id IN (SELECT categoryIdSet${idx}.id FROM IdSet(?) categoryIdSet${idx} ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES) AND Parent.Id = ${parentElementId}`,
+            type: "category" as const,
+            bindings: [{ type: "idset" as const, value: [...categoryIds] }],
           };
         }),
       ),
+      rootCategoryValues.size > 0
+        ? of({
+            whereClause: "Category.Id IN (SELECT categoryIdSet.id FROM IdSet(?) categoryIdSet ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES) AND Parent.Id IS NULL",
+            type: "category" as const,
+            bindings: [{ type: "idset" as const, value: [...rootCategoryValues] }],
+          })
+        : EMPTY,
+      elementValues.size > 0
+        ? of({
+            whereClause: `Parent.Id IN (SELECT elementIdSet.id FROM IdSet(?) elementIdSet ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES)`,
+            type: "element" as const,
+            bindings: [{ type: "idset" as const, value: [...elementValues] }],
+          })
+        : EMPTY,
     );
   }
 

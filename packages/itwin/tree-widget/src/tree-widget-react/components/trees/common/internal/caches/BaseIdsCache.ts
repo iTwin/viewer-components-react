@@ -36,6 +36,17 @@ export class BaseIdsCache {
   #elementClassName: string;
   #modeledElementsCache: Observable<ModeledElementsCache> | undefined;
   readonly #elementModelCategoriesCache: ElementModelCategoriesCache;
+  #categoryModelsInfoWithoutSubModels:
+    | Observable<
+        Map<
+          CategoryId,
+          {
+            id: ModelId;
+            categoryIsOfTopMostElement: boolean;
+          }[]
+        >
+      >
+    | undefined;
 
   constructor(props: BaseIdsCacheProps) {
     this.#queryExecutor = props.queryExecutor;
@@ -238,6 +249,27 @@ export class BaseIdsCache {
       .pipe(map(({ allCategories, allTopMostElementCategories }) => (props?.onlyTopMostElementCategories ? allTopMostElementCategories : allCategories)));
   }
 
+  private getCategoryModelsInfoWithoutSubModels(): Observable<Map<CategoryId, { id: ModelId; categoryIsOfTopMostElement: boolean }[]>> {
+    this.#categoryModelsInfoWithoutSubModels ??= this.getAllSubModels().pipe(
+      mergeMap((allSubModels) =>
+        allSubModels.size === 0
+          ? this.#elementModelCategoriesCache.getCachedData().pipe(map(({ categoryModelsInfo }) => categoryModelsInfo))
+          : this.#elementModelCategoriesCache.getCachedData().pipe(
+              mergeMap(({ categoryModelsInfo }) => categoryModelsInfo.entries()),
+              reduce((acc, [key, modelInfos]) => {
+                const newModelInfos = modelInfos.filter(({ id }) => !allSubModels.has(id));
+                if (newModelInfos.length > 0) {
+                  acc.set(key, newModelInfos);
+                }
+                return acc;
+              }, new Map<CategoryId, { id: ModelId; categoryIsOfTopMostElement: boolean }[]>()),
+            ),
+      ),
+      shareReplay(),
+    );
+    return this.#categoryModelsInfoWithoutSubModels;
+  }
+
   public getModels({
     categoryId,
     excludeSubModels,
@@ -247,23 +279,18 @@ export class BaseIdsCache {
     excludeSubModels?: boolean;
     includeOnlyTopMostElementCategory?: boolean;
   }): Observable<ModelId> {
-    return this.#elementModelCategoriesCache.getCachedData().pipe(
-      mergeMap(({ categoryModelsInfo }) => {
+    let getCategoryModelsInfo = () => this.#elementModelCategoriesCache.getCachedData().pipe(map(({ categoryModelsInfo }) => categoryModelsInfo));
+
+    if (excludeSubModels) {
+      getCategoryModelsInfo = () => this.getCategoryModelsInfoWithoutSubModels();
+    }
+    return getCategoryModelsInfo().pipe(
+      mergeMap((categoryModelsInfo) => {
         const categoryModels = categoryModelsInfo.get(categoryId);
         if (!categoryModels) {
           return EMPTY;
         }
-        if (excludeSubModels) {
-          return this.getAllSubModels().pipe(
-            mergeMap((allSubModels) => {
-              if (allSubModels.size === 0) {
-                return categoryModels;
-              }
-              return from(categoryModels).pipe(filter(({ id }) => !allSubModels.has(id)));
-            }),
-          );
-        }
-        return categoryModels;
+        return from(categoryModels);
       }),
       includeOnlyTopMostElementCategory ? filter(({ categoryIsOfTopMostElement }) => categoryIsOfTopMostElement) : identity,
       map(({ id }) => id),

@@ -30,7 +30,7 @@ describe("ModelsTreeIdsCache", () => {
     const categoryId = "0x2";
     const elementCount = 3;
     const stub = vi.fn((query: string) => {
-      if (query.includes("Descendants") && query.includes(`Model.Id = ${modelId}`)) {
+      if (query.includes("Descendants")) {
         return [{ modelId, reqParent: null, reqCategory: categoryId, ownCategory: categoryId, cnt: elementCount }];
       }
       throw new Error(`Unexpected query: ${query}`);
@@ -49,7 +49,7 @@ describe("ModelsTreeIdsCache", () => {
     const elementCount1 = 3;
     const elementCount2 = 4;
     const stub = vi.fn((query: string) => {
-      if (query.includes("Descendants") && query.includes(`Model.Id = ${modelId}`)) {
+      if (query.includes("Descendants")) {
         return [
           { modelId, reqParent: null, reqCategory: categoryId, ownCategory: categoryId, cnt: elementCount1 },
           { modelId, reqParent: null, reqCategory: categoryId2, ownCategory: categoryId2, cnt: elementCount2 },

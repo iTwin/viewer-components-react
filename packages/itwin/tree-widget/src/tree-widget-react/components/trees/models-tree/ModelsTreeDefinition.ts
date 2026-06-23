@@ -344,7 +344,17 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   }),
                 },
                 hideIfNoChildren: true,
-                hasChildren: { selector: `InVirtualSet(?, this.ECInstanceId)` },
+                hasChildren: {
+                  selector: `IFNULL(
+                    (
+                      SELECT 1
+                      FROM IdSet(?) hasChildrenIdSet
+                      WHERE hasChildrenIdSet.id = this.ECInstanceId
+                      LIMIT 1
+                    ),
+                    0
+                  )`,
+                },
                 grouping: { byLabel: { action: "merge", groupId: "subject" } },
                 extendedData: {
                   imageId: { selector: `IIF(this.ECInstanceId = ${IModel.rootSubjectId}, 'icon-imodel-hollow-2', 'icon-folder')` },
@@ -583,8 +593,21 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
               WHERE ce.Parent.Id = this.ECInstanceId
               LIMIT 1
             ),
-            ${allSubModels.length ? "InVirtualSet(?, this.ECInstanceId)" : `0`}
-            )
+            ${
+              allSubModels.length
+                ? `IFNULL(
+                    (
+                      SELECT 1
+                      FROM IdSet(?) subModelIdSet
+                      WHERE this.ECInstanceId = subModelIdSet.id
+                      LIMIT 1
+                      ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+                    ),
+                    0
+                  )`
+                : "0"
+            }
+          )
         `,
       },
       extendedData: {
@@ -1028,7 +1051,20 @@ export function createCategoriesSearchPaths(props: {
               || mce.Path
             )
           FROM CategoriesParentsHierarchy mce
-          WHERE mce.ParentId IS NULL ${subModelIds.size > 0 ? `AND NOT InVirtualSet(?, mce.ModelId)` : ""}
+          WHERE mce.ParentId IS NULL
+           ${
+             subModelIds.size > 0
+               ? `AND NOT IFNULL(
+                  (
+                    SELECT 1
+                    FROM IdSet(?) subModelIdSet
+                    WHERE mce.ModelId = subModelIdSet.id
+                    LIMIT 1
+                  ),
+                  0
+                )`
+               : ""
+           }
         `;
 
         return queryExecutor.createQueryReader(

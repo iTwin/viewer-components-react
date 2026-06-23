@@ -170,7 +170,17 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                     className: CLASS_NAME_Subject,
                   }),
                 },
-                hasChildren: { selector: `InVirtualSet(?, this.ECInstanceId)` },
+                hasChildren: {
+                  selector: `IFNULL(
+                    (
+                      SELECT 1
+                      FROM IdSet(?) hasChildrenIdSet
+                      WHERE this.ECInstanceId = hasChildrenIdSet.id
+                      LIMIT 1
+                    ),
+                    0
+                  )`,
+                },
                 grouping: { byLabel: { action: "merge", groupId: "subject" } },
                 extendedData: {
                   imageId: { selector: `IIF(this.ECInstanceId = ${IModel.rootSubjectId}, 'icon-imodel-hollow-2', 'icon-folder')` },
