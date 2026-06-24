@@ -6,6 +6,7 @@
 import { assert } from "chai";
 import { vi } from "vitest";
 import { IModelApp } from "@itwin/core-frontend";
+import { Units } from "@itwin/core-quantity";
 import { Point3d } from "@itwin/core-geometry";
 import { Measurement, MeasurementPickContext } from "../../api/Measurement.js";
 import { WellKnownViewType } from "../../api/MeasurementEnums.js";
@@ -85,7 +86,7 @@ describe("AngleMeasurement tests", () => {
       // Verify that getFormatSpecHandle was called with the correct KoQ and unit
       assert.isTrue(getFormatSpecHandleSpy.mock.calls.length > 0, "getFormatSpecHandle should have been called during construction");
       assert.strictEqual(getFormatSpecHandleSpy.mock.calls[0][0], "DefaultToolsUnits.ANGLE", "Should use the default angle KoQ");
-      assert.strictEqual(getFormatSpecHandleSpy.mock.calls[0][1], "Units.RAD", "Should use the correct persistence unit");
+      assert.strictEqual(getFormatSpecHandleSpy.mock.calls[0][1], Units.ANGLE.RAD, "Should use the correct persistence unit");
 
       // Verify the measurement was created successfully
       assert.isDefined(measurement);

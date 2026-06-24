@@ -25,6 +25,8 @@ import type {
   MeasurementWidgetData,
 } from "../api/Measurement.js";
 import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
+import { Units } from "@itwin/core-quantity";
+
 import type { FormatSpecHandle } from "@itwin/core-quantity";
 
 /**
@@ -39,11 +41,11 @@ export interface DistanceMeasurementProps extends MeasurementProps {
 
 /** Formatting properties for distance measurement. */
 export interface DistanceMeasurementFormattingProps {
-  /** Defaults to "DefaultToolsUnits.LENGTH" and "Units.M" */
+  /** Defaults to "DefaultToolsUnits.LENGTH" and `Units.LENGTH.M` */
   length?: MeasurementFormattingProps;
-  /** Defaults to "CivilUnits.BEARING" and "Units.RAD" */
+  /** Optional and opt-in: no default is applied. When set, bearing is shown using this KoQ; a typical persistence unit is `Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_RAD`. */
   bearing? : MeasurementFormattingProps;
-  /** Defaults to "DefaultToolsUnits.LENGTH_COORDINATE" and "Units.M" */
+  /** Defaults to "DefaultToolsUnits.LENGTH_COORDINATE" and `Units.LENGTH.M` */
   coordinate?: MeasurementFormattingProps;
 }
 
@@ -202,9 +204,9 @@ export class DistanceMeasurement extends Measurement {
     this._showAxes = MeasurementPreferences.current.displayMeasurementAxes;
     this._runRiseAxes = [];
     this._lengthKoQ = "DefaultToolsUnits.LENGTH";
-    this._lengthPersistenceUnitName = "Units.M";
+    this._lengthPersistenceUnitName = Units.LENGTH.M;
     this._coordinateKoQ = "DefaultToolsUnits.LENGTH_COORDINATE";
-    this._coordinatePersistenceUnitName = "Units.M";
+    this._coordinatePersistenceUnitName = Units.LENGTH.M;
 
     if (props) this.readFromJSON(props);
 

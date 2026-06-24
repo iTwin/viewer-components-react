@@ -6,6 +6,7 @@
 import { Cartographic } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 import { Point3d } from "@itwin/core-geometry";
+import { Units } from "@itwin/core-quantity";
 import { assert } from "chai";
 import { FormatterUtils } from "../../api/FormatterUtils.js";
 
@@ -98,6 +99,72 @@ describe("FormatterUtils", () => {
 
     fLatLong = await FormatterUtils.formatCartographicToLatLong(Cartographic.fromDegrees({ latitude: -1.23456, longitude: 0.123456 }));
     assert.strictEqual(fLatLong, `1${Symbols.Deg}14${Symbols.Min}4.416${Symbols.Sec}${Symbols.S}, 0${Symbols.Deg}7${Symbols.Min}24.4416${Symbols.Sec}${Symbols.E}`);
+  });
+
+  it("getDefaultBearingFormatProps returns ANGLE-phenomenon composite for Units.RAD", () => {
+    const props = FormatterUtils.getDefaultBearingFormatProps(Units.ANGLE.RAD);
+    assert.strictEqual(props.type, "Bearing");
+    assert.strictEqual(props.revolutionUnit, Units.ANGLE.REVOLUTION);
+    assert.deepStrictEqual(props.composite?.units.map((u) => u.name), [
+      Units.ANGLE.ARC_DEG,
+      Units.ANGLE.ARC_MINUTE,
+      Units.ANGLE.ARC_SECOND,
+    ]);
+  });
+
+  it("getDefaultBearingFormatProps returns HORIZONTAL_DIRECTION-phenomenon composite for Units.HORIZONTAL_DIR_RAD", () => {
+    const props = FormatterUtils.getDefaultBearingFormatProps(Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_RAD);
+    assert.strictEqual(props.type, "Bearing");
+    assert.strictEqual(props.revolutionUnit, Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_REVOLUTION);
+    assert.deepStrictEqual(props.composite?.units.map((u) => u.name), [
+      Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_ARC_DEG,
+      Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_ARC_MINUTE,
+      Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_ARC_SECOND,
+    ]);
+  });
+
+  it("getDefaultBearingFormatProps falls back to ANGLE composite for unknown persistence unit", () => {
+    const props = FormatterUtils.getDefaultBearingFormatProps("Units.NOT_A_REAL_UNIT");
+    assert.strictEqual(props.revolutionUnit, Units.ANGLE.REVOLUTION);
+    assert.strictEqual(props.composite?.units[0].name, Units.ANGLE.ARC_DEG);
+  });
+
+  it("getDefaultBearingFormatProps keeps ANGLE composite for a non-RAD ANGLE persistence unit", () => {
+    // Edge case: persistence unit is in the ANGLE phenomenon but not RAD; should still pick ANGLE.
+    const props = FormatterUtils.getDefaultBearingFormatProps(Units.ANGLE.ARC_DEG);
+    assert.strictEqual(props.revolutionUnit, Units.ANGLE.REVOLUTION);
+    assert.deepStrictEqual(props.composite?.units.map((u) => u.name), [
+      Units.ANGLE.ARC_DEG,
+      Units.ANGLE.ARC_MINUTE,
+      Units.ANGLE.ARC_SECOND,
+    ]);
+  });
+
+  it("getDefaultBearingFormatProps applies phenomenon-independent DMS labels", () => {
+    const props = FormatterUtils.getDefaultBearingFormatProps(Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_RAD);
+    assert.deepStrictEqual(props.composite?.units.map((u) => u.label), [Symbols.Deg, Symbols.Min, Symbols.Sec]);
+  });
+
+  it("getBearingFormatterSpec round-trips an ANGLE persistence unit without throwing", async () => {
+    // No host format is registered for this bogus KoQ, so it exercises the default-fallback path.
+    const spec = await FormatterUtils.getBearingFormatterSpec("MeasureTools.NonexistentBearingKoQ", Units.ANGLE.RAD);
+    assert.isDefined(spec);
+    // PI/2 rad === due east === N90°E in bearing notation.
+    const formatted = spec!.applyFormatting(Math.PI / 2);
+    assert.isString(formatted);
+    assert.isAbove(formatted.length, 0);
+  });
+
+  it("getBearingFormatterSpec round-trips a HORIZONTAL_DIRECTION persistence unit without throwing", async () => {
+    // Phenomenon mismatch between persistence unit and composite would throw here.
+    const spec = await FormatterUtils.getBearingFormatterSpec(
+      "MeasureTools.NonexistentBearingKoQ2",
+      Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_RAD,
+    );
+    assert.isDefined(spec);
+    const formatted = spec!.applyFormatting(Math.PI / 2);
+    assert.isString(formatted);
+    assert.isAbove(formatted.length, 0);
   });
 
   it("test formatSlope", () => {

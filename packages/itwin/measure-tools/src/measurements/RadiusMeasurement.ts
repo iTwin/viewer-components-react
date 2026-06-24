@@ -27,6 +27,8 @@ import type {
   MeasurementWidgetData,
 } from "../api/Measurement.js";
 import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
+import { Units } from "@itwin/core-quantity";
+
 import type { FormatSpecHandle } from "@itwin/core-quantity";
 export interface RadiusMeasurementProps extends MeasurementProps {
   startPoint?: XYZProps;
@@ -37,7 +39,7 @@ export interface RadiusMeasurementProps extends MeasurementProps {
 
 /** Formatting properties for Radius measurement. */
 export interface RadiusMeasurementFormattingProps {
-  /** Defaults to "DefaultToolsUnits.LENGTH" and "Units.M" */
+  /** Defaults to "DefaultToolsUnits.LENGTH" and `Units.LENGTH.M` */
   length?: MeasurementFormattingProps;
 }
 
@@ -105,7 +107,7 @@ export class RadiusMeasurement extends Measurement {
 
     this._isDynamic = false;
     this._lengthKoQ = "DefaultToolsUnits.LENGTH";
-    this._lengthPersistenceUnitName = "Units.M";
+    this._lengthPersistenceUnitName = Units.LENGTH.M;
     if (props) this.readFromJSON(props);
 
     this.createTextMarker();

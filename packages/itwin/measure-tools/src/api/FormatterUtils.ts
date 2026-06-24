@@ -6,10 +6,10 @@
 import type { Point3d, XAndY } from "@itwin/core-geometry";
 import type { Cartographic } from "@itwin/core-common";
 import { IModelApp, QuantityType } from "@itwin/core-frontend";
-import { FormatTraits } from "@itwin/core-quantity";
+import { FormatTraits, UnitConversions, Units } from "@itwin/core-quantity";
 import { MeasureTools } from "../MeasureTools.js";
 
-import type { FormatDefinition, FormatProps, FormatSpecHandle, FormatterSpec} from "@itwin/core-quantity";
+import type { FormatDefinition, FormatProps, FormatSpecHandle, FormatterSpec, UnitName } from "@itwin/core-quantity";
 export namespace FormatterUtils {
   const bearingUnitSystems = ["metric", "imperial", "usCustomary", "usSurvey"] as const;
   const bearingRegistrationPromises = new Map<string, Promise<void>>();
@@ -280,7 +280,7 @@ export namespace FormatterUtils {
     return bearing;
   }
 
-  async function getBearingFormatProps(bearingKoQ: string, system?: (typeof bearingUnitSystems)[number]): Promise<FormatDefinition> {
+  async function getBearingFormatProps(bearingKoQ: string, persistenceUnitName: string, system?: (typeof bearingUnitSystems)[number]): Promise<FormatDefinition> {
     try {
       const formatProps = await IModelApp.formatsProvider.getFormat(bearingKoQ, system);
       if (formatProps) {
@@ -299,12 +299,12 @@ export namespace FormatterUtils {
       // fall through to default format
     }
 
-    return getDefaultBearingFormatProps();
+    return getDefaultBearingFormatProps(persistenceUnitName);
   }
 
   async function registerBearingFormatSpecs(bearingKoQ: string, persistenceUnitName: string): Promise<void> {
     for (const system of bearingUnitSystems) {
-      const formatProps = await getBearingFormatProps(bearingKoQ, system);
+      const formatProps = await getBearingFormatProps(bearingKoQ, persistenceUnitName, system);
       await IModelApp.quantityFormatter.addFormattingSpecsToRegistry({
         name: bearingKoQ,
         persistenceUnitName,
@@ -335,7 +335,7 @@ export namespace FormatterUtils {
    * @returns A FormatterSpec for bearing formatting.
    */
   export async function getBearingFormatterSpec(bearingKoQ: string, persistenceUnitName: string): Promise<FormatterSpec | undefined> {
-    const formatProps = await getBearingFormatProps(bearingKoQ);
+    const formatProps = await getBearingFormatProps(bearingKoQ, persistenceUnitName);
 
     // Create and return the formatter spec
     return IModelApp.quantityFormatter.createFormatterSpec({
@@ -344,22 +344,58 @@ export namespace FormatterUtils {
     });
   }
 
-  export function getDefaultBearingFormatProps(): FormatProps {
+  // DMS glyphs; same across phenomena.
+  const BEARING_COMPOSITE_LABELS = ["°", "'", "\""] as const;
+
+  // Bearing composite + revolutionUnit must match the persistence unit's phenomenon.
+  // revolutionUnit doubles as the phenomenon probe. ANGLE is the default (`?? fallback`).
+  const BEARING_UNITS_BY_PHENOMENON: ReadonlyArray<{
+    revolutionUnit: UnitName;
+    compositeUnitNames: readonly [UnitName, UnitName, UnitName];
+  }> = [
+    {
+      revolutionUnit: Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_REVOLUTION,
+      compositeUnitNames: [
+        Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_ARC_DEG,
+        Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_ARC_MINUTE,
+        Units.HORIZONTAL_DIRECTION.HORIZONTAL_DIR_ARC_SECOND,
+      ],
+    },
+  ];
+
+  const DEFAULT_BEARING_UNITS = {
+    revolutionUnit: Units.ANGLE.REVOLUTION,
+    compositeUnitNames: [Units.ANGLE.ARC_DEG, Units.ANGLE.ARC_MINUTE, Units.ANGLE.ARC_SECOND] as const,
+  };
+
+  function pickBearingUnits(persistenceUnitName: string) {
+    // Callers may pass non-canonical units, so cast `string` -> `UnitName`; isCompatible
+    // throws for unknown units, which we treat as "no match".
+    const matchesPhenomenon = (phenomenonUnit: UnitName): boolean => {
+      try {
+        return UnitConversions.isCompatible(persistenceUnitName as UnitName, phenomenonUnit);
+      } catch {
+        return false;
+      }
+    };
+
+    return BEARING_UNITS_BY_PHENOMENON.find((entry) => matchesPhenomenon(entry.revolutionUnit)) ?? DEFAULT_BEARING_UNITS;
+  }
+
+  /** Fallback Bearing `FormatProps` matching the phenomenon of `persistenceUnitName`; unknown units default to ANGLE. */
+  export function getDefaultBearingFormatProps(persistenceUnitName: string): FormatProps {
+    const { revolutionUnit, compositeUnitNames } = pickBearingUnits(persistenceUnitName);
     return {
       minWidth: 2,
       precision: 0,
       type: "Bearing",
-      revolutionUnit: "Units.REVOLUTION",
+      revolutionUnit,
       formatTraits: ["showUnitLabel"],
       uomSeparator: "",
       composite: {
         includeZero: true,
         spacer: "",
-        units: [
-          { name: "Units.ARC_DEG", label: "°" },
-          { name: "Units.ARC_MINUTE", label: "'" },
-          { name: "Units.ARC_SECOND", label: "\"" },
-        ],
+        units: compositeUnitNames.map((name, i) => ({ name, label: BEARING_COMPOSITE_LABELS[i] })),
       },
     };
   }

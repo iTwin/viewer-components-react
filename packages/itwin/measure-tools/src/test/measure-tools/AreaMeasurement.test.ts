@@ -6,6 +6,7 @@
 import { assert } from "chai";
 import { vi } from "vitest";
 import { IModelApp, QuantityType } from "@itwin/core-frontend";
+import { Units } from "@itwin/core-quantity";
 import { Point3d } from "@itwin/core-geometry";
 import { Measurement, MeasurementPickContext } from "../../api/Measurement.js";
 import { WellKnownViewType } from "../../api/MeasurementEnums.js";
@@ -73,7 +74,7 @@ describe("AreaMeasurement tests", () => {
     const getSpecsByNameAndUnitSpy = vi.fn().mockReturnValue(undefined);
     const findFormatterSpecSpy = vi.fn().mockReturnValue({
       format: { formatTraits: 0 },
-      persistenceUnit: { name: "Units.M" },
+      persistenceUnit: { name: Units.LENGTH.M },
       applyFormatting: vi.fn().mockReturnValue("mockedFormattedValue")
     });
 
@@ -89,7 +90,7 @@ describe("AreaMeasurement tests", () => {
       // Verify that the KoQ lookup was attempted via getSpecsByNameAndUnit
       assert.isTrue(getSpecsByNameAndUnitSpy.mock.calls.length > 0, "getSpecsByNameAndUnit should have been called during construction");
       assert.strictEqual(getSpecsByNameAndUnitSpy.mock.calls[0][0].name, "DefaultToolsUnits.AREA", "Should lookup the default area KoQ string");
-      assert.strictEqual(getSpecsByNameAndUnitSpy.mock.calls[0][0].persistenceUnitName, "Units.SQ_M", "Should use the correct persistence unit");
+      assert.strictEqual(getSpecsByNameAndUnitSpy.mock.calls[0][0].persistenceUnitName, Units.AREA.SQ_M, "Should use the correct persistence unit");
 
       // Verify that the fallback method was called
       assert.isTrue(findFormatterSpecSpy.mock.calls.length > 0, "findFormatterSpecByQuantityType should have been called as fallback");
@@ -112,7 +113,7 @@ describe("AreaMeasurement tests", () => {
 
     const findFormatterSpecSpy = vi.fn().mockReturnValue({
       format: { formatTraits: 0 },
-      persistenceUnit: { name: "Units.SQ_M" },
+      persistenceUnit: { name: Units.AREA.SQ_M },
     });
     const formatQuantitySpy = vi.fn().mockReturnValue("1.5 m²");
 

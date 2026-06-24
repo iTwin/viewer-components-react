@@ -28,6 +28,8 @@ import type {
   MeasurementWidgetData,
 } from "../api/Measurement.js";
 import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
+import { Units } from "@itwin/core-quantity";
+
 import type { FormatSpecHandle } from "@itwin/core-quantity";
 /**
  * Props for serializing a [[LocationMeasurement]].
@@ -43,13 +45,13 @@ export interface LocationMeasurementProps extends MeasurementProps {
 
 /** Formatting properties for location measurement. */
 export interface LocationMeasurementFormattingProps {
-  /** Defaults to "DefaultToolsUnits.LENGTH_COORDINATE" and "Units.M" */
+  /** Defaults to "DefaultToolsUnits.LENGTH_COORDINATE" and `Units.LENGTH.M` */
   coordinate?: MeasurementFormattingProps;
-  /** Defaults to "DefaultToolsUnits.LENGTH" and "Units.M" */
+  /** Defaults to "DefaultToolsUnits.LENGTH" and `Units.LENGTH.M` */
   length?: MeasurementFormattingProps;
-  /** Defaults to "CivilUnits.STATION" and "Units.M" */
+  /** Defaults to "CivilUnits.STATION" and `Units.LENGTH.M` */
   station?: MeasurementFormattingProps;
-  /** Defaults to "DefaultToolsUnits.ANGLE" and "Units.RAD" */
+  /** Defaults to "DefaultToolsUnits.ANGLE" and `Units.ANGLE.RAD` */
   angle?: MeasurementFormattingProps;
 }
 /** Serializer for a [[LocationMeasurement]]. */
@@ -220,13 +222,13 @@ export class LocationMeasurement extends Measurement {
     this._location = Point3d.createZero();
     this._isDynamic = false;
     this._coordinateKoQ = "DefaultToolsUnits.LENGTH_COORDINATE";
-    this._coordinatePersistenceUnitName = "Units.M";
+    this._coordinatePersistenceUnitName = Units.LENGTH.M;
     this._lengthKoQ = "DefaultToolsUnits.LENGTH";
-    this._lengthPersistenceUnitName = "Units.M";
+    this._lengthPersistenceUnitName = Units.LENGTH.M;
     this._stationKoQ = "CivilUnits.STATION";
-    this._stationPersistenceUnitName = "Units.M";
+    this._stationPersistenceUnitName = Units.LENGTH.M;
     this._angleKoQ = "DefaultToolsUnits.ANGLE";
-    this._anglePersistenceUnitName = "Units.RAD";
+    this._anglePersistenceUnitName = Units.ANGLE.RAD;
     this.getSnapId(); // Preload transient ID"s since we normally don not have these as dynamic
 
     if (props) {

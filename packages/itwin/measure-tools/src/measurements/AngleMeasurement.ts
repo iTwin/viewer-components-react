@@ -22,6 +22,8 @@ import type {
   MeasurementWidgetData,
 } from "../api/Measurement.js";
 import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
+import { Units } from "@itwin/core-quantity";
+
 import type { FormatSpecHandle } from "@itwin/core-quantity";
 export interface AngleMeasurementProps extends MeasurementProps {
   startPoint?: XYZProps;
@@ -32,7 +34,7 @@ export interface AngleMeasurementProps extends MeasurementProps {
 
 /** Formatting properties for angle measurement. */
 export interface AngleMeasurementFormattingProps {
-  /** Defaults to "DefaultToolsUnits.ANGLE" and "Units.RAD" */
+  /** Defaults to "DefaultToolsUnits.ANGLE" and `Units.ANGLE.RAD` */
   angle?: MeasurementFormattingProps;
 }
 
@@ -81,7 +83,7 @@ export class AngleMeasurement extends Measurement {
 
     this._isDynamic = false;
     this._angleKoQ = "DefaultToolsUnits.ANGLE";
-    this._anglePersistenceUnitName = "Units.RAD";
+    this._anglePersistenceUnitName = Units.ANGLE.RAD;
     if (props) this.readFromJSON(props);
 
     this.createTextMarker();

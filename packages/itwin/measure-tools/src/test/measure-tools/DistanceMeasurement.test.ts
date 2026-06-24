@@ -6,6 +6,7 @@
 import { assert } from "chai";
 import { vi } from "vitest";
 import { IModelApp } from "@itwin/core-frontend";
+import { Units } from "@itwin/core-quantity";
 import { Point3d } from "@itwin/core-geometry";
 import { Measurement, MeasurementPickContext } from "../../api/Measurement.js";
 import { WellKnownViewType } from "../../api/MeasurementEnums.js";
@@ -78,7 +79,7 @@ describe("DistanceMeasurement tests", () => {
       // Verify that getFormatSpecHandle was called with the correct KoQ and unit
       assert.isTrue(getFormatSpecHandleSpy.mock.calls.length > 0, "getFormatSpecHandle should have been called during construction");
       assert.strictEqual(getFormatSpecHandleSpy.mock.calls[0][0], "DefaultToolsUnits.LENGTH", "Should use the default length KoQ");
-      assert.strictEqual(getFormatSpecHandleSpy.mock.calls[0][1], "Units.M", "Should use the correct persistence unit");
+      assert.strictEqual(getFormatSpecHandleSpy.mock.calls[0][1], Units.LENGTH.M, "Should use the correct persistence unit");
 
       // Verify the measurement was created successfully
       assert.isDefined(measurement);
@@ -100,7 +101,7 @@ describe("DistanceMeasurement tests", () => {
         Point3d.create(0, 10, 0),
         WellKnownViewType.XSection,
         {
-          bearing: { koqName: "CivilUnits.BEARING", persistenceUnitName: "Units.RAD" },
+          bearing: { koqName: "CivilUnits.BEARING", persistenceUnitName: Units.ANGLE.RAD },
         },
       );
 
@@ -109,11 +110,11 @@ describe("DistanceMeasurement tests", () => {
       assert.isDefined(data);
       assert.isAtLeast(addFormattingSpecsToRegistrySpy.mock.calls.length, 1, "bearing formatting should be registered before widget data is gathered");
       assert.isTrue(
-        addFormattingSpecsToRegistrySpy.mock.calls.some((call) => call[0].name === "CivilUnits.BEARING" && call[0].persistenceUnitName === "Units.RAD"),
+        addFormattingSpecsToRegistrySpy.mock.calls.some((call) => call[0].name === "CivilUnits.BEARING" && call[0].persistenceUnitName === Units.ANGLE.RAD),
         "bearing KoQ should be registered in the formatting specs registry",
       );
       assert.isTrue(
-        getFormatSpecHandleSpy.mock.calls.some((call) => call[0] === "CivilUnits.BEARING" && call[1] === "Units.RAD"),
+        getFormatSpecHandleSpy.mock.calls.some((call) => call[0] === "CivilUnits.BEARING" && call[1] === Units.ANGLE.RAD),
         "bearing should use a format spec handle after registration",
       );
     } finally {
