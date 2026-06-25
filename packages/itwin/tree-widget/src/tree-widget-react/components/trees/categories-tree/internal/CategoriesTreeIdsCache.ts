@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, forkJoin, from, map, merge, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
+import { defaultIfEmpty, defer, EMPTY, forkJoin, from, map, merge, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
@@ -400,6 +400,9 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
   }
 
   public getSubCategoriesSearchPaths({ subCategoryIds }: { subCategoryIds: Id64Arg }): Observable<HierarchyNodeIdentifiersPath> {
+    if (Id64.sizeOf(subCategoryIds) === 0) {
+      return EMPTY;
+    }
     return this.getSubCategoryCategories({ subCategoryIds, checkForSubCategoriesSize: true }).pipe(
       mergeMap((categorySubCategories) => categorySubCategories.entries()),
       mergeMap(([categoryId, categorySubCategories]) => {
@@ -415,6 +418,12 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
           ),
         );
       }),
+      defaultIfEmpty(
+        (() => {
+          console.log("EMTPY");
+          return [];
+        })(),
+      ),
     );
   }
 
