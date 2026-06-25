@@ -418,12 +418,7 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
           ),
         );
       }),
-      defaultIfEmpty(
-        (() => {
-          console.log("EMTPY");
-          return [];
-        })(),
-      ),
+      defaultIfEmpty([]),
     );
   }
 
