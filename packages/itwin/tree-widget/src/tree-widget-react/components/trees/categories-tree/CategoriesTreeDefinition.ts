@@ -1167,7 +1167,10 @@ function createSearchPathsForDifferentTypes(
             viewType: props.viewType,
             showElements: props.hierarchyConfig.showElements,
           }),
-          idsCache.getSubCategoriesSearchPaths({ subCategoryIds: ids.subCategoryIds }).pipe(map((path) => ({ path, target: path[path.length - 1].id }))),
+          idsCache.getSubCategoriesSearchPaths({ subCategoryIds: ids.subCategoryIds }).pipe(
+            releaseMainThreadOnItemsCount(2000),
+            map((path) => ({ path, target: path[path.length - 1].id })),
+          ),
           props.hierarchyConfig.showElements
             ? from(ids.elementIds).pipe(
                 bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),

@@ -400,29 +400,19 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
   }
 
   public getSubCategoriesSearchPaths({ subCategoryIds }: { subCategoryIds: Id64Arg }): Observable<HierarchyNodeIdentifiersPath> {
-    return fromWithRelease({ source: subCategoryIds, releaseOnCount: 200 }).pipe(
-      mergeMap((subCategoryId) =>
-        forkJoin({
-          subCategoryId: of(subCategoryId),
-          categoryId: this.getCategoryId({ subCategoryId }).pipe(
-            mergeMap((categoryId) =>
-              categoryId
-                ? this.getSubCategories({ categoryId }).pipe(map((categorySubCategories) => (categorySubCategories.length > 1 ? categoryId : undefined)))
-                : of(undefined),
+    return this.getSubCategoryCategories({ subCategoryIds, checkForSubCategoriesSize: true }).pipe(
+      mergeMap((categorySubCategories) => categorySubCategories.entries()),
+      mergeMap(([categoryId, categorySubCategories]) => {
+        return this.getSearchPathsUpToRootCategory({ categoryId }).pipe(
+          mergeMap((pathsUpToCategory) =>
+            fromWithRelease({ source: categorySubCategories, releaseOnCount: 300 }).pipe(
+              map((subCategoryId) => [
+                ...pathsUpToCategory,
+                { id: categoryId, className: this.#categoryClass },
+                { id: subCategoryId, className: CLASS_NAME_SubCategory },
+              ]),
             ),
           ),
-        }),
-      ),
-      mergeMap(({ subCategoryId, categoryId }) => {
-        if (!categoryId) {
-          return of([]);
-        }
-        return this.getSearchPathsUpToRootCategory({ categoryId }).pipe(
-          map((pathsUpToCategory) => [
-            ...pathsUpToCategory,
-            { id: categoryId, className: this.#categoryClass },
-            { id: subCategoryId, className: CLASS_NAME_SubCategory },
-          ]),
         );
       }),
     );

@@ -5,7 +5,7 @@
 
 import { EMPTY, filter, forkJoin, from, identity, map, mergeMap, of, reduce, shareReplay } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
-import { ChildrenTree, fromWithRelease } from "../Utils.js";
+import { ChildrenTree, fromWithRelease, getOrCreate } from "../Utils.js";
 import { ChildElementsCache } from "./ChildElementsCache.js";
 import { DescendantsCountCache } from "./DescendantsCountCache.js";
 import { ElementModelCategoriesCache } from "./ElementModelCategoriesCache.js";
@@ -13,7 +13,7 @@ import { ModeledElementsCache } from "./ModeledElementsCache.js";
 import { SubCategoriesCache } from "./SubCategoriesCache.js";
 
 import type { Observable } from "rxjs";
-import type { GuidString, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { Props } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../Types.js";
@@ -318,8 +318,32 @@ export class BaseIdsCache {
     return this.#subCategoriesCache.getSubCategoriesInfo().pipe(map(({ categorySubCategories }) => categorySubCategories.get(props.categoryId) ?? []));
   }
 
-  public getCategoryId(props: { subCategoryId: Id64String }): Observable<CategoryId | undefined> {
-    return this.#subCategoriesCache.getSubCategoriesInfo().pipe(map(({ subCategoryCategories }) => subCategoryCategories.get(props.subCategoryId)));
+  public getSubCategoryCategories({
+    subCategoryIds,
+    checkForSubCategoriesSize,
+  }: {
+    subCategoryIds: Id64Arg;
+    checkForSubCategoriesSize: boolean;
+  }): Observable<Map<CategoryId, SubCategoryId[]>> {
+    return this.#subCategoriesCache.getSubCategoriesInfo().pipe(
+      mergeMap(({ subCategoryCategories, categorySubCategories }) =>
+        fromWithRelease({ source: subCategoryIds, releaseOnCount: 500 }).pipe(
+          reduce((acc, subCategoryId) => {
+            const categoryId = subCategoryCategories.get(subCategoryId);
+            if (!checkForSubCategoriesSize || categoryId === undefined) {
+              return acc;
+            }
+            const subCategories = categorySubCategories.get(categoryId);
+            if (!subCategories || subCategories.length <= 1) {
+              return acc;
+            }
+            const entry = getOrCreate({ map: acc, key: categoryId, createFunc: () => new Array<SubCategoryId>() });
+            entry.push(subCategoryId);
+            return acc;
+          }, new Map<CategoryId, SubCategoryId[]>()),
+        ),
+      ),
+    );
   }
 }
 
@@ -345,8 +369,8 @@ export class BaseIdsCacheImpl {
     return this.#baseIdsCache.getSubCategories(props);
   }
 
-  public getCategoryId(props: Props<BaseIdsCache["getCategoryId"]>): ReturnType<BaseIdsCache["getCategoryId"]> {
-    return this.#baseIdsCache.getCategoryId(props);
+  public getSubCategoryCategories(props: Props<BaseIdsCache["getSubCategoryCategories"]>): ReturnType<BaseIdsCache["getSubCategoryCategories"]> {
+    return this.#baseIdsCache.getSubCategoryCategories(props);
   }
 
   public getSubModels(props: Props<BaseIdsCache["getSubModels"]>): ReturnType<BaseIdsCache["getSubModels"]> {
