@@ -589,7 +589,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                       FROM IdSet(?) subModelIdSet
                       WHERE this.ECInstanceId = subModelIdSet.id
                       LIMIT 1
-                      ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
                     ),
                     0
                   )`
@@ -1042,14 +1041,11 @@ export function createCategoriesSearchPaths(props: {
           WHERE mce.ParentId IS NULL
            ${
              subModelIds.size > 0
-               ? `AND NOT IFNULL(
-                  (
-                    SELECT 1
-                    FROM IdSet(?) subModelIdSet
-                    WHERE mce.ModelId = subModelIdSet.id
-                    LIMIT 1
-                  ),
-                  0
+               ? `AND NOT EXISTS (
+                  SELECT 1
+                  FROM IdSet(?) subModelIdSet
+                  WHERE mce.ModelId = subModelIdSet.id
+                  LIMIT 1
                 )`
                : ""
            }

@@ -549,7 +549,20 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
               extendedData: {
                 description: { selector: "this.Description" },
                 modelIds: { selector: createIdsSelector(new Array<ModelId>()) },
-                hasSubCategories: categoriesWithMultipleSubCategories.length > 0 ? { selector: "IIF(InVirtualSet(?, this.ECInstanceId), true, false)" } : false,
+                hasSubCategories:
+                  categoriesWithMultipleSubCategories.length > 0
+                    ? {
+                        selector: `IFNULL(
+                          (
+                            SELECT 1
+                            FROM IdSet(?) hasSubCategoriesIdSet
+                            WHERE hasSubCategoriesIdSet.id = this.ECInstanceId
+                            LIMIT 1
+                          ),
+                          0
+                        )`,
+                      }
+                    : false,
               },
             })}
           FROM ${instanceFilterClauses.from} this
@@ -661,7 +674,6 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                       FROM IdSet(?) subModelIdSet
                       WHERE this.ECInstanceId = subModelIdSet.id
                       LIMIT 1
-                      ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
                     ),
                     0
                   )`
@@ -1222,14 +1234,11 @@ export function createGeometricElementInstanceKeyPaths(props: {
         WHERE mce.ParentId IS NULL
         ${
           subModelIds.size > 0
-            ? `AND NOT IFNULL(
-                (
-                  SELECT 1
-                  FROM IdSet(?) subModelIdSet
-                  WHERE mce.ModelId = subModelIdSet.id
-                  LIMIT 1
-                ),
-                0
+            ? `AND NOT EXISTS (
+                SELECT 1
+                FROM IdSet(?) subModelIdSet
+                WHERE mce.ModelId = subModelIdSet.id
+                LIMIT 1
               )`
             : ""
         }
@@ -1343,14 +1352,11 @@ export function createCategoriesSearchPaths(props: {
           WHERE mce.ParentId IS NULL
           ${
             subModelIds.size > 0
-              ? `AND NOT IFNULL(
-                  (
-                    SELECT 1
-                    FROM IdSet(?) subModelIdSet
-                    WHERE mce.ModelId = subModelIdSet.id
-                    LIMIT 1
-                  ),
-                  0
+              ? `AND NOT EXISTS (
+                  SELECT 1
+                  FROM IdSet(?) subModelIdSet
+                  WHERE mce.ModelId = subModelIdSet.id
+                  LIMIT 1
                 )`
               : ""
           }
