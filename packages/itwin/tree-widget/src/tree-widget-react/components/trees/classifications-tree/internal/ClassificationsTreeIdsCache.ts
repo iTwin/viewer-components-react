@@ -56,7 +56,7 @@ interface ClassificationsTreeIdsCacheProps extends BaseIdsCacheImplProps {
 /** @internal */
 export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
   #classificationInfos: Observable<Map<ClassificationId | ClassificationTableId, ClassificationInfo>> | undefined;
-  #filteredElementsData: Observable<Map<ElementId, { modelId: Id64String; categoryId: Id64String; categoryOfTopMostParentElement: CategoryId }>> | undefined;
+  #filteredElementsData: Observable<Map<ElementId, { modelId: Id64String; categoryId: Id64String }>> | undefined;
   #props: ClassificationsTreeIdsCacheProps;
   #componentId: GuidString;
   #componentName: string;
@@ -265,29 +265,13 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
     modelId: Id64String;
     id: ElementId;
     categoryId: Id64String;
-    categoryOfTopMostParentElement: Id64String;
   }> {
     return defer(() => {
       const query = `
         SELECT
           this.Model.Id modelId,
           this.Category.Id categoryId,
-          this.ECInstanceId id,
-          (
-            WITH RECURSIVE
-              ParentWithCategory(id, categoryId, parentId) AS (
-                SELECT e.ECInstanceId, e.Category.Id, e.Parent.Id
-                FROM ${CLASS_NAME_GeometricElement3d} e
-                WHERE e.ECInstanceId = this.ECInstanceId
-                UNION ALL
-                SELECT p.ECInstanceId, p.Category.Id, p.Parent.Id
-                FROM ${CLASS_NAME_GeometricElement3d} p
-                JOIN ParentWithCategory c ON p.ECInstanceId = c.parentId
-              )
-            SELECT IdToHex(categoryId)
-            FROM ParentWithCategory
-            WHERE parentId IS NULL
-          ) categoryOfTopMostParentElement
+          this.ECInstanceId id
         FROM ${CLASS_NAME_GeometricElement3d} this
         JOIN IdSet(?) elementIdSet ON ECInstanceId = elementIdSet.id
         ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
@@ -310,26 +294,21 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
           modelId: row.modelId,
           id: row.id,
           categoryId: row.categoryId,
-          categoryOfTopMostParentElement: row.categoryOfTopMostParentElement,
         };
       }),
     );
   }
 
-  public getFilteredElementsData({
-    elementIds,
-  }: {
-    elementIds: Id64Array;
-  }): Observable<Map<ElementId, { categoryId: Id64String; modelId: Id64String; categoryOfTopMostParentElement: CategoryId }>> {
-    const result = new Map<ElementId, { categoryId: Id64String; modelId: Id64String; categoryOfTopMostParentElement: CategoryId }>();
+  public getFilteredElementsData({ elementIds }: { elementIds: Id64Array }): Observable<Map<ElementId, { categoryId: Id64String; modelId: Id64String }>> {
+    const result = new Map<ElementId, { categoryId: Id64String; modelId: Id64String }>();
     if (Id64.sizeOf(elementIds) === 0) {
       return of(result);
     }
     this.#filteredElementsData ??= this.queryFilteredElementsData({
       elementIds,
     }).pipe(
-      reduce((acc, { modelId, id, categoryId, categoryOfTopMostParentElement }) => {
-        acc.set(id, { modelId, categoryId, categoryOfTopMostParentElement });
+      reduce((acc, { modelId, id, categoryId }) => {
+        acc.set(id, { modelId, categoryId });
         return acc;
       }, result),
       shareReplay(),

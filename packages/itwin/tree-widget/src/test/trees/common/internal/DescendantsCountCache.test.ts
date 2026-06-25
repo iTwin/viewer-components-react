@@ -180,7 +180,7 @@ describe("DescendantsCountCache", () => {
       const cache = createFakeCache(vp);
       const promises = new Array<Promise<unknown>>();
       for (let i = 1; i <= 100; ++i) {
-        promises.push(firstValueFrom(cache.getDescendantsCounts({ modelId: `0x${i}`, categoryId: "0x1000" })));
+        promises.push(firstValueFrom(cache.getDescendantsCounts({ modelId: `0x1`, categoryId: "0x1000", parentElementId: `0x${i + 1}` })));
       }
       await Promise.all([...promises, vi.advanceTimersByTimeAsync(20)]);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
@@ -191,7 +191,7 @@ describe("DescendantsCountCache", () => {
       const cache = createFakeCache(vp);
       const promises = new Array<Promise<unknown>>();
       for (let i = 1; i <= 101; ++i) {
-        promises.push(firstValueFrom(cache.getDescendantsCounts({ modelId: `0x${i}`, categoryId: "0x1000" })));
+        promises.push(firstValueFrom(cache.getDescendantsCounts({ modelId: `0x1`, categoryId: "0x1000", parentElementId: `0x${i + 1}` })));
       }
       await Promise.all([...promises, vi.advanceTimersByTimeAsync(20)]);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
