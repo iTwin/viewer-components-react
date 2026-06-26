@@ -196,6 +196,36 @@ describe("DescendantsCountCache", () => {
       await Promise.all([...promises, vi.advanceTimersByTimeAsync(20)]);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
     });
+
+    it("returns default count for root category request covered only by the cross-product of an in-flight batch", async () => {
+      // The in-flight batch contains { model1, catA } and { model2, catB }. The consolidated root-category query is:
+      //   Model.Id IN (model1, model2) AND Category.Id IN (catA, catB) AND Parent.Id IS NULL
+      // A request for { model1, catB } is treated as "covered" by this batch (model1 and catB both appear), but if
+      // model1 has no root elements in catB, the query returns no row for that pair and a default entry must still be created.
+      let crossProductResultPromise: Promise<Array<{ categoryId: string; count: number }>> | undefined;
+      const requestHolder: { cache?: DescendantsCountCache } = {};
+      using vp = createFakeViewport({
+        queryHandler: () => {
+          // Request { model1: "0x1", catB: "0x4" } while the batch query is in-flight.
+          crossProductResultPromise = firstValueFrom(requestHolder.cache!.getDescendantsCounts({ modelId: "0x1", categoryId: "0x4" }));
+          return [
+            { modelId: "0x1", reqParent: null, reqCategory: "0x2", ownCategory: "0x2", cnt: 1 },
+            { modelId: "0x3", reqParent: null, reqCategory: "0x4", ownCategory: "0x4", cnt: 1 },
+          ];
+        },
+      });
+      const cache = createFakeCache(vp);
+      requestHolder.cache = cache;
+
+      const promise1 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
+      const promise2 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x3", categoryId: "0x4" }));
+      await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(20)]);
+
+      expect(crossProductResultPromise).toBeDefined();
+      const crossProductResult = await crossProductResultPromise!;
+      expect(crossProductResult).toEqual([{ categoryId: "0x4", count: 0 }]);
+      expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
+    });
   });
 
   describe("query results", () => {
