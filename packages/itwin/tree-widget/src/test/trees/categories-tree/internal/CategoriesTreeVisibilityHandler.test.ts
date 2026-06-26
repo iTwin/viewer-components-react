@@ -2275,9 +2275,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               getTargetNode: (ids: IModelWithSubModelIds) =>
                 createClassGroupingHierarchyNode({
                   categoryId: ids.category.id,
-                  modelElementsMap: new Map([
-                    [ids.model.id, { elementIds: new Set([ids.modeledElement.id]), categoryOfTopMostParentElement: ids.category.id }],
-                  ]),
+                  modelElementsMap: new Map([[ids.model.id, { elementIds: new Set([ids.modeledElement.id]) }]]),
                 }),
               // prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
@@ -2401,9 +2399,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               getTargetNode: (ids: IModelWithSubModelIds) =>
                 createClassGroupingHierarchyNode({
                   categoryId: ids.category.id,
-                  modelElementsMap: new Map([
-                    [ids.model.id, { elementIds: new Set([ids.modeledElement.id]), categoryOfTopMostParentElement: ids.category.id }],
-                  ]),
+                  modelElementsMap: new Map([[ids.model.id, { elementIds: new Set([ids.modeledElement.id]) }]]),
                 }),
               // Category has partial visibility, since its sub-category is not visible
               // prettier-ignore
@@ -2472,9 +2468,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               getTargetNode: (ids: IModelWithSubModelIds) =>
                 createClassGroupingHierarchyNode({
                   categoryId: ids.category.id,
-                  modelElementsMap: new Map([
-                    [ids.model.id, { elementIds: new Set([ids.modeledElement.id]), categoryOfTopMostParentElement: ids.category.id }],
-                  ]),
+                  modelElementsMap: new Map([[ids.model.id, { elementIds: new Set([ids.modeledElement.id]) }]]),
                 }),
               // Category has partial visibility, since its sub-category is not visible
               // prettier-ignore

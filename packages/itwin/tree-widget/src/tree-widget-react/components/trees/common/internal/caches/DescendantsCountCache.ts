@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, from, map, merge, mergeMap } from "rxjs";
+import { defer, EMPTY, from, map, merge, of } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
 import { getOrCreate } from "../Utils.js";
 import { BatchingCache } from "./BatchingCache.js";
@@ -72,49 +72,75 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
     request: DescendantsCountRequest,
     batch: DescendantsCountRequest[],
   ): { valuesNotInBatch: DescendantsCountRequest; batchContainsValues: boolean } | { valuesNotInBatch: undefined; batchContainsValues: true } {
-    if (batch.some((r) => r.modelId === request.modelId && r.parentElementId === request.parentElementId && r.categoryId === request.categoryId)) {
+    if (request.categoryId && request.parentElementId === undefined) {
+      // This is a root category request.
+      // When multiple root category requests are made under different models, then request will include all models and all categories.
+      // E.g.
+      // request1: { modelId: "model1", categoryId: "category1" }, request2: { modelId: "model2", categoryId: "category2" }
+      // Query: SELECT ... WHERE Model.Id IN (model1, model2) AND Category.Id IN (category1, category2) AND Parent.Id IS NULL
+      let hasRootModelRequest = false;
+      let hasRootCategoryRequest = false;
+      for (const r of batch) {
+        hasRootModelRequest ||= r.modelId === request.modelId && r.parentElementId === undefined;
+        hasRootCategoryRequest ||= r.categoryId === request.categoryId && r.parentElementId === undefined;
+        // batch has a request for the same model and category, no need to add them to the batch.
+        if (hasRootModelRequest && hasRootCategoryRequest) {
+          return { valuesNotInBatch: undefined, batchContainsValues: true };
+        }
+      }
+    } else if (batch.some((r) => r.modelId === request.modelId && r.parentElementId === request.parentElementId && r.categoryId === request.categoryId)) {
       return { valuesNotInBatch: undefined, batchContainsValues: true };
     }
     return { valuesNotInBatch: request, batchContainsValues: false };
   }
 
   protected getQueryData(batch: DescendantsCountRequest[]): Observable<WhereClause> {
-    const groupedCategoryValues = new Map<ModelId, Map<ElementId | undefined, Set<CategoryId>>>();
-    const groupedElementValues = new Map<ModelId, Set<ElementId>>();
+    const groupedCategoryIds = new Map<ElementId, Set<CategoryId>>();
+    const rootCategoryIds = new Set<CategoryId>();
+    const rootCategoryModels = new Set<ModelId>();
+    const elementIds = new Set<ElementId>();
     for (const batchEntry of batch) {
       if (batchEntry.categoryId === undefined) {
-        const groupedElementsModelEntry = getOrCreate({ map: groupedElementValues, key: batchEntry.modelId, createFunc: () => new Set<ElementId>() });
-        groupedElementsModelEntry.add(batchEntry.parentElementId);
+        elementIds.add(batchEntry.parentElementId);
         continue;
       }
-      const { modelId, parentElementId, categoryId } = batchEntry;
-      const modelEntry = getOrCreate({ map: groupedCategoryValues, key: modelId, createFunc: () => new Map<ElementId | undefined, Set<CategoryId>>() });
-      const parentEntry = getOrCreate({ map: modelEntry, key: parentElementId, createFunc: () => new Set<CategoryId>() });
+      const { parentElementId, categoryId, modelId } = batchEntry;
+      if (!parentElementId) {
+        rootCategoryIds.add(categoryId);
+        rootCategoryModels.add(modelId);
+        continue;
+      }
+      const parentEntry = getOrCreate({ map: groupedCategoryIds, key: parentElementId, createFunc: () => new Set<CategoryId>() });
       parentEntry.add(categoryId);
     }
     return merge(
-      from(groupedCategoryValues.entries()).pipe(
-        mergeMap(([modelId, parentMap]) =>
-          from(parentMap.entries()).pipe(
-            map(([parentElementId, categoryIds], idx): WhereClause => {
-              return {
-                whereClause: `Model.Id = ${modelId} AND Category.Id IN (SELECT categoryIdSet${idx}.id FROM IdSet(?) categoryIdSet${idx} ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES) ${parentElementId === undefined ? "AND Parent.Id IS NULL" : `AND Parent.Id = ${parentElementId}`}`,
-                type: "category" as const,
-                bindings: [{ type: "idset" as const, value: [...categoryIds] }],
-              };
-            }),
-          ),
-        ),
-      ),
-      from(groupedElementValues.entries()).pipe(
-        map(([modelId, parentElementIds], idx): WhereClause => {
+      from(groupedCategoryIds.entries()).pipe(
+        map(([parentElementId, categoryIds], idx): WhereClause => {
           return {
-            whereClause: `Model.Id = ${modelId} AND Parent.Id IN (SELECT elementIdSet${idx}.id FROM IdSet(?) elementIdSet${idx} ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES)`,
-            type: "element" as const,
-            bindings: [{ type: "idset" as const, value: [...parentElementIds] }],
+            whereClause: `Category.Id IN (SELECT categoryIdSet${idx}.id FROM IdSet(?) categoryIdSet${idx}) AND Parent.Id = ${parentElementId}`,
+            type: "category" as const,
+            bindings: [{ type: "idset" as const, value: [...categoryIds] }],
           };
         }),
       ),
+      rootCategoryIds.size && rootCategoryModels.size > 0
+        ? of({
+            whereClause:
+              "Model.Id IN (SELECT modelIdSet.id FROM IdSet(?) modelIdSet) AND Category.Id IN (SELECT categoryIdSet.id FROM IdSet(?) categoryIdSet) AND Parent.Id IS NULL",
+            type: "category" as const,
+            bindings: [
+              { type: "idset" as const, value: [...rootCategoryModels] },
+              { type: "idset" as const, value: [...rootCategoryIds] },
+            ],
+          })
+        : EMPTY,
+      elementIds.size > 0
+        ? of({
+            whereClause: `Parent.Id IN (SELECT elementIdSet.id FROM IdSet(?) elementIdSet)`,
+            type: "element" as const,
+            bindings: [{ type: "idset" as const, value: [...elementIds] }],
+          })
+        : EMPTY,
     );
   }
 
@@ -169,6 +195,7 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
               SELECT modelId, reqParent, reqCategory, ownCategory, COUNT(*) as cnt
               FROM Descendants
               GROUP BY modelId, reqParent, reqCategory, ownCategory
+              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
             bindings: bindings.length > 0 ? bindings : undefined,
           },
@@ -192,11 +219,28 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
   }
 
   protected ensureDefaultCacheEntries(batch: DescendantsCountRequest[]): void {
+    const rootCategoryIds = new Set<CategoryId>();
+    const rootCategoryModels = new Set<ModelId>();
     for (const { modelId, categoryId, parentElementId } of batch) {
+      if (parentElementId === undefined && categoryId !== undefined) {
+        rootCategoryIds.add(categoryId);
+        rootCategoryModels.add(modelId);
+        continue;
+      }
       const modelEntry = getOrCreate({ map: this.#cachedValues, key: modelId, createFunc: () => new Map() });
       const parentEntry = getOrCreate({ map: modelEntry, key: parentElementId, createFunc: () => new Map() });
       if (!parentEntry.has(categoryId)) {
         parentEntry.set(categoryId, categoryId === undefined ? [] : [{ categoryId, count: 0 }]);
+      }
+    }
+    // Make sure that default entry exists for all model - root category pairs.
+    for (const modelId of rootCategoryModels) {
+      const modelEntry = getOrCreate({ map: this.#cachedValues, key: modelId, createFunc: () => new Map() });
+      const parentEntry = getOrCreate({ map: modelEntry, key: undefined, createFunc: () => new Map() });
+      for (const categoryId of rootCategoryIds) {
+        if (!parentEntry.has(categoryId)) {
+          parentEntry.set(categoryId, categoryId === undefined ? [] : [{ categoryId, count: 0 }]);
+        }
       }
     }
   }
