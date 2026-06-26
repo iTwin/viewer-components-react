@@ -222,7 +222,7 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
     const rootCategoryIds = new Set<CategoryId>();
     const rootCategoryModels = new Set<ModelId>();
     for (const { modelId, categoryId, parentElementId } of batch) {
-      if (parentElementId === undefined) {
+      if (parentElementId === undefined && categoryId !== undefined) {
         rootCategoryIds.add(categoryId);
         rootCategoryModels.add(modelId);
         continue;
