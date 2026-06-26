@@ -72,55 +72,73 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
     request: DescendantsCountRequest,
     batch: DescendantsCountRequest[],
   ): { valuesNotInBatch: DescendantsCountRequest; batchContainsValues: boolean } | { valuesNotInBatch: undefined; batchContainsValues: true } {
-    if (batch.some((r) => r.modelId === request.modelId && r.parentElementId === request.parentElementId && r.categoryId === request.categoryId)) {
+    if (request.categoryId && request.parentElementId === undefined) {
+      // This is a root category request.
+      // When multiple root category requests are made under different models, then request will include all models and all categories.
+      // E.g.
+      // request1: { modelId: "model1", categoryId: "category1" }, request2: { modelId: "model2", categoryId: "category2" }
+      // Query: SELECT ... WHERE Model.Id IN (model1, model2) AND Category.Id IN (category1, category2) AND Parent.Id IS NULL
+      let hasRootModelRequest = false;
+      let hasRootCategoryRequest = false;
+      for (const r of batch) {
+        hasRootModelRequest ||= r.modelId === request.modelId && r.parentElementId === undefined;
+        hasRootCategoryRequest ||= r.categoryId === request.categoryId && r.parentElementId === undefined;
+        // batch has a request for the same model and category, no need to add them to the batch.
+        if (hasRootModelRequest && hasRootCategoryRequest) {
+          return { valuesNotInBatch: undefined, batchContainsValues: true };
+        }
+      }
+    } else if (batch.some((r) => r.modelId === request.modelId && r.parentElementId === request.parentElementId && r.categoryId === request.categoryId)) {
       return { valuesNotInBatch: undefined, batchContainsValues: true };
     }
     return { valuesNotInBatch: request, batchContainsValues: false };
   }
 
   protected getQueryData(batch: DescendantsCountRequest[]): Observable<WhereClause> {
-    const groupedCategoryValues = new Map<ElementId, Set<CategoryId>>();
-    const rootCategoryValues = new Set<CategoryId>();
-    const elementValues = new Set<ElementId>();
-    // Requests contain modelId, but there is no need to include them in the query:
-    // - When making element request: it can only exist within a single model;
-    // - When making category request: if count for category under one model is requested, then it will be requested for other models also,
-    // so there is no need to include them in the query.
+    const groupedCategoryIds = new Map<ElementId, Set<CategoryId>>();
+    const rootCategoryIds = new Set<CategoryId>();
+    const rootCategoryModels = new Set<ModelId>();
+    const elementIds = new Set<ElementId>();
     for (const batchEntry of batch) {
       if (batchEntry.categoryId === undefined) {
-        elementValues.add(batchEntry.parentElementId);
+        elementIds.add(batchEntry.parentElementId);
         continue;
       }
-      const { parentElementId, categoryId } = batchEntry;
+      const { parentElementId, categoryId, modelId } = batchEntry;
       if (!parentElementId) {
-        rootCategoryValues.add(categoryId);
+        rootCategoryIds.add(categoryId);
+        rootCategoryModels.add(modelId);
         continue;
       }
-      const parentEntry = getOrCreate({ map: groupedCategoryValues, key: parentElementId, createFunc: () => new Set<CategoryId>() });
+      const parentEntry = getOrCreate({ map: groupedCategoryIds, key: parentElementId, createFunc: () => new Set<CategoryId>() });
       parentEntry.add(categoryId);
     }
     return merge(
-      from(groupedCategoryValues.entries()).pipe(
+      from(groupedCategoryIds.entries()).pipe(
         map(([parentElementId, categoryIds], idx): WhereClause => {
           return {
-            whereClause: `Category.Id IN (SELECT categoryIdSet${idx}.id FROM IdSet(?) categoryIdSet${idx} ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES) AND Parent.Id = ${parentElementId}`,
+            whereClause: `Category.Id IN (SELECT categoryIdSet${idx}.id FROM IdSet(?) categoryIdSet${idx}) AND Parent.Id = ${parentElementId}`,
             type: "category" as const,
             bindings: [{ type: "idset" as const, value: [...categoryIds] }],
           };
         }),
       ),
-      rootCategoryValues.size > 0
+      rootCategoryIds.size && rootCategoryModels.size > 0
         ? of({
-            whereClause: "Category.Id IN (SELECT categoryIdSet.id FROM IdSet(?) categoryIdSet ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES) AND Parent.Id IS NULL",
+            whereClause:
+              "Model.Id IN (SELECT modelIdSet.id FROM IdSet(?) modelIdSet) AND Category.Id IN (SELECT categoryIdSet.id FROM IdSet(?) categoryIdSet) AND Parent.Id IS NULL",
             type: "category" as const,
-            bindings: [{ type: "idset" as const, value: [...rootCategoryValues] }],
+            bindings: [
+              { type: "idset" as const, value: [...rootCategoryModels] },
+              { type: "idset" as const, value: [...rootCategoryIds] },
+            ],
           })
         : EMPTY,
-      elementValues.size > 0
+      elementIds.size > 0
         ? of({
-            whereClause: `Parent.Id IN (SELECT elementIdSet.id FROM IdSet(?) elementIdSet ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES)`,
+            whereClause: `Parent.Id IN (SELECT elementIdSet.id FROM IdSet(?) elementIdSet)`,
             type: "element" as const,
-            bindings: [{ type: "idset" as const, value: [...elementValues] }],
+            bindings: [{ type: "idset" as const, value: [...elementIds] }],
           })
         : EMPTY,
     );
@@ -164,6 +182,7 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
               `
               Descendants(id, modelId, reqParent, reqCategory, ownCategory) AS (
                 ${baseCases.join(" UNION ALL ")}
+                ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
                 UNION ALL
 
@@ -177,6 +196,7 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
               SELECT modelId, reqParent, reqCategory, ownCategory, COUNT(*) as cnt
               FROM Descendants
               GROUP BY modelId, reqParent, reqCategory, ownCategory
+
             `,
             bindings: bindings.length > 0 ? bindings : undefined,
           },
