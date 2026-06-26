@@ -182,7 +182,6 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
               `
               Descendants(id, modelId, reqParent, reqCategory, ownCategory) AS (
                 ${baseCases.join(" UNION ALL ")}
-                ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
                 UNION ALL
 
@@ -196,7 +195,7 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
               SELECT modelId, reqParent, reqCategory, ownCategory, COUNT(*) as cnt
               FROM Descendants
               GROUP BY modelId, reqParent, reqCategory, ownCategory
-
+              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
             bindings: bindings.length > 0 ? bindings : undefined,
           },
@@ -220,11 +219,28 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
   }
 
   protected ensureDefaultCacheEntries(batch: DescendantsCountRequest[]): void {
+    const rootCategoryIds = new Set<CategoryId>();
+    const rootCategoryModels = new Set<ModelId>();
     for (const { modelId, categoryId, parentElementId } of batch) {
+      if (parentElementId === undefined) {
+        rootCategoryIds.add(categoryId);
+        rootCategoryModels.add(modelId);
+        continue;
+      }
       const modelEntry = getOrCreate({ map: this.#cachedValues, key: modelId, createFunc: () => new Map() });
       const parentEntry = getOrCreate({ map: modelEntry, key: parentElementId, createFunc: () => new Map() });
       if (!parentEntry.has(categoryId)) {
         parentEntry.set(categoryId, categoryId === undefined ? [] : [{ categoryId, count: 0 }]);
+      }
+    }
+    // Make sure that default entry exists for all model - root category pairs.
+    for (const modelId of rootCategoryModels) {
+      const modelEntry = getOrCreate({ map: this.#cachedValues, key: modelId, createFunc: () => new Map() });
+      const parentEntry = getOrCreate({ map: modelEntry, key: undefined, createFunc: () => new Map() });
+      for (const categoryId of rootCategoryIds) {
+        if (!parentEntry.has(categoryId)) {
+          parentEntry.set(categoryId, categoryId === undefined ? [] : [{ categoryId, count: 0 }]);
+        }
       }
     }
   }
