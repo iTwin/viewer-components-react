@@ -312,9 +312,8 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
   }
 
   public getSearchPathsUpToRootCategory({ categoryId }: { categoryId: Id64String }): Observable<HierarchyNodeIdentifiersPath> {
-    return this.getModels({ categoryId }).pipe(
-      filter(({ isSubModel, categoryIsOfTopMostElement }) => !isSubModel && categoryIsOfTopMostElement),
-      mergeMap(({ id: categoryModelId }) =>
+    return this.getModels({ categoryId, excludeSubModels: true, includeOnlyTopMostElementCategory: true }).pipe(
+      mergeMap((categoryModelId) =>
         this.createUpToModelInstanceKeyPaths(categoryModelId).pipe(
           map((modelPath) => [...modelPath, { className: CLASS_NAME_GeometricModel3d, id: categoryModelId }]),
         ),

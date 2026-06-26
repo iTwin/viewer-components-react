@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, forkJoin, from, map, merge, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
+import { defaultIfEmpty, defer, EMPTY, forkJoin, from, map, merge, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
@@ -400,28 +400,25 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
   }
 
   public getSubCategoriesSearchPaths({ subCategoryIds }: { subCategoryIds: Id64Arg }): Observable<HierarchyNodeIdentifiersPath> {
-    return this.getSubCategoriesInfo().pipe(
-      mergeMap(({ subCategoryCategories, categorySubCategories }) =>
-        fromWithRelease({ source: subCategoryIds, releaseOnCount: 200 }).pipe(
-          mergeMap((subCategoryId) => {
-            const categoryOfSubCategory = subCategoryCategories.get(subCategoryId);
-            if (categoryOfSubCategory === undefined) {
-              return of([]);
-            }
-            const subCategories = categorySubCategories.get(categoryOfSubCategory);
-            if (!subCategories || subCategories.length <= 1) {
-              return of([]);
-            }
-            return this.getSearchPathsUpToRootCategory({ categoryId: categoryOfSubCategory }).pipe(
-              map((pathsUpToCategory) => [
+    if (Id64.sizeOf(subCategoryIds) === 0) {
+      return EMPTY;
+    }
+    return this.getSubCategoryCategories({ subCategoryIds, checkForSubCategoriesSize: true }).pipe(
+      mergeMap((categorySubCategories) => categorySubCategories.entries()),
+      mergeMap(([categoryId, categorySubCategories]) => {
+        return this.getSearchPathsUpToRootCategory({ categoryId }).pipe(
+          mergeMap((pathsUpToCategory) =>
+            fromWithRelease({ source: categorySubCategories, releaseOnCount: 300 }).pipe(
+              map((subCategoryId) => [
                 ...pathsUpToCategory,
-                { id: categoryOfSubCategory, className: this.#categoryClass },
+                { id: categoryId, className: this.#categoryClass },
                 { id: subCategoryId, className: CLASS_NAME_SubCategory },
               ]),
-            );
-          }),
-        ),
-      ),
+            ),
+          ),
+        );
+      }),
+      defaultIfEmpty([]),
     );
   }
 

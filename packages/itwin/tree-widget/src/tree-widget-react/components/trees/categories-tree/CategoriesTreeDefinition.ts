@@ -5,9 +5,9 @@
 
 import {
   bufferCount,
+  defaultIfEmpty,
   distinct,
   EMPTY,
-  filter,
   firstValueFrom,
   from,
   fromEvent,
@@ -15,8 +15,10 @@ import {
   map,
   merge,
   mergeMap,
+  of,
   reduce,
   switchMap,
+  take,
   takeUntil,
   toArray,
 } from "rxjs";
@@ -359,7 +361,18 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         contentClass: { fullName: this.#categoryElementClass, alias: "this" },
       }),
       firstValueFrom(this.#idsCache.getAllSubModels()),
-      firstValueFrom(this.#idsCache.getCategoriesOfModelsTopMostElements(modelIds).pipe(map((categoriesSet) => [...categoriesSet]))),
+      firstValueFrom(
+        from(modelIds).pipe(
+          mergeMap((modelId) => this.#idsCache.getCategories({ modelId, includeOnlyIfCategoryOfTopMostElement: true })),
+          reduce((acc, modelCategories) => {
+            for (const categoryId of modelCategories) {
+              acc.add(categoryId);
+            }
+            return acc;
+          }, new Set<CategoryId>()),
+          map((categoryIdsSet) => [...categoryIdsSet]),
+        ),
+      ),
     ]);
     if (categoryIds.length === 0) {
       return [];
@@ -504,38 +517,39 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     instanceLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
     nodeSelectClauseFactory: NodesQueryClauseFactory;
   }): Promise<HierarchyNodesDefinition> {
-    const [instanceFilterClauses, subModels] = await Promise.all([
+    const [instanceFilterClauses, categoriesWithChildElements] = await Promise.all([
       nodeSelectClauseFactory.createFilterClauses({
         filter: instanceFilter,
         contentClass: { fullName: this.#categoryClass, alias: "this" },
       }),
-      this.#hierarchyConfig.showElements ? firstValueFrom(this.#idsCache.getAllSubModels()) : new Set<ModelId>(),
+      this.#hierarchyConfig.showElements
+        ? firstValueFrom(
+            // Iterate over categories which will be returned by the query
+            from(categories).pipe(
+              mergeMap(({ id: categoryId }) =>
+                // when category has element models, then it has element children
+                this.#idsCache.getModels({ categoryId, excludeSubModels: true, includeOnlyTopMostElementCategory: true }).pipe(
+                  take(1),
+                  defaultIfEmpty(undefined),
+                  mergeMap((modelId) => (modelId ? of(categoryId) : EMPTY)),
+                ),
+              ),
+              toArray(),
+            ),
+          )
+        : new Array<CategoryId>(),
     ]);
     const categoriesWithMultipleSubCategories = categories
       .filter((categoryInfo) => categoryInfo.subCategoryChildCount > 1)
       .map((categoryInfo) => categoryInfo.id);
 
-    const conditions = new Array<string>();
-    if (!this.#hierarchyConfig.hideSubCategories && categoriesWithMultipleSubCategories.length > 0) {
-      conditions.push(`InVirtualSet(?, this.ECInstanceId)`);
-    }
-    if (this.#hierarchyConfig.showElements) {
-      conditions.push(`
-          this.ECInstanceId IN (
-            SELECT e.Category.Id
-            FROM ${this.#categoryElementClass} e
-            WHERE
-              e.Parent.Id IS NULL
-              ${subModels.size > 0 ? `AND NOT InVirtualSet(?, e.Model.Id)` : ""}
-          )`);
-    }
-
-    const hasChildren =
-      conditions.length > 0
-        ? {
-            selector: `IIF(${conditions.join(" OR ")}, 1, 0)`,
-          }
-        : false;
+    const categoriesWithChildren =
+      !this.#hierarchyConfig.hideSubCategories && categoriesWithMultipleSubCategories.length > 0
+        ? categoriesWithChildElements.length > 0
+          ? // Want to filter out duplicate entries
+            [...new Set(categoriesWithChildElements.concat(categoriesWithMultipleSubCategories))]
+          : categoriesWithMultipleSubCategories
+        : categoriesWithChildElements;
 
     return {
       fullClassName: this.#categoryClass,
@@ -545,7 +559,20 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             ${await this.createCategoryNodeSelectClause({
               nodeSelectClauseFactory,
               instanceLabelSelectClauseFactory,
-              hasChildren,
+              hasChildren:
+                categoriesWithChildren.length > 0
+                  ? {
+                      selector: `IFNULL(
+                        (
+                          SELECT 1
+                          FROM IdSet(?) hasChildrenIdSet
+                          WHERE hasChildrenIdSet.id = this.ECInstanceId
+                          LIMIT 1
+                        ),
+                        0
+                      )`,
+                    }
+                  : false,
               extendedData: {
                 description: { selector: "this.Description" },
                 modelIds: { selector: createIdsSelector(new Array<ModelId>()) },
@@ -572,10 +599,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
           ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
         bindings: [
-          ...(!this.#hierarchyConfig.hideSubCategories && categoriesWithMultipleSubCategories.length > 0
-            ? [{ type: "idset" as const, value: categoriesWithMultipleSubCategories }]
-            : []),
-          ...(subModels.size > 0 ? [{ type: "idset" as const, value: [...subModels] }] : []),
+          ...(categoriesWithChildren.length > 0 ? [{ type: "idset" as const, value: categoriesWithChildren }] : []),
           ...(categoriesWithMultipleSubCategories.length > 0 ? [{ type: "idset" as const, value: categoriesWithMultipleSubCategories }] : []),
           { type: "idset", value: categories.map((category) => category.id) },
         ],
@@ -749,9 +773,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         ? parseIdsSelectorResult(parentNode.extendedData.modelIds)
         : await firstValueFrom(
             from(categoryIds).pipe(
-              mergeMap((categoryId) => this.#idsCache.getModels({ categoryId })),
-              filter(({ isSubModel }) => !isSubModel), // sub-models are handled as separate nodes, so we need to filter them out here
-              map(({ id }) => id),
+              mergeMap((categoryId) => this.#idsCache.getModels({ categoryId, excludeSubModels: true })),
               distinct(),
               toArray(),
             ),

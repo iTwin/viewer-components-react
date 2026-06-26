@@ -3,7 +3,24 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, defer, EMPTY, firstValueFrom, from, fromEvent, identity, map, merge, mergeMap, of, reduce, switchMap, takeUntil } from "rxjs";
+import {
+  bufferCount,
+  defer,
+  EMPTY,
+  firstValueFrom,
+  forkJoin,
+  from,
+  fromEvent,
+  identity,
+  map,
+  merge,
+  mergeMap,
+  of,
+  reduce,
+  switchMap,
+  takeUntil,
+  toArray,
+} from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
 import { createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql, parseFullClassName } from "@itwin/presentation-shared";
@@ -203,8 +220,13 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
       filter: instanceFilter,
       contentClass: { fullName: CLASS_NAME_Classification, alias: "this" },
     });
-    const classificationIds = await firstValueFrom(this.#props.getIdsCache(imodelKey).getDirectChildClassifications(classificationTableIds));
-    return classificationIds.length
+    const cache = this.#props.getIdsCache(imodelKey);
+    const { childClassifications, childClassificationsWithChildren } = await getChildClassifications({
+      classificationOrTableIds: classificationTableIds,
+      cache,
+    });
+
+    return childClassifications.length
       ? [
           {
             fullClassName: CLASS_NAME_Classification,
@@ -220,9 +242,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                         className: CLASS_NAME_Classification,
                       }),
                     },
-                    hasChildren: {
-                      selector: createClassificationHasChildrenSelector("this"),
-                    },
+                    hasChildren: childClassificationsWithChildren.length > 0 ? { selector: createClassificationHasChildrenSelector("this") } : false,
                     extendedData: {
                       type: "Classification",
                     },
@@ -234,7 +254,10 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                 ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
                 ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
               `,
-              bindings: [{ type: "idset", value: classificationIds }],
+              bindings: [
+                ...(childClassificationsWithChildren.length > 0 ? [{ type: "idset" as const, value: childClassificationsWithChildren }] : []),
+                { type: "idset", value: childClassifications },
+              ],
             },
           },
         ]
@@ -252,7 +275,11 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     if (!parentImodelKey) {
       return [];
     }
-    const classificationIds = await firstValueFrom(this.#props.getIdsCache(parentImodelKey).getDirectChildClassifications(parentClassificationIds));
+    const cache = this.#props.getIdsCache(parentImodelKey);
+    const { childClassifications, childClassificationsWithChildren } = await getChildClassifications({
+      classificationOrTableIds: parentClassificationIds,
+      cache,
+    });
     const elementsInstanceFilterClauses = await nodeSelectClauseFactory.createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: CLASS_NAME_GeometricElement3d, alias: "this" },
@@ -277,7 +304,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
         },
       },
       // load child classifications
-      ...(classificationIds.length
+      ...(childClassifications.length
         ? [
             await (async () => {
               const instanceFilterClauses = await nodeSelectClauseFactory.createFilterClauses({
@@ -298,9 +325,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                             className: CLASS_NAME_Classification,
                           }),
                         },
-                        hasChildren: {
-                          selector: createClassificationHasChildrenSelector("this"),
-                        },
+                        hasChildren: childClassificationsWithChildren.length > 0 ? { selector: createClassificationHasChildrenSelector("this") } : false,
                         extendedData: {
                           type: "Classification",
                         },
@@ -312,7 +337,10 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                     ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
                     ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
                   `,
-                  bindings: [{ type: "idset" as const, value: classificationIds }],
+                  bindings: [
+                    ...(childClassificationsWithChildren.length > 0 ? [{ type: "idset" as const, value: childClassificationsWithChildren }] : []),
+                    { type: "idset" as const, value: childClassifications },
+                  ],
                 },
               };
             })(),
@@ -405,17 +433,34 @@ function getParentNodeIModelKey(instanceKey: InstancesNodeKey): string | undefin
   return instanceKey.instanceKeys[0]?.imodelKey;
 }
 
+async function getChildClassifications({
+  classificationOrTableIds,
+  cache,
+}: {
+  classificationOrTableIds: Id64Array;
+  cache: ClassificationsTreeIdsCache;
+}): Promise<{ childClassifications: Id64Array; childClassificationsWithChildren: Id64Array }> {
+  return firstValueFrom(
+    cache.getDirectChildClassifications(classificationOrTableIds).pipe(
+      mergeMap((classifications) =>
+        from(classifications).pipe(
+          mergeMap((classificationId) => forkJoin({ hasChildren: cache.hasChildren(classificationId), classificationId: of(classificationId) })),
+          mergeMap(({ classificationId, hasChildren }) => (hasChildren ? of(classificationId) : EMPTY)),
+          toArray(),
+          map((nonEmptyClassifications) => ({ childClassifications: classifications, childClassificationsWithChildren: nonEmptyClassifications })),
+        ),
+      ),
+    ),
+  );
+}
+
 function createClassificationHasChildrenSelector(classificationAlias: string) {
   return `
-    COALESCE((
+    IFNULL(
+      (
         SELECT 1
-        FROM ${CLASS_NAME_Classification} classification
-        WHERE classification.Parent.Id = ${classificationAlias}.ECInstanceId
-        LIMIT 1
-      ), (
-        SELECT 1
-        FROM ${CLASS_NAME_ElementHasClassifications} ehc
-        WHERE ehc.TargetECInstanceId = ${classificationAlias}.ECInstanceId
+        FROM IdSet(?) hasChildrenIdSet
+        WHERE hasChildrenIdSet.id = ${classificationAlias}.ECInstanceId
         LIMIT 1
       ),
       0

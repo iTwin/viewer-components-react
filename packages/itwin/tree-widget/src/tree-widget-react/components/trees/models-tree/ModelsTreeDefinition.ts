@@ -59,6 +59,7 @@ import type {
   InstanceKey,
   Props,
 } from "@itwin/presentation-shared";
+import type { CategoryId } from "../common/internal/Types.js";
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 import type { CategoryNodeProps, ElementNodeProps } from "./internal/ModelsTreeNodeInternal.js";
 
@@ -491,7 +492,18 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         contentClass: { fullName: this.#hierarchyConfig.elementClassSpecification, alias: "this" },
       }),
       firstValueFrom(this.#idsCache.getAllSubModels()),
-      firstValueFrom(this.#idsCache.getCategoriesOfModelsTopMostElements(modelIds).pipe(map((categoriesSet) => [...categoriesSet]))),
+      firstValueFrom(
+        from(modelIds).pipe(
+          mergeMap((modelId) => this.#idsCache.getCategories({ modelId, includeOnlyIfCategoryOfTopMostElement: true })),
+          reduce((acc, modelCategories) => {
+            for (const categoryId of modelCategories) {
+              acc.add(categoryId);
+            }
+            return acc;
+          }, new Set<CategoryId>()),
+          map((categoryIdsSet) => [...categoryIdsSet]),
+        ),
+      ),
     ]);
     if (categoryIds.length === 0) {
       return [];

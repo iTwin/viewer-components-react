@@ -281,10 +281,9 @@ export class BaseVisibilityHelper implements Disposable {
 
       const categoryModelsObservable = fromWithRelease({ source: categoryIds, releaseOnCount: 100 }).pipe(
         mergeMap((categoryId) =>
-          this.#props.baseIdsCache.getModels({ categoryId }).pipe(
-            filter(({ categoryIsOfTopMostElement, isSubModel }) => categoryIsOfTopMostElement && !isSubModel),
-            map(({ id: modelId }) => ({ modelId, categoryId })),
-          ),
+          this.#props.baseIdsCache
+            .getModels({ categoryId, excludeSubModels: true, includeOnlyTopMostElementCategory: true })
+            .pipe(map((modelId) => ({ modelId, categoryId }))),
         ),
         shareReplay({ refCount: true }),
       );
@@ -442,7 +441,8 @@ export class BaseVisibilityHelper implements Disposable {
             return EMPTY;
           }
           return fromWithRelease({ source: elementIds, releaseOnCount: 100 }).pipe(
-            mergeMap((elementId) => (computeOnlyOwnStatus?.(elementId) ? EMPTY : this.#props.baseIdsCache.getSubModelsUnderElement(elementId))),
+            mergeMap((elementId) => (computeOnlyOwnStatus?.(elementId) ? EMPTY : this.#props.baseIdsCache.getSubModels({ elementId }))),
+            toArray(),
             mergeMap((subModelsUnderElement) => this.getModelsVisibilityStatus({ modelIds: subModelsUnderElement })),
           );
         }),
@@ -529,7 +529,7 @@ export class BaseVisibilityHelper implements Disposable {
     parentElementsPath: ParentElementsPath;
     getElementsAccessor: ElementsAccessor;
   }): Observable<VisibilityStatus> {
-    return this.#props.baseIdsCache.categoryHasParentElements(props.categoryId).pipe(
+    return this.#props.baseIdsCache.categoryHasParentElements({ categoryId: props.categoryId }).pipe(
       mergeMap((hasParentElements) => {
         if (!hasParentElements) {
           const categoryVisibility = this.getVisibleModelCategoryDirectVisibilityStatus({ modelId: props.modelId, categoryId: props.categoryId });
@@ -764,10 +764,9 @@ export class BaseVisibilityHelper implements Disposable {
 
       const categoryModelsObs = fromWithRelease({ source: categoryIds, releaseOnCount: 500 }).pipe(
         mergeMap((categoryId) =>
-          this.#props.baseIdsCache.getModels({ categoryId }).pipe(
-            filter(({ categoryIsOfTopMostElement, isSubModel }) => categoryIsOfTopMostElement && !isSubModel),
-            map(({ id }) => ({ modelId: id, categoryId })),
-          ),
+          this.#props.baseIdsCache
+            .getModels({ categoryId, excludeSubModels: true, includeOnlyTopMostElementCategory: true })
+            .pipe(map((modelId) => ({ modelId, categoryId }))),
         ),
         reduce((acc, { modelId, categoryId }) => {
           const entry = getOrCreate({ map: acc, key: modelId, createFunc: () => new Set<CategoryId>() });
@@ -1061,7 +1060,8 @@ export class BaseVisibilityHelper implements Disposable {
             }
             return fromWithRelease({ source: elementIds, releaseOnCount: 100 });
           }),
-          mergeMap((elementId) => this.#props.baseIdsCache.getSubModelsUnderElement(elementId)),
+          mergeMap((elementId) => this.#props.baseIdsCache.getSubModels({ elementId })),
+          toArray(),
           mergeMap((subModelsUnderElement) => {
             if (subModelsUnderElement.length > 0) {
               return this.changeModelsVisibilityStatus({ modelIds: subModelsUnderElement, on });
@@ -1115,7 +1115,7 @@ export class BaseVisibilityHelper implements Disposable {
     const source = subscribeAll({
       ids: props.categoryIds,
       getObservable: (categoryId) =>
-        this.#props.baseIdsCache.categoryHasParentElements(categoryId).pipe(
+        this.#props.baseIdsCache.categoryHasParentElements({ categoryId }).pipe(
           mergeMap((hasParentElements) => {
             if (!hasParentElements) {
               return of([]);
