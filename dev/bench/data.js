@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782479846265,
+  "lastUpdate": 1782482245364,
   "repoUrl": "https://github.com/iTwin/viewer-components-react",
   "entries": {
     "Tree-Widget Next benchmark": [
@@ -21871,6 +21871,415 @@ window.BENCHMARK_DATA = {
             "value": 33,
             "unit": "ms",
             "extra": "count: 1\nmax: 33\np95: 33\nmedian: 33"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "100586436+JonasDov@users.noreply.github.com",
+            "name": "JonasDov",
+            "username": "JonasDov"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "19de7559db5d5f17b4ae8ce8d48b81a0e356795e",
+          "message": "[Tree widget]: reduce cache coupling on `next` (#1726)\n\n* [Tree widget]: reduce cache coupling on `next`\n\n* Address comments\n\n* Don't use InVirtualSet, optimize classifications tree definition to use cached data\n\n* Remove categoryOfTopMostParentElement references\n\n* adjust sub-categories search paths implementation\n\n* fix empty sub-categories search paths\n\n* remove debug code",
+          "timestamp": "2026-06-26T16:18:45+03:00",
+          "tree_id": "b3a1a37e01dbc1a76245b95b7b4c94f2555d1872",
+          "url": "https://github.com/iTwin/viewer-components-react/commit/19de7559db5d5f17b4ae8ce8d48b81a0e356795e"
+        },
+        "date": 1782482242248,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "models tree 50k 3D elements search > get search paths",
+            "value": 1248,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree 50k 3D elements search > get search paths (P95 of main thread blocks)",
+            "value": 62,
+            "unit": "ms",
+            "extra": "count: 5\nmax: 62\np95: 62\nmedian: 29"
+          },
+          {
+            "name": "models tree 50k 3D elements search > load hierarchy from search paths",
+            "value": 125643,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree 50k 3D elements search > load hierarchy from search paths (P95 of main thread blocks)",
+            "value": 32,
+            "unit": "ms",
+            "extra": "count: 3\nmax: 32\np95: 32\nmedian: 27"
+          },
+          {
+            "name": "models tree 50k categories > collect nodes",
+            "value": 2938,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree 50k categories > collect nodes (P95 of main thread blocks)",
+            "value": 165,
+            "unit": "ms",
+            "extra": "count: 13\nmax: 165\np95: 165\nmedian: 49"
+          },
+          {
+            "name": "models tree 50k categories > validate initial visibility",
+            "value": 1911,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree 50k categories > validate initial visibility (P95 of main thread blocks)",
+            "value": 0,
+            "unit": "ms",
+            "extra": "count: 0\nmax: N/A\np95: N/A\nmedian: N/A"
+          },
+          {
+            "name": "models tree 50k categories > change visibility",
+            "value": 240,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree 50k categories > change visibility (P95 of main thread blocks)",
+            "value": 70,
+            "unit": "ms",
+            "extra": "count: 3\nmax: 70\np95: 70\nmedian: 36"
+          },
+          {
+            "name": "models tree 50k categories > validate changed visibility",
+            "value": 2533,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree 50k categories > validate changed visibility (P95 of main thread blocks)",
+            "value": 33,
+            "unit": "ms",
+            "extra": "count: 1\nmax: 33\np95: 33\nmedian: 33"
+          },
+          {
+            "name": "models tree 50k 3D elements > collect nodes",
+            "value": 51109,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree 50k 3D elements > collect nodes (P95 of main thread blocks)",
+            "value": 65,
+            "unit": "ms",
+            "extra": "count: 5\nmax: 65\np95: 65\nmedian: 38"
+          },
+          {
+            "name": "models tree 50k 3D elements > validate initial visibility",
+            "value": 1538,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree 50k 3D elements > validate initial visibility (P95 of main thread blocks)",
+            "value": 24,
+            "unit": "ms",
+            "extra": "count: 1\nmax: 24\np95: 24\nmedian: 24"
+          },
+          {
+            "name": "models tree 50k 3D elements > change model visibility",
+            "value": 102,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree 50k 3D elements > change model visibility (P95 of main thread blocks)",
+            "value": 21,
+            "unit": "ms",
+            "extra": "count: 1\nmax: 21\np95: 21\nmedian: 21"
+          },
+          {
+            "name": "models tree 50k 3D elements > validate changed model visibility",
+            "value": 2052,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree 50k 3D elements > validate changed model visibility (P95 of main thread blocks)",
+            "value": 0,
+            "unit": "ms",
+            "extra": "count: 0\nmax: N/A\np95: N/A\nmedian: N/A"
+          },
+          {
+            "name": "models tree 50k 3D elements > change category node visibility",
+            "value": 504,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree 50k 3D elements > change category node visibility (P95 of main thread blocks)",
+            "value": 52,
+            "unit": "ms",
+            "extra": "count: 5\nmax: 52\np95: 52\nmedian: 40"
+          },
+          {
+            "name": "models tree 50k 3D elements > validate changed category visibility",
+            "value": 1491,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree 50k 3D elements > validate changed category visibility (P95 of main thread blocks)",
+            "value": 0,
+            "unit": "ms",
+            "extra": "count: 0\nmax: N/A\np95: N/A\nmedian: N/A"
+          },
+          {
+            "name": "models tree 50k 3D elements > validate per-model category override",
+            "value": 1479,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree 50k 3D elements > validate per-model category override (P95 of main thread blocks)",
+            "value": 0,
+            "unit": "ms",
+            "extra": "count: 0\nmax: N/A\np95: N/A\nmedian: N/A"
+          },
+          {
+            "name": "models tree 50k 3D elements > change element visibility",
+            "value": 38,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree 50k 3D elements > change element visibility (P95 of main thread blocks)",
+            "value": 0,
+            "unit": "ms",
+            "extra": "count: 0\nmax: N/A\np95: N/A\nmedian: N/A"
+          },
+          {
+            "name": "models tree 50k 3D elements > validate changed element visibility",
+            "value": 2255,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree 50k 3D elements > validate changed element visibility (P95 of main thread blocks)",
+            "value": 50,
+            "unit": "ms",
+            "extra": "count: 6\nmax: 50\np95: 50\nmedian: 29.5"
+          },
+          {
+            "name": "models tree 50k 3D child elements with different categories > collect nodes",
+            "value": 73251,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree 50k 3D child elements with different categories > collect nodes (P95 of main thread blocks)",
+            "value": 72,
+            "unit": "ms",
+            "extra": "count: 6\nmax: 72\np95: 72\nmedian: 36.5"
+          },
+          {
+            "name": "models tree 50k 3D child elements with different categories > validate initial visibility",
+            "value": 2230,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree 50k 3D child elements with different categories > validate initial visibility (P95 of main thread blocks)",
+            "value": 28,
+            "unit": "ms",
+            "extra": "count: 1\nmax: 28\np95: 28\nmedian: 28"
+          },
+          {
+            "name": "models tree 50k 3D child elements with different categories > change visibility",
+            "value": 53,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree 50k 3D child elements with different categories > change visibility (P95 of main thread blocks)",
+            "value": 0,
+            "unit": "ms",
+            "extra": "count: 0\nmax: N/A\np95: N/A\nmedian: N/A"
+          },
+          {
+            "name": "models tree 50k 3D child elements with different categories > validate changed visibility",
+            "value": 5369,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree 50k 3D child elements with different categories > validate changed visibility (P95 of main thread blocks)",
+            "value": 54,
+            "unit": "ms",
+            "extra": "count: 9\nmax: 54\np95: 54\nmedian: 34"
+          },
+          {
+            "name": "classifications tree 50k classifications search > get search paths",
+            "value": 2151,
+            "unit": "ms"
+          },
+          {
+            "name": "classifications tree 50k classifications search > get search paths (P95 of main thread blocks)",
+            "value": 148,
+            "unit": "ms",
+            "extra": "count: 11\nmax: 148\np95: 148\nmedian: 55"
+          },
+          {
+            "name": "classifications tree 50k classifications search > load hierarchy from search paths",
+            "value": 68620,
+            "unit": "ms"
+          },
+          {
+            "name": "classifications tree 50k classifications search > load hierarchy from search paths (P95 of main thread blocks)",
+            "value": 27,
+            "unit": "ms",
+            "extra": "count: 2\nmax: 27\np95: 27\nmedian: 25"
+          },
+          {
+            "name": "classifications tree 50k classifications > collect nodes",
+            "value": 37239,
+            "unit": "ms"
+          },
+          {
+            "name": "classifications tree 50k classifications > collect nodes (P95 of main thread blocks)",
+            "value": 67,
+            "unit": "ms",
+            "extra": "count: 4\nmax: 67\np95: 67\nmedian: 36"
+          },
+          {
+            "name": "classifications tree 50k classifications > validate initial visibility",
+            "value": 3312,
+            "unit": "ms"
+          },
+          {
+            "name": "classifications tree 50k classifications > validate initial visibility (P95 of main thread blocks)",
+            "value": 77,
+            "unit": "ms",
+            "extra": "count: 6\nmax: 77\np95: 77\nmedian: 42"
+          },
+          {
+            "name": "classifications tree 50k classifications > change visibility",
+            "value": 161,
+            "unit": "ms"
+          },
+          {
+            "name": "classifications tree 50k classifications > change visibility (P95 of main thread blocks)",
+            "value": 21,
+            "unit": "ms",
+            "extra": "count: 1\nmax: 21\np95: 21\nmedian: 21"
+          },
+          {
+            "name": "classifications tree 50k classifications > validate changed visibility",
+            "value": 3738,
+            "unit": "ms"
+          },
+          {
+            "name": "classifications tree 50k classifications > validate changed visibility (P95 of main thread blocks)",
+            "value": 59,
+            "unit": "ms",
+            "extra": "count: 8\nmax: 59\np95: 59\nmedian: 38.5"
+          },
+          {
+            "name": "categories tree 50k subCategories search > get search paths",
+            "value": 1611,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree 50k subCategories search > get search paths (P95 of main thread blocks)",
+            "value": 54,
+            "unit": "ms",
+            "extra": "count: 18\nmax: 54\np95: 54\nmedian: 41.5"
+          },
+          {
+            "name": "categories tree 50k subCategories search > load hierarchy from search paths",
+            "value": 5741,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree 50k subCategories search > load hierarchy from search paths (P95 of main thread blocks)",
+            "value": 58,
+            "unit": "ms",
+            "extra": "count: 15\nmax: 58\np95: 58\nmedian: 29"
+          },
+          {
+            "name": "categories tree 50k subCategories > collect nodes",
+            "value": 6209,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree 50k subCategories > collect nodes (P95 of main thread blocks)",
+            "value": 43,
+            "unit": "ms",
+            "extra": "count: 11\nmax: 43\np95: 43\nmedian: 29"
+          },
+          {
+            "name": "categories tree 50k subCategories > validate initial visibility",
+            "value": 1226,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree 50k subCategories > validate initial visibility (P95 of main thread blocks)",
+            "value": 25,
+            "unit": "ms",
+            "extra": "count: 3\nmax: 25\np95: 25\nmedian: 23"
+          },
+          {
+            "name": "categories tree 50k subCategories > change visibility",
+            "value": 376,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree 50k subCategories > change visibility (P95 of main thread blocks)",
+            "value": 28,
+            "unit": "ms",
+            "extra": "count: 1\nmax: 28\np95: 28\nmedian: 28"
+          },
+          {
+            "name": "categories tree 50k subCategories > validate changed visibility",
+            "value": 1106,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree 50k subCategories > validate changed visibility (P95 of main thread blocks)",
+            "value": 38,
+            "unit": "ms",
+            "extra": "count: 1\nmax: 38\np95: 38\nmedian: 38"
+          },
+          {
+            "name": "categories tree 50k categories > collect nodes",
+            "value": 2732,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree 50k categories > collect nodes (P95 of main thread blocks)",
+            "value": 106,
+            "unit": "ms",
+            "extra": "count: 9\nmax: 106\np95: 106\nmedian: 49"
+          },
+          {
+            "name": "categories tree 50k categories > validate initial visibility",
+            "value": 4556,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree 50k categories > validate initial visibility (P95 of main thread blocks)",
+            "value": 119,
+            "unit": "ms",
+            "extra": "count: 7\nmax: 119\np95: 119\nmedian: 72"
+          },
+          {
+            "name": "categories tree 50k categories > change visibility",
+            "value": 858,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree 50k categories > change visibility (P95 of main thread blocks)",
+            "value": 72,
+            "unit": "ms",
+            "extra": "count: 3\nmax: 72\np95: 72\nmedian: 44"
+          },
+          {
+            "name": "categories tree 50k categories > validate changed visibility",
+            "value": 4270,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree 50k categories > validate changed visibility (P95 of main thread blocks)",
+            "value": 49,
+            "unit": "ms",
+            "extra": "count: 1\nmax: 49\np95: 49\nmedian: 49"
           }
         ]
       }
