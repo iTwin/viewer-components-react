@@ -21,11 +21,11 @@ describe("Utils", () => {
     });
 
     it("joins multiple conditions with AND", () => {
-      expect(createWhereClause({ conditions: ["a.Id = 1", "b.Id = 2"] })).toEqual("WHERE a.Id = 1 AND b.Id = 2");
+      expect(createWhereClause({ conditions: ["a.Id = 1", "b.Id = 2"] })).toEqual("WHERE (a.Id = 1) AND (b.Id = 2)");
     });
 
     it("filters out falsy conditions before joining", () => {
-      expect(createWhereClause({ conditions: ["a.Id = 1", undefined, false, "", "b.Id = 2"] })).toEqual("WHERE a.Id = 1 AND b.Id = 2");
+      expect(createWhereClause({ conditions: ["a.Id = 1", undefined, false, "", "b.Id = 2"] })).toEqual("WHERE (a.Id = 1) AND (b.Id = 2)");
     });
   });
 });
