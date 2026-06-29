@@ -35,6 +35,7 @@ import {
 import { catchBeSQLiteInterrupts } from "../common/internal/UseErrorState.js";
 import {
   createIdsSelector,
+  createWhereClause,
   fromWithRelease,
   getClassesByView,
   getOptimalBatchSize,
@@ -331,9 +332,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
               })}
             FROM ${this.#categoryModelClass} this
             JOIN IdSet(?) elementIdSet ON this.ModeledElement.Id = elementIdSet.id
-            WHERE
-              NOT this.IsPrivate
-              AND this.ECInstanceId IN (SELECT Model.Id FROM ${this.#categoryElementClass})
+            ${createWhereClause({ conditions: ["NOT this.IsPrivate", `this.ECInstanceId IN (SELECT Model.Id FROM ${this.#categoryElementClass})`] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: elementIds }],
@@ -390,7 +389,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             FROM ${categoryInstanceFilterClauses.from} this
             JOIN IdSet(?) categoryIdSet ON categoryIdSet.id = this.ECInstanceId
             ${categoryInstanceFilterClauses.joins}
-            ${categoryInstanceFilterClauses.where ? `WHERE ${categoryInstanceFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: [categoryInstanceFilterClauses.where] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: categoriesToShow }],
@@ -413,10 +412,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             FROM ${elementInstanceFilterClauses.from} this
             JOIN IdSet(?) modelIdSet ON this.Model.Id = modelIdSet.id
             ${elementInstanceFilterClauses.joins}
-            WHERE
-              this.Parent.Id IS NULL
-              AND this.Category.Id = ${modeledElementCategory}
-              ${elementInstanceFilterClauses.where ? `AND ${elementInstanceFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: ["this.Parent.Id IS NULL", `this.Category.Id = ${modeledElementCategory}`, elementInstanceFilterClauses.where] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
           bindings: [...bindings, { type: "idset", value: modelIds }],
@@ -498,7 +494,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
           FROM ${instanceFilterClauses.from} this
           JOIN IdSet(?) definitionContainerIdSet ON this.ECInstanceId = definitionContainerIdSet.id
           ${instanceFilterClauses.joins}
-          ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
           ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
         bindings: [{ type: "idset", value: definitionContainerIds }],
@@ -595,7 +591,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
           FROM ${instanceFilterClauses.from} this
           JOIN IdSet(?) categoryIdSet ON this.ECInstanceId = categoryIdSet.id
           ${instanceFilterClauses.joins}
-          ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+          ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
           ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
         bindings: [
@@ -652,9 +648,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             FROM ${instanceFilterClauses.from} this
             JOIN IdSet(?) categoryIdSet ON this.Parent.Id = categoryIdSet.id
             ${instanceFilterClauses.joins}
-            WHERE
-              NOT this.IsPrivate
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: ["NOT this.IsPrivate", instanceFilterClauses.where] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: categoryIds }],
@@ -800,8 +794,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             JOIN IdSet(?) modelIdSet ON this.Model.Id = modelIdSet.id
             ${parentIds ? "JOIN IdSet(?) parentIdSet ON this.Parent.Id = parentIdSet.id" : ""}
             ${instanceFilterClauses.joins}
-            ${parentIds ? "" : "WHERE this.Parent.Id IS NULL"}
-            ${instanceFilterClauses.where ? `${parentIds ? "WHERE" : "AND"} ${instanceFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: [!parentIds && "this.Parent.Id IS NULL", instanceFilterClauses.where] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
           bindings: [
@@ -852,9 +845,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             FROM ${elementInstanceFilterClauses.from} this
             JOIN IdSet(?) elementIdSet ON this.Parent.Id = elementIdSet.id
             ${elementInstanceFilterClauses.joins}
-            WHERE
-              this.Category.Id = ${parentCategoryId}
-              ${elementInstanceFilterClauses.where ? `AND ${elementInstanceFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: [`this.Category.Id = ${parentCategoryId}`, elementInstanceFilterClauses.where] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [...bindings, { type: "idset", value: elementIds }],
@@ -875,15 +866,18 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
               })}
             FROM ${categoryInstanceFilterClauses.from} this
             ${categoryInstanceFilterClauses.joins ? `${categoryInstanceFilterClauses.joins}` : ""}
-            WHERE
-              this.ECInstanceId <> ${parentCategoryId}
-              AND this.ECInstanceId IN (
-                SELECT DISTINCT ce.Category.Id
-                FROM ${this.#categoryElementClass} ce
-                JOIN IdSet(?) parentIdSet ON ce.Parent.Id = parentIdSet.id
-                ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
-              )
-              ${categoryInstanceFilterClauses.where ? `AND ${categoryInstanceFilterClauses.where}` : ""}
+            ${createWhereClause({
+              conditions: [
+                `this.ECInstanceId <> ${parentCategoryId}`,
+                `this.ECInstanceId IN (
+                  SELECT DISTINCT ce.Category.Id
+                  FROM ${this.#categoryElementClass} ce
+                  JOIN IdSet(?) parentIdSet ON ce.Parent.Id = parentIdSet.id
+                  ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+                )`,
+                categoryInstanceFilterClauses.where,
+              ],
+            })}
           `,
           bindings: [{ type: "idset", value: elementIds }],
         },
@@ -1038,9 +1032,9 @@ function createInstanceKeyPathsFromInstanceLabel(
                   FROM
                     ${CATEGORIES_WITH_LABELS_CTE} c
                     JOIN ${SUBCATEGORIES_WITH_LABELS_CTE} sc ON sc.ParentId = c.ECInstanceId
-                  WHERE
-                    c.ChildCount > 1
-                    AND sc.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
+                  ${createWhereClause({
+                    conditions: ["c.ChildCount > 1", "sc.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'"],
+                  })}
                 `
             }
             ${
@@ -1253,17 +1247,18 @@ export function createGeometricElementInstanceKeyPaths(props: {
       const ecsql = `
         SELECT '${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([mce].[CategoryId]) AS TEXT) || '${separator}' || mce.Path
         FROM CategoriesElementsHierarchy mce
-        WHERE mce.ParentId IS NULL
-        ${
-          subModelIds.size > 0
-            ? `AND NOT EXISTS (
+        ${createWhereClause({
+          conditions: [
+            "mce.ParentId IS NULL",
+            subModelIds.size > 0 &&
+              `NOT EXISTS (
                 SELECT 1
                 FROM IdSet(?) subModelIdSet
                 WHERE mce.ModelId = subModelIdSet.id
                 LIMIT 1
-              )`
-            : ""
-        }
+              )`,
+          ],
+        })}
       `;
 
       return queryExecutor.createQueryReader(
@@ -1371,17 +1366,18 @@ export function createCategoriesSearchPaths(props: {
         const ecsql = `
           SELECT '${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([mce].[CategoryId]) AS TEXT) || '${separator}' || mce.Path
           FROM CategoriesParentsHierarchy mce
-          WHERE mce.ParentId IS NULL
-          ${
-            subModelIds.size > 0
-              ? `AND NOT EXISTS (
+          ${createWhereClause({
+            conditions: [
+              "mce.ParentId IS NULL",
+              subModelIds.size > 0 &&
+                `NOT EXISTS (
                   SELECT 1
                   FROM IdSet(?) subModelIdSet
                   WHERE mce.ModelId = subModelIdSet.id
                   LIMIT 1
-                )`
-              : ""
-          }
+                )`,
+            ],
+          })}
         `;
 
         return queryExecutor.createQueryReader(

@@ -12,7 +12,7 @@ import {
   CLASS_NAME_Subject,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { isBeSqliteInterruptError } from "../../common/internal/UseErrorState.js";
-import { pushToMap } from "../../common/internal/Utils.js";
+import { createWhereClause, pushToMap } from "../../common/internal/Utils.js";
 
 import type { GuidString, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
@@ -53,9 +53,7 @@ export class IModelContentTreeIdsCache {
           (
             SELECT m.ECInstanceId
             FROM ${CLASS_NAME_Model} m
-            WHERE
-              m.ECInstanceId = HexToId(json_extract(s.JsonProperties, '$.Subject.Model.TargetPartition'))
-              AND NOT m.IsPrivate
+            ${createWhereClause({ conditions: ["m.ECInstanceId = HexToId(json_extract(s.JsonProperties, '$.Subject.Model.TargetPartition'))", "NOT m.IsPrivate"] })}
           ) targetPartitionId,
           CASE
             WHEN (

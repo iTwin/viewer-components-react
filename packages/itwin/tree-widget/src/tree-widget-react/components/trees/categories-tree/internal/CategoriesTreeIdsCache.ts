@@ -8,7 +8,7 @@ import { Guid, Id64 } from "@itwin/core-bentley";
 import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
-import { fromWithRelease, getClassesByView, getOrCreate } from "../../common/internal/Utils.js";
+import { createWhereClause, fromWithRelease, getClassesByView, getOrCreate } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
@@ -154,9 +154,7 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
               ${this.#categoryClass} this
               JOIN ${CLASS_NAME_SubCategory} sc ON sc.Parent.Id = this.ECInstanceId
               JOIN ${CLASS_NAME_Model} m ON m.ECInstanceId = this.Model.Id
-            WHERE
-              NOT this.IsPrivate
-              AND (NOT m.IsPrivate OR m.ECClassId IS (BisCore.DictionaryModel))
+            ${createWhereClause({ conditions: ["NOT this.IsPrivate", "NOT m.IsPrivate OR m.ECClassId IS (BisCore.DictionaryModel)"] })}
             GROUP BY this.ECInstanceId
           `;
           return this.#queryExecutor.createQueryReader(
@@ -188,9 +186,7 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
         FROM
           ECDbMeta.ECSchemaDef s
           JOIN ECDbMeta.ECClassDef c ON c.Schema.Id = s.ECInstanceId
-        WHERE
-          s.Name = 'BisCore'
-          AND c.Name = 'DefinitionContainer'
+        ${createWhereClause({ conditions: ["s.Name = 'BisCore'", "c.Name = 'DefinitionContainer'"] })}
       `;
 
       return this.#queryExecutor.createQueryReader(

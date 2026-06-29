@@ -7,7 +7,7 @@ import { defer, EMPTY, expand, map, reduce, shareReplay } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
 import { CLASS_NAME_SubCategory } from "../ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
-import { getOrCreate } from "../Utils.js";
+import { createWhereClause, getOrCreate } from "../Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString } from "@itwin/core-bentley";
@@ -43,9 +43,7 @@ export class SubCategoriesCache {
           sc.Parent.Id categoryId
         FROM
           ${CLASS_NAME_SubCategory} sc
-        WHERE
-          NOT sc.IsPrivate
-          ${lastSubCategoryId === undefined ? "" : `AND sc.ECInstanceId > ${lastSubCategoryId}`}
+        ${createWhereClause({ conditions: ["NOT sc.IsPrivate", lastSubCategoryId !== undefined && `sc.ECInstanceId > ${lastSubCategoryId}`] })}
         ORDER BY sc.ECInstanceId
         LIMIT ${this.#rowLimit}
       `;
