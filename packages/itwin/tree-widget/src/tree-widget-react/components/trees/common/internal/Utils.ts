@@ -87,6 +87,15 @@ export function createIdsSelector(ids: Id64Array): string {
 }
 
 /** @internal */
+export function createWhereClause({ conditions }: { conditions: Array<string | undefined | false> }): string {
+  const filteredConditions = conditions.filter((condition): condition is string => !!condition);
+  if (filteredConditions.length === 0) {
+    return "";
+  }
+  return `WHERE ${filteredConditions.join(" AND ")}`;
+}
+
+/** @internal */
 export function parseIdsSelectorResult(selectorResult: any): Id64Array {
   if (!Array.isArray(selectorResult)) {
     return [];

@@ -9,7 +9,7 @@ import { IModel } from "@itwin/core-common";
 import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_GeometricModel3d, CLASS_NAME_InformationPartitionElement, CLASS_NAME_Subject } from "../../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
-import { getOrCreate, pushToMap } from "../../common/internal/Utils.js";
+import { createWhereClause, getOrCreate, pushToMap } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -68,9 +68,7 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
           (
             SELECT m.ECInstanceId
             FROM ${CLASS_NAME_GeometricModel3d} m
-            WHERE m.ECInstanceId = HexToId(json_extract(s.JsonProperties, '$.Subject.Model.TargetPartition'))
-              AND NOT m.IsPrivate
-              AND EXISTS (SELECT 1 FROM ${this.#elementClassName} WHERE Model.Id = m.ECInstanceId)
+            ${createWhereClause({ conditions: ["m.ECInstanceId = HexToId(json_extract(s.JsonProperties, '$.Subject.Model.TargetPartition'))", "NOT m.IsPrivate", `EXISTS (SELECT 1 FROM ${this.#elementClassName} WHERE Model.Id = m.ECInstanceId)`] })}
           ) targetPartitionId,
           CASE
             WHEN (
@@ -99,9 +97,7 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
         SELECT p.ECInstanceId id, p.Parent.Id parentId
         FROM ${CLASS_NAME_InformationPartitionElement} p
         INNER JOIN ${CLASS_NAME_GeometricModel3d} m ON m.ModeledElement.Id = p.ECInstanceId
-        WHERE
-          NOT m.IsPrivate
-          ${this.#showEmptyModels ? "" : `AND EXISTS (SELECT 1 FROM ${this.#elementClassName} WHERE Model.Id = m.ECInstanceId)`}
+        ${createWhereClause({ conditions: ["NOT m.IsPrivate", this.#showEmptyModels ? undefined : `EXISTS (SELECT 1 FROM ${this.#elementClassName} WHERE Model.Id = m.ECInstanceId)`] })}
       `;
       return this.#queryExecutor.createQueryReader(
         { ecsql: modelsQuery },

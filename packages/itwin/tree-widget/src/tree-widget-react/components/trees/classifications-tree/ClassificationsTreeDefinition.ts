@@ -35,7 +35,7 @@ import {
   CLASS_NAME_GeometricElement3d,
 } from "../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../common/internal/UseErrorState.js";
-import { fromWithRelease, getOptimalBatchSize, ParentElementsPath, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
+import { createWhereClause, fromWithRelease, getOptimalBatchSize, ParentElementsPath, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../common/TreeErrors.js";
 import { ClassificationsTreeNodeInternal } from "./internal/ClassificationsTreeNodeInternal.js";
 
@@ -195,10 +195,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
               ${instanceFilterClauses.from} this
             JOIN ${CLASS_NAME_ClassificationSystem} system ON system.ECInstanceId = this.Parent.Id
             ${instanceFilterClauses.joins}
-            WHERE
-              system.CodeValue = '${this.#props.hierarchyConfig.rootClassificationSystemCode}'
-              AND NOT this.IsPrivate
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: [`system.CodeValue = '${this.#props.hierarchyConfig.rootClassificationSystemCode}'`, "NOT this.IsPrivate", instanceFilterClauses.where] })}
           `,
         },
       },
@@ -251,7 +248,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                 FROM ${instanceFilterClauses.from} this
                 JOIN IdSet(?) classificationIdSet ON this.ECInstanceId = classificationIdSet.id
                 ${instanceFilterClauses.joins}
-                ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+                ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
                 ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
               `,
               bindings: [
@@ -295,9 +292,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
             JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = this.ECInstanceId
             JOIN IdSet(?) parentClassificationIdSet ON ehc.TargetECInstanceId = parentClassificationIdSet.id
             ${elementsInstanceFilterClauses.joins}
-            WHERE
-              this.Parent.Id IS NULL
-              ${elementsInstanceFilterClauses.where ? `AND ${elementsInstanceFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: ["this.Parent.Id IS NULL", elementsInstanceFilterClauses.where] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: parentClassificationIds }],
@@ -334,7 +329,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                     FROM ${instanceFilterClauses.from} this
                     JOIN IdSet(?) classificationIdSet ON this.ECInstanceId = classificationIdSet.id
                     ${instanceFilterClauses.joins}
-                    ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+                    ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
                     ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
                   `,
                   bindings: [
@@ -368,7 +363,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
           FROM ${instanceFilterClauses.from} this
           JOIN IdSet(?) parentElementIdSet ON this.Parent.Id = parentElementIdSet.id
           ${instanceFilterClauses.joins}
-          ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+          ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
           ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
           bindings: [{ type: "idset", value: parentElementIds }],
@@ -504,9 +499,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
             ${classificationTableLabelSelectClause}
           FROM ${CLASS_NAME_ClassificationTable} this
           JOIN ${CLASS_NAME_ClassificationSystem} system ON system.ECInstanceId = this.Parent.Id
-          WHERE
-            system.CodeValue = '${props.hierarchyConfig.rootClassificationSystemCode}'
-            AND NOT this.IsPrivate
+          ${createWhereClause({ conditions: [`system.CodeValue = '${props.hierarchyConfig.rootClassificationSystemCode}'`, "NOT this.IsPrivate"] })}
         )
       `,
       ...(classificationIds.length > 0

@@ -22,6 +22,7 @@ import {
 import { catchBeSQLiteInterrupts } from "../common/internal/UseErrorState.js";
 import {
   createIdsSelector,
+  createWhereClause,
   fromWithRelease,
   getOptimalBatchSize,
   groupingNodeDataFromChildren,
@@ -366,7 +367,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             FROM ${subjectFilterClauses.from} this
             JOIN IdSet(?) childSubjectIdSet ON this.ECInstanceId = childSubjectIdSet.id
             ${subjectFilterClauses.joins}
-            ${subjectFilterClauses.where ? `WHERE ${subjectFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: [subjectFilterClauses.where] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [
@@ -463,9 +464,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
               })}
             FROM ${CLASS_NAME_GeometricModel3d} this
             JOIN IdSet(?) elementIdSet ON this.ModeledElement.Id = elementIdSet.id
-            WHERE
-              NOT this.IsPrivate
-              AND this.ECInstanceId IN (SELECT Model.Id FROM ${this.#hierarchyConfig.elementClassSpecification})
+            ${createWhereClause({ conditions: ["NOT this.IsPrivate", `this.ECInstanceId IN (SELECT Model.Id FROM ${this.#hierarchyConfig.elementClassSpecification})`] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: elementIds }],
@@ -527,7 +526,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             FROM ${categoryInstanceFilterClauses.from} this
             JOIN IdSet(?) categoryIdSet ON categoryIdSet.id = this.ECInstanceId
             ${categoryInstanceFilterClauses.joins}
-            ${categoryInstanceFilterClauses.where ? `WHERE ${categoryInstanceFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: [categoryInstanceFilterClauses.where] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: categoriesToShow }],
@@ -550,10 +549,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             FROM ${elementInstanceFilterClauses.from} this
             JOIN IdSet(?) modelIdSet ON this.Model.Id = modelIdSet.id
             ${elementInstanceFilterClauses.joins}
-            WHERE
-              this.Parent.Id IS NULL
-              AND this.Category.Id = ${modeledElementCategory}
-              ${elementInstanceFilterClauses.where ? `AND ${elementInstanceFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: ["this.Parent.Id IS NULL", `this.Category.Id = ${modeledElementCategory}`, elementInstanceFilterClauses.where] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [...bindings, { type: "idset", value: modelIds }],
@@ -686,8 +682,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             JOIN IdSet(?) modelIdSet ON this.Model.Id = modelIdSet.id
             ${parentIds ? `JOIN IdSet(?) parentIdSet ON this.Parent.Id = parentIdSet.id` : ""}
             ${instanceFilterClauses.joins}
-            ${parentIds ? "" : "WHERE this.Parent.Id IS NULL"}
-            ${instanceFilterClauses.where ? `${parentIds ? "WHERE" : "AND"} ${instanceFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: [!parentIds && "this.Parent.Id IS NULL", instanceFilterClauses.where] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [
@@ -739,9 +734,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           FROM ${elementInstanceFilterClauses.from} this
           JOIN IdSet(?) elementIdSet ON this.Parent.Id = elementIdSet.id
           ${elementInstanceFilterClauses.joins}
-          WHERE
-            this.Category.Id = ${parentCategoryId}
-            ${elementInstanceFilterClauses.where ? `AND ${elementInstanceFilterClauses.where}` : ""}
+          ${createWhereClause({ conditions: [`this.Category.Id = ${parentCategoryId}`, elementInstanceFilterClauses.where] })}
           ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
           bindings: [...bindings, { type: "idset", value: elementIds }],
@@ -759,15 +752,18 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             })}
           FROM ${categoryInstanceFilterClauses.from} this
           ${categoryInstanceFilterClauses.joins ? `${categoryInstanceFilterClauses.joins}` : ""}
-          WHERE
-            this.ECInstanceId <> ${parentCategoryId}
-            AND this.ECInstanceId IN (
-              SELECT DISTINCT ce.Category.Id
-              FROM ${this.#hierarchyConfig.elementClassSpecification} ce
-              JOIN IdSet(?) parentIdSet ON ce.Parent.Id = parentIdSet.id
-              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
-            )
-            ${categoryInstanceFilterClauses.where ? `AND ${categoryInstanceFilterClauses.where}` : ""}
+          ${createWhereClause({
+            conditions: [
+              `this.ECInstanceId <> ${parentCategoryId}`,
+              `this.ECInstanceId IN (
+                SELECT DISTINCT ce.Category.Id
+                FROM ${this.#hierarchyConfig.elementClassSpecification} ce
+                JOIN IdSet(?) parentIdSet ON ce.Parent.Id = parentIdSet.id
+                ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+              )`,
+              categoryInstanceFilterClauses.where,
+            ],
+          })}
         `,
           bindings: [{ type: "idset", value: elementIds }],
         },
@@ -805,7 +801,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         SELECT 1
         FROM ECDbMeta.ECSchemaDef s
         JOIN ECDbMeta.ECClassDef c ON c.Schema.Id = s.ECInstanceId
-        WHERE s.Name = ? AND c.Name = ? AND c.ECInstanceId IS (${CLASS_NAME_GeometricElement3d})
+        ${createWhereClause({ conditions: ["s.Name = ?", "c.Name = ?", `c.ECInstanceId IS (${CLASS_NAME_GeometricElement3d})`] })}
       `,
       bindings: [
         { type: "string", value: schemaName },
@@ -873,9 +869,7 @@ export function createGeometricElementInstanceKeyPaths(props: {
           FROM ${elementClassName} e
           JOIN IdSet(?) parentIdSet${index} ON ${parent.type === "element" ? `e.Parent.Id = parentIdSet${index}.id` : `e.Category.Id = parentIdSet${index}.id`}
           ${parent.type !== "element" ? `JOIN IdSet(?) modelIdSet${index} ON e.Model.Id = modelIdSet${index}.id` : ""}
-          WHERE
-            e.ECClassId IS (${groupingNode.key.className})
-            ${parent.type === "element" ? "" : `AND e.Parent.Id IS NULL`}
+          ${createWhereClause({ conditions: [`e.ECClassId IS (${groupingNode.key.className})`, parent.type !== "element" && `e.Parent.Id IS NULL`] })}
           ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
       );
@@ -1050,17 +1044,18 @@ export function createCategoriesSearchPaths(props: {
               || mce.Path
             )
           FROM CategoriesParentsHierarchy mce
-          WHERE mce.ParentId IS NULL
-           ${
-             subModelIds.size > 0
-               ? `AND NOT EXISTS (
+          ${createWhereClause({
+            conditions: [
+              "mce.ParentId IS NULL",
+              subModelIds.size > 0 &&
+                `NOT EXISTS (
                   SELECT 1
                   FROM IdSet(?) subModelIdSet
                   WHERE mce.ModelId = subModelIdSet.id
                   LIMIT 1
-                )`
-               : ""
-           }
+                )`,
+            ],
+          })}
         `;
 
         return queryExecutor.createQueryReader(
@@ -1265,10 +1260,14 @@ function createInstanceKeyPathsFromInstanceLabelObs(
             ${elementLabelSelectClause} Label
           FROM ${CLASS_NAME_GeometricModel3d} m
           JOIN ${CLASS_NAME_Element} e ON e.ECInstanceId = m.ModeledElement.Id
-          WHERE NOT m.IsPrivate
-            ${hierarchyConfig.showEmptyModels ? "" : `AND EXISTS (SELECT 1 FROM ${hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`}
-            AND json_extract(e.JsonProperties, '$.PhysicalPartition.Model.Content') IS NULL
-            AND json_extract(e.JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NULL
+          ${createWhereClause({
+            conditions: [
+              "NOT m.IsPrivate",
+              !hierarchyConfig.showEmptyModels && `EXISTS (SELECT 1 FROM ${hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`,
+              "json_extract(e.JsonProperties, '$.PhysicalPartition.Model.Content') IS NULL",
+              "json_extract(e.JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NULL",
+            ],
+          })}
         )
         WHERE Label LIKE '%' || ? || '%' ESCAPE '\\'
         LIMIT ${MAX_SEARCH_INSTANCE_KEY_COUNT + 1}
