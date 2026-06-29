@@ -78,7 +78,7 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
     setOptions([]);
   };
 
-    // Prevent navigation keys from bubbling up to an ancestor toolbar's list
+  // Prevent navigation keys from bubbling up to an ancestor toolbar's list
   // navigation (e.g. appui toolbar), which would otherwise steal focus out of
   // the ComboBox input (moving it to the adjacent button) while the user is
   // exploring the dropdown options.
