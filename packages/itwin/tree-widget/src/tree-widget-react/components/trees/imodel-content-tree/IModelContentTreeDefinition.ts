@@ -241,7 +241,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
             JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = model.ECInstanceId
             ${modelFilterClauses.joins}
 
-            ${createWhereClause({ conditions: [modelFilterClauses.where && `(model.${NodeSelectClauseColumnNames.HideNodeInHierarchy} OR ${modelFilterClauses.where})`] })}
+            ${createWhereClause({ conditions: [modelFilterClauses.where && `model.${NodeSelectClauseColumnNames.HideNodeInHierarchy} OR ${modelFilterClauses.where}`] })}
           `,
           bindings: [{ type: "idset", value: childModelIds }],
         },

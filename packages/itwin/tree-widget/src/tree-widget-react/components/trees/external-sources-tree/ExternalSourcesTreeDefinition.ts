@@ -332,7 +332,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
     const query = `
       SELECT 1
       FROM ECDbMeta.ECSchemaDef
-      ${createWhereClause({ conditions: ["Name = 'BisCore'", "(VersionMajor > 1 OR (VersionMajor = 1 AND VersionMinor > 12))"] })}
+      ${createWhereClause({ conditions: ["Name = 'BisCore'", "VersionMajor > 1 OR (VersionMajor = 1 AND VersionMinor > 12)"] })}
     `;
 
     for await (const _row of this.#queryExecutor.createQueryReader(

@@ -429,7 +429,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             ) model
             JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = model.ECInstanceId
             ${modelFilterClauses.joins}
-            ${modelFilterClauses.where ? `AND (model.${NodeSelectClauseColumnNames.HideNodeInHierarchy} OR ${modelFilterClauses.where})` : ""}
+            ${createWhereClause({ conditions: [modelFilterClauses.where && `model.${NodeSelectClauseColumnNames.HideNodeInHierarchy} OR ${modelFilterClauses.where}`] })}
           `,
           bindings: [{ type: "idset", value: childModelIds }],
         },

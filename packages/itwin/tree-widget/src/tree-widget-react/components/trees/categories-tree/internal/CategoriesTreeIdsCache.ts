@@ -154,7 +154,7 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
               ${this.#categoryClass} this
               JOIN ${CLASS_NAME_SubCategory} sc ON sc.Parent.Id = this.ECInstanceId
               JOIN ${CLASS_NAME_Model} m ON m.ECInstanceId = this.Model.Id
-            ${createWhereClause({ conditions: ["NOT this.IsPrivate", "(NOT m.IsPrivate OR m.ECClassId IS (BisCore.DictionaryModel))"] })}
+            ${createWhereClause({ conditions: ["NOT this.IsPrivate", "NOT m.IsPrivate OR m.ECClassId IS (BisCore.DictionaryModel)"] })}
             GROUP BY this.ECInstanceId
           `;
           return this.#queryExecutor.createQueryReader(

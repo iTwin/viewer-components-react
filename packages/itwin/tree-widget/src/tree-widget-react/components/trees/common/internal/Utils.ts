@@ -92,7 +92,10 @@ export function createWhereClause({ conditions }: { conditions: Array<string | u
   if (filteredConditions.length === 0) {
     return "";
   }
-  return `WHERE ${filteredConditions.join(" AND ")}`;
+  if (filteredConditions.length === 1) {
+    return `WHERE ${filteredConditions[0]}`;
+  }
+  return `WHERE ${filteredConditions.map((condition) => `(${condition})`).join(" AND ")}`;
 }
 
 /** @internal */
