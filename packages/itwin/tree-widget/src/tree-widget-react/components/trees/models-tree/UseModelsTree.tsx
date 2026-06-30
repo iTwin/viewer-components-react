@@ -321,7 +321,12 @@ export function ModelsTreeIcon({ node }: { node: TreeNode }) {
 
 function useModelsTreeIdsCache({ imodel, hierarchyConfig }: { imodel: IModelConnection; hierarchyConfig: HierarchyConfigForModelsCache }): ModelsTreeIdsCache {
   const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
-  const baseIdsCache = getBaseIdsCache({ type: "3d", elementClassName: hierarchyConfig.elementClassSpecification, imodel });
+  const baseIdsCache = getBaseIdsCache({
+    type: "3d",
+    elementClassName: hierarchyConfig.elementClassSpecification,
+    omittedElementClassNames: hierarchyConfig.omittedElementClassNames,
+    imodel,
+  });
 
   const modelsTreeIdsCache = getCache({
     imodel,
@@ -331,7 +336,7 @@ function useModelsTreeIdsCache({ imodel, hierarchyConfig }: { imodel: IModelConn
         hierarchyConfig,
         queryExecutor: createECSqlQueryExecutor(imodel),
       }),
-    cacheKey: `${hierarchyConfig.hideRootSubject ? "hideRootSubject" : "showRootSubject"}-${hierarchyConfig.showEmptyModels ? "showEmptyModels" : "hideEmptyModels"}-${hierarchyConfig.elementClassSpecification}-ModelsTreeIdsCache`,
+    cacheKey: `${hierarchyConfig.hideRootSubject ? "hideRootSubject" : "showRootSubject"}-${hierarchyConfig.showEmptyModels ? "showEmptyModels" : "hideEmptyModels"}-${hierarchyConfig.elementClassSpecification}-${[...(hierarchyConfig.omittedElementClassNames ?? [])].sort().join(",")}-ModelsTreeIdsCache`,
   });
 
   return modelsTreeIdsCache;

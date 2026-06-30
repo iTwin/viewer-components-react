@@ -16,7 +16,7 @@ import {
   CLASS_NAME_SpatialCategory,
   CLASS_NAME_Subject,
 } from "../common/internal/ClassNameDefinitions.js";
-import { createIdsSelector, getClassesByView, parseIdsSelectorResult } from "../common/internal/Utils.js";
+import { createIdsSelector, createWhereClause, getClassesByView, parseIdsSelectorResult } from "../common/internal/Utils.js";
 
 import type {
   DefineGenericNodeChildHierarchyLevelProps,
@@ -191,7 +191,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
             FROM ${subjectFilterClauses.from} this
             JOIN IdSet(?) childSubjectIdSet ON childSubjectIdSet.id = this.ECInstanceId
             ${subjectFilterClauses.joins}
-            ${subjectFilterClauses.where ? `WHERE ${subjectFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: [subjectFilterClauses.where] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [
@@ -240,7 +240,8 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
             ) model
             JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = model.ECInstanceId
             ${modelFilterClauses.joins}
-            ${modelFilterClauses.where ? `WHERE (model.${NodeSelectClauseColumnNames.HideNodeInHierarchy} OR ${modelFilterClauses.where})` : ""}
+
+            ${createWhereClause({ conditions: [modelFilterClauses.where && `model.${NodeSelectClauseColumnNames.HideNodeInHierarchy} OR ${modelFilterClauses.where}`] })}
           `,
           bindings: [{ type: "idset", value: childModelIds }],
         },
@@ -323,7 +324,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
             FROM ${categoryFilterClauses.from} this
             JOIN IdSet(?) childCategoryIdSet ON childCategoryIdSet.id = this.ECInstanceId
             ${categoryFilterClauses.joins}
-            ${categoryFilterClauses.where ? `WHERE ${categoryFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: [categoryFilterClauses.where] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: childCategoryIds }],
@@ -352,7 +353,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
             FROM ${informationContentElementFilterClauses.from} this
             JOIN IdSet(?) modelIdSet ON modelIdSet.id = this.Model.Id
             ${informationContentElementFilterClauses.joins}
-            ${informationContentElementFilterClauses.where ? `WHERE ${informationContentElementFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: [informationContentElementFilterClauses.where] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
         bindings: [{ type: "idset", value: modelIds }],
@@ -405,10 +406,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
               JOIN IdSet(?) categoryIdSet ON this.Category.Id = categoryIdSet.id
               JOIN IdSet(?) modelIdSet ON this.Model.Id = modelIdSet.id
               ${instanceFilterClauses.joins}
-              WHERE
-                this.Parent.Id IS NULL
-                ${whereClause ? `AND ${whereClause}` : ""}
-                ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+              ${createWhereClause({ conditions: ["this.Parent.Id IS NULL", whereClause, instanceFilterClauses.where] })}
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
             bindings: [
@@ -459,10 +457,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
               FROM ${instanceFilterClauses.from} this
               JOIN IdSet(?) modelIdSet ON this.Model.Id = modelIdSet.id
               ${instanceFilterClauses.joins}
-              WHERE
-                this.Parent.Id IS NULL
-                ${whereClause ? `AND ${whereClause}` : ""}
-                ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+              ${createWhereClause({ conditions: ["this.Parent.Id IS NULL", whereClause, instanceFilterClauses.where] })}
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
             bindings: [{ type: "idset", value: modelIds }],
@@ -544,8 +539,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
               FROM ${instanceFilterClauses.from} this
               JOIN IdSet(?) groupIdSet ON this.Parent.Id = groupIdSet.id
               ${instanceFilterClauses.joins}
-              ${whereClause ? `WHERE ${whereClause}` : ""}
-              ${instanceFilterClauses.where ? `${whereClause ? "AND" : "WHERE"} ${instanceFilterClauses.where}` : ""}
+              ${createWhereClause({ conditions: [whereClause, instanceFilterClauses.where] })}
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
             bindings: [{ type: "idset", value: groupIds }],
@@ -593,8 +587,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
               JOIN BisCore.ElementGroupsMembers egm ON egm.TargetECInstanceId = this.ECInstanceId
               JOIN IdSet(?) groupIdSet ON egm.SourceECInstanceId = groupIdSet.id
               ${instanceFilterClauses.joins}
-              ${whereClause ? `WHERE ${whereClause}` : ""}
-              ${instanceFilterClauses.where ? `${whereClause ? "AND" : "WHERE"} ${instanceFilterClauses.where}` : ""}
+              ${createWhereClause({ conditions: [whereClause, instanceFilterClauses.where] })}
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
             bindings: [{ type: "idset", value: groupIds }],
@@ -641,8 +634,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
               JOIN BisCore.Element p ON p.ECInstanceId = this.Parent.Id
               JOIN IdSet(?) elementIdSet ON p.ECInstanceId = elementIdSet.id
               ${instanceFilterClauses.joins}
-              ${whereClause ? `WHERE ${whereClause}` : ""}
-              ${instanceFilterClauses.where ? `${whereClause ? "AND" : "WHERE"} ${instanceFilterClauses.where}` : ""}
+              ${createWhereClause({ conditions: [whereClause, instanceFilterClauses.where] })}
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
             bindings: [{ type: "idset", value: elementIds }],

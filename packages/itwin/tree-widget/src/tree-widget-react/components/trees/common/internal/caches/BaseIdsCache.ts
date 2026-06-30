@@ -15,7 +15,7 @@ import { SubCategoriesCache } from "./SubCategoriesCache.js";
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { Props } from "@itwin/presentation-shared";
+import type { EC, Props } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../Types.js";
 import type { ParentElementsPath } from "../Utils.js";
 
@@ -24,6 +24,7 @@ export interface BaseIdsCacheProps {
   queryExecutor: LimitingECSqlQueryExecutor;
   elementClassName: string;
   type: "2d" | "3d";
+  omittedElementClassNames?: ReadonlyArray<EC.FullClassName>;
 }
 
 /** @internal */
@@ -43,10 +44,12 @@ export class BaseIdsCache {
           {
             id: ModelId;
             categoryIsOfTopMostElement: boolean;
+            hasNonOmittedTopMostElements: boolean;
           }[]
         >
       >
     | undefined;
+  #subModelsWithNonOmittedElements: Observable<Set<ModelId>> | undefined;
 
   constructor(props: BaseIdsCacheProps) {
     this.#queryExecutor = props.queryExecutor;
@@ -70,6 +73,7 @@ export class BaseIdsCache {
       queryExecutor: this.#queryExecutor,
       componentId: this.#componentId,
       elementClassName: props.elementClassName,
+      omittedElementClassNames: props.omittedElementClassNames,
     });
   }
 
@@ -139,8 +143,33 @@ export class BaseIdsCache {
     return this.getModeledElementsInfo().pipe(map(({ subModelsTree }) => subModelsTree.has(modelId)));
   }
 
-  public getAllSubModels(): Observable<Id64Set> {
-    return this.getModeledElementsInfo().pipe(map(({ allSubModels }) => allSubModels));
+  public getAllSubModels(props?: { excludeIfOnlyOmittedClasses?: boolean }): Observable<Id64Set> {
+    if (!props?.excludeIfOnlyOmittedClasses) {
+      return this.getModeledElementsInfo().pipe(map(({ allSubModels }) => allSubModels));
+    }
+    this.#subModelsWithNonOmittedElements ??= this.getModeledElementsInfo().pipe(
+      mergeMap(({ allSubModels }) => {
+        if (allSubModels.size === 0) {
+          return of(allSubModels);
+        }
+        return this.#elementModelCategoriesCache.getCachedData().pipe(
+          map(({ modelsCategoriesInfo }) => {
+            const result = new Set<ElementId>();
+            for (const subModelId of allSubModels) {
+              const modelInfo = modelsCategoriesInfo.get(subModelId);
+              // Keep the sub-model unless it has elements that are all of omitted classes. Empty sub-models (no entry) are kept
+              // so that behavior with an empty omitted list is identical to not passing `excludeIfOnlyOmittedClasses`.
+              if (modelInfo && modelInfo.nonOmittedCategories.size > 0) {
+                result.add(subModelId);
+              }
+            }
+            return result;
+          }),
+        );
+      }),
+      shareReplay(),
+    );
+    return this.#subModelsWithNonOmittedElements;
   }
 
   public getSubModels(
@@ -227,20 +256,31 @@ export class BaseIdsCache {
   public getCategories({
     modelId,
     includeOnlyIfCategoryOfTopMostElement,
+    excludeIfOnlyOmittedClasses,
   }: {
     modelId: Id64String;
     includeOnlyIfCategoryOfTopMostElement?: boolean;
+    excludeIfOnlyOmittedClasses?: boolean;
   }): Observable<Id64Set> {
+    return this.#elementModelCategoriesCache.getCachedData().pipe(
+      map(({ modelsCategoriesInfo }) => {
+        const modelInfo = modelsCategoriesInfo.get(modelId);
+        if (excludeIfOnlyOmittedClasses) {
+          return (includeOnlyIfCategoryOfTopMostElement ? modelInfo?.categoriesOfTopMostNonOmittedElements : modelInfo?.nonOmittedCategories) ?? new Set();
+        }
+        return (includeOnlyIfCategoryOfTopMostElement ? modelInfo?.categoriesOfTopMostElements : modelInfo?.allCategories) ?? new Set();
+      }),
+    );
+  }
+
+  public getModelsContainingNonOmittedElements(): Observable<Id64Set> {
     return this.#elementModelCategoriesCache
       .getCachedData()
-      .pipe(
-        map(
-          ({ modelsCategoriesInfo }) =>
-            (includeOnlyIfCategoryOfTopMostElement
-              ? modelsCategoriesInfo.get(modelId)?.categoriesOfTopMostElements
-              : modelsCategoriesInfo.get(modelId)?.allCategories) ?? new Set(),
-        ),
-      );
+      .pipe(map(({ modelsContainingTopMostNonOmittedElements }) => modelsContainingTopMostNonOmittedElements));
+  }
+
+  public getCategoriesContainingNonOmittedElements(): Observable<Id64Set> {
+    return this.#elementModelCategoriesCache.getCachedData().pipe(map(({ categoriesContainingNonOmittedElements }) => categoriesContainingNonOmittedElements));
   }
 
   public getAllCategoriesOfElements(props?: { onlyTopMostElementCategories?: boolean }): Observable<Id64Set> {
@@ -249,7 +289,9 @@ export class BaseIdsCache {
       .pipe(map(({ allCategories, allTopMostElementCategories }) => (props?.onlyTopMostElementCategories ? allTopMostElementCategories : allCategories)));
   }
 
-  private getCategoryModelsInfoWithoutSubModels(): Observable<Map<CategoryId, { id: ModelId; categoryIsOfTopMostElement: boolean }[]>> {
+  private getCategoryModelsInfoWithoutSubModels(): Observable<
+    Map<CategoryId, { id: ModelId; categoryIsOfTopMostElement: boolean; hasNonOmittedTopMostElements: boolean }[]>
+  > {
     this.#categoryModelsInfoWithoutSubModels ??= this.getAllSubModels().pipe(
       mergeMap((allSubModels) =>
         allSubModels.size === 0
@@ -262,7 +304,7 @@ export class BaseIdsCache {
                   acc.set(key, newModelInfos);
                 }
                 return acc;
-              }, new Map<CategoryId, { id: ModelId; categoryIsOfTopMostElement: boolean }[]>()),
+              }, new Map<CategoryId, { id: ModelId; categoryIsOfTopMostElement: boolean; hasNonOmittedTopMostElements: boolean }[]>()),
             ),
       ),
       shareReplay(),
@@ -274,10 +316,12 @@ export class BaseIdsCache {
     categoryId,
     excludeSubModels,
     includeOnlyTopMostElementCategory,
+    excludeIfOnlyOmittedClasses,
   }: {
     categoryId: Id64String;
     excludeSubModels?: boolean;
     includeOnlyTopMostElementCategory?: boolean;
+    excludeIfOnlyOmittedClasses?: boolean;
   }): Observable<ModelId> {
     let getCategoryModelsInfo = () => this.#elementModelCategoriesCache.getCachedData().pipe(map(({ categoryModelsInfo }) => categoryModelsInfo));
 
@@ -293,6 +337,7 @@ export class BaseIdsCache {
         return from(categoryModels);
       }),
       includeOnlyTopMostElementCategory ? filter(({ categoryIsOfTopMostElement }) => categoryIsOfTopMostElement) : identity,
+      excludeIfOnlyOmittedClasses ? filter(({ hasNonOmittedTopMostElements }) => hasNonOmittedTopMostElements) : identity,
       map(({ id }) => id),
     );
   }
@@ -377,8 +422,16 @@ export class BaseIdsCacheImpl {
     return this.#baseIdsCache.getSubModels(props);
   }
 
-  public getAllSubModels(): ReturnType<BaseIdsCache["getAllSubModels"]> {
-    return this.#baseIdsCache.getAllSubModels();
+  public getAllSubModels(props?: Props<BaseIdsCache["getAllSubModels"]>): ReturnType<BaseIdsCache["getAllSubModels"]> {
+    return this.#baseIdsCache.getAllSubModels(props);
+  }
+
+  public getModelsContainingNonOmittedElements(): ReturnType<BaseIdsCache["getModelsContainingNonOmittedElements"]> {
+    return this.#baseIdsCache.getModelsContainingNonOmittedElements();
+  }
+
+  public getCategoriesContainingNonOmittedElements(): ReturnType<BaseIdsCache["getCategoriesContainingNonOmittedElements"]> {
+    return this.#baseIdsCache.getCategoriesContainingNonOmittedElements();
   }
 
   public hasSubModels(props: Props<BaseIdsCache["hasSubModels"]>): ReturnType<BaseIdsCache["hasSubModels"]> {

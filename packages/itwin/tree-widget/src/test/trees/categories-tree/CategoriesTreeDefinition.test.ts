@@ -31,7 +31,7 @@ import {
 import { CategoriesTreeIdsCache } from "../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
 import { getClassesByView } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
-import { buildIModel } from "../../IModelUtils.js";
+import { buildIModel, TestSchema } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 import { CLASS_NAME_DefinitionModel } from "../TreeUtils.js";
@@ -39,6 +39,7 @@ import { getInsertFunctionByViewType } from "./internal/Utils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
+import type { EC } from "@itwin/presentation-shared";
 import type { CategoriesTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 
 describe("Categories tree", () => {
@@ -983,6 +984,430 @@ describe("Categories tree", () => {
           });
         });
       });
+      describe(`omittedElementClassNames in '${viewType}' view`, () => {
+        const elementClassName: EC.FullClassName = viewType === "3d" ? "Generic.PhysicalObject" : "BisCore.DrawingGraphic";
+        const modeledElementClassName: EC.FullClassName = `${TestSchema.Name}.${viewType === "3d" ? TestSchema.ModeledElement3dClassName : TestSchema.ModeledElement2dClassName}`;
+        const unrelatedElementClassName: EC.FullClassName = viewType === "3d" ? "BisCore.GeometricElement2d" : "BisCore.GeometricElement3d";
+        const subModeledElementBaseClassName: EC.FullClassName = "BisCore.ISubModeledElement";
+        it("does not filter out elements when they don't belong to any of the omitted classes", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const physicalModel = insertElementsModel({ txn, codeValue: "model" });
+              const category = insertCategory({ txn, codeValue: "category" });
+              const element = insertElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+              return { category, element };
+            }),
+          );
+
+          const { imodelConnection, ...keys } = buildIModelResult;
+          using provider = createCategoryTreeProvider(imodelConnection, viewType, {
+            showElements: true,
+            omittedElementClassNames: [unrelatedElementClassName],
+          });
+
+          await validateHierarchy({
+            provider,
+            expect: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.category],
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.element.className,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.element],
+                        children: false,
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          });
+        });
+
+        describe("root elements of omitted classes", () => {
+          it("filters out elements of omitted classes", async () => {
+            await using buildIModelResult = await buildIModel(async (imodel) =>
+              withEditTxn(imodel, (txn) => {
+                const physicalModel = insertElementsModel({ txn, codeValue: "model" });
+                const category = insertCategory({ txn, codeValue: "category" });
+                const keptElement = insertElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+                insertModeledElement({
+                  txn,
+                  modelId: physicalModel.id,
+                  categoryId: category.id,
+                });
+                return { category, keptElement };
+              }),
+            );
+
+            const { imodelConnection, ...keys } = buildIModelResult;
+            using provider = createCategoryTreeProvider(imodelConnection, viewType, {
+              showElements: true,
+              omittedElementClassNames: [modeledElementClassName],
+            });
+
+            await validateHierarchy({
+              provider,
+              expect: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.category],
+                  children: [
+                    NodeValidators.createForClassGroupingNode({
+                      className: keys.keptElement.className,
+                      children: [
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.keptElement],
+                          children: false,
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            });
+          });
+
+          it("filters out elements of classes derived from omitted classes", async () => {
+            await using buildIModelResult = await buildIModel(async (imodel) =>
+              withEditTxn(imodel, (txn) => {
+                const physicalModel = insertElementsModel({ txn, codeValue: "model" });
+                const category = insertCategory({ txn, codeValue: "category" });
+                insertModeledElement({
+                  txn,
+                  modelId: physicalModel.id,
+                  categoryId: category.id,
+                });
+                const keptElement = insertElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+                return { category, keptElement };
+              }),
+            );
+
+            const { imodelConnection, ...keys } = buildIModelResult;
+            using provider = createCategoryTreeProvider(imodelConnection, viewType, {
+              showElements: true,
+              omittedElementClassNames: [subModeledElementBaseClassName],
+            });
+
+            await validateHierarchy({
+              provider,
+              expect: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.category],
+                  children: [
+                    NodeValidators.createForClassGroupingNode({
+                      className: keys.keptElement.className,
+                      children: [
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.keptElement],
+                          children: false,
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            });
+          });
+
+          it("shows category when it contains only omitted elements", async () => {
+            await using buildIModelResult = await buildIModel(async (imodel) =>
+              withEditTxn(imodel, (txn) => {
+                const definitionContainer = insertDefinitionContainer({ txn, codeValue: "DefinitionContainer" });
+                const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+                const physicalModel = insertElementsModel({ txn, codeValue: "model" });
+                const category = insertCategory({ txn, codeValue: "category", modelId: definitionModel.id });
+                insertElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+                return { category, definitionContainer };
+              }),
+            );
+
+            const { imodelConnection, ...keys } = buildIModelResult;
+            using provider = createCategoryTreeProvider(imodelConnection, viewType, {
+              showElements: true,
+              omittedElementClassNames: [elementClassName],
+            });
+
+            await validateHierarchy({
+              provider,
+              expect: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.definitionContainer],
+                  children: [
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.category],
+                      children: false,
+                    }),
+                  ],
+                }),
+              ],
+            });
+          });
+        });
+
+        describe("child elements of omitted classes", () => {
+          it("sets hasChildren to false when parent contains only omitted child elements", async () => {
+            await using buildIModelResult = await buildIModel(async (imodel) =>
+              withEditTxn(imodel, (txn) => {
+                const physicalModel = insertElementsModel({ txn, codeValue: "model" });
+                const category = insertCategory({ txn, codeValue: "category" });
+                const omittedChildCategory = insertCategory({ txn, codeValue: "omitted child category" });
+                const parentElement = insertElement({ txn, userLabel: "parent element", modelId: physicalModel.id, categoryId: category.id });
+                insertModeledElement({
+                  txn,
+                  userLabel: "omitted child element",
+                  modelId: physicalModel.id,
+                  categoryId: omittedChildCategory.id,
+                  parentId: parentElement.id,
+                });
+                return { category, parentElement, omittedChildCategory };
+              }),
+            );
+
+            const { imodelConnection, ...keys } = buildIModelResult;
+            using provider = createCategoryTreeProvider(imodelConnection, viewType, {
+              showElements: true,
+              omittedElementClassNames: [modeledElementClassName],
+            });
+
+            await validateHierarchy({
+              provider,
+              expect: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.category],
+                  children: [
+                    NodeValidators.createForClassGroupingNode({
+                      className: keys.parentElement.className,
+                      children: [
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.parentElement],
+                          children: false,
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.omittedChildCategory],
+                  children: false,
+                }),
+              ],
+            });
+          });
+
+          it("filters out child of omitted classes and their categories", async () => {
+            await using buildIModelResult = await buildIModel(async (imodel) =>
+              withEditTxn(imodel, (txn) => {
+                const physicalModel = insertElementsModel({ txn, codeValue: "model" });
+                const category = insertCategory({ txn, codeValue: "category" });
+                const omittedChildCategory = insertCategory({ txn, codeValue: "omitted child category" });
+                const childCategory = insertCategory({ txn, codeValue: "child category" });
+                const parentElement = insertElement({ txn, userLabel: "parent element", modelId: physicalModel.id, categoryId: category.id });
+                insertModeledElement({
+                  txn,
+                  userLabel: "omitted child element",
+                  modelId: physicalModel.id,
+                  categoryId: omittedChildCategory.id,
+                  parentId: parentElement.id,
+                });
+                const childElement = insertElement({
+                  txn,
+                  userLabel: "child element",
+                  modelId: physicalModel.id,
+                  categoryId: childCategory.id,
+                  parentId: parentElement.id,
+                });
+                return { category, parentElement, childCategory, childElement, omittedChildCategory };
+              }),
+            );
+
+            const { imodelConnection, ...keys } = buildIModelResult;
+            using provider = createCategoryTreeProvider(imodelConnection, viewType, {
+              showElements: true,
+              omittedElementClassNames: [modeledElementClassName],
+            });
+
+            await validateHierarchy({
+              provider,
+              expect: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.category],
+                  children: [
+                    NodeValidators.createForClassGroupingNode({
+                      className: keys.parentElement.className,
+                      children: [
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.parentElement],
+                          children: [
+                            NodeValidators.createForInstanceNode({
+                              instanceKeys: [keys.childCategory],
+                              children: [
+                                NodeValidators.createForClassGroupingNode({
+                                  className: keys.childElement.className,
+                                  children: [
+                                    NodeValidators.createForInstanceNode({
+                                      instanceKeys: [keys.childElement],
+                                      children: false,
+                                    }),
+                                  ],
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.childCategory],
+                  children: false,
+                }),
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.omittedChildCategory],
+                  children: false,
+                }),
+              ],
+            });
+          });
+
+          it("sets hasChildren to false when parent modeled element contains only omitted elements", async () => {
+            await using buildIModelResult = await buildIModel(async (imodel) =>
+              withEditTxn(imodel, (txn) => {
+                const physicalModel = insertElementsModel({ txn, codeValue: "model" });
+                const category = insertCategory({ txn, codeValue: "category" });
+                const omittedChildCategory = insertCategory({ txn, codeValue: "omitted child category" });
+                const modeledElement = insertModeledElement({
+                  txn,
+                  userLabel: "modeled element",
+                  modelId: physicalModel.id,
+                  categoryId: category.id,
+                });
+                const subModel = insertElementsSubModel({ txn, modeledElementId: modeledElement.id });
+                insertElement({
+                  txn,
+                  userLabel: "omitted modeling element",
+                  modelId: subModel.id,
+                  categoryId: omittedChildCategory.id,
+                });
+                return { category, modeledElement, omittedChildCategory };
+              }),
+            );
+
+            const { imodelConnection, ...keys } = buildIModelResult;
+            using provider = createCategoryTreeProvider(imodelConnection, viewType, {
+              showElements: true,
+              omittedElementClassNames: [elementClassName],
+            });
+
+            await validateHierarchy({
+              provider,
+              expect: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.category],
+                  children: [
+                    NodeValidators.createForClassGroupingNode({
+                      className: keys.modeledElement.className,
+                      children: [
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.modeledElement],
+                          children: false,
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.omittedChildCategory],
+                  children: false,
+                }),
+              ],
+            });
+          });
+
+          it("filters out sub-model child elements of omitted classes and their categories", async () => {
+            await using buildIModelResult = await buildIModel(async (imodel) =>
+              withEditTxn(imodel, (txn) => {
+                const physicalModel = insertElementsModel({ txn, codeValue: "model" });
+                const category = insertCategory({ txn, codeValue: "category" });
+                const omittedChildCategory = insertCategory({ txn, codeValue: "omitted child category" });
+                const childCategory = insertCategory({ txn, codeValue: "child category" });
+                const modeledElement = insertModeledElement({
+                  txn,
+                  userLabel: "modeled element",
+                  modelId: physicalModel.id,
+                  categoryId: category.id,
+                });
+                const subModel = insertElementsSubModel({ txn, modeledElementId: modeledElement.id });
+                insertElement({
+                  txn,
+                  userLabel: "omitted modeling element",
+                  modelId: subModel.id,
+                  categoryId: omittedChildCategory.id,
+                });
+                const childModeledElement = insertModeledElement({
+                  txn,
+                  userLabel: "child modeled element",
+                  modelId: subModel.id,
+                  categoryId: childCategory.id,
+                });
+                return { category, modeledElement, childCategory, childModeledElement, omittedChildCategory };
+              }),
+            );
+
+            const { imodelConnection, ...keys } = buildIModelResult;
+            using provider = createCategoryTreeProvider(imodelConnection, viewType, {
+              showElements: true,
+              omittedElementClassNames: [elementClassName],
+            });
+
+            await validateHierarchy({
+              provider,
+              expect: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.category],
+                  label: "category",
+                  children: [
+                    NodeValidators.createForClassGroupingNode({
+                      className: keys.modeledElement.className,
+                      children: [
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.modeledElement],
+                          children: [
+                            NodeValidators.createForInstanceNode({
+                              instanceKeys: [keys.childCategory],
+                              children: [
+                                NodeValidators.createForClassGroupingNode({
+                                  className: keys.childModeledElement.className,
+                                  children: [
+                                    NodeValidators.createForInstanceNode({
+                                      instanceKeys: [keys.childModeledElement],
+                                      children: false,
+                                    }),
+                                  ],
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.childCategory],
+                  children: false,
+                }),
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.omittedChildCategory],
+                  children: false,
+                }),
+              ],
+            });
+          });
+        });
+      });
     });
 
     describe("createInstanceKeyPaths", () => {
@@ -1052,8 +1477,18 @@ function createCategoryTreeProvider(
   hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>,
 ): HierarchyProvider & Disposable {
   const imodelAccess = createIModelAccess(imodelConnection);
-  const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
-  const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
+  const baseIdsCache = new BaseIdsCache({
+    queryExecutor: imodelAccess,
+    elementClassName: getClassesByView(viewType).elementClass,
+    type: viewType,
+    omittedElementClassNames: hierarchyConfig?.omittedElementClassNames,
+  });
+  const idsCache = new CategoriesTreeIdsCache({
+    queryExecutor: imodelAccess,
+    type: viewType,
+    baseIdsCache,
+    omittedElementClassNames: hierarchyConfig?.omittedElementClassNames,
+  });
   const hierarchyProvider = createIModelHierarchyProvider({
     imodelAccess,
     hierarchyDefinition: new CategoriesTreeDefinition({

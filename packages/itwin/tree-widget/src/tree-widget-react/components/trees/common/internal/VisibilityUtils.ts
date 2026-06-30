@@ -9,7 +9,7 @@ import { QueryRowFormat } from "@itwin/core-common";
 import { reduceWhile, toVoidPromise } from "./Rxjs.js";
 import { createVisibilityStatus } from "./Tooltip.js";
 import { isBeSqliteInterruptError } from "./UseErrorState.js";
-import { fromWithRelease, getClassesByView, getOptimalBatchSize, releaseMainThreadOnItemsCount } from "./Utils.js";
+import { createWhereClause, fromWithRelease, getClassesByView, getOptimalBatchSize, releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Observable, OperatorFunction } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -173,9 +173,7 @@ export async function loadCategoriesFromViewport(vp: TreeWidgetViewport, compone
       ECInstanceId IN (
         SELECT DISTINCT Category.Id
         FROM ${elementClass}
-        WHERE
-          Category.Id IN (SELECT ECInstanceId FROM ${categoryClass})
-          ${vp.viewType !== "2d" ? "" : "AND Model.Id=?"}
+        ${createWhereClause({ conditions: [`Category.Id IN (SELECT ECInstanceId FROM ${categoryClass})`, vp.viewType === "2d" && "Model.Id=?"] })}
       )
   `;
 

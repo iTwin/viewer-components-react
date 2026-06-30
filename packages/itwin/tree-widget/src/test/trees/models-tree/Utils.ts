@@ -50,7 +50,12 @@ export function createModelsTreeProvider({
 }: CreateModelsTreeProviderProps): HierarchyProvider & { dispose: () => void; [Symbol.dispose]: () => void } {
   const config = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...hierarchyConfig };
   const createdImodelAccess = imodelAccess ?? createIModelAccess(imodelConnection);
-  const baseIdsCache = new BaseIdsCache({ queryExecutor: createdImodelAccess, elementClassName: config.elementClassSpecification, type: "3d" });
+  const baseIdsCache = new BaseIdsCache({
+    queryExecutor: createdImodelAccess,
+    elementClassName: config.elementClassSpecification,
+    type: "3d",
+    omittedElementClassNames: config.omittedElementClassNames,
+  });
   const createdIdsCache =
     idsCache ??
     new ModelsTreeIdsCache({
@@ -93,8 +98,8 @@ interface IdsCacheMockProps {
 
 export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCache {
   return {
-    getChildSubjectIds: vi.fn((subjectIds: Id64Arg) => {
-      return from(Id64.iterable(subjectIds)).pipe(
+    getChildSubjectIds: vi.fn(({ parentSubjectIds }: { parentSubjectIds: Id64Arg; excludeIfOnlyOmittedClasses?: boolean }) => {
+      return from(Id64.iterable(parentSubjectIds)).pipe(
         concatMap((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         toArray(),

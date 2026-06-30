@@ -35,6 +35,8 @@ import {
 import { catchBeSQLiteInterrupts } from "../common/internal/UseErrorState.js";
 import {
   createIdsSelector,
+  createOmittedClassesExclusionClause,
+  createWhereClause,
   fromWithRelease,
   getClassesByView,
   getOptimalBatchSize,
@@ -113,6 +115,8 @@ export interface CategoriesTreeHierarchyConfiguration {
   showElements: boolean;
   /** Should categories without elements be shown. Defaults to `false`. */
   showEmptyCategories: boolean;
+  /** Classes to omit from the hierarchy. Element nodes whose class derive from the omitted classes will not be shown in the hierarchy. Defaults to `undefined`. */
+  omittedElementClassNames?: Array<EC.FullClassName>;
 }
 
 /** @internal */
@@ -131,12 +135,14 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   #categoryClass: EC.FullClassName;
   #categoryElementClass: EC.FullClassName;
   #categoryModelClass: EC.FullClassName;
+  #omittedElementClassNames?: ReadonlyArray<EC.FullClassName>;
   static #componentName = "CategoriesTreeDefinition";
 
   public constructor(props: CategoriesTreeDefinitionProps) {
     this.#iModelAccess = props.imodelAccess;
     this.#idsCache = props.idsCache;
     this.#hierarchyConfig = props.hierarchyConfig;
+    this.#omittedElementClassNames = props.hierarchyConfig.omittedElementClassNames;
     const { categoryClass, elementClass, modelClass } = getClassesByView(props.viewType);
     this.#categoryClass = categoryClass;
     this.#categoryElementClass = elementClass;
@@ -331,9 +337,18 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
               })}
             FROM ${this.#categoryModelClass} this
             JOIN IdSet(?) elementIdSet ON this.ModeledElement.Id = elementIdSet.id
-            WHERE
-              NOT this.IsPrivate
-              AND this.ECInstanceId IN (SELECT Model.Id FROM ${this.#categoryElementClass})
+            ${createWhereClause({
+              conditions: [
+                "NOT this.IsPrivate",
+                `this.ECInstanceId IN (
+                  SELECT c.Model.Id
+                  FROM ${this.#categoryElementClass} c
+                  ${createWhereClause({
+                    conditions: [createOmittedClassesExclusionClause({ alias: "c", omittedClassNames: this.#hierarchyConfig.omittedElementClassNames })],
+                  })}
+                )`,
+              ],
+            })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: elementIds }],
@@ -360,10 +375,10 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         filter: instanceFilter,
         contentClass: { fullName: this.#categoryElementClass, alias: "this" },
       }),
-      firstValueFrom(this.#idsCache.getAllSubModels()),
+      firstValueFrom(this.#idsCache.getAllSubModels({ excludeIfOnlyOmittedClasses: true })),
       firstValueFrom(
         from(modelIds).pipe(
-          mergeMap((modelId) => this.#idsCache.getCategories({ modelId, includeOnlyIfCategoryOfTopMostElement: true })),
+          mergeMap((modelId) => this.#idsCache.getCategories({ modelId, includeOnlyIfCategoryOfTopMostElement: true, excludeIfOnlyOmittedClasses: true })),
           reduce((acc, modelCategories) => {
             for (const categoryId of modelCategories) {
               acc.add(categoryId);
@@ -390,7 +405,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             FROM ${categoryInstanceFilterClauses.from} this
             JOIN IdSet(?) categoryIdSet ON categoryIdSet.id = this.ECInstanceId
             ${categoryInstanceFilterClauses.joins}
-            ${categoryInstanceFilterClauses.where ? `WHERE ${categoryInstanceFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: [categoryInstanceFilterClauses.where] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: categoriesToShow }],
@@ -413,10 +428,13 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             FROM ${elementInstanceFilterClauses.from} this
             JOIN IdSet(?) modelIdSet ON this.Model.Id = modelIdSet.id
             ${elementInstanceFilterClauses.joins}
-            WHERE
-              this.Parent.Id IS NULL
-              AND this.Category.Id = ${modeledElementCategory}
-              ${elementInstanceFilterClauses.where ? `AND ${elementInstanceFilterClauses.where}` : ""}
+           ${createWhereClause({
+             conditions: [
+               "this.Parent.Id IS NULL",
+               elementInstanceFilterClauses.where,
+               createOmittedClassesExclusionClause({ alias: "this", omittedClassNames: this.#omittedElementClassNames }),
+             ],
+           })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
           bindings: [...bindings, { type: "idset", value: modelIds }],
@@ -433,7 +451,9 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     const parentNodeInstanceIds = "parentNodeInstanceIds" in props ? props.parentNodeInstanceIds : undefined;
     const { definitionContainers, categories } = await firstValueFrom(
       parentNodeInstanceIds === undefined
-        ? this.#idsCache.getRootDefinitionContainersAndCategories({ includeEmpty: this.#hierarchyConfig.showEmptyCategories })
+        ? this.#idsCache.getRootDefinitionContainersAndCategories({
+            includeEmpty: this.#hierarchyConfig.showEmptyCategories,
+          })
         : this.#idsCache.getDirectChildDefinitionContainersAndCategories({
             parentDefinitionContainerIds: parentNodeInstanceIds,
             includeEmpty: this.#hierarchyConfig.showEmptyCategories,
@@ -498,7 +518,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
           FROM ${instanceFilterClauses.from} this
           JOIN IdSet(?) definitionContainerIdSet ON this.ECInstanceId = definitionContainerIdSet.id
           ${instanceFilterClauses.joins}
-          ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
           ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
         bindings: [{ type: "idset", value: definitionContainerIds }],
@@ -526,6 +546,8 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         ? firstValueFrom(
             // Iterate over categories which will be returned by the query
             from(categories).pipe(
+              // only categories that have at least one non-omitted element can have element children
+              mergeMap((categoryInfo) => (categoryInfo.hasElementsFromNonOmittedClasses ? of(categoryInfo) : EMPTY)),
               mergeMap(({ id: categoryId }) =>
                 // when category has element models, then it has element children
                 this.#idsCache.getModels({ categoryId, excludeSubModels: true, includeOnlyTopMostElementCategory: true }).pipe(
@@ -595,7 +617,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
           FROM ${instanceFilterClauses.from} this
           JOIN IdSet(?) categoryIdSet ON this.ECInstanceId = categoryIdSet.id
           ${instanceFilterClauses.joins}
-          ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+          ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
           ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
         bindings: [
@@ -652,9 +674,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             FROM ${instanceFilterClauses.from} this
             JOIN IdSet(?) categoryIdSet ON this.Parent.Id = categoryIdSet.id
             ${instanceFilterClauses.joins}
-            WHERE
-              NOT this.IsPrivate
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: ["NOT this.IsPrivate", instanceFilterClauses.where] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: categoryIds }],
@@ -687,7 +707,12 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             (
               SELECT 1
               FROM ${this.#categoryElementClass} ce
-              WHERE ce.Parent.Id = this.ECInstanceId
+              ${createWhereClause({
+                conditions: [
+                  "ce.Parent.Id = this.ECInstanceId",
+                  createOmittedClassesExclusionClause({ alias: "ce", omittedClassNames: this.#omittedElementClassNames }),
+                ],
+              })}
               LIMIT 1
             ),
             ${
@@ -766,7 +791,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         filter: instanceFilter,
         contentClass: { fullName: this.#categoryElementClass, alias: "this" },
       }),
-      firstValueFrom(this.#idsCache.getAllSubModels()),
+      firstValueFrom(this.#idsCache.getAllSubModels({ excludeIfOnlyOmittedClasses: true })),
     ]);
     const modelIds: Id64Array =
       parentNode.extendedData.modelIds.length > 0
@@ -800,8 +825,13 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             JOIN IdSet(?) modelIdSet ON this.Model.Id = modelIdSet.id
             ${parentIds ? "JOIN IdSet(?) parentIdSet ON this.Parent.Id = parentIdSet.id" : ""}
             ${instanceFilterClauses.joins}
-            ${parentIds ? "" : "WHERE this.Parent.Id IS NULL"}
-            ${instanceFilterClauses.where ? `${parentIds ? "WHERE" : "AND"} ${instanceFilterClauses.where}` : ""}
+            ${createWhereClause({
+              conditions: [
+                !parentIds && "this.Parent.Id IS NULL",
+                createOmittedClassesExclusionClause({ alias: "this", omittedClassNames: this.#omittedElementClassNames }),
+                instanceFilterClauses.where,
+              ],
+            })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
           bindings: [
@@ -834,7 +864,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         filter: instanceFilter,
         contentClass: { fullName: this.#categoryClass, alias: "this" },
       }),
-      firstValueFrom(this.#idsCache.getAllSubModels()),
+      firstValueFrom(this.#idsCache.getAllSubModels({ excludeIfOnlyOmittedClasses: true })),
     ]);
 
     const { selectClause, bindings } = await this.createElementNodeSelectClause({
@@ -852,9 +882,13 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             FROM ${elementInstanceFilterClauses.from} this
             JOIN IdSet(?) elementIdSet ON this.Parent.Id = elementIdSet.id
             ${elementInstanceFilterClauses.joins}
-            WHERE
-              this.Category.Id = ${parentCategoryId}
-              ${elementInstanceFilterClauses.where ? `AND ${elementInstanceFilterClauses.where}` : ""}
+            ${createWhereClause({
+              conditions: [
+                `this.Category.Id = ${parentCategoryId}`,
+                elementInstanceFilterClauses.where,
+                createOmittedClassesExclusionClause({ alias: "this", omittedClassNames: this.#omittedElementClassNames }),
+              ],
+            })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [...bindings, { type: "idset", value: elementIds }],
@@ -881,6 +915,9 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 SELECT DISTINCT ce.Category.Id
                 FROM ${this.#categoryElementClass} ce
                 JOIN IdSet(?) parentIdSet ON ce.Parent.Id = parentIdSet.id
+                ${createWhereClause({
+                  conditions: [createOmittedClassesExclusionClause({ alias: "ce", omittedClassNames: this.#omittedElementClassNames })],
+                })}
                 ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
               )
               ${categoryInstanceFilterClauses.where ? `AND ${categoryInstanceFilterClauses.where}` : ""}
@@ -969,7 +1006,12 @@ function createInstanceKeyPathsFromInstanceLabel(
                   FROM ${elementClass} this
                   JOIN IdSet(?) elementCategoryIdSet ON this.Category.Id = elementCategoryIdSet.id
                   JOIN ${CLASS_NAME_Model} m ON this.Model.Id = m.ECInstanceId
-                  WHERE NOT m.IsPrivate
+                  ${createWhereClause({
+                    conditions: [
+                      "NOT m.IsPrivate",
+                      createOmittedClassesExclusionClause({ alias: "this", omittedClassNames: props.hierarchyConfig.omittedElementClassNames }),
+                    ],
+                  })}
                   ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
                 )`,
               ]
@@ -1038,9 +1080,9 @@ function createInstanceKeyPathsFromInstanceLabel(
                   FROM
                     ${CATEGORIES_WITH_LABELS_CTE} c
                     JOIN ${SUBCATEGORIES_WITH_LABELS_CTE} sc ON sc.ParentId = c.ECInstanceId
-                  WHERE
-                    c.ChildCount > 1
-                    AND sc.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
+                  ${createWhereClause({
+                    conditions: ["c.ChildCount > 1", "sc.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'"],
+                  })}
                 `
             }
             ${
@@ -1165,6 +1207,7 @@ function createSearchPathsForDifferentTypes(
             idsCache,
             viewType: props.viewType,
             showElements: props.hierarchyConfig.showElements,
+            omittedElementClassNames: props.hierarchyConfig.omittedElementClassNames,
           }),
           idsCache.getSubCategoriesSearchPaths({ subCategoryIds: ids.subCategoryIds }).pipe(
             releaseMainThreadOnItemsCount(2000),
@@ -1184,6 +1227,7 @@ function createSearchPathsForDifferentTypes(
                       chunkIndex,
                       componentId,
                       componentName,
+                      omittedElementClassNames: props.hierarchyConfig.omittedElementClassNames,
                     }),
                   2,
                 ),
@@ -1203,9 +1247,10 @@ export function createGeometricElementInstanceKeyPaths(props: {
   componentId: GuidString;
   componentName: string;
   chunkIndex: number;
+  omittedElementClassNames?: Array<EC.FullClassName>;
 }): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String }> {
   const separator = ";";
-  const { targetItems, chunkIndex, componentId, componentName, idsCache, queryExecutor, viewType } = props;
+  const { targetItems, chunkIndex, componentId, componentName, idsCache, queryExecutor, viewType, omittedElementClassNames } = props;
   const { categoryClass, elementClass, modelClass } = getClassesByView(viewType);
   if (targetItems.length === 0) {
     return EMPTY;
@@ -1223,6 +1268,7 @@ export function createGeometricElementInstanceKeyPaths(props: {
             '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT)
           FROM ${elementClass} e
           JOIN IdSet(?) targetItemIdSet ON e.ECInstanceId = targetItemIdSet.id
+          ${createWhereClause({ conditions: [createOmittedClassesExclusionClause({ alias: "e", omittedClassNames: omittedElementClassNames })] })}
           ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
           UNION ALL
@@ -1248,22 +1294,24 @@ export function createGeometricElementInstanceKeyPaths(props: {
             )
           FROM CategoriesElementsHierarchy ce
           JOIN ${elementClass} pe ON (pe.ECInstanceId = ce.ParentId OR pe.ECInstanceId = ce.ModelId AND ce.ParentId IS NULL)
+          ${createWhereClause({ conditions: [createOmittedClassesExclusionClause({ alias: "pe", omittedClassNames: omittedElementClassNames })] })}
         )`,
       ];
       const ecsql = `
         SELECT '${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([mce].[CategoryId]) AS TEXT) || '${separator}' || mce.Path
         FROM CategoriesElementsHierarchy mce
-        WHERE mce.ParentId IS NULL
-        ${
-          subModelIds.size > 0
-            ? `AND NOT EXISTS (
+        ${createWhereClause({
+          conditions: [
+            "mce.ParentId IS NULL",
+            subModelIds.size > 0 &&
+              `NOT EXISTS (
                 SELECT 1
                 FROM IdSet(?) subModelIdSet
                 WHERE mce.ModelId = subModelIdSet.id
                 LIMIT 1
-              )`
-            : ""
-        }
+              )`,
+          ],
+        })}
       `;
 
       return queryExecutor.createQueryReader(
@@ -1298,9 +1346,10 @@ export function createCategoriesSearchPaths(props: {
   componentId: GuidString;
   componentName: string;
   showElements: boolean;
+  omittedElementClassNames?: Array<EC.FullClassName>;
 }): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String }> {
   const separator = ";";
-  const { targetCategoryIds, componentId, componentName, idsCache, queryExecutor, viewType } = props;
+  const { targetCategoryIds, componentId, componentName, idsCache, queryExecutor, viewType, omittedElementClassNames } = props;
   const { categoryClass, elementClass, modelClass } = getClassesByView(viewType);
   if (targetCategoryIds.length === 0) {
     return EMPTY;
@@ -1340,7 +1389,13 @@ export function createCategoriesSearchPaths(props: {
             FROM ${elementClass} e
             JOIN IdSet(?) categoryIdSet ON e.Category.Id = categoryIdSet.id
             JOIN ${elementClass} pe ON (pe.ECInstanceId = e.Parent.Id OR (pe.ECInstanceId = e.Model.Id AND e.Parent.Id IS NULL))
-            WHERE pe.Category.Id <> e.Category.Id
+            ${createWhereClause({
+              conditions: [
+                "pe.Category.Id <> e.Category.Id",
+                createOmittedClassesExclusionClause({ alias: "e", omittedClassNames: omittedElementClassNames }),
+                createOmittedClassesExclusionClause({ alias: "pe", omittedClassNames: omittedElementClassNames }),
+              ],
+            })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
             UNION ALL
@@ -1366,22 +1421,24 @@ export function createCategoriesSearchPaths(props: {
               )
             FROM CategoriesParentsHierarchy ce
             JOIN ${elementClass} pe ON (pe.ECInstanceId = ce.ParentId OR (pe.ECInstanceId = ce.ModelId AND ce.ParentId IS NULL))
+            ${createWhereClause({ conditions: [createOmittedClassesExclusionClause({ alias: "pe", omittedClassNames: omittedElementClassNames })] })}
           )`,
         ];
         const ecsql = `
           SELECT '${CATEGORY_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([mce].[CategoryId]) AS TEXT) || '${separator}' || mce.Path
           FROM CategoriesParentsHierarchy mce
-          WHERE mce.ParentId IS NULL
-          ${
-            subModelIds.size > 0
-              ? `AND NOT EXISTS (
+          ${createWhereClause({
+            conditions: [
+              "mce.ParentId IS NULL",
+              subModelIds.size > 0 &&
+                `NOT EXISTS (
                   SELECT 1
                   FROM IdSet(?) subModelIdSet
                   WHERE mce.ModelId = subModelIdSet.id
                   LIMIT 1
-                )`
-              : ""
-          }
+                )`,
+            ],
+          })}
         `;
 
         return queryExecutor.createQueryReader(

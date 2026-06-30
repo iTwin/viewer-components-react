@@ -259,7 +259,7 @@ export function getClassificationsTreeIdsCache({
   hierarchyConfig: HierarchyConfigForClassificationsCache;
   visibilityHandlerConfig?: VisibilityHandlerConfigForClassificationsCache;
 }) {
-  const hierarchyConfigKey = hierarchyConfig.rootClassificationSystemCode;
+  const hierarchyConfigKey = `${hierarchyConfig.rootClassificationSystemCode}-${[...(hierarchyConfig.omittedElementClassNames ?? [])].sort().join(",")}`;
   const visibilityHandlerConfigKey = visibilityHandlerConfig?.classificationToCategoriesRelationshipSpecification
     ? `${visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.fullClassName};${visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.source}`
     : "default";
@@ -268,7 +268,12 @@ export function getClassificationsTreeIdsCache({
     imodel,
     createCache: () =>
       new ClassificationsTreeIdsCache({
-        baseIdsCache: getBaseIdsCache({ type: "3d", elementClassName: getClassesByView("3d").elementClass, imodel }),
+        baseIdsCache: getBaseIdsCache({
+          type: "3d",
+          elementClassName: getClassesByView("3d").elementClass,
+          omittedElementClassNames: hierarchyConfig.omittedElementClassNames,
+          imodel,
+        }),
         hierarchyConfig,
         queryExecutor: createECSqlQueryExecutor(imodel),
         visibilityHandlerConfig,

@@ -16,7 +16,7 @@ import {
   CLASS_NAME_SpatialCategory,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
-import { fromWithRelease, getOrCreate } from "../../common/internal/Utils.js";
+import { createWhereClause, fromWithRelease, getOrCreate } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
@@ -30,7 +30,10 @@ import type { ClassificationsTreeVisibilityHandlerConfiguration } from "../UseCl
  * Hierarchy config props needed for ids cache.
  * @internal
  */
-export type HierarchyConfigForClassificationsCache = Pick<ClassificationsTreeHierarchyConfiguration, "rootClassificationSystemCode">;
+export type HierarchyConfigForClassificationsCache = Pick<
+  ClassificationsTreeHierarchyConfiguration,
+  "rootClassificationSystemCode" | "omittedElementClassNames"
+>;
 
 /**
  * Visibility handler config props needed for ids cache.
@@ -59,6 +62,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
     | Observable<{
         classificationOrTableInfos: Map<ClassificationId | ClassificationTableId, ClassificationOrTableInfo>;
         classificationsWithChildren: Set<ClassificationId>;
+        classificationsWithNonOmittedChildren: Set<ClassificationId>;
       }>
     | undefined;
   #filteredElementsData: Observable<Map<ElementId, { modelId: Id64String; categoryId: Id64String }>> | undefined;
@@ -92,11 +96,14 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
             FROM ${CLASS_NAME_Classification} cl
             JOIN ${CLASS_NAME_ClassificationTable} ct ON ct.ECInstanceId = cl.Model.Id
             JOIN ${CLASS_NAME_ClassificationSystem} cs ON cs.ECInstanceId = ct.Parent.Id
-            WHERE
-              cs.CodeValue = '${this.#props.hierarchyConfig.rootClassificationSystemCode}'
-              AND NOT ct.IsPrivate
-              AND NOT cl.IsPrivate
-              AND cl.Parent.Id IS NULL
+            ${createWhereClause({
+              conditions: [
+                `cs.CodeValue = '${this.#props.hierarchyConfig.rootClassificationSystemCode}'`,
+                "NOT ct.IsPrivate",
+                "NOT cl.IsPrivate",
+                "cl.Parent.Id IS NULL",
+              ],
+            })}
 
             UNION ALL
 
@@ -123,7 +130,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
           SELECT group_concat(IdToHex(cat.ECInstanceId))
           FROM ${CLASS_NAME_SpatialCategory} cat
           JOIN ${relationship} rel ON rel.${categoryAccessor} = cat.ECInstanceId
-          WHERE NOT cat.IsPrivate AND rel.${classificationAccessor} = cl.ClassificationId
+          ${createWhereClause({ conditions: ["NOT cat.IsPrivate", `rel.${classificationAccessor} = cl.ClassificationId`] })}
           GROUP BY rel.${classificationAccessor}
         `;
       } else {
@@ -132,7 +139,9 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
           FROM ${CLASS_NAME_GeometricElement3d} e
           JOIN ${CLASS_NAME_SpatialCategory} cat ON cat.ECInstanceId = e.Category.Id
           JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = e.ECInstanceId
-          WHERE e.Parent.Id IS NULL AND NOT cat.IsPrivate AND ehc.TargetECInstanceId = cl.ClassificationId
+          ${createWhereClause({
+            conditions: ["e.Parent.Id IS NULL", "NOT cat.IsPrivate", "ehc.TargetECInstanceId = cl.ClassificationId"],
+          })}
           GROUP BY ehc.TargetECInstanceId
         `;
       }
@@ -143,7 +152,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
           cl.ParentClassificationId parentId,
           (${categoriesOfClassificationSelector}) relatedCategories
         FROM ${CLASSIFICATIONS_CTE} cl
-        ${lastClassificationId === undefined ? "" : `WHERE cl.ClassificationId > ${lastClassificationId}`}
+        ${createWhereClause({ conditions: [lastClassificationId !== undefined && `cl.ClassificationId > ${lastClassificationId}`] })}
         ORDER BY cl.ClassificationId
         LIMIT ${this.#rowLimit}
       `;
@@ -167,45 +176,55 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
       }),
       catchBeSQLiteInterrupts,
       map((row) => {
+        const relatedCategories = row.relatedCategories ? (row.relatedCategories as string).split(",") : [];
         return {
           id: row.id,
           tableId: row.tableId,
           parentId: row.parentId,
-          relatedCategories: row.relatedCategories ? (row.relatedCategories as string).split(",") : [],
+          relatedCategories,
         };
       }),
     );
   }
 
   private getCachedData() {
-    this.#cachedData ??= this.queryClassifications().pipe(
-      reduce(
-        (acc, { id, tableId, parentId, relatedCategories }) => {
-          if (parentId !== undefined) {
-            acc.classificationsWithChildren.add(parentId);
-          }
-          if (relatedCategories.length > 0) {
-            acc.classificationsWithChildren.add(id);
-          }
-          const tableOrParentId = tableId ?? parentId;
-          const parentInfo = getOrCreate({
-            map: acc.classificationOrTableInfos,
-            key: tableOrParentId,
-            createFunc: () => ({ childClassificationIds: [], relatedCategories: [], parentClassificationOrTableId: undefined }),
-          });
-          parentInfo.childClassificationIds.push(id);
-          const classificationEntry = getOrCreate({
-            map: acc.classificationOrTableInfos,
-            key: id,
-            createFunc: () => ({ childClassificationIds: [], relatedCategories, parentClassificationOrTableId: tableOrParentId }),
-          });
-          classificationEntry.parentClassificationOrTableId = tableOrParentId;
-          return acc;
-        },
-        {
-          classificationOrTableInfos: new Map<ClassificationId | ClassificationTableId, ClassificationOrTableInfo>(),
-          classificationsWithChildren: new Set<ClassificationId>(),
-        },
+    this.#cachedData ??= this.getCategoriesContainingNonOmittedElements().pipe(
+      mergeMap((categoriesContainingNonOmittedElements) =>
+        this.queryClassifications().pipe(
+          reduce(
+            (acc, { id, tableId, parentId, relatedCategories }) => {
+              if (parentId !== undefined) {
+                acc.classificationsWithChildren.add(parentId);
+                acc.classificationsWithNonOmittedChildren.add(parentId);
+              }
+              if (relatedCategories.length > 0) {
+                acc.classificationsWithChildren.add(id);
+                if (relatedCategories.some((categoryId) => categoriesContainingNonOmittedElements.has(categoryId))) {
+                  acc.classificationsWithNonOmittedChildren.add(id);
+                }
+              }
+              const tableOrParentId = tableId ?? parentId;
+              const parentInfo = getOrCreate({
+                map: acc.classificationOrTableInfos,
+                key: tableOrParentId,
+                createFunc: () => ({ childClassificationIds: [], relatedCategories: [], parentClassificationOrTableId: undefined }),
+              });
+              parentInfo.childClassificationIds.push(id);
+              const classificationEntry = getOrCreate({
+                map: acc.classificationOrTableInfos,
+                key: id,
+                createFunc: () => ({ childClassificationIds: [], relatedCategories, parentClassificationOrTableId: tableOrParentId }),
+              });
+              classificationEntry.parentClassificationOrTableId = tableOrParentId;
+              return acc;
+            },
+            {
+              classificationOrTableInfos: new Map<ClassificationId | ClassificationTableId, ClassificationOrTableInfo>(),
+              classificationsWithChildren: new Set<ClassificationId>(),
+              classificationsWithNonOmittedChildren: new Set<ClassificationId>(),
+            },
+          ),
+        ),
       ),
       shareReplay(),
     );
@@ -213,7 +232,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
   }
 
   public hasChildren(classificationId: ClassificationId): Observable<boolean> {
-    return this.getCachedData().pipe(map(({ classificationsWithChildren }) => classificationsWithChildren.has(classificationId)));
+    return this.getCachedData().pipe(map(({ classificationsWithNonOmittedChildren }) => classificationsWithNonOmittedChildren.has(classificationId)));
   }
 
   public getAllContainedCategories(classificationOrTableIds: Id64Arg): Observable<CategoryId> {

@@ -18,6 +18,7 @@ import {
 
 import type { Observable } from "rxjs";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { EC } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId } from "./Types.js";
 
 /** @internal */
@@ -84,6 +85,36 @@ export function createIdsSelector(ids: Id64Array): string {
     slices.push(ids.slice(sliceStartIndex, sliceEndIndex));
   }
   return `json_array(${slices.map((sliceIds) => `json_array(${sliceIds.map((id) => `'${id}'`).join(",")})`).join(",")})`;
+}
+
+/**
+ * Builds an ECSQL fragment that excludes the given classes via `<alias>.ECClassId IS NOT (...)`.
+ * Returns an empty string when no classes are provided.
+ * @internal
+ */
+export function createOmittedClassesExclusionClause({
+  alias,
+  omittedClassNames,
+}: {
+  alias: string;
+  omittedClassNames: ReadonlyArray<EC.FullClassName> | undefined;
+}): string {
+  if (!omittedClassNames || omittedClassNames.length === 0) {
+    return "";
+  }
+  return `${alias}.ECClassId IS NOT (${omittedClassNames.join(", ")})`;
+}
+
+/** @internal */
+export function createWhereClause({ conditions }: { conditions: Array<string | undefined | false> }): string {
+  const filteredConditions = conditions.filter((condition): condition is string => !!condition);
+  if (filteredConditions.length === 0) {
+    return "";
+  }
+  if (filteredConditions.length === 1) {
+    return `WHERE ${filteredConditions[0]}`;
+  }
+  return `WHERE ${filteredConditions.map((condition) => `(${condition})`).join(" AND ")}`;
 }
 
 /** @internal */

@@ -39,7 +39,7 @@ import { CLASS_NAME_DefinitionModel } from "../TreeUtils.js";
 import { getInsertFunctionByViewType } from "./internal/Utils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { Props } from "@itwin/presentation-shared";
+import type { EC, Props } from "@itwin/presentation-shared";
 import type { CategoryInfo } from "../../../tree-widget-react/components/trees/common/CategoriesVisibilityUtils.js";
 
 // cspell:words egory
@@ -84,6 +84,48 @@ describe("Categories tree", () => {
       using hook = renderUseCategoriesTreeHook({
         imodelConnection,
         hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "Test",
+        viewType: "3d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
+        { identifier: keys.definitionContainer, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
+      ]);
+    });
+
+    it("does not return definition container with only empty categories when `showEmptyCategories` is false", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "DefinitionContainer", userLabel: "Test" });
+          const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+          insertSpatialCategory({ txn, codeValue: "SpatialCategory", modelId: definitionModel.id });
+          return { definitionContainer };
+        }),
+      );
+      const { imodelConnection } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodelConnection);
+      using hook = renderUseCategoriesTreeHook({
+        imodelConnection,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "Test",
+        viewType: "3d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([]);
+    });
+
+    it("returns definition container with only empty categories when `showEmptyCategories` is true", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "DefinitionContainer", userLabel: "Test" });
+          const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+          insertSpatialCategory({ txn, codeValue: "SpatialCategory", modelId: definitionModel.id });
+          return { definitionContainer };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodelConnection);
+      using hook = renderUseCategoriesTreeHook({
+        imodelConnection,
+        hierarchyConfig: { ...defaultHierarchyConfiguration, showEmptyCategories: true },
         searchText: "Test",
         viewType: "3d",
       });
@@ -963,6 +1005,157 @@ describe("Categories tree", () => {
 
           // When showEmptyCategories is false, only the category with elements should be reported
           expect(filteredCategories?.categories).toEqual([{ categoryId: keys.categoryWithElements.id, subCategoryIds: undefined }]);
+        });
+      });
+
+      describe(`omittedElementClassNames in '${viewType}' view`, () => {
+        const showElementsConfig = { ...defaultHierarchyConfiguration, showElements: true };
+        const elementClassName: EC.FullClassName = viewType === "3d" ? "Generic.PhysicalObject" : "BisCore.DrawingGraphic";
+        const subModeledElementBaseClassName: EC.FullClassName = "BisCore.ISubModeledElement";
+
+        it("excludes elements of omitted classes from search paths", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertElementsModel({ txn, codeValue: "model" });
+              const category = insertCategory({ txn, codeValue: "category" });
+              insertElement({ txn, userLabel: "matching omitted element", modelId: model.id, categoryId: category.id });
+            }),
+          );
+          const { imodelConnection } = buildIModelResult;
+          const imodelAccess = createIModelAccess(imodelConnection);
+          using hook = renderUseCategoriesTreeHook({
+            imodelConnection,
+            hierarchyConfig: { ...showElementsConfig, omittedElementClassNames: [elementClassName] },
+            searchText: "matching",
+            viewType,
+          });
+          expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual(
+            [],
+          );
+        });
+
+        it("excludes elements of classes derived from omitted classes from search paths", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertElementsModel({ txn, codeValue: "model" });
+              const category = insertCategory({ txn, codeValue: "category" });
+              insertModeledElement({ txn, userLabel: "matching omitted element", modelId: model.id, categoryId: category.id });
+            }),
+          );
+          const { imodelConnection } = buildIModelResult;
+          const imodelAccess = createIModelAccess(imodelConnection);
+          using hook = renderUseCategoriesTreeHook({
+            imodelConnection,
+            hierarchyConfig: { ...showElementsConfig, omittedElementClassNames: [subModeledElementBaseClassName] },
+            searchText: "matching",
+            viewType,
+          });
+          expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual(
+            [],
+          );
+        });
+
+        it("returns the category even when its only element is omitted", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertElementsModel({ txn, codeValue: "model" });
+              const omittedCategory = insertCategory({ txn, codeValue: "matching omitted category" });
+              insertElement({ txn, userLabel: "omitted element", modelId: model.id, categoryId: omittedCategory.id });
+              return { omittedCategory };
+            }),
+          );
+          const { imodelConnection, ...keys } = buildIModelResult;
+          const imodelAccess = createIModelAccess(imodelConnection);
+          using hook = renderUseCategoriesTreeHook({
+            imodelConnection,
+            hierarchyConfig: { ...defaultHierarchyConfiguration, omittedElementClassNames: [elementClassName] },
+            searchText: "matching",
+            viewType,
+          });
+          expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
+            { identifier: keys.omittedCategory, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
+          ]);
+        });
+
+        it("does not return child elements of filtered out parent elements", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertElementsModel({ txn, codeValue: "model" });
+              const category = insertCategory({ txn, codeValue: "category" });
+              const omittedParent = insertElement({ txn, userLabel: "omitted parent", modelId: model.id, categoryId: category.id });
+              insertModeledElement({
+                txn,
+                userLabel: "matching child of omitted parent",
+                modelId: model.id,
+                categoryId: category.id,
+                parentId: omittedParent.id,
+              });
+            }),
+          );
+          const { imodelConnection } = buildIModelResult;
+          const imodelAccess = createIModelAccess(imodelConnection);
+          using hook = renderUseCategoriesTreeHook({
+            imodelConnection,
+            hierarchyConfig: { ...showElementsConfig, omittedElementClassNames: [elementClassName] },
+            searchText: "matching",
+            viewType,
+          });
+          expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual(
+            [],
+          );
+        });
+
+        it("does not return omitted child elements when their parent is not omitted", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertElementsModel({ txn, codeValue: "model" });
+              const category = insertCategory({ txn, codeValue: "category" });
+              const keptParent = insertElement({ txn, userLabel: "kept parent", modelId: model.id, categoryId: category.id });
+              insertModeledElement({
+                txn,
+                userLabel: "matching omitted child",
+                modelId: model.id,
+                categoryId: category.id,
+                parentId: keptParent.id,
+              });
+            }),
+          );
+          const { imodelConnection } = buildIModelResult;
+          const imodelAccess = createIModelAccess(imodelConnection);
+          using hook = renderUseCategoriesTreeHook({
+            imodelConnection,
+            hierarchyConfig: { ...showElementsConfig, omittedElementClassNames: [subModeledElementBaseClassName] },
+            searchText: "matching",
+            viewType,
+          });
+          expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual(
+            [],
+          );
+        });
+
+        it("returns the category even when its only sub-model element is omitted", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertElementsModel({ txn, codeValue: "model" });
+              const category = insertCategory({ txn, codeValue: "category" });
+              const omittedCategory = insertCategory({ txn, codeValue: "matching omitted category" });
+              const modeledElement = insertModeledElement({ txn, userLabel: "modeled element", modelId: model.id, categoryId: category.id });
+              const subModel = insertElementsSubModel({ txn, modeledElementId: modeledElement.id });
+              insertElement({ txn, userLabel: "omitted element", modelId: subModel.id, categoryId: omittedCategory.id });
+              return { omittedCategory };
+            }),
+          );
+          const { imodelConnection, ...keys } = buildIModelResult;
+          const imodelAccess = createIModelAccess(imodelConnection);
+          using hook = renderUseCategoriesTreeHook({
+            imodelConnection,
+            hierarchyConfig: { ...defaultHierarchyConfiguration, omittedElementClassNames: [elementClassName] },
+            searchText: "matching",
+            viewType,
+          });
+          expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
+            { identifier: keys.omittedCategory, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
+          ]);
         });
       });
     });

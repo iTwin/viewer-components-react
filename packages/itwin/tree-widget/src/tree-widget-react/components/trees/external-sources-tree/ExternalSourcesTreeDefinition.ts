@@ -7,6 +7,7 @@ import { Guid } from "@itwin/core-bentley";
 import { createPredicateBasedHierarchyDefinition, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { ECSql } from "@itwin/presentation-shared";
 import { CLASS_NAME_GeometricElement } from "../common/internal/ClassNameDefinitions.js";
+import { createWhereClause } from "../common/internal/Utils.js";
 
 import type { GuidString } from "@itwin/core-bentley";
 import type {
@@ -117,7 +118,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
             ${instanceFilterClauses.joins}
             JOIN BisCore.SynchronizationConfigSpecifiesRootSources scsrs ON scsrs.TargetECInstanceId = this.ECInstanceId
             LEFT JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
-            ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
           `,
         },
       },
@@ -162,7 +163,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
             JOIN IdSet(?) groupIdSet ON esggs.SourceECInstanceId = groupIdSet.id
             LEFT JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
             ${instanceFilterClauses.joins}
-            ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: groupIds }],
@@ -208,7 +209,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
             JOIN IdSet(?) sourceIdSet ON sourceIdSet.id = esa.Parent.Id
             LEFT JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
             ${instanceFilterClauses.joins}
-            ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: sourceIds }],
@@ -281,7 +282,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
             JOIN BisCore.ExternalSourceAspect esa ON esa.Element.Id = this.ECInstanceId
             JOIN IdSet(?) sourceIdSet ON sourceIdSet.id = esa.Source.Id
             ${instanceFilterClauses.joins}
-            ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: sourceIds }],
@@ -331,7 +332,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
     const query = `
       SELECT 1
       FROM ECDbMeta.ECSchemaDef
-      WHERE Name = 'BisCore' AND (VersionMajor > 1 OR (VersionMajor = 1 AND VersionMinor > 12))
+      ${createWhereClause({ conditions: ["Name = 'BisCore'", "VersionMajor > 1 OR (VersionMajor = 1 AND VersionMinor > 12)"] })}
     `;
 
     for await (const _row of this.#queryExecutor.createQueryReader(

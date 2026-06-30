@@ -35,7 +35,14 @@ import {
   CLASS_NAME_GeometricElement3d,
 } from "../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../common/internal/UseErrorState.js";
-import { fromWithRelease, getOptimalBatchSize, ParentElementsPath, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
+import {
+  createOmittedClassesExclusionClause,
+  createWhereClause,
+  fromWithRelease,
+  getOptimalBatchSize,
+  ParentElementsPath,
+  releaseMainThreadOnItemsCount,
+} from "../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../common/TreeErrors.js";
 import { ClassificationsTreeNodeInternal } from "./internal/ClassificationsTreeNodeInternal.js";
 
@@ -53,7 +60,14 @@ import type {
   NodePostProcessor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlQueryRow, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
+import type {
+  EC,
+  ECClassHierarchyInspector,
+  ECSchemaProvider,
+  ECSqlQueryRow,
+  IInstanceLabelSelectClauseFactory,
+  InstanceKey,
+} from "@itwin/presentation-shared";
 import type { ClassificationId, ClassificationTableId, ElementId } from "../common/internal/Types.js";
 import type { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
 
@@ -72,6 +86,8 @@ export interface ClassificationsTreeHierarchyConfiguration {
    * root `ClassificationSystem`.
    */
   rootClassificationSystemCode: string;
+  /** Classes to omit from the hierarchy. Element nodes whose class derive from the omitted classes will not be shown in the hierarchy. Defaults to `undefined`. */
+  omittedElementClassNames?: Array<EC.FullClassName>;
 }
 
 interface ClassificationsTreeInstanceKeyPathsBaseProps {
@@ -195,10 +211,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
               ${instanceFilterClauses.from} this
             JOIN ${CLASS_NAME_ClassificationSystem} system ON system.ECInstanceId = this.Parent.Id
             ${instanceFilterClauses.joins}
-            WHERE
-              system.CodeValue = '${this.#props.hierarchyConfig.rootClassificationSystemCode}'
-              AND NOT this.IsPrivate
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ${createWhereClause({ conditions: [`system.CodeValue = '${this.#props.hierarchyConfig.rootClassificationSystemCode}'`, "NOT this.IsPrivate", instanceFilterClauses.where] })}
           `,
         },
       },
@@ -251,7 +264,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                 FROM ${instanceFilterClauses.from} this
                 JOIN IdSet(?) classificationIdSet ON this.ECInstanceId = classificationIdSet.id
                 ${instanceFilterClauses.joins}
-                ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+                ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
                 ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
               `,
               bindings: [
@@ -295,9 +308,13 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
             JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = this.ECInstanceId
             JOIN IdSet(?) parentClassificationIdSet ON ehc.TargetECInstanceId = parentClassificationIdSet.id
             ${elementsInstanceFilterClauses.joins}
-            WHERE
-              this.Parent.Id IS NULL
-              ${elementsInstanceFilterClauses.where ? `AND ${elementsInstanceFilterClauses.where}` : ""}
+            ${createWhereClause({
+              conditions: [
+                "this.Parent.Id IS NULL",
+                createOmittedClassesExclusionClause({ alias: "this", omittedClassNames: this.#props.hierarchyConfig.omittedElementClassNames }),
+                elementsInstanceFilterClauses.where,
+              ],
+            })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: parentClassificationIds }],
@@ -334,7 +351,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                     FROM ${instanceFilterClauses.from} this
                     JOIN IdSet(?) classificationIdSet ON this.ECInstanceId = classificationIdSet.id
                     ${instanceFilterClauses.joins}
-                    ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+                    ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
                     ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
                   `,
                   bindings: [
@@ -368,7 +385,12 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
           FROM ${instanceFilterClauses.from} this
           JOIN IdSet(?) parentElementIdSet ON this.Parent.Id = parentElementIdSet.id
           ${instanceFilterClauses.joins}
-          ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
+          ${createWhereClause({
+            conditions: [
+              createOmittedClassesExclusionClause({ alias: "this", omittedClassNames: this.#props.hierarchyConfig.omittedElementClassNames }),
+              instanceFilterClauses.where,
+            ],
+          })}
           ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
           bindings: [{ type: "idset", value: parentElementIds }],
@@ -399,7 +421,12 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
           IFNULL((
             SELECT 1
             FROM ${CLASS_NAME_Element} ce
-            WHERE ce.Parent.Id = this.ECInstanceId
+            ${createWhereClause({
+              conditions: [
+                "ce.Parent.Id = this.ECInstanceId",
+                createOmittedClassesExclusionClause({ alias: "ce", omittedClassNames: this.#props.hierarchyConfig.omittedElementClassNames }),
+              ],
+            })}
             LIMIT 1
           ), 0)
         `,
@@ -504,9 +531,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
             ${classificationTableLabelSelectClause}
           FROM ${CLASS_NAME_ClassificationTable} this
           JOIN ${CLASS_NAME_ClassificationSystem} system ON system.ECInstanceId = this.Parent.Id
-          WHERE
-            system.CodeValue = '${props.hierarchyConfig.rootClassificationSystemCode}'
-            AND NOT this.IsPrivate
+          ${createWhereClause({ conditions: [`system.CodeValue = '${props.hierarchyConfig.rootClassificationSystemCode}'`, "NOT this.IsPrivate"] })}
         )
       `,
       ...(classificationIds.length > 0
@@ -528,7 +553,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
               FROM ${CLASS_NAME_GeometricElement3d} this
               JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = this.ECInstanceId
               JOIN IdSet(?) classificationIdSet ON ehc.TargetECInstanceId = classificationIdSet.id
-              WHERE this.Parent.Id IS NULL
+              ${createWhereClause({ conditions: ["this.Parent.Id IS NULL", createOmittedClassesExclusionClause({ alias: "this", omittedClassNames: props.hierarchyConfig.omittedElementClassNames })] })}
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
               UNION ALL
@@ -540,6 +565,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
               FROM
                 ${CLASS_NAME_GeometricElement3d} this
                 JOIN ${ELEMENTS_WITH_LABELS_CTE} pe ON pe.ECInstanceId = this.Parent.Id
+              ${createWhereClause({ conditions: [createOmittedClassesExclusionClause({ alias: "this", omittedClassNames: props.hierarchyConfig.omittedElementClassNames })] })}
             )`,
           ]
         : []),
@@ -702,6 +728,7 @@ function createSearchPathsForDifferentTypes(
                   chunkIndex,
                   componentId,
                   componentName,
+                  omittedElementClassNames: props.hierarchyConfig.omittedElementClassNames,
                 }),
               2,
             ),
@@ -718,8 +745,9 @@ function createGeometricElementInstanceKeyPaths(props: {
   componentId: GuidString;
   componentName: string;
   chunkIndex: number;
+  omittedElementClassNames?: Array<EC.FullClassName>;
 }): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String }> {
-  const { targetItems, imodelAccess, idsCache, componentId, componentName, chunkIndex } = props;
+  const { targetItems, imodelAccess, idsCache, componentId, componentName, chunkIndex, omittedElementClassNames } = props;
   if (targetItems.length === 0) {
     return EMPTY;
   }
@@ -735,6 +763,7 @@ function createGeometricElementInstanceKeyPaths(props: {
           '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT)
         FROM  ${CLASS_NAME_Element} e
         JOIN IdSet(?) targetItemIdSet ON e.ECInstanceId = targetItemIdSet.id
+        ${createWhereClause({ conditions: [createOmittedClassesExclusionClause({ alias: "e", omittedClassNames: omittedElementClassNames })] })}
         ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
         UNION ALL
@@ -745,6 +774,7 @@ function createGeometricElementInstanceKeyPaths(props: {
           '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || ce.Path
         FROM ElementsHierarchy ce
         JOIN ${CLASS_NAME_Element} pe ON pe.ECInstanceId = ce.ParentId
+        ${createWhereClause({ conditions: [createOmittedClassesExclusionClause({ alias: "pe", omittedClassNames: omittedElementClassNames })] })}
       )`,
     ];
     const ecsql = `
