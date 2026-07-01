@@ -318,7 +318,7 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
     excludeIfOnlyOmittedClasses,
   }: {
     parentSubjectIds: Id64Arg;
-    excludeIfOnlyOmittedClasses: boolean;
+    excludeIfOnlyOmittedClasses?: boolean;
   }): Observable<Id64Array> {
     return this.getSubjectInfos().pipe(
       map((subjectInfos) => {

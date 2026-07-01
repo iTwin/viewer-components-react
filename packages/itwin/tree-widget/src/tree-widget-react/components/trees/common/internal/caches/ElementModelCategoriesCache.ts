@@ -6,7 +6,7 @@
 import { defer, delay, map, reduce, shareReplay, tap } from "rxjs";
 import { CLASS_NAME_Model } from "../ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
-import { createOmittedClassesExclusionClause, createWhereClause, getOrCreate } from "../Utils.js";
+import { createOmittedClassesExclusionClause, getOrCreate } from "../Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64String } from "@itwin/core-bentley";
@@ -73,7 +73,7 @@ export class ElementModelCategoriesCache {
             this.Category.Id categoryId,
             MAX(IIF(this.Parent.Id IS NULL, 1, 0)) isTopMostElementCategory,
             MAX(IIF((SELECT 1 FROM ${this.#elementClassName} ce WHERE ce.Parent.Id = this.ECInstanceId LIMIT 1), 1, 0)) hasParentElements
-            ${omittedClause ? `, MAX(IIF((SELECT 1 FROM ${this.#elementClassName} e ${createWhereClause({ conditions: ["e.ECInstanceId = this.ECInstanceId", omittedClause] })} LIMIT 1), 1, 0)) hasElementsFromNonOmittedClasses` : ""}
+            ${omittedClause ? `, MAX(IIF((${omittedClause}), 1, 0)) hasElementsFromNonOmittedClasses` : ""}
           FROM ${this.#elementClassName} this
           JOIN ${CLASS_NAME_Model} m ON m.ECInstanceId = this.Model.Id
           WHERE m.IsPrivate = false

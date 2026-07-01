@@ -365,6 +365,10 @@ export class BaseIdsCache {
     return this.#subCategoriesCache.getSubCategoriesInfo().pipe(map(({ categorySubCategories }) => categorySubCategories.get(props.categoryId) ?? []));
   }
 
+  public getCategorySubCategoriesMap(): Observable<Map<CategoryId, SubCategoryId[]>> {
+    return this.#subCategoriesCache.getSubCategoriesInfo().pipe(map(({ categorySubCategories }) => categorySubCategories));
+  }
+
   public getSubCategoryCategories({
     subCategoryIds,
     checkForSubCategoriesSize,
@@ -466,5 +470,9 @@ export class BaseIdsCacheImpl {
 
   public canHaveHiddenChildren(): ReturnType<BaseIdsCache["canHaveHiddenChildren"]> {
     return this.#baseIdsCache.canHaveHiddenChildren();
+  }
+
+  public getCategorySubCategoriesMap(): ReturnType<BaseIdsCache["getCategorySubCategoriesMap"]> {
+    return this.#baseIdsCache.getCategorySubCategoriesMap();
   }
 }

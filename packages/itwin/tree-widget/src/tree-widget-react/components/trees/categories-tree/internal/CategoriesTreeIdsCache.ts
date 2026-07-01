@@ -245,21 +245,20 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
       categoriesContainingNonOmittedElements: this.getCategoriesContainingNonOmittedElements(),
       categoriesOfTopMostElements: this.getAllCategoriesOfElements({ onlyTopMostElementCategories: true }),
       allCategories: this.getAllCategoriesOfElements({ onlyTopMostElementCategories: false }),
+      categorySubCategoriesMap: this.getCategorySubCategoriesMap(),
     })
       .pipe(
-        mergeMap(({ categoriesContainingNonOmittedElements, categoriesOfTopMostElements, allCategories }) =>
+        mergeMap(({ categoriesContainingNonOmittedElements, categoriesOfTopMostElements, allCategories, categorySubCategoriesMap }) =>
           this.queryCategories().pipe(
-            mergeMap((queriedCategory) =>
-              forkJoin({
-                modelId: of(queriedCategory.modelId),
-                parentDefinitionContainerExists: of(queriedCategory.parentDefinitionContainerExists),
-                id: of(queriedCategory.id),
-                subCategoryChildCount: this.getSubCategories({ categoryId: queriedCategory.id }).pipe(map((subCategories) => subCategories.length)),
-                hasElementsFromNonOmittedClasses: of(categoriesContainingNonOmittedElements.has(queriedCategory.id)),
-                hasElements: of(allCategories.has(queriedCategory.id)),
-                isTopMostElementCategory: of(categoriesOfTopMostElements.has(queriedCategory.id)),
-              }),
-            ),
+            map((queriedCategory) => ({
+              modelId: queriedCategory.modelId,
+              parentDefinitionContainerExists: queriedCategory.parentDefinitionContainerExists,
+              id: queriedCategory.id,
+              subCategoryChildCount: categorySubCategoriesMap.get(queriedCategory.id)?.length ?? 0,
+              hasElementsFromNonOmittedClasses: categoriesContainingNonOmittedElements.has(queriedCategory.id),
+              hasElements: allCategories.has(queriedCategory.id),
+              isTopMostElementCategory: categoriesOfTopMostElements.has(queriedCategory.id),
+            })),
           ),
         ),
         reduce(
@@ -316,7 +315,7 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
                 modelId: queriedDefinitionContainer.modelId,
                 childDefinitionContainers: [],
                 parentDefinitionContainerExists: false,
-                hasElements: childCategories.some((category) => category.hasElements) ?? false,
+                hasElements: childCategories.some((category) => category.hasElements),
               });
               return acc;
             }, definitionContainersInfo),
