@@ -1723,7 +1723,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
   });
 
-  it.only("child element of an omitted class still participates in visibility", async () => {
+  it("child element of an omitted class still participates in visibility", async () => {
     await using buildIModelResult = await buildIModel(async (imodel) =>
       withEditTxn(imodel, async (txn) => {
         await importClassificationSchema(imodel);
