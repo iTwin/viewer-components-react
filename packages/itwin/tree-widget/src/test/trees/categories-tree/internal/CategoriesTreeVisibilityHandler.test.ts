@@ -5698,6 +5698,58 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
     });
   });
+
+  describe("omittedElementClassNames", () => {
+    it("element of an omitted class participates in visibility", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "DefinitionContainer" });
+          const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+          const category = insertSpatialCategory({ txn, codeValue: "SpatialCategory", modelId: definitionModel.id });
+          const omittedElement = insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+          return { physicalModel, definitionContainer, category, omittedElement };
+        }),
+      );
+
+      const { imodelConnection, ...keys } = buildIModelResult;
+
+      using visibilityTestData = await createVisibilityTestData({
+        imodelConnection,
+        hierarchyConfig: { omittedElementClassNames: [CLASS_NAME_GeometricElement3d] },
+      });
+      const { handler, provider, viewport } = visibilityTestData;
+
+      await validateCategoriesTreeHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        expectations: "all-hidden",
+      });
+
+      const definitionContainerNode = createDefinitionContainerHierarchyNode({ id: keys.definitionContainer.id });
+      await handler.changeVisibility(definitionContainerNode, true);
+      await validateCategoriesTreeHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        expectations: "all-visible",
+      });
+
+      viewport.setNeverDrawn({ elementIds: new Set([keys.omittedElement.id]) });
+
+      await validateCategoriesTreeHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        // prettier-ignore
+        expectations: {
+          [keys.definitionContainer.id]: "partial",
+            [keys.category.id]: "partial",
+        },
+      });
+    });
+  });
 });
 
 interface VisibilityInfo {

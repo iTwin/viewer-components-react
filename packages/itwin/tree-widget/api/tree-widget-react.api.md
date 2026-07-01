@@ -119,6 +119,7 @@ type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) =
 // @beta
 interface CategoriesTreeHierarchyConfiguration {
     hideSubCategories: boolean;
+    omittedElementClassNames?: Array<EC.FullClassName>;
     showElements: boolean;
     showEmptyCategories: boolean;
 }
@@ -213,6 +214,7 @@ interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProp
 
 // @alpha (undocumented)
 interface ClassificationsTreeHierarchyConfiguration {
+    omittedElementClassNames?: Array<EC.FullClassName>;
     rootClassificationSystemCode: string;
 }
 
@@ -449,6 +451,7 @@ interface ModelsTreeHierarchyConfiguration {
     elementClassSpecification: EC.FullClassName;
     hideRootSubject: boolean;
     hierarchyLevelFiltering: "enable" | "disable";
+    omittedElementClassNames?: Array<EC.FullClassName>;
     showEmptyModels: boolean;
 }
 

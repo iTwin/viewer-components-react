@@ -50,6 +50,7 @@ export class BaseIdsCache {
       >
     | undefined;
   #subModelsWithNonOmittedElements: Observable<Set<ModelId>> | undefined;
+  #canHaveHiddenChildren: boolean;
 
   constructor(props: BaseIdsCacheProps) {
     this.#queryExecutor = props.queryExecutor;
@@ -75,6 +76,7 @@ export class BaseIdsCache {
       elementClassName: props.elementClassName,
       omittedElementClassNames: props.omittedElementClassNames,
     });
+    this.#canHaveHiddenChildren = !!props.omittedElementClassNames?.length;
   }
 
   private getModeledElementsInfo(): ReturnType<ModeledElementsCache["getModeledElementsInfo"]> {
@@ -390,6 +392,10 @@ export class BaseIdsCache {
       ),
     );
   }
+
+  public canHaveHiddenChildren(): boolean {
+    return this.#canHaveHiddenChildren;
+  }
 }
 
 /** @internal */
@@ -456,5 +462,9 @@ export class BaseIdsCacheImpl {
 
   public getAllCategoriesOfElements(props?: Props<BaseIdsCache["getAllCategoriesOfElements"]>): ReturnType<BaseIdsCache["getAllCategoriesOfElements"]> {
     return this.#baseIdsCache.getAllCategoriesOfElements(props);
+  }
+
+  public canHaveHiddenChildren(): ReturnType<BaseIdsCache["canHaveHiddenChildren"]> {
+    return this.#baseIdsCache.canHaveHiddenChildren();
   }
 }

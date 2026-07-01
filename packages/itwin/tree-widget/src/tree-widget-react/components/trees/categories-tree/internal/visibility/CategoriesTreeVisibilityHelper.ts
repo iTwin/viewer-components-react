@@ -74,7 +74,11 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
           modelId,
           categoryId,
           parentElementsPath,
-          computeOnlyOwnStatus: childrenWhichAreParents.size ? (elementId) => !childrenWhichAreParents.has(elementId) : true,
+          computeOnlyOwnStatus: this.#props.baseIdsCache.canHaveHiddenChildren()
+            ? undefined
+            : childrenWhichAreParents.size
+              ? (elementId) => !childrenWhichAreParents.has(elementId)
+              : true,
         }),
       ),
       mergeVisibilityStatuses(),

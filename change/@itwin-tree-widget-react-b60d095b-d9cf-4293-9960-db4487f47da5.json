@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Models, Categories and Classifications trees: Added option to exclude element nodes with specified classes. Use `hierarchyConfig.omittedElementClassNames` property for specifying the classes to omit.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

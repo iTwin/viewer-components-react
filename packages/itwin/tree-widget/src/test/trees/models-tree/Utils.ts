@@ -105,6 +105,7 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
         toArray(),
       );
     }),
+    canHaveHiddenChildren: vi.fn(() => false),
     getChildSubjectModelIds: vi.fn(),
     getSubjectModelIds: vi.fn((subjectIds: Id64Arg) => {
       return from(Id64.iterable(subjectIds)).pipe(
