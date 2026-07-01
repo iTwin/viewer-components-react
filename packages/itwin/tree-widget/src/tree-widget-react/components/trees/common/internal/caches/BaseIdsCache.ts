@@ -159,8 +159,6 @@ export class BaseIdsCache {
             const result = new Set<ElementId>();
             for (const subModelId of allSubModels) {
               const modelInfo = modelsCategoriesInfo.get(subModelId);
-              // Keep the sub-model unless it has elements that are all of omitted classes. Empty sub-models (no entry) are kept
-              // so that behavior with an empty omitted list is identical to not passing `excludeIfOnlyOmittedClasses`.
               if (modelInfo && modelInfo.nonOmittedCategories.size > 0) {
                 result.add(subModelId);
               }

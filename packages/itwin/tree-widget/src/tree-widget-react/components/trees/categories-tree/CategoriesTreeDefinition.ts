@@ -431,8 +431,9 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
            ${createWhereClause({
              conditions: [
                "this.Parent.Id IS NULL",
-               elementInstanceFilterClauses.where,
+               `this.Category.Id = ${modeledElementCategory}`,
                createOmittedClassesExclusionClause({ alias: "this", omittedClassNames: this.#omittedElementClassNames }),
+               elementInstanceFilterClauses.where,
              ],
            })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES

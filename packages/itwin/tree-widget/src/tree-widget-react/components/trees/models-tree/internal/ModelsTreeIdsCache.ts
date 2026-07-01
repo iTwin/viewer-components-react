@@ -45,7 +45,7 @@ interface SubjectInfo {
 /** @internal */
 export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
   #subjectInfos: Observable<Map<SubjectId, SubjectInfo>> | undefined;
-  #upToModelInstanceKeyPaths: Map<ModelId, Observable<HierarchyNodeIdentifiersPath>> = new Map();
+  #upToModelInstanceKeyPaths: Map<`${ModelId}-${"excluded" | "all"}`, Observable<HierarchyNodeIdentifiersPath>> = new Map();
   #parentSubjectIds: Observable<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   #parentSubjectIdsWithoutOmittedChildren: Observable<Id64Array> | undefined;
   #queryExecutor: LimitingECSqlQueryExecutor;
@@ -406,7 +406,7 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
   }): Observable<HierarchyNodeIdentifiersPath> {
     return getOrCreate({
       map: this.#upToModelInstanceKeyPaths,
-      key: modelId,
+      key: `${modelId}-${excludeIfOnlyOmittedClasses ? "excluded" : "all"}`,
       createFunc: () =>
         this.getSubjectInfos().pipe(
           mergeMap((subjectInfos) => subjectInfos.entries()),
