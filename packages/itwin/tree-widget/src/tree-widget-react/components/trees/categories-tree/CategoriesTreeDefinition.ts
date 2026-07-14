@@ -115,7 +115,7 @@ export interface CategoriesTreeHierarchyConfiguration {
   showElements: boolean;
   /** Should categories without elements be shown. Defaults to `false`. */
   showEmptyCategories: boolean;
-  /** Classes to omit from the hierarchy. Element nodes whose class derive from the omitted classes will not be shown in the hierarchy. Defaults to `undefined`. */
+  /** Element classes to exclude from the hierarchy. Elements, whose class is or derives from one of the classes in this list, are not loaded into the hierarchy. Defaults to `[]`. */
   omittedElementClassNames?: Array<EC.FullClassName>;
 }
 
