@@ -25,7 +25,7 @@ import type { ModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.j
  */
 export type HierarchyConfigForModelsCache = Pick<
   ModelsTreeHierarchyConfiguration,
-  "elementClassSpecification" | "hideRootSubject" | "showEmptyModels" | "omittedElementClassNames"
+  "elementClassSpecification" | "hideRootSubject" | "showEmptyModels" | "excludedElementClassNames"
 >;
 
 interface ModelsTreeIdsCacheProps extends BaseIdsCacheImplProps {
@@ -38,8 +38,8 @@ interface SubjectInfo {
   hideInHierarchy: boolean;
   childSubjectIds: Id64Set;
   childModelIds: Id64Set;
-  childModelsWithElementsFromNonOmittedClasses: Id64Set;
-  hasElementsFromNonOmittedClasses: boolean;
+  childModelsWithElementsFromNonExcludedClasses: Id64Set;
+  hasElementsFromNonExcludedClasses: boolean;
 }
 
 /** @internal */
@@ -47,7 +47,7 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
   #subjectInfos: Observable<Map<SubjectId, SubjectInfo>> | undefined;
   #upToModelInstanceKeyPaths: Map<`${ModelId}-${"excluded" | "all"}`, Observable<HierarchyNodeIdentifiersPath>> = new Map();
   #parentSubjectIds: Observable<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
-  #parentSubjectIdsWithoutOmittedChildren: Observable<Id64Array> | undefined;
+  #parentSubjectIdsWithoutExcludedChildren: Observable<Id64Array> | undefined;
   #queryExecutor: LimitingECSqlQueryExecutor;
   #showEmptyModels: boolean;
   #hideRootSubject: boolean;
@@ -126,8 +126,8 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
   }
 
   private getSubjectInfos() {
-    this.#subjectInfos ??= this.getModelsContainingNonOmittedElements().pipe(
-      mergeMap((modelsContainingTopMostNonOmittedElements) =>
+    this.#subjectInfos ??= this.getModelsContainingNonExcludedElements().pipe(
+      mergeMap((modelsContainingTopMostNonExcludedElements) =>
         forkJoin({
           subjectInfos: this.querySubjects().pipe(
             reduce((acc, subject) => {
@@ -136,27 +136,27 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
                 hideInHierarchy: subject.hideInHierarchy,
                 childSubjectIds: new Set(),
                 childModelIds: new Set(),
-                childModelsWithElementsFromNonOmittedClasses: new Set(),
-                hasElementsFromNonOmittedClasses: false,
+                childModelsWithElementsFromNonExcludedClasses: new Set(),
+                hasElementsFromNonExcludedClasses: false,
               };
               if (subject.targetPartitionId) {
                 subjectInfo.childModelIds.add(subject.targetPartitionId);
-                if (modelsContainingTopMostNonOmittedElements.has(subject.targetPartitionId)) {
-                  subjectInfo.hasElementsFromNonOmittedClasses = true;
-                  subjectInfo.childModelsWithElementsFromNonOmittedClasses.add(subject.targetPartitionId);
+                if (modelsContainingTopMostNonExcludedElements.has(subject.targetPartitionId)) {
+                  subjectInfo.hasElementsFromNonExcludedClasses = true;
+                  subjectInfo.childModelsWithElementsFromNonExcludedClasses.add(subject.targetPartitionId);
                 }
               }
               acc.set(subject.id, subjectInfo);
               return acc;
             }, new Map<SubjectId, SubjectInfo>()),
             map((subjectInfos) => {
-              for (const [subjectId, { parentSubjectId: parentSubjectId, hasElementsFromNonOmittedClasses }] of subjectInfos) {
+              for (const [subjectId, { parentSubjectId: parentSubjectId, hasElementsFromNonExcludedClasses }] of subjectInfos) {
                 if (parentSubjectId) {
                   const parentSubjectInfo = subjectInfos.get(parentSubjectId);
                   assert(!!parentSubjectInfo);
                   parentSubjectInfo.childSubjectIds.add(subjectId);
-                  if (hasElementsFromNonOmittedClasses) {
-                    this.setHasElementsFromNonOmittedClasses({ subjectId: parentSubjectId, subjectInfos });
+                  if (hasElementsFromNonExcludedClasses) {
+                    this.setHasElementsFromNonExcludedClasses({ subjectId: parentSubjectId, subjectInfos });
                   }
                 }
               }
@@ -170,24 +170,24 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
                 key: model.id,
                 createFunc: () => ({
                   subjects: new Set<SubjectId>(),
-                  hasElementsFromNonOmittedClasses: modelsContainingTopMostNonOmittedElements.has(model.id),
+                  hasElementsFromNonExcludedClasses: modelsContainingTopMostNonExcludedElements.has(model.id),
                 }),
               });
               entry.subjects.add(model.parentId);
               return acc;
-            }, new Map<ModelId, { subjects: Set<SubjectId>; hasElementsFromNonOmittedClasses: boolean }>()),
+            }, new Map<ModelId, { subjects: Set<SubjectId>; hasElementsFromNonExcludedClasses: boolean }>()),
           ),
         }),
       ),
       map(({ subjectInfos, modelInfos }) => {
-        for (const [modelId, { subjects, hasElementsFromNonOmittedClasses }] of modelInfos) {
+        for (const [modelId, { subjects, hasElementsFromNonExcludedClasses }] of modelInfos) {
           for (const subjectId of subjects) {
             const subjectInfo = subjectInfos.get(subjectId);
             assert(!!subjectInfo);
             subjectInfo.childModelIds.add(modelId);
-            if (hasElementsFromNonOmittedClasses) {
-              subjectInfo.childModelsWithElementsFromNonOmittedClasses.add(modelId);
-              this.setHasElementsFromNonOmittedClasses({ subjectId, subjectInfos });
+            if (hasElementsFromNonExcludedClasses) {
+              subjectInfo.childModelsWithElementsFromNonExcludedClasses.add(modelId);
+              this.setHasElementsFromNonExcludedClasses({ subjectId, subjectInfos });
             }
           }
         }
@@ -198,45 +198,45 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
     return this.#subjectInfos;
   }
 
-  private setHasElementsFromNonOmittedClasses({ subjectId, subjectInfos }: { subjectId: SubjectId; subjectInfos: Map<SubjectId, SubjectInfo> }) {
+  private setHasElementsFromNonExcludedClasses({ subjectId, subjectInfos }: { subjectId: SubjectId; subjectInfos: Map<SubjectId, SubjectInfo> }) {
     const subjectInfo = subjectInfos.get(subjectId);
     assert(!!subjectInfo);
-    if (subjectInfo.hasElementsFromNonOmittedClasses) {
+    if (subjectInfo.hasElementsFromNonExcludedClasses) {
       return;
     }
-    subjectInfo.hasElementsFromNonOmittedClasses = true;
+    subjectInfo.hasElementsFromNonExcludedClasses = true;
     if (subjectInfo.parentSubjectId) {
-      this.setHasElementsFromNonOmittedClasses({ subjectId: subjectInfo.parentSubjectId, subjectInfos });
+      this.setHasElementsFromNonExcludedClasses({ subjectId: subjectInfo.parentSubjectId, subjectInfos });
     }
   }
 
   /** Returns ECInstanceIDs of Subjects that either have direct Model or at least one child Subject with a Model. */
-  public getParentSubjectIds(props?: { excludeIfOnlyOmittedClasses?: boolean }): Observable<Id64Array> {
-    const { excludeIfOnlyOmittedClasses } = props ?? {};
-    if (excludeIfOnlyOmittedClasses) {
-      this.#parentSubjectIdsWithoutOmittedChildren ??= this.getSubjectInfos().pipe(
-        map((subjectInfos) => this.createParentSubjectIds({ excludeIfOnlyOmittedClasses, subjectInfos })),
+  public getParentSubjectIds(props?: { excludeIfOnlyExcludedClasses?: boolean }): Observable<Id64Array> {
+    const { excludeIfOnlyExcludedClasses } = props ?? {};
+    if (excludeIfOnlyExcludedClasses) {
+      this.#parentSubjectIdsWithoutExcludedChildren ??= this.getSubjectInfos().pipe(
+        map((subjectInfos) => this.createParentSubjectIds({ excludeIfOnlyExcludedClasses, subjectInfos })),
         shareReplay(),
       );
-      return this.#parentSubjectIdsWithoutOmittedChildren;
+      return this.#parentSubjectIdsWithoutExcludedChildren;
     }
     this.#parentSubjectIds ??= this.getSubjectInfos().pipe(
-      map((subjectInfos) => this.createParentSubjectIds({ excludeIfOnlyOmittedClasses, subjectInfos })),
+      map((subjectInfos) => this.createParentSubjectIds({ excludeIfOnlyExcludedClasses, subjectInfos })),
       shareReplay(),
     );
     return this.#parentSubjectIds;
   }
 
   private createParentSubjectIds({
-    excludeIfOnlyOmittedClasses,
+    excludeIfOnlyExcludedClasses,
     subjectInfos,
   }: {
-    excludeIfOnlyOmittedClasses?: boolean;
+    excludeIfOnlyExcludedClasses?: boolean;
     subjectInfos: Map<SubjectId, SubjectInfo>;
   }): Id64Array {
     const parentSubjectIds = new Set<SubjectId>();
     for (const [subjectId, subjectInfo] of subjectInfos) {
-      if ((excludeIfOnlyOmittedClasses ? subjectInfo.childModelsWithElementsFromNonOmittedClasses : subjectInfo.childModelIds).size > 0) {
+      if ((excludeIfOnlyExcludedClasses ? subjectInfo.childModelsWithElementsFromNonExcludedClasses : subjectInfo.childModelIds).size > 0) {
         parentSubjectIds.add(subjectId);
         let currParentId = subjectInfo.parentSubjectId;
         while (currParentId) {
@@ -254,17 +254,17 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
    */
   public getChildSubjectIds({
     parentSubjectIds,
-    excludeIfOnlyOmittedClasses,
+    excludeIfOnlyExcludedClasses,
   }: {
     parentSubjectIds: Id64Arg;
-    excludeIfOnlyOmittedClasses?: boolean;
+    excludeIfOnlyExcludedClasses?: boolean;
   }): Observable<Id64Array> {
     return this.getSubjectInfos().pipe(
       map((subjectInfos) => {
         const childSubjectIds = new Array<SubjectId>();
         for (const subjectId of Id64.iterable(parentSubjectIds)) {
           forEachChildSubject(subjectInfos, subjectId, (childSubjectId, childSubjectInfo) => {
-            if (excludeIfOnlyOmittedClasses && !childSubjectInfo.hasElementsFromNonOmittedClasses) {
+            if (excludeIfOnlyExcludedClasses && !childSubjectInfo.hasElementsFromNonExcludedClasses) {
               return "break";
             }
             if (!childSubjectInfo.hideInHierarchy) {
@@ -315,17 +315,17 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
   /** Returns ECInstanceIDs of Models under specific parent Subjects as they are displayed in the hierarchy. */
   public getChildSubjectModelIds({
     parentSubjectIds,
-    excludeIfOnlyOmittedClasses,
+    excludeIfOnlyExcludedClasses,
   }: {
     parentSubjectIds: Id64Arg;
-    excludeIfOnlyOmittedClasses?: boolean;
+    excludeIfOnlyExcludedClasses?: boolean;
   }): Observable<Id64Array> {
     return this.getSubjectInfos().pipe(
       map((subjectInfos) => {
         const hiddenSubjectIds = new Array<SubjectId>();
         for (const subjectId of Id64.iterable(parentSubjectIds)) {
           forEachChildSubject(subjectInfos, subjectId, (childSubjectId, childSubjectInfo) => {
-            if (excludeIfOnlyOmittedClasses && !childSubjectInfo.hasElementsFromNonOmittedClasses) {
+            if (excludeIfOnlyExcludedClasses && !childSubjectInfo.hasElementsFromNonExcludedClasses) {
               return "break";
             }
             if (childSubjectInfo.hideInHierarchy) {
@@ -338,11 +338,11 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
         const modelIds = new Array<ModelId>();
 
         for (const subjectId of Id64.iterable(parentSubjectIds)) {
-          this.addModelsFromExistingSubject({ subjectId, subjectInfos, modelIds, excludeIfOnlyOmittedClasses });
+          this.addModelsFromExistingSubject({ subjectId, subjectInfos, modelIds, excludeIfOnlyExcludedClasses });
         }
 
         for (const subjectId of hiddenSubjectIds) {
-          this.addModelsFromExistingSubject({ subjectId, subjectInfos, modelIds, excludeIfOnlyOmittedClasses });
+          this.addModelsFromExistingSubject({ subjectId, subjectInfos, modelIds, excludeIfOnlyExcludedClasses });
         }
         return modelIds;
       }),
@@ -352,28 +352,28 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
     subjectId,
     subjectInfos,
     modelIds,
-    excludeIfOnlyOmittedClasses,
+    excludeIfOnlyExcludedClasses,
   }: {
     subjectId: Id64String;
     subjectInfos: Map<SubjectId, SubjectInfo>;
     modelIds: ModelId[];
-    excludeIfOnlyOmittedClasses?: boolean;
+    excludeIfOnlyExcludedClasses?: boolean;
   }) {
     const subjectInfo = subjectInfos.get(subjectId);
     if (!subjectInfo) {
       return;
     }
-    for (const modelId of excludeIfOnlyOmittedClasses ? subjectInfo.childModelsWithElementsFromNonOmittedClasses : subjectInfo.childModelIds) {
+    for (const modelId of excludeIfOnlyExcludedClasses ? subjectInfo.childModelsWithElementsFromNonExcludedClasses : subjectInfo.childModelIds) {
       modelIds.push(modelId);
     }
   }
 
   public createSubjectInstanceKeysPath({
     targetSubjectId,
-    excludeIfOnlyOmittedClasses,
+    excludeIfOnlyExcludedClasses,
   }: {
     targetSubjectId: Id64String;
-    excludeIfOnlyOmittedClasses?: boolean;
+    excludeIfOnlyExcludedClasses?: boolean;
   }): Observable<HierarchyNodeIdentifiersPath> {
     return this.getSubjectInfos().pipe(
       map((subjectInfos) => {
@@ -384,7 +384,7 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
             break;
           }
           const parentInfo = subjectInfos.get(currParentId);
-          if (excludeIfOnlyOmittedClasses && !parentInfo?.hasElementsFromNonOmittedClasses) {
+          if (excludeIfOnlyExcludedClasses && !parentInfo?.hasElementsFromNonExcludedClasses) {
             break;
           }
           if (!parentInfo?.hideInHierarchy) {
@@ -399,30 +399,30 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
 
   public createUpToModelInstanceKeyPaths({
     modelId,
-    excludeIfOnlyOmittedClasses,
+    excludeIfOnlyExcludedClasses,
   }: {
     modelId: Id64String;
-    excludeIfOnlyOmittedClasses?: boolean;
+    excludeIfOnlyExcludedClasses?: boolean;
   }): Observable<HierarchyNodeIdentifiersPath> {
     return getOrCreate({
       map: this.#upToModelInstanceKeyPaths,
-      key: `${modelId}-${excludeIfOnlyOmittedClasses ? "excluded" : "all"}`,
+      key: `${modelId}-${excludeIfOnlyExcludedClasses ? "excluded" : "all"}`,
       createFunc: () =>
         this.getSubjectInfos().pipe(
           mergeMap((subjectInfos) => subjectInfos.entries()),
           filter(([_, subjectInfo]) =>
-            excludeIfOnlyOmittedClasses ? subjectInfo.childModelsWithElementsFromNonOmittedClasses.has(modelId) : subjectInfo.childModelIds.has(modelId),
+            excludeIfOnlyExcludedClasses ? subjectInfo.childModelsWithElementsFromNonExcludedClasses.has(modelId) : subjectInfo.childModelIds.has(modelId),
           ),
-          mergeMap(([modelSubjectId]) => this.createSubjectInstanceKeysPath({ targetSubjectId: modelSubjectId, excludeIfOnlyOmittedClasses })),
+          mergeMap(([modelSubjectId]) => this.createSubjectInstanceKeysPath({ targetSubjectId: modelSubjectId, excludeIfOnlyExcludedClasses })),
           shareReplay(),
         ),
     });
   }
 
   public getSearchPathsUpToRootCategory({ categoryId }: { categoryId: Id64String }): Observable<HierarchyNodeIdentifiersPath> {
-    return this.getModels({ categoryId, excludeSubModels: true, includeOnlyTopMostElementCategory: true, excludeIfOnlyOmittedClasses: true }).pipe(
+    return this.getModels({ categoryId, excludeSubModels: true, includeOnlyTopMostElementCategory: true, excludeIfOnlyExcludedClasses: true }).pipe(
       mergeMap((categoryModelId) =>
-        this.createUpToModelInstanceKeyPaths({ modelId: categoryModelId, excludeIfOnlyOmittedClasses: true }).pipe(
+        this.createUpToModelInstanceKeyPaths({ modelId: categoryModelId, excludeIfOnlyExcludedClasses: true }).pipe(
           map((modelPath) => [...modelPath, { className: CLASS_NAME_GeometricModel3d, id: categoryModelId }]),
         ),
       ),

@@ -324,7 +324,7 @@ function useModelsTreeIdsCache({ imodel, hierarchyConfig }: { imodel: IModelConn
   const baseIdsCache = getBaseIdsCache({
     type: "3d",
     elementClassName: hierarchyConfig.elementClassSpecification,
-    omittedElementClassNames: hierarchyConfig.omittedElementClassNames,
+    excludedElementClassNames: hierarchyConfig.excludedElementClassNames,
     imodel,
   });
 
@@ -336,7 +336,7 @@ function useModelsTreeIdsCache({ imodel, hierarchyConfig }: { imodel: IModelConn
         hierarchyConfig,
         queryExecutor: createECSqlQueryExecutor(imodel),
       }),
-    cacheKey: `${hierarchyConfig.hideRootSubject ? "hideRootSubject" : "showRootSubject"}-${hierarchyConfig.showEmptyModels ? "showEmptyModels" : "hideEmptyModels"}-${hierarchyConfig.elementClassSpecification}-${[...(hierarchyConfig.omittedElementClassNames ?? [])].sort().join(",")}-ModelsTreeIdsCache`,
+    cacheKey: `${hierarchyConfig.hideRootSubject ? "hideRootSubject" : "showRootSubject"}-${hierarchyConfig.showEmptyModels ? "showEmptyModels" : "hideEmptyModels"}-${hierarchyConfig.elementClassSpecification}-${[...(hierarchyConfig.excludedElementClassNames ?? [])].sort().join(",")}-ModelsTreeIdsCache`,
   });
 
   return modelsTreeIdsCache;

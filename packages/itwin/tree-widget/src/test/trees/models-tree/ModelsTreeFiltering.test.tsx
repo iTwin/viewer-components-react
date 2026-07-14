@@ -1567,47 +1567,47 @@ describe("Models tree", () => {
         ],
       }),
       TreeSearchTestCaseDefinition.create({
-        name: "excludes elements of omitted classes from search paths",
+        name: "excludes elements of excluded classes from search paths",
         setupIModel: async (imodel) =>
           withEditTxn(imodel, (txn) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
             const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
             const category = insertSpatialCategory({ txn, codeValue: "category" });
-            const omittedElement = insertPhysicalElement({
+            const excludedElement = insertPhysicalElement({
               txn,
-              userLabel: `matching omitted element`,
+              userLabel: `matching excluded element`,
               modelId: model.id,
               categoryId: category.id,
             });
-            return { omittedElement };
+            return { excludedElement };
           }),
         getTargetInstancePaths: () => [],
-        getTargetItems: (x) => [x.omittedElement],
+        getTargetItems: (x) => [x.excludedElement],
         getTargetInstanceLabel: (_x) => "matching",
         getExpectedHierarchy: () => [],
-        getHierarchyConfig: () => ({ omittedElementClassNames: ["Generic.PhysicalObject"] }),
+        getHierarchyConfig: () => ({ excludedElementClassNames: ["Generic.PhysicalObject"] }),
       }),
       TreeSearchTestCaseDefinition.create({
-        name: "excludes elements of classes derived from omitted classes from search paths",
+        name: "excludes elements of classes derived from excluded classes from search paths",
         setupIModel: async (imodel, testSchema) =>
           withEditTxn(imodel, (txn) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
             const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
             const category = insertSpatialCategory({ txn, codeValue: "category" });
-            const omittedElement = insertPhysicalElement({
+            const excludedElement = insertPhysicalElement({
               txn,
-              userLabel: `matching omitted element`,
+              userLabel: `matching excluded element`,
               classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
               modelId: model.id,
               categoryId: category.id,
             });
-            return { omittedElement };
+            return { excludedElement };
           }),
         getTargetInstancePaths: () => [],
-        getTargetItems: (x) => [x.omittedElement],
+        getTargetItems: (x) => [x.excludedElement],
         getTargetInstanceLabel: (_x) => "matching",
         getExpectedHierarchy: () => [],
-        getHierarchyConfig: () => ({ omittedElementClassNames: ["BisCore.PhysicalElement"] }),
+        getHierarchyConfig: () => ({ excludedElementClassNames: ["BisCore.PhysicalElement"] }),
       }),
       TreeSearchTestCaseDefinition.create({
         name: "does not return the category of a filtered out element",
@@ -1615,20 +1615,20 @@ describe("Models tree", () => {
           withEditTxn(imodel, (txn) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
             const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
-            const omittedCategory = insertSpatialCategory({ txn, codeValue: "matching omitted category" });
+            const excludedCategory = insertSpatialCategory({ txn, codeValue: "matching excluded category" });
             insertPhysicalElement({
               txn,
-              userLabel: `omitted element`,
+              userLabel: `excluded element`,
               modelId: model.id,
-              categoryId: omittedCategory.id,
+              categoryId: excludedCategory.id,
             });
-            return { omittedCategory };
+            return { excludedCategory };
           }),
         getTargetInstancePaths: () => [],
-        getTargetItems: (x) => [x.omittedCategory],
+        getTargetItems: (x) => [x.excludedCategory],
         getTargetInstanceLabel: (_x) => "matching",
         getExpectedHierarchy: () => [],
-        getHierarchyConfig: () => ({ omittedElementClassNames: ["Generic.PhysicalObject"] }),
+        getHierarchyConfig: () => ({ excludedElementClassNames: ["Generic.PhysicalObject"] }),
       }),
       TreeSearchTestCaseDefinition.create({
         name: "does not return child elements of filtered out parent elements",
@@ -1637,30 +1637,30 @@ describe("Models tree", () => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
             const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
             const category = insertSpatialCategory({ txn, codeValue: "category" });
-            const omittedParent = insertPhysicalElement({
+            const excludedParent = insertPhysicalElement({
               txn,
-              userLabel: `omitted parent`,
+              userLabel: `excluded parent`,
               modelId: model.id,
               categoryId: category.id,
             });
-            const childOfOmittedParent = insertPhysicalElement({
+            const childOfExcludedParent = insertPhysicalElement({
               txn,
-              userLabel: `matching child of omitted parent`,
+              userLabel: `matching child of excluded parent`,
               classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
               modelId: model.id,
               categoryId: category.id,
-              parentId: omittedParent.id,
+              parentId: excludedParent.id,
             });
-            return { childOfOmittedParent };
+            return { childOfExcludedParent };
           }),
         getTargetInstancePaths: () => [],
-        getTargetItems: (x) => [x.childOfOmittedParent],
+        getTargetItems: (x) => [x.childOfExcludedParent],
         getTargetInstanceLabel: (_x) => "matching",
         getExpectedHierarchy: () => [],
-        getHierarchyConfig: () => ({ omittedElementClassNames: ["Generic.PhysicalObject"] }),
+        getHierarchyConfig: () => ({ excludedElementClassNames: ["Generic.PhysicalObject"] }),
       }),
       TreeSearchTestCaseDefinition.create({
-        name: "does not return omitted child elements when their parent is not omitted",
+        name: "does not return excluded child elements when their parent is not excluded",
         setupIModel: async (imodel, testSchema) =>
           withEditTxn(imodel, (txn) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -1672,21 +1672,21 @@ describe("Models tree", () => {
               modelId: model.id,
               categoryId: category.id,
             });
-            const omittedChild = insertPhysicalElement({
+            const excludedChild = insertPhysicalElement({
               txn,
-              userLabel: `matching omitted child`,
+              userLabel: `matching excluded child`,
               classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
               modelId: model.id,
               categoryId: category.id,
               parentId: keptParent.id,
             });
-            return { omittedChild };
+            return { excludedChild };
           }),
         getTargetInstancePaths: () => [],
-        getTargetItems: (x) => [x.omittedChild],
+        getTargetItems: (x) => [x.excludedChild],
         getTargetInstanceLabel: (_x) => "matching",
         getExpectedHierarchy: () => [],
-        getHierarchyConfig: () => ({ omittedElementClassNames: ["BisCore.ISubModeledElement"] }),
+        getHierarchyConfig: () => ({ excludedElementClassNames: ["BisCore.ISubModeledElement"] }),
       }),
       TreeSearchTestCaseDefinition.create({
         name: "does not return the category of a filtered out sub-model element",
@@ -1695,7 +1695,7 @@ describe("Models tree", () => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
             const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
             const category = insertSpatialCategory({ txn, codeValue: "category" });
-            const omittedCategory = insertSpatialCategory({ txn, codeValue: "matching omitted category" });
+            const excludedCategory = insertSpatialCategory({ txn, codeValue: "matching excluded category" });
             const modeledElement = insertPhysicalElement({
               txn,
               userLabel: `modeled element`,
@@ -1706,17 +1706,17 @@ describe("Models tree", () => {
             const subModel = insertPhysicalSubModel({ txn, modeledElementId: modeledElement.id });
             insertPhysicalElement({
               txn,
-              userLabel: `omitted element`,
+              userLabel: `excluded element`,
               modelId: subModel.id,
-              categoryId: omittedCategory.id,
+              categoryId: excludedCategory.id,
             });
-            return { omittedCategory };
+            return { excludedCategory };
           }),
         getTargetInstancePaths: () => [],
-        getTargetItems: (x) => [x.omittedCategory],
+        getTargetItems: (x) => [x.excludedCategory],
         getTargetInstanceLabel: (_x) => "matching",
         getExpectedHierarchy: () => [],
-        getHierarchyConfig: () => ({ omittedElementClassNames: ["Generic.PhysicalObject"] }),
+        getHierarchyConfig: () => ({ excludedElementClassNames: ["Generic.PhysicalObject"] }),
       }),
     );
 

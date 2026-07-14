@@ -1008,24 +1008,24 @@ describe("Categories tree", () => {
         });
       });
 
-      describe(`omittedElementClassNames in '${viewType}' view`, () => {
+      describe(`excludedElementClassNames in '${viewType}' view`, () => {
         const showElementsConfig = { ...defaultHierarchyConfiguration, showElements: true };
         const elementClassName: EC.FullClassName = viewType === "3d" ? "Generic.PhysicalObject" : "BisCore.DrawingGraphic";
         const subModeledElementBaseClassName: EC.FullClassName = "BisCore.ISubModeledElement";
 
-        it("excludes elements of omitted classes from search paths", async () => {
+        it("excludes elements of excluded classes from search paths", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
               const model = insertElementsModel({ txn, codeValue: "model" });
               const category = insertCategory({ txn, codeValue: "category" });
-              insertElement({ txn, userLabel: "matching omitted element", modelId: model.id, categoryId: category.id });
+              insertElement({ txn, userLabel: "matching excluded element", modelId: model.id, categoryId: category.id });
             }),
           );
           const { imodelConnection } = buildIModelResult;
           const imodelAccess = createIModelAccess(imodelConnection);
           using hook = renderUseCategoriesTreeHook({
             imodelConnection,
-            hierarchyConfig: { ...showElementsConfig, omittedElementClassNames: [elementClassName] },
+            hierarchyConfig: { ...showElementsConfig, excludedElementClassNames: [elementClassName] },
             searchText: "matching",
             viewType,
           });
@@ -1034,19 +1034,19 @@ describe("Categories tree", () => {
           );
         });
 
-        it("excludes elements of classes derived from omitted classes from search paths", async () => {
+        it("excludes elements of classes derived from excluded classes from search paths", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
               const model = insertElementsModel({ txn, codeValue: "model" });
               const category = insertCategory({ txn, codeValue: "category" });
-              insertModeledElement({ txn, userLabel: "matching omitted element", modelId: model.id, categoryId: category.id });
+              insertModeledElement({ txn, userLabel: "matching excluded element", modelId: model.id, categoryId: category.id });
             }),
           );
           const { imodelConnection } = buildIModelResult;
           const imodelAccess = createIModelAccess(imodelConnection);
           using hook = renderUseCategoriesTreeHook({
             imodelConnection,
-            hierarchyConfig: { ...showElementsConfig, omittedElementClassNames: [subModeledElementBaseClassName] },
+            hierarchyConfig: { ...showElementsConfig, excludedElementClassNames: [subModeledElementBaseClassName] },
             searchText: "matching",
             viewType,
           });
@@ -1055,25 +1055,25 @@ describe("Categories tree", () => {
           );
         });
 
-        it("returns the category even when its only element is omitted", async () => {
+        it("returns the category even when its only element is excluded", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
               const model = insertElementsModel({ txn, codeValue: "model" });
-              const omittedCategory = insertCategory({ txn, codeValue: "matching omitted category" });
-              insertElement({ txn, userLabel: "omitted element", modelId: model.id, categoryId: omittedCategory.id });
-              return { omittedCategory };
+              const excludedCategory = insertCategory({ txn, codeValue: "matching excluded category" });
+              insertElement({ txn, userLabel: "excluded element", modelId: model.id, categoryId: excludedCategory.id });
+              return { excludedCategory };
             }),
           );
           const { imodelConnection, ...keys } = buildIModelResult;
           const imodelAccess = createIModelAccess(imodelConnection);
           using hook = renderUseCategoriesTreeHook({
             imodelConnection,
-            hierarchyConfig: { ...defaultHierarchyConfiguration, omittedElementClassNames: [elementClassName] },
+            hierarchyConfig: { ...defaultHierarchyConfiguration, excludedElementClassNames: [elementClassName] },
             searchText: "matching",
             viewType,
           });
           expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
-            { identifier: keys.omittedCategory, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
+            { identifier: keys.excludedCategory, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
           ]);
         });
 
@@ -1082,13 +1082,13 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const model = insertElementsModel({ txn, codeValue: "model" });
               const category = insertCategory({ txn, codeValue: "category" });
-              const omittedParent = insertElement({ txn, userLabel: "omitted parent", modelId: model.id, categoryId: category.id });
+              const excludedParent = insertElement({ txn, userLabel: "excluded parent", modelId: model.id, categoryId: category.id });
               insertModeledElement({
                 txn,
-                userLabel: "matching child of omitted parent",
+                userLabel: "matching child of excluded parent",
                 modelId: model.id,
                 categoryId: category.id,
-                parentId: omittedParent.id,
+                parentId: excludedParent.id,
               });
             }),
           );
@@ -1096,7 +1096,7 @@ describe("Categories tree", () => {
           const imodelAccess = createIModelAccess(imodelConnection);
           using hook = renderUseCategoriesTreeHook({
             imodelConnection,
-            hierarchyConfig: { ...showElementsConfig, omittedElementClassNames: [elementClassName] },
+            hierarchyConfig: { ...showElementsConfig, excludedElementClassNames: [elementClassName] },
             searchText: "matching",
             viewType,
           });
@@ -1105,7 +1105,7 @@ describe("Categories tree", () => {
           );
         });
 
-        it("does not return omitted child elements when their parent is not omitted", async () => {
+        it("does not return excluded child elements when their parent is not excluded", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
               const model = insertElementsModel({ txn, codeValue: "model" });
@@ -1113,7 +1113,7 @@ describe("Categories tree", () => {
               const keptParent = insertElement({ txn, userLabel: "kept parent", modelId: model.id, categoryId: category.id });
               insertModeledElement({
                 txn,
-                userLabel: "matching omitted child",
+                userLabel: "matching excluded child",
                 modelId: model.id,
                 categoryId: category.id,
                 parentId: keptParent.id,
@@ -1124,7 +1124,7 @@ describe("Categories tree", () => {
           const imodelAccess = createIModelAccess(imodelConnection);
           using hook = renderUseCategoriesTreeHook({
             imodelConnection,
-            hierarchyConfig: { ...showElementsConfig, omittedElementClassNames: [subModeledElementBaseClassName] },
+            hierarchyConfig: { ...showElementsConfig, excludedElementClassNames: [subModeledElementBaseClassName] },
             searchText: "matching",
             viewType,
           });
@@ -1133,28 +1133,28 @@ describe("Categories tree", () => {
           );
         });
 
-        it("returns the category even when its only sub-model element is omitted", async () => {
+        it("returns the category even when its only sub-model element is excluded", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
               const model = insertElementsModel({ txn, codeValue: "model" });
               const category = insertCategory({ txn, codeValue: "category" });
-              const omittedCategory = insertCategory({ txn, codeValue: "matching omitted category" });
+              const excludedCategory = insertCategory({ txn, codeValue: "matching excluded category" });
               const modeledElement = insertModeledElement({ txn, userLabel: "modeled element", modelId: model.id, categoryId: category.id });
               const subModel = insertElementsSubModel({ txn, modeledElementId: modeledElement.id });
-              insertElement({ txn, userLabel: "omitted element", modelId: subModel.id, categoryId: omittedCategory.id });
-              return { omittedCategory };
+              insertElement({ txn, userLabel: "excluded element", modelId: subModel.id, categoryId: excludedCategory.id });
+              return { excludedCategory };
             }),
           );
           const { imodelConnection, ...keys } = buildIModelResult;
           const imodelAccess = createIModelAccess(imodelConnection);
           using hook = renderUseCategoriesTreeHook({
             imodelConnection,
-            hierarchyConfig: { ...defaultHierarchyConfiguration, omittedElementClassNames: [elementClassName] },
+            hierarchyConfig: { ...defaultHierarchyConfiguration, excludedElementClassNames: [elementClassName] },
             searchText: "matching",
             viewType,
           });
           expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
-            { identifier: keys.omittedCategory, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
+            { identifier: keys.excludedCategory, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
           ]);
         });
       });

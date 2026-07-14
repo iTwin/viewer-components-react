@@ -139,8 +139,8 @@ describe("Classifications tree", () => {
       });
     });
 
-    describe("omittedElementClassNames", () => {
-      it("does not filter out elements when they don't belong to any of the omitted classes", async () => {
+    describe("excludedElementClassNames", () => {
+      it("does not filter out elements when they don't belong to any of the excluded classes", async () => {
         await using buildIModelResult = await buildIModel(async (imodel) =>
           withEditTxn(imodel, async (txn) => {
             await importClassificationSchema(imodel);
@@ -161,7 +161,7 @@ describe("Classifications tree", () => {
         const { imodelConnection, ...keys } = buildIModelResult;
         using provider = createClassificationsTreeProvider(imodelConnection, {
           rootClassificationSystemCode,
-          omittedElementClassNames: ["BisCore.GeometricElement2d"],
+          excludedElementClassNames: ["BisCore.GeometricElement2d"],
         });
 
         await validateHierarchy({
@@ -188,7 +188,7 @@ describe("Classifications tree", () => {
         });
       });
 
-      it("filters out elements of omitted classes", async () => {
+      it("filters out elements of excluded classes", async () => {
         await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
           withEditTxn(imodel, async (txn) => {
             await importClassificationSchema(imodel);
@@ -199,7 +199,7 @@ describe("Classifications tree", () => {
 
             const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
             const spatialCategory = insertSpatialCategory({ txn, codeValue: "Test spatial category" });
-            const omittedElement = insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: spatialCategory.id, codeValue: "Omitted element" });
+            const excludedElement = insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: spatialCategory.id, codeValue: "Excluded element" });
             const keptElement = insertPhysicalElement({
               txn,
               classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
@@ -207,7 +207,7 @@ describe("Classifications tree", () => {
               categoryId: spatialCategory.id,
               codeValue: "Kept element",
             });
-            insertElementHasClassificationsRelationship({ txn, elementId: omittedElement.id, classificationId: classification.id });
+            insertElementHasClassificationsRelationship({ txn, elementId: excludedElement.id, classificationId: classification.id });
             insertElementHasClassificationsRelationship({ txn, elementId: keptElement.id, classificationId: classification.id });
 
             return { table, classification, keptElement };
@@ -217,7 +217,7 @@ describe("Classifications tree", () => {
         const { imodelConnection, ...keys } = buildIModelResult;
         using provider = createClassificationsTreeProvider(imodelConnection, {
           rootClassificationSystemCode,
-          omittedElementClassNames: ["Generic.PhysicalObject"],
+          excludedElementClassNames: ["Generic.PhysicalObject"],
         });
 
         await validateHierarchy({
@@ -244,7 +244,7 @@ describe("Classifications tree", () => {
         });
       });
 
-      it("filters out elements of classes derived from omitted classes", async () => {
+      it("filters out elements of classes derived from excluded classes", async () => {
         await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
           withEditTxn(imodel, async (txn) => {
             await importClassificationSchema(imodel);
@@ -255,12 +255,12 @@ describe("Classifications tree", () => {
 
             const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
             const spatialCategory = insertSpatialCategory({ txn, codeValue: "Test spatial category" });
-            const omittedElement = insertPhysicalElement({
+            const excludedElement = insertPhysicalElement({
               txn,
               classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
               modelId: physicalModel.id,
               categoryId: spatialCategory.id,
-              codeValue: "Omitted element",
+              codeValue: "Excluded element",
             });
             const keptElement = insertPhysicalElement({
               txn,
@@ -269,7 +269,7 @@ describe("Classifications tree", () => {
               categoryId: spatialCategory.id,
               codeValue: "Kept element",
             });
-            insertElementHasClassificationsRelationship({ txn, elementId: omittedElement.id, classificationId: classification.id });
+            insertElementHasClassificationsRelationship({ txn, elementId: excludedElement.id, classificationId: classification.id });
             insertElementHasClassificationsRelationship({ txn, elementId: keptElement.id, classificationId: classification.id });
 
             return { table, classification, keptElement };
@@ -280,7 +280,7 @@ describe("Classifications tree", () => {
         // Omitting the base class should filter out elements of all derived classes due to polymorphic class exclusion.
         using provider = createClassificationsTreeProvider(imodelConnection, {
           rootClassificationSystemCode,
-          omittedElementClassNames: ["BisCore.PhysicalElement"],
+          excludedElementClassNames: ["BisCore.PhysicalElement"],
         });
 
         await validateHierarchy({
@@ -307,7 +307,7 @@ describe("Classifications tree", () => {
         });
       });
 
-      it("shows classification with no children when it contains only omitted elements", async () => {
+      it("shows classification with no children when it contains only excluded elements", async () => {
         await using buildIModelResult = await buildIModel(async (imodel) =>
           withEditTxn(imodel, async (txn) => {
             await importClassificationSchema(imodel);
@@ -318,8 +318,8 @@ describe("Classifications tree", () => {
 
             const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
             const spatialCategory = insertSpatialCategory({ txn, codeValue: "Test spatial category" });
-            const omittedElement = insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: spatialCategory.id, codeValue: "Omitted element" });
-            insertElementHasClassificationsRelationship({ txn, elementId: omittedElement.id, classificationId: classification.id });
+            const excludedElement = insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: spatialCategory.id, codeValue: "Excluded element" });
+            insertElementHasClassificationsRelationship({ txn, elementId: excludedElement.id, classificationId: classification.id });
 
             return { table, classification };
           }),
@@ -328,7 +328,7 @@ describe("Classifications tree", () => {
         const { imodelConnection, ...keys } = buildIModelResult;
         using provider = createClassificationsTreeProvider(imodelConnection, {
           rootClassificationSystemCode,
-          omittedElementClassNames: ["Generic.PhysicalObject"],
+          excludedElementClassNames: ["Generic.PhysicalObject"],
         });
 
         await validateHierarchy({
@@ -349,7 +349,7 @@ describe("Classifications tree", () => {
         });
       });
 
-      it("sets hasChildren to false when classified element contains only omitted child elements", async () => {
+      it("sets hasChildren to false when classified element contains only excluded child elements", async () => {
         await using buildIModelResult = await buildIModel(async (imodel) =>
           withEditTxn(imodel, async (txn) => {
             await importClassificationSchema(imodel);
@@ -372,7 +372,7 @@ describe("Classifications tree", () => {
               modelId: physicalModel.id,
               categoryId: spatialCategory.id,
               parentId: parentElement.id,
-              codeValue: "Omitted child element",
+              codeValue: "Excluded child element",
             });
             insertElementHasClassificationsRelationship({ txn, elementId: parentElement.id, classificationId: classification.id });
 
@@ -383,7 +383,7 @@ describe("Classifications tree", () => {
         const { imodelConnection, ...keys } = buildIModelResult;
         using provider = createClassificationsTreeProvider(imodelConnection, {
           rootClassificationSystemCode,
-          omittedElementClassNames: ["Generic.PhysicalObject"],
+          excludedElementClassNames: ["Generic.PhysicalObject"],
         });
 
         await validateHierarchy({
@@ -410,7 +410,7 @@ describe("Classifications tree", () => {
         });
       });
 
-      it("filters out child elements of omitted classes", async () => {
+      it("filters out child elements of excluded classes", async () => {
         await using buildIModelResult = await buildIModel(async (imodel) =>
           withEditTxn(imodel, async (txn) => {
             await importClassificationSchema(imodel);
@@ -433,7 +433,7 @@ describe("Classifications tree", () => {
               modelId: physicalModel.id,
               categoryId: spatialCategory.id,
               parentId: parentElement.id,
-              codeValue: "Omitted child element",
+              codeValue: "Excluded child element",
             });
             const keptChildElement = insertPhysicalElement({
               txn,
@@ -452,7 +452,7 @@ describe("Classifications tree", () => {
         const { imodelConnection, ...keys } = buildIModelResult;
         using provider = createClassificationsTreeProvider(imodelConnection, {
           rootClassificationSystemCode,
-          omittedElementClassNames: ["Generic.PhysicalObject"],
+          excludedElementClassNames: ["Generic.PhysicalObject"],
         });
 
         await validateHierarchy({

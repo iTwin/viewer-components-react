@@ -229,8 +229,8 @@ describe("Classifications tree", () => {
       });
     });
 
-    describe("omittedElementClassNames", () => {
-      it("excludes elements of omitted classes from search paths", async () => {
+    describe("excludedElementClassNames", () => {
+      it("excludes elements of excluded classes from search paths", async () => {
         await using buildIModelResult = await buildIModel(async (imodel) =>
           withEditTxn(imodel, async (txn) => {
             await importClassificationSchema(imodel);
@@ -245,7 +245,7 @@ describe("Classifications tree", () => {
               modelId: physicalModel.id,
               categoryId: spatialCategory.id,
               codeValue: "Element",
-              userLabel: "matching omitted element",
+              userLabel: "matching excluded element",
             });
             insertElementHasClassificationsRelationship({ txn, elementId: element.id, classificationId: classification.id });
           }),
@@ -253,13 +253,13 @@ describe("Classifications tree", () => {
         const { imodelConnection } = buildIModelResult;
         using hook = renderUseClassificationsTreeDefinitionHook({
           imodels: [imodelConnection],
-          hierarchyConfig: { ...defaultHierarchyConfiguration, omittedElementClassNames: ["Generic.PhysicalObject"] },
+          hierarchyConfig: { ...defaultHierarchyConfiguration, excludedElementClassNames: ["Generic.PhysicalObject"] },
           search: { searchText: "matching" },
         });
         expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([]);
       });
 
-      it("excludes elements of classes derived from omitted classes from search paths", async () => {
+      it("excludes elements of classes derived from excluded classes from search paths", async () => {
         await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
           withEditTxn(imodel, async (txn) => {
             await importClassificationSchema(imodel);
@@ -275,7 +275,7 @@ describe("Classifications tree", () => {
               modelId: physicalModel.id,
               categoryId: spatialCategory.id,
               codeValue: "Element",
-              userLabel: "matching omitted element",
+              userLabel: "matching excluded element",
             });
             insertElementHasClassificationsRelationship({ txn, elementId: element.id, classificationId: classification.id });
           }),
@@ -283,20 +283,20 @@ describe("Classifications tree", () => {
         const { imodelConnection } = buildIModelResult;
         using hook = renderUseClassificationsTreeDefinitionHook({
           imodels: [imodelConnection],
-          hierarchyConfig: { ...defaultHierarchyConfiguration, omittedElementClassNames: ["BisCore.PhysicalElement"] },
+          hierarchyConfig: { ...defaultHierarchyConfiguration, excludedElementClassNames: ["BisCore.PhysicalElement"] },
           search: { searchText: "matching" },
         });
         expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([]);
       });
 
-      it("returns the classification even when its only element is omitted", async () => {
+      it("returns the classification even when its only element is excluded", async () => {
         await using buildIModelResult = await buildIModel(async (imodel) =>
           withEditTxn(imodel, async (txn) => {
             await importClassificationSchema(imodel);
 
             const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
             const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable" });
-            const classification = insertClassification({ txn, modelId: table.id, codeValue: "Classification", userLabel: "matching omitted classification" });
+            const classification = insertClassification({ txn, modelId: table.id, codeValue: "Classification", userLabel: "matching excluded classification" });
             const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Model" });
             const spatialCategory = insertSpatialCategory({ txn, codeValue: "Category" });
             const element = insertPhysicalElement({
@@ -304,7 +304,7 @@ describe("Classifications tree", () => {
               modelId: physicalModel.id,
               categoryId: spatialCategory.id,
               codeValue: "Element",
-              userLabel: "omitted element",
+              userLabel: "excluded element",
             });
             insertElementHasClassificationsRelationship({ txn, elementId: element.id, classificationId: classification.id });
 
@@ -314,7 +314,7 @@ describe("Classifications tree", () => {
         const { imodelConnection, ...keys } = buildIModelResult;
         using hook = renderUseClassificationsTreeDefinitionHook({
           imodels: [imodelConnection],
-          hierarchyConfig: { ...defaultHierarchyConfiguration, omittedElementClassNames: ["Generic.PhysicalObject"] },
+          hierarchyConfig: { ...defaultHierarchyConfiguration, excludedElementClassNames: ["Generic.PhysicalObject"] },
           search: { searchText: "matching" },
         });
         expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
@@ -341,35 +341,35 @@ describe("Classifications tree", () => {
             const classification = insertClassification({ txn, modelId: table.id, codeValue: "Classification" });
             const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Model" });
             const spatialCategory = insertSpatialCategory({ txn, codeValue: "Category" });
-            const omittedParent = insertPhysicalElement({
+            const excludedParent = insertPhysicalElement({
               txn,
               modelId: physicalModel.id,
               categoryId: spatialCategory.id,
               codeValue: "Parent",
-              userLabel: "omitted parent",
+              userLabel: "excluded parent",
             });
             insertPhysicalElement({
               txn,
               classFullName: "Generic.SpatialLocation",
               modelId: physicalModel.id,
               categoryId: spatialCategory.id,
-              parentId: omittedParent.id,
+              parentId: excludedParent.id,
               codeValue: "Child",
-              userLabel: "matching child of omitted parent",
+              userLabel: "matching child of excluded parent",
             });
-            insertElementHasClassificationsRelationship({ txn, elementId: omittedParent.id, classificationId: classification.id });
+            insertElementHasClassificationsRelationship({ txn, elementId: excludedParent.id, classificationId: classification.id });
           }),
         );
         const { imodelConnection } = buildIModelResult;
         using hook = renderUseClassificationsTreeDefinitionHook({
           imodels: [imodelConnection],
-          hierarchyConfig: { ...defaultHierarchyConfiguration, omittedElementClassNames: ["Generic.PhysicalObject"] },
+          hierarchyConfig: { ...defaultHierarchyConfiguration, excludedElementClassNames: ["Generic.PhysicalObject"] },
           search: { searchText: "matching" },
         });
         expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([]);
       });
 
-      it("does not return omitted child elements when their parent is not omitted", async () => {
+      it("does not return excluded child elements when their parent is not excluded", async () => {
         await using buildIModelResult = await buildIModel(async (imodel) =>
           withEditTxn(imodel, async (txn) => {
             await importClassificationSchema(imodel);
@@ -393,7 +393,7 @@ describe("Classifications tree", () => {
               categoryId: spatialCategory.id,
               parentId: keptParent.id,
               codeValue: "Child",
-              userLabel: "matching omitted child",
+              userLabel: "matching excluded child",
             });
             insertElementHasClassificationsRelationship({ txn, elementId: keptParent.id, classificationId: classification.id });
           }),
@@ -401,7 +401,7 @@ describe("Classifications tree", () => {
         const { imodelConnection } = buildIModelResult;
         using hook = renderUseClassificationsTreeDefinitionHook({
           imodels: [imodelConnection],
-          hierarchyConfig: { ...defaultHierarchyConfiguration, omittedElementClassNames: ["Generic.PhysicalObject"] },
+          hierarchyConfig: { ...defaultHierarchyConfiguration, excludedElementClassNames: ["Generic.PhysicalObject"] },
           search: { searchText: "matching" },
         });
         expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([]);

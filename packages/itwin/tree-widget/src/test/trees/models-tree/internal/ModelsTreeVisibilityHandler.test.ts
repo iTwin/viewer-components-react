@@ -5465,13 +5465,13 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
     });
 
-    it("element of an omitted class still participates in visibility", async () => {
+    it("element of an excluded class still participates in visibility", async () => {
       await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
           const categoryId = insertSpatialCategory({ txn, codeValue: "category" }).id;
           const modelId = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
-          const omittedElementId = insertPhysicalElement({ txn, modelId, categoryId }).id;
-          return { categoryId, modelId, omittedElementId };
+          const excludedElementId = insertPhysicalElement({ txn, modelId, categoryId }).id;
+          return { categoryId, modelId, excludedElementId };
         }),
       );
 
@@ -5482,7 +5482,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           ...defaultHierarchyConfiguration,
           hideRootSubject: true,
           showEmptyModels: true,
-          omittedElementClassNames: [CLASS_NAME_GeometricElement3d],
+          excludedElementClassNames: [CLASS_NAME_GeometricElement3d],
         },
       });
       const { handler, viewport, provider } = visibilityTestData;
@@ -5505,7 +5505,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         expectations: "all-visible",
       });
 
-      viewport.setNeverDrawn({ elementIds: new Set([keys.omittedElementId]) });
+      viewport.setNeverDrawn({ elementIds: new Set([keys.excludedElementId]) });
 
       await validateModelsTreeHierarchyVisibility({
         provider,

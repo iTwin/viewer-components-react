@@ -5699,16 +5699,16 @@ describe("CategoriesTreeVisibilityHandler", () => {
     });
   });
 
-  describe("omittedElementClassNames", () => {
-    it("element of an omitted class participates in visibility", async () => {
+  describe("excludedElementClassNames", () => {
+    it("element of an excluded class participates in visibility", async () => {
       await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
           const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
           const definitionContainer = insertDefinitionContainer({ txn, codeValue: "DefinitionContainer" });
           const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
           const category = insertSpatialCategory({ txn, codeValue: "SpatialCategory", modelId: definitionModel.id });
-          const omittedElement = insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
-          return { physicalModel, definitionContainer, category, omittedElement };
+          const excludedElement = insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+          return { physicalModel, definitionContainer, category, excludedElement };
         }),
       );
 
@@ -5716,7 +5716,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
       using visibilityTestData = await createVisibilityTestData({
         imodelConnection,
-        hierarchyConfig: { omittedElementClassNames: [CLASS_NAME_GeometricElement3d] },
+        hierarchyConfig: { excludedElementClassNames: [CLASS_NAME_GeometricElement3d] },
       });
       const { handler, provider, viewport } = visibilityTestData;
 
@@ -5736,7 +5736,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         expectations: "all-visible",
       });
 
-      viewport.setNeverDrawn({ elementIds: new Set([keys.omittedElement.id]) });
+      viewport.setNeverDrawn({ elementIds: new Set([keys.excludedElement.id]) });
 
       await validateCategoriesTreeHierarchyVisibility({
         provider,

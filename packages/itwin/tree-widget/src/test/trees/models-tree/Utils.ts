@@ -54,7 +54,7 @@ export function createModelsTreeProvider({
     queryExecutor: createdImodelAccess,
     elementClassName: config.elementClassSpecification,
     type: "3d",
-    omittedElementClassNames: config.omittedElementClassNames,
+    excludedElementClassNames: config.excludedElementClassNames,
   });
   const createdIdsCache =
     idsCache ??
@@ -98,7 +98,7 @@ interface IdsCacheMockProps {
 
 export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCache {
   return {
-    getChildSubjectIds: vi.fn(({ parentSubjectIds }: { parentSubjectIds: Id64Arg; excludeIfOnlyOmittedClasses?: boolean }) => {
+    getChildSubjectIds: vi.fn(({ parentSubjectIds }: { parentSubjectIds: Id64Arg; excludeIfOnlyExcludedClasses?: boolean }) => {
       return from(Id64.iterable(parentSubjectIds)).pipe(
         concatMap((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),

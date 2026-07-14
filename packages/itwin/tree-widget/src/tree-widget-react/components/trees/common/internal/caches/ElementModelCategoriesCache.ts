@@ -6,7 +6,7 @@
 import { defer, delay, map, reduce, shareReplay, tap } from "rxjs";
 import { CLASS_NAME_Model } from "../ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
-import { createOmittedClassesExclusionClause, getOrCreate } from "../Utils.js";
+import { createExcludedClassesClause, getOrCreate } from "../Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64String } from "@itwin/core-bentley";
@@ -18,7 +18,7 @@ interface ElementModelCategoriesCacheProps {
   queryExecutor: LimitingECSqlQueryExecutor;
   componentId: GuidString;
   elementClassName: string;
-  omittedElementClassNames?: ReadonlyArray<EC.FullClassName>;
+  excludedElementClassNames?: ReadonlyArray<EC.FullClassName>;
 }
 
 interface CachedData {
@@ -27,13 +27,13 @@ interface CachedData {
     {
       categoriesOfTopMostElements: Set<CategoryId>;
       allCategories: Set<CategoryId>;
-      categoriesOfTopMostNonOmittedElements: Set<CategoryId>;
-      nonOmittedCategories: Set<CategoryId>;
+      categoriesOfTopMostNonExcludedElements: Set<CategoryId>;
+      nonExcludedCategories: Set<CategoryId>;
     }
   >;
-  modelsContainingTopMostNonOmittedElements: Set<ModelId>;
-  categoriesContainingNonOmittedElements: Set<CategoryId>;
-  categoryModelsInfo: Map<CategoryId, Array<{ id: ModelId; categoryIsOfTopMostElement: boolean; hasNonOmittedTopMostElements: boolean }>>;
+  modelsContainingTopMostNonExcludedElements: Set<ModelId>;
+  categoriesContainingNonExcludedElements: Set<CategoryId>;
+  categoryModelsInfo: Map<CategoryId, Array<{ id: ModelId; categoryIsOfTopMostElement: boolean; hasNonExcludedTopMostElements: boolean }>>;
   categoriesWithParentElements: Set<CategoryId>;
   allCategories: Set<CategoryId>;
   allTopMostElementCategories: Set<CategoryId>;
@@ -45,7 +45,7 @@ export class ElementModelCategoriesCache {
   #componentId: GuidString;
   #componentName: string;
   #elementClassName: string;
-  #omittedElementClassNames?: ReadonlyArray<EC.FullClassName>;
+  #excludedElementClassNames?: ReadonlyArray<EC.FullClassName>;
   #cachedData: Observable<CachedData> | undefined;
   #dataResolved = false;
   #subscriberBatches: Array<{ obs: Observable<CachedData>; subscriberCount: number }> = [];
@@ -53,7 +53,7 @@ export class ElementModelCategoriesCache {
   constructor(props: ElementModelCategoriesCacheProps) {
     this.#queryExecutor = props.queryExecutor;
     this.#elementClassName = props.elementClassName;
-    this.#omittedElementClassNames = props.omittedElementClassNames;
+    this.#excludedElementClassNames = props.excludedElementClassNames;
     this.#componentId = props.componentId;
     this.#componentName = "ElementModelCategoriesCache";
   }
@@ -63,9 +63,9 @@ export class ElementModelCategoriesCache {
     categoryId: Id64String;
     isTopMostElementCategory: boolean;
     hasParentElements: boolean;
-    hasElementsFromNonOmittedClasses: boolean;
+    hasElementsFromNonExcludedClasses: boolean;
   }> {
-    const omittedClause = createOmittedClassesExclusionClause({ alias: "this", omittedClassNames: this.#omittedElementClassNames });
+    const excludedClause = createExcludedClassesClause({ alias: "this", excludedClassNames: this.#excludedElementClassNames });
     return defer(() => {
       const query = `
           SELECT
@@ -73,7 +73,7 @@ export class ElementModelCategoriesCache {
             this.Category.Id categoryId,
             MAX(IIF(this.Parent.Id IS NULL, 1, 0)) isTopMostElementCategory,
             MAX(IIF((SELECT 1 FROM ${this.#elementClassName} ce WHERE ce.Parent.Id = this.ECInstanceId LIMIT 1), 1, 0)) hasParentElements
-            ${omittedClause ? `, MAX(IIF((${omittedClause}), 1, 0)) hasElementsFromNonOmittedClasses` : ""}
+            ${excludedClause ? `, MAX(IIF((${excludedClause}), 1, 0)) hasElementsFromNonExcludedClasses` : ""}
           FROM ${this.#elementClassName} this
           JOIN ${CLASS_NAME_Model} m ON m.ECInstanceId = this.Model.Id
           WHERE m.IsPrivate = false
@@ -91,7 +91,7 @@ export class ElementModelCategoriesCache {
           categoryId: row.categoryId,
           isTopMostElementCategory: !!row.isTopMostElementCategory,
           hasParentElements: !!row.hasParentElements,
-          hasElementsFromNonOmittedClasses: omittedClause ? !!row.hasElementsFromNonOmittedClasses : true,
+          hasElementsFromNonExcludedClasses: excludedClause ? !!row.hasElementsFromNonExcludedClasses : true,
         };
       }),
     );
@@ -105,12 +105,12 @@ export class ElementModelCategoriesCache {
           const categoryModelsEntry = getOrCreate({
             map: acc.categoryModelsInfo,
             key: queriedCategory.categoryId,
-            createFunc: () => new Array<{ id: ModelId; categoryIsOfTopMostElement: boolean; hasNonOmittedTopMostElements: boolean }>(),
+            createFunc: () => new Array<{ id: ModelId; categoryIsOfTopMostElement: boolean; hasNonExcludedTopMostElements: boolean }>(),
           });
           categoryModelsEntry.push({
             id: queriedCategory.modelId,
             categoryIsOfTopMostElement: queriedCategory.isTopMostElementCategory,
-            hasNonOmittedTopMostElements: queriedCategory.hasElementsFromNonOmittedClasses && queriedCategory.isTopMostElementCategory,
+            hasNonExcludedTopMostElements: queriedCategory.hasElementsFromNonExcludedClasses && queriedCategory.isTopMostElementCategory,
           });
           const modelEntry = getOrCreate({
             map: acc.modelsCategoriesInfo,
@@ -118,8 +118,8 @@ export class ElementModelCategoriesCache {
             createFunc: () => ({
               categoriesOfTopMostElements: new Set<string>(),
               allCategories: new Set<string>(),
-              categoriesOfTopMostNonOmittedElements: new Set<string>(),
-              nonOmittedCategories: new Set<string>(),
+              categoriesOfTopMostNonExcludedElements: new Set<string>(),
+              nonExcludedCategories: new Set<string>(),
             }),
           });
           modelEntry.allCategories.add(queriedCategory.categoryId);
@@ -127,12 +127,12 @@ export class ElementModelCategoriesCache {
             modelEntry.categoriesOfTopMostElements.add(queriedCategory.categoryId);
             acc.allTopMostElementCategories.add(queriedCategory.categoryId);
           }
-          if (queriedCategory.hasElementsFromNonOmittedClasses) {
-            modelEntry.nonOmittedCategories.add(queriedCategory.categoryId);
-            acc.categoriesContainingNonOmittedElements.add(queriedCategory.categoryId);
+          if (queriedCategory.hasElementsFromNonExcludedClasses) {
+            modelEntry.nonExcludedCategories.add(queriedCategory.categoryId);
+            acc.categoriesContainingNonExcludedElements.add(queriedCategory.categoryId);
             if (queriedCategory.isTopMostElementCategory) {
-              acc.modelsContainingTopMostNonOmittedElements.add(queriedCategory.modelId);
-              modelEntry.categoriesOfTopMostNonOmittedElements.add(queriedCategory.categoryId);
+              acc.modelsContainingTopMostNonExcludedElements.add(queriedCategory.modelId);
+              modelEntry.categoriesOfTopMostNonExcludedElements.add(queriedCategory.categoryId);
             }
           }
           if (queriedCategory.hasParentElements) {
@@ -146,16 +146,16 @@ export class ElementModelCategoriesCache {
             {
               categoriesOfTopMostElements: Set<CategoryId>;
               allCategories: Set<CategoryId>;
-              categoriesOfTopMostNonOmittedElements: Set<CategoryId>;
-              nonOmittedCategories: Set<CategoryId>;
+              categoriesOfTopMostNonExcludedElements: Set<CategoryId>;
+              nonExcludedCategories: Set<CategoryId>;
             }
           >(),
           categoriesWithParentElements: new Set<CategoryId>(),
           allTopMostElementCategories: new Set<CategoryId>(),
           allCategories: new Set<CategoryId>(),
-          modelsContainingTopMostNonOmittedElements: new Set<ModelId>(),
-          categoriesContainingNonOmittedElements: new Set<CategoryId>(),
-          categoryModelsInfo: new Map<CategoryId, Array<{ id: ModelId; categoryIsOfTopMostElement: boolean; hasNonOmittedTopMostElements: boolean }>>(),
+          modelsContainingTopMostNonExcludedElements: new Set<ModelId>(),
+          categoriesContainingNonExcludedElements: new Set<CategoryId>(),
+          categoryModelsInfo: new Map<CategoryId, Array<{ id: ModelId; categoryIsOfTopMostElement: boolean; hasNonExcludedTopMostElements: boolean }>>(),
         },
       ),
       tap(() => {

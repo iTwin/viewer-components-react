@@ -31,7 +31,7 @@ import type { SnapshotDb } from "@itwin/core-backend";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyDefinition, HierarchyNode, HierarchyProvider, HierarchySearchTree } from "@itwin/presentation-hierarchies";
-import type { Props } from "@itwin/presentation-shared";
+import type { EC, Props } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
 import type { IModelAccess } from "./StatelessHierarchyProvider.js";
 import type { TreeWidgetTestingViewport } from "./VisibilityUtilities.js";
@@ -112,109 +112,118 @@ describe("classifications tree", () => {
     ],
   });
 
-  run<{
-    iModel: SnapshotDb;
-    imodelAccess: IModelAccess;
-    viewport: TreeWidgetTestingViewport;
-    handler: HierarchyVisibilityHandler & Disposable;
-    provider: HierarchyProvider & Disposable;
-    firstClassificationTable: Id64String;
-    iModelConnection: IModelConnection;
-    hierarchyNodes: HierarchyNode[];
-  }>({
-    testName: "50k classifications",
-    setup: async () => {
-      const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k classifications"));
-      const imodelAccess = StatelessHierarchyProvider.createIModelAccess(iModel, "unbounded");
-      const visibilityTargets = await getVisibilityTargets(imodelAccess, rootClassificationSystemCode);
-      const testData = createTestDataForInitialDisplay({ visibilityTargets, visible: false });
+  for (let i = 0; i < 2; i++) {
+    // Excluded 2d elements won't affect the hierarchy in any way since imodel contains only 3d data.
+    const excludedElementClassNames: EC.FullClassName[] | undefined = i === 1 ? ["BisCore.GeometricElement2d"] : undefined;
+    run<{
+      iModel: SnapshotDb;
+      imodelAccess: IModelAccess;
+      viewport: TreeWidgetTestingViewport;
+      handler: HierarchyVisibilityHandler & Disposable;
+      provider: HierarchyProvider & Disposable;
+      firstClassificationTable: Id64String;
+      iModelConnection: IModelConnection;
+      hierarchyNodes: HierarchyNode[];
+    }>({
+      testName: `50k classifications${excludedElementClassNames ? " and excluded classes" : ""}`,
+      setup: async () => {
+        const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k classifications"));
+        const imodelAccess = StatelessHierarchyProvider.createIModelAccess(iModel, "unbounded");
+        const visibilityTargets = await getVisibilityTargets(imodelAccess, rootClassificationSystemCode);
+        const testData = createTestDataForInitialDisplay({ visibilityTargets, visible: false });
 
-      const viewport = await createViewport({
-        iModelConnection,
-        testData,
-      });
-      setupInitialDisplayState({
-        viewport,
-        ...testData,
-      });
-      const hierarchyConfig = { rootClassificationSystemCode };
-      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: "BisCore:GeometricElement3d", type: "3d" });
-      const idsCache = new ClassificationsTreeIdsCache({
-        queryExecutor: imodelAccess,
-        hierarchyConfig,
-        baseIdsCache,
-      });
-      const handler = createClassificationsTreeVisibilityHandler({ imodelAccess, idsCache, viewport });
-      const provider = createIModelHierarchyProvider({
-        hierarchyDefinition: new ClassificationsTreeDefinition({
-          getIdsCache: () => idsCache,
-          imodelAccess,
+        const viewport = await createViewport({
+          iModelConnection,
+          testData,
+        });
+        setupInitialDisplayState({
+          viewport,
+          ...testData,
+        });
+        const hierarchyConfig = { rootClassificationSystemCode, excludedElementClassNames };
+        const baseIdsCache = new BaseIdsCache({
+          queryExecutor: imodelAccess,
+          elementClassName: "BisCore:GeometricElement3d",
+          type: "3d",
+          excludedElementClassNames: hierarchyConfig.excludedElementClassNames,
+        });
+        const idsCache = new ClassificationsTreeIdsCache({
+          queryExecutor: imodelAccess,
           hierarchyConfig,
-        }),
-        imodelAccess,
-      });
-      expect(visibilityTargets.classificationTables.length).toBeGreaterThanOrEqual(1);
-      const firstClassificationTable = visibilityTargets.classificationTables[0];
-      return { iModel, imodelAccess, viewport, handler, provider, firstClassificationTable, iModelConnection, hierarchyNodes: [] };
-    },
-    cleanup: async (props) => {
-      props.iModel.close();
-      props.viewport[Symbol.dispose]();
-      props.handler[Symbol.dispose]();
-      props.provider[Symbol.dispose]();
-      if (!props.iModelConnection.isClosed) {
-        await props.iModelConnection.close();
-      }
-    },
-    steps: [
-      {
-        name: "collect nodes",
-        callBack: async (ctx) => {
-          // Collect only classification tables and classifications
-          ctx.hierarchyNodes = await collectNodes({
-            provider: ctx.provider,
-            ignoreChildren: (node) => ClassificationsTreeNode.isClassificationNode(node) && node.parentKeys.length === 2,
-          });
-        },
+          baseIdsCache,
+        });
+        const handler = createClassificationsTreeVisibilityHandler({ imodelAccess, idsCache, viewport });
+        const provider = createIModelHierarchyProvider({
+          hierarchyDefinition: new ClassificationsTreeDefinition({
+            getIdsCache: () => idsCache,
+            imodelAccess,
+            hierarchyConfig,
+          }),
+          imodelAccess,
+        });
+        expect(visibilityTargets.classificationTables.length).toBeGreaterThanOrEqual(1);
+        const firstClassificationTable = visibilityTargets.classificationTables[0];
+        return { iModel, imodelAccess, viewport, handler, provider, firstClassificationTable, iModelConnection, hierarchyNodes: [] };
       },
-      {
-        name: "validate initial visibility",
-        callBack: async ({ hierarchyNodes, handler, viewport }) => {
-          await validateHierarchyVisibility({
-            hierarchyNodes,
-            handler,
-            viewport,
-            expectations: "all-hidden",
-          });
-        },
+      cleanup: async (props) => {
+        props.iModel.close();
+        props.viewport[Symbol.dispose]();
+        props.handler[Symbol.dispose]();
+        props.provider[Symbol.dispose]();
+        if (!props.iModelConnection.isClosed) {
+          await props.iModelConnection.close();
+        }
       },
-      {
-        name: "change visibility",
-        callBack: async ({ handler, firstClassificationTable }) => {
-          await handler.changeVisibility(createClassificationTableHierarchyNode(firstClassificationTable), true);
+      steps: [
+        {
+          name: "collect nodes",
+          callBack: async (ctx) => {
+            // Collect only classification tables and classifications
+            ctx.hierarchyNodes = await collectNodes({
+              provider: ctx.provider,
+              ignoreChildren: (node) => ClassificationsTreeNode.isClassificationNode(node) && node.parentKeys.length === 2,
+            });
+          },
         },
-      },
-      {
-        name: "validate changed visibility",
-        callBack: async ({ hierarchyNodes, handler, viewport, firstClassificationTable }) => {
-          await validateHierarchyVisibility({
-            hierarchyNodes,
-            handler,
-            viewport,
-            expectations: {
-              default: "all-hidden",
-              instances: {
-                [firstClassificationTable]: "visible",
+        {
+          name: "validate initial visibility",
+          callBack: async ({ hierarchyNodes, handler, viewport }) => {
+            await validateHierarchyVisibility({
+              hierarchyNodes,
+              handler,
+              viewport,
+              expectations: "all-hidden",
+            });
+          },
+        },
+        {
+          name: "change visibility",
+          callBack: async ({ handler, firstClassificationTable }) => {
+            await handler.changeVisibility(createClassificationTableHierarchyNode(firstClassificationTable), true);
+          },
+        },
+        {
+          name: "validate changed visibility",
+          callBack: async ({ hierarchyNodes, handler, viewport, firstClassificationTable }) => {
+            await validateHierarchyVisibility({
+              hierarchyNodes,
+              handler,
+              viewport,
+              expectations: {
+                default: "all-hidden",
+                instances: {
+                  [firstClassificationTable]: "visible",
+                },
+                parentIds: {
+                  [firstClassificationTable]: "visible",
+                },
               },
-              parentIds: {
-                [firstClassificationTable]: "visible",
-              },
-            },
-          });
+            });
+          },
         },
-      },
-    ],
-  });
+      ],
+    });
+  }
 });
 
 function renderUseClassificationsTreeHook(props: Props<typeof useClassificationsTree>) {

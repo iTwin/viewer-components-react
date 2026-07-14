@@ -92,17 +92,17 @@ export function createIdsSelector(ids: Id64Array): string {
  * Returns an empty string when no classes are provided.
  * @internal
  */
-export function createOmittedClassesExclusionClause({
+export function createExcludedClassesClause({
   alias,
-  omittedClassNames,
+  excludedClassNames,
 }: {
   alias: string;
-  omittedClassNames: ReadonlyArray<EC.FullClassName> | undefined;
+  excludedClassNames: ReadonlyArray<EC.FullClassName> | undefined;
 }): string {
-  if (!omittedClassNames || omittedClassNames.length === 0) {
+  if (!excludedClassNames || excludedClassNames.length === 0) {
     return "";
   }
-  return `${alias}.ECClassId IS NOT (${omittedClassNames.join(", ")})`;
+  return `${alias}.ECClassId IS NOT (${excludedClassNames.join(", ")})`;
 }
 
 /** @internal */

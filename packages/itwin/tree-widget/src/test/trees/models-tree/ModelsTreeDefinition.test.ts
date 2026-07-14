@@ -1685,8 +1685,8 @@ describe("Models tree", () => {
         });
       });
 
-      describe("omittedElementClassNames", () => {
-        it("does not filter out elements when they don't belong to any of the omitted classes", async () => {
+      describe("excludedElementClassNames", () => {
+        it("does not filter out elements when they don't belong to any of the excluded classes", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
               const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: IModel.rootSubjectId });
@@ -1696,7 +1696,7 @@ describe("Models tree", () => {
             }),
           );
           const { imodelConnection, ...keys } = buildIModelResult;
-          using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { omittedElementClassNames: ["BisCore.GeometricElement2d"] } });
+          using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { excludedElementClassNames: ["BisCore.GeometricElement2d"] } });
           await validateHierarchy({
             provider,
             expect: [
@@ -1726,13 +1726,13 @@ describe("Models tree", () => {
           });
         });
 
-        describe("root elements of omitted classes", () => {
-          it("filters out elements of omitted classes", async () => {
+        describe("root elements of excluded classes", () => {
+          it("filters out elements of excluded classes", async () => {
             await using buildIModelResult = await buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
                 const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: IModel.rootSubjectId });
                 const category = insertSpatialCategory({ txn, codeValue: "category" });
-                insertPhysicalElement({ txn, userLabel: `omitted element`, modelId: model.id, categoryId: category.id });
+                insertPhysicalElement({ txn, userLabel: `excluded element`, modelId: model.id, categoryId: category.id });
                 const keptElement = insertPhysicalElement({
                   txn,
                   userLabel: `kept element`,
@@ -1744,7 +1744,7 @@ describe("Models tree", () => {
               }),
             );
             const { imodelConnection, ...keys } = buildIModelResult;
-            using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { omittedElementClassNames: ["Generic.PhysicalObject"] } });
+            using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { excludedElementClassNames: ["Generic.PhysicalObject"] } });
             await validateHierarchy({
               provider,
               expect: [
@@ -1774,14 +1774,14 @@ describe("Models tree", () => {
             });
           });
 
-          it("filters out elements of classes derived from omitted classes", async () => {
+          it("filters out elements of classes derived from excluded classes", async () => {
             await using buildIModelResult = await buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
                 const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: IModel.rootSubjectId });
                 const category = insertSpatialCategory({ txn, codeValue: "category" });
                 insertPhysicalElement({
                   txn,
-                  userLabel: `omitted element`,
+                  userLabel: `excluded element`,
                   classFullName: `${TestSchema.Name}.${TestSchema.ModeledElement3dClassName}`,
                   modelId: model.id,
                   categoryId: category.id,
@@ -1797,7 +1797,7 @@ describe("Models tree", () => {
               }),
             );
             const { imodelConnection, ...keys } = buildIModelResult;
-            using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { omittedElementClassNames: ["BisCore.PhysicalElement"] } });
+            using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { excludedElementClassNames: ["BisCore.PhysicalElement"] } });
             await validateHierarchy({
               provider,
               expect: [
@@ -1827,14 +1827,14 @@ describe("Models tree", () => {
             });
           });
 
-          it("filters out everything when only omitted elements exist", async () => {
+          it("filters out everything when only excluded elements exist", async () => {
             await using buildIModelResult = await buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
                 const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: IModel.rootSubjectId });
                 const category = insertSpatialCategory({ txn, codeValue: "category" });
                 insertPhysicalElement({
                   txn,
-                  userLabel: `omitted element`,
+                  userLabel: `excluded element`,
                   modelId: model.id,
                   categoryId: category.id,
                 });
@@ -1843,7 +1843,7 @@ describe("Models tree", () => {
             const { imodelConnection } = buildIModelResult;
             using provider = createModelsTreeProvider({
               imodelConnection,
-              hierarchyConfig: { hideRootSubject: false, omittedElementClassNames: ["BisCore.PhysicalElement"] },
+              hierarchyConfig: { hideRootSubject: false, excludedElementClassNames: ["BisCore.PhysicalElement"] },
             });
             await validateHierarchy({
               provider,
@@ -1851,7 +1851,7 @@ describe("Models tree", () => {
             });
           });
 
-          it("filters out nodes which contain only omitted elements", async () => {
+          it("filters out nodes which contain only excluded elements", async () => {
             await using buildIModelResult = await buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
                 const childSubject = insertSubject({ txn, codeValue: "child subject", parentId: IModel.rootSubjectId });
@@ -1859,7 +1859,7 @@ describe("Models tree", () => {
                 const category = insertSpatialCategory({ txn, codeValue: "category" });
                 insertPhysicalElement({
                   txn,
-                  userLabel: `omitted element 1`,
+                  userLabel: `excluded element 1`,
                   modelId: model.id,
                   categoryId: category.id,
                 });
@@ -1870,26 +1870,26 @@ describe("Models tree", () => {
                   categoryId: category.id,
                   classFullName: `${TestSchema.Name}.${TestSchema.ModeledElement3dClassName}`,
                 });
-                const omittedCategory = insertSpatialCategory({ txn, codeValue: "omitted category" });
+                const excludedCategory = insertSpatialCategory({ txn, codeValue: "excluded category" });
                 insertPhysicalElement({
                   txn,
-                  userLabel: `omitted element 2`,
+                  userLabel: `excluded element 2`,
                   modelId: model.id,
-                  categoryId: omittedCategory.id,
+                  categoryId: excludedCategory.id,
                 });
-                const omittedModel = insertPhysicalModelWithPartition({ txn, codeValue: `omitted model`, partitionParentId: childSubject.id });
+                const excludedModel = insertPhysicalModelWithPartition({ txn, codeValue: `excluded model`, partitionParentId: childSubject.id });
                 insertPhysicalElement({
                   txn,
-                  userLabel: `omitted element 3`,
-                  modelId: omittedModel.id,
+                  userLabel: `excluded element 3`,
+                  modelId: excludedModel.id,
                   categoryId: category.id,
                 });
-                const omittedChildSubject = insertSubject({ txn, codeValue: "omitted child subject", parentId: IModel.rootSubjectId });
-                const omittedModel2 = insertPhysicalModelWithPartition({ txn, codeValue: `omitted model 2`, partitionParentId: omittedChildSubject.id });
+                const excludedChildSubject = insertSubject({ txn, codeValue: "excluded child subject", parentId: IModel.rootSubjectId });
+                const excludedModel2 = insertPhysicalModelWithPartition({ txn, codeValue: `excluded model 2`, partitionParentId: excludedChildSubject.id });
                 insertPhysicalElement({
                   txn,
-                  userLabel: `omitted element`,
-                  modelId: omittedModel2.id,
+                  userLabel: `excluded element`,
+                  modelId: excludedModel2.id,
                   categoryId: category.id,
                 });
                 return { childSubject, model, category, element1 };
@@ -1898,7 +1898,7 @@ describe("Models tree", () => {
             const { imodelConnection, ...keys } = buildIModelResult;
             using provider = createModelsTreeProvider({
               imodelConnection,
-              hierarchyConfig: { hideRootSubject: false, omittedElementClassNames: ["Generic.PhysicalObject"] },
+              hierarchyConfig: { hideRootSubject: false, excludedElementClassNames: ["Generic.PhysicalObject"] },
             });
             await validateHierarchy({
               provider,
@@ -1941,7 +1941,7 @@ describe("Models tree", () => {
             });
           });
 
-          it("filters only category when models have only omitted elements and `showEmptyModels` is true", async () => {
+          it("filters only category when models have only excluded elements and `showEmptyModels` is true", async () => {
             await using buildIModelResult = await buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
                 const childSubject = insertSubject({ txn, codeValue: "child subject", parentId: IModel.rootSubjectId });
@@ -1949,7 +1949,7 @@ describe("Models tree", () => {
                 const category = insertSpatialCategory({ txn, codeValue: "category" });
                 insertPhysicalElement({
                   txn,
-                  userLabel: `omitted element 1`,
+                  userLabel: `excluded element 1`,
                   modelId: model.id,
                   categoryId: category.id,
                 });
@@ -1960,17 +1960,17 @@ describe("Models tree", () => {
                   categoryId: category.id,
                   classFullName: `${TestSchema.Name}.${TestSchema.ModeledElement3dClassName}`,
                 });
-                const omittedCategory = insertSpatialCategory({ txn, codeValue: "omitted category" });
+                const excludedCategory = insertSpatialCategory({ txn, codeValue: "excluded category" });
                 insertPhysicalElement({
                   txn,
-                  userLabel: `omitted element 2`,
+                  userLabel: `excluded element 2`,
                   modelId: model.id,
-                  categoryId: omittedCategory.id,
+                  categoryId: excludedCategory.id,
                 });
                 const emptyModel = insertPhysicalModelWithPartition({ txn, codeValue: `empty model`, partitionParentId: childSubject.id });
                 insertPhysicalElement({
                   txn,
-                  userLabel: `empty element 1`,
+                  userLabel: `excluded element 1`,
                   modelId: emptyModel.id,
                   categoryId: category.id,
                 });
@@ -1978,7 +1978,7 @@ describe("Models tree", () => {
                 const emptyModel2 = insertPhysicalModelWithPartition({ txn, codeValue: `empty model 2`, partitionParentId: emptyChildSubject.id });
                 insertPhysicalElement({
                   txn,
-                  userLabel: `empty element`,
+                  userLabel: `excluded element`,
                   modelId: emptyModel2.id,
                   categoryId: category.id,
                 });
@@ -1988,7 +1988,7 @@ describe("Models tree", () => {
             const { imodelConnection, ...keys } = buildIModelResult;
             using provider = createModelsTreeProvider({
               imodelConnection,
-              hierarchyConfig: { hideRootSubject: false, showEmptyModels: true, omittedElementClassNames: ["Generic.PhysicalObject"] },
+              hierarchyConfig: { hideRootSubject: false, showEmptyModels: true, excludedElementClassNames: ["Generic.PhysicalObject"] },
             });
             await validateHierarchy({
               provider,
@@ -2048,13 +2048,13 @@ describe("Models tree", () => {
           });
         });
 
-        describe("child elements of omitted classes", () => {
-          it("sets hasChildren to false when parent contains only omitted elements", async () => {
+        describe("child elements of excluded classes", () => {
+          it("sets hasChildren to false when parent contains only excluded elements", async () => {
             await using buildIModelResult = await buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
                 const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: IModel.rootSubjectId });
                 const category = insertSpatialCategory({ txn, codeValue: "category" });
-                const omittedChildCategory = insertSpatialCategory({ txn, codeValue: "omitted child category" });
+                const excludedChildCategory = insertSpatialCategory({ txn, codeValue: "excluded child category" });
                 const parentElement = insertPhysicalElement({
                   txn,
                   userLabel: `parent element`,
@@ -2063,10 +2063,10 @@ describe("Models tree", () => {
                 });
                 insertPhysicalElement({
                   txn,
-                  userLabel: `omitted child element`,
+                  userLabel: `excluded child element`,
                   classFullName: `${TestSchema.Name}.${TestSchema.ModeledElement3dClassName}`,
                   modelId: model.id,
-                  categoryId: omittedChildCategory.id,
+                  categoryId: excludedChildCategory.id,
                   parentId: parentElement.id,
                 });
                 return { model, category, parentElement };
@@ -2075,7 +2075,7 @@ describe("Models tree", () => {
             const { imodelConnection, ...keys } = buildIModelResult;
             using provider = createModelsTreeProvider({
               imodelConnection,
-              hierarchyConfig: { omittedElementClassNames: [`${TestSchema.Name}.${TestSchema.ModeledElement3dClassName}`] },
+              hierarchyConfig: { excludedElementClassNames: [`${TestSchema.Name}.${TestSchema.ModeledElement3dClassName}`] },
             });
             await validateHierarchy({
               provider,
@@ -2106,12 +2106,12 @@ describe("Models tree", () => {
             });
           });
 
-          it("filters out child of omitted classes and their categories", async () => {
+          it("filters out child of excluded classes and their categories", async () => {
             await using buildIModelResult = await buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
                 const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: IModel.rootSubjectId });
                 const category = insertSpatialCategory({ txn, codeValue: "category" });
-                const omittedChildCategory = insertSpatialCategory({ txn, codeValue: "omitted child category" });
+                const excludedChildCategory = insertSpatialCategory({ txn, codeValue: "excluded child category" });
                 const childCategory = insertSpatialCategory({ txn, codeValue: "child category" });
                 const parentElement = insertPhysicalElement({
                   txn,
@@ -2121,10 +2121,10 @@ describe("Models tree", () => {
                 });
                 insertPhysicalElement({
                   txn,
-                  userLabel: `omitted child element`,
+                  userLabel: `excluded child element`,
                   classFullName: `${TestSchema.Name}.${TestSchema.ModeledElement3dClassName}`,
                   modelId: model.id,
-                  categoryId: omittedChildCategory.id,
+                  categoryId: excludedChildCategory.id,
                   parentId: parentElement.id,
                 });
                 const childElement = insertPhysicalElement({
@@ -2140,7 +2140,7 @@ describe("Models tree", () => {
             const { imodelConnection, ...keys } = buildIModelResult;
             using provider = createModelsTreeProvider({
               imodelConnection,
-              hierarchyConfig: { omittedElementClassNames: [`${TestSchema.Name}.${TestSchema.ModeledElement3dClassName}`] },
+              hierarchyConfig: { excludedElementClassNames: [`${TestSchema.Name}.${TestSchema.ModeledElement3dClassName}`] },
             });
             await validateHierarchy({
               provider,
@@ -2188,12 +2188,12 @@ describe("Models tree", () => {
             });
           });
 
-          it("sets hasChildren to false when parent modeled element contains only omitted elements", async () => {
+          it("sets hasChildren to false when parent modeled element contains only excluded elements", async () => {
             await using buildIModelResult = await buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
                 const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: IModel.rootSubjectId });
                 const category = insertSpatialCategory({ txn, codeValue: "category" });
-                const omittedChildCategory = insertSpatialCategory({ txn, codeValue: "omitted child category" });
+                const excludedChildCategory = insertSpatialCategory({ txn, codeValue: "excluded child category" });
                 const modeledElement = insertPhysicalElement({
                   txn,
                   userLabel: `parent element`,
@@ -2204,9 +2204,9 @@ describe("Models tree", () => {
                 const subModel = insertPhysicalSubModel({ txn, modeledElementId: modeledElement.id });
                 insertPhysicalElement({
                   txn,
-                  userLabel: `child omitted element`,
+                  userLabel: `child excluded element`,
                   modelId: subModel.id,
-                  categoryId: omittedChildCategory.id,
+                  categoryId: excludedChildCategory.id,
                 });
                 return { model, category, modeledElement };
               }),
@@ -2214,7 +2214,7 @@ describe("Models tree", () => {
             const { imodelConnection, ...keys } = buildIModelResult;
             using provider = createModelsTreeProvider({
               imodelConnection,
-              hierarchyConfig: { omittedElementClassNames: ["Generic.PhysicalObject"] },
+              hierarchyConfig: { excludedElementClassNames: ["Generic.PhysicalObject"] },
             });
             await validateHierarchy({
               provider,
@@ -2245,12 +2245,12 @@ describe("Models tree", () => {
             });
           });
 
-          it("filters out sub-model child elements of omitted classes and their categories", async () => {
+          it("filters out sub-model child elements of excluded classes and their categories", async () => {
             await using buildIModelResult = await buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
                 const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: IModel.rootSubjectId });
                 const category = insertSpatialCategory({ txn, codeValue: "category" });
-                const omittedChildCategory = insertSpatialCategory({ txn, codeValue: "omitted child category" });
+                const excludedChildCategory = insertSpatialCategory({ txn, codeValue: "excluded child category" });
                 const childCategory = insertSpatialCategory({ txn, codeValue: "child category" });
                 const modeledElement = insertPhysicalElement({
                   txn,
@@ -2262,9 +2262,9 @@ describe("Models tree", () => {
                 const subModel = insertPhysicalSubModel({ txn, modeledElementId: modeledElement.id });
                 insertPhysicalElement({
                   txn,
-                  userLabel: `child omitted element`,
+                  userLabel: `child excluded element`,
                   modelId: subModel.id,
-                  categoryId: omittedChildCategory.id,
+                  categoryId: excludedChildCategory.id,
                 });
                 const childModeledElement = insertPhysicalElement({
                   txn,
@@ -2279,7 +2279,7 @@ describe("Models tree", () => {
             const { imodelConnection, ...keys } = buildIModelResult;
             using provider = createModelsTreeProvider({
               imodelConnection,
-              hierarchyConfig: { omittedElementClassNames: ["Generic.PhysicalObject"] },
+              hierarchyConfig: { excludedElementClassNames: ["Generic.PhysicalObject"] },
             });
             await validateHierarchy({
               provider,

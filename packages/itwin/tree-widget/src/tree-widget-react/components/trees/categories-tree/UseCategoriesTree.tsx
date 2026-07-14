@@ -100,7 +100,7 @@ export function useCategoriesTree({
   const idsCache = useCategoriesTreeIdsCache({
     imodel: activeView.iModel,
     activeViewType: viewType,
-    omittedElementClassNames: hierarchyConfiguration.omittedElementClassNames,
+    excludedElementClassNames: hierarchyConfiguration.excludedElementClassNames,
   });
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useCategoriesCachedVisibility({
@@ -258,25 +258,25 @@ async function createSearchResultsTree(
 function useCategoriesTreeIdsCache({
   imodel,
   activeViewType,
-  omittedElementClassNames,
+  excludedElementClassNames,
 }: {
   imodel: IModelConnection;
   activeViewType: "2d" | "3d";
-  omittedElementClassNames?: Array<EC.FullClassName>;
+  excludedElementClassNames?: Array<EC.FullClassName>;
 }): CategoriesTreeIdsCache {
   const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
 
   const baseIdsCache = getBaseIdsCache({
     type: activeViewType,
     elementClassName: getClassesByView(activeViewType).elementClass,
-    omittedElementClassNames,
+    excludedElementClassNames,
     imodel,
   });
   const categoriesTreeIdsCache = getCache({
     imodel,
     createCache: () =>
-      new CategoriesTreeIdsCache({ baseIdsCache, type: activeViewType, queryExecutor: createECSqlQueryExecutor(imodel), omittedElementClassNames }),
-    cacheKey: `${activeViewType}-${[...(omittedElementClassNames ?? [])].sort().join(",")}-CategoriesTreeIdsCache`,
+      new CategoriesTreeIdsCache({ baseIdsCache, type: activeViewType, queryExecutor: createECSqlQueryExecutor(imodel), excludedElementClassNames }),
+    cacheKey: `${activeViewType}-${[...(excludedElementClassNames ?? [])].sort().join(",")}-CategoriesTreeIdsCache`,
   });
   return categoriesTreeIdsCache;
 }

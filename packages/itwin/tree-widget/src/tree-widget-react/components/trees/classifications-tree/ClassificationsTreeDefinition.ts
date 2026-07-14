@@ -36,7 +36,7 @@ import {
 } from "../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../common/internal/UseErrorState.js";
 import {
-  createOmittedClassesExclusionClause,
+  createExcludedClassesClause,
   createWhereClause,
   fromWithRelease,
   getOptimalBatchSize,
@@ -86,8 +86,8 @@ export interface ClassificationsTreeHierarchyConfiguration {
    * root `ClassificationSystem`.
    */
   rootClassificationSystemCode: string;
-  /** Classes to omit from the hierarchy. Element nodes whose class derive from the omitted classes will not be shown in the hierarchy. Defaults to `undefined`. */
-  omittedElementClassNames?: Array<EC.FullClassName>;
+  /** Element classes to exclude from the hierarchy. Elements, whose class is or derives from one of the classes in this list, are not loaded into the hierarchy. Defaults to `[]`. */
+  excludedElementClassNames?: Array<EC.FullClassName>;
 }
 
 interface ClassificationsTreeInstanceKeyPathsBaseProps {
@@ -311,7 +311,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
             ${createWhereClause({
               conditions: [
                 "this.Parent.Id IS NULL",
-                createOmittedClassesExclusionClause({ alias: "this", omittedClassNames: this.#props.hierarchyConfig.omittedElementClassNames }),
+                createExcludedClassesClause({ alias: "this", excludedClassNames: this.#props.hierarchyConfig.excludedElementClassNames }),
                 elementsInstanceFilterClauses.where,
               ],
             })}
@@ -387,7 +387,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
           ${instanceFilterClauses.joins}
           ${createWhereClause({
             conditions: [
-              createOmittedClassesExclusionClause({ alias: "this", omittedClassNames: this.#props.hierarchyConfig.omittedElementClassNames }),
+              createExcludedClassesClause({ alias: "this", excludedClassNames: this.#props.hierarchyConfig.excludedElementClassNames }),
               instanceFilterClauses.where,
             ],
           })}
@@ -424,7 +424,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
             ${createWhereClause({
               conditions: [
                 "ce.Parent.Id = this.ECInstanceId",
-                createOmittedClassesExclusionClause({ alias: "ce", omittedClassNames: this.#props.hierarchyConfig.omittedElementClassNames }),
+                createExcludedClassesClause({ alias: "ce", excludedClassNames: this.#props.hierarchyConfig.excludedElementClassNames }),
               ],
             })}
             LIMIT 1
@@ -553,7 +553,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
               FROM ${CLASS_NAME_GeometricElement3d} this
               JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = this.ECInstanceId
               JOIN IdSet(?) classificationIdSet ON ehc.TargetECInstanceId = classificationIdSet.id
-              ${createWhereClause({ conditions: ["this.Parent.Id IS NULL", createOmittedClassesExclusionClause({ alias: "this", omittedClassNames: props.hierarchyConfig.omittedElementClassNames })] })}
+              ${createWhereClause({ conditions: ["this.Parent.Id IS NULL", createExcludedClassesClause({ alias: "this", excludedClassNames: props.hierarchyConfig.excludedElementClassNames })] })}
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
               UNION ALL
@@ -565,7 +565,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
               FROM
                 ${CLASS_NAME_GeometricElement3d} this
                 JOIN ${ELEMENTS_WITH_LABELS_CTE} pe ON pe.ECInstanceId = this.Parent.Id
-              ${createWhereClause({ conditions: [createOmittedClassesExclusionClause({ alias: "this", omittedClassNames: props.hierarchyConfig.omittedElementClassNames })] })}
+              ${createWhereClause({ conditions: [createExcludedClassesClause({ alias: "this", excludedClassNames: props.hierarchyConfig.excludedElementClassNames })] })}
             )`,
           ]
         : []),
@@ -728,7 +728,7 @@ function createSearchPathsForDifferentTypes(
                   chunkIndex,
                   componentId,
                   componentName,
-                  omittedElementClassNames: props.hierarchyConfig.omittedElementClassNames,
+                  excludedElementClassNames: props.hierarchyConfig.excludedElementClassNames,
                 }),
               2,
             ),
@@ -745,9 +745,9 @@ function createGeometricElementInstanceKeyPaths(props: {
   componentId: GuidString;
   componentName: string;
   chunkIndex: number;
-  omittedElementClassNames?: Array<EC.FullClassName>;
+  excludedElementClassNames?: Array<EC.FullClassName>;
 }): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String }> {
-  const { targetItems, imodelAccess, idsCache, componentId, componentName, chunkIndex, omittedElementClassNames } = props;
+  const { targetItems, imodelAccess, idsCache, componentId, componentName, chunkIndex, excludedElementClassNames } = props;
   if (targetItems.length === 0) {
     return EMPTY;
   }
@@ -763,7 +763,7 @@ function createGeometricElementInstanceKeyPaths(props: {
           '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT)
         FROM  ${CLASS_NAME_Element} e
         JOIN IdSet(?) targetItemIdSet ON e.ECInstanceId = targetItemIdSet.id
-        ${createWhereClause({ conditions: [createOmittedClassesExclusionClause({ alias: "e", omittedClassNames: omittedElementClassNames })] })}
+        ${createWhereClause({ conditions: [createExcludedClassesClause({ alias: "e", excludedClassNames: excludedElementClassNames })] })}
         ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
         UNION ALL
@@ -774,7 +774,7 @@ function createGeometricElementInstanceKeyPaths(props: {
           '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || ce.Path
         FROM ElementsHierarchy ce
         JOIN ${CLASS_NAME_Element} pe ON pe.ECInstanceId = ce.ParentId
-        ${createWhereClause({ conditions: [createOmittedClassesExclusionClause({ alias: "pe", omittedClassNames: omittedElementClassNames })] })}
+        ${createWhereClause({ conditions: [createExcludedClassesClause({ alias: "pe", excludedClassNames: excludedElementClassNames })] })}
       )`,
     ];
     const ecsql = `

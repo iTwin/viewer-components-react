@@ -32,7 +32,7 @@ import type { ClassificationsTreeVisibilityHandlerConfiguration } from "../UseCl
  */
 export type HierarchyConfigForClassificationsCache = Pick<
   ClassificationsTreeHierarchyConfiguration,
-  "rootClassificationSystemCode" | "omittedElementClassNames"
+  "rootClassificationSystemCode" | "excludedElementClassNames"
 >;
 
 /**
@@ -62,7 +62,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
     | Observable<{
         classificationOrTableInfos: Map<ClassificationId | ClassificationTableId, ClassificationOrTableInfo>;
         classificationsWithChildren: Set<ClassificationId>;
-        classificationsWithNonOmittedChildren: Set<ClassificationId>;
+        classificationsWithNonExcludedChildren: Set<ClassificationId>;
       }>
     | undefined;
   #filteredElementsData: Observable<Map<ElementId, { modelId: Id64String; categoryId: Id64String }>> | undefined;
@@ -188,19 +188,19 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
   }
 
   private getCachedData() {
-    this.#cachedData ??= this.getCategoriesContainingNonOmittedElements().pipe(
-      mergeMap((categoriesContainingNonOmittedElements) =>
+    this.#cachedData ??= this.getCategoriesContainingNonExcludedElements().pipe(
+      mergeMap((categoriesContainingNonExcludedElements) =>
         this.queryClassifications().pipe(
           reduce(
             (acc, { id, tableId, parentId, relatedCategories }) => {
               if (parentId !== undefined) {
                 acc.classificationsWithChildren.add(parentId);
-                acc.classificationsWithNonOmittedChildren.add(parentId);
+                acc.classificationsWithNonExcludedChildren.add(parentId);
               }
               if (relatedCategories.length > 0) {
                 acc.classificationsWithChildren.add(id);
-                if (relatedCategories.some((categoryId) => categoriesContainingNonOmittedElements.has(categoryId))) {
-                  acc.classificationsWithNonOmittedChildren.add(id);
+                if (relatedCategories.some((categoryId) => categoriesContainingNonExcludedElements.has(categoryId))) {
+                  acc.classificationsWithNonExcludedChildren.add(id);
                 }
               }
               const tableOrParentId = tableId ?? parentId;
@@ -221,7 +221,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
             {
               classificationOrTableInfos: new Map<ClassificationId | ClassificationTableId, ClassificationOrTableInfo>(),
               classificationsWithChildren: new Set<ClassificationId>(),
-              classificationsWithNonOmittedChildren: new Set<ClassificationId>(),
+              classificationsWithNonExcludedChildren: new Set<ClassificationId>(),
             },
           ),
         ),
@@ -232,7 +232,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
   }
 
   public hasChildren(classificationId: ClassificationId): Observable<boolean> {
-    return this.getCachedData().pipe(map(({ classificationsWithNonOmittedChildren }) => classificationsWithNonOmittedChildren.has(classificationId)));
+    return this.getCachedData().pipe(map(({ classificationsWithNonExcludedChildren }) => classificationsWithNonExcludedChildren.has(classificationId)));
   }
 
   public getAllContainedCategories(classificationOrTableIds: Id64Arg): Observable<CategoryId> {

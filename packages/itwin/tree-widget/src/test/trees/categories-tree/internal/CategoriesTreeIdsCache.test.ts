@@ -195,7 +195,7 @@ describe("CategoriesTreeIdsCache", () => {
         await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] })),
       ).toEqual({
         categories: [
-          { id: keys.category.id, subCategoryChildCount: 1, isTopMostElementCategory: true, hasElements: true, hasElementsFromNonOmittedClasses: true },
+          { id: keys.category.id, subCategoryChildCount: 1, isTopMostElementCategory: true, hasElements: true, hasElementsFromNonExcludedClasses: true },
         ],
         definitionContainers: [],
       });
@@ -225,7 +225,7 @@ describe("CategoriesTreeIdsCache", () => {
             subCategoryChildCount: 1,
             isTopMostElementCategory: false,
             hasElements: false,
-            hasElementsFromNonOmittedClasses: false,
+            hasElementsFromNonExcludedClasses: false,
           },
         ],
         definitionContainers: [],
@@ -274,7 +274,7 @@ describe("CategoriesTreeIdsCache", () => {
         await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] })),
       ).toEqual({
         categories: [
-          { id: keys.category.id, subCategoryChildCount: 1, isTopMostElementCategory: true, hasElements: true, hasElementsFromNonOmittedClasses: true },
+          { id: keys.category.id, subCategoryChildCount: 1, isTopMostElementCategory: true, hasElements: true, hasElementsFromNonExcludedClasses: true },
         ],
         definitionContainers: [],
       });
@@ -310,7 +310,7 @@ describe("CategoriesTreeIdsCache", () => {
             subCategoryChildCount: 1,
             isTopMostElementCategory: true,
             hasElements: true,
-            hasElementsFromNonOmittedClasses: true,
+            hasElementsFromNonExcludedClasses: true,
           },
         ],
         definitionContainers: [keys.definitionModelChild.id],
@@ -344,7 +344,7 @@ describe("CategoriesTreeIdsCache", () => {
             subCategoryChildCount: 1,
             isTopMostElementCategory: true,
             hasElements: true,
-            hasElementsFromNonOmittedClasses: true,
+            hasElementsFromNonExcludedClasses: true,
           },
         ],
         definitionContainers: [],
@@ -389,7 +389,7 @@ describe("CategoriesTreeIdsCache", () => {
           id: keys.category.id,
           isTopMostElementCategory: false,
           subCategoryChildCount: 1,
-          hasElementsFromNonOmittedClasses: false,
+          hasElementsFromNonExcludedClasses: false,
         },
       ]);
     });
@@ -417,7 +417,7 @@ describe("CategoriesTreeIdsCache", () => {
           id: keys.category.id,
           isTopMostElementCategory: true,
           subCategoryChildCount: 1,
-          hasElementsFromNonOmittedClasses: true,
+          hasElementsFromNonExcludedClasses: true,
         },
       ]);
     });
@@ -443,7 +443,7 @@ describe("CategoriesTreeIdsCache", () => {
           id: keys.category.id,
           isTopMostElementCategory: true,
           subCategoryChildCount: 1,
-          hasElementsFromNonOmittedClasses: true,
+          hasElementsFromNonExcludedClasses: true,
         },
       ]);
     });
@@ -976,7 +976,7 @@ describe("CategoriesTreeIdsCache", () => {
             subCategoryChildCount: 1,
             isTopMostElementCategory: false,
             hasElements: false,
-            hasElementsFromNonOmittedClasses: false,
+            hasElementsFromNonExcludedClasses: false,
           },
         ],
         definitionContainers: [keys.definitionContainer.id],
@@ -1000,7 +1000,7 @@ describe("CategoriesTreeIdsCache", () => {
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).toEqual({
         categories: [
-          { id: keys.category.id, subCategoryChildCount: 1, isTopMostElementCategory: true, hasElements: true, hasElementsFromNonOmittedClasses: true },
+          { id: keys.category.id, subCategoryChildCount: 1, isTopMostElementCategory: true, hasElements: true, hasElementsFromNonExcludedClasses: true },
         ],
         definitionContainers: [],
       });
@@ -1025,7 +1025,7 @@ describe("CategoriesTreeIdsCache", () => {
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).toEqual({
         categories: [
-          { id: keys.category.id, subCategoryChildCount: 1, isTopMostElementCategory: true, hasElements: true, hasElementsFromNonOmittedClasses: true },
+          { id: keys.category.id, subCategoryChildCount: 1, isTopMostElementCategory: true, hasElements: true, hasElementsFromNonExcludedClasses: true },
         ],
         definitionContainers: [],
       });
@@ -1113,14 +1113,14 @@ describe("CategoriesTreeIdsCache", () => {
             subCategoryChildCount: 1,
             isTopMostElementCategory: true,
             hasElements: true,
-            hasElementsFromNonOmittedClasses: true,
+            hasElementsFromNonExcludedClasses: true,
           },
           {
             id: keys.rootCategory2.id,
             subCategoryChildCount: 1,
             isTopMostElementCategory: true,
             hasElements: true,
-            hasElementsFromNonOmittedClasses: true,
+            hasElementsFromNonExcludedClasses: true,
           },
         ],
         definitionContainers: [keys.definitionContainerRoot.id, keys.definitionContainerRoot2.id],

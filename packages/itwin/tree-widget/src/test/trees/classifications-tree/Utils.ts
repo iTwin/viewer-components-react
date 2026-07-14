@@ -31,7 +31,7 @@ export function createClassificationsTreeProvider(
     queryExecutor: imodelAccess,
     elementClassName: CLASS_NAME_GeometricElement3d,
     type: "3d",
-    omittedElementClassNames: hierarchyConfig.omittedElementClassNames,
+    excludedElementClassNames: hierarchyConfig.excludedElementClassNames,
   });
   const idsCache = new ClassificationsTreeIdsCache({
     queryExecutor: imodelAccess,

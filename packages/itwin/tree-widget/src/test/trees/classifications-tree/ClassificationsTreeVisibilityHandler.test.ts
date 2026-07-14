@@ -83,7 +83,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       queryExecutor: imodelAccess,
       elementClassName: CLASS_NAME_GeometricElement3d,
       type: "3d",
-      omittedElementClassNames: hierarchyConfig?.omittedElementClassNames,
+      excludedElementClassNames: hierarchyConfig?.excludedElementClassNames,
     });
     const idsCache = new ClassificationsTreeIdsCache({
       queryExecutor: imodelAccess,
@@ -1671,7 +1671,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
   });
 
-  it("element of an omitted class still participates in visibility", async () => {
+  it("element of an excluded class still participates in visibility", async () => {
     await using buildIModelResult = await buildIModel(async (imodel) =>
       withEditTxn(imodel, async (txn) => {
         await importClassificationSchema(imodel);
@@ -1682,9 +1682,9 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
         const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
         const spatialCategory = insertSpatialCategory({ txn, codeValue: "Test spatial category" });
-        const omittedElement = insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: spatialCategory.id });
-        insertElementHasClassificationsRelationship({ txn, elementId: omittedElement.id, classificationId: classification.id });
-        return { classificationTable: table, omittedElement };
+        const excludedElement = insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: spatialCategory.id });
+        insertElementHasClassificationsRelationship({ txn, elementId: excludedElement.id, classificationId: classification.id });
+        return { classificationTable: table, excludedElement };
       }),
     );
 
@@ -1692,7 +1692,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     using visibilityTestData = await createVisibilityTestData({
       imodelConnection,
       hierarchyConfig: {
-        omittedElementClassNames: [CLASS_NAME_GeometricElement3d],
+        excludedElementClassNames: [CLASS_NAME_GeometricElement3d],
       },
     });
     const { handler, viewport, provider } = visibilityTestData;
@@ -1713,7 +1713,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       expectations: "all-visible",
     });
 
-    viewport.setNeverDrawn({ elementIds: new Set([keys.omittedElement.id]) });
+    viewport.setNeverDrawn({ elementIds: new Set([keys.excludedElement.id]) });
 
     await validateClassificationsTreeHierarchyVisibility({
       provider,
@@ -1723,7 +1723,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
   });
 
-  it("child element of an omitted class still participates in visibility", async () => {
+  it("child element of an excluded class still participates in visibility", async () => {
     await using buildIModelResult = await buildIModel(async (imodel) =>
       withEditTxn(imodel, async (txn) => {
         await importClassificationSchema(imodel);
@@ -1735,7 +1735,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
         const spatialCategory = insertSpatialCategory({ txn, codeValue: "Test spatial category" });
         const parentElement = insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: spatialCategory.id });
-        const omittedChildElement = insertPhysicalElement({
+        const excludedChildElement = insertPhysicalElement({
           txn,
           parentId: parentElement.id,
           modelId: physicalModel.id,
@@ -1743,7 +1743,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           classFullName: "Generic.SpatialLocation",
         });
         insertElementHasClassificationsRelationship({ txn, elementId: parentElement.id, classificationId: classification.id });
-        return { classificationTable: table, parentElement, omittedChildElement, classification };
+        return { classificationTable: table, parentElement, excludedChildElement, classification };
       }),
     );
 
@@ -1751,7 +1751,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     using visibilityTestData = await createVisibilityTestData({
       imodelConnection,
       hierarchyConfig: {
-        omittedElementClassNames: ["Generic.SpatialLocation"],
+        excludedElementClassNames: ["Generic.SpatialLocation"],
       },
     });
     const { handler, viewport, provider } = visibilityTestData;
@@ -1772,7 +1772,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       expectations: "all-visible",
     });
 
-    viewport.setNeverDrawn({ elementIds: new Set([keys.omittedChildElement.id]) });
+    viewport.setNeverDrawn({ elementIds: new Set([keys.excludedChildElement.id]) });
 
     await validateClassificationsTreeHierarchyVisibility({
       provider,
