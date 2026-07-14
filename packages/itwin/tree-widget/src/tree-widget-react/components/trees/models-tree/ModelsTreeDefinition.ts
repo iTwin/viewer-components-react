@@ -326,14 +326,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     const { childSubjectIds, childModelIds } = parentSubjectIds.length
       ? await firstValueFrom(
           forkJoin({
-            childSubjectIds: this.#idsCache.getChildSubjectIds({
-              parentSubjectIds,
-              excludeIfOnlyExcludedClasses: this.#hierarchyConfig.showEmptyModels ? false : true,
-            }),
-            childModelIds: this.#idsCache.getChildSubjectModelIds({
-              parentSubjectIds,
-              excludeIfOnlyExcludedClasses: this.#hierarchyConfig.showEmptyModels ? false : true,
-            }),
+            childSubjectIds: this.#idsCache.getChildSubjectIds(parentSubjectIds),
+            childModelIds: this.#idsCache.getChildSubjectModelIds(parentSubjectIds),
           }),
         )
       : { childSubjectIds: [IModel.rootSubjectId], childModelIds: [] };
@@ -382,9 +376,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           bindings: [
             {
               type: "idset",
-              value: await firstValueFrom(
-                this.#idsCache.getParentSubjectIds({ excludeIfOnlyExcludedClasses: this.#hierarchyConfig.showEmptyModels ? false : true }),
-              ),
+              value: await firstValueFrom(this.#idsCache.getParentSubjectIds()),
             },
             { type: "idset", value: childSubjectIds },
           ],
@@ -418,9 +410,10 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                       END
                     `,
                   },
-                  hasChildren: this.#hierarchyConfig.showEmptyModels
-                    ? {
-                        selector: `
+                  hasChildren:
+                    this.#hierarchyConfig.showEmptyModels || this.#hierarchyConfig.excludedElementClassNames?.length
+                      ? {
+                          selector: `
                           IFNULL((
                             SELECT 1
                             FROM ${this.#hierarchyConfig.elementClassSpecification} e
@@ -433,8 +426,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                             LIMIT 1
                           ), 0)
                         `,
-                      }
-                    : true,
+                        }
+                      : true,
                   extendedData: {
                     imageId: "icon-model",
                     isModel: true,
@@ -983,7 +976,7 @@ export function createGeometricElementInstanceKeyPaths(props: {
     releaseMainThreadOnItemsCount(300),
     map((row) => parseElementsQueryRow(row, groupInfos, separator, elementClassName)),
     mergeMap(({ elementHierarchyPath, groupingInfo }) =>
-      idsCache.createUpToModelInstanceKeyPaths({ modelId: elementHierarchyPath[0].id }).pipe(
+      idsCache.createUpToModelInstanceKeyPaths(elementHierarchyPath[0].id).pipe(
         map((modelPath) => {
           const path = [...modelPath, ...elementHierarchyPath];
           return {
@@ -1125,7 +1118,7 @@ export function createCategoriesSearchPaths(props: {
         return parseQueriedPath({ queriedPathRaw: row[0], elementClassName, separator });
       }),
       mergeMap((categoryHierarchyPath) =>
-        idsCache.createUpToModelInstanceKeyPaths({ modelId: categoryHierarchyPath[0].id }).pipe(
+        idsCache.createUpToModelInstanceKeyPaths(categoryHierarchyPath[0].id).pipe(
           map((pathUpToCategory) => {
             const path = [...pathUpToCategory, ...categoryHierarchyPath];
             return { path, target: categoryHierarchyPath[categoryHierarchyPath.length - 1].id };
@@ -1242,17 +1235,11 @@ function createSearchPathsForDifferentTypes(
         }
 
         return merge(
-          from(ids.subjectIds).pipe(
-            mergeMap((id) =>
-              idsCache
-                .createSubjectInstanceKeysPath({ targetSubjectId: id, excludeIfOnlyExcludedClasses: props.hierarchyConfig.showEmptyModels ? false : true })
-                .pipe(map((path) => ({ path, target: id }))),
-            ),
-          ),
+          from(ids.subjectIds).pipe(mergeMap((id) => idsCache.createSubjectInstanceKeysPath(id).pipe(map((path) => ({ path, target: id }))))),
           from(ids.modelIds).pipe(
             mergeMap((id) =>
               idsCache
-                .createUpToModelInstanceKeyPaths({ modelId: id, excludeIfOnlyExcludedClasses: props.hierarchyConfig.showEmptyModels ? false : true })
+                .createUpToModelInstanceKeyPaths(id)
                 .pipe(map((path) => ({ path: [...path, { className: CLASS_NAME_GeometricModel3d, id }], target: id }))),
             ),
           ),

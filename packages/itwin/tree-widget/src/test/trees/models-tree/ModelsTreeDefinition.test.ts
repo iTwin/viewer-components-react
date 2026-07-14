@@ -1827,7 +1827,7 @@ describe("Models tree", () => {
             });
           });
 
-          it("filters out everything when only excluded elements exist", async () => {
+          it("filters out elements and their categories when only excluded elements exist", async () => {
             await using buildIModelResult = await buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
                 const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: IModel.rootSubjectId });
@@ -1838,67 +1838,13 @@ describe("Models tree", () => {
                   modelId: model.id,
                   categoryId: category.id,
                 });
-              }),
-            );
-            const { imodelConnection } = buildIModelResult;
-            using provider = createModelsTreeProvider({
-              imodelConnection,
-              hierarchyConfig: { hideRootSubject: false, excludedElementClassNames: ["BisCore.PhysicalElement"] },
-            });
-            await validateHierarchy({
-              provider,
-              expect: [],
-            });
-          });
-
-          it("filters out nodes which contain only excluded elements", async () => {
-            await using buildIModelResult = await buildIModel(async (imodel) =>
-              withEditTxn(imodel, (txn) => {
-                const childSubject = insertSubject({ txn, codeValue: "child subject", parentId: IModel.rootSubjectId });
-                const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: childSubject.id });
-                const category = insertSpatialCategory({ txn, codeValue: "category" });
-                insertPhysicalElement({
-                  txn,
-                  userLabel: `excluded element 1`,
-                  modelId: model.id,
-                  categoryId: category.id,
-                });
-                const element1 = insertPhysicalElement({
-                  txn,
-                  userLabel: `element 1`,
-                  modelId: model.id,
-                  categoryId: category.id,
-                  classFullName: `${TestSchema.Name}.${TestSchema.ModeledElement3dClassName}`,
-                });
-                const excludedCategory = insertSpatialCategory({ txn, codeValue: "excluded category" });
-                insertPhysicalElement({
-                  txn,
-                  userLabel: `excluded element 2`,
-                  modelId: model.id,
-                  categoryId: excludedCategory.id,
-                });
-                const excludedModel = insertPhysicalModelWithPartition({ txn, codeValue: `excluded model`, partitionParentId: childSubject.id });
-                insertPhysicalElement({
-                  txn,
-                  userLabel: `excluded element 3`,
-                  modelId: excludedModel.id,
-                  categoryId: category.id,
-                });
-                const excludedChildSubject = insertSubject({ txn, codeValue: "excluded child subject", parentId: IModel.rootSubjectId });
-                const excludedModel2 = insertPhysicalModelWithPartition({ txn, codeValue: `excluded model 2`, partitionParentId: excludedChildSubject.id });
-                insertPhysicalElement({
-                  txn,
-                  userLabel: `excluded element`,
-                  modelId: excludedModel2.id,
-                  categoryId: category.id,
-                });
-                return { childSubject, model, category, element1 };
+                return { model };
               }),
             );
             const { imodelConnection, ...keys } = buildIModelResult;
             using provider = createModelsTreeProvider({
               imodelConnection,
-              hierarchyConfig: { hideRootSubject: false, excludedElementClassNames: ["Generic.PhysicalObject"] },
+              hierarchyConfig: { hideRootSubject: false, excludedElementClassNames: ["BisCore.PhysicalElement"] },
             });
             await validateHierarchy({
               provider,
@@ -1908,32 +1854,9 @@ describe("Models tree", () => {
                   supportsFiltering: true,
                   children: [
                     NodeValidators.createForInstanceNode({
-                      instanceKeys: [keys.childSubject],
+                      instanceKeys: [keys.model],
                       supportsFiltering: true,
-                      children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.model],
-                          supportsFiltering: true,
-                          children: [
-                            NodeValidators.createForInstanceNode({
-                              instanceKeys: [keys.category],
-                              supportsFiltering: true,
-                              children: [
-                                NodeValidators.createForClassGroupingNode({
-                                  className: keys.element1.className,
-                                  children: [
-                                    NodeValidators.createForInstanceNode({
-                                      instanceKeys: [keys.element1],
-                                      supportsFiltering: true,
-                                      children: false,
-                                    }),
-                                  ],
-                                }),
-                              ],
-                            }),
-                          ],
-                        }),
-                      ],
+                      children: false,
                     }),
                   ],
                 }),
