@@ -193,7 +193,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       modelId: node.extendedData.modelId,
       categoryId: node.extendedData.categoryId,
       parentElementsPath: node.extendedData.parentElementsPath,
-      computeOnlyOwnStatus: this.#props.idsCache.canHaveHiddenChildren() ? undefined : node.children ? undefined : true,
+      computeOnlyOwnStatus: this.#props.idsCache.canHaveHiddenChildren() || node.children ? undefined : true,
     });
   }
 
