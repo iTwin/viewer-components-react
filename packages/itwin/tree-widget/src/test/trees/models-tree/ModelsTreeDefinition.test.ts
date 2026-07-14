@@ -2049,7 +2049,7 @@ describe("Models tree", () => {
         });
 
         describe("child elements of omitted classes", () => {
-          it("sets hasChildren to false parent contains only omitted elements", async () => {
+          it("sets hasChildren to false when parent contains only omitted elements", async () => {
             await using buildIModelResult = await buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
                 const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: IModel.rootSubjectId });
