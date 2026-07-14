@@ -85,7 +85,7 @@ export interface ModelsTreeHierarchyConfiguration {
   hideRootSubject: boolean;
   /** Should hierarchy level be filterable. Defaults to `enable` */
   hierarchyLevelFiltering: "enable" | "disable";
-  /** Classes to omit from the hierarchy. Element nodes whose class derive from the omitted classes will not be shown in the hierarchy. Defaults to `undefined`. */
+  /** Element classes to exclude from the hierarchy. Elements, whose class is or derives from one of the classes in this list, are not loaded into the hierarchy. Defaults to `[]`. */
   omittedElementClassNames?: Array<EC.FullClassName>;
 }
 
