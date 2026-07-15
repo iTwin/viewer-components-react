@@ -5543,7 +5543,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               elementId: keys.modelingElement.id,
               modelId: keys.modeledElement.id,
               categoryId: keys.categoryA.id,
-              parentKeys: [keys.model, keys.categoryA, keys.modeledElement, keys.subModel, keys.categoryA],
+              parentKeys: [keys.model, keys.categoryA, keys.modeledElement, keys.subModel],
               search: { isSearchTarget: true },
             }),
             true,
