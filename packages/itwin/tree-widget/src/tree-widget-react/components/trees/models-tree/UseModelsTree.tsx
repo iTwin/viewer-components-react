@@ -179,8 +179,8 @@ export function useModelsTree({
   });
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
-    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache, hierarchyConfig, componentId }),
-    [idsCache, hierarchyConfig, componentId],
+    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache, hierarchyConfig: hierarchyConfiguration, componentId }),
+    [idsCache, hierarchyConfiguration, componentId],
   );
 
   const { getPaths, searchError, subTreeError } = useSearchPaths({

@@ -15,8 +15,8 @@ import { EmptyTreeContent, NoSearchMatches, SearchUnknownError, TooManySearchMat
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { useGuid } from "../common/internal/useGuid.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { getClassesByView } from "../common/internal/Utils.js";
-import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition.js";
+import { getClassesByView, mergeWithDefaults } from "../common/internal/Utils.js";
+import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import { useSearchPaths } from "./internal/UseSearchPaths.js";
 import { CategoriesTreeVisibilityHandler } from "./internal/visibility/CategoriesTreeVisibilityHandler.js";
@@ -79,6 +79,15 @@ export function useCategoriesTree({
   hierarchyConfig,
   getTreeItemProps,
 }: UseCategoriesTreeProps): UseCategoriesTreeResult {
+  const hierarchyConfiguration = useMemo(
+    () =>
+      mergeWithDefaults({
+        defaults: defaultHierarchyConfiguration,
+        overrides: hierarchyConfig,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
+    Object.values(hierarchyConfig ?? {}),
+  );
   const [viewType, setViewType] = useState<"2d" | "3d">(activeView.viewType === "2d" ? "2d" : "3d");
   const componentId = useGuid();
 
@@ -92,7 +101,7 @@ export function useCategoriesTree({
   const idsCache = useCategoriesTreeIdsCache({
     imodel: activeView.iModel,
     activeViewType: viewType,
-    excludedElementClassNames: hierarchyConfig?.excludedElementClassNames,
+    excludedElementClassNames: hierarchyConfiguration.excludedElementClassNames,
   });
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useCategoriesCachedVisibility({
@@ -100,7 +109,7 @@ export function useCategoriesTree({
     viewType,
     idsCache,
     componentId,
-    hierarchyConfig,
+    hierarchyConfig: hierarchyConfiguration,
   });
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
@@ -109,14 +118,14 @@ export function useCategoriesTree({
         ...props,
         viewType,
         idsCache,
-        hierarchyConfig,
+        hierarchyConfig: hierarchyConfiguration,
       });
     },
-    [viewType, idsCache, hierarchyConfig],
+    [viewType, idsCache, hierarchyConfiguration],
   );
 
   const { getPaths, searchError } = useSearchPaths({
-    hierarchyConfig,
+    hierarchyConfig: hierarchyConfiguration,
     searchText,
     searchLimit,
     idsCache,
