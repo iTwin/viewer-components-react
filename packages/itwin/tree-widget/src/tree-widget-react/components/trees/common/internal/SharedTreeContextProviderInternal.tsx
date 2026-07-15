@@ -52,11 +52,11 @@ function SharedTreeContextProviderInternalImpl({ children, showWarning }: PropsW
     }
   }, [showWarning]);
   const getBaseIdsCache = useCallback(
-    ({ elementClassName, type, imodel }: Omit<BaseIdsCacheProps, "queryExecutor"> & { imodel: IModelConnection }) => {
+    ({ elementClassName, type, imodel, excludedElementClassNames }: Omit<BaseIdsCacheProps, "queryExecutor"> & { imodel: IModelConnection }) => {
       return getCache({
         imodel,
-        cacheKey: `${type}-${elementClassName}-BaseIdsCache`,
-        createCache: () => new BaseIdsCache({ elementClassName, type, queryExecutor: createECSqlQueryExecutor(imodel) }),
+        cacheKey: `${type}-${elementClassName}-${[...(excludedElementClassNames ?? [])].sort().join(",")}-BaseIdsCache`,
+        createCache: () => new BaseIdsCache({ elementClassName, type, excludedElementClassNames, queryExecutor: createECSqlQueryExecutor(imodel) }),
       });
     },
     [getCache],

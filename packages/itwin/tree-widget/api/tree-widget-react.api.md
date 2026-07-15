@@ -118,6 +118,7 @@ type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) =
 
 // @beta
 interface CategoriesTreeHierarchyConfiguration {
+    excludedElementClassNames?: Array<EC.FullClassName>;
     hideSubCategories: boolean;
     showElements: boolean;
     showEmptyCategories: boolean;
@@ -213,6 +214,7 @@ interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProp
 
 // @alpha (undocumented)
 interface ClassificationsTreeHierarchyConfiguration {
+    excludedElementClassNames?: Array<EC.FullClassName>;
     rootClassificationSystemCode: string;
 }
 
@@ -447,6 +449,7 @@ type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => ReactE
 interface ModelsTreeHierarchyConfiguration {
     elementClassGrouping: "enable" | "enableWithCounts" | "disable";
     elementClassSpecification: EC.FullClassName;
+    excludedElementClassNames?: Array<EC.FullClassName>;
     hideRootSubject: boolean;
     hierarchyLevelFiltering: "enable" | "disable";
     showEmptyModels: boolean;

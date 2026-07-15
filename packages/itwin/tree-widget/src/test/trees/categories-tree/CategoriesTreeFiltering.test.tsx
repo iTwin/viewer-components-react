@@ -39,7 +39,7 @@ import { CLASS_NAME_DefinitionModel } from "../TreeUtils.js";
 import { getInsertFunctionByViewType } from "./internal/Utils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { Props } from "@itwin/presentation-shared";
+import type { EC, Props } from "@itwin/presentation-shared";
 import type { CategoryInfo } from "../../../tree-widget-react/components/trees/common/CategoriesVisibilityUtils.js";
 
 // cspell:words egory
@@ -84,6 +84,48 @@ describe("Categories tree", () => {
       using hook = renderUseCategoriesTreeHook({
         imodelConnection,
         hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "Test",
+        viewType: "3d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
+        { identifier: keys.definitionContainer, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
+      ]);
+    });
+
+    it("does not return definition container with only empty categories when `showEmptyCategories` is false", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "DefinitionContainer", userLabel: "Test" });
+          const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+          insertSpatialCategory({ txn, codeValue: "SpatialCategory", modelId: definitionModel.id });
+          return { definitionContainer };
+        }),
+      );
+      const { imodelConnection } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodelConnection);
+      using hook = renderUseCategoriesTreeHook({
+        imodelConnection,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        searchText: "Test",
+        viewType: "3d",
+      });
+      expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([]);
+    });
+
+    it("returns definition container with only empty categories when `showEmptyCategories` is true", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "DefinitionContainer", userLabel: "Test" });
+          const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+          insertSpatialCategory({ txn, codeValue: "SpatialCategory", modelId: definitionModel.id });
+          return { definitionContainer };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodelConnection);
+      using hook = renderUseCategoriesTreeHook({
+        imodelConnection,
+        hierarchyConfig: { ...defaultHierarchyConfiguration, showEmptyCategories: true },
         searchText: "Test",
         viewType: "3d",
       });
@@ -963,6 +1005,157 @@ describe("Categories tree", () => {
 
           // When showEmptyCategories is false, only the category with elements should be reported
           expect(filteredCategories?.categories).toEqual([{ categoryId: keys.categoryWithElements.id, subCategoryIds: undefined }]);
+        });
+      });
+
+      describe(`excludedElementClassNames in '${viewType}' view`, () => {
+        const showElementsConfig = { ...defaultHierarchyConfiguration, showElements: true };
+        const elementClassName: EC.FullClassName = viewType === "3d" ? "Generic.PhysicalObject" : "BisCore.DrawingGraphic";
+        const subModeledElementBaseClassName: EC.FullClassName = "BisCore.ISubModeledElement";
+
+        it("excludes elements of excluded classes from search paths", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertElementsModel({ txn, codeValue: "model" });
+              const category = insertCategory({ txn, codeValue: "category" });
+              insertElement({ txn, userLabel: "matching excluded element", modelId: model.id, categoryId: category.id });
+            }),
+          );
+          const { imodelConnection } = buildIModelResult;
+          const imodelAccess = createIModelAccess(imodelConnection);
+          using hook = renderUseCategoriesTreeHook({
+            imodelConnection,
+            hierarchyConfig: { ...showElementsConfig, excludedElementClassNames: [elementClassName] },
+            searchText: "matching",
+            viewType,
+          });
+          expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual(
+            [],
+          );
+        });
+
+        it("excludes elements of classes derived from excluded classes from search paths", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertElementsModel({ txn, codeValue: "model" });
+              const category = insertCategory({ txn, codeValue: "category" });
+              insertModeledElement({ txn, userLabel: "matching excluded element", modelId: model.id, categoryId: category.id });
+            }),
+          );
+          const { imodelConnection } = buildIModelResult;
+          const imodelAccess = createIModelAccess(imodelConnection);
+          using hook = renderUseCategoriesTreeHook({
+            imodelConnection,
+            hierarchyConfig: { ...showElementsConfig, excludedElementClassNames: [subModeledElementBaseClassName] },
+            searchText: "matching",
+            viewType,
+          });
+          expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual(
+            [],
+          );
+        });
+
+        it("returns the category even when its only element is excluded", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertElementsModel({ txn, codeValue: "model" });
+              const excludedCategory = insertCategory({ txn, codeValue: "matching excluded category" });
+              insertElement({ txn, userLabel: "excluded element", modelId: model.id, categoryId: excludedCategory.id });
+              return { excludedCategory };
+            }),
+          );
+          const { imodelConnection, ...keys } = buildIModelResult;
+          const imodelAccess = createIModelAccess(imodelConnection);
+          using hook = renderUseCategoriesTreeHook({
+            imodelConnection,
+            hierarchyConfig: { ...defaultHierarchyConfiguration, excludedElementClassNames: [elementClassName] },
+            searchText: "matching",
+            viewType,
+          });
+          expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
+            { identifier: keys.excludedCategory, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
+          ]);
+        });
+
+        it("does not return child elements of filtered out parent elements", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertElementsModel({ txn, codeValue: "model" });
+              const category = insertCategory({ txn, codeValue: "category" });
+              const excludedParent = insertElement({ txn, userLabel: "excluded parent", modelId: model.id, categoryId: category.id });
+              insertModeledElement({
+                txn,
+                userLabel: "matching child of excluded parent",
+                modelId: model.id,
+                categoryId: category.id,
+                parentId: excludedParent.id,
+              });
+            }),
+          );
+          const { imodelConnection } = buildIModelResult;
+          const imodelAccess = createIModelAccess(imodelConnection);
+          using hook = renderUseCategoriesTreeHook({
+            imodelConnection,
+            hierarchyConfig: { ...showElementsConfig, excludedElementClassNames: [elementClassName] },
+            searchText: "matching",
+            viewType,
+          });
+          expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual(
+            [],
+          );
+        });
+
+        it("does not return excluded child elements when their parent is not excluded", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertElementsModel({ txn, codeValue: "model" });
+              const category = insertCategory({ txn, codeValue: "category" });
+              const keptParent = insertElement({ txn, userLabel: "kept parent", modelId: model.id, categoryId: category.id });
+              insertModeledElement({
+                txn,
+                userLabel: "matching excluded child",
+                modelId: model.id,
+                categoryId: category.id,
+                parentId: keptParent.id,
+              });
+            }),
+          );
+          const { imodelConnection } = buildIModelResult;
+          const imodelAccess = createIModelAccess(imodelConnection);
+          using hook = renderUseCategoriesTreeHook({
+            imodelConnection,
+            hierarchyConfig: { ...showElementsConfig, excludedElementClassNames: [subModeledElementBaseClassName] },
+            searchText: "matching",
+            viewType,
+          });
+          expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual(
+            [],
+          );
+        });
+
+        it("returns the category even when its only sub-model element is excluded", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertElementsModel({ txn, codeValue: "model" });
+              const category = insertCategory({ txn, codeValue: "category" });
+              const excludedCategory = insertCategory({ txn, codeValue: "matching excluded category" });
+              const modeledElement = insertModeledElement({ txn, userLabel: "modeled element", modelId: model.id, categoryId: category.id });
+              const subModel = insertElementsSubModel({ txn, modeledElementId: modeledElement.id });
+              insertElement({ txn, userLabel: "excluded element", modelId: subModel.id, categoryId: excludedCategory.id });
+              return { excludedCategory };
+            }),
+          );
+          const { imodelConnection, ...keys } = buildIModelResult;
+          const imodelAccess = createIModelAccess(imodelConnection);
+          using hook = renderUseCategoriesTreeHook({
+            imodelConnection,
+            hierarchyConfig: { ...defaultHierarchyConfiguration, excludedElementClassNames: [elementClassName] },
+            searchText: "matching",
+            viewType,
+          });
+          expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
+            { identifier: keys.excludedCategory, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
+          ]);
         });
       });
     });

@@ -71,7 +71,11 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
       modelId,
       categoryId,
       parentElementsPath,
-      computeOnlyOwnStatus: childrenWhichAreParents.size === 0 ? true : (elementId) => !childrenWhichAreParents.has(elementId),
+      computeOnlyOwnStatus: this.#props.baseIdsCache.canHaveHiddenChildren()
+        ? undefined
+        : childrenWhichAreParents.size === 0
+          ? true
+          : (elementId) => !childrenWhichAreParents.has(elementId),
     });
   }
 

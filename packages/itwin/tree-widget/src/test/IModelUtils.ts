@@ -38,8 +38,8 @@ export async function buildIModel<TResult extends object | undefined>(setup?: (i
           <BaseClass>bis:PhysicalElement</BaseClass>
           <BaseClass>bis:ISubModeledElement</BaseClass>
         </ECEntityClass>
-        <ECEntityClass typeName="${TestSchema.ModeledElement2dClassName}" displayLabel="Test Drawing Graphic" modifier="Sealed" description="Similar to generic:DrawingGraphic but also sub-modelable.">
-          <BaseClass>bis:DrawingGraphic</BaseClass>
+        <ECEntityClass typeName="${TestSchema.ModeledElement2dClassName}" displayLabel="Test Drawing Graphic" modifier="Sealed" description="A sub-modelable 2d graphic that is a sibling of bis:DrawingGraphic (not derived from it).">
+          <BaseClass>bis:GraphicalElement2d</BaseClass>
           <BaseClass>bis:ISubModeledElement</BaseClass>
         </ECEntityClass>
         <ECEntityClass typeName="${TestSchema.SubModel2dClassName}" displayLabel="Drawing Graphic Model" modifier="Sealed" description="A 2d geometric model that can sub-model a DrawingGraphic element.">

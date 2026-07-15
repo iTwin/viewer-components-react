@@ -27,7 +27,12 @@ export function createClassificationsTreeProvider(
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration,
 ): HierarchyProvider & Disposable {
   const imodelAccess = createIModelAccess(imodel);
-  const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
+  const baseIdsCache = new BaseIdsCache({
+    queryExecutor: imodelAccess,
+    elementClassName: CLASS_NAME_GeometricElement3d,
+    type: "3d",
+    excludedElementClassNames: hierarchyConfig.excludedElementClassNames,
+  });
   const idsCache = new ClassificationsTreeIdsCache({
     queryExecutor: imodelAccess,
     hierarchyConfig,

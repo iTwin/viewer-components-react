@@ -173,7 +173,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       modelId: node.extendedData.modelId,
       categoryId: node.extendedData.categoryId,
       parentElementsPath: node.extendedData.parentElementsPath,
-      computeOnlyOwnStatus: node.children ? undefined : true,
+      computeOnlyOwnStatus: this.#props.idsCache.canHaveHiddenChildren() || node.children ? undefined : true,
     });
   }
 

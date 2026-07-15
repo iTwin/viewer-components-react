@@ -33,6 +33,7 @@ import { validateNodeVisibility } from "./VisibilityValidation.js";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { Props } from "@itwin/presentation-shared";
+import type { ClassificationsTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
 import type { ClassificationsTreeVisibilityHandlerConfiguration } from "../../../tree-widget-react/components/trees/classifications-tree/UseClassificationsTree.js";
 
 describe("ClassificationsTreeVisibilityHandler", () => {
@@ -53,9 +54,14 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     idsCache: ClassificationsTreeIdsCache;
     imodelAccess: ReturnType<typeof createIModelAccess>;
     searchPaths?: HierarchySearchTree[];
+    hierarchyConfig?: Partial<ClassificationsTreeHierarchyConfiguration>;
   }) {
     return createIModelHierarchyProvider({
-      hierarchyDefinition: new ClassificationsTreeDefinition({ ...props, getIdsCache: () => idsCache, hierarchyConfig: { rootClassificationSystemCode } }),
+      hierarchyDefinition: new ClassificationsTreeDefinition({
+        ...props,
+        getIdsCache: () => idsCache,
+        hierarchyConfig: { rootClassificationSystemCode, ...props.hierarchyConfig },
+      }),
       imodelAccess: props.imodelAccess,
       ...(props.searchPaths ? { search: { paths: props.searchPaths } } : undefined),
     });
@@ -65,16 +71,23 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     imodelConnection,
     visibleByDefault,
     visibilityHandlerConfig,
+    hierarchyConfig,
   }: {
     imodelConnection: IModelConnection;
     visibleByDefault?: boolean;
     visibilityHandlerConfig?: ClassificationsTreeVisibilityHandlerConfiguration;
+    hierarchyConfig?: Partial<ClassificationsTreeHierarchyConfiguration>;
   }) {
     const imodelAccess = createIModelAccess(imodelConnection);
-    const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
+    const baseIdsCache = new BaseIdsCache({
+      queryExecutor: imodelAccess,
+      elementClassName: CLASS_NAME_GeometricElement3d,
+      type: "3d",
+      excludedElementClassNames: hierarchyConfig?.excludedElementClassNames,
+    });
     const idsCache = new ClassificationsTreeIdsCache({
       queryExecutor: imodelAccess,
-      hierarchyConfig: { rootClassificationSystemCode },
+      hierarchyConfig: { rootClassificationSystemCode, ...hierarchyConfig },
       baseIdsCache,
       visibilityHandlerConfig,
     });
@@ -84,7 +97,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       viewType: "3d",
     });
     const handler = createClassificationsTreeVisibilityHandler({ imodelAccess, idsCache, viewport });
-    const provider = createProvider({ idsCache, imodelAccess });
+    const provider = createProvider({ idsCache, imodelAccess, hierarchyConfig });
     return {
       handler,
       provider,
@@ -1655,6 +1668,122 @@ describe("ClassificationsTreeVisibilityHandler", () => {
               [keys.elementFromOtherClassification.id]: "hidden",
         },
       });
+    });
+  });
+
+  it("element of an excluded class still participates in visibility", async () => {
+    await using buildIModelResult = await buildIModel(async (imodel) =>
+      withEditTxn(imodel, async (txn) => {
+        await importClassificationSchema(imodel);
+
+        const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+        const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "TestClassificationTable" });
+        const classification = insertClassification({ txn, modelId: table.id, codeValue: "TestClassification" });
+
+        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
+        const spatialCategory = insertSpatialCategory({ txn, codeValue: "Test spatial category" });
+        const excludedElement = insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: spatialCategory.id });
+        insertElementHasClassificationsRelationship({ txn, elementId: excludedElement.id, classificationId: classification.id });
+        return { classificationTable: table, excludedElement };
+      }),
+    );
+
+    const { imodelConnection, ...keys } = buildIModelResult;
+    using visibilityTestData = await createVisibilityTestData({
+      imodelConnection,
+      hierarchyConfig: {
+        excludedElementClassNames: [CLASS_NAME_GeometricElement3d],
+      },
+    });
+    const { handler, viewport, provider } = visibilityTestData;
+
+    await validateClassificationsTreeHierarchyVisibility({
+      provider,
+      handler,
+      viewport,
+      expectations: "all-hidden",
+    });
+
+    const classificationTableNode = createClassificationTableHierarchyNode({ id: keys.classificationTable.id });
+    await handler.changeVisibility(classificationTableNode, true);
+    await validateClassificationsTreeHierarchyVisibility({
+      provider,
+      handler,
+      viewport,
+      expectations: "all-visible",
+    });
+
+    viewport.setNeverDrawn({ elementIds: new Set([keys.excludedElement.id]) });
+
+    await validateClassificationsTreeHierarchyVisibility({
+      provider,
+      handler,
+      viewport,
+      expectations: "all-hidden",
+    });
+  });
+
+  it("child element of an excluded class still participates in visibility", async () => {
+    await using buildIModelResult = await buildIModel(async (imodel) =>
+      withEditTxn(imodel, async (txn) => {
+        await importClassificationSchema(imodel);
+
+        const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+        const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "TestClassificationTable" });
+        const classification = insertClassification({ txn, modelId: table.id, codeValue: "TestClassification" });
+
+        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
+        const spatialCategory = insertSpatialCategory({ txn, codeValue: "Test spatial category" });
+        const parentElement = insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: spatialCategory.id });
+        const excludedChildElement = insertPhysicalElement({
+          txn,
+          parentId: parentElement.id,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory.id,
+          classFullName: "Generic.SpatialLocation",
+        });
+        insertElementHasClassificationsRelationship({ txn, elementId: parentElement.id, classificationId: classification.id });
+        return { classificationTable: table, parentElement, excludedChildElement, classification };
+      }),
+    );
+
+    const { imodelConnection, ...keys } = buildIModelResult;
+    using visibilityTestData = await createVisibilityTestData({
+      imodelConnection,
+      hierarchyConfig: {
+        excludedElementClassNames: ["Generic.SpatialLocation"],
+      },
+    });
+    const { handler, viewport, provider } = visibilityTestData;
+
+    await validateClassificationsTreeHierarchyVisibility({
+      provider,
+      handler,
+      viewport,
+      expectations: "all-hidden",
+    });
+
+    const classificationTableNode = createClassificationTableHierarchyNode({ id: keys.classificationTable.id });
+    await handler.changeVisibility(classificationTableNode, true);
+    await validateClassificationsTreeHierarchyVisibility({
+      provider,
+      handler,
+      viewport,
+      expectations: "all-visible",
+    });
+
+    viewport.setNeverDrawn({ elementIds: new Set([keys.excludedChildElement.id]) });
+
+    await validateClassificationsTreeHierarchyVisibility({
+      provider,
+      handler,
+      viewport,
+      // prettier-ignore
+      expectations: {
+        [keys.classificationTable.id]: "partial",
+          [keys.classification.id]: "partial",
+            [keys.parentElement.id]: "partial",
+      },
     });
   });
 });

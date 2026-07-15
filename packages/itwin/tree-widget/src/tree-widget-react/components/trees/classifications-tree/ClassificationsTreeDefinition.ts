@@ -35,7 +35,14 @@ import {
   CLASS_NAME_GeometricElement3d,
 } from "../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../common/internal/UseErrorState.js";
-import { createWhereClause, fromWithRelease, getOptimalBatchSize, ParentElementsPath, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
+import {
+  createExcludedClassesClause,
+  createWhereClause,
+  fromWithRelease,
+  getOptimalBatchSize,
+  ParentElementsPath,
+  releaseMainThreadOnItemsCount,
+} from "../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../common/TreeErrors.js";
 import { ClassificationsTreeNodeInternal } from "./internal/ClassificationsTreeNodeInternal.js";
 
@@ -53,7 +60,14 @@ import type {
   NodePostProcessor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlQueryRow, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
+import type {
+  EC,
+  ECClassHierarchyInspector,
+  ECSchemaProvider,
+  ECSqlQueryRow,
+  IInstanceLabelSelectClauseFactory,
+  InstanceKey,
+} from "@itwin/presentation-shared";
 import type { ClassificationId, ClassificationTableId, ElementId } from "../common/internal/Types.js";
 import type { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
 
@@ -72,6 +86,8 @@ export interface ClassificationsTreeHierarchyConfiguration {
    * root `ClassificationSystem`.
    */
   rootClassificationSystemCode: string;
+  /** Element classes to exclude from the hierarchy. Elements, whose class is or derives from one of the classes in this list, are not loaded into the hierarchy. Defaults to `[]`. */
+  excludedElementClassNames?: Array<EC.FullClassName>;
 }
 
 interface ClassificationsTreeInstanceKeyPathsBaseProps {
@@ -292,7 +308,13 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
             JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = this.ECInstanceId
             JOIN IdSet(?) parentClassificationIdSet ON ehc.TargetECInstanceId = parentClassificationIdSet.id
             ${elementsInstanceFilterClauses.joins}
-            ${createWhereClause({ conditions: ["this.Parent.Id IS NULL", elementsInstanceFilterClauses.where] })}
+            ${createWhereClause({
+              conditions: [
+                "this.Parent.Id IS NULL",
+                createExcludedClassesClause({ alias: "this", excludedClassNames: this.#props.hierarchyConfig.excludedElementClassNames }),
+                elementsInstanceFilterClauses.where,
+              ],
+            })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: parentClassificationIds }],
@@ -363,7 +385,12 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
           FROM ${instanceFilterClauses.from} this
           JOIN IdSet(?) parentElementIdSet ON this.Parent.Id = parentElementIdSet.id
           ${instanceFilterClauses.joins}
-          ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
+          ${createWhereClause({
+            conditions: [
+              createExcludedClassesClause({ alias: "this", excludedClassNames: this.#props.hierarchyConfig.excludedElementClassNames }),
+              instanceFilterClauses.where,
+            ],
+          })}
           ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
           bindings: [{ type: "idset", value: parentElementIds }],
@@ -394,7 +421,12 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
           IFNULL((
             SELECT 1
             FROM ${CLASS_NAME_Element} ce
-            WHERE ce.Parent.Id = this.ECInstanceId
+            ${createWhereClause({
+              conditions: [
+                "ce.Parent.Id = this.ECInstanceId",
+                createExcludedClassesClause({ alias: "ce", excludedClassNames: this.#props.hierarchyConfig.excludedElementClassNames }),
+              ],
+            })}
             LIMIT 1
           ), 0)
         `,
@@ -521,7 +553,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
               FROM ${CLASS_NAME_GeometricElement3d} this
               JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = this.ECInstanceId
               JOIN IdSet(?) classificationIdSet ON ehc.TargetECInstanceId = classificationIdSet.id
-              WHERE this.Parent.Id IS NULL
+              ${createWhereClause({ conditions: ["this.Parent.Id IS NULL", createExcludedClassesClause({ alias: "this", excludedClassNames: props.hierarchyConfig.excludedElementClassNames })] })}
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
               UNION ALL
@@ -533,6 +565,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
               FROM
                 ${CLASS_NAME_GeometricElement3d} this
                 JOIN ${ELEMENTS_WITH_LABELS_CTE} pe ON pe.ECInstanceId = this.Parent.Id
+              ${createWhereClause({ conditions: [createExcludedClassesClause({ alias: "this", excludedClassNames: props.hierarchyConfig.excludedElementClassNames })] })}
             )`,
           ]
         : []),
@@ -695,6 +728,7 @@ function createSearchPathsForDifferentTypes(
                   chunkIndex,
                   componentId,
                   componentName,
+                  excludedElementClassNames: props.hierarchyConfig.excludedElementClassNames,
                 }),
               2,
             ),
@@ -711,8 +745,9 @@ function createGeometricElementInstanceKeyPaths(props: {
   componentId: GuidString;
   componentName: string;
   chunkIndex: number;
+  excludedElementClassNames?: Array<EC.FullClassName>;
 }): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String }> {
-  const { targetItems, imodelAccess, idsCache, componentId, componentName, chunkIndex } = props;
+  const { targetItems, imodelAccess, idsCache, componentId, componentName, chunkIndex, excludedElementClassNames } = props;
   if (targetItems.length === 0) {
     return EMPTY;
   }
@@ -728,6 +763,7 @@ function createGeometricElementInstanceKeyPaths(props: {
           '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT)
         FROM  ${CLASS_NAME_Element} e
         JOIN IdSet(?) targetItemIdSet ON e.ECInstanceId = targetItemIdSet.id
+        ${createWhereClause({ conditions: [createExcludedClassesClause({ alias: "e", excludedClassNames: excludedElementClassNames })] })}
         ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
         UNION ALL
@@ -738,6 +774,7 @@ function createGeometricElementInstanceKeyPaths(props: {
           '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || ce.Path
         FROM ElementsHierarchy ce
         JOIN ${CLASS_NAME_Element} pe ON pe.ECInstanceId = ce.ParentId
+        ${createWhereClause({ conditions: [createExcludedClassesClause({ alias: "pe", excludedClassNames: excludedElementClassNames })] })}
       )`,
     ];
     const ecsql = `

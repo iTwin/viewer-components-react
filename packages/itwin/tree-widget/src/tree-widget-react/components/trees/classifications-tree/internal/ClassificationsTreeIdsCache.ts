@@ -30,7 +30,10 @@ import type { ClassificationsTreeVisibilityHandlerConfiguration } from "../UseCl
  * Hierarchy config props needed for ids cache.
  * @internal
  */
-export type HierarchyConfigForClassificationsCache = Pick<ClassificationsTreeHierarchyConfiguration, "rootClassificationSystemCode">;
+export type HierarchyConfigForClassificationsCache = Pick<
+  ClassificationsTreeHierarchyConfiguration,
+  "rootClassificationSystemCode" | "excludedElementClassNames"
+>;
 
 /**
  * Visibility handler config props needed for ids cache.
@@ -59,6 +62,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
     | Observable<{
         classificationOrTableInfos: Map<ClassificationId | ClassificationTableId, ClassificationOrTableInfo>;
         classificationsWithChildren: Set<ClassificationId>;
+        classificationsWithNonExcludedChildren: Set<ClassificationId>;
       }>
     | undefined;
   #filteredElementsData: Observable<Map<ElementId, { modelId: Id64String; categoryId: Id64String }>> | undefined;
@@ -172,45 +176,55 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
       }),
       catchBeSQLiteInterrupts,
       map((row) => {
+        const relatedCategories = row.relatedCategories ? (row.relatedCategories as string).split(",") : [];
         return {
           id: row.id,
           tableId: row.tableId,
           parentId: row.parentId,
-          relatedCategories: row.relatedCategories ? (row.relatedCategories as string).split(",") : [],
+          relatedCategories,
         };
       }),
     );
   }
 
   private getCachedData() {
-    this.#cachedData ??= this.queryClassifications().pipe(
-      reduce(
-        (acc, { id, tableId, parentId, relatedCategories }) => {
-          if (parentId !== undefined) {
-            acc.classificationsWithChildren.add(parentId);
-          }
-          if (relatedCategories.length > 0) {
-            acc.classificationsWithChildren.add(id);
-          }
-          const tableOrParentId = tableId ?? parentId;
-          const parentInfo = getOrCreate({
-            map: acc.classificationOrTableInfos,
-            key: tableOrParentId,
-            createFunc: () => ({ childClassificationIds: [], relatedCategories: [], parentClassificationOrTableId: undefined }),
-          });
-          parentInfo.childClassificationIds.push(id);
-          const classificationEntry = getOrCreate({
-            map: acc.classificationOrTableInfos,
-            key: id,
-            createFunc: () => ({ childClassificationIds: [], relatedCategories, parentClassificationOrTableId: tableOrParentId }),
-          });
-          classificationEntry.parentClassificationOrTableId = tableOrParentId;
-          return acc;
-        },
-        {
-          classificationOrTableInfos: new Map<ClassificationId | ClassificationTableId, ClassificationOrTableInfo>(),
-          classificationsWithChildren: new Set<ClassificationId>(),
-        },
+    this.#cachedData ??= this.getCategoriesContainingNonExcludedElements().pipe(
+      mergeMap((categoriesContainingNonExcludedElements) =>
+        this.queryClassifications().pipe(
+          reduce(
+            (acc, { id, tableId, parentId, relatedCategories }) => {
+              if (parentId !== undefined) {
+                acc.classificationsWithChildren.add(parentId);
+                acc.classificationsWithNonExcludedChildren.add(parentId);
+              }
+              if (relatedCategories.length > 0) {
+                acc.classificationsWithChildren.add(id);
+                if (relatedCategories.some((categoryId) => categoriesContainingNonExcludedElements.has(categoryId))) {
+                  acc.classificationsWithNonExcludedChildren.add(id);
+                }
+              }
+              const tableOrParentId = tableId ?? parentId;
+              const parentInfo = getOrCreate({
+                map: acc.classificationOrTableInfos,
+                key: tableOrParentId,
+                createFunc: () => ({ childClassificationIds: [], relatedCategories: [], parentClassificationOrTableId: undefined }),
+              });
+              parentInfo.childClassificationIds.push(id);
+              const classificationEntry = getOrCreate({
+                map: acc.classificationOrTableInfos,
+                key: id,
+                createFunc: () => ({ childClassificationIds: [], relatedCategories, parentClassificationOrTableId: tableOrParentId }),
+              });
+              classificationEntry.parentClassificationOrTableId = tableOrParentId;
+              return acc;
+            },
+            {
+              classificationOrTableInfos: new Map<ClassificationId | ClassificationTableId, ClassificationOrTableInfo>(),
+              classificationsWithChildren: new Set<ClassificationId>(),
+              classificationsWithNonExcludedChildren: new Set<ClassificationId>(),
+            },
+          ),
+        ),
       ),
       shareReplay(),
     );
@@ -218,7 +232,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
   }
 
   public hasChildren(classificationId: ClassificationId): Observable<boolean> {
-    return this.getCachedData().pipe(map(({ classificationsWithChildren }) => classificationsWithChildren.has(classificationId)));
+    return this.getCachedData().pipe(map(({ classificationsWithNonExcludedChildren }) => classificationsWithNonExcludedChildren.has(classificationId)));
   }
 
   public getAllContainedCategories(classificationOrTableIds: Id64Arg): Observable<CategoryId> {

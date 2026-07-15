@@ -27,6 +27,7 @@ import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import { BaseIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
 import {
+  CLASS_NAME_GeometricElement3d,
   CLASS_NAME_GeometricModel3d,
   CLASS_NAME_SpatialCategory,
   CLASS_NAME_Subject,
@@ -5461,6 +5462,56 @@ describe("ModelsTreeVisibilityHandler", () => {
             },
           });
         });
+      });
+    });
+
+    it("element of an excluded class still participates in visibility", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const categoryId = insertSpatialCategory({ txn, codeValue: "category" }).id;
+          const modelId = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+          const excludedElementId = insertPhysicalElement({ txn, modelId, categoryId }).id;
+          return { categoryId, modelId, excludedElementId };
+        }),
+      );
+
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using visibilityTestData = createVisibilityTestData({
+        imodelConnection,
+        hierarchyConfig: {
+          ...defaultHierarchyConfiguration,
+          hideRootSubject: true,
+          showEmptyModels: true,
+          excludedElementClassNames: [CLASS_NAME_GeometricElement3d],
+        },
+      });
+      const { handler, viewport, provider } = visibilityTestData;
+
+      viewport.changeModelDisplay({ modelIds: keys.modelId, display: true });
+      await validateModelsTreeHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        expectations: "all-hidden",
+      });
+
+      const subjectNode = createSubjectHierarchyNode({ ids: [IModel.rootSubjectId] });
+      await handler.changeVisibility(subjectNode, true);
+
+      await validateModelsTreeHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        expectations: "all-visible",
+      });
+
+      viewport.setNeverDrawn({ elementIds: new Set([keys.excludedElementId]) });
+
+      await validateModelsTreeHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        expectations: "all-hidden",
       });
     });
   });
