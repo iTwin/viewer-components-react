@@ -40,18 +40,6 @@ export function setDifference<T>(lhs: ReadonlySet<T>, rhs: ReadonlySet<T>): Set<
 }
 
 /** @internal */
-export function setIntersection<T>(lhs: ReadonlySet<T>, rhs: ReadonlySet<T>): Set<T> {
-  const result = new Set<T>();
-  const { smallerSet, largerSet } = lhs.size < rhs.size ? { smallerSet: lhs, largerSet: rhs } : { smallerSet: rhs, largerSet: lhs };
-  for (const x of smallerSet) {
-    if (largerSet.has(x)) {
-      result.add(x);
-    }
-  }
-  return result;
-}
-
-/** @internal */
 export function countInSet(ids: Id64Arg, set: ReadonlySet<Id64String> | undefined): number {
   if (!set?.size) {
     return 0;
@@ -97,7 +85,7 @@ export function createExcludedClassesClause({
   excludedClassNames,
 }: {
   alias: string;
-  excludedClassNames: ReadonlyArray<EC.FullClassName> | undefined;
+  excludedClassNames: ReadonlyArray<EC.FullClassNameDotNotation> | undefined;
 }): string {
   if (!excludedClassNames || excludedClassNames.length === 0) {
     return "";
@@ -123,12 +111,6 @@ export function parseIdsSelectorResult(selectorResult: any): Id64Array {
     return [];
   }
   return selectorResult.reduce((arr, ids: Id64String | Id64String[]) => [...arr, ...(Array.isArray(ids) ? ids : [ids])], new Array<Id64String>());
-}
-
-/** @internal */
-export function pushToMap<TKey, TValue>(targetMap: Map<TKey, Set<TValue>>, key: TKey, value: TValue) {
-  const set = getOrCreate({ map: targetMap, key, createFunc: () => new Set<TValue>() });
-  set.add(value);
 }
 
 /** @internal */
@@ -331,4 +313,31 @@ export function getId64Array(ids: Id64Arg): Id64Array {
 /** @internal */
 export function getId64Spreadable(ids: Id64Arg): Id64Array | Id64Set {
   return typeof ids === "string" ? [ids] : ids;
+}
+
+type PartialWithUndefined<T extends object> = {
+  [Key in keyof T]?: T[Key] | undefined;
+};
+
+/**
+ * Shallowly merges overrides into defaults, ignoring properties whose value
+ * is `undefined`.
+ *
+ * @internal
+ */
+export function mergeWithDefaults<T extends object>({ defaults, overrides }: { defaults: T; overrides?: PartialWithUndefined<T> }): T {
+  const normalized = { ...defaults };
+
+  if (!overrides) {
+    return normalized;
+  }
+
+  for (const key of Object.keys(overrides) as Array<keyof T>) {
+    const value = overrides[key];
+    if (value !== undefined) {
+      normalized[key] = value;
+    }
+  }
+
+  return normalized;
 }

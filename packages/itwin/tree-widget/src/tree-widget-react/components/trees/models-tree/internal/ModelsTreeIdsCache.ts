@@ -9,12 +9,13 @@ import { IModel } from "@itwin/core-common";
 import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_GeometricModel3d, CLASS_NAME_InformationPartitionElement, CLASS_NAME_Subject } from "../../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
-import { createWhereClause, getOrCreate } from "../../common/internal/Utils.js";
+import { createWhereClause, getOrCreate, mergeWithDefaults } from "../../common/internal/Utils.js";
+import { defaultHierarchyConfiguration } from "../ModelsTreeDefinition.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { EC, InstanceKey } from "@itwin/presentation-shared";
+import type { InstanceKey } from "@itwin/presentation-shared";
 import type { BaseIdsCacheImplProps } from "../../common/internal/caches/BaseIdsCache.js";
 import type { ModelId, SubjectId } from "../../common/internal/Types.js";
 import type { ModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
@@ -25,12 +26,12 @@ import type { ModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.j
  */
 export type HierarchyConfigForModelsCache = Pick<
   ModelsTreeHierarchyConfiguration,
-  "elementClassSpecification" | "hideRootSubject" | "showEmptyModels" | "excludedElementClassNames"
+  "elementClassSpecification" | "rootSubject" | "modelsWithoutElements" | "excludedElementClassNames"
 >;
 
 interface ModelsTreeIdsCacheProps extends BaseIdsCacheImplProps {
   queryExecutor: LimitingECSqlQueryExecutor;
-  hierarchyConfig: HierarchyConfigForModelsCache;
+  hierarchyConfig?: HierarchyConfigForModelsCache;
 }
 
 interface SubjectInfo {
@@ -46,18 +47,18 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
   #upToModelInstanceKeyPaths: Map<ModelId, Observable<HierarchyNodeIdentifiersPath>> = new Map();
   #parentSubjectIds: Observable<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   #queryExecutor: LimitingECSqlQueryExecutor;
-  #showEmptyModels: boolean;
-  #hideRootSubject: boolean;
-  #elementClassName: EC.FullClassName;
+  #hierarchyConfig: Required<HierarchyConfigForModelsCache>;
   #componentId: GuidString;
   #componentName: string;
 
   constructor(props: ModelsTreeIdsCacheProps) {
     super(props);
     this.#queryExecutor = props.queryExecutor;
-    this.#showEmptyModels = props.hierarchyConfig.showEmptyModels;
-    this.#hideRootSubject = props.hierarchyConfig.hideRootSubject;
-    this.#elementClassName = props.hierarchyConfig.elementClassSpecification;
+    this.#hierarchyConfig = mergeWithDefaults({
+      defaults: defaultHierarchyConfiguration,
+      overrides: props.hierarchyConfig,
+    });
+
     this.#componentId = Guid.createValue();
     this.#componentName = "ModelsTreeIdsCache";
   }
@@ -75,7 +76,7 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
               conditions: [
                 "m.ECInstanceId = HexToId(json_extract(s.JsonProperties, '$.Subject.Model.TargetPartition'))",
                 "NOT m.IsPrivate",
-                `EXISTS (SELECT 1 FROM ${this.#elementClassName} WHERE Model.Id = m.ECInstanceId)`,
+                `EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`,
               ],
             })}
           ) targetPartitionId,
@@ -106,7 +107,7 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
         SELECT p.ECInstanceId id, p.Parent.Id parentId
         FROM ${CLASS_NAME_InformationPartitionElement} p
         INNER JOIN ${CLASS_NAME_GeometricModel3d} m ON m.ModeledElement.Id = p.ECInstanceId
-        ${createWhereClause({ conditions: ["NOT m.IsPrivate", !this.#showEmptyModels && `EXISTS (SELECT 1 FROM ${this.#elementClassName} WHERE Model.Id = m.ECInstanceId)`] })}
+        ${createWhereClause({ conditions: ["NOT m.IsPrivate", this.#hierarchyConfig.modelsWithoutElements !== "include" && `EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`] })}
       `;
       return this.#queryExecutor.createQueryReader(
         { ecsql: modelsQuery },
@@ -301,12 +302,12 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
     return this.getSubjectInfos().pipe(
       map((subjectInfos) => {
         const result = new Array<InstanceKey>();
-        if (!this.#showEmptyModels && !this.subjectHasNestedModels({ subjectId: targetSubjectId, subjectInfos })) {
+        if (this.#hierarchyConfig.modelsWithoutElements === "exclude" && !this.subjectHasNestedModels({ subjectId: targetSubjectId, subjectInfos })) {
           return result;
         }
         let currParentId: SubjectId | undefined = targetSubjectId;
         while (currParentId) {
-          if (this.#hideRootSubject && currParentId === IModel.rootSubjectId) {
+          if (this.#hierarchyConfig.rootSubject === "exclude" && currParentId === IModel.rootSubjectId) {
             break;
           }
           const parentInfo = subjectInfos.get(currParentId);

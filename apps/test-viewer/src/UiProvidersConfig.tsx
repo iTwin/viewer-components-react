@@ -115,7 +115,7 @@ const configuredUiItems = new Map<string, UiItem>([
                 render: (props) => (
                   <ModelsTreeWithOptions
                     hierarchyConfig={{
-                      hideRootSubject: true,
+                      rootSubject: "exclude",
                     }}
                     searchText={props.searchText}
                     selectionStorage={unifiedSelectionStorage}
@@ -138,7 +138,7 @@ const configuredUiItems = new Map<string, UiItem>([
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
                     treeLabel={props.treeLabel}
-                    hierarchyConfig={{ showElements: true }}
+                    hierarchyConfig={{ elements: "include" }}
                   />
                 ),
               },

@@ -30,7 +30,7 @@ export interface CategoriesTreeVisibilityHandlerProps {
   idsCache: CategoriesTreeIdsCache;
   viewport: TreeWidgetViewport;
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfoCache;
-  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
 }
 
 /**
@@ -321,7 +321,7 @@ export function createCategoriesTreeVisibilityHandler(props: {
   idsCache: CategoriesTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
   searchPaths?: HierarchySearchTree[];
-  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
 }) {
   return new HierarchyVisibilityHandlerImpl<CategoriesTreeSearchTargets>({
     cancelChangesInProgress: new Subject<void>(),

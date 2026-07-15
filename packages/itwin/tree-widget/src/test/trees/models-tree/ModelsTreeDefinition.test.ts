@@ -77,7 +77,7 @@ describe("Models tree", () => {
         }),
       );
       const { imodelConnection, ...keys } = buildIModelResult;
-      using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { hideRootSubject: false } });
+      using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { rootSubject: "include" } });
       await validateHierarchy({
         provider,
         expect: [
@@ -1316,7 +1316,7 @@ describe("Models tree", () => {
     });
 
     describe("Hierarchy customization", () => {
-      it("shows empty models when `showEmptyModels` is set to true", async () => {
+      it("shows models without elements when `modelsWithoutElements` is set to 'include'", async () => {
         await using buildIModelResult = await buildIModel(async (imodel) =>
           withEditTxn(imodel, (txn) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -1326,7 +1326,7 @@ describe("Models tree", () => {
           }),
         );
         const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { showEmptyModels: true } });
+        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { modelsWithoutElements: "include" } });
         await validateHierarchy({
           provider,
           expect: [
@@ -1844,7 +1844,7 @@ describe("Models tree", () => {
             const { imodelConnection, ...keys } = buildIModelResult;
             using provider = createModelsTreeProvider({
               imodelConnection,
-              hierarchyConfig: { hideRootSubject: false, excludedElementClassNames: ["BisCore.PhysicalElement"] },
+              hierarchyConfig: { rootSubject: "include", excludedElementClassNames: ["BisCore.PhysicalElement"] },
             });
             await validateHierarchy({
               provider,
@@ -1864,7 +1864,7 @@ describe("Models tree", () => {
             });
           });
 
-          it("filters only category when models have only excluded elements and `showEmptyModels` is true", async () => {
+          it("filters only category when models have only excluded elements and `modelsWithoutElements` is 'include'", async () => {
             await using buildIModelResult = await buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
                 const childSubject = insertSubject({ txn, codeValue: "child subject", parentId: IModel.rootSubjectId });
@@ -1911,7 +1911,11 @@ describe("Models tree", () => {
             const { imodelConnection, ...keys } = buildIModelResult;
             using provider = createModelsTreeProvider({
               imodelConnection,
-              hierarchyConfig: { hideRootSubject: false, showEmptyModels: true, excludedElementClassNames: ["Generic.PhysicalObject"] },
+              hierarchyConfig: {
+                rootSubject: "include",
+                modelsWithoutElements: "include",
+                excludedElementClassNames: ["Generic.PhysicalObject"],
+              },
             });
             await validateHierarchy({
               provider,

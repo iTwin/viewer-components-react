@@ -118,10 +118,10 @@ type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) =
 
 // @beta
 interface CategoriesTreeHierarchyConfiguration {
-    excludedElementClassNames?: Array<EC.FullClassName>;
-    hideSubCategories: boolean;
-    showElements: boolean;
-    showEmptyCategories: boolean;
+    categoriesWithoutElements?: "include" | "exclude";
+    elements?: "include" | "exclude";
+    excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
+    subCategories?: "include" | "exclude";
 }
 
 // @beta (undocumented)
@@ -214,7 +214,7 @@ interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProp
 
 // @alpha (undocumented)
 interface ClassificationsTreeHierarchyConfiguration {
-    excludedElementClassNames?: Array<EC.FullClassName>;
+    excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
     rootClassificationSystemCode: string;
 }
 
@@ -255,7 +255,7 @@ interface ClassificationsTreeVisibilityHandlerConfiguration {
 
 // @alpha
 interface ClassificationToCategoriesRelationshipSpecification {
-    fullClassName: string;
+    fullClassName: EC.FullClassNameDotNotation;
     source: "classification" | "category";
 }
 
@@ -447,12 +447,12 @@ type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => ReactE
 
 // @beta
 interface ModelsTreeHierarchyConfiguration {
-    elementClassGrouping: "enable" | "enableWithCounts" | "disable";
-    elementClassSpecification: EC.FullClassName;
-    excludedElementClassNames?: Array<EC.FullClassName>;
-    hideRootSubject: boolean;
-    hierarchyLevelFiltering: "enable" | "disable";
-    showEmptyModels: boolean;
+    elementClassGrouping?: "enable" | "enableWithCounts" | "disable";
+    elementClassSpecification?: EC.FullClassName;
+    excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
+    hierarchyLevelFiltering?: "enable" | "disable";
+    modelsWithoutElements?: "include" | "exclude";
+    rootSubject?: "include" | "exclude";
 }
 
 // @beta (undocumented)
@@ -740,7 +740,7 @@ interface UseCategoriesTreeProps {
     // (undocumented)
     getTreeItemProps?: ExtendedVisibilityTreeRendererProps["getTreeItemProps"];
     // (undocumented)
-    hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
+    hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
     // (undocumented)
     onCategoriesFiltered?: (props: {
         categories: CategoryInfo[] | undefined;
@@ -849,7 +849,7 @@ interface UseModelsTreeProps {
     // (undocumented)
     getTreeItemProps?: ExtendedVisibilityTreeRendererProps["getTreeItemProps"];
     // (undocumented)
-    hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
+    hierarchyConfig?: ModelsTreeHierarchyConfiguration;
     // (undocumented)
     onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
     searchLimit?: number | "unbounded";

@@ -48,11 +48,11 @@ export function createModelsTreeProvider({
   imodelAccess,
   idsCache,
 }: CreateModelsTreeProviderProps): HierarchyProvider & { dispose: () => void; [Symbol.dispose]: () => void } {
-  const config = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...hierarchyConfig };
+  const config = { rootSubject: "exclude" as const, ...hierarchyConfig };
   const createdImodelAccess = imodelAccess ?? createIModelAccess(imodelConnection);
   const baseIdsCache = new BaseIdsCache({
     queryExecutor: createdImodelAccess,
-    elementClassName: config.elementClassSpecification,
+    elementClassName: config.elementClassSpecification ?? defaultHierarchyConfiguration.elementClassSpecification,
     type: "3d",
     excludedElementClassNames: config.excludedElementClassNames,
   });

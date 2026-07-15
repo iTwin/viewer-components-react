@@ -12,7 +12,7 @@ import {
   CLASS_NAME_Subject,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { isBeSqliteInterruptError } from "../../common/internal/UseErrorState.js";
-import { createWhereClause, pushToMap } from "../../common/internal/Utils.js";
+import { createWhereClause, getOrCreate } from "../../common/internal/Utils.js";
 
 import type { GuidString, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
@@ -120,7 +120,8 @@ export class IModelContentTreeIdsCache {
         (async () => {
           const result = new Map<ModelId, Set<SubjectId>>();
           for await (const model of this.queryModels()) {
-            pushToMap(result, model.id, model.parentId);
+            const set = getOrCreate({ map: result, key: model.id, createFunc: () => new Set<SubjectId>() });
+            set.add(model.parentId);
           }
           return result;
         })(),

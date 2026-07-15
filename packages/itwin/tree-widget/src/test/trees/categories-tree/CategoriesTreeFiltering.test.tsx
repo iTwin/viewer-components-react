@@ -25,7 +25,6 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { act, renderHook } from "@testing-library/react";
-import { defaultHierarchyConfiguration } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { useCategoriesTree } from "../../../tree-widget-react/components/trees/categories-tree/UseCategoriesTree.js";
 import {
   CLASS_NAME_GeometricElement2d,
@@ -83,7 +82,6 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       using hook = renderUseCategoriesTreeHook({
         imodelConnection,
-        hierarchyConfig: defaultHierarchyConfiguration,
         searchText: "Test",
         viewType: "3d",
       });
@@ -105,7 +103,6 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       using hook = renderUseCategoriesTreeHook({
         imodelConnection,
-        hierarchyConfig: defaultHierarchyConfiguration,
         searchText: "Test",
         viewType: "3d",
       });
@@ -125,7 +122,7 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       using hook = renderUseCategoriesTreeHook({
         imodelConnection,
-        hierarchyConfig: { ...defaultHierarchyConfiguration, showEmptyCategories: true },
+        hierarchyConfig: { categoriesWithoutElements: "include" },
         searchText: "Test",
         viewType: "3d",
       });
@@ -150,7 +147,6 @@ describe("Categories tree", () => {
 
       using hook = renderUseCategoriesTreeHook({
         imodelConnection,
-        hierarchyConfig: defaultHierarchyConfiguration,
         searchText: "Test",
         viewType: "3d",
       });
@@ -193,7 +189,6 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       using hook = renderUseCategoriesTreeHook({
         imodelConnection,
-        hierarchyConfig: defaultHierarchyConfiguration,
         searchText: "Test",
         viewType: "3d",
       });
@@ -220,7 +215,6 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       using hook = renderUseCategoriesTreeHook({
         imodelConnection,
-        hierarchyConfig: defaultHierarchyConfiguration,
         searchText: "Test",
         viewType: "3d",
       });
@@ -243,7 +237,6 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       using hook = renderUseCategoriesTreeHook({
         imodelConnection,
-        hierarchyConfig: defaultHierarchyConfiguration,
         searchText: "Test",
         viewType: "3d",
       });
@@ -273,7 +266,6 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       using hook = renderUseCategoriesTreeHook({
         imodelConnection,
-        hierarchyConfig: defaultHierarchyConfiguration,
         searchText: "SubCategory1",
         viewType: "3d",
       });
@@ -311,7 +303,6 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       using hook = renderUseCategoriesTreeHook({
         imodelConnection,
-        hierarchyConfig: defaultHierarchyConfiguration,
         searchText: "_",
         viewType: "3d",
       });
@@ -321,7 +312,6 @@ describe("Categories tree", () => {
 
       hook.rerender({
         imodelConnection,
-        hierarchyConfig: defaultHierarchyConfiguration,
         searchText: "%",
         viewType: "3d",
       });
@@ -349,7 +339,6 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       using hook = renderUseCategoriesTreeHook({
         imodelConnection,
-        hierarchyConfig: defaultHierarchyConfiguration,
         searchText: "_",
         viewType: "3d",
       });
@@ -363,7 +352,6 @@ describe("Categories tree", () => {
 
       hook.rerender({
         imodelConnection,
-        hierarchyConfig: defaultHierarchyConfiguration,
         searchText: "%",
         viewType: "3d",
       });
@@ -392,7 +380,6 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       using hook = renderUseCategoriesTreeHook({
         imodelConnection,
-        hierarchyConfig: defaultHierarchyConfiguration,
         searchText: "Test",
         viewType: "3d",
       });
@@ -403,7 +390,6 @@ describe("Categories tree", () => {
 
       hook.rerender({
         imodelConnection,
-        hierarchyConfig: defaultHierarchyConfiguration,
         searchText: "SpatialCategory",
         viewType: "3d",
       });
@@ -430,7 +416,6 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       using hook = renderUseCategoriesTreeHook({
         imodelConnection,
-        hierarchyConfig: defaultHierarchyConfiguration,
         searchText: "Test",
         viewType: "3d",
       });
@@ -441,7 +426,6 @@ describe("Categories tree", () => {
 
       hook.rerender({
         imodelConnection,
-        hierarchyConfig: defaultHierarchyConfiguration,
         searchText: "SubCategory1",
         viewType: "3d",
       });
@@ -455,7 +439,6 @@ describe("Categories tree", () => {
 
       hook.rerender({
         imodelConnection,
-        hierarchyConfig: defaultHierarchyConfiguration,
         searchText: "SubCategory2",
         viewType: "3d",
       });
@@ -487,7 +470,6 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       using hook = renderUseCategoriesTreeHook({
         imodelConnection,
-        hierarchyConfig: defaultHierarchyConfiguration,
         searchText: "_",
         viewType: "2d",
       });
@@ -497,7 +479,6 @@ describe("Categories tree", () => {
 
       hook.rerender({
         imodelConnection,
-        hierarchyConfig: defaultHierarchyConfiguration,
         searchText: "%",
         viewType: "2d",
       });
@@ -525,7 +506,6 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       using hook = renderUseCategoriesTreeHook({
         imodelConnection,
-        hierarchyConfig: defaultHierarchyConfiguration,
         searchText: "_",
         viewType: "2d",
       });
@@ -539,7 +519,6 @@ describe("Categories tree", () => {
 
       hook.rerender({
         imodelConnection,
-        hierarchyConfig: defaultHierarchyConfiguration,
         searchText: "%",
         viewType: "2d",
       });
@@ -571,7 +550,7 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       using hook = renderUseCategoriesTreeHook({
         imodelConnection,
-        hierarchyConfig: { ...defaultHierarchyConfiguration, showElements: true },
+        hierarchyConfig: { elements: "include" },
         searchText: `[${briefcaseId}-${localId}]`,
         viewType: "3d",
       });
@@ -615,7 +594,7 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodelConnection);
       using hook = renderUseCategoriesTreeHook({
         imodelConnection,
-        hierarchyConfig: { ...defaultHierarchyConfiguration, showElements: true },
+        hierarchyConfig: { elements: "include" },
         searchText: `[${briefcaseId}-${localId}]`,
         viewType: "2d",
       });
@@ -641,7 +620,7 @@ describe("Categories tree", () => {
     ["2d" as const, "3d" as const].forEach((viewType) => {
       const { insertCategory, insertElement, insertElementsModel, insertElementsSubModel, insertModeledElement } = getInsertFunctionByViewType(viewType);
       describe(`intermediate ${viewType} categories`, () => {
-        const showElementsConfig = { ...defaultHierarchyConfiguration, showElements: true };
+        const showElementsConfig = { elements: "include" as const };
         const { elementClass, modelClass } = getClassesByView(viewType);
         it("finds child element with different category than parent (intermediate category in path)", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
@@ -982,7 +961,7 @@ describe("Categories tree", () => {
 
           using hook = renderUseCategoriesTreeHook({
             imodelConnection,
-            hierarchyConfig: { ...defaultHierarchyConfiguration, showEmptyCategories: true },
+            hierarchyConfig: { categoriesWithoutElements: "include" },
             searchText: "TestDC",
             viewType,
             onCategoriesFiltered,
@@ -996,7 +975,7 @@ describe("Categories tree", () => {
           ]);
           hook.rerender({
             imodelConnection,
-            hierarchyConfig: { ...defaultHierarchyConfiguration, showEmptyCategories: false },
+            hierarchyConfig: { categoriesWithoutElements: "exclude" },
             searchText: "TestDC",
             viewType,
             onCategoriesFiltered,
@@ -1009,7 +988,7 @@ describe("Categories tree", () => {
       });
 
       describe(`excludedElementClassNames in '${viewType}' view`, () => {
-        const showElementsConfig = { ...defaultHierarchyConfiguration, showElements: true };
+        const showElementsConfig = { elements: "include" as const };
         const elementClassName: EC.FullClassName = viewType === "3d" ? "Generic.PhysicalObject" : "BisCore.DrawingGraphic";
         const subModeledElementBaseClassName: EC.FullClassName = "BisCore.ISubModeledElement";
 
@@ -1068,7 +1047,7 @@ describe("Categories tree", () => {
           const imodelAccess = createIModelAccess(imodelConnection);
           using hook = renderUseCategoriesTreeHook({
             imodelConnection,
-            hierarchyConfig: { ...defaultHierarchyConfiguration, excludedElementClassNames: [elementClassName] },
+            hierarchyConfig: { excludedElementClassNames: [elementClassName] },
             searchText: "matching",
             viewType,
           });
@@ -1149,7 +1128,7 @@ describe("Categories tree", () => {
           const imodelAccess = createIModelAccess(imodelConnection);
           using hook = renderUseCategoriesTreeHook({
             imodelConnection,
-            hierarchyConfig: { ...defaultHierarchyConfiguration, excludedElementClassNames: [elementClassName] },
+            hierarchyConfig: { excludedElementClassNames: [elementClassName] },
             searchText: "matching",
             viewType,
           });

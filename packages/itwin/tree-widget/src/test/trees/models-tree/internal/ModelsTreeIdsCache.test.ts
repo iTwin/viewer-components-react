@@ -19,7 +19,6 @@ describe("ModelsTreeIdsCache", () => {
     const baseIdsCache = new BaseIdsCache({ queryExecutor, elementClassName: defaultHierarchyConfiguration.elementClassSpecification, type: "3d" });
     const idsCache = new ModelsTreeIdsCache({
       queryExecutor,
-      hierarchyConfig: defaultHierarchyConfiguration,
       baseIdsCache,
     });
     return idsCache;

@@ -86,8 +86,14 @@ export interface ClassificationsTreeHierarchyConfiguration {
    * root `ClassificationSystem`.
    */
   rootClassificationSystemCode: string;
-  /** Element classes to exclude from the hierarchy. Elements, whose class is or derives from one of the classes in this list, are not loaded into the hierarchy. Defaults to `[]`. */
-  excludedElementClassNames?: Array<EC.FullClassName>;
+  /**
+   * Element classes to exclude from the hierarchy.
+   *
+   * Elements, whose class is or derives from one of the classes in this list, are not loaded into the hierarchy.
+   *
+   * Defaults to `[]`.
+   */
+  excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
 }
 
 interface ClassificationsTreeInstanceKeyPathsBaseProps {
@@ -745,7 +751,7 @@ function createGeometricElementInstanceKeyPaths(props: {
   componentId: GuidString;
   componentName: string;
   chunkIndex: number;
-  excludedElementClassNames?: Array<EC.FullClassName>;
+  excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
 }): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String }> {
   const { targetItems, imodelAccess, idsCache, componentId, componentName, chunkIndex, excludedElementClassNames } = props;
   if (targetItems.length === 0) {

@@ -24,7 +24,7 @@ export interface BaseIdsCacheProps {
   queryExecutor: LimitingECSqlQueryExecutor;
   elementClassName: string;
   type: "2d" | "3d";
-  excludedElementClassNames?: ReadonlyArray<EC.FullClassName>;
+  excludedElementClassNames?: ReadonlyArray<EC.FullClassNameDotNotation>;
 }
 
 /** @internal */

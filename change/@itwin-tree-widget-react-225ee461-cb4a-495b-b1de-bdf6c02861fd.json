@@ -1,0 +1,7 @@
+{
+  "type": "major",
+  "comment": "Updated `CategoriesTreeHierarchyConfiguration` and `ModelsTreeHierarchyConfiguration` to use optional `'include' | 'exclude'` settings. For categories, replace `hideSubCategories` with `subCategories: 'include' | 'exclude'`, `showElements` with `elements: 'include' | 'exclude'`, and `showEmptyCategories` with `categoriesWithoutElements: 'include' | 'exclude'`. For models, replace `hideRootSubject` with `rootSubject: 'include' | 'exclude'` and `showEmptyModels` with `modelsWithoutElements: 'include' | 'exclude'`. Omitted settings retain the previous defaults. `excludedElementClassNames` and `ClassificationToCategoriesRelationshipSpecification.fullClassName` now require dot-notation EC class names.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

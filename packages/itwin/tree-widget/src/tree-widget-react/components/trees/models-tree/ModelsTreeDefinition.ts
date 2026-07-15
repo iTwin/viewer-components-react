@@ -27,6 +27,7 @@ import {
   fromWithRelease,
   getOptimalBatchSize,
   groupingNodeDataFromChildren,
+  mergeWithDefaults,
   ParentElementsPath,
   parseIdsSelectorResult,
   releaseMainThreadOnItemsCount,
@@ -75,33 +76,62 @@ const MAX_SEARCH_INSTANCE_KEY_COUNT = 100;
  * @beta
  */
 export interface ModelsTreeHierarchyConfiguration {
-  /** Should element nodes be grouped by class. Defaults to `enable`. */
-  elementClassGrouping: "enable" | "enableWithCounts" | "disable";
-  /** Full class name of a `GeometricElement3d` sub-class that should be used to load element nodes. Defaults to `BisCore.GeometricElement3d`. */
-  elementClassSpecification: EC.FullClassName;
-  /** Should models without elements be shown. Defaults to `false`. */
-  showEmptyModels: boolean;
-  /** Should the root Subject node be hidden. Defaults to `false`. */
-  hideRootSubject: boolean;
-  /** Should hierarchy level be filterable. Defaults to `enable` */
-  hierarchyLevelFiltering: "enable" | "disable";
-  /** Element classes to exclude from the hierarchy. Elements, whose class is or derives from one of the classes in this list, are not loaded into the hierarchy. Defaults to `[]`. */
-  excludedElementClassNames?: Array<EC.FullClassName>;
+  /**
+   * Controls whether element nodes are grouped by class.
+   *
+   * Defaults to `"enable"`.
+   */
+  elementClassGrouping?: "enable" | "enableWithCounts" | "disable";
+  /**
+   * Full class name of a `GeometricElement3d` sub-class that should be used to load element nodes.
+   *
+   * Defaults to `BisCore.GeometricElement3d`.
+   */
+  elementClassSpecification?: EC.FullClassName;
+  /**
+   * Controls whether models that have no elements in the iModel are included in the hierarchy.
+   *
+   * Defaults to `"exclude"`.
+   */
+  modelsWithoutElements?: "include" | "exclude";
+  /**
+   * Controls whether the root Subject node is included in the hierarchy.
+   *
+   * Defaults to `"include"`.
+   */
+  rootSubject?: "include" | "exclude";
+  /**
+   * Controls whether hierarchy levels are filterable.
+   *
+   * Defaults to `"enable"`.
+   */
+  hierarchyLevelFiltering?: "enable" | "disable";
+  /**
+   * Element classes to exclude from the hierarchy.
+   *
+   * Elements, whose class is or derives from one of the classes in this list, are not loaded into the hierarchy.
+   *
+   * Defaults to `[]`.
+   */
+  excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
 }
 
+type RequiredModelsTreeHierarchyConfiguration = Required<ModelsTreeHierarchyConfiguration>;
+
 /** @internal */
-export const defaultHierarchyConfiguration: ModelsTreeHierarchyConfiguration = {
+export const defaultHierarchyConfiguration: RequiredModelsTreeHierarchyConfiguration = {
   elementClassGrouping: "enable",
   elementClassSpecification: CLASS_NAME_GeometricElement3d,
-  showEmptyModels: false,
-  hideRootSubject: false,
+  modelsWithoutElements: "exclude",
+  rootSubject: "include",
   hierarchyLevelFiltering: "enable",
+  excludedElementClassNames: [],
 };
 
 interface ModelsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
-  hierarchyConfig: ModelsTreeHierarchyConfiguration;
+  hierarchyConfig?: ModelsTreeHierarchyConfiguration;
   componentId?: GuidString;
 }
 
@@ -123,7 +153,7 @@ export interface ElementsGroupInfo {
 interface ModelsTreeInstanceKeyPathsBaseProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
-  hierarchyConfig: ModelsTreeHierarchyConfiguration;
+  hierarchyConfig?: ModelsTreeHierarchyConfiguration;
   limit?: number | "unbounded";
   abortSignal?: AbortSignal;
   componentId?: string;
@@ -151,18 +181,25 @@ export namespace ModelsTreeInstanceKeyPathsProps {
 export class ModelsTreeDefinition implements HierarchyDefinition {
   #impl: HierarchyDefinition;
   #idsCache: ModelsTreeIdsCache;
-  #hierarchyConfig: ModelsTreeHierarchyConfiguration;
+  #hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
   #queryExecutor: LimitingECSqlQueryExecutor;
   #isSupported?: Promise<boolean>;
   static #componentName = "ModelsTreeDefinition";
   #componentId: GuidString;
 
   public constructor(props: ModelsTreeDefinitionProps) {
+    this.#hierarchyConfig = mergeWithDefaults({
+      defaults: defaultHierarchyConfiguration,
+      overrides: props.hierarchyConfig,
+    });
     this.#impl = createPredicateBasedHierarchyDefinition({
       classHierarchyInspector: props.imodelAccess,
       hierarchy: {
         rootNodes: async (requestProps) =>
-          this.createSubjectChildrenQuery({ ...requestProps, parentNodeInstanceIds: this.#hierarchyConfig.hideRootSubject ? [IModel.rootSubjectId] : [] }),
+          this.createSubjectChildrenQuery({
+            ...requestProps,
+            parentNodeInstanceIds: this.#hierarchyConfig.rootSubject === "exclude" ? [IModel.rootSubjectId] : [],
+          }),
         childNodes: [
           {
             parentInstancesNodePredicate: CLASS_NAME_Subject,
@@ -190,7 +227,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     this.#componentId = props.componentId ?? Guid.createValue();
     this.#idsCache = props.idsCache;
     this.#queryExecutor = props.imodelAccess;
-    this.#hierarchyConfig = props.hierarchyConfig;
   }
 
   public preProcessNode: NodePreProcessor = async ({ node }) => {
@@ -411,7 +447,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                     `,
                   },
                   hasChildren:
-                    this.#hierarchyConfig.showEmptyModels || this.#hierarchyConfig.excludedElementClassNames?.length
+                    this.#hierarchyConfig.modelsWithoutElements === "include" || this.#hierarchyConfig.excludedElementClassNames.length
                       ? {
                           selector: `
                           IFNULL((
@@ -865,7 +901,7 @@ export function createGeometricElementInstanceKeyPaths(props: {
   componentId: GuidString;
   componentName: string;
   chunkIndex: number;
-  excludedElementClassNames?: Array<EC.FullClassName>;
+  excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
 }): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String | ElementsGroupInfo }> {
   const { targetItems, chunkIndex, componentId, componentName, elementClassName, idsCache, queryExecutor, excludedElementClassNames } = props;
   const elementIds = targetItems.filter((info): info is Id64String => typeof info === "string");
@@ -1005,7 +1041,7 @@ export function createCategoriesSearchPaths(props: {
   componentId: GuidString;
   componentName: string;
   elementClassName: EC.FullClassName;
-  excludedElementClassNames?: Array<EC.FullClassName>;
+  excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
 }): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String }> {
   const separator = ";";
   const { targetCategoryIds, componentId, componentName, idsCache, queryExecutor, elementClassName, excludedElementClassNames } = props;
@@ -1200,6 +1236,10 @@ function createSearchPathsForDifferentTypes(
     },
   ObservedValueOf<ReturnType<typeof createGeometricElementInstanceKeyPaths>>
 > {
+  const hierarchyConfig = mergeWithDefaults({
+    defaults: defaultHierarchyConfiguration,
+    overrides: props.hierarchyConfig,
+  });
   return (obs) =>
     obs.pipe(
       reduce(
@@ -1227,7 +1267,7 @@ function createSearchPathsForDifferentTypes(
         },
       ),
       switchMap((ids) => {
-        const { idsCache, imodelAccess, hierarchyConfig, componentId, componentName, limit } = props;
+        const { idsCache, imodelAccess, componentId, componentName, limit } = props;
         const elementsLength = ids.elementIds.length;
         const totalSize = ids.subjectIds.length + ids.modelIds.length + ids.categoryIds.length + elementsLength;
         if (limit !== "unbounded" && totalSize > (limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT)) {
@@ -1282,7 +1322,11 @@ function createInstanceKeyPathsFromInstanceLabelObs(
     componentName: string;
   },
 ) {
-  const { labelsFactory, hierarchyConfig, label, imodelAccess, limit } = props;
+  const { labelsFactory, label, imodelAccess, limit } = props;
+  const hierarchyConfig = mergeWithDefaults({
+    defaults: defaultHierarchyConfiguration,
+    overrides: props.hierarchyConfig,
+  });
   return defer(async () => {
     const elementLabelSelectClause = await labelsFactory.createSelectClause({
       classAlias: "e",
@@ -1300,7 +1344,7 @@ function createInstanceKeyPathsFromInstanceLabelObs(
           ${createWhereClause({
             conditions: [
               `e.ECClassId IS (${CLASS_NAME_Subject}, ${CLASS_NAME_SpatialCategory}, ${hierarchyConfig.elementClassSpecification})`,
-              createExcludedClassesClause({ alias: "e", excludedClassNames: props.hierarchyConfig.excludedElementClassNames }),
+              createExcludedClassesClause({ alias: "e", excludedClassNames: hierarchyConfig.excludedElementClassNames }),
             ],
           })}
 
@@ -1315,7 +1359,8 @@ function createInstanceKeyPathsFromInstanceLabelObs(
           ${createWhereClause({
             conditions: [
               "NOT m.IsPrivate",
-              !hierarchyConfig.showEmptyModels && `EXISTS (SELECT 1 FROM ${hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`,
+              hierarchyConfig.modelsWithoutElements === "exclude" &&
+                `EXISTS (SELECT 1 FROM ${hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`,
               "json_extract(e.JsonProperties, '$.PhysicalPartition.Model.Content') IS NULL",
               "json_extract(e.JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NULL",
             ],

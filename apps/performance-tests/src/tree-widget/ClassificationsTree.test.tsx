@@ -114,7 +114,7 @@ describe("classifications tree", () => {
 
   for (let i = 0; i < 2; i++) {
     // Excluded 2d elements won't affect the hierarchy in any way since imodel contains only 3d data.
-    const excludedElementClassNames: EC.FullClassName[] | undefined = i === 1 ? ["BisCore.GeometricElement2d"] : undefined;
+    const excludedElementClassNames: EC.FullClassNameDotNotation[] | undefined = i === 1 ? ["BisCore.GeometricElement2d"] : undefined;
     run<{
       iModel: SnapshotDb;
       imodelAccess: IModelAccess;

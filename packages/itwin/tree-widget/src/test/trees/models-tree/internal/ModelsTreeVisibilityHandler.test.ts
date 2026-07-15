@@ -80,7 +80,7 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
     const idsCache = new ModelsTreeIdsCache({
       queryExecutor: createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"),
-      hierarchyConfig: { ...defaultHierarchyConfiguration, ...hierarchyConfig },
+      hierarchyConfig,
       baseIdsCache,
     });
     return idsCache;
@@ -1723,15 +1723,15 @@ describe("ModelsTreeVisibilityHandler", () => {
       await terminateCore();
     });
 
-    function createCommonProps(props: {
-      imodelConnection: IModelConnection;
-      hierarchyConfig?: typeof defaultHierarchyConfiguration;
-      visibleByDefault?: boolean;
-    }) {
-      const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...props.hierarchyConfig };
+    function createCommonProps(props: { imodelConnection: IModelConnection; hierarchyConfig?: ModelsTreeHierarchyConfiguration; visibleByDefault?: boolean }) {
+      const hierarchyConfig = { rootSubject: "exclude" as const, ...props.hierarchyConfig };
       const imodelAccess = createIModelAccess(props.imodelConnection);
       const viewport = createTreeWidgetTestingViewport({ iModel: props.imodelConnection, viewType: "3d", visibleByDefault: props.visibleByDefault });
-      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
+      const baseIdsCache = new BaseIdsCache({
+        queryExecutor: imodelAccess,
+        elementClassName: hierarchyConfig.elementClassSpecification ?? defaultHierarchyConfiguration.elementClassSpecification,
+        type: "3d",
+      });
       const idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
         hierarchyConfig,
@@ -1749,11 +1749,11 @@ describe("ModelsTreeVisibilityHandler", () => {
     function createProvider(props: {
       idsCache: ModelsTreeIdsCache;
       imodelAccess: ReturnType<typeof createIModelAccess>;
-      hierarchyConfig: typeof defaultHierarchyConfiguration;
+      hierarchyConfig?: ModelsTreeHierarchyConfiguration;
       searchPaths?: HierarchySearchTree[];
     }) {
       return createIModelHierarchyProvider({
-        hierarchyDefinition: new ModelsTreeDefinition({ ...props }),
+        hierarchyDefinition: new ModelsTreeDefinition(props),
         imodelAccess: props.imodelAccess,
         ...(props.searchPaths ? { search: { paths: props.searchPaths } } : undefined),
       });
@@ -1761,7 +1761,7 @@ describe("ModelsTreeVisibilityHandler", () => {
 
     function createVisibilityTestData(props: {
       imodelConnection: IModelConnection;
-      hierarchyConfig?: typeof defaultHierarchyConfiguration;
+      hierarchyConfig?: ModelsTreeHierarchyConfiguration;
       visibleByDefault?: boolean;
     }) {
       const commonProps = createCommonProps(props);
@@ -3803,9 +3803,8 @@ describe("ModelsTreeVisibilityHandler", () => {
             }
             const [customClassElement1, customClassElement2, nonCustomClassElement] = elements;
 
-            const hierarchyConfig: typeof defaultHierarchyConfiguration = {
-              ...defaultHierarchyConfiguration,
-              showEmptyModels: true,
+            const hierarchyConfig = {
+              modelsWithoutElements: "include" as const,
               elementClassSpecification: customClassName,
             };
 
@@ -5479,9 +5478,8 @@ describe("ModelsTreeVisibilityHandler", () => {
       using visibilityTestData = createVisibilityTestData({
         imodelConnection,
         hierarchyConfig: {
-          ...defaultHierarchyConfiguration,
-          hideRootSubject: true,
-          showEmptyModels: true,
+          rootSubject: "exclude",
+          modelsWithoutElements: "include",
           excludedElementClassNames: [CLASS_NAME_GeometricElement3d],
         },
       });

@@ -9,10 +9,10 @@ import { assert } from "@itwin/core-bentley";
 import { HierarchyNodeIdentifier, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
 import { toVoidPromise } from "../../common/internal/Rxjs.js";
-import { getClassesByView, getOrCreate } from "../../common/internal/Utils.js";
+import { getClassesByView, getOrCreate, mergeWithDefaults } from "../../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../../common/TreeErrors.js";
 import { useTelemetryContext } from "../../common/UseTelemetryContext.js";
-import { CategoriesTreeDefinition } from "../CategoriesTreeDefinition.js";
+import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "../CategoriesTreeDefinition.js";
 
 import type { GuidString } from "@itwin/core-bentley";
 import type { InstanceKey } from "@itwin/presentation-shared";
@@ -30,7 +30,7 @@ export function useSearchPaths({
   searchText,
   searchLimit,
   viewType,
-  hierarchyConfiguration,
+  hierarchyConfig,
   idsCache,
   onCategoriesFiltered,
   onSearchPathsChanged,
@@ -39,7 +39,7 @@ export function useSearchPaths({
   viewType: "2d" | "3d";
   searchText?: string;
   searchLimit?: number | "unbounded";
-  hierarchyConfiguration: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
   idsCache: CategoriesTreeIdsCache;
   onCategoriesFiltered?: (categories: { categories: CategoryInfo[] | undefined; models?: Array<ModelId> }) => void;
   onSearchPathsChanged: (paths: HierarchySearchTree[] | undefined) => void;
@@ -78,7 +78,7 @@ export function useSearchPaths({
           label: searchText,
           viewType,
           idsCache,
-          hierarchyConfig: hierarchyConfiguration,
+          hierarchyConfig,
           componentId,
           limit: searchLimit,
         });
@@ -89,7 +89,9 @@ export function useSearchPaths({
         const paths = builder.getTree();
         onSearchPathsChanged(paths);
         const { elementClass, modelClass } = getClassesByView(viewType);
-        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, idsCache, elementClass, modelClass, hierarchyConfiguration));
+        onCategoriesFiltered?.(
+          await getCategoriesFromPaths({ trees: paths, idsCache, elementClassName: elementClass, modelsClassName: modelClass, hierarchyConfig }),
+        );
         return paths;
       } catch (e) {
         const newError = e instanceof SearchLimitExceededError ? "tooManySearchMatches" : "unknownSearchError";
@@ -101,7 +103,7 @@ export function useSearchPaths({
         return [];
       }
     };
-  }, [onCategoriesFiltered, searchText, searchLimit, onSearchPathsChanged, onFeatureUsed, viewType, idsCache, hierarchyConfiguration, componentId]);
+  }, [onCategoriesFiltered, searchText, searchLimit, onSearchPathsChanged, onFeatureUsed, viewType, idsCache, hierarchyConfig, componentId]);
 
   return {
     getPaths: getSearchPaths,
@@ -109,16 +111,21 @@ export function useSearchPaths({
   };
 }
 
-async function getCategoriesFromPaths(
-  trees: HierarchySearchTree[] | undefined,
-  idsCache: CategoriesTreeIdsCache,
-  elementClassName: string,
-  modelsClassName: string,
-  hierarchyConfig: CategoriesTreeHierarchyConfiguration,
-): Promise<{ categories: CategoryInfo[] | undefined; models?: Array<ModelId> }> {
+async function getCategoriesFromPaths(props: {
+  trees: HierarchySearchTree[] | undefined;
+  idsCache: CategoriesTreeIdsCache;
+  elementClassName: string;
+  modelsClassName: string;
+  hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
+}): Promise<{ categories: CategoryInfo[] | undefined; models?: Array<ModelId> }> {
+  const { trees, idsCache, elementClassName, modelsClassName } = props;
   if (!trees) {
     return { categories: undefined };
   }
+  const hierarchyConfig = mergeWithDefaults({
+    defaults: defaultHierarchyConfiguration,
+    overrides: props.hierarchyConfig,
+  });
 
   const rootFilteredElementIds = new Set<ElementId>();
   const subModelIds = new Set<ModelId>();
@@ -146,7 +153,7 @@ async function getCategoriesFromPaths(
     if (identifier.className === CLASS_NAME_DefinitionContainer) {
       await toVoidPromise(
         idsCache.getAllContainedCategories({ definitionContainerIds: identifier.id }).pipe(
-          hierarchyConfig.showEmptyCategories ? identity : filter(({ hasElements }) => hasElements),
+          hierarchyConfig.categoriesWithoutElements === "include" ? identity : filter(({ hasElements }) => hasElements),
           tap(({ id }) => {
             if (!categories.has(id)) {
               categories.set(id, []);

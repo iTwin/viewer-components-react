@@ -24,6 +24,7 @@ import type { ReactNode } from "react";
 import type { GuidString } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { useTree } from "@itwin/presentation-hierarchies-react";
+import type { EC } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { ExtendedVisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
@@ -45,7 +46,7 @@ export interface ClassificationToCategoriesRelationshipSpecification {
   /**
    * Full class name of the relationship which links classifications to categories. Format: `{SchemaName}.{RelationshipClassName}`.
    */
-  fullClassName: string;
+  fullClassName: EC.FullClassNameDotNotation;
   /**
    * Describes the relationship direction by specifying its source.
    * E.g. whether it's a `classification` -> `categories` or `category` -> `classifications` relationship.
