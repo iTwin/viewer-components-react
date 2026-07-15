@@ -5463,6 +5463,121 @@ describe("ModelsTreeVisibilityHandler", () => {
           });
         });
       });
+
+      describe("path with modeling element of same category as modeled element", () => {
+        let buildIModelResult: Awaited<ReturnType<typeof createSameCategoryModelingElementIModel>>;
+        let visibilityTestData: ReturnType<typeof createFilteredVisibilityTestData>;
+
+        async function createSameCategoryModelingElementIModel() {
+          return buildIModel(async (imodel, testSchema) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertPhysicalModelWithPartition({ txn, partitionParentId: IModel.rootSubjectId, codeValue: "model" });
+              const categoryA = insertSpatialCategory({ txn, codeValue: "categoryA" });
+              const modeledElement = insertPhysicalElement({
+                txn,
+                userLabel: "modeled element",
+                modelId: model.id,
+                categoryId: categoryA.id,
+                classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+              });
+              const subModel = insertPhysicalSubModel({ txn, modeledElementId: modeledElement.id });
+              // modeling element uses the same category as the modeled element, so the intermediate category node is not shown.
+              const modelingElement = insertPhysicalElement({ txn, userLabel: "modeling element", modelId: subModel.id, categoryId: categoryA.id });
+
+              return {
+                model,
+                categoryA,
+                modeledElement,
+                subModel,
+                modelingElement,
+                searchPaths: [
+                  {
+                    identifier: model,
+                    children: [
+                      {
+                        identifier: categoryA,
+                        children: [
+                          {
+                            identifier: modeledElement,
+                            children: [{ identifier: subModel, children: [{ identifier: modelingElement }] }],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              };
+            }),
+          );
+        }
+
+        beforeAll(async () => {
+          buildIModelResult = await createSameCategoryModelingElementIModel();
+        });
+
+        beforeEach(() => {
+          visibilityTestData = createFilteredVisibilityTestData({
+            imodelConnection: buildIModelResult.imodelConnection,
+            searchPaths: buildIModelResult.searchPaths,
+          });
+          visibilityTestData.viewport.setNeverDrawn({
+            elementIds: new Set([buildIModelResult.modeledElement.id, buildIModelResult.modelingElement.id]),
+          });
+          visibilityTestData.viewport.renderFrame();
+        });
+
+        afterEach(() => {
+          visibilityTestData[Symbol.dispose]();
+        });
+
+        afterAll(async () => {
+          await buildIModelResult.imodelConnection.close();
+        });
+
+        it("showing search target modeling element changes visibility for related nodes in search paths", async () => {
+          const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
+          const keys = buildIModelResult;
+
+          await visibilityHandlerWithSearchPaths.changeVisibility(
+            createElementHierarchyNode({
+              elementId: keys.modelingElement.id,
+              modelId: keys.modeledElement.id,
+              categoryId: keys.categoryA.id,
+              parentKeys: [keys.model, keys.categoryA, keys.modeledElement, keys.subModel, keys.categoryA],
+              search: { isSearchTarget: true },
+            }),
+            true,
+          );
+
+          await validateModelsTreeHierarchyVisibility({
+            provider: providerWithSearchPaths,
+            handler: visibilityHandlerWithSearchPaths,
+            viewport,
+            // prettier-ignore
+            expectations: {
+              [IModel.rootSubjectId]: "partial",
+                [keys.model.id]: "partial",
+                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                    [keys.modeledElement.id]: "partial",
+                      [keys.modelingElement.id]: "visible",
+            },
+          });
+
+          await validateModelsTreeHierarchyVisibility({
+            provider: defaultProvider,
+            handler: defaultVisibilityHandler,
+            viewport,
+            // prettier-ignore
+            expectations: {
+              [IModel.rootSubjectId]: "partial",
+                [keys.model.id]: "partial",
+                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                    [keys.modeledElement.id]: "partial",
+                      [keys.modelingElement.id]: "visible",
+            },
+          });
+        });
+      });
     });
 
     it("element of an excluded class still participates in visibility", async () => {
