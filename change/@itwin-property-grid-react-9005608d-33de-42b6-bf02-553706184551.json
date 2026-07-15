@@ -1,0 +1,7 @@
+{
+  "type": "major",
+  "comment": "Bump AppUI peer dependencies to `^5.33.0`.",
+  "packageName": "@itwin/property-grid-react",
+  "email": "24278440+saskliutas@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

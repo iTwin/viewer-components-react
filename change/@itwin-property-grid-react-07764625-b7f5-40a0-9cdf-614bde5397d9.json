@@ -1,0 +1,7 @@
+{
+  "type": "major",
+  "comment": "Bump `@itwin/presentation-components` peer dependency to `^6.0.0`.",
+  "packageName": "@itwin/property-grid-react",
+  "email": "24278440+saskliutas@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

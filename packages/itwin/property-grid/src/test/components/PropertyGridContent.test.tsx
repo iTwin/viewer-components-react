@@ -221,14 +221,14 @@ describe("<PropertyGridContent />", () => {
     await user.dblClick(propertyValue);
 
     const editor = await findByDisplayValue("Prop Value");
-    // type ` Updated` and press enter to commit new value
-    await user.type(editor, " Updated{Enter}");
+    // type `Updated` and press enter to commit new value
+    await user.type(editor, "Updated{Enter}");
 
     await waitFor(() => {
       expect(stub).toHaveBeenCalledOnce();
       const [{ dataProvider, newValue }] = stub.mock.calls[0];
       expect(dataProvider).toBe(provider);
-      expect((newValue as PrimitiveValue).value).toBe("Prop Value Updated");
+      expect((newValue as PrimitiveValue).value).toBe("Updated");
     });
   });
 

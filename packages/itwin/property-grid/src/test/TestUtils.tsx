@@ -15,7 +15,7 @@ import { userEvent } from "@testing-library/user-event";
 import type { PropsWithChildren, ReactElement } from "react";
 import type { Mock, Mocked } from "vitest";
 import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
-import type { FavoritePropertiesManager } from "@itwin/presentation-frontend";
+import type { FavoritePropertiesManager, PresentationManager } from "@itwin/presentation-frontend";
 import type { SelectionStorage, StorageSelectionChangesListener } from "@itwin/unified-selection";
 import type { RenderHookOptions, RenderHookResult, RenderOptions, RenderResult } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
@@ -66,13 +66,16 @@ export function stubFavoriteProperties() {
 
 export function stubPresentation(): {
   onIModelContentChanged: BeEvent<() => void>;
-  getDisplayLabelDefinitions: Mock;
+  getDisplayLabelDefinitionsIterator: Mock<PresentationManager["getDisplayLabelDefinitionsIterator"]>;
   rulesets: () => { onRulesetModified: BeEvent<() => void> };
   vars: () => { onVariableChanged: BeEvent<() => void> };
 } {
   const presentationStub = {
     onIModelContentChanged: new BeEvent(),
-    getDisplayLabelDefinitions: vi.fn().mockResolvedValue([]),
+    getDisplayLabelDefinitionsIterator: vi.fn<PresentationManager["getDisplayLabelDefinitionsIterator"]>().mockResolvedValue({
+      items: (async function* () {})(),
+      total: 0,
+    }),
     rulesets: () => ({
       onRulesetModified: new BeEvent(),
     }),
