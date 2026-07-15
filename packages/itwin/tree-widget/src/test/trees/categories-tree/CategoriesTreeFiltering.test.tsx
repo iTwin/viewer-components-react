@@ -90,7 +90,7 @@ describe("Categories tree", () => {
       ]);
     });
 
-    it("does not return definition container with only empty categories when `showEmptyCategories` is false", async () => {
+    it("does not return definition container with only empty categories when `categoriesWithoutElements` is set to 'exclude'", async () => {
       await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
           const definitionContainer = insertDefinitionContainer({ txn, codeValue: "DefinitionContainer", userLabel: "Test" });
@@ -109,7 +109,7 @@ describe("Categories tree", () => {
       expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([]);
     });
 
-    it("returns definition container with only empty categories when `showEmptyCategories` is true", async () => {
+    it("returns definition container with only empty categories when `categoriesWithoutElements` is set to 'include'", async () => {
       await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
           const definitionContainer = insertDefinitionContainer({ txn, codeValue: "DefinitionContainer", userLabel: "Test" });
@@ -938,7 +938,7 @@ describe("Categories tree", () => {
       });
 
       describe(`'onCategoriesFiltered' callback with ${viewType} categories`, () => {
-        it("is called with empty categories when `showEmptyCategories` flag is set", async () => {
+        it("is called with empty categories when `categoriesWithoutElements` is set to 'include'", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
               const physicalModel = insertElementsModel({ txn, codeValue: "TestPhysicalModel" });
@@ -968,7 +968,7 @@ describe("Categories tree", () => {
           });
           await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }));
 
-          // When showEmptyCategories is true, both categories should be reported (including the one without elements)
+          // When categoriesWithoutElements is set to 'include', both categories should be reported (including the one without elements)
           expect(filteredCategories?.categories).toEqual([
             { categoryId: keys.categoryWithElements.id, subCategoryIds: undefined },
             { categoryId: keys.categoryWithoutElements.id, subCategoryIds: undefined },
@@ -982,7 +982,7 @@ describe("Categories tree", () => {
           });
           await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }));
 
-          // When showEmptyCategories is false, only the category with elements should be reported
+          // When categoriesWithoutElements is set to 'exclude', only the category with elements should be reported
           expect(filteredCategories?.categories).toEqual([{ categoryId: keys.categoryWithElements.id, subCategoryIds: undefined }]);
         });
       });
