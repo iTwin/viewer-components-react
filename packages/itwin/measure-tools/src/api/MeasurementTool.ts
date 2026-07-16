@@ -221,7 +221,7 @@ export abstract class MeasurementToolBase<
     return true;
   }
 
-  protected get allowedDrawingTypes(): SheetMeasurementHelper.DrawingType[] {
+  protected get forbiddenDrawingTypes(): SheetMeasurementHelper.DrawingType[] {
     return [];
   }
 
@@ -361,7 +361,7 @@ export abstract class MeasurementToolBase<
     if (!this._enableSheetMeasurements) {
       return defaultToolTip(hit);
     } else {
-      return SheetMeasurementHelper.getSheetToolTipText(hit, this.allowedDrawingTypes, defaultToolTip);
+      return SheetMeasurementHelper.getSheetToolTipText(hit, this.forbiddenDrawingTypes, defaultToolTip);
     }
   }
 
