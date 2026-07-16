@@ -73,7 +73,8 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
               conditions: [
                 "m.ECInstanceId = HexToId(json_extract(s.JsonProperties, '$.Subject.Model.TargetPartition'))",
                 "NOT m.IsPrivate",
-                `EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elements.baseClass} WHERE Model.Id = m.ECInstanceId)`,
+                this.#hierarchyConfig.models.withoutElements === "exclude" &&
+                  `EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elements.baseClass} WHERE Model.Id = m.ECInstanceId)`,
               ],
             })}
           ) targetPartitionId,
