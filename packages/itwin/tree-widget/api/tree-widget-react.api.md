@@ -448,7 +448,7 @@ type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => ReactE
 // @beta
 interface ModelsTreeHierarchyConfiguration {
     elementClassGrouping?: "enable" | "enableWithCounts" | "disable";
-    elementClassSpecification?: EC.FullClassName;
+    elementClassSpecification?: EC.FullClassNameDotNotation;
     excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
     hierarchyLevelFiltering?: "enable" | "disable";
     modelsWithoutElements?: "include" | "exclude";

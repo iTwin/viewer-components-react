@@ -265,7 +265,7 @@ export function createClassGroupingHierarchyNode({
   ...props
 }: {
   elements: Id64Array;
-  className?: EC.FullClassName;
+  className?: EC.FullClassNameDotNotation;
   parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   modelId: Id64String;
   categoryId: Id64String;

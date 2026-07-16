@@ -87,7 +87,7 @@ export interface ModelsTreeHierarchyConfiguration {
    *
    * Defaults to `BisCore.GeometricElement3d`.
    */
-  elementClassSpecification?: EC.FullClassName;
+  elementClassSpecification?: EC.FullClassNameDotNotation;
   /**
    * Controls whether models that have no elements in the iModel are included in the hierarchy.
    *
@@ -131,7 +131,7 @@ export const defaultHierarchyConfiguration: RequiredModelsTreeHierarchyConfigura
 interface ModelsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
-  hierarchyConfig?: ModelsTreeHierarchyConfiguration;
+  hierarchyConfig: ModelsTreeHierarchyConfiguration;
   componentId?: GuidString;
 }
 
@@ -153,7 +153,7 @@ export interface ElementsGroupInfo {
 interface ModelsTreeInstanceKeyPathsBaseProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
-  hierarchyConfig?: ModelsTreeHierarchyConfiguration;
+  hierarchyConfig: ModelsTreeHierarchyConfiguration;
   limit?: number | "unbounded";
   abortSignal?: AbortSignal;
   componentId?: string;
@@ -896,7 +896,7 @@ const ELEMENT_CLASS_NAME_QUERY_ALIAS = "e";
 export function createGeometricElementInstanceKeyPaths(props: {
   queryExecutor: LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
-  elementClassName: EC.FullClassName;
+  elementClassName: EC.FullClassNameDotNotation;
   targetItems: Array<Id64String | ElementsGroupInfo>;
   componentId: GuidString;
   componentName: string;
@@ -1025,7 +1025,7 @@ export function createGeometricElementInstanceKeyPaths(props: {
   );
 }
 
-function parseElementsQueryRow(row: ECSqlQueryRow, groupInfos: ElementsGroupInfo[], separator: string, elementClassName: EC.FullClassName) {
+function parseElementsQueryRow(row: ECSqlQueryRow, groupInfos: ElementsGroupInfo[], separator: string, elementClassName: EC.FullClassNameDotNotation) {
   const path = parseQueriedPath({ queriedPathRaw: row[0], elementClassName, separator });
   return {
     elementHierarchyPath: path,
@@ -1040,7 +1040,7 @@ export function createCategoriesSearchPaths(props: {
   targetCategoryIds: Id64Array;
   componentId: GuidString;
   componentName: string;
-  elementClassName: EC.FullClassName;
+  elementClassName: EC.FullClassNameDotNotation;
   excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
 }): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String }> {
   const separator = ";";
@@ -1171,7 +1171,7 @@ function parseQueriedPath({
   separator,
 }: {
   queriedPathRaw: string;
-  elementClassName: EC.FullClassName;
+  elementClassName: EC.FullClassNameDotNotation;
   separator: string;
 }): HierarchyNodeIdentifiersPath {
   const path = new Array<InstanceKey>();

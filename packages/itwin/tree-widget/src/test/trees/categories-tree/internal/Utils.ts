@@ -90,7 +90,7 @@ export function createClassGroupingHierarchyNode({
 }: {
   categoryId: Id64String | undefined;
   modelElementsMap: Map<ModelId, { elementIds: Set<ElementId> }>;
-  className?: EC.FullClassName;
+  className?: EC.FullClassNameDotNotation;
   parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   hasDirectNonSearchTargets?: boolean;
   hasSearchTargetAncestor?: boolean;

@@ -31,7 +31,7 @@ export type HierarchyConfigForModelsCache = Pick<
 
 interface ModelsTreeIdsCacheProps extends BaseIdsCacheImplProps {
   queryExecutor: LimitingECSqlQueryExecutor;
-  hierarchyConfig?: HierarchyConfigForModelsCache;
+  hierarchyConfig: HierarchyConfigForModelsCache;
 }
 
 interface SubjectInfo {

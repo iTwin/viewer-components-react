@@ -24,7 +24,10 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { CategoriesTreeDefinition } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
+import {
+  CategoriesTreeDefinition,
+  defaultHierarchyConfiguration,
+} from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
 import { getClassesByView } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
@@ -982,10 +985,10 @@ describe("Categories tree", () => {
         });
       });
       describe(`excludedElementClassNames in '${viewType}' view`, () => {
-        const elementClassName: EC.FullClassName = viewType === "3d" ? "Generic.PhysicalObject" : "BisCore.DrawingGraphic";
-        const modeledElementClassName: EC.FullClassName = `${TestSchema.Name}.${viewType === "3d" ? TestSchema.ModeledElement3dClassName : TestSchema.ModeledElement2dClassName}`;
-        const unrelatedElementClassName: EC.FullClassName = viewType === "3d" ? "BisCore.GeometricElement2d" : "BisCore.GeometricElement3d";
-        const subModeledElementBaseClassName: EC.FullClassName = "BisCore.ISubModeledElement";
+        const elementClassName: EC.FullClassNameDotNotation = viewType === "3d" ? "Generic.PhysicalObject" : "BisCore.DrawingGraphic";
+        const modeledElementClassName: EC.FullClassNameDotNotation = `${TestSchema.Name}.${viewType === "3d" ? TestSchema.ModeledElement3dClassName : TestSchema.ModeledElement2dClassName}`;
+        const unrelatedElementClassName: EC.FullClassNameDotNotation = viewType === "3d" ? "BisCore.GeometricElement2d" : "BisCore.GeometricElement3d";
+        const subModeledElementBaseClassName: EC.FullClassNameDotNotation = "BisCore.ISubModeledElement";
         it("does not filter out elements when they don't belong to any of the excluded classes", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
@@ -1492,7 +1495,7 @@ function createCategoryTreeProvider(
       imodelAccess,
       viewType,
       idsCache,
-      hierarchyConfig,
+      hierarchyConfig: hierarchyConfig ?? defaultHierarchyConfiguration,
     }),
   });
   return {

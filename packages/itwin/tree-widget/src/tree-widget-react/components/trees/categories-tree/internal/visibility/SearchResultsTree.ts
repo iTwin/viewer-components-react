@@ -44,9 +44,9 @@ export interface CategoriesTreeSearchTargets {
 export async function createCategoriesSearchResultsTree(props: {
   imodelAccess: ECClassHierarchyInspector;
   searchPaths: HierarchySearchTree[];
-  categoryClassName: EC.FullClassName;
-  categoryElementClassName: EC.FullClassName;
-  categoryModelClassName: EC.FullClassName;
+  categoryClassName: EC.FullClassNameDotNotation;
+  categoryElementClassName: EC.FullClassNameDotNotation;
+  categoryModelClassName: EC.FullClassNameDotNotation;
   idsCache: CategoriesTreeIdsCache;
 }): Promise<SearchResultsTree<CategoriesTreeSearchTargets>> {
   const { imodelAccess, searchPaths, categoryClassName, categoryElementClassName, categoryModelClassName, idsCache } = props;
@@ -132,9 +132,9 @@ interface ProcessedNodes {
 interface CategoriesTreeSearchResultsNodesHandlerProps {
   idsCache: CategoriesTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
-  categoryClassName: EC.FullClassName;
-  categoryElementClassName: EC.FullClassName;
-  categoryModelClassName: EC.FullClassName;
+  categoryClassName: EC.FullClassNameDotNotation;
+  categoryElementClassName: EC.FullClassNameDotNotation;
+  categoryModelClassName: EC.FullClassNameDotNotation;
 }
 
 class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<ProcessedNodes, CategoriesTreeSearchTargets, RawNode> {
@@ -429,7 +429,7 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
     throw new Error("Invalid parent node type");
   }
 
-  public async getType(className: EC.FullClassName): Promise<RawNode["type"]> {
+  public async getType(className: EC.FullClassNameDotNotation): Promise<RawNode["type"]> {
     if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_SubCategory)) {
       return "subCategory";
     }

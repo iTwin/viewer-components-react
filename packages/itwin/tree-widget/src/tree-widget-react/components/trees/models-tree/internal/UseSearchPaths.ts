@@ -37,7 +37,7 @@ export function useSearchPaths({
   onSearchPathsChanged,
   componentId,
 }: {
-  hierarchyConfig?: ModelsTreeHierarchyConfiguration;
+  hierarchyConfig: ModelsTreeHierarchyConfiguration;
   searchText?: string;
   searchLimit?: number | "unbounded";
   getSearchPaths?: (props: {

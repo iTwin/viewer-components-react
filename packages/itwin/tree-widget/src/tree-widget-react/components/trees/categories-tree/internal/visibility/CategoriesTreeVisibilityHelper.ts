@@ -22,7 +22,7 @@ import type { ElementClassGroupingNodeProps } from "../CategoriesTreeNodeInterna
 /** @internal */
 export type CategoriesTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
   idsCache: CategoriesTreeIdsCache;
-  hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 };
 
 /**

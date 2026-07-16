@@ -66,7 +66,7 @@ export function insertClassificationSystem(
   } & Partial<Omit<DefinitionElementProps, "id" | "parent" | "code" | "model">>,
 ) {
   const { txn, codeValue, modelId, ...elementProps } = props;
-  const className: EC.FullClassName = `ClassificationSystems.ClassificationSystem`;
+  const className: EC.FullClassNameDotNotation = `ClassificationSystems.ClassificationSystem`;
   const id = txn.insertElement({
     classFullName: className,
     model: modelId ?? IModel.dictionaryId,
@@ -85,7 +85,7 @@ export function insertClassificationTable(
   } & Partial<Omit<DefinitionElementProps, "id" | "parent" | "code" | "model">>,
 ) {
   const { txn, codeValue, modelId, parentId, ...elementProps } = props;
-  const className: EC.FullClassName = `ClassificationSystems.ClassificationTable`;
+  const className: EC.FullClassNameDotNotation = `ClassificationSystems.ClassificationTable`;
   const id = txn.insertElement({
     classFullName: className,
     model: modelId ?? IModel.dictionaryId,
@@ -115,7 +115,7 @@ export function insertClassification(
   } & Partial<Omit<DefinitionElementProps, "id" | "parent" | "code" | "model">>,
 ) {
   const { txn, codeValue, modelId, parentId, ...elementProps } = props;
-  const className: EC.FullClassName = `ClassificationSystems.Classification`;
+  const className: EC.FullClassNameDotNotation = `ClassificationSystems.Classification`;
   const id = txn.insertElement({
     classFullName: className,
     model: modelId,

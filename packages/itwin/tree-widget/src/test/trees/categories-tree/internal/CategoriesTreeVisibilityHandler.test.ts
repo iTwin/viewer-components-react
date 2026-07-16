@@ -23,7 +23,10 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { CategoriesTreeDefinition } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
+import {
+  CategoriesTreeDefinition,
+  defaultHierarchyConfiguration,
+} from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import { createCategoriesTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.js";
 import { BaseIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
@@ -109,7 +112,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
     idsCache: CategoriesTreeIdsCache;
     imodelAccess: ReturnType<typeof createIModelAccess>;
     searchPaths?: HierarchySearchTree[];
-    hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
+    hierarchyConfig: CategoriesTreeHierarchyConfiguration;
   }) {
     return createIModelHierarchyProvider({
       hierarchyDefinition: new CategoriesTreeDefinition({ ...props, viewType: "3d" }),
@@ -137,7 +140,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       searchPaths: undefined,
       hierarchyConfig,
     });
-    const provider = createProvider({ ...commonProps });
+    const provider = createProvider({ ...commonProps, hierarchyConfig: commonProps.hierarchyConfig ?? defaultHierarchyConfiguration });
 
     return {
       handler,

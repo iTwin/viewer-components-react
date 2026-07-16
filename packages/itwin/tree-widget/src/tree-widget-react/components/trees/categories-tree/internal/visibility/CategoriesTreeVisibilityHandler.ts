@@ -9,6 +9,7 @@ import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { fromWithRelease, getClassesByView } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
+import { defaultHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
 import { CategoriesTreeNodeInternal } from "../../internal/CategoriesTreeNodeInternal.js";
 import { CategoriesTreeVisibilityHelper } from "./CategoriesTreeVisibilityHelper.js";
 import { createCategoriesSearchResultsTree } from "./SearchResultsTree.js";
@@ -30,7 +31,7 @@ export interface CategoriesTreeVisibilityHandlerProps {
   idsCache: CategoriesTreeIdsCache;
   viewport: TreeWidgetViewport;
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfoCache;
-  hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 }
 
 /**
@@ -344,7 +345,7 @@ export function createCategoriesTreeVisibilityHandler(props: {
         alwaysAndNeverDrawnElementInfo: info,
         idsCache: props.idsCache,
         viewport,
-        hierarchyConfig: props.hierarchyConfig,
+        hierarchyConfig: props.hierarchyConfig ?? defaultHierarchyConfiguration,
       });
     },
     viewport: props.viewport,

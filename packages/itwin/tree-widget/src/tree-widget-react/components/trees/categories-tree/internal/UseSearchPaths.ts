@@ -39,7 +39,7 @@ export function useSearchPaths({
   viewType: "2d" | "3d";
   searchText?: string;
   searchLimit?: number | "unbounded";
-  hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
   idsCache: CategoriesTreeIdsCache;
   onCategoriesFiltered?: (categories: { categories: CategoryInfo[] | undefined; models?: Array<ModelId> }) => void;
   onSearchPathsChanged: (paths: HierarchySearchTree[] | undefined) => void;
@@ -116,7 +116,7 @@ async function getCategoriesFromPaths(props: {
   idsCache: CategoriesTreeIdsCache;
   elementClassName: string;
   modelsClassName: string;
-  hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 }): Promise<{ categories: CategoryInfo[] | undefined; models?: Array<ModelId> }> {
   const { trees, idsCache, elementClassName, modelsClassName } = props;
   if (!trees) {

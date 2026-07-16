@@ -130,6 +130,7 @@ describe("categories tree", () => {
           idsCache,
           imodelAccess,
           viewType: "3d",
+          hierarchyConfig: {},
         }),
         imodelAccess,
       });

@@ -150,10 +150,11 @@ describe("models tree", () => {
       const idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
         baseIdsCache,
+        hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
       });
       const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
       const provider = createIModelHierarchyProvider({
-        hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess }),
+        hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
         imodelAccess,
       });
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
@@ -247,10 +248,11 @@ describe("models tree", () => {
       const idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
         baseIdsCache,
+        hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
       });
       const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
       const provider = createIModelHierarchyProvider({
-        hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess }),
+        hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
         imodelAccess,
       });
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;

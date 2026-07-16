@@ -989,8 +989,8 @@ describe("Categories tree", () => {
 
       describe(`excludedElementClassNames in '${viewType}' view`, () => {
         const showElementsConfig = { elements: "include" as const };
-        const elementClassName: EC.FullClassName = viewType === "3d" ? "Generic.PhysicalObject" : "BisCore.DrawingGraphic";
-        const subModeledElementBaseClassName: EC.FullClassName = "BisCore.ISubModeledElement";
+        const elementClassName: EC.FullClassNameDotNotation = viewType === "3d" ? "Generic.PhysicalObject" : "BisCore.DrawingGraphic";
+        const subModeledElementBaseClassName: EC.FullClassNameDotNotation = "BisCore.ISubModeledElement";
 
         it("excludes elements of excluded classes from search paths", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>

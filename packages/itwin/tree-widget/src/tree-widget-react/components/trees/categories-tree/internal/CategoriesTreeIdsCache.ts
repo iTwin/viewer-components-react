@@ -55,8 +55,8 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
       }>
     | undefined;
   #definitionContainerInstanceKeyPaths: Map<DefinitionContainerId, Observable<HierarchyNodeIdentifiersPath>> = new Map();
-  #categoryClass: EC.FullClassName;
-  #categoryElementClass: EC.FullClassName;
+  #categoryClass: EC.FullClassNameDotNotation;
+  #categoryElementClass: EC.FullClassNameDotNotation;
   #isDefinitionContainerSupported: Observable<boolean> | undefined;
   #filteredElementsModels: Observable<Map<ElementId, ModelId>> | undefined;
   #queryExecutor: LimitingECSqlQueryExecutor;

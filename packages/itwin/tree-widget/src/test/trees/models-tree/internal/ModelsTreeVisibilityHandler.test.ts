@@ -80,7 +80,7 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
     const idsCache = new ModelsTreeIdsCache({
       queryExecutor: createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"),
-      hierarchyConfig,
+      hierarchyConfig: hierarchyConfig ?? defaultHierarchyConfiguration,
       baseIdsCache,
     });
     return idsCache;
@@ -1749,7 +1749,7 @@ describe("ModelsTreeVisibilityHandler", () => {
     function createProvider(props: {
       idsCache: ModelsTreeIdsCache;
       imodelAccess: ReturnType<typeof createIModelAccess>;
-      hierarchyConfig?: ModelsTreeHierarchyConfiguration;
+      hierarchyConfig: ModelsTreeHierarchyConfiguration;
       searchPaths?: HierarchySearchTree[];
     }) {
       return createIModelHierarchyProvider({
@@ -3782,7 +3782,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const emptyPartitionId = insertPhysicalPartition({ txn, codeValue: "EmptyPhysicalModel", parentId: IModel.rootSubjectId }).id;
             const emptyModelId = insertPhysicalSubModel({ txn, modeledElementId: emptyPartitionId }).id;
 
-            const customClassName = schema.items.SubModelablePhysicalObject.fullName as EC.FullClassName;
+            const customClassName = schema.items.SubModelablePhysicalObject.fullName as EC.FullClassNameDotNotation;
 
             const partitionId = insertPhysicalPartition({ txn, codeValue: "ConfigurationPhysicalModel ", parentId: IModel.rootSubjectId }).id;
             const configurationModelId = insertPhysicalSubModel({ txn, modeledElementId: partitionId }).id;

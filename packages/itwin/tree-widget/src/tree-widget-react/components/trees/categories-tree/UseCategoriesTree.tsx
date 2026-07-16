@@ -200,7 +200,7 @@ function useCategoriesCachedVisibility(props: {
   idsCache: CategoriesTreeIdsCache;
   viewType: "2d" | "3d";
   componentId: GuidString;
-  hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 }) {
   const { activeView, idsCache, viewType, componentId, hierarchyConfig } = props;
   const { visibilityHandlerFactory, searchPaths, onSearchPathsChanged } = useCachedVisibility<CategoriesTreeIdsCache, CategoriesTreeSearchTargets>({
@@ -230,7 +230,7 @@ function useCategoriesCachedVisibility(props: {
 
 function createTreeSpecificVisibilityHandler(
   props: CreateTreeSpecificVisibilityHandlerProps<CategoriesTreeIdsCache> & {
-    hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
+    hierarchyConfig: CategoriesTreeHierarchyConfiguration;
   },
 ) {
   const { info, idsCache, viewport, hierarchyConfig } = props;

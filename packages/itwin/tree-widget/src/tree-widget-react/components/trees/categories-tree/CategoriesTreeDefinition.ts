@@ -87,7 +87,7 @@ interface CategoriesTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   viewType: "2d" | "3d";
   idsCache: CategoriesTreeIdsCache;
-  hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 }
 
 interface CategoriesTreeInstanceKeyPathsBaseProps {
@@ -95,7 +95,7 @@ interface CategoriesTreeInstanceKeyPathsBaseProps {
   limit?: number | "unbounded";
   viewType: "2d" | "3d";
   idsCache: CategoriesTreeIdsCache;
-  hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
   componentId?: GuidString;
   abortSignal?: AbortSignal;
 }
@@ -154,9 +154,9 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   #idsCache: CategoriesTreeIdsCache;
   #hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
   #iModelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
-  #categoryClass: EC.FullClassName;
-  #categoryElementClass: EC.FullClassName;
-  #categoryModelClass: EC.FullClassName;
+  #categoryClass: EC.FullClassNameDotNotation;
+  #categoryElementClass: EC.FullClassNameDotNotation;
+  #categoryModelClass: EC.FullClassNameDotNotation;
   static #componentName = "CategoriesTreeDefinition";
 
   public constructor(props: CategoriesTreeDefinitionProps) {
@@ -1502,9 +1502,9 @@ export function createCategoriesSearchPaths(props: {
 function parseQueryRow(
   row: ECSqlQueryRow,
   separator: string,
-  elementClassName: EC.FullClassName,
-  categoryClassName: EC.FullClassName,
-  modelClassName: EC.FullClassName,
+  elementClassName: EC.FullClassNameDotNotation,
+  categoryClassName: EC.FullClassNameDotNotation,
+  modelClassName: EC.FullClassNameDotNotation,
 ) {
   const queriedPath: string[] = row[0].split(separator);
   const path = new Array<InstanceKey>();

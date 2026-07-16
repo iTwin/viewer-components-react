@@ -20,6 +20,7 @@ describe("ModelsTreeIdsCache", () => {
     const idsCache = new ModelsTreeIdsCache({
       queryExecutor,
       baseIdsCache,
+      hierarchyConfig: defaultHierarchyConfiguration,
     });
     return idsCache;
   }

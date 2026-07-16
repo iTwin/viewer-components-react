@@ -211,7 +211,7 @@ export function insertPartition(
 }
 
 export function insertSubModel(
-  props: BaseInstanceInsertProps & { classFullName: string; modeledElementId: Id64String; relationshipName?: EC.FullClassName } & Partial<
+  props: BaseInstanceInsertProps & { classFullName: string; modeledElementId: Id64String; relationshipName?: EC.FullClassNameDotNotation } & Partial<
       Omit<ModelProps, "id" | "modeledElement" | "parentModel">
     >,
 ) {
@@ -310,7 +310,7 @@ export function getDefaultSubcategoryKey(categoryId: Id64String, fullClassNameSe
   const pair = Id64.getUint32Pair(categoryId);
   pair.lower++; // id of default subcategory is always `category id + 1`
   return {
-    className: `BisCore${fullClassNameSeparator ?? "."}SubCategory` as EC.FullClassName,
+    className: `BisCore${fullClassNameSeparator ?? "."}SubCategory` as EC.FullClassNameDotNotation,
     id: Id64.fromUint32PairObject(pair),
   };
 }
@@ -626,7 +626,7 @@ export function insertDefinitionPartition(
 }
 
 export function insertDefinitionSubModel(
-  props: BaseInstanceInsertProps & { modeledElementId: Id64String; relationshipName?: EC.FullClassName } & Partial<
+  props: BaseInstanceInsertProps & { modeledElementId: Id64String; relationshipName?: EC.FullClassNameDotNotation } & Partial<
       Omit<GeometricModel3dProps, "id" | "modeledElement" | "parentModel">
     >,
 ) {
