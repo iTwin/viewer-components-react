@@ -1,6 +1,6 @@
 {
   "type": "major",
-  "comment": "Bumped `itwinjs-core` peer dependencies to `^5.9.0`. Bumped `appui` peer dependencies to `^5.31.0`. Moved `@itwin/itwinui-react` from direct dependencies to peer dependencies. Removed support for `react` version `17`.",
+  "comment": "Bumped `itwinjs-core` peer dependencies to `^5.11.0`. Moved `@itwin/itwinui-react` from direct dependencies to peer dependencies. Removed support for `react` version `17`.",
   "packageName": "@itwin/property-grid-react",
   "email": "24278440+saskliutas@users.noreply.github.com",
   "dependentChangeType": "patch"
