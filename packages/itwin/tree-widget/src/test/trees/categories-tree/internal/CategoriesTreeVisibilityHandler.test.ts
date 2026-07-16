@@ -5140,8 +5140,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
     });
 
-    // TODO: Enable with https://github.com/iTwin/viewer-components-react/issues/1553
-    describe.skip("category with modeled elements hierarchy", () => {
+    describe("category with modeled elements hierarchy", () => {
       let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
       let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
       async function createIModel() {
@@ -5165,6 +5164,15 @@ describe("CategoriesTreeVisibilityHandler", () => {
             const subModelElement2 = insertPhysicalElement({ txn, userLabel: `subModel element 2`, modelId: subModel.id, categoryId: subModelCategory.id });
             const defaultSubCategoryOfSubModelCategory = { id: getDefaultSubCategoryId(subModelCategory.id), className: CLASS_NAME_SubCategory };
 
+            const otherSubModelCategory = insertSpatialCategory({ txn, codeValue: "other subModel category" });
+            const otherSubModelElement = insertPhysicalElement({
+              txn,
+              userLabel: `other subModel element`,
+              modelId: subModel.id,
+              categoryId: otherSubModelCategory.id,
+            });
+            const defaultSubCategoryOfOtherSubModelCategory = { id: getDefaultSubCategoryId(otherSubModelCategory.id), className: CLASS_NAME_SubCategory };
+
             const siblingCategory = insertSpatialCategory({ txn, codeValue: "sibling category" });
             const siblingElement = insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: siblingCategory.id });
             const defaultSiblingSubCategory = { id: getDefaultSubCategoryId(siblingCategory.id), className: CLASS_NAME_SubCategory };
@@ -5180,6 +5188,9 @@ describe("CategoriesTreeVisibilityHandler", () => {
               subModelElement,
               subModelElement2,
               defaultSubCategoryOfSubModelCategory,
+              otherSubModelCategory,
+              otherSubModelElement,
+              defaultSubCategoryOfOtherSubModelCategory,
               siblingCategory,
               siblingElement,
               defaultSiblingSubCategory,
@@ -5212,6 +5223,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
           subCategoriesOfCategories: [
             { categoryId: createIModelResult.category.id, subCategories: createIModelResult.defaultSubCategory.id },
             { categoryId: createIModelResult.subModelCategory.id, subCategories: createIModelResult.defaultSubCategoryOfSubModelCategory.id },
+            {
+              categoryId: createIModelResult.otherSubModelCategory.id,
+              subCategories: createIModelResult.defaultSubCategoryOfOtherSubModelCategory.id,
+            },
             { categoryId: createIModelResult.siblingCategory.id, subCategories: createIModelResult.defaultSiblingSubCategory.id },
           ],
         });
@@ -5240,6 +5255,9 @@ describe("CategoriesTreeVisibilityHandler", () => {
           defaultSubCategory,
           element,
           subModelElement2,
+          otherSubModelCategory,
+          otherSubModelElement,
+          defaultSubCategoryOfOtherSubModelCategory,
         } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
           createCategoryHierarchyNode({
@@ -5284,6 +5302,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 [`${subModel.id}-${subModelCategory.id}`]: "partial",
                   [subModelElement.id]: "visible",
                   [subModelElement2.id]: "hidden",
+                [`${subModel.id}-${otherSubModelCategory.id}`]: "hidden",
+                  [otherSubModelElement.id]: "hidden",
+
+            [otherSubModelCategory.id]: "hidden",
+              [defaultSubCategoryOfOtherSubModelCategory.id]: "hidden",
 
             [siblingCategory.id]: "hidden",
               [siblingElement.id]: "hidden",
@@ -5310,6 +5333,9 @@ describe("CategoriesTreeVisibilityHandler", () => {
           defaultSubCategory,
           element,
           subModelElement2,
+          otherSubModelCategory,
+          otherSubModelElement,
+          defaultSubCategoryOfOtherSubModelCategory,
           physicalModel,
         } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
@@ -5353,6 +5379,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 [`${subModel.id}-${subModelCategory.id}`]: "partial",
                   [subModelElement.id]: "visible",
                   [subModelElement2.id]: "hidden",
+                [`${subModel.id}-${otherSubModelCategory.id}`]: "hidden",
+                  [otherSubModelElement.id]: "hidden",
+
+            [otherSubModelCategory.id]: "hidden",
+              [defaultSubCategoryOfOtherSubModelCategory.id]: "hidden",
 
             [siblingCategory.id]: "hidden",
               [siblingElement.id]: "hidden",
@@ -5379,11 +5410,14 @@ describe("CategoriesTreeVisibilityHandler", () => {
           defaultSubCategory,
           element,
           subModelElement2,
+          otherSubModelCategory,
+          otherSubModelElement,
+          defaultSubCategoryOfOtherSubModelCategory,
         } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
           createCategoryHierarchyNode({
             id: subModelCategory.id,
-            parentKeys: [category, modeledElement],
+            parentKeys: [category, modeledElement, subModel],
             modelIds: [subModel.id],
             search: {
               isSearchTarget: false,
@@ -5422,12 +5456,17 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 [`${subModel.id}-${subModelCategory.id}`]: "partial",
                   [subModelElement.id]: "visible",
                   [subModelElement2.id]: "hidden",
+                [`${subModel.id}-${otherSubModelCategory.id}`]: "hidden",
+                  [otherSubModelElement.id]: "hidden",
+
+            [otherSubModelCategory.id]: "hidden",
+              [defaultSubCategoryOfOtherSubModelCategory.id]: "hidden",
 
             [siblingCategory.id]: "hidden",
               [siblingElement.id]: "hidden",
               [defaultSiblingSubCategory.id]: "hidden",
 
-            [subModelCategory.id]: "partial",
+            [subModelCategory.id]: "hidden",
               [defaultSubCategoryOfSubModelCategory.id]: "hidden",
           },
         });
@@ -5448,6 +5487,9 @@ describe("CategoriesTreeVisibilityHandler", () => {
           defaultSubCategory,
           element,
           subModelElement2,
+          otherSubModelCategory,
+          otherSubModelElement,
+          defaultSubCategoryOfOtherSubModelCategory,
         } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
           createElementHierarchyNode({
@@ -5490,6 +5532,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 [`${subModel.id}-${subModelCategory.id}`]: "partial",
                   [subModelElement.id]: "visible",
                   [subModelElement2.id]: "hidden",
+                [`${subModel.id}-${otherSubModelCategory.id}`]: "hidden",
+                  [otherSubModelElement.id]: "hidden",
+
+            [otherSubModelCategory.id]: "hidden",
+              [defaultSubCategoryOfOtherSubModelCategory.id]: "hidden",
 
             [siblingCategory.id]: "hidden",
               [siblingElement.id]: "hidden",
