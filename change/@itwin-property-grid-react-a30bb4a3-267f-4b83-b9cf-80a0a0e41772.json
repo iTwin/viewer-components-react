@@ -1,7 +1,0 @@
-{
-  "type": "major",
-  "comment": "Removed handling of deprecated `Presentation.selection` handling. Now property grid components handle selection only through `selectionStorage` passed in through props.",
-  "packageName": "@itwin/property-grid-react",
-  "email": "24278440+saskliutas@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

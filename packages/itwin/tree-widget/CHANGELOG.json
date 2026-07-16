@@ -2,6 +2,21 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Thu, 16 Jul 2026 13:39:19 GMT",
+      "version": "3.18.0",
+      "tag": "@itwin/tree-widget-react_v3.18.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "2d966e0df536d724a8dd050b18bbca8b33acbe4c",
+            "comment": "Add support for `@itwin/presentation-components` 6.0."
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 07 May 2026 14:10:55 GMT",
       "version": "3.17.10",
       "tag": "@itwin/tree-widget-react_v3.17.10",
