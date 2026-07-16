@@ -143,7 +143,7 @@ describe("models tree", () => {
         ...testData,
       });
       const baseIdsCache = new BaseIdsCache({
-        elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
+        elementClassName: defaultModelsTreeHierarchyConfiguration.elements.baseClass,
         type: "3d",
         queryExecutor: imodelAccess,
       });
@@ -241,7 +241,7 @@ describe("models tree", () => {
         ...hiddenTestData,
       });
       const baseIdsCache = new BaseIdsCache({
-        elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
+        elementClassName: defaultModelsTreeHierarchyConfiguration.elements.baseClass,
         type: "3d",
         queryExecutor: imodelAccess,
       });
@@ -436,10 +436,12 @@ describe("models tree", () => {
           categories: testData.categories.map((category, index) => ({ ...category, visible: index !== 0 })),
         });
         const hierarchyConfig = {
-          excludedElementClassNames,
+          elements: {
+            excludedClasses: excludedElementClassNames,
+          },
         };
         const baseIdsCache = new BaseIdsCache({
-          elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
+          elementClassName: defaultModelsTreeHierarchyConfiguration.elements.baseClass,
           type: "3d",
           queryExecutor: imodelAccess,
           excludedElementClassNames,

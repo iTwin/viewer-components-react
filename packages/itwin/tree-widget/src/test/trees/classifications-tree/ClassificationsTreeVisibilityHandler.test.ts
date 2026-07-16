@@ -83,7 +83,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       queryExecutor: imodelAccess,
       elementClassName: CLASS_NAME_GeometricElement3d,
       type: "3d",
-      excludedElementClassNames: hierarchyConfig?.excludedElementClassNames,
+      excludedElementClassNames: hierarchyConfig?.elements?.excludedClasses,
     });
     const idsCache = new ClassificationsTreeIdsCache({
       queryExecutor: imodelAccess,
@@ -1692,7 +1692,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     using visibilityTestData = await createVisibilityTestData({
       imodelConnection,
       hierarchyConfig: {
-        excludedElementClassNames: [CLASS_NAME_GeometricElement3d],
+        elements: { excludedClasses: [CLASS_NAME_GeometricElement3d] },
       },
     });
     const { handler, viewport, provider } = visibilityTestData;
@@ -1751,7 +1751,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     using visibilityTestData = await createVisibilityTestData({
       imodelConnection,
       hierarchyConfig: {
-        excludedElementClassNames: ["Generic.SpatialLocation"],
+        elements: { excludedClasses: ["Generic.SpatialLocation"] },
       },
     });
     const { handler, viewport, provider } = visibilityTestData;

@@ -140,12 +140,12 @@ describe("classifications tree", () => {
           viewport,
           ...testData,
         });
-        const hierarchyConfig = { rootClassificationSystemCode, excludedElementClassNames };
+        const hierarchyConfig = { rootClassificationSystemCode, elements: { excludedClasses: excludedElementClassNames } };
         const baseIdsCache = new BaseIdsCache({
           queryExecutor: imodelAccess,
-          elementClassName: "BisCore:GeometricElement3d",
+          elementClassName: "BisCore.GeometricElement3d",
           type: "3d",
-          excludedElementClassNames: hierarchyConfig.excludedElementClassNames,
+          excludedElementClassNames: hierarchyConfig.elements.excludedClasses,
         });
         const idsCache = new ClassificationsTreeIdsCache({
           queryExecutor: imodelAccess,

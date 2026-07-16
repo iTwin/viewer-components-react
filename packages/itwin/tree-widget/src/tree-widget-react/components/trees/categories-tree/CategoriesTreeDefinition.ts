@@ -42,7 +42,6 @@ import {
   getOptimalBatchSize,
   getOrCreate,
   groupingNodeDataFromChildren,
-  mergeWithDefaults,
   ParentElementsPath,
   parseIdsSelectorResult,
   releaseMainThreadOnItemsCount,
@@ -78,6 +77,7 @@ import type {
   Props,
 } from "@itwin/presentation-shared";
 import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategoryId } from "../common/internal/Types.js";
+import type { DeepRequired } from "../common/internal/Utils.js";
 import type { CategoriesTreeIdsCache, CategoryInfo } from "./internal/CategoriesTreeIdsCache.js";
 import type { CategoryNodeProps, ElementNodeProps } from "./internal/CategoriesTreeNodeInternal.js";
 
@@ -111,42 +111,100 @@ export interface CategoriesTreeInstanceKeyPathsFromInstanceLabelProps extends Ca
  */
 export interface CategoriesTreeHierarchyConfiguration {
   /**
-   * Controls whether SubCategory nodes are included in the hierarchy.
+   * Element node's configuration options.
    *
-   * Defaults to `"include"`.
+   * Defaults to `{ nodes: "exclude" }`.
    */
-  subCategories?: "include" | "exclude";
+  elements?:
+    | {
+        /**
+         * Excludes Element nodes from the hierarchy.
+         */
+        nodes?: "exclude";
+      }
+    | {
+        /**
+         * Includes Element nodes in the hierarchy.
+         */
+        nodes: "include";
+        /**
+         * Element classes to exclude from the hierarchy.
+         *
+         * Elements, whose class is or derives from one of the classes in this list, are not loaded into the hierarchy.
+         * Children of such nodes are also not shown.
+         *
+         * Defaults to `[]`.
+         */
+        excludedClasses?: EC.FullClassNameDotNotation[];
+      };
   /**
-   * Controls whether Element nodes are included in the hierarchy.
+   * Category node's configuration options.
    *
-   * Defaults to `"exclude"`.
+   * Defaults to `{ withoutElements: "exclude" }`.
    */
-  elements?: "include" | "exclude";
+  categories?: {
+    /**
+     * Controls whether categories that have no elements in the iModel are included in the hierarchy.
+     *
+     * Defaults to `"exclude"`.
+     */
+    withoutElements?: "include" | "exclude";
+  };
   /**
-   * Controls whether categories that have no elements in the iModel are included in the hierarchy.
+   * SubCategory node's configuration options.
    *
-   * Defaults to `"exclude"`.
+   * Defaults to `{ nodes: "include" }`.
+   *
    */
-  categoriesWithoutElements?: "include" | "exclude";
-  /**
-   * Element classes to exclude from the hierarchy.
-   *
-   * Elements, whose class is or derives from one of the classes in this list, are not loaded into the hierarchy.
-   *
-   * Defaults to `[]`.
-   */
-  excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
+  subCategories?: {
+    /**
+     * Controls whether SubCategory nodes are included in the hierarchy.
+     *
+     * Defaults to `"include"`.
+     */
+    nodes?: "include" | "exclude";
+  };
 }
 
-type RequiredCategoriesTreeHierarchyConfiguration = Required<CategoriesTreeHierarchyConfiguration>;
+/** @internal */
+export type RequiredCategoriesTreeHierarchyConfiguration = DeepRequired<CategoriesTreeHierarchyConfiguration> & {
+  elements: {
+    nodes: "include" | "exclude";
+    excludedClasses: EC.FullClassNameDotNotation[];
+  };
+};
 
 /** @internal */
 export const defaultHierarchyConfiguration: RequiredCategoriesTreeHierarchyConfiguration = {
-  subCategories: "include",
-  elements: "exclude",
-  categoriesWithoutElements: "exclude",
-  excludedElementClassNames: [],
+  elements: {
+    nodes: "exclude",
+    excludedClasses: [],
+  },
+  categories: {
+    withoutElements: "exclude",
+  },
+  subCategories: {
+    nodes: "include",
+  },
 };
+
+/** @internal */
+export function resolveCategoriesTreeHierarchyConfiguration(
+  hierarchyConfig?: CategoriesTreeHierarchyConfiguration,
+): RequiredCategoriesTreeHierarchyConfiguration {
+  return {
+    elements: {
+      nodes: hierarchyConfig?.elements?.nodes ?? defaultHierarchyConfiguration.elements.nodes,
+      excludedClasses: hierarchyConfig?.elements?.nodes === "include" ? (hierarchyConfig.elements.excludedClasses ?? []) : [],
+    },
+    categories: {
+      withoutElements: hierarchyConfig?.categories?.withoutElements ?? defaultHierarchyConfiguration.categories.withoutElements,
+    },
+    subCategories: {
+      nodes: hierarchyConfig?.subCategories?.nodes ?? defaultHierarchyConfiguration.subCategories.nodes,
+    },
+  };
+}
 
 /** @internal */
 export class CategoriesTreeDefinition implements HierarchyDefinition {
@@ -162,10 +220,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   public constructor(props: CategoriesTreeDefinitionProps) {
     this.#iModelAccess = props.imodelAccess;
     this.#idsCache = props.idsCache;
-    this.#hierarchyConfig = mergeWithDefaults({
-      defaults: defaultHierarchyConfiguration,
-      overrides: props.hierarchyConfig,
-    });
+    this.#hierarchyConfig = resolveCategoriesTreeHierarchyConfiguration(props.hierarchyConfig);
     const { categoryClass, elementClass, modelClass } = getClassesByView(props.viewType);
     this.#categoryClass = categoryClass;
     this.#categoryElementClass = elementClass;
@@ -286,7 +341,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         hierarchy: {
           rootNodes: async (requestProps: DefineRootHierarchyLevelProps) => this.createDefinitionContainersAndCategoriesQuery(requestProps),
           childNodes: [
-            ...(this.#hierarchyConfig.elements === "include"
+            ...(this.#hierarchyConfig.elements.nodes === "include"
               ? [
                   {
                     parentInstancesNodePredicate: this.#categoryElementClass,
@@ -303,7 +358,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 ]
               : []),
             // When sub-categories and elements are not shown, category will never have children
-            ...(this.#hierarchyConfig.subCategories === "exclude" && this.#hierarchyConfig.elements === "exclude"
+            ...(this.#hierarchyConfig.subCategories.nodes === "exclude" && this.#hierarchyConfig.elements.nodes === "exclude"
               ? []
               : [
                   {
@@ -368,7 +423,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                   SELECT c.Model.Id
                   FROM ${this.#categoryElementClass} c
                   ${createWhereClause({
-                    conditions: [createExcludedClassesClause({ alias: "c", excludedClassNames: this.#hierarchyConfig.excludedElementClassNames })],
+                    conditions: [createExcludedClassesClause({ alias: "c", excludedClassNames: this.#hierarchyConfig.elements.excludedClasses })],
                   })}
                 )`,
               ],
@@ -456,7 +511,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
               conditions: [
                 "this.Parent.Id IS NULL",
                 `this.Category.Id = ${modeledElementCategory}`,
-                createExcludedClassesClause({ alias: "this", excludedClassNames: this.#hierarchyConfig.excludedElementClassNames }),
+                createExcludedClassesClause({ alias: "this", excludedClassNames: this.#hierarchyConfig.elements.excludedClasses }),
                 elementInstanceFilterClauses.where,
               ],
             })}
@@ -477,11 +532,11 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     const { definitionContainers, categories } = await firstValueFrom(
       parentNodeInstanceIds === undefined
         ? this.#idsCache.getRootDefinitionContainersAndCategories({
-            includeEmpty: this.#hierarchyConfig.categoriesWithoutElements === "include",
+            includeEmpty: this.#hierarchyConfig.categories.withoutElements === "include",
           })
         : this.#idsCache.getDirectChildDefinitionContainersAndCategories({
             parentDefinitionContainerIds: parentNodeInstanceIds,
-            includeEmpty: this.#hierarchyConfig.categoriesWithoutElements === "include",
+            includeEmpty: this.#hierarchyConfig.categories.withoutElements === "include",
           }),
     );
     const hierarchyDefinitionPromises = new Array<Promise<HierarchyNodesDefinition>>();
@@ -567,7 +622,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         filter: instanceFilter,
         contentClass: { fullName: this.#categoryClass, alias: "this" },
       }),
-      this.#hierarchyConfig.elements === "include"
+      this.#hierarchyConfig.elements.nodes === "include"
         ? firstValueFrom(
             // Iterate over categories which will be returned by the query
             from(categories).pipe(
@@ -591,7 +646,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       .map((categoryInfo) => categoryInfo.id);
 
     const categoriesWithChildren =
-      this.#hierarchyConfig.subCategories === "include" && categoriesWithMultipleSubCategories.length > 0
+      this.#hierarchyConfig.subCategories.nodes === "include" && categoriesWithMultipleSubCategories.length > 0
         ? categoriesWithChildElements.length > 0
           ? // Want to filter out duplicate entries
             [...new Set(categoriesWithChildElements.concat(categoriesWithMultipleSubCategories))]
@@ -657,8 +712,10 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   private async createCategoryChildrenQuery(props: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     return (
       await Promise.all([
-        ...(this.#hierarchyConfig.subCategories === "include" && props.parentNode.extendedData?.hasSubCategories ? [this.createSubCategoriesQuery(props)] : []),
-        ...(this.#hierarchyConfig.elements === "include" ? [this.createCategoryElementsQuery(props)] : []),
+        ...(this.#hierarchyConfig.subCategories.nodes === "include" && props.parentNode.extendedData?.hasSubCategories
+          ? [this.createSubCategoriesQuery(props)]
+          : []),
+        ...(this.#hierarchyConfig.elements.nodes === "include" ? [this.createCategoryElementsQuery(props)] : []),
       ])
     ).reduce((acc, levelDefinition) => acc.concat(levelDefinition), new Array<HierarchyNodesDefinition>());
   }
@@ -735,7 +792,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
               ${createWhereClause({
                 conditions: [
                   "ce.Parent.Id = this.ECInstanceId",
-                  createExcludedClassesClause({ alias: "ce", excludedClassNames: this.#hierarchyConfig.excludedElementClassNames }),
+                  createExcludedClassesClause({ alias: "ce", excludedClassNames: this.#hierarchyConfig.elements.excludedClasses }),
                 ],
               })}
               LIMIT 1
@@ -853,7 +910,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             ${createWhereClause({
               conditions: [
                 !parentIds && "this.Parent.Id IS NULL",
-                createExcludedClassesClause({ alias: "this", excludedClassNames: this.#hierarchyConfig.excludedElementClassNames }),
+                createExcludedClassesClause({ alias: "this", excludedClassNames: this.#hierarchyConfig.elements.excludedClasses }),
                 instanceFilterClauses.where,
               ],
             })}
@@ -911,7 +968,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
               conditions: [
                 `this.Category.Id = ${parentCategoryId}`,
                 elementInstanceFilterClauses.where,
-                createExcludedClassesClause({ alias: "this", excludedClassNames: this.#hierarchyConfig.excludedElementClassNames }),
+                createExcludedClassesClause({ alias: "this", excludedClassNames: this.#hierarchyConfig.elements.excludedClasses }),
               ],
             })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
@@ -942,7 +999,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                   FROM ${this.#categoryElementClass} ce
                   JOIN IdSet(?) parentIdSet ON ce.Parent.Id = parentIdSet.id
                   ${createWhereClause({
-                    conditions: [createExcludedClassesClause({ alias: "ce", excludedClassNames: this.#hierarchyConfig.excludedElementClassNames })],
+                    conditions: [createExcludedClassesClause({ alias: "ce", excludedClassNames: this.#hierarchyConfig.elements.excludedClasses })],
                   })}
                   ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
                 )`,
@@ -988,10 +1045,7 @@ function createInstanceKeyPathsFromInstanceLabel(
   },
 ) {
   const { idsCache, label, viewType, labelsFactory, limit, imodelAccess, componentId, componentName } = props;
-  const hierarchyConfig = mergeWithDefaults({
-    defaults: defaultHierarchyConfiguration,
-    overrides: props.hierarchyConfig,
-  });
+  const hierarchyConfig = resolveCategoriesTreeHierarchyConfiguration(props.hierarchyConfig);
   const { categoryClass, elementClass } = getClassesByView(viewType);
 
   const adjustedLabel = label.replace(/[%_\\]/g, "\\$&");
@@ -1003,7 +1057,7 @@ function createInstanceKeyPathsFromInstanceLabel(
 
   return idsCache
     .getAllDefinitionContainersAndCategories({
-      includeEmpty: hierarchyConfig.categoriesWithoutElements === "include",
+      includeEmpty: hierarchyConfig.categories.withoutElements === "include",
     })
     .pipe(
       mergeMap(async ({ definitionContainers, categories }) => {
@@ -1027,7 +1081,7 @@ function createInstanceKeyPathsFromInstanceLabel(
             JOIN ${CLASS_NAME_SubCategory} sc ON sc.Parent.Id = this.ECInstanceId
             GROUP BY this.ECInstanceId
           )`,
-          ...(hierarchyConfig.elements === "include"
+          ...(hierarchyConfig.elements.nodes === "include"
             ? [
                 `${ELEMENTS_WITH_LABELS_CTE}(ClassName, ECInstanceId, ParentId, DisplayLabel) AS (
                   SELECT
@@ -1041,14 +1095,14 @@ function createInstanceKeyPathsFromInstanceLabel(
                   ${createWhereClause({
                     conditions: [
                       "NOT m.IsPrivate",
-                      createExcludedClassesClause({ alias: "this", excludedClassNames: hierarchyConfig.excludedElementClassNames }),
+                      createExcludedClassesClause({ alias: "this", excludedClassNames: hierarchyConfig.elements.excludedClasses }),
                     ],
                   })}
                   ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
                 )`,
               ]
             : []),
-          ...(hierarchyConfig.subCategories === "include"
+          ...(hierarchyConfig.subCategories.nodes === "include"
             ? [
                 `${SUBCATEGORIES_WITH_LABELS_CTE}(ClassName, ECInstanceId, ParentId, DisplayLabel) AS (
                   SELECT
@@ -1088,7 +1142,7 @@ function createInstanceKeyPathsFromInstanceLabel(
             WHERE
               c.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
             ${
-              hierarchyConfig.elements === "include"
+              hierarchyConfig.elements.nodes === "include"
                 ? `
                   UNION ALL
                   SELECT
@@ -1102,7 +1156,7 @@ function createInstanceKeyPathsFromInstanceLabel(
                 : ""
             }
             ${
-              hierarchyConfig.subCategories === "include"
+              hierarchyConfig.subCategories.nodes === "include"
                 ? `
                   UNION ALL
                   SELECT
@@ -1135,12 +1189,12 @@ function createInstanceKeyPathsFromInstanceLabel(
           ${limit === undefined ? `LIMIT ${MAX_SEARCH_INSTANCE_KEY_COUNT + 1}` : limit !== "unbounded" ? `LIMIT ${limit}` : ""}
         `;
         const bindings = [
-          ...(hierarchyConfig.elements === "include" ? [{ type: "idset" as const, value: categories }] : []),
-          ...(hierarchyConfig.subCategories === "include" ? [{ type: "idset" as const, value: categories }] : []),
+          ...(hierarchyConfig.elements.nodes === "include" ? [{ type: "idset" as const, value: categories }] : []),
+          ...(hierarchyConfig.subCategories.nodes === "include" ? [{ type: "idset" as const, value: categories }] : []),
           ...(definitionContainers.length > 0 ? [{ type: "idset" as const, value: definitionContainers }] : []),
           { type: "string" as const, value: adjustedLabel },
-          ...(hierarchyConfig.elements === "include" ? [{ type: "string" as const, value: adjustedLabel }] : []),
-          ...(hierarchyConfig.subCategories === "include" ? [{ type: "string" as const, value: adjustedLabel }] : []),
+          ...(hierarchyConfig.elements.nodes === "include" ? [{ type: "string" as const, value: adjustedLabel }] : []),
+          ...(hierarchyConfig.subCategories.nodes === "include" ? [{ type: "string" as const, value: adjustedLabel }] : []),
           ...(definitionContainers.length > 0 ? [{ type: "string" as const, value: adjustedLabel }] : []),
         ];
         return { ctes, ecsql, bindings };
@@ -1186,10 +1240,7 @@ function createSearchPathsForDifferentTypes(
   },
   ObservedValueOf<ReturnType<typeof createGeometricElementInstanceKeyPaths>>
 > {
-  const hierarchyConfig = mergeWithDefaults({
-    defaults: defaultHierarchyConfiguration,
-    overrides: props.hierarchyConfig,
-  });
+  const hierarchyConfig = resolveCategoriesTreeHierarchyConfiguration(props.hierarchyConfig);
   return (obs) =>
     obs.pipe(
       reduce(
@@ -1202,12 +1253,12 @@ function createSearchPathsForDifferentTypes(
               acc.definitionContainerIds.push(key);
               break;
             case SUB_CATEGORY_TYPE_AS_NUMBER:
-              if (hierarchyConfig.subCategories === "include") {
+              if (hierarchyConfig.subCategories.nodes === "include") {
                 acc.subCategoryIds.push(key);
               }
               break;
             default:
-              if (hierarchyConfig.elements === "include") {
+              if (hierarchyConfig.elements.nodes === "include") {
                 acc.elementIds.push(key);
               }
               break;
@@ -1240,14 +1291,14 @@ function createSearchPathsForDifferentTypes(
             componentName,
             idsCache,
             viewType: props.viewType,
-            elements: hierarchyConfig.elements,
-            excludedElementClassNames: hierarchyConfig.excludedElementClassNames,
+            elements: hierarchyConfig.elements.nodes,
+            excludedElementClassNames: hierarchyConfig.elements.excludedClasses,
           }),
           idsCache.getSubCategoriesSearchPaths({ subCategoryIds: ids.subCategoryIds }).pipe(
             releaseMainThreadOnItemsCount(2000),
             map((path) => ({ path, target: path[path.length - 1].id })),
           ),
-          hierarchyConfig.elements === "include"
+          hierarchyConfig.elements.nodes === "include"
             ? from(ids.elementIds).pipe(
                 bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),
                 releaseMainThreadOnItemsCount(1),
@@ -1261,7 +1312,7 @@ function createSearchPathsForDifferentTypes(
                       chunkIndex,
                       componentId,
                       componentName,
-                      excludedElementClassNames: hierarchyConfig.excludedElementClassNames,
+                      excludedElementClassNames: hierarchyConfig.elements.excludedClasses,
                     }),
                   2,
                 ),

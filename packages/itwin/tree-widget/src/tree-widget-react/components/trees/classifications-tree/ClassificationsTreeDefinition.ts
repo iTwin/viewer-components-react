@@ -87,13 +87,21 @@ export interface ClassificationsTreeHierarchyConfiguration {
    */
   rootClassificationSystemCode: string;
   /**
-   * Element classes to exclude from the hierarchy.
+   * Element node's configuration options.
    *
-   * Elements, whose class is or derives from one of the classes in this list, are not loaded into the hierarchy.
-   *
-   * Defaults to `[]`.
+   * Defaults to `{ excludedClasses: [] }`.
    */
-  excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
+  elements?: {
+    /**
+     * Element classes to exclude from the hierarchy.
+     *
+     * Elements, whose class is or derives from one of the classes in this list, are not loaded into the hierarchy.
+     * Children of such nodes are also not shown.
+     *
+     * Defaults to `[]`.
+     */
+    excludedClasses?: EC.FullClassNameDotNotation[];
+  };
 }
 
 interface ClassificationsTreeInstanceKeyPathsBaseProps {
@@ -317,7 +325,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
             ${createWhereClause({
               conditions: [
                 "this.Parent.Id IS NULL",
-                createExcludedClassesClause({ alias: "this", excludedClassNames: this.#props.hierarchyConfig.excludedElementClassNames }),
+                createExcludedClassesClause({ alias: "this", excludedClassNames: this.#props.hierarchyConfig.elements?.excludedClasses }),
                 elementsInstanceFilterClauses.where,
               ],
             })}
@@ -393,7 +401,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
           ${instanceFilterClauses.joins}
           ${createWhereClause({
             conditions: [
-              createExcludedClassesClause({ alias: "this", excludedClassNames: this.#props.hierarchyConfig.excludedElementClassNames }),
+              createExcludedClassesClause({ alias: "this", excludedClassNames: this.#props.hierarchyConfig.elements?.excludedClasses }),
               instanceFilterClauses.where,
             ],
           })}
@@ -430,7 +438,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
             ${createWhereClause({
               conditions: [
                 "ce.Parent.Id = this.ECInstanceId",
-                createExcludedClassesClause({ alias: "ce", excludedClassNames: this.#props.hierarchyConfig.excludedElementClassNames }),
+                createExcludedClassesClause({ alias: "ce", excludedClassNames: this.#props.hierarchyConfig.elements?.excludedClasses }),
               ],
             })}
             LIMIT 1
@@ -559,7 +567,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
               FROM ${CLASS_NAME_GeometricElement3d} this
               JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = this.ECInstanceId
               JOIN IdSet(?) classificationIdSet ON ehc.TargetECInstanceId = classificationIdSet.id
-              ${createWhereClause({ conditions: ["this.Parent.Id IS NULL", createExcludedClassesClause({ alias: "this", excludedClassNames: props.hierarchyConfig.excludedElementClassNames })] })}
+              ${createWhereClause({ conditions: ["this.Parent.Id IS NULL", createExcludedClassesClause({ alias: "this", excludedClassNames: props.hierarchyConfig.elements?.excludedClasses })] })}
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
               UNION ALL
@@ -571,7 +579,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
               FROM
                 ${CLASS_NAME_GeometricElement3d} this
                 JOIN ${ELEMENTS_WITH_LABELS_CTE} pe ON pe.ECInstanceId = this.Parent.Id
-              ${createWhereClause({ conditions: [createExcludedClassesClause({ alias: "this", excludedClassNames: props.hierarchyConfig.excludedElementClassNames })] })}
+              ${createWhereClause({ conditions: [createExcludedClassesClause({ alias: "this", excludedClassNames: props.hierarchyConfig.elements?.excludedClasses })] })}
             )`,
           ]
         : []),
@@ -734,7 +742,7 @@ function createSearchPathsForDifferentTypes(
                   chunkIndex,
                   componentId,
                   componentName,
-                  excludedElementClassNames: props.hierarchyConfig.excludedElementClassNames,
+                  excludedElementClassNames: props.hierarchyConfig.elements?.excludedClasses,
                 }),
               2,
             ),

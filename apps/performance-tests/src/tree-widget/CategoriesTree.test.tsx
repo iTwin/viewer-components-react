@@ -122,7 +122,7 @@ describe("categories tree", () => {
         viewport,
         ...testData,
       });
-      const baseIdsCache = new BaseIdsCache({ elementClassName: "BisCore:GeometricElement3d", type: "3d", queryExecutor: imodelAccess });
+      const baseIdsCache = new BaseIdsCache({ elementClassName: "BisCore.GeometricElement3d", type: "3d", queryExecutor: imodelAccess });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
       const handler = createCategoriesTreeVisibilityHandler({ imodelAccess, idsCache, viewport });
       const provider = createIModelHierarchyProvider({
@@ -223,13 +223,16 @@ describe("categories tree", () => {
           ...testData,
         });
         const hierarchyConfig = {
-          excludedElementClassNames,
+          elements: {
+            nodes: "include" as const,
+            excludedClasses: excludedElementClassNames,
+          },
         };
         const baseIdsCache = new BaseIdsCache({
-          elementClassName: "BisCore:GeometricElement3d",
+          elementClassName: "BisCore.GeometricElement3d",
           type: "3d",
           queryExecutor: imodelAccess,
-          excludedElementClassNames: hierarchyConfig.excludedElementClassNames,
+          excludedElementClassNames: hierarchyConfig.elements.excludedClasses,
         });
         const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
         const handler = createCategoriesTreeVisibilityHandler({ imodelAccess, idsCache, viewport, hierarchyConfig });

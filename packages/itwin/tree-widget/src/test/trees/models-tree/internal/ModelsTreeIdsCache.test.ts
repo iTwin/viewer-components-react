@@ -16,7 +16,7 @@ describe("ModelsTreeIdsCache", () => {
   function createIdsCache(queryHandler: (query: string) => any[]) {
     const iModel = createIModelMock({ queryHandler });
     const queryExecutor = createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded");
-    const baseIdsCache = new BaseIdsCache({ queryExecutor, elementClassName: defaultHierarchyConfiguration.elementClassSpecification, type: "3d" });
+    const baseIdsCache = new BaseIdsCache({ queryExecutor, elementClassName: defaultHierarchyConfiguration.elements.baseClass, type: "3d" });
     const idsCache = new ModelsTreeIdsCache({
       queryExecutor,
       baseIdsCache,

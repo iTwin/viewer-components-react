@@ -986,7 +986,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           using visibilityTestData = await createVisibilityTestData({
             imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.indirectCategory.id, subCategories: keys.subCategory.id }],
-            hierarchyConfig: { elements: "include" },
+            hierarchyConfig: { elements: { nodes: "include" } },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1045,7 +1045,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               { categoryId: keys.indirectCategory.id, subCategories: keys.indirectSubCategory.id },
               { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
             ],
-            hierarchyConfig: { elements: "include" },
+            hierarchyConfig: { elements: { nodes: "include" } },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1094,7 +1094,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
           using visibilityTestData = await createVisibilityTestData({
             imodelConnection,
-            hierarchyConfig: { elements: "include" },
+            hierarchyConfig: { elements: { nodes: "include" } },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1153,7 +1153,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
           using visibilityTestData = await createVisibilityTestData({
             imodelConnection,
-            hierarchyConfig: { elements: "include" },
+            hierarchyConfig: { elements: { nodes: "include" } },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1202,7 +1202,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           using visibilityTestData = await createVisibilityTestData({
             imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.indirectCategory.id, subCategories: keys.indirectSubCategory.id }],
-            hierarchyConfig: { elements: "include" },
+            hierarchyConfig: { elements: { nodes: "include" } },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1238,7 +1238,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           using visibilityTestData = await createVisibilityTestData({
             imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
-            hierarchyConfig: { elements: "include" },
+            hierarchyConfig: { elements: { nodes: "include" } },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1282,7 +1282,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               { categoryId: keys.category.id, subCategories: keys.subCategory.id },
               { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
             ],
-            hierarchyConfig: { elements: "include" },
+            hierarchyConfig: { elements: { nodes: "include" } },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1341,7 +1341,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               { categoryId: keys.category.id, subCategories: keys.subCategory.id },
               { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
             ],
-            hierarchyConfig: { elements: "include" },
+            hierarchyConfig: { elements: { nodes: "include" } },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1401,7 +1401,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               { categoryId: keys.category.id, subCategories: keys.subCategory.id },
               { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
             ],
-            hierarchyConfig: { elements: "include" },
+            hierarchyConfig: { elements: { nodes: "include" } },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1455,7 +1455,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           using visibilityTestData = await createVisibilityTestData({
             imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
-            hierarchyConfig: { elements: "include" },
+            hierarchyConfig: { elements: { nodes: "include" } },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1508,7 +1508,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           using visibilityTestData = await createVisibilityTestData({
             imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: [keys.subCategory.id, keys.subCategory2.id] }],
-            hierarchyConfig: { elements: "include" },
+            hierarchyConfig: { elements: { nodes: "include" } },
           });
           const { handler, provider, viewport } = visibilityTestData;
           setupInitialDisplayState({ viewport, elements: [{ id: keys.element.id, visible: false }] });
@@ -1552,7 +1552,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           using visibilityTestData = await createVisibilityTestData({
             imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
-            hierarchyConfig: { elements: "include" },
+            hierarchyConfig: { elements: { nodes: "include" } },
           });
           const { handler, provider, viewport } = visibilityTestData;
           setupInitialDisplayState({
@@ -1606,7 +1606,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           using visibilityTestData = await createVisibilityTestData({
             imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
-            hierarchyConfig: { elements: "include" },
+            hierarchyConfig: { elements: { nodes: "include" } },
           });
           const { handler, provider, viewport } = visibilityTestData;
           setupInitialDisplayState({ viewport, elements: [{ id: keys.element.id, visible: false }] });
@@ -1670,7 +1670,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               { categoryId: keys.category.id, subCategories: keys.subCategory.id },
               { categoryId: keys.categoryOfDefinitionContainer.id, subCategories: keys.subCategoryOfDefinitionContainer.id },
             ],
-            hierarchyConfig: { elements: "include" },
+            hierarchyConfig: { elements: { nodes: "include" } },
           });
           const { handler, provider, viewport } = visibilityTestData;
           setupInitialDisplayState({
@@ -1731,7 +1731,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           using visibilityTestData = await createVisibilityTestData({
             imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: [keys.subCategory.id, keys.subCategory2.id] }],
-            hierarchyConfig: { elements: "include" },
+            hierarchyConfig: { elements: { nodes: "include" } },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1779,7 +1779,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           using visibilityTestData = await createVisibilityTestData({
             imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
-            hierarchyConfig: { elements: "include" },
+            hierarchyConfig: { elements: { nodes: "include" } },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1830,7 +1830,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           using visibilityTestData = await createVisibilityTestData({
             imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
-            hierarchyConfig: { elements: "include" },
+            hierarchyConfig: { elements: { nodes: "include" } },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1897,7 +1897,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               { categoryId: keys.category.id, subCategories: keys.subCategory.id },
               { categoryId: keys.categoryOfDefinitionContainer.id, subCategories: keys.subCategoryOfDefinitionContainer.id },
             ],
-            hierarchyConfig: { elements: "include" },
+            hierarchyConfig: { elements: { nodes: "include" } },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1957,7 +1957,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           beforeEach(async () => {
             visibilityTestData = await createVisibilityTestData({
               imodelConnection: buildIModelResult.imodelConnection,
-              hierarchyConfig: { elements: "include" },
+              hierarchyConfig: { elements: { nodes: "include" } },
             });
           });
 
@@ -2095,7 +2095,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           beforeEach(async () => {
             visibilityTestData = await createVisibilityTestData({
               imodelConnection: buildIModelResult.imodelConnection,
-              hierarchyConfig: { elements: "include" },
+              hierarchyConfig: { elements: { nodes: "include" } },
             });
           });
 
@@ -2511,7 +2511,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             (only ? it.only : it)(name, async function () {
               using visibilityTestData = await createVisibilityTestData({
                 imodelConnection: iModel,
-                hierarchyConfig: { elements: "include" },
+                hierarchyConfig: { elements: { nodes: "include" } },
               });
               const { handler, provider, viewport } = visibilityTestData;
 
@@ -3371,7 +3371,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           beforeEach(async () => {
             visibilityTestData = await createVisibilityTestData({
               imodelConnection: buildIModelResult.imodelConnection,
-              hierarchyConfig: { elements: "include" },
+              hierarchyConfig: { elements: { nodes: "include" } },
               visibleByDefault: true,
             });
           });
@@ -3510,7 +3510,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           beforeEach(async () => {
             visibilityTestData = await createVisibilityTestData({
               imodelConnection: buildIModelResult.imodelConnection,
-              hierarchyConfig: { elements: "include" },
+              hierarchyConfig: { elements: { nodes: "include" } },
               visibleByDefault: true,
             });
           });
@@ -3702,7 +3702,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
       visibleByDefault?: boolean;
       subCategoriesOfCategories: Array<{ categoryId: string; subCategories: Id64Arg }>;
     }) {
-      const hierarchyConfig: CategoriesTreeHierarchyConfiguration = { elements: "include", categoriesWithoutElements: "include" };
+      const hierarchyConfig: CategoriesTreeHierarchyConfiguration = {
+        elements: { nodes: "include" },
+        categories: { withoutElements: "include" },
+      };
       const imodelAccess = createIModelAccess(imodelConnection);
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(view).elementClass, type: view });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: view, baseIdsCache });
@@ -3757,7 +3760,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
         }),
       );
       const { imodelConnection, ...keys } = buildIModelResult;
-      const hierarchyConfig: CategoriesTreeHierarchyConfiguration = { elements: "include", categoriesWithoutElements: "include" };
+      const hierarchyConfig: CategoriesTreeHierarchyConfiguration = {
+        elements: { nodes: "include" },
+        categories: { withoutElements: "include" },
+      };
       const imodelAccess = createIModelAccess(imodelConnection);
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
@@ -5742,7 +5748,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
     });
   });
 
-  describe("excludedElementClassNames", () => {
+  describe("elements.excludedClasses", () => {
     it("element of an excluded class participates in visibility", async () => {
       await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
@@ -5759,7 +5765,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
       using visibilityTestData = await createVisibilityTestData({
         imodelConnection,
-        hierarchyConfig: { excludedElementClassNames: [CLASS_NAME_GeometricElement3d] },
+        hierarchyConfig: { elements: { nodes: "include", excludedClasses: [CLASS_NAME_GeometricElement3d] } },
       });
       const { handler, provider, viewport } = visibilityTestData;
 

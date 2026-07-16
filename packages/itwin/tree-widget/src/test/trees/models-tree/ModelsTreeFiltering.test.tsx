@@ -135,7 +135,7 @@ describe("Models tree", () => {
       );
       const { imodelConnection, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodelConnection);
-      const hierarchyConfig = { rootSubject: "exclude" as const, elementClassSpecification: keys.parentElement.className };
+      const hierarchyConfig = { subjects: { root: "exclude" as const }, elements: { baseClass: keys.parentElement.className } };
       using hook = renderUseModelsTreeHook({
         imodelConnection,
         hierarchyConfig,
@@ -496,10 +496,10 @@ describe("Models tree", () => {
             children: false,
           }),
         ],
-        getHierarchyConfig: () => ({ modelsWithoutElements: "include" }),
+        getHierarchyConfig: () => ({ models: { withoutElements: "include" } }),
       }),
       TreeSearchTestCaseDefinition.create({
-        name: "Models without elements are not returned when `modelsWithoutElements` is 'exclude'",
+        name: "Models without elements are not returned when `models.withoutElements` is 'exclude'",
         setupIModel: async (imodel) =>
           withEditTxn(imodel, (txn) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -512,10 +512,10 @@ describe("Models tree", () => {
         getTargetItems: (x) => [x.model1, x.model3],
         getTargetInstanceLabel: (_x) => "matching",
         getExpectedHierarchy: () => [],
-        getHierarchyConfig: () => ({ modelsWithoutElements: "exclude" }),
+        getHierarchyConfig: () => ({ models: { withoutElements: "exclude" } }),
       }),
       TreeSearchTestCaseDefinition.create({
-        name: "Subject with only models without elements is not returned when `modelsWithoutElements` is 'exclude'",
+        name: "Subject with only models without elements is not returned when `models.withoutElements` is 'exclude'",
         setupIModel: async (imodel) =>
           withEditTxn(imodel, (txn) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -527,10 +527,10 @@ describe("Models tree", () => {
         getTargetItems: (x) => [x.childSubject],
         getTargetInstanceLabel: (_x) => "matching",
         getExpectedHierarchy: () => [],
-        getHierarchyConfig: () => ({ modelsWithoutElements: "exclude" }),
+        getHierarchyConfig: () => ({ models: { withoutElements: "exclude" } }),
       }),
       TreeSearchTestCaseDefinition.create({
-        name: "Subject with only models without elements is returned when `modelsWithoutElements` is 'include'",
+        name: "Subject with only models without elements is returned when `models.withoutElements` is 'include'",
         setupIModel: async (imodel) =>
           withEditTxn(imodel, (txn) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -555,7 +555,7 @@ describe("Models tree", () => {
             ],
           }),
         ],
-        getHierarchyConfig: () => ({ modelsWithoutElements: "include" }),
+        getHierarchyConfig: () => ({ models: { withoutElements: "include" } }),
       }),
       TreeSearchTestCaseDefinition.create({
         name: "Subject with hidden child Model node",
@@ -1021,7 +1021,7 @@ describe("Models tree", () => {
             ],
           }),
         ],
-        getHierarchyConfig: (x) => ({ elementClassSpecification: x.rootElement1.className }),
+        getHierarchyConfig: (x) => ({ elements: { baseClass: x.rootElement1.className } }),
       }),
       TreeSearchTestCaseDefinition.create({
         name: "sub-modeled Element nodes",
@@ -1584,7 +1584,7 @@ describe("Models tree", () => {
         getTargetItems: (x) => [x.excludedElement],
         getTargetInstanceLabel: (_x) => "matching",
         getExpectedHierarchy: () => [],
-        getHierarchyConfig: () => ({ excludedElementClassNames: ["Generic.PhysicalObject"] }),
+        getHierarchyConfig: () => ({ elements: { excludedClasses: ["Generic.PhysicalObject"] } }),
       }),
       TreeSearchTestCaseDefinition.create({
         name: "excludes elements of classes derived from excluded classes from search paths",
@@ -1606,7 +1606,7 @@ describe("Models tree", () => {
         getTargetItems: (x) => [x.excludedElement],
         getTargetInstanceLabel: (_x) => "matching",
         getExpectedHierarchy: () => [],
-        getHierarchyConfig: () => ({ excludedElementClassNames: ["BisCore.PhysicalElement"] }),
+        getHierarchyConfig: () => ({ elements: { excludedClasses: ["BisCore.PhysicalElement"] } }),
       }),
       TreeSearchTestCaseDefinition.create({
         name: "does not return the category of a filtered out element",
@@ -1627,7 +1627,7 @@ describe("Models tree", () => {
         getTargetItems: (x) => [x.excludedCategory],
         getTargetInstanceLabel: (_x) => "matching",
         getExpectedHierarchy: () => [],
-        getHierarchyConfig: () => ({ excludedElementClassNames: ["Generic.PhysicalObject"] }),
+        getHierarchyConfig: () => ({ elements: { excludedClasses: ["Generic.PhysicalObject"] } }),
       }),
       TreeSearchTestCaseDefinition.create({
         name: "does not return child elements of filtered out parent elements",
@@ -1656,7 +1656,7 @@ describe("Models tree", () => {
         getTargetItems: (x) => [x.childOfExcludedParent],
         getTargetInstanceLabel: (_x) => "matching",
         getExpectedHierarchy: () => [],
-        getHierarchyConfig: () => ({ excludedElementClassNames: ["Generic.PhysicalObject"] }),
+        getHierarchyConfig: () => ({ elements: { excludedClasses: ["Generic.PhysicalObject"] } }),
       }),
       TreeSearchTestCaseDefinition.create({
         name: "does not return excluded child elements when their parent is not excluded",
@@ -1685,7 +1685,7 @@ describe("Models tree", () => {
         getTargetItems: (x) => [x.excludedChild],
         getTargetInstanceLabel: (_x) => "matching",
         getExpectedHierarchy: () => [],
-        getHierarchyConfig: () => ({ excludedElementClassNames: ["BisCore.ISubModeledElement"] }),
+        getHierarchyConfig: () => ({ elements: { excludedClasses: ["BisCore.ISubModeledElement"] } }),
       }),
       TreeSearchTestCaseDefinition.create({
         name: "does not return the category of a filtered out sub-model element",
@@ -1715,7 +1715,7 @@ describe("Models tree", () => {
         getTargetItems: (x) => [x.excludedCategory],
         getTargetInstanceLabel: (_x) => "matching",
         getExpectedHierarchy: () => [],
-        getHierarchyConfig: () => ({ excludedElementClassNames: ["Generic.PhysicalObject"] }),
+        getHierarchyConfig: () => ({ elements: { excludedClasses: ["Generic.PhysicalObject"] } }),
       }),
     );
 
@@ -2365,7 +2365,7 @@ describe("Models tree", () => {
           targetItems = testCase.getTargetItems(imodelSetupResult);
           targetInstanceLabel = testCase.getTargetInstanceLabel?.(imodelSetupResult);
           expectedHierarchy = testCase.getExpectedHierarchy(imodelSetupResult);
-          hierarchyConfig = { rootSubject: "exclude", ...testCase.getHierarchyConfig?.(imodelSetupResult) };
+          hierarchyConfig = { subjects: { root: "exclude" }, ...testCase.getHierarchyConfig?.(imodelSetupResult) };
         });
 
         afterAll(async () => {
@@ -2458,7 +2458,7 @@ describe("Models tree", () => {
         }),
       );
       const { imodelConnection, expectedPaths, formattedECInstanceId } = buildIModelResult;
-      const hierarchyConfig = { rootSubject: "exclude" as const };
+      const hierarchyConfig = { subjects: { root: "exclude" as const } };
       const imodelAccess = createIModelAccess(imodelConnection);
       using hook = renderUseModelsTreeHook({
         imodelConnection,
@@ -2481,7 +2481,7 @@ describe("Models tree", () => {
       );
       const { imodelConnection, ...ids } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodelConnection);
-      const hierarchyConfig = { rootSubject: "exclude" as const };
+      const hierarchyConfig = { subjects: { root: "exclude" as const } };
       using hook = renderUseModelsTreeHook({
         imodelConnection,
         hierarchyConfig,
@@ -2518,7 +2518,7 @@ describe("Models tree", () => {
       );
       const { imodelConnection, ...ids } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodelConnection);
-      const hierarchyConfig = { rootSubject: "exclude" as const };
+      const hierarchyConfig = { subjects: { root: "exclude" as const } };
       using hook = renderUseModelsTreeHook({
         imodelConnection,
         hierarchyConfig,
@@ -2568,7 +2568,7 @@ describe("Models tree", () => {
         }),
       );
       const { imodelConnection, keys } = buildIModelResult;
-      const hierarchyConfig = { rootSubject: "exclude" as const };
+      const hierarchyConfig = { subjects: { root: "exclude" as const } };
       const imodelAccess = createIModelAccess(imodelConnection);
       const defaultProps = { hierarchyConfig, imodelConnection };
 

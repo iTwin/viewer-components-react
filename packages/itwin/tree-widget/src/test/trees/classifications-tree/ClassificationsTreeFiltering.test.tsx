@@ -253,7 +253,7 @@ describe("Classifications tree", () => {
         const { imodelConnection } = buildIModelResult;
         using hook = renderUseClassificationsTreeDefinitionHook({
           imodels: [imodelConnection],
-          hierarchyConfig: { ...defaultHierarchyConfiguration, excludedElementClassNames: ["Generic.PhysicalObject"] },
+          hierarchyConfig: { ...defaultHierarchyConfiguration, elements: { excludedClasses: ["Generic.PhysicalObject"] } },
           search: { searchText: "matching" },
         });
         expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([]);
@@ -283,7 +283,7 @@ describe("Classifications tree", () => {
         const { imodelConnection } = buildIModelResult;
         using hook = renderUseClassificationsTreeDefinitionHook({
           imodels: [imodelConnection],
-          hierarchyConfig: { ...defaultHierarchyConfiguration, excludedElementClassNames: ["BisCore.PhysicalElement"] },
+          hierarchyConfig: { ...defaultHierarchyConfiguration, elements: { excludedClasses: ["BisCore.PhysicalElement"] } },
           search: { searchText: "matching" },
         });
         expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([]);
@@ -314,7 +314,7 @@ describe("Classifications tree", () => {
         const { imodelConnection, ...keys } = buildIModelResult;
         using hook = renderUseClassificationsTreeDefinitionHook({
           imodels: [imodelConnection],
-          hierarchyConfig: { ...defaultHierarchyConfiguration, excludedElementClassNames: ["Generic.PhysicalObject"] },
+          hierarchyConfig: { ...defaultHierarchyConfiguration, elements: { excludedClasses: ["Generic.PhysicalObject"] } },
           search: { searchText: "matching" },
         });
         expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
@@ -363,7 +363,7 @@ describe("Classifications tree", () => {
         const { imodelConnection } = buildIModelResult;
         using hook = renderUseClassificationsTreeDefinitionHook({
           imodels: [imodelConnection],
-          hierarchyConfig: { ...defaultHierarchyConfiguration, excludedElementClassNames: ["Generic.PhysicalObject"] },
+          hierarchyConfig: { ...defaultHierarchyConfiguration, elements: { excludedClasses: ["Generic.PhysicalObject"] } },
           search: { searchText: "matching" },
         });
         expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([]);
@@ -401,7 +401,7 @@ describe("Classifications tree", () => {
         const { imodelConnection } = buildIModelResult;
         using hook = renderUseClassificationsTreeDefinitionHook({
           imodels: [imodelConnection],
-          hierarchyConfig: { ...defaultHierarchyConfiguration, excludedElementClassNames: ["Generic.PhysicalObject"] },
+          hierarchyConfig: { ...defaultHierarchyConfiguration, elements: { excludedClasses: ["Generic.PhysicalObject"] } },
           search: { searchText: "matching" },
         });
         expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([]);

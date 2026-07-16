@@ -153,7 +153,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
             acc.topMostElementCategories.push(id);
             return acc;
           }
-          if (this.#hierarchyConfig.categoriesWithoutElements === "include" && !hasElements) {
+          if (this.#hierarchyConfig.categories.withoutElements === "include" && !hasElements) {
             acc.emptyCategories.push(id);
           }
           return acc;

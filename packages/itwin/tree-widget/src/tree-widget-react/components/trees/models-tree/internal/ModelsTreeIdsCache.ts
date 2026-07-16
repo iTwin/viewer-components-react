@@ -24,10 +24,7 @@ import type { ModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.j
  * Hierarchy config props needed for ids cache.
  * @internal
  */
-export type HierarchyConfigForModelsCache = Pick<
-  ModelsTreeHierarchyConfiguration,
-  "elementClassSpecification" | "rootSubject" | "modelsWithoutElements" | "excludedElementClassNames"
->;
+export type HierarchyConfigForModelsCache = Pick<ModelsTreeHierarchyConfiguration, "elements" | "subjects" | "models">;
 
 interface ModelsTreeIdsCacheProps extends BaseIdsCacheImplProps {
   queryExecutor: LimitingECSqlQueryExecutor;
@@ -76,7 +73,7 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
               conditions: [
                 "m.ECInstanceId = HexToId(json_extract(s.JsonProperties, '$.Subject.Model.TargetPartition'))",
                 "NOT m.IsPrivate",
-                `EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`,
+                `EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elements.baseClass} WHERE Model.Id = m.ECInstanceId)`,
               ],
             })}
           ) targetPartitionId,
@@ -107,7 +104,7 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
         SELECT p.ECInstanceId id, p.Parent.Id parentId
         FROM ${CLASS_NAME_InformationPartitionElement} p
         INNER JOIN ${CLASS_NAME_GeometricModel3d} m ON m.ModeledElement.Id = p.ECInstanceId
-        ${createWhereClause({ conditions: ["NOT m.IsPrivate", this.#hierarchyConfig.modelsWithoutElements !== "include" && `EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`] })}
+        ${createWhereClause({ conditions: ["NOT m.IsPrivate", this.#hierarchyConfig.models.withoutElements === "exclude" && `EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elements.baseClass} WHERE Model.Id = m.ECInstanceId)`] })}
       `;
       return this.#queryExecutor.createQueryReader(
         { ecsql: modelsQuery },
@@ -302,12 +299,12 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
     return this.getSubjectInfos().pipe(
       map((subjectInfos) => {
         const result = new Array<InstanceKey>();
-        if (this.#hierarchyConfig.modelsWithoutElements === "exclude" && !this.subjectHasNestedModels({ subjectId: targetSubjectId, subjectInfos })) {
+        if (this.#hierarchyConfig.models.withoutElements === "exclude" && !this.subjectHasNestedModels({ subjectId: targetSubjectId, subjectInfos })) {
           return result;
         }
         let currParentId: SubjectId | undefined = targetSubjectId;
         while (currParentId) {
-          if (this.#hierarchyConfig.rootSubject === "exclude" && currParentId === IModel.rootSubjectId) {
+          if (this.#hierarchyConfig.subjects.root === "exclude" && currParentId === IModel.rootSubjectId) {
             break;
           }
           const parentInfo = subjectInfos.get(currParentId);

@@ -33,6 +33,7 @@ import {
   CLASS_NAME_Subject,
 } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
+import { mergeWithDefaults } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
 import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
@@ -72,15 +73,16 @@ type ModelsTreeHierarchyConfiguration = Partial<ConstructorParameters<typeof Mod
 
 describe("ModelsTreeVisibilityHandler", () => {
   function createIdsCache(iModel: IModelConnection, hierarchyConfig?: ModelsTreeHierarchyConfiguration) {
+    const resolvedHierarchyConfig = mergeWithDefaults({ defaults: defaultHierarchyConfiguration, overrides: hierarchyConfig });
     const queryExecutor = createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded");
     const baseIdsCache = new BaseIdsCache({
       queryExecutor,
-      elementClassName: hierarchyConfig?.elementClassSpecification ?? defaultHierarchyConfiguration.elementClassSpecification,
+      elementClassName: hierarchyConfig?.elements?.baseClass ?? defaultHierarchyConfiguration.elements.baseClass,
       type: "3d",
     });
     const idsCache = new ModelsTreeIdsCache({
       queryExecutor: createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"),
-      hierarchyConfig: hierarchyConfig ?? defaultHierarchyConfiguration,
+      hierarchyConfig: resolvedHierarchyConfig,
       baseIdsCache,
     });
     return idsCache;
@@ -1724,12 +1726,16 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     function createCommonProps(props: { imodelConnection: IModelConnection; hierarchyConfig?: ModelsTreeHierarchyConfiguration; visibleByDefault?: boolean }) {
-      const hierarchyConfig = { rootSubject: "exclude" as const, ...props.hierarchyConfig };
+      const configOverrides: ModelsTreeHierarchyConfiguration = { subjects: { root: "exclude" }, ...props.hierarchyConfig };
+      const hierarchyConfig = mergeWithDefaults({
+        defaults: defaultHierarchyConfiguration,
+        overrides: configOverrides,
+      });
       const imodelAccess = createIModelAccess(props.imodelConnection);
       const viewport = createTreeWidgetTestingViewport({ iModel: props.imodelConnection, viewType: "3d", visibleByDefault: props.visibleByDefault });
       const baseIdsCache = new BaseIdsCache({
         queryExecutor: imodelAccess,
-        elementClassName: hierarchyConfig.elementClassSpecification ?? defaultHierarchyConfiguration.elementClassSpecification,
+        elementClassName: hierarchyConfig.elements.baseClass,
         type: "3d",
       });
       const idsCache = new ModelsTreeIdsCache({
@@ -3804,8 +3810,8 @@ describe("ModelsTreeVisibilityHandler", () => {
             const [customClassElement1, customClassElement2, nonCustomClassElement] = elements;
 
             const hierarchyConfig = {
-              modelsWithoutElements: "include" as const,
-              elementClassSpecification: customClassName,
+              models: { withoutElements: "include" as const },
+              elements: { baseClass: customClassName },
             };
 
             return {
@@ -5593,9 +5599,9 @@ describe("ModelsTreeVisibilityHandler", () => {
       using visibilityTestData = createVisibilityTestData({
         imodelConnection,
         hierarchyConfig: {
-          rootSubject: "exclude",
-          modelsWithoutElements: "include",
-          excludedElementClassNames: [CLASS_NAME_GeometricElement3d],
+          subjects: { root: "exclude" },
+          models: { withoutElements: "include" },
+          elements: { excludedClasses: [CLASS_NAME_GeometricElement3d] },
         },
       });
       const { handler, viewport, provider } = visibilityTestData;

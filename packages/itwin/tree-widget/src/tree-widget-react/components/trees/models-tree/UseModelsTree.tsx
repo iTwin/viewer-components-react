@@ -40,6 +40,7 @@ import type { InstanceKey } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { ExtendedVisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import type { DeepRequired } from "../common/internal/Utils.js";
 import type { SearchResultsTree } from "../common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { HierarchyConfigForModelsCache } from "./internal/ModelsTreeIdsCache.js";
@@ -326,13 +327,13 @@ function useModelsTreeIdsCache({
   hierarchyConfig,
 }: {
   imodel: IModelConnection;
-  hierarchyConfig: Required<HierarchyConfigForModelsCache>;
+  hierarchyConfig: DeepRequired<HierarchyConfigForModelsCache>;
 }): ModelsTreeIdsCache {
   const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
   const baseIdsCache = getBaseIdsCache({
     type: "3d",
-    elementClassName: hierarchyConfig.elementClassSpecification,
-    excludedElementClassNames: hierarchyConfig.excludedElementClassNames,
+    elementClassName: hierarchyConfig.elements.baseClass,
+    excludedElementClassNames: hierarchyConfig.elements.excludedClasses,
     imodel,
   });
 
@@ -344,8 +345,8 @@ function useModelsTreeIdsCache({
         hierarchyConfig,
         queryExecutor: createECSqlQueryExecutor(imodel),
       }),
-    cacheKey: `${hierarchyConfig.rootSubject}-${hierarchyConfig.modelsWithoutElements}-${hierarchyConfig.elementClassSpecification}-${[
-      ...hierarchyConfig.excludedElementClassNames,
+    cacheKey: `${hierarchyConfig.subjects.root}-${hierarchyConfig.models.withoutElements}-${hierarchyConfig.elements.baseClass}-${[
+      ...(hierarchyConfig.elements.excludedClasses ?? []),
     ]
       .sort()
       .join(",")}-ModelsTreeIdsCache`,

@@ -15,6 +15,7 @@ import {
   CLASS_NAME_SpatialCategory,
   CLASS_NAME_Subject,
 } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { mergeWithDefaults } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
 import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelAccess } from "../Common.js";
@@ -48,13 +49,17 @@ export function createModelsTreeProvider({
   imodelAccess,
   idsCache,
 }: CreateModelsTreeProviderProps): HierarchyProvider & { dispose: () => void; [Symbol.dispose]: () => void } {
-  const config = { rootSubject: "exclude" as const, ...hierarchyConfig };
+  const configOverrides: Partial<ModelsTreeHierarchyConfiguration> = { subjects: { root: "exclude" }, ...hierarchyConfig };
+  const config = mergeWithDefaults({
+    defaults: defaultHierarchyConfiguration,
+    overrides: configOverrides,
+  });
   const createdImodelAccess = imodelAccess ?? createIModelAccess(imodelConnection);
   const baseIdsCache = new BaseIdsCache({
     queryExecutor: createdImodelAccess,
-    elementClassName: config.elementClassSpecification ?? defaultHierarchyConfiguration.elementClassSpecification,
+    elementClassName: config.elements.baseClass,
     type: "3d",
-    excludedElementClassNames: config.excludedElementClassNames,
+    excludedElementClassNames: config.elements.excludedClasses,
   });
   const createdIdsCache =
     idsCache ??

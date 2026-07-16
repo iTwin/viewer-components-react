@@ -29,10 +29,7 @@ import type { ClassificationsTreeVisibilityHandlerConfiguration } from "../UseCl
  * Hierarchy config props needed for ids cache.
  * @internal
  */
-export type HierarchyConfigForClassificationsCache = Pick<
-  ClassificationsTreeHierarchyConfiguration,
-  "rootClassificationSystemCode" | "excludedElementClassNames"
->;
+export type HierarchyConfigForClassificationsCache = Pick<ClassificationsTreeHierarchyConfiguration, "rootClassificationSystemCode" | "elements">;
 
 /**
  * Visibility handler config props needed for ids cache.

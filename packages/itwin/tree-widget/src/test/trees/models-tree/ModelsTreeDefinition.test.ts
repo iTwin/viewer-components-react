@@ -77,7 +77,7 @@ describe("Models tree", () => {
         }),
       );
       const { imodelConnection, ...keys } = buildIModelResult;
-      using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { rootSubject: "include" } });
+      using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { subjects: { root: "include" } } });
       await validateHierarchy({
         provider,
         expect: [
@@ -1316,7 +1316,7 @@ describe("Models tree", () => {
     });
 
     describe("Hierarchy customization", () => {
-      it("shows models without elements when `modelsWithoutElements` is set to 'include'", async () => {
+      it("shows models without elements when `models.withoutElements` is set to 'include'", async () => {
         await using buildIModelResult = await buildIModel(async (imodel) =>
           withEditTxn(imodel, (txn) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -1326,7 +1326,7 @@ describe("Models tree", () => {
           }),
         );
         const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { modelsWithoutElements: "include" } });
+        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { models: { withoutElements: "include" } } });
         await validateHierarchy({
           provider,
           expect: [
@@ -1339,7 +1339,7 @@ describe("Models tree", () => {
         });
       });
 
-      it("does not group elements when `elementClassGrouping` set to `disable`", async () => {
+      it("does not group elements when `elements.classGrouping` is set to `disable`", async () => {
         await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
           withEditTxn(imodel, (txn) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -1367,7 +1367,7 @@ describe("Models tree", () => {
           }),
         );
         const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { elementClassGrouping: "disable" } });
+        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { elements: { classGrouping: "disable" } } });
         await validateHierarchy({
           provider,
           expect: [
@@ -1415,7 +1415,7 @@ describe("Models tree", () => {
         });
       });
 
-      it("displays element count for grouping nodes when `elementClassGrouping` set to `enableWithCounts`", async () => {
+      it("displays element count for grouping nodes when `elements.classGrouping` is set to `enable-with-counts`", async () => {
         await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
           withEditTxn(imodel, (txn) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -1450,7 +1450,7 @@ describe("Models tree", () => {
           }),
         );
         const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { elementClassGrouping: "enableWithCounts" } });
+        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { elements: { classGrouping: "enable-with-counts" } } });
         await validateHierarchy({
           provider,
           expect: [
@@ -1568,7 +1568,7 @@ describe("Models tree", () => {
         const { imodelConnection, ...keys } = buildIModelResult;
         using provider = createModelsTreeProvider({
           imodelConnection,
-          hierarchyConfig: { elementClassSpecification: keys.parentElement2.className, elementClassGrouping: "disable" },
+          hierarchyConfig: { elements: { baseClass: keys.parentElement2.className, classGrouping: "disable" } },
         });
         await validateHierarchy({
           provider,
@@ -1600,7 +1600,7 @@ describe("Models tree", () => {
         });
       });
 
-      it("returns empty hierarchy when the iModel doesn't have any elements of `elementClassSpecification` class", async () => {
+      it("returns empty hierarchy when the iModel doesn't have any elements of `elements.baseClass` class", async () => {
         await using buildIModelResult = await buildIModel(async (imodel) =>
           withEditTxn(imodel, (txn) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -1610,7 +1610,7 @@ describe("Models tree", () => {
           }),
         );
         const { imodelConnection } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { elementClassSpecification: CLASS_NAME_GeometricElement2d } });
+        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { elements: { baseClass: CLASS_NAME_GeometricElement2d } } });
         await validateHierarchy({
           provider,
           expect: [],
@@ -1685,7 +1685,7 @@ describe("Models tree", () => {
         });
       });
 
-      describe("excludedElementClassNames", () => {
+      describe("elements.excludedClasses", () => {
         it("does not filter out elements when they don't belong to any of the excluded classes", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
@@ -1696,7 +1696,7 @@ describe("Models tree", () => {
             }),
           );
           const { imodelConnection, ...keys } = buildIModelResult;
-          using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { excludedElementClassNames: ["BisCore.GeometricElement2d"] } });
+          using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { elements: { excludedClasses: ["BisCore.GeometricElement2d"] } } });
           await validateHierarchy({
             provider,
             expect: [
@@ -1744,7 +1744,7 @@ describe("Models tree", () => {
               }),
             );
             const { imodelConnection, ...keys } = buildIModelResult;
-            using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { excludedElementClassNames: ["Generic.PhysicalObject"] } });
+            using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { elements: { excludedClasses: ["Generic.PhysicalObject"] } } });
             await validateHierarchy({
               provider,
               expect: [
@@ -1797,7 +1797,7 @@ describe("Models tree", () => {
               }),
             );
             const { imodelConnection, ...keys } = buildIModelResult;
-            using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { excludedElementClassNames: ["BisCore.PhysicalElement"] } });
+            using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { elements: { excludedClasses: ["BisCore.PhysicalElement"] } } });
             await validateHierarchy({
               provider,
               expect: [
@@ -1844,7 +1844,7 @@ describe("Models tree", () => {
             const { imodelConnection, ...keys } = buildIModelResult;
             using provider = createModelsTreeProvider({
               imodelConnection,
-              hierarchyConfig: { rootSubject: "include", excludedElementClassNames: ["BisCore.PhysicalElement"] },
+              hierarchyConfig: { subjects: { root: "include" }, elements: { excludedClasses: ["BisCore.PhysicalElement"] } },
             });
             await validateHierarchy({
               provider,
@@ -1864,7 +1864,7 @@ describe("Models tree", () => {
             });
           });
 
-          it("filters only category when models have only excluded elements and `modelsWithoutElements` is 'include'", async () => {
+          it("filters only category when models have only excluded elements and `models.withoutElements` is 'include'", async () => {
             await using buildIModelResult = await buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
                 const childSubject = insertSubject({ txn, codeValue: "child subject", parentId: IModel.rootSubjectId });
@@ -1912,9 +1912,9 @@ describe("Models tree", () => {
             using provider = createModelsTreeProvider({
               imodelConnection,
               hierarchyConfig: {
-                rootSubject: "include",
-                modelsWithoutElements: "include",
-                excludedElementClassNames: ["Generic.PhysicalObject"],
+                subjects: { root: "include" },
+                models: { withoutElements: "include" },
+                elements: { excludedClasses: ["Generic.PhysicalObject"] },
               },
             });
             await validateHierarchy({
@@ -2002,7 +2002,7 @@ describe("Models tree", () => {
             const { imodelConnection, ...keys } = buildIModelResult;
             using provider = createModelsTreeProvider({
               imodelConnection,
-              hierarchyConfig: { excludedElementClassNames: [`${TestSchema.Name}.${TestSchema.ModeledElement3dClassName}`] },
+              hierarchyConfig: { elements: { excludedClasses: [`${TestSchema.Name}.${TestSchema.ModeledElement3dClassName}`] } },
             });
             await validateHierarchy({
               provider,
@@ -2067,7 +2067,7 @@ describe("Models tree", () => {
             const { imodelConnection, ...keys } = buildIModelResult;
             using provider = createModelsTreeProvider({
               imodelConnection,
-              hierarchyConfig: { excludedElementClassNames: [`${TestSchema.Name}.${TestSchema.ModeledElement3dClassName}`] },
+              hierarchyConfig: { elements: { excludedClasses: [`${TestSchema.Name}.${TestSchema.ModeledElement3dClassName}`] } },
             });
             await validateHierarchy({
               provider,
@@ -2141,7 +2141,7 @@ describe("Models tree", () => {
             const { imodelConnection, ...keys } = buildIModelResult;
             using provider = createModelsTreeProvider({
               imodelConnection,
-              hierarchyConfig: { excludedElementClassNames: ["Generic.PhysicalObject"] },
+              hierarchyConfig: { elements: { excludedClasses: ["Generic.PhysicalObject"] } },
             });
             await validateHierarchy({
               provider,
@@ -2206,7 +2206,7 @@ describe("Models tree", () => {
             const { imodelConnection, ...keys } = buildIModelResult;
             using provider = createModelsTreeProvider({
               imodelConnection,
-              hierarchyConfig: { excludedElementClassNames: ["Generic.PhysicalObject"] },
+              hierarchyConfig: { elements: { excludedClasses: ["Generic.PhysicalObject"] } },
             });
             await validateHierarchy({
               provider,

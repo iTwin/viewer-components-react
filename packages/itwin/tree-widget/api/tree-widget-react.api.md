@@ -118,10 +118,18 @@ type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) =
 
 // @beta
 interface CategoriesTreeHierarchyConfiguration {
-    categoriesWithoutElements?: "include" | "exclude";
-    elements?: "include" | "exclude";
-    excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
-    subCategories?: "include" | "exclude";
+    categories?: {
+        withoutElements?: "include" | "exclude";
+    };
+    elements?: {
+        nodes?: "exclude";
+    } | {
+        nodes: "include";
+        excludedClasses?: EC.FullClassNameDotNotation[];
+    };
+    subCategories?: {
+        nodes?: "include" | "exclude";
+    };
 }
 
 // @beta (undocumented)
@@ -214,7 +222,9 @@ interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProp
 
 // @alpha (undocumented)
 interface ClassificationsTreeHierarchyConfiguration {
-    excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
+    elements?: {
+        excludedClasses?: EC.FullClassNameDotNotation[];
+    };
     rootClassificationSystemCode: string;
 }
 
@@ -447,12 +457,18 @@ type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => ReactE
 
 // @beta
 interface ModelsTreeHierarchyConfiguration {
-    elementClassGrouping?: "enable" | "enableWithCounts" | "disable";
-    elementClassSpecification?: EC.FullClassNameDotNotation;
-    excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
+    elements?: {
+        baseClass?: EC.FullClassNameDotNotation;
+        excludedClasses?: EC.FullClassNameDotNotation[];
+        classGrouping?: "enable" | "enable-with-counts" | "disable";
+    };
     hierarchyLevelFiltering?: "enable" | "disable";
-    modelsWithoutElements?: "include" | "exclude";
-    rootSubject?: "include" | "exclude";
+    models?: {
+        withoutElements?: "include" | "exclude";
+    };
+    subjects?: {
+        root?: "include" | "exclude";
+    };
 }
 
 // @beta (undocumented)

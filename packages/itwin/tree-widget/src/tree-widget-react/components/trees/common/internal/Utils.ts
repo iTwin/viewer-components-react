@@ -315,29 +315,55 @@ export function getId64Spreadable(ids: Id64Arg): Id64Array | Id64Set {
   return typeof ids === "string" ? [ids] : ids;
 }
 
-type PartialWithUndefined<T extends object> = {
-  [Key in keyof T]?: T[Key] | undefined;
-};
-
 /**
- * Shallowly merges overrides into defaults, ignoring properties whose value
- * is `undefined`.
+ * Recursively merges overrides into defaults, ignoring properties whose value is `undefined`.
  *
  * @internal
  */
-export function mergeWithDefaults<T extends object>({ defaults, overrides }: { defaults: T; overrides?: PartialWithUndefined<T> }): T {
-  const normalized = { ...defaults };
-
-  if (!overrides) {
-    return normalized;
-  }
-
-  for (const key of Object.keys(overrides) as Array<keyof T>) {
-    const value = overrides[key];
-    if (value !== undefined) {
-      normalized[key] = value;
-    }
-  }
-
-  return normalized;
+export function mergeWithDefaults<T extends object>({ defaults, overrides }: { defaults: DeepRequired<T>; overrides?: DeepOptional<T> }): DeepRequired<T> {
+  return mergeObjects({ defaults: defaults as Record<string, unknown>, overrides: overrides as Record<string, unknown> | undefined }) as DeepRequired<T>;
 }
+
+function mergeObjects({ defaults, overrides }: { defaults: Record<string, unknown>; overrides: Record<string, unknown> | undefined }): Record<string, unknown> {
+  const result = { ...defaults };
+  if (!overrides) {
+    return result;
+  }
+
+  for (const [key, override] of Object.entries(overrides)) {
+    if (override === undefined) {
+      continue;
+    }
+
+    const defaultValue = defaults[key];
+    result[key] = isMergeableObject(defaultValue) && isMergeableObject(override) ? mergeObjects({ defaults: defaultValue, overrides: override }) : override;
+  }
+  return result;
+}
+
+function isMergeableObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Recursively marks all properties as required with no depth limit.
+ * @internal
+ */
+export type DeepRequired<T> = T extends (...args: any[]) => any
+  ? T
+  : T extends Array<infer U>
+    ? Array<DeepRequired<U>>
+    : T extends object
+      ? { [K in keyof T]-?: DeepRequired<Exclude<T[K], undefined>> }
+      : T;
+
+/**
+ * Recursively marks all properties as optional with no depth limit.
+ */
+type DeepOptional<T> = T extends (...args: any[]) => any
+  ? T
+  : T extends Array<infer U>
+    ? Array<DeepOptional<U>>
+    : T extends object
+      ? { [K in keyof T]?: DeepOptional<T[K]> | undefined }
+      : T;
