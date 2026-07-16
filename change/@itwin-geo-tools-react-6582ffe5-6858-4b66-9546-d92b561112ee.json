@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "GoogleAddressProvider does not always resolve location requests correctly. Now handling different API variants",
+  "packageName": "@itwin/geo-tools-react",
+  "email": "Johannes.Goltz@bentley.com",
+  "dependentChangeType": "patch"
+}

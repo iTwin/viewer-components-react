@@ -73,8 +73,19 @@ export class GoogleAddressProvider implements AddressProvider {
       } });
     const json: any = await response.json();
 
-    const lat = json?.location?.geometry?.latitude
-    const long = json?.location?.geometry?.longitude
+    // Google Address Validation API response shape: { location: { latitude, longitude } }
+    // @see https://developers.google.com/maps/documentation/address-validation/reference/rest/v1/TopLevel/validateAddress#Location
+    const lat = json?.location?.latitude
+      // Google Geocoding API response shape: { result: { geometry: { location: { lat, lng } } } }
+      // @see https://developers.google.com/maps/documentation/geocoding/requests-geocoding#Results
+      ?? json?.result?.geometry?.location?.lat
+      // Legacy/wrapper format: { location: { geometry: { latitude, longitude } } }
+      ?? json?.location?.geometry?.latitude;
+
+    const long = json?.location?.longitude
+      ?? json?.result?.geometry?.location?.lng
+      ?? json?.location?.geometry?.longitude;
+
     if (lat === undefined || long === undefined) {
       throw new Error("Invalid location data");
     }
