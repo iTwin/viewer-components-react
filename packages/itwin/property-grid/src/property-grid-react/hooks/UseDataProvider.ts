@@ -8,7 +8,7 @@ import { PresentationPropertyDataProvider } from "@itwin/presentation-components
 import { trackTime } from "../common/TimeTracker.js";
 import { useTelemetryContext } from "./UseTelemetryContext.js";
 
-import type { PropertyDescription, PropertyRecord } from "@itwin/appui-abstract";
+import type { PropertyDescription } from "@itwin/appui-abstract";
 import type { PropertyDataChangeEvent } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { KeySet, PageOptions, SelectionInfo } from "@itwin/presentation-common";
@@ -109,12 +109,6 @@ class PerformanceTrackingProvider implements IPresentationPropertyDataProvider {
   /* c8 ignore next 3 */
   public async getContent(pageOptions?: PageOptions | undefined) {
     return this.#wrappedProvider.getContent(pageOptions);
-  }
-
-  /* c8 ignore next 4 */
-  public async getFieldByPropertyRecord(propertyRecord: PropertyRecord) {
-    // eslint-disable-next-line @typescript-eslint/no-deprecated
-    return this.#wrappedProvider.getFieldByPropertyRecord(propertyRecord);
   }
 
   /* c8 ignore next 3 */

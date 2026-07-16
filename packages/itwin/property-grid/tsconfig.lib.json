@@ -1,9 +1,8 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "outDir": "lib/esm"
+    "noEmit": false,
+    "outDir": "lib"
   },
   "exclude": ["src/e2e-tests/**/*"]
 }

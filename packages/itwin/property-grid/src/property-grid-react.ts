@@ -6,15 +6,7 @@
 export * from "./property-grid-react/PropertyGridManager.js";
 export * from "./property-grid-react/PropertyGridComponent.js";
 export * from "./property-grid-react/api/PreferencesStorage.js";
-export {
-  PropertyGridWidgetId,
-  PropertyGridWidgetProps,
-  createPropertyGrid,
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  PropertyGridUiItemsProvider,
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  PropertyGridUiItemsProviderProps,
-} from "./property-grid-react/PropertyGridUiItemsProvider.js";
+export { PropertyGridWidgetId, PropertyGridWidgetProps, createPropertyGrid } from "./property-grid-react/PropertyGridUiItemsProvider.js";
 
 export * from "./property-grid-react/components/PropertyGrid.js";
 export * from "./property-grid-react/components/MultiElementPropertyGrid.js";

@@ -12,7 +12,7 @@ import { PropertyGridSettingsMenuItem, ShowHideEmptyValuesSettingsMenuItem } fro
 import { EmptyValuesSettingContext } from "../../property-grid-react/hooks/UseEmptyValuesSetting.js";
 import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTelemetryContext.js";
 import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
-import { createPropertyRecord, render, stubSelectionManager, waitFor } from "../TestUtils.js";
+import { createPropertyRecord, render, waitFor } from "../TestUtils.js";
 
 import type { ReactElement } from "react";
 import type { PrimitiveValue } from "@itwin/appui-abstract";
@@ -23,7 +23,6 @@ import type { PropertyGridContentProps } from "../../property-grid-react/compone
 describe("<PropertyGridContent />", () => {
   beforeEach(() => {
     vi.spyOn(PropertyGridManager, "translate").mockImplementation((key) => key);
-    stubSelectionManager();
   });
 
   const createProvider = () =>
@@ -222,14 +221,14 @@ describe("<PropertyGridContent />", () => {
     await user.dblClick(propertyValue);
 
     const editor = await findByDisplayValue("Prop Value");
-    // type ` Updated` and press enter to commit new value
-    await user.type(editor, " Updated{Enter}");
+    // type `Updated` and press enter to commit new value
+    await user.type(editor, "Updated{Enter}");
 
     await waitFor(() => {
       expect(stub).toHaveBeenCalledOnce();
       const [{ dataProvider, newValue }] = stub.mock.calls[0];
       expect(dataProvider).toBe(provider);
-      expect((newValue as PrimitiveValue).value).toBe("Prop Value Updated");
+      expect((newValue as PrimitiveValue).value).toBe("Updated");
     });
   });
 
