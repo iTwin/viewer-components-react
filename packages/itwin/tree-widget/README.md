@@ -369,9 +369,9 @@ Use `getFilteredPaths` when you need more control over filtering behaviour. Here
             WHERE Label LIKE '%${activeFilter.replaceAll(/[%_\\]/g, "\\$&")}%' ESCAPE '\\'
           `,
           undefined,
-          { rowFormat: QueryRowFormat.UseJsPropertyNames },
+          { rowFormat: QueryRowFormat.UseECSqlPropertyIndexes },
         )) {
-          targetItems.push({ id: row.Id, className: row.ClassName });
+          targetItems.push({ id: row[1], className: row[0] });
         }
         // `createInstanceKeyPaths` doesn't automatically set the `autoExpand` flag - set it here
         const paths = await createInstanceKeyPaths({ targetItems });

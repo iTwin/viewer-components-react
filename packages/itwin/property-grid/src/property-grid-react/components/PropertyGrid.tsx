@@ -24,11 +24,8 @@ export type PropertyGridProps = OmitOverUnion<PropertyGridContentProps, "dataPro
   DataProviderProps & {
     /**
      * Unified selection storage to use for listening and getting active selection.
-     *
-     * When not specified, the deprecated `SelectionManager` from `@itwin/presentation-frontend` package
-     * is used.
      */
-    selectionStorage?: SelectionStorage;
+    selectionStorage: SelectionStorage;
   };
 
 /**
@@ -44,7 +41,7 @@ export function PropertyGrid({ createDataProvider, ...props }: PropertyGridProps
   return <UnifiedSelectionPropertyGrid {...props} dataProvider={dataProvider} />;
 }
 
-function UnifiedSelectionPropertyGrid({ selectionStorage, ...props }: PropertyGridContentProps & { selectionStorage?: SelectionStorage }) {
+function UnifiedSelectionPropertyGrid({ selectionStorage, ...props }: PropertyGridContentProps & { selectionStorage: SelectionStorage }) {
   const { isOverLimit } = usePropertyDataProviderWithUnifiedSelection({ dataProvider: props.dataProvider, selectionStorage });
 
   const dataRenderer = (dataRendererProps: FilteringPropertyGridProps) => {

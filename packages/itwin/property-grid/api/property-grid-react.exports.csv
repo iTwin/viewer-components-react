@@ -31,10 +31,6 @@ public;type;PropertyGridPropertyUpdatedArgs
 public;type;PropertyGridProps
 public;function;PropertyGridSettingsMenuItem
 public;interface;PropertyGridSettingsMenuItemProps
-public;class;PropertyGridUiItemsProvider
-deprecated;class;PropertyGridUiItemsProvider
-public;interface;PropertyGridUiItemsProviderProps
-deprecated;interface;PropertyGridUiItemsProviderProps
 public;const;PropertyGridWidgetId
 public;type;PropertyGridWidgetProps
 public;function;RemoveFavoritePropertyContextMenuItem
