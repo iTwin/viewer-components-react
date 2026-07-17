@@ -453,6 +453,28 @@ export namespace SheetMeasurementHelper {
     return true;
   }
 
+  /**
+   * Checks if the drawing pointed by the event is allowed according to the provided drawing types.
+   * Will return false if no drawing is detected at the point.
+   * @deprecated Use {@link SheetMeasurementHelper.checkIfNotForbiddenDrawingType} instead.
+   * @param viewport
+   * @param point
+   * @param allowedDrawingTypes
+   * @returns
+   */
+  export function checkIfAllowedDrawingType(viewport: ScreenViewport | undefined, point: Point3d, allowedDrawingTypes: DrawingType[]) {
+    if (!viewport)
+      return false;
+    for (const drawing of DrawingDataCache.getInstance().getSheetDrawingDataForViewport(viewport)) {
+      if (drawing.type !== undefined && allowedDrawingTypes.includes(drawing.type)) {
+        if (SheetMeasurementHelper.checkIfInDrawing(point, Point2d.fromJSON(drawing.origin), Point2d.fromJSON(drawing.bBoxHigh))) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   export async function getDrawingMetadata(imodel: IModelConnection, id: string, mousePos: Point3d): Promise<DrawingMetadata | undefined> {
     const drawingData = await getDrawingData(imodel, id, mousePos);
     if (drawingData?.drawingId !== undefined && drawingData.viewAttachmentOrigin !== undefined && drawingData.transformProps !== undefined)
@@ -628,6 +650,28 @@ export namespace SheetMeasurementsHelper {
     }
 
     return result;
+  }
+
+  /**
+   * @deprecated use SheetMeasurementHelper.checkIfAllowedDrawingType instead
+   * Checks if the drawing pointed by the event is allowed according to the provided drawing types.
+   * Will return false if no drawing is detected at the point.
+   * @param viewport
+   * @param point
+   * @param allowedDrawingTypes
+   * @returns
+   */
+  export function checkIfAllowedDrawingType(viewport: ScreenViewport | undefined, point: Point3d, allowedDrawingTypes: DrawingType[]) {
+    if (!viewport)
+      return false;
+    for (const drawing of DrawingDataCache.getInstance().getSheetDrawingDataForViewport(viewport)) {
+      if (drawing.type && allowedDrawingTypes.includes(drawing.type)) {
+        if (SheetMeasurementsHelper.checkIfInDrawing(point, Point2d.fromJSON(drawing.origin), Point2d.fromJSON(drawing.bBoxHigh))) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   /**

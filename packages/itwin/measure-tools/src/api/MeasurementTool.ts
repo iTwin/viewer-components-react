@@ -225,6 +225,11 @@ export abstract class MeasurementToolBase<
     return [];
   }
 
+  /** @deprecated Use {@link forbiddenDrawingTypes} instead. */
+  protected get allowedDrawingTypes(): SheetMeasurementHelper.DrawingType[] {
+    return this.forbiddenDrawingTypes;
+  }
+
   constructor(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true))  {
     super();
 
