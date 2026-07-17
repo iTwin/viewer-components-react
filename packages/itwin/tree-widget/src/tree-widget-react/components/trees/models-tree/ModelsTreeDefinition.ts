@@ -139,6 +139,7 @@ export interface ModelsTreeHierarchyConfiguration {
   };
 }
 
+/** @internal */
 export type RequiredModelsTreeHierarchyConfiguration = DeepRequired<ModelsTreeHierarchyConfiguration>;
 
 /** @internal */

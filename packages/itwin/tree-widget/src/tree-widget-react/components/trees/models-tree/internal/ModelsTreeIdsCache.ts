@@ -18,7 +18,7 @@ import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { BaseIdsCacheImplProps } from "../../common/internal/caches/BaseIdsCache.js";
 import type { ModelId, SubjectId } from "../../common/internal/Types.js";
-import type { ModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
+import type { ModelsTreeHierarchyConfiguration, RequiredModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
 
 /**
  * Hierarchy config props needed for ids cache.
@@ -44,14 +44,14 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
   #upToModelInstanceKeyPaths: Map<ModelId, Observable<HierarchyNodeIdentifiersPath>> = new Map();
   #parentSubjectIds: Observable<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   #queryExecutor: LimitingECSqlQueryExecutor;
-  #hierarchyConfig: Required<HierarchyConfigForModelsCache>;
+  #hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
   #componentId: GuidString;
   #componentName: string;
 
   constructor(props: ModelsTreeIdsCacheProps) {
     super(props);
     this.#queryExecutor = props.queryExecutor;
-    this.#hierarchyConfig = mergeWithDefaults({
+    this.#hierarchyConfig = mergeWithDefaults<RequiredModelsTreeHierarchyConfiguration>({
       defaults: defaultHierarchyConfiguration,
       overrides: props.hierarchyConfig,
     });
