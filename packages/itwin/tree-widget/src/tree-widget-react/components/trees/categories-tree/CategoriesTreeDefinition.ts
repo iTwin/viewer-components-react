@@ -188,7 +188,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   #impl: Promise<HierarchyDefinition> | undefined;
   #idsCache: CategoriesTreeIdsCache;
   #hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
-  #excludedClasses: EC.FullClassNameDotNotation[];
+  #excludedClasses?: EC.FullClassNameDotNotation[];
   #iModelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   #categoryClass: EC.FullClassNameDotNotation;
   #categoryElementClass: EC.FullClassNameDotNotation;
@@ -203,7 +203,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     this.#categoryClass = categoryClass;
     this.#categoryElementClass = elementClass;
     this.#categoryModelClass = modelClass;
-    this.#excludedClasses = this.#hierarchyConfig.elements.nodes === "include" ? this.#hierarchyConfig.elements.excludedClasses : [];
+    this.#excludedClasses = this.#hierarchyConfig.elements.nodes === "include" ? this.#hierarchyConfig.elements.excludedClasses : undefined;
   }
 
   public preProcessNode: NodePreProcessor = async ({ node }) => {
@@ -1268,7 +1268,7 @@ function createSearchPathsForDifferentTypes(
             idsCache,
             viewType: props.viewType,
             elements: hierarchyConfig.elements.nodes,
-            excludedElementClassNames: hierarchyConfig.elements.nodes === "include" ? hierarchyConfig.elements.excludedClasses : [],
+            excludedElementClassNames: hierarchyConfig.elements.nodes === "include" ? hierarchyConfig.elements.excludedClasses : undefined,
           }),
           idsCache.getSubCategoriesSearchPaths({ subCategoryIds: ids.subCategoryIds }).pipe(
             releaseMainThreadOnItemsCount(2000),
@@ -1288,7 +1288,7 @@ function createSearchPathsForDifferentTypes(
                       chunkIndex,
                       componentId,
                       componentName,
-                      excludedElementClassNames: hierarchyConfig.elements.nodes === "include" ? hierarchyConfig.elements.excludedClasses : [],
+                      excludedElementClassNames: hierarchyConfig.elements.nodes === "include" ? hierarchyConfig.elements.excludedClasses : undefined,
                     }),
                   2,
                 ),
@@ -1407,7 +1407,7 @@ export function createCategoriesSearchPaths(props: {
   componentId: GuidString;
   componentName: string;
   elements: "include" | "exclude";
-  excludedElementClassNames: Array<EC.FullClassNameDotNotation>;
+  excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
 }): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String }> {
   const separator = ";";
   const { targetCategoryIds, componentId, componentName, idsCache, queryExecutor, viewType, excludedElementClassNames } = props;

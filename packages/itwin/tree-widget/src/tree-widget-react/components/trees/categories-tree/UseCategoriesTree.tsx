@@ -102,7 +102,7 @@ export function useCategoriesTree({
   const idsCache = useCategoriesTreeIdsCache({
     imodel: activeView.iModel,
     activeViewType: viewType,
-    excludedElementClassNames: hierarchyConfiguration.elements.nodes === "include" ? hierarchyConfiguration.elements.excludedClasses : [],
+    excludedElementClassNames: hierarchyConfiguration.elements.nodes === "include" ? hierarchyConfiguration.elements.excludedClasses : undefined,
   });
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useCategoriesCachedVisibility({
