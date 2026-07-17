@@ -705,7 +705,7 @@ describe("Models tree", () => {
     });
 
     describe("Hierarchy configuration", () => {
-it("includes models without elements when `models.withoutElements` is set to 'include'", async () => {
+      it("includes models without elements when `models.withoutElements` is set to 'include'", async () => {
         await using buildIModelResult = await buildIModel(async (imodel) =>
           withEditTxn(imodel, (txn) => {
             const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };

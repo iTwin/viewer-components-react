@@ -159,8 +159,15 @@ export function useModelsTree({
         defaults: defaultHierarchyConfiguration,
         overrides: hierarchyConfig,
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
-    Object.values(hierarchyConfig ?? {}),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      hierarchyConfig?.elements?.baseClass,
+      hierarchyConfig?.elements?.excludedClasses,
+      hierarchyConfig?.elements?.classGrouping,
+      hierarchyConfig?.models?.withoutElements,
+      hierarchyConfig?.subjects?.root,
+      hierarchyConfig?.hierarchyLevelFiltering,
+    ],
   );
   const componentId = useGuid();
   const idsCache = useModelsTreeIdsCache({

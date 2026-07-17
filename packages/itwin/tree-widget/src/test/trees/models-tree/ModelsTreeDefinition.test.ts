@@ -1316,7 +1316,7 @@ describe("Models tree", () => {
     });
 
     describe("Hierarchy customization", () => {
-      it("shows models without elements when `models.withoutElements` is set to 'include'", async () => {
+      it("includes models without elements when `models.withoutElements` is set to 'include'", async () => {
         await using buildIModelResult = await buildIModel(async (imodel) =>
           withEditTxn(imodel, (txn) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };

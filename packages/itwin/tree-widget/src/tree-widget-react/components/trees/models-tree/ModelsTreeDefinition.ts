@@ -7,7 +7,7 @@ import { bufferCount, defer, EMPTY, firstValueFrom, forkJoin, from, fromEvent, i
 import { assert, Guid } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { createPredicateBasedHierarchyDefinition, NodeSelectClauseColumnNames, ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
-import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
+import { createBisInstanceLabelSelectClauseFactory, ECSql, parseFullClassName } from "@itwin/presentation-shared";
 import { eachValueFrom } from "../../utils/EachValueFrom.js";
 import {
   CLASS_NAME_Element,
@@ -883,10 +883,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   }
 
   private async isSupported() {
-    const [schemaName, className] = this.#hierarchyConfig.elements.baseClass.split(".");
-    if (!schemaName || !className) {
-      throw new Error(`Provided class specification ${this.#hierarchyConfig.elements.baseClass} should be in format {SchemaName}.{ClassName}`);
-    }
+    const { schemaName, className } = parseFullClassName(this.#hierarchyConfig.elements.baseClass);
 
     const query: ECSqlQueryDef = {
       ecsql: `

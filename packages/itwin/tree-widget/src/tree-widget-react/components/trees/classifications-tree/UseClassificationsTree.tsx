@@ -121,8 +121,8 @@ export function useClassificationsTree({
 
   const hierarchyConfig = useMemo(
     () => ({ ...rest.hierarchyConfig }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
-    [...Object.values(rest.hierarchyConfig)],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [rest.hierarchyConfig.rootClassificationSystemCode, rest.hierarchyConfig.elements?.excludedClasses],
   );
   const componentId = useGuid();
 
