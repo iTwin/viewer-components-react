@@ -407,7 +407,7 @@ describe("models tree", () => {
 
   for (let i = 0; i < 2; i++) {
     // Excluded 2d elements won't affect the hierarchy in any way since imodel contains only 3d data.
-    const excludedElementClassNames: EC.FullClassNameDotNotation[] | undefined = i === 1 ? ["BisCore.GeometricElement2d"] : undefined;
+    const excludedElementClassNames: EC.FullClassNameDotNotation[] = i === 1 ? ["BisCore.GeometricElement2d"] : [];
     run<{
       iModel: SnapshotDb;
       imodelAccess: IModelAccess;
@@ -435,8 +435,10 @@ describe("models tree", () => {
           // lets child categories visible in selector except top most elements category
           categories: testData.categories.map((category, index) => ({ ...category, visible: index !== 0 })),
         });
-        const hierarchyConfig = {
+        const hierarchyConfig: typeof defaultModelsTreeHierarchyConfiguration = {
+          ...defaultModelsTreeHierarchyConfiguration,
           elements: {
+            ...defaultModelsTreeHierarchyConfiguration.elements,
             excludedClasses: excludedElementClassNames,
           },
         };

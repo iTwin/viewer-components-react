@@ -27,7 +27,6 @@ import {
   fromWithRelease,
   getOptimalBatchSize,
   groupingNodeDataFromChildren,
-  mergeWithDefaults,
   ParentElementsPath,
   parseIdsSelectorResult,
   releaseMainThreadOnItemsCount,
@@ -161,7 +160,7 @@ export const defaultHierarchyConfiguration: RequiredModelsTreeHierarchyConfigura
 interface ModelsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
-  hierarchyConfig: ModelsTreeHierarchyConfiguration;
+  hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
   componentId?: GuidString;
 }
 
@@ -183,7 +182,7 @@ export interface ElementsGroupInfo {
 interface ModelsTreeInstanceKeyPathsBaseProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
-  hierarchyConfig: ModelsTreeHierarchyConfiguration;
+  hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
   limit?: number | "unbounded";
   abortSignal?: AbortSignal;
   componentId?: string;
@@ -218,10 +217,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   #componentId: GuidString;
 
   public constructor(props: ModelsTreeDefinitionProps) {
-    this.#hierarchyConfig = mergeWithDefaults({
-      defaults: defaultHierarchyConfiguration,
-      overrides: props.hierarchyConfig,
-    });
+    this.#hierarchyConfig = props.hierarchyConfig;
     this.#impl = createPredicateBasedHierarchyDefinition({
       classHierarchyInspector: props.imodelAccess,
       hierarchy: {
@@ -1261,10 +1257,6 @@ function createSearchPathsForDifferentTypes(
     },
   ObservedValueOf<ReturnType<typeof createGeometricElementInstanceKeyPaths>>
 > {
-  const hierarchyConfig = mergeWithDefaults({
-    defaults: defaultHierarchyConfiguration,
-    overrides: props.hierarchyConfig,
-  });
   return (obs) =>
     obs.pipe(
       reduce(
@@ -1312,10 +1304,10 @@ function createSearchPathsForDifferentTypes(
             targetCategoryIds: ids.categoryIds,
             idsCache,
             queryExecutor: imodelAccess,
-            elementClassName: hierarchyConfig.elements.baseClass,
+            elementClassName: props.hierarchyConfig.elements.baseClass,
             componentId,
             componentName,
-            excludedElementClassNames: hierarchyConfig.elements.excludedClasses,
+            excludedElementClassNames: props.hierarchyConfig.elements.excludedClasses,
           }),
           from(ids.elementIds).pipe(
             bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),
@@ -1325,12 +1317,12 @@ function createSearchPathsForDifferentTypes(
                 createGeometricElementInstanceKeyPaths({
                   queryExecutor: imodelAccess,
                   idsCache,
-                  elementClassName: hierarchyConfig.elements.baseClass,
+                  elementClassName: props.hierarchyConfig.elements.baseClass,
                   targetItems: block,
                   componentId,
                   componentName,
                   chunkIndex,
-                  excludedElementClassNames: hierarchyConfig.elements.excludedClasses,
+                  excludedElementClassNames: props.hierarchyConfig.elements.excludedClasses,
                 }),
               2,
             ),
@@ -1347,11 +1339,7 @@ function createInstanceKeyPathsFromInstanceLabelObs(
     componentName: string;
   },
 ) {
-  const { labelsFactory, label, imodelAccess, limit } = props;
-  const hierarchyConfig = mergeWithDefaults({
-    defaults: defaultHierarchyConfiguration,
-    overrides: props.hierarchyConfig,
-  });
+  const { labelsFactory, label, imodelAccess, limit, hierarchyConfig } = props;
   return defer(async () => {
     const elementLabelSelectClause = await labelsFactory.createSelectClause({
       classAlias: "e",

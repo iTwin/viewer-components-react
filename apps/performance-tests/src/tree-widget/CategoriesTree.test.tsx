@@ -7,7 +7,13 @@ import { describe, expect } from "vitest";
 import { assert } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { SharedTreeContextProvider, useCategoriesTree } from "@itwin/tree-widget-react";
-import { BaseIdsCache, CategoriesTreeDefinition, CategoriesTreeIdsCache, createCategoriesTreeVisibilityHandler } from "@itwin/tree-widget-react/internal";
+import {
+  BaseIdsCache,
+  CategoriesTreeDefinition,
+  CategoriesTreeIdsCache,
+  createCategoriesTreeVisibilityHandler,
+  defaultCategoriesTreeHierarchyConfiguration,
+} from "@itwin/tree-widget-react/internal";
 import { act, renderHook } from "@testing-library/react";
 import { Datasets } from "../util/Datasets.js";
 import { run, TestIModelConnection } from "../util/TestUtilities.js";
@@ -124,13 +130,13 @@ describe("categories tree", () => {
       });
       const baseIdsCache = new BaseIdsCache({ elementClassName: "BisCore.GeometricElement3d", type: "3d", queryExecutor: imodelAccess });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-      const handler = createCategoriesTreeVisibilityHandler({ imodelAccess, idsCache, viewport });
+      const handler = createCategoriesTreeVisibilityHandler({ imodelAccess, idsCache, viewport, hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration });
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new CategoriesTreeDefinition({
           idsCache,
           imodelAccess,
           viewType: "3d",
-          hierarchyConfig: {},
+          hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration,
         }),
         imodelAccess,
       });
@@ -196,7 +202,7 @@ describe("categories tree", () => {
 
   for (let i = 0; i < 2; i++) {
     // Excluded 2d elements won't affect the hierarchy in any way since imodel contains only 3d data.
-    const excludedElementClassNames: EC.FullClassNameDotNotation[] | undefined = i === 1 ? ["BisCore.GeometricElement2d"] : undefined;
+    const excludedElementClassNames: EC.FullClassNameDotNotation[] = i === 1 ? ["BisCore.GeometricElement2d"] : [];
     run<{
       iModel: SnapshotDb;
       imodelAccess: IModelAccess;
@@ -222,8 +228,10 @@ describe("categories tree", () => {
           viewport,
           ...testData,
         });
-        const hierarchyConfig = {
+        const hierarchyConfig: typeof defaultCategoriesTreeHierarchyConfiguration = {
+          ...defaultCategoriesTreeHierarchyConfiguration,
           elements: {
+            ...defaultCategoriesTreeHierarchyConfiguration.elements,
             nodes: "include" as const,
             excludedClasses: excludedElementClassNames,
           },
@@ -232,7 +240,7 @@ describe("categories tree", () => {
           elementClassName: "BisCore.GeometricElement3d",
           type: "3d",
           queryExecutor: imodelAccess,
-          excludedElementClassNames: hierarchyConfig.elements.excludedClasses,
+          excludedElementClassNames: hierarchyConfig.elements.nodes === "include" ? hierarchyConfig.elements.excludedClasses : [],
         });
         const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
         const handler = createCategoriesTreeVisibilityHandler({ imodelAccess, idsCache, viewport, hierarchyConfig });

@@ -35,7 +35,7 @@ import {
   CLASS_NAME_SubCategory,
   CLASS_NAME_Subject,
 } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
-import { getClassesByView } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
+import { getClassesByView, mergeWithDefaults } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
 import { buildIModel } from "../../../IModelUtils.js";
 import { TestUtils } from "../../../TestUtils.js";
 import { createIModelAccess } from "../../Common.js";
@@ -56,7 +56,10 @@ import type { Id64Arg, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { GroupingHierarchyNode, HierarchySearchTree, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { InstanceKey, Props } from "@itwin/presentation-shared";
-import type { CategoriesTreeHierarchyConfiguration } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
+import type {
+  CategoriesTreeHierarchyConfiguration,
+  RequiredCategoriesTreeHierarchyConfiguration,
+} from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import type { VisibilityExpectations } from "../../common/VisibilityValidation.js";
 import type { TreeWidgetTestingViewport } from "../../TreeUtils.js";
 
@@ -90,7 +93,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
     visibleByDefault,
   }: {
     imodelConnection: IModelConnection;
-    hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
+    hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
     subCategoriesOfCategories?: Array<{ categoryId: Id64String; subCategories: Id64Arg }>;
     visibleByDefault?: boolean;
   }) {
@@ -112,7 +115,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
     idsCache: CategoriesTreeIdsCache;
     imodelAccess: ReturnType<typeof createIModelAccess>;
     searchPaths?: HierarchySearchTree[];
-    hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+    hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
   }) {
     return createIModelHierarchyProvider({
       hierarchyDefinition: new CategoriesTreeDefinition({ ...props, viewType: "3d" }),
@@ -123,15 +126,19 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
   async function createVisibilityTestData({
     imodelConnection,
-    hierarchyConfig,
     subCategoriesOfCategories,
     visibleByDefault,
+    ...restProps
   }: {
     imodelConnection: IModelConnection;
     hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
     subCategoriesOfCategories?: Array<{ categoryId: Id64String; subCategories: Id64Arg }>;
     visibleByDefault?: boolean;
   }) {
+    const hierarchyConfig = mergeWithDefaults({
+      defaults: defaultHierarchyConfiguration,
+      overrides: restProps.hierarchyConfig,
+    });
     const commonProps = await createCommonProps({ imodelConnection, hierarchyConfig, subCategoriesOfCategories, visibleByDefault });
     const handler = createCategoriesTreeVisibilityHandler({
       viewport: commonProps.viewport,
@@ -3702,10 +3709,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
       visibleByDefault?: boolean;
       subCategoriesOfCategories: Array<{ categoryId: string; subCategories: Id64Arg }>;
     }) {
-      const hierarchyConfig: CategoriesTreeHierarchyConfiguration = {
-        elements: { nodes: "include" },
-        categories: { withoutElements: "include" },
-      };
+      const hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration = mergeWithDefaults({
+        defaults: defaultHierarchyConfiguration,
+        overrides: {
+          elements: { nodes: "include" },
+          categories: { withoutElements: "include" },
+        },
+      });
       const imodelAccess = createIModelAccess(imodelConnection);
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(view).elementClass, type: view });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: view, baseIdsCache });
@@ -3760,10 +3770,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
         }),
       );
       const { imodelConnection, ...keys } = buildIModelResult;
-      const hierarchyConfig: CategoriesTreeHierarchyConfiguration = {
-        elements: { nodes: "include" },
-        categories: { withoutElements: "include" },
-      };
+      const hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration = mergeWithDefaults({
+        defaults: defaultHierarchyConfiguration,
+        overrides: {
+          elements: { nodes: "include" },
+          categories: { withoutElements: "include" },
+        },
+      });
       const imodelAccess = createIModelAccess(imodelConnection);
       const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
       const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });

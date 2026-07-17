@@ -5,24 +5,23 @@
 
 import { bufferCount, concat, concatMap, delay, EMPTY, from, map, merge, mergeMap, reduce, toArray } from "rxjs";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
-import { getOptimalBatchSize, mergeWithDefaults } from "../../../common/internal/Utils.js";
+import { getOptimalBatchSize } from "../../../common/internal/Utils.js";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
-import { defaultHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
 
 import type { Observable } from "rxjs";
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
 import type { BaseVisibilityHelperProps } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
-import type { CategoriesTreeHierarchyConfiguration, RequiredCategoriesTreeHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
+import type { RequiredCategoriesTreeHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
 import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
 import type { ElementClassGroupingNodeProps } from "../CategoriesTreeNodeInternal.js";
 
 /** @internal */
 export type CategoriesTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
   idsCache: CategoriesTreeIdsCache;
-  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
 };
 
 /**
@@ -39,10 +38,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
     super(props);
     this.#viewport = props.viewport;
     this.#idsCache = props.idsCache;
-    this.#hierarchyConfig = mergeWithDefaults({
-      defaults: defaultHierarchyConfiguration,
-      overrides: props.hierarchyConfig,
-    });
+    this.#hierarchyConfig = props.hierarchyConfig;
   }
 
   /**

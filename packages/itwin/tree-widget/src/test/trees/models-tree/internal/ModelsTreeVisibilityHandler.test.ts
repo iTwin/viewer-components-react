@@ -61,6 +61,10 @@ import type { Visibility } from "../../../../tree-widget-react/components/trees/
 import type { TreeWidgetViewport } from "../../../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 import type { ModelsTreeVisibilityHandlerProps } from "../../../../tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
+import type {
+  ModelsTreeHierarchyConfiguration,
+  RequiredModelsTreeHierarchyConfiguration,
+} from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import type { VisibilityExpectations } from "../../common/VisibilityValidation.js";
 
 interface VisibilityOverrides {
@@ -68,8 +72,6 @@ interface VisibilityOverrides {
   categories?: Map<Id64String, Visibility>;
   elements?: Map<Id64String, Visibility>;
 }
-
-type ModelsTreeHierarchyConfiguration = Partial<ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"]>;
 
 describe("ModelsTreeVisibilityHandler", () => {
   function createIdsCache(iModel: IModelConnection, hierarchyConfig?: ModelsTreeHierarchyConfiguration) {
@@ -1755,7 +1757,7 @@ describe("ModelsTreeVisibilityHandler", () => {
     function createProvider(props: {
       idsCache: ModelsTreeIdsCache;
       imodelAccess: ReturnType<typeof createIModelAccess>;
-      hierarchyConfig: ModelsTreeHierarchyConfiguration;
+      hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
       searchPaths?: HierarchySearchTree[];
     }) {
       return createIModelHierarchyProvider({
@@ -3809,10 +3811,13 @@ describe("ModelsTreeVisibilityHandler", () => {
             }
             const [customClassElement1, customClassElement2, nonCustomClassElement] = elements;
 
-            const hierarchyConfig = {
-              models: { withoutElements: "include" as const },
-              elements: { baseClass: customClassName },
-            };
+            const hierarchyConfig: RequiredModelsTreeHierarchyConfiguration = mergeWithDefaults({
+              defaults: defaultHierarchyConfiguration,
+              overrides: {
+                models: { withoutElements: "include" as const },
+                elements: { baseClass: customClassName },
+              },
+            });
 
             return {
               configurationModelId,

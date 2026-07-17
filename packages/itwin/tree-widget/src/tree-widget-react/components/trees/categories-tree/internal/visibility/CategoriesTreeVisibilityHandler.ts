@@ -22,7 +22,7 @@ import type { SearchResultsTree } from "../../../common/internal/visibility/Base
 import type { TreeSpecificVisibilityHandler } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
-import type { CategoriesTreeHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
+import type { RequiredCategoriesTreeHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
 import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
 import type { CategoriesTreeSearchTargets } from "./SearchResultsTree.js";
 
@@ -31,7 +31,7 @@ export interface CategoriesTreeVisibilityHandlerProps {
   idsCache: CategoriesTreeIdsCache;
   viewport: TreeWidgetViewport;
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfoCache;
-  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
 }
 
 /**
@@ -322,7 +322,7 @@ export function createCategoriesTreeVisibilityHandler(props: {
   idsCache: CategoriesTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
   searchPaths?: HierarchySearchTree[];
-  hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
 }) {
   return new HierarchyVisibilityHandlerImpl<CategoriesTreeSearchTargets>({
     cancelChangesInProgress: new Subject<void>(),

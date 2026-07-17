@@ -31,13 +31,12 @@ import type {
 } from "@itwin/presentation-hierarchies";
 import type { EC, InstanceKey } from "@itwin/presentation-shared";
 import type { ParentElementsPath } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
-
-type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
+import type { ModelsTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 
 interface CreateModelsTreeProviderProps {
   imodelConnection: IModelConnection;
   searchPaths?: HierarchySearchTree[];
-  hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
+  hierarchyConfig?: ModelsTreeHierarchyConfiguration;
   idsCache?: ModelsTreeIdsCache;
   imodelAccess?: ReturnType<typeof createIModelAccess>;
 }
@@ -49,7 +48,7 @@ export function createModelsTreeProvider({
   imodelAccess,
   idsCache,
 }: CreateModelsTreeProviderProps): HierarchyProvider & { dispose: () => void; [Symbol.dispose]: () => void } {
-  const configOverrides: Partial<ModelsTreeHierarchyConfiguration> = { subjects: { root: "exclude" }, ...hierarchyConfig };
+  const configOverrides: ModelsTreeHierarchyConfiguration = { subjects: { root: "exclude" }, ...hierarchyConfig };
   const config = mergeWithDefaults({
     defaults: defaultHierarchyConfiguration,
     overrides: configOverrides,

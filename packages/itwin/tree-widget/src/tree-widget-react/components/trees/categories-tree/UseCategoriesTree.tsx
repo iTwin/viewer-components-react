@@ -33,7 +33,7 @@ import type { ExtendedVisibilityTreeRendererProps } from "../common/components/V
 import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { SearchResultsTree } from "../common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
-import type { CategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
+import type { CategoriesTreeHierarchyConfiguration, RequiredCategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import type { CategoriesTreeSearchError } from "./internal/UseSearchPaths.js";
 import type { CategoriesTreeSearchTargets } from "./internal/visibility/SearchResultsTree.js";
 
@@ -201,7 +201,7 @@ function useCategoriesCachedVisibility(props: {
   idsCache: CategoriesTreeIdsCache;
   viewType: "2d" | "3d";
   componentId: GuidString;
-  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
 }) {
   const { activeView, idsCache, viewType, componentId, hierarchyConfig } = props;
   const { visibilityHandlerFactory, searchPaths, onSearchPathsChanged } = useCachedVisibility<CategoriesTreeIdsCache, CategoriesTreeSearchTargets>({
@@ -231,7 +231,7 @@ function useCategoriesCachedVisibility(props: {
 
 function createTreeSpecificVisibilityHandler(
   props: CreateTreeSpecificVisibilityHandlerProps<CategoriesTreeIdsCache> & {
-    hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+    hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
   },
 ) {
   const { info, idsCache, viewport, hierarchyConfig } = props;

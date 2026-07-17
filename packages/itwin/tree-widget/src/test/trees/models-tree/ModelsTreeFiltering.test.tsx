@@ -41,10 +41,8 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { InstanceKey, Props } from "@itwin/presentation-shared";
-import type { ElementsGroupInfo, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
+import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import type { ExpectedHierarchyDef } from "../HierarchyValidation.js";
-
-type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
 interface TreeSearchTestCaseDefinition<TIModelSetupResult extends object> {
   name: string;

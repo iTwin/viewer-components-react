@@ -17,7 +17,7 @@ import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../../common/components/VisibilityTree.js";
-import type { ClassGroupingHierarchyNode, ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
+import type { ClassGroupingHierarchyNode, ElementsGroupInfo, RequiredModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
 import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache.js";
 
 /** @internal */
@@ -37,7 +37,7 @@ export function useSearchPaths({
   onSearchPathsChanged,
   componentId,
 }: {
-  hierarchyConfig: ModelsTreeHierarchyConfiguration;
+  hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
   searchText?: string;
   searchLimit?: number | "unbounded";
   getSearchPaths?: (props: {

@@ -42,7 +42,6 @@ import {
   getOptimalBatchSize,
   getOrCreate,
   groupingNodeDataFromChildren,
-  mergeWithDefaults,
   ParentElementsPath,
   parseIdsSelectorResult,
   releaseMainThreadOnItemsCount,
@@ -88,7 +87,7 @@ interface CategoriesTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   viewType: "2d" | "3d";
   idsCache: CategoriesTreeIdsCache;
-  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
 }
 
 interface CategoriesTreeInstanceKeyPathsBaseProps {
@@ -96,7 +95,7 @@ interface CategoriesTreeInstanceKeyPathsBaseProps {
   limit?: number | "unbounded";
   viewType: "2d" | "3d";
   idsCache: CategoriesTreeIdsCache;
-  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
   componentId?: GuidString;
   abortSignal?: AbortSignal;
 }
@@ -198,7 +197,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   public constructor(props: CategoriesTreeDefinitionProps) {
     this.#iModelAccess = props.imodelAccess;
     this.#idsCache = props.idsCache;
-    this.#hierarchyConfig = mergeWithDefaults({ defaults: defaultHierarchyConfiguration, overrides: props.hierarchyConfig });
+    this.#hierarchyConfig = props.hierarchyConfig;
     const { categoryClass, elementClass, modelClass } = getClassesByView(props.viewType);
     this.#categoryClass = categoryClass;
     this.#categoryElementClass = elementClass;
@@ -1020,8 +1019,7 @@ function createInstanceKeyPathsFromInstanceLabel(
     componentName: string;
   },
 ) {
-  const { idsCache, label, viewType, labelsFactory, limit, imodelAccess, componentId, componentName } = props;
-  const hierarchyConfig = mergeWithDefaults({ defaults: defaultHierarchyConfiguration, overrides: props.hierarchyConfig });
+  const { idsCache, label, viewType, labelsFactory, limit, imodelAccess, componentId, componentName, hierarchyConfig } = props;
   const { categoryClass, elementClass } = getClassesByView(viewType);
 
   const adjustedLabel = label.replace(/[%_\\]/g, "\\$&");
@@ -1216,7 +1214,6 @@ function createSearchPathsForDifferentTypes(
   },
   ObservedValueOf<ReturnType<typeof createGeometricElementInstanceKeyPaths>>
 > {
-  const hierarchyConfig = mergeWithDefaults({ defaults: defaultHierarchyConfiguration, overrides: props.hierarchyConfig });
   return (obs) =>
     obs.pipe(
       reduce(
@@ -1229,12 +1226,12 @@ function createSearchPathsForDifferentTypes(
               acc.definitionContainerIds.push(key);
               break;
             case SUB_CATEGORY_TYPE_AS_NUMBER:
-              if (hierarchyConfig.subCategories.nodes === "include") {
+              if (props.hierarchyConfig.subCategories.nodes === "include") {
                 acc.subCategoryIds.push(key);
               }
               break;
             default:
-              if (hierarchyConfig.elements.nodes === "include") {
+              if (props.hierarchyConfig.elements.nodes === "include") {
                 acc.elementIds.push(key);
               }
               break;
@@ -1267,14 +1264,14 @@ function createSearchPathsForDifferentTypes(
             componentName,
             idsCache,
             viewType: props.viewType,
-            elements: hierarchyConfig.elements.nodes,
-            excludedElementClassNames: hierarchyConfig.elements.nodes === "include" ? hierarchyConfig.elements.excludedClasses : undefined,
+            elements: props.hierarchyConfig.elements.nodes,
+            excludedElementClassNames: props.hierarchyConfig.elements.nodes === "include" ? props.hierarchyConfig.elements.excludedClasses : undefined,
           }),
           idsCache.getSubCategoriesSearchPaths({ subCategoryIds: ids.subCategoryIds }).pipe(
             releaseMainThreadOnItemsCount(2000),
             map((path) => ({ path, target: path[path.length - 1].id })),
           ),
-          hierarchyConfig.elements.nodes === "include"
+          props.hierarchyConfig.elements.nodes === "include"
             ? from(ids.elementIds).pipe(
                 bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),
                 releaseMainThreadOnItemsCount(1),
@@ -1288,7 +1285,8 @@ function createSearchPathsForDifferentTypes(
                       chunkIndex,
                       componentId,
                       componentName,
-                      excludedElementClassNames: hierarchyConfig.elements.nodes === "include" ? hierarchyConfig.elements.excludedClasses : undefined,
+                      excludedElementClassNames:
+                        props.hierarchyConfig.elements.nodes === "include" ? props.hierarchyConfig.elements.excludedClasses : undefined,
                     }),
                   2,
                 ),

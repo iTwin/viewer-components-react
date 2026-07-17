@@ -30,7 +30,7 @@ import {
 } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
-import { getClassesByView } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
+import { getClassesByView, mergeWithDefaults } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
 import { buildIModel, TestSchema } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
@@ -1442,7 +1442,7 @@ describe("Categories tree", () => {
               hierarchyConfig: {
                 subCategories: { nodes: "include" },
                 categories: { withoutElements: "include" },
-                elements: { nodes: "include" },
+                elements: { nodes: "include", excludedClasses: [] },
               },
               label: "x",
             });
@@ -1492,7 +1492,7 @@ function createCategoryTreeProvider(
       imodelAccess,
       viewType,
       idsCache,
-      hierarchyConfig: hierarchyConfig ?? defaultHierarchyConfiguration,
+      hierarchyConfig: mergeWithDefaults({ defaults: defaultHierarchyConfiguration, overrides: hierarchyConfig }),
     }),
   });
   return {

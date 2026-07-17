@@ -9,17 +9,17 @@ import { assert } from "@itwin/core-bentley";
 import { HierarchyNodeIdentifier, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
 import { toVoidPromise } from "../../common/internal/Rxjs.js";
-import { getClassesByView, getOrCreate, mergeWithDefaults } from "../../common/internal/Utils.js";
+import { getClassesByView, getOrCreate } from "../../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../../common/TreeErrors.js";
 import { useTelemetryContext } from "../../common/UseTelemetryContext.js";
-import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "../CategoriesTreeDefinition.js";
+import { CategoriesTreeDefinition } from "../CategoriesTreeDefinition.js";
 
 import type { GuidString } from "@itwin/core-bentley";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { CategoryInfo } from "../../common/CategoriesVisibilityUtils.js";
 import type { VisibilityTreeProps } from "../../common/components/VisibilityTree.js";
 import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
-import type { CategoriesTreeHierarchyConfiguration } from "../CategoriesTreeDefinition.js";
+import type { RequiredCategoriesTreeHierarchyConfiguration } from "../CategoriesTreeDefinition.js";
 import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
 
 /** @internal */
@@ -39,7 +39,7 @@ export function useSearchPaths({
   viewType: "2d" | "3d";
   searchText?: string;
   searchLimit?: number | "unbounded";
-  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
   idsCache: CategoriesTreeIdsCache;
   onCategoriesFiltered?: (categories: { categories: CategoryInfo[] | undefined; models?: Array<ModelId> }) => void;
   onSearchPathsChanged: (paths: HierarchySearchTree[] | undefined) => void;
@@ -116,16 +116,12 @@ async function getCategoriesFromPaths(props: {
   idsCache: CategoriesTreeIdsCache;
   elementClassName: string;
   modelsClassName: string;
-  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
 }): Promise<{ categories: CategoryInfo[] | undefined; models?: Array<ModelId> }> {
-  const { trees, idsCache, elementClassName, modelsClassName } = props;
+  const { trees, idsCache, elementClassName, modelsClassName, hierarchyConfig } = props;
   if (!trees) {
     return { categories: undefined };
   }
-  const hierarchyConfig = mergeWithDefaults({
-    defaults: defaultHierarchyConfiguration,
-    overrides: props.hierarchyConfig,
-  });
 
   const rootFilteredElementIds = new Set<ElementId>();
   const subModelIds = new Set<ModelId>();
