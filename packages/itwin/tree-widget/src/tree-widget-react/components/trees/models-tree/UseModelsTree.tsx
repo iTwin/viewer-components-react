@@ -153,7 +153,6 @@ export function useModelsTree({
   getSubTreePaths,
   getTreeItemProps,
 }: UseModelsTreeProps): UseModelsTreeResult {
-  const excludedClassesKey = hierarchyConfig?.elements?.excludedClasses?.join("|");
   const hierarchyConfiguration = useMemo(
     () =>
       mergeWithDefaults({
@@ -163,7 +162,7 @@ export function useModelsTree({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       hierarchyConfig?.elements?.baseClass,
-      excludedClassesKey,
+      hierarchyConfig?.elements?.excludedClasses,
       hierarchyConfig?.elements?.classGrouping,
       hierarchyConfig?.models?.withoutElements,
       hierarchyConfig?.subjects?.root,

@@ -15,7 +15,7 @@ import type { Id64Arg, Id64String } from "@itwin/core-bentley";
 import type { BaseVisibilityHelperProps } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
-import type { CategoriesTreeHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
+import type { CategoriesTreeHierarchyConfiguration, RequiredCategoriesTreeHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
 import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
 import type { ElementClassGroupingNodeProps } from "../CategoriesTreeNodeInternal.js";
 
@@ -33,7 +33,7 @@ export type CategoriesTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
  */
 export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
   #idsCache: CategoriesTreeIdsCache;
-  #hierarchyConfig: Required<CategoriesTreeHierarchyConfiguration>;
+  #hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
   #viewport: TreeWidgetViewport;
   constructor(props: CategoriesTreeVisibilityHelperProps) {
     super(props);

@@ -118,11 +118,10 @@ export function useClassificationsTree({
   const { onFeatureUsed } = useTelemetryContext();
 
   const [searchError, setSearchError] = useState<ClassificationsTreeSearchError | undefined>();
-  const excludedClassesConfig = rest.hierarchyConfig.elements?.excludedClasses?.join("|");
   const hierarchyConfig = useMemo(
     () => ({ ...rest.hierarchyConfig }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [rest.hierarchyConfig.rootClassificationSystemCode, excludedClassesConfig],
+    [rest.hierarchyConfig.rootClassificationSystemCode, rest.hierarchyConfig.elements?.excludedClasses],
   );
   const componentId = useGuid();
 

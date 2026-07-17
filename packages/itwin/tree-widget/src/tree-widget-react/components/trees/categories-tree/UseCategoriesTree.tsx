@@ -79,7 +79,7 @@ export function useCategoriesTree({
   hierarchyConfig,
   getTreeItemProps,
 }: UseCategoriesTreeProps): UseCategoriesTreeResult {
-  const excludedClassesKey = hierarchyConfig?.elements?.nodes === "include" ? hierarchyConfig?.elements?.excludedClasses?.join("|") : undefined;
+  const excludedClassesConfig = hierarchyConfig?.elements?.nodes === "include" ? hierarchyConfig?.elements?.excludedClasses : undefined;
   const hierarchyConfiguration = useMemo(
     () =>
       mergeWithDefaults({
@@ -87,7 +87,7 @@ export function useCategoriesTree({
         overrides: hierarchyConfig,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [hierarchyConfig?.elements?.nodes, excludedClassesKey, hierarchyConfig?.subCategories?.nodes, hierarchyConfig?.categories?.withoutElements],
+    [hierarchyConfig?.elements?.nodes, excludedClassesConfig, hierarchyConfig?.subCategories?.nodes, hierarchyConfig?.categories?.withoutElements],
   );
   const [viewType, setViewType] = useState<"2d" | "3d">(activeView.viewType === "2d" ? "2d" : "3d");
   const componentId = useGuid();
