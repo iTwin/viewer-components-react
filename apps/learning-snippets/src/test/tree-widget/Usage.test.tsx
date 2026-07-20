@@ -1,0 +1,98 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+/* eslint-disable import/no-duplicates */
+/* eslint-disable unused-imports/no-unused-vars */
+
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+// __PUBLISH_EXTRACT_START__ TreeWidget.RegisterExampleImports
+import { UiItemsManager } from "@itwin/appui-react";
+import { createTreeWidget, ModelsTreeComponent } from "@itwin/tree-widget-react";
+// __PUBLISH_EXTRACT_END__
+import { UiFramework } from "@itwin/appui-react";
+import { IModel } from "@itwin/core-common";
+import { IModelApp } from "@itwin/core-frontend";
+import { createStorage } from "@itwin/unified-selection";
+import { render, waitFor } from "@testing-library/react";
+import { insertPhysicalModelWithPartition, insertSubject } from "test-utilities";
+import { buildIModel } from "../../utils/IModelUtils.js";
+import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
+import { getSchemaContext, getTestViewer, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
+
+import type { InstanceKey } from "@itwin/presentation-common";
+import type { Widget } from "@itwin/appui-react";
+import { withEditTxn } from "@itwin/core-backend";
+
+describe("Tree widget", () => {
+  describe("Learning snippets", () => {
+    describe("Usage", () => {
+      beforeAll(async () => {
+        await initializeLearningSnippetsTests();
+        await TreeWidgetTestUtils.initialize();
+      });
+
+      afterAll(async () => {
+        await terminateLearningSnippetsTests();
+        TreeWidgetTestUtils.terminate();
+      });
+
+      it("registers tree widget", async () => {
+        const { imodelConnection } = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
+            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+            const childSubject = insertSubject({
+              txn,
+              codeValue: "test subject",
+              parentId: rootSubject.id,
+            });
+            return { model, childSubject };
+          }),
+        );
+        const testViewport = getTestViewer(imodelConnection);
+        const unifiedSelectionStorage = createStorage();
+        vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
+        vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
+        let createTreeWidgetFunction: (() => ReadonlyArray<Widget>) | undefined;
+        vi.spyOn(UiItemsManager, "register").mockImplementation(({ id: _id, getWidgets }) => {
+          createTreeWidgetFunction = getWidgets;
+        });
+
+        // __PUBLISH_EXTRACT_START__ TreeWidget.RegisterExample
+        UiItemsManager.register({
+          id: "tree-widget-provider",
+          getWidgets: () =>
+            [
+              createTreeWidget({
+                trees: [
+                  // add a custom component
+                  { id: "my-tree-id", startIcon: <svg />, getLabel: () => "My Custom Tree", render: () => <>This is my custom tree.</> },
+                  // add the Models tree component delivered with the package
+                  {
+                    id: ModelsTreeComponent.id,
+                    getLabel: () => ModelsTreeComponent.getLabel(),
+                    render: (props) => (
+                      <ModelsTreeComponent
+                        // see "Creating schema context" section for example implementation
+                        getSchemaContext={getSchemaContext}
+                        // see "Creating unified selection storage" section for example implementation
+                        selectionStorage={unifiedSelectionStorage}
+                      />
+                    ),
+                  },
+                ],
+              }),
+            ] as readonly Widget[],
+        });
+        // __PUBLISH_EXTRACT_END__
+
+        expect(createTreeWidgetFunction).toBeDefined();
+        const widgets = createTreeWidgetFunction!();
+        expect(widgets).toBeDefined();
+        const { getByText } = render(<>{widgets[0].content}</>);
+        await waitFor(() => getByText("My Custom Tree"));
+      });
+    });
+  });
+});
