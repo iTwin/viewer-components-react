@@ -3,9 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
-/* eslint-disable @typescript-eslint/no-shadow */
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { afterAll, beforeAll, describe, it, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
@@ -13,18 +12,16 @@ import { IModelApp } from "@itwin/core-frontend";
 import { CategoriesTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ TreeWidget.CustomCategoriesTreeExampleImports
-import { TreeWithHeader, useCategoriesTree, useCategoriesTreeButtonProps, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+import { createTreeWidgetViewport, SelectableTree, SharedTreeContextProvider, useCategoriesTree, useCategoriesTreeButtonProps, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { SelectionStorage } from "@itwin/unified-selection";
-import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { ComponentPropsWithoutRef } from "react";
 // __PUBLISH_EXTRACT_END__
 import { createStorage } from "@itwin/unified-selection";
-import { cleanup, render, waitFor } from "@testing-library/react";
 import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
 import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
-import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
+import { cleanup, getTestViewer, mockGetBoundingClientRect, render, TreeWidgetTestUtils, waitFor } from "./TestUtils.js";
 import { withEditTxn } from "@itwin/core-backend";
 
 describe("Tree widget", () => {
@@ -60,8 +57,8 @@ describe("Tree widget", () => {
           function MyWidget() {
             return (
               <CategoriesTreeComponent
-                // see "Creating schema context" section for example implementation
-                getSchemaContext={getSchemaContext}
+                // label for the tree, used for accessibility purposes
+                treeLabel="Categories tree"
                 // see "Creating unified selection storage" section for example implementation
                 selectionStorage={unifiedSelectionStorage}
                 headerButtons={[
@@ -97,57 +94,56 @@ describe("Tree widget", () => {
           type CustomCategoriesTreeRendererProps = Parameters<ComponentPropsWithoutRef<typeof VisibilityTree>["treeRenderer"]>[0];
 
           function CustomCategoriesTreeRenderer(props: CustomCategoriesTreeRendererProps) {
-            const getLabel = props.getLabel;
-            const getLabelCallback = useCallback<Required<VisibilityTreeRendererProps>["getLabel"]>(
+            const getTreeItemProps = props.getTreeItemProps;
+            const getTreeItemPropsCallback = useCallback<Required<VisibilityTreeRendererProps>["getTreeItemProps"]>(
               (node) => {
-                const originalLabel = getLabel(node);
-                return <>Custom node - {originalLabel}</>;
+                const nodeProps = getTreeItemProps(node);
+                return {
+                  ...nodeProps,
+                  label: <>Custom node - {nodeProps.label}</>,
+                  description: <>Custom sub label</>,
+                };
               },
-              [getLabel],
+              [getTreeItemProps],
             );
-            const getSublabel = useCallback<Required<VisibilityTreeRendererProps>["getSublabel"]>(() => {
-              return <>Custom sub label</>;
-            }, []);
-            return <VisibilityTreeRenderer {...props} getLabel={getLabelCallback} getSublabel={getSublabel} />;
+            return <VisibilityTreeRenderer {...props} treeLabel="Custom categories tree" getTreeItemProps={getTreeItemPropsCallback} />;
           }
 
           interface CustomCategoriesTreeProps {
             imodel: IModelConnection;
             viewport: Viewport;
-            getSchemaContext: (imodel: IModelConnection) => SchemaContext;
             selectionStorage: SelectionStorage;
           }
 
-          function CustomCategoriesTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage }: CustomCategoriesTreeProps) {
-            const { buttonProps } = useCategoriesTreeButtonProps({ viewport });
-            const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: viewport, filter: "" });
+          function CustomCategoriesTreeComponent({ imodel, viewport, selectionStorage }: CustomCategoriesTreeProps) {
+            const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
+            const { buttonProps } = useCategoriesTreeButtonProps({ viewport: activeView });
+            const { treeProps, getTreeItemProps } = useCategoriesTree({ activeView });
             return (
-              <TreeWithHeader
+              <SelectableTree
                 buttons={[
                   <CategoriesTreeComponent.ShowAllButton {...buttonProps} key={"ShowAllButton"} />,
                   <CategoriesTreeComponent.HideAllButton {...buttonProps} key={"HideAllButton"} />,
                 ]}
               >
                 <VisibilityTree
-                  {...categoriesTreeProps}
-                  getSchemaContext={getSchemaContext}
+                  {...treeProps}
                   selectionStorage={selectionStorage}
                   imodel={imodel}
-                  treeRenderer={(props) => <CustomCategoriesTreeRenderer {...props} {...rendererProps} />}
+                  treeRenderer={(rendererProps) => (
+                    <CustomCategoriesTreeRenderer {...rendererProps} getTreeItemProps={(node) => getTreeItemProps(node, rendererProps)} />
+                  )}
                 />
-              </TreeWithHeader>
+              </SelectableTree>
             );
           }
           // __PUBLISH_EXTRACT_END__
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText } = render(
-            <CustomCategoriesTreeComponent
-              imodel={imodelConnection}
-              viewport={testViewport}
-              getSchemaContext={getSchemaContext}
-              selectionStorage={unifiedSelectionStorage}
-            />,
+            <SharedTreeContextProvider>
+              <CustomCategoriesTreeComponent imodel={imodelConnection} viewport={testViewport} selectionStorage={unifiedSelectionStorage} />
+            </SharedTreeContextProvider>,
           );
           await waitFor(() => {
             getByText("Test SpatialCategory");

@@ -14,11 +14,10 @@ import { afterAll, beforeAll, describe, it, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { createStorage } from "@itwin/unified-selection";
-import { cleanup, render, waitFor } from "@testing-library/react";
 import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
 import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
-import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
+import { cleanup, getTestViewer, mockGetBoundingClientRect, render, TreeWidgetTestUtils, waitFor } from "./TestUtils.js";
 import { withEditTxn } from "@itwin/core-backend";
 
 describe("Tree widget", () => {
@@ -93,9 +92,8 @@ describe("Tree widget", () => {
               treeName="MyTree"
               imodel={imodel}
               selectionStorage={unifiedSelectionStorage}
-              getSchemaContext={getSchemaContext}
               getHierarchyDefinition={getHierarchyDefinition}
-              treeRenderer={(props) => <TreeRenderer {...props} />}
+              treeRenderer={(props) => <TreeRenderer {...props} treeLabel="My tree" />}
             />
           );
         }

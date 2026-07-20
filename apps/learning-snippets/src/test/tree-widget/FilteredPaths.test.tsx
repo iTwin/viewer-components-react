@@ -4,27 +4,26 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { UiFramework } from "@itwin/appui-react";
 import { IModel, QueryRowFormat } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
-import { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
-import { useModelsTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+import { createTreeWidgetViewport, SharedTreeContextProvider, useModelsTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 import { createStorage } from "@itwin/unified-selection";
-import { cleanup, render, waitFor } from "@testing-library/react";
 import { insertPhysicalElement, insertPhysicalModelWithPartition, insertPhysicalSubModel, insertSpatialCategory, insertSubject } from "test-utilities";
 import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
-import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
+import { cleanup, getTestViewer, mockGetBoundingClientRect, render, TreeWidgetTestUtils, waitFor } from "./TestUtils.js";
 
+import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { InstanceKey } from "@itwin/presentation-common";
+import type { InstanceKey } from "@itwin/presentation-shared";
 import { withEditTxn } from "@itwin/core-backend";
 
 // __PUBLISH_EXTRACT_START__ TreeWidget.GetFilteredPathsComponentWithTargetItemsExample
 type UseModelsTreeProps = Parameters<typeof useModelsTree>[0];
-type GetFilteredPathsType = Exclude<UseModelsTreeProps["getFilteredPaths"], undefined>;
+type GetSearchPathsType = Exclude<UseModelsTreeProps["getSearchPaths"], undefined>;
 
 function CustomModelsTreeComponentWithTargetItems({
   viewport,
@@ -37,7 +36,7 @@ function CustomModelsTreeComponentWithTargetItems({
   imodel: IModelConnection;
   targetItems: InstanceKey[];
 }) {
-  const getFilteredPaths = useCallback<GetFilteredPathsType>(
+  const getSearchPaths = useCallback<GetSearchPathsType>(
     async ({ createInstanceKeyPaths }) => {
       return createInstanceKeyPaths({
         // list of instance keys representing nodes that should be displayed in the hierarchy
@@ -47,15 +46,17 @@ function CustomModelsTreeComponentWithTargetItems({
     [targetItems],
   );
 
-  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
+  const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
+  const { treeProps, getTreeItemProps } = useModelsTree({ activeView, getSearchPaths });
 
   return (
     <VisibilityTree
-      {...modelsTreeProps}
-      getSchemaContext={getSchemaContext}
+      {...treeProps}
       selectionStorage={selectionStorage}
       imodel={imodel}
-      treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+      treeRenderer={(rendererProps) => (
+        <VisibilityTreeRenderer {...rendererProps} treeLabel="Custom models tree" getTreeItemProps={(node) => getTreeItemProps(node, rendererProps)} />
+      )}
     />
   );
 }
@@ -71,28 +72,34 @@ function CustomModelsTreeComponentWithPostProcessing({
   selectionStorage: SelectionStorage;
   imodel: IModelConnection;
 }) {
-  const getFilteredPaths = useCallback<GetFilteredPathsType>(async ({ createInstanceKeyPaths, filter }) => {
-    const defaultPaths = await createInstanceKeyPaths({ label: filter ?? "test" });
-    const result = new Array<HierarchyFilteringPath>();
-    for (const path of defaultPaths) {
-      const normalizedPath = HierarchyFilteringPath.normalize(path);
-      if (normalizedPath.path.length < 5) {
-        normalizedPath.options = { autoExpand: true };
-        result.push(normalizedPath);
+  const getSearchPaths = useCallback<GetSearchPathsType>(async ({ createInstanceKeyPaths, searchText }) => {
+    const searchTree = await createInstanceKeyPaths({ label: searchText ?? "test" });
+    // post-process the search tree - e.g. limit displayed depth and auto-expand the remaining nodes
+    const limitDepthAndAutoExpand = (entries: HierarchySearchTree[], depth: number): HierarchySearchTree[] => {
+      const result = new Array<HierarchySearchTree>();
+      for (const entry of entries) {
+        if (depth >= 5) {
+          continue;
+        }
+        const children = entry.children ? limitDepthAndAutoExpand(entry.children, depth + 1) : undefined;
+        result.push({ ...entry, options: { autoExpand: true }, children });
       }
-    }
-    return result;
+      return result;
+    };
+    return limitDepthAndAutoExpand(searchTree, 1);
   }, []);
 
-  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
+  const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
+  const { treeProps, getTreeItemProps } = useModelsTree({ activeView, getSearchPaths });
 
   return (
     <VisibilityTree
-      {...modelsTreeProps}
-      getSchemaContext={getSchemaContext}
+      {...treeProps}
       selectionStorage={selectionStorage}
       imodel={imodel}
-      treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+      treeRenderer={(rendererProps) => (
+        <VisibilityTreeRenderer {...rendererProps} treeLabel="Custom models tree" getTreeItemProps={(node) => getTreeItemProps(node, rendererProps)} />
+      )}
     />
   );
 }
@@ -110,10 +117,10 @@ function CustomModelsTreeComponentWithFilterAndTargetItems({
   imodel: IModelConnection;
   filter: string | undefined;
 }) {
-  const getFilteredPaths = useCallback<GetFilteredPathsType>(
-    async ({ createInstanceKeyPaths, filter: activeFilter }) => {
-      if (!activeFilter) {
-        // if filter is not defined, return `undefined` to avoid applying empty filter
+  const getSearchPaths = useCallback<GetSearchPathsType>(
+    async ({ createInstanceKeyPaths, searchText }) => {
+      if (!searchText) {
+        // if search text is not defined, return `undefined` to avoid applying empty filter
         return undefined;
       }
       const targetItems = new Array<InstanceKey>();
@@ -140,7 +147,7 @@ function CustomModelsTreeComponentWithFilterAndTargetItems({
               AND json_extract(e.JsonProperties, '$.PhysicalPartition.Model.Content') IS NULL
               AND json_extract(e.JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NULL
           )
-          WHERE Label LIKE '%${activeFilter.replaceAll(/[%_\\]/g, "\\$&")}%' ESCAPE '\\'
+          WHERE Label LIKE '%${searchText.replaceAll(/[%_\\]/g, "\\$&")}%' ESCAPE '\\'
         `,
         undefined,
         { rowFormat: QueryRowFormat.UseJsPropertyNames },
@@ -148,20 +155,22 @@ function CustomModelsTreeComponentWithFilterAndTargetItems({
         targetItems.push({ id: row.Id, className: row.ClassName });
       }
       // `createInstanceKeyPaths` doesn't automatically set the `autoExpand` flag - set it here
-      const paths = await createInstanceKeyPaths({ targetItems });
-      return paths.map((path) => ({ ...path, options: { autoExpand: true } }));
+      const searchTree = await createInstanceKeyPaths({ targetItems });
+      return searchTree.map((entry) => ({ ...entry, options: { autoExpand: true } }));
     },
     [imodel],
   );
 
-  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths, filter });
+  const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
+  const { treeProps, getTreeItemProps } = useModelsTree({ activeView, getSearchPaths, searchText: filter });
   return (
     <VisibilityTree
-      {...modelsTreeProps}
-      getSchemaContext={getSchemaContext}
+      {...treeProps}
       selectionStorage={selectionStorage}
       imodel={imodel}
-      treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+      treeRenderer={(rendererProps) => (
+        <VisibilityTreeRenderer {...rendererProps} treeLabel="Custom models tree" getTreeItemProps={(node) => getTreeItemProps(node, rendererProps)} />
+      )}
     />
   );
 }
@@ -201,12 +210,14 @@ describe("Tree widget", () => {
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText, queryByText } = render(
-            <CustomModelsTreeComponentWithTargetItems
-              selectionStorage={unifiedSelectionStorage}
-              imodel={imodelConnection}
-              viewport={testViewport}
-              targetItems={[keys.physicalModel]}
-            />,
+            <SharedTreeContextProvider>
+              <CustomModelsTreeComponentWithTargetItems
+                selectionStorage={unifiedSelectionStorage}
+                imodel={imodelConnection}
+                viewport={testViewport}
+                targetItems={[keys.physicalModel]}
+              />
+            </SharedTreeContextProvider>,
           );
 
           await waitFor(() => {
@@ -241,7 +252,9 @@ describe("Tree widget", () => {
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText, queryByText } = render(
-            <CustomModelsTreeComponentWithPostProcessing selectionStorage={unifiedSelectionStorage} imodel={imodelConnection} viewport={testViewport} />,
+            <SharedTreeContextProvider>
+              <CustomModelsTreeComponentWithPostProcessing selectionStorage={unifiedSelectionStorage} imodel={imodelConnection} viewport={testViewport} />
+            </SharedTreeContextProvider>,
           );
 
           await waitFor(() => {
@@ -286,12 +299,14 @@ describe("Tree widget", () => {
           using _ = { [Symbol.dispose]: cleanup };
 
           const { getByText, queryByText, rerender } = render(
-            <CustomModelsTreeComponentWithFilterAndTargetItems
-              selectionStorage={unifiedSelectionStorage}
-              imodel={imodelConnection}
-              viewport={testViewport}
-              filter={undefined}
-            />,
+            <SharedTreeContextProvider>
+              <CustomModelsTreeComponentWithFilterAndTargetItems
+                selectionStorage={unifiedSelectionStorage}
+                imodel={imodelConnection}
+                viewport={testViewport}
+                filter={undefined}
+              />
+            </SharedTreeContextProvider>,
           );
           await waitFor(() => {
             getByText("subject 1", { exact: false });
@@ -308,12 +323,14 @@ describe("Tree widget", () => {
           });
 
           rerender(
-            <CustomModelsTreeComponentWithFilterAndTargetItems
-              selectionStorage={unifiedSelectionStorage}
-              imodel={imodelConnection}
-              viewport={testViewport}
-              filter="match"
-            />,
+            <SharedTreeContextProvider>
+              <CustomModelsTreeComponentWithFilterAndTargetItems
+                selectionStorage={unifiedSelectionStorage}
+                imodel={imodelConnection}
+                viewport={testViewport}
+                filter="match"
+              />
+            </SharedTreeContextProvider>,
           );
           await waitFor(() => {
             getByText("subject 1", { exact: false });

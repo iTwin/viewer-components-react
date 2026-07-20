@@ -16,11 +16,10 @@ import type { IModelConnection } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_END__
 import { IModelApp } from "@itwin/core-frontend";
 import { createStorage } from "@itwin/unified-selection";
-import { cleanup, render, waitFor } from "@testing-library/react";
 import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
 import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
-import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
+import { cleanup, getTestViewer, mockGetBoundingClientRect, render, TreeWidgetTestUtils, waitFor } from "./TestUtils.js";
 
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { VisibilityStatus } from "@itwin/tree-widget-react";
@@ -99,7 +98,7 @@ describe("Tree widget", () => {
             async changeVisibility(node: HierarchyNode, on: boolean): Promise<void> {
               // change visibility of the instance represented by tree node.
             },
-            dispose() {
+            [Symbol.dispose]() {
               // if necessary, do some clean up before new visibility handler is created or component is unmounted.
             },
           };
@@ -115,10 +114,9 @@ describe("Tree widget", () => {
               treeName="MyVisibilityTree"
               imodel={imodel}
               selectionStorage={unifiedSelectionStorage}
-              getSchemaContext={getSchemaContext}
               getHierarchyDefinition={getHierarchyDefinition}
               visibilityHandlerFactory={visibilityHandlerFactory}
-              treeRenderer={(props) => <VisibilityTreeRenderer {...props} />}
+              treeRenderer={(props) => <VisibilityTreeRenderer {...props} treeLabel="My visibility tree" />}
             />
           );
         }

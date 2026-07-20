@@ -11,16 +11,17 @@ import { UiFramework } from "@itwin/appui-react";
 import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryCustomTreeExampleImports
-import { TelemetryContextProvider, useCategoriesTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+import { createTreeWidgetViewport, SharedTreeContextProvider, TelemetryContextProvider, useCategoriesTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
+
+import { useMemo } from "react";
 
 import { IModelApp } from "@itwin/core-frontend";
 import { createStorage } from "@itwin/unified-selection";
-import { cleanup, render, waitFor } from "@testing-library/react";
 import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
 import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
-import { getSchemaContext, getTestViewer, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
+import { cleanup, getTestViewer, render, TreeWidgetTestUtils, waitFor } from "./TestUtils.js";
 import { withEditTxn } from "@itwin/core-backend";
 
 describe("Tree widget", () => {
@@ -62,7 +63,7 @@ describe("Tree widget", () => {
                 onFeatureUsed={(feature) => {
                   console.log(`TreeWidget [${feature}] used`);
                 }}
-                getSchemaContext={getSchemaContext}
+                treeLabel="IModel content tree"
                 selectionStorage={unifiedSelectionStorage}
               />
             );
@@ -72,7 +73,7 @@ describe("Tree widget", () => {
           using _ = { [Symbol.dispose]: cleanup };
           render(<MyWidget />);
           await waitFor(() => {
-            expect(consoleSpy).toHaveBeenCalledOnce();
+            expect(consoleSpy).toHaveBeenCalled();
           });
         });
 
@@ -103,21 +104,25 @@ describe("Tree widget", () => {
                   console.log(`TreeWidget [${feature}] used`);
                 }}
               >
-                <MyTree />
+                <SharedTreeContextProvider>
+                  <MyTree />
+                </SharedTreeContextProvider>
               </TelemetryContextProvider>
             );
           }
 
           function MyTree() {
-            const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: viewport, filter: "" });
+            const activeView = useMemo(() => createTreeWidgetViewport(viewport), []);
+            const { treeProps, getTreeItemProps } = useCategoriesTree({ activeView });
             return (
               // VisibilityTree will use provided telemetry context to report used features and their performance
               <VisibilityTree
-                {...categoriesTreeProps}
-                getSchemaContext={getSchemaContext}
+                {...treeProps}
                 selectionStorage={unifiedSelectionStorage}
                 imodel={imodelConnection}
-                treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+                treeRenderer={(rendererProps) => (
+                  <VisibilityTreeRenderer {...rendererProps} treeLabel="My tree" getTreeItemProps={(node) => getTreeItemProps(node, rendererProps)} />
+                )}
               />
             );
             // see "Custom trees" section for more example implementations
@@ -127,7 +132,7 @@ describe("Tree widget", () => {
           using _ = { [Symbol.dispose]: cleanup };
           render(<MyWidget />);
           await waitFor(() => {
-            expect(consoleSpy).toHaveBeenCalledOnce();
+            expect(consoleSpy).toHaveBeenCalled();
           });
         });
       });

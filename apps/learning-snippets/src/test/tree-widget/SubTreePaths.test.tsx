@@ -4,21 +4,19 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
-import { useModelsTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+import { createTreeWidgetViewport, SharedTreeContextProvider, useModelsTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 import { createStorage } from "@itwin/unified-selection";
-import { cleanup, render, waitFor } from "@testing-library/react";
 import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
 import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
-import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
+import { cleanup, getTestViewer, mockGetBoundingClientRect, render, TreeWidgetTestUtils, waitFor } from "./TestUtils.js";
 
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { InstanceKey } from "@itwin/presentation-common";
-import type { Props } from "@itwin/presentation-shared";
+import type { InstanceKey, Props } from "@itwin/presentation-shared";
 import { withEditTxn } from "@itwin/core-backend";
 
 // __PUBLISH_EXTRACT_START__ TreeWidget.GetSubTreePathsComponentWithTargetItemsExample
@@ -47,15 +45,17 @@ function CustomModelsTreeComponentWithTargetItems({
     [targetItems],
   );
 
-  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getSubTreePaths });
+  const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
+  const { treeProps, getTreeItemProps } = useModelsTree({ activeView, getSubTreePaths });
 
   return (
     <VisibilityTree
-      {...modelsTreeProps}
-      getSchemaContext={getSchemaContext}
+      {...treeProps}
       selectionStorage={selectionStorage}
       imodel={imodel}
-      treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+      treeRenderer={(rendererProps) => (
+        <VisibilityTreeRenderer {...rendererProps} treeLabel="Custom models tree" getTreeItemProps={(node) => getTreeItemProps(node, rendererProps)} />
+      )}
     />
   );
 }
@@ -95,12 +95,14 @@ describe("Tree widget", () => {
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText, queryByText } = render(
-            <CustomModelsTreeComponentWithTargetItems
-              selectionStorage={unifiedSelectionStorage}
-              imodel={imodelConnection}
-              viewport={testViewport}
-              targetItems={[keys.physicalModel]}
-            />,
+            <SharedTreeContextProvider>
+              <CustomModelsTreeComponentWithTargetItems
+                selectionStorage={unifiedSelectionStorage}
+                imodel={imodelConnection}
+                viewport={testViewport}
+                targetItems={[keys.physicalModel]}
+              />
+            </SharedTreeContextProvider>,
           );
 
           await waitFor(() => {

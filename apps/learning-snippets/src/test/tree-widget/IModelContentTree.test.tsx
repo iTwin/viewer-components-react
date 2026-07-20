@@ -11,11 +11,10 @@ import { IModelApp } from "@itwin/core-frontend";
 import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 import { createStorage } from "@itwin/unified-selection";
-import { cleanup, render, waitFor } from "@testing-library/react";
 import { insertSubject } from "test-utilities";
 import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
-import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
+import { cleanup, getTestViewer, mockGetBoundingClientRect, render, TreeWidgetTestUtils, waitFor } from "./TestUtils.js";
 import { withEditTxn } from "@itwin/core-backend";
 
 describe("Tree widget", () => {
@@ -49,8 +48,8 @@ describe("Tree widget", () => {
           function MyWidget() {
             return (
               <IModelContentTreeComponent
-                // see "Creating schema context" section for example implementation
-                getSchemaContext={getSchemaContext}
+                // label for the tree, used for accessibility purposes
+                treeLabel="IModel content tree"
                 // see "Creating unified selection storage" section for example implementation
                 selectionStorage={unifiedSelectionStorage}
               />

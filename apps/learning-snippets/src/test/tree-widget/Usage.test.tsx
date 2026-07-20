@@ -14,11 +14,10 @@ import { UiFramework } from "@itwin/appui-react";
 import { IModel } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 import { createStorage } from "@itwin/unified-selection";
-import { render, waitFor } from "@testing-library/react";
 import { insertPhysicalModelWithPartition, insertSubject } from "test-utilities";
 import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
-import { getSchemaContext, getTestViewer, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
+import { getTestViewer, render, TreeWidgetTestUtils, waitFor } from "./TestUtils.js";
 
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { Widget } from "@itwin/appui-react";
@@ -65,17 +64,19 @@ describe("Tree widget", () => {
           getWidgets: () =>
             [
               createTreeWidget({
+                // localization object for localizing widget components
+                localization: IModelApp.localization,
                 trees: [
                   // add a custom component
                   { id: "my-tree-id", startIcon: <svg />, getLabel: () => "My Custom Tree", render: () => <>This is my custom tree.</> },
                   // add the Models tree component delivered with the package
                   {
                     id: ModelsTreeComponent.id,
-                    getLabel: () => ModelsTreeComponent.getLabel(),
+                    getLabel: ({ standardLabels }) => ModelsTreeComponent.getLabel({ standardLabels }),
                     render: (props) => (
                       <ModelsTreeComponent
-                        // see "Creating schema context" section for example implementation
-                        getSchemaContext={getSchemaContext}
+                        // label for the tree, used for accessibility purposes
+                        treeLabel="Models tree"
                         // see "Creating unified selection storage" section for example implementation
                         selectionStorage={unifiedSelectionStorage}
                       />
