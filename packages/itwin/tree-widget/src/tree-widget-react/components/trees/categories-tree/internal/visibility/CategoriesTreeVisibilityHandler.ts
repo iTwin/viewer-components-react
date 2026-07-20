@@ -9,7 +9,6 @@ import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { fromWithRelease, getClassesByView } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
-import { defaultHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
 import { CategoriesTreeNodeInternal } from "../../internal/CategoriesTreeNodeInternal.js";
 import { CategoriesTreeVisibilityHelper } from "./CategoriesTreeVisibilityHelper.js";
 import { createCategoriesSearchResultsTree } from "./SearchResultsTree.js";
@@ -324,17 +323,18 @@ export function createCategoriesTreeVisibilityHandler(props: {
   searchPaths?: HierarchySearchTree[];
   hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
 }) {
+  const { idsCache, imodelAccess, searchPaths, hierarchyConfig } = props;
   return new HierarchyVisibilityHandlerImpl<CategoriesTreeSearchTargets>({
     cancelChangesInProgress: new Subject<void>(),
     getSearchResultsTree: (): undefined | Promise<SearchResultsTree<CategoriesTreeSearchTargets>> => {
-      if (!props.searchPaths) {
+      if (!searchPaths) {
         return undefined;
       }
       const { categoryClass, elementClass, modelClass } = getClassesByView(props.viewport.viewType === "2d" ? "2d" : "3d");
       return createCategoriesSearchResultsTree({
-        idsCache: props.idsCache,
-        searchPaths: props.searchPaths,
-        imodelAccess: props.imodelAccess,
+        idsCache,
+        searchPaths,
+        imodelAccess,
         categoryClassName: categoryClass,
         categoryElementClassName: elementClass,
         categoryModelClassName: modelClass,
@@ -343,9 +343,9 @@ export function createCategoriesTreeVisibilityHandler(props: {
     getTreeSpecificVisibilityHandler: ({ info, viewport }) => {
       return new CategoriesTreeVisibilityHandler({
         alwaysAndNeverDrawnElementInfo: info,
-        idsCache: props.idsCache,
+        idsCache,
         viewport,
-        hierarchyConfig: props.hierarchyConfig ?? defaultHierarchyConfiguration,
+        hierarchyConfig,
       });
     },
     viewport: props.viewport,

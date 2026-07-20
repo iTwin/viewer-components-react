@@ -23,7 +23,7 @@ import {
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { useGuid } from "../common/internal/useGuid.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { mergeWithDefaults } from "../common/internal/Utils.js";
+import { mergeWithDefaults, stableStringify } from "../common/internal/Utils.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 import { useSearchPaths } from "./internal/UseSearchPaths.js";
 import { ModelsTreeVisibilityHandler } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
@@ -40,14 +40,12 @@ import type { InstanceKey } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { ExtendedVisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
-import type { DeepRequired } from "../common/internal/Utils.js";
 import type { SearchResultsTree } from "../common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
-import type { HierarchyConfigForModelsCache } from "./internal/ModelsTreeIdsCache.js";
 import type { ModelsTreeSearchError, ModelsTreeSubTreeError } from "./internal/UseSearchPaths.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
 import type { ModelsTreeSearchTargets } from "./internal/visibility/SearchResultsTree.js";
-import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition.js";
+import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration, RequiredModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition.js";
 
 /** @beta */
 export interface UseModelsTreeProps {
@@ -153,6 +151,7 @@ export function useModelsTree({
   getSubTreePaths,
   getTreeItemProps,
 }: UseModelsTreeProps): UseModelsTreeResult {
+  const hierarchyConfigFingerprint = stableStringify(hierarchyConfig);
   const hierarchyConfiguration = useMemo(
     () =>
       mergeWithDefaults({
@@ -160,14 +159,7 @@ export function useModelsTree({
         overrides: hierarchyConfig,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      hierarchyConfig?.elements?.baseClass,
-      hierarchyConfig?.elements?.excludedClasses,
-      hierarchyConfig?.elements?.classGrouping,
-      hierarchyConfig?.models?.withoutElements,
-      hierarchyConfig?.subjects?.root,
-      hierarchyConfig?.hierarchyLevelFiltering,
-    ],
+    [hierarchyConfigFingerprint],
   );
   const componentId = useGuid();
   const idsCache = useModelsTreeIdsCache({
@@ -334,7 +326,7 @@ function useModelsTreeIdsCache({
   hierarchyConfig,
 }: {
   imodel: IModelConnection;
-  hierarchyConfig: DeepRequired<HierarchyConfigForModelsCache>;
+  hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
 }): ModelsTreeIdsCache {
   const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
   const baseIdsCache = getBaseIdsCache({

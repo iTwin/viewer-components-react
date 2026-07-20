@@ -15,7 +15,7 @@ import { EmptyTreeContent, NoSearchMatches, SearchUnknownError, TooManySearchMat
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { useGuid } from "../common/internal/useGuid.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { getClassesByView, mergeWithDefaults } from "../common/internal/Utils.js";
+import { getClassesByView, mergeWithDefaults, stableStringify } from "../common/internal/Utils.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import { useSearchPaths } from "./internal/UseSearchPaths.js";
@@ -79,7 +79,7 @@ export function useCategoriesTree({
   hierarchyConfig,
   getTreeItemProps,
 }: UseCategoriesTreeProps): UseCategoriesTreeResult {
-  const excludedClassesConfig = hierarchyConfig?.elements?.nodes === "include" ? hierarchyConfig?.elements?.excludedClasses : undefined;
+  const hierarchyConfigFingerprint = stableStringify(hierarchyConfig);
   const hierarchyConfiguration = useMemo(
     () =>
       mergeWithDefaults({
@@ -87,7 +87,7 @@ export function useCategoriesTree({
         overrides: hierarchyConfig,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [hierarchyConfig?.elements?.nodes, excludedClassesConfig, hierarchyConfig?.subCategories?.nodes, hierarchyConfig?.categories?.withoutElements],
+    [hierarchyConfigFingerprint],
   );
   const [viewType, setViewType] = useState<"2d" | "3d">(activeView.viewType === "2d" ? "2d" : "3d");
   const componentId = useGuid();

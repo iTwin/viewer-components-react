@@ -367,3 +367,31 @@ type DeepOptional<T> = T extends (...args: any[]) => any
     : T extends object
       ? { [K in keyof T]?: DeepOptional<T[K]> | undefined }
       : T;
+
+/** @internal */
+export function stableStringify(value: unknown): string {
+  if (value === undefined) {
+    return "undefined";
+  }
+  if (value === null || typeof value === "string" || typeof value === "boolean" || typeof value === "number") {
+    return JSON.stringify(value);
+  }
+  if (Array.isArray(value)) {
+    return `[${value.map((entry) => stableStringify(entry)).join(",")}]`;
+  }
+  if (typeof value !== "object") {
+    return "";
+  }
+  const entries = Object.keys(value)
+    .sort()
+    .map((key) => {
+      const entry = (value as Record<string, unknown>)[key];
+      if (entry === undefined) {
+        return undefined;
+      }
+      return `${JSON.stringify(key)}:${stableStringify(entry)}`;
+    })
+    .filter((entry): entry is string => !!entry);
+
+  return `{${entries.join(",")}}`;
+}

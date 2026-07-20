@@ -9,8 +9,7 @@ import { IModel } from "@itwin/core-common";
 import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_GeometricModel3d, CLASS_NAME_InformationPartitionElement, CLASS_NAME_Subject } from "../../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
-import { createWhereClause, getOrCreate, mergeWithDefaults } from "../../common/internal/Utils.js";
-import { defaultHierarchyConfiguration } from "../ModelsTreeDefinition.js";
+import { createWhereClause, getOrCreate } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -18,13 +17,12 @@ import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { BaseIdsCacheImplProps } from "../../common/internal/caches/BaseIdsCache.js";
 import type { ModelId, SubjectId } from "../../common/internal/Types.js";
-import type { ModelsTreeHierarchyConfiguration, RequiredModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
+import type { RequiredModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
 
 /**
  * Hierarchy config props needed for ids cache.
- * @internal
  */
-export type HierarchyConfigForModelsCache = Pick<ModelsTreeHierarchyConfiguration, "elements" | "subjects" | "models">;
+type HierarchyConfigForModelsCache = Pick<RequiredModelsTreeHierarchyConfiguration, "elements" | "subjects" | "models">;
 
 interface ModelsTreeIdsCacheProps extends BaseIdsCacheImplProps {
   queryExecutor: LimitingECSqlQueryExecutor;
@@ -44,17 +42,14 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
   #upToModelInstanceKeyPaths: Map<ModelId, Observable<HierarchyNodeIdentifiersPath>> = new Map();
   #parentSubjectIds: Observable<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   #queryExecutor: LimitingECSqlQueryExecutor;
-  #hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
+  #hierarchyConfig: HierarchyConfigForModelsCache;
   #componentId: GuidString;
   #componentName: string;
 
   constructor(props: ModelsTreeIdsCacheProps) {
     super(props);
     this.#queryExecutor = props.queryExecutor;
-    this.#hierarchyConfig = mergeWithDefaults<RequiredModelsTreeHierarchyConfiguration>({
-      defaults: defaultHierarchyConfiguration,
-      overrides: props.hierarchyConfig,
-    });
+    this.#hierarchyConfig = props.hierarchyConfig;
 
     this.#componentId = Guid.createValue();
     this.#componentName = "ModelsTreeIdsCache";

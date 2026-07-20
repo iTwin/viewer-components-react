@@ -10,7 +10,7 @@ import { EmptyTreeContent, NoSearchMatches, SearchUnknownError, TooManySearchMat
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { useGuid } from "../common/internal/useGuid.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { getClassesByView } from "../common/internal/Utils.js";
+import { getClassesByView, stableStringify } from "../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../common/TreeErrors.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { ClassificationsTreeComponent } from "./ClassificationsTreeComponent.js";
@@ -118,10 +118,11 @@ export function useClassificationsTree({
   const { onFeatureUsed } = useTelemetryContext();
 
   const [searchError, setSearchError] = useState<ClassificationsTreeSearchError | undefined>();
+  const hierarchyConfigFingerprint = stableStringify(rest.hierarchyConfig);
   const hierarchyConfig = useMemo(
     () => ({ ...rest.hierarchyConfig }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [rest.hierarchyConfig.rootClassificationSystemCode, rest.hierarchyConfig.elements?.excludedClasses],
+    [hierarchyConfigFingerprint],
   );
   const componentId = useGuid();
 
