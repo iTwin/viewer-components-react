@@ -10,7 +10,7 @@ import { EmptyTreeContent, NoSearchMatches, SearchUnknownError, TooManySearchMat
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { useGuid } from "../common/internal/useGuid.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { getClassesByView } from "../common/internal/Utils.js";
+import { getClassesByView, stableStringify } from "../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../common/TreeErrors.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { ClassificationsTreeComponent } from "./ClassificationsTreeComponent.js";
@@ -24,6 +24,7 @@ import type { ReactNode } from "react";
 import type { GuidString } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { useTree } from "@itwin/presentation-hierarchies-react";
+import type { EC } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { ExtendedVisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
@@ -45,7 +46,7 @@ export interface ClassificationToCategoriesRelationshipSpecification {
   /**
    * Full class name of the relationship which links classifications to categories. Format: `{SchemaName}.{RelationshipClassName}`.
    */
-  fullClassName: string;
+  fullClassName: EC.FullClassNameDotNotation;
   /**
    * Describes the relationship direction by specifying its source.
    * E.g. whether it's a `classification` -> `categories` or `category` -> `classifications` relationship.
@@ -117,11 +118,11 @@ export function useClassificationsTree({
   const { onFeatureUsed } = useTelemetryContext();
 
   const [searchError, setSearchError] = useState<ClassificationsTreeSearchError | undefined>();
-
+  const hierarchyConfigFingerprint = stableStringify(rest.hierarchyConfig);
   const hierarchyConfig = useMemo(
     () => ({ ...rest.hierarchyConfig }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
-    [...Object.values(rest.hierarchyConfig)],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [hierarchyConfigFingerprint],
   );
   const componentId = useGuid();
 
@@ -259,7 +260,7 @@ export function getClassificationsTreeIdsCache({
   hierarchyConfig: HierarchyConfigForClassificationsCache;
   visibilityHandlerConfig?: VisibilityHandlerConfigForClassificationsCache;
 }) {
-  const hierarchyConfigKey = `${hierarchyConfig.rootClassificationSystemCode}-${[...(hierarchyConfig.excludedElementClassNames ?? [])].sort().join(",")}`;
+  const hierarchyConfigKey = `${hierarchyConfig.rootClassificationSystemCode}-${[...(hierarchyConfig.elements?.excludedClasses ?? [])].sort().join(",")}`;
   const visibilityHandlerConfigKey = visibilityHandlerConfig?.classificationToCategoriesRelationshipSpecification
     ? `${visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.fullClassName};${visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.source}`
     : "default";
@@ -271,7 +272,7 @@ export function getClassificationsTreeIdsCache({
         baseIdsCache: getBaseIdsCache({
           type: "3d",
           elementClassName: getClassesByView("3d").elementClass,
-          excludedElementClassNames: hierarchyConfig.excludedElementClassNames,
+          excludedElementClassNames: hierarchyConfig.elements?.excludedClasses,
           imodel,
         }),
         hierarchyConfig,

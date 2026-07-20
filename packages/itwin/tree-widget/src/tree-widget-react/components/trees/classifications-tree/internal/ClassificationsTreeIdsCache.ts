@@ -5,7 +5,6 @@
 
 import { defer, EMPTY, expand, from, map, merge, mergeMap, of, reduce, shareReplay } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
-import { normalizeFullClassName } from "@itwin/presentation-shared";
 import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
 import {
   CLASS_NAME_Classification,
@@ -30,10 +29,7 @@ import type { ClassificationsTreeVisibilityHandlerConfiguration } from "../UseCl
  * Hierarchy config props needed for ids cache.
  * @internal
  */
-export type HierarchyConfigForClassificationsCache = Pick<
-  ClassificationsTreeHierarchyConfiguration,
-  "rootClassificationSystemCode" | "excludedElementClassNames"
->;
+export type HierarchyConfigForClassificationsCache = Pick<ClassificationsTreeHierarchyConfiguration, "rootClassificationSystemCode" | "elements">;
 
 /**
  * Visibility handler config props needed for ids cache.
@@ -121,7 +117,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
       ];
       let categoriesOfClassificationSelector: string;
       if (this.#props.visibilityHandlerConfig?.classificationToCategoriesRelationshipSpecification) {
-        const relationship = normalizeFullClassName(this.#props.visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.fullClassName);
+        const relationship = this.#props.visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.fullClassName;
         const { categoryAccessor, classificationAccessor } =
           this.#props.visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.source === "classification"
             ? { classificationAccessor: "SourceECInstanceId", categoryAccessor: "TargetECInstanceId" }

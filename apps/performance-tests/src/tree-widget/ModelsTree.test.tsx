@@ -84,7 +84,6 @@ describe("models tree", () => {
         callBack: async (ctx) => {
           using hook = renderUseModelsTreeHook({
             activeView: ctx.viewport,
-            hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
             getSearchPaths: async ({ createInstanceKeyPaths }) => createInstanceKeyPaths({ targetItems: ctx.targetItems }),
             searchLimit: "unbounded",
           });
@@ -144,14 +143,14 @@ describe("models tree", () => {
         ...testData,
       });
       const baseIdsCache = new BaseIdsCache({
-        elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
+        elementClassName: defaultModelsTreeHierarchyConfiguration.elements.baseClass,
         type: "3d",
         queryExecutor: imodelAccess,
       });
       const idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
-        hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
         baseIdsCache,
+        hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
       });
       const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
       const provider = createIModelHierarchyProvider({
@@ -242,14 +241,14 @@ describe("models tree", () => {
         ...hiddenTestData,
       });
       const baseIdsCache = new BaseIdsCache({
-        elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
+        elementClassName: defaultModelsTreeHierarchyConfiguration.elements.baseClass,
         type: "3d",
         queryExecutor: imodelAccess,
       });
       const idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
-        hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
         baseIdsCache,
+        hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
       });
       const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
       const provider = createIModelHierarchyProvider({
@@ -408,7 +407,7 @@ describe("models tree", () => {
 
   for (let i = 0; i < 2; i++) {
     // Excluded 2d elements won't affect the hierarchy in any way since imodel contains only 3d data.
-    const excludedElementClassNames: EC.FullClassName[] | undefined = i === 1 ? ["BisCore.GeometricElement2d"] : undefined;
+    const excludedElementClassNames: EC.FullClassNameDotNotation[] = i === 1 ? ["BisCore.GeometricElement2d"] : [];
     run<{
       iModel: SnapshotDb;
       imodelAccess: IModelAccess;
@@ -438,18 +437,21 @@ describe("models tree", () => {
         });
         const hierarchyConfig: typeof defaultModelsTreeHierarchyConfiguration = {
           ...defaultModelsTreeHierarchyConfiguration,
-          excludedElementClassNames,
+          elements: {
+            ...defaultModelsTreeHierarchyConfiguration.elements,
+            excludedClasses: excludedElementClassNames,
+          },
         };
         const baseIdsCache = new BaseIdsCache({
-          elementClassName: defaultModelsTreeHierarchyConfiguration.elementClassSpecification,
+          elementClassName: defaultModelsTreeHierarchyConfiguration.elements.baseClass,
           type: "3d",
           queryExecutor: imodelAccess,
           excludedElementClassNames,
         });
         const idsCache = new ModelsTreeIdsCache({
           queryExecutor: imodelAccess,
-          hierarchyConfig,
           baseIdsCache,
+          hierarchyConfig,
         });
         const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
         const provider = createIModelHierarchyProvider({

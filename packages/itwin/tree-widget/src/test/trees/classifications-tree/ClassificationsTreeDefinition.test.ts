@@ -161,7 +161,7 @@ describe("Classifications tree", () => {
         const { imodelConnection, ...keys } = buildIModelResult;
         using provider = createClassificationsTreeProvider(imodelConnection, {
           rootClassificationSystemCode,
-          excludedElementClassNames: ["BisCore.GeometricElement2d"],
+          elements: { excludedClasses: ["BisCore.GeometricElement2d"] },
         });
 
         await validateHierarchy({
@@ -217,7 +217,7 @@ describe("Classifications tree", () => {
         const { imodelConnection, ...keys } = buildIModelResult;
         using provider = createClassificationsTreeProvider(imodelConnection, {
           rootClassificationSystemCode,
-          excludedElementClassNames: ["Generic.PhysicalObject"],
+          elements: { excludedClasses: ["Generic.PhysicalObject"] },
         });
 
         await validateHierarchy({
@@ -280,7 +280,7 @@ describe("Classifications tree", () => {
         // Omitting the base class should filter out elements of all derived classes due to polymorphic class exclusion.
         using provider = createClassificationsTreeProvider(imodelConnection, {
           rootClassificationSystemCode,
-          excludedElementClassNames: ["BisCore.PhysicalElement"],
+          elements: { excludedClasses: ["BisCore.PhysicalElement"] },
         });
 
         await validateHierarchy({
@@ -328,7 +328,7 @@ describe("Classifications tree", () => {
         const { imodelConnection, ...keys } = buildIModelResult;
         using provider = createClassificationsTreeProvider(imodelConnection, {
           rootClassificationSystemCode,
-          excludedElementClassNames: ["Generic.PhysicalObject"],
+          elements: { excludedClasses: ["Generic.PhysicalObject"] },
         });
 
         await validateHierarchy({
@@ -383,7 +383,7 @@ describe("Classifications tree", () => {
         const { imodelConnection, ...keys } = buildIModelResult;
         using provider = createClassificationsTreeProvider(imodelConnection, {
           rootClassificationSystemCode,
-          excludedElementClassNames: ["Generic.PhysicalObject"],
+          elements: { excludedClasses: ["Generic.PhysicalObject"] },
         });
 
         await validateHierarchy({
@@ -452,7 +452,7 @@ describe("Classifications tree", () => {
         const { imodelConnection, ...keys } = buildIModelResult;
         using provider = createClassificationsTreeProvider(imodelConnection, {
           rootClassificationSystemCode,
-          excludedElementClassNames: ["Generic.PhysicalObject"],
+          elements: { excludedClasses: ["Generic.PhysicalObject"] },
         });
 
         await validateHierarchy({

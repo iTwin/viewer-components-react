@@ -18,7 +18,7 @@ interface ElementModelCategoriesCacheProps {
   queryExecutor: LimitingECSqlQueryExecutor;
   componentId: GuidString;
   elementClassName: string;
-  excludedElementClassNames?: ReadonlyArray<EC.FullClassName>;
+  excludedElementClassNames?: ReadonlyArray<EC.FullClassNameDotNotation>;
 }
 
 interface CachedData {
@@ -45,7 +45,7 @@ export class ElementModelCategoriesCache {
   #componentId: GuidString;
   #componentName: string;
   #elementClassName: string;
-  #excludedElementClassNames?: ReadonlyArray<EC.FullClassName>;
+  #excludedElementClassNames?: ReadonlyArray<EC.FullClassNameDotNotation>;
   #cachedData: Observable<CachedData> | undefined;
   #dataResolved = false;
   #subscriberBatches: Array<{ obs: Observable<CachedData>; subscriberCount: number }> = [];

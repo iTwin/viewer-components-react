@@ -33,6 +33,7 @@ import {
   CLASS_NAME_Subject,
 } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
+import { mergeWithDefaults } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
 import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
@@ -60,6 +61,10 @@ import type { Visibility } from "../../../../tree-widget-react/components/trees/
 import type { TreeWidgetViewport } from "../../../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 import type { ModelsTreeVisibilityHandlerProps } from "../../../../tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
+import type {
+  ModelsTreeHierarchyConfiguration,
+  RequiredModelsTreeHierarchyConfiguration,
+} from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import type { VisibilityExpectations } from "../../common/VisibilityValidation.js";
 
 interface VisibilityOverrides {
@@ -68,19 +73,18 @@ interface VisibilityOverrides {
   elements?: Map<Id64String, Visibility>;
 }
 
-type ModelsTreeHierarchyConfiguration = Partial<ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"]>;
-
 describe("ModelsTreeVisibilityHandler", () => {
   function createIdsCache(iModel: IModelConnection, hierarchyConfig?: ModelsTreeHierarchyConfiguration) {
+    const resolvedHierarchyConfig = mergeWithDefaults({ defaults: defaultHierarchyConfiguration, overrides: hierarchyConfig });
     const queryExecutor = createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded");
     const baseIdsCache = new BaseIdsCache({
       queryExecutor,
-      elementClassName: hierarchyConfig?.elementClassSpecification ?? defaultHierarchyConfiguration.elementClassSpecification,
+      elementClassName: resolvedHierarchyConfig.elements.baseClass,
       type: "3d",
     });
     const idsCache = new ModelsTreeIdsCache({
       queryExecutor: createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"),
-      hierarchyConfig: { ...defaultHierarchyConfiguration, ...hierarchyConfig },
+      hierarchyConfig: resolvedHierarchyConfig,
       baseIdsCache,
     });
     return idsCache;
@@ -1723,15 +1727,19 @@ describe("ModelsTreeVisibilityHandler", () => {
       await terminateCore();
     });
 
-    function createCommonProps(props: {
-      imodelConnection: IModelConnection;
-      hierarchyConfig?: typeof defaultHierarchyConfiguration;
-      visibleByDefault?: boolean;
-    }) {
-      const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...props.hierarchyConfig };
+    function createCommonProps(props: { imodelConnection: IModelConnection; hierarchyConfig?: ModelsTreeHierarchyConfiguration; visibleByDefault?: boolean }) {
+      const configOverrides: ModelsTreeHierarchyConfiguration = { subjects: { root: "exclude" }, ...props.hierarchyConfig };
+      const hierarchyConfig = mergeWithDefaults({
+        defaults: defaultHierarchyConfiguration,
+        overrides: configOverrides,
+      });
       const imodelAccess = createIModelAccess(props.imodelConnection);
       const viewport = createTreeWidgetTestingViewport({ iModel: props.imodelConnection, viewType: "3d", visibleByDefault: props.visibleByDefault });
-      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: hierarchyConfig.elementClassSpecification, type: "3d" });
+      const baseIdsCache = new BaseIdsCache({
+        queryExecutor: imodelAccess,
+        elementClassName: hierarchyConfig.elements.baseClass,
+        type: "3d",
+      });
       const idsCache = new ModelsTreeIdsCache({
         queryExecutor: imodelAccess,
         hierarchyConfig,
@@ -1749,11 +1757,11 @@ describe("ModelsTreeVisibilityHandler", () => {
     function createProvider(props: {
       idsCache: ModelsTreeIdsCache;
       imodelAccess: ReturnType<typeof createIModelAccess>;
-      hierarchyConfig: typeof defaultHierarchyConfiguration;
+      hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
       searchPaths?: HierarchySearchTree[];
     }) {
       return createIModelHierarchyProvider({
-        hierarchyDefinition: new ModelsTreeDefinition({ ...props }),
+        hierarchyDefinition: new ModelsTreeDefinition(props),
         imodelAccess: props.imodelAccess,
         ...(props.searchPaths ? { search: { paths: props.searchPaths } } : undefined),
       });
@@ -1761,7 +1769,7 @@ describe("ModelsTreeVisibilityHandler", () => {
 
     function createVisibilityTestData(props: {
       imodelConnection: IModelConnection;
-      hierarchyConfig?: typeof defaultHierarchyConfiguration;
+      hierarchyConfig?: ModelsTreeHierarchyConfiguration;
       visibleByDefault?: boolean;
     }) {
       const commonProps = createCommonProps(props);
@@ -3782,7 +3790,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const emptyPartitionId = insertPhysicalPartition({ txn, codeValue: "EmptyPhysicalModel", parentId: IModel.rootSubjectId }).id;
             const emptyModelId = insertPhysicalSubModel({ txn, modeledElementId: emptyPartitionId }).id;
 
-            const customClassName = schema.items.SubModelablePhysicalObject.fullName as EC.FullClassName;
+            const customClassName = schema.items.SubModelablePhysicalObject.fullName as EC.FullClassNameDotNotation;
 
             const partitionId = insertPhysicalPartition({ txn, codeValue: "ConfigurationPhysicalModel ", parentId: IModel.rootSubjectId }).id;
             const configurationModelId = insertPhysicalSubModel({ txn, modeledElementId: partitionId }).id;
@@ -3803,11 +3811,13 @@ describe("ModelsTreeVisibilityHandler", () => {
             }
             const [customClassElement1, customClassElement2, nonCustomClassElement] = elements;
 
-            const hierarchyConfig: typeof defaultHierarchyConfiguration = {
-              ...defaultHierarchyConfiguration,
-              showEmptyModels: true,
-              elementClassSpecification: customClassName,
-            };
+            const hierarchyConfig: RequiredModelsTreeHierarchyConfiguration = mergeWithDefaults({
+              defaults: defaultHierarchyConfiguration,
+              overrides: {
+                models: { withoutElements: "include" as const },
+                elements: { baseClass: customClassName },
+              },
+            });
 
             return {
               configurationModelId,
@@ -5594,10 +5604,9 @@ describe("ModelsTreeVisibilityHandler", () => {
       using visibilityTestData = createVisibilityTestData({
         imodelConnection,
         hierarchyConfig: {
-          ...defaultHierarchyConfiguration,
-          hideRootSubject: true,
-          showEmptyModels: true,
-          excludedElementClassNames: [CLASS_NAME_GeometricElement3d],
+          subjects: { root: "exclude" },
+          models: { withoutElements: "include" },
+          elements: { excludedClasses: [CLASS_NAME_GeometricElement3d] },
         },
       });
       const { handler, viewport, provider } = visibilityTestData;

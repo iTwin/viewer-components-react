@@ -17,7 +17,7 @@ import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../../common/components/VisibilityTree.js";
-import type { ClassGroupingHierarchyNode, ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
+import type { ClassGroupingHierarchyNode, ElementsGroupInfo, RequiredModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
 import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache.js";
 
 /** @internal */
@@ -27,7 +27,7 @@ export type ModelsTreeSubTreeError = "unknownSubTreeError";
 
 /** @internal */
 export function useSearchPaths({
-  hierarchyConfiguration,
+  hierarchyConfig,
   searchText,
   searchLimit,
   getSearchPaths,
@@ -37,7 +37,7 @@ export function useSearchPaths({
   onSearchPathsChanged,
   componentId,
 }: {
-  hierarchyConfiguration: ModelsTreeHierarchyConfiguration;
+  hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
   searchText?: string;
   searchLimit?: number | "unbounded";
   getSearchPaths?: (props: {
@@ -98,7 +98,7 @@ export function useSearchPaths({
                 imodelAccess,
                 targetItems,
                 idsCache,
-                hierarchyConfig: hierarchyConfiguration,
+                hierarchyConfig,
                 limit: "unbounded",
                 abortSignal,
                 componentId: `${componentId}/subTree`,
@@ -111,7 +111,7 @@ export function useSearchPaths({
         return [];
       }
     };
-  }, [idsCache, hierarchyConfiguration, getSubTreePaths, componentId]);
+  }, [idsCache, hierarchyConfig, getSubTreePaths, componentId]);
 
   const getPaths = useMemo<VisibilityTreeProps["getSearchPaths"] | undefined>(() => {
     const handlePaths = async (searchPaths: HierarchySearchTree[] | undefined, classInspector: ECClassHierarchyInspector) => {
@@ -135,7 +135,7 @@ export function useSearchPaths({
                   imodelAccess,
                   idsCache,
                   targetItems: focusedItems,
-                  hierarchyConfig: hierarchyConfiguration,
+                  hierarchyConfig,
                   limit: searchLimit,
                   abortSignal,
                   componentId,
@@ -169,7 +169,7 @@ export function useSearchPaths({
                       ...props,
                       imodelAccess,
                       idsCache,
-                      hierarchyConfig: hierarchyConfiguration,
+                      hierarchyConfig,
                       limit: searchLimit,
                       abortSignal,
                       componentId,
@@ -205,7 +205,7 @@ export function useSearchPaths({
                   imodelAccess,
                   label: searchText,
                   idsCache,
-                  hierarchyConfig: hierarchyConfiguration,
+                  hierarchyConfig,
                   limit: searchLimit,
                   abortSignal,
                   componentId,
@@ -234,7 +234,7 @@ export function useSearchPaths({
     idsCache,
     onFeatureUsed,
     getSearchPaths,
-    hierarchyConfiguration,
+    hierarchyConfig,
     onModelsFiltered,
     onSearchPathsChanged,
     getSubTreePathsInternal,

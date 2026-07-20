@@ -22,9 +22,9 @@ import type { ParentElementsPath } from "../Utils.js";
 /** @internal */
 export interface BaseIdsCacheProps {
   queryExecutor: LimitingECSqlQueryExecutor;
-  elementClassName: string;
+  elementClassName: EC.FullClassNameDotNotation;
   type: "2d" | "3d";
-  excludedElementClassNames?: ReadonlyArray<EC.FullClassName>;
+  excludedElementClassNames?: ReadonlyArray<EC.FullClassNameDotNotation>;
 }
 
 /** @internal */
@@ -34,7 +34,7 @@ export class BaseIdsCache {
   readonly #descendantsCountCache: DescendantsCountCache;
   readonly #childElementsCache: ChildElementsCache;
   readonly #subCategoriesCache: SubCategoriesCache;
-  #elementClassName: string;
+  #elementClassName: EC.FullClassNameDotNotation;
   #modeledElementsCache: Observable<ModeledElementsCache> | undefined;
   readonly #elementModelCategoriesCache: ElementModelCategoriesCache;
   #categoryModelsInfoWithoutSubModels:

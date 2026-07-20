@@ -23,6 +23,7 @@ import {
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { useGuid } from "../common/internal/useGuid.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import { mergeWithDefaults, stableStringify } from "../common/internal/Utils.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 import { useSearchPaths } from "./internal/UseSearchPaths.js";
 import { ModelsTreeVisibilityHandler } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
@@ -41,11 +42,10 @@ import type { ExtendedVisibilityTreeRendererProps } from "../common/components/V
 import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { SearchResultsTree } from "../common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
-import type { HierarchyConfigForModelsCache } from "./internal/ModelsTreeIdsCache.js";
 import type { ModelsTreeSearchError, ModelsTreeSubTreeError } from "./internal/UseSearchPaths.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
 import type { ModelsTreeSearchTargets } from "./internal/visibility/SearchResultsTree.js";
-import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition.js";
+import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration, RequiredModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition.js";
 
 /** @beta */
 export interface UseModelsTreeProps {
@@ -67,7 +67,7 @@ export interface UseModelsTreeProps {
    */
   searchLimit?: number | "unbounded";
   activeView: TreeWidgetViewport;
-  hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
+  hierarchyConfig?: ModelsTreeHierarchyConfiguration;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
   /**
    * Optional function for applying custom search on the hierarchy. Use it when you want full control over which nodes should be displayed, based on more complex logic or known instance keys.
@@ -151,13 +151,15 @@ export function useModelsTree({
   getSubTreePaths,
   getTreeItemProps,
 }: UseModelsTreeProps): UseModelsTreeResult {
-  const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
-    () => ({
-      ...defaultHierarchyConfiguration,
-      ...hierarchyConfig,
-    }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
-    Object.values(hierarchyConfig ?? {}),
+  const hierarchyConfigFingerprint = stableStringify(hierarchyConfig);
+  const hierarchyConfiguration = useMemo(
+    () =>
+      mergeWithDefaults({
+        defaults: defaultHierarchyConfiguration,
+        overrides: hierarchyConfig,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [hierarchyConfigFingerprint],
   );
   const componentId = useGuid();
   const idsCache = useModelsTreeIdsCache({
@@ -182,7 +184,7 @@ export function useModelsTree({
   );
 
   const { getPaths, searchError, subTreeError } = useSearchPaths({
-    hierarchyConfiguration,
+    hierarchyConfig: hierarchyConfiguration,
     searchText,
     searchLimit,
     getSearchPaths,
@@ -319,12 +321,18 @@ export function ModelsTreeIcon({ node }: { node: TreeNode }) {
   return <Icon href={getIcon()} />;
 }
 
-function useModelsTreeIdsCache({ imodel, hierarchyConfig }: { imodel: IModelConnection; hierarchyConfig: HierarchyConfigForModelsCache }): ModelsTreeIdsCache {
+function useModelsTreeIdsCache({
+  imodel,
+  hierarchyConfig,
+}: {
+  imodel: IModelConnection;
+  hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
+}): ModelsTreeIdsCache {
   const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
   const baseIdsCache = getBaseIdsCache({
     type: "3d",
-    elementClassName: hierarchyConfig.elementClassSpecification,
-    excludedElementClassNames: hierarchyConfig.excludedElementClassNames,
+    elementClassName: hierarchyConfig.elements.baseClass,
+    excludedElementClassNames: hierarchyConfig.elements.excludedClasses,
     imodel,
   });
 
@@ -336,7 +344,11 @@ function useModelsTreeIdsCache({ imodel, hierarchyConfig }: { imodel: IModelConn
         hierarchyConfig,
         queryExecutor: createECSqlQueryExecutor(imodel),
       }),
-    cacheKey: `${hierarchyConfig.hideRootSubject ? "hideRootSubject" : "showRootSubject"}-${hierarchyConfig.showEmptyModels ? "showEmptyModels" : "hideEmptyModels"}-${hierarchyConfig.elementClassSpecification}-${[...(hierarchyConfig.excludedElementClassNames ?? [])].sort().join(",")}-ModelsTreeIdsCache`,
+    cacheKey: `${hierarchyConfig.subjects.root}-${hierarchyConfig.models.withoutElements}-${hierarchyConfig.elements.baseClass}-${[
+      ...(hierarchyConfig.elements.excludedClasses ?? []),
+    ]
+      .sort()
+      .join(",")}-ModelsTreeIdsCache`,
   });
 
   return modelsTreeIdsCache;

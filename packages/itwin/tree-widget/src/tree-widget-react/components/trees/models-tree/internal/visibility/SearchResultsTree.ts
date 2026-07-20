@@ -374,7 +374,7 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<Proc
     };
   }
 
-  public async getType(className: EC.FullClassName): Promise<Node["type"]> {
+  public async getType(className: EC.FullClassNameDotNotation): Promise<Node["type"]> {
     if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Subject)) {
       return "subject";
     }

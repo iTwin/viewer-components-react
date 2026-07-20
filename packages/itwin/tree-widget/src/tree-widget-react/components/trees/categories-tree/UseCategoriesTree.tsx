@@ -15,7 +15,7 @@ import { EmptyTreeContent, NoSearchMatches, SearchUnknownError, TooManySearchMat
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { useGuid } from "../common/internal/useGuid.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { getClassesByView } from "../common/internal/Utils.js";
+import { getClassesByView, mergeWithDefaults, stableStringify } from "../common/internal/Utils.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import { useSearchPaths } from "./internal/UseSearchPaths.js";
@@ -33,7 +33,7 @@ import type { ExtendedVisibilityTreeRendererProps } from "../common/components/V
 import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { SearchResultsTree } from "../common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
-import type { CategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
+import type { CategoriesTreeHierarchyConfiguration, RequiredCategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import type { CategoriesTreeSearchError } from "./internal/UseSearchPaths.js";
 import type { CategoriesTreeSearchTargets } from "./internal/visibility/SearchResultsTree.js";
 
@@ -51,7 +51,7 @@ export interface UseCategoriesTreeProps {
    */
   searchLimit?: number | "unbounded";
   emptyTreeContent?: ReactNode;
-  hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
+  hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
   getTreeItemProps?: ExtendedVisibilityTreeRendererProps["getTreeItemProps"];
 }
 
@@ -79,13 +79,15 @@ export function useCategoriesTree({
   hierarchyConfig,
   getTreeItemProps,
 }: UseCategoriesTreeProps): UseCategoriesTreeResult {
-  const hierarchyConfiguration = useMemo<CategoriesTreeHierarchyConfiguration>(
-    () => ({
-      ...defaultHierarchyConfiguration,
-      ...hierarchyConfig,
-    }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
-    Object.values(hierarchyConfig ?? {}),
+  const hierarchyConfigFingerprint = stableStringify(hierarchyConfig);
+  const hierarchyConfiguration = useMemo(
+    () =>
+      mergeWithDefaults({
+        defaults: defaultHierarchyConfiguration,
+        overrides: hierarchyConfig,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [hierarchyConfigFingerprint],
   );
   const [viewType, setViewType] = useState<"2d" | "3d">(activeView.viewType === "2d" ? "2d" : "3d");
   const componentId = useGuid();
@@ -100,7 +102,7 @@ export function useCategoriesTree({
   const idsCache = useCategoriesTreeIdsCache({
     imodel: activeView.iModel,
     activeViewType: viewType,
-    excludedElementClassNames: hierarchyConfiguration.excludedElementClassNames,
+    excludedElementClassNames: hierarchyConfiguration.elements.nodes === "include" ? hierarchyConfiguration.elements.excludedClasses : undefined,
   });
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useCategoriesCachedVisibility({
@@ -124,7 +126,7 @@ export function useCategoriesTree({
   );
 
   const { getPaths, searchError } = useSearchPaths({
-    hierarchyConfiguration,
+    hierarchyConfig: hierarchyConfiguration,
     searchText,
     searchLimit,
     idsCache,
@@ -199,9 +201,9 @@ function useCategoriesCachedVisibility(props: {
   idsCache: CategoriesTreeIdsCache;
   viewType: "2d" | "3d";
   componentId: GuidString;
-  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
 }) {
-  const { activeView, idsCache, viewType, componentId } = props;
+  const { activeView, idsCache, viewType, componentId, hierarchyConfig } = props;
   const { visibilityHandlerFactory, searchPaths, onSearchPathsChanged } = useCachedVisibility<CategoriesTreeIdsCache, CategoriesTreeSearchTargets>({
     activeView,
     idsCache,
@@ -211,8 +213,8 @@ function useCategoriesCachedVisibility(props: {
       [viewType],
     ),
     createTreeSpecificVisibilityHandler: useCallback(
-      (specificProps) => createTreeSpecificVisibilityHandler({ ...specificProps, hierarchyConfig: props.hierarchyConfig }),
-      [props.hierarchyConfig],
+      (specificProps) => createTreeSpecificVisibilityHandler({ ...specificProps, hierarchyConfig }),
+      [hierarchyConfig],
     ),
     componentId,
   });
@@ -229,7 +231,7 @@ function useCategoriesCachedVisibility(props: {
 
 function createTreeSpecificVisibilityHandler(
   props: CreateTreeSpecificVisibilityHandlerProps<CategoriesTreeIdsCache> & {
-    hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+    hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
   },
 ) {
   const { info, idsCache, viewport, hierarchyConfig } = props;
@@ -262,7 +264,7 @@ function useCategoriesTreeIdsCache({
 }: {
   imodel: IModelConnection;
   activeViewType: "2d" | "3d";
-  excludedElementClassNames?: Array<EC.FullClassName>;
+  excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
 }): CategoriesTreeIdsCache {
   const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
 

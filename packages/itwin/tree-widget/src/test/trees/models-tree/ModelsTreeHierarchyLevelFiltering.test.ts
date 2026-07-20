@@ -705,7 +705,7 @@ describe("Models tree", () => {
     });
 
     describe("Hierarchy configuration", () => {
-      it("filters empty models when `showEmptyModels` set to true", async () => {
+      it("includes models without elements when `models.withoutElements` is set to 'include'", async () => {
         await using buildIModelResult = await buildIModel(async (imodel) =>
           withEditTxn(imodel, (txn) => {
             const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
@@ -717,7 +717,7 @@ describe("Models tree", () => {
           }),
         );
         const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { showEmptyModels: true } });
+        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { models: { withoutElements: "include" } } });
         const parentNode = {
           key: {
             type: "instances" as const,
@@ -765,7 +765,7 @@ describe("Models tree", () => {
         });
       });
 
-      it("filters elements when `elementClassSpecification` is provided", async () => {
+      it("filters elements when `elements.baseClass` is provided", async () => {
         await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
           withEditTxn(imodel, (txn) => {
             const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
@@ -788,7 +788,7 @@ describe("Models tree", () => {
           }),
         );
         const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { elementClassSpecification: keys.element1.className } });
+        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { elements: { baseClass: keys.element1.className } } });
         const parentNode = {
           key: {
             type: "instances" as const,

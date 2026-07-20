@@ -15,6 +15,7 @@ import {
   CLASS_NAME_SpatialCategory,
   CLASS_NAME_Subject,
 } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { mergeWithDefaults } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
 import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelAccess } from "../Common.js";
@@ -30,13 +31,12 @@ import type {
 } from "@itwin/presentation-hierarchies";
 import type { EC, InstanceKey } from "@itwin/presentation-shared";
 import type { ParentElementsPath } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
-
-type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
+import type { ModelsTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 
 interface CreateModelsTreeProviderProps {
   imodelConnection: IModelConnection;
   searchPaths?: HierarchySearchTree[];
-  hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
+  hierarchyConfig?: ModelsTreeHierarchyConfiguration;
   idsCache?: ModelsTreeIdsCache;
   imodelAccess?: ReturnType<typeof createIModelAccess>;
 }
@@ -48,13 +48,17 @@ export function createModelsTreeProvider({
   imodelAccess,
   idsCache,
 }: CreateModelsTreeProviderProps): HierarchyProvider & { dispose: () => void; [Symbol.dispose]: () => void } {
-  const config = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...hierarchyConfig };
+  const configOverrides: ModelsTreeHierarchyConfiguration = { subjects: { root: "exclude" }, ...hierarchyConfig };
+  const config = mergeWithDefaults({
+    defaults: defaultHierarchyConfiguration,
+    overrides: configOverrides,
+  });
   const createdImodelAccess = imodelAccess ?? createIModelAccess(imodelConnection);
   const baseIdsCache = new BaseIdsCache({
     queryExecutor: createdImodelAccess,
-    elementClassName: config.elementClassSpecification,
+    elementClassName: config.elements.baseClass,
     type: "3d",
-    excludedElementClassNames: config.excludedElementClassNames,
+    excludedElementClassNames: config.elements.excludedClasses,
   });
   const createdIdsCache =
     idsCache ??
@@ -265,7 +269,7 @@ export function createClassGroupingHierarchyNode({
   ...props
 }: {
   elements: Id64Array;
-  className?: EC.FullClassName;
+  className?: EC.FullClassNameDotNotation;
   parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   modelId: Id64String;
   categoryId: Id64String;
