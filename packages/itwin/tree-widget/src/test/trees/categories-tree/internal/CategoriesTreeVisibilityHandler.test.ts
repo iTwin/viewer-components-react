@@ -147,7 +147,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       searchPaths: undefined,
       hierarchyConfig,
     });
-    const provider = createProvider({ ...commonProps, hierarchyConfig: commonProps.hierarchyConfig ?? defaultHierarchyConfiguration });
+    const provider = createProvider({ ...commonProps, hierarchyConfig: commonProps.hierarchyConfig });
 
     return {
       handler,

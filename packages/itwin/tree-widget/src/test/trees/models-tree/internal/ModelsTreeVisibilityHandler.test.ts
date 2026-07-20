@@ -79,7 +79,7 @@ describe("ModelsTreeVisibilityHandler", () => {
     const queryExecutor = createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded");
     const baseIdsCache = new BaseIdsCache({
       queryExecutor,
-      elementClassName: hierarchyConfig?.elements?.baseClass ?? defaultHierarchyConfiguration.elements.baseClass,
+      elementClassName: resolvedHierarchyConfig.elements.baseClass,
       type: "3d",
     });
     const idsCache = new ModelsTreeIdsCache({
