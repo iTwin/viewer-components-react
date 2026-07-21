@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { afterEach, describe, expect, it, vi } from "vitest";
-// __PUBLISH_EXTRACT_START__  TreeWidget.SelectionStorageInitializeExampleImports
+// __PUBLISH_EXTRACT_START__ TreeWidget.SelectionStorageInitializeExampleImports
 import { Presentation } from "@itwin/presentation-frontend";
 // __PUBLISH_EXTRACT_END__
-// __PUBLISH_EXTRACT_START__  TreeWidget.SelectionStorageExampleImports
+// __PUBLISH_EXTRACT_START__ TreeWidget.SelectionStorageExampleImports
 import { IModelConnection } from "@itwin/core-frontend";
 import { createStorage } from "@itwin/unified-selection";
 import type { SelectionStorage } from "@itwin/unified-selection";

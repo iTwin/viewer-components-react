@@ -119,7 +119,7 @@ describe("Tree widget", () => {
           }
 
           function MyTree() {
-            const activeView = useMemo(() => createTreeWidgetViewport(viewport), []);
+            const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
             const { treeProps, getTreeItemProps } = useCategoriesTree({ activeView });
             return (
               // VisibilityTree will use provided telemetry context to report used features and their performance
