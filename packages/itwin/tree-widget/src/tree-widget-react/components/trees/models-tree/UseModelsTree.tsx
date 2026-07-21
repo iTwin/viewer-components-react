@@ -5,11 +5,6 @@
 
 import { useCallback, useMemo } from "react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { Icon } from "@stratakit/foundations";
-import categorySvg from "@stratakit/icons/bis-category-3d.svg";
-import classSvg from "@stratakit/icons/bis-class.svg";
-import elementSvg from "@stratakit/icons/bis-element.svg";
-import subjectSvg from "@stratakit/icons/bis-subject.svg";
 import modelSvg from "@stratakit/icons/model-cube.svg";
 import {
   EmptyTreeContent,
@@ -29,6 +24,7 @@ import { useSearchPaths } from "./internal/UseSearchPaths.js";
 import { ModelsTreeVisibilityHandler } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
 import { createModelsSearchResultsTree } from "./internal/visibility/SearchResultsTree.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition.js";
+import { ModelsTreeIcon } from "./ModelsTreeIcon.js";
 import { ModelsTreeNode } from "./ModelsTreeNode.js";
 
 import type { ReactNode } from "react";
@@ -200,7 +196,11 @@ export function useModelsTree({
       if (!nodeTypeSelectionPredicate) {
         return true;
       }
-      return nodeTypeSelectionPredicate({ node, type: ModelsTreeNode.getType(node.nodeData) });
+      const type = ModelsTreeNode.getType(node.nodeData);
+      if (type === undefined) {
+        return false;
+      }
+      return nodeTypeSelectionPredicate({ node, type });
     },
     [nodeTypeSelectionPredicate],
   );
@@ -293,32 +293,6 @@ function InstanceFocusError({ error }: { error: ModelsTreeSearchError }) {
     return <TooManyInstancesFocused base={"modelsTree"} />;
   }
   return <UnknownInstanceFocusError base={"modelsTree"} />;
-}
-
-/** @beta */
-export function ModelsTreeIcon({ node }: { node: TreeNode }) {
-  if (node.nodeData.extendedData?.imageId === undefined) {
-    return undefined;
-  }
-
-  const getIcon = () => {
-    switch (node.nodeData.extendedData!.imageId) {
-      case "icon-layers":
-        return categorySvg;
-      case "icon-item":
-        return elementSvg;
-      case "icon-ec-class":
-        return classSvg;
-      case "icon-folder":
-        return subjectSvg;
-      case "icon-model":
-        return modelSvg;
-      default:
-        return undefined;
-    }
-  };
-
-  return <Icon href={getIcon()} />;
 }
 
 function useModelsTreeIdsCache({

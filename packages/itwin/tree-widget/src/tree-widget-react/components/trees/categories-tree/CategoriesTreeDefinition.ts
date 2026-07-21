@@ -304,9 +304,6 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         modelElementsMap,
         ...(hasDirectNonSearchTargets ? { hasDirectNonSearchTargets } : {}),
         ...(hasSearchTargetAncestor ? { hasSearchTargetAncestor } : {}),
-        // `imageId` is assigned to instance nodes at query time, but grouping ones need to
-        // be handled during post-processing
-        imageId: "icon-ec-class",
       },
     };
   };
@@ -388,7 +385,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 hideNodeInHierarchy: true,
                 hasChildren: true,
                 extendedData: {
-                  isModel: true,
+                  type: "model",
                   modeledElementCategory: { selector: `IdToHex(${parentNode.extendedData.categoryId})` },
                 },
               })}
@@ -567,8 +564,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 }),
               },
               extendedData: {
-                isDefinitionContainer: true,
-                imageId: "icon-definition-container",
+                type: "definition-container",
               },
               hasChildren: true,
               supportsFiltering: true,
@@ -654,6 +650,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                     }
                   : false,
               extendedData: {
+                type: "category",
                 description: { selector: "this.Description" },
                 modelIds: { selector: createIdsSelector(new Array<ModelId>()) },
                 hasSubCategories:
@@ -726,8 +723,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 },
                 extendedData: {
                   categoryId: { selector: "printf('0x%x', this.Parent.Id)" },
-                  isSubCategory: true,
-                  imageId: "icon-layers-isolate",
+                  type: "sub-category",
                 },
                 supportsFiltering: false,
               })}
@@ -792,8 +788,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       extendedData: {
         modelId: { selector: "IdToHex(this.Model.Id)" },
         categoryId: { selector: "IdToHex(this.Category.Id)" },
-        imageId: "icon-item",
-        isElement: true,
+        type: "element",
       },
       supportsFiltering: true,
     });
@@ -826,8 +821,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       grouping: { byLabel: { action: "merge", groupId: "category" } },
       hasChildren,
       extendedData: {
-        imageId: "icon-layers",
-        isCategory: true,
+        type: "category",
         ...extendedData,
       },
       supportsFiltering: true,

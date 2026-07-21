@@ -5,18 +5,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { Icon } from "@stratakit/foundations";
 import categorySvg from "@stratakit/icons/bis-category-3d.svg";
-import subcategorySvg from "@stratakit/icons/bis-category-subcategory.svg";
-import classSvg from "@stratakit/icons/bis-class.svg";
-import definitionContainerSvg from "@stratakit/icons/bis-definitions-container.svg";
-import elementSvg from "@stratakit/icons/bis-element.svg";
 import { EmptyTreeContent, NoSearchMatches, SearchUnknownError, TooManySearchMatches } from "../common/components/EmptyTree.js";
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { useGuid } from "../common/internal/useGuid.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { getClassesByView, mergeWithDefaults, stableStringify } from "../common/internal/Utils.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
+import { CategoriesTreeIcon } from "./CategoriesTreeIcon.js";
 import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import { useSearchPaths } from "./internal/UseSearchPaths.js";
 import { CategoriesTreeVisibilityHandler } from "./internal/visibility/CategoriesTreeVisibilityHandler.js";
@@ -25,7 +21,6 @@ import { createCategoriesSearchResultsTree } from "./internal/visibility/SearchR
 import type { ReactNode } from "react";
 import type { GuidString, Id64Array } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { TreeNode } from "@itwin/presentation-hierarchies-react";
 import type { EC } from "@itwin/presentation-shared";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
@@ -168,32 +163,6 @@ function getEmptyTreeContentComponent(searchText?: string, error?: CategoriesTre
     return emptyTreeContent;
   }
   return <EmptyTreeContent icon={categorySvg} />;
-}
-
-/** @beta */
-export function CategoriesTreeIcon({ node }: { node: TreeNode }) {
-  if (node.nodeData.extendedData?.imageId === undefined) {
-    return undefined;
-  }
-
-  const getIcon = () => {
-    switch (node.nodeData.extendedData!.imageId) {
-      case "icon-layers":
-        return categorySvg;
-      case "icon-layers-isolate":
-        return subcategorySvg;
-      case "icon-definition-container":
-        return definitionContainerSvg;
-      case "icon-item":
-        return elementSvg;
-      case "icon-ec-class":
-        return classSvg;
-      default:
-        return undefined;
-    }
-  };
-
-  return <Icon href={getIcon()} />;
 }
 
 function useCategoriesCachedVisibility(props: {

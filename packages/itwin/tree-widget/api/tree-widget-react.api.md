@@ -179,6 +179,7 @@ export namespace CategoriesTreeNode {
             categoryId: Id64String;
         };
     };
+    const getType: (node: HierarchyNode_2) => "definition-container" | "category" | "element" | "sub-category" | "model" | "elements-class-group" | undefined;
 }
 
 // @beta (undocumented)
@@ -249,6 +250,7 @@ export namespace ClassificationsTreeNode {
             categoryId: Id64String;
         };
     };
+    const getType: (node: HierarchyNode_2) => "classification-table" | "classification" | "element" | undefined;
 }
 
 // @alpha (undocumented)
@@ -507,7 +509,7 @@ export namespace ModelsTreeNode {
             categoryId: Id64String;
         };
     };
-    const getType: (node: HierarchyNode_2) => "subject" | "model" | "category" | "element" | "elements-class-group";
+    const getType: (node: HierarchyNode_2) => "subject" | "model" | "category" | "element" | "elements-class-group" | undefined;
 }
 
 // @beta (undocumented)

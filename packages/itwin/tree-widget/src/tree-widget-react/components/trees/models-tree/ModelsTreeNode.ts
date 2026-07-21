@@ -15,11 +15,11 @@ import type { ClassGroupingNodeKey, GroupingHierarchyNode, InstancesNodeKey, Non
 export namespace ModelsTreeNode {
   /** Checks if the given node represents a `BisCore.Subject` element. */
   export const isSubjectNode = (node: Pick<HierarchyNode, "extendedData">): node is NonGroupingHierarchyNode & { key: InstancesNodeKey } =>
-    !!node.extendedData?.isSubject;
+    node.extendedData?.type === "subject";
 
   /** Checks if the given node represents a `BisCore.Model`. */
   export const isModelNode = (node: Pick<HierarchyNode, "extendedData">): node is NonGroupingHierarchyNode & { key: InstancesNodeKey } =>
-    !!node.extendedData?.isModel;
+    node.extendedData?.type === "model";
 
   /**
    * Checks if the given node represents a `BisCore.Category` element.
@@ -33,7 +33,7 @@ export namespace ModelsTreeNode {
     extendedData: {
       modelIds: Id64String[];
     };
-  } => !!node.extendedData?.isCategory;
+  } => node.extendedData?.type === "category";
 
   /**
    * Checks if the given node represents a `BisCore.GeometricElement` element.
@@ -49,7 +49,7 @@ export namespace ModelsTreeNode {
       modelId: Id64String;
       categoryId: Id64String;
     };
-  } => !!node.extendedData && "isElement" in node.extendedData && !!node.extendedData.isElement;
+  } => node.extendedData?.type === "element";
 
   /**
    * Checks if the given node is a class grouping node of `BisCore.GeometricElement` nodes.
@@ -68,7 +68,7 @@ export namespace ModelsTreeNode {
   } => HierarchyNode.isClassGroupingNode(node);
 
   /** Returns type of the node. */
-  export const getType = (node: HierarchyNode): "subject" | "model" | "category" | "element" | "elements-class-group" => {
+  export const getType = (node: HierarchyNode): "subject" | "model" | "category" | "element" | "elements-class-group" | undefined => {
     if (HierarchyNodeKey.isClassGrouping(node.key)) {
       return "elements-class-group";
     }
@@ -81,6 +81,9 @@ export namespace ModelsTreeNode {
     if (isCategoryNode(node)) {
       return "category";
     }
-    return "element";
+    if (isElementNode(node)) {
+      return "element";
+    }
+    return undefined;
   };
 }

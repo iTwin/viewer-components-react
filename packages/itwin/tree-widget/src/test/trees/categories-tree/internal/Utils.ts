@@ -52,7 +52,7 @@ export function createCategoryHierarchyNode(props: {
       ? props.parentKeys.map((parentKey) => ("type" in parentKey ? parentKey : { type: "instances", instanceKeys: [parentKey] }))
       : [],
     extendedData: {
-      isCategory: true,
+      type: "category",
       parentElementsPath: props.parentElementsPath ?? [],
       modelIds: props.modelIds ?? [],
       hasSubCategories: props.hasSubCategories,
@@ -76,7 +76,7 @@ export function createSubCategoryHierarchyNode(props: {
     label: "",
     parentKeys: props.parentKeys ? props.parentKeys.map((key) => ({ type: "instances", instanceKeys: [key] })) : [],
     extendedData: {
-      isSubCategory: true,
+      type: "sub-category",
       categoryId: props.categoryId,
     },
   };
@@ -134,7 +134,7 @@ export function createDefinitionContainerHierarchyNode(props: {
     parentKeys: props.parentKeys ? props.parentKeys.map((key) => ({ type: "instances", instanceKeys: [key] })) : [],
     search: props.search,
     extendedData: {
-      isDefinitionContainer: true,
+      type: "definition-container",
     },
   };
 }
@@ -165,7 +165,7 @@ export function createElementHierarchyNode(props: {
     extendedData: {
       modelId: props.modelId,
       categoryId: props.categoryId,
-      isElement: true,
+      type: "element",
       parentElementsPath: props.parentElementsPath ?? [],
     },
   };
@@ -183,7 +183,7 @@ export function createModelHierarchyNode(props: { id: Id64String; hasChildren?: 
     label: "",
     parentKeys: [],
     extendedData: {
-      isModel: true,
+      type: "model",
       modelId: props.id,
     },
   };

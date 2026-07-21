@@ -27,7 +27,13 @@ import { CLASS_NAME_Subject } from "../../../tree-widget-react/components/trees/
 import { buildIModel } from "../../IModelUtils.js";
 import { collect } from "../Common.js";
 import { NodeValidators, validateHierarchyLevel } from "../HierarchyValidation.js";
-import { createModelsTreeProvider } from "./Utils.js";
+import {
+  createCategoryHierarchyNode,
+  createElementHierarchyNode,
+  createModelHierarchyNode,
+  createModelsTreeProvider,
+  createSubjectHierarchyNode,
+} from "./Utils.js";
 
 import type { GenericInstanceFilter, GenericInstanceFilterRule } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -173,14 +179,7 @@ describe("Models tree", () => {
       );
       const { imodelConnection, ...keys } = buildIModelResult;
       using provider = createModelsTreeProvider({ imodelConnection });
-      const parentNode = {
-        key: {
-          type: "instances" as const,
-          instanceKeys: [keys.rootSubject],
-        },
-        parentKeys: [],
-        label: "",
-      };
+      const parentNode = createSubjectHierarchyNode({ ids: keys.rootSubject.id });
 
       // validate hierarchy level without filter
       validateHierarchyLevel({
@@ -272,19 +271,12 @@ describe("Models tree", () => {
       );
       const { imodelConnection, ...keys } = buildIModelResult;
       using provider = createModelsTreeProvider({ imodelConnection });
-      const parentNode = {
-        key: {
-          type: "instances" as const,
-          instanceKeys: [keys.model],
-        },
-        parentKeys: [
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.rootSubject],
-          },
-        ],
-        label: "",
-      };
+      const parentNode = createModelHierarchyNode({
+        modelId: keys.model.id,
+        hasChildren: true,
+        className: keys.model.className,
+        parentKeys: [keys.rootSubject],
+      });
 
       // validate hierarchy level without filter
       validateHierarchyLevel({
@@ -340,28 +332,12 @@ describe("Models tree", () => {
       );
       const { imodelConnection, ...keys } = buildIModelResult;
       using provider = createModelsTreeProvider({ imodelConnection });
-      const parentNode = {
-        key: {
-          type: "instances" as const,
-          instanceKeys: [keys.category],
-        },
-        parentKeys: [
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.rootSubject],
-          },
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.model],
-          },
-        ],
-        extendedData: {
-          isCategory: true,
-          modelIds: [keys.model.id],
-          parentElementsPath: [],
-        },
-        label: "",
-      };
+      const parentNode = createCategoryHierarchyNode({
+        modelId: keys.model.id,
+        categoryId: keys.category.id,
+        hasChildren: true,
+        parentKeys: [keys.rootSubject, keys.model],
+      });
 
       // validate hierarchy level without filter
       validateHierarchyLevel({
@@ -435,33 +411,13 @@ describe("Models tree", () => {
       );
       const { imodelConnection, ...keys } = buildIModelResult;
       using provider = createModelsTreeProvider({ imodelConnection });
-      const parentNode = {
-        key: {
-          type: "instances" as const,
-          instanceKeys: [keys.parentElement],
-        },
-        extendedData: {
-          parentElementsPath: [],
-          categoryId: keys.category.id,
-          modelId: keys.model.id,
-          isElement: true,
-        },
-        parentKeys: [
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.rootSubject],
-          },
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.model],
-          },
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.category],
-          },
-        ],
-        label: "",
-      };
+      const parentNode = createElementHierarchyNode({
+        modelId: keys.model.id,
+        categoryId: keys.category.id,
+        elementId: keys.parentElement.id,
+        hasChildren: true,
+        parentKeys: [keys.rootSubject, keys.model, keys.category],
+      });
 
       // validate hierarchy level without filter
       validateHierarchyLevel({
@@ -542,33 +498,14 @@ describe("Models tree", () => {
       );
       const { imodelConnection, ...keys } = buildIModelResult;
       using provider = createModelsTreeProvider({ imodelConnection });
-      const parentNode = {
-        key: {
-          type: "instances" as const,
-          instanceKeys: [keys.modeledElement],
-        },
-        extendedData: {
-          parentElementsPath: [],
-          categoryId: keys.category.id,
-          modelId: keys.model.id,
-          isElement: true,
-        },
-        parentKeys: [
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.rootSubject],
-          },
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.model],
-          },
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.category],
-          },
-        ],
-        label: "",
-      };
+      const parentNode = createElementHierarchyNode({
+        modelId: keys.model.id,
+        categoryId: keys.category.id,
+        elementId: keys.modeledElement.id,
+        hasChildren: true,
+        parentKeys: [keys.rootSubject, keys.model, keys.category],
+        className: keys.modeledElement.className,
+      });
 
       // validate hierarchy level without filter
       validateHierarchyLevel({
@@ -636,28 +573,12 @@ describe("Models tree", () => {
       );
       const { imodelConnection, ...keys } = buildIModelResult;
       using provider = createModelsTreeProvider({ imodelConnection });
-      const parentNode = {
-        key: {
-          type: "instances" as const,
-          instanceKeys: [keys.category],
-        },
-        parentKeys: [
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.rootSubject],
-          },
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.model],
-          },
-        ],
-        extendedData: {
-          modelIds: [keys.model.id],
-          isCategory: true,
-          parentElementsPath: [],
-        },
-        label: "",
-      };
+      const parentNode = createCategoryHierarchyNode({
+        modelId: keys.model.id,
+        hasChildren: true,
+        parentKeys: [keys.rootSubject, keys.model],
+        categoryId: keys.category.id,
+      });
       validateHierarchyLevel({
         nodes: await collect(provider.getNodes({ parentNode })),
         expect: [NodeValidators.createForClassGroupingNode({ className: keys.element.className })],
@@ -718,14 +639,9 @@ describe("Models tree", () => {
         );
         const { imodelConnection, ...keys } = buildIModelResult;
         using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { models: { withoutElements: "include" } } });
-        const parentNode = {
-          key: {
-            type: "instances" as const,
-            instanceKeys: [keys.rootSubject],
-          },
-          parentKeys: [],
-          label: "",
-        };
+        const parentNode = createSubjectHierarchyNode({
+          ids: keys.rootSubject.id,
+        });
 
         // validate hierarchy level without filter
         validateHierarchyLevel({
@@ -789,28 +705,12 @@ describe("Models tree", () => {
         );
         const { imodelConnection, ...keys } = buildIModelResult;
         using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { elements: { baseClass: keys.element1.className } } });
-        const parentNode = {
-          key: {
-            type: "instances" as const,
-            instanceKeys: [keys.category],
-          },
-          parentKeys: [
-            {
-              type: "instances" as const,
-              instanceKeys: [keys.rootSubject],
-            },
-            {
-              type: "instances" as const,
-              instanceKeys: [keys.model],
-            },
-          ],
-          extendedData: {
-            modelIds: [keys.model.id],
-            parentElementsPath: [],
-            isCategory: true,
-          },
-          label: "",
-        };
+        const parentNode = createCategoryHierarchyNode({
+          modelId: keys.model.id,
+          categoryId: keys.category.id,
+          hasChildren: true,
+          parentKeys: [keys.rootSubject, keys.model],
+        });
 
         // validate hierarchy level without filter
         validateHierarchyLevel({

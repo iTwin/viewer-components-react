@@ -23,7 +23,7 @@ import {
 } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
 import { createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
-import { createBisInstanceLabelSelectClauseFactory, ECSql, parseFullClassName } from "@itwin/presentation-shared";
+import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { eachValueFrom } from "../../utils/EachValueFrom.js";
 import {
   CLASS_NAME_Classification,
@@ -217,7 +217,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                   `,
                 },
                 extendedData: {
-                  type: "ClassificationTable",
+                  type: "classification-table",
                 },
                 supportsFiltering: true,
               })}
@@ -271,7 +271,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                     },
                     hasChildren: childClassificationsWithChildren.length > 0 ? { selector: createClassificationHasChildrenSelector("this") } : false,
                     extendedData: {
-                      type: "Classification",
+                      type: "classification",
                     },
                     supportsFiltering: true,
                   })}
@@ -358,7 +358,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                         },
                         hasChildren: childClassificationsWithChildren.length > 0 ? { selector: createClassificationHasChildrenSelector("this") } : false,
                         extendedData: {
-                          type: "Classification",
+                          type: "classification",
                         },
                         supportsFiltering: true,
                       })}
@@ -420,7 +420,6 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     nodeSelectClauseFactory: NodesQueryClauseFactory;
     instanceLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
   }): Promise<string> {
-    const { className: elementClassName } = parseFullClassName(CLASS_NAME_GeometricElement3d);
     return nodeSelectClauseFactory.createSelectClause({
       ecClassId: { selector: "this.ECClassId" },
       ecInstanceId: { selector: "this.ECInstanceId" },
@@ -446,7 +445,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
         `,
       },
       extendedData: {
-        type: elementClassName,
+        type: "element",
         modelId: { selector: "IdToHex(this.Model.Id)" },
         categoryId: { selector: "IdToHex(this.Category.Id)" },
       },
