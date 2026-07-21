@@ -15,6 +15,7 @@ import {
   CLASS_NAME_SpatialCategory,
   CLASS_NAME_Subject,
 } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { mergeWithDefaults } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
 import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelAccess } from "../Common.js";
@@ -30,13 +31,12 @@ import type {
 } from "@itwin/presentation-hierarchies";
 import type { EC, InstanceKey } from "@itwin/presentation-shared";
 import type { ParentElementsPath } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
-
-type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
+import type { ModelsTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 
 interface CreateModelsTreeProviderProps {
   imodelConnection: IModelConnection;
   searchPaths?: HierarchySearchTree[];
-  hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
+  hierarchyConfig?: ModelsTreeHierarchyConfiguration;
   idsCache?: ModelsTreeIdsCache;
   imodelAccess?: ReturnType<typeof createIModelAccess>;
 }
@@ -48,13 +48,17 @@ export function createModelsTreeProvider({
   imodelAccess,
   idsCache,
 }: CreateModelsTreeProviderProps): HierarchyProvider & { dispose: () => void; [Symbol.dispose]: () => void } {
-  const config = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...hierarchyConfig };
+  const configOverrides: ModelsTreeHierarchyConfiguration = { subjects: { root: "exclude" }, ...hierarchyConfig };
+  const config = mergeWithDefaults({
+    defaults: defaultHierarchyConfiguration,
+    overrides: configOverrides,
+  });
   const createdImodelAccess = imodelAccess ?? createIModelAccess(imodelConnection);
   const baseIdsCache = new BaseIdsCache({
     queryExecutor: createdImodelAccess,
-    elementClassName: config.elementClassSpecification,
+    elementClassName: config.elements.baseClass,
     type: "3d",
-    excludedElementClassNames: config.excludedElementClassNames,
+    excludedElementClassNames: config.elements.excludedClasses,
   });
   const createdIdsCache =
     idsCache ??
@@ -170,7 +174,7 @@ export function createSubjectHierarchyNode(props?: { ids?: Id64Arg; parentKeys?:
     label: "",
     parentKeys: props?.parentKeys ? props.parentKeys.map((parentKey) => ({ type: "instances", instanceKeys: [parentKey] })) : [],
     extendedData: {
-      isSubject: true,
+      type: "subject",
     },
   };
 }
@@ -179,18 +183,19 @@ export function createModelHierarchyNode(props?: {
   hasChildren?: boolean;
   parentKeys?: InstanceKey[];
   search?: NonGroupingHierarchyNode["search"];
+  className?: EC.FullClassNameDotNotation;
 }): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: CLASS_NAME_Model, id: props?.modelId ?? "" }],
+      instanceKeys: [{ className: props?.className ?? CLASS_NAME_Model, id: props?.modelId ?? "" }],
     },
     children: !!props?.hasChildren,
     label: "",
     parentKeys: props?.parentKeys ? props.parentKeys.map((parentKey) => ({ type: "instances", instanceKeys: [parentKey] })) : [],
     search: props?.search,
     extendedData: {
-      isModel: true,
+      type: "model",
       modelId: props?.modelId ?? "0x1",
     },
   };
@@ -223,7 +228,7 @@ export function createCategoryHierarchyNode({
     parentKeys: parentKeys ? parentKeys.map((parentKey) => ("type" in parentKey ? parentKey : { type: "instances", instanceKeys: [parentKey] })) : [],
     search,
     extendedData: {
-      isCategory: true,
+      type: "category",
       modelIds: [modelId ?? "0x1"],
       parentElementsPath: parentElementsPath ?? [],
     },
@@ -237,11 +242,12 @@ export function createElementHierarchyNode(props: {
   parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   search?: NonGroupingHierarchyNode["search"];
   parentElementsPath?: ParentElementsPath;
+  className?: EC.FullClassNameDotNotation;
 }): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: CLASS_NAME_GeometricElement3d, id: props.elementId ?? "" }],
+      instanceKeys: [{ className: props.className ?? CLASS_NAME_GeometricElement3d, id: props.elementId ?? "" }],
     },
     children: !!props.hasChildren,
     label: "",
@@ -250,7 +256,7 @@ export function createElementHierarchyNode(props: {
       ? props.parentKeys.map((parentKey) => ("type" in parentKey ? parentKey : { type: "instances", instanceKeys: [parentKey] }))
       : [],
     extendedData: {
-      isElement: true,
+      type: "element",
       modelId: props.modelId,
       categoryId: props.categoryId,
       parentElementsPath: props.parentElementsPath ?? [],
@@ -265,7 +271,7 @@ export function createClassGroupingHierarchyNode({
   ...props
 }: {
   elements: Id64Array;
-  className?: EC.FullClassName;
+  className?: EC.FullClassNameDotNotation;
   parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   modelId: Id64String;
   categoryId: Id64String;

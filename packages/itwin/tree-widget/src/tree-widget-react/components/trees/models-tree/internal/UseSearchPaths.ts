@@ -12,12 +12,13 @@ import { SearchLimitExceededError } from "../../common/TreeErrors.js";
 import { useTelemetryContext } from "../../common/UseTelemetryContext.js";
 import { joinHierarchySearchTrees } from "../../common/Utils.js";
 import { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
+import { ModelsTreeNode } from "../ModelsTreeNode.js";
 
 import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../../common/components/VisibilityTree.js";
-import type { ClassGroupingHierarchyNode, ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
+import type { ClassGroupingHierarchyNode, ElementsGroupInfo, RequiredModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
 import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache.js";
 
 /** @internal */
@@ -27,7 +28,7 @@ export type ModelsTreeSubTreeError = "unknownSubTreeError";
 
 /** @internal */
 export function useSearchPaths({
-  hierarchyConfiguration,
+  hierarchyConfig,
   searchText,
   searchLimit,
   getSearchPaths,
@@ -37,7 +38,7 @@ export function useSearchPaths({
   onSearchPathsChanged,
   componentId,
 }: {
-  hierarchyConfiguration: ModelsTreeHierarchyConfiguration;
+  hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
   searchText?: string;
   searchLimit?: number | "unbounded";
   getSearchPaths?: (props: {
@@ -98,7 +99,7 @@ export function useSearchPaths({
                 imodelAccess,
                 targetItems,
                 idsCache,
-                hierarchyConfig: hierarchyConfiguration,
+                hierarchyConfig,
                 limit: "unbounded",
                 abortSignal,
                 componentId: `${componentId}/subTree`,
@@ -111,7 +112,7 @@ export function useSearchPaths({
         return [];
       }
     };
-  }, [idsCache, hierarchyConfiguration, getSubTreePaths, componentId]);
+  }, [idsCache, hierarchyConfig, getSubTreePaths, componentId]);
 
   const getPaths = useMemo<VisibilityTreeProps["getSearchPaths"] | undefined>(() => {
     const handlePaths = async (searchPaths: HierarchySearchTree[] | undefined, classInspector: ECClassHierarchyInspector) => {
@@ -135,7 +136,7 @@ export function useSearchPaths({
                   imodelAccess,
                   idsCache,
                   targetItems: focusedItems,
-                  hierarchyConfig: hierarchyConfiguration,
+                  hierarchyConfig,
                   limit: searchLimit,
                   abortSignal,
                   componentId,
@@ -169,7 +170,7 @@ export function useSearchPaths({
                       ...props,
                       imodelAccess,
                       idsCache,
-                      hierarchyConfig: hierarchyConfiguration,
+                      hierarchyConfig,
                       limit: searchLimit,
                       abortSignal,
                       componentId,
@@ -205,7 +206,7 @@ export function useSearchPaths({
                   imodelAccess,
                   label: searchText,
                   idsCache,
-                  hierarchyConfig: hierarchyConfiguration,
+                  hierarchyConfig,
                   limit: searchLimit,
                   abortSignal,
                   componentId,
@@ -234,7 +235,7 @@ export function useSearchPaths({
     idsCache,
     onFeatureUsed,
     getSearchPaths,
-    hierarchyConfiguration,
+    hierarchyConfig,
     onModelsFiltered,
     onSearchPathsChanged,
     getSubTreePathsInternal,
@@ -303,9 +304,11 @@ async function collectFocusedItems(loadFocusedItems: () => AsyncIterableIterator
     }
 
     const parentKey = groupingNode.nonGroupingAncestor.key;
-    const type = groupingNode.nonGroupingAncestor.extendedData?.isCategory ? "category" : "element";
-    const modelIds = ((groupingNode.nonGroupingAncestor.extendedData?.modelIds as Id64String[][]) ?? []).flatMap((ids) => ids);
-    groupingNodeInfos.push({ groupingNode, parentType: type, parentKey, modelIds });
+    if (ModelsTreeNode.isCategoryNode(groupingNode.nonGroupingAncestor)) {
+      groupingNodeInfos.push({ groupingNode, parentType: "category", parentKey, modelIds: groupingNode.nonGroupingAncestor.extendedData.modelIds });
+      continue;
+    }
+    groupingNodeInfos.push({ groupingNode, parentType: "element", parentKey, modelIds: [] });
   }
   focusedItems.push(
     ...groupingNodeInfos.map(({ parentKey, parentType, groupingNode, modelIds }) => ({

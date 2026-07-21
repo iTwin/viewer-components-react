@@ -13,11 +13,11 @@ import type { HierarchyNode, InstancesNodeKey, NonGroupingHierarchyNode } from "
 export namespace ClassificationsTreeNode {
   /** Checks if the given node represents a `ClassificationSystems.ClassificationTable` element. */
   export const isClassificationTableNode = (node: Pick<HierarchyNode, "extendedData">): node is NonGroupingHierarchyNode & { key: InstancesNodeKey } =>
-    node.extendedData?.type === "ClassificationTable";
+    node.extendedData?.type === "classification-table";
 
   /** Checks if the given node represents a `ClassificationSystems.Classification` element. */
   export const isClassificationNode = (node: Pick<HierarchyNode, "extendedData">): node is NonGroupingHierarchyNode & { key: InstancesNodeKey } =>
-    node.extendedData?.type === "Classification";
+    node.extendedData?.type === "classification";
 
   /**
    * Checks if the given node represents a `BisCore.GeometricElement3d` element.
@@ -34,6 +34,20 @@ export namespace ClassificationsTreeNode {
       categoryId: Id64String;
     };
   } => {
-    return node.extendedData?.type === "GeometricElement3d";
+    return node.extendedData?.type === "element";
+  };
+
+  /** Returns type of the node. */
+  export const getType = (node: HierarchyNode): "classification-table" | "classification" | "element" | undefined => {
+    if (isClassificationTableNode(node)) {
+      return "classification-table";
+    }
+    if (isClassificationNode(node)) {
+      return "classification";
+    }
+    if (isGeometricElementNode(node)) {
+      return "element";
+    }
+    return undefined;
   };
 }

@@ -19,7 +19,7 @@ import type { InstanceKey } from "@itwin/presentation-shared";
 import type { CategoryInfo } from "../../common/CategoriesVisibilityUtils.js";
 import type { VisibilityTreeProps } from "../../common/components/VisibilityTree.js";
 import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
-import type { CategoriesTreeHierarchyConfiguration } from "../CategoriesTreeDefinition.js";
+import type { RequiredCategoriesTreeHierarchyConfiguration } from "../CategoriesTreeDefinition.js";
 import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
 
 /** @internal */
@@ -30,7 +30,7 @@ export function useSearchPaths({
   searchText,
   searchLimit,
   viewType,
-  hierarchyConfiguration,
+  hierarchyConfig,
   idsCache,
   onCategoriesFiltered,
   onSearchPathsChanged,
@@ -39,7 +39,7 @@ export function useSearchPaths({
   viewType: "2d" | "3d";
   searchText?: string;
   searchLimit?: number | "unbounded";
-  hierarchyConfiguration: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
   idsCache: CategoriesTreeIdsCache;
   onCategoriesFiltered?: (categories: { categories: CategoryInfo[] | undefined; models?: Array<ModelId> }) => void;
   onSearchPathsChanged: (paths: HierarchySearchTree[] | undefined) => void;
@@ -78,7 +78,7 @@ export function useSearchPaths({
           label: searchText,
           viewType,
           idsCache,
-          hierarchyConfig: hierarchyConfiguration,
+          hierarchyConfig,
           componentId,
           limit: searchLimit,
         });
@@ -89,7 +89,9 @@ export function useSearchPaths({
         const paths = builder.getTree();
         onSearchPathsChanged(paths);
         const { elementClass, modelClass } = getClassesByView(viewType);
-        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, idsCache, elementClass, modelClass, hierarchyConfiguration));
+        onCategoriesFiltered?.(
+          await getCategoriesFromPaths({ trees: paths, idsCache, elementClassName: elementClass, modelsClassName: modelClass, hierarchyConfig }),
+        );
         return paths;
       } catch (e) {
         const newError = e instanceof SearchLimitExceededError ? "tooManySearchMatches" : "unknownSearchError";
@@ -101,7 +103,7 @@ export function useSearchPaths({
         return [];
       }
     };
-  }, [onCategoriesFiltered, searchText, searchLimit, onSearchPathsChanged, onFeatureUsed, viewType, idsCache, hierarchyConfiguration, componentId]);
+  }, [onCategoriesFiltered, searchText, searchLimit, onSearchPathsChanged, onFeatureUsed, viewType, idsCache, hierarchyConfig, componentId]);
 
   return {
     getPaths: getSearchPaths,
@@ -109,13 +111,14 @@ export function useSearchPaths({
   };
 }
 
-async function getCategoriesFromPaths(
-  trees: HierarchySearchTree[] | undefined,
-  idsCache: CategoriesTreeIdsCache,
-  elementClassName: string,
-  modelsClassName: string,
-  hierarchyConfig: CategoriesTreeHierarchyConfiguration,
-): Promise<{ categories: CategoryInfo[] | undefined; models?: Array<ModelId> }> {
+async function getCategoriesFromPaths(props: {
+  trees: HierarchySearchTree[] | undefined;
+  idsCache: CategoriesTreeIdsCache;
+  elementClassName: string;
+  modelsClassName: string;
+  hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
+}): Promise<{ categories: CategoryInfo[] | undefined; models?: Array<ModelId> }> {
+  const { trees, idsCache, elementClassName, modelsClassName, hierarchyConfig } = props;
   if (!trees) {
     return { categories: undefined };
   }
@@ -146,7 +149,7 @@ async function getCategoriesFromPaths(
     if (identifier.className === CLASS_NAME_DefinitionContainer) {
       await toVoidPromise(
         idsCache.getAllContainedCategories({ definitionContainerIds: identifier.id }).pipe(
-          hierarchyConfig.showEmptyCategories ? identity : filter(({ hasElements }) => hasElements),
+          hierarchyConfig.categories.withoutElements === "include" ? identity : filter(({ hasElements }) => hasElements),
           tap(({ id }) => {
             if (!categories.has(id)) {
               categories.set(id, []);

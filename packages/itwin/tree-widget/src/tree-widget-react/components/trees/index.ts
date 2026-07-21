@@ -4,12 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 export { ModelsTreeComponent } from "./models-tree/ModelsTreeComponent.js";
-export { useModelsTree, ModelsTreeIcon } from "./models-tree/UseModelsTree.js";
+export { useModelsTree } from "./models-tree/UseModelsTree.js";
+export { ModelsTreeIcon } from "./models-tree/ModelsTreeIcon.js";
 export { useModelsTreeButtonProps } from "./models-tree/ModelsTreeButtons.js";
 export { ModelsTreeNode } from "./models-tree/ModelsTreeNode.js";
 
 export { CategoriesTreeComponent } from "./categories-tree/CategoriesTreeComponent.js";
-export { useCategoriesTree, CategoriesTreeIcon } from "./categories-tree/UseCategoriesTree.js";
+export { useCategoriesTree } from "./categories-tree/UseCategoriesTree.js";
+export { CategoriesTreeIcon } from "./categories-tree/CategoriesTreeIcon.js";
 export { useCategoriesTreeButtonProps } from "./categories-tree/CategoriesTreeButtons.js";
 export { CategoriesTreeNode } from "./categories-tree/CategoriesTreeNode.js";
 

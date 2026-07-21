@@ -118,10 +118,18 @@ type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) =
 
 // @beta
 interface CategoriesTreeHierarchyConfiguration {
-    excludedElementClassNames?: Array<EC.FullClassName>;
-    hideSubCategories: boolean;
-    showElements: boolean;
-    showEmptyCategories: boolean;
+    categories?: {
+        withoutElements?: "include" | "exclude";
+    };
+    elements?: {
+        nodes?: "exclude";
+    } | {
+        nodes: "include";
+        excludedClasses?: EC.FullClassNameDotNotation[];
+    };
+    subCategories?: {
+        nodes?: "include" | "exclude";
+    };
 }
 
 // @beta (undocumented)
@@ -171,6 +179,7 @@ export namespace CategoriesTreeNode {
             categoryId: Id64String;
         };
     };
+    const getType: (node: HierarchyNode_2) => "definition-container" | "category" | "element" | "sub-category" | "model" | "elements-class-group" | undefined;
 }
 
 // @beta (undocumented)
@@ -214,7 +223,9 @@ interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProp
 
 // @alpha (undocumented)
 interface ClassificationsTreeHierarchyConfiguration {
-    excludedElementClassNames?: Array<EC.FullClassName>;
+    elements?: {
+        excludedClasses?: EC.FullClassNameDotNotation[];
+    };
     rootClassificationSystemCode: string;
 }
 
@@ -239,6 +250,7 @@ export namespace ClassificationsTreeNode {
             categoryId: Id64String;
         };
     };
+    const getType: (node: HierarchyNode_2) => "classification-table" | "classification" | "element" | undefined;
 }
 
 // @alpha (undocumented)
@@ -255,7 +267,7 @@ interface ClassificationsTreeVisibilityHandlerConfiguration {
 
 // @alpha
 interface ClassificationToCategoriesRelationshipSpecification {
-    fullClassName: string;
+    fullClassName: EC.FullClassNameDotNotation;
     source: "classification" | "category";
 }
 
@@ -447,12 +459,18 @@ type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => ReactE
 
 // @beta
 interface ModelsTreeHierarchyConfiguration {
-    elementClassGrouping: "enable" | "enableWithCounts" | "disable";
-    elementClassSpecification: EC.FullClassName;
-    excludedElementClassNames?: Array<EC.FullClassName>;
-    hideRootSubject: boolean;
-    hierarchyLevelFiltering: "enable" | "disable";
-    showEmptyModels: boolean;
+    elements?: {
+        baseClass?: EC.FullClassNameDotNotation;
+        excludedClasses?: EC.FullClassNameDotNotation[];
+        classGrouping?: "enable" | "enable-with-counts" | "disable";
+    };
+    hierarchyLevelFiltering?: "enable" | "disable";
+    models?: {
+        withoutElements?: "include" | "exclude";
+    };
+    subjects?: {
+        root?: "include" | "exclude";
+    };
 }
 
 // @beta (undocumented)
@@ -491,7 +509,7 @@ export namespace ModelsTreeNode {
             categoryId: Id64String;
         };
     };
-    const getType: (node: HierarchyNode_2) => "subject" | "model" | "category" | "element" | "elements-class-group";
+    const getType: (node: HierarchyNode_2) => "subject" | "model" | "category" | "element" | "elements-class-group" | undefined;
 }
 
 // @beta (undocumented)
@@ -740,7 +758,7 @@ interface UseCategoriesTreeProps {
     // (undocumented)
     getTreeItemProps?: ExtendedVisibilityTreeRendererProps["getTreeItemProps"];
     // (undocumented)
-    hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
+    hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
     // (undocumented)
     onCategoriesFiltered?: (props: {
         categories: CategoryInfo[] | undefined;
@@ -849,7 +867,7 @@ interface UseModelsTreeProps {
     // (undocumented)
     getTreeItemProps?: ExtendedVisibilityTreeRendererProps["getTreeItemProps"];
     // (undocumented)
-    hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
+    hierarchyConfig?: ModelsTreeHierarchyConfiguration;
     // (undocumented)
     onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
     searchLimit?: number | "unbounded";

@@ -21,7 +21,7 @@ import type { SearchResultsTree } from "../../../common/internal/visibility/Base
 import type { TreeSpecificVisibilityHandler } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
-import type { CategoriesTreeHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
+import type { RequiredCategoriesTreeHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
 import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
 import type { CategoriesTreeSearchTargets } from "./SearchResultsTree.js";
 
@@ -30,7 +30,7 @@ export interface CategoriesTreeVisibilityHandlerProps {
   idsCache: CategoriesTreeIdsCache;
   viewport: TreeWidgetViewport;
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfoCache;
-  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
 }
 
 /**
@@ -321,19 +321,20 @@ export function createCategoriesTreeVisibilityHandler(props: {
   idsCache: CategoriesTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
   searchPaths?: HierarchySearchTree[];
-  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+  hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
 }) {
+  const { idsCache, imodelAccess, searchPaths, hierarchyConfig } = props;
   return new HierarchyVisibilityHandlerImpl<CategoriesTreeSearchTargets>({
     cancelChangesInProgress: new Subject<void>(),
     getSearchResultsTree: (): undefined | Promise<SearchResultsTree<CategoriesTreeSearchTargets>> => {
-      if (!props.searchPaths) {
+      if (!searchPaths) {
         return undefined;
       }
       const { categoryClass, elementClass, modelClass } = getClassesByView(props.viewport.viewType === "2d" ? "2d" : "3d");
       return createCategoriesSearchResultsTree({
-        idsCache: props.idsCache,
-        searchPaths: props.searchPaths,
-        imodelAccess: props.imodelAccess,
+        idsCache,
+        searchPaths,
+        imodelAccess,
         categoryClassName: categoryClass,
         categoryElementClassName: elementClass,
         categoryModelClassName: modelClass,
@@ -342,9 +343,9 @@ export function createCategoriesTreeVisibilityHandler(props: {
     getTreeSpecificVisibilityHandler: ({ info, viewport }) => {
       return new CategoriesTreeVisibilityHandler({
         alwaysAndNeverDrawnElementInfo: info,
-        idsCache: props.idsCache,
+        idsCache,
         viewport,
-        hierarchyConfig: props.hierarchyConfig,
+        hierarchyConfig,
       });
     },
     viewport: props.viewport,

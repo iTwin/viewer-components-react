@@ -40,18 +40,6 @@ export function setDifference<T>(lhs: ReadonlySet<T>, rhs: ReadonlySet<T>): Set<
 }
 
 /** @internal */
-export function setIntersection<T>(lhs: ReadonlySet<T>, rhs: ReadonlySet<T>): Set<T> {
-  const result = new Set<T>();
-  const { smallerSet, largerSet } = lhs.size < rhs.size ? { smallerSet: lhs, largerSet: rhs } : { smallerSet: rhs, largerSet: lhs };
-  for (const x of smallerSet) {
-    if (largerSet.has(x)) {
-      result.add(x);
-    }
-  }
-  return result;
-}
-
-/** @internal */
 export function countInSet(ids: Id64Arg, set: ReadonlySet<Id64String> | undefined): number {
   if (!set?.size) {
     return 0;
@@ -97,7 +85,7 @@ export function createExcludedClassesClause({
   excludedClassNames,
 }: {
   alias: string;
-  excludedClassNames: ReadonlyArray<EC.FullClassName> | undefined;
+  excludedClassNames: ReadonlyArray<EC.FullClassNameDotNotation> | undefined;
 }): string {
   if (!excludedClassNames || excludedClassNames.length === 0) {
     return "";
@@ -123,12 +111,6 @@ export function parseIdsSelectorResult(selectorResult: any): Id64Array {
     return [];
   }
   return selectorResult.reduce((arr, ids: Id64String | Id64String[]) => [...arr, ...(Array.isArray(ids) ? ids : [ids])], new Array<Id64String>());
-}
-
-/** @internal */
-export function pushToMap<TKey, TValue>(targetMap: Map<TKey, Set<TValue>>, key: TKey, value: TValue) {
-  const set = getOrCreate({ map: targetMap, key, createFunc: () => new Set<TValue>() });
-  set.add(value);
 }
 
 /** @internal */
@@ -331,4 +313,85 @@ export function getId64Array(ids: Id64Arg): Id64Array {
 /** @internal */
 export function getId64Spreadable(ids: Id64Arg): Id64Array | Id64Set {
   return typeof ids === "string" ? [ids] : ids;
+}
+
+/**
+ * Recursively merges overrides into defaults, ignoring properties whose value is `undefined`.
+ *
+ * @internal
+ */
+export function mergeWithDefaults<T extends object>({ defaults, overrides }: { defaults: DeepRequired<T>; overrides?: DeepOptional<T> }): DeepRequired<T> {
+  return mergeObjects({ defaults: defaults as Record<string, unknown>, overrides: overrides as Record<string, unknown> | undefined }) as DeepRequired<T>;
+}
+
+function mergeObjects({ defaults, overrides }: { defaults: Record<string, unknown>; overrides: Record<string, unknown> | undefined }): Record<string, unknown> {
+  const result = { ...defaults };
+  if (!overrides) {
+    return result;
+  }
+
+  for (const [key, override] of Object.entries(overrides)) {
+    if (override === undefined) {
+      continue;
+    }
+
+    const defaultValue = defaults[key];
+    result[key] = isMergeableObject(defaultValue) && isMergeableObject(override) ? mergeObjects({ defaults: defaultValue, overrides: override }) : override;
+  }
+  return result;
+}
+
+function isMergeableObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Recursively marks all properties as required with no depth limit.
+ * @internal
+ */
+export type DeepRequired<T> = T extends (...args: any[]) => any
+  ? T
+  : T extends Array<infer U>
+    ? Array<DeepRequired<U>>
+    : T extends object
+      ? { [K in keyof T]-?: DeepRequired<Exclude<T[K], undefined>> }
+      : T;
+
+/**
+ * Recursively marks all properties as optional with no depth limit.
+ */
+type DeepOptional<T> = T extends (...args: any[]) => any
+  ? T
+  : T extends Array<infer U>
+    ? Array<DeepOptional<U>>
+    : T extends object
+      ? { [K in keyof T]?: DeepOptional<T[K]> | undefined }
+      : T;
+
+/** @internal */
+export function stableStringify(value: unknown): string {
+  if (value === undefined) {
+    return "undefined";
+  }
+  if (value === null || typeof value === "string" || typeof value === "boolean" || typeof value === "number") {
+    return JSON.stringify(value);
+  }
+  if (Array.isArray(value)) {
+    return `[${value.map((entry) => stableStringify(entry)).join(",")}]`;
+  }
+  if (typeof value !== "object") {
+    return "";
+  }
+  const entries = Object.keys(value)
+    .sort()
+    .map((key) => {
+      const entry = (value as Record<string, unknown>)[key];
+      if (entry === undefined) {
+        return undefined;
+      }
+      return `${JSON.stringify(key)}:${stableStringify(entry)}`;
+    })
+    .filter((entry): entry is string => !!entry);
+
+  return `{${entries.join(",")}}`;
 }

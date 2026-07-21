@@ -4,32 +4,28 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Icon } from "@stratakit/foundations";
-import icon2d from "@stratakit/icons/2d.svg";
 import icon3d from "@stratakit/icons/3d.svg";
 import iconBisDefinitionsContainer from "@stratakit/icons/bis-definitions-container.svg";
-import iconBisElement from "@stratakit/icons/bis-element.svg";
+import { ClassificationsTreeNode } from "./ClassificationsTreeNode.js";
 
 import type { TreeNode } from "@itwin/presentation-hierarchies-react";
 
 /** @beta */
 export function ClassificationsTreeIcon({ node }: { node: TreeNode }) {
-  if (node.nodeData.extendedData?.type === undefined) {
+  const nodeType = ClassificationsTreeNode.getType(node.nodeData);
+  if (nodeType === undefined) {
     return undefined;
   }
 
   const getIcon = () => {
     // FIXME: icons...
-    switch (node.nodeData.extendedData!.type) {
-      case "ClassificationTable":
+    switch (nodeType) {
+      case "classification-table":
         return iconBisDefinitionsContainer;
-      case "Classification":
+      case "classification":
         return iconBisDefinitionsContainer;
-      case "GeometricElement3d":
+      case "element":
         return icon3d;
-      case "GeometricElement2d":
-        return icon2d;
-      default:
-        return iconBisElement;
     }
   };
 

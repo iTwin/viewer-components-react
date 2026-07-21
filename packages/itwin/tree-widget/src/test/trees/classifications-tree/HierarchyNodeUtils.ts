@@ -28,7 +28,7 @@ export function createClassificationTableHierarchyNode({
     parentKeys: [],
     children: !!hasChildren,
     extendedData: {
-      type: "ClassificationTable",
+      type: "classification-table",
     },
     search,
   };
@@ -54,7 +54,7 @@ export function createClassificationHierarchyNode({
     parentKeys: parentKeys ? parentKeys.map((key) => ({ type: "instances", instanceKeys: [key] })) : [],
     children: !!hasChildren,
     extendedData: {
-      type: "Classification",
+      type: "classification",
     },
     search,
   };
@@ -84,40 +84,10 @@ export function createPhysicalElementHierarchyNode({
     label: "",
     children: false,
     extendedData: {
-      type: "GeometricElement3d",
+      type: "element",
       modelId,
       categoryId,
       parentElementsPath: parentElementsPath ?? [],
-    },
-    search,
-  };
-}
-
-export function createDrawingElementHierarchyNode({
-  id,
-  modelId,
-  categoryId,
-  search,
-  parentKeys,
-}: {
-  id: Id64String;
-  modelId: Id64String;
-  categoryId: Id64String;
-  search?: NonGroupingHierarchyNode["search"];
-  parentKeys?: InstanceKey[];
-}): NonGroupingHierarchyNode {
-  return {
-    key: {
-      type: "instances",
-      instanceKeys: [{ className: "BisCore.DrawingGraphic", id }],
-    },
-    parentKeys: parentKeys ? parentKeys.map((key) => ({ type: "instances", instanceKeys: [key] })) : [],
-    label: "",
-    children: false,
-    extendedData: {
-      type: "GeometricElement2d",
-      modelId,
-      categoryId,
     },
     search,
   };

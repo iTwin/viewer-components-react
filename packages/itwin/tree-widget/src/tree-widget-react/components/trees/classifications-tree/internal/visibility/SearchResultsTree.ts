@@ -247,7 +247,7 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
     };
   }
 
-  public async getType(className: EC.FullClassName): Promise<RawNode["type"]> {
+  public async getType(className: EC.FullClassNameDotNotation): Promise<RawNode["type"]> {
     if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_ClassificationTable)) {
       return "classificationTable";
     }

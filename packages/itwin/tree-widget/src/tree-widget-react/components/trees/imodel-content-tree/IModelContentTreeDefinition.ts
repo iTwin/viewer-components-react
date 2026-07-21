@@ -645,9 +645,12 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
   }
 }
 
-function getElementsSelectProps(props?: { modelClass?: EC.FullClassName; elementClass?: "BisCore.GeometricElement3d" | "BisCore.GeometricElement2d" }) {
-  const modelClassFullName: EC.FullClassName = props?.modelClass ?? CLASS_NAME_Model;
-  const elementClassFullName: EC.FullClassName = props?.elementClass ?? CLASS_NAME_Element;
+function getElementsSelectProps(props?: {
+  modelClass?: EC.FullClassNameDotNotation;
+  elementClass?: "BisCore.GeometricElement3d" | "BisCore.GeometricElement2d";
+}) {
+  const modelClassFullName: EC.FullClassNameDotNotation = props?.modelClass ?? CLASS_NAME_Model;
+  const elementClassFullName: EC.FullClassNameDotNotation = props?.elementClass ?? CLASS_NAME_Element;
   const result = [
     {
       classFullName: elementClassFullName,
