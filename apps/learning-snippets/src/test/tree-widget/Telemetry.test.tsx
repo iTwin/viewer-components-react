@@ -11,7 +11,14 @@ import { UiFramework } from "@itwin/appui-react";
 import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryCustomTreeExampleImports
-import { createTreeWidgetViewport, SharedTreeContextProvider, TelemetryContextProvider, useCategoriesTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+import {
+  createTreeWidgetViewport,
+  SharedTreeContextProvider,
+  TelemetryContextProvider,
+  useCategoriesTree,
+  VisibilityTree,
+  VisibilityTreeRenderer,
+} from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 
 import { useMemo } from "react";

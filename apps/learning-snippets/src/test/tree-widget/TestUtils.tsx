@@ -42,7 +42,6 @@ function customRender(ui: ReactElement, options?: Omit<RenderOptions, "wrapper">
 export * from "@testing-library/react";
 export { customRender as render };
 
-
 export class TreeWidgetTestUtils {
   private static _initialized = false;
 

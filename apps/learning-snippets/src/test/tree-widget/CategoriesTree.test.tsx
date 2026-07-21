@@ -12,7 +12,15 @@ import { IModelApp } from "@itwin/core-frontend";
 import { CategoriesTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ TreeWidget.CustomCategoriesTreeExampleImports
-import { createTreeWidgetViewport, SelectableTree, SharedTreeContextProvider, useCategoriesTree, useCategoriesTreeButtonProps, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+import {
+  createTreeWidgetViewport,
+  SelectableTree,
+  SharedTreeContextProvider,
+  useCategoriesTree,
+  useCategoriesTreeButtonProps,
+  VisibilityTree,
+  VisibilityTreeRenderer,
+} from "@itwin/tree-widget-react";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { ComponentPropsWithoutRef } from "react";

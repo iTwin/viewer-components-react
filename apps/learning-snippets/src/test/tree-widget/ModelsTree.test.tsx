@@ -13,7 +13,15 @@ import { ModelsTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ TreeWidget.CustomModelsTreeExampleImports
 import { useCallback, useMemo } from "react";
-import { createTreeWidgetViewport, SelectableTree, SharedTreeContextProvider, useModelsTree, useModelsTreeButtonProps, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+import {
+  createTreeWidgetViewport,
+  SelectableTree,
+  SharedTreeContextProvider,
+  useModelsTree,
+  useModelsTreeButtonProps,
+  VisibilityTree,
+  VisibilityTreeRenderer,
+} from "@itwin/tree-widget-react";
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { ComponentPropsWithoutRef } from "react";
