@@ -174,7 +174,7 @@ export function createSubjectHierarchyNode(props?: { ids?: Id64Arg; parentKeys?:
     label: "",
     parentKeys: props?.parentKeys ? props.parentKeys.map((parentKey) => ({ type: "instances", instanceKeys: [parentKey] })) : [],
     extendedData: {
-      isSubject: true,
+      type: "subject",
     },
   };
 }
@@ -183,18 +183,19 @@ export function createModelHierarchyNode(props?: {
   hasChildren?: boolean;
   parentKeys?: InstanceKey[];
   search?: NonGroupingHierarchyNode["search"];
+  className?: EC.FullClassNameDotNotation;
 }): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: CLASS_NAME_Model, id: props?.modelId ?? "" }],
+      instanceKeys: [{ className: props?.className ?? CLASS_NAME_Model, id: props?.modelId ?? "" }],
     },
     children: !!props?.hasChildren,
     label: "",
     parentKeys: props?.parentKeys ? props.parentKeys.map((parentKey) => ({ type: "instances", instanceKeys: [parentKey] })) : [],
     search: props?.search,
     extendedData: {
-      isModel: true,
+      type: "model",
       modelId: props?.modelId ?? "0x1",
     },
   };
@@ -227,7 +228,7 @@ export function createCategoryHierarchyNode({
     parentKeys: parentKeys ? parentKeys.map((parentKey) => ("type" in parentKey ? parentKey : { type: "instances", instanceKeys: [parentKey] })) : [],
     search,
     extendedData: {
-      isCategory: true,
+      type: "category",
       modelIds: [modelId ?? "0x1"],
       parentElementsPath: parentElementsPath ?? [],
     },
@@ -241,11 +242,12 @@ export function createElementHierarchyNode(props: {
   parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   search?: NonGroupingHierarchyNode["search"];
   parentElementsPath?: ParentElementsPath;
+  className?: EC.FullClassNameDotNotation;
 }): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: CLASS_NAME_GeometricElement3d, id: props.elementId ?? "" }],
+      instanceKeys: [{ className: props.className ?? CLASS_NAME_GeometricElement3d, id: props.elementId ?? "" }],
     },
     children: !!props.hasChildren,
     label: "",
@@ -254,7 +256,7 @@ export function createElementHierarchyNode(props: {
       ? props.parentKeys.map((parentKey) => ("type" in parentKey ? parentKey : { type: "instances", instanceKeys: [parentKey] }))
       : [],
     extendedData: {
-      isElement: true,
+      type: "element",
       modelId: props.modelId,
       categoryId: props.categoryId,
       parentElementsPath: props.parentElementsPath ?? [],

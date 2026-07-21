@@ -347,9 +347,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         childrenWhichAreParents,
         ...(hasDirectNonSearchTargets ? { hasDirectNonSearchTargets } : {}),
         ...(hasSearchTargetAncestor ? { hasSearchTargetAncestor } : {}),
-        // `imageId` is assigned to instance nodes at query time, but grouping ones need to
-        // be handled during post-processing
-        imageId: "icon-ec-class",
       },
     };
   };
@@ -423,8 +420,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 },
                 grouping: { byLabel: { action: "merge", groupId: "subject" } },
                 extendedData: {
-                  imageId: { selector: `IIF(this.ECInstanceId = ${IModel.rootSubjectId}, 'icon-imodel-hollow-2', 'icon-folder')` },
-                  isSubject: true,
+                  isRootSubject: { selector: `IIF(this.ECInstanceId = ${IModel.rootSubjectId}, true, false)` },
+                  type: "subject",
                 },
                 autoExpand: { selector: `IIF(this.ECInstanceId = ${IModel.rootSubjectId}, true, false)` },
                 supportsFiltering: this.supportsFiltering(),
@@ -491,8 +488,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                         }
                       : true,
                   extendedData: {
-                    imageId: "icon-model",
-                    isModel: true,
+                    type: "model",
                   },
                   supportsFiltering: this.supportsFiltering(),
                 })}
@@ -532,7 +528,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 hideNodeInHierarchy: true,
                 hasChildren: true,
                 extendedData: {
-                  isModel: true,
+                  type: "model",
                   modeledElementCategory: { selector: `IdToHex(${parentNode.extendedData.categoryId})` },
                 },
               })}
@@ -696,10 +692,9 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         `,
       },
       extendedData: {
-        isElement: true,
+        type: "element",
         modelId: { selector: "IdToHex(this.Model.Id)" },
         categoryId: { selector: "IdToHex(this.Category.Id)" },
-        imageId: "icon-item",
       },
       supportsFiltering: this.supportsFiltering(),
     });
@@ -730,8 +725,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       grouping: { byLabel: { action: "merge", groupId: "category" } },
       hasChildren: true,
       extendedData: {
-        imageId: "icon-layers",
-        isCategory: true,
+        type: "category",
         ...extendedData,
       },
       supportsFiltering: this.supportsFiltering(),

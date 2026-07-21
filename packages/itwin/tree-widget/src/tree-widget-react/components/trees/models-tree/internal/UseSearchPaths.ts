@@ -12,6 +12,7 @@ import { SearchLimitExceededError } from "../../common/TreeErrors.js";
 import { useTelemetryContext } from "../../common/UseTelemetryContext.js";
 import { joinHierarchySearchTrees } from "../../common/Utils.js";
 import { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
+import { ModelsTreeNode } from "../ModelsTreeNode.js";
 
 import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
@@ -303,9 +304,11 @@ async function collectFocusedItems(loadFocusedItems: () => AsyncIterableIterator
     }
 
     const parentKey = groupingNode.nonGroupingAncestor.key;
-    const type = groupingNode.nonGroupingAncestor.extendedData?.isCategory ? "category" : "element";
-    const modelIds = ((groupingNode.nonGroupingAncestor.extendedData?.modelIds as Id64String[][]) ?? []).flatMap((ids) => ids);
-    groupingNodeInfos.push({ groupingNode, parentType: type, parentKey, modelIds });
+    if (ModelsTreeNode.isCategoryNode(groupingNode.nonGroupingAncestor)) {
+      groupingNodeInfos.push({ groupingNode, parentType: "category", parentKey, modelIds: groupingNode.nonGroupingAncestor.extendedData.modelIds });
+      continue;
+    }
+    groupingNodeInfos.push({ groupingNode, parentType: "element", parentKey, modelIds: [] });
   }
   focusedItems.push(
     ...groupingNodeInfos.map(({ parentKey, parentType, groupingNode, modelIds }) => ({

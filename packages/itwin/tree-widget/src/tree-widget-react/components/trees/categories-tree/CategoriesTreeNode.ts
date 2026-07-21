@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { HierarchyNode } from "@itwin/presentation-hierarchies";
+import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, GroupingHierarchyNode, InstancesNodeKey, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
@@ -15,7 +15,7 @@ import type { ClassGroupingNodeKey, GroupingHierarchyNode, InstancesNodeKey, Non
 export namespace CategoriesTreeNode {
   /** Checks if the given node represents a `BisCore.DefinitionContainer` element. */
   export const isDefinitionContainerNode = (node: Pick<HierarchyNode, "extendedData">): node is NonGroupingHierarchyNode & { key: InstancesNodeKey } =>
-    !!node.extendedData && "isDefinitionContainer" in node.extendedData && !!node.extendedData.isDefinitionContainer;
+    node.extendedData?.type === "definition-container";
 
   /**
    * Checks if the given node represents a `BisCore.Category` element.
@@ -33,11 +33,11 @@ export namespace CategoriesTreeNode {
       hasSubCategories?: boolean;
       modelIds: Id64Array;
     };
-  } => !!node.extendedData && "isCategory" in node.extendedData && !!node.extendedData.isCategory;
+  } => node.extendedData?.type === "category";
 
   /** Checks if the given node represents a `BisCore.Model`. */
   export const isModelNode = (node: Pick<HierarchyNode, "extendedData">): node is NonGroupingHierarchyNode & { key: InstancesNodeKey } =>
-    !!node.extendedData && "isModel" in node.extendedData && !!node.extendedData.isModel;
+    node.extendedData?.type === "model";
 
   /**
    * Checks if the given node represents a `BisCore.GeometricElement` element.
@@ -53,7 +53,7 @@ export namespace CategoriesTreeNode {
       modelId: Id64String;
       categoryId: Id64String;
     };
-  } => !!node.extendedData && "isElement" in node.extendedData && !!node.extendedData.isElement;
+  } => node.extendedData?.type === "element";
 
   /**
    * Checks if the given node is a class grouping node of `BisCore.GeometricElement` nodes.
@@ -83,5 +83,30 @@ export namespace CategoriesTreeNode {
     extendedData: {
       categoryId: Id64String;
     };
-  } => !!node.extendedData && "isSubCategory" in node.extendedData && !!node.extendedData.isSubCategory;
+  } => node.extendedData?.type === "sub-category";
+
+  /** Returns type of the node. */
+  export const getType = (
+    node: HierarchyNode,
+  ): "definition-container" | "category" | "element" | "sub-category" | "model" | "elements-class-group" | undefined => {
+    if (HierarchyNodeKey.isClassGrouping(node.key)) {
+      return "elements-class-group";
+    }
+    if (isCategoryNode(node)) {
+      return "category";
+    }
+    if (isDefinitionContainerNode(node)) {
+      return "definition-container";
+    }
+    if (isSubCategoryNode(node)) {
+      return "sub-category";
+    }
+    if (isElementNode(node)) {
+      return "element";
+    }
+    if (isModelNode(node)) {
+      return "model";
+    }
+    return undefined;
+  };
 }

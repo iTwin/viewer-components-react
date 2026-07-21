@@ -335,7 +335,7 @@ export function createCategoryHierarchyNode(categoryId: Id64String, modelId: Id6
     label: "",
     parentKeys: [],
     extendedData: {
-      isCategory: true,
+      type: "category",
       modelIds: [modelId],
       parentElementsPath: [],
     },
@@ -351,7 +351,7 @@ export function createModelHierarchyNode(modelId?: Id64String, hasChildren?: boo
     label: "",
     parentKeys: [],
     extendedData: {
-      isModel: true,
+      type: "model",
       modelId: modelId ?? "0x1",
     },
   };
@@ -372,7 +372,7 @@ export function createElementHierarchyNode(props: {
     label: "",
     parentKeys: [],
     extendedData: {
-      isElement: true,
+      type: "element",
       modelId: props.modelId,
       categoryId: props.categoryId,
       parentElementsPath: [],
@@ -390,7 +390,7 @@ export function createDefinitionContainerHierarchyNode(definitionContainerId: Id
     label: "",
     parentKeys: [],
     extendedData: {
-      isDefinitionContainer: true,
+      type: "definition-container",
     },
   };
 }
@@ -405,7 +405,7 @@ export function createClassificationTableHierarchyNode(classificationTableId: Id
     label: "",
     parentKeys: [],
     extendedData: {
-      type: "ClassificationTable",
+      type: "classification-table",
     },
   };
 }
