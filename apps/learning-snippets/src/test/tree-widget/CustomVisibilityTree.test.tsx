@@ -9,8 +9,7 @@ import { UiFramework } from "@itwin/appui-react";
 // __PUBLISH_EXTRACT_START__ TreeWidget.CustomVisibilityTreeExampleImports
 import { BeEvent } from "@itwin/core-bentley";
 import { VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
-import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
-import { createBisInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
+import { createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import type { ComponentPropsWithoutRef } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_END__
@@ -58,23 +57,21 @@ describe("Tree widget", () => {
         const getHierarchyDefinition: VisibilityTreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
           // create a hierarchy definition that defines what should be shown in the tree
           // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/learning/imodel/HierarchyDefinition.md
-          const labelsQueryFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: imodelAccess });
-          const nodesQueryFactory = createNodesQueryClauseFactory({ imodelAccess, instanceLabelSelectClauseFactory: labelsQueryFactory });
           return createPredicateBasedHierarchyDefinition({
             classHierarchyInspector: imodelAccess,
             hierarchy: {
               // For root nodes, select all BisCore.GeometricModel3d instances
-              rootNodes: async () => [
+              rootNodes: async ({ nodeSelectClauseFactory, instanceLabelSelectClauseFactory }) => [
                 {
                   fullClassName: "BisCore.GeometricModel3d",
                   query: {
                     ecsql: `
                       SELECT
-                        ${await nodesQueryFactory.createSelectClause({
+                        ${await nodeSelectClauseFactory.createSelectClause({
                           ecClassId: { selector: "this.ECClassId" },
                           ecInstanceId: { selector: "this.ECInstanceId" },
                           nodeLabel: {
-                            selector: await labelsQueryFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
+                            selector: await instanceLabelSelectClauseFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
                           },
                         })}
                       FROM BisCore.GeometricModel3d this
