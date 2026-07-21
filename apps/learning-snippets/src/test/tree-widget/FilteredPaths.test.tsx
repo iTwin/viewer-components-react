@@ -6,7 +6,7 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { useCallback, useMemo } from "react";
 import { UiFramework } from "@itwin/appui-react";
-import { IModel, QueryRowFormat } from "@itwin/core-common";
+import { IModel, QueryBinder, QueryRowFormat } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 import { createTreeWidgetViewport, SharedTreeContextProvider, useModelsTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 import { createStorage } from "@itwin/unified-selection";
@@ -147,9 +147,9 @@ function CustomModelsTreeComponentWithFilterAndTargetItems({
               AND json_extract(e.JsonProperties, '$.PhysicalPartition.Model.Content') IS NULL
               AND json_extract(e.JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NULL
           )
-          WHERE Label LIKE '%${searchText.replaceAll(/[%_\\]/g, "\\$&")}%' ESCAPE '\\'
+          WHERE Label LIKE '%' || ? || '%' ESCAPE '\\'
         `,
-        undefined,
+        QueryBinder.from([searchText.replace(/[%_\\]/g, "\\$&")]),
         { rowFormat: QueryRowFormat.UseJsPropertyNames },
       )) {
         targetItems.push({ id: row.Id, className: row.ClassName });
@@ -180,7 +180,7 @@ describe("Tree widget", () => {
   mockGetBoundingClientRect();
   describe("Learning snippets", () => {
     describe("Components", () => {
-      describe("Filtered paths", () => {
+      describe("Search paths", () => {
         beforeAll(async () => {
           await initializeLearningSnippetsTests();
           await TreeWidgetTestUtils.initialize();
@@ -191,7 +191,7 @@ describe("Tree widget", () => {
           TreeWidgetTestUtils.terminate();
         });
 
-        it("renders custom models tree component with filtered paths using targetItems", async () => {
+        it("renders custom models tree component with search paths using targetItems", async () => {
           const { imodelConnection, ...keys } = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
               const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });

@@ -76,7 +76,7 @@ describe("Tree widget", () => {
           TreeWidgetTestUtils.terminate();
         });
 
-        it("renders custom models tree component with filtered paths using targetItems", async () => {
+        it("renders custom models tree component with sub-tree paths using targetItems", async () => {
           const { imodelConnection, ...keys } = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
               const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });

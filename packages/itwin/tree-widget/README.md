@@ -402,9 +402,9 @@ Use `getSearchPaths` when you need more control over filtering behaviour. Here a
                 AND json_extract(e.JsonProperties, '$.PhysicalPartition.Model.Content') IS NULL
                 AND json_extract(e.JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NULL
             )
-            WHERE Label LIKE '%${searchText.replaceAll(/[%_\\]/g, "\\$&")}%' ESCAPE '\\'
+            WHERE Label LIKE '%' || ? || '%' ESCAPE '\\'
           `,
-          undefined,
+          QueryBinder.from([searchText.replace(/[%_\\]/g, "\\$&")]),
           { rowFormat: QueryRowFormat.UseJsPropertyNames },
         )) {
           targetItems.push({ id: row.Id, className: row.ClassName });
