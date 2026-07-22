@@ -67,16 +67,18 @@ describe("Tree widget", () => {
           // __PUBLISH_EXTRACT_START__ TreeWidget.ModelsTreeExample
           function MyWidget() {
             return (
-              <ModelsTreeComponent
-                // label for the tree, used for accessibility purposes
-                treeLabel="Models tree"
-                // see "Creating unified selection storage" section for example implementation
-                selectionStorage={unifiedSelectionStorage}
-                headerButtons={[
-                  (props) => <ModelsTreeComponent.ShowAllButton {...props} key={"ShowAllButton"} />,
-                  (props) => <ModelsTreeComponent.HideAllButton {...props} key={"HideAllButton"} />,
-                ]}
-              />
+              <SharedTreeContextProvider>
+                <ModelsTreeComponent
+                  // label for the tree, used for accessibility purposes
+                  treeLabel="Models tree"
+                  // see "Creating unified selection storage" section for example implementation
+                  selectionStorage={unifiedSelectionStorage}
+                  headerButtons={[
+                    (props) => <ModelsTreeComponent.ShowAllButton {...props} key={"ShowAllButton"} />,
+                    (props) => <ModelsTreeComponent.HideAllButton {...props} key={"HideAllButton"} />,
+                  ]}
+                />
+              </SharedTreeContextProvider>
             );
           }
           // __PUBLISH_EXTRACT_END__
@@ -135,7 +137,7 @@ describe("Tree widget", () => {
             selectionStorage: SelectionStorage;
           }
 
-          function CustomModelsTreeComponent({ imodel, viewport, selectionStorage }: CustomModelsTreeProps) {
+          function CustomModelsTree({ imodel, viewport, selectionStorage }: CustomModelsTreeProps) {
             const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
             const { buttonProps } = useModelsTreeButtonProps({ imodel, viewport: activeView });
             const { treeProps, getTreeItemProps } = useModelsTree({ activeView });
@@ -158,13 +160,19 @@ describe("Tree widget", () => {
               </SelectableTree>
             );
           }
+
+          function CustomModelsTreeComponent(props: CustomModelsTreeProps) {
+            return (
+              <SharedTreeContextProvider>
+                <CustomModelsTree {...props} />
+              </SharedTreeContextProvider>
+            );
+          }
           // __PUBLISH_EXTRACT_END__
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText } = render(
-            <SharedTreeContextProvider>
-              <CustomModelsTreeComponent imodel={imodelConnection} viewport={testViewport} selectionStorage={unifiedSelectionStorage} />
-            </SharedTreeContextProvider>,
+            <CustomModelsTreeComponent imodel={imodelConnection} viewport={testViewport} selectionStorage={unifiedSelectionStorage} />,
           );
           await waitFor(() => {
             getByText("Test subject X");

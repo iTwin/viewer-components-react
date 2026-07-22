@@ -45,11 +45,12 @@ UiItemsManager.register({
           // add the Models tree component delivered with the package
           {
             id: ModelsTreeComponent.id,
+            // use `ModelsTreeComponent.getLabel` to get the localized default label for models tree
             getLabel: ({ standardLabels }) => ModelsTreeComponent.getLabel({ standardLabels }),
-            render: (props) => (
+            render: ({ treeLabel }) => (
               <ModelsTreeComponent
                 // label for the tree, used for accessibility purposes
-                treeLabel="Models tree"
+                treeLabel={treeLabel}
                 // see "Creating unified selection storage" section for example implementation
                 selectionStorage={unifiedSelectionStorage}
               />
@@ -134,16 +135,18 @@ import { ModelsTreeComponent } from "@itwin/tree-widget-react";
 
 function MyWidget() {
   return (
-    <ModelsTreeComponent
-      // label for the tree, used for accessibility purposes
-      treeLabel="Models tree"
-      // see "Creating unified selection storage" section for example implementation
-      selectionStorage={unifiedSelectionStorage}
-      headerButtons={[
-        (props) => <ModelsTreeComponent.ShowAllButton {...props} key={"ShowAllButton"} />,
-        (props) => <ModelsTreeComponent.HideAllButton {...props} key={"HideAllButton"} />,
-      ]}
-    />
+    <SharedTreeContextProvider>
+      <ModelsTreeComponent
+        // label for the tree, used for accessibility purposes
+        treeLabel="Models tree"
+        // see "Creating unified selection storage" section for example implementation
+        selectionStorage={unifiedSelectionStorage}
+        headerButtons={[
+          (props) => <ModelsTreeComponent.ShowAllButton {...props} key={"ShowAllButton"} />,
+          (props) => <ModelsTreeComponent.HideAllButton {...props} key={"HideAllButton"} />,
+        ]}
+      />
+    </SharedTreeContextProvider>
   );
 }
 ```
@@ -216,7 +219,7 @@ interface CustomModelsTreeProps {
   selectionStorage: SelectionStorage;
 }
 
-function CustomModelsTreeComponent({ imodel, viewport, selectionStorage }: CustomModelsTreeProps) {
+function CustomModelsTree({ imodel, viewport, selectionStorage }: CustomModelsTreeProps) {
   const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
   const { buttonProps } = useModelsTreeButtonProps({ imodel, viewport: activeView });
   const { treeProps, getTreeItemProps } = useModelsTree({ activeView });
@@ -235,6 +238,14 @@ function CustomModelsTreeComponent({ imodel, viewport, selectionStorage }: Custo
         treeRenderer={(rendererProps) => <CustomModelsTreeRenderer {...rendererProps} getTreeItemProps={(node) => getTreeItemProps(node, rendererProps)} />}
       />
     </SelectableTree>
+  );
+}
+
+function CustomModelsTreeComponent(props: CustomModelsTreeProps) {
+  return (
+    <SharedTreeContextProvider>
+      <CustomModelsTree {...props} />
+    </SharedTreeContextProvider>
   );
 }
 ```
@@ -324,11 +335,11 @@ Use `getSearchPaths` when you need more control over filtering behaviour. Here a
       const searchTree = await createInstanceKeyPaths({ label: searchText ?? "test" });
       // post-process the search tree - e.g. limit displayed depth and auto-expand the remaining nodes
       const limitDepthAndAutoExpand = (entries: HierarchySearchTree[], depth: number): HierarchySearchTree[] => {
+        if (depth >= 5) {
+          return [];
+        }
         const result = new Array<HierarchySearchTree>();
         for (const entry of entries) {
-          if (depth >= 5) {
-            continue;
-          }
           const children = entry.children ? limitDepthAndAutoExpand(entry.children, depth + 1) : undefined;
           result.push({ ...entry, options: { autoExpand: true }, children });
         }
@@ -404,7 +415,7 @@ Use `getSearchPaths` when you need more control over filtering behaviour. Here a
             )
             WHERE Label LIKE '%' || ? || '%' ESCAPE '\\'
           `,
-          QueryBinder.from([searchText.replace(/[%_\\]/g, "\\$&")]),
+          QueryBinder.from([searchText]),
           { rowFormat: QueryRowFormat.UseJsPropertyNames },
         )) {
           targetItems.push({ id: row.Id, className: row.ClassName });
@@ -500,13 +511,15 @@ import { CategoriesTreeComponent } from "@itwin/tree-widget-react";
 
 function MyWidget() {
   return (
-    <CategoriesTreeComponent
-      // label for the tree, used for accessibility purposes
-      treeLabel="Categories tree"
-      // see "Creating unified selection storage" section for example implementation
-      selectionStorage={unifiedSelectionStorage}
-      headerButtons={[(props) => <CategoriesTreeComponent.ShowAllButton {...props} />, (props) => <CategoriesTreeComponent.HideAllButton {...props} />]}
-    />
+    <SharedTreeContextProvider>
+      <CategoriesTreeComponent
+        // label for the tree, used for accessibility purposes
+        treeLabel="Categories tree"
+        // see "Creating unified selection storage" section for example implementation
+        selectionStorage={unifiedSelectionStorage}
+        headerButtons={[(props) => <CategoriesTreeComponent.ShowAllButton {...props} />, (props) => <CategoriesTreeComponent.HideAllButton {...props} />]}
+      />
+    </SharedTreeContextProvider>
   );
 }
 ```
@@ -570,7 +583,7 @@ interface CustomCategoriesTreeProps {
   selectionStorage: SelectionStorage;
 }
 
-function CustomCategoriesTreeComponent({ imodel, viewport, selectionStorage }: CustomCategoriesTreeProps) {
+function CustomCategoriesTree({ imodel, viewport, selectionStorage }: CustomCategoriesTreeProps) {
   const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
   const { buttonProps } = useCategoriesTreeButtonProps({ viewport: activeView });
   const { treeProps, getTreeItemProps } = useCategoriesTree({ activeView });
@@ -588,6 +601,14 @@ function CustomCategoriesTreeComponent({ imodel, viewport, selectionStorage }: C
         treeRenderer={(rendererProps) => <CustomCategoriesTreeRenderer {...rendererProps} getTreeItemProps={(node) => getTreeItemProps(node, rendererProps)} />}
       />
     </SelectableTree>
+  );
+}
+
+function CustomCategoriesTreeComponent(props: CustomCategoriesTreeProps) {
+  return (
+    <SharedTreeContextProvider>
+      <CustomCategoriesTree {...props} />
+    </SharedTreeContextProvider>
   );
 }
 ```
@@ -923,7 +944,7 @@ For custom tree components `TelemetryContextProvider` should be used:
 ```tsx
 import { createTreeWidgetViewport, TelemetryContextProvider, useCategoriesTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 
-function MyWidget() {
+function MyWidget({ viewport }: { viewport: Viewport }) {
   return (
     <TelemetryContextProvider
       componentIdentifier="MyTree"
@@ -935,7 +956,7 @@ function MyWidget() {
       }}
     >
       <SharedTreeContextProvider>
-        <MyTree viewport={activeViewport} />
+        <MyTree viewport={viewport} />
       </SharedTreeContextProvider>
     </TelemetryContextProvider>
   );

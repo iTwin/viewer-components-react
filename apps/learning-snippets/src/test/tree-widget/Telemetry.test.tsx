@@ -94,7 +94,7 @@ describe("Tree widget", () => {
           const consoleSpy = vi.spyOn(console, "log");
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryCustomTreeExample
-          function MyWidget() {
+          function MyWidget({ viewport }: { viewport: Viewport }) {
             return (
               <TelemetryContextProvider
                 componentIdentifier="MyTree"
@@ -106,7 +106,7 @@ describe("Tree widget", () => {
                 }}
               >
                 <SharedTreeContextProvider>
-                  <MyTree viewport={activeViewport} />
+                  <MyTree viewport={viewport} />
                 </SharedTreeContextProvider>
               </TelemetryContextProvider>
             );
@@ -131,7 +131,7 @@ describe("Tree widget", () => {
           // __PUBLISH_EXTRACT_END__
 
           using _ = { [Symbol.dispose]: cleanup };
-          render(<MyWidget />);
+          render(<MyWidget viewport={activeViewport} />);
           await waitFor(() => {
             expect(consoleSpy).toHaveBeenCalled();
           });

@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
-/* eslint-disable unused-imports/no-unused-vars */
 
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 // __PUBLISH_EXTRACT_START__ TreeWidget.RegisterExampleImports
@@ -72,11 +71,12 @@ describe("Tree widget", () => {
                   // add the Models tree component delivered with the package
                   {
                     id: ModelsTreeComponent.id,
+                    // use `ModelsTreeComponent.getLabel` to get the localized default label for models tree
                     getLabel: ({ standardLabels }) => ModelsTreeComponent.getLabel({ standardLabels }),
-                    render: (props) => (
+                    render: ({ treeLabel }) => (
                       <ModelsTreeComponent
                         // label for the tree, used for accessibility purposes
-                        treeLabel="Models tree"
+                        treeLabel={treeLabel}
                         // see "Creating unified selection storage" section for example implementation
                         selectionStorage={unifiedSelectionStorage}
                       />

@@ -76,11 +76,11 @@ function CustomModelsTreeComponentWithPostProcessing({
     const searchTree = await createInstanceKeyPaths({ label: searchText ?? "test" });
     // post-process the search tree - e.g. limit displayed depth and auto-expand the remaining nodes
     const limitDepthAndAutoExpand = (entries: HierarchySearchTree[], depth: number): HierarchySearchTree[] => {
+      if (depth >= 5) {
+        return [];
+      }
       const result = new Array<HierarchySearchTree>();
       for (const entry of entries) {
-        if (depth >= 5) {
-          continue;
-        }
         const children = entry.children ? limitDepthAndAutoExpand(entry.children, depth + 1) : undefined;
         result.push({ ...entry, options: { autoExpand: true }, children });
       }
@@ -149,7 +149,7 @@ function CustomModelsTreeComponentWithFilterAndTargetItems({
           )
           WHERE Label LIKE '%' || ? || '%' ESCAPE '\\'
         `,
-        QueryBinder.from([searchText.replace(/[%_\\]/g, "\\$&")]),
+        QueryBinder.from([searchText]),
         { rowFormat: QueryRowFormat.UseJsPropertyNames },
       )) {
         targetItems.push({ id: row.Id, className: row.ClassName });

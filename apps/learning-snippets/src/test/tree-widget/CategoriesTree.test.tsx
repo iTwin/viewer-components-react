@@ -64,16 +64,18 @@ describe("Tree widget", () => {
           // __PUBLISH_EXTRACT_START__ TreeWidget.CategoriesTreeExample
           function MyWidget() {
             return (
-              <CategoriesTreeComponent
-                // label for the tree, used for accessibility purposes
-                treeLabel="Categories tree"
-                // see "Creating unified selection storage" section for example implementation
-                selectionStorage={unifiedSelectionStorage}
-                headerButtons={[
-                  (props) => <CategoriesTreeComponent.ShowAllButton {...props} />,
-                  (props) => <CategoriesTreeComponent.HideAllButton {...props} />,
-                ]}
-              />
+              <SharedTreeContextProvider>
+                <CategoriesTreeComponent
+                  // label for the tree, used for accessibility purposes
+                  treeLabel="Categories tree"
+                  // see "Creating unified selection storage" section for example implementation
+                  selectionStorage={unifiedSelectionStorage}
+                  headerButtons={[
+                    (props) => <CategoriesTreeComponent.ShowAllButton {...props} />,
+                    (props) => <CategoriesTreeComponent.HideAllButton {...props} />,
+                  ]}
+                />
+              </SharedTreeContextProvider>
             );
           }
           // __PUBLISH_EXTRACT_END__
@@ -123,7 +125,7 @@ describe("Tree widget", () => {
             selectionStorage: SelectionStorage;
           }
 
-          function CustomCategoriesTreeComponent({ imodel, viewport, selectionStorage }: CustomCategoriesTreeProps) {
+          function CustomCategoriesTree({ imodel, viewport, selectionStorage }: CustomCategoriesTreeProps) {
             const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
             const { buttonProps } = useCategoriesTreeButtonProps({ viewport: activeView });
             const { treeProps, getTreeItemProps } = useCategoriesTree({ activeView });
@@ -145,13 +147,19 @@ describe("Tree widget", () => {
               </SelectableTree>
             );
           }
+
+          function CustomCategoriesTreeComponent(props: CustomCategoriesTreeProps) {
+            return (
+              <SharedTreeContextProvider>
+                <CustomCategoriesTree {...props} />
+              </SharedTreeContextProvider>
+            );
+          }
           // __PUBLISH_EXTRACT_END__
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText } = render(
-            <SharedTreeContextProvider>
-              <CustomCategoriesTreeComponent imodel={imodelConnection} viewport={testViewport} selectionStorage={unifiedSelectionStorage} />
-            </SharedTreeContextProvider>,
+            <CustomCategoriesTreeComponent imodel={imodelConnection} viewport={testViewport} selectionStorage={unifiedSelectionStorage} />,
           );
           await waitFor(() => {
             getByText("Test SpatialCategory");
