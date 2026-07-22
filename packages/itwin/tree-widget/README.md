@@ -68,15 +68,29 @@ As seen in the above code snippet, `createTreeWidget` takes a list of trees that
 
 ## Localization
 
-This package delivers a locale JSON file with English strings that follows the [`i18next JSON format`](https://www.i18next.com/misc/json-format). To enable localization, register `LOCALIZATION_NAMESPACES` during initialization and wrap components in `LocalizationContextProvider`:
+This package delivers a locale JSON file with English strings that follows the [`i18next JSON format`](https://www.i18next.com/misc/json-format). To enable localization, register `LOCALIZATION_NAMESPACES` during initialization:
+
+<!-- [[include: [TreeWidget.LocalizationRegisterNamespacesImports, TreeWidget.LocalizationRegisterNamespaces], tsx]] -->
+<!-- BEGIN EXTRACTION -->
 
 ```tsx
-import { LocalizationContextProvider, LOCALIZATION_NAMESPACES, createTreeWidget, ModelsTreeComponent } from "@itwin/tree-widget-react";
+import { LOCALIZATION_NAMESPACES } from "@itwin/tree-widget-react";
 
 // Register localization namespaces with `i18next` based localization provider.
 for (const namespace of LOCALIZATION_NAMESPACES) {
   await IModelApp.localization.registerNamespace(namespace);
 }
+```
+
+<!-- END EXTRACTION -->
+
+When using `createTreeWidget`, pass a `localization` object and `LocalizationContextProvider` will be added at the widget scope automatically:
+
+<!-- [[include: [TreeWidget.LocalizationCreateTreeWidgetImports, TreeWidget.LocalizationCreateTreeWidget], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { createTreeWidget, ModelsTreeComponent } from "@itwin/tree-widget-react";
 
 // When using `createTreeWidget` pass `localization` object and `LocalizationContextProvider` will be added at the widget scope automatically.
 UiItemsManager.register({
@@ -86,18 +100,33 @@ UiItemsManager.register({
       createTreeWidget({
         localization: IModelApp.localization,
         trees: [
-          // tree definitions
+          {
+            id: ModelsTreeComponent.id,
+            getLabel: ({ standardLabels }) => ModelsTreeComponent.getLabel({ standardLabels }),
+            render: ({ treeLabel }) => <ModelsTreeComponent treeLabel={treeLabel} selectionStorage={unifiedSelectionStorage} />,
+          },
         ],
       }),
     ] as readonly Widget[],
 });
+```
+
+<!-- END EXTRACTION -->
+
+When using lower level components directly, they need to be wrapped inside `LocalizationContextProvider`:
+
+<!-- [[include: [TreeWidget.LocalizationContextProviderImports, TreeWidget.LocalizationContextProvider], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { LocalizationContextProvider } from "@itwin/tree-widget-react";
 
 // When using lower level components directly they will need to be wrapped inside `LocalizationContextProvider`
 function TreeComponent() {
   return (
     <LocalizationContextProvider localization={IModelApp.localization}>
       <ModelsTreeComponent
-        // see "Creating unified selection storage" section for example implementation
+        treeLabel="Models tree"
         selectionStorage={unifiedSelectionStorage}
         headerButtons={[
           (props) => <ModelsTreeComponent.ShowAllButton {...props} key={"ShowAllButton"} />,
@@ -108,6 +137,8 @@ function TreeComponent() {
   );
 }
 ```
+
+<!-- END EXTRACTION -->
 
 `LocalizationContextProvider` accepts a `localization` prop — an object with a `getLocalizedString(key: string): string` method. It is designed to work with the `Localization` interface from `@itwin/core-common`, but a custom implementation can be used as well by providing an object with a custom `getLocalizedString` function.
 
