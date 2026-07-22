@@ -11,18 +11,12 @@ import { UiFramework } from "@itwin/appui-react";
 import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryCustomTreeExampleImports
-import {
-  createTreeWidgetViewport,
-  SharedTreeContextProvider,
-  TelemetryContextProvider,
-  useCategoriesTree,
-  VisibilityTree,
-  VisibilityTreeRenderer,
-} from "@itwin/tree-widget-react";
+import { createTreeWidgetViewport, TelemetryContextProvider, useCategoriesTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 
 import { useMemo } from "react";
 
+import type { Viewport } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
 import { createStorage } from "@itwin/unified-selection";
 import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
@@ -93,9 +87,9 @@ describe("Tree widget", () => {
               return { category };
             }),
           );
-          const viewport = getTestViewer(imodelConnection);
+          const activeViewport = getTestViewer(imodelConnection);
           const unifiedSelectionStorage = createStorage();
-          vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(viewport);
+          vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(activeViewport);
           vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
           const consoleSpy = vi.spyOn(console, "log");
 
@@ -111,14 +105,12 @@ describe("Tree widget", () => {
                   console.log(`TreeWidget [${feature}] used`);
                 }}
               >
-                <SharedTreeContextProvider>
-                  <MyTree />
-                </SharedTreeContextProvider>
+                <MyTree viewport={activeViewport} />
               </TelemetryContextProvider>
             );
           }
 
-          function MyTree() {
+          function MyTree({ viewport }: { viewport: Viewport }) {
             const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
             const { treeProps, getTreeItemProps } = useCategoriesTree({ activeView });
             return (
