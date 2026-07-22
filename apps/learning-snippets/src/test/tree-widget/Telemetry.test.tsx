@@ -8,7 +8,7 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 // __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryTreeComponentExampleImports
-import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
+import { IModelContentTreeComponent, SharedTreeContextProvider } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryCustomTreeExampleImports
 import { createTreeWidgetViewport, TelemetryContextProvider, useCategoriesTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
@@ -105,7 +105,9 @@ describe("Tree widget", () => {
                   console.log(`TreeWidget [${feature}] used`);
                 }}
               >
-                <MyTree viewport={activeViewport} />
+                <SharedTreeContextProvider>
+                  <MyTree viewport={activeViewport} />
+                </SharedTreeContextProvider>
               </TelemetryContextProvider>
             );
           }

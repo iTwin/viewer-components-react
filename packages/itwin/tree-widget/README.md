@@ -895,7 +895,7 @@ For individual tree components the callbacks should be supplied through props:
 <!-- BEGIN EXTRACTION -->
 
 ```tsx
-import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
+import { IModelContentTreeComponent, SharedTreeContextProvider } from "@itwin/tree-widget-react";
 
 function MyWidget() {
   return (
@@ -921,14 +921,7 @@ For custom tree components `TelemetryContextProvider` should be used:
 <!-- BEGIN EXTRACTION -->
 
 ```tsx
-import {
-  createTreeWidgetViewport,
-  SharedTreeContextProvider,
-  TelemetryContextProvider,
-  useCategoriesTree,
-  VisibilityTree,
-  VisibilityTreeRenderer,
-} from "@itwin/tree-widget-react";
+import { createTreeWidgetViewport, TelemetryContextProvider, useCategoriesTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 
 function MyWidget() {
   return (
@@ -942,14 +935,14 @@ function MyWidget() {
       }}
     >
       <SharedTreeContextProvider>
-        <MyTree />
+        <MyTree viewport={activeViewport} />
       </SharedTreeContextProvider>
     </TelemetryContextProvider>
   );
 }
 
-function MyTree() {
-  const activeView = useMemo(() => createTreeWidgetViewport(viewport), []);
+function MyTree({ viewport }: { viewport: Viewport }) {
+  const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
   const { treeProps, getTreeItemProps } = useCategoriesTree({ activeView });
   return (
     // VisibilityTree will use provided telemetry context to report used features and their performance
