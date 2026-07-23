@@ -29,7 +29,7 @@ flowchart TD
   UCV -- "creates per request" --> HANDLER
   HANDLER -- "when search paths are present" --> SRT
   HANDLER --> HELPER
-  HELPER --> BASE
+  HELPER -- "extends" --> BASE
   BASE -- "uses" --> CACHES
   BASE -- "reads & writes" --> BUF
   BUF -- "committed on success,<br/>discarded on cancellation" --> VP
