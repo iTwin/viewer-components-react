@@ -1,0 +1,105 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
+// __PUBLISH_EXTRACT_START__ TreeWidget.CustomTreeExampleImports
+import type { ComponentPropsWithoutRef } from "react";
+import type { IModelConnection } from "@itwin/core-frontend";
+import { Tree, TreeRenderer } from "@itwin/tree-widget-react";
+import { createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
+// __PUBLISH_EXTRACT_END__
+import { afterAll, beforeAll, describe, it, vi } from "vitest";
+import { UiFramework } from "@itwin/appui-react";
+import { IModelApp } from "@itwin/core-frontend";
+import { createStorage } from "@itwin/unified-selection";
+import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
+import { buildIModel } from "../../utils/IModelUtils.js";
+import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
+import { cleanup, getTestViewer, mockGetBoundingClientRect, render, TreeWidgetTestUtils, waitFor } from "./TestUtils.js";
+import { withEditTxn } from "@itwin/core-backend";
+
+describe("Tree widget", () => {
+  mockGetBoundingClientRect();
+  describe("Learning snippets", () => {
+    describe("Components", () => {
+      beforeAll(async () => {
+        await initializeLearningSnippetsTests();
+        await TreeWidgetTestUtils.initialize();
+      });
+
+      afterAll(async () => {
+        await terminateLearningSnippetsTests();
+        TreeWidgetTestUtils.terminate();
+      });
+
+      it("renders custom tree", async () => {
+        const { imodelConnection } = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+            const category = insertSpatialCategory({ txn, codeValue: "Test SpatialCategory" });
+            insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+            return { category };
+          }),
+        );
+        const testViewport = getTestViewer(imodelConnection);
+        const unifiedSelectionStorage = createStorage();
+        vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
+        vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
+
+        // __PUBLISH_EXTRACT_START__ TreeWidget.CustomTreeExample
+        type TreeProps = ComponentPropsWithoutRef<typeof Tree>;
+        const getHierarchyDefinition: TreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
+          // create a hierarchy definition that defines what should be shown in the tree
+          // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/learning/imodel/HierarchyDefinition.md
+          return createPredicateBasedHierarchyDefinition({
+            classHierarchyInspector: imodelAccess,
+            hierarchy: {
+              // For root nodes, select all BisCore.GeometricModel3d instances
+              rootNodes: async ({ nodeSelectClauseFactory, instanceLabelSelectClauseFactory }) => [
+                {
+                  fullClassName: "BisCore.GeometricModel3d",
+                  query: {
+                    ecsql: `
+                      SELECT
+                        ${await nodeSelectClauseFactory.createSelectClause({
+                          ecClassId: { selector: "this.ECClassId" },
+                          ecInstanceId: { selector: "this.ECInstanceId" },
+                          nodeLabel: {
+                            selector: await instanceLabelSelectClauseFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
+                          },
+                        })}
+                      FROM BisCore.GeometricModel3d this
+                    `,
+                  },
+                },
+              ],
+              childNodes: [],
+            },
+          });
+        };
+
+        interface MyTreeProps {
+          imodel: IModelConnection;
+        }
+
+        function MyTree({ imodel }: MyTreeProps) {
+          return (
+            <Tree
+              treeName="MyTree"
+              imodel={imodel}
+              selectionStorage={unifiedSelectionStorage}
+              getHierarchyDefinition={getHierarchyDefinition}
+              treeRenderer={(props) => <TreeRenderer {...props} treeLabel="My tree" />}
+            />
+          );
+        }
+        // __PUBLISH_EXTRACT_END__
+
+        using _ = { [Symbol.dispose]: cleanup };
+        const result = render(<MyTree imodel={imodelConnection} />);
+        await waitFor(() => result.getByText("TestPhysicalModel"));
+      });
+    });
+  });
+});

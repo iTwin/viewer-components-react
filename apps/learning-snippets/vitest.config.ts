@@ -24,8 +24,7 @@ export default defineConfig({
     server: {
       deps: {
         inline: [
-          "@stratakit/foundations",
-          "@stratakit/icons",
+          /@stratakit\//,
           "@itwin/appui-react",
           "@itwin/components-react",
           "@itwin/core-react",
