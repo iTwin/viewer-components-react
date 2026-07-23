@@ -30,7 +30,7 @@ flowchart TD
   HANDLER -- "when search paths are present" --> SRT
   HANDLER --> HELPER
   HELPER --> BASE
-  BASE --> CACHES
+  BASE -- "uses" --> CACHES
   BASE -- "reads & writes" --> BUF
   BUF -- "committed on success,<br/>discarded on cancellation" --> VP
 ```
