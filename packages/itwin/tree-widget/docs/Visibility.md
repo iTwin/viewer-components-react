@@ -27,7 +27,7 @@ flowchart TD
 
   HOOK --> UCV
   UCV -- "creates per request" --> HANDLER
-  HANDLER -- "when search paths are present" --> SRT
+  HANDLER -- "uses when search paths are present" --> SRT
   HANDLER --> HELPER
   HELPER -- "extends" --> BASE
   BASE -- "uses" --> CACHES
