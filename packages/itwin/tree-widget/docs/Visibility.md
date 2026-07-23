@@ -53,7 +53,7 @@ Every flowchart in these documents follows the same conventions:
 - **Own status** — the status of the requested element IDs themselves: the direct status adjusted by counting those IDs in the opposite always/never-drawn set. Excludes descendants and sub-models.
 - **Opposite set** — the forcing set that can flip elements away from their direct status: `neverDrawn` when the direct status is `visible`, `alwaysDrawn` when it is `hidden`.
 - **Search target** — when hierarchy search/filtering is active, a node matched by a search path. Non-target nodes may omit children that still contribute to visibility, so their visibility is computed from their child search targets instead.
-- **Hierarchy can have hidden children** — true when the tree configuration excludes element classes (`excludedElementClassNames`). Excluded descendants do not appear in the trees but still render in the viewport, so visibility handling has to take these nodes into account.
+- **Hierarchy can have hidden children** — true when the tree configuration excludes element classes (`elements.excludedClasses`). Excluded descendants do not appear in the trees but still render in the viewport, so visibility handling has to take these nodes into account.
 
 ## Key Internal APIs
 

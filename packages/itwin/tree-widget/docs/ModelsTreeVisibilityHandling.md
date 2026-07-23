@@ -56,7 +56,7 @@ flowchart TD
 
 A class-grouping node is resolved through [getElementsVisibilityStatus](./SharedVisibilityHandling.md#getelementsvisibilitystatus). The node provides its model, category, parent path, grouped element IDs, and the grouped elements known to have children.
 
-When the hierarchy can hide children, all descendants are evaluated. Otherwise, descendants are evaluated only for grouped elements known to be parents; a group containing only leaves computes only the grouped elements' own status. The hierarchy can have hidden children when the tree configuration excludes element classes (`excludedElementClassNames`) — excluded descendants do not appear in the tree but still render in the viewport, so their visibility must be evaluated.
+When the hierarchy can hide children, all descendants are evaluated. Otherwise, descendants are evaluated only for grouped elements known to be parents; a group containing only leaves computes only the grouped elements' own status. The hierarchy can have hidden children when the tree configuration excludes element classes (`elements.excludedClasses`) — excluded descendants do not appear in the tree but still render in the viewport, so their visibility must be evaluated.
 
 ```mermaid
 ---

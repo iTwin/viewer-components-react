@@ -73,7 +73,7 @@ flowchart TD
 
 Categories tree grouping node may represent elements from multiple models. Each `modelElementsMap` entry is resolved through [getElementsVisibilityStatus](./SharedVisibilityHandling.md#getelementsvisibilitystatus), using the grouping category and parent path, and all model results are merged.
 
-As in the Models tree, nested descendant evaluation is skipped for known leaf elements. The hierarchy can have hidden children when the tree configuration excludes element classes (`excludedElementClassNames`) — excluded descendants do not appear in the tree but still render in the viewport, so their visibility must be evaluated.
+As in the Models tree, nested descendant evaluation is skipped for known leaf elements. The hierarchy can have hidden children when the tree configuration excludes element classes (`elements.excludedClasses`) — excluded descendants do not appear in the tree but still render in the viewport, so their visibility must be evaluated.
 
 ```mermaid
 ---

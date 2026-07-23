@@ -185,7 +185,6 @@ flowchart TD
   A -- No --> C{"<span style='font-family: monospace;'>props.ignoreSubCategories === true</span>"}
   C -- No --> C1["For each category, get sub-categories from cache"]
   C1 --> C2["<span style='font-family: monospace;'><a href='#getsubcategoriesvisibilitystatus'>getSubCategoriesVisibilityStatus</a>({ categoryId, subCategoryIds })</span>"]
-  C -- Yes --> C3[Skip sub-category status]
 
   A -- No --> D["Get non-sub-models whose top-most elements use each requested category"]
   D -- "modelId, categoryId" --> D1{"<span style='font-family: monospace;'>viewport.viewsModel(modelId)</span>"}
@@ -195,7 +194,6 @@ flowchart TD
   E -- subModels --> E1["<span style='font-family: monospace;'><a href='#getmodelsvisibilitystatus'>getModelsVisibilityStatus</a>({ modelIds: subModels })</span>"]
 
   C2 --> M[/"<span style='font-family: monospace;'><a href='#mergevisibilitystatuses'>mergeVisibilityStatuses</a>()</span>"/]
-  C3 --> M
   D2 --> M
   D3 --> M
   E1 --> M
@@ -300,7 +298,7 @@ flowchart TD
   RESULT_Direct[/direct category status/]
 
   %% Start
-  TITLE(["<span style='font-family: monospace;'>getCategoryVisibilityFromAlwaysAndNeverDrawnElements</span>"]) --> A["Get whether <span style='font-family: monospace;'>categoryId</span> has parent elements from cache"]
+  TITLE(["<span style='font-family: monospace;'>getCategoryVisibilityFromAlwaysAndNeverDrawnElements</span>"]) --> A["Get whether <span style='font-family: monospace;'>categoryId</span> has parent elements"]
 
   PROPS[\"
     <span style='font-family: monospace;'>props</span>
@@ -316,7 +314,7 @@ flowchart TD
   E --> F["<span style='font-family: monospace;'><a href='#grouped-descendant-visibility'>getVisibilityFromGroupedDescendants</a>({ modelId, descendantsCounts, segment, getElementsAccessor })</span>"]
 ```
 
-### Grouped descendant visibility
+### getVisibilityFromGroupedDescendants
 
 `getVisibilityFromGroupedDescendants` is the shared descendant-count core for model categories, categories under a model, and element descendants:
 

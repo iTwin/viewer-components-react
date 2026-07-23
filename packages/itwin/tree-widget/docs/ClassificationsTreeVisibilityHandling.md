@@ -18,6 +18,7 @@ Classifications tree visibility is available only for 3D viewports. In other vie
   - [changeClassificationTablesVisibilityStatus](#changeclassificationtablesvisibilitystatus)
   - [changeClassificationsVisibilityStatus](#changeclassificationsvisibilitystatus)
   - [changeCategoriesVisibilityStatus](./SharedVisibilityHandling.md#changecategoriesvisibilitystatus)
+  - [changeElementsVisibilityStatus](./SharedVisibilityHandling.md#changeelementsvisibilitystatus)
 
 ## Resolving contained categories
 
