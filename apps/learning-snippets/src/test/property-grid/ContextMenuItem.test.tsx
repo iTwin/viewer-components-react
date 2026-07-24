@@ -4,11 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable unused-imports/no-unused-vars */
 /* eslint-disable import/no-duplicates */
-/* eslint-disable @typescript-eslint/no-deprecated */
 
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
-import { Presentation } from "@itwin/presentation-frontend";
 // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleContextMenuItemImports
 import { PropertyGridContextMenuItem } from "@itwin/property-grid-react";
 import type { ContextMenuItemProps } from "@itwin/property-grid-react";
@@ -23,6 +21,9 @@ import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
 import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils.js";
 import { withEditTxn } from "@itwin/core-backend";
+import { createStorage } from "@itwin/unified-selection";
+
+const selectionStorage = createStorage();
 
 describe("Property grid", () => {
   describe("Learning snippets", () => {
@@ -68,11 +69,15 @@ describe("Property grid", () => {
 
         // __PUBLISH_EXTRACT_START__ PropertyGrid.PropertyGridWithContextMenuItem
         function MyPropertyGrid() {
-          return <PropertyGridComponent contextMenuItems={[(props) => <ExampleContextMenuItem {...props} />]} />;
+          return <PropertyGridComponent selectionStorage={selectionStorage} contextMenuItems={[(props) => <ExampleContextMenuItem {...props} />]} />;
         }
         // __PUBLISH_EXTRACT_END__
 
-        Presentation.selection.addToSelection("", imodelConnection, [keys.category]);
+        selectionStorage.addToSelection({
+          source: "test",
+          imodelKey: imodelConnection.key,
+          selectables: [keys.category],
+        });
 
         using _ = { [Symbol.dispose]: cleanup };
         const { baseElement, getAllByText } = render(<MyPropertyGrid />);

@@ -13,7 +13,6 @@ import type { InstanceKey } from '@itwin/presentation-common';
 import type { IPresentationPropertyDataProvider } from '@itwin/presentation-components';
 import type { IPropertyDataFilterer } from '@itwin/components-react';
 import { JSX as JSX_2 } from 'react/jsx-runtime';
-import { KeySet } from '@itwin/presentation-common';
 import type { Localization } from '@itwin/core-common';
 import type { OmitOverUnion } from '@itwin/presentation-shared';
 import type { PropertyCategory } from '@itwin/components-react';
@@ -24,10 +23,7 @@ import type { ReactNode } from 'react';
 import { Ref } from 'react';
 import { Selectables } from '@itwin/unified-selection';
 import type { SelectionStorage } from '@itwin/unified-selection';
-import { StagePanelLocation } from '@itwin/appui-react';
-import { StagePanelSection } from '@itwin/appui-react';
 import type { TranslationOptions } from '@itwin/core-common';
-import type { UiItemsProvider } from '@itwin/appui-react';
 import { VirtualizedPropertyGridWithDataProvider } from '@itwin/components-react';
 import type { Widget } from '@itwin/appui-react';
 
@@ -77,6 +73,9 @@ export interface DefaultContextMenuItemProps extends ContextMenuItemProps {
 }
 
 // @public
+export function EmptyValuesSettingContext(input: PropsWithChildren<object>): JSX_2.Element;
+
+// @public
 export interface FavoritePropertiesContextMenuItemProps extends DefaultContextMenuItemProps {
     scope?: FavoritePropertiesScope;
 }
@@ -105,8 +104,8 @@ export type MultiElementPropertyGridProps = OmitOverUnion<PropertyGridProps, "he
     getParentInstanceKey?: (key: InstanceKey) => Promise<InstanceKey | undefined>;
 };
 
-// @public
-export function NullValueSettingContext(input: PropsWithChildren<object>): JSX_2.Element;
+// @public @deprecated
+export const NullValueSettingContext: typeof EmptyValuesSettingContext;
 
 // @public
 export type PerformanceTrackedFeatures = "properties-load" | "elements-list-load";
@@ -179,7 +178,7 @@ export type PropertyGridPropertyUpdatedArgs = PropertyUpdatedArgs & {
 
 // @public
 export type PropertyGridProps = OmitOverUnion<PropertyGridContentProps, "dataProvider" | "dataRenderer"> & DataProviderProps & {
-    selectionStorage?: SelectionStorage;
+    selectionStorage: SelectionStorage;
 };
 
 // @public
@@ -192,45 +191,21 @@ export interface PropertyGridSettingsMenuItemProps {
     title?: string;
 }
 
-// @public @deprecated
-export class PropertyGridUiItemsProvider implements UiItemsProvider {
-    constructor(props?: PropertyGridUiItemsProviderProps);
-    // (undocumented)
-    readonly id = "PropertyGridUiItemsProvider";
-    // (undocumented)
-    provideWidgets(_stageId: string, stageUsage: string, location: StagePanelLocation, section?: StagePanelSection): ReadonlyArray<Widget>;
-}
-
-// @public @deprecated
-export interface PropertyGridUiItemsProviderProps {
-    defaultPanelLocation?: StagePanelLocation;
-    defaultPanelSection?: StagePanelSection;
-    defaultPanelWidgetPriority?: number;
-    propertyGridProps?: PropertyGridWidgetProps;
-}
-
 // @public
 export const PropertyGridWidgetId = "vcr:PropertyGridComponent";
 
 // @public (undocumented)
-type PropertyGridWidgetOwnProps = {
-    widgetId?: string;
-} & ({
-    shouldShow?: (selection: Readonly<KeySet>) => boolean;
-    selectionStorage?: never;
-} | {
+interface PropertyGridWidgetOwnProps {
+    selectionStorage: SelectionStorage;
     shouldShow?: (selection: Selectables) => Promise<boolean>;
-    selectionStorage: SelectionStorage_2;
-});
+    widgetId?: string;
+}
 
 // @public
 export type PropertyGridWidgetProps = PropertyGridComponentProps & PropertyGridWidgetOwnProps;
 
 // @public
 export function RemoveFavoritePropertyContextMenuItem(input: FavoritePropertiesContextMenuItemProps): JSX_2.Element | null;
-
-// @public (undocumented)
-type SelectionStorage_2 = Pick<SelectionStorage, "getSelection" | "replaceSelection" | "selectionChangeEvent">;
 
 // @public
 export interface SettingsMenuItemProps {
@@ -244,12 +219,18 @@ export interface SettingsMenuProps {
 }
 
 // @public
-export function ShowHideNullValuesSettingsMenuItem(input: ShowHideNullValuesSettingsMenuItemProps): JSX_2.Element;
+export function ShowHideEmptyValuesSettingsMenuItem(input: ShowHideEmptyValuesSettingsMenuItemProps): JSX_2.Element;
 
 // @public
-export interface ShowHideNullValuesSettingsMenuItemProps extends SettingsMenuItemProps {
+export interface ShowHideEmptyValuesSettingsMenuItemProps extends SettingsMenuItemProps {
     persist?: boolean;
 }
+
+// @public @deprecated
+export const ShowHideNullValuesSettingsMenuItem: typeof ShowHideEmptyValuesSettingsMenuItem;
+
+// @public @deprecated
+export type ShowHideNullValuesSettingsMenuItemProps = ShowHideEmptyValuesSettingsMenuItemProps;
 
 // @public
 export interface SingleElementDataProviderProps extends DataProviderProps {

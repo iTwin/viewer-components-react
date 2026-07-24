@@ -82,6 +82,8 @@ export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildC
   return (
     <VirtualizedPropertyGridWithDataProvider
       {...props}
+      // eslint-disable-next-line @typescript-eslint/no-deprecated
+      editorSystem={props.editorSystem ?? "new"}
       minLabelWidth={10}
       minValueWidth={10}
       actionButtonWidth={actionButtonWidth}
@@ -130,10 +132,13 @@ export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFilter
       };
     }
 
+    // merged primitive values are not empty (the value differs between instances), so they should always match the filter.
+    // empty string primitive values are considered empty, but `false`/`0` are valid non-empty values.
+    const hasValue = node.isMerged || (node.value.value !== undefined && node.value.value !== "");
     return {
       filteredTypes: [FilteredType.Value],
-      matchesFilter: !!node.value.displayValue,
-      matchesCount: node.value.displayValue ? 1 : 0,
+      matchesFilter: hasValue,
+      matchesCount: hasValue ? 1 : 0,
     };
   }
 }

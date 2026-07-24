@@ -33,7 +33,7 @@ In [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) based appl
 import { createPropertyGrid } from "@itwin/property-grid-react";
 import { UiItemsManager } from "@itwin/appui-react";
 
-UiItemsManager.register({ id: "property-grid-provider", getWidgets: () => [createPropertyGrid({})] });
+UiItemsManager.register({ id: "property-grid-provider", getWidgets: () => [createPropertyGrid({ selectionStorage: getGlobalSelectionStorage() })] });
 ```
 
 <!-- END EXTRACTION -->
@@ -52,7 +52,7 @@ import {
   CopyPropertyTextContextMenuItem,
   IModelAppUserPreferencesStorage,
   RemoveFavoritePropertyContextMenuItem,
-  ShowHideNullValuesSettingsMenuItem,
+  ShowHideEmptyValuesSettingsMenuItem,
 } from "@itwin/property-grid-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 
@@ -81,10 +81,10 @@ UiItemsManager.register({
         // the list populates the settings menu
         settingsMenuItems: [
           // allows hiding properties without values
-          (props) => <ShowHideNullValuesSettingsMenuItem {...props} persist={true} />,
+          (props) => <ShowHideEmptyValuesSettingsMenuItem {...props} persist={true} />,
         ],
 
-        // supply an optional custom storage for user preferences, e.g. the show/hide null values used above
+        // supply an optional custom storage for user preferences, e.g. the show/hide empty values used above
         preferencesStorage: new IModelAppUserPreferencesStorage("my-favorites-namespace"),
 
         // supply the global selection storage that the widget will use to listen to selection
@@ -205,7 +205,7 @@ Provide it to the widget:
 import { PropertyGridComponent } from "@itwin/property-grid-react";
 
 function MyPropertyGrid() {
-  return <PropertyGridComponent contextMenuItems={[(props) => <ExampleContextMenuItem {...props} />]} />;
+  return <PropertyGridComponent selectionStorage={selectionStorage} contextMenuItems={[(props) => <ExampleContextMenuItem {...props} />]} />;
 }
 ```
 
@@ -225,7 +225,7 @@ The entry point is only rendered if there's at least one settings menu item prov
 
 ### Hiding empty values
 
-The package delivers `ShowHideNullValuesSettingsMenuItem` that allows users to hide / show properties that don't have values:
+The package delivers `ShowHideEmptyValuesSettingsMenuItem` that allows users to hide / show properties that don't have values:
 
 | Empty values displayed                                            | Empty values hidden                                           |
 | ----------------------------------------------------------------- | ------------------------------------------------------------- |
@@ -269,7 +269,7 @@ Provide it to the widget:
 import { PropertyGridComponent } from "@itwin/property-grid-react";
 
 function MyPropertyGrid() {
-  return <PropertyGridComponent settingsMenuItems={[() => <ExampleSettingsMenuItem />]} />;
+  return <PropertyGridComponent selectionStorage={selectionStorage} settingsMenuItems={[() => <ExampleSettingsMenuItem />]} />;
 }
 ```
 
@@ -333,6 +333,7 @@ import { PropertyGridComponent } from "@itwin/property-grid-react";
 function MyPropertyGrid() {
   return (
     <PropertyGridComponent
+      selectionStorage={selectionStorage}
       onPerformanceMeasured={(feature, elapsedTime) => {
         // user-defined function to handle performance logging.
         logPerformance(feature, elapsedTime);
@@ -368,7 +369,7 @@ function ExampleComponent() {
         logUsage(feature);
       }}
     >
-      <PropertyGrid imodel={imodelConnection} />
+      <PropertyGrid selectionStorage={selectionStorage} imodel={imodelConnection} />
     </TelemetryContextProvider>
   );
 }
