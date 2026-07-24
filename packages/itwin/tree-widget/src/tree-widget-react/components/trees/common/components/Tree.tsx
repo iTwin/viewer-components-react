@@ -77,7 +77,7 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPath
   };
 
 /** @beta */
-export type CommonTreeRendererProps = Pick<BaseTreeRendererProps, "filterHierarchyLevel" | "selectionMode" | "getTreeItemProps"> & TreeRendererProps;
+type CommonTreeRendererProps = Pick<BaseTreeRendererProps, "filterHierarchyLevel" | "selectionMode" | "getTreeItemProps"> & TreeRendererProps;
 
 /** @beta */
 export type CallbacksWithCommonTreeRendererProps<T extends BaseTreeRendererProps, K extends keyof T> = Omit<T, K> & {

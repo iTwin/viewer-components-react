@@ -19,18 +19,18 @@ import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { invertAllCategories } from "../../tree-widget-react/components/trees/common/CategoriesVisibilityUtils.js";
-import { enableCategoryDisplay, loadCategoriesFromViewport } from "../../tree-widget-react/components/trees/common/internal/VisibilityUtils.js";
-import { buildIModel } from "../IModelUtils.js";
-import { TestUtils } from "../TestUtils.js";
-import { createFakeViewport, createIModelMock } from "./Common.js";
-import { createTreeWidgetTestingViewport } from "./TreeUtils.js";
+import { enableCategoryDisplay, invertAllCategories } from "../../../../tree-widget-react/components/trees/common/internal/VisibilityUtils.js";
+import { buildIModel } from "../../../IModelUtils.js";
+import { TestUtils } from "../../../TestUtils.js";
+import { createFakeViewport } from "../../Common.js";
+import { createTreeWidgetTestingViewport } from "../../TreeUtils.js";
 
+import type { IModelDb } from "@itwin/core-backend";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { TreeWidgetTestingViewport } from "./TreeUtils.js";
+import type { TreeWidgetTestingViewport } from "../../TreeUtils.js";
 
-describe("CategoryVisibilityUtils", () => {
+describe("VisibilityUtils", () => {
   beforeAll(async () => {
     await NoRenderApp.startup();
     await TestUtils.initialize();
@@ -102,26 +102,6 @@ describe("CategoryVisibilityUtils", () => {
     });
   });
 
-  describe("loadCategoriesFromViewport", () => {
-    it("loadCategoriesFromViewport sets subCategories as undefined when subCategories size is 0", async () => {
-      const categoryInfoWithoutSubcategories: Map<Id64String, IModelConnection.Categories.CategoryInfo> = new Map([
-        [
-          categoryId,
-          {
-            id: categoryId,
-            subCategories: new Map(),
-          },
-        ],
-      ]);
-      viewport.iModel = createIModelMock({
-        queryHandler: () => [{ id: "CategoryWithoutSubcategories" }],
-        getCategoryInfo: async () => categoryInfoWithoutSubcategories,
-      });
-      const result = await loadCategoriesFromViewport(viewport);
-      expect(result[0].subCategoryIds).toBeUndefined();
-    });
-  });
-
   describe("invertAllCategories", () => {
     let imodelConnection: IModelConnection;
     let categoryIds: Array<Id64String>;
@@ -129,7 +109,7 @@ describe("CategoryVisibilityUtils", () => {
     let subCategoryIds: Array<Id64String>;
     let nonMockedViewport: TreeWidgetTestingViewport;
     async function createIModel(): Promise<{ imodelConnection: IModelConnection } & { models: Id64Array; categories: Id64Array; subCategories: Id64Array }> {
-      return buildIModel(async (imodel) =>
+      return buildIModel(async (imodel: IModelDb) =>
         withEditTxn(imodel, (txn) => {
           const physicalModel1 = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel1" }).id;
           const physicalModel2 = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel2" }).id;
@@ -159,6 +139,7 @@ describe("CategoryVisibilityUtils", () => {
         },
         rpcs: [IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
       });
+
       // eslint-disable-next-line @itwin/no-internal
       ECSchemaRpcImpl.register();
       const buildIModelResult = await createIModel();

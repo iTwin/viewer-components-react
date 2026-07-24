@@ -229,7 +229,7 @@ function createStateGetter(map: VisibilityStatusMap, calculateVisibility: (node:
  * Properties for an overridden method of a `HierarchyVisibilityHandler` implementation.
  * @beta
  */
-export type HierarchyVisibilityHandlerOverridableMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult
+type HierarchyVisibilityHandlerOverridableMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult
   ? TProps & {
       /** A callback that produces the value from the original implementation. */
       readonly originalImplementation: () => TResult;

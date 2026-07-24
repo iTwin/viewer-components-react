@@ -10,7 +10,7 @@ import type { ComponentProps } from "react";
 import type { CallbacksWithCommonTreeRendererProps } from "./Tree.js";
 
 /** @beta */
-export type TreeRendererProps = ComponentProps<typeof StrataKitTreeRenderer>;
+type TreeRendererProps = ComponentProps<typeof StrataKitTreeRenderer>;
 
 /** @beta */
 export type ExtendedTreeRendererProps = CallbacksWithCommonTreeRendererProps<

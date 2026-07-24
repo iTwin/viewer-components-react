@@ -21,18 +21,18 @@ import type { CategoryId, DefinitionContainerId, ElementId, ModelId } from "../.
 interface DefinitionContainerInfo {
   modelId: Id64String;
   parentDefinitionContainerExists: boolean;
-  childCategories: CategoryInfo[];
+  childCategories: CachedCategoryInfo[];
   childDefinitionContainers: Array<{ id: Id64String; hasElements: boolean }>;
   hasElements: boolean;
 }
 
 interface CategoriesInfo {
-  childCategories: CategoryInfo[];
+  childCategories: CachedCategoryInfo[];
   parentDefinitionContainerExists: boolean;
 }
 
 /** @internal */
-export interface CategoryInfo {
+export interface CachedCategoryInfo {
   id: CategoryId;
   subCategoryChildCount: number;
   hasElements: boolean;
@@ -269,7 +269,7 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
               key: processedCategory.modelId,
               createFunc: () => ({
                 parentDefinitionContainerExists: processedCategory.parentDefinitionContainerExists,
-                childCategories: new Array<CategoryInfo>(),
+                childCategories: new Array<CachedCategoryInfo>(),
               }),
             });
             modelCategories.childCategories.push({
@@ -374,7 +374,7 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
   }: {
     parentDefinitionContainerIds: Id64Arg;
     includeEmpty?: boolean;
-  }): Observable<{ categories: CategoryInfo[]; definitionContainers: Array<DefinitionContainerId> }> {
+  }): Observable<{ categories: CachedCategoryInfo[]; definitionContainers: Array<DefinitionContainerId> }> {
     return this.getDefinitionContainersInfo().pipe(
       mergeMap((definitionContainersInfo) =>
         from(Id64.iterable(parentDefinitionContainerIds)).pipe(
@@ -389,7 +389,7 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
               }
               return acc;
             },
-            { definitionContainers: new Array<Id64String>(), categories: new Array<CategoryInfo>() },
+            { definitionContainers: new Array<Id64String>(), categories: new Array<CachedCategoryInfo>() },
           ),
         ),
       ),
@@ -533,7 +533,7 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
 
   public getRootDefinitionContainersAndCategories(props?: {
     includeEmpty?: boolean;
-  }): Observable<{ categories: CategoryInfo[]; definitionContainers: Array<DefinitionContainerId> }> {
+  }): Observable<{ categories: CachedCategoryInfo[]; definitionContainers: Array<DefinitionContainerId> }> {
     return forkJoin({
       categories: this.getCachedCategoryData().pipe(
         mergeMap(({ categoriesGroupedByModel }) => categoriesGroupedByModel.values()),
@@ -542,7 +542,7 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
             applyElementsFilter(modelCategoriesInfo.childCategories, props?.includeEmpty).forEach((categoryInfo) => acc.push(categoryInfo));
           }
           return acc;
-        }, new Array<CategoryInfo>()),
+        }, new Array<CachedCategoryInfo>()),
       ),
       definitionContainers: this.getDefinitionContainersInfo().pipe(
         mergeMap((definitionContainersInfo) => definitionContainersInfo.entries()),
