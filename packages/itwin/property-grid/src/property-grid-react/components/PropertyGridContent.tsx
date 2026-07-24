@@ -19,8 +19,8 @@ import {
 import { Text } from "@itwin/itwinui-react";
 import { useActionButtons } from "../hooks/UseActionButtons.js";
 import { useContextMenu } from "../hooks/UseContextMenu.js";
+import { useEmptyValuesSettingContext } from "../hooks/UseEmptyValuesSetting.js";
 import { useLoadedInstanceInfo } from "../hooks/UseInstanceInfo.js";
-import { useNullValueSettingContext } from "../hooks/UseNullValuesSetting.js";
 import { useResizeObserver } from "../hooks/UseResizeObserver.js";
 import { useTelemetryContext } from "../hooks/UseTelemetryContext.js";
 import { FilteringPropertyGrid, NonEmptyValuesPropertyDataFilterer } from "./FilteringPropertyGrid.js";
@@ -32,6 +32,7 @@ import type { PropertyRecord } from "@itwin/appui-abstract";
 import type { PropertyCategory, PropertyUpdatedArgs } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
+import type { OmitOverUnion } from "@itwin/presentation-shared";
 import type { PropertyGridActionButtonRenderer } from "../hooks/UseActionButtons.js";
 import type { ContextMenuProps } from "../hooks/UseContextMenu.js";
 import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid.js";
@@ -41,16 +42,16 @@ import type { SettingsDropdownMenuProps, SettingsMenuProps } from "./SettingsDro
  * Arguments for the `onPropertyUpdated` callback.
  * @public
  */
-export interface PropertyGridPropertyUpdatedArgs extends PropertyUpdatedArgs {
+export type PropertyGridPropertyUpdatedArgs = PropertyUpdatedArgs & {
   /** Data provider used by property grid. */
   dataProvider: IPresentationPropertyDataProvider;
-}
+};
 
 /**
  * Base props for rendering `PropertyGridContent` component.
  * @public
  */
-export interface PropertyGridContentBaseProps extends Omit<
+export type PropertyGridContentBaseProps = OmitOverUnion<
   FilteringPropertyGridProps,
   | "dataProvider"
   | "filterer"
@@ -61,7 +62,7 @@ export interface PropertyGridContentBaseProps extends Omit<
   | "height"
   | "onPropertyUpdated"
   | "actionButtonRenderers"
-> {
+> & {
   imodel: IModelConnection;
   className?: string;
   onBackButton?: () => void;
@@ -70,7 +71,7 @@ export interface PropertyGridContentBaseProps extends Omit<
   dataProvider: IPresentationPropertyDataProvider;
   dataRenderer?: (props: FilteringPropertyGridProps) => ReactNode;
   actionButtonRenderers?: PropertyGridActionButtonRenderer[];
-}
+};
 
 /**
  * Props for `PropertyGridContent` component.
@@ -104,9 +105,9 @@ export function PropertyGridContent({
   });
 
   const [filterText, setFilterText] = useState<string>("");
-  const { showNullValues } = useNullValueSettingContext();
+  const { showEmptyValues } = useEmptyValuesSettingContext();
   const { onFeatureUsed } = useTelemetryContext();
-  const filterer = useFilterer({ showNullValues, filterText });
+  const filterer = useFilterer({ showEmptyValues, filterText });
   const { ref, height, width } = useResizeObserver();
 
   const reportFiltering = useDebounced(() => onFeatureUsed("filter-properties"), 1000);
@@ -185,11 +186,11 @@ function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick, 
 }
 
 interface UseFiltererProps {
-  showNullValues: boolean;
+  showEmptyValues: boolean;
   filterText: string;
 }
 
-function useFilterer({ showNullValues, filterText }: UseFiltererProps) {
+function useFilterer({ showEmptyValues, filterText }: UseFiltererProps) {
   const [defaultFilterers] = useState(() => ({
     nonEmpty: new NonEmptyValuesPropertyDataFilterer(),
   }));
@@ -201,12 +202,12 @@ function useFilterer({ showNullValues, filterText }: UseFiltererProps) {
     const valueAndRecordFilterer = new CompositePropertyDataFilterer(valueFilterer, CompositeFilterType.Or, labelFilterer);
     const textFilterer = new CompositePropertyDataFilterer(valueAndRecordFilterer, CompositeFilterType.Or, categoryFilterer);
 
-    if (!showNullValues) {
+    if (!showEmptyValues) {
       return new CompositePropertyDataFilterer(textFilterer, CompositeFilterType.And, defaultFilterers.nonEmpty);
     }
 
     return textFilterer;
-  }, [defaultFilterers.nonEmpty, filterText, showNullValues]);
+  }, [defaultFilterers.nonEmpty, filterText, showEmptyValues]);
 
   return compositeFilterer;
 }

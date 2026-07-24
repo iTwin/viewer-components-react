@@ -447,9 +447,9 @@ Use `getSearchPaths` when you need more control over filtering behaviour. Here a
             WHERE Label LIKE '%' || ? || '%' ESCAPE '\\'
           `,
           QueryBinder.from([searchText]),
-          { rowFormat: QueryRowFormat.UseJsPropertyNames },
+          { rowFormat: QueryRowFormat.UseECSqlPropertyIndexes },
         )) {
-          targetItems.push({ id: row.Id, className: row.ClassName });
+          targetItems.push({ id: row[1], className: row[0] });
         }
         // `createInstanceKeyPaths` doesn't automatically set the `autoExpand` flag - set it here
         const searchTree = await createInstanceKeyPaths({ targetItems });

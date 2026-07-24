@@ -7,18 +7,11 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import * as appuiReactModule from "@itwin/appui-react";
 import { UiFramework } from "@itwin/appui-react";
 import { EmptyLocalization } from "@itwin/core-common";
-import { KeySet, StandardNodeTypes } from "@itwin/presentation-common";
-import { Presentation } from "@itwin/presentation-frontend";
+import { StandardNodeTypes } from "@itwin/presentation-common";
 import { Selectables, TRANSIENT_ELEMENT_CLASSNAME } from "@itwin/unified-selection";
-import { createKeysFromSelectable } from "../property-grid-react/hooks/UseUnifiedSelectionHandler.js";
 import { PropertyGridManager } from "../property-grid-react/PropertyGridManager.js";
-import {
-  createPropertyGrid,
-  PropertyGridUiItemsProvider,
-  PropertyGridWidget,
-  PropertyGridWidgetId,
-} from "../property-grid-react/PropertyGridUiItemsProvider.js";
-import { act, render, stubSelectionManager, stubSelectionStorage, waitFor } from "./TestUtils.js";
+import { createPropertyGrid, PropertyGridWidget, PropertyGridWidgetId } from "../property-grid-react/PropertyGridUiItemsProvider.js";
+import { act, render, stubSelectionStorage, waitFor } from "./TestUtils.js";
 
 import type { ReactElement } from "react";
 import type { WidgetDef } from "@itwin/appui-react";
@@ -28,55 +21,11 @@ import type { EventArgs, Props } from "@itwin/presentation-shared";
 import type { Selectable } from "@itwin/unified-selection";
 import type { PropertyGridWidgetProps } from "../property-grid-react/PropertyGridUiItemsProvider.js";
 
-/* eslint-disable @typescript-eslint/no-deprecated */
-describe("PropertyGridUiItemsProvider", () => {
-  beforeAll(async () => {
-    await PropertyGridManager.initialize(new EmptyLocalization());
-  });
-
-  afterAll(() => {
-    PropertyGridManager.terminate();
-  });
-
-  it("provides widgets to default location", () => {
-    const provider = new PropertyGridUiItemsProvider();
-
-    expect(
-      provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Right, appuiReactModule.StagePanelSection.End),
-    ).not.toHaveLength(0);
-    expect(
-      provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Right, appuiReactModule.StagePanelSection.Start),
-    ).toHaveLength(0);
-    expect(
-      provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Left, appuiReactModule.StagePanelSection.Start),
-    ).toHaveLength(0);
-  });
-
-  it("provides widgets to preferred location", () => {
-    const provider = new PropertyGridUiItemsProvider({
-      defaultPanelLocation: appuiReactModule.StagePanelLocation.Left,
-      defaultPanelSection: appuiReactModule.StagePanelSection.End,
-    });
-
-    expect(
-      provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Right, appuiReactModule.StagePanelSection.End),
-    ).toHaveLength(0);
-    expect(
-      provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Left, appuiReactModule.StagePanelSection.End),
-    ).not.toHaveLength(0);
-    expect(
-      provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Left, appuiReactModule.StagePanelSection.Start),
-    ).toHaveLength(0);
-  });
-});
-/* eslint-enable @typescript-eslint/no-deprecated */
-
 describe("createPropertyGrid", () => {
   function TestPropertyGridComponent() {
     return <>Test PropertyGridComponent</>;
   }
 
-  let selectionManager: ReturnType<typeof stubSelectionManager>;
   let selectionStorage: ReturnType<typeof stubSelectionStorage>;
 
   beforeAll(async () => {
@@ -88,17 +37,16 @@ describe("createPropertyGrid", () => {
   });
 
   beforeEach(async () => {
-    selectionManager = stubSelectionManager(Presentation);
     selectionStorage = stubSelectionStorage();
   });
 
   it("creates a basic widget", async () => {
-    const widget = createPropertyGrid({});
+    const widget = createPropertyGrid({ selectionStorage });
     expect(widget.content).toBeDefined();
   });
 
   it("renders property grid component", async () => {
-    const { getByText } = render(<PropertyGridWidget widgetId="x" propertyGridComponent={<TestPropertyGridComponent />} />);
+    const { getByText } = render(<PropertyGridWidget widgetId="x" selectionStorage={selectionStorage} propertyGridComponent={<TestPropertyGridComponent />} />);
     await waitFor(() => getByText("Test PropertyGridComponent"));
   });
 
@@ -107,7 +55,7 @@ describe("createPropertyGrid", () => {
     function ThrowingComponent(): ReactElement | null {
       throw new Error("Test error");
     }
-    const { getByText } = render(<PropertyGridWidget widgetId="x" propertyGridComponent={<ThrowingComponent />} />);
+    const { getByText } = render(<PropertyGridWidget widgetId="x" selectionStorage={selectionStorage} propertyGridComponent={<ThrowingComponent />} />);
     await waitFor(() => getByText("error"));
     errorStub.mockRestore();
   });
@@ -127,174 +75,154 @@ describe("createPropertyGrid", () => {
       vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodel);
     });
 
-    [
-      {
-        name: "with unified selection storage",
-        getProps: (): Partial<PropertyGridWidgetProps> => ({ selectionStorage }),
-        async setupSelection(keys: Selectable[]) {
-          selectionStorage.getSelection.mockReset();
-          selectionStorage.getSelection.mockReturnValue(Selectables.create(keys));
-        },
-        triggerSelectionChange(props?: Pick<Partial<EventArgs<typeof selectionStorage.selectionChangeEvent>>, "source">) {
-          selectionStorage.selectionChangeEvent.raiseEvent({ source: "TestSource", imodelKey: imodel.key, ...props } as EventArgs<
-            typeof selectionStorage.selectionChangeEvent
-          >);
-        },
-      },
-      {
-        name: "with deprecated selection manager",
-        getProps: (): Partial<PropertyGridWidgetProps> => ({}),
-        async setupSelection(keys: Selectable[]) {
-          selectionManager.getSelection.mockReset();
-          selectionManager.getSelection.mockReturnValue(new KeySet((await Promise.all(keys.map(createKeysFromSelectable))).flat()));
-        },
-        triggerSelectionChange(props?: Pick<Partial<EventArgs<typeof selectionStorage.selectionChangeEvent>>, "source">) {
-          selectionManager.selectionChange.raiseEvent(
-            { source: "TestSource", imodel, ...props } as EventArgs<typeof selectionManager.selectionChange>,
-            selectionManager,
-          );
-        },
-      },
-    ].forEach(({ name, getProps, setupSelection, triggerSelectionChange }) => {
-      function renderWidget(widgetProps?: PropertyGridWidgetProps) {
+    describe("with unified selection storage", () => {
+      async function setupSelection(keys: Selectable[]) {
+        selectionStorage.getSelection.mockReset();
+        selectionStorage.getSelection.mockReturnValue(Selectables.create(keys));
+      }
+      function triggerSelectionChange(props?: Pick<Partial<EventArgs<typeof selectionStorage.selectionChangeEvent>>, "source">) {
+        selectionStorage.selectionChangeEvent.raiseEvent({ source: "TestSource", imodelKey: imodel.key, ...props } as EventArgs<
+          typeof selectionStorage.selectionChangeEvent
+        >);
+      }
+
+      function renderWidget(widgetProps?: Partial<PropertyGridWidgetProps>) {
         const props = {
           widgetId: "test",
           widgetDef: widgetDef as unknown as WidgetDef,
           propertyGridComponent: <TestPropertyGridComponent />,
-          ...getProps(),
+          selectionStorage,
           ...widgetProps,
         } as Props<typeof PropertyGridWidget>;
         render(<PropertyGridWidget {...props} />);
       }
 
-      describe(name, () => {
-        it("hides widget if unified selection changes to empty", async () => {
-          await setupSelection([{ id: "0x1", className: "TestSchema.TestClass" }]);
-          renderWidget();
+      it("hides widget if unified selection changes to empty", async () => {
+        await setupSelection([{ id: "0x1", className: "TestSchema.TestClass" }]);
+        renderWidget();
 
-          widgetDef.state = appuiReactModule.WidgetState.Open;
-          await setupSelection([]);
-          act(() => triggerSelectionChange());
+        widgetDef.state = appuiReactModule.WidgetState.Open;
+        await setupSelection([]);
+        act(() => triggerSelectionChange());
 
-          await waitFor(() => {
-            expect(widgetDef.setWidgetState).toHaveBeenCalled();
-            expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Hidden);
-          });
+        await waitFor(() => {
+          expect(widgetDef.setWidgetState).toHaveBeenCalled();
+          expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Hidden);
+        });
+      });
+
+      it("hides widget if unified selection has only transient instance keys", async () => {
+        await setupSelection([{ id: "0x1", className: "TestSchema.TestClass" }]);
+        renderWidget();
+
+        await waitFor(() => {
+          expect(widgetDef.setWidgetState).toHaveBeenCalled();
+          expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Open);
         });
 
-        it("hides widget if unified selection has only transient instance keys", async () => {
-          await setupSelection([{ id: "0x1", className: "TestSchema.TestClass" }]);
-          renderWidget();
+        widgetDef.setWidgetState.mockReset();
+        widgetDef.state = appuiReactModule.WidgetState.Open;
+        await setupSelection([{ id: "0xffffff0000000001", className: TRANSIENT_ELEMENT_CLASSNAME }]);
+        act(() => triggerSelectionChange());
 
-          await waitFor(() => {
-            expect(widgetDef.setWidgetState).toHaveBeenCalled();
-            expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Open);
-          });
-
-          widgetDef.setWidgetState.mockReset();
-          widgetDef.state = appuiReactModule.WidgetState.Open;
-          await setupSelection([{ id: "0xffffff0000000001", className: TRANSIENT_ELEMENT_CLASSNAME }]);
-          act(() => triggerSelectionChange());
-
-          await waitFor(() => {
-            expect(widgetDef.setWidgetState).toHaveBeenCalled();
-            expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Hidden);
-          });
+        await waitFor(() => {
+          expect(widgetDef.setWidgetState).toHaveBeenCalled();
+          expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Hidden);
         });
+      });
 
-        it("opens widget if unified selection changes to non-empty", async () => {
-          await setupSelection([]);
-          renderWidget();
+      it("opens widget if unified selection changes to non-empty", async () => {
+        await setupSelection([]);
+        renderWidget();
 
-          widgetDef.setWidgetState.mockReset();
-          await setupSelection([{ id: "0x1", className: "TestSchema.TestClass" }]);
-          act(() => triggerSelectionChange());
+        widgetDef.setWidgetState.mockReset();
+        await setupSelection([{ id: "0x1", className: "TestSchema.TestClass" }]);
+        act(() => triggerSelectionChange());
 
-          await waitFor(() => {
-            expect(widgetDef.setWidgetState).toHaveBeenCalled();
-            expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Open);
-          });
+        await waitFor(() => {
+          expect(widgetDef.setWidgetState).toHaveBeenCalled();
+          expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Open);
         });
+      });
 
-        it("opens widget if unified selection has node keys", async () => {
-          await setupSelection([]);
-          renderWidget();
+      it("opens widget if unified selection has node keys", async () => {
+        await setupSelection([]);
+        renderWidget();
 
-          widgetDef.setWidgetState.mockReset();
+        widgetDef.setWidgetState.mockReset();
+        // eslint-disable-next-line @typescript-eslint/no-deprecated
+        const key: ECClassGroupingNodeKey = {
+          className: "TestSchema.TestClass",
+          groupedInstancesCount: 5,
+          pathFromRoot: [],
           // eslint-disable-next-line @typescript-eslint/no-deprecated
-          const key: ECClassGroupingNodeKey = {
-            className: "TestSchema.TestClass",
-            groupedInstancesCount: 5,
-            pathFromRoot: [],
-            // eslint-disable-next-line @typescript-eslint/no-deprecated
-            type: StandardNodeTypes.ECClassGroupingNode,
-            version: 2,
-          };
-          await setupSelection([{ identifier: "class grouping node", data: key, async *loadInstanceKeys() {} }]);
-          act(() => triggerSelectionChange());
+          type: StandardNodeTypes.ECClassGroupingNode,
+          version: 2,
+        };
+        await setupSelection([{ identifier: "class grouping node", data: key, async *loadInstanceKeys() {} }]);
+        act(() => triggerSelectionChange());
 
-          await waitFor(() => {
-            expect(widgetDef.setWidgetState).toHaveBeenCalled();
-            expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Open);
-          });
+        await waitFor(() => {
+          expect(widgetDef.setWidgetState).toHaveBeenCalled();
+          expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Open);
+        });
+      });
+
+      it("does not open widget when unified selection changes to non-empty if the widget is not hidden", async () => {
+        await setupSelection([{ id: "0x2", className: "TestSchema.TestClass" }]);
+        renderWidget();
+
+        await waitFor(() => {
+          expect(widgetDef.setWidgetState).toHaveBeenCalled();
+          expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Open);
         });
 
-        it("does not open widget when unified selection changes to non-empty if the widget is not hidden", async () => {
-          await setupSelection([{ id: "0x2", className: "TestSchema.TestClass" }]);
-          renderWidget();
+        widgetDef.setWidgetState.mockReset();
+        widgetDef.state = appuiReactModule.WidgetState.Closed;
 
-          await waitFor(() => {
-            expect(widgetDef.setWidgetState).toHaveBeenCalled();
-            expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Open);
-          });
+        await setupSelection([{ id: "0x1", className: "TestSchema.TestClass" }]);
+        act(() => triggerSelectionChange());
 
-          widgetDef.setWidgetState.mockReset();
-          widgetDef.state = appuiReactModule.WidgetState.Closed;
+        await waitFor(() => expect(widgetDef.setWidgetState).not.toHaveBeenCalled());
+      });
 
-          await setupSelection([{ id: "0x1", className: "TestSchema.TestClass" }]);
-          act(() => triggerSelectionChange());
+      it("opens widget if unified selection non-empty with instance keys and `shouldShow` return true", async () => {
+        await setupSelection([{ id: "0x1", className: "TestSchema.TestClass" }]);
+        renderWidget({ shouldShow: async () => true });
 
-          await waitFor(() => expect(widgetDef.setWidgetState).not.toHaveBeenCalled());
+        await waitFor(() => {
+          expect(widgetDef.setWidgetState).toHaveBeenCalled();
+          expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Open);
         });
+      });
 
-        it("opens widget if unified selection non-empty with instance keys and `shouldShow` return true", async () => {
-          await setupSelection([{ id: "0x1", className: "TestSchema.TestClass" }]);
-          renderWidget({ shouldShow: () => true });
-
-          await waitFor(() => {
-            expect(widgetDef.setWidgetState).toHaveBeenCalled();
-            expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Open);
-          });
-        });
-
-        it("opens widget if unified selection non-empty with node keys and `shouldShow` returns true", async () => {
+      it("opens widget if unified selection non-empty with node keys and `shouldShow` returns true", async () => {
+        // eslint-disable-next-line @typescript-eslint/no-deprecated
+        const key: ECClassGroupingNodeKey = {
+          className: "TestSchema.TestClass",
+          groupedInstancesCount: 5,
+          pathFromRoot: [],
           // eslint-disable-next-line @typescript-eslint/no-deprecated
-          const key: ECClassGroupingNodeKey = {
-            className: "TestSchema.TestClass",
-            groupedInstancesCount: 5,
-            pathFromRoot: [],
-            // eslint-disable-next-line @typescript-eslint/no-deprecated
-            type: StandardNodeTypes.ECClassGroupingNode,
-            version: 2,
-          };
-          await setupSelection([{ identifier: "class grouping node", data: key, async *loadInstanceKeys() {} }]);
-          renderWidget({ shouldShow: () => true });
+          type: StandardNodeTypes.ECClassGroupingNode,
+          version: 2,
+        };
+        await setupSelection([{ identifier: "class grouping node", data: key, async *loadInstanceKeys() {} }]);
+        renderWidget({ shouldShow: async () => true });
 
-          await waitFor(() => {
-            expect(widgetDef.setWidgetState).toHaveBeenCalled();
-            expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Open);
-          });
+        await waitFor(() => {
+          expect(widgetDef.setWidgetState).toHaveBeenCalled();
+          expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Open);
         });
+      });
 
-        it("hides widget if unified selection changes non-empty and `shouldShow` returns false", async () => {
-          widgetDef.state = appuiReactModule.WidgetState.Open;
-          await setupSelection([{ id: "0x1", className: "TestSchema.TestClass" }]);
-          renderWidget({ shouldShow: () => false });
+      it("hides widget if unified selection changes non-empty and `shouldShow` returns false", async () => {
+        widgetDef.state = appuiReactModule.WidgetState.Open;
+        await setupSelection([{ id: "0x1", className: "TestSchema.TestClass" }]);
+        renderWidget({ shouldShow: async () => false });
 
-          await waitFor(() => {
-            expect(widgetDef.setWidgetState).toHaveBeenCalled();
-            expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Hidden);
-          });
+        await waitFor(() => {
+          expect(widgetDef.setWidgetState).toHaveBeenCalled();
+          expect(widgetDef.setWidgetState).toHaveBeenCalledWith(appuiReactModule.WidgetState.Hidden);
         });
       });
     });

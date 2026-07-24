@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Thu, 07 May 2026 14:10:55 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 16 Jul 2026 13:39:19 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.18.0
+
+Thu, 16 Jul 2026 13:39:19 GMT
+
+### Minor changes
+
+- Add support for `@itwin/presentation-components` 6.0. ([#1692](https://github.com/iTwin/viewer-components-react/pull/1692))
 
 ## 3.17.10
 

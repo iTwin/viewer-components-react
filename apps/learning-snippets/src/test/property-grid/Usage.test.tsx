@@ -19,11 +19,14 @@ import {
   CopyPropertyTextContextMenuItem,
   IModelAppUserPreferencesStorage,
   RemoveFavoritePropertyContextMenuItem,
-  ShowHideNullValuesSettingsMenuItem,
+  ShowHideEmptyValuesSettingsMenuItem,
 } from "@itwin/property-grid-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_END__
 import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils.js";
+
+const selectionStorage = createStorage();
+const getGlobalSelectionStorage = () => selectionStorage;
 
 describe("Property grid", () => {
   describe("Learning snippets", () => {
@@ -40,7 +43,7 @@ describe("Property grid", () => {
 
       it("registers property grid", async () => {
         // __PUBLISH_EXTRACT_START__ PropertyGrid.RegisterPropertyGridWidget
-        UiItemsManager.register({ id: "property-grid-provider", getWidgets: () => [createPropertyGrid({})] });
+        UiItemsManager.register({ id: "property-grid-provider", getWidgets: () => [createPropertyGrid({ selectionStorage: getGlobalSelectionStorage() })] });
         // __PUBLISH_EXTRACT_END__
 
         expect(UiItemsManager.getWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End)).not.toHaveLength(0);
@@ -48,9 +51,6 @@ describe("Property grid", () => {
 
       it("registers customizable property grid", async () => {
         const MY_CUSTOM_RULESET = undefined;
-
-        const selectionStorage = createStorage();
-        const getGlobalSelectionStorage = () => selectionStorage;
 
         // __PUBLISH_EXTRACT_START__ PropertyGrid.RegisterCustomPropertyGridWidget
         UiItemsManager.register({
@@ -78,10 +78,10 @@ describe("Property grid", () => {
                 // the list populates the settings menu
                 settingsMenuItems: [
                   // allows hiding properties without values
-                  (props) => <ShowHideNullValuesSettingsMenuItem {...props} persist={true} />,
+                  (props) => <ShowHideEmptyValuesSettingsMenuItem {...props} persist={true} />,
                 ],
 
-                // supply an optional custom storage for user preferences, e.g. the show/hide null values used above
+                // supply an optional custom storage for user preferences, e.g. the show/hide empty values used above
                 preferencesStorage: new IModelAppUserPreferencesStorage("my-favorites-namespace"),
 
                 // supply the global selection storage that the widget will use to listen to selection

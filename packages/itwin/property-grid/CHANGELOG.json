@@ -2,6 +2,116 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Thu, 16 Jul 2026 13:39:19 GMT",
+      "version": "2.0.0",
+      "tag": "@itwin/property-grid-react_v2.0.0",
+      "comments": {
+        "major": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "2d966e0df536d724a8dd050b18bbca8b33acbe4c",
+            "comment": "Updated property grid component to use `new` editor system by default. If, for some reason, `legacy` editor system should be used, pass in `editorSystem: \"legacy\"` prop."
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "2d966e0df536d724a8dd050b18bbca8b33acbe4c",
+            "comment": "Bumped `itwinjs-core` peer dependencies to `^5.11.0`. Moved `@itwin/itwinui-react` from direct dependencies to peer dependencies. Removed support for `react` version `17`."
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "2d966e0df536d724a8dd050b18bbca8b33acbe4c",
+            "comment": "Updated `PropertyGridComponent`, `MultiElementPropertyGrid` and `PropertyGrid` components to require `selectionStorage` prop to be passed in."
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "2d966e0df536d724a8dd050b18bbca8b33acbe4c",
+            "comment": "Bump AppUI peer dependencies to `^5.33.0`."
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "2d966e0df536d724a8dd050b18bbca8b33acbe4c",
+            "comment": "Removed handling of deprecated `Presentation.selection` handling. Now property grid components handle selection only through `selectionStorage` passed in through props."
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "2d966e0df536d724a8dd050b18bbca8b33acbe4c",
+            "comment": "Removed deprecated `PropertyGridUiItemsProvider` API. Removed `shouldShow` callback using `Readonly<KeySet>` from `createPropertyGrid` API. `createPropertyGrid` now requires `selectionStorage` to be passed in."
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "2d966e0df536d724a8dd050b18bbca8b33acbe4c",
+            "comment": "Dropped CommonJS modules support."
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "2d966e0df536d724a8dd050b18bbca8b33acbe4c",
+            "comment": "Bump `@itwin/presentation-components` peer dependency to `^6.0.0`."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Fri, 19 Jun 2026 07:57:27 GMT",
+      "version": "1.20.0",
+      "tag": "@itwin/property-grid-react_v1.20.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "AzureDevOps@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "39a5632ba67358bce575729253de80bba996904b",
+            "comment": "Downgrade missing `IModelApp.userPreferences` log from error to warning and deduplicate"
+          }
+        ],
+        "minor": [
+          {
+            "author": "AzureDevOps@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "6a9a3b95dc7ef5969647cb035562401d1d8b89f1",
+            "comment": "Added `ShowHideEmptyValuesSettingsMenuItem` and `EmptyValuesSettingContext` whose names match the rendered `Show/Hide Empty Values` setting and deprecated `ShowHideNullValuesSettingsMenuItem` and `NullValueSettingContext` in favor of them. Also fixed the setting incorrectly hiding boolean and merged properties."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Mon, 01 Jun 2026 13:08:04 GMT",
+      "version": "1.19.9",
+      "tag": "@itwin/property-grid-react_v1.19.9",
+      "comments": {
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "556c99eeee855588034395d6ce01f1862039a671",
+            "comment": "Update prop types to use `type` instead of `interface` when building types on top of types coming from dependencies."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Mon, 18 May 2026 18:26:36 GMT",
+      "version": "1.19.8",
+      "tag": "@itwin/property-grid-react_v1.19.8",
+      "comments": {
+        "patch": [
+          {
+            "author": "carlos.dm.menezes@gmail.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "7d4ca29c2e9c86fcf7dbebf5c7a3da859e533807",
+            "comment": "[property-grid] convert `FilteringPropertyGridProps` from interface to type"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 07 May 2026 14:10:55 GMT",
       "version": "1.19.7",
       "tag": "@itwin/property-grid-react_v1.19.7",

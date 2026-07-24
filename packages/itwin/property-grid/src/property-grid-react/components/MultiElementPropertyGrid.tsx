@@ -9,10 +9,9 @@ import classnames from "classnames";
 import { useEffect, useState } from "react";
 import { SvgArrowDown, SvgArrowUp, SvgPropertiesList } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
+import { EmptyValuesSettingContext } from "../hooks/UseEmptyValuesSetting.js";
 import { useInstanceSelection } from "../hooks/UseInstanceSelection.js";
-import { NullValueSettingContext } from "../hooks/UseNullValuesSetting.js";
 import { useTelemetryContext } from "../hooks/UseTelemetryContext.js";
-import { useSelectionHandler } from "../hooks/UseUnifiedSelectionHandler.js";
 import { PropertyGridManager } from "../PropertyGridManager.js";
 import { ElementList as ElementListComponent } from "./ElementList.js";
 import { PropertyGrid as PropertyGridComponent } from "./PropertyGrid.js";
@@ -20,6 +19,7 @@ import { SingleElementPropertyGrid as SingleElementPropertyGridComponent } from 
 
 import type { ReactNode } from "react";
 import type { InstanceKey } from "@itwin/presentation-common";
+import type { OmitOverUnion } from "@itwin/presentation-shared";
 import type { UsageTrackedFeatures } from "../hooks/UseTelemetryContext.js";
 import type { ElementListProps } from "./ElementList.js";
 import type { PropertyGridProps } from "./PropertyGrid.js";
@@ -35,7 +35,7 @@ enum MultiElementPropertyContent {
  * Props for `MultiElementPropertyGrid` component.
  * @public
  */
-export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "headerControls" | "onBackButton"> {
+export type MultiElementPropertyGridProps = OmitOverUnion<PropertyGridProps, "headerControls" | "onBackButton"> & {
   /** Renders controls for ancestors navigation. If set to `undefined`, ancestors navigation is disabled. */
   ancestorsNavigationControls?: (props: AncestorsNavigationControlsProps) => ReactNode;
 
@@ -45,7 +45,7 @@ export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "
    * memoized to avoid unnecessary re-renders.
    */
   getParentInstanceKey?: (key: InstanceKey) => Promise<InstanceKey | undefined>;
-}
+};
 
 /**
  * Component that renders property grid for instances in `UnifiedSelection`.
@@ -54,7 +54,6 @@ export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "
  * @public
  */
 export function MultiElementPropertyGrid({ ancestorsNavigationControls, getParentInstanceKey, ...props }: MultiElementPropertyGridProps) {
-  const { selectionChange } = useSelectionHandler({ selectionStorage: props.selectionStorage });
   const { selectedKeys, focusedInstanceKey, focusInstance, ancestorsNavigationProps } = useInstanceSelection({
     imodel: props.imodel,
     selectionStorage: props.selectionStorage,
@@ -62,6 +61,7 @@ export function MultiElementPropertyGrid({ ancestorsNavigationControls, getParen
   });
   const [content, setContent] = useState<MultiElementPropertyContent>(MultiElementPropertyContent.PropertyGrid);
   const { onFeatureUsed } = useTelemetryContext();
+  const selectionStorage = props.selectionStorage;
 
   useEffect(() => {
     const feature = featureFromSelectedCount(selectedKeys.length);
@@ -70,10 +70,10 @@ export function MultiElementPropertyGrid({ ancestorsNavigationControls, getParen
 
   useEffect(() => {
     // show standard property grid when selection changes
-    return selectionChange.addListener(() => {
+    return selectionStorage.selectionChangeEvent.addListener(() => {
       setContent(MultiElementPropertyContent.PropertyGrid);
     });
-  }, [selectionChange]);
+  }, [selectionStorage]);
 
   const openElementList = () => {
     onFeatureUsed("elements-list");
@@ -126,7 +126,7 @@ export function MultiElementPropertyGrid({ ancestorsNavigationControls, getParen
   return (
     <div className="property-grid-react-transition-container">
       <div className="property-grid-react-transition-container-inner">
-        <NullValueSettingContext>
+        <EmptyValuesSettingContext>
           {items.map((component, idx) => (
             <div
               key={component.key}
@@ -139,7 +139,7 @@ export function MultiElementPropertyGrid({ ancestorsNavigationControls, getParen
               {component}
             </div>
           ))}
-        </NullValueSettingContext>
+        </EmptyValuesSettingContext>
       </div>
     </div>
   );

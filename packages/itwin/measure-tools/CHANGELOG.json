@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Tue, 12 May 2026 16:14:28 GMT",
+      "version": "0.33.0",
+      "tag": "@itwin/measure-tools-react_v0.33.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "50554904+hl662@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "6b6f98aa108bca7ebb718f294dfa264a1d55f310",
+            "comment": "Update peer dependencies to iTwin.js 5.9, migrate measurement formatting to the FormatSpecHandle-based API, and fix existing measurement labels to refresh immediately after quantity format changes."
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 15 Jan 2026 14:30:28 GMT",
       "version": "0.32.0",
       "tag": "@itwin/measure-tools-react_v0.32.0",

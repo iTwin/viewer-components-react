@@ -1,8 +1,51 @@
 # Change Log - @itwin/property-grid-react
 
-<!-- This log was last generated on Thu, 07 May 2026 14:10:55 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 16 Jul 2026 13:39:19 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 2.0.0
+
+Thu, 16 Jul 2026 13:39:19 GMT
+
+### Major changes
+
+- Updated property grid component to use `new` editor system by default. If, for some reason, `legacy` editor system should be used, pass in `editorSystem: "legacy"` prop. ([#1692](https://github.com/iTwin/viewer-components-react/pull/1692))
+- Bumped `itwinjs-core` peer dependencies to `^5.11.0`. Moved `@itwin/itwinui-react` from direct dependencies to peer dependencies. Removed support for `react` version `17`. ([#1692](https://github.com/iTwin/viewer-components-react/pull/1692))
+- Updated `PropertyGridComponent`, `MultiElementPropertyGrid` and `PropertyGrid` components to require `selectionStorage` prop to be passed in. ([#1692](https://github.com/iTwin/viewer-components-react/pull/1692))
+- Bump AppUI peer dependencies to `^5.33.0`. ([#1692](https://github.com/iTwin/viewer-components-react/pull/1692))
+- Removed handling of deprecated `Presentation.selection` handling. Now property grid components handle selection only through `selectionStorage` passed in through props. ([#1692](https://github.com/iTwin/viewer-components-react/pull/1692))
+- Removed deprecated `PropertyGridUiItemsProvider` API. Removed `shouldShow` callback using `Readonly<KeySet>` from `createPropertyGrid` API. `createPropertyGrid` now requires `selectionStorage` to be passed in. ([#1692](https://github.com/iTwin/viewer-components-react/pull/1692))
+- Dropped CommonJS modules support. ([#1692](https://github.com/iTwin/viewer-components-react/pull/1692))
+- Bump `@itwin/presentation-components` peer dependency to `^6.0.0`. ([#1692](https://github.com/iTwin/viewer-components-react/pull/1692))
+
+## 1.20.0
+
+Fri, 19 Jun 2026 07:57:27 GMT
+
+### Minor changes
+
+- Added `ShowHideEmptyValuesSettingsMenuItem` and `EmptyValuesSettingContext` whose names match the rendered `Show/Hide Empty Values` setting and deprecated `ShowHideNullValuesSettingsMenuItem` and `NullValueSettingContext` in favor of them. Also fixed the setting incorrectly hiding boolean and merged properties. ([#1724](https://github.com/iTwin/viewer-components-react/pull/1724))
+
+### Patches
+
+- Downgrade missing `IModelApp.userPreferences` log from error to warning and deduplicate ([#1718](https://github.com/iTwin/viewer-components-react/pull/1718))
+
+## 1.19.9
+
+Mon, 01 Jun 2026 13:08:04 GMT
+
+### Patches
+
+- Update prop types to use `type` instead of `interface` when building types on top of types coming from dependencies. ([#1685](https://github.com/iTwin/viewer-components-react/pull/1685))
+
+## 1.19.8
+
+Mon, 18 May 2026 18:26:36 GMT
+
+### Patches
+
+- [property-grid] convert `FilteringPropertyGridProps` from interface to type ([#1684](https://github.com/iTwin/viewer-components-react/pull/1684))
 
 ## 1.19.7
 
