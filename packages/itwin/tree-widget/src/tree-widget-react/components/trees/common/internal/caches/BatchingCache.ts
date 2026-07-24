@@ -6,7 +6,7 @@
 import { bufferCount, forkJoin, fromEventPattern, map, mergeMap, of, reduce, switchMap, take, tap, timer } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
 import { catchBeSQLiteInterrupts } from "../hooks/UseErrorState.js";
-import { releaseMainThreadOnItemsCount } from "../Utils.js";
+import { releaseMainThreadOnItemsCount } from "../Rxjs.js";
 
 import type { Observable } from "rxjs";
 
