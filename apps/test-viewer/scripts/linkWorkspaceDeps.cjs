@@ -106,6 +106,6 @@ function getTargetLibPath(packageName, distDirName) {
 }
 
 function getSourceLibPath(packageDir, distDirName) {
-  const sourcePath = path.resolve(__dirname, "../../../packages/itwin", packageDir);
+  const sourcePath = path.resolve(__dirname, "../../../packages", packageDir);
   return path.resolve(sourcePath, distDirName ?? "lib");
 }
