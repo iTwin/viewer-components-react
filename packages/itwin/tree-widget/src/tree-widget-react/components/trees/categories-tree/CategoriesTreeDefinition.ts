@@ -77,7 +77,7 @@ import type {
 } from "@itwin/presentation-shared";
 import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategoryId } from "../common/internal/Types.js";
 import type { DeepRequired } from "../common/internal/Utils.js";
-import type { CategoriesTreeIdsCache, CategoryInfo } from "./internal/CategoriesTreeIdsCache.js";
+import type { CachedCategoryInfo, CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import type { CategoryNodeProps, ElementNodeProps } from "./internal/CategoriesTreeNodeInternal.js";
 
 const MAX_SEARCH_INSTANCE_KEY_COUNT = 100;
@@ -585,7 +585,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     instanceLabelSelectClauseFactory,
     nodeSelectClauseFactory,
   }: {
-    categories: Array<CategoryInfo>;
+    categories: Array<CachedCategoryInfo>;
     instanceFilter?: GenericInstanceFilter;
     instanceLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
     nodeSelectClauseFactory: NodesQueryClauseFactory;

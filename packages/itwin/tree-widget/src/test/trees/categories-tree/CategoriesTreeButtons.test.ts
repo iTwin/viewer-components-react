@@ -12,25 +12,23 @@ import {
   insertSubCategory,
   terminateCore,
 } from "test-utilities";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { withEditTxn } from "@itwin/core-backend";
-import { IModelReadRpcInterface, SubCategoryAppearance } from "@itwin/core-common";
+import { IModelReadRpcInterface } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { invertAllCategories } from "../../tree-widget-react/components/trees/common/CategoriesVisibilityUtils.js";
-import { enableCategoryDisplay, loadCategoriesFromViewport } from "../../tree-widget-react/components/trees/common/internal/VisibilityUtils.js";
-import { buildIModel } from "../IModelUtils.js";
-import { TestUtils } from "../TestUtils.js";
-import { createFakeViewport, createIModelMock } from "./Common.js";
-import { createTreeWidgetTestingViewport } from "./TreeUtils.js";
+import { invertAllCategories } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeButtons.js";
+import { buildIModel } from "../../IModelUtils.js";
+import { TestUtils } from "../../TestUtils.js";
+import { createTreeWidgetTestingViewport } from "../TreeUtils.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { TreeWidgetTestingViewport } from "./TreeUtils.js";
+import type { TreeWidgetTestingViewport } from "../TreeUtils.js";
 
-describe("CategoryVisibilityUtils", () => {
+describe("CategoriesTreeButtons", () => {
   beforeAll(async () => {
     await NoRenderApp.startup();
     await TestUtils.initialize();
@@ -39,87 +37,6 @@ describe("CategoryVisibilityUtils", () => {
   afterAll(async () => {
     TestUtils.terminate();
     await IModelApp.shutdown();
-  });
-
-  const categoryId = "CategoryId";
-  const subCategoryId = "SubCategoryId";
-  const categoriesInfo = new Map([
-    [
-      categoryId,
-      {
-        id: categoryId,
-        subCategories: new Map([
-          [
-            subCategoryId,
-            {
-              id: subCategoryId,
-              categoryId,
-              appearance: new SubCategoryAppearance(),
-            },
-          ],
-        ]),
-      },
-    ],
-  ]);
-  let viewport: TreeWidgetTestingViewport;
-
-  beforeEach(() => {
-    viewport = createFakeViewport({
-      queryHandler: () => [{ id: categoryId }],
-      getCategoryInfo: async () => categoriesInfo,
-      viewType: "3d",
-    });
-  });
-
-  describe("enableCategoryDisplay", () => {
-    it("enables category", async () => {
-      await enableCategoryDisplay(viewport, categoryId, true, false);
-      expect(viewport.changeCategoryDisplay).toHaveBeenCalledWith({ categoryIds: [categoryId], display: true, enableAllSubCategories: false });
-    });
-
-    it("disables category", async () => {
-      await enableCategoryDisplay(viewport, categoryId, false, false);
-      expect(viewport.changeCategoryDisplay).toHaveBeenCalledWith({ categoryIds: [categoryId], display: false, enableAllSubCategories: false });
-    });
-
-    it("disables category and subcategories", async () => {
-      await enableCategoryDisplay(viewport, categoryId, false, true);
-      expect(viewport.changeCategoryDisplay).toHaveBeenCalledWith({ categoryIds: [categoryId], display: false, enableAllSubCategories: true });
-      expect(viewport.changeSubCategoryDisplay).toHaveBeenCalledWith({ subCategoryId, display: false });
-    });
-
-    it("removes overrides per model when enabling category", async () => {
-      const overrides = [{ modelId: "ModelId", categoryId, visible: false }];
-      viewport.perModelCategoryOverrides = overrides;
-      await enableCategoryDisplay(viewport, categoryId, true, false);
-
-      expect(viewport.changeCategoryDisplay).toHaveBeenCalledWith({ categoryIds: [categoryId], display: true, enableAllSubCategories: false });
-      expect(viewport.setPerModelCategoryOverride).toHaveBeenCalledWith({
-        modelIds: new Set(["ModelId"]),
-        categoryIds: new Set([categoryId]),
-        override: "none",
-      });
-    });
-  });
-
-  describe("loadCategoriesFromViewport", () => {
-    it("loadCategoriesFromViewport sets subCategories as undefined when subCategories size is 0", async () => {
-      const categoryInfoWithoutSubcategories: Map<Id64String, IModelConnection.Categories.CategoryInfo> = new Map([
-        [
-          categoryId,
-          {
-            id: categoryId,
-            subCategories: new Map(),
-          },
-        ],
-      ]);
-      viewport.iModel = createIModelMock({
-        queryHandler: () => [{ id: "CategoryWithoutSubcategories" }],
-        getCategoryInfo: async () => categoryInfoWithoutSubcategories,
-      });
-      const result = await loadCategoriesFromViewport(viewport);
-      expect(result[0].subCategoryIds).toBeUndefined();
-    });
   });
 
   describe("invertAllCategories", () => {

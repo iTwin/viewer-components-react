@@ -4,10 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { HierarchySearchTree } from "@itwin/presentation-hierarchies";
-import { showAllCategories } from "./CategoriesVisibilityUtils.js";
-import { enableCategoryDisplay, loadCategoriesFromViewport } from "./internal/VisibilityUtils.js";
+import { enableCategoryDisplay } from "./internal/VisibilityUtils.js";
 
-import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { TreeWidgetViewport } from "./TreeWidgetViewport.js";
 
 /**
@@ -20,37 +19,19 @@ export const LOGGING_NAMESPACE = "TreeWidget";
 export type FunctionProps<THook extends (props: any) => any> = Parameters<THook>[0];
 
 /**
- * Disables display of all given models.
- * @public
- */
-export function hideAllModels(models: string[], viewport: TreeWidgetViewport) {
-  viewport.changeModelDisplay({ modelIds: models, display: false });
-}
-
-/**
  * Enables display of all given models. Also enables display of all categories and clears always and
  * never drawn lists in the viewport.
- * @public
+ * @internal
  */
 export async function showAll(props: {
   /** ID's of models to enable */
   models: Id64Array;
-  /** ID's of categories to enable, if set to undefined, all categories will be enabled */
-  categories?: Id64Array;
+  /** ID's of categories to enable */
+  categories: Id64Array;
   viewport: TreeWidgetViewport;
-  componentId?: GuidString;
 }) {
-  const { models, categories, viewport, componentId } = props;
-  if (categories) {
-    await showAllCategories(categories, viewport);
-  } else {
-    const categoryInfos = await loadCategoriesFromViewport(viewport, componentId);
-    if (categoryInfos.length === 0) {
-      return;
-    }
-    const ids = categoryInfos.map((categoryInfo) => categoryInfo.categoryId);
-    await enableCategoryDisplay(viewport, ids, true);
-  }
+  const { models, categories, viewport } = props;
+  await enableCategoryDisplay(viewport, categories, true, true);
   viewport.changeModelDisplay({ modelIds: models, display: true });
   viewport.clearNeverDrawn();
   viewport.clearAlwaysDrawn();
@@ -58,7 +39,7 @@ export async function showAll(props: {
 
 /**
  * Inverts display of all given models.
- * @public
+ * @internal
  */
 export function invertAllModels(models: Id64Array, viewport: TreeWidgetViewport) {
   const notViewedModels = new Array<Id64String>();
@@ -76,7 +57,7 @@ export function invertAllModels(models: Id64Array, viewport: TreeWidgetViewport)
 
 /**
  * Based on the value of `enable` argument, either enables or disables display of given models.
- * @public
+ * @internal
  */
 export function toggleModels(models: string[], enable: boolean, viewport: TreeWidgetViewport) {
   if (!models) {
@@ -87,7 +68,7 @@ export function toggleModels(models: string[], enable: boolean, viewport: TreeWi
 
 /**
  * Checks if all given models are displayed in given viewport.
- * @public
+ * @internal
  */
 export function areAllModelsVisible(models: string[], viewport: TreeWidgetViewport) {
   return models.length !== 0 ? models.every((id) => viewport.viewsModel(id)) : false;

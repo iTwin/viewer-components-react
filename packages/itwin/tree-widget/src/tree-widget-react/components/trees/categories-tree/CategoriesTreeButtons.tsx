@@ -10,19 +10,26 @@ import { IconButton } from "@stratakit/bricks";
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
 import visibilityInvertSvg from "@stratakit/icons/visibility-invert.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
-import { hideAllCategories, invertAllCategories } from "../common/CategoriesVisibilityUtils.js";
 import { useTranslation } from "../common/components/LocalizationContext.js";
 import { useErrorState } from "../common/internal/hooks/UseErrorState.js";
-import { useGuid } from "../common/internal/hooks/UseGuid.js";
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { getClassesByView } from "../common/internal/Utils.js";
-import { hideAllModels, showAll } from "../common/Utils.js";
+import { enableCategoryDisplay } from "../common/internal/VisibilityUtils.js";
+import { showAll } from "../common/Utils.js";
 
-import type { Id64Array } from "@itwin/core-bentley";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
-import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { ModelId } from "../common/internal/Types.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
+
+/**
+ * Data structure that describes category.
+ * @beta
+ */
+export interface CategoryInfo {
+  categoryId: Id64String;
+  subCategoryIds?: Id64Array;
+}
 
 /**
  * Props that get passed to `CategoriesTreeComponent` header button renderer.
@@ -83,7 +90,6 @@ export type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonP
 
 /** @public */
 export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
-  const componentId = useGuid();
   const { cancelChangesInProgress } = useSharedTreeContextInternal();
   const translate = useTranslation();
   return (
@@ -98,7 +104,6 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
           models: props.models,
           viewport: props.viewport,
           categories: props.categories.map((category) => category.categoryId),
-          componentId,
         }).catch(() => {});
       }}
       icon={visibilityShowSvg}
@@ -118,11 +123,14 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
         // cspell:disable-next-line
         props.onFeatureUsed?.(`categories-tree-hideall`);
         cancelChangesInProgress.next();
-        void hideAllCategories(
-          props.categories.map((category) => category.categoryId),
+        void enableCategoryDisplay(
           props.viewport,
+          props.categories.map((category) => category.categoryId),
+          false,
+          false,
         );
-        hideAllModels(props.models, props.viewport);
+
+        props.viewport.changeModelDisplay({ modelIds: props.models, display: false });
       }}
       icon={visibilityHideSvg}
     />
@@ -203,4 +211,42 @@ function useAvailableModels(viewport: TreeWidgetViewport): Array<ModelId> {
   }, [imodel, baseIdsCache, setErrorState]);
 
   return availableModels;
+}
+
+/**
+ * Invert display of all given categories.
+ * Categories are inverted like this:
+ * - If category is visible, it will be hidden.
+ * - If category is hidden, it will be visible.
+ * - If category is partially visible, it will be fully visible.
+ * @internal
+ */
+export async function invertAllCategories(categories: CategoryInfo[], viewport: TreeWidgetViewport) {
+  const categoriesToEnable = new Set<Id64String>();
+  const categoriesToDisable = new Set<Id64String>();
+
+  for (const category of categories) {
+    if (!viewport.viewsCategory(category.categoryId)) {
+      categoriesToEnable.add(category.categoryId);
+      continue;
+    }
+    // Check if category is in partial state
+    if (category.subCategoryIds?.some((subCategory) => !viewport.viewsSubCategory(subCategory))) {
+      categoriesToEnable.add(category.categoryId);
+    } else {
+      categoriesToDisable.add(category.categoryId);
+    }
+  }
+
+  // collect per model overrides that need to be inverted
+  for (const { categoryId, visible } of viewport.perModelCategoryOverrides) {
+    if (!visible && categoriesToDisable.has(categoryId)) {
+      categoriesToEnable.add(categoryId);
+      categoriesToDisable.delete(categoryId);
+    }
+  }
+
+  await enableCategoryDisplay(viewport, categoriesToDisable, false, true);
+
+  await enableCategoryDisplay(viewport, categoriesToEnable, true, true);
 }

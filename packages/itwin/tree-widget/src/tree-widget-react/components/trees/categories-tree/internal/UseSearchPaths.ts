@@ -16,9 +16,9 @@ import { CategoriesTreeDefinition } from "../CategoriesTreeDefinition.js";
 
 import type { GuidString } from "@itwin/core-bentley";
 import type { InstanceKey } from "@itwin/presentation-shared";
-import type { CategoryInfo } from "../../common/CategoriesVisibilityUtils.js";
 import type { VisibilityTreeProps } from "../../common/components/VisibilityTree.js";
 import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
+import type { CategoryInfo } from "../CategoriesTreeButtons.js";
 import type { RequiredCategoriesTreeHierarchyConfiguration } from "../CategoriesTreeDefinition.js";
 import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
 

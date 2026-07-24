@@ -13,7 +13,7 @@ import type { CallbacksWithCommonTreeRendererProps } from "./Tree.js";
 import type { VisibilityContext } from "./TreeNodeVisibilityButton.js";
 
 /** @beta */
-export type VisibilityTreeRendererProps = ComponentProps<typeof StrataKitTreeRenderer> & VisibilityContext;
+type VisibilityTreeRendererProps = ComponentProps<typeof StrataKitTreeRenderer> & VisibilityContext;
 
 /** @beta */
 export type ExtendedVisibilityTreeRendererProps = CallbacksWithCommonTreeRendererProps<

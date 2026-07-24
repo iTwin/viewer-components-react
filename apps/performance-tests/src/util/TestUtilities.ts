@@ -104,7 +104,7 @@ function createThreadBlocksDetector({ ignoreMeasurement, name, task }: { ignoreM
 
 /**
  * Implementation of `IModelConnection` that allows opening local files in tests.
- * @beta
+ * @internal
  */
 export class TestIModelConnection extends IModelConnection {
   readonly #db: IModelDb;

@@ -39,7 +39,7 @@ import { getInsertFunctionByViewType } from "./internal/Utils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { EC, Props } from "@itwin/presentation-shared";
-import type { CategoryInfo } from "../../../tree-widget-react/components/trees/common/CategoriesVisibilityUtils.js";
+import type { CategoryInfo } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeButtons.js";
 
 // cspell:words egory
 // cspell complains about Cat_egory and Cat%egory

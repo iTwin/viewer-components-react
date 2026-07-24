@@ -12,8 +12,7 @@ import { createVisibilityStatus } from "./Tooltip.js";
 import { createWhereClause, getClassesByView, getOptimalBatchSize } from "./Utils.js";
 
 import type { Observable, OperatorFunction } from "rxjs";
-import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { CategoryInfo } from "../CategoriesVisibilityUtils.js";
+import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { TreeWidgetViewport } from "../TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
 import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip.js";
@@ -157,48 +156,4 @@ export async function enableCategoryDisplay(viewport: TreeWidgetViewport, catego
       }),
     ),
   );
-}
-
-/** @internal */
-export async function loadCategoriesFromViewport(vp: TreeWidgetViewport, componentId?: GuidString) {
-  // Query categories and add them to state
-  if (vp.viewType === "other") {
-    return [];
-  }
-  const { categoryClass, elementClass } = getClassesByView(vp.viewType);
-  const ecsql = `
-    SELECT ECInstanceId as id
-    FROM ${categoryClass}
-    WHERE
-      ECInstanceId IN (
-        SELECT DISTINCT Category.Id
-        FROM ${elementClass}
-        ${createWhereClause({ conditions: [`Category.Id IN (SELECT ECInstanceId FROM ${categoryClass})`, vp.viewType === "2d" && "Model.Id=?"] })}
-      )
-  `;
-
-  const categories: CategoryInfo[] = [];
-  const rows = await (async () => {
-    const result = new Array<Id64String>();
-    try {
-      for await (const row of vp.iModel.createQueryReader(ecsql, undefined, {
-        rowFormat: QueryRowFormat.UseJsPropertyNames,
-        restartToken: `CategoriesVisibilityUtils/${componentId ?? Guid.createValue()}/categories`,
-      })) {
-        result.push(row.id);
-      }
-      return result;
-      // This can happen when query is cancelled
-    } catch (error) {
-      if (isBeSqliteInterruptError(error)) {
-        return [];
-      }
-      throw error;
-    }
-  })();
-  const categoryInfo = await vp.iModel.categories.getCategoryInfo(rows);
-  for (const val of categoryInfo.values()) {
-    categories.push({ categoryId: val.id, subCategoryIds: val.subCategories.size ? [...val.subCategories.keys()] : undefined });
-  }
-  return categories;
 }

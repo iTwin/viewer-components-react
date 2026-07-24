@@ -16,7 +16,7 @@ import { useTranslation } from "../common/components/LocalizationContext.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { getClassesByView } from "../common/internal/Utils.js";
-import { areAllModelsVisible, hideAllModels, invertAllModels, showAll, toggleModels } from "../common/Utils.js";
+import { areAllModelsVisible, invertAllModels, showAll, toggleModels } from "../common/Utils.js";
 
 import type { ReactElement } from "react";
 import type { Id64String } from "@itwin/core-bentley";
@@ -28,7 +28,7 @@ import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
  * Information about a single Model.
  * @public
  */
-export interface ModelInfo {
+interface ModelInfo {
   id: string;
   isPlanProjection?: boolean;
 }
@@ -145,10 +145,7 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
         // cspell:disable-next-line
         props.onFeatureUsed?.("models-tree-hideall");
         cancelChangesInProgress.next();
-        hideAllModels(
-          props.models.map((model) => model.id),
-          props.viewport,
-        );
+        props.viewport.changeModelDisplay({ modelIds: props.models.map((model) => model.id), display: false });
       }}
       icon={visibilityHideSvg}
     />
