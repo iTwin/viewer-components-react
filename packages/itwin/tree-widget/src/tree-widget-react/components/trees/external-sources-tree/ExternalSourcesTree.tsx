@@ -12,7 +12,7 @@ import ecSchemaSvg from "@stratakit/icons/selection-children.svg";
 import { EmptyTreeContent } from "../common/components/EmptyTree.js";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
-import { useGuid } from "../common/internal/useGuid.js";
+import { useGuid } from "../common/internal/hooks/UseGuid.js";
 import { ExternalSourcesTreeComponent } from "./ExternalSourcesTreeComponent.js";
 import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition.js";
 

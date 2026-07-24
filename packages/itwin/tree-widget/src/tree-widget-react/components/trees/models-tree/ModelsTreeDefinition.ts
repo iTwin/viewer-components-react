@@ -19,17 +19,16 @@ import {
   CLASS_NAME_SpatialCategory,
   CLASS_NAME_Subject,
 } from "../common/internal/ClassNameDefinitions.js";
-import { catchBeSQLiteInterrupts } from "../common/internal/UseErrorState.js";
+import { catchBeSQLiteInterrupts } from "../common/internal/hooks/UseErrorState.js";
+import { fromWithRelease, releaseMainThreadOnItemsCount } from "../common/internal/Rxjs.js";
 import {
   createExcludedClassesClause,
   createIdsSelector,
   createWhereClause,
-  fromWithRelease,
   getOptimalBatchSize,
   groupingNodeDataFromChildren,
   ParentElementsPath,
   parseIdsSelectorResult,
-  releaseMainThreadOnItemsCount,
 } from "../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../common/TreeErrors.js";
 import { ModelsTreeNodeInternal } from "./internal/ModelsTreeNodeInternal.js";

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback } from "react";
-import { useLatest } from "../internal/Utils.js";
+import { useLatest } from "../internal/hooks/UseLatest.js";
 
 import type { TreeNode } from "@itwin/presentation-hierarchies-react";
 import type { VisibilityContext } from "./TreeNodeVisibilityButton.js";

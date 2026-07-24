@@ -15,9 +15,9 @@ import {
   TooManySearchMatches,
   UnknownInstanceFocusError,
 } from "../common/components/EmptyTree.js";
+import { useCachedVisibility } from "../common/internal/hooks/UseCachedVisibility.js";
+import { useGuid } from "../common/internal/hooks/UseGuid.js";
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
-import { useGuid } from "../common/internal/useGuid.js";
-import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { mergeWithDefaults, stableStringify } from "../common/internal/Utils.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 import { useSearchPaths } from "./internal/UseSearchPaths.js";
@@ -35,7 +35,7 @@ import type { TreeNode } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { ExtendedVisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
-import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/hooks/UseCachedVisibility.js";
 import type { SearchResultsTree } from "../common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { ModelsTreeSearchError, ModelsTreeSubTreeError } from "./internal/UseSearchPaths.js";

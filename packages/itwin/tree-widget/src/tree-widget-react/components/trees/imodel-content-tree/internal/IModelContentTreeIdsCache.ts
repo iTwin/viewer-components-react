@@ -11,7 +11,7 @@ import {
   CLASS_NAME_Model,
   CLASS_NAME_Subject,
 } from "../../common/internal/ClassNameDefinitions.js";
-import { isBeSqliteInterruptError } from "../../common/internal/UseErrorState.js";
+import { isBeSqliteInterruptError } from "../../common/internal/hooks/UseErrorState.js";
 import { createWhereClause, getOrCreate } from "../../common/internal/Utils.js";
 
 import type { GuidString, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";

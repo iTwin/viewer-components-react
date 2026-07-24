@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { defer, EMPTY, map, reduce, shareReplay } from "rxjs";
-import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
+import { catchBeSQLiteInterrupts } from "../hooks/UseErrorState.js";
 import { ChildrenTree, getOrCreate } from "../Utils.js";
 
 import type { Observable } from "rxjs";

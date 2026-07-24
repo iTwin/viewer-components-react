@@ -24,7 +24,7 @@ export { createCategoriesTreeVisibilityHandler } from "./tree-widget-react/compo
 
 export { ClassificationsTreeDefinition } from "./tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
 export { ClassificationsTreeIdsCache } from "./tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
-export { releaseMainThreadOnItemsCount } from "./tree-widget-react/components/trees/common/internal/Utils.js";
+export { releaseMainThreadOnItemsCount } from "./tree-widget-react/components/trees/common/internal/Rxjs.js";
 export { createClassificationsTreeVisibilityHandler } from "./tree-widget-react/components/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHandler.js";
 
 export { BaseIdsCache } from "./tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";

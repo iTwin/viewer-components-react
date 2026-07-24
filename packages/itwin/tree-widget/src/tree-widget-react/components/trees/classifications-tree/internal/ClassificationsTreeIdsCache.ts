@@ -14,8 +14,9 @@ import {
   CLASS_NAME_GeometricElement3d,
   CLASS_NAME_SpatialCategory,
 } from "../../common/internal/ClassNameDefinitions.js";
-import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
-import { createWhereClause, fromWithRelease, getOrCreate } from "../../common/internal/Utils.js";
+import { catchBeSQLiteInterrupts } from "../../common/internal/hooks/UseErrorState.js";
+import { fromWithRelease } from "../../common/internal/Rxjs.js";
+import { createWhereClause, getOrCreate } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";

@@ -7,8 +7,9 @@ import { defaultIfEmpty, defer, EMPTY, forkJoin, from, map, merge, mergeMap, of,
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
-import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
-import { createWhereClause, fromWithRelease, getClassesByView, getOrCreate } from "../../common/internal/Utils.js";
+import { catchBeSQLiteInterrupts } from "../../common/internal/hooks/UseErrorState.js";
+import { fromWithRelease } from "../../common/internal/Rxjs.js";
+import { createWhereClause, getClassesByView, getOrCreate } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";

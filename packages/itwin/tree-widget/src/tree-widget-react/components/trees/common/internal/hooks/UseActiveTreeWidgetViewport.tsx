@@ -5,10 +5,10 @@
 
 import { useMemo } from "react";
 import { useActiveViewport } from "@itwin/appui-react";
-import { createTreeWidgetViewport } from "../TreeWidgetViewport.js";
+import { createTreeWidgetViewport } from "../../TreeWidgetViewport.js";
 
 import type { Viewport } from "@itwin/core-frontend";
-import type { TreeWidgetViewport } from "../TreeWidgetViewport.js";
+import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
 
 /** @internal */
 export function useActiveTreeWidgetViewport({ treeWidgetViewport }: { treeWidgetViewport?: TreeWidgetViewport }): TreeWidgetViewport | undefined {

@@ -6,7 +6,7 @@
 import { defer, EMPTY, expand, map, reduce, shareReplay } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
 import { CLASS_NAME_SubCategory } from "../ClassNameDefinitions.js";
-import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
+import { catchBeSQLiteInterrupts } from "../hooks/UseErrorState.js";
 import { createWhereClause, getOrCreate } from "../Utils.js";
 
 import type { Observable } from "rxjs";

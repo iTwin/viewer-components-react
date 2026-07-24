@@ -5,7 +5,7 @@
 
 import { defer, delay, map, reduce, shareReplay, tap } from "rxjs";
 import { CLASS_NAME_Model } from "../ClassNameDefinitions.js";
-import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
+import { catchBeSQLiteInterrupts } from "../hooks/UseErrorState.js";
 import { createExcludedClassesClause, getOrCreate } from "../Utils.js";
 
 import type { Observable } from "rxjs";

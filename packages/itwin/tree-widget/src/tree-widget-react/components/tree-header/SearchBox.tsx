@@ -8,7 +8,7 @@ import { IconButton, TextBox } from "@stratakit/bricks";
 import dismissSvg from "@stratakit/icons/dismiss.svg";
 import searchSvg from "@stratakit/icons/search.svg";
 import { useTranslation } from "../trees/common/components/LocalizationContext.js";
-import { useLatest } from "../trees/common/internal/Utils.js";
+import { useLatest } from "../trees/common/internal/hooks/UseLatest.js";
 
 interface DebouncedSearchBoxProps {
   isOpened: boolean;

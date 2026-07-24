@@ -30,8 +30,9 @@ import {
 } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
-import { ChildrenTree, getClassesByView, getOptimalBatchSize, getOrCreate, releaseMainThreadOnItemsCount } from "../Utils.js";
+import { catchBeSQLiteInterrupts } from "../hooks/UseErrorState.js";
+import { releaseMainThreadOnItemsCount } from "../Rxjs.js";
+import { ChildrenTree, getClassesByView, getOptimalBatchSize, getOrCreate } from "../Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";

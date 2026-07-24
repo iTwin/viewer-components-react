@@ -11,10 +11,10 @@ import { PresentationInstanceFilter, PresentationInstanceFilterDialog } from "@i
 import { Presentation } from "@itwin/presentation-frontend";
 import { GenericInstanceFilter, RowsLimitExceededError } from "@itwin/presentation-hierarchies";
 import { Spinner } from "@stratakit/bricks";
-import { Delayed } from "../components/Delayed.js";
-import { useTranslation } from "../components/LocalizationContext.js";
-import { useTelemetryContext } from "../UseTelemetryContext.js";
-import { getOrCreate } from "./Utils.js";
+import { Delayed } from "../../components/Delayed.js";
+import { useTranslation } from "../../components/LocalizationContext.js";
+import { useTelemetryContext } from "../../UseTelemetryContext.js";
+import { getOrCreate } from "../Utils.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";

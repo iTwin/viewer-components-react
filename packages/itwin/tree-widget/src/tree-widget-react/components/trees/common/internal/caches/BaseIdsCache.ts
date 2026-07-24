@@ -5,7 +5,8 @@
 
 import { EMPTY, filter, forkJoin, from, identity, map, mergeMap, of, reduce, shareReplay } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
-import { ChildrenTree, fromWithRelease, getOrCreate } from "../Utils.js";
+import { fromWithRelease } from "../Rxjs.js";
+import { ChildrenTree, getOrCreate } from "../Utils.js";
 import { ChildElementsCache } from "./ChildElementsCache.js";
 import { DescendantsCountCache } from "./DescendantsCountCache.js";
 import { ElementModelCategoriesCache } from "./ElementModelCategoriesCache.js";

@@ -6,10 +6,10 @@
 import { bufferCount, EMPTY, map, mergeMap, of, reduce } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { QueryRowFormat } from "@itwin/core-common";
-import { reduceWhile, toVoidPromise } from "./Rxjs.js";
+import { isBeSqliteInterruptError } from "./hooks/UseErrorState.js";
+import { fromWithRelease, reduceWhile, releaseMainThreadOnItemsCount, toVoidPromise } from "./Rxjs.js";
 import { createVisibilityStatus } from "./Tooltip.js";
-import { isBeSqliteInterruptError } from "./UseErrorState.js";
-import { createWhereClause, fromWithRelease, getClassesByView, getOptimalBatchSize, releaseMainThreadOnItemsCount } from "./Utils.js";
+import { createWhereClause, getClassesByView, getOptimalBatchSize } from "./Utils.js";
 
 import type { Observable, OperatorFunction } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";

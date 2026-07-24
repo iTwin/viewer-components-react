@@ -12,9 +12,9 @@ import visibilityInvertSvg from "@stratakit/icons/visibility-invert.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
 import { hideAllCategories, invertAllCategories } from "../common/CategoriesVisibilityUtils.js";
 import { useTranslation } from "../common/components/LocalizationContext.js";
+import { useErrorState } from "../common/internal/hooks/UseErrorState.js";
+import { useGuid } from "../common/internal/hooks/UseGuid.js";
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
-import { useErrorState } from "../common/internal/UseErrorState.js";
-import { useGuid } from "../common/internal/useGuid.js";
 import { getClassesByView } from "../common/internal/Utils.js";
 import { hideAllModels, showAll } from "../common/Utils.js";
 
