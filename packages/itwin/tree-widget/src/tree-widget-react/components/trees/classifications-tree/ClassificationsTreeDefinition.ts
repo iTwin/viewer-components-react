@@ -34,15 +34,9 @@ import {
   CLASS_NAME_GeometricElement,
   CLASS_NAME_GeometricElement3d,
 } from "../common/internal/ClassNameDefinitions.js";
-import { catchBeSQLiteInterrupts } from "../common/internal/UseErrorState.js";
-import {
-  createExcludedClassesClause,
-  createWhereClause,
-  fromWithRelease,
-  getOptimalBatchSize,
-  ParentElementsPath,
-  releaseMainThreadOnItemsCount,
-} from "../common/internal/Utils.js";
+import { catchBeSQLiteInterrupts } from "../common/internal/hooks/UseErrorState.js";
+import { fromWithRelease, releaseMainThreadOnItemsCount } from "../common/internal/Rxjs.js";
+import { createExcludedClassesClause, createWhereClause, getOptimalBatchSize, ParentElementsPath } from "../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../common/TreeErrors.js";
 import { ClassificationsTreeNodeInternal } from "./internal/ClassificationsTreeNodeInternal.js";
 

@@ -27,9 +27,9 @@ import {
   toArray,
 } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
-import { subscribeAll } from "../Rxjs.js";
+import { fromWithRelease, releaseMainThreadOnItemsCount, subscribeAll } from "../Rxjs.js";
 import { createVisibilityStatus } from "../Tooltip.js";
-import { countInSet, fromWithRelease, getId64Spreadable, getOrCreate, ParentElementsPath, releaseMainThreadOnItemsCount, setDifference } from "../Utils.js";
+import { countInSet, getId64Spreadable, getOrCreate, ParentElementsPath, setDifference } from "../Utils.js";
 import { changeElementStateNoChildrenOperator, getCategoryVisibilityFromAlwaysAndNeverDrawnElementsImpl, mergeVisibilityStatuses } from "../VisibilityUtils.js";
 
 import type { Observable, Subscription } from "rxjs";

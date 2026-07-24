@@ -5,9 +5,9 @@
 
 import { concat, defer, EMPTY, from, merge, mergeAll, mergeMap, of, Subject } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
+import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/hooks/UseCachedVisibility.js";
+import { fromWithRelease } from "../../../common/internal/Rxjs.js";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
-import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { fromWithRelease } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 import { ModelsTreeNodeInternal } from "../ModelsTreeNodeInternal.js";
 import { ModelsTreeVisibilityHelper } from "./ModelsTreeVisibilityHelper.js";

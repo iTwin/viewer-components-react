@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback } from "react";
-import { useIModelAccess } from "../internal/UseIModelAccess.js";
+import { useIModelAccess } from "../internal/hooks/UseIModelAccess.js";
 import { useHierarchyVisibility } from "../UseHierarchyVisibility.js";
 import { Tree } from "./Tree.js";
 

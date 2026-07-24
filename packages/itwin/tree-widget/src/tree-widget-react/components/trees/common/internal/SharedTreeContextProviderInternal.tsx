@@ -7,12 +7,12 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import { Subject } from "rxjs";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { BaseIdsCache } from "./caches/BaseIdsCache.js";
-import { useIdsCache } from "./useTreeHooks/UseIdsCache.js";
+import { useIdsCache } from "./hooks/UseIdsCache.js";
 
 import type { PropsWithChildren } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { BaseIdsCacheProps } from "./caches/BaseIdsCache.js";
-import type { GetCacheProps } from "./useTreeHooks/UseIdsCache.js";
+import type { GetCacheProps } from "./hooks/UseIdsCache.js";
 
 /** @internal */
 interface SharedTreeContextInternal {

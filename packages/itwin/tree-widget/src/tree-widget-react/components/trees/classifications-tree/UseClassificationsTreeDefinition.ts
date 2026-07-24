@@ -5,8 +5,8 @@
 
 import { useEffect, useMemo } from "react";
 import { HierarchySearchTree } from "@itwin/presentation-hierarchies";
+import { createIModelAccess } from "../common/internal/hooks/UseIModelAccess.js";
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
-import { createIModelAccess } from "../common/internal/UseIModelAccess.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
 import { getClassificationsTreeIdsCache } from "./UseClassificationsTree.js";

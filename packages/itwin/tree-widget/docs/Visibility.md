@@ -57,7 +57,7 @@ Every flowchart in these documents follows the same conventions:
 
 ## Key Internal APIs
 
-- [`useCachedVisibility`](../src/tree-widget-react/components/trees/common/internal/useTreeHooks/UseCachedVisibility.ts) — React hook that returns a factory for the shared hierarchy visibility handler.
+- [`useCachedVisibility`](../src/tree-widget-react/components/trees/common/internal/hooks/UseCachedVisibility.ts) — React hook that returns a factory for the shared hierarchy visibility handler.
   - Creates and disposes a tree-specific handler for each status or change request.
   - Cancels an in-progress `getVisibilityStatus()` when the same node receives a change request or the viewport emits a relevant visibility event. [`useHierarchyVisibility`](../src/tree-widget-react/components/trees/common/UseHierarchyVisibility.ts) requests the status again through `onVisibilityChange()`.
   - Runs changes against a [`BufferingViewport`](../src/tree-widget-react/components/trees/common/internal/BufferingViewport.ts). The buffered viewport is committed only when the complete change pipeline finishes normally; cancellation discards all buffered mutations.
@@ -120,7 +120,7 @@ flowchart TD
   RESULT_ChangeCancelled([Change discarded])
 
   %% Start
-  TITLE(["<span style='font-family: monospace;'><a href='../src/tree-widget-react/components/trees/common/internal/useTreeHooks/UseCachedVisibility.ts'>HierarchyVisibilityHandlerImpl request lifecycle</a></span>"]) --> A{"Request operation"}
+  TITLE(["<span style='font-family: monospace;'><a href='../src/tree-widget-react/components/trees/common/internal/hooks/UseCachedVisibility.ts'>HierarchyVisibilityHandlerImpl request lifecycle</a></span>"]) --> A{"Request operation"}
 
   PROPS[\"
     <span style='font-family: monospace;'>request</span>
@@ -194,7 +194,7 @@ The viewport only renders elements. Element visibility is resolved in the follow
 
 A trace of what happens when the user clicks the eye icon of a hidden category node in the Categories tree (no search active):
 
-1. [`useHierarchyVisibility`](../src/tree-widget-react/components/trees/common/UseHierarchyVisibility.ts) calls `changeVisibility(node, true)` on the shared hierarchy visibility handler created by [`useCachedVisibility`](../src/tree-widget-react/components/trees/common/internal/useTreeHooks/UseCachedVisibility.ts).
+1. [`useHierarchyVisibility`](../src/tree-widget-react/components/trees/common/UseHierarchyVisibility.ts) calls `changeVisibility(node, true)` on the shared hierarchy visibility handler created by [`useCachedVisibility`](../src/tree-widget-react/components/trees/common/internal/hooks/UseCachedVisibility.ts).
 2. The handler announces the change request, cancelling any in-progress status or change request for the same node. It creates a [`BufferingViewport`](../src/tree-widget-react/components/trees/common/internal/BufferingViewport.ts), suppresses viewport and always/never-drawn cache events, and creates a `CategoriesTreeVisibilityHandler` against the buffered viewport.
 3. The tree-specific handler reads the node's `extendedData`, identifies a category node, and — after calling [removeAlwaysDrawnExclusive](./SharedVisibilityHandling.md#removealwaysdrawnexclusive) first if exclusive mode is active — delegates to the shared [changeCategoriesVisibilityStatus](./SharedVisibilityHandling.md#changecategoriesvisibilitystatus) without a `modelId`.
 4. The shared helper enables the category in the category selector, then for every related model: clears the per-model category override, clears path-scoped always/never-drawn entries, and recursively changes scoped sub-models. Hidden related models are prepared by [showModelWithoutAnyCategoriesOrElements](./SharedVisibilityHandling.md#showmodelwithoutanycategoriesorelements) so no unrelated categories become visible. Descendants in other actual categories are reconciled through [queueElementsVisibilityChange](./SharedVisibilityHandling.md#queueelementsvisibilitychange), and hidden sub-categories of the requested category are enabled.

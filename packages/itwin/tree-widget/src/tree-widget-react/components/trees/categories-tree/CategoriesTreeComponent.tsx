@@ -6,8 +6,8 @@
 import { Fragment } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
+import { useActiveTreeWidgetViewport } from "../common/internal/hooks/UseActiveTreeWidgetViewport.js";
 import { SharedTreeContextProviderInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
-import { useActiveTreeWidgetViewport } from "../common/internal/UseActiveTreeWidgetViewport.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { CategoriesTree } from "./CategoriesTree.js";
 import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonProps } from "./CategoriesTreeButtons.js";

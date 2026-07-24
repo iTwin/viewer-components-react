@@ -7,8 +7,8 @@ import { Fragment, useEffect } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
+import { useActiveTreeWidgetViewport } from "../common/internal/hooks/UseActiveTreeWidgetViewport.js";
 import { SharedTreeContextProviderInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
-import { useActiveTreeWidgetViewport } from "../common/internal/UseActiveTreeWidgetViewport.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { ModelsTree } from "./ModelsTree.js";
 import {

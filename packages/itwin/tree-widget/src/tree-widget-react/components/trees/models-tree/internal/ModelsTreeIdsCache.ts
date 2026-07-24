@@ -8,7 +8,7 @@ import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { BaseIdsCacheImpl } from "../../common/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_GeometricModel3d, CLASS_NAME_InformationPartitionElement, CLASS_NAME_Subject } from "../../common/internal/ClassNameDefinitions.js";
-import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
+import { catchBeSQLiteInterrupts } from "../../common/internal/hooks/UseErrorState.js";
 import { createWhereClause, getOrCreate } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";

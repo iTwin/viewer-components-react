@@ -3,10 +3,13 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useState } from "react";
-import { Guid } from "@itwin/core-bentley";
+import { useEffect, useRef } from "react";
 
-export function useGuid() {
-  const [componentId] = useState(() => Guid.createValue());
-  return componentId;
+/** @internal */
+export function useLatest<T>(value: T) {
+  const ref = useRef(value);
+  useEffect(() => {
+    ref.current = value;
+  }, [value]);
+  return ref;
 }
