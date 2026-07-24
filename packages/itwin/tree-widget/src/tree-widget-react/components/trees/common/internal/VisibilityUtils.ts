@@ -4,15 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { bufferCount, EMPTY, map, mergeMap, of, reduce } from "rxjs";
-import { Guid, Id64 } from "@itwin/core-bentley";
-import { QueryRowFormat } from "@itwin/core-common";
-import { isBeSqliteInterruptError } from "./hooks/UseErrorState.js";
+import { Id64 } from "@itwin/core-bentley";
 import { fromWithRelease, reduceWhile, releaseMainThreadOnItemsCount, toVoidPromise } from "./Rxjs.js";
 import { createVisibilityStatus } from "./Tooltip.js";
-import { createWhereClause, getClassesByView, getOptimalBatchSize } from "./Utils.js";
+import { getOptimalBatchSize } from "./Utils.js";
 
 import type { Observable, OperatorFunction } from "rxjs";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { CategoryInfo } from "../../categories-tree/CategoriesTreeButtons.js";
 import type { TreeWidgetViewport } from "../TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
 import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip.js";
@@ -156,4 +155,42 @@ export async function enableCategoryDisplay(viewport: TreeWidgetViewport, catego
       }),
     ),
   );
+}
+
+/**
+ * Invert display of all given categories.
+ * Categories are inverted like this:
+ * - If category is visible, it will be hidden.
+ * - If category is hidden, it will be visible.
+ * - If category is partially visible, it will be fully visible.
+ * @internal
+ */
+export async function invertAllCategories(categories: CategoryInfo[], viewport: TreeWidgetViewport) {
+  const categoriesToEnable = new Set<Id64String>();
+  const categoriesToDisable = new Set<Id64String>();
+
+  for (const category of categories) {
+    if (!viewport.viewsCategory(category.categoryId)) {
+      categoriesToEnable.add(category.categoryId);
+      continue;
+    }
+    // Check if category is in partial state
+    if (category.subCategoryIds?.some((subCategory) => !viewport.viewsSubCategory(subCategory))) {
+      categoriesToEnable.add(category.categoryId);
+    } else {
+      categoriesToDisable.add(category.categoryId);
+    }
+  }
+
+  // collect per model overrides that need to be inverted
+  for (const { categoryId, visible } of viewport.perModelCategoryOverrides) {
+    if (!visible && categoriesToDisable.has(categoryId)) {
+      categoriesToEnable.add(categoryId);
+      categoriesToDisable.delete(categoryId);
+    }
+  }
+
+  await enableCategoryDisplay(viewport, categoriesToDisable, false, true);
+
+  await enableCategoryDisplay(viewport, categoriesToEnable, true, true);
 }

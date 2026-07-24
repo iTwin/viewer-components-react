@@ -14,7 +14,7 @@ import { useTranslation } from "../common/components/LocalizationContext.js";
 import { useErrorState } from "../common/internal/hooks/UseErrorState.js";
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { getClassesByView } from "../common/internal/Utils.js";
-import { enableCategoryDisplay } from "../common/internal/VisibilityUtils.js";
+import { enableCategoryDisplay, invertAllCategories } from "../common/internal/VisibilityUtils.js";
 import { showAll } from "../common/Utils.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
@@ -211,42 +211,4 @@ function useAvailableModels(viewport: TreeWidgetViewport): Array<ModelId> {
   }, [imodel, baseIdsCache, setErrorState]);
 
   return availableModels;
-}
-
-/**
- * Invert display of all given categories.
- * Categories are inverted like this:
- * - If category is visible, it will be hidden.
- * - If category is hidden, it will be visible.
- * - If category is partially visible, it will be fully visible.
- * @internal
- */
-export async function invertAllCategories(categories: CategoryInfo[], viewport: TreeWidgetViewport) {
-  const categoriesToEnable = new Set<Id64String>();
-  const categoriesToDisable = new Set<Id64String>();
-
-  for (const category of categories) {
-    if (!viewport.viewsCategory(category.categoryId)) {
-      categoriesToEnable.add(category.categoryId);
-      continue;
-    }
-    // Check if category is in partial state
-    if (category.subCategoryIds?.some((subCategory) => !viewport.viewsSubCategory(subCategory))) {
-      categoriesToEnable.add(category.categoryId);
-    } else {
-      categoriesToDisable.add(category.categoryId);
-    }
-  }
-
-  // collect per model overrides that need to be inverted
-  for (const { categoryId, visible } of viewport.perModelCategoryOverrides) {
-    if (!visible && categoriesToDisable.has(categoryId)) {
-      categoriesToEnable.add(categoryId);
-      categoriesToDisable.delete(categoryId);
-    }
-  }
-
-  await enableCategoryDisplay(viewport, categoriesToDisable, false, true);
-
-  await enableCategoryDisplay(viewport, categoriesToEnable, true, true);
 }
