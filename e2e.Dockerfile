@@ -16,11 +16,11 @@ COPY /pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY /package.json ./package.json
 COPY /scripts ./scripts
 COPY ${TEST_VIEWER_DIST} ./apps/test-viewer/dist
-COPY /packages/itwin/test-utilities ./packages/itwin/test-utilities
-COPY /packages/itwin/${PACKAGE_NAME} ./packages/itwin/${PACKAGE_NAME}
+COPY /packages/test-utilities ./packages/test-utilities
+COPY /packages/${PACKAGE_NAME} ./packages/${PACKAGE_NAME}
 
 # Switch to the directory where E2E tests will run
-WORKDIR /workspaces/viewer-components-react/packages/itwin/${PACKAGE_NAME}
+WORKDIR /workspaces/viewer-components-react/packages/${PACKAGE_NAME}
 
 # Install dependencies
 RUN pnpm install --filter .

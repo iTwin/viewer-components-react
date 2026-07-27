@@ -1,5 +1,5 @@
 packages:
-  - packages/itwin/*
+  - packages/*
   - apps/test-viewer
   - apps/learning-snippets
   - apps/performance-tests
