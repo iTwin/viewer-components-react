@@ -25,7 +25,7 @@ function SkeletonRow() {
   return (
     <div className="tw-skeleton-row">
       <Skeleton variant={"rounded"} width={20} height={20} />
-      <Skeleton variant={"text"} style={{ flex: 1 }} />
+      <Skeleton variant={"rounded"} style={{ flex: 1 }} />
     </div>
   );
 }

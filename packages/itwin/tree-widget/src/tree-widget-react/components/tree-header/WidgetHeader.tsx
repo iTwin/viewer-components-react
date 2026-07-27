@@ -84,10 +84,9 @@ export function WidgetHeader({ defaultSelectedContentId, trees, onSelect, onSear
 }
 
 function LoadingHeader() {
-  // TODO: does not look good, need to improve the loading state for the header
   return (
     <div className="tw-content-header">
-      <Skeleton variant={"text"} width={"100%"} height={30} />
+      <Skeleton variant={"rounded"} width={"100%"} height={30} />
       <Skeleton variant={"rounded"} width={28} height={28} />
     </div>
   );
