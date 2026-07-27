@@ -6,7 +6,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { firstValueFrom, forkJoin, mergeAll, mergeMap, of, toArray } from "rxjs";
 import { useAsyncValue } from "@itwin/components-react";
-import { IconButton } from "@stratakit/bricks";
+import { IconButton, Tooltip } from "@mui/material";
+import { Icon } from "@stratakit/mui";
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
 import visibilityInvertSvg from "@stratakit/icons/visibility-invert.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
@@ -93,21 +94,23 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   const { cancelChangesInProgress } = useSharedTreeContextInternal();
   const translate = useTranslation();
   return (
-    <IconButton
-      variant={"ghost"}
-      label={translate("categoriesTree.buttons.showAll.tooltip")}
-      onClick={() => {
-        // cspell:disable-next-line
-        props.onFeatureUsed?.(`categories-tree-showall`);
-        cancelChangesInProgress.next();
-        void showAll({
-          models: props.models,
-          viewport: props.viewport,
-          categories: props.categories.map((category) => category.categoryId),
-        }).catch(() => {});
-      }}
-      icon={visibilityShowSvg}
-    />
+    <Tooltip title={translate("categoriesTree.buttons.showAll.tooltip")}>
+      <IconButton
+        aria-label={translate("categoriesTree.buttons.showAll.tooltip")}
+        onClick={() => {
+          // cspell:disable-next-line
+          props.onFeatureUsed?.(`categories-tree-showall`);
+          cancelChangesInProgress.next();
+          void showAll({
+            models: props.models,
+            viewport: props.viewport,
+            categories: props.categories.map((category) => category.categoryId),
+          }).catch(() => {});
+        }}
+      >
+        <Icon href={visibilityShowSvg} />
+      </IconButton>
+    </Tooltip>
   );
 }
 
@@ -116,24 +119,26 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
   const { cancelChangesInProgress } = useSharedTreeContextInternal();
   const translate = useTranslation();
   return (
-    <IconButton
-      variant={"ghost"}
-      label={translate("categoriesTree.buttons.hideAll.tooltip")}
-      onClick={() => {
-        // cspell:disable-next-line
-        props.onFeatureUsed?.(`categories-tree-hideall`);
-        cancelChangesInProgress.next();
-        void enableCategoryDisplay(
-          props.viewport,
-          props.categories.map((category) => category.categoryId),
-          false,
-          false,
-        );
+    <Tooltip title={translate("categoriesTree.buttons.hideAll.tooltip")}>
+      <IconButton
+        aria-label={translate("categoriesTree.buttons.hideAll.tooltip")}
+        onClick={() => {
+          // cspell:disable-next-line
+          props.onFeatureUsed?.(`categories-tree-hideall`);
+          cancelChangesInProgress.next();
+          void enableCategoryDisplay(
+            props.viewport,
+            props.categories.map((category) => category.categoryId),
+            false,
+            false,
+          );
 
-        props.viewport.changeModelDisplay({ modelIds: props.models, display: false });
-      }}
-      icon={visibilityHideSvg}
-    />
+          props.viewport.changeModelDisplay({ modelIds: props.models, display: false });
+        }}
+      >
+        <Icon href={visibilityHideSvg} />
+      </IconButton>
+    </Tooltip>
   );
 }
 
@@ -142,16 +147,18 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   const { cancelChangesInProgress } = useSharedTreeContextInternal();
   const translate = useTranslation();
   return (
-    <IconButton
-      variant={"ghost"}
-      label={translate("categoriesTree.buttons.invert.tooltip")}
-      onClick={() => {
-        props.onFeatureUsed?.(`categories-tree-invert`);
-        cancelChangesInProgress.next();
-        void invertAllCategories(props.categories, props.viewport);
-      }}
-      icon={visibilityInvertSvg}
-    />
+    <Tooltip title={translate("categoriesTree.buttons.invert.tooltip")}>
+      <IconButton
+        aria-label={translate("categoriesTree.buttons.invert.tooltip")}
+        onClick={() => {
+          props.onFeatureUsed?.(`categories-tree-invert`);
+          cancelChangesInProgress.next();
+          void invertAllCategories(props.categories, props.viewport);
+        }}
+      >
+        <Icon href={visibilityInvertSvg} />
+      </IconButton>
+    </Tooltip>
   );
 }
 

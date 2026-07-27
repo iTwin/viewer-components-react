@@ -5,21 +5,18 @@
 
 import "./SkeletonTree.css";
 
-import { Skeleton, VisuallyHidden } from "@stratakit/bricks";
-import { useTranslation } from "./LocalizationContext.js";
+import { Skeleton } from "@mui/material";
 
 /**
  * Represents the loaded tree content before it finishes loading.
  * @beta
  */
 export function SkeletonTree() {
-  const translate = useTranslation();
   return (
-    <div className="tw-skeleton-container">
+    <div className="tw-skeleton-container" role="status">
       {Array.from({ length: 20 }, (_, index) => (
         <SkeletonRow key={index} />
       ))}
-      <VisuallyHidden id={"tw-progress-bar"}>{translate("loading.skeleton")}</VisuallyHidden>
     </div>
   );
 }
@@ -27,8 +24,8 @@ export function SkeletonTree() {
 function SkeletonRow() {
   return (
     <div className="tw-skeleton-row">
-      <Skeleton variant={"object"} size={"small"} />
-      <Skeleton variant={"text"} />
+      <Skeleton variant={"rounded"} width={20} height={20} />
+      <Skeleton variant={"text"} style={{ flex: 1 }} />
     </div>
   );
 }

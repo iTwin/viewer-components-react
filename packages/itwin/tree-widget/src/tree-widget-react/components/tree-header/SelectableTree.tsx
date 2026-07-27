@@ -6,7 +6,7 @@
 import "./SelectableTree.css";
 
 import { ErrorBoundary } from "react-error-boundary";
-import { Divider } from "@stratakit/bricks";
+import { Divider } from "@mui/material";
 import { ErrorState } from "./ErrorState.js";
 
 import type { PropsWithChildren, ReactNode } from "react";

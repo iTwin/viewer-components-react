@@ -8,7 +8,7 @@ import "./TreeWidgetUiItemsProvider.css";
 import { useRef } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, useTransientState } from "@itwin/appui-react";
-import { Icon } from "@stratakit/foundations";
+import { Icon } from "@stratakit/mui";
 import hierarchyTreeSvg from "@stratakit/icons/hierarchy-tree.svg";
 import { getLocalizationKey } from "./shared/LocalizationHelpers.js";
 import { ErrorState } from "./tree-header/ErrorState.js";

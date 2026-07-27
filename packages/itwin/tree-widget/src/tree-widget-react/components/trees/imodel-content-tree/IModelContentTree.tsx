@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback } from "react";
-import { Icon } from "@stratakit/foundations";
+import { Icon } from "@stratakit/mui";
 import categorySvg from "@stratakit/icons/bis-category-3d.svg";
 import classSvg from "@stratakit/icons/bis-class.svg";
 import elementSvg from "@stratakit/icons/bis-element.svg";

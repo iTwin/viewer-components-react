@@ -5,7 +5,7 @@
 
 import "./ProgressOverlay.css";
 
-import { ProgressBar, VisuallyHidden } from "@stratakit/bricks";
+import { LinearProgress } from "@mui/material";
 import { useTranslation } from "./LocalizationContext.js";
 
 /** @internal */
@@ -13,8 +13,7 @@ export function ProgressOverlay() {
   const translate = useTranslation();
   return (
     <div className="tw-progress-overlay-container">
-      <ProgressBar aria-labelledby={"tw-progress-bar"} tone={"accent"} />
-      <VisuallyHidden id={"tw-progress-bar"}>{translate("loading.search")}</VisuallyHidden>
+      <LinearProgress aria-label={translate("loading.search")} color={"primary"} />
       <div className="tw-progress-overlay-backdrop" />
     </div>
   );

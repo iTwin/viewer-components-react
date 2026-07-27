@@ -52,7 +52,6 @@ import type {
   InstancesNodeKey,
   LimitingECSqlQueryExecutor,
   NodePostProcessor,
-  NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
 import type {
   EC,
@@ -178,10 +177,10 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
 
   async #createClassificationTablesQuery({
     instanceFilter,
-    nodeSelectClauseFactory,
-    instanceLabelSelectClauseFactory,
+    createSelectClause,
+    createFilterClauses,
   }: DefineRootHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const instanceFilterClauses = await nodeSelectClauseFactory.createFilterClauses({
+    const instanceFilterClauses = await createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: CLASS_NAME_ClassificationTable, alias: "this" },
     });
@@ -191,14 +190,14 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
         query: {
           ecsql: `
             SELECT
-              ${await nodeSelectClauseFactory.createSelectClause({
+              ${await createSelectClause({
                 ecClassId: { selector: ECSql.createRawPropertyValueSelector("this", "ECClassId") },
                 ecInstanceId: { selector: "this.ECInstanceId" },
                 nodeLabel: {
-                  selector: await instanceLabelSelectClauseFactory.createSelectClause({
+                  of: {
                     classAlias: "this",
                     className: CLASS_NAME_ClassificationTable,
-                  }),
+                  },
                 },
                 hasChildren: {
                   selector: `
@@ -230,14 +229,14 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     parentNodeInstanceIds: classificationTableIds,
     instanceFilter,
     parentNode,
-    nodeSelectClauseFactory,
-    instanceLabelSelectClauseFactory,
+    createSelectClause,
+    createFilterClauses,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     const imodelKey = getParentNodeIModelKey(parentNode.key);
     if (!imodelKey) {
       return [];
     }
-    const instanceFilterClauses = await nodeSelectClauseFactory.createFilterClauses({
+    const instanceFilterClauses = await createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: CLASS_NAME_Classification, alias: "this" },
     });
@@ -254,14 +253,14 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
             query: {
               ecsql: `
                 SELECT
-                  ${await nodeSelectClauseFactory.createSelectClause({
+                  ${await createSelectClause({
                     ecClassId: { selector: ECSql.createRawPropertyValueSelector("this", "ECClassId") },
                     ecInstanceId: { selector: "this.ECInstanceId" },
                     nodeLabel: {
-                      selector: await instanceLabelSelectClauseFactory.createSelectClause({
+                      of: {
                         classAlias: "this",
                         className: CLASS_NAME_Classification,
-                      }),
+                      },
                     },
                     hasChildren: childClassificationsWithChildren.length > 0 ? { selector: createClassificationHasChildrenSelector("this") } : false,
                     extendedData: {
@@ -289,8 +288,8 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     parentNodeInstanceIds: parentClassificationIds,
     instanceFilter,
     parentNode,
-    nodeSelectClauseFactory,
-    instanceLabelSelectClauseFactory,
+    createSelectClause,
+    createFilterClauses,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     const parentImodelKey = getParentNodeIModelKey(parentNode.key);
     if (!parentImodelKey) {
@@ -301,7 +300,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
       classificationOrTableIds: parentClassificationIds,
       cache,
     });
-    const elementsInstanceFilterClauses = await nodeSelectClauseFactory.createFilterClauses({
+    const elementsInstanceFilterClauses = await createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: CLASS_NAME_GeometricElement3d, alias: "this" },
     });
@@ -311,7 +310,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
         fullClassName: CLASS_NAME_GeometricElement3d,
         query: {
           ecsql: `
-            SELECT ${await this.#createElementSelectClause({ nodeSelectClauseFactory, instanceLabelSelectClauseFactory })}
+            SELECT ${await this.#createElementSelectClause({ createSelectClause })}
             FROM ${elementsInstanceFilterClauses.from} this
             JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = this.ECInstanceId
             JOIN IdSet(?) parentClassificationIdSet ON ehc.TargetECInstanceId = parentClassificationIdSet.id
@@ -332,7 +331,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
       ...(childClassifications.length
         ? [
             await (async () => {
-              const instanceFilterClauses = await nodeSelectClauseFactory.createFilterClauses({
+              const instanceFilterClauses = await createFilterClauses({
                 filter: instanceFilter,
                 contentClass: { fullName: CLASS_NAME_Classification, alias: "this" },
               });
@@ -341,14 +340,14 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                 query: {
                   ecsql: `
                     SELECT
-                      ${await nodeSelectClauseFactory.createSelectClause({
+                      ${await createSelectClause({
                         ecClassId: { selector: ECSql.createRawPropertyValueSelector("this", "ECClassId") },
                         ecInstanceId: { selector: "this.ECInstanceId" },
                         nodeLabel: {
-                          selector: await instanceLabelSelectClauseFactory.createSelectClause({
+                          of: {
                             classAlias: "this",
                             className: CLASS_NAME_Classification,
-                          }),
+                          },
                         },
                         hasChildren: childClassificationsWithChildren.length > 0 ? { selector: createClassificationHasChildrenSelector("this") } : false,
                         extendedData: {
@@ -377,10 +376,10 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
   async #createGeometricElementChildrenQuery({
     parentNodeInstanceIds: parentElementIds,
     instanceFilter,
-    nodeSelectClauseFactory,
-    instanceLabelSelectClauseFactory,
+    createSelectClause,
+    createFilterClauses,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const instanceFilterClauses = await nodeSelectClauseFactory.createFilterClauses({
+    const instanceFilterClauses = await createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: CLASS_NAME_GeometricElement3d, alias: "this" },
     });
@@ -389,7 +388,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
         fullClassName: CLASS_NAME_GeometricElement3d,
         query: {
           ecsql: `
-          SELECT ${await this.#createElementSelectClause({ nodeSelectClauseFactory, instanceLabelSelectClauseFactory })}
+          SELECT ${await this.#createElementSelectClause({ createSelectClause })}
           FROM ${instanceFilterClauses.from} this
           JOIN IdSet(?) parentElementIdSet ON this.Parent.Id = parentElementIdSet.id
           ${instanceFilterClauses.joins}
@@ -408,20 +407,18 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
   }
 
   async #createElementSelectClause({
-    nodeSelectClauseFactory,
-    instanceLabelSelectClauseFactory,
+    createSelectClause,
   }: {
-    nodeSelectClauseFactory: NodesQueryClauseFactory;
-    instanceLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
+    createSelectClause: DefineHierarchyLevelProps["createSelectClause"];
   }): Promise<string> {
-    return nodeSelectClauseFactory.createSelectClause({
+    return createSelectClause({
       ecClassId: { selector: "this.ECClassId" },
       ecInstanceId: { selector: "this.ECInstanceId" },
       nodeLabel: {
-        selector: await instanceLabelSelectClauseFactory.createSelectClause({
+        of: {
           classAlias: "this",
           className: CLASS_NAME_GeometricElement3d,
-        }),
+        },
       },
       hasChildren: {
         selector: `

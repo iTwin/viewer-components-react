@@ -10,7 +10,7 @@ import { DefaultContentDisplayTypes, KeySet } from "@itwin/presentation-common";
 import { PresentationInstanceFilter, PresentationInstanceFilterDialog } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { GenericInstanceFilter, RowsLimitExceededError } from "@itwin/presentation-hierarchies";
-import { Spinner } from "@stratakit/bricks";
+import { CircularProgress } from "@mui/material";
 import { Delayed } from "../../components/Delayed.js";
 import { useTranslation } from "../../components/LocalizationContext.js";
 import { useTelemetryContext } from "../../UseTelemetryContext.js";
@@ -148,7 +148,7 @@ function MatchingInstancesCount({ filter, defaultHierarchyLevelSizeLimit, hierar
     return (
       <Delayed show={true}>
         {translate("filteringDialog.matchingInstancesCount", { instanceCount: "" })}
-        <Spinner size="small" />
+        <CircularProgress size="small" />
       </Delayed>
     );
   }

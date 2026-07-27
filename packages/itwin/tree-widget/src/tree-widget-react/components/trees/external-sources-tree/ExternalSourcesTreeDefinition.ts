@@ -5,7 +5,7 @@
 
 import { Guid } from "@itwin/core-bentley";
 import { createPredicateBasedHierarchyDefinition, HierarchyNode } from "@itwin/presentation-hierarchies";
-import { ECSql } from "@itwin/presentation-shared";
+import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { CLASS_NAME_GeometricElement } from "../common/internal/ClassNameDefinitions.js";
 import { createWhereClause } from "../common/internal/Utils.js";
 
@@ -32,10 +32,12 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
   #impl: HierarchyDefinition;
   #queryExecutor: LimitingECSqlQueryExecutor;
   #isSupported?: Promise<boolean>;
+  #labelsFactory: IInstanceLabelSelectClauseFactory;
   #componentId: GuidString;
   #componentName: string;
 
   public constructor(props: ExternalSourcesTreeDefinitionProps) {
+    this.#labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
     this.#impl = createPredicateBasedHierarchyDefinition({
       classHierarchyInspector: props.imodelAccess,
       hierarchy: {
@@ -83,10 +85,10 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
 
   private async createRootHierarchyLevelDefinition({
     instanceFilter,
-    nodeSelectClauseFactory,
-    instanceLabelSelectClauseFactory,
+    createSelectClause,
+    createFilterClauses,
   }: DefineRootHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const instanceFilterClauses = await nodeSelectClauseFactory.createFilterClauses({
+    const instanceFilterClauses = await createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: "BisCore.ExternalSource", alias: "this" },
     });
@@ -98,14 +100,13 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
         query: {
           ecsql: `
             SELECT
-              ${await nodeSelectClauseFactory.createSelectClause({
+              ${await createSelectClause({
                 ecClassId: { selector: ECSql.createRawPropertyValueSelector("this", "ECClassId") },
                 ecInstanceId: { selector: "this.ECInstanceId" },
                 nodeLabel: {
                   selector: await this.createCompositeLabelSelectClause({
                     externalSourceAlias: "this",
                     repositoryLinkAlias: "rl",
-                    instanceLabelSelectClauseFactory,
                   }),
                 },
                 extendedData: {
@@ -129,10 +130,10 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
   private async createExternalSourcesGroupChildrenQuery({
     parentNodeInstanceIds: groupIds,
     instanceFilter,
-    nodeSelectClauseFactory,
-    instanceLabelSelectClauseFactory,
+    createSelectClause,
+    createFilterClauses,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const instanceFilterClauses = await nodeSelectClauseFactory.createFilterClauses({
+    const instanceFilterClauses = await createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: "BisCore.ExternalSource", alias: "this" },
     });
@@ -143,14 +144,13 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
         query: {
           ecsql: `
             SELECT
-              ${await nodeSelectClauseFactory.createSelectClause({
+              ${await createSelectClause({
                 ecClassId: { selector: "this.ECClassId" },
                 ecInstanceId: { selector: "this.ECInstanceId" },
                 nodeLabel: {
                   selector: await this.createCompositeLabelSelectClause({
                     externalSourceAlias: "this",
                     repositoryLinkAlias: "rl",
-                    instanceLabelSelectClauseFactory,
                   }),
                 },
                 extendedData: {
@@ -176,10 +176,10 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
   private async createExternalSourceChildrenQuery({
     parentNodeInstanceIds: sourceIds,
     instanceFilter,
-    nodeSelectClauseFactory,
-    instanceLabelSelectClauseFactory,
+    createSelectClause,
+    createFilterClauses,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const instanceFilterClauses = await nodeSelectClauseFactory.createFilterClauses({
+    const instanceFilterClauses = await createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: "BisCore.ExternalSource", alias: "this" },
     });
@@ -189,14 +189,13 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
         query: {
           ecsql: `
             SELECT
-              ${await nodeSelectClauseFactory.createSelectClause({
+              ${await createSelectClause({
                 ecClassId: { selector: "this.ECClassId" },
                 ecInstanceId: { selector: "this.ECInstanceId" },
                 nodeLabel: {
                   selector: await this.createCompositeLabelSelectClause({
                     externalSourceAlias: "this",
                     repositoryLinkAlias: "rl",
-                    instanceLabelSelectClauseFactory,
                   }),
                 },
                 extendedData: {
@@ -249,11 +248,11 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
   private async createElementsNodeChildrenQuery({
     parentNode,
     instanceFilter,
-    nodeSelectClauseFactory,
-    instanceLabelSelectClauseFactory,
+    createSelectClause,
+    createFilterClauses,
   }: DefineGenericNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     const sourceIds: string[] = parentNode.extendedData?.sourceIds;
-    const instanceFilterClauses = await nodeSelectClauseFactory.createFilterClauses({
+    const instanceFilterClauses = await createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: CLASS_NAME_GeometricElement, alias: "this" },
     });
@@ -263,14 +262,14 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
         query: {
           ecsql: `
             SELECT
-              ${await nodeSelectClauseFactory.createSelectClause({
+              ${await createSelectClause({
                 ecClassId: { selector: "this.ECClassId" },
                 ecInstanceId: { selector: "this.ECInstanceId" },
                 nodeLabel: {
-                  selector: await instanceLabelSelectClauseFactory.createSelectClause({
+                  of: {
                     classAlias: "this",
                     className: CLASS_NAME_GeometricElement,
-                  }),
+                  },
                 },
                 extendedData: {
                   imageId: "icon-item",
@@ -294,11 +293,9 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
   private async createCompositeLabelSelectClause({
     externalSourceAlias,
     repositoryLinkAlias,
-    instanceLabelSelectClauseFactory,
   }: {
     externalSourceAlias: string;
     repositoryLinkAlias: string;
-    instanceLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
   }) {
     return ECSql.createConcatenatedValueJsonSelector([
       {
@@ -306,7 +303,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
           ${repositoryLinkAlias}.ECInstanceId IS NOT NULL,
           ${ECSql.createConcatenatedValueJsonSelector([
             {
-              selector: await instanceLabelSelectClauseFactory.createSelectClause({
+              selector: await this.#labelsFactory.createSelectClause({
                 classAlias: repositoryLinkAlias,
                 className: "BisCore.RepositoryLink",
               }),
@@ -320,7 +317,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
         )`,
       },
       {
-        selector: await instanceLabelSelectClauseFactory.createSelectClause({
+        selector: await this.#labelsFactory.createSelectClause({
           classAlias: externalSourceAlias,
           className: "BisCore.ExternalSource",
         }),
