@@ -1,13 +1,15 @@
+;
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import React from "react";
+import React, { useCallback } from "react";
 import { Button, Flex, Text } from "@itwin/itwinui-react";
-import { FormatSetPanel, FormatSetSelector } from "@itwin/quantity-formatting-react";
+import { FormatSetPanel, FormatSetSelector, TelemetryContextProvider } from "@itwin/quantity-formatting-react";
 
 import type { FormatSet } from "@itwin/ecschema-metadata";
+import type { UsageTrackedFeatures } from "@itwin/quantity-formatting-react";
 import type { FormatManager } from "./FormatManager";
 
 interface FormatSetsTabPanelProps {
@@ -86,52 +88,58 @@ export const FormatSetsTabPanel: React.FC<FormatSetsTabPanelProps> = ({ formatMa
     }
   }, [selectedFormatSet]);
 
-  return (
-    <Flex flexDirection="row" gap="l" className="format-tab-panel">
-      <Flex.Item className="quantity-format-selector-item">
-        <Flex flexDirection="column" gap="m" alignItems="none">
-          <div style={{ height: "36rem" }}>
-            <FormatSetSelector
-              formatSets={formatSets}
-              selectedFormatSetKey={selectedFormatSet?.name}
-              activeFormatSetKey={activeFormatSetKey}
-              onFormatSetChange={handleFormatSetChange}
-            />
-          </div>
-        </Flex>
-      </Flex.Item>
+  const handleFeatureUsed = useCallback((feature: UsageTrackedFeatures) => {
+    console.log(`[QuantityFormatting] Feature used: ${feature}`);
+  }, []);
 
-      <Flex.Item className="quantity-format-panel-item">
-        <Flex flexDirection="column" gap="xs" alignItems="stretch">
-          {clonedSelectedFormatSet ? (
-            <FormatSetPanel formatSet={clonedSelectedFormatSet} editable={true} onFormatSetChange={handleSelectedFormatSetChange} />
-          ) : (
-            <Flex className="quantityFormat--formatSetPanel-emptyState">
-              <Text variant="leading" isMuted>
-                Select a format set to view details
-              </Text>
-            </Flex>
-          )}
-          <Flex.Item alignSelf="flex-end">
-            <Flex gap="xs">
-              <Button size="small" styleType="default" onClick={handleClearFormatSet} disabled={!saveEnabled}>
-                Clear
-              </Button>
-              <Button size="small" styleType="high-visibility" onClick={handleSaveFormatSet} disabled={!saveEnabled}>
-                Save
-              </Button>
-              <Button
-                size="small"
-                styleType="default"
-                onClick={handleApplyFormatSet}
-                disabled={activeFormatSetKey === selectedFormatSet?.name || !selectedFormatSet}
-              >
-                Set as Active
-              </Button>
-            </Flex>
-          </Flex.Item>
-        </Flex>
-      </Flex.Item>
-    </Flex>
+  return (
+    <TelemetryContextProvider onFeatureUsed={handleFeatureUsed}>
+      <Flex flexDirection="row" gap="l" className="format-tab-panel">
+        <Flex.Item className="quantity-format-selector-item">
+          <Flex flexDirection="column" gap="m" alignItems="none">
+            <div style={{ height: "36rem" }}>
+              <FormatSetSelector
+                formatSets={formatSets}
+                selectedFormatSetKey={selectedFormatSet?.name}
+                activeFormatSetKey={activeFormatSetKey}
+                onFormatSetChange={handleFormatSetChange}
+              />
+            </div>
+          </Flex>
+        </Flex.Item>
+
+        <Flex.Item className="quantity-format-panel-item">
+          <Flex flexDirection="column" gap="xs" alignItems="stretch">
+            {clonedSelectedFormatSet ? (
+              <FormatSetPanel formatSet={clonedSelectedFormatSet} editable={true} onFormatSetChange={handleSelectedFormatSetChange} />
+            ) : (
+              <Flex className="quantityFormat--formatSetPanel-emptyState">
+                <Text variant="leading" isMuted>
+                  Select a format set to view details
+                </Text>
+              </Flex>
+            )}
+            <Flex.Item alignSelf="flex-end">
+              <Flex gap="xs">
+                <Button size="small" styleType="default" onClick={handleClearFormatSet} disabled={!saveEnabled}>
+                  Clear
+                </Button>
+                <Button size="small" styleType="high-visibility" onClick={handleSaveFormatSet} disabled={!saveEnabled}>
+                  Save
+                </Button>
+                <Button
+                  size="small"
+                  styleType="default"
+                  onClick={handleApplyFormatSet}
+                  disabled={activeFormatSetKey === selectedFormatSet?.name || !selectedFormatSet}
+                >
+                  Set as Active
+                </Button>
+              </Flex>
+            </Flex.Item>
+          </Flex>
+        </Flex.Item>
+      </Flex>
+    </TelemetryContextProvider>
   );
 };

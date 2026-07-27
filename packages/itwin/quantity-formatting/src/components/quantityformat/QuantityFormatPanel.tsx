@@ -7,6 +7,7 @@ import "./FormatPanel.scss";
 import * as React from "react";
 import { Button, Flex, Text } from "@itwin/itwinui-react";
 import { useTranslation } from "../../useTranslation.js";
+import { useTelemetryContext } from "../../hooks/UseTelemetryContext.js";
 import { FormatPanel } from "./FormatPanel.js";
 import { FormatSample } from "./FormatSample.js";
 
@@ -34,6 +35,7 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
   } = props;
 
   const { translate } = useTranslation();
+  const { onFeatureUsed } = useTelemetryContext();
 
   // Clone the formatDefinition to work with internally
   const [clonedFormatDefinition, setClonedFormatDefinition] = React.useState<FormatDefinition>(() =>
@@ -90,15 +92,17 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
     []
   );
 
-  const handleSave = React.useCallback(() => {
+  const handleApply = React.useCallback(() => {
+    onFeatureUsed("format-apply");
     onFormatChange && onFormatChange(clonedFormatDefinition);
     setSaveEnabled(false);
-  }, [onFormatChange, clonedFormatDefinition]);
+  }, [onFormatChange, clonedFormatDefinition, onFeatureUsed]);
 
   const handleClear = React.useCallback(() => {
+    onFeatureUsed("format-clear");
     setClonedFormatDefinition({...formatDefinition});
     setSaveEnabled(false);
-  }, [formatDefinition]);
+  }, [formatDefinition, onFeatureUsed]);
 
   return (
     <div className="components-quantityFormat-quantityPanel">
@@ -120,7 +124,7 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
         <Button size="small" styleType="default" onClick={handleClear} disabled={!saveEnabled}>
           {translate("QuantityFormat:labels.revert")}
         </Button>
-        <Button size="small" styleType="high-visibility" onClick={handleSave} disabled={!saveEnabled}>
+        <Button size="small" styleType="high-visibility" onClick={handleApply} disabled={!saveEnabled}>
           {translate("QuantityFormat:labels.apply")}
         </Button>
       </Flex>

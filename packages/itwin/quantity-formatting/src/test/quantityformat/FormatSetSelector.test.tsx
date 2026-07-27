@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { FormatSetSelector } from "../../components/quantityformat/FormatSetSelector.js";
+import { TelemetryContextProvider } from "../../hooks/UseTelemetryContext.js";
 
 import type { FormatSet } from "@itwin/ecschema-metadata";
 // Mock the useTranslation hook
@@ -423,6 +424,46 @@ describe("FormatSetSelector", () => {
 
       expect(screen.getByText("Special Format Set 0")).toBeTruthy();
       expect(screen.queryByText("Format Set 50")).toBeNull();
+    });
+  });
+
+  describe("Telemetry", () => {
+    it("should report 'format-set-select' when a format set is clicked", async () => {
+      const onFeatureUsedSpy = vi.fn();
+
+      render(
+        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
+          <FormatSetSelector
+            formatSets={mockFormatSets}
+            onFormatSetChange={mockOnFormatSetChange}
+          />
+        </TelemetryContextProvider>
+      );
+
+      const formatSetItem = screen.getByText("Arizona Highway Project (Civil)");
+      await user.click(formatSetItem);
+
+      expect(onFeatureUsedSpy).toHaveBeenCalledWith("format-set-select");
+    });
+
+    it("should report 'format-set-search' when search starts (fire once)", async () => {
+      const onFeatureUsedSpy = vi.fn();
+
+      render(
+        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
+          <FormatSetSelector
+            formatSets={mockFormatSets}
+            onFormatSetChange={mockOnFormatSetChange}
+          />
+        </TelemetryContextProvider>
+      );
+
+      const searchInput = screen.getByPlaceholderText("Search format sets...");
+      await user.type(searchInput, "Arizona");
+
+      // Should only fire once at the start of typing
+      expect(onFeatureUsedSpy).toHaveBeenCalledWith("format-set-search");
+      expect(onFeatureUsedSpy).toHaveBeenCalledTimes(1);
     });
   });
 });
