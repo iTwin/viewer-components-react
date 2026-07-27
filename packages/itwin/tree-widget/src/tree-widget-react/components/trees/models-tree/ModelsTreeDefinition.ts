@@ -821,7 +821,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           ecsql: `
           SELECT
             ${await this.createCategoryNodeSelectClause({
-                createSelectClause,
+              createSelectClause,
               extendedData: { modelIds: { selector: createIdsSelector([parentModelId]) } },
             })}
           FROM ${categoryInstanceFilterClauses.from} this

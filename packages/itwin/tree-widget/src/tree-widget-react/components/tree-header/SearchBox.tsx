@@ -5,9 +5,9 @@
 
 import { useEffect, useState } from "react";
 import { IconButton, TextField, Tooltip } from "@mui/material";
-import { Icon } from "@stratakit/mui";
 import dismissSvg from "@stratakit/icons/dismiss.svg";
 import searchSvg from "@stratakit/icons/search.svg";
+import { Icon } from "@stratakit/mui";
 import { useTranslation } from "../trees/common/components/LocalizationContext.js";
 import { useLatest } from "../trees/common/internal/hooks/UseLatest.js";
 
@@ -70,7 +70,12 @@ export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, cla
     </Tooltip>
   ) : (
     <>
-      <TextField className={className} type={"text"} onChange={(e) => setInputValue(e.currentTarget.value)} placeholder={translate("header.searchBox.search")}/>
+      <TextField
+        className={className}
+        type={"text"}
+        onChange={(e) => setInputValue(e.currentTarget.value)}
+        placeholder={translate("header.searchBox.search")}
+      />
       <Tooltip title={translate("header.searchBox.close")} slotProps={tooltipSlotProps}>
         <IconButton
           className={"tw-search-box-button"}

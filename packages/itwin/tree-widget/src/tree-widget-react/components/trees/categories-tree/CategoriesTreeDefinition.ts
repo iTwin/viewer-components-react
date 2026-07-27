@@ -513,9 +513,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     );
     const hierarchyDefinitionPromises = new Array<Promise<HierarchyNodesDefinition>>();
     if (categories.length > 0) {
-      hierarchyDefinitionPromises.push(
-        this.createTopMostCategoriesQuery({ categories, instanceFilter, createSelectClause, createFilterClauses }),
-      );
+      hierarchyDefinitionPromises.push(this.createTopMostCategoriesQuery({ categories, instanceFilter, createSelectClause, createFilterClauses }));
     }
     if (definitionContainers.length > 0) {
       hierarchyDefinitionPromises.push(
@@ -630,11 +628,11 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         ecsql: `
           SELECT
               ${await this.createCategoryNodeSelectClause({
-              createSelectClause,
-              hasChildren:
-                categoriesWithChildren.length > 0
-                  ? {
-                      selector: `IFNULL(
+                createSelectClause,
+                hasChildren:
+                  categoriesWithChildren.length > 0
+                    ? {
+                        selector: `IFNULL(
                         (
                           SELECT 1
                           FROM IdSet(?) hasChildrenIdSet
@@ -643,16 +641,16 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                         ),
                         0
                       )`,
-                    }
-                  : false,
-              extendedData: {
-                type: "category",
-                description: { selector: "this.Description" },
-                modelIds: { selector: createIdsSelector(new Array<ModelId>()) },
-                hasSubCategories:
-                  categoriesWithMultipleSubCategories.length > 0
-                    ? {
-                        selector: `IFNULL(
+                      }
+                    : false,
+                extendedData: {
+                  type: "category",
+                  description: { selector: "this.Description" },
+                  modelIds: { selector: createIdsSelector(new Array<ModelId>()) },
+                  hasSubCategories:
+                    categoriesWithMultipleSubCategories.length > 0
+                      ? {
+                          selector: `IFNULL(
                           (
                             SELECT 1
                             FROM IdSet(?) hasSubCategoriesIdSet
@@ -661,10 +659,10 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                           ),
                           0
                         )`,
-                      }
-                    : false,
-              },
-            })}
+                        }
+                      : false,
+                },
+              })}
           FROM ${instanceFilterClauses.from} this
           JOIN IdSet(?) categoryIdSet ON this.ECInstanceId = categoryIdSet.id
           ${instanceFilterClauses.joins}

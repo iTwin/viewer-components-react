@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Button, Typography } from "@mui/material";
-import { Icon } from "@stratakit/mui";
 import errorSvg from "@stratakit/icons/status-error.svg";
+import { Icon } from "@stratakit/mui";
 import { useTranslation } from "../trees/common/components/LocalizationContext.js";
 
 import type { FallbackProps } from "react-error-boundary";

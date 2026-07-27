@@ -406,11 +406,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  async #createElementSelectClause({
-    createSelectClause,
-  }: {
-    createSelectClause: DefineHierarchyLevelProps["createSelectClause"];
-  }): Promise<string> {
+  async #createElementSelectClause({ createSelectClause }: { createSelectClause: DefineHierarchyLevelProps["createSelectClause"] }): Promise<string> {
     return createSelectClause({
       ecClassId: { selector: "this.ECClassId" },
       ecInstanceId: { selector: "this.ECInstanceId" },

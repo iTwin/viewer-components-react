@@ -290,13 +290,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  private async createCompositeLabelSelectClause({
-    externalSourceAlias,
-    repositoryLinkAlias,
-  }: {
-    externalSourceAlias: string;
-    repositoryLinkAlias: string;
-  }) {
+  private async createCompositeLabelSelectClause({ externalSourceAlias, repositoryLinkAlias }: { externalSourceAlias: string; repositoryLinkAlias: string }) {
     return ECSql.createConcatenatedValueJsonSelector([
       {
         selector: `IIF(

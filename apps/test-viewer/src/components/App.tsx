@@ -17,10 +17,11 @@ import { EC3AuthRedirect } from "./EC3AuthRedirect";
 import { Viewer } from "./Viewer";
 
 import type { FallbackProps } from "react-error-boundary";
+
 export function App() {
   return (
     <BrowserRouter>
-      <ThemeProvider theme={"light"} future={true} as={Root} colorScheme={"light"} >
+      <ThemeProvider theme={"light"} future={true} as={Root} colorScheme={"light"}>
         <ErrorBoundary FallbackComponent={ErrorState}>
           <AuthorizationProvider>
             <AppRoutes />
