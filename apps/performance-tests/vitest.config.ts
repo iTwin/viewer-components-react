@@ -10,7 +10,7 @@ import { defineConfig } from "vitest/config";
 import TestReporter from "./src/util/TestReporter.js";
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
-const treeWidgetRoot = path.resolve(rootDir, "../../packages/itwin/tree-widget");
+const treeWidgetRoot = path.resolve(rootDir, "../../packages/tree-widget");
 const treeWidgetSrc = path.resolve(treeWidgetRoot, "src");
 
 function collectDepsFromPackage(...packageDirs: string[]): string[] {

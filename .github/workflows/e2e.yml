@@ -26,9 +26,9 @@ jobs:
             test_viewer:
               - 'apps/test-viewer/**'
             tree_widget:
-              - 'packages/itwin/tree-widget/**'
+              - 'packages/tree-widget/**'
             property_grid:
-              - 'packages/itwin/property-grid/**'
+              - 'packages/property-grid/**'
 
   build-test-viewer:
     name: Build test-viewer
@@ -85,7 +85,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install -D --filter ./packages/itwin/tree-widget
+        run: pnpm install -D --filter ./packages/tree-widget
 
       - name: Download test-viewer artifact
         id: test-viewer-artifact
@@ -101,14 +101,14 @@ jobs:
           IMJS_AUTH_CLIENT_CLIENT_ID: ${{ secrets.IMJS_AUTH_CLIENT_CLIENT_ID }}
           IMJS_USER_EMAIL: ${{ secrets.IMJS_USER_EMAIL }}
           IMJS_USER_PASSWORD: ${{ secrets.IMJS_USER_PASSWORD }}
-        run: pnpm run --dir packages/itwin/tree-widget test:e2e
+        run: pnpm run --dir packages/tree-widget test:e2e
 
       - name: Publish test results artifact
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: tree-widget-e2e-test-results
-          path: packages/itwin/tree-widget/e2e-out
+          path: packages/tree-widget/e2e-out
 
   run-tests-property-grid:
     name: Run property-grid tests
@@ -129,7 +129,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install -D --filter ./packages/itwin/property-grid
+        run: pnpm install -D --filter ./packages/property-grid
 
       - name: Download test-viewer artifact
         id: test-viewer-artifact
@@ -145,11 +145,11 @@ jobs:
           IMJS_AUTH_CLIENT_CLIENT_ID: ${{ secrets.IMJS_AUTH_CLIENT_CLIENT_ID }}
           IMJS_USER_EMAIL: ${{ secrets.IMJS_USER_EMAIL }}
           IMJS_USER_PASSWORD: ${{ secrets.IMJS_USER_PASSWORD }}
-        run: pnpm run --dir packages/itwin/property-grid test:e2e
+        run: pnpm run --dir packages/property-grid test:e2e
 
       - name: Publish test results artifact
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: property-grid-e2e-test-results
-          path: packages/itwin/property-grid/e2e-out
+          path: packages/property-grid/e2e-out
