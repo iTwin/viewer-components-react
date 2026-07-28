@@ -30,6 +30,17 @@ Each one has it's own folder and README describing the package.
 | @itwin/property-grid-react | [property-grid](./packages/property-grid) | [changelog](./packages/property-grid/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40itwin%2Fproperty-grid-react.svg)](https://badge.fury.io/js/%40itwin%2Fproperty-grid-react) |
 | @itwin/ec3-widget-react    | [ec3-widget](./packages/ec3-widget)       | [changelog](./packages/ec3-widget/CHANGELOG.md)    | [![npm version](https://badge.fury.io/js/%40itwin%2Fec3-widget-react.svg)](https://badge.fury.io/js/%40itwin%2Fec3-widget-react)       |
 
+### Archived
+
+### iTwin.js@^4 Compatible
+
+| Name                               | Folder                                                        | Changelog                                                    | Version                                                                                                                                                |
+| ---------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| @itwin/ec3-widget-react            | [ec3-widget](./packages/ec3-widget)                           | [changelog](./packages/ec3-widget/CHANGELOG.md)              | [![npm version](https://badge.fury.io/js/%40itwin%2Fec3-widget-react.svg)](https://badge.fury.io/js/%40itwin%2Fec3-widget-react)                       |
+| @itwin/grouping-mapping-widget     | [grouping-mapping-widget](./packages/grouping-mapping-widget) | [changelog](./packages/grouping-mapping-widget/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40itwin%2Fgrouping-mapping-widget.svg)](https://badge.fury.io/js/%40itwin%2Fgrouping-mapping-widget)         |
+| @itwin/one-click-lca-react         | [one-click-lca-widget](./packages/one-click-lca-widget)       | [changelog](./packages/one-click-lca-widget/CHANGELOG.md)    | [![npm version](https://badge.fury.io/js/%40itwin%2Fone-click-lca-react.svg)](https://badge.fury.io/js/%40itwin%2Fone-click-lca-react)                 |
+| @itwin/reports-config-widget-react | [reports-config-widget](./packages/reports-config-widget)     | [changelog](./packages/reports-config-widget/CHANGELOG.md)   | [![npm version](https://badge.fury.io/js/%40itwin%2Freports-config-widget-react.svg)](https://badge.fury.io/js/%40itwin%2Freports-config-widget-react) |
+
 ## Adding a new "project"
 
 Please refer to the [section](CONTRIBUTING.md#adding-a-new-project) in the contributing guide.

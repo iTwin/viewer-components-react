@@ -25,19 +25,19 @@
 /packages/measure-tools  @itwin/viewer-components-reviewers @simnorm @a-gagnon @bsy-nicholasw
 /change/@itwin-measure-tools-react*  @itwin/viewer-components-reviewers @simnorm @a-gagnon @bsy-nicholasw
 
-/packages/grouping-mapping-widget  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
+/archive/grouping-mapping-widget  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
 /change/@itwin-grouping-mapping-widget*  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
 
-/packages/one-click-lca-widget  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
+/archive/one-click-lca-widget  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
 /change/@itwin-one-click-lca-react*  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
 
-/packages/reports-config-widget  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
+/archive/reports-config-widget  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
 /change/@itwin-reports-config-widget-react*  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
 
 /packages/geo-tools  @itwin/viewer-components-reviewers @mdastous-bentley
 /change/@itwin-geo-tools-react*  @itwin/viewer-components-reviewers @mdastous-bentley
 
-/packages/ec3-widget  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
+/archive/ec3-widget  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
 /change/@itwin-ec3-widget-react*  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
 
 /packages/map-layers  @itwin/viewer-components-reviewers @mdastous-bentley @eringram
