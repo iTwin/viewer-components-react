@@ -13,8 +13,8 @@ import react from "@vitejs/plugin-react";
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const ENV_PREFIX = "IMJS_";
 
-const treeWidgetRoot = path.resolve(rootDir, "../../packages/itwin/tree-widget");
-const treeWidgetSrc = path.resolve(rootDir, "../../packages/itwin/tree-widget/src");
+const treeWidgetRoot = path.resolve(rootDir, "../../packages/tree-widget");
+const treeWidgetSrc = path.resolve(rootDir, "../../packages/tree-widget/src");
 
 function collectDepsFromPackage(...packageDirs: string[]): string[] {
   const deps = new Set<string>();
