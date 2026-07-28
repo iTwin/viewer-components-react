@@ -278,6 +278,20 @@ describe("VisibilityUtils", () => {
       expect(viewport.changeSubCategoryDisplay).toHaveBeenCalledWith({ subCategoryId, display: true });
     });
 
+    it("applies non-category changes when there are no categories", async () => {
+      await showAll({
+        viewport,
+        modelIds: ["0x10"],
+        categoryInfos: new Map(),
+        cancel: new Subject<void>(),
+      });
+
+      expect(viewport.clearAlwaysDrawn).toHaveBeenCalled();
+      expect(viewport.clearNeverDrawn).toHaveBeenCalled();
+      expect(viewport.changeModelDisplay).toHaveBeenCalledWith({ modelIds: ["0x10"], display: true });
+      expect(viewport.changeCategoryDisplay).not.toHaveBeenCalled();
+    });
+
     it("applies changes when it is not cancelled", async () => {
       await showAll({ viewport, modelIds: ["0x10"], categoryInfos: createLargeCategoryInfos(), cancel: new Subject<void>() });
 
@@ -311,6 +325,17 @@ describe("VisibilityUtils", () => {
       expect(viewport.changeSubCategoryDisplay).not.toHaveBeenCalled();
       expect(viewport.changeModelDisplay).not.toHaveBeenCalled();
       expect(viewport.clearNeverDrawn).not.toHaveBeenCalled();
+    });
+
+    it("applies non-category changes when there are no categories", async () => {
+      await hideAllCategories({
+        viewport,
+        categoryInfos: new Map(),
+        cancel: new Subject<void>(),
+      });
+
+      expect(viewport.clearAlwaysDrawn).toHaveBeenCalled();
+      expect(viewport.changeCategoryDisplay).not.toHaveBeenCalled();
     });
 
     it("does not modify viewport when it is cancelled before completing", async () => {
