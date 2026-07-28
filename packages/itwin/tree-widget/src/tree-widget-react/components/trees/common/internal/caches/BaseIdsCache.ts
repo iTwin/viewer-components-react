@@ -250,6 +250,10 @@ export class BaseIdsCache {
 
   // ElementModelCategoriesCache methods
 
+  public getPlanProjectionModels(): Observable<Set<ModelId>> {
+    return this.#elementModelCategoriesCache.getPlanProjectionModels();
+  }
+
   public getAllModels(): Observable<Array<ModelId>> {
     return this.#elementModelCategoriesCache.getCachedData().pipe(map(({ modelsCategoriesInfo }) => [...modelsCategoriesInfo.keys()]));
   }

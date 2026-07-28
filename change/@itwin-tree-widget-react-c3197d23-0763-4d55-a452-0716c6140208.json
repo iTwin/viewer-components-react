@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Changed the Models and Categories tree header buttons to behave more consistently. Fixed an issue where the 2D toggle was always disabled.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

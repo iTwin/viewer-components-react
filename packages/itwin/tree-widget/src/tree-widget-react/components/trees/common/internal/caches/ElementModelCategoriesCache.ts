@@ -3,10 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, delay, map, reduce, shareReplay, tap } from "rxjs";
-import { CLASS_NAME_Model } from "../ClassNameDefinitions.js";
+import { defer, delay, forkJoin, map, reduce, shareReplay, tap } from "rxjs";
+import { CLASS_NAME_GeometricModel3d, CLASS_NAME_Model } from "../ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../hooks/UseErrorState.js";
-import { createExcludedClassesClause, getOrCreate } from "../Utils.js";
+import { createExcludedClassesClause, getOrCreate, setIntersection } from "../Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64String } from "@itwin/core-bentley";
@@ -49,6 +49,7 @@ export class ElementModelCategoriesCache {
   #cachedData: Observable<CachedData> | undefined;
   #dataResolved = false;
   #subscriberBatches: Array<{ obs: Observable<CachedData>; subscriberCount: number }> = [];
+  #cachedPlanProjectionModels: Observable<Set<ModelId>> | undefined;
 
   constructor(props: ElementModelCategoriesCacheProps) {
     this.#queryExecutor = props.queryExecutor;
@@ -95,6 +96,36 @@ export class ElementModelCategoriesCache {
         };
       }),
     );
+  }
+
+  private queryPlanProjectionModels(): Observable<ModelId> {
+    return defer(() => {
+      const query = `
+          SELECT this.ECInstanceId modelId
+          FROM ${CLASS_NAME_GeometricModel3d} this
+          WHERE this.IsPrivate = false AND this.IsPlanProjection
+        `;
+      return this.#queryExecutor.createQueryReader(
+        { ecsql: query },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/plan-projection-models` },
+      );
+    }).pipe(
+      catchBeSQLiteInterrupts,
+      map((row) => row.modelId),
+    );
+  }
+
+  public getPlanProjectionModels(): Observable<Set<ModelId>> {
+    this.#cachedPlanProjectionModels ??= forkJoin({
+      cachedData: this.getCachedData(),
+      allPlanProjectionModels: this.queryPlanProjectionModels().pipe(reduce((acc, modelId) => acc.add(modelId), new Set<ModelId>())),
+    }).pipe(
+      map(({ cachedData, allPlanProjectionModels }) => {
+        return setIntersection(new Set([...cachedData.modelsCategoriesInfo.keys()]), allPlanProjectionModels);
+      }),
+      shareReplay(),
+    );
+    return this.#cachedPlanProjectionModels;
   }
 
   public getCachedData() {

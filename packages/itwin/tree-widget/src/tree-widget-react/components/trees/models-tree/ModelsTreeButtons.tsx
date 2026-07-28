@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { firstValueFrom, mergeAll, toArray } from "rxjs";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { defaultIfEmpty, firstValueFrom, forkJoin, mergeAll, mergeMap, of, reduce, takeUntil } from "rxjs";
 import { IconButton } from "@stratakit/bricks";
 import toggle2DSvg from "@stratakit/icons/2d.svg";
 import toggle3DSvg from "@stratakit/icons/3d.svg";
@@ -16,12 +16,15 @@ import { useTranslation } from "../common/components/LocalizationContext.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { getClassesByView } from "../common/internal/Utils.js";
-import { areAllModelsVisible, invertAllModels, showAll, toggleModels } from "../common/Utils.js";
+import { invertAllModels, showAll } from "../common/internal/VisibilityUtils.js";
 
 import type { ReactElement } from "react";
+import type { Observable } from "rxjs";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
+import type { BaseIdsCache } from "../common/internal/caches/BaseIdsCache.js";
+import type { CategoryInfosMap } from "../common/internal/VisibilityUtils.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 
 /**
@@ -85,8 +88,11 @@ function useAvailableModels(imodel: IModelConnection): ModelInfo[] {
   useEffect(() => {
     const getModels = async () => {
       try {
-        const models = await firstValueFrom(baseIdsCache.getAllModels());
-        setAvailableModels(models.map((id) => ({ id })));
+        const [allModels, planProjectionModels] = await Promise.all([
+          firstValueFrom(baseIdsCache.getAllModels()),
+          firstValueFrom(baseIdsCache.getPlanProjectionModels()),
+        ]);
+        setAvailableModels(allModels.map((id) => ({ id, isPlanProjection: planProjectionModels.has(id) })));
       } catch {
         setAvailableModels([]);
       }
@@ -105,27 +111,34 @@ export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) =>
  * @public
  */
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
+  const { models, viewport, onFeatureUsed } = props;
   const { getBaseIdsCache, cancelChangesInProgress } = useSharedTreeContextInternal();
-  const baseIdsCache = getBaseIdsCache({ imodel: props.viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
+  const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
   const translate = useTranslation();
   const onClick = useCallback(async () => {
+    // cspell:disable-next-line
+    onFeatureUsed?.("models-tree-showall");
+    cancelChangesInProgress.next();
+    // wrap in try catch for getCategoryInfos call
     try {
-      cancelChangesInProgress.next();
-      const categories = await firstValueFrom(baseIdsCache.getAllCategoriesOfElements().pipe(mergeAll(), toArray()));
-      return await showAll({
-        models: props.models.map((model) => model.id),
-        categories,
-        viewport: props.viewport,
+      const categoryInfos = await getCategoryInfos({ baseIdsCache, cancel: cancelChangesInProgress });
+      if (!categoryInfos) {
+        return;
+      }
+      await showAll({
+        viewport,
+        modelIds: models.map((model) => model.id),
+        categoryInfos,
+        cancel: cancelChangesInProgress,
       });
     } catch {}
-  }, [baseIdsCache, props.viewport, props.models, cancelChangesInProgress]);
+  }, [viewport, cancelChangesInProgress, models, baseIdsCache, onFeatureUsed]);
+
   return (
     <IconButton
       variant={"ghost"}
       label={translate("modelsTree.buttons.showAll.tooltip")}
       onClick={() => {
-        // cspell:disable-next-line
-        props.onFeatureUsed?.("models-tree-showall");
         void onClick();
       }}
       icon={visibilityShowSvg}
@@ -135,17 +148,22 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
 
 /** @public */
 export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
+  const { models, viewport, onFeatureUsed } = props;
   const { cancelChangesInProgress } = useSharedTreeContextInternal();
   const translate = useTranslation();
+  const onClick = useCallback(() => {
+    // cspell:disable-next-line
+    onFeatureUsed?.("models-tree-hideall");
+    cancelChangesInProgress.next();
+    viewport.changeModelDisplay({ modelIds: models.map((model) => model.id), display: false });
+  }, [viewport, cancelChangesInProgress, models, onFeatureUsed]);
+
   return (
     <IconButton
       variant={"ghost"}
       label={translate("modelsTree.buttons.hideAll.tooltip")}
       onClick={() => {
-        // cspell:disable-next-line
-        props.onFeatureUsed?.("models-tree-hideall");
-        cancelChangesInProgress.next();
-        props.viewport.changeModelDisplay({ modelIds: props.models.map((model) => model.id), display: false });
+        onClick();
       }}
       icon={visibilityHideSvg}
     />
@@ -154,47 +172,76 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
 
 /** @public */
 export function InvertButton(props: ModelsTreeHeaderButtonProps) {
-  const { cancelChangesInProgress } = useSharedTreeContextInternal();
+  const { models, viewport, onFeatureUsed } = props;
+  const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContextInternal();
+  const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
   const translate = useTranslation();
+
+  const onClick = useCallback(async () => {
+    // cspell:disable-next-line
+    onFeatureUsed?.("models-tree-invert");
+    cancelChangesInProgress.next();
+    // wrap in try catch for getCategoryInfos call
+    try {
+      const categoryInfos = await getCategoryInfos({ baseIdsCache, cancel: cancelChangesInProgress });
+      if (!categoryInfos) {
+        return;
+      }
+      await invertAllModels({
+        viewport,
+        modelIds: models.map((model) => model.id),
+        categoryInfos,
+        cancel: cancelChangesInProgress,
+      });
+    } catch {}
+  }, [viewport, cancelChangesInProgress, models, baseIdsCache, onFeatureUsed]);
+
   return (
     <IconButton
       variant={"ghost"}
       label={translate("modelsTree.buttons.invert.tooltip")}
       onClick={() => {
-        props.onFeatureUsed?.("models-tree-invert");
-        cancelChangesInProgress.next();
-        invertAllModels(
-          props.models.map((model) => model.id),
-          props.viewport,
-        );
+        void onClick();
       }}
       icon={visibilityInvertSvg}
     />
   );
 }
 
+function useAreAllModelsVisible({ modelIds, viewport }: { modelIds: Id64String[]; viewport: TreeWidgetViewport }): boolean {
+  const subscribe = useCallback((onStoreChange: () => void) => viewport.onDisplayedModelsChanged.addListener(onStoreChange), [viewport]);
+  const getSnapshot = useCallback(() => (modelIds.length !== 0 ? modelIds.every((id) => viewport.viewsModel(id)) : false), [modelIds, viewport]);
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+}
+
 /** @public */
 export function View2DButton(props: ModelsTreeHeaderButtonProps) {
+  const { models, viewport, onFeatureUsed } = props;
   const translate = useTranslation();
+  const { cancelChangesInProgress } = useSharedTreeContextInternal();
   const models2d = useMemo(() => {
-    return props.models.filter((model) => model.isPlanProjection).map((model) => model.id);
-  }, [props.models]);
+    return models.filter((model) => model.isPlanProjection).map((model) => model.id);
+  }, [models]);
 
-  const [is2dToggleActive, setIs2dToggleActive] = useState(() => areAllModelsVisible(models2d, props.viewport));
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIs2dToggleActive(areAllModelsVisible(models2d, props.viewport));
-    return props.viewport.onDisplayedModelsChanged.addListener(() => setIs2dToggleActive(areAllModelsVisible(models2d, props.viewport)));
-  }, [models2d, props.viewport]);
+  const is2dToggleActive = useAreAllModelsVisible({ modelIds: models2d, viewport });
+  const onClick = useCallback(() => {
+    onFeatureUsed?.("models-tree-view2d");
+    cancelChangesInProgress.next();
+    const modelsToTurnOn = models2d.filter((id) => !viewport.viewsModel(id));
+    if (modelsToTurnOn.length > 0) {
+      viewport.changeModelDisplay({ modelIds: modelsToTurnOn, display: true });
+    } else {
+      // All models are already visible, so turn them all off
+      viewport.changeModelDisplay({ modelIds: models2d, display: false });
+    }
+  }, [viewport, cancelChangesInProgress, models2d, onFeatureUsed]);
 
   return (
     <IconButton
       variant={"ghost"}
       label={translate("modelsTree.buttons.toggle2d.tooltip")}
       onClick={() => {
-        props.onFeatureUsed?.("models-tree-view2d");
-        toggleModels(models2d, is2dToggleActive, props.viewport);
+        onClick();
       }}
       aria-disabled={models2d.length === 0}
       active={is2dToggleActive}
@@ -205,26 +252,32 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
 
 /** @public */
 export function View3DButton(props: ModelsTreeHeaderButtonProps) {
+  const { models, viewport, onFeatureUsed } = props;
+  const { cancelChangesInProgress } = useSharedTreeContextInternal();
   const translate = useTranslation();
   const models3d = useMemo(() => {
-    return props.models.filter((model) => !model.isPlanProjection).map((model) => model.id);
-  }, [props.models]);
+    return models.filter((model) => !model.isPlanProjection).map((model) => model.id);
+  }, [models]);
 
-  const [is3dToggleActive, setIs3dToggleActive] = useState(() => areAllModelsVisible(models3d, props.viewport));
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIs3dToggleActive(areAllModelsVisible(models3d, props.viewport));
-    return props.viewport.onDisplayedModelsChanged.addListener(() => setIs3dToggleActive(areAllModelsVisible(models3d, props.viewport)));
-  }, [models3d, props.viewport]);
+  const is3dToggleActive = useAreAllModelsVisible({ modelIds: models3d, viewport });
+  const onClick = useCallback(() => {
+    onFeatureUsed?.("models-tree-view3d");
+    cancelChangesInProgress.next();
+    const modelsToTurnOn = models3d.filter((id) => !viewport.viewsModel(id));
+    if (modelsToTurnOn.length > 0) {
+      viewport.changeModelDisplay({ modelIds: modelsToTurnOn, display: true });
+    } else {
+      // All models are already visible, so turn them all off
+      viewport.changeModelDisplay({ modelIds: models3d, display: false });
+    }
+  }, [viewport, cancelChangesInProgress, models3d, onFeatureUsed]);
 
   return (
     <IconButton
       variant={"ghost"}
       label={translate("modelsTree.buttons.toggle3d.tooltip")}
       onClick={() => {
-        props.onFeatureUsed?.("models-tree-view3d");
-        toggleModels(models3d, is3dToggleActive, props.viewport);
+        onClick();
       }}
       aria-disabled={models3d.length === 0}
       active={is3dToggleActive}
@@ -255,5 +308,20 @@ export function ToggleInstancesFocusButton({ onFeatureUsed, disabled }: { onFeat
       active={enabled}
       icon={focusModeSvg}
     />
+  );
+}
+
+async function getCategoryInfos({ baseIdsCache, cancel }: { baseIdsCache: BaseIdsCache; cancel: Observable<void> }): Promise<CategoryInfosMap | undefined> {
+  return firstValueFrom(
+    baseIdsCache.getAllCategoriesOfElements().pipe(
+      mergeAll(),
+      mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), subCategories: baseIdsCache.getSubCategories({ categoryId }) })),
+      reduce((acc: CategoryInfosMap, { categoryId, subCategories }) => {
+        acc.set(categoryId, subCategories);
+        return acc;
+      }, new Map()),
+      takeUntil(cancel),
+      defaultIfEmpty(undefined),
+    ),
   );
 }
