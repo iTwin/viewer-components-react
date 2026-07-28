@@ -148,9 +148,6 @@ importers:
       '@mui/material':
         specifier: ^9.0.0
         version: 9.1.2(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@stratakit/bricks':
-        specifier: ^0.5.5
-        version: 0.5.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@stratakit/foundations':
         specifier: ^0.4.9
         version: 0.4.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -160,9 +157,6 @@ importers:
       '@stratakit/mui':
         specifier: ^0.5.0
         version: 0.5.0(@mui/material@9.1.2(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@stratakit/structures':
-        specifier: ^0.5.8
-        version: 0.5.8(@types/react@18.3.28)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
       react:
         specifier: ^18.3.1
         version: 18.3.1

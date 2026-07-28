@@ -96,6 +96,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <Tooltip title={translate("categoriesTree.buttons.showAll.tooltip")}>
       <IconButton
+        size="small"
         aria-label={translate("categoriesTree.buttons.showAll.tooltip")}
         onClick={() => {
           // cspell:disable-next-line
@@ -121,6 +122,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <Tooltip title={translate("categoriesTree.buttons.hideAll.tooltip")}>
       <IconButton
+        size="small"
         aria-label={translate("categoriesTree.buttons.hideAll.tooltip")}
         onClick={() => {
           // cspell:disable-next-line
@@ -149,6 +151,7 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <Tooltip title={translate("categoriesTree.buttons.invert.tooltip")}>
       <IconButton
+        size="small"
         aria-label={translate("categoriesTree.buttons.invert.tooltip")}
         onClick={() => {
           props.onFeatureUsed?.(`categories-tree-invert`);

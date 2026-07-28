@@ -124,6 +124,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <Tooltip title={label}>
       <IconButton
+        size="small"
         aria-label={label}
         onClick={() => {
           // cspell:disable-next-line
@@ -145,6 +146,7 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <Tooltip title={label}>
       <IconButton
+        size="small"
         aria-label={label}
         onClick={() => {
           // cspell:disable-next-line
@@ -167,6 +169,7 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <Tooltip title={label}>
       <IconButton
+        size="small"
         aria-label={label}
         onClick={() => {
           props.onFeatureUsed?.("models-tree-invert");
@@ -202,6 +205,7 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <Tooltip title={label}>
       <IconButton
+        size="small"
         aria-label={label}
         onClick={() => {
           props.onFeatureUsed?.("models-tree-view2d");
@@ -236,6 +240,7 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <Tooltip title={label}>
       <IconButton
+        size="small"
         aria-label={label}
         onClick={() => {
           props.onFeatureUsed?.("models-tree-view3d");
@@ -263,6 +268,7 @@ export function ToggleInstancesFocusButton({ onFeatureUsed, disabled }: { onFeat
   return (
     <Tooltip title={label}>
       <IconButton
+        size="small"
         aria-label={label}
         onClick={() => {
           // cspell:disable-next-line

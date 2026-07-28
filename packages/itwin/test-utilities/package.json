@@ -27,7 +27,7 @@
     "@itwin/presentation-frontend": "^5.0.0"
   },
   "dependencies": {
-    "@itwin/presentation-shared": "2.0.0-alpha.10",
+    "@itwin/presentation-shared": "2.0.0-alpha.11",
     "fast-xml-parser": "^5.7.0",
     "sanitize-filename": "^1.6.4"
   },

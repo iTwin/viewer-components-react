@@ -61,17 +61,17 @@ describe("Tree widget", () => {
             classHierarchyInspector: imodelAccess,
             hierarchy: {
               // For root nodes, select all BisCore.GeometricModel3d instances
-              rootNodes: async ({ nodeSelectClauseFactory, instanceLabelSelectClauseFactory }) => [
+              rootNodes: async ({ createSelectClause }) => [
                 {
                   fullClassName: "BisCore.GeometricModel3d",
                   query: {
                     ecsql: `
                       SELECT
-                        ${await nodeSelectClauseFactory.createSelectClause({
+                        ${await createSelectClause({
                           ecClassId: { selector: "this.ECClassId" },
                           ecInstanceId: { selector: "this.ECInstanceId" },
                           nodeLabel: {
-                            selector: await instanceLabelSelectClauseFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
+                            of: { classAlias: "this", className: "BisCore.GeometricModel3d" },
                           },
                         })}
                       FROM BisCore.GeometricModel3d this

@@ -59,6 +59,7 @@ export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, cla
     <Tooltip title={translate("header.searchBox.searchForSomething")} slotProps={tooltipSlotProps}>
       <IconButton
         className={"tw-search-box-button"}
+        size="small"
         aria-label={translate("header.searchBox.searchForSomething")}
         onClick={() => {
           setIsOpened(true);
@@ -72,6 +73,7 @@ export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, cla
     <>
       <TextField
         className={className}
+        size="small"
         type={"text"}
         onChange={(e) => setInputValue(e.currentTarget.value)}
         placeholder={translate("header.searchBox.search")}
@@ -79,6 +81,7 @@ export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, cla
       <Tooltip title={translate("header.searchBox.close")} slotProps={tooltipSlotProps}>
         <IconButton
           className={"tw-search-box-button"}
+          size="small"
           aria-label={translate("header.searchBox.close")}
           onClick={() => {
             setIsOpened(false);
