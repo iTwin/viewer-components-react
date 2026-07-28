@@ -115,7 +115,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   const { getBaseIdsCache, cancelChangesInProgress } = useSharedTreeContextInternal();
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
   const translate = useTranslation();
-  const onClick = useCallback(async () => {
+  const onClick = async () => {
     // cspell:disable-next-line
     onFeatureUsed?.("models-tree-showall");
     cancelChangesInProgress.next();
@@ -132,18 +132,9 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
         cancel: cancelChangesInProgress,
       });
     } catch {}
-  }, [viewport, cancelChangesInProgress, models, baseIdsCache, onFeatureUsed]);
+  };
 
-  return (
-    <IconButton
-      variant={"ghost"}
-      label={translate("modelsTree.buttons.showAll.tooltip")}
-      onClick={() => {
-        void onClick();
-      }}
-      icon={visibilityShowSvg}
-    />
-  );
+  return <IconButton variant={"ghost"} label={translate("modelsTree.buttons.showAll.tooltip")} onClick={onClick} icon={visibilityShowSvg} />;
 }
 
 /** @public */
@@ -151,23 +142,14 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
   const { models, viewport, onFeatureUsed } = props;
   const { cancelChangesInProgress } = useSharedTreeContextInternal();
   const translate = useTranslation();
-  const onClick = useCallback(() => {
+  const onClick = () => {
     // cspell:disable-next-line
     onFeatureUsed?.("models-tree-hideall");
     cancelChangesInProgress.next();
     viewport.changeModelDisplay({ modelIds: models.map((model) => model.id), display: false });
-  }, [viewport, cancelChangesInProgress, models, onFeatureUsed]);
+  };
 
-  return (
-    <IconButton
-      variant={"ghost"}
-      label={translate("modelsTree.buttons.hideAll.tooltip")}
-      onClick={() => {
-        onClick();
-      }}
-      icon={visibilityHideSvg}
-    />
-  );
+  return <IconButton variant={"ghost"} label={translate("modelsTree.buttons.hideAll.tooltip")} onClick={onClick} icon={visibilityHideSvg} />;
 }
 
 /** @public */
@@ -177,7 +159,7 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
   const translate = useTranslation();
 
-  const onClick = useCallback(async () => {
+  const onClick = async () => {
     // cspell:disable-next-line
     onFeatureUsed?.("models-tree-invert");
     cancelChangesInProgress.next();
@@ -194,18 +176,9 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
         cancel: cancelChangesInProgress,
       });
     } catch {}
-  }, [viewport, cancelChangesInProgress, models, baseIdsCache, onFeatureUsed]);
+  };
 
-  return (
-    <IconButton
-      variant={"ghost"}
-      label={translate("modelsTree.buttons.invert.tooltip")}
-      onClick={() => {
-        void onClick();
-      }}
-      icon={visibilityInvertSvg}
-    />
-  );
+  return <IconButton variant={"ghost"} label={translate("modelsTree.buttons.invert.tooltip")} onClick={onClick} icon={visibilityInvertSvg} />;
 }
 
 function useAreAllModelsVisible({ modelIds, viewport }: { modelIds: Id64String[]; viewport: TreeWidgetViewport }): boolean {
@@ -224,25 +197,17 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
   }, [models]);
 
   const is2dToggleActive = useAreAllModelsVisible({ modelIds: models2d, viewport });
-  const onClick = useCallback(() => {
+  const onClick = () => {
     onFeatureUsed?.("models-tree-view2d");
     cancelChangesInProgress.next();
-    const modelsToTurnOn = models2d.filter((id) => !viewport.viewsModel(id));
-    if (modelsToTurnOn.length > 0) {
-      viewport.changeModelDisplay({ modelIds: modelsToTurnOn, display: true });
-    } else {
-      // All models are already visible, so turn them all off
-      viewport.changeModelDisplay({ modelIds: models2d, display: false });
-    }
-  }, [viewport, cancelChangesInProgress, models2d, onFeatureUsed]);
+    viewport.changeModelDisplay({ modelIds: models2d, display: is2dToggleActive ? false : true });
+  };
 
   return (
     <IconButton
       variant={"ghost"}
       label={translate("modelsTree.buttons.toggle2d.tooltip")}
-      onClick={() => {
-        onClick();
-      }}
+      onClick={onClick}
       aria-disabled={models2d.length === 0}
       active={is2dToggleActive}
       icon={toggle2DSvg}
@@ -260,25 +225,17 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
   }, [models]);
 
   const is3dToggleActive = useAreAllModelsVisible({ modelIds: models3d, viewport });
-  const onClick = useCallback(() => {
+  const onClick = () => {
     onFeatureUsed?.("models-tree-view3d");
     cancelChangesInProgress.next();
-    const modelsToTurnOn = models3d.filter((id) => !viewport.viewsModel(id));
-    if (modelsToTurnOn.length > 0) {
-      viewport.changeModelDisplay({ modelIds: modelsToTurnOn, display: true });
-    } else {
-      // All models are already visible, so turn them all off
-      viewport.changeModelDisplay({ modelIds: models3d, display: false });
-    }
-  }, [viewport, cancelChangesInProgress, models3d, onFeatureUsed]);
+    viewport.changeModelDisplay({ modelIds: models3d, display: is3dToggleActive ? false : true });
+  };
 
   return (
     <IconButton
       variant={"ghost"}
       label={translate("modelsTree.buttons.toggle3d.tooltip")}
-      onClick={() => {
-        onClick();
-      }}
+      onClick={onClick}
       aria-disabled={models3d.length === 0}
       active={is3dToggleActive}
       icon={toggle3DSvg}

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { defaultIfEmpty, defer, firstValueFrom, forkJoin, mergeAll, mergeMap, of, takeUntil, toArray } from "rxjs";
+import { defaultIfEmpty, firstValueFrom, forkJoin, from, map, mergeAll, mergeMap, of, reduce, takeUntil, toArray } from "rxjs";
 import { useAsyncValue } from "@itwin/components-react";
 import { IconButton } from "@stratakit/bricks";
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
@@ -98,7 +98,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
   const translate = useTranslation();
 
-  const onClick = useCallback(async () => {
+  const onClick = async () => {
     // cspell:disable-next-line
     onFeatureUsed?.(`categories-tree-showall`);
     cancelChangesInProgress.next();
@@ -115,18 +115,9 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
         cancel: cancelChangesInProgress,
       });
     } catch {}
-  }, [viewport, cancelChangesInProgress, categories, models, onFeatureUsed, baseIdsCache]);
+  };
 
-  return (
-    <IconButton
-      variant={"ghost"}
-      label={translate("categoriesTree.buttons.showAll.tooltip")}
-      onClick={() => {
-        void onClick();
-      }}
-      icon={visibilityShowSvg}
-    />
-  );
+  return <IconButton variant={"ghost"} label={translate("categoriesTree.buttons.showAll.tooltip")} onClick={onClick} icon={visibilityShowSvg} />;
 }
 
 /** @public */
@@ -136,7 +127,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
   const viewType = viewport.viewType === "2d" ? "2d" : "3d";
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
   const translate = useTranslation();
-  const onClick = useCallback(async () => {
+  const onClick = async () => {
     // cspell:disable-next-line
     onFeatureUsed?.(`categories-tree-hideall`);
     cancelChangesInProgress.next();
@@ -152,17 +143,8 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
         cancel: cancelChangesInProgress,
       });
     } catch {}
-  }, [viewport, cancelChangesInProgress, categories, onFeatureUsed, baseIdsCache]);
-  return (
-    <IconButton
-      variant={"ghost"}
-      label={translate("categoriesTree.buttons.hideAll.tooltip")}
-      onClick={() => {
-        void onClick();
-      }}
-      icon={visibilityHideSvg}
-    />
-  );
+  };
+  return <IconButton variant={"ghost"} label={translate("categoriesTree.buttons.hideAll.tooltip")} onClick={onClick} icon={visibilityHideSvg} />;
 }
 
 /** @public */
@@ -172,7 +154,7 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   const viewType = viewport.viewType === "2d" ? "2d" : "3d";
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
   const translate = useTranslation();
-  const onClick = useCallback(async () => {
+  const onClick = async () => {
     // cspell:disable-next-line
     onFeatureUsed?.(`categories-tree-invert`);
     cancelChangesInProgress.next();
@@ -189,17 +171,8 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
         cancel: cancelChangesInProgress,
       });
     } catch {}
-  }, [viewport, cancelChangesInProgress, categories, models, onFeatureUsed, baseIdsCache]);
-  return (
-    <IconButton
-      variant={"ghost"}
-      label={translate("categoriesTree.buttons.invert.tooltip")}
-      onClick={() => {
-        void onClick();
-      }}
-      icon={visibilityInvertSvg}
-    />
-  );
+  };
+  return <IconButton variant={"ghost"} label={translate("categoriesTree.buttons.invert.tooltip")} onClick={onClick} icon={visibilityInvertSvg} />;
 }
 
 const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
@@ -270,17 +243,21 @@ async function getCategoryInfos({
   cancel: Observable<void>;
 }): Promise<CategoryInfosMap | undefined> {
   return firstValueFrom(
-    defer(async () => {
-      const categoriesWithSubCategories = await Promise.all(
-        categoriesInfo.map(async (categoryInfo) => {
-          if (categoryInfo.subCategoryIds && categoryInfo.subCategoryIds.length > 0) {
-            return { categoryId: categoryInfo.categoryId, subCategoryIds: categoryInfo.subCategoryIds };
-          }
-          const subCategoryIds = await firstValueFrom(baseIdsCache.getSubCategories({ categoryId: categoryInfo.categoryId }));
-          return { categoryId: categoryInfo.categoryId, subCategoryIds };
-        }),
-      );
-      return new Map(categoriesWithSubCategories.map((category) => [category.categoryId, category.subCategoryIds]));
-    }).pipe(takeUntil(cancel), defaultIfEmpty(undefined)),
+    from(categoriesInfo).pipe(
+      mergeMap((categoryInfo) => {
+        if (categoryInfo.subCategoryIds && categoryInfo.subCategoryIds.length > 0) {
+          return of({ categoryId: categoryInfo.categoryId, subCategoryIds: categoryInfo.subCategoryIds });
+        }
+        return baseIdsCache
+          .getSubCategories({ categoryId: categoryInfo.categoryId })
+          .pipe(map((subCategoryIds) => ({ categoryId: categoryInfo.categoryId, subCategoryIds })));
+      }),
+      reduce((acc: CategoryInfosMap, category) => {
+        acc.set(category.categoryId, category.subCategoryIds);
+        return acc;
+      }, new Map()),
+      takeUntil(cancel),
+      defaultIfEmpty(undefined),
+    ),
   );
 }

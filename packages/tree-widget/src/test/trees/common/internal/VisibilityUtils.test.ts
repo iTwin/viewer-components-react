@@ -22,13 +22,13 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
 import {
+  changeCategoryDisplay,
   changeElementStateNoChildrenOperator,
   getCategoryVisibilityFromAlwaysAndNeverDrawnElementsImpl,
   hideAllCategories,
   invertAllCategories,
   invertAllModels,
   mergeVisibilityStatuses,
-  modifyCategoryDisplay,
   showAll,
 } from "../../../../tree-widget-react/components/trees/common/internal/VisibilityUtils.js";
 import { buildIModel } from "../../../IModelUtils.js";
@@ -75,7 +75,7 @@ describe("VisibilityUtils", () => {
   let viewport: TreeWidgetTestingViewport;
 
   /**
-   * Creates enough categories for `modifyCategoryDisplay` to release the main thread while processing them.
+   * Creates enough categories for `changeCategoryDisplay` to release the main thread while processing them.
    * This makes the change asynchronous, giving tests a chance to cancel it before it completes.
    */
   function createLargeCategoryInfos(): Map<Id64String, Array<Id64String> | undefined> {
@@ -90,15 +90,15 @@ describe("VisibilityUtils", () => {
     });
   });
 
-  describe("modifyCategoryDisplay", () => {
+  describe("changeCategoryDisplay", () => {
     it("turns on category", async () => {
-      await firstValueFrom(modifyCategoryDisplay({ viewport, categoryInfos: new Map([[categoryId, [subCategoryId]]]), display: true }));
+      await firstValueFrom(changeCategoryDisplay({ viewport, categoryInfos: new Map([[categoryId, [subCategoryId]]]), display: true }));
       expect(viewport.changeCategoryDisplay).toHaveBeenCalledWith({ categoryIds: [categoryId], display: true, enableAllSubCategories: false });
       expect(viewport.changeSubCategoryDisplay).toHaveBeenCalledWith({ subCategoryId, display: true });
     });
 
     it("disables category", async () => {
-      await firstValueFrom(modifyCategoryDisplay({ viewport, categoryInfos: new Map([[categoryId, [subCategoryId]]]), display: false }));
+      await firstValueFrom(changeCategoryDisplay({ viewport, categoryInfos: new Map([[categoryId, [subCategoryId]]]), display: false }));
       expect(viewport.changeCategoryDisplay).toHaveBeenCalledWith({ categoryIds: [categoryId], display: false, enableAllSubCategories: false });
       expect(viewport.changeSubCategoryDisplay).not.toHaveBeenCalled();
     });
@@ -106,7 +106,7 @@ describe("VisibilityUtils", () => {
     it("removes overrides per model when enabling category", async () => {
       const overrides = [{ modelId: "ModelId", categoryId, visible: false }];
       viewport.perModelCategoryOverrides = overrides;
-      await firstValueFrom(modifyCategoryDisplay({ viewport, categoryInfos: new Map([[categoryId, [subCategoryId]]]), display: true }));
+      await firstValueFrom(changeCategoryDisplay({ viewport, categoryInfos: new Map([[categoryId, [subCategoryId]]]), display: true }));
 
       expect(viewport.changeCategoryDisplay).toHaveBeenCalledWith({ categoryIds: [categoryId], display: true, enableAllSubCategories: false });
       expect(viewport.getPerModelCategoryOverride({ modelId: "ModelId", categoryId })).toBe("none");
@@ -292,8 +292,13 @@ describe("VisibilityUtils", () => {
       expect(viewport.changeCategoryDisplay).not.toHaveBeenCalled();
     });
 
-    it("applies changes when it is not cancelled", async () => {
-      await showAll({ viewport, modelIds: ["0x10"], categoryInfos: createLargeCategoryInfos(), cancel: new Subject<void>() });
+    it("commits buffered changes after yielding to the main thread", async () => {
+      await showAll({
+        viewport,
+        modelIds: ["0x10"],
+        categoryInfos: createLargeCategoryInfos(),
+        cancel: new Subject<void>(),
+      });
 
       expect(viewport.changeModelDisplay).toHaveBeenCalled();
       expect(viewport.changeCategoryDisplay).toHaveBeenCalled();

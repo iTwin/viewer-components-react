@@ -163,7 +163,7 @@ async function commitViewportChange({
  * Categories are processed in batches, releasing the main thread in between, so the returned observable may emit over multiple frames.
  * @internal
  */
-export function modifyCategoryDisplay({
+export function changeCategoryDisplay({
   categoryInfos,
   viewport,
   display,
@@ -225,7 +225,7 @@ export async function showAll({
       bufferingViewport.clearAlwaysDrawn();
       bufferingViewport.clearNeverDrawn();
       bufferingViewport.changeModelDisplay({ modelIds, display: true });
-      return modifyCategoryDisplay({
+      return changeCategoryDisplay({
         viewport: bufferingViewport,
         categoryInfos,
         display: true,
@@ -252,7 +252,7 @@ export async function hideAllCategories({
     cancel,
     change: (bufferingViewport) => {
       bufferingViewport.clearAlwaysDrawn();
-      return modifyCategoryDisplay({
+      return changeCategoryDisplay({
         viewport: bufferingViewport,
         categoryInfos,
         display: false,
@@ -358,8 +358,8 @@ export async function invertAllCategories({
       }
 
       return merge(
-        modifyCategoryDisplay({ viewport: bufferingViewport, categoryInfos: categoriesToDisable, display: false }),
-        modifyCategoryDisplay({ viewport: bufferingViewport, categoryInfos: categoriesToEnable, display: true }),
+        changeCategoryDisplay({ viewport: bufferingViewport, categoryInfos: categoriesToDisable, display: false }),
+        changeCategoryDisplay({ viewport: bufferingViewport, categoryInfos: categoriesToEnable, display: true }),
       ).pipe(takeLast(1));
     },
   });
