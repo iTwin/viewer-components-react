@@ -24,9 +24,9 @@
       "request": "launch",
       "autoAttachChildProcesses": true,
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
-      "program": "${workspaceFolder}/packages/itwin/measure-tools/node_modules/vitest/vitest.mjs",
+      "program": "${workspaceFolder}/packages/measure-tools/node_modules/vitest/vitest.mjs",
       "args": ["--inspect-brk", "--no-file-parallelism"],
-      "cwd": "${workspaceFolder}/packages/itwin/measure-tools",
+      "cwd": "${workspaceFolder}/packages/measure-tools",
       "smartStep": true,
       "console": "integratedTerminal",
     },
@@ -44,7 +44,7 @@
       "webRoot": "${workspaceFolder}/apps/test-viewer",
       "outFiles": [
         "${workspaceFolder}/apps/test-viewer/lib/**/*.js",
-        "${workspaceFolder}/packages/itwin/*/lib/**/*.js",
+        "${workspaceFolder}/packages/*/lib/**/*.js",
       ],
     },
     { /* Partial */
@@ -57,10 +57,10 @@
     },
     {
       "name": "Tests: Property-grid",
-      "cwd": "${workspaceFolder}/packages/itwin/property-grid",
+      "cwd": "${workspaceFolder}/packages/property-grid",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/packages/itwin/property-grid/node_modules/mocha/bin/_mocha",
+      "program": "${workspaceFolder}/packages/property-grid/node_modules/mocha/bin/_mocha",
       "args": [
         "--config",
         "./.mocharc.json",
@@ -71,26 +71,12 @@
         "NODE_OPTIONS": "--enable-source-maps --import ../../../node-hooks/ignore-styles/register.cjs"
       },
       "outFiles": [
-        "${workspaceFolder}/packages/itwin/property-grid/lib/**/*.js"
-      ]
-    },
-    {
-      "name": "Tests: Breakdown-trees",
-      "cwd": "${workspaceFolder}/packages/itwin/breakdown-trees",
-      "type": "node",
-      "request": "launch",
-      "outputCapture": "std",
-      "program": "${workspaceFolder}/packages/itwin/breakdown-trees/node_modules/mocha/bin/_mocha",
-      "args": [
-        "./lib/cjs/test/**/*.test.js"
-      ],
-      "outFiles": [
-        "${workspaceFolder}/packages/itwin/breakdown-trees/lib/**/*.js"
+        "${workspaceFolder}/packages/property-grid/lib/**/*.js"
       ]
     },
     {
       "name": "Tests: map-layers",
-      "cwd": "${workspaceFolder}/packages/itwin/map-layers",
+      "cwd": "${workspaceFolder}/packages/map-layers",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "npm",
@@ -98,7 +84,7 @@
         "test"
       ],
       "outFiles": [
-        "${workspaceFolder}/packages/itwin/map-layers/lib/**/*.js"
+        "${workspaceFolder}/packages/map-layers/lib/**/*.js"
       ]
     },
   ]

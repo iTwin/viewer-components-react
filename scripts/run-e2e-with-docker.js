@@ -22,7 +22,7 @@ const execute = (command, args = []) =>
 
 try {
   const currentDirectory = process.cwd();
-  const rootDirectory = path.resolve(currentDirectory, "../../../");
+  const rootDirectory = path.resolve(currentDirectory, "../../");
   process.chdir(rootDirectory);
 } catch (err) {
   console.error(`Failed to change directory: ${err}`);
@@ -55,7 +55,7 @@ async function buildAndRunDocker() {
   } catch {
     process.exitCode = 1;
   } finally {
-    const relativePackageDir = `packages/itwin/${packageName}`;
+    const relativePackageDir = `packages/${packageName}`;
     const containerPackageDir = `${dockerContainerName}:/workspaces/viewer-components-react/${relativePackageDir}`;
     const hostPackageDir = `./${relativePackageDir}`;
     // Copy snapshots from docker container to the local repo

@@ -9,7 +9,7 @@ const fs = require("fs");
 const path = require("path");
 const { glob } = require("glob");
 
-const mapLayersPath = "packages/itwin/map-layers/**/*.{ts,tsx}";
+const mapLayersPath = "packages/map-layers/**/*.{ts,tsx}";
 
 async function checkForInlineStyles() {
   try {

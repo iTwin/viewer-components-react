@@ -7,7 +7,7 @@ on:
       - master
     paths:
       - apps/performance-tests/**
-      - packages/itwin/tree-widget/**
+      - packages/tree-widget/**
 
 jobs:
   benchmark:
