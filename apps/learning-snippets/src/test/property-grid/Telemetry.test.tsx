@@ -3,11 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
-/* eslint-disable @typescript-eslint/no-deprecated */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
-import { Presentation } from "@itwin/presentation-frontend";
 // __PUBLISH_EXTRACT_START__ PropertyGrid.ComponentWithTelemetryImports
 import { PropertyGridComponent } from "@itwin/property-grid-react";
 // __PUBLISH_EXTRACT_END__
@@ -21,6 +19,9 @@ import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
 import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils.js";
 import { withEditTxn } from "@itwin/core-backend";
+import { createStorage } from "@itwin/unified-selection";
+
+const selectionStorage = createStorage();
 
 describe("Property grid", () => {
   describe("Learning snippets", () => {
@@ -52,6 +53,7 @@ describe("Property grid", () => {
         function MyPropertyGrid() {
           return (
             <PropertyGridComponent
+              selectionStorage={selectionStorage}
               onPerformanceMeasured={(feature, elapsedTime) => {
                 // user-defined function to handle performance logging.
                 logPerformance(feature, elapsedTime);
@@ -68,7 +70,11 @@ describe("Property grid", () => {
         using _ = { [Symbol.dispose]: cleanup };
         render(<MyPropertyGrid />);
         act(() => {
-          Presentation.selection.addToSelection("", imodelConnection, [keys.category]);
+          selectionStorage.addToSelection({
+            source: "test",
+            imodelKey: imodelConnection.key,
+            selectables: [keys.category],
+          });
         });
         await waitFor(() => {
           expect(logUsage).toHaveBeenCalledTimes(3);
@@ -104,13 +110,17 @@ describe("Property grid", () => {
                 logUsage(feature);
               }}
             >
-              <PropertyGrid imodel={imodelConnection} />
+              <PropertyGrid selectionStorage={selectionStorage} imodel={imodelConnection} />
             </TelemetryContextProvider>
           );
         }
         // __PUBLISH_EXTRACT_END__
 
-        Presentation.selection.addToSelection("", imodelConnection, [keys.category]);
+        selectionStorage.addToSelection({
+          source: "test",
+          imodelKey: imodelConnection.key,
+          selectables: [keys.category],
+        });
 
         using _ = { [Symbol.dispose]: cleanup };
         const user = userEvent.setup();

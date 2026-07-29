@@ -11,25 +11,25 @@ dist
 .github
 
 # Ignore archived packages
-packages/archive
+archive
 
-# Ignore everything under packages/itwin/
-packages/itwin/**
+# Ignore everything under packages/
+packages/**
 
 # Except for the following directories
-!packages/itwin/tree-widget/
-!packages/itwin/tree-widget/**
-!packages/itwin/test-utilities/
-!packages/itwin/test-utilities/**
-!packages/itwin/property-grid/
-!packages/itwin/property-grid/**
+!packages/tree-widget/
+!packages/tree-widget/**
+!packages/test-utilities/
+!packages/test-utilities/**
+!packages/property-grid/
+!packages/property-grid/**
 
 # Ignore README files due to extractions
-packages/itwin/tree-widget/README.md
-packages/itwin/property-grid/README.md
+packages/tree-widget/README.md
+packages/property-grid/README.md
 
 # Ignore extracted api definitions
-packages/itwin/**/api
+packages/**/api
 
 # Ignore auto-generated files
 CHANGELOG.md

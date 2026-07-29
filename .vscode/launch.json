@@ -24,9 +24,9 @@
       "request": "launch",
       "autoAttachChildProcesses": true,
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
-      "program": "${workspaceFolder}/packages/itwin/measure-tools/node_modules/vitest/vitest.mjs",
+      "program": "${workspaceFolder}/packages/measure-tools/node_modules/vitest/vitest.mjs",
       "args": ["--inspect-brk", "--no-file-parallelism"],
-      "cwd": "${workspaceFolder}/packages/itwin/measure-tools",
+      "cwd": "${workspaceFolder}/packages/measure-tools",
       "smartStep": true,
       "console": "integratedTerminal",
     },
@@ -44,7 +44,7 @@
       "webRoot": "${workspaceFolder}/apps/test-viewer",
       "outFiles": [
         "${workspaceFolder}/apps/test-viewer/lib/**/*.js",
-        "${workspaceFolder}/packages/itwin/*/lib/**/*.js",
+        "${workspaceFolder}/packages/*/lib/**/*.js",
       ],
     },
     { /* Partial */
@@ -57,7 +57,7 @@
     },
     {
       "name": "Tests: Tree-widget",
-      "cwd": "${workspaceFolder}/packages/itwin/tree-widget",
+      "cwd": "${workspaceFolder}/packages/tree-widget",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "node",
@@ -66,8 +66,8 @@
         "--experimental-test-module-mocks",
         "--enable-source-maps",
         "--import",
-        "../../../node-hooks/ignore-styles/register.cjs",
-        "${workspaceFolder}/packages/itwin/tree-widget/node_modules/mocha/bin/mocha.js"
+        "../../node-hooks/ignore-styles/register.cjs",
+        "${workspaceFolder}/packages/tree-widget/node_modules/mocha/bin/mocha.js"
       ],
       "args": [
         "--config",
@@ -78,26 +78,12 @@
         "NODE_ENV": "development"
       },
       "outFiles": [
-        "${workspaceFolder}/packages/itwin/tree-widget/lib/**/*.js"
-      ]
-    },
-    {
-      "name": "Tests: Breakdown-trees",
-      "cwd": "${workspaceFolder}/packages/itwin/breakdown-trees",
-      "type": "node",
-      "request": "launch",
-      "outputCapture": "std",
-      "program": "${workspaceFolder}/packages/itwin/breakdown-trees/node_modules/mocha/bin/_mocha",
-      "args": [
-        "./lib/cjs/test/**/*.test.js"
-      ],
-      "outFiles": [
-        "${workspaceFolder}/packages/itwin/breakdown-trees/lib/**/*.js"
+        "${workspaceFolder}/packages/tree-widget/lib/**/*.js"
       ]
     },
     {
       "name": "Tests: map-layers",
-      "cwd": "${workspaceFolder}/packages/itwin/map-layers",
+      "cwd": "${workspaceFolder}/packages/map-layers",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "npm",
@@ -105,7 +91,7 @@
         "test"
       ],
       "outFiles": [
-        "${workspaceFolder}/packages/itwin/map-layers/lib/**/*.js"
+        "${workspaceFolder}/packages/map-layers/lib/**/*.js"
       ]
     },
   ]

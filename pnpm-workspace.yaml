@@ -1,5 +1,5 @@
 packages:
-  - packages/itwin/*
+  - packages/*
   - apps/test-viewer
   - apps/learning-snippets
   - apps/performance-tests
@@ -8,7 +8,7 @@ packageConfigs:
   "test-viewer":
     overrides:
       "@itwin/itwinui-react@^2": "2.12.26"
-      "@itwin/itwinui-react@^3": "3.20.1"
+      "@itwin/itwinui-react@^3": "3.21.2"
 
 
 allowBuilds:

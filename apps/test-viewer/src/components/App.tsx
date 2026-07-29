@@ -12,7 +12,6 @@ import { SvgError } from "@itwin/itwinui-illustrations-react";
 import { NonIdealState, ProgressLinear, ThemeProvider } from "@itwin/itwinui-react";
 import { ArcGisOauthRedirect } from "./ArcGisOauthRedirect";
 import { AuthorizationProvider, AuthorizationState, SignInRedirect, useAuthorizationContext } from "./Authorization";
-import { EC3AuthRedirect } from "./EC3AuthRedirect";
 import { Viewer } from "./Viewer";
 
 import type { FallbackProps } from "react-error-boundary";
@@ -37,7 +36,6 @@ function AppRoutes() {
       <Route path="/signin-callback" element={<SignInRedirect />} />
       <Route path="/*" element={<Main />} />
       <Route path="/esri-oauth2-callback" element={<ArcGisOauthRedirect />} />
-      <Route path="/ec3-oauth2-callback" element={<EC3AuthRedirect />} />
     </Routes>
   );
 }
