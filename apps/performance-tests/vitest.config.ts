@@ -51,6 +51,8 @@ export default defineConfig({
         inline: [
           "@stratakit/foundations",
           "@stratakit/icons",
+          "@stratakit/mui",
+          "@mui/material",
           "@itwin/appui-react",
           "@itwin/components-react",
           "@itwin/core-react",
