@@ -10,8 +10,8 @@ importers:
   .:
     dependencies:
       '@itwin/presentation-shared':
-        specifier: 2.0.0-alpha.10
-        version: 2.0.0-alpha.10
+        specifier: 2.0.0-alpha.11
+        version: 2.0.0-alpha.11
       fast-xml-parser:
         specifier: ^5.7.0
         version: 5.7.2
@@ -239,6 +239,9 @@ packages:
       '@opentelemetry/api':
         optional: true
 
+  '@itwin/core-bentley@5.11.3':
+    resolution: {integrity: sha512-W2yDoz2ltaAJ8IUhKG6+kH5kdg8N6QFGzQznt5gbHvkjfxNt5SpNprLtDsPhUl6zQneU4ziqO5mzDY3j7mRd0g==}
+
   '@itwin/core-bentley@5.9.1':
     resolution: {integrity: sha512-avysdRO0rT1mkYGPh8g3cxFZb/fWpYyo2zBxrsQcFDUpkTt4cF6/UkdAKylQ8h4xd19/AKucR2Vh3K7Eeez++Q==}
 
@@ -354,8 +357,8 @@ packages:
   '@itwin/presentation-shared@1.2.13':
     resolution: {integrity: sha512-nvc0gn+7PVlMbdlMJj+ddIWYthHinR64dsY9Fe6upx8HwbLNb4ANZoWZscWsnfJx0vntwnNBrH7B4webvUYpWw==}
 
-  '@itwin/presentation-shared@2.0.0-alpha.10':
-    resolution: {integrity: sha512-Cx9m7ePSNnlR+E75U2Sz+wGC+tjh/B3VBPuiSGfZkUvK1BvwutYSKI6UA5XtNQbf6tN7svnsi9Gq0JtIhI5rVw==}
+  '@itwin/presentation-shared@2.0.0-alpha.11':
+    resolution: {integrity: sha512-VbE706Vr/6ahf3hHSLjmdpOQQnGxTsUiUHNOoxrApekRf5CLXHzS5HOoCCukOX779h3zBHwOq6bXFkw15rLKcw==}
 
   '@itwin/unified-selection@1.7.0':
     resolution: {integrity: sha512-tnf3cqKgjRKRkpdkAXd3sVK/pIwNgsfQuDRAS0MfAsntnp05PMVrLaPdDOVZDrmh75+udg7HHzbdLREPqcoT3A==}
@@ -2023,6 +2026,8 @@ snapshots:
       - supports-color
       - utf-8-validate
 
+  '@itwin/core-bentley@5.11.3': {}
+
   '@itwin/core-bentley@5.9.1': {}
 
   '@itwin/core-bentley@5.9.2': {}
@@ -2159,11 +2164,11 @@ snapshots:
 
   '@itwin/presentation-shared@1.2.13':
     dependencies:
-      '@itwin/core-bentley': 5.9.1
+      '@itwin/core-bentley': 5.9.2
 
-  '@itwin/presentation-shared@2.0.0-alpha.10':
+  '@itwin/presentation-shared@2.0.0-alpha.11':
     dependencies:
-      '@itwin/core-bentley': 5.9.1
+      '@itwin/core-bentley': 5.11.3
 
   '@itwin/unified-selection@1.7.0':
     dependencies:
