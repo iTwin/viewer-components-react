@@ -230,7 +230,8 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                   ) THEN 1
                   ELSE 0
                 END IsHidden,
-                m.*
+                m.ECInstanceId ECInstanceId,
+                m.ECClassId ECClassId
               FROM ${CLASS_NAME_Model} m
               JOIN IdSet(?) childModelIdSet ON childModelIdSet.id = m.ECInstanceId
               JOIN ${CLASS_NAME_InformationPartitionElement} p ON p.ECInstanceId = m.ModeledElement.Id
