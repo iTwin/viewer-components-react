@@ -250,8 +250,26 @@ export class BaseIdsCache {
 
   // ElementModelCategoriesCache methods
 
+  public elementModelCategoriesLoaded(): boolean {
+    return this.#elementModelCategoriesCache.cachedDataLoaded();
+  }
+
   public getAllModels(): Observable<Array<ModelId>> {
     return this.#elementModelCategoriesCache.getCachedData().pipe(map(({ modelsCategoriesInfo }) => [...modelsCategoriesInfo.keys()]));
+  }
+
+  public getPlanProjectionModels(): Observable<Id64Set> {
+    return this.#elementModelCategoriesCache.getCachedData().pipe(
+      map(({ modelsCategoriesInfo }) => {
+        const result = new Set<ModelId>();
+        for (const [modelId, modelInfo] of modelsCategoriesInfo) {
+          if (modelInfo.isPlanProjectionModel) {
+            result.add(modelId);
+          }
+        }
+        return result;
+      }),
+    );
   }
 
   public getCategories({

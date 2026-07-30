@@ -5,9 +5,11 @@
 
 import { Fragment } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
+import { Skeleton } from "@stratakit/bricks";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { useActiveTreeWidgetViewport } from "../common/internal/hooks/UseActiveTreeWidgetViewport.js";
-import { SharedTreeContextProviderInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
+import { SharedTreeContextProviderInternal, useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
+import { getClassesByView } from "../common/internal/Utils.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { CategoriesTree } from "./CategoriesTree.js";
 import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonProps } from "./CategoriesTreeButtons.js";
@@ -117,14 +119,21 @@ function CategoriesTreeComponentImpl({
   ...treeProps
 }: CategoriesTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
   const { buttonProps, onCategoriesFiltered } = useCategoriesTreeButtonProps({ viewport });
+  const { getBaseIdsCache } = useSharedTreeContextInternal();
+  const viewType = viewport.viewType === "2d" ? "2d" : "3d";
+  const isLoaded =
+    buttonProps.categories.length > 0 ||
+    getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType }).elementModelCategoriesLoaded();
 
-  const buttons: ReactNode = headerButtons
-    ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ ...buttonProps, onFeatureUsed })}</Fragment>)
-    : [
-        <ShowAllButton {...buttonProps} key="show-all-btn" onFeatureUsed={onFeatureUsed} />,
-        <HideAllButton {...buttonProps} key="hide-all-btn" onFeatureUsed={onFeatureUsed} />,
-        <InvertAllButton {...buttonProps} key="invert-all-btn" onFeatureUsed={onFeatureUsed} />,
-      ];
+  const buttons: ReactNode = isLoaded
+    ? headerButtons
+      ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ ...buttonProps, onFeatureUsed })}</Fragment>)
+      : [
+          <ShowAllButton {...buttonProps} key="show-all-btn" onFeatureUsed={onFeatureUsed} />,
+          <HideAllButton {...buttonProps} key="hide-all-btn" onFeatureUsed={onFeatureUsed} />,
+          <InvertAllButton {...buttonProps} key="invert-all-btn" onFeatureUsed={onFeatureUsed} />,
+        ]
+    : Array.from({ length: headerButtons?.length ?? 3 }, (_, index) => <Skeleton variant={"object"} size={"medium"} key={index} />);
 
   return (
     <TelemetryContextProvider componentIdentifier={CategoriesTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
