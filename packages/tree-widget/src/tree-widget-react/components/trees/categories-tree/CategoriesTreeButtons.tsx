@@ -97,6 +97,10 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   const viewType = viewport.viewType === "2d" ? "2d" : "3d";
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
   const translate = useTranslation();
+  const label =
+    !baseIdsCache.elementModelCategoriesLoaded() && categories.length === 0
+      ? translate("loading.headerButton")
+      : translate("categoriesTree.buttons.showAll.tooltip");
 
   const onClick = async () => {
     // cspell:disable-next-line
@@ -108,16 +112,15 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
       if (!categoryInfos) {
         return;
       }
-      await showAll({
+      showAll({
         viewport,
         modelIds: models,
         categoryInfos,
-        cancel: cancelChangesInProgress,
       });
     } catch {}
   };
 
-  return <IconButton variant={"ghost"} label={translate("categoriesTree.buttons.showAll.tooltip")} onClick={onClick} icon={visibilityShowSvg} />;
+  return <IconButton variant={"ghost"} label={label} onClick={onClick} icon={visibilityShowSvg} aria-disabled={categories.length === 0} />;
 }
 
 /** @public */
@@ -127,6 +130,11 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
   const viewType = viewport.viewType === "2d" ? "2d" : "3d";
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
   const translate = useTranslation();
+  const label =
+    !baseIdsCache.elementModelCategoriesLoaded() && categories.length === 0
+      ? translate("loading.headerButton")
+      : translate("categoriesTree.buttons.hideAll.tooltip");
+
   const onClick = async () => {
     // cspell:disable-next-line
     onFeatureUsed?.(`categories-tree-hideall`);
@@ -137,14 +145,13 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
       if (!categoryInfos) {
         return;
       }
-      await hideAllCategories({
+      hideAllCategories({
         viewport,
         categoryInfos,
-        cancel: cancelChangesInProgress,
       });
     } catch {}
   };
-  return <IconButton variant={"ghost"} label={translate("categoriesTree.buttons.hideAll.tooltip")} onClick={onClick} icon={visibilityHideSvg} />;
+  return <IconButton variant={"ghost"} label={label} onClick={onClick} icon={visibilityHideSvg} aria-disabled={categories.length === 0} />;
 }
 
 /** @public */
@@ -154,6 +161,11 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   const viewType = viewport.viewType === "2d" ? "2d" : "3d";
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
   const translate = useTranslation();
+  const label =
+    !baseIdsCache.elementModelCategoriesLoaded() && categories.length === 0
+      ? translate("loading.headerButton")
+      : translate("categoriesTree.buttons.invert.tooltip");
+
   const onClick = async () => {
     // cspell:disable-next-line
     onFeatureUsed?.(`categories-tree-invert`);
@@ -164,15 +176,15 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
       if (!categoryInfos) {
         return;
       }
-      await invertAllCategories({
+      invertAllCategories({
         viewport,
         modelIds: models,
         categoryInfos,
-        cancel: cancelChangesInProgress,
       });
     } catch {}
   };
-  return <IconButton variant={"ghost"} label={translate("categoriesTree.buttons.invert.tooltip")} onClick={onClick} icon={visibilityInvertSvg} />;
+
+  return <IconButton variant={"ghost"} label={label} onClick={onClick} icon={visibilityInvertSvg} aria-disabled={categories.length === 0} />;
 }
 
 const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];

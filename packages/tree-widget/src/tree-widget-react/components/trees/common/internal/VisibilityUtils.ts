@@ -3,14 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, defer, EMPTY, from, map, merge, mergeMap, of, reduce, takeLast, takeUntil, tap } from "rxjs";
-import { BufferingViewport } from "./BufferingViewport.js";
-import { fromWithRelease, reduceWhile, releaseMainThreadOnItemsCount, toVoidPromise } from "./Rxjs.js";
+import { EMPTY, map, mergeMap, of, reduce } from "rxjs";
+import { reduceWhile, releaseMainThreadOnItemsCount } from "./Rxjs.js";
 import { createVisibilityStatus } from "./Tooltip.js";
-import { getOptimalBatchSize } from "./Utils.js";
 
 import type { Observable, OperatorFunction } from "rxjs";
-import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { TreeWidgetViewport } from "../TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
 import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip.js";
@@ -123,41 +121,6 @@ export function getCategoryVisibilityFromAlwaysAndNeverDrawnElementsImpl(props: 
 export type CategoryInfosMap = Map<CategoryId, Array<SubCategoryId> | undefined>;
 
 /**
- * Runs a buffered viewport change and commits it only if it runs to completion.
- *
- * If `cancel` emits before the change completes, the change is aborted and all buffered modifications are discarded,
- * leaving the viewport untouched.
- */
-async function commitViewportChange({
-  viewport,
-  cancel,
-  change,
-}: {
-  viewport: TreeWidgetViewport;
-  cancel: Observable<void>;
-  change: (bufferingViewport: BufferingViewport) => Observable<void>;
-}): Promise<void> {
-  const bufferingViewport = new BufferingViewport(viewport);
-  return toVoidPromise(
-    defer(() => change(bufferingViewport)).pipe(
-      tap({
-        // Apply all changes that were made at once.
-        // This only fires on natural completion: `takeUntil` below does not trigger `complete`.
-        complete: () => bufferingViewport.commit(),
-      }),
-      // abort if all ongoing changes are cancelled
-      takeUntil(cancel),
-      tap({
-        finalize: () => {
-          // Discard any changes that were made. If commit was called, then this will have no effect
-          bufferingViewport.discard();
-        },
-      }),
-    ),
-  );
-}
-
-/**
  * Turns display of given categories and their sub-categories on or off, clearing any per-model category overrides.
  *
  * Categories are processed in batches, releasing the main thread in between, so the returned observable may emit over multiple frames.
@@ -171,66 +134,39 @@ export function changeCategoryDisplay({
   viewport: TreeWidgetViewport;
   categoryInfos: CategoryInfosMap;
   display: boolean;
-}): Observable<void> {
-  return defer(() => {
-    const removeOverrides = (bufferedCategories: Id64Set) => {
-      const modelsContainingOverrides = new Set<Id64String>();
-      for (const ovr of viewport.perModelCategoryOverrides) {
-        if (bufferedCategories.has(ovr.categoryId)) {
-          modelsContainingOverrides.add(ovr.modelId);
-        }
-      }
-      viewport.setPerModelCategoryOverride({ modelIds: modelsContainingOverrides, categoryIds: bufferedCategories, override: "none" });
-    };
-    return fromWithRelease({ source: categoryInfos.keys(), releaseOnCount: 500, size: categoryInfos.size }).pipe(
-      bufferCount(getOptimalBatchSize({ totalSize: categoryInfos.size, maximumBatchSize: 500 })),
-      map((bufferedCategories) => {
-        viewport.changeCategoryDisplay({ categoryIds: bufferedCategories, display, enableAllSubCategories: false });
-        // Category is already turned off, no need to modify sub-categories
-        removeOverrides(new Set(bufferedCategories));
-        if (!display) {
-          return;
-        }
-        for (const categoryId of bufferedCategories) {
-          const subCategoryIds = categoryInfos.get(categoryId);
-          for (const subCategoryId of subCategoryIds ?? []) {
-            viewport.changeSubCategoryDisplay({ subCategoryId, display });
-          }
-        }
-      }),
-      takeLast(1),
-    );
-  });
+}): void {
+  const modelsContainingOverrides = new Set<Id64String>();
+  const categoriesArray = [...categoryInfos.keys()];
+  for (const ovr of viewport.perModelCategoryOverrides) {
+    if (categoryInfos.has(ovr.categoryId)) {
+      modelsContainingOverrides.add(ovr.modelId);
+    }
+  }
+  viewport.setPerModelCategoryOverride({ modelIds: modelsContainingOverrides, categoryIds: categoriesArray, override: "none" });
+  viewport.changeCategoryDisplay({ categoryIds: categoriesArray, display, enableAllSubCategories: false });
+  if (!display) {
+    return;
+  }
+  for (const categoryId of categoriesArray) {
+    const subCategoryIds = categoryInfos.get(categoryId);
+    for (const subCategoryId of subCategoryIds ?? []) {
+      viewport.changeSubCategoryDisplay({ subCategoryId, display });
+    }
+  }
 }
 
 /**
  * Makes everything visible: displays all given models, categories and sub-categories, and clears the always/never drawn element lists.
  * @internal
  */
-export async function showAll({
-  viewport,
-  modelIds,
-  categoryInfos,
-  cancel,
-}: {
-  viewport: TreeWidgetViewport;
-  modelIds: Id64Array;
-  categoryInfos: CategoryInfosMap;
-  cancel: Observable<void>;
-}) {
-  return commitViewportChange({
+export function showAll({ viewport, modelIds, categoryInfos }: { viewport: TreeWidgetViewport; modelIds: Id64Array; categoryInfos: CategoryInfosMap }) {
+  viewport.clearAlwaysDrawn();
+  viewport.clearNeverDrawn();
+  viewport.changeModelDisplay({ modelIds, display: true });
+  changeCategoryDisplay({
     viewport,
-    cancel,
-    change: (bufferingViewport) => {
-      bufferingViewport.clearAlwaysDrawn();
-      bufferingViewport.clearNeverDrawn();
-      bufferingViewport.changeModelDisplay({ modelIds, display: true });
-      return changeCategoryDisplay({
-        viewport: bufferingViewport,
-        categoryInfos,
-        display: true,
-      });
-    },
+    categoryInfos,
+    display: true,
   });
 }
 
@@ -238,26 +174,12 @@ export async function showAll({
  * Hides all given categories and their sub-categories, and clears the always drawn element list.
  * @internal
  */
-export async function hideAllCategories({
-  viewport,
-  categoryInfos,
-  cancel,
-}: {
-  viewport: TreeWidgetViewport;
-  categoryInfos: CategoryInfosMap;
-  cancel: Observable<void>;
-}) {
-  return commitViewportChange({
+export function hideAllCategories({ viewport, categoryInfos }: { viewport: TreeWidgetViewport; categoryInfos: CategoryInfosMap }) {
+  viewport.clearAlwaysDrawn();
+  changeCategoryDisplay({
     viewport,
-    cancel,
-    change: (bufferingViewport) => {
-      bufferingViewport.clearAlwaysDrawn();
-      return changeCategoryDisplay({
-        viewport: bufferingViewport,
-        categoryInfos,
-        display: false,
-      });
-    },
+    categoryInfos,
+    display: false,
   });
 }
 
@@ -268,51 +190,29 @@ export async function hideAllCategories({
  * so that model display alone determines what is visible.
  * @internal
  */
-export async function invertAllModels({
-  modelIds,
-  viewport,
-  categoryInfos,
-  cancel,
-}: {
-  modelIds: Id64Array;
-  viewport: TreeWidgetViewport;
-  categoryInfos: CategoryInfosMap;
-  cancel: Observable<void>;
-}) {
-  return commitViewportChange({
-    viewport,
-    cancel,
-    change: (bufferingViewport) => {
-      bufferingViewport.clearNeverDrawn();
-      bufferingViewport.clearAlwaysDrawn();
-      bufferingViewport.clearPerModelCategoryOverrides();
-      bufferingViewport.changeCategoryDisplay({ categoryIds: [...categoryInfos.keys()], display: true });
-      for (const subCategoryIds of categoryInfos.values()) {
-        for (const subCategoryId of subCategoryIds ?? []) {
-          if (!bufferingViewport.viewsSubCategory(subCategoryId)) {
-            bufferingViewport.changeSubCategoryDisplay({ subCategoryId, display: true });
-          }
-        }
+export function invertAllModels({ modelIds, viewport, categoryInfos }: { modelIds: Id64Array; viewport: TreeWidgetViewport; categoryInfos: CategoryInfosMap }) {
+  viewport.clearNeverDrawn();
+  viewport.clearAlwaysDrawn();
+  viewport.clearPerModelCategoryOverrides();
+  viewport.changeCategoryDisplay({ categoryIds: [...categoryInfos.keys()], display: true });
+  for (const subCategoryIds of categoryInfos.values()) {
+    for (const subCategoryId of subCategoryIds ?? []) {
+      if (!viewport.viewsSubCategory(subCategoryId)) {
+        viewport.changeSubCategoryDisplay({ subCategoryId, display: true });
       }
-      return from(modelIds).pipe(
-        reduce(
-          (acc, modelId) => {
-            if (bufferingViewport.viewsModel(modelId)) {
-              acc.viewedModels.push(modelId);
-            } else {
-              acc.notViewedModels.push(modelId);
-            }
-            return acc;
-          },
-          { notViewedModels: new Array<Id64String>(), viewedModels: new Array<Id64String>() },
-        ),
-        map(({ notViewedModels, viewedModels }) => {
-          bufferingViewport.changeModelDisplay({ modelIds: notViewedModels, display: true });
-          bufferingViewport.changeModelDisplay({ modelIds: viewedModels, display: false });
-        }),
-      );
-    },
-  });
+    }
+  }
+  const notViewedModels = new Array<Id64String>();
+  const viewedModels = new Array<Id64String>();
+  for (const modelId of modelIds) {
+    if (viewport.viewsModel(modelId)) {
+      viewedModels.push(modelId);
+      continue;
+    }
+    notViewedModels.push(modelId);
+  }
+  viewport.changeModelDisplay({ modelIds: notViewedModels, display: true });
+  viewport.changeModelDisplay({ modelIds: viewedModels, display: false });
 }
 
 /**
@@ -322,45 +222,35 @@ export async function invertAllModels({
  * so that category display alone determines what is visible.
  * @internal
  */
-export async function invertAllCategories({
+export function invertAllCategories({
   categoryInfos,
   modelIds,
   viewport,
-  cancel,
 }: {
   categoryInfos: Map<CategoryId, Array<SubCategoryId> | undefined>;
   modelIds: Id64Array;
   viewport: TreeWidgetViewport;
-  cancel: Observable<void>;
 }) {
-  return commitViewportChange({
-    viewport,
-    cancel,
-    change: (bufferingViewport) => {
-      bufferingViewport.clearNeverDrawn();
-      bufferingViewport.clearAlwaysDrawn();
-      bufferingViewport.changeModelDisplay({ modelIds, display: true });
+  viewport.clearNeverDrawn();
+  viewport.clearAlwaysDrawn();
+  viewport.changeModelDisplay({ modelIds, display: true });
 
-      const categoriesToEnable: CategoryInfosMap = new Map();
-      const categoriesToDisable: CategoryInfosMap = new Map();
+  const categoriesToEnable: CategoryInfosMap = new Map();
+  const categoriesToDisable: CategoryInfosMap = new Map();
 
-      for (const [categoryId, subCategoryIds] of categoryInfos) {
-        if (!bufferingViewport.viewsCategory(categoryId)) {
-          categoriesToEnable.set(categoryId, subCategoryIds);
-          continue;
-        }
-        // Check if category is in partial state
-        if (subCategoryIds?.some((subCategory) => !bufferingViewport.viewsSubCategory(subCategory))) {
-          categoriesToEnable.set(categoryId, subCategoryIds);
-        } else {
-          categoriesToDisable.set(categoryId, subCategoryIds);
-        }
-      }
+  for (const [categoryId, subCategoryIds] of categoryInfos) {
+    if (!viewport.viewsCategory(categoryId)) {
+      categoriesToEnable.set(categoryId, subCategoryIds);
+      continue;
+    }
+    // Check if category is in partial state
+    if (subCategoryIds?.some((subCategory) => !viewport.viewsSubCategory(subCategory))) {
+      categoriesToEnable.set(categoryId, subCategoryIds);
+    } else {
+      categoriesToDisable.set(categoryId, subCategoryIds);
+    }
+  }
 
-      return merge(
-        changeCategoryDisplay({ viewport: bufferingViewport, categoryInfos: categoriesToDisable, display: false }),
-        changeCategoryDisplay({ viewport: bufferingViewport, categoryInfos: categoriesToEnable, display: true }),
-      ).pipe(takeLast(1));
-    },
-  });
+  changeCategoryDisplay({ viewport, categoryInfos: categoriesToDisable, display: false });
+  changeCategoryDisplay({ viewport, categoryInfos: categoriesToEnable, display: true });
 }

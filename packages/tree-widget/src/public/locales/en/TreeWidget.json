@@ -15,7 +15,8 @@
   },
   "loading": {
     "search": "Search in progress",
-    "skeleton": "Loading tree"
+    "skeleton": "Loading tree",
+    "headerButton": "Loading"
   },
   "selectableTree": {
     "noTrees": "There are no trees available for this iModel."

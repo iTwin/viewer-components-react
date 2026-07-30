@@ -3,10 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, delay, forkJoin, map, reduce, shareReplay, tap } from "rxjs";
-import { CLASS_NAME_GeometricModel3d, CLASS_NAME_Model } from "../ClassNameDefinitions.js";
+import { defer, delay, map, reduce, shareReplay, tap } from "rxjs";
+import { CLASS_NAME_Model } from "../ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../hooks/UseErrorState.js";
-import { createExcludedClassesClause, getOrCreate, setIntersection } from "../Utils.js";
+import { createExcludedClassesClause, getOrCreate } from "../Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64String } from "@itwin/core-bentley";
@@ -20,17 +20,15 @@ interface ElementModelCategoriesCacheProps {
   elementClassName: string;
   excludedElementClassNames?: ReadonlyArray<EC.FullClassNameDotNotation>;
 }
-
+interface ModelsCategoriesInfoEntry {
+  categoriesOfTopMostElements: Set<CategoryId>;
+  allCategories: Set<CategoryId>;
+  categoriesOfTopMostNonExcludedElements: Set<CategoryId>;
+  nonExcludedCategories: Set<CategoryId>;
+  isPlanProjectionModel: boolean;
+}
 interface CachedData {
-  modelsCategoriesInfo: Map<
-    ModelId,
-    {
-      categoriesOfTopMostElements: Set<CategoryId>;
-      allCategories: Set<CategoryId>;
-      categoriesOfTopMostNonExcludedElements: Set<CategoryId>;
-      nonExcludedCategories: Set<CategoryId>;
-    }
-  >;
+  modelsCategoriesInfo: Map<ModelId, ModelsCategoriesInfoEntry>;
   modelsContainingTopMostNonExcludedElements: Set<ModelId>;
   categoriesContainingNonExcludedElements: Set<CategoryId>;
   categoryModelsInfo: Map<CategoryId, Array<{ id: ModelId; categoryIsOfTopMostElement: boolean; hasNonExcludedTopMostElements: boolean }>>;
@@ -49,7 +47,6 @@ export class ElementModelCategoriesCache {
   #cachedData: Observable<CachedData> | undefined;
   #dataResolved = false;
   #subscriberBatches: Array<{ obs: Observable<CachedData>; subscriberCount: number }> = [];
-  #cachedPlanProjectionModels: Observable<Set<ModelId>> | undefined;
 
   constructor(props: ElementModelCategoriesCacheProps) {
     this.#queryExecutor = props.queryExecutor;
@@ -65,6 +62,7 @@ export class ElementModelCategoriesCache {
     isTopMostElementCategory: boolean;
     hasParentElements: boolean;
     hasElementsFromNonExcludedClasses: boolean;
+    isPlanProjectionModel: boolean;
   }> {
     const excludedClause = createExcludedClassesClause({ alias: "this", excludedClassNames: this.#excludedElementClassNames });
     return defer(() => {
@@ -73,7 +71,8 @@ export class ElementModelCategoriesCache {
             this.Model.Id modelId,
             this.Category.Id categoryId,
             MAX(IIF(this.Parent.Id IS NULL, 1, 0)) isTopMostElementCategory,
-            MAX(IIF((SELECT 1 FROM ${this.#elementClassName} ce WHERE ce.Parent.Id = this.ECInstanceId LIMIT 1), 1, 0)) hasParentElements
+            MAX(IIF((SELECT 1 FROM ${this.#elementClassName} ce WHERE ce.Parent.Id = this.ECInstanceId LIMIT 1), 1, 0)) hasParentElements,
+            IIF(m.$->IsPlanProjection?, 1, 0) isPlanProjectionModel
             ${excludedClause ? `, MAX(IIF((${excludedClause}), 1, 0)) hasElementsFromNonExcludedClasses` : ""}
           FROM ${this.#elementClassName} this
           JOIN ${CLASS_NAME_Model} m ON m.ECInstanceId = this.Model.Id
@@ -93,39 +92,14 @@ export class ElementModelCategoriesCache {
           isTopMostElementCategory: !!row.isTopMostElementCategory,
           hasParentElements: !!row.hasParentElements,
           hasElementsFromNonExcludedClasses: excludedClause ? !!row.hasElementsFromNonExcludedClasses : true,
+          isPlanProjectionModel: !!row.isPlanProjectionModel,
         };
       }),
     );
   }
 
-  private queryPlanProjectionModels(): Observable<ModelId> {
-    return defer(() => {
-      const query = `
-          SELECT this.ECInstanceId modelId
-          FROM ${CLASS_NAME_GeometricModel3d} this
-          WHERE this.IsPrivate = false AND this.IsPlanProjection
-        `;
-      return this.#queryExecutor.createQueryReader(
-        { ecsql: query },
-        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/plan-projection-models` },
-      );
-    }).pipe(
-      catchBeSQLiteInterrupts,
-      map((row) => row.modelId),
-    );
-  }
-
-  public getPlanProjectionModels(): Observable<Set<ModelId>> {
-    this.#cachedPlanProjectionModels ??= forkJoin({
-      cachedData: this.getCachedData(),
-      allPlanProjectionModels: this.queryPlanProjectionModels().pipe(reduce((acc, modelId) => acc.add(modelId), new Set<ModelId>())),
-    }).pipe(
-      map(({ cachedData, allPlanProjectionModels }) => {
-        return setIntersection(new Set([...cachedData.modelsCategoriesInfo.keys()]), allPlanProjectionModels);
-      }),
-      shareReplay(),
-    );
-    return this.#cachedPlanProjectionModels;
+  public cachedDataLoaded() {
+    return !!this.#dataResolved;
   }
 
   public getCachedData() {
@@ -146,11 +120,12 @@ export class ElementModelCategoriesCache {
           const modelEntry = getOrCreate({
             map: acc.modelsCategoriesInfo,
             key: queriedCategory.modelId,
-            createFunc: () => ({
+            createFunc: (): ModelsCategoriesInfoEntry => ({
               categoriesOfTopMostElements: new Set<string>(),
               allCategories: new Set<string>(),
               categoriesOfTopMostNonExcludedElements: new Set<string>(),
               nonExcludedCategories: new Set<string>(),
+              isPlanProjectionModel: queriedCategory.isPlanProjectionModel,
             }),
           });
           modelEntry.allCategories.add(queriedCategory.categoryId);
@@ -172,15 +147,7 @@ export class ElementModelCategoriesCache {
           return acc;
         },
         {
-          modelsCategoriesInfo: new Map<
-            ModelId,
-            {
-              categoriesOfTopMostElements: Set<CategoryId>;
-              allCategories: Set<CategoryId>;
-              categoriesOfTopMostNonExcludedElements: Set<CategoryId>;
-              nonExcludedCategories: Set<CategoryId>;
-            }
-          >(),
+          modelsCategoriesInfo: new Map<ModelId, ModelsCategoriesInfoEntry>(),
           categoriesWithParentElements: new Set<CategoryId>(),
           allTopMostElementCategories: new Set<CategoryId>(),
           allCategories: new Set<CategoryId>(),

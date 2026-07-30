@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { EMPTY, firstValueFrom, from, Subject, toArray } from "rxjs";
+import { EMPTY, firstValueFrom, from, toArray } from "rxjs";
 import {
   HierarchyCacheMode,
   initializeCore,
@@ -74,14 +74,6 @@ describe("VisibilityUtils", () => {
   ]);
   let viewport: TreeWidgetTestingViewport;
 
-  /**
-   * Creates enough categories for `changeCategoryDisplay` to release the main thread while processing them.
-   * This makes the change asynchronous, giving tests a chance to cancel it before it completes.
-   */
-  function createLargeCategoryInfos(): Map<Id64String, Array<Id64String> | undefined> {
-    return new Map(Array.from({ length: 500 }, (_, index): [Id64String, Array<Id64String> | undefined] => [`0x${index + 1}`, undefined]));
-  }
-
   beforeEach(() => {
     viewport = createFakeViewport({
       queryHandler: () => [{ id: categoryId }],
@@ -91,22 +83,22 @@ describe("VisibilityUtils", () => {
   });
 
   describe("changeCategoryDisplay", () => {
-    it("turns on category", async () => {
-      await firstValueFrom(changeCategoryDisplay({ viewport, categoryInfos: new Map([[categoryId, [subCategoryId]]]), display: true }));
+    it("turns on category", () => {
+      changeCategoryDisplay({ viewport, categoryInfos: new Map([[categoryId, [subCategoryId]]]), display: true });
       expect(viewport.changeCategoryDisplay).toHaveBeenCalledWith({ categoryIds: [categoryId], display: true, enableAllSubCategories: false });
       expect(viewport.changeSubCategoryDisplay).toHaveBeenCalledWith({ subCategoryId, display: true });
     });
 
-    it("disables category", async () => {
-      await firstValueFrom(changeCategoryDisplay({ viewport, categoryInfos: new Map([[categoryId, [subCategoryId]]]), display: false }));
+    it("disables category", () => {
+      changeCategoryDisplay({ viewport, categoryInfos: new Map([[categoryId, [subCategoryId]]]), display: false });
       expect(viewport.changeCategoryDisplay).toHaveBeenCalledWith({ categoryIds: [categoryId], display: false, enableAllSubCategories: false });
       expect(viewport.changeSubCategoryDisplay).not.toHaveBeenCalled();
     });
 
-    it("removes overrides per model when enabling category", async () => {
+    it("removes overrides per model when enabling category", () => {
       const overrides = [{ modelId: "ModelId", categoryId, visible: false }];
       viewport.perModelCategoryOverrides = overrides;
-      await firstValueFrom(changeCategoryDisplay({ viewport, categoryInfos: new Map([[categoryId, [subCategoryId]]]), display: true }));
+      changeCategoryDisplay({ viewport, categoryInfos: new Map([[categoryId, [subCategoryId]]]), display: true });
 
       expect(viewport.changeCategoryDisplay).toHaveBeenCalledWith({ categoryIds: [categoryId], display: true, enableAllSubCategories: false });
       expect(viewport.getPerModelCategoryOverride({ modelId: "ModelId", categoryId })).toBe("none");
@@ -263,12 +255,11 @@ describe("VisibilityUtils", () => {
   });
 
   describe("showAll", () => {
-    it("turns on models, categories and sub-categories and clears always and never drawn lists", async () => {
-      await showAll({
+    it("turns on models, categories and sub-categories and clears always and never drawn lists", () => {
+      showAll({
         viewport,
         modelIds: ["0x10"],
         categoryInfos: new Map([[categoryId, [subCategoryId]]]),
-        cancel: new Subject<void>(),
       });
 
       expect(viewport.clearAlwaysDrawn).toHaveBeenCalled();
@@ -278,51 +269,25 @@ describe("VisibilityUtils", () => {
       expect(viewport.changeSubCategoryDisplay).toHaveBeenCalledWith({ subCategoryId, display: true });
     });
 
-    it("applies non-category changes when there are no categories", async () => {
-      await showAll({
+    it("applies non-category changes and an empty category update when there are no categories", () => {
+      showAll({
         viewport,
         modelIds: ["0x10"],
         categoryInfos: new Map(),
-        cancel: new Subject<void>(),
       });
 
       expect(viewport.clearAlwaysDrawn).toHaveBeenCalled();
       expect(viewport.clearNeverDrawn).toHaveBeenCalled();
       expect(viewport.changeModelDisplay).toHaveBeenCalledWith({ modelIds: ["0x10"], display: true });
-      expect(viewport.changeCategoryDisplay).not.toHaveBeenCalled();
-    });
-
-    it("commits buffered changes after yielding to the main thread", async () => {
-      await showAll({
-        viewport,
-        modelIds: ["0x10"],
-        categoryInfos: createLargeCategoryInfos(),
-        cancel: new Subject<void>(),
-      });
-
-      expect(viewport.changeModelDisplay).toHaveBeenCalled();
-      expect(viewport.changeCategoryDisplay).toHaveBeenCalled();
-    });
-
-    it("does not modify viewport when it is cancelled before completing", async () => {
-      const cancel = new Subject<void>();
-      const promise = showAll({ viewport, modelIds: ["0x10"], categoryInfos: createLargeCategoryInfos(), cancel });
-      cancel.next();
-      await promise;
-
-      expect(viewport.clearAlwaysDrawn).not.toHaveBeenCalled();
-      expect(viewport.clearNeverDrawn).not.toHaveBeenCalled();
-      expect(viewport.changeModelDisplay).not.toHaveBeenCalled();
-      expect(viewport.changeCategoryDisplay).not.toHaveBeenCalled();
+      expect(viewport.changeCategoryDisplay).toHaveBeenCalledWith({ categoryIds: [], display: true, enableAllSubCategories: false });
     });
   });
 
   describe("hideAllCategories", () => {
-    it("turns off categories and clears always drawn list", async () => {
-      await hideAllCategories({
+    it("turns off categories and clears always drawn list", () => {
+      hideAllCategories({
         viewport,
         categoryInfos: new Map([[categoryId, [subCategoryId]]]),
-        cancel: new Subject<void>(),
       });
 
       expect(viewport.clearAlwaysDrawn).toHaveBeenCalled();
@@ -332,51 +297,38 @@ describe("VisibilityUtils", () => {
       expect(viewport.clearNeverDrawn).not.toHaveBeenCalled();
     });
 
-    it("applies non-category changes when there are no categories", async () => {
-      await hideAllCategories({
+    it("applies non-category changes and an empty category update when there are no categories", () => {
+      hideAllCategories({
         viewport,
         categoryInfos: new Map(),
-        cancel: new Subject<void>(),
       });
 
       expect(viewport.clearAlwaysDrawn).toHaveBeenCalled();
-      expect(viewport.changeCategoryDisplay).not.toHaveBeenCalled();
-    });
-
-    it("does not modify viewport when it is cancelled before completing", async () => {
-      const cancel = new Subject<void>();
-      const promise = hideAllCategories({ viewport, categoryInfos: createLargeCategoryInfos(), cancel });
-      cancel.next();
-      await promise;
-
-      expect(viewport.clearAlwaysDrawn).not.toHaveBeenCalled();
-      expect(viewport.changeCategoryDisplay).not.toHaveBeenCalled();
+      expect(viewport.changeCategoryDisplay).toHaveBeenCalledWith({ categoryIds: [], display: false, enableAllSubCategories: false });
     });
   });
 
   describe("invertAllModels", () => {
-    it("turns on hidden models and turns off visible ones", async () => {
+    it("turns on hidden models and turns off visible ones", () => {
       using testViewport = createFakeViewport({ viewsModel: (modelId) => modelId === "0x10", viewsSubCategory: () => false });
 
-      await invertAllModels({
+      invertAllModels({
         viewport: testViewport,
         modelIds: ["0x10", "0x20"],
         categoryInfos: new Map([[categoryId, [subCategoryId]]]),
-        cancel: new Subject<void>(),
       });
 
       expect(testViewport.changeModelDisplay).toHaveBeenCalledWith({ modelIds: ["0x20"], display: true });
       expect(testViewport.changeModelDisplay).toHaveBeenCalledWith({ modelIds: ["0x10"], display: false });
     });
 
-    it("turns on all categories and sub-categories and clears always drawn, never drawn lists and per model overrides", async () => {
+    it("turns on all categories and sub-categories and clears always drawn, never drawn lists and per model overrides", () => {
       using testViewport = createFakeViewport({ viewsModel: () => false, viewsSubCategory: () => false });
 
-      await invertAllModels({
+      invertAllModels({
         viewport: testViewport,
         modelIds: ["0x10"],
         categoryInfos: new Map([[categoryId, [subCategoryId]]]),
-        cancel: new Subject<void>(),
       });
 
       expect(testViewport.clearAlwaysDrawn).toHaveBeenCalled();
@@ -385,14 +337,13 @@ describe("VisibilityUtils", () => {
       expect(testViewport.changeSubCategoryDisplay).toHaveBeenCalledWith({ subCategoryId, display: true });
     });
 
-    it("does not change sub-category display when it is already visible", async () => {
+    it("does not change sub-category display when it is already visible", () => {
       using testViewport = createFakeViewport({ viewsModel: () => false, viewsSubCategory: () => true });
 
-      await invertAllModels({
+      invertAllModels({
         viewport: testViewport,
         modelIds: ["0x10"],
         categoryInfos: new Map([[categoryId, [subCategoryId]]]),
-        cancel: new Subject<void>(),
       });
 
       expect(testViewport.changeSubCategoryDisplay).not.toHaveBeenCalled();
@@ -460,16 +411,15 @@ describe("VisibilityUtils", () => {
       await terminateCore();
     });
 
-    it("inverts visible and hidden categories", async () => {
+    it("inverts visible and hidden categories", () => {
       nonMockedViewport.changeCategoryDisplay({ categoryIds: [categoryIds[0]], display: false, enableAllSubCategories: true });
       nonMockedViewport.changeCategoryDisplay({ categoryIds: [categoryIds[1], categoryIds[2]], display: true, enableAllSubCategories: true });
       for (let i = 0; i < categoryIds.length; ++i) {
         expect(nonMockedViewport.viewsCategory(categoryIds[i])).toBe(i > 0);
       }
-      await invertAllCategories({
+      invertAllCategories({
         categoryInfos: new Map(categoryIds.map((id, index) => [id, [subCategoryIds[index]]])),
         modelIds,
-        cancel: new Subject<void>(),
         viewport: nonMockedViewport,
       });
       for (let i = 0; i < categoryIds.length; ++i) {
@@ -477,7 +427,7 @@ describe("VisibilityUtils", () => {
       }
     });
 
-    it("clears always/never drawn sets and per model category overrides ", async () => {
+    it("clears always/never drawn sets and per model category overrides ", () => {
       nonMockedViewport.changeCategoryDisplay({ categoryIds: categoryIds[0], display: true, enableAllSubCategories: true });
       nonMockedViewport.changeCategoryDisplay({ categoryIds: categoryIds[1], display: false, enableAllSubCategories: true });
       nonMockedViewport.setAlwaysDrawn({ elementIds: new Set(["element1"]) });
@@ -485,10 +435,9 @@ describe("VisibilityUtils", () => {
       nonMockedViewport.setPerModelCategoryOverride({ modelIds: modelIds[0], categoryIds: categoryIds[0], override: "show" });
       nonMockedViewport.setPerModelCategoryOverride({ modelIds: modelIds[1], categoryIds: categoryIds[1], override: "hide" });
       expect(nonMockedViewport.alwaysDrawn?.size).toBe(1);
-      await invertAllCategories({
+      invertAllCategories({
         categoryInfos: new Map(categoryIds.map((id, index) => [id, [subCategoryIds[index]]])),
         modelIds,
-        cancel: new Subject<void>(),
         viewport: nonMockedViewport,
       });
       expect(nonMockedViewport.viewsCategory(categoryIds[0])).toBe(false);
