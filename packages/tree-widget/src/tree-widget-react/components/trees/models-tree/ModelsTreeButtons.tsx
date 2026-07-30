@@ -115,8 +115,6 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   const { getBaseIdsCache, cancelChangesInProgress } = useSharedTreeContextInternal();
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
   const translate = useTranslation();
-  const label =
-    !baseIdsCache.elementModelCategoriesLoaded() && models.length === 0 ? translate("loading.headerButton") : translate("modelsTree.buttons.showAll.tooltip");
 
   const onClick = async () => {
     // cspell:disable-next-line
@@ -136,17 +134,22 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
     } catch {}
   };
 
-  return <IconButton variant={"ghost"} label={label} onClick={onClick} icon={visibilityShowSvg} aria-disabled={models.length === 0} />;
+  return (
+    <IconButton
+      variant={"ghost"}
+      label={translate("modelsTree.buttons.showAll.tooltip")}
+      onClick={onClick}
+      icon={visibilityShowSvg}
+      aria-disabled={models.length === 0}
+    />
+  );
 }
 
 /** @public */
 export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
   const { models, viewport, onFeatureUsed } = props;
-  const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContextInternal();
-  const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
+  const { cancelChangesInProgress } = useSharedTreeContextInternal();
   const translate = useTranslation();
-  const label =
-    !baseIdsCache.elementModelCategoriesLoaded() && models.length === 0 ? translate("loading.headerButton") : translate("modelsTree.buttons.hideAll.tooltip");
 
   const onClick = () => {
     // cspell:disable-next-line
@@ -155,7 +158,15 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
     viewport.changeModelDisplay({ modelIds: models.map((model) => model.id), display: false });
   };
 
-  return <IconButton variant={"ghost"} label={label} onClick={onClick} icon={visibilityHideSvg} aria-disabled={models.length === 0} />;
+  return (
+    <IconButton
+      variant={"ghost"}
+      label={translate("modelsTree.buttons.hideAll.tooltip")}
+      onClick={onClick}
+      icon={visibilityHideSvg}
+      aria-disabled={models.length === 0}
+    />
+  );
 }
 
 /** @public */
@@ -164,8 +175,6 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
   const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContextInternal();
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
   const translate = useTranslation();
-  const label =
-    !baseIdsCache.elementModelCategoriesLoaded() && models.length === 0 ? translate("loading.headerButton") : translate("modelsTree.buttons.invert.tooltip");
 
   const onClick = async () => {
     // cspell:disable-next-line
@@ -185,7 +194,15 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
     } catch {}
   };
 
-  return <IconButton variant={"ghost"} label={label} onClick={onClick} icon={visibilityInvertSvg} aria-disabled={models.length === 0} />;
+  return (
+    <IconButton
+      variant={"ghost"}
+      label={translate("modelsTree.buttons.invert.tooltip")}
+      onClick={onClick}
+      icon={visibilityInvertSvg}
+      aria-disabled={models.length === 0}
+    />
+  );
 }
 
 function useAreAllModelsVisible({ modelIds, viewport }: { modelIds: Id64String[]; viewport: TreeWidgetViewport }): boolean {
@@ -197,13 +214,10 @@ function useAreAllModelsVisible({ modelIds, viewport }: { modelIds: Id64String[]
 /** @public */
 export function View2DButton(props: ModelsTreeHeaderButtonProps) {
   const { models, viewport, onFeatureUsed } = props;
-  const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContextInternal();
-  const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
+  const { cancelChangesInProgress } = useSharedTreeContextInternal();
   const models2d = useMemo(() => models.filter((model) => model.isPlanProjection).map((model) => model.id), [models]);
   const is2dToggleActive = useAreAllModelsVisible({ modelIds: models2d, viewport });
   const translate = useTranslation();
-  const label =
-    !baseIdsCache.elementModelCategoriesLoaded() && models.length === 0 ? translate("loading.headerButton") : translate("modelsTree.buttons.toggle2d.tooltip");
 
   const onClick = () => {
     onFeatureUsed?.("models-tree-view2d");
@@ -211,21 +225,27 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
     viewport.changeModelDisplay({ modelIds: models2d, display: is2dToggleActive ? false : true });
   };
 
-  return <IconButton variant={"ghost"} label={label} onClick={onClick} aria-disabled={models2d.length === 0} active={is2dToggleActive} icon={toggle2DSvg} />;
+  return (
+    <IconButton
+      variant={"ghost"}
+      label={translate("modelsTree.buttons.toggle2d.tooltip")}
+      onClick={onClick}
+      aria-disabled={models2d.length === 0}
+      active={is2dToggleActive}
+      icon={toggle2DSvg}
+    />
+  );
 }
 
 /** @public */
 export function View3DButton(props: ModelsTreeHeaderButtonProps) {
   const { models, viewport, onFeatureUsed } = props;
-  const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContextInternal();
-  const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
+  const { cancelChangesInProgress } = useSharedTreeContextInternal();
   const models3d = useMemo(() => {
     return models.filter((model) => !model.isPlanProjection).map((model) => model.id);
   }, [models]);
   const is3dToggleActive = useAreAllModelsVisible({ modelIds: models3d, viewport });
   const translate = useTranslation();
-  const label =
-    !baseIdsCache.elementModelCategoriesLoaded() && models.length === 0 ? translate("loading.headerButton") : translate("modelsTree.buttons.toggle3d.tooltip");
 
   const onClick = () => {
     onFeatureUsed?.("models-tree-view3d");
@@ -233,7 +253,16 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
     viewport.changeModelDisplay({ modelIds: models3d, display: is3dToggleActive ? false : true });
   };
 
-  return <IconButton variant={"ghost"} label={label} onClick={onClick} aria-disabled={models3d.length === 0} active={is3dToggleActive} icon={toggle3DSvg} />;
+  return (
+    <IconButton
+      variant={"ghost"}
+      label={translate("modelsTree.buttons.toggle3d.tooltip")}
+      onClick={onClick}
+      aria-disabled={models3d.length === 0}
+      active={is3dToggleActive}
+      icon={toggle3DSvg}
+    />
+  );
 }
 
 /** @public */

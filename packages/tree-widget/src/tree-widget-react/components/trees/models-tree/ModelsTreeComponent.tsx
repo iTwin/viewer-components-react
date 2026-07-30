@@ -5,10 +5,12 @@
 
 import { Fragment, useEffect } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
+import { Skeleton } from "@stratakit/bricks";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import { useActiveTreeWidgetViewport } from "../common/internal/hooks/UseActiveTreeWidgetViewport.js";
-import { SharedTreeContextProviderInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
+import { SharedTreeContextProviderInternal, useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
+import { getClassesByView } from "../common/internal/Utils.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { ModelsTree } from "./ModelsTree.js";
 import {
@@ -160,17 +162,22 @@ function ModelsTreeComponentImpl({
 }: ModelsTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
   const { buttonProps, onModelsFiltered } = useModelsTreeButtonProps({ imodel: iModel, viewport });
   const { enabled: instanceFocusEnabled, toggle: toggleInstanceFocus } = useFocusedInstancesContext();
-
-  const buttons: ReactNode = headerButtons
-    ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ ...buttonProps, onFeatureUsed })}</Fragment>)
-    : [
-        <ShowAllButton {...buttonProps} key="show-all-btn" onFeatureUsed={onFeatureUsed} />,
-        <HideAllButton {...buttonProps} key="hide-all-btn" onFeatureUsed={onFeatureUsed} />,
-        <InvertButton {...buttonProps} key="invert-all-btn" onFeatureUsed={onFeatureUsed} />,
-        <View2DButton {...buttonProps} key="view-2d-btn" onFeatureUsed={onFeatureUsed} />,
-        <View3DButton {...buttonProps} key="view-3d-btn" onFeatureUsed={onFeatureUsed} />,
-        <ToggleInstancesFocusButton disabled={searchText !== undefined} key="toggle-instances-focus-btn" onFeatureUsed={onFeatureUsed} />,
-      ];
+  const { getBaseIdsCache } = useSharedTreeContextInternal();
+  const isLoaded =
+    buttonProps.models.length > 0 ||
+    getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" }).elementModelCategoriesLoaded();
+  const buttons: ReactNode = isLoaded
+    ? headerButtons
+      ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ ...buttonProps, onFeatureUsed })}</Fragment>)
+      : [
+          <ShowAllButton {...buttonProps} key="show-all-btn" onFeatureUsed={onFeatureUsed} />,
+          <HideAllButton {...buttonProps} key="hide-all-btn" onFeatureUsed={onFeatureUsed} />,
+          <InvertButton {...buttonProps} key="invert-all-btn" onFeatureUsed={onFeatureUsed} />,
+          <View2DButton {...buttonProps} key="view-2d-btn" onFeatureUsed={onFeatureUsed} />,
+          <View3DButton {...buttonProps} key="view-3d-btn" onFeatureUsed={onFeatureUsed} />,
+          <ToggleInstancesFocusButton disabled={searchText !== undefined} key="toggle-instances-focus-btn" onFeatureUsed={onFeatureUsed} />,
+        ]
+    : Array.from({ length: headerButtons?.length ?? 6 }, (_, index) => <Skeleton variant={"object"} size={"medium"} key={index} />);
 
   useEffect(() => {
     if (instanceFocusEnabled && searchText !== undefined) {
