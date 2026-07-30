@@ -4,10 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { HierarchySearchTree } from "@itwin/presentation-hierarchies";
-import { enableCategoryDisplay } from "./internal/VisibilityUtils.js";
-
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import type { TreeWidgetViewport } from "./TreeWidgetViewport.js";
 
 /**
  * This is a logging namespace for public log messages that may be interesting to consumers.
@@ -17,62 +13,6 @@ export const LOGGING_NAMESPACE = "TreeWidget";
 
 /** @beta */
 export type FunctionProps<THook extends (props: any) => any> = Parameters<THook>[0];
-
-/**
- * Enables display of all given models. Also enables display of all categories and clears always and
- * never drawn lists in the viewport.
- * @internal
- */
-export async function showAll(props: {
-  /** ID's of models to enable */
-  models: Id64Array;
-  /** ID's of categories to enable */
-  categories: Id64Array;
-  viewport: TreeWidgetViewport;
-}) {
-  const { models, categories, viewport } = props;
-  await enableCategoryDisplay(viewport, categories, true, true);
-  viewport.changeModelDisplay({ modelIds: models, display: true });
-  viewport.clearNeverDrawn();
-  viewport.clearAlwaysDrawn();
-}
-
-/**
- * Inverts display of all given models.
- * @internal
- */
-export function invertAllModels(models: Id64Array, viewport: TreeWidgetViewport) {
-  const notViewedModels = new Array<Id64String>();
-  const viewedModels = new Array<Id64String>();
-  models.forEach((modelId) => {
-    if (viewport.viewsModel(modelId)) {
-      viewedModels.push(modelId);
-    } else {
-      notViewedModels.push(modelId);
-    }
-  });
-  viewport.changeModelDisplay({ modelIds: notViewedModels, display: true });
-  viewport.changeModelDisplay({ modelIds: viewedModels, display: false });
-}
-
-/**
- * Based on the value of `enable` argument, either enables or disables display of given models.
- * @internal
- */
-export function toggleModels(models: string[], enable: boolean, viewport: TreeWidgetViewport) {
-  if (!models) {
-    return;
-  }
-  viewport.changeModelDisplay({ modelIds: models, display: enable });
-}
-
-/**
- * Checks if all given models are displayed in given viewport.
- * @internal
- */
-export function areAllModelsVisible(models: string[], viewport: TreeWidgetViewport) {
-  return models.length !== 0 ? models.every((id) => viewport.viewsModel(id)) : false;
-}
 
 /** @internal */
 export function joinHierarchySearchTrees(subTrees: HierarchySearchTree[], searchTrees: HierarchySearchTree[]): HierarchySearchTree[] {

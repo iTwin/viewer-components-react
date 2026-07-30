@@ -37,6 +37,18 @@ export function setDifference<T>(lhs: ReadonlySet<T>, rhs: ReadonlySet<T>): Set<
 }
 
 /** @internal */
+export function setIntersection<T>(lhs: ReadonlySet<T>, rhs: ReadonlySet<T>): Set<T> {
+  const result = new Set<T>();
+  const { smallerSet, largerSet } = lhs.size < rhs.size ? { smallerSet: lhs, largerSet: rhs } : { smallerSet: rhs, largerSet: lhs };
+  for (const x of smallerSet) {
+    if (largerSet.has(x)) {
+      result.add(x);
+    }
+  }
+  return result;
+}
+
+/** @internal */
 export function countInSet(ids: Id64Arg, set: ReadonlySet<Id64String> | undefined): number {
   if (!set?.size) {
     return 0;

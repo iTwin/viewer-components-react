@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { firstValueFrom, forkJoin, mergeAll, mergeMap, of, toArray } from "rxjs";
+import { defaultIfEmpty, firstValueFrom, forkJoin, from, map, mergeAll, mergeMap, of, reduce, takeUntil, toArray } from "rxjs";
 import { useAsyncValue } from "@itwin/components-react";
 import { IconButton } from "@stratakit/bricks";
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
@@ -14,12 +14,14 @@ import { useTranslation } from "../common/components/LocalizationContext.js";
 import { useErrorState } from "../common/internal/hooks/UseErrorState.js";
 import { useSharedTreeContextInternal } from "../common/internal/SharedTreeContextProviderInternal.js";
 import { getClassesByView } from "../common/internal/Utils.js";
-import { enableCategoryDisplay, invertAllCategories } from "../common/internal/VisibilityUtils.js";
-import { showAll } from "../common/Utils.js";
+import { hideAllCategories, invertAllCategories, showAll } from "../common/internal/VisibilityUtils.js";
 
+import type { Observable } from "rxjs";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
+import type { BaseIdsCache } from "../common/internal/caches/BaseIdsCache.js";
 import type { ModelId } from "../common/internal/Types.js";
+import type { CategoryInfosMap } from "../common/internal/VisibilityUtils.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 
 /**
@@ -90,67 +92,109 @@ export type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonP
 
 /** @public */
 export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
-  const { cancelChangesInProgress } = useSharedTreeContextInternal();
+  const { categories, viewport, onFeatureUsed, models } = props;
+  const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContextInternal();
+  const viewType = viewport.viewType === "2d" ? "2d" : "3d";
+  const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
   const translate = useTranslation();
+
+  const onClick = async () => {
+    // cspell:disable-next-line
+    onFeatureUsed?.(`categories-tree-showall`);
+    cancelChangesInProgress.next();
+    // wrap in try catch for getCategoryInfos call
+    try {
+      const categoryInfos = await getCategoryInfos({ categoriesInfo: categories, baseIdsCache, cancel: cancelChangesInProgress });
+      if (!categoryInfos) {
+        return;
+      }
+      showAll({
+        viewport,
+        modelIds: models,
+        categoryInfos,
+      });
+    } catch {}
+  };
+
   return (
     <IconButton
       variant={"ghost"}
       label={translate("categoriesTree.buttons.showAll.tooltip")}
-      onClick={() => {
-        // cspell:disable-next-line
-        props.onFeatureUsed?.(`categories-tree-showall`);
-        cancelChangesInProgress.next();
-        void showAll({
-          models: props.models,
-          viewport: props.viewport,
-          categories: props.categories.map((category) => category.categoryId),
-        }).catch(() => {});
-      }}
+      onClick={onClick}
       icon={visibilityShowSvg}
+      aria-disabled={categories.length === 0}
     />
   );
 }
 
 /** @public */
 export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
-  const { cancelChangesInProgress } = useSharedTreeContextInternal();
+  const { categories, viewport, onFeatureUsed } = props;
+  const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContextInternal();
+  const viewType = viewport.viewType === "2d" ? "2d" : "3d";
+  const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
   const translate = useTranslation();
+
+  const onClick = async () => {
+    // cspell:disable-next-line
+    onFeatureUsed?.(`categories-tree-hideall`);
+    cancelChangesInProgress.next();
+    // wrap in try catch for getCategoryInfos call
+    try {
+      const categoryInfos = await getCategoryInfos({ categoriesInfo: categories, baseIdsCache, cancel: cancelChangesInProgress });
+      if (!categoryInfos) {
+        return;
+      }
+      hideAllCategories({
+        viewport,
+        categoryInfos,
+      });
+    } catch {}
+  };
   return (
     <IconButton
       variant={"ghost"}
       label={translate("categoriesTree.buttons.hideAll.tooltip")}
-      onClick={() => {
-        // cspell:disable-next-line
-        props.onFeatureUsed?.(`categories-tree-hideall`);
-        cancelChangesInProgress.next();
-        void enableCategoryDisplay(
-          props.viewport,
-          props.categories.map((category) => category.categoryId),
-          false,
-          false,
-        );
-
-        props.viewport.changeModelDisplay({ modelIds: props.models, display: false });
-      }}
+      onClick={onClick}
       icon={visibilityHideSvg}
+      aria-disabled={categories.length === 0}
     />
   );
 }
 
 /** @public */
 export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
-  const { cancelChangesInProgress } = useSharedTreeContextInternal();
+  const { categories, viewport, onFeatureUsed, models } = props;
+  const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContextInternal();
+  const viewType = viewport.viewType === "2d" ? "2d" : "3d";
+  const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
   const translate = useTranslation();
+
+  const onClick = async () => {
+    // cspell:disable-next-line
+    onFeatureUsed?.(`categories-tree-invert`);
+    cancelChangesInProgress.next();
+    // wrap in try catch for getCategoryInfos call
+    try {
+      const categoryInfos = await getCategoryInfos({ categoriesInfo: categories, baseIdsCache, cancel: cancelChangesInProgress });
+      if (!categoryInfos) {
+        return;
+      }
+      invertAllCategories({
+        viewport,
+        modelIds: models,
+        categoryInfos,
+      });
+    } catch {}
+  };
+
   return (
     <IconButton
       variant={"ghost"}
       label={translate("categoriesTree.buttons.invert.tooltip")}
-      onClick={() => {
-        props.onFeatureUsed?.(`categories-tree-invert`);
-        cancelChangesInProgress.next();
-        void invertAllCategories(props.categories, props.viewport);
-      }}
+      onClick={onClick}
       icon={visibilityInvertSvg}
+      aria-disabled={categories.length === 0}
     />
   );
 }
@@ -211,4 +255,33 @@ function useAvailableModels(viewport: TreeWidgetViewport): Array<ModelId> {
   }, [imodel, baseIdsCache, setErrorState]);
 
   return availableModels;
+}
+
+async function getCategoryInfos({
+  categoriesInfo,
+  baseIdsCache,
+  cancel,
+}: {
+  categoriesInfo: CategoryInfo[];
+  baseIdsCache: BaseIdsCache;
+  cancel: Observable<void>;
+}): Promise<CategoryInfosMap | undefined> {
+  return firstValueFrom(
+    from(categoriesInfo).pipe(
+      mergeMap((categoryInfo) => {
+        if (categoryInfo.subCategoryIds && categoryInfo.subCategoryIds.length > 0) {
+          return of({ categoryId: categoryInfo.categoryId, subCategoryIds: categoryInfo.subCategoryIds });
+        }
+        return baseIdsCache
+          .getSubCategories({ categoryId: categoryInfo.categoryId })
+          .pipe(map((subCategoryIds) => ({ categoryId: categoryInfo.categoryId, subCategoryIds })));
+      }),
+      reduce((acc: CategoryInfosMap, category) => {
+        acc.set(category.categoryId, category.subCategoryIds);
+        return acc;
+      }, new Map()),
+      takeUntil(cancel),
+      defaultIfEmpty(undefined),
+    ),
+  );
 }
