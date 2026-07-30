@@ -205,43 +205,42 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
         fullClassName: CLASS_NAME_Model,
         query: {
           ecsql: `
-            SELECT model.ECInstanceId AS ECInstanceId, model.*
+            SELECT
+              ${await createSelectClause({
+                ecClassId: { selector: "model.ECClassId" },
+                ecInstanceId: { selector: "model.ECInstanceId" },
+                nodeLabel: {
+                  of: {
+                    classAlias: "partition",
+                    className: CLASS_NAME_InformationPartitionElement,
+                  },
+                },
+                hideNodeInHierarchy: { selector: "model.IsHidden" },
+                extendedData: {
+                  imageId: "icon-model",
+                },
+                supportsFiltering: true,
+              })}
             FROM (
               SELECT
-                ${await createSelectClause({
-                  ecClassId: { selector: "m.ECClassId" },
-                  ecInstanceId: { selector: "m.ECInstanceId" },
-                  nodeLabel: {
-                    of: {
-                      classAlias: "partition",
-                      className: CLASS_NAME_InformationPartitionElement,
-                    },
-                  },
-                  hideNodeInHierarchy: {
-                    selector: `
-                      CASE
-                        WHEN (
-                          json_extract([partition].JsonProperties, '$.PhysicalPartition.Model.Content') IS NOT NULL
-                          OR json_extract([partition].JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NOT NULL
-                        ) THEN 1
-                        ELSE 0
-                      END
-                    `,
-                  },
-                  extendedData: {
-                    imageId: "icon-model",
-                  },
-                  supportsFiltering: true,
-                })}
+                CASE
+                  WHEN (
+                    json_extract(p.JsonProperties, '$.PhysicalPartition.Model.Content') IS NOT NULL
+                    OR json_extract(p.JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NOT NULL
+                  ) THEN 1
+                  ELSE 0
+                END IsHidden,
+                m.*
               FROM ${CLASS_NAME_Model} m
               JOIN IdSet(?) childModelIdSet ON childModelIdSet.id = m.ECInstanceId
-              JOIN ${CLASS_NAME_InformationPartitionElement} [partition] ON [partition].ECInstanceId = m.ModeledElement.Id
+              JOIN ${CLASS_NAME_InformationPartitionElement} p ON p.ECInstanceId = m.ModeledElement.Id
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             ) model
             JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = model.ECInstanceId
+            JOIN ${CLASS_NAME_InformationPartitionElement} [partition] ON [partition].ECInstanceId = this.ModeledElement.Id
             ${modelFilterClauses.joins}
 
-            ${createWhereClause({ conditions: [modelFilterClauses.where && `model.HideNodeInHierarchy OR ${modelFilterClauses.where}`] })}
+            ${createWhereClause({ conditions: [modelFilterClauses.where && `model.IsHidden OR ${modelFilterClauses.where}`] })}
           `,
           bindings: [{ type: "idset", value: childModelIds }],
         },

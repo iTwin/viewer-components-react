@@ -445,60 +445,60 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         fullClassName: CLASS_NAME_GeometricModel3d,
         query: {
           ecsql: `
-            SELECT model.ECInstanceId AS ECInstanceId, model.*
+            SELECT
+              ${await createSelectClause({
+                ecClassId: { selector: "model.ECClassId" },
+                ecInstanceId: { selector: "model.ECInstanceId" },
+                nodeLabel: {
+                  of: {
+                    classAlias: "partition",
+                    className: CLASS_NAME_InformationPartitionElement,
+                  },
+                },
+                hideNodeInHierarchy: { selector: "model.IsHidden" },
+                hasChildren:
+                  this.#hierarchyConfig.models.withoutElements === "include" || this.#hierarchyConfig.elements.excludedClasses.length
+                    ? { selector: "model.HasChildren" }
+                    : true,
+                extendedData: {
+                  type: "model",
+                },
+                supportsFiltering: this.supportsFiltering(),
+              })}
             FROM (
               SELECT
-                ${await createSelectClause({
-                  ecClassId: { selector: "m.ECClassId" },
-                  ecInstanceId: { selector: "m.ECInstanceId" },
-                  nodeLabel: {
-                    of: {
-                      classAlias: "partition",
-                      className: CLASS_NAME_InformationPartitionElement,
-                    },
-                  },
-                  hideNodeInHierarchy: {
-                    selector: `
-                      CASE
-                        WHEN (
-                          json_extract([partition].JsonProperties, '$.PhysicalPartition.Model.Content') IS NOT NULL
-                          OR json_extract([partition].JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NOT NULL
-                        ) THEN 1
-                        ELSE 0
-                      END
-                    `,
-                  },
-                  hasChildren:
-                    this.#hierarchyConfig.models.withoutElements === "include" || this.#hierarchyConfig.elements.excludedClasses.length
-                      ? {
-                          selector: `
-                          IFNULL((
-                            SELECT 1
-                            FROM ${this.#hierarchyConfig.elements.baseClass} e
-                            ${createWhereClause({
-                              conditions: [
-                                "e.Model.Id = m.ECInstanceId",
-                                createExcludedClassesClause({ alias: "e", excludedClassNames: this.#hierarchyConfig.elements.excludedClasses }),
-                              ],
-                            })}
-                            LIMIT 1
-                          ), 0)
-                        `,
-                        }
-                      : true,
-                  extendedData: {
-                    type: "model",
-                  },
-                  supportsFiltering: this.supportsFiltering(),
-                })}
+                CASE
+                  WHEN (
+                    json_extract(p.JsonProperties, '$.PhysicalPartition.Model.Content') IS NOT NULL
+                    OR json_extract(p.JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NOT NULL
+                  ) THEN 1
+                  ELSE 0
+                END IsHidden,
+                ${
+                  this.#hierarchyConfig.models.withoutElements === "include" || this.#hierarchyConfig.elements.excludedClasses.length
+                    ? `IFNULL((
+                        SELECT 1
+                        FROM ${this.#hierarchyConfig.elements.baseClass} e
+                        ${createWhereClause({
+                          conditions: [
+                            "e.Model.Id = m.ECInstanceId",
+                            createExcludedClassesClause({ alias: "e", excludedClassNames: this.#hierarchyConfig.elements.excludedClasses }),
+                          ],
+                        })}
+                        LIMIT 1
+                      ), 0)`
+                    : "1"
+                } HasChildren,
+                m.*
               FROM ${CLASS_NAME_GeometricModel3d} m
               JOIN IdSet(?) childModelIdSet ON m.ECInstanceId = childModelIdSet.id
-              JOIN ${CLASS_NAME_InformationPartitionElement} [partition] ON [partition].ECInstanceId = m.ModeledElement.Id
+              JOIN ${CLASS_NAME_InformationPartitionElement} p ON p.ECInstanceId = m.ModeledElement.Id
               ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             ) model
             JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = model.ECInstanceId
+            JOIN ${CLASS_NAME_InformationPartitionElement} [partition] ON [partition].ECInstanceId = this.ModeledElement.Id
             ${modelFilterClauses.joins}
-            ${createWhereClause({ conditions: [modelFilterClauses.where && `model.HideNodeInHierarchy OR ${modelFilterClauses.where}`] })}
+            ${createWhereClause({ conditions: [modelFilterClauses.where && `model.IsHidden OR ${modelFilterClauses.where}`] })}
           `,
           bindings: [{ type: "idset", value: childModelIds }],
         },
