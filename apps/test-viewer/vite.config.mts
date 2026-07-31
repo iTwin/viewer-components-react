@@ -76,7 +76,7 @@ export default defineConfig(({ mode }) => {
           replacement: "$1",
         },
       ],
-      // Dedupe only tree-widget's deps so its source imports resolve from this app's node_modules
+      // Dedupe tree-widget's deps so its source imports resolve from this app's node_modules
       // rather than tree-widget's own node_modules, preventing duplicate package instances.
       dedupe: collectDepsFromPackage(treeWidgetRoot),
     },

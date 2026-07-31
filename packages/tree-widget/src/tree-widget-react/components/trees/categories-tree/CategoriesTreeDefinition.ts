@@ -63,7 +63,6 @@ import type {
   LimitingECSqlQueryExecutor,
   NodePostProcessor,
   NodePreProcessor,
-  NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
 import type {
   EC,
@@ -363,7 +362,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   private async createISubModeledElementChildrenQuery({
     parentNodeInstanceIds: elementIds,
     parentNode,
-    nodeSelectClauseFactory,
+    createSelectClause,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     if (CategoriesTreeNodeInternal.isDefinitionContainerNode(parentNode)) {
       return [];
@@ -377,7 +376,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         query: {
           ecsql: `
             SELECT
-              ${await nodeSelectClauseFactory.createSelectClause({
+              ${await createSelectClause({
                 ecClassId: { selector: "this.ECClassId" },
                 ecInstanceId: { selector: "this.ECInstanceId" },
                 nodeLabel: "", // doesn't matter - the node is always hidden
@@ -413,18 +412,18 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   private async createGeometricModelChildrenQuery({
     parentNodeInstanceIds: modelIds,
     instanceFilter,
-    nodeSelectClauseFactory,
     parentNode,
-    instanceLabelSelectClauseFactory,
+    createSelectClause,
+    createFilterClauses,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     const modeledElementCategory = parentNode.extendedData?.modeledElementCategory;
     assert(modeledElementCategory !== undefined, "Expected parent node to have modeledElementCategory extended data");
     const [categoryInstanceFilterClauses, elementInstanceFilterClauses, allSubModels, categoryIds] = await Promise.all([
-      nodeSelectClauseFactory.createFilterClauses({
+      createFilterClauses({
         filter: instanceFilter,
         contentClass: { fullName: this.#categoryClass, alias: "this" },
       }),
-      nodeSelectClauseFactory.createFilterClauses({
+      createFilterClauses({
         filter: instanceFilter,
         contentClass: { fullName: this.#categoryElementClass, alias: "this" },
       }),
@@ -454,7 +453,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         query: {
           ecsql: `
             SELECT
-              ${await this.createCategoryNodeSelectClause({ nodeSelectClauseFactory, instanceLabelSelectClauseFactory, hasChildren: true, extendedData: { modelIds: { selector: createIdsSelector(modelIds) } } })}
+              ${await this.createCategoryNodeSelectClause({ createSelectClause, hasChildren: true, extendedData: { modelIds: { selector: createIdsSelector(modelIds) } } })}
             FROM ${categoryInstanceFilterClauses.from} this
             JOIN IdSet(?) categoryIdSet ON categoryIdSet.id = this.ECInstanceId
             ${categoryInstanceFilterClauses.joins}
@@ -468,8 +467,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     // Show elements which match modeled elements category
     if (categoriesToShow.length !== categoryIds.length) {
       const { selectClause, bindings } = await this.createElementNodeSelectClause({
-        nodeSelectClauseFactory,
-        instanceLabelSelectClauseFactory,
+        createSelectClause,
         allSubModels: [...allSubModels],
       });
       definitions.push({
@@ -501,7 +499,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   private async createDefinitionContainersAndCategoriesQuery(
     props: DefineRootHierarchyLevelProps | DefineInstanceNodeChildHierarchyLevelProps,
   ): Promise<HierarchyLevelDefinition> {
-    const { instanceFilter, instanceLabelSelectClauseFactory, nodeSelectClauseFactory } = props;
+    const { instanceFilter, createSelectClause, createFilterClauses } = props;
     const parentNodeInstanceIds = "parentNodeInstanceIds" in props ? props.parentNodeInstanceIds : undefined;
     const { definitionContainers, categories } = await firstValueFrom(
       parentNodeInstanceIds === undefined
@@ -515,17 +513,15 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     );
     const hierarchyDefinitionPromises = new Array<Promise<HierarchyNodesDefinition>>();
     if (categories.length > 0) {
-      hierarchyDefinitionPromises.push(
-        this.createTopMostCategoriesQuery({ categories, instanceFilter, instanceLabelSelectClauseFactory, nodeSelectClauseFactory }),
-      );
+      hierarchyDefinitionPromises.push(this.createTopMostCategoriesQuery({ categories, instanceFilter, createSelectClause, createFilterClauses }));
     }
     if (definitionContainers.length > 0) {
       hierarchyDefinitionPromises.push(
         this.createDefinitionContainersQuery({
           definitionContainerIds: definitionContainers,
           instanceFilter,
-          nodeSelectClauseFactory,
-          instanceLabelSelectClauseFactory,
+          createSelectClause,
+          createFilterClauses,
         }),
       );
     }
@@ -535,15 +531,15 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   private async createDefinitionContainersQuery({
     definitionContainerIds,
     instanceFilter,
-    nodeSelectClauseFactory,
-    instanceLabelSelectClauseFactory,
+    createSelectClause,
+    createFilterClauses,
   }: {
     definitionContainerIds: Id64Array;
     instanceFilter?: GenericInstanceFilter;
-    nodeSelectClauseFactory: NodesQueryClauseFactory;
-    instanceLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
+    createSelectClause: DefineHierarchyLevelProps["createSelectClause"];
+    createFilterClauses: DefineHierarchyLevelProps["createFilterClauses"];
   }): Promise<HierarchyNodesDefinition> {
-    const instanceFilterClauses = await nodeSelectClauseFactory.createFilterClauses({
+    const instanceFilterClauses = await createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: CLASS_NAME_DefinitionContainer, alias: "this" },
     });
@@ -553,14 +549,14 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       query: {
         ecsql: `
           SELECT
-            ${await nodeSelectClauseFactory.createSelectClause({
+            ${await createSelectClause({
               ecClassId: { selector: ECSql.createRawPropertyValueSelector("this", "ECClassId") },
               ecInstanceId: { selector: "this.ECInstanceId" },
               nodeLabel: {
-                selector: await instanceLabelSelectClauseFactory.createSelectClause({
+                of: {
                   classAlias: "this",
                   className: CLASS_NAME_DefinitionContainer,
-                }),
+                },
               },
               extendedData: {
                 type: "definition-container",
@@ -582,16 +578,16 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   private async createTopMostCategoriesQuery({
     categories,
     instanceFilter,
-    instanceLabelSelectClauseFactory,
-    nodeSelectClauseFactory,
+    createSelectClause,
+    createFilterClauses,
   }: {
     categories: Array<CachedCategoryInfo>;
     instanceFilter?: GenericInstanceFilter;
-    instanceLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
-    nodeSelectClauseFactory: NodesQueryClauseFactory;
+    createSelectClause: DefineHierarchyLevelProps["createSelectClause"];
+    createFilterClauses: DefineHierarchyLevelProps["createFilterClauses"];
   }): Promise<HierarchyNodesDefinition> {
     const [instanceFilterClauses, categoriesWithChildElements] = await Promise.all([
-      nodeSelectClauseFactory.createFilterClauses({
+      createFilterClauses({
         filter: instanceFilter,
         contentClass: { fullName: this.#categoryClass, alias: "this" },
       }),
@@ -631,13 +627,12 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       query: {
         ecsql: `
           SELECT
-            ${await this.createCategoryNodeSelectClause({
-              nodeSelectClauseFactory,
-              instanceLabelSelectClauseFactory,
-              hasChildren:
-                categoriesWithChildren.length > 0
-                  ? {
-                      selector: `IFNULL(
+              ${await this.createCategoryNodeSelectClause({
+                createSelectClause,
+                hasChildren:
+                  categoriesWithChildren.length > 0
+                    ? {
+                        selector: `IFNULL(
                         (
                           SELECT 1
                           FROM IdSet(?) hasChildrenIdSet
@@ -646,16 +641,16 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                         ),
                         0
                       )`,
-                    }
-                  : false,
-              extendedData: {
-                type: "category",
-                description: { selector: "this.Description" },
-                modelIds: { selector: createIdsSelector(new Array<ModelId>()) },
-                hasSubCategories:
-                  categoriesWithMultipleSubCategories.length > 0
-                    ? {
-                        selector: `IFNULL(
+                      }
+                    : false,
+                extendedData: {
+                  type: "category",
+                  description: { selector: "this.Description" },
+                  modelIds: { selector: createIdsSelector(new Array<ModelId>()) },
+                  hasSubCategories:
+                    categoriesWithMultipleSubCategories.length > 0
+                      ? {
+                          selector: `IFNULL(
                           (
                             SELECT 1
                             FROM IdSet(?) hasSubCategoriesIdSet
@@ -664,10 +659,10 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                           ),
                           0
                         )`,
-                      }
-                    : false,
-              },
-            })}
+                        }
+                      : false,
+                },
+              })}
           FROM ${instanceFilterClauses.from} this
           JOIN IdSet(?) categoryIdSet ON this.ECInstanceId = categoryIdSet.id
           ${instanceFilterClauses.joins}
@@ -697,10 +692,10 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   private async createSubCategoriesQuery({
     parentNodeInstanceIds: categoryIds,
     instanceFilter,
-    nodeSelectClauseFactory,
-    instanceLabelSelectClauseFactory,
+    createSelectClause,
+    createFilterClauses,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const instanceFilterClauses = await nodeSelectClauseFactory.createFilterClauses({
+    const instanceFilterClauses = await createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: CLASS_NAME_SubCategory, alias: "this" },
     });
@@ -711,14 +706,14 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         query: {
           ecsql: `
             SELECT
-              ${await nodeSelectClauseFactory.createSelectClause({
+              ${await createSelectClause({
                 ecClassId: { selector: "this.ECClassId" },
                 ecInstanceId: { selector: "this.ECInstanceId" },
                 nodeLabel: {
-                  selector: await instanceLabelSelectClauseFactory.createSelectClause({
+                  of: {
                     classAlias: "this",
                     className: CLASS_NAME_SubCategory,
-                  }),
+                  },
                 },
                 extendedData: {
                   categoryId: { selector: "printf('0x%x', this.Parent.Id)" },
@@ -739,22 +734,20 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   }
 
   private async createElementNodeSelectClause({
-    nodeSelectClauseFactory,
-    instanceLabelSelectClauseFactory,
+    createSelectClause,
     allSubModels,
   }: {
-    nodeSelectClauseFactory: DefineInstanceNodeChildHierarchyLevelProps["nodeSelectClauseFactory"];
-    instanceLabelSelectClauseFactory: DefineInstanceNodeChildHierarchyLevelProps["instanceLabelSelectClauseFactory"];
+    createSelectClause: DefineHierarchyLevelProps["createSelectClause"];
     allSubModels: Id64String[];
   }): Promise<{ selectClause: string; bindings: ECSqlBinding[] }> {
-    const selectClause = await nodeSelectClauseFactory.createSelectClause({
+    const selectClause = await createSelectClause({
       ecClassId: { selector: "this.ECClassId" },
       ecInstanceId: { selector: "this.ECInstanceId" },
       nodeLabel: {
-        selector: await instanceLabelSelectClauseFactory.createSelectClause({
+        of: {
           classAlias: "this",
           className: this.#categoryElementClass,
-        }),
+        },
       },
       hasChildren: {
         selector: `
@@ -798,24 +791,22 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   }
 
   private async createCategoryNodeSelectClause({
-    nodeSelectClauseFactory,
-    instanceLabelSelectClauseFactory,
+    createSelectClause,
     extendedData,
     hasChildren,
   }: {
-    nodeSelectClauseFactory: DefineInstanceNodeChildHierarchyLevelProps["nodeSelectClauseFactory"];
-    instanceLabelSelectClauseFactory: DefineInstanceNodeChildHierarchyLevelProps["instanceLabelSelectClauseFactory"];
-    extendedData: Props<DefineInstanceNodeChildHierarchyLevelProps["nodeSelectClauseFactory"]["createSelectClause"]>["extendedData"];
+    createSelectClause: DefineHierarchyLevelProps["createSelectClause"];
+    extendedData: Parameters<DefineHierarchyLevelProps["createSelectClause"]>[0]["extendedData"];
     hasChildren: boolean | { selector: string };
   }): Promise<string> {
-    return nodeSelectClauseFactory.createSelectClause({
+    return createSelectClause({
       ecClassId: { selector: "this.ECClassId" },
       ecInstanceId: { selector: "this.ECInstanceId" },
       nodeLabel: {
-        selector: await instanceLabelSelectClauseFactory.createSelectClause({
+        of: {
           classAlias: "this",
           className: this.#categoryClass,
-        }),
+        },
       },
       grouping: { byLabel: { action: "merge", groupId: "category" } },
       hasChildren,
@@ -831,13 +822,13 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     parentNodeInstanceIds: categoryIds,
     instanceFilter,
     parentNode,
-    nodeSelectClauseFactory,
-    instanceLabelSelectClauseFactory,
+    createSelectClause,
+    createFilterClauses,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     assert(CategoriesTreeNodeInternal.isCategoryNode(parentNode), "Expected category node as parent");
     const parentCategoryElementPath = parentNode.extendedData.parentElementsPath;
     const [instanceFilterClauses, allSubModels] = await Promise.all([
-      nodeSelectClauseFactory.createFilterClauses({
+      createFilterClauses({
         filter: instanceFilter,
         contentClass: { fullName: this.#categoryElementClass, alias: "this" },
       }),
@@ -859,8 +850,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     }
     const parentIds = ParentElementsPath.getLastParentIds(parentCategoryElementPath);
     const { selectClause, bindings } = await this.createElementNodeSelectClause({
-      nodeSelectClauseFactory,
-      instanceLabelSelectClauseFactory,
+      createSelectClause,
       allSubModels: [...allSubModels],
     });
     return [
@@ -899,18 +889,18 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     parentNodeInstanceIds: elementIds,
     instanceFilter,
     parentNode,
-    nodeSelectClauseFactory,
-    instanceLabelSelectClauseFactory,
+    createSelectClause,
+    createFilterClauses,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     assert(CategoriesTreeNodeInternal.isElementNode(parentNode), "Expected parent node to be element node");
     const parentCategoryId = parentNode.extendedData.categoryId;
 
     const [elementInstanceFilterClauses, categoryInstanceFilterClauses, allSubModels] = await Promise.all([
-      nodeSelectClauseFactory.createFilterClauses({
+      createFilterClauses({
         filter: instanceFilter,
         contentClass: { fullName: this.#categoryElementClass, alias: "this" },
       }),
-      nodeSelectClauseFactory.createFilterClauses({
+      createFilterClauses({
         filter: instanceFilter,
         contentClass: { fullName: this.#categoryClass, alias: "this" },
       }),
@@ -918,8 +908,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     ]);
 
     const { selectClause, bindings } = await this.createElementNodeSelectClause({
-      nodeSelectClauseFactory,
-      instanceLabelSelectClauseFactory,
+      createSelectClause,
       allSubModels: [...allSubModels],
     });
     return [
@@ -950,8 +939,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
           ecsql: `
             SELECT
               ${await this.createCategoryNodeSelectClause({
-                nodeSelectClauseFactory,
-                instanceLabelSelectClauseFactory,
+                createSelectClause,
                 hasChildren: true,
                 extendedData: {
                   modelIds: { selector: createIdsSelector([parentNode.extendedData.modelId]) },

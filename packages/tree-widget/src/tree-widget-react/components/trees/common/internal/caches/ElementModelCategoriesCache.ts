@@ -20,17 +20,15 @@ interface ElementModelCategoriesCacheProps {
   elementClassName: string;
   excludedElementClassNames?: ReadonlyArray<EC.FullClassNameDotNotation>;
 }
-
+interface ModelsCategoriesInfoEntry {
+  categoriesOfTopMostElements: Set<CategoryId>;
+  allCategories: Set<CategoryId>;
+  categoriesOfTopMostNonExcludedElements: Set<CategoryId>;
+  nonExcludedCategories: Set<CategoryId>;
+  isPlanProjectionModel: boolean;
+}
 interface CachedData {
-  modelsCategoriesInfo: Map<
-    ModelId,
-    {
-      categoriesOfTopMostElements: Set<CategoryId>;
-      allCategories: Set<CategoryId>;
-      categoriesOfTopMostNonExcludedElements: Set<CategoryId>;
-      nonExcludedCategories: Set<CategoryId>;
-    }
-  >;
+  modelsCategoriesInfo: Map<ModelId, ModelsCategoriesInfoEntry>;
   modelsContainingTopMostNonExcludedElements: Set<ModelId>;
   categoriesContainingNonExcludedElements: Set<CategoryId>;
   categoryModelsInfo: Map<CategoryId, Array<{ id: ModelId; categoryIsOfTopMostElement: boolean; hasNonExcludedTopMostElements: boolean }>>;
@@ -64,6 +62,7 @@ export class ElementModelCategoriesCache {
     isTopMostElementCategory: boolean;
     hasParentElements: boolean;
     hasElementsFromNonExcludedClasses: boolean;
+    isPlanProjectionModel: boolean;
   }> {
     const excludedClause = createExcludedClassesClause({ alias: "this", excludedClassNames: this.#excludedElementClassNames });
     return defer(() => {
@@ -72,7 +71,8 @@ export class ElementModelCategoriesCache {
             this.Model.Id modelId,
             this.Category.Id categoryId,
             MAX(IIF(this.Parent.Id IS NULL, 1, 0)) isTopMostElementCategory,
-            MAX(IIF((SELECT 1 FROM ${this.#elementClassName} ce WHERE ce.Parent.Id = this.ECInstanceId LIMIT 1), 1, 0)) hasParentElements
+            MAX(IIF((SELECT 1 FROM ${this.#elementClassName} ce WHERE ce.Parent.Id = this.ECInstanceId LIMIT 1), 1, 0)) hasParentElements,
+            IIF(m.$->IsPlanProjection?, 1, 0) isPlanProjectionModel
             ${excludedClause ? `, MAX(IIF((${excludedClause}), 1, 0)) hasElementsFromNonExcludedClasses` : ""}
           FROM ${this.#elementClassName} this
           JOIN ${CLASS_NAME_Model} m ON m.ECInstanceId = this.Model.Id
@@ -92,9 +92,14 @@ export class ElementModelCategoriesCache {
           isTopMostElementCategory: !!row.isTopMostElementCategory,
           hasParentElements: !!row.hasParentElements,
           hasElementsFromNonExcludedClasses: excludedClause ? !!row.hasElementsFromNonExcludedClasses : true,
+          isPlanProjectionModel: !!row.isPlanProjectionModel,
         };
       }),
     );
+  }
+
+  public cachedDataLoaded() {
+    return !!this.#dataResolved;
   }
 
   public getCachedData() {
@@ -115,11 +120,12 @@ export class ElementModelCategoriesCache {
           const modelEntry = getOrCreate({
             map: acc.modelsCategoriesInfo,
             key: queriedCategory.modelId,
-            createFunc: () => ({
+            createFunc: (): ModelsCategoriesInfoEntry => ({
               categoriesOfTopMostElements: new Set<string>(),
               allCategories: new Set<string>(),
               categoriesOfTopMostNonExcludedElements: new Set<string>(),
               nonExcludedCategories: new Set<string>(),
+              isPlanProjectionModel: queriedCategory.isPlanProjectionModel,
             }),
           });
           modelEntry.allCategories.add(queriedCategory.categoryId);
@@ -141,15 +147,7 @@ export class ElementModelCategoriesCache {
           return acc;
         },
         {
-          modelsCategoriesInfo: new Map<
-            ModelId,
-            {
-              categoriesOfTopMostElements: Set<CategoryId>;
-              allCategories: Set<CategoryId>;
-              categoriesOfTopMostNonExcludedElements: Set<CategoryId>;
-              nonExcludedCategories: Set<CategoryId>;
-            }
-          >(),
+          modelsCategoriesInfo: new Map<ModelId, ModelsCategoriesInfoEntry>(),
           categoriesWithParentElements: new Set<CategoryId>(),
           allTopMostElementCategories: new Set<CategoryId>(),
           allCategories: new Set<CategoryId>(),

@@ -3,19 +3,16 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, EMPTY, map, mergeMap, of, reduce } from "rxjs";
-import { Id64 } from "@itwin/core-bentley";
-import { fromWithRelease, reduceWhile, releaseMainThreadOnItemsCount, toVoidPromise } from "./Rxjs.js";
+import { EMPTY, map, mergeMap, of, reduce } from "rxjs";
+import { reduceWhile, releaseMainThreadOnItemsCount } from "./Rxjs.js";
 import { createVisibilityStatus } from "./Tooltip.js";
-import { getOptimalBatchSize } from "./Utils.js";
 
 import type { Observable, OperatorFunction } from "rxjs";
-import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { CategoryInfo } from "../../categories-tree/CategoriesTreeButtons.js";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { TreeWidgetViewport } from "../TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
 import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip.js";
-import type { ElementId } from "./Types.js";
+import type { CategoryId, ElementId, SubCategoryId } from "./Types.js";
 
 function mergeVisibilities(obs: Observable<Visibility>): Observable<Visibility | "empty"> {
   return obs.pipe(
@@ -120,77 +117,140 @@ export function getCategoryVisibilityFromAlwaysAndNeverDrawnElementsImpl(props: 
   return createVisibilityStatus("partial");
 }
 
+/** @internal */
+export type CategoryInfosMap = Map<CategoryId, Array<SubCategoryId> | undefined>;
+
 /**
- * Changes category display in the viewport.
+ * Turns display of given categories and their sub-categories on or off, clearing any per-model category overrides.
+ *
+ * Categories are processed in batches, releasing the main thread in between, so the returned observable may emit over multiple frames.
  * @internal
  */
-export async function enableCategoryDisplay(viewport: TreeWidgetViewport, categoryIds: Id64Arg, enabled: boolean, enableAllSubCategories = true) {
-  const removeOverrides = (bufferedCategories: Id64Set) => {
-    const modelsContainingOverrides = new Set<Id64String>();
-    for (const ovr of viewport.perModelCategoryOverrides) {
-      if (bufferedCategories.has(ovr.categoryId)) {
-        modelsContainingOverrides.add(ovr.modelId);
-      }
+export function changeCategoryDisplay({
+  categoryInfos,
+  viewport,
+  display,
+}: {
+  viewport: TreeWidgetViewport;
+  categoryInfos: CategoryInfosMap;
+  display: boolean;
+}): void {
+  const modelsContainingOverrides = new Set<Id64String>();
+  const categoriesArray = [...categoryInfos.keys()];
+  for (const ovr of viewport.perModelCategoryOverrides) {
+    if (categoryInfos.has(ovr.categoryId)) {
+      modelsContainingOverrides.add(ovr.modelId);
     }
-    viewport.setPerModelCategoryOverride({ modelIds: modelsContainingOverrides, categoryIds: bufferedCategories, override: "none" });
-  };
-  const disableSubCategories = async (bufferedCategories: Id64Array) => {
-    // changeCategoryDisplay only enables subcategories, it does not disabled them. So we must do that ourselves.
-    const categoryInfo = await viewport.iModel.categories.getCategoryInfo(bufferedCategories);
-    for (const info of categoryInfo.values()) {
-      for (const value of info.subCategories.values()) {
-        viewport.changeSubCategoryDisplay({ subCategoryId: value.id, display: false });
-      }
+  }
+  viewport.setPerModelCategoryOverride({ modelIds: modelsContainingOverrides, categoryIds: categoriesArray, override: "none" });
+  viewport.changeCategoryDisplay({ categoryIds: categoriesArray, display, enableAllSubCategories: false });
+  if (!display) {
+    return;
+  }
+  for (const categoryId of categoriesArray) {
+    const subCategoryIds = categoryInfos.get(categoryId);
+    for (const subCategoryId of subCategoryIds ?? []) {
+      viewport.changeSubCategoryDisplay({ subCategoryId, display });
     }
-  };
-  return toVoidPromise(
-    fromWithRelease({ source: categoryIds, releaseOnCount: 500 }).pipe(
-      bufferCount(getOptimalBatchSize({ totalSize: Id64.sizeOf(categoryIds), maximumBatchSize: 500 })),
-      mergeMap(async (bufferedCategories) => {
-        viewport.changeCategoryDisplay({ categoryIds: bufferedCategories, display: enabled, enableAllSubCategories });
-        removeOverrides(new Set(bufferedCategories));
-        if (!enabled) {
-          await disableSubCategories(bufferedCategories);
-        }
-      }),
-    ),
-  );
+  }
 }
 
 /**
- * Invert display of all given categories.
- * Categories are inverted like this:
- * - If category is visible, it will be hidden.
- * - If category is hidden, it will be visible.
- * - If category is partially visible, it will be fully visible.
+ * Makes everything visible: displays all given models, categories and sub-categories, and clears the always/never drawn element lists.
  * @internal
  */
-export async function invertAllCategories(categories: CategoryInfo[], viewport: TreeWidgetViewport) {
-  const categoriesToEnable = new Set<Id64String>();
-  const categoriesToDisable = new Set<Id64String>();
+export function showAll({ viewport, modelIds, categoryInfos }: { viewport: TreeWidgetViewport; modelIds: Id64Array; categoryInfos: CategoryInfosMap }) {
+  viewport.clearAlwaysDrawn();
+  viewport.clearNeverDrawn();
+  viewport.changeModelDisplay({ modelIds, display: true });
+  changeCategoryDisplay({
+    viewport,
+    categoryInfos,
+    display: true,
+  });
+}
 
-  for (const category of categories) {
-    if (!viewport.viewsCategory(category.categoryId)) {
-      categoriesToEnable.add(category.categoryId);
+/**
+ * Hides all given categories and their sub-categories, and clears the always drawn element list.
+ * @internal
+ */
+export function hideAllCategories({ viewport, categoryInfos }: { viewport: TreeWidgetViewport; categoryInfos: CategoryInfosMap }) {
+  viewport.clearAlwaysDrawn();
+  changeCategoryDisplay({
+    viewport,
+    categoryInfos,
+    display: false,
+  });
+}
+
+/**
+ * Invert display of all given models: visible models are hidden and hidden models are made visible.
+ *
+ * All given categories and sub-categories are turned on, and always/never drawn element lists and per-model category overrides are cleared,
+ * so that model display alone determines what is visible.
+ * @internal
+ */
+export function invertAllModels({ modelIds, viewport, categoryInfos }: { modelIds: Id64Array; viewport: TreeWidgetViewport; categoryInfos: CategoryInfosMap }) {
+  viewport.clearNeverDrawn();
+  viewport.clearAlwaysDrawn();
+  viewport.clearPerModelCategoryOverrides();
+  viewport.changeCategoryDisplay({ categoryIds: [...categoryInfos.keys()], display: true });
+  for (const subCategoryIds of categoryInfos.values()) {
+    for (const subCategoryId of subCategoryIds ?? []) {
+      if (!viewport.viewsSubCategory(subCategoryId)) {
+        viewport.changeSubCategoryDisplay({ subCategoryId, display: true });
+      }
+    }
+  }
+  const notViewedModels = new Array<Id64String>();
+  const viewedModels = new Array<Id64String>();
+  for (const modelId of modelIds) {
+    if (viewport.viewsModel(modelId)) {
+      viewedModels.push(modelId);
+      continue;
+    }
+    notViewedModels.push(modelId);
+  }
+  viewport.changeModelDisplay({ modelIds: notViewedModels, display: true });
+  viewport.changeModelDisplay({ modelIds: viewedModels, display: false });
+}
+
+/**
+ * Invert display of all given categories: visible categories are hidden and hidden categories are made visible.
+ *
+ * All given models are made visible, and always/never drawn element lists and per-model category overrides are cleared,
+ * so that category display alone determines what is visible.
+ * @internal
+ */
+export function invertAllCategories({
+  categoryInfos,
+  modelIds,
+  viewport,
+}: {
+  categoryInfos: Map<CategoryId, Array<SubCategoryId> | undefined>;
+  modelIds: Id64Array;
+  viewport: TreeWidgetViewport;
+}) {
+  viewport.clearNeverDrawn();
+  viewport.clearAlwaysDrawn();
+  viewport.changeModelDisplay({ modelIds, display: true });
+
+  const categoriesToEnable: CategoryInfosMap = new Map();
+  const categoriesToDisable: CategoryInfosMap = new Map();
+
+  for (const [categoryId, subCategoryIds] of categoryInfos) {
+    if (!viewport.viewsCategory(categoryId)) {
+      categoriesToEnable.set(categoryId, subCategoryIds);
       continue;
     }
     // Check if category is in partial state
-    if (category.subCategoryIds?.some((subCategory) => !viewport.viewsSubCategory(subCategory))) {
-      categoriesToEnable.add(category.categoryId);
+    if (subCategoryIds?.some((subCategory) => !viewport.viewsSubCategory(subCategory))) {
+      categoriesToEnable.set(categoryId, subCategoryIds);
     } else {
-      categoriesToDisable.add(category.categoryId);
+      categoriesToDisable.set(categoryId, subCategoryIds);
     }
   }
 
-  // collect per model overrides that need to be inverted
-  for (const { categoryId, visible } of viewport.perModelCategoryOverrides) {
-    if (!visible && categoriesToDisable.has(categoryId)) {
-      categoriesToEnable.add(categoryId);
-      categoriesToDisable.delete(categoryId);
-    }
-  }
-
-  await enableCategoryDisplay(viewport, categoriesToDisable, false, true);
-
-  await enableCategoryDisplay(viewport, categoriesToEnable, true, true);
+  changeCategoryDisplay({ viewport, categoryInfos: categoriesToDisable, display: false });
+  changeCategoryDisplay({ viewport, categoryInfos: categoriesToEnable, display: true });
 }
