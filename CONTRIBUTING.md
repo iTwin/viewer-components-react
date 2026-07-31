@@ -10,7 +10,8 @@ Please take a read through this document to help streamline the process of getti
 - [Creating Issues and Enhancements](#creating-issues-and-enhancements)
   - [Writing Good Bug Reports and Feature Requests](#writing-good-bug-reports-and-feature-requests)
 - [Pull Requests](#pull-requests)
-  - [Source Code Edit Workflow](#code-change-workflow)
+- [Development Workflow](#development-workflow)
+- [Changesets and Releases](#changesets-and-releases)
 
 ## Adding a New Project
 
@@ -55,36 +56,43 @@ We follow the normal [GitHub pull request workflow](https://help.github.com/en/g
 
 Every change must be tested with proper unit tests. Integration tests are highly encouraged in libraries with critical workflows to ensure end-to-end consistency.
 
-Every change must be described with a change log: Run "pnpm change" on your committed and always choose "patch" as the change type. Commit your change log along with your pull request.
+## Development Workflow
 
-## Source Code Edit Workflow
+1. Clone the repository or pull the latest changes from `master`.
+2. Install dependencies: `pnpm install`.
+3. Create a branch and make your changes.
+4. Add or update tests for the changed behavior.
+5. Run the relevant validation commands. The root commands include:
 
-### Build Instructions
+- `pnpm build`
+- `pnpm test`
+- `pnpm lint`
+- `pnpm prettier`
+- `pnpm cspell`
 
-1. Clone repository (first time) with `git clone` or pull updates to the repository (subsequent times) with `git pull`
-2. Install dependencies: `pnpm install`
-3. Clean: `pnpm run clean`
-4. Rebuild source: `pnpm run build`
-5. Run tests: `pnpm run test`
+6. Commit and push your changes, then open a pull request.
 
 The above commands iterate and perform their action against each package in the monorepo.
 
-For incremental builds, the `pnpm run build` command can be used to only build packages that have changes.
-
 > Note: It is a good idea to `pnpm install` after each `git pull` as dependencies may have changed.
 
-### Making and testing changes
+## Changesets and Releases
 
-1. Make source code changes on a new Git branch
-2. Ensure unit tests pass when run locally: `pnpm run test`
-3. Locally commit changes: `git commit` (or use the Visual Studio Code user interface)
-4. Repeat steps 1-3 until ready to push changes
-5. Add changelog entry (which could potentially cover several commits): `pnpm change`
-6. Follow prompts to enter a change description or press ENTER if the change does not warrant a changelog entry. If multiple packages have changed, multiple sets of prompts will be presented.
-7. Completing the `pnpm change` prompts will cause new changelog entry JSON files to be created.
-8. Commit the changelog JSON files.
-9. Publish changes on the branch and open a pull request.
+Every change that requires a public package release must include a changeset. Documentation, tests, tooling, and other changes that do not affect a published package do not need one. Empty changesets are not used.
 
-> Note: The CI build will break if changes are pushed without running `pnpm change`. The fix will be to complete steps 5 through 9.
+Before opening a pull request:
+
+1. Run `pnpm change`.
+2. Select each affected package and its release type:
+
+- `patch` for backward-compatible fixes.
+- `minor` for backward-compatible features.
+- `major` for breaking changes.
+
+3. Enter a concise summary suitable for the package changelog.
+4. Review the generated `.changeset/*.md` file. Single-package changesets use the package name in the filename for package-specific reviewer routing. Changesets affecting multiple packages use the `multi-package` prefix. The Markdown content may be expanded with examples, code snippets, migration guidance, or any other context needed for useful release notes.
+5. Commit the generated file from the `.changeset` directory with your pull request.
+
+Do not edit package versions or package CHANGELOG.md files manually. After changesets are merged to `master`, the release workflow creates or updates a release pull request containing the generated version and changelog changes. Merging that release pull request publishes the packages to npm.
 
 Here is a sample [changelog](https://github.com/microsoft/rushstack/blob/master/apps/rush/CHANGELOG.md) to demonstrate the level of detail expected.
