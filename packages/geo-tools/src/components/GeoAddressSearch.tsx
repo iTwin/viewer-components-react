@@ -78,9 +78,28 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
     setOptions([]);
   };
 
+  // Prevent navigation keys from bubbling up to an ancestor toolbar's list
+  // navigation (e.g. appui toolbar), which would otherwise steal focus out of
+  // the ComboBox input (moving it to the adjacent button) while the user is
+  // exploring the dropdown options.
+  const stopNavKeyPropagation = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    switch (event.key) {
+      case "ArrowUp":
+      case "ArrowDown":
+      case "ArrowLeft":
+      case "ArrowRight":
+      case "Home":
+      case "End":
+      case "Enter":
+      case "Escape":
+        event.stopPropagation();
+        break;
+    }
+  };
+
   return (
     <div className="geotools-geoaddresssearch__container">
-      <div className="geotools-geoaddresssearch__combobox">
+      <div className="geotools-geoaddresssearch__combobox" onKeyDown={stopNavKeyPropagation}>
         <ComboBox
 
           options={options}
