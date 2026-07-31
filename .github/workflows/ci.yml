@@ -43,7 +43,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Prevent manual package version changes
-        run: pnpm check:versions
+        run: pnpm check:versions -- ${{ github.event.pull_request.base.sha }}
 
   audit:
     runs-on: ubuntu-latest

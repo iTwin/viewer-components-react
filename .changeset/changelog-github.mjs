@@ -31,9 +31,22 @@ export default changelogFunctions;
 
 async function getPullRequestLink(repository, commit) {
   try {
-    const response = await fetch(`https://api.github.com/repos/${repository}/commits/${commit}/pulls`);
+    const headers = {
+      Accept: "application/vnd.github+json",
+      ...(process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}),
+    };
+
+    const response = await fetch(`https://api.github.com/repos/${repository}/commits/${commit}/pulls`, { headers });
+    if (!response.ok) {
+      throw new Error(`GitHub returned ${response.status} while resolving commit ${commit}.`);
+    }
+
     const pullRequests = await response.json();
-    const pullRequest = pullRequests.find(({ merge_commit_sha: mergeCommit }) => mergeCommit?.includes(commit));
+    if (!Array.isArray(pullRequests)) {
+      throw new Error("GitHub returned an unexpected pull request response.");
+    }
+
+    const pullRequest = pullRequests.find(({ merge_commit_sha: mergeCommit }) => mergeCommit?.startsWith(commit));
 
     if (pullRequest) {
       return `[#${pullRequest.number}](https://github.com/${repository}/pull/${pullRequest.number})`;

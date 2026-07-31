@@ -27,19 +27,22 @@ for (const changesetFile of getChangesetFiles().filter((file) => !existingChange
 function prefixChangeset(changesetFile) {
   const sourcePath = path.join(changesetDirectory, changesetFile);
   const content = fs.readFileSync(sourcePath, "utf8");
-  const parts = content.split("---");
-  if (parts.length < 3) {
+  const frontmatter = content.match(/^---\r?\n([\s\S]*?)^---\r?\n/m);
+  if (!frontmatter) {
     throw new Error(`Invalid changeset in ${changesetFile}.`);
   }
-  let affectedPackagesString = parts[1];
-  const removableParts = ['"', "major", "minor", "patch", ":"];
-  for (const part of removableParts) {
-    affectedPackagesString = affectedPackagesString.replaceAll(part, "");
-  }
-  const affectedPackages = affectedPackagesString
-    .split("\n")
+
+  const releaseLines = frontmatter[1]
+    .split(/\r?\n/)
     .map((line) => line.trim())
     .filter((line) => line.length > 0);
+  const affectedPackages = releaseLines.map((line) => {
+    const release = line.match(/^"([^"]+)":\s*(?:major|minor|patch)$/);
+    if (!release) {
+      throw new Error(`Invalid changeset release in ${changesetFile}: ${line}`);
+    }
+    return release[1];
+  });
 
   if (affectedPackages.length === 0) {
     fs.unlinkSync(sourcePath);
