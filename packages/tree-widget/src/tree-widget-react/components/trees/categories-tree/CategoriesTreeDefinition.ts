@@ -427,12 +427,10 @@ async function createInstanceKeyPathsFromInstanceLabel(
           return imodelAccess.createQueryReader(queryProps, { restartToken: `${componentName}/${componentId}/filter-by-label`, limit });
         }),
         releaseMainThreadOnItemsCount(1000),
-        map(
-          (row): InstanceKey => ({
-            className: row.ClassName === "c" ? categoryClass : row.ClassName === "sc" ? SUB_CATEGORY_CLASS : DEFINITION_CONTAINER_CLASS,
-            id: row.ECInstanceId,
-          }),
-        ),
+        map((row): InstanceKey => ({
+          className: row.ClassName === "c" ? categoryClass : row.ClassName === "sc" ? SUB_CATEGORY_CLASS : DEFINITION_CONTAINER_CLASS,
+          id: row.ECInstanceId,
+        })),
         toArray(),
         mergeMap((targetItems): Observable<HierarchyFilteringPath> => createInstanceKeyPathsFromTargetItems({ ...props, targetItems })),
         toArray(),
