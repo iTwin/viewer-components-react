@@ -6,6 +6,7 @@
 import axe from "axe-core";
 import { expect } from "vitest";
 import { render } from "vitest-browser-react";
+import { ThemeProvider } from "@itwin/itwinui-react";
 import { Root } from "@stratakit/foundations";
 import { LocalizationContextProvider } from "../../tree-widget-react/components/trees/common/components/LocalizationContext.js";
 import localeEn from "../../public/locales/en/TreeWidget.json" with { type: "json" };
@@ -41,14 +42,14 @@ interface RenderWithThemeOptions {
 function createWrapper(colorScheme: ColorScheme) {
   return function Wrapper({ children }: PropsWithChildren<unknown>) {
     return (
-      <Root colorScheme={colorScheme} density="dense">
+      <ThemeProvider theme={colorScheme} future={true} as={Root} colorScheme={colorScheme} density="dense">
         <LocalizationContextProvider localization={localization}>{children}</LocalizationContextProvider>
-      </Root>
+      </ThemeProvider>
     );
   };
 }
 
-/** Renders `element` wrapped with the StrataKit `Root` theme and the tree-widget localization context. */
+/** Renders `element` wrapped with the iTwinUI theme rendered as the StrataKit `Root` (design tokens + theming) and the tree-widget localization context. */
 export async function renderWithTheme(element: ReactNode, options?: RenderWithThemeOptions) {
   const { colorScheme = "light" } = options ?? {};
   return render(element, { wrapper: createWrapper(colorScheme) });

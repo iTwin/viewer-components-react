@@ -9,7 +9,7 @@ import { EmptyTreeContent, NoSearchMatches, SearchUnknownError, TooManySearchMat
 import { COLOR_SCHEMES, renderWithTheme, validateSnapshot } from "./RenderUtils.js";
 
 COLOR_SCHEMES.forEach((colorScheme) => {
-  describe(`[${colorScheme}] empty tree states`, () => {
+  describe(`[${colorScheme}] <EmptyTree />`, () => {
     it("renders 'no data available' content", async () => {
       await page.viewport(300, 150);
       const { locator } = await renderWithTheme(

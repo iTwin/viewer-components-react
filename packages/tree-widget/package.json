@@ -103,6 +103,7 @@
     "@itwin/ecschema-rpcinterface-impl": "^5.9.1",
     "@itwin/eslint-plugin": "^6.1.0",
     "@itwin/imodel-components-react": "^5.33.0",
+    "@itwin/itwinui-react": "^3.21.2",
     "@itwin/oidc-signin-tool": "^5.1.3",
     "@itwin/presentation-backend": "^5.9.1",
     "@itwin/presentation-common": "^5.9.1",

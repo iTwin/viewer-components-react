@@ -13,8 +13,10 @@ COLOR_SCHEMES.forEach((colorScheme) => {
     it("renders skeleton rows", async () => {
       await page.viewport(300, 320);
       const { locator } = await renderWithTheme(
-        <div style={{ width: 300, height: 320 }}>
-          <SkeletonTree />
+        <div className="tw-content">
+          <div className="tw-content-wrapper">
+            <SkeletonTree />
+          </div>
         </div>,
         { colorScheme },
       );

@@ -3,6 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+// Some of our component still use ItwinUI styles for padding and size, this should be removed when fully migrating away from ItwinUI. The ItwinUI styles are imported here so that they are available for all component tests.
+import "@itwin/itwinui-react/styles.css";
+
 import { afterEach, beforeAll } from "vitest";
 import { cleanup } from "vitest-browser-react";
 
@@ -12,5 +15,5 @@ beforeAll(async () => {
 });
 
 afterEach(() => {
-  cleanup();
+  void cleanup();
 });
