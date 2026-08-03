@@ -1899,13 +1899,12 @@ describe("ModelsTreeVisibilityHandler", () => {
               }),
             // prettier-ignore
             expectations: (ids: IModelWithSubModelIds) => ({
-              [ids.subjectId]: "partial",
-                [ids.modelId]: "partial",
-                  [`${ids.modelId}-${ids.categoryId}`]: "partial",
-                    [ids.parentElementId!]: "partial",
-                      [ids.modeledElementId]: "visible",
-                        [`${ids.modeledElementId}-${ids.subModelCategoryId}`]: "visible",
-                          [ids.subModelElementId!]: "visible",
+              [ids.modelId]: "partial",
+                [`${ids.modelId}-${ids.categoryId}`]: "partial",
+                  [ids.parentElementId!]: "partial",
+                    [ids.modeledElementId]: "visible",
+                      [`${ids.modeledElementId}-${ids.subModelCategoryId}`]: "visible",
+                        [ids.subModelElementId!]: "visible",
             }),
           },
           {
@@ -1919,13 +1918,12 @@ describe("ModelsTreeVisibilityHandler", () => {
               }),
             // prettier-ignore
             expectations: (ids: IModelWithSubModelIds) => ({
-              [ids.subjectId]: "partial",
-                [ids.modelId]: "partial",
-                  [`${ids.modelId}-${ids.categoryId}`]: "partial",
-                    [ids.parentElementId!]: "partial",
-                      [ids.modeledElementId]: "visible",
-                        [`${ids.modeledElementId}-${ids.subModelCategoryId}`]: "visible",
-                          [ids.subModelElementId!]: "visible",
+              [ids.modelId]: "partial",
+                [`${ids.modelId}-${ids.categoryId}`]: "partial",
+                  [ids.parentElementId!]: "partial",
+                    [ids.modeledElementId]: "visible",
+                      [`${ids.modeledElementId}-${ids.subModelCategoryId}`]: "visible",
+                        [ids.subModelElementId!]: "visible",
             }),
           },
           {
@@ -1937,13 +1935,12 @@ describe("ModelsTreeVisibilityHandler", () => {
               }),
             // prettier-ignore
             expectations: (ids: IModelWithSubModelIds) => ({
-              [ids.subjectId]: "partial",
-                [ids.modelId]: "partial",
-                  [`${ids.modelId}-${ids.categoryId}`]: "partial",
-                    [ids.parentElementId!]: "partial",
-                      [ids.modeledElementId]: "partial",
-                        [`${ids.modeledElementId}-${ids.subModelCategoryId}`]: "visible",
-                          [ids.subModelElementId!]: "visible",
+              [ids.modelId]: "partial",
+                [`${ids.modelId}-${ids.categoryId}`]: "partial",
+                  [ids.parentElementId!]: "partial",
+                    [ids.modeledElementId]: "partial",
+                      [`${ids.modeledElementId}-${ids.subModelCategoryId}`]: "visible",
+                        [ids.subModelElementId!]: "visible",
             }),
           },
           {
@@ -1956,13 +1953,12 @@ describe("ModelsTreeVisibilityHandler", () => {
               }),
             // prettier-ignore
             expectations: (ids: IModelWithSubModelIds) => ({
-              [ids.subjectId]: "partial",
-                [ids.modelId]: "partial",
-                  [`${ids.modelId}-${ids.categoryId}`]: "partial",
-                    [ids.parentElementId!]: "partial",
-                      [ids.modeledElementId]: "partial",
-                        [`${ids.modeledElementId}-${ids.subModelCategoryId}`]: "visible",
-                          [ids.subModelElementId!]: "visible",
+              [ids.modelId]: "partial",
+                [`${ids.modelId}-${ids.categoryId}`]: "partial",
+                  [ids.parentElementId!]: "partial",
+                    [ids.modeledElementId]: "partial",
+                      [`${ids.modeledElementId}-${ids.subModelCategoryId}`]: "visible",
+                        [ids.subModelElementId!]: "visible",
             }),
           },
           {
@@ -1975,13 +1971,12 @@ describe("ModelsTreeVisibilityHandler", () => {
               }),
             // prettier-ignore
             expectations: (ids: IModelWithSubModelIds) => ({
-              [ids.subjectId]: "partial",
-                [ids.modelId]: "partial",
-                  [`${ids.modelId}-${ids.categoryId}`]: "partial",
-                    [ids.parentElementId!]: "partial",
-                      [ids.modeledElementId]: "partial",
-                        [`${ids.modeledElementId}-${ids.subModelCategoryId}`]: "visible",
-                          [ids.subModelElementId!]: "visible",
+              [ids.modelId]: "partial",
+                [`${ids.modelId}-${ids.categoryId}`]: "partial",
+                  [ids.parentElementId!]: "partial",
+                    [ids.modeledElementId]: "partial",
+                      [`${ids.modeledElementId}-${ids.subModelCategoryId}`]: "visible",
+                        [ids.subModelElementId!]: "visible",
             }),
           },
         ],
@@ -2257,14 +2252,13 @@ describe("ModelsTreeVisibilityHandler", () => {
         viewport,
         // prettier-ignore
         expectations: {
-          [IModel.rootSubjectId]: "partial",
-            [ids.model]: "visible",
-              [`${ids.model}-${ids.categoryId}`]: "visible",
-                [ids.element]: "visible",
+          [ids.model]: "visible",
+            [`${ids.model}-${ids.categoryId}`]: "visible",
+              [ids.element]: "visible",
 
-            [ids.otherModel]: "hidden",
-              [`${ids.otherModel}-${ids.categoryId}`]: "hidden",
-                [ids.otherElement]: "hidden",
+          [ids.otherModel]: "hidden",
+            [`${ids.otherModel}-${ids.categoryId}`]: "hidden",
+              [ids.otherElement]: "hidden",
         },
       });
     });
@@ -2295,12 +2289,11 @@ describe("ModelsTreeVisibilityHandler", () => {
         viewport,
         // prettier-ignore
         expectations: {
-          [IModel.rootSubjectId]: "partial",
-            [ids.model]: "partial",
-              [`${ids.model}-${ids.categoryId}`]: "partial",
-                [ids.hiddenElement]: "hidden",
-                [ids.element1]: "visible",
-                [ids.element2]: "visible",
+          [ids.model]: "partial",
+            [`${ids.model}-${ids.categoryId}`]: "partial",
+              [ids.hiddenElement]: "hidden",
+              [ids.element1]: "visible",
+              [ids.element2]: "visible",
         },
       });
     });
@@ -2463,15 +2456,14 @@ describe("ModelsTreeVisibilityHandler", () => {
         viewport,
         // prettier-ignore
         expectations: {
-          [IModel.rootSubjectId]: "partial",
-            [ids.model]: "partial",
-              [`${ids.model}-${ids.category}`]: "partial",
-                [ids.elementToShow]: "visible",
-                [ids.elements1]: "hidden",
-                [ids.elements2]: "hidden",
+          [ids.model]: "partial",
+            [`${ids.model}-${ids.category}`]: "partial",
+              [ids.elementToShow]: "visible",
+              [ids.elements1]: "hidden",
+              [ids.elements2]: "hidden",
 
-              [`${ids.model}-${ids.otherCategory}`]: "hidden",
-                [ids.otherElement]: "hidden",
+            [`${ids.model}-${ids.otherCategory}`]: "hidden",
+              [ids.otherElement]: "hidden",
         },
       });
     });
@@ -2528,18 +2520,17 @@ describe("ModelsTreeVisibilityHandler", () => {
         viewport,
         // prettier-ignore
         expectations: {
-          [IModel.rootSubjectId]: "partial",
-            [ids.model]: "partial",
-              [`${ids.model}-${ids.category}`]: "partial",
-                [elementToShow]: "visible",
-                [ids.modelElements[1]]: "hidden",
-                [ids.modelElements[2]]: "hidden",
+          [ids.model]: "partial",
+            [`${ids.model}-${ids.category}`]: "partial",
+              [elementToShow]: "visible",
+              [ids.modelElements[1]]: "hidden",
+              [ids.modelElements[2]]: "hidden",
 
-            [ids.otherModel]: "hidden",
-              [`${ids.otherModel}-${ids.category}`]: "hidden",
-                [ids.otherModelElements[0]]: "hidden",
-                [ids.otherModelElements[1]]: "hidden",
-                [ids.otherModelElements[2]]: "hidden",
+          [ids.otherModel]: "hidden",
+            [`${ids.otherModel}-${ids.category}`]: "hidden",
+              [ids.otherModelElements[0]]: "hidden",
+              [ids.otherModelElements[1]]: "hidden",
+              [ids.otherModelElements[2]]: "hidden",
         },
       });
     });
@@ -2569,15 +2560,14 @@ describe("ModelsTreeVisibilityHandler", () => {
         viewport,
         // prettier-ignore
         expectations: {
-          [IModel.rootSubjectId]: "partial",
-            [ids.model]: "partial",
-              [`${ids.model}-${ids.categoryId}`]: "partial",
-                [ids.exclusiveElement]: "visible",
-                [ids.element]: "hidden",
+          [ids.model]: "partial",
+            [`${ids.model}-${ids.categoryId}`]: "partial",
+              [ids.exclusiveElement]: "visible",
+              [ids.element]: "hidden",
 
-            [ids.otherModel]: "hidden",
-              [`${ids.otherModel}-${ids.categoryId}`]: "hidden",
-                [ids.otherElement]: "hidden",
+          [ids.otherModel]: "hidden",
+            [`${ids.otherModel}-${ids.categoryId}`]: "hidden",
+              [ids.otherElement]: "hidden",
         },
       });
     });
@@ -2608,16 +2598,15 @@ describe("ModelsTreeVisibilityHandler", () => {
         viewport,
         // prettier-ignore
         expectations: {
-          [IModel.rootSubjectId]: "partial",
-            [ids.model]: "partial",
-              [`${ids.model}-${ids.categoryId}`]: "partial",
-                [ids.exclusiveElement]: "partial",
-                  [`${ids.exclusiveElement}-${ids.childCategoryId}`]: "hidden",
-                    [ids.childElement]: "hidden",
+          [ids.model]: "partial",
+            [`${ids.model}-${ids.categoryId}`]: "partial",
+              [ids.exclusiveElement]: "partial",
+                [`${ids.exclusiveElement}-${ids.childCategoryId}`]: "hidden",
+                  [ids.childElement]: "hidden",
 
-            [ids.otherModel]: "hidden",
-              [`${ids.otherModel}-${ids.categoryId}`]: "hidden",
-                [ids.otherElement]: "hidden",
+          [ids.otherModel]: "hidden",
+            [`${ids.otherModel}-${ids.categoryId}`]: "hidden",
+              [ids.otherElement]: "hidden",
         },
       });
     });
@@ -2687,13 +2676,12 @@ describe("ModelsTreeVisibilityHandler", () => {
         viewport,
         // prettier-ignore
         expectations: {
-          [IModel.rootSubjectId]: "partial",
-            [ids.model]: "partial",
-              [`${ids.model}-${ids.category}`]: "hidden",
-                [ids.element]: "hidden",
+          [ids.model]: "partial",
+            [`${ids.model}-${ids.category}`]: "hidden",
+              [ids.element]: "hidden",
 
-              [`${ids.model}-${ids.otherCategory}`]: "visible",
-                [ids.otherElement]: "visible",
+            [`${ids.model}-${ids.otherCategory}`]: "visible",
+              [ids.otherElement]: "visible",
         },
       });
     });
@@ -2732,15 +2720,14 @@ describe("ModelsTreeVisibilityHandler", () => {
         viewport,
         // prettier-ignore
         expectations: {
-          [IModel.rootSubjectId]: "partial",
-            [ids.model]: "partial",
-              [`${ids.model}-${ids.category}`]: "visible",
-                [ids.parentElement]: "visible",
-                  [ids.child]: "visible",
-                    [ids.childOfChild]: "visible",
+          [ids.model]: "partial",
+            [`${ids.model}-${ids.category}`]: "visible",
+              [ids.parentElement]: "visible",
+                [ids.child]: "visible",
+                  [ids.childOfChild]: "visible",
 
-              [`${ids.model}-${ids.otherCategory}`]: "hidden",
-                [ids.otherElement]: "hidden",
+            [`${ids.model}-${ids.otherCategory}`]: "hidden",
+              [ids.otherElement]: "hidden",
         },
       });
     });
@@ -2781,15 +2768,14 @@ describe("ModelsTreeVisibilityHandler", () => {
         viewport,
         // prettier-ignore
         expectations: {
-          [IModel.rootSubjectId]: "partial",
-            [ids.model]: "partial",
-              [`${ids.model}-${ids.category}`]: "hidden",
-                [ids.parentElement]: "hidden",
-                  [ids.child]: "hidden",
-                    [ids.childOfChild]: "hidden",
+          [ids.model]: "partial",
+            [`${ids.model}-${ids.category}`]: "hidden",
+              [ids.parentElement]: "hidden",
+                [ids.child]: "hidden",
+                  [ids.childOfChild]: "hidden",
 
-              [`${ids.model}-${ids.otherCategory}`]: "visible",
-                [ids.otherElement]: "visible",
+            [`${ids.model}-${ids.otherCategory}`]: "visible",
+              [ids.otherElement]: "visible",
         },
       });
     });
@@ -2849,12 +2835,11 @@ describe("ModelsTreeVisibilityHandler", () => {
         viewport,
         // prettier-ignore
         expectations: {
-          [IModel.rootSubjectId]: "partial",
-            [ids.model]: "partial",
-              // Validation uses first category id to check expected visibility
-              [`${ids.model}-${ids.category1}`]: "partial",
-                [ids.element1]: "hidden",
-                [ids.element2]: "visible",
+          [ids.model]: "partial",
+            // Validation uses first category id to check expected visibility
+            [`${ids.model}-${ids.category1}`]: "partial",
+              [ids.element1]: "hidden",
+              [ids.element2]: "visible",
         },
       });
       await handler.changeVisibility(
@@ -2999,15 +2984,14 @@ describe("ModelsTreeVisibilityHandler", () => {
           viewport,
           // prettier-ignore
           expectations: {
-            [IModel.rootSubjectId]: "partial",
-              [modelId]: "partial",
-                [`${modelId}-${category1Id}`]: "visible",
-                  [parentElementId]: "visible",
-                    [`${parentElementId}-${childCategoryId}`]: "visible",
-                      [childElementWithDifferentCategoryId]: "visible",
+            [modelId]: "partial",
+              [`${modelId}-${category1Id}`]: "visible",
+                [parentElementId]: "visible",
+                  [`${parentElementId}-${childCategoryId}`]: "visible",
+                    [childElementWithDifferentCategoryId]: "visible",
 
-                [`${modelId}-${category2Id}`]: "hidden",
-                  [element2Id]: "hidden",
+              [`${modelId}-${category2Id}`]: "hidden",
+                [element2Id]: "hidden",
           },
         });
       });
@@ -3063,15 +3047,14 @@ describe("ModelsTreeVisibilityHandler", () => {
           viewport,
           // prettier-ignore
           expectations: {
-            [IModel.rootSubjectId]: "partial",
-              [modelId]: "partial",
-                [`${modelId}-${sharedCategoryId}`]: "visible",
-                  [elementWithSharedCategoryId]: "visible",
+            [modelId]: "partial",
+              [`${modelId}-${sharedCategoryId}`]: "visible",
+                [elementWithSharedCategoryId]: "visible",
 
-                [`${modelId}-${parentCategoryId}`]: "partial",
-                  [parentElementId]: "partial",
-                    [`${parentElementId}-${sharedCategoryId}`]: "visible",
-                      [childElementWithSharedCategoryId]: "visible",
+              [`${modelId}-${parentCategoryId}`]: "partial",
+                [parentElementId]: "partial",
+                  [`${parentElementId}-${sharedCategoryId}`]: "visible",
+                    [childElementWithSharedCategoryId]: "visible",
           },
         });
       });
@@ -3115,15 +3098,14 @@ describe("ModelsTreeVisibilityHandler", () => {
           viewport,
           // prettier-ignore
           expectations: {
-            [IModel.rootSubjectId]: "partial",
-              [modelId]: "partial",
-                [`${modelId}-${categoryId}`]: "visible",
-                  [elementId]: "visible",
+            [modelId]: "partial",
+              [`${modelId}-${categoryId}`]: "visible",
+                [elementId]: "visible",
 
-                [`${modelId}-${unrelatedCategoryId}`]: "hidden",
-                  [unrelatedParentElementId]: "hidden",
-                    [`${unrelatedParentElementId}-${categoryId}`]: "hidden",
-                      [childOfUnrelatedElementId]: "hidden",
+              [`${modelId}-${unrelatedCategoryId}`]: "hidden",
+                [unrelatedParentElementId]: "hidden",
+                  [`${unrelatedParentElementId}-${categoryId}`]: "hidden",
+                    [childOfUnrelatedElementId]: "hidden",
           },
         });
       });
@@ -3167,12 +3149,11 @@ describe("ModelsTreeVisibilityHandler", () => {
           viewport,
           // prettier-ignore
           expectations: {
-            [IModel.rootSubjectId]: "partial",
-              [modelId]: "partial",
-                [`${modelId}-${parentCategoryId}`]: "partial",
-                  [parentElementId]: "partial",
-                    [`${parentElementId}-${childCategoryId}`]: "visible",
-                      [childElementWithDifferentCategoryId]: "visible",
+            [modelId]: "partial",
+              [`${modelId}-${parentCategoryId}`]: "partial",
+                [parentElementId]: "partial",
+                  [`${parentElementId}-${childCategoryId}`]: "visible",
+                    [childElementWithDifferentCategoryId]: "visible",
           },
         });
       });
@@ -3218,12 +3199,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [ids.modelId]: "partial",
-                  [`${ids.modelId}-${ids.categoryAId}`]: "partial",
-                    [ids.parentElementId]: "partial",
-                      [`${ids.parentElementId}-${ids.categoryBId}`]: "visible",
-                        [ids.childElementId]: "visible",
+              [ids.modelId]: "partial",
+                [`${ids.modelId}-${ids.categoryAId}`]: "partial",
+                  [ids.parentElementId]: "partial",
+                    [`${ids.parentElementId}-${ids.categoryBId}`]: "visible",
+                      [ids.childElementId]: "visible",
             },
           });
         });
@@ -3266,12 +3246,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [ids.modelId]: "partial",
-                  [`${ids.modelId}-${ids.categoryAId}`]: "partial",
-                    [ids.parentElementId]: "partial",
-                      [`${ids.parentElementId}-${ids.categoryBId}`]: "visible",
-                        [ids.childElementId]: "visible",
+              [ids.modelId]: "partial",
+                [`${ids.modelId}-${ids.categoryAId}`]: "partial",
+                  [ids.parentElementId]: "partial",
+                    [`${ids.parentElementId}-${ids.categoryBId}`]: "visible",
+                      [ids.childElementId]: "visible",
             },
           });
         });
@@ -3356,12 +3335,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [ids.modelId]: "partial",
-                  [`${ids.modelId}-${ids.categoryAId}`]: "partial",
-                    [ids.parentElementId]: "partial",
-                      [`${ids.parentElementId}-${ids.categoryBId}`]: "hidden",
-                        [ids.childElementId]: "hidden",
+              [ids.modelId]: "partial",
+                [`${ids.modelId}-${ids.categoryAId}`]: "partial",
+                  [ids.parentElementId]: "partial",
+                    [`${ids.parentElementId}-${ids.categoryBId}`]: "hidden",
+                      [ids.childElementId]: "hidden",
             },
           });
         });
@@ -3404,12 +3382,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [ids.modelId]: "partial",
-                  [`${ids.modelId}-${ids.categoryAId}`]: "partial",
-                    [ids.parentElementId]: "partial",
-                      [`${ids.parentElementId}-${ids.categoryBId}`]: "hidden",
-                        [ids.childElementId]: "hidden",
+              [ids.modelId]: "partial",
+                [`${ids.modelId}-${ids.categoryAId}`]: "partial",
+                  [ids.parentElementId]: "partial",
+                    [`${ids.parentElementId}-${ids.categoryBId}`]: "hidden",
+                      [ids.childElementId]: "hidden",
             },
           });
         });
@@ -3460,12 +3437,11 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport,
               // prettier-ignore
               expectations: {
-                [IModel.rootSubjectId]: "partial",
-                  [ids.modelId]: "partial",
-                    [`${ids.modelId}-${ids.categoryAId}`]: "partial",
-                      [ids.modeledElementId]: "partial",
-                        [`${ids.modeledElementId}-${ids.categoryBId}`]: "visible",
-                          [ids.subModelElementId]: "visible",
+                [ids.modelId]: "partial",
+                  [`${ids.modelId}-${ids.categoryAId}`]: "partial",
+                    [ids.modeledElementId]: "partial",
+                      [`${ids.modeledElementId}-${ids.categoryBId}`]: "visible",
+                        [ids.subModelElementId]: "visible",
               },
             });
           });
@@ -3513,12 +3489,11 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport,
               // prettier-ignore
               expectations: {
-                [IModel.rootSubjectId]: "partial",
-                  [ids.modelId]: "partial",
-                    [`${ids.modelId}-${ids.categoryAId}`]: "partial",
-                      [ids.modeledElementId]: "partial",
-                        [`${ids.modeledElementId}-${ids.categoryBId}`]: "visible",
-                          [ids.subModelElementId]: "visible",
+                [ids.modelId]: "partial",
+                  [`${ids.modelId}-${ids.categoryAId}`]: "partial",
+                    [ids.modeledElementId]: "partial",
+                      [`${ids.modeledElementId}-${ids.categoryBId}`]: "visible",
+                        [ids.subModelElementId]: "visible",
               },
             });
           });
@@ -3568,12 +3543,11 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport,
               // prettier-ignore
               expectations: {
-                [IModel.rootSubjectId]: "partial",
-                  [ids.modelId]: "partial",
-                    [`${ids.modelId}-${ids.categoryAId}`]: "partial",
-                      [ids.modeledElementId]: "partial",
-                        [`${ids.modeledElementId}-${ids.categoryBId}`]: "hidden",
-                          [ids.subModelElementId]: "hidden",
+                [ids.modelId]: "partial",
+                  [`${ids.modelId}-${ids.categoryAId}`]: "partial",
+                    [ids.modeledElementId]: "partial",
+                      [`${ids.modeledElementId}-${ids.categoryBId}`]: "hidden",
+                        [ids.subModelElementId]: "hidden",
               },
             });
           });
@@ -3668,15 +3642,14 @@ describe("ModelsTreeVisibilityHandler", () => {
           viewport,
           // prettier-ignore
           expectations: {
-            [IModel.rootSubjectId]: "partial",
-              [modelId]: "partial",
-                [`${modelId}-${firstCategoryId}`]: "partial",
-                  [elements1[0]]: "hidden",
-                  [elements1[1]]: "visible",
+            [modelId]: "partial",
+              [`${modelId}-${firstCategoryId}`]: "partial",
+                [elements1[0]]: "hidden",
+                [elements1[1]]: "visible",
 
-                [`${modelId}-${secondCategoryId}`]: "hidden",
-                  [elements2[0]]: "hidden",
-                  [elements2[1]]: "hidden",
+              [`${modelId}-${secondCategoryId}`]: "hidden",
+                [elements2[0]]: "hidden",
+                [elements2[1]]: "hidden",
           },
         });
 
@@ -3706,15 +3679,14 @@ describe("ModelsTreeVisibilityHandler", () => {
           viewport,
           // prettier-ignore
           expectations: {
-            [IModel.rootSubjectId]: "partial",
-              [modelId]: "partial",
-                [`${modelId}-${firstCategoryId}`]: "partial",
-                  [elements1[0]]: "visible",
-                  [elements1[1]]: "hidden",
+            [modelId]: "partial",
+              [`${modelId}-${firstCategoryId}`]: "partial",
+                [elements1[0]]: "visible",
+                [elements1[1]]: "hidden",
 
-                [`${modelId}-${secondCategoryId}`]: "visible",
-                  [elements2[0]]: "visible",
-                  [elements2[1]]: "visible",
+              [`${modelId}-${secondCategoryId}`]: "visible",
+                [elements2[0]]: "visible",
+                [elements2[1]]: "visible",
           },
         });
 
@@ -3800,16 +3772,16 @@ describe("ModelsTreeVisibilityHandler", () => {
             modelCategories.push(configurationCategoryId);
             const elements = new Array<Id64String>();
 
-            for (let childIdx = 0; childIdx < 3; ++childIdx) {
+            for (let childIdx = 0; childIdx < 2; ++childIdx) {
               const props: GeometricElement3dProps = {
                 model: configurationModelId,
                 category: configurationCategoryId,
                 code: new Code({ scope: partitionId, spec: "", value: `Configuration_${customClassName}_${childIdx}` }),
-                classFullName: childIdx !== 2 ? customClassName : "Generic:PhysicalObject",
+                classFullName: customClassName,
               };
               elements.push(txn.insertElement(props));
             }
-            const [customClassElement1, customClassElement2, nonCustomClassElement] = elements;
+            const [customClassElement1, customClassElement2] = elements;
 
             const hierarchyConfig: RequiredModelsTreeHierarchyConfiguration = mergeWithDefaults({
               defaults: defaultHierarchyConfiguration,
@@ -3825,7 +3797,6 @@ describe("ModelsTreeVisibilityHandler", () => {
               elements,
               customClassElement1,
               customClassElement2,
-              nonCustomClassElement,
               modelCategories,
               emptyModelId,
               customClassName,
@@ -3887,7 +3858,6 @@ describe("ModelsTreeVisibilityHandler", () => {
                   [`${ids.configurationModelId}-${ids.configurationCategoryId}`]: "hidden",
                   [ids.customClassElement1]: "hidden",
                   [ids.customClassElement2]: "hidden",
-                  [ids.nonCustomClassElement]: "hidden",
             },
           });
         });
@@ -3914,7 +3884,6 @@ describe("ModelsTreeVisibilityHandler", () => {
                   [`${ids.configurationModelId}-${ids.configurationCategoryId}`]: "visible",
                     [ids.customClassElement1]: "visible",
                     [ids.customClassElement2]: "visible",
-                    [ids.nonCustomClassElement]: "visible",
             },
           });
         });
@@ -3949,7 +3918,6 @@ describe("ModelsTreeVisibilityHandler", () => {
                   [`${ids.configurationModelId}-${ids.configurationCategoryId}`]: "partial",
                     [ids.customClassElement1]: "visible",
                     [ids.customClassElement2]: "hidden",
-                    [ids.nonCustomClassElement]: "hidden",
             },
           });
         });
@@ -3993,7 +3961,6 @@ describe("ModelsTreeVisibilityHandler", () => {
                   [`${ids.configurationModelId}-${ids.configurationCategoryId}`]: "visible",
                     [ids.customClassElement1]: "visible",
                     [ids.customClassElement2]: "visible",
-                    [ids.nonCustomClassElement]: "hidden",
             },
           });
         });
@@ -4029,15 +3996,14 @@ describe("ModelsTreeVisibilityHandler", () => {
           viewport,
           // prettier-ignore
           expectations: {
-            [IModel.rootSubjectId]: "partial",
-              [ids.model1]: "partial",
-                [`${ids.model1}-${ids.category1}`]: "partial",
-                  [ids.element1]: "hidden",
-                  [ids.element2]: "visible",
+            [ids.model1]: "partial",
+              [`${ids.model1}-${ids.category1}`]: "partial",
+                [ids.element1]: "hidden",
+                [ids.element2]: "visible",
 
-              [ids.otherModel]: "hidden",
-                [`${ids.otherModel}-${ids.otherCategory}`]: "hidden",
-                  [ids.otherElement]: "hidden",
+            [ids.otherModel]: "hidden",
+              [`${ids.otherModel}-${ids.otherCategory}`]: "hidden",
+                [ids.otherElement]: "hidden",
           },
         });
         await handler.changeVisibility(createModelHierarchyNode({ modelId: ids.model1 }), true);
@@ -4048,15 +4014,14 @@ describe("ModelsTreeVisibilityHandler", () => {
           viewport,
           // prettier-ignore
           expectations: {
-            [IModel.rootSubjectId]: "partial",
-              [ids.model1]: "visible",
-                [`${ids.model1}-${ids.category1}`]: "visible",
-                  [ids.element1]: "visible",
-                  [ids.element2]: "visible",
+            [ids.model1]: "visible",
+              [`${ids.model1}-${ids.category1}`]: "visible",
+                [ids.element1]: "visible",
+                [ids.element2]: "visible",
 
-              [ids.otherModel]: "hidden",
-                [`${ids.otherModel}-${ids.otherCategory}`]: "hidden",
-                  [ids.otherElement]: "hidden",
+            [ids.otherModel]: "hidden",
+              [`${ids.otherModel}-${ids.otherCategory}`]: "hidden",
+                [ids.otherElement]: "hidden",
           },
         });
       });
@@ -4088,14 +4053,13 @@ describe("ModelsTreeVisibilityHandler", () => {
           viewport,
           // prettier-ignore
           expectations: {
-            [IModel.rootSubjectId]: "partial",
-              [ids.model]: "partial",
-                [`${ids.model}-${ids.category1}`]: "partial",
-                  [ids.element1]: "hidden",
-                  [ids.element2]: "visible",
+            [ids.model]: "partial",
+              [`${ids.model}-${ids.category1}`]: "partial",
+                [ids.element1]: "hidden",
+                [ids.element2]: "visible",
 
-                [`${ids.model}-${ids.otherCategory}`]: "hidden",
-                  [ids.otherElement]: "hidden",
+              [`${ids.model}-${ids.otherCategory}`]: "hidden",
+                [ids.otherElement]: "hidden",
           },
         });
         await handler.changeVisibility(createCategoryHierarchyNode({ modelId: ids.model, categoryId: ids.category1, hasChildren: true }), true);
@@ -4106,14 +4070,13 @@ describe("ModelsTreeVisibilityHandler", () => {
           viewport,
           // prettier-ignore
           expectations: {
-            [IModel.rootSubjectId]: "partial",
-              [ids.model]: "partial",
-                [`${ids.model}-${ids.category1}`]: "visible",
-                  [ids.element1]: "visible",
-                  [ids.element2]: "visible",
+            [ids.model]: "partial",
+              [`${ids.model}-${ids.category1}`]: "visible",
+                [ids.element1]: "visible",
+                [ids.element2]: "visible",
 
-                [`${ids.model}-${ids.otherCategory}`]: "hidden",
-                  [ids.otherElement]: "hidden",
+              [`${ids.model}-${ids.otherCategory}`]: "hidden",
+                [ids.otherElement]: "hidden",
           },
         });
       });
@@ -4151,12 +4114,11 @@ describe("ModelsTreeVisibilityHandler", () => {
           viewport,
           // prettier-ignore
           expectations: {
-            [IModel.rootSubjectId]: "partial",
-              [ids.model]: "partial",
-                [`${ids.model}-${ids.category}`]: "partial",
-                  [ids.element1]: "hidden",
-                  [ids.element2]: "visible",
-                  [ids.elementOfOtherClass]: "hidden",
+            [ids.model]: "partial",
+              [`${ids.model}-${ids.category}`]: "partial",
+                [ids.element1]: "hidden",
+                [ids.element2]: "visible",
+                [ids.elementOfOtherClass]: "hidden",
           },
         });
         await handler.changeVisibility(
@@ -4170,12 +4132,11 @@ describe("ModelsTreeVisibilityHandler", () => {
           viewport,
           // prettier-ignore
           expectations: {
-            [IModel.rootSubjectId]: "partial",
-              [ids.model]: "partial",
-                [`${ids.model}-${ids.category}`]: "partial",
-                  [ids.element1]: "visible",
-                  [ids.element2]: "visible",
-                  [ids.elementOfOtherClass]: "hidden",
+            [ids.model]: "partial",
+              [`${ids.model}-${ids.category}`]: "partial",
+                [ids.element1]: "visible",
+                [ids.element2]: "visible",
+                [ids.elementOfOtherClass]: "hidden",
           },
         });
       });
@@ -4206,12 +4167,11 @@ describe("ModelsTreeVisibilityHandler", () => {
           viewport,
           // prettier-ignore
           expectations: {
-            [IModel.rootSubjectId]: "partial",
-              [ids.model]: "partial",
-                [`${ids.model}-${ids.category}`]: "partial",
-                  [ids.element1]: "hidden",
-                  [ids.element2]: "visible",
-                  [ids.element3]: "hidden",
+            [ids.model]: "partial",
+              [`${ids.model}-${ids.category}`]: "partial",
+                [ids.element1]: "hidden",
+                [ids.element2]: "visible",
+                [ids.element3]: "hidden",
           },
         });
         await handler.changeVisibility(createElementHierarchyNode({ elementId: ids.element1, categoryId: ids.category, modelId: ids.model }), true);
@@ -4222,12 +4182,11 @@ describe("ModelsTreeVisibilityHandler", () => {
           viewport,
           // prettier-ignore
           expectations: {
-            [IModel.rootSubjectId]: "partial",
-              [ids.model]: "partial",
-                [`${ids.model}-${ids.category}`]: "partial",
-                  [ids.element1]: "visible",
-                  [ids.element2]: "visible",
-                  [ids.element3]: "hidden",
+            [ids.model]: "partial",
+              [`${ids.model}-${ids.category}`]: "partial",
+                [ids.element1]: "visible",
+                [ids.element2]: "visible",
+                [ids.element3]: "hidden",
           },
         });
       });
@@ -4315,12 +4274,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.category.id}`]: "partial",
-                    [keys.parentElement.id]: "partial",
-                      [keys.searchTargetChildElement.id]: "visible",
-                      [keys.childElement.id]: "hidden",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.category.id}`]: "partial",
+                  [keys.parentElement.id]: "partial",
+                    [keys.searchTargetChildElement.id]: "visible",
+                    [keys.childElement.id]: "hidden",
             },
           });
         });
@@ -4376,12 +4334,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.category.id}`]: "partial",
-                    [keys.parentElement.id]: "partial",
-                      [keys.searchTargetChildElement.id]: "visible",
-                      [keys.childElement.id]: "hidden",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.category.id}`]: "partial",
+                  [keys.parentElement.id]: "partial",
+                    [keys.searchTargetChildElement.id]: "visible",
+                    [keys.childElement.id]: "hidden",
             },
           });
         });
@@ -4437,12 +4394,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.category.id}`]: "partial",
-                    [keys.parentElement.id]: "partial",
-                      [keys.searchTargetChildElement.id]: "visible",
-                      [keys.childElement.id]: "hidden",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.category.id}`]: "partial",
+                  [keys.parentElement.id]: "partial",
+                    [keys.searchTargetChildElement.id]: "visible",
+                    [keys.childElement.id]: "hidden",
             },
           });
         });
@@ -4503,12 +4459,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.category.id}`]: "partial",
-                    [keys.parentElement.id]: "partial",
-                      [keys.searchTargetChildElement.id]: "hidden",
-                      [keys.childElement.id]: "visible",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.category.id}`]: "partial",
+                  [keys.parentElement.id]: "partial",
+                    [keys.searchTargetChildElement.id]: "hidden",
+                    [keys.childElement.id]: "visible",
             },
           });
         });
@@ -4571,12 +4526,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.category.id}`]: "partial",
-                    [keys.parentElement.id]: "partial",
-                      [keys.searchTargetChildElement.id]: "hidden",
-                      [keys.childElement.id]: "visible",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.category.id}`]: "partial",
+                  [keys.parentElement.id]: "partial",
+                    [keys.searchTargetChildElement.id]: "hidden",
+                    [keys.childElement.id]: "visible",
             },
           });
         });
@@ -4635,12 +4589,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.category.id}`]: "partial",
-                    [keys.parentElement.id]: "partial",
-                      [keys.searchTargetChildElement.id]: "hidden",
-                      [keys.childElement.id]: "visible",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.category.id}`]: "partial",
+                  [keys.parentElement.id]: "partial",
+                    [keys.searchTargetChildElement.id]: "hidden",
+                    [keys.childElement.id]: "visible",
             },
           });
         });
@@ -4692,14 +4645,13 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "visible",
-                  [`${keys.model.id}-${keys.category.id}`]: "visible",
-                    [keys.searchTargetElement.id]: "visible",
+              [keys.model.id]: "visible",
+                [`${keys.model.id}-${keys.category.id}`]: "visible",
+                  [keys.searchTargetElement.id]: "visible",
 
-                [keys.otherModel.id]: "hidden",
-                  [`${keys.otherModel.id}-${keys.otherCategory.id}`]: "hidden",
-                    [keys.otherElement.id]: "hidden",
+              [keys.otherModel.id]: "hidden",
+                [`${keys.otherModel.id}-${keys.otherCategory.id}`]: "hidden",
+                  [keys.otherElement.id]: "hidden",
             },
           });
         });
@@ -4772,23 +4724,22 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.categoriesOfSearchTargets[0].id}`]: "partial",
-                    [keys.searchTargetElements[0]]: "visible",
-                    [keys.nonSearchTargetElements[0]]: "hidden",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.categoriesOfSearchTargets[0].id}`]: "partial",
+                  [keys.searchTargetElements[0]]: "visible",
+                  [keys.nonSearchTargetElements[0]]: "hidden",
 
-                  [`${keys.model.id}-${keys.categoriesOfSearchTargets[1].id}`]: "partial",
-                    [keys.searchTargetElements[1]]: "visible",
-                    [keys.nonSearchTargetElements[1]]: "hidden",
+                [`${keys.model.id}-${keys.categoriesOfSearchTargets[1].id}`]: "partial",
+                  [keys.searchTargetElements[1]]: "visible",
+                  [keys.nonSearchTargetElements[1]]: "hidden",
 
-                  [`${keys.model.id}-${keys.categoriesOfSearchTargets[2].id}`]: "partial",
-                    [keys.searchTargetElements[2]]: "visible",
-                    [keys.nonSearchTargetElements[2]]: "hidden",
+                [`${keys.model.id}-${keys.categoriesOfSearchTargets[2].id}`]: "partial",
+                  [keys.searchTargetElements[2]]: "visible",
+                  [keys.nonSearchTargetElements[2]]: "hidden",
 
-                [keys.otherModel.id]: "hidden",
-                  [`${keys.otherModel.id}-${keys.otherCategory.id}`]: "hidden",
-                    [keys.otherElement.id]: "hidden",
+              [keys.otherModel.id]: "hidden",
+                [`${keys.otherModel.id}-${keys.otherCategory.id}`]: "hidden",
+                  [keys.otherElement.id]: "hidden",
             },
           });
         });
@@ -4813,16 +4764,15 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.categoriesOfSearchTargets[0].id}`]: "visible",
-                    [keys.searchTargetElements[0]]: "visible",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.categoriesOfSearchTargets[0].id}`]: "visible",
+                  [keys.searchTargetElements[0]]: "visible",
 
-                  [`${keys.model.id}-${keys.categoriesOfSearchTargets[1].id}`]: "hidden",
-                    [keys.searchTargetElements[1]]: "hidden",
+                [`${keys.model.id}-${keys.categoriesOfSearchTargets[1].id}`]: "hidden",
+                  [keys.searchTargetElements[1]]: "hidden",
 
-                  [`${keys.model.id}-${keys.categoriesOfSearchTargets[2].id}`]: "hidden",
-                    [keys.searchTargetElements[2]]: "hidden",
+                [`${keys.model.id}-${keys.categoriesOfSearchTargets[2].id}`]: "hidden",
+                  [keys.searchTargetElements[2]]: "hidden",
             },
           });
 
@@ -4832,23 +4782,22 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.categoriesOfSearchTargets[0].id}`]: "partial",
-                    [keys.searchTargetElements[0]]: "visible",
-                    [keys.nonSearchTargetElements[0]]: "hidden",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.categoriesOfSearchTargets[0].id}`]: "partial",
+                  [keys.searchTargetElements[0]]: "visible",
+                  [keys.nonSearchTargetElements[0]]: "hidden",
 
-                  [`${keys.model.id}-${keys.categoriesOfSearchTargets[1].id}`]: "hidden",
-                    [keys.searchTargetElements[1]]: "hidden",
-                    [keys.nonSearchTargetElements[1]]: "hidden",
+                [`${keys.model.id}-${keys.categoriesOfSearchTargets[1].id}`]: "hidden",
+                  [keys.searchTargetElements[1]]: "hidden",
+                  [keys.nonSearchTargetElements[1]]: "hidden",
 
-                  [`${keys.model.id}-${keys.categoriesOfSearchTargets[2].id}`]: "hidden",
-                    [keys.searchTargetElements[2]]: "hidden",
-                    [keys.nonSearchTargetElements[2]]: "hidden",
+                [`${keys.model.id}-${keys.categoriesOfSearchTargets[2].id}`]: "hidden",
+                  [keys.searchTargetElements[2]]: "hidden",
+                  [keys.nonSearchTargetElements[2]]: "hidden",
 
-                [keys.otherModel.id]: "hidden",
-                  [`${keys.otherModel.id}-${keys.otherCategory.id}`]: "hidden",
-                    [keys.otherElement.id]: "hidden",
+              [keys.otherModel.id]: "hidden",
+                [`${keys.otherModel.id}-${keys.otherCategory.id}`]: "hidden",
+                  [keys.otherElement.id]: "hidden",
             },
           });
         });
@@ -4940,19 +4889,18 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.parentSubject.id]: "partial",
-                  [keys.subjectIds[0]]: "visible",
-                    [keys.modelIds[0]]: "visible",
-                      [`${keys.modelIds[0]}-${keys.categoryIds[0]}`]: "visible",
-                        [keys.elementsOfModels[0][0]]: "visible",
-                        [keys.elementsOfModels[0][1]]: "visible",
+              [keys.parentSubject.id]: "partial",
+                [keys.subjectIds[0]]: "visible",
+                  [keys.modelIds[0]]: "visible",
+                    [`${keys.modelIds[0]}-${keys.categoryIds[0]}`]: "visible",
+                      [keys.elementsOfModels[0][0]]: "visible",
+                      [keys.elementsOfModels[0][1]]: "visible",
 
-                [keys.subjectIds[1]]: "hidden",
-                  [keys.modelIds[1]]: "hidden",
-                    [`${keys.modelIds[1]}-${keys.categoryIds[1]}`]: "hidden",
-                      [keys.elementsOfModels[1][0]]: "hidden",
-                      [keys.elementsOfModels[1][1]]: "hidden",
+              [keys.subjectIds[1]]: "hidden",
+                [keys.modelIds[1]]: "hidden",
+                  [`${keys.modelIds[1]}-${keys.categoryIds[1]}`]: "hidden",
+                    [keys.elementsOfModels[1][0]]: "hidden",
+                    [keys.elementsOfModels[1][1]]: "hidden",
             },
           });
 
@@ -4962,19 +4910,18 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.parentSubject.id]: "partial",
-                  [keys.subjectIds[0]]: "visible",
-                    [keys.modelIds[0]]: "visible",
-                      [`${keys.modelIds[0]}-${keys.categoryIds[0]}`]: "visible",
-                        [keys.elementsOfModels[0][0]]: "visible",
-                        [keys.elementsOfModels[0][1]]: "visible",
+              [keys.parentSubject.id]: "partial",
+                [keys.subjectIds[0]]: "visible",
+                  [keys.modelIds[0]]: "visible",
+                    [`${keys.modelIds[0]}-${keys.categoryIds[0]}`]: "visible",
+                      [keys.elementsOfModels[0][0]]: "visible",
+                      [keys.elementsOfModels[0][1]]: "visible",
 
-                [keys.subjectIds[1]]: "hidden",
-                  [keys.modelIds[1]]: "hidden",
-                    [`${keys.modelIds[1]}-${keys.categoryIds[1]}`]: "hidden",
-                      [keys.elementsOfModels[1][0]]: "hidden",
-                      [keys.elementsOfModels[1][1]]: "hidden",
+              [keys.subjectIds[1]]: "hidden",
+                [keys.modelIds[1]]: "hidden",
+                  [`${keys.modelIds[1]}-${keys.categoryIds[1]}`]: "hidden",
+                    [keys.elementsOfModels[1][0]]: "hidden",
+                    [keys.elementsOfModels[1][1]]: "hidden",
             },
           });
         });
@@ -5047,11 +4994,10 @@ describe("ModelsTreeVisibilityHandler", () => {
           viewport,
           // prettier-ignore
           expectations: {
-            [IModel.rootSubjectId]: "partial",
-              [keys.model]: "partial",
-                [`${keys.model}-${keys.category}`]: "partial",
-                  [keys.firstElement]: "visible",
-                  [keys.element2]: "hidden",
+            [keys.model]: "partial",
+              [`${keys.model}-${keys.category}`]: "partial",
+                [keys.firstElement]: "visible",
+                [keys.element2]: "hidden",
           },
         });
       });
@@ -5141,12 +5087,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
-                    [keys.parentElement.id]: "partial",
-                      [`${keys.parentElement.id}-${keys.categoryB.id}`]: "visible",
-                        [keys.childElement1.id]: "visible",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                  [keys.parentElement.id]: "partial",
+                    [`${keys.parentElement.id}-${keys.categoryB.id}`]: "visible",
+                      [keys.childElement1.id]: "visible",
             },
           });
 
@@ -5156,13 +5101,12 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
-                    [keys.parentElement.id]: "partial",
-                      [`${keys.parentElement.id}-${keys.categoryB.id}`]: "partial",
-                        [keys.childElement1.id]: "visible",
-                        [keys.childElement2.id]: "hidden",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                  [keys.parentElement.id]: "partial",
+                    [`${keys.parentElement.id}-${keys.categoryB.id}`]: "partial",
+                      [keys.childElement1.id]: "visible",
+                      [keys.childElement2.id]: "hidden",
             },
           });
         });
@@ -5189,12 +5133,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
-                    [keys.parentElement.id]: "partial",
-                      [`${keys.parentElement.id}-${keys.categoryB.id}`]: "visible",
-                        [keys.childElement1.id]: "visible",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                  [keys.parentElement.id]: "partial",
+                    [`${keys.parentElement.id}-${keys.categoryB.id}`]: "visible",
+                      [keys.childElement1.id]: "visible",
             },
           });
 
@@ -5204,13 +5147,12 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
-                    [keys.parentElement.id]: "partial",
-                      [`${keys.parentElement.id}-${keys.categoryB.id}`]: "partial",
-                        [keys.childElement1.id]: "visible",
-                        [keys.childElement2.id]: "hidden",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                  [keys.parentElement.id]: "partial",
+                    [`${keys.parentElement.id}-${keys.categoryB.id}`]: "partial",
+                      [keys.childElement1.id]: "visible",
+                      [keys.childElement2.id]: "hidden",
             },
           });
         });
@@ -5247,13 +5189,12 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
-                    [keys.parentElement.id]: "partial",
-                      [`${keys.parentElement.id}-${keys.categoryB.id}`]: "partial",
-                        [keys.childElement1.id]: "visible",
-                        [keys.childElement2.id]: "hidden",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                  [keys.parentElement.id]: "partial",
+                    [`${keys.parentElement.id}-${keys.categoryB.id}`]: "partial",
+                      [keys.childElement1.id]: "visible",
+                      [keys.childElement2.id]: "hidden",
             },
           });
         });
@@ -5355,12 +5296,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
-                    [keys.modeledElement.id]: "partial",
-                      [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "visible",
-                        [keys.subModelElement1.id]: "visible",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                  [keys.modeledElement.id]: "partial",
+                    [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "visible",
+                      [keys.subModelElement1.id]: "visible",
             },
           });
 
@@ -5370,13 +5310,12 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
-                    [keys.modeledElement.id]: "partial",
-                      [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "partial",
-                        [keys.subModelElement1.id]: "visible",
-                        [keys.subModelElement2.id]: "hidden",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                  [keys.modeledElement.id]: "partial",
+                    [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "partial",
+                      [keys.subModelElement1.id]: "visible",
+                      [keys.subModelElement2.id]: "hidden",
             },
           });
         });
@@ -5402,12 +5341,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
-                    [keys.modeledElement.id]: "partial",
-                      [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "visible",
-                        [keys.subModelElement1.id]: "visible",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                  [keys.modeledElement.id]: "partial",
+                    [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "visible",
+                      [keys.subModelElement1.id]: "visible",
             },
           });
 
@@ -5417,13 +5355,12 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
-                    [keys.modeledElement.id]: "partial",
-                      [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "partial",
-                        [keys.subModelElement1.id]: "visible",
-                        [keys.subModelElement2.id]: "hidden",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                  [keys.modeledElement.id]: "partial",
+                    [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "partial",
+                      [keys.subModelElement1.id]: "visible",
+                      [keys.subModelElement2.id]: "hidden",
             },
           });
         });
@@ -5462,13 +5399,12 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
-                    [keys.modeledElement.id]: "partial",
-                      [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "partial",
-                        [keys.subModelElement1.id]: "visible",
-                        [keys.subModelElement2.id]: "hidden",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                  [keys.modeledElement.id]: "partial",
+                    [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "partial",
+                      [keys.subModelElement1.id]: "visible",
+                      [keys.subModelElement2.id]: "hidden",
             },
           });
         });
@@ -5565,11 +5501,10 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
-                    [keys.modeledElement.id]: "partial",
-                      [keys.modelingElement.id]: "visible",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                  [keys.modeledElement.id]: "partial",
+                    [keys.modelingElement.id]: "visible",
             },
           });
 
@@ -5579,11 +5514,10 @@ describe("ModelsTreeVisibilityHandler", () => {
             viewport,
             // prettier-ignore
             expectations: {
-              [IModel.rootSubjectId]: "partial",
-                [keys.model.id]: "partial",
-                  [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
-                    [keys.modeledElement.id]: "partial",
-                      [keys.modelingElement.id]: "visible",
+              [keys.model.id]: "partial",
+                [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
+                  [keys.modeledElement.id]: "partial",
+                    [keys.modelingElement.id]: "visible",
             },
           });
         });
