@@ -43,8 +43,8 @@ jobs:
         uses: changesets/action@63a615b9cd06ba9a3e6d13796c7fbcb080a60a0b
         with:
           publish: pnpm release
-          title: Release packages [publish docs]
-          commit: Release packages [publish docs]
+          title: Release packages
+          commit: Release packages
           commitMode: github-api
         env:
           GITHUB_TOKEN: ${{ secrets.IMJS_ADMIN_GH_TOKEN }}
