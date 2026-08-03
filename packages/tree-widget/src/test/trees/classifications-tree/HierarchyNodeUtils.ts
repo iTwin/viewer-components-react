@@ -3,12 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
-import type { ParentElementsPath } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
+import type { ParentElementsPath } from "../../../tree-widget-react/shared/internal/Utils.js";
 
 export function createClassificationTableHierarchyNode({
   id,

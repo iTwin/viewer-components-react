@@ -25,22 +25,22 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchySearchTree } from "@itwin/presentation-hierarchies";
-import { BaseIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
+import { BaseIdsCache } from "../../../../tree-widget-react/shared/internal/caches/BaseIdsCache.js";
 import {
   CLASS_NAME_GeometricElement3d,
   CLASS_NAME_GeometricModel3d,
   CLASS_NAME_SpatialCategory,
   CLASS_NAME_Subject,
-} from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
-import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
-import { mergeWithDefaults } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
-import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
-import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
-import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
+} from "../../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { createVisibilityStatus } from "../../../../tree-widget-react/shared/internal/Tooltip.js";
+import { mergeWithDefaults } from "../../../../tree-widget-react/shared/internal/Utils.js";
+import { ModelsTreeIdsCache } from "../../../../tree-widget-react/trees/models-tree/internal/ModelsTreeIdsCache.js";
+import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
+import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
 import { buildIModel, TestSchema } from "../../../IModelUtils.js";
+import { validateHierarchyVisibility } from "../../../shared/VisibilityValidation.js";
 import { TestUtils } from "../../../TestUtils.js";
 import { createFakeViewport, createIModelAccess } from "../../Common.js";
-import { validateHierarchyVisibility } from "../../common/VisibilityValidation.js";
 import { createTreeWidgetTestingViewport } from "../../TreeUtils.js";
 import {
   createCategoryHierarchyNode,
@@ -57,15 +57,15 @@ import type { GeometricElement3dProps, QueryBinder } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { GroupingHierarchyNode, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { EC, ECClassHierarchyInspector, InstanceKey, Props } from "@itwin/presentation-shared";
-import type { Visibility } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
-import type { TreeWidgetViewport } from "../../../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
-import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
-import type { ModelsTreeVisibilityHandlerProps } from "../../../../tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
+import type { Visibility } from "../../../../tree-widget-react/shared/internal/Tooltip.js";
+import type { TreeWidgetViewport } from "../../../../tree-widget-react/shared/TreeWidgetViewport.js";
+import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/shared/UseHierarchyVisibility.js";
+import type { ModelsTreeVisibilityHandlerProps } from "../../../../tree-widget-react/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 import type {
   ModelsTreeHierarchyConfiguration,
   RequiredModelsTreeHierarchyConfiguration,
-} from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
-import type { VisibilityExpectations } from "../../common/VisibilityValidation.js";
+} from "../../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
+import type { VisibilityExpectations } from "../../../shared/VisibilityValidation.js";
 
 interface VisibilityOverrides {
   models?: Map<Id64String, Visibility>;

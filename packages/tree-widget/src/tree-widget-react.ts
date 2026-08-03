@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 export { TreeWidget } from "./tree-widget-react/TreeWidget.js";
-export { createTreeWidget, TreeWidgetComponent } from "./tree-widget-react/components/TreeWidgetUiItemsProvider.js";
-export type { TreeDefinition } from "./tree-widget-react/components/TreeWidgetComponentImpl.js";
-export { SelectableTree } from "./tree-widget-react/components/tree-header/SelectableTree.js";
-export * from "./tree-widget-react/components/trees/index.js";
+export { createTreeWidget, TreeWidgetComponent } from "./tree-widget-react/TreeWidgetUiItemsProvider.js";
+export type { TreeDefinition } from "./tree-widget-react/TreeWidgetComponentImpl.js";
+export { SelectableTree } from "./tree-widget-react/tree-header/SelectableTree.js";
+export * from "./tree-widget-react/trees/index.js";
 
-export { LocalizationContextProvider, LOCALIZATION_NAMESPACES } from "./tree-widget-react/components/trees/common/components/LocalizationContext.js";
+export { LocalizationContextProvider, LOCALIZATION_NAMESPACES } from "./tree-widget-react/shared/components/LocalizationContext.js";
