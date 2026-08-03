@@ -14,7 +14,7 @@ export async function validateNodeVisibility({
   handler,
   expectations,
   validatedIds,
-}: ValidateNodeProps & { node: HierarchyNode; validatedIds?: Set<string> }) {
+}: ValidateNodeProps & { node: HierarchyNode; validatedIds: Set<string> }) {
   const actualVisibility = await handler.getVisibilityStatus(node);
 
   if (expectations === "all-hidden" || expectations === "all-visible") {
@@ -28,7 +28,7 @@ export async function validateNodeVisibility({
     ClassificationsTreeNode.isGeometricElementNode(node)
   ) {
     const { id } = node.key.instanceKeys[0];
-    validatedIds?.add(id);
+    validatedIds.add(id);
     if (expectations[id] === "disabled") {
       expect(actualVisibility.isDisabled, `Node, ${JSON.stringify(node)}`).toBe(true);
     } else {
