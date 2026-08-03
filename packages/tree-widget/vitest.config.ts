@@ -3,9 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { configDefaults, coverageConfigDefaults, defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import { playwright } from "@vitest/browser-playwright";
-import { configDefaults, coverageConfigDefaults, defineConfig } from "vitest/config";
 
 const logsToIgnore = ["CSS variable not found", "ECClass 'PresentationRules.Ruleset' does not exist or could not be loaded."];
 

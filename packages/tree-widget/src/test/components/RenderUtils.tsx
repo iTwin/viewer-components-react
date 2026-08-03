@@ -8,8 +8,8 @@ import { expect } from "vitest";
 import { render } from "vitest-browser-react";
 import { ThemeProvider } from "@itwin/itwinui-react";
 import { Root } from "@stratakit/foundations";
-import { LocalizationContextProvider } from "../../tree-widget-react/components/trees/common/components/LocalizationContext.js";
 import localeEn from "../../public/locales/en/TreeWidget.json" with { type: "json" };
+import { LocalizationContextProvider } from "../../tree-widget-react/components/trees/common/components/LocalizationContext.js";
 
 import type { PropsWithChildren, ReactNode } from "react";
 import type { Locator } from "vitest/browser";
