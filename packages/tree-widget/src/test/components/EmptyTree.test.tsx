@@ -5,12 +5,7 @@
 
 import { describe, it } from "vitest";
 import { page } from "vitest/browser";
-import {
-  EmptyTreeContent,
-  NoSearchMatches,
-  SearchUnknownError,
-  TooManySearchMatches,
-} from "../../tree-widget-react/shared/components/EmptyTree.js";
+import { EmptyTreeContent, NoSearchMatches, SearchUnknownError, TooManySearchMatches } from "../../tree-widget-react/shared/components/EmptyTree.js";
 import { COLOR_SCHEMES, renderWithTheme, validateSnapshot } from "./RenderUtils.js";
 
 COLOR_SCHEMES.forEach((colorScheme) => {
