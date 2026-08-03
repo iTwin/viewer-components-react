@@ -17,9 +17,9 @@
   position: sticky;
   left: 0;
   z-index: 1;
-  background-color: var(--iui-color-background);
+  background-color: var(--stratakit-color-bg-page-base);
   align-self: stretch;
-  padding-inline: 1px var(--iui-size-2xs);
+  padding-inline: 1px var(--stratakit-space-x1);
   margin-inline-end: 0;
   margin-block: 1px;
   display: flex;
@@ -28,7 +28,7 @@
 }
 
 [aria-selected="true"] .tw-tree-node-checkbox-container {
-  background-color: var(--iui-color-background-accent-muted);
+  background-color: var(--stratakit-color-bg-glow-on-surface-accent-pressed);
 }
 
 [aria-selected="true"]:focus-visible .tw-tree-node-checkbox-container,
@@ -38,6 +38,6 @@
 
 @media (any-hover: hover) {
   [aria-selected="false"]:hover .tw-tree-node-checkbox-container {
-    background-color: var(--iui-color-background-hover);
+    background-color: color-mix(in oklch, var(--stratakit-color-bg-page-base), var(--stratakit-color-glow-hue) 4%);
   }
 }

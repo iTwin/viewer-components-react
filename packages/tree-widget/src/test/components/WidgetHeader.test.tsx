@@ -5,10 +5,10 @@
 
 import { describe, it, vi } from "vitest";
 import { page } from "vitest/browser";
-import { WidgetHeader } from "../../tree-widget-react/components/tree-header/WidgetHeader.js";
+import { WidgetHeader } from "../../tree-widget-react/tree-header/WidgetHeader.js";
 import { COLOR_SCHEMES, renderWithTheme, validateSnapshot } from "./RenderUtils.js";
 
-import type { TreeContentDefinition } from "../../tree-widget-react/components/tree-header/WidgetHeader.js";
+import type { TreeContentDefinition } from "../../tree-widget-react/tree-header/WidgetHeader.js";
 
 const trees: TreeContentDefinition[] = [
   { id: "models", label: "Models", isSearchable: true, render: () => <div>Models tree</div> },

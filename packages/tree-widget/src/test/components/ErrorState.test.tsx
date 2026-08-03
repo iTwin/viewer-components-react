@@ -5,7 +5,7 @@
 
 import { describe, it, vi } from "vitest";
 import { page } from "vitest/browser";
-import { ErrorState } from "../../tree-widget-react/components/tree-header/ErrorState.js";
+import { ErrorState } from "../../tree-widget-react/tree-header/ErrorState.js";
 import { COLOR_SCHEMES, renderWithTheme, validateSnapshot } from "./RenderUtils.js";
 
 COLOR_SCHEMES.forEach((colorScheme) => {

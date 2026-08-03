@@ -5,7 +5,7 @@
 
 import { describe, it } from "vitest";
 import { page } from "vitest/browser";
-import { SkeletonTree } from "../../tree-widget-react/components/trees/common/components/SkeletonTree.js";
+import { SkeletonTree } from "../../tree-widget-react/shared/components/SkeletonTree.js";
 import { COLOR_SCHEMES, renderWithTheme, validateSnapshot } from "./RenderUtils.js";
 
 COLOR_SCHEMES.forEach((colorScheme) => {
