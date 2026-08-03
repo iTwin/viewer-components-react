@@ -19,19 +19,17 @@ COLOR_SCHEMES.forEach((colorScheme) => {
   describe(`[${colorScheme}] <WidgetHeader />`, () => {
     it("renders tree selector with search button", async () => {
       await page.viewport(400, 200);
-      const { locator } = await renderWithTheme(
-        <WidgetHeader defaultSelectedContentId="models" trees={trees} onSelect={vi.fn()} onSearch={vi.fn()} />,
-        { colorScheme },
-      );
+      const { locator } = await renderWithTheme(<WidgetHeader defaultSelectedContentId="models" trees={trees} onSelect={vi.fn()} onSearch={vi.fn()} />, {
+        colorScheme,
+      });
       await validateSnapshot(locator, { skipA11y: ["select-name"] });
     });
 
     it("renders search input when search is enabled", async () => {
       await page.viewport(400, 200);
-      const { locator } = await renderWithTheme(
-        <WidgetHeader defaultSelectedContentId="models" trees={trees} onSelect={vi.fn()} onSearch={vi.fn()} />,
-        { colorScheme },
-      );
+      const { locator } = await renderWithTheme(<WidgetHeader defaultSelectedContentId="models" trees={trees} onSelect={vi.fn()} onSearch={vi.fn()} />, {
+        colorScheme,
+      });
       await page.getByRole("button", { name: "Search the tree" }).click();
       await validateSnapshot(locator);
     });
