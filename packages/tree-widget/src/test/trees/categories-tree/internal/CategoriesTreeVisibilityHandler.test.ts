@@ -34,9 +34,9 @@ import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "../../.
 import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import { createCategoriesTreeVisibilityHandler } from "../../../../tree-widget-react/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.js";
 import { buildIModel } from "../../../IModelUtils.js";
+import { validateHierarchyVisibility } from "../../../shared/VisibilityValidation.js";
 import { TestUtils } from "../../../TestUtils.js";
 import { createIModelAccess } from "../../Common.js";
-import { validateHierarchyVisibility } from "../../common/VisibilityValidation.js";
 import { CLASS_NAME_DefinitionModel, createTreeWidgetTestingViewport, getDefaultSubCategoryId } from "../../TreeUtils.js";
 import {
   createCategoryHierarchyNode,
@@ -57,7 +57,7 @@ import type {
   CategoriesTreeHierarchyConfiguration,
   RequiredCategoriesTreeHierarchyConfiguration,
 } from "../../../../tree-widget-react/trees/categories-tree/CategoriesTreeDefinition.js";
-import type { VisibilityExpectations } from "../../common/VisibilityValidation.js";
+import type { VisibilityExpectations } from "../../../shared/VisibilityValidation.js";
 import type { TreeWidgetTestingViewport } from "../../TreeUtils.js";
 
 describe("CategoriesTreeVisibilityHandler", () => {

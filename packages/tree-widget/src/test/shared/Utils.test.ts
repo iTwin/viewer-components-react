@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { describe, expect, it } from "vitest";
-import { joinHierarchySearchTrees } from "../../../tree-widget-react/shared/Utils.js";
+import { joinHierarchySearchTrees } from "../../tree-widget-react/shared/Utils.js";
 
 import type { IModelInstanceKey } from "@itwin/presentation-hierarchies";
 

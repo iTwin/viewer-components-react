@@ -5,8 +5,8 @@
 
 import { beforeEach, describe, expect, it } from "vitest";
 import { createStorage } from "@itwin/unified-selection";
-import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../../tree-widget-react/shared/FocusedInstancesContext.js";
-import { act, createAsyncIterator, renderHook, waitFor } from "../../TestUtils.js";
+import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../tree-widget-react/shared/FocusedInstancesContext.js";
+import { act, createAsyncIterator, renderHook, waitFor } from "../TestUtils.js";
 
 import type { PropsWithChildren } from "react";
 import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";

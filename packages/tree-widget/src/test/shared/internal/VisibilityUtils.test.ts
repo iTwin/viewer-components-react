@@ -20,7 +20,7 @@ import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { createVisibilityStatus } from "../../../../tree-widget-react/shared/internal/Tooltip.js";
+import { createVisibilityStatus } from "../../../tree-widget-react/shared/internal/Tooltip.js";
 import {
   changeCategoryDisplay,
   changeElementStateNoChildrenOperator,
@@ -30,16 +30,16 @@ import {
   invertAllModels,
   mergeVisibilityStatuses,
   showAll,
-} from "../../../../tree-widget-react/shared/internal/VisibilityUtils.js";
-import { buildIModel } from "../../../IModelUtils.js";
-import { TestUtils } from "../../../TestUtils.js";
-import { createFakeViewport } from "../../Common.js";
-import { createTreeWidgetTestingViewport } from "../../TreeUtils.js";
+} from "../../../tree-widget-react/shared/internal/VisibilityUtils.js";
+import { buildIModel } from "../../IModelUtils.js";
+import { TestUtils } from "../../TestUtils.js";
+import { createFakeViewport } from "../../trees/Common.js";
+import { createTreeWidgetTestingViewport } from "../../trees/TreeUtils.js";
 
 import type { IModelDb } from "@itwin/core-backend";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { TreeWidgetTestingViewport } from "../../TreeUtils.js";
+import type { TreeWidgetTestingViewport } from "../../trees/TreeUtils.js";
 
 describe("VisibilityUtils", () => {
   beforeAll(async () => {

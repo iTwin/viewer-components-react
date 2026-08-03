@@ -5,14 +5,14 @@
 
 import { EMPTY, of, Subject } from "rxjs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { HierarchyVisibilityHandlerImpl } from "../../../../../tree-widget-react/shared/internal/hooks/UseCachedVisibility.js";
-import { createVisibilityStatus } from "../../../../../tree-widget-react/shared/internal/Tooltip.js";
-import { createFakeViewport } from "../../../Common.js";
+import { HierarchyVisibilityHandlerImpl } from "../../../../tree-widget-react/shared/internal/hooks/UseCachedVisibility.js";
+import { createVisibilityStatus } from "../../../../tree-widget-react/shared/internal/Tooltip.js";
+import { createFakeViewport } from "../../../trees/Common.js";
 
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
-import type { HierarchyVisibilityHandlerImplProps } from "../../../../../tree-widget-react/shared/internal/hooks/UseCachedVisibility.js";
-import type { TreeSpecificVisibilityHandler } from "../../../../../tree-widget-react/shared/internal/visibility/BaseVisibilityHelper.js";
-import type { VisibilityStatus } from "../../../../../tree-widget-react/shared/UseHierarchyVisibility.js";
+import type { HierarchyVisibilityHandlerImplProps } from "../../../../tree-widget-react/shared/internal/hooks/UseCachedVisibility.js";
+import type { TreeSpecificVisibilityHandler } from "../../../../tree-widget-react/shared/internal/visibility/BaseVisibilityHelper.js";
+import type { VisibilityStatus } from "../../../../tree-widget-react/shared/UseHierarchyVisibility.js";
 
 function createNode(props?: { instanceKeys?: Array<{ className: string; id: string }>; parentKeys?: HierarchyNode["parentKeys"] }): HierarchyNode {
   return {

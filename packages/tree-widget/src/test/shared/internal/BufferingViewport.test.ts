@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { describe, expect, it } from "vitest";
-import { BufferingViewport } from "../../../../tree-widget-react/shared/internal/BufferingViewport.js";
-import { createTreeWidgetTestingViewport } from "../../TreeUtils.js";
+import { BufferingViewport } from "../../../tree-widget-react/shared/internal/BufferingViewport.js";
+import { createTreeWidgetTestingViewport } from "../../trees/TreeUtils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { TreeWidgetViewport } from "../../../../tree-widget-react/shared/TreeWidgetViewport.js";
+import type { TreeWidgetViewport } from "../../../tree-widget-react/shared/TreeWidgetViewport.js";
 
 describe("BufferingViewport", () => {
   describe("models", () => {

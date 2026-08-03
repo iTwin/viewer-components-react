@@ -10,14 +10,14 @@ import {
   ALWAYS_NEVER_BUFFER_THRESHOLD,
   AlwaysAndNeverDrawnElementInfoCache,
   SET_CHANGE_DEBOUNCE_TIME,
-} from "../../../../tree-widget-react/shared/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
-import { createResolvablePromise } from "../../../TestUtils.js";
-import { createFakeViewport } from "../../Common.js";
+} from "../../../tree-widget-react/shared/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
+import { createResolvablePromise } from "../../TestUtils.js";
+import { createFakeViewport } from "../../trees/Common.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { QueryBinder } from "@itwin/core-common";
-import type { TreeWidgetViewport } from "../../../../tree-widget-react.js";
-import type { ElementPathSegment } from "../../../../tree-widget-react/shared/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
+import type { ElementPathSegment } from "../../../tree-widget-react/shared/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
+import type { TreeWidgetViewport } from "../../../tree-widget-react/shared/TreeWidgetViewport.js";
 
 describe("AlwaysAndNeverDrawnElementInfoCache", () => {
   beforeEach(() => {

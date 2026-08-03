@@ -21,10 +21,10 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { ChildElementsCache } from "../../../../tree-widget-react/shared/internal/caches/ChildElementsCache.js";
-import { CLASS_NAME_GeometricElement3d } from "../../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
-import { buildIModel } from "../../../IModelUtils.js";
-import { createFakeViewport } from "../../Common.js";
+import { ChildElementsCache } from "../../../tree-widget-react/shared/internal/caches/ChildElementsCache.js";
+import { CLASS_NAME_GeometricElement3d } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { buildIModel } from "../../IModelUtils.js";
+import { createFakeViewport } from "../../trees/Common.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 

@@ -8,7 +8,7 @@ import { ModelsTreeNodeInternal } from "../../../../tree-widget-react/trees/mode
 import { ModelsTreeNode } from "../../../../tree-widget-react/trees/models-tree/ModelsTreeNode.js";
 
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
-import type { ValidateNodeProps } from "../../common/VisibilityValidation.js";
+import type { ValidateNodeProps } from "../../../shared/VisibilityValidation.js";
 
 export async function validateNodeVisibility({
   node,

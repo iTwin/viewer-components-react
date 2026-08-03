@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { describe, expect, it, vi } from "vitest";
-import { createVisibilityChangeEventListener } from "../../../../tree-widget-react/shared/internal/VisibilityChangeEventListener.js";
-import { waitFor } from "../../../TestUtils.js";
-import { createFakeViewport } from "../../Common.js";
+import { createVisibilityChangeEventListener } from "../../../tree-widget-react/shared/internal/VisibilityChangeEventListener.js";
+import { waitFor } from "../../TestUtils.js";
+import { createFakeViewport } from "../../trees/Common.js";
 
 describe("VisibilityChangeEventListener", () => {
   it("raises event on `onAlwaysDrawnChanged` event", async () => {

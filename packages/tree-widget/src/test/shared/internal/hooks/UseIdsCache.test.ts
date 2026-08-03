@@ -5,8 +5,8 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BeEvent } from "@itwin/core-bentley";
-import { useIdsCache } from "../../../../../tree-widget-react/shared/internal/hooks/UseIdsCache.js";
-import { act, renderHook } from "../../../../TestUtils.js";
+import { useIdsCache } from "../../../../tree-widget-react/shared/internal/hooks/UseIdsCache.js";
+import { act, renderHook } from "../../../TestUtils.js";
 
 import type { BriefcaseConnection } from "@itwin/core-frontend";
 

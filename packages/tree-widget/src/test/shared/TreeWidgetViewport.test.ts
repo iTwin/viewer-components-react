@@ -16,8 +16,8 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { withEditTxn } from "@itwin/core-backend";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
-import { createTreeWidgetViewport } from "../../../tree-widget-react/shared/TreeWidgetViewport.js";
-import { buildIModel } from "../../IModelUtils.js";
+import { createTreeWidgetViewport } from "../../tree-widget-react/shared/TreeWidgetViewport.js";
+import { buildIModel } from "../IModelUtils.js";
 
 import type { Id64Array } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";

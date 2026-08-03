@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { describe, expect, it } from "vitest";
-import { createWhereClause, mergeWithDefaults, stableStringify } from "../../../../tree-widget-react/shared/internal/Utils.js";
+import { createWhereClause, mergeWithDefaults, stableStringify } from "../../../tree-widget-react/shared/internal/Utils.js";
 
 describe("Utils", () => {
   describe("createWhereClause", () => {

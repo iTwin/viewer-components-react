@@ -14,8 +14,8 @@ import { ClassificationsTreeIdsCache } from "../../../tree-widget-react/trees/cl
 import { createClassificationsTreeVisibilityHandler } from "../../../tree-widget-react/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHandler.js";
 import { buildIModel } from "../../IModelUtils.js";
 import { initializeITwinJs, terminateITwinJs } from "../../Initialize.js";
+import { validateHierarchyVisibility } from "../../shared/VisibilityValidation.js";
 import { createIModelAccess } from "../Common.js";
-import { validateHierarchyVisibility } from "../common/VisibilityValidation.js";
 import { createTreeWidgetTestingViewport } from "../TreeUtils.js";
 import { createClassificationHierarchyNode, createClassificationTableHierarchyNode, createPhysicalElementHierarchyNode } from "./HierarchyNodeUtils.js";
 import {

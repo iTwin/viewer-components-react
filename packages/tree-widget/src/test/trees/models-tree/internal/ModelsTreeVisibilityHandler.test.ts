@@ -38,9 +38,9 @@ import { ModelsTreeIdsCache } from "../../../../tree-widget-react/trees/models-t
 import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
 import { buildIModel, TestSchema } from "../../../IModelUtils.js";
+import { validateHierarchyVisibility } from "../../../shared/VisibilityValidation.js";
 import { TestUtils } from "../../../TestUtils.js";
 import { createFakeViewport, createIModelAccess } from "../../Common.js";
-import { validateHierarchyVisibility } from "../../common/VisibilityValidation.js";
 import { createTreeWidgetTestingViewport } from "../../TreeUtils.js";
 import {
   createCategoryHierarchyNode,
@@ -65,7 +65,7 @@ import type {
   ModelsTreeHierarchyConfiguration,
   RequiredModelsTreeHierarchyConfiguration,
 } from "../../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
-import type { VisibilityExpectations } from "../../common/VisibilityValidation.js";
+import type { VisibilityExpectations } from "../../../shared/VisibilityValidation.js";
 
 interface VisibilityOverrides {
   models?: Map<Id64String, Visibility>;

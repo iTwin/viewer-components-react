@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { EMPTY, expand, from, mergeMap, tap } from "rxjs";
-import { toVoidPromise } from "../../tree-widget-react/components/trees/common/internal/Rxjs.js";
+import { toVoidPromise } from "../../tree-widget-react/shared/internal/Rxjs.js";
 
 import type { HierarchyNode, HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { Visibility } from "../../tree-widget-react/shared/internal/Tooltip.js";

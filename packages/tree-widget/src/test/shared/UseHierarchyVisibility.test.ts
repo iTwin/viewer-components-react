@@ -5,12 +5,12 @@
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { BeEvent } from "@itwin/core-bentley";
-import { useHierarchyVisibility } from "../../../tree-widget-react/shared/UseHierarchyVisibility.js";
-import { TreeWidget } from "../../../tree-widget-react/TreeWidget.js";
-import { act, renderHook, waitFor } from "../../TestUtils.js";
-import { createTreeNode } from "../TreeUtils.js";
+import { useHierarchyVisibility } from "../../tree-widget-react/shared/UseHierarchyVisibility.js";
+import { TreeWidget } from "../../tree-widget-react/TreeWidget.js";
+import { act, renderHook, waitFor } from "../TestUtils.js";
+import { createTreeNode } from "../trees/TreeUtils.js";
 
-import type { HierarchyVisibilityHandler } from "../../../tree-widget-react/shared/UseHierarchyVisibility.js";
+import type { HierarchyVisibilityHandler } from "../../tree-widget-react/shared/UseHierarchyVisibility.js";
 
 type UseHierarchyVisibilityProps = Parameters<typeof useHierarchyVisibility>[0];
 
