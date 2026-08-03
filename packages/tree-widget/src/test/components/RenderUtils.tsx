@@ -42,7 +42,9 @@ function createWrapper(colorScheme: ColorScheme) {
   return function Wrapper({ children }: PropsWithChildren<unknown>) {
     return (
       <Root colorScheme={colorScheme} density="dense">
-        <LocalizationContextProvider localization={localization}>{children}</LocalizationContextProvider>
+        <div style={{ width: "100vw", height: "100vh" }}>
+          <LocalizationContextProvider localization={localization}>{children}</LocalizationContextProvider>
+        </div>
       </Root>
     );
   };

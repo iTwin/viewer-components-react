@@ -12,14 +12,7 @@ COLOR_SCHEMES.forEach((colorScheme) => {
   describe(`[${colorScheme}] <SkeletonTree />`, () => {
     it("renders skeleton rows", async () => {
       await page.viewport(300, 320);
-      const { locator } = await renderWithTheme(
-        <div className="tw-content">
-          <div className="tw-content-wrapper">
-            <SkeletonTree />
-          </div>
-        </div>,
-        { colorScheme },
-      );
+      const { locator } = await renderWithTheme(<SkeletonTree />, { colorScheme });
       await validateSnapshot(locator);
     });
   });

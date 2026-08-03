@@ -20,9 +20,7 @@ COLOR_SCHEMES.forEach((colorScheme) => {
     it("renders tree selector with search button", async () => {
       await page.viewport(400, 200);
       const { locator } = await renderWithTheme(
-        <div className="tw-content">
-          <WidgetHeader defaultSelectedContentId="models" trees={trees} onSelect={vi.fn()} onSearch={vi.fn()} />
-        </div>,
+        <WidgetHeader defaultSelectedContentId="models" trees={trees} onSelect={vi.fn()} onSearch={vi.fn()} />,
         { colorScheme },
       );
       await validateSnapshot(locator, { skipA11y: ["select-name"] });
@@ -31,9 +29,7 @@ COLOR_SCHEMES.forEach((colorScheme) => {
     it("renders search input when search is enabled", async () => {
       await page.viewport(400, 200);
       const { locator } = await renderWithTheme(
-        <div className="tw-content">
-          <WidgetHeader defaultSelectedContentId="models" trees={trees} onSelect={vi.fn()} onSearch={vi.fn()} />
-        </div>,
+        <WidgetHeader defaultSelectedContentId="models" trees={trees} onSelect={vi.fn()} onSearch={vi.fn()} />,
         { colorScheme },
       );
       await page.getByRole("button", { name: "Search the tree" }).click();
@@ -44,9 +40,7 @@ COLOR_SCHEMES.forEach((colorScheme) => {
       await page.viewport(400, 200);
       const loadingTrees: TreeContentDefinition[] = [{ id: "loading", label: "", render: () => null }];
       const { locator } = await renderWithTheme(
-        <div className="tw-content">
-          <WidgetHeader defaultSelectedContentId="loading" trees={loadingTrees} onSelect={vi.fn()} onSearch={vi.fn()} />
-        </div>,
+        <WidgetHeader defaultSelectedContentId="loading" trees={loadingTrees} onSelect={vi.fn()} onSearch={vi.fn()} />,
         { colorScheme },
       );
       await validateSnapshot(locator);

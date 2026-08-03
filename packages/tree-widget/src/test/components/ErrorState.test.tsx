@@ -12,12 +12,7 @@ COLOR_SCHEMES.forEach((colorScheme) => {
   describe(`[${colorScheme}] <ErrorState />`, () => {
     it("renders error message with retry button", async () => {
       await page.viewport(300, 200);
-      const { locator } = await renderWithTheme(
-        <div style={{ width: 300, height: 200 }}>
-          <ErrorState error={new Error("Something went wrong")} resetErrorBoundary={vi.fn()} />
-        </div>,
-        { colorScheme },
-      );
+      const { locator } = await renderWithTheme(<ErrorState error={new Error("Something went wrong")} resetErrorBoundary={vi.fn()} />, { colorScheme });
       await validateSnapshot(locator);
     });
   });
