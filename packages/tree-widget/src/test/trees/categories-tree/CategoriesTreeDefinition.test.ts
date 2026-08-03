@@ -24,13 +24,10 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import {
-  CategoriesTreeDefinition,
-  defaultHierarchyConfiguration,
-} from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
-import { CategoriesTreeIdsCache } from "../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
-import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
-import { getClassesByView, mergeWithDefaults } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
+import { BaseIdsCache } from "../../../tree-widget-react/shared/internal/caches/BaseIdsCache.js";
+import { getClassesByView, mergeWithDefaults } from "../../../tree-widget-react/shared/internal/Utils.js";
+import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "../../../tree-widget-react/trees/categories-tree/CategoriesTreeDefinition.js";
+import { CategoriesTreeIdsCache } from "../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import { buildIModel, TestSchema } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
@@ -40,7 +37,7 @@ import { getInsertFunctionByViewType } from "./internal/Utils.js";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { EC } from "@itwin/presentation-shared";
-import type { CategoriesTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
+import type { CategoriesTreeHierarchyConfiguration } from "../../../tree-widget-react/trees/categories-tree/CategoriesTreeDefinition.js";
 
 describe("Categories tree", () => {
   describe("Hierarchy definition", () => {

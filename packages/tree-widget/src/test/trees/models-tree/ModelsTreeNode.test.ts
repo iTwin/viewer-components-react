@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { describe, expect, it } from "vitest";
-import { CLASS_NAME_GeometricElement3d } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
-import { ModelsTreeNode } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeNode.js";
+import { CLASS_NAME_GeometricElement3d } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { ModelsTreeNode } from "../../../tree-widget-react/trees/models-tree/ModelsTreeNode.js";
 
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 

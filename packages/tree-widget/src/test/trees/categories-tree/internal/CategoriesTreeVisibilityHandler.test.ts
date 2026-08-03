@@ -23,19 +23,16 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import {
-  CategoriesTreeDefinition,
-  defaultHierarchyConfiguration,
-} from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
-import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
-import { createCategoriesTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.js";
-import { BaseIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
+import { BaseIdsCache } from "../../../../tree-widget-react/shared/internal/caches/BaseIdsCache.js";
 import {
   CLASS_NAME_GeometricElement3d,
   CLASS_NAME_SubCategory,
   CLASS_NAME_Subject,
-} from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
-import { getClassesByView, mergeWithDefaults } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
+} from "../../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { getClassesByView, mergeWithDefaults } from "../../../../tree-widget-react/shared/internal/Utils.js";
+import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "../../../../tree-widget-react/trees/categories-tree/CategoriesTreeDefinition.js";
+import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
+import { createCategoriesTreeVisibilityHandler } from "../../../../tree-widget-react/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.js";
 import { buildIModel } from "../../../IModelUtils.js";
 import { TestUtils } from "../../../TestUtils.js";
 import { createIModelAccess } from "../../Common.js";
@@ -59,7 +56,7 @@ import type { InstanceKey, Props } from "@itwin/presentation-shared";
 import type {
   CategoriesTreeHierarchyConfiguration,
   RequiredCategoriesTreeHierarchyConfiguration,
-} from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
+} from "../../../../tree-widget-react/trees/categories-tree/CategoriesTreeDefinition.js";
 import type { VisibilityExpectations } from "../../common/VisibilityValidation.js";
 import type { TreeWidgetTestingViewport } from "../../TreeUtils.js";
 

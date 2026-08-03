@@ -1,0 +1,168 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
+import {
+  HierarchyCacheMode,
+  initializeCore,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
+  insertSpatialCategory,
+  insertSubCategory,
+  terminateCore,
+} from "test-utilities";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { withEditTxn } from "@itwin/core-backend";
+import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
+import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
+import { createTreeWidgetViewport } from "../../../tree-widget-react/shared/TreeWidgetViewport.js";
+import { buildIModel } from "../../IModelUtils.js";
+
+import type { Id64Array } from "@itwin/core-bentley";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+
+describe("TreeWidgetViewport", () => {
+  const listeners = new Array<() => void>();
+  beforeAll(async () => {
+    await initializeCore({
+      backendProps: {
+        caching: {
+          hierarchies: {
+            // eslint-disable-next-line @typescript-eslint/no-deprecated
+            mode: HierarchyCacheMode.Memory,
+          },
+        },
+      },
+    });
+  });
+
+  afterAll(async () => {
+    await terminateCore();
+    listeners.forEach((listener) => listener());
+  });
+
+  it("triggers onChange events when visibility changes", async () => {
+    await using buildIModelResult = await buildIModel(async (imodel) =>
+      withEditTxn(imodel, (txn) => {
+        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "TestPhysicalModel" });
+
+        const category = insertSpatialCategory({ txn, codeValue: "SpatialCategory1" });
+        const element = insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: category.id });
+        const subCategory = insertSubCategory({
+          txn,
+          parentCategoryId: category.id,
+          codeValue: "subCategory",
+        });
+        return { category, model: physicalModel, subCategory, element };
+      }),
+    );
+
+    const { imodelConnection, ...keys } = buildIModelResult;
+
+    using viewport = await createViewport({
+      iModelConnection: imodelConnection,
+      testData: {
+        models: [keys.model.id],
+        categories: [keys.category.id],
+      },
+    });
+    const treeWidgetViewport = createTreeWidgetViewport(viewport);
+    const onChangeListener = vi.fn();
+    listeners.push(treeWidgetViewport.onAlwaysDrawnChanged.addListener(() => onChangeListener("always")));
+    listeners.push(treeWidgetViewport.onDisplayStyleChanged.addListener(() => onChangeListener("displayStyle")));
+    listeners.push(treeWidgetViewport.onDisplayedCategoriesChanged.addListener(() => onChangeListener("categories")));
+    listeners.push(treeWidgetViewport.onDisplayedModelsChanged.addListener(() => onChangeListener("models")));
+    listeners.push(treeWidgetViewport.onNeverDrawnChanged.addListener(() => onChangeListener("never")));
+    listeners.push(treeWidgetViewport.onPerModelCategoriesOverridesChanged.addListener(() => onChangeListener("override")));
+
+    treeWidgetViewport.changeCategoryDisplay({ categoryIds: keys.category.id, display: false });
+    viewport.renderFrame();
+    expect(onChangeListener).toHaveBeenCalledWith("categories");
+    vi.clearAllMocks();
+
+    treeWidgetViewport.changeModelDisplay({ modelIds: keys.model.id, display: false });
+    viewport.renderFrame();
+    expect(onChangeListener).toHaveBeenCalledWith("models");
+    vi.clearAllMocks();
+
+    treeWidgetViewport.changeSubCategoryDisplay({ subCategoryId: keys.subCategory.id, display: false });
+    viewport.renderFrame();
+    expect(onChangeListener).toHaveBeenCalledWith("displayStyle");
+    vi.clearAllMocks();
+
+    treeWidgetViewport.setAlwaysDrawn({ elementIds: new Set([keys.element.id]) });
+    viewport.renderFrame();
+    expect(onChangeListener).toHaveBeenCalledWith("always");
+    vi.clearAllMocks();
+
+    treeWidgetViewport.setNeverDrawn({ elementIds: new Set([keys.element.id]) });
+    viewport.renderFrame();
+    expect(onChangeListener).toHaveBeenCalledWith("never");
+    vi.clearAllMocks();
+
+    treeWidgetViewport.setPerModelCategoryOverride({ categoryIds: keys.category.id, modelIds: keys.model.id, override: "show" });
+    viewport.renderFrame();
+    expect(onChangeListener).toHaveBeenCalledWith("override");
+    vi.clearAllMocks();
+  });
+});
+
+async function createViewport({
+  iModelConnection,
+  testData,
+}: {
+  iModelConnection: IModelConnection;
+  testData: {
+    categories: Id64Array;
+    models: Id64Array;
+  };
+}): Promise<Viewport> {
+  const model = IModel.dictionaryId;
+  const viewState = SpatialViewState.createFromProps(
+    {
+      categorySelectorProps: {
+        categories: testData.categories,
+        model,
+        code: Code.createEmpty(),
+        classFullName: "BisCore:CategorySelector",
+      },
+      displayStyleProps: { model, code: Code.createEmpty(), classFullName: "BisCore:DisplayStyle3d" },
+      viewDefinitionProps: {
+        model,
+        code: Code.createEmpty(),
+        categorySelectorId: "",
+        classFullName: "BisCore:SpatialViewDefinition",
+        displayStyleId: "",
+      },
+      modelSelectorProps: {
+        models: testData.models,
+        code: Code.createEmpty(),
+        model,
+        classFullName: "BisCore:ModelSelector",
+      },
+    },
+    iModelConnection,
+  );
+
+  viewState.setAllow3dManipulations(true);
+
+  viewState.displayStyle.backgroundColor = ColorDef.white;
+  const flags = viewState.viewFlags.copy({
+    grid: false,
+    renderMode: RenderMode.SmoothShade,
+    backgroundMap: false,
+  });
+  viewState.displayStyle.viewFlags = flags;
+
+  IModelApp.viewManager.onViewOpen.addOnce((vp) => {
+    if (vp.view.hasSameCoordinates(viewState)) {
+      vp.applyViewState(viewState);
+    }
+  });
+  await viewState.load();
+  return OffScreenViewport.create({
+    view: viewState,
+    viewRect: new ViewRect(),
+  });
+}

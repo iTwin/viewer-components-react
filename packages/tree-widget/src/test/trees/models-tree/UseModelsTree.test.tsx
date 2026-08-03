@@ -18,9 +18,9 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createStorage } from "@itwin/unified-selection";
-import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../../tree-widget-react/components/trees/common/FocusedInstancesContext.js";
-import { SharedTreeContextProviderInternal } from "../../../tree-widget-react/components/trees/common/internal/SharedTreeContextProviderInternal.js";
-import { useModelsTree } from "../../../tree-widget-react/components/trees/models-tree/UseModelsTree.js";
+import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../../tree-widget-react/shared/FocusedInstancesContext.js";
+import { SharedTreeContextProviderInternal } from "../../../tree-widget-react/shared/internal/SharedTreeContextProviderInternal.js";
+import { useModelsTree } from "../../../tree-widget-react/trees/models-tree/UseModelsTree.js";
 import { TreeWidget } from "../../../tree-widget-react/TreeWidget.js";
 import { buildIModel } from "../../IModelUtils.js";
 import { act, renderHook, waitFor } from "../../TestUtils.js";
@@ -33,7 +33,7 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { SelectionStorage } from "@itwin/unified-selection";
-import type { UseModelsTreeProps } from "../../../tree-widget-react/components/trees/models-tree/UseModelsTree.js";
+import type { UseModelsTreeProps } from "../../../tree-widget-react/trees/models-tree/UseModelsTree.js";
 import type { TreeWidgetTestingViewport } from "../TreeUtils.js";
 
 describe("useModelsTree", () => {

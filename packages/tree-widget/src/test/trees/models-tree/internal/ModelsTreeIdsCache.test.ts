@@ -7,9 +7,9 @@ import { firstValueFrom } from "rxjs";
 import { describe, expect, it, vi } from "vitest";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { BaseIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
-import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
-import { defaultHierarchyConfiguration } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
+import { BaseIdsCache } from "../../../../tree-widget-react/shared/internal/caches/BaseIdsCache.js";
+import { ModelsTreeIdsCache } from "../../../../tree-widget-react/trees/models-tree/internal/ModelsTreeIdsCache.js";
+import { defaultHierarchyConfiguration } from "../../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelMock } from "../../Common.js";
 
 describe("ModelsTreeIdsCache", () => {

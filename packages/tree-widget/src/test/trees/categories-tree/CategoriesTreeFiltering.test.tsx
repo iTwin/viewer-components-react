@@ -25,13 +25,10 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { act, renderHook } from "@testing-library/react";
-import { useCategoriesTree } from "../../../tree-widget-react/components/trees/categories-tree/UseCategoriesTree.js";
-import {
-  CLASS_NAME_GeometricElement2d,
-  CLASS_NAME_GeometricElement3d,
-} from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
-import { getClassesByView } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
-import { SharedTreeContextProvider } from "../../../tree-widget-react/components/trees/common/SharedTreeContextProvider.js";
+import { CLASS_NAME_GeometricElement2d, CLASS_NAME_GeometricElement3d } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { getClassesByView } from "../../../tree-widget-react/shared/internal/Utils.js";
+import { SharedTreeContextProvider } from "../../../tree-widget-react/shared/SharedTreeContextProvider.js";
+import { useCategoriesTree } from "../../../tree-widget-react/trees/categories-tree/UseCategoriesTree.js";
 import { buildIModel } from "../../IModelUtils.js";
 import { createFakeViewport, createIModelAccess } from "../Common.js";
 import { CLASS_NAME_DefinitionModel } from "../TreeUtils.js";
@@ -39,7 +36,7 @@ import { getInsertFunctionByViewType } from "./internal/Utils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { EC, Props } from "@itwin/presentation-shared";
-import type { CategoryInfo } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeButtons.js";
+import type { CategoryInfo } from "../../../tree-widget-react/trees/categories-tree/CategoriesTreeButtons.js";
 
 // cspell:words egory
 // cspell complains about Cat_egory and Cat%egory

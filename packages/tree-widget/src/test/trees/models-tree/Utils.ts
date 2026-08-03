@@ -7,17 +7,17 @@ import { concatMap, EMPTY, expand, from, of, toArray } from "rxjs";
 import { vi } from "vitest";
 import { Id64 } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { BaseIdsCache } from "../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
+import { BaseIdsCache } from "../../../tree-widget-react/shared/internal/caches/BaseIdsCache.js";
 import {
   CLASS_NAME_Element,
   CLASS_NAME_GeometricElement3d,
   CLASS_NAME_Model,
   CLASS_NAME_SpatialCategory,
   CLASS_NAME_Subject,
-} from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
-import { mergeWithDefaults } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
-import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
-import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
+} from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { mergeWithDefaults } from "../../../tree-widget-react/shared/internal/Utils.js";
+import { ModelsTreeIdsCache } from "../../../tree-widget-react/trees/models-tree/internal/ModelsTreeIdsCache.js";
+import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelAccess } from "../Common.js";
 
 import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
@@ -30,8 +30,8 @@ import type {
   NonGroupingHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import type { EC, InstanceKey } from "@itwin/presentation-shared";
-import type { ParentElementsPath } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
-import type { ModelsTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
+import type { ParentElementsPath } from "../../../tree-widget-react/shared/internal/Utils.js";
+import type { ModelsTreeHierarchyConfiguration } from "../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
 
 interface CreateModelsTreeProviderProps {
   imodelConnection: IModelConnection;

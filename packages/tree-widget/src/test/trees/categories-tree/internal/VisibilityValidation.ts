@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "vitest";
-import { CategoriesTreeNode } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeNode.js";
-import { CategoriesTreeNodeInternal } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeNodeInternal.js";
+import { CategoriesTreeNode } from "../../../../tree-widget-react/trees/categories-tree/CategoriesTreeNode.js";
+import { CategoriesTreeNodeInternal } from "../../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeNodeInternal.js";
 
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ValidateNodeProps } from "../../common/VisibilityValidation.js";

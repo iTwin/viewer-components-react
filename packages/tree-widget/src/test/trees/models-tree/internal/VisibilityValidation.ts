@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "vitest";
-import { ModelsTreeNodeInternal } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeNodeInternal.js";
-import { ModelsTreeNode } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeNode.js";
+import { ModelsTreeNodeInternal } from "../../../../tree-widget-react/trees/models-tree/internal/ModelsTreeNodeInternal.js";
+import { ModelsTreeNode } from "../../../../tree-widget-react/trees/models-tree/ModelsTreeNode.js";
 
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ValidateNodeProps } from "../../common/VisibilityValidation.js";
