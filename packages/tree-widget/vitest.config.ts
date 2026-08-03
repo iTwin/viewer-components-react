@@ -29,10 +29,6 @@ export default defineConfig({
           testTimeout: 60000,
           server: {
             deps: {
-              // Dependencies that need to be transformed by Vite (instead of being externalized and run through Node) so
-              // that their raw `.svg`/`.css` asset imports resolve. `@stratakit/mui` (transitive via
-              // `@itwin/presentation-hierarchies-react`) imports `.svg` icons from `@stratakit/icons`, which fail with
-              // "Unknown file extension .svg" unless the whole chain is inlined.
               inline: [
                 "@stratakit/foundations",
                 "@stratakit/icons",
