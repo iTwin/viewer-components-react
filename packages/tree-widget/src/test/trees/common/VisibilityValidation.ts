@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { EMPTY, expand, from, map, mergeMap, takeLast } from "rxjs";
+import { EMPTY, expand, from, mergeMap, tap } from "rxjs";
 import { toVoidPromise } from "../../../tree-widget-react/components/trees/common/internal/Rxjs.js";
 
 import type { HierarchyNode, HierarchyProvider } from "@itwin/presentation-hierarchies";
@@ -37,15 +37,16 @@ export async function validateHierarchyVisibility({
     from(provider.getNodes({ parentNode: undefined })).pipe(
       expand((node) => (node.children ? provider.getNodes({ parentNode: node }) : EMPTY)),
       mergeMap(async (node) => validateNodeVisibility({ ...props, node, validatedIds })),
-      takeLast(1),
-      map(() => {
-        if (props.expectations === "all-hidden" || props.expectations === "all-visible") {
-          return;
-        }
-        const unnecessaryExpectations = Object.keys(props.expectations).filter((id) => !validatedIds.has(id));
-        if (unnecessaryExpectations.length > 0) {
-          throw new Error(`Too many expectations provided, unused ids: ${unnecessaryExpectations.join(", ")}`);
-        }
+      tap({
+        complete: () => {
+          if (props.expectations === "all-hidden" || props.expectations === "all-visible") {
+            return;
+          }
+          const unnecessaryExpectations = Object.keys(props.expectations).filter((id) => !validatedIds.has(id));
+          if (unnecessaryExpectations.length > 0) {
+            throw new Error(`Too many expectations provided, unused ids: ${unnecessaryExpectations.join(", ")}`);
+          }
+        },
       }),
     ),
   );

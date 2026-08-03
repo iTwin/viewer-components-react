@@ -91,16 +91,18 @@ describe("CategoriesTreeVisibilityHandler", () => {
     hierarchyConfig,
     subCategoriesOfCategories,
     visibleByDefault,
+    viewType,
   }: {
     imodelConnection: IModelConnection;
     hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
     subCategoriesOfCategories?: Array<{ categoryId: Id64String; subCategories: Id64Arg }>;
     visibleByDefault?: boolean;
+    viewType: "2d" | "3d";
   }) {
     const imodelAccess = createIModelAccess(imodelConnection);
-    const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
-    const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-    const viewport = createTreeWidgetTestingViewport({ iModel: imodelConnection, subCategoriesOfCategories, viewType: "3d", visibleByDefault });
+    const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+    const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
+    const viewport = createTreeWidgetTestingViewport({ iModel: imodelConnection, subCategoriesOfCategories, viewType, visibleByDefault });
 
     return {
       imodelAccess,
@@ -116,9 +118,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
     imodelAccess: ReturnType<typeof createIModelAccess>;
     searchPaths?: HierarchySearchTree[];
     hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
+    viewType?: "2d" | "3d";
   }) {
     return createIModelHierarchyProvider({
-      hierarchyDefinition: new CategoriesTreeDefinition({ ...props, viewType: "3d" }),
+      hierarchyDefinition: new CategoriesTreeDefinition({ ...props, viewType: props.viewType ?? "3d" }),
       imodelAccess: props.imodelAccess,
       ...(props.searchPaths ? { search: { paths: props.searchPaths } } : undefined),
     });
@@ -128,18 +131,20 @@ describe("CategoriesTreeVisibilityHandler", () => {
     imodelConnection,
     subCategoriesOfCategories,
     visibleByDefault,
+    viewType,
     ...restProps
   }: {
     imodelConnection: IModelConnection;
     hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
     subCategoriesOfCategories?: Array<{ categoryId: Id64String; subCategories: Id64Arg }>;
     visibleByDefault?: boolean;
+    viewType?: "2d" | "3d";
   }) {
     const hierarchyConfig = mergeWithDefaults({
       defaults: defaultHierarchyConfiguration,
       overrides: restProps.hierarchyConfig,
     });
-    const commonProps = await createCommonProps({ imodelConnection, hierarchyConfig, subCategoriesOfCategories, visibleByDefault });
+    const commonProps = await createCommonProps({ imodelConnection, hierarchyConfig, subCategoriesOfCategories, visibleByDefault, viewType: viewType ?? "3d" });
     const handler = createCategoriesTreeVisibilityHandler({
       viewport: commonProps.viewport,
       idsCache: commonProps.idsCache,
@@ -147,7 +152,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       searchPaths: undefined,
       hierarchyConfig,
     });
-    const provider = createProvider({ ...commonProps, hierarchyConfig });
+    const provider = createProvider({ ...commonProps, hierarchyConfig, viewType });
 
     return {
       handler,
@@ -1960,6 +1965,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             visibilityTestData = await createVisibilityTestData({
               imodelConnection: buildIModelResult.imodelConnection,
               hierarchyConfig: { elements: { nodes: "include" } },
+              viewType,
             });
           });
 
@@ -2093,6 +2099,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             visibilityTestData = await createVisibilityTestData({
               imodelConnection: buildIModelResult.imodelConnection,
               hierarchyConfig: { elements: { nodes: "include" } },
+              viewType,
             });
           });
 
@@ -3357,6 +3364,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               imodelConnection: buildIModelResult.imodelConnection,
               hierarchyConfig: { elements: { nodes: "include" } },
               visibleByDefault: true,
+              viewType,
             });
           });
 
@@ -3491,6 +3499,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               imodelConnection: buildIModelResult.imodelConnection,
               hierarchyConfig: { elements: { nodes: "include" } },
               visibleByDefault: true,
+              viewType,
             });
           });
 
@@ -3705,8 +3714,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         viewport,
         hierarchyConfig,
       });
-      const defaultProvider = createProvider({ idsCache, imodelAccess, hierarchyConfig });
-      const providerWithSearchPaths = createProvider({ idsCache, imodelAccess, searchPaths, hierarchyConfig });
+      const defaultProvider = createProvider({ idsCache, imodelAccess, hierarchyConfig, viewType: view });
+      const providerWithSearchPaths = createProvider({ idsCache, imodelAccess, searchPaths, hierarchyConfig, viewType: view });
       return {
         defaultVisibilityHandler,
         visibilityHandlerWithSearchPaths,
