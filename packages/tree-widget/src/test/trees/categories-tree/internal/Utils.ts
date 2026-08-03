@@ -17,16 +17,16 @@ import {
   CLASS_NAME_DefinitionContainer,
   CLASS_NAME_Element,
   CLASS_NAME_SubCategory,
-} from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
-import { getClassesByView } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
+} from "../../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { getClassesByView } from "../../../../tree-widget-react/shared/internal/Utils.js";
 import { TestSchema } from "../../../IModelUtils.js";
 
 import type { EditTxn } from "@itwin/core-backend";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, GroupingHierarchyNode, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { EC, InstanceKey } from "@itwin/presentation-shared";
-import type { ElementId, ModelId } from "../../../../tree-widget-react/components/trees/common/internal/Types.js";
-import type { ParentElementsPath } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
+import type { ElementId, ModelId } from "../../../../tree-widget-react/shared/internal/Types.js";
+import type { ParentElementsPath } from "../../../../tree-widget-react/shared/internal/Utils.js";
 
 /** @internal */
 export function createCategoryHierarchyNode(props: {

@@ -1,0 +1,66 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
+import { useEffect, useState } from "react";
+import { IconButton, TextBox } from "@stratakit/bricks";
+import dismissSvg from "@stratakit/icons/dismiss.svg";
+import searchSvg from "@stratakit/icons/search.svg";
+import { useTranslation } from "../shared/components/LocalizationContext.js";
+import { useLatest } from "../shared/internal/hooks/UseLatest.js";
+
+interface DebouncedSearchBoxProps {
+  isOpened: boolean;
+  setIsOpened: (value: boolean) => void;
+  onSearch: (value?: string) => void;
+  delay: number;
+  className?: string;
+}
+
+/** @internal */
+export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, className }: DebouncedSearchBoxProps) {
+  const translate = useTranslation();
+  const [inputValue, setInputValue] = useState<string | undefined>(undefined);
+  // save latest `onChange` reference into `useRef` to avoid restarting timeout when `onChange` reference changes.
+  const onChangeRef = useLatest(onSearch);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      onChangeRef.current(inputValue);
+    }, delay);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [inputValue, delay, onChangeRef]);
+
+  return !isOpened ? (
+    <IconButton
+      className={"tw-search-box-button"}
+      variant={"ghost"}
+      label={translate("header.searchBox.searchForSomething")}
+      icon={searchSvg}
+      onClick={() => {
+        setIsOpened(true);
+        setInputValue("");
+      }}
+    />
+  ) : (
+    <>
+      <TextBox.Root className={className}>
+        <TextBox.Input type={"text"} onChange={(e) => setInputValue(e.currentTarget.value)} placeholder={translate("header.searchBox.search")} />
+      </TextBox.Root>
+      <IconButton
+        className={"tw-search-box-button"}
+        variant={"ghost"}
+        label={translate("header.searchBox.close")}
+        icon={dismissSvg}
+        onClick={() => {
+          setIsOpened(false);
+          setInputValue(undefined);
+        }}
+      />
+    </>
+  );
+}

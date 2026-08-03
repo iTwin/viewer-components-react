@@ -15,7 +15,7 @@ import type { QueryBinder, QueryOptions } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, ECSchemaProvider } from "@itwin/presentation-shared";
-import type { TreeWidgetViewport } from "../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
+import type { TreeWidgetViewport } from "../../tree-widget-react/shared/TreeWidgetViewport.js";
 import type { TreeWidgetTestingViewport } from "./TreeUtils.js";
 
 type QueryHandler = (query: string, params?: QueryBinder, config?: QueryOptions) => any[] | Promise<any[]>;

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { describe, expect, it } from "vitest";
-import { ClassificationsTreeNode } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeNode.js";
+import { ClassificationsTreeNode } from "../../../tree-widget-react/trees/classifications-tree/ClassificationsTreeNode.js";
 
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 

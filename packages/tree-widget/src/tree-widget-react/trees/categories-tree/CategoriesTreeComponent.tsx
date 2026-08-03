@@ -1,0 +1,152 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
+import { Fragment } from "react";
+import { useActiveIModelConnection } from "@itwin/appui-react";
+import { Skeleton } from "@stratakit/bricks";
+import { useActiveTreeWidgetViewport } from "../../shared/internal/hooks/UseActiveTreeWidgetViewport.js";
+import { SharedTreeContextProviderInternal, useSharedTreeContextInternal } from "../../shared/internal/SharedTreeContextProviderInternal.js";
+import { getClassesByView } from "../../shared/internal/Utils.js";
+import { TelemetryContextProvider } from "../../shared/UseTelemetryContext.js";
+import { SelectableTree } from "../../tree-header/SelectableTree.js";
+import { CategoriesTree } from "./CategoriesTree.js";
+import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonProps } from "./CategoriesTreeButtons.js";
+
+import type { ReactNode } from "react";
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { TreeWidgetViewport } from "../../shared/TreeWidgetViewport.js";
+import type { StandardTreeLabels } from "../../TreeWidgetComponentImpl.js";
+import type { CategoriesTreeProps } from "./CategoriesTree.js";
+import type { CategoriesTreeHeaderButtonProps, CategoriesTreeHeaderButtonType } from "./CategoriesTreeButtons.js";
+
+/** @public */
+interface CategoriesTreeComponentProps extends Pick<
+  CategoriesTreeProps,
+  | "selectionStorage"
+  | "hierarchyLevelConfig"
+  | "selectionMode"
+  | "searchText"
+  | "emptyTreeContent"
+  | "getInlineActions"
+  | "getMenuActions"
+  | "getContextMenuActions"
+  | "getTreeItemProps"
+  | "hierarchyConfig"
+  | "treeLabel"
+> {
+  /**
+   * Renderers of header buttons. Defaults to:
+   * ```ts
+   * [
+   *   CategoriesTreeComponent.ShowAllButton,
+   *   CategoriesTreeComponent.HideAllButton,
+   *   CategoriesTreeComponent.InvertAllButton,
+   * ]
+   * ```
+   */
+  headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
+  /**
+   * Viewport used for visibility controls.
+   *
+   * When viewport is not provided, `IModelApp.viewManager.selectedView` will be used.
+   */
+  viewport?: TreeWidgetViewport;
+  onPerformanceMeasured?: (featureId: string, duration: number) => void;
+  onFeatureUsed?: (feature: string) => void;
+}
+
+/**
+ * A component that renders `CategoriesTree` and a header with search capabilities and header buttons.
+ *
+ * **Note:** Wrap tree components with a single `SharedTreeContextProvider` to improve trees' performance.`
+ * @public
+ */
+export const CategoriesTreeComponent = (props: CategoriesTreeComponentProps) => {
+  const iModel = useActiveIModelConnection();
+  const viewport = useActiveTreeWidgetViewport({ treeWidgetViewport: props.viewport });
+
+  if (!iModel || !viewport) {
+    return null;
+  }
+
+  return (
+    <SharedTreeContextProviderInternal showWarning={true}>
+      <CategoriesTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />
+    </SharedTreeContextProviderInternal>
+  );
+};
+
+/**
+ * Renders a "Show all" button that enables display of all categories and their subcategories.
+ * @public
+ */
+CategoriesTreeComponent.ShowAllButton = ShowAllButton as CategoriesTreeHeaderButtonType;
+
+/**
+ * Renders a "Hide all" button that disables display of all categories.
+ * @public
+ */
+CategoriesTreeComponent.HideAllButton = HideAllButton as CategoriesTreeHeaderButtonType;
+
+/**
+ * Renders an "Invert all" button that inverts display of all categories.
+ * @public
+ */
+CategoriesTreeComponent.InvertAllButton = InvertAllButton as CategoriesTreeHeaderButtonType;
+
+/**
+ * Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
+ * @public
+ */
+CategoriesTreeComponent.id = "categories-tree-v2";
+
+/**
+ * Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
+ * @public
+ */
+CategoriesTreeComponent.getLabel = ({ standardLabels }: { standardLabels: StandardTreeLabels }) => standardLabels.categories;
+
+function CategoriesTreeComponentImpl({
+  iModel,
+  viewport,
+  headerButtons,
+  onPerformanceMeasured,
+  onFeatureUsed,
+  searchText,
+  treeLabel,
+  ...treeProps
+}: CategoriesTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
+  const { buttonProps, onCategoriesFiltered } = useCategoriesTreeButtonProps({ viewport });
+  const { getBaseIdsCache } = useSharedTreeContextInternal();
+  const viewType = viewport.viewType === "2d" ? "2d" : "3d";
+  const isLoaded =
+    buttonProps.categories.length > 0 ||
+    getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType }).elementModelCategoriesLoaded();
+
+  const buttons: ReactNode = isLoaded
+    ? headerButtons
+      ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ ...buttonProps, onFeatureUsed })}</Fragment>)
+      : [
+          <ShowAllButton {...buttonProps} key="show-all-btn" onFeatureUsed={onFeatureUsed} />,
+          <HideAllButton {...buttonProps} key="hide-all-btn" onFeatureUsed={onFeatureUsed} />,
+          <InvertAllButton {...buttonProps} key="invert-all-btn" onFeatureUsed={onFeatureUsed} />,
+        ]
+    : Array.from({ length: headerButtons?.length ?? 3 }, (_, index) => <Skeleton variant={"object"} size={"medium"} key={index} />);
+
+  return (
+    <TelemetryContextProvider componentIdentifier={CategoriesTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
+      <SelectableTree buttons={buttons}>
+        <CategoriesTree
+          {...treeProps}
+          imodel={iModel}
+          activeView={viewport}
+          searchText={searchText}
+          treeLabel={treeLabel}
+          onCategoriesFiltered={onCategoriesFiltered}
+        />
+      </SelectableTree>
+    </TelemetryContextProvider>
+  );
+}
