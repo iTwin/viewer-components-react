@@ -73,6 +73,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Detect tree-widget changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            tree_widget:
+              - 'packages/tree-widget/**'
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -84,6 +92,10 @@ jobs:
 
       - run: pnpm install
 
+      - name: Install browsers
+        if: steps.changes.outputs.tree_widget == 'true'
+        run: pnpm lage install-browsers
+
       - name: Run prettier
         run: pnpm prettier
 
@@ -94,6 +106,10 @@ jobs:
         name: Build Lint Test and check API changes
         env:
           TF_BUILD: 1
+
+      - name: Run component tests
+        if: steps.changes.outputs.tree_widget == 'true'
+        run: pnpm exec lage test:components --grouped
 
   validate-docs:
     runs-on: ubuntu-latest
