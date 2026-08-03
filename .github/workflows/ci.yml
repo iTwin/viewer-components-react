@@ -24,7 +24,6 @@ jobs:
       - run: pnpm install
 
   check:
-    if: ${{ github.event.pull_request.head.ref != 'changeset-release/master' || github.event.pull_request.user.login != 'imodeljs-admin' }}
     runs-on: ubuntu-latest
     name: Check package versions
     steps:
@@ -43,6 +42,8 @@ jobs:
           cache: 'pnpm'
 
       - name: Prevent manual package version changes
+        # Skip here so the job still runs and this required check reports a status.
+        if: ${{ github.event.pull_request.head.ref != 'changeset-release/master' || github.event.pull_request.user.login != 'imodeljs-admin' }}
         run: pnpm check:versions -- ${{ github.event.pull_request.base.sha }}
 
   audit:
