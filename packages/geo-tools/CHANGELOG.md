@@ -4,7 +4,7 @@
 
 ### Patch Changes
 
-- [#1760](https://github.com/iTwin/viewer-components-react/pull/1760): Fixed an issue where the `GeoAddressSearch` dropdown could close unexpectedly while using the arrow keys to navigate search results. Navigation key events are now kept within the search component so parent controls cannot steal focus.
+- [#1732](https://github.com/iTwin/viewer-components-react/pull/1732): Fixed an issue where the `GeoAddressSearch` dropdown could close unexpectedly while using the arrow keys to navigate search results. Navigation key events are now kept within the search component so parent controls cannot steal focus.
 
 <!-- This log was last generated on Mon, 07 Jul 2025 19:55:02 GMT and should not be manually modified. -->
 
