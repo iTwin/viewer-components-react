@@ -101,7 +101,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Detect component test changes
     outputs:
-      # JSON array of package folder names whose files changed (e.g. ["tree-widget"]).
+      # JSON array of package names (without the @itwin/ prefix) whose files changed (e.g. ["tree-widget-react"]).
       packages: ${{ steps.filter.outputs.changes }}
     steps:
       - name: Checkout
@@ -112,8 +112,9 @@ jobs:
         id: filter
         with:
           # Add a package here to include it in the component test matrix.
+          # The filter key is the package name without the @itwin/ prefix.
           filters: |
-            tree-widget:
+            tree-widget-react:
               - 'packages/tree-widget/**'
 
   component-tests:
@@ -141,10 +142,10 @@ jobs:
       - run: pnpm install
 
       - name: Install browsers
-        run: pnpm --filter @itwin/${{ matrix.package }}-react install-browsers
+        run: pnpm --filter @itwin/${{ matrix.package }} install-browsers
 
       - name: Run component tests
-        run: pnpm --filter @itwin/${{ matrix.package }}-react test:components
+        run: pnpm --filter @itwin/${{ matrix.package }} test:components
 
   validate-docs:
     runs-on: ubuntu-latest
