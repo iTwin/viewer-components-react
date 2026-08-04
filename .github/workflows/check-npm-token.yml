@@ -22,8 +22,13 @@ jobs:
 
       - name: Check package access
         run: |
-          npm access list packages > packages.txt 2>/dev/null || echo "npm access list packages failed"
-          echo "Access to packages published from this repo:"
+          echo "--- npm access list packages imodeljs ---"
+          npm access list packages imodeljs > packages.txt || true
+          echo "listed $(wc -l < packages.txt) packages"
           grep -E "geo-tools-react|map-layers|measure-tools-react|property-grid-react|quantity-formatting-react|tree-widget-react" packages.txt || echo "none of the vcr packages are listed"
+          echo "--- npm access get status ---"
+          for p in geo-tools-react map-layers measure-tools-react property-grid-react quantity-formatting-react tree-widget-react; do
+            npm access get status "@itwin/$p" || true
+          done
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPMJS_PUBLISH_ITWIN }}
