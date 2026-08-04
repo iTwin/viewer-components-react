@@ -1,5 +1,5 @@
 # Ignore artifacts
-change
+.changeset
 lib
 dist
 
