@@ -401,6 +401,7 @@ Use `getSearchPaths` when you need more control over filtering behaviour. Here a
 
   <!-- [[include: [TreeWidget.GetFilteredPathsComponentWithFilterAndTargetItemsExample], tsx]] -->
   <!-- BEGIN EXTRACTION -->
+
   ```tsx
   function CustomModelsTreeComponentWithFilterAndTargetItems({
     viewport,
@@ -471,6 +472,7 @@ Use `getSearchPaths` when you need more control over filtering behaviour. Here a
     );
   }
   ```
+
   <!-- END EXTRACTION -->
 
 Use `getSubTreePaths` when you need to restrict the visible hierarchy to a specific sub-tree of nodes, without changing how filtering works. Here is an example use case:
