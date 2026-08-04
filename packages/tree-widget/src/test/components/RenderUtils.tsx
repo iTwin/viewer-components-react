@@ -41,10 +41,8 @@ interface RenderWithThemeOptions {
 function createWrapper(colorScheme: ColorScheme) {
   return function Wrapper({ children }: PropsWithChildren<unknown>) {
     return (
-      <Root colorScheme={colorScheme} density="dense">
-        <div style={{ width: "100vw", height: "100vh" }}>
-          <LocalizationContextProvider localization={localization}>{children}</LocalizationContextProvider>
-        </div>
+      <Root colorScheme={colorScheme} density="dense" style={{ width: "100vw", height: "100vh" }}>
+        <LocalizationContextProvider localization={localization}>{children}</LocalizationContextProvider>
       </Root>
     );
   };
