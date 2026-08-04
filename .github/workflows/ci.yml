@@ -73,14 +73,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Detect tree-widget changes
-        uses: dorny/paths-filter@v3
-        id: changes
-        with:
-          filters: |
-            tree_widget:
-              - 'packages/tree-widget/**'
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -92,10 +84,6 @@ jobs:
 
       - run: pnpm install
 
-      - name: Install browsers
-        if: steps.changes.outputs.tree_widget == 'true'
-        run: pnpm lage install-browsers
-
       - name: Run prettier
         run: pnpm prettier
 
@@ -106,6 +94,41 @@ jobs:
         name: Build Lint Test and check API changes
         env:
           TF_BUILD: 1
+
+  component-tests:
+    runs-on: ubuntu-latest
+    needs: install
+    name: Tree-widget component tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect tree-widget changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            tree_widget:
+              - 'packages/tree-widget/**'
+
+      - name: Setup pnpm
+        if: steps.changes.outputs.tree_widget == 'true'
+        uses: pnpm/action-setup@v4
+
+      - name: Use Node.js 24
+        if: steps.changes.outputs.tree_widget == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        if: steps.changes.outputs.tree_widget == 'true'
+        run: pnpm install
+
+      - name: Install browsers
+        if: steps.changes.outputs.tree_widget == 'true'
+        run: pnpm lage install-browsers
 
       - name: Run component tests
         if: steps.changes.outputs.tree_widget == 'true'
