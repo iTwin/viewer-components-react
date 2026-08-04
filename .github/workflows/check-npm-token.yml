@@ -1,0 +1,29 @@
+# Temporary diagnostic workflow - verifies the NPMJS_PUBLISH_ITWIN token
+# identity and per-package publish access. Remove once publishing is fixed.
+name: Check npm token access
+
+on: pull_request
+
+jobs:
+  check:
+    if: github.repository_owner == 'iTwin'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Use Node.js 22
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org/
+
+      - name: Check token identity
+        run: npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_PUBLISH_ITWIN }}
+
+      - name: Check package access
+        run: |
+          npm access list packages > packages.txt 2>/dev/null || echo "npm access list packages failed"
+          echo "Access to packages published from this repo:"
+          grep -E "geo-tools-react|map-layers|measure-tools-react|property-grid-react|quantity-formatting-react|tree-widget-react" packages.txt || echo "none of the vcr packages are listed"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_PUBLISH_ITWIN }}
