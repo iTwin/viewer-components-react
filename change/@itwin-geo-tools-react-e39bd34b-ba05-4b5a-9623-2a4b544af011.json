@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Potential fix for pull request finding",
-  "packageName": "@itwin/geo-tools-react",
-  "email": "email not defined",
-  "dependentChangeType": "patch"
-}
