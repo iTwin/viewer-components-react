@@ -11,7 +11,7 @@
     "@itwin/property-grid-react": "2.0.0",
     "@itwin/quantity-formatting-react": "0.1.5",
     "test-utilities": "0.0.0",
-    "@itwin/tree-widget-react": "4.0.0-alpha.30"
+    "@itwin/tree-widget-react": "3.18.0"
   },
   "changesets": [
     "@itwin-tree-widget-react-04f2a34d-6620-47c9-b297-378af2a324b9",
