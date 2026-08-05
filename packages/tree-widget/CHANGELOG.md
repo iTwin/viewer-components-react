@@ -1,5 +1,11 @@
 # Change Log - @itwin/tree-widget-react
 
+## 4.0.0-alpha.31
+
+### Patch Changes
+
+- [#1751](https://github.com/iTwin/viewer-components-react/pull/1751): Changed the Models and Categories tree header buttons to behave more consistently. Fixed an issue where the 2D toggle was always disabled.
+
 <!-- This log was last generated on Thu, 16 Jul 2026 13:39:19 GMT and should not be manually modified. -->
 
 <!-- Start content -->
@@ -554,6 +560,7 @@ Tue, 30 Jan 2024 13:20:38 GMT
 - Fixed `onCheckboxStateChanged` event handling when multiple `rxjs` versions are present. ([#750](https://github.com/iTwin/viewer-components-react/pull/750))
 
 ## 1.2.1
+
 Fri, 01 Dec 2023 13:46:38 GMT
 
 ### Patches
@@ -562,6 +569,7 @@ Fri, 01 Dec 2023 13:46:38 GMT
 - Fix progress indicator sizing in `enlarged` layout
 
 ## 1.2.0
+
 Tue, 19 Sep 2023 14:55:43 GMT
 
 ### Minor changes
@@ -569,6 +577,7 @@ Tue, 19 Sep 2023 14:55:43 GMT
 - `ModelsTree`: Add an option to pass `modelsVisibilityHandler` as a factory function.
 
 ## 1.1.3
+
 Tue, 29 Aug 2023 13:48:47 GMT
 
 ### Patches
@@ -577,6 +586,7 @@ Tue, 29 Aug 2023 13:48:47 GMT
 - Fix Models tree search not loading Subject nodes with hidden content models
 
 ## 1.1.2
+
 Tue, 22 Aug 2023 14:39:05 GMT
 
 ### Patches
@@ -584,6 +594,7 @@ Tue, 22 Aug 2023 14:39:05 GMT
 - `Trees`: Do not select node when checkbox is clicked.
 
 ## 1.1.1
+
 Thu, 17 Aug 2023 14:42:37 GMT
 
 ### Patches
@@ -591,6 +602,7 @@ Thu, 17 Aug 2023 14:42:37 GMT
 - Trees: Fix eye checkbox background when node is selected and hovered.
 
 ## 1.1.0
+
 Mon, 07 Aug 2023 13:36:23 GMT
 
 ### Minor changes
@@ -605,6 +617,7 @@ Mon, 07 Aug 2023 13:36:23 GMT
 - Removed `@itwin/itwinui-variables` from dependencies.
 
 ## 1.0.0
+
 Mon, 31 Jul 2023 14:10:09 GMT
 
 ### Breaking changes
@@ -640,11 +653,13 @@ Mon, 31 Jul 2023 14:10:09 GMT
 - `ModelsTree`: Always render checkbox to avoid UI shifting when checkbox appear.
 
 ## 0.10.0
+
 Tue, 23 May 2023 13:16:11 GMT
 
 _Version update only_
 
 ## 0.9.0
+
 Tue, 02 May 2023 16:12:17 GMT
 
 ### Minor changes
@@ -652,6 +667,7 @@ Tue, 02 May 2023 16:12:17 GMT
 - Updated to AppUI 4.0 and Presentation 4.0.
 
 ## 0.8.0
+
 Mon, 03 Apr 2023 15:34:07 GMT
 
 ### Minor changes
@@ -664,6 +680,7 @@ Mon, 03 Apr 2023 15:34:07 GMT
 - Use iTwin UI components instead of custom ones and CSS variables from `@itwin/itwinui-variables` instead of `@itwin/core-react`.
 
 ## 0.7.2
+
 Fri, 24 Mar 2023 10:46:34 GMT
 
 ### Patches
@@ -671,6 +688,7 @@ Fri, 24 Mar 2023 10:46:34 GMT
 - Fixed tree filtering not being removed when search box is closed.
 
 ## 0.7.1
+
 Thu, 23 Mar 2023 15:12:36 GMT
 
 ### Patches
@@ -678,6 +696,7 @@ Thu, 23 Mar 2023 15:12:36 GMT
 - 'ModelsTree': Restored 'HideAll' button behavior to hide only models.
 
 ## 0.7.0
+
 Mon, 20 Mar 2023 14:48:35 GMT
 
 ### Minor changes
@@ -692,6 +711,7 @@ Mon, 20 Mar 2023 14:48:35 GMT
 - '2d' and '3d' buttons react to visibility changes in the viewport. The '2d' button will be disabled if no models with the PlanProjection flag are present in the model.
 
 ## 0.6.2
+
 Thu, 09 Mar 2023 20:08:53 GMT
 
 ### Patches
@@ -700,6 +720,7 @@ Thu, 09 Mar 2023 20:08:53 GMT
 - `ModelsTree`: Remove unused feature of filtering the tree by element ids.
 
 ## 0.6.1
+
 Thu, 19 Jan 2023 10:29:18 GMT
 
 ### Patches
@@ -708,6 +729,7 @@ Thu, 19 Jan 2023 10:29:18 GMT
 - Bug fix for changing visibility of multiple nodes at once.
 
 ## 0.6.0
+
 Tue, 20 Dec 2022 15:12:29 GMT
 
 ### Minor changes
@@ -715,6 +737,7 @@ Tue, 20 Dec 2022 15:12:29 GMT
 - Moved core trees implementation from `@itwin/appui-react` package to `@itwin/tree-widget-react`.
 
 ## 0.5.0
+
 Mon, 12 Sep 2022 19:50:36 GMT
 
 ### Minor changes
@@ -722,6 +745,7 @@ Mon, 12 Sep 2022 19:50:36 GMT
 - Add new `defaultTreeId` prop to specify default tree for `TreeWidgetUiItemsProvider`.
 
 ## 0.4.7
+
 Mon, 30 May 2022 12:44:10 GMT
 
 ### Patches
@@ -729,6 +753,7 @@ Mon, 30 May 2022 12:44:10 GMT
 - Fix GeometricElement nodes not being shown in `IModelContentTree`.
 
 ## 0.4.6
+
 Thu, 26 May 2022 15:54:07 GMT
 
 ### Patches
@@ -736,6 +761,7 @@ Thu, 26 May 2022 15:54:07 GMT
 - Allow a caller to specify a default priority for `TreeWidgetUiItemsProvider`.
 
 ## 0.4.5
+
 Mon, 09 May 2022 18:04:58 GMT
 
 ### Patches
@@ -743,6 +769,7 @@ Mon, 09 May 2022 18:04:58 GMT
 - Set restore transient state in `TreeWidgetUiItemsProvider` to restore state when remounted.
 
 ## 0.4.4
+
 Thu, 05 May 2022 12:21:21 GMT
 
 ### Patches
@@ -750,6 +777,7 @@ Thu, 05 May 2022 12:21:21 GMT
 - Set tree-widget-search-bar-button-container z-index to 1.
 
 ## 0.4.3
+
 Thu, 21 Apr 2022 18:47:53 GMT
 
 ### Patches
@@ -757,6 +785,7 @@ Thu, 21 Apr 2022 18:47:53 GMT
 - Do not unmount children in `AutoSizer` when height or width is 0 to avoid losing children state.
 
 ## 0.4.2
+
 Tue, 19 Apr 2022 14:15:57 GMT
 
 ### Patches
@@ -764,6 +793,7 @@ Tue, 19 Apr 2022 14:15:57 GMT
 - Fixed search bar container to take up entire width of widget when open.
 
 ## 0.4.1
+
 Wed, 06 Apr 2022 13:48:44 GMT
 
 ### Patches
@@ -772,6 +802,7 @@ Wed, 06 Apr 2022 13:48:44 GMT
 - Added tree icon to tree widget tab.
 
 ## 0.4.0
+
 Fri, 18 Mar 2022 13:31:19 GMT
 
 ### Minor changes
@@ -779,6 +810,7 @@ Fri, 18 Mar 2022 13:31:19 GMT
 - Remove deprecated `WidgetControl`, update `UiItemsProvider` initialization.
 
 ## 0.3.0
+
 Wed, 02 Mar 2022 21:38:51 GMT
 
 ### Minor changes
@@ -786,6 +818,7 @@ Wed, 02 Mar 2022 21:38:51 GMT
 - Add `IModelContentTree`.
 
 ## 0.2.1
+
 Fri, 04 Feb 2022 00:43:35 GMT
 
 ### Patches
@@ -793,6 +826,7 @@ Fri, 04 Feb 2022 00:43:35 GMT
 - Update scss to be pulled from cjs dir.
 
 ## 0.2.0
+
 Mon, 24 Jan 2022 19:14:37 GMT
 
 ### Minor changes
@@ -800,6 +834,7 @@ Mon, 24 Jan 2022 19:14:37 GMT
 - Bump to official iTwin.js 3.0 release.
 
 ## 0.1.2
+
 Wed, 19 Jan 2022 17:39:40 GMT
 
 ### Patches
@@ -807,6 +842,7 @@ Wed, 19 Jan 2022 17:39:40 GMT
 - Updated to latest rc, dev-185, and updated deps.
 
 ## 0.1.1
+
 Wed, 12 Jan 2022 13:59:35 GMT
 
 ### Patches
