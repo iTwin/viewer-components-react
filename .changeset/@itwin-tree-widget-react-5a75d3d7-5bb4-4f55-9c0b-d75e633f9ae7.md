@@ -1,7 +1,5 @@
-{
-  "type": "patch",
-  "comment": "Fix `BE_SQLITE_INTERRUPT` query error causing application crash.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "100586436+JonasDov@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
+---
+"@itwin/tree-widget-react": patch
+---
+
+Fix `BE_SQLITE_INTERRUPT` query error causing application crash.
