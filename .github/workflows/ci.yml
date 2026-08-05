@@ -43,7 +43,7 @@ jobs:
 
       - name: Prevent manual package version changes
         # Skip here so the job still runs and this required check reports a status.
-        if: ${{ github.event.pull_request.head.ref != 'changeset-release/master' || github.event.pull_request.user.login != 'imodeljs-admin' }}
+        if: ${{ github.event.pull_request.head.ref != format('changeset-release/{0}', github.event.pull_request.base.ref) || github.event.pull_request.user.login != 'imodeljs-admin' }}
         run: pnpm check:versions -- ${{ github.event.pull_request.base.sha }}
 
   audit:

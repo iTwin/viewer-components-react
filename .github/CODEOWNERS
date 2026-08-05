@@ -25,6 +25,7 @@
 /packages/tree-widget  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
 /packages/tree-widget/CHANGELOG.md  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
 /.changeset/@itwin-tree-widget-react-*  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
+/.changeset/pre.json  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
 
 /packages/measure-tools  @itwin/viewer-components-reviewers @simnorm @a-gagnon @bsy-nicholasw
 /packages/measure-tools/CHANGELOG.md  @itwin/viewer-components-reviewers
