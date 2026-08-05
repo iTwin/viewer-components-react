@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - master
+      - tree-widget/next
 
 env:
   NPM_CONFIG_PROVENANCE: true
