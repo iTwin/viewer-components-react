@@ -4,7 +4,7 @@
 
 ### Patch Changes
 
-- [#1762](https://github.com/iTwin/viewer-components-react/pull/1762): Changed the Models and Categories tree header buttons to behave more consistently. Fixed an issue where the 2D toggle was always disabled.
+- [#1751](https://github.com/iTwin/viewer-components-react/pull/1751): Changed the Models and Categories tree header buttons to behave more consistently. Fixed an issue where the 2D toggle was always disabled.
 
 <!-- This log was last generated on Thu, 16 Jul 2026 13:39:19 GMT and should not be manually modified. -->
 
