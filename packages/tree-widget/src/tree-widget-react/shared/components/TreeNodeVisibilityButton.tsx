@@ -50,7 +50,6 @@ export const VisibilityAction = memo(function VisibilityAction({ node, ...action
       <TreeActionBase
         {...actionAttributes}
         label={translate("visibilityTooltips.status.disabled")}
-        onClick={() => {}}
         visible={false}
         icon={visibilityShowSvg}
         hide={true}

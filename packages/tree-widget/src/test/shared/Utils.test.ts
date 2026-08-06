@@ -10,10 +10,10 @@ import type { IModelInstanceKey } from "@itwin/presentation-hierarchies";
 
 describe("Utils", () => {
   describe("joinHierarchySearchTrees", () => {
-    const subject: IModelInstanceKey = { id: "0x1", className: "s:s", imodelKey: "key" };
-    const model: IModelInstanceKey = { id: "0x2", className: "s:m", imodelKey: "key" };
-    const category1: IModelInstanceKey = { id: "0x3", className: "s:c", imodelKey: "key" };
-    const category2: IModelInstanceKey = { id: "0x4", className: "s:c", imodelKey: "key" };
+    const subject: IModelInstanceKey = { id: "0x1", className: "s.s", imodelKey: "key" };
+    const model: IModelInstanceKey = { id: "0x2", className: "s.m", imodelKey: "key" };
+    const category1: IModelInstanceKey = { id: "0x3", className: "s.c", imodelKey: "key" };
+    const category2: IModelInstanceKey = { id: "0x4", className: "s.c", imodelKey: "key" };
 
     it("returns empty array when both inputs are empty", () => {
       expect(joinHierarchySearchTrees([], [])).toEqual([]);
