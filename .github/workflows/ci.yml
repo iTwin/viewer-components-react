@@ -97,6 +97,56 @@ jobs:
         env:
           TF_BUILD: 1
 
+  detect:
+    runs-on: ubuntu-latest
+    name: Detect component test changes
+    outputs:
+      # JSON array of package names (without the @itwin/ prefix) whose files changed (e.g. ["tree-widget-react"]).
+      packages: ${{ steps.filter.outputs.changes }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          # Add a package here to include it in the component test matrix.
+          # The filter key is the package name without the @itwin/ prefix.
+          filters: |
+            tree-widget-react:
+              - 'packages/tree-widget/**'
+
+  component-tests:
+    runs-on: ubuntu-latest
+    needs: [install, detect]
+    if: needs.detect.outputs.packages != '[]'
+    name: Component tests (${{ matrix.package }})
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.detect.outputs.packages) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Use Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+          cache: 'pnpm'
+
+      - run: pnpm install
+
+      - name: Install browsers
+        run: pnpm --filter @itwin/${{ matrix.package }} install-browsers
+
+      - name: Run component tests
+        run: pnpm --filter @itwin/${{ matrix.package }} test:components
+
   validate-docs:
     runs-on: ubuntu-latest
     needs: install

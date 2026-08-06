@@ -3,14 +3,5 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-.tw-skeleton-container {
-  padding-top: var(--stratakit-space-x2);
-
-  .tw-skeleton-row {
-    display: flex;
-    gap: var(--stratakit-space-x1);
-    height: 28px;
-    align-items: center;
-    padding: 0 var(--stratakit-space-x3);
-  }
-}
+// Allow side-effect imports of component CSS (e.g. `import "./WidgetHeader.css"`) in browser component tests.
+declare module "*.css";

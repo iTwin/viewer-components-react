@@ -14,7 +14,7 @@
 
   .tw-progress-overlay-backdrop {
     opacity: 0.5;
-    background-color: var(--iui-color-background-backdrop);
+    background-color: var(--stratakit-color-bg-page-base);
     height: 100%;
     width: 100%;
   }

@@ -15,6 +15,18 @@ module.exports = {
       outputs: [],
       inputs: ["lib/**"],
     },
+    "install-browsers": {
+      cache: false,
+    },
+    "test:components": {
+      dependsOn: ["build"],
+      outputs: ["**/test/components/__screenshots__/**"],
+      inputs: ["**/test/components/**", "!**/test/components/__screenshots__/**"],
+    },
+    "test:components:update": {
+      dependsOn: ["build"],
+      cache: false,
+    },
     "test:e2e": {
       dependsOn: ["test-viewer#build"],
       outputs: [],

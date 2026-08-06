@@ -3,14 +3,14 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-.tw-skeleton-container {
-  padding-top: var(--stratakit-space-x2);
+import { afterEach, beforeAll } from "vitest";
+import { cleanup } from "vitest-browser-react";
 
-  .tw-skeleton-row {
-    display: flex;
-    gap: var(--stratakit-space-x1);
-    height: 28px;
-    align-items: center;
-    padding: 0 var(--stratakit-space-x3);
-  }
-}
+beforeAll(async () => {
+  // Wait for fonts to be ready so text renders consistently in screenshots.
+  await document.fonts.ready;
+});
+
+afterEach(() => {
+  void cleanup();
+});
