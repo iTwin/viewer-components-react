@@ -10,7 +10,7 @@ import { MapLayersPrefBrowserStorage, MapLayersUI, MapLayersWidget } from "@itwi
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { CategoriesTreeIcon, createTreeWidgetViewport, Tree, TreeRenderer, TreeWidget, useCategoriesTree } from "@itwin/tree-widget-react";
 import { Chip } from "@mui/material";
-import { Icon } from "@stratakit/foundations";
+import { Icon } from "@stratakit/mui";
 import { unifiedSelectionStorage } from "../SelectionStorage";
 
 import type { ComponentProps, PropsWithChildren, ReactNode } from "react";

@@ -89,16 +89,13 @@ importers:
         version: file:../../packages/quantity-formatting(c8e896a5365358edc06b30b1048ddef2)
       '@itwin/tree-widget-react':
         specifier: workspace:*
-        version: file:../../packages/tree-widget(25e7b917ba86792966fd79b7cc03ba9c)
+        version: file:../../packages/tree-widget(216d6dbc307d9e075fa7009589e9bf50)
       '@itwin/unified-selection':
         specifier: 2.0.0-alpha.0
         version: 2.0.0-alpha.0
       '@mui/material':
         specifier: ^9.0.0
         version: 9.2.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@stratakit/foundations':
-        specifier: ^0.4.8
-        version: 0.4.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@stratakit/mui':
         specifier: ^0.5.3
         version: 0.5.3(@mui/material@9.2.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@8.1.1)
@@ -504,7 +501,7 @@ packages:
       '@itwin/appui-abstract': ^4.0.0 || ^5.0.0
       '@itwin/core-bentley': ^4.0.0 || ^5.0.0
       '@itwin/core-react': 5.33.1
-      '@itwin/itwinui-react': ^3.15.0
+      '@itwin/itwinui-react': 3.21.2
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
@@ -563,7 +560,7 @@ packages:
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0 || ^5.0.0
       '@itwin/core-bentley': ^4.0.0 || ^5.0.0
-      '@itwin/itwinui-react': ^3.15.0
+      '@itwin/itwinui-react': 3.21.2
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
@@ -610,7 +607,7 @@ packages:
       '@itwin/core-geometry': ^4.0.0 || ^5.0.0
       '@itwin/core-quantity': ^4.0.0 || ^5.0.0
       '@itwin/core-react': 5.33.1
-      '@itwin/itwinui-react': ^3.15.0
+      '@itwin/itwinui-react': 3.21.2
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
@@ -788,8 +785,6 @@ packages:
       '@itwin/presentation-components': ^5.12.0
       '@itwin/presentation-frontend': ^5.8.0
       '@mui/material': ^9.0.0
-      '@stratakit/bricks': ^0.5.4
-      '@stratakit/foundations': ^0.4.7
       '@stratakit/icons': ^0.3.1
       '@stratakit/mui': ^0.5.3
       '@stratakit/structures': ^0.5.6
@@ -1213,17 +1208,6 @@ packages:
 
   '@stratakit/foundations@0.4.10':
     resolution: {integrity: sha512-+EWxgQTZTW4Fibc6zui5KJUrneFMo3WnmugH3GnW8qpkGbDvgOm0g6kumwQnnIM4S8zcdlYvBe28H1DEvcwnJQ==}
-    peerDependencies:
-      react: '>=18.0.0'
-      react-dom: '>=18.0.0'
-    peerDependenciesMeta:
-      react:
-        optional: true
-      react-dom:
-        optional: true
-
-  '@stratakit/foundations@0.4.9':
-    resolution: {integrity: sha512-juBKMLLsNTjbmwGNuHUS/MwSQgOSbAjD49fRzgQWfSvPlC1PmP+Zh+XeqWTleH3nh4DXZ2TFBgNuOYKfd5loSA==}
     peerDependencies:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
@@ -4574,7 +4558,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@itwin/tree-widget-react@file:../../packages/tree-widget(25e7b917ba86792966fd79b7cc03ba9c)':
+  '@itwin/tree-widget-react@file:../../packages/tree-widget(216d6dbc307d9e075fa7009589e9bf50)':
     dependencies:
       '@itwin/appui-abstract': 5.11.3(@itwin/core-bentley@5.11.3)
       '@itwin/appui-react': 5.33.1(910914859613feb6003f3866a3d7ebd2)
@@ -4592,8 +4576,6 @@ snapshots:
       '@itwin/presentation-shared': 2.0.0-alpha.12
       '@itwin/unified-selection': 2.0.0-alpha.0
       '@mui/material': 9.2.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@stratakit/bricks': 0.5.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@stratakit/foundations': 0.4.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@stratakit/icons': 0.3.2
       '@stratakit/mui': 0.5.3(@mui/material@9.2.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@8.1.1)
       '@stratakit/structures': 0.5.8(@types/react@18.3.31)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
@@ -4997,22 +4979,13 @@ snapshots:
   '@stratakit/bricks@0.5.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@ariakit/react': 0.4.35(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@stratakit/foundations': 0.4.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/foundations': 0.4.10(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
       react: 18.3.1
       react-compiler-runtime: 1.0.0(react@18.3.1)
       react-dom: 18.3.1(react@18.3.1)
 
   '@stratakit/foundations@0.4.10(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@ariakit/react': 0.4.35(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      classnames: 2.5.1
-      react-compiler-runtime: 1.0.0(react@18.3.1)
-    optionalDependencies:
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-
-  '@stratakit/foundations@0.4.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@ariakit/react': 0.4.35(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
@@ -5048,7 +5021,7 @@ snapshots:
     dependencies:
       '@ariakit/react': 0.4.35(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@stratakit/bricks': 0.5.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@stratakit/foundations': 0.4.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/foundations': 0.4.10(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
       react: 18.3.1
       react-compiler-runtime: 1.0.0(react@18.3.1)

@@ -17,7 +17,9 @@ export function ErrorState({ resetErrorBoundary }: FallbackProps) {
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: "0.5rem" }}>
       <Icon href={errorSvg} size="large" />
       <Typography variant={"body-sm"}>{translate("errorState.description")}</Typography>
-      <Button onClick={resetErrorBoundary}>{translate("errorState.retryButtonLabel")}</Button>
+      <Button size="small" onClick={resetErrorBoundary}>
+        {translate("errorState.retryButtonLabel")}
+      </Button>
     </div>
   );
 }
