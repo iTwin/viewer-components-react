@@ -47,13 +47,7 @@ export const VisibilityAction = memo(function VisibilityAction({ node, ...action
 
   if (!context || !state || ("isDisabled" in state && state.isDisabled) || "isLoading" in state) {
     return (
-      <TreeActionBase
-        {...actionAttributes}
-        label={translate("visibilityTooltips.status.disabled")}
-        visible={false}
-        icon={visibilityShowSvg}
-        hide={true}
-      />
+      <TreeActionBase {...actionAttributes} label={translate("visibilityTooltips.status.disabled")} visible={false} icon={visibilityShowSvg} hide={true} />
     );
   }
 
