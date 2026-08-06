@@ -28,9 +28,9 @@ import {
   CLASS_NAME_GeometricElement3d,
   CLASS_NAME_GeometricModel3d,
   CLASS_NAME_Subject,
-} from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
-import { SharedTreeContextProvider } from "../../../tree-widget-react/components/trees/common/SharedTreeContextProvider.js";
-import { useModelsTree } from "../../../tree-widget-react/components/trees/models-tree/UseModelsTree.js";
+} from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { SharedTreeContextProvider } from "../../../tree-widget-react/shared/SharedTreeContextProvider.js";
+import { useModelsTree } from "../../../tree-widget-react/trees/models-tree/UseModelsTree.js";
 import { buildIModel } from "../../IModelUtils.js";
 import { createFakeViewport, createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
@@ -41,7 +41,7 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { InstanceKey, Props } from "@itwin/presentation-shared";
-import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
+import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
 import type { ExpectedHierarchyDef } from "../HierarchyValidation.js";
 
 interface TreeSearchTestCaseDefinition<TIModelSetupResult extends object> {

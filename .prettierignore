@@ -1,5 +1,4 @@
 # Ignore artifacts
-change
 lib
 dist
 
@@ -11,7 +10,7 @@ dist
 .github
 
 # Ignore archived packages
-packages/archive
+archive
 
 # Ignore everything under packages/
 packages/**

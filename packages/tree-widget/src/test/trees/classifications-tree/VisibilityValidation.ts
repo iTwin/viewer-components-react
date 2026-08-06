@@ -4,12 +4,17 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "vitest";
-import { ClassificationsTreeNode } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeNode.js";
+import { ClassificationsTreeNode } from "../../../tree-widget-react/trees/classifications-tree/ClassificationsTreeNode.js";
 
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
-import type { ValidateNodeProps } from "../common/VisibilityValidation.js";
+import type { ValidateNodeProps } from "../../shared/VisibilityValidation.js";
 
-export async function validateNodeVisibility({ node, handler, expectations }: ValidateNodeProps & { node: HierarchyNode }) {
+export async function validateNodeVisibility({
+  node,
+  handler,
+  expectations,
+  validatedIds,
+}: ValidateNodeProps & { node: HierarchyNode; validatedIds?: Set<string> }) {
   const actualVisibility = await handler.getVisibilityStatus(node);
 
   if (expectations === "all-hidden" || expectations === "all-visible") {
@@ -23,6 +28,7 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
     ClassificationsTreeNode.isGeometricElementNode(node)
   ) {
     const { id } = node.key.instanceKeys[0];
+    validatedIds?.add(id);
     if (expectations[id] === "disabled") {
       expect(actualVisibility.isDisabled, `Node, ${JSON.stringify(node)}`).toBe(true);
     } else {

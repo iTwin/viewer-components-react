@@ -711,17 +711,17 @@ const getHierarchyDefinition: TreeProps["getHierarchyDefinition"] = ({ imodelAcc
     classHierarchyInspector: imodelAccess,
     hierarchy: {
       // For root nodes, select all BisCore.GeometricModel3d instances
-      rootNodes: async ({ nodeSelectClauseFactory, instanceLabelSelectClauseFactory }) => [
+      rootNodes: async ({ createSelectClause }) => [
         {
           fullClassName: "BisCore.GeometricModel3d",
           query: {
             ecsql: `
               SELECT
-                ${await nodeSelectClauseFactory.createSelectClause({
+                ${await createSelectClause({
                   ecClassId: { selector: "this.ECClassId" },
                   ecInstanceId: { selector: "this.ECInstanceId" },
                   nodeLabel: {
-                    selector: await instanceLabelSelectClauseFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
+                    of: { classAlias: "this", className: "BisCore.GeometricModel3d" },
                   },
                 })}
               FROM BisCore.GeometricModel3d this
@@ -780,17 +780,17 @@ const getHierarchyDefinition: VisibilityTreeProps["getHierarchyDefinition"] = ({
     classHierarchyInspector: imodelAccess,
     hierarchy: {
       // For root nodes, select all BisCore.GeometricModel3d instances
-      rootNodes: async ({ nodeSelectClauseFactory, instanceLabelSelectClauseFactory }) => [
+      rootNodes: async ({ createSelectClause }) => [
         {
           fullClassName: "BisCore.GeometricModel3d",
           query: {
             ecsql: `
               SELECT
-                ${await nodeSelectClauseFactory.createSelectClause({
+                ${await createSelectClause({
                   ecClassId: { selector: "this.ECClassId" },
                   ecInstanceId: { selector: "this.ECInstanceId" },
                   nodeLabel: {
-                    selector: await instanceLabelSelectClauseFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
+                    of: { classAlias: "this", className: "BisCore.GeometricModel3d" },
                   },
                 })}
               FROM BisCore.GeometricModel3d this
@@ -935,6 +935,7 @@ This can be achieved by passing `onFeatureUsed` function to `CategoriesTreeCompo
 - `"categories-tree-showall"` - when "Show All" button is used in `CategoriesTreeComponent`.
 - `"categories-tree-hideall"` - when "Hide All" button is used in `CategoriesTreeComponent`.
 - `"categories-tree-invert"` - when "Invert" button is used in `CategoriesTreeComponent`.
+
 <!-- cspell:enable -->
 
 Where `{tree}` specifies which tree component the feature is of.

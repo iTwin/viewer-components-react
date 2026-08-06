@@ -4,13 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "vitest";
-import { ModelsTreeNodeInternal } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeNodeInternal.js";
-import { ModelsTreeNode } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeNode.js";
+import { ModelsTreeNodeInternal } from "../../../../tree-widget-react/trees/models-tree/internal/ModelsTreeNodeInternal.js";
+import { ModelsTreeNode } from "../../../../tree-widget-react/trees/models-tree/ModelsTreeNode.js";
 
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
-import type { ValidateNodeProps } from "../../common/VisibilityValidation.js";
+import type { ValidateNodeProps } from "../../../shared/VisibilityValidation.js";
 
-export async function validateNodeVisibility({ node, handler, expectations }: ValidateNodeProps & { node: HierarchyNode }) {
+export async function validateNodeVisibility({
+  node,
+  handler,
+  expectations,
+  validatedIds,
+}: ValidateNodeProps & { node: HierarchyNode; validatedIds: Set<string> }) {
   const actualVisibility = await handler.getVisibilityStatus(node);
 
   if (expectations === "all-hidden" || expectations === "all-visible") {
@@ -24,6 +29,7 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
     let hiddenCount = 0;
 
     for (const elementId of elementIds) {
+      validatedIds.add(elementId);
       if (expectations[elementId] === "visible") {
         ++visibleCount;
       } else if (expectations[elementId] === "hidden") {
@@ -46,6 +52,7 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
 
   if (ModelsTreeNode.isSubjectNode(node) || ModelsTreeNode.isElementNode(node) || ModelsTreeNode.isModelNode(node)) {
     const { id } = node.key.instanceKeys[0];
+    validatedIds.add(id);
     if (expectations[id] === "disabled") {
       expect(actualVisibility.isDisabled, `Node, ${JSON.stringify(node)}`).toBe(true);
     } else {
@@ -61,6 +68,7 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
         ? node.extendedData.parentElementsPath[node.extendedData.parentElementsPath.length - 1].elementIds[0]
         : node.extendedData.modelIds[0];
     const idToUse = `${parentOrModelId}-${id}`;
+    validatedIds.add(idToUse);
     if (expectations[idToUse] === "disabled") {
       expect(actualVisibility.isDisabled, `Node, ${JSON.stringify(node)}`).toBe(true);
     } else {

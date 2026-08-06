@@ -1,0 +1,28 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
+import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
+import type { TranslateFunc } from "./LocalizationHelpers.js";
+
+/** @internal */
+export type Visibility = "visible" | "hidden" | "partial";
+
+/** @internal */
+export type NonPartialVisibilityStatus = Omit<VisibilityStatus, "state"> & { state: "visible" | "hidden" };
+
+/** @internal */
+export function createVisibilityStatus(status: "visible" | "hidden"): NonPartialVisibilityStatus;
+export function createVisibilityStatus(status: "visible" | "hidden" | "partial" | "disabled"): VisibilityStatus;
+export function createVisibilityStatus(status: Visibility | "disabled"): VisibilityStatus {
+  return {
+    state: status === "disabled" ? "visible" : status,
+    isDisabled: status === "disabled",
+  };
+}
+
+/** @internal */
+export function createTooltip(status: Visibility | "disabled" | "determining", translate: TranslateFunc): string {
+  return translate(`visibilityTooltips.status.${status}`);
+}

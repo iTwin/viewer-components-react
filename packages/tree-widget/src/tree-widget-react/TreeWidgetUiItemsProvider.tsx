@@ -1,0 +1,125 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
+import "./TreeWidgetUiItemsProvider.css";
+
+import { useRef } from "react";
+import { ErrorBoundary } from "react-error-boundary";
+import { StagePanelLocation, StagePanelSection, useTransientState } from "@itwin/appui-react";
+import hierarchyTreeSvg from "@stratakit/icons/hierarchy-tree.svg";
+import { Icon } from "@stratakit/mui";
+import { LocalizationContextProvider } from "./shared/components/LocalizationContext.js";
+import { getLocalizationKey } from "./shared/internal/LocalizationHelpers.js";
+import { ErrorState } from "./tree-header/ErrorState.js";
+import { SharedTreeContextProvider } from "./trees/index.js";
+import { TreeWidgetComponentImpl } from "./TreeWidgetComponentImpl.js";
+
+import type { Ref } from "react";
+import type { Widget } from "@itwin/appui-react";
+import type { Localization } from "@itwin/core-common";
+import type { TreeDefinition } from "./TreeWidgetComponentImpl.js";
+
+/**
+ * Props for `createWidget`.
+ * @public
+ */
+interface TreeWidgetProps {
+  /**
+   * Trees to show in the widget.
+   * @see ModelsTreeComponent
+   * @see CategoriesTreeComponent
+   * @see ExternalSourcesTreeComponent
+   * @see IModelContentTreeComponent
+   */
+  trees: TreeDefinition[];
+  /** Localization object for localizing widget components. */
+  localization: Pick<Localization, "getLocalizedString">;
+  /** Callback that is invoked when performance of tracked feature is measured. */
+  onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
+  /** Callback that is invoked when a tracked feature is used. */
+  onFeatureUsed?: (feature: string) => void;
+}
+
+/**
+ * Creates a tree widget definition that should be returned from `UiItemsProvider.getWidgets()`.
+ * @public
+ */
+export function createTreeWidget(props: TreeWidgetProps): Widget {
+  return {
+    id: "tree-widget-react:trees",
+    label: props.localization.getLocalizedString(getLocalizationKey("widget.label")),
+    icon: <Icon href={hierarchyTreeSvg} />,
+    layouts: {
+      standard: {
+        section: StagePanelSection.Start,
+        location: StagePanelLocation.Right,
+      },
+    },
+    content: (
+      <TreeWidgetComponent
+        localization={props.localization}
+        trees={props.trees}
+        onPerformanceMeasured={props.onPerformanceMeasured}
+        onFeatureUsed={props.onFeatureUsed}
+      />
+    ),
+  };
+}
+
+/**
+ * Tree widget component which allows selecting which tree to render.
+ * @public
+ */
+export function TreeWidgetComponent({ localization, ...props }: TreeWidgetProps) {
+  const ref = useTreeWidgetTransientState();
+  return (
+    <div ref={ref} className="tree-widget">
+      <LocalizationContextProvider localization={localization}>
+        <ErrorBoundary FallbackComponent={ErrorState}>
+          <SharedTreeContextProvider>
+            <TreeWidgetComponentImpl {...props} />
+          </SharedTreeContextProvider>
+        </ErrorBoundary>
+      </LocalizationContextProvider>
+    </div>
+  );
+}
+
+function useTreeWidgetTransientState() {
+  const { ref, persist, restore } = useTreeStorage();
+  useTransientState(persist, restore);
+  return ref;
+}
+
+interface UseTreeStorageResult {
+  ref: Ref<HTMLDivElement>;
+  persist: () => void;
+  restore: () => void;
+}
+
+function useTreeStorage(): UseTreeStorageResult {
+  const ref = useRef<HTMLDivElement>(null);
+  const scrollTop = useRef<number | undefined>();
+
+  const getContainer = () => {
+    return ref.current?.querySelector("#tw-tree-renderer");
+  };
+
+  const persist = () => {
+    const container = getContainer();
+    scrollTop.current = container?.scrollTop;
+  };
+
+  const restore = () => {
+    setTimeout(() => {
+      const container = getContainer();
+      if (container && scrollTop.current) {
+        container.scrollTop = scrollTop.current;
+      }
+    });
+  };
+
+  return { ref, persist, restore };
+}

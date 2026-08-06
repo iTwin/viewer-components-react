@@ -49,7 +49,7 @@ flowchart TD
   RESULT_Empty([No status produced])
 
   %% Start
-  TITLE(["<span style='font-family: monospace;'><a href='../src/tree-widget-react/components/trees/common/internal/VisibilityUtils.ts'>mergeVisibilityStatuses</a></span>"]) --> A["Inspect supplied <span style='font-family: monospace;'>VisibilityStatus.state</span> values"]
+  TITLE(["<span style='font-family: monospace;'><a href='../src/tree-widget-react/shared/internal/VisibilityUtils.ts'>mergeVisibilityStatuses</a></span>"]) --> A["Inspect supplied <span style='font-family: monospace;'>VisibilityStatus.state</span> values"]
 
   PROPS[\"
     <span style='font-family: monospace;'>input</span>

@@ -4,7 +4,7 @@
   "repository": {
     "url": "https://github.com/iTwin/viewer-components-react.git"
   },
-  "packageManager": "pnpm@11.0.8",
+  "packageManager": "pnpm@11.20.0",
   "scripts": {
     "build": "lage build --grouped",
     "cover": "lage cover --grouped --continue",
@@ -14,16 +14,13 @@
     "lint": "lage lint --grouped --continue",
     "clean": "lage clean --grouped --continue",
     "extract-api": "lage extract-api --grouped --continue",
-    "check": "beachball check",
-    "check:dev": "beachball check --config beachball.config.dev.js",
-    "change": "beachball change --no-commit",
-    "change:next": "beachball change --config beachball.config.dev.js --no-commit -b origin/tree-widget/next",
+    "check:versions": "node scripts/check-package-versions.js",
+    "change": "node scripts/create-changeset.js",
     "cspell:contents": "cspell .",
     "cspell:filenames": "node scripts/cspellFileNames.js",
     "cspell": "pnpm run cspell:contents && pnpm run cspell:filenames",
     "check-inline-styles": "node scripts/check-inline-styles.js",
-    "publish": "beachball publish --new",
-    "bump": "beachball bump",
+    "release": "pnpm build && changeset publish",
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --write .",
     "gather-docs": "node ./scripts/gatherDocs.js",
@@ -33,8 +30,8 @@
     "benchmark:tree-widget-median": "node scripts/getMedianBenchmarkResults.js"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.31.1",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
-    "beachball": "^2.65.4",
     "cpx2": "^8.0.2",
     "cspell": "^9.8.0",
     "glob": "^13.0.6",

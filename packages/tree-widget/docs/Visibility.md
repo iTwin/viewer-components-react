@@ -57,48 +57,48 @@ Every flowchart in these documents follows the same conventions:
 
 ## Key Internal APIs
 
-- [`useCachedVisibility`](../src/tree-widget-react/components/trees/common/internal/hooks/UseCachedVisibility.ts) — React hook that returns a factory for the shared hierarchy visibility handler.
+- [`useCachedVisibility`](../src/tree-widget-react/shared/internal/hooks/UseCachedVisibility.ts) — React hook that returns a factory for the shared hierarchy visibility handler.
   - Creates and disposes a tree-specific handler for each status or change request.
-  - Cancels an in-progress `getVisibilityStatus()` when the same node receives a change request or the viewport emits a relevant visibility event. [`useHierarchyVisibility`](../src/tree-widget-react/components/trees/common/UseHierarchyVisibility.ts) requests the status again through `onVisibilityChange()`.
-  - Runs changes against a [`BufferingViewport`](../src/tree-widget-react/components/trees/common/internal/BufferingViewport.ts). The buffered viewport is committed only when the complete change pipeline finishes normally; cancellation discards all buffered mutations.
+  - Cancels an in-progress `getVisibilityStatus()` when the same node receives a change request or the viewport emits a relevant visibility event. [`useHierarchyVisibility`](../src/tree-widget-react/shared/UseHierarchyVisibility.ts) requests the status again through `onVisibilityChange()`.
+  - Runs changes against a [`BufferingViewport`](../src/tree-widget-react/shared/internal/BufferingViewport.ts). The buffered viewport is committed only when the complete change pipeline finishes normally; cancellation discards all buffered mutations.
   - Suppresses viewport and always/never-drawn cache events during a change, then resumes them after commit or cancellation.
   - Applies special handling when search paths are present, because filtered hierarchy nodes may omit children that still contribute to visibility.
 
-- [`BaseVisibilityHelper`](../src/tree-widget-react/components/trees/common/internal/visibility/BaseVisibilityHelper.ts) — shared get/change operations for visibility status based on element/model/category ids.
-  - Uses [`BaseIdsCache`](../src/tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.ts) to retrieve information about nodes.
+- [`BaseVisibilityHelper`](../src/tree-widget-react/shared/internal/visibility/BaseVisibilityHelper.ts) — shared get/change operations for visibility status based on element/model/category ids.
+  - Uses [`BaseIdsCache`](../src/tree-widget-react/shared/internal/caches/BaseIdsCache.ts) to retrieve information about nodes.
   - Examples: `getModelsVisibilityStatus()`, `getCategoriesVisibilityStatus()`, `changeModelsVisibilityStatus()`, `changeCategoriesVisibilityStatus()`.
 
-- Tree-specific visibility handlers [`CategoriesTreeVisibilityHandler`](../src/tree-widget-react/components/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.ts), [`ClassificationsTreeVisibilityHandler`](../src/tree-widget-react/components/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHandler.ts), [`ModelsTreeVisibilityHandler`](../src/tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.ts):
+- Tree-specific visibility handlers [`CategoriesTreeVisibilityHandler`](../src/tree-widget-react/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.ts), [`ClassificationsTreeVisibilityHandler`](../src/tree-widget-react/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHandler.ts), [`ModelsTreeVisibilityHandler`](../src/tree-widget-react/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.ts):
   - These handlers are aware of tree-specific hierarchy structure.
   - Take tree nodes as input, determine node type via nodes' `extendedData` property, and use appropriate methods from visibility helpers.
   - Expose get/change visibility status logic for search-target nodes.
   - Models and Classifications tree visibility is 3D-only. Categories tree visibility supports 2D and 3D viewports.
   - Before changing visibility in always-drawn-exclusive mode, preserve the current visible set while converting the viewport to normal mode, then apply the requested change.
 
-- Tree-specific visibility helpers ([`CategoriesTreeVisibilityHelper`](../src/tree-widget-react/components/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHelper.ts), [`ClassificationsTreeVisibilityHelper`](../src/tree-widget-react/components/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHelper.ts), [`ModelsTreeVisibilityHelper`](../src/tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHelper.ts)):
+- Tree-specific visibility helpers ([`CategoriesTreeVisibilityHelper`](../src/tree-widget-react/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHelper.ts), [`ClassificationsTreeVisibilityHelper`](../src/tree-widget-react/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHelper.ts), [`ModelsTreeVisibilityHelper`](../src/tree-widget-react/trees/models-tree/internal/visibility/ModelsTreeVisibilityHelper.ts)):
   - Cover tree-specific cases (e.g. definition containers exist only in the Categories tree, so `CategoriesTreeVisibilityHelper` implements get/change visibility methods for definition containers).
-  - All of them use [`BaseVisibilityHelper`](../src/tree-widget-react/components/trees/common/internal/visibility/BaseVisibilityHelper.ts) to get/change visibility for those tree-specific cases.
+  - All of them use [`BaseVisibilityHelper`](../src/tree-widget-react/shared/internal/visibility/BaseVisibilityHelper.ts) to get/change visibility for those tree-specific cases.
 
-- Search-results trees ([`BaseSearchResultsTree`](../src/tree-widget-react/components/trees/common/internal/visibility/BaseSearchResultsTree.ts) and tree-specific implementations: [Categories](../src/tree-widget-react/components/trees/categories-tree/internal/visibility/SearchResultsTree.ts), [Classifications](../src/tree-widget-react/components/trees/classifications-tree/internal/visibility/SearchResultsTree.ts), [Models](../src/tree-widget-react/components/trees/models-tree/internal/visibility/SearchResultsTree.ts)):
+- Search-results trees ([`BaseSearchResultsTree`](../src/tree-widget-react/shared/internal/visibility/BaseSearchResultsTree.ts) and tree-specific implementations: [Categories](../src/tree-widget-react/trees/categories-tree/internal/visibility/SearchResultsTree.ts), [Classifications](../src/tree-widget-react/trees/classifications-tree/internal/visibility/SearchResultsTree.ts), [Models](../src/tree-widget-react/trees/models-tree/internal/visibility/SearchResultsTree.ts)):
   - Help get/change visibility of nodes which are not search targets and don't have search-target ancestors (since these nodes might have some children missing). They allow retrieving child search targets for such nodes and then getting/changing visibility is done based on search targets instead.
 
 - Caching:
-  - [`BaseIdsCache`](../src/tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.ts) - stores data that is relevant to models/categories/classifications trees (e.g. model <-> category relationship).
-    - This cache is composed of other caches ([`DescendantsCountCache`](../src/tree-widget-react/components/trees/common/internal/caches/DescendantsCountCache.ts), [`ChildElementsCache`](../src/tree-widget-react/components/trees/common/internal/caches/ChildElementsCache.ts), [`SubCategoriesCache`](../src/tree-widget-react/components/trees/common/internal/caches/SubCategoriesCache.ts), and others).
+  - [`BaseIdsCache`](../src/tree-widget-react/shared/internal/caches/BaseIdsCache.ts) - stores data that is relevant to models/categories/classifications trees (e.g. model <-> category relationship).
+    - This cache is composed of other caches ([`DescendantsCountCache`](../src/tree-widget-react/shared/internal/caches/DescendantsCountCache.ts), [`ChildElementsCache`](../src/tree-widget-react/shared/internal/caches/ChildElementsCache.ts), [`SubCategoriesCache`](../src/tree-widget-react/shared/internal/caches/SubCategoriesCache.ts), and others).
     - Data stored in this cache is requested only once, because it does not change.
-  - Tree-specific id caches ([`CategoriesTreeIdsCache`](../src/tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.ts), [`ClassificationsTreeIdsCache`](../src/tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.ts), [`ModelsTreeIdsCache`](../src/tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.ts)):
+  - Tree-specific id caches ([`CategoriesTreeIdsCache`](../src/tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsCache.ts), [`ClassificationsTreeIdsCache`](../src/tree-widget-react/trees/classifications-tree/internal/ClassificationsTreeIdsCache.ts), [`ModelsTreeIdsCache`](../src/tree-widget-react/trees/models-tree/internal/ModelsTreeIdsCache.ts)):
     - Store various tree-specific relationships, (e.g. models tree ids cache stores element's model <-> subject relationship).
-    - Extend `BaseIdsCacheImpl` so each tree-specific cache can be used in [`BaseVisibilityHelper`](../src/tree-widget-react/components/trees/common/internal/visibility/BaseVisibilityHelper.ts).
+    - Extend `BaseIdsCacheImpl` so each tree-specific cache can be used in [`BaseVisibilityHelper`](../src/tree-widget-react/shared/internal/visibility/BaseVisibilityHelper.ts).
 
-  - [`AlwaysAndNeverDrawnElementInfoCache`](../src/tree-widget-react/components/trees/common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.ts) — caches extra data (like category) for always/never drawn elements.
+  - [`AlwaysAndNeverDrawnElementInfoCache`](../src/tree-widget-react/shared/internal/caches/AlwaysAndNeverDrawnElementInfoCache.ts) — caches extra data (like category) for always/never drawn elements.
     - Always and never drawn caches are reset when always and never drawn sets change respectively.
     - Always and never drawn elements can be retrieved by model, actual category, and hierarchy path.
 
-  - [`DescendantsCountCache`](../src/tree-widget-react/components/trees/common/internal/caches/DescendantsCountCache.ts) — retrieves descendant counts grouped by each descendant's actual category.
+  - [`DescendantsCountCache`](../src/tree-widget-react/shared/internal/caches/DescendantsCountCache.ts) — retrieves descendant counts grouped by each descendant's actual category.
     - Status requests use these counts with path-scoped always/never-drawn information. They do not load all descendant IDs.
     - Change requests use the grouped counts to decide which category groups already match the requested state.
 
-  - [`ChildElementsCache`](../src/tree-widget-react/components/trees/common/internal/caches/ChildElementsCache.ts) — cache for retrieving elements' children.
+  - [`ChildElementsCache`](../src/tree-widget-react/shared/internal/caches/ChildElementsCache.ts) — cache for retrieving elements' children.
     - Used only during changes, for category and element/grouping operations whose descendants are in categories that do not already match the requested state.
     - It retrieves IDs only for those non-matching category groups so they can be added to `alwaysDrawn` or `neverDrawn`.
     - It is not used for status requests. A hierarchy branch may contain hundreds of thousands of descendants, so status is computed from grouped counts instead.
@@ -120,7 +120,7 @@ flowchart TD
   RESULT_ChangeCancelled([Change discarded])
 
   %% Start
-  TITLE(["<span style='font-family: monospace;'><a href='../src/tree-widget-react/components/trees/common/internal/hooks/UseCachedVisibility.ts'>HierarchyVisibilityHandlerImpl request lifecycle</a></span>"]) --> A{"Request operation"}
+  TITLE(["<span style='font-family: monospace;'><a href='../src/tree-widget-react/shared/internal/hooks/UseCachedVisibility.ts'>HierarchyVisibilityHandlerImpl request lifecycle</a></span>"]) --> A{"Request operation"}
 
   PROPS[\"
     <span style='font-family: monospace;'>request</span>
@@ -194,8 +194,8 @@ The viewport only renders elements. Element visibility is resolved in the follow
 
 A trace of what happens when the user clicks the eye icon of a hidden category node in the Categories tree (no search active):
 
-1. [`useHierarchyVisibility`](../src/tree-widget-react/components/trees/common/UseHierarchyVisibility.ts) calls `changeVisibility(node, true)` on the shared hierarchy visibility handler created by [`useCachedVisibility`](../src/tree-widget-react/components/trees/common/internal/hooks/UseCachedVisibility.ts).
-2. The handler announces the change request, cancelling any in-progress status or change request for the same node. It creates a [`BufferingViewport`](../src/tree-widget-react/components/trees/common/internal/BufferingViewport.ts), suppresses viewport and always/never-drawn cache events, and creates a `CategoriesTreeVisibilityHandler` against the buffered viewport.
+1. [`useHierarchyVisibility`](../src/tree-widget-react/shared/UseHierarchyVisibility.ts) calls `changeVisibility(node, true)` on the shared hierarchy visibility handler created by [`useCachedVisibility`](../src/tree-widget-react/shared/internal/hooks/UseCachedVisibility.ts).
+2. The handler announces the change request, cancelling any in-progress status or change request for the same node. It creates a [`BufferingViewport`](../src/tree-widget-react/shared/internal/BufferingViewport.ts), suppresses viewport and always/never-drawn cache events, and creates a `CategoriesTreeVisibilityHandler` against the buffered viewport.
 3. The tree-specific handler reads the node's `extendedData`, identifies a category node, and — after calling [removeAlwaysDrawnExclusive](./SharedVisibilityHandling.md#removealwaysdrawnexclusive) first if exclusive mode is active — delegates to the shared [changeCategoriesVisibilityStatus](./SharedVisibilityHandling.md#changecategoriesvisibilitystatus) without a `modelId`.
 4. The shared helper enables the category in the category selector, then for every related model: clears the per-model category override, clears path-scoped always/never-drawn entries, and recursively changes scoped sub-models. Hidden related models are prepared by [showModelWithoutAnyCategoriesOrElements](./SharedVisibilityHandling.md#showmodelwithoutanycategoriesorelements) so no unrelated categories become visible. Descendants in other actual categories are reconciled through [queueElementsVisibilityChange](./SharedVisibilityHandling.md#queueelementsvisibilitychange), and hidden sub-categories of the requested category are enabled.
 5. The change pipeline completes, so all buffered viewport mutations are committed in one batch, events are resumed, and the tree-specific handler is disposed.

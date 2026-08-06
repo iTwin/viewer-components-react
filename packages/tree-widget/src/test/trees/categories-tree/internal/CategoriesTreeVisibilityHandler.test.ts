@@ -23,23 +23,20 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import {
-  CategoriesTreeDefinition,
-  defaultHierarchyConfiguration,
-} from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
-import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
-import { createCategoriesTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.js";
-import { BaseIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/caches/BaseIdsCache.js";
+import { BaseIdsCache } from "../../../../tree-widget-react/shared/internal/caches/BaseIdsCache.js";
 import {
   CLASS_NAME_GeometricElement3d,
   CLASS_NAME_SubCategory,
   CLASS_NAME_Subject,
-} from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
-import { getClassesByView, mergeWithDefaults } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
+} from "../../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { getClassesByView, mergeWithDefaults } from "../../../../tree-widget-react/shared/internal/Utils.js";
+import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "../../../../tree-widget-react/trees/categories-tree/CategoriesTreeDefinition.js";
+import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
+import { createCategoriesTreeVisibilityHandler } from "../../../../tree-widget-react/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.js";
 import { buildIModel } from "../../../IModelUtils.js";
+import { validateHierarchyVisibility } from "../../../shared/VisibilityValidation.js";
 import { TestUtils } from "../../../TestUtils.js";
 import { createIModelAccess } from "../../Common.js";
-import { validateHierarchyVisibility } from "../../common/VisibilityValidation.js";
 import { CLASS_NAME_DefinitionModel, createTreeWidgetTestingViewport, getDefaultSubCategoryId } from "../../TreeUtils.js";
 import {
   createCategoryHierarchyNode,
@@ -59,8 +56,8 @@ import type { InstanceKey, Props } from "@itwin/presentation-shared";
 import type {
   CategoriesTreeHierarchyConfiguration,
   RequiredCategoriesTreeHierarchyConfiguration,
-} from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
-import type { VisibilityExpectations } from "../../common/VisibilityValidation.js";
+} from "../../../../tree-widget-react/trees/categories-tree/CategoriesTreeDefinition.js";
+import type { VisibilityExpectations } from "../../../shared/VisibilityValidation.js";
 import type { TreeWidgetTestingViewport } from "../../TreeUtils.js";
 
 describe("CategoriesTreeVisibilityHandler", () => {
@@ -91,16 +88,18 @@ describe("CategoriesTreeVisibilityHandler", () => {
     hierarchyConfig,
     subCategoriesOfCategories,
     visibleByDefault,
+    viewType,
   }: {
     imodelConnection: IModelConnection;
     hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
     subCategoriesOfCategories?: Array<{ categoryId: Id64String; subCategories: Id64Arg }>;
     visibleByDefault?: boolean;
+    viewType: "2d" | "3d";
   }) {
     const imodelAccess = createIModelAccess(imodelConnection);
-    const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
-    const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-    const viewport = createTreeWidgetTestingViewport({ iModel: imodelConnection, subCategoriesOfCategories, viewType: "3d", visibleByDefault });
+    const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+    const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
+    const viewport = createTreeWidgetTestingViewport({ iModel: imodelConnection, subCategoriesOfCategories, viewType, visibleByDefault });
 
     return {
       imodelAccess,
@@ -116,9 +115,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
     imodelAccess: ReturnType<typeof createIModelAccess>;
     searchPaths?: HierarchySearchTree[];
     hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
+    viewType?: "2d" | "3d";
   }) {
     return createIModelHierarchyProvider({
-      hierarchyDefinition: new CategoriesTreeDefinition({ ...props, viewType: "3d" }),
+      hierarchyDefinition: new CategoriesTreeDefinition({ ...props, viewType: props.viewType ?? "3d" }),
       imodelAccess: props.imodelAccess,
       ...(props.searchPaths ? { search: { paths: props.searchPaths } } : undefined),
     });
@@ -128,18 +128,20 @@ describe("CategoriesTreeVisibilityHandler", () => {
     imodelConnection,
     subCategoriesOfCategories,
     visibleByDefault,
+    viewType,
     ...restProps
   }: {
     imodelConnection: IModelConnection;
     hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
     subCategoriesOfCategories?: Array<{ categoryId: Id64String; subCategories: Id64Arg }>;
     visibleByDefault?: boolean;
+    viewType?: "2d" | "3d";
   }) {
     const hierarchyConfig = mergeWithDefaults({
       defaults: defaultHierarchyConfiguration,
       overrides: restProps.hierarchyConfig,
     });
-    const commonProps = await createCommonProps({ imodelConnection, hierarchyConfig, subCategoriesOfCategories, visibleByDefault });
+    const commonProps = await createCommonProps({ imodelConnection, hierarchyConfig, subCategoriesOfCategories, visibleByDefault, viewType: viewType ?? "3d" });
     const handler = createCategoriesTreeVisibilityHandler({
       viewport: commonProps.viewport,
       idsCache: commonProps.idsCache,
@@ -147,7 +149,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       searchPaths: undefined,
       hierarchyConfig,
     });
-    const provider = createProvider({ ...commonProps, hierarchyConfig });
+    const provider = createProvider({ ...commonProps, hierarchyConfig, viewType });
 
     return {
       handler,
@@ -715,7 +717,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
               [keys.definitionContainerChild.id]: "hidden",
                 [keys.indirectCategory.id]: "hidden",
-                  [getDefaultSubCategoryId(keys.indirectCategory.id)]: "hidden",
           },
         });
       });
@@ -858,7 +859,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
               [keys.subCategory.id]: "visible",
 
             [keys.category2.id]: "hidden",
-              [getDefaultSubCategoryId(keys.category2.id)]: "hidden",
           },
         });
       });
@@ -1476,7 +1476,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
               [keys.definitionContainerRoot.id]: "partial",
                 [keys.definitionContainerChild.id]: "hidden",
                   [keys.indirectCategory.id]: "hidden",
-                    [getDefaultSubCategoryId(keys.indirectCategory.id)]: "hidden",
                     [keys.indirectElement.id]: "hidden",
 
                 [keys.category.id]: "visible",
@@ -1583,7 +1582,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 [keys.element.id]: "hidden",
 
               [keys.category2.id]: "hidden",
-                [getDefaultSubCategoryId(keys.category2.id)]: "hidden",
                 [keys.element2.id]: "hidden",
             },
           });
@@ -1806,7 +1804,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 [keys.element.id]: "visible",
 
               [keys.category2.id]: "hidden",
-                [getDefaultSubCategoryId(keys.category2.id)]: "hidden",
                 [keys.element2.id]: "hidden",
             },
           });
@@ -1965,6 +1962,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             visibilityTestData = await createVisibilityTestData({
               imodelConnection: buildIModelResult.imodelConnection,
               hierarchyConfig: { elements: { nodes: "include" } },
+              viewType,
             });
           });
 
@@ -1997,13 +1995,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
               // prettier-ignore
               expectations: {
                 [keys.categoryA.id]: "partial",
-                  [getDefaultSubCategoryId(keys.categoryA.id)]: "hidden",
                   [keys.parentElement.id]: "partial",
                     [`${keys.parentElement.id}-${keys.categoryB.id}`]: "visible",
                       [keys.childElement.id]: "visible",
 
                 [keys.categoryB.id]: "hidden",
-                  [getDefaultSubCategoryId(keys.categoryB.id)]: "hidden",
               },
             });
           });
@@ -2029,13 +2025,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
               // prettier-ignore
               expectations: {
                 [keys.categoryA.id]: "partial",
-                  [getDefaultSubCategoryId(keys.categoryA.id)]: "hidden",
                   [keys.parentElement.id]: "partial",
                     [`${keys.parentElement.id}-${keys.categoryB.id}`]: "visible",
                       [keys.childElement.id]: "visible",
 
                 [keys.categoryB.id]: "hidden",
-                  [getDefaultSubCategoryId(keys.categoryB.id)]: "hidden",
               },
             });
           });
@@ -2061,13 +2055,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
               // prettier-ignore
               expectations: {
                 [keys.categoryA.id]: "partial",
-                  [getDefaultSubCategoryId(keys.categoryA.id)]: "hidden",
+                  // Category has a sub-category which is hidden
                   [keys.parentElement.id]: "visible",
                     [`${keys.parentElement.id}-${keys.categoryB.id}`]: "visible",
                       [keys.childElement.id]: "visible",
 
                 [keys.categoryB.id]: "hidden",
-                  [getDefaultSubCategoryId(keys.categoryB.id)]: "hidden",
               },
             });
           });
@@ -2103,6 +2096,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             visibilityTestData = await createVisibilityTestData({
               imodelConnection: buildIModelResult.imodelConnection,
               hierarchyConfig: { elements: { nodes: "include" } },
+              viewType,
             });
           });
 
@@ -2134,13 +2128,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
               // prettier-ignore
               expectations: {
                 [keys.categoryA.id]: "partial",
-                  [getDefaultSubCategoryId(keys.categoryA.id)]: "hidden",
                   [keys.modeledElement.id]: "partial",
                     [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "visible",
                       [keys.subModelElement.id]: "visible",
 
                 [keys.categoryB.id]: "hidden",
-                  [getDefaultSubCategoryId(keys.categoryB.id)]: "hidden",
               },
             });
           });
@@ -2165,13 +2157,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
               // prettier-ignore
               expectations: {
                 [keys.categoryA.id]: "partial",
-                  [getDefaultSubCategoryId(keys.categoryA.id)]: "hidden",
                   [keys.modeledElement.id]: "partial",
                     [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "visible",
                       [keys.subModelElement.id]: "visible",
 
                 [keys.categoryB.id]: "hidden",
-                  [getDefaultSubCategoryId(keys.categoryB.id)]: "hidden",
               },
             });
           });
@@ -2197,13 +2187,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
               // prettier-ignore
               expectations: {
                 [keys.categoryA.id]: "partial",
-                  [getDefaultSubCategoryId(keys.categoryA.id)]: "hidden",
+                  // Category has a sub-category which is hidden
                   [keys.modeledElement.id]: "visible",
                     [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "visible",
                       [keys.subModelElement.id]: "visible",
 
                 [keys.categoryB.id]: "hidden",
-                  [getDefaultSubCategoryId(keys.categoryB.id)]: "hidden",
               },
             });
           });
@@ -2391,8 +2380,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
               getTargetNode: (ids: IModelWithSubModelIds) => createCategoryHierarchyNode({ id: ids.category.id, hasChildren: true }),
               // prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
-                [ids.subModelCategory?.id ?? ""]: "hidden",
-
                 [ids.category.id]: "visible",
                   [ids.modeledElement.id]: "visible",
               }),
@@ -2404,12 +2391,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
                   categoryId: ids.category.id,
                   modelElementsMap: new Map([[ids.model.id, { elementIds: new Set([ids.modeledElement.id]) }]]),
                 }),
-              // Category has partial visibility, since its sub-category is not visible
               // prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
-                [ids.subModelCategory?.id ?? ""]: "hidden",
-
                 [ids.category.id]: "partial",
+                  // Category has hidden sub-category
                   [ids.modeledElement.id]: "visible",
               }),
             },
@@ -2422,12 +2407,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
                   elementId: ids.modeledElement.id,
                   hasChildren: false,
                 }),
-              // Category has partial visibility, since its sub-category is not visible
               //prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
-                [ids.subModelCategory?.id ?? ""]: "hidden",
-
                 [ids.category.id]: "partial",
+                  // Category has hidden sub-category
                   [ids.modeledElement.id]: "visible",
               }),
             },
@@ -3158,7 +3141,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
               [keys.definitionContainerChild.id]: "visible",
                 [keys.indirectCategory.id]: "visible",
-                  [getDefaultSubCategoryId(keys.indirectCategory.id)]: "visible",
           },
         });
       });
@@ -3247,7 +3229,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
               [getDefaultSubCategoryId(keys.category.id)]: "visible",
 
             [keys.category2.id]: "visible",
-              [getDefaultSubCategoryId(keys.category2.id)]: "visible",
           },
         });
       });
@@ -3380,6 +3361,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               imodelConnection: buildIModelResult.imodelConnection,
               hierarchyConfig: { elements: { nodes: "include" } },
               visibleByDefault: true,
+              viewType,
             });
           });
 
@@ -3412,13 +3394,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
               // prettier-ignore
               expectations: {
                 [keys.categoryA.id]: "partial",
-                  [getDefaultSubCategoryId(keys.categoryA.id)]: "visible",
                   [keys.parentElement.id]: "partial",
                     [`${keys.parentElement.id}-${keys.categoryB.id}`]: "hidden",
                       [keys.childElement.id]: "hidden",
 
                 [keys.categoryB.id]: "visible",
-                  [getDefaultSubCategoryId(keys.categoryB.id)]: "visible",
               },
             });
           });
@@ -3444,13 +3424,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
               // prettier-ignore
               expectations: {
                 [keys.categoryA.id]: "partial",
-                  [getDefaultSubCategoryId(keys.categoryA.id)]: "visible",
                   [keys.parentElement.id]: "partial",
                     [`${keys.parentElement.id}-${keys.categoryB.id}`]: "hidden",
                       [keys.childElement.id]: "hidden",
 
                 [keys.categoryB.id]: "visible",
-                  [getDefaultSubCategoryId(keys.categoryB.id)]: "visible",
               },
             });
           });
@@ -3476,13 +3454,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
               // prettier-ignore
               expectations: {
                 [keys.categoryA.id]: "partial",
-                  [getDefaultSubCategoryId(keys.categoryA.id)]: "visible",
+                  // Category has a sub-category which is visible
                   [keys.parentElement.id]: "hidden",
                     [`${keys.parentElement.id}-${keys.categoryB.id}`]: "hidden",
                       [keys.childElement.id]: "hidden",
 
                 [keys.categoryB.id]: "visible",
-                  [getDefaultSubCategoryId(keys.categoryB.id)]: "visible",
               },
             });
           });
@@ -3519,6 +3496,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               imodelConnection: buildIModelResult.imodelConnection,
               hierarchyConfig: { elements: { nodes: "include" } },
               visibleByDefault: true,
+              viewType,
             });
           });
 
@@ -3550,13 +3528,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
               // prettier-ignore
               expectations: {
                 [keys.categoryA.id]: "partial",
-                  [getDefaultSubCategoryId(keys.categoryA.id)]: "visible",
                   [keys.modeledElement.id]: "partial",
                     [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "hidden",
                       [keys.subModelElement.id]: "hidden",
 
                 [keys.categoryB.id]: "visible",
-                  [getDefaultSubCategoryId(keys.categoryB.id)]: "visible",
               },
             });
           });
@@ -3581,13 +3557,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
               // prettier-ignore
               expectations: {
                 [keys.categoryA.id]: "partial",
-                  [getDefaultSubCategoryId(keys.categoryA.id)]: "visible",
                   [keys.modeledElement.id]: "partial",
                     [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "hidden",
                       [keys.subModelElement.id]: "hidden",
 
                 [keys.categoryB.id]: "visible",
-                  [getDefaultSubCategoryId(keys.categoryB.id)]: "visible",
               },
             });
           });
@@ -3612,14 +3586,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
               viewport,
               // prettier-ignore
               expectations: {
+                // Category has a sub-category which is visible
                 [keys.categoryA.id]: "partial",
-                  [getDefaultSubCategoryId(keys.categoryA.id)]: "visible",
                   [keys.modeledElement.id]: "hidden",
                     [`${keys.modeledElement.id}-${keys.categoryB.id}`]: "hidden",
                       [keys.subModelElement.id]: "hidden",
 
                 [keys.categoryB.id]: "visible",
-                  [getDefaultSubCategoryId(keys.categoryB.id)]: "visible",
               },
             });
           });
@@ -3738,8 +3711,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         viewport,
         hierarchyConfig,
       });
-      const defaultProvider = createProvider({ idsCache, imodelAccess, hierarchyConfig });
-      const providerWithSearchPaths = createProvider({ idsCache, imodelAccess, searchPaths, hierarchyConfig });
+      const defaultProvider = createProvider({ idsCache, imodelAccess, hierarchyConfig, viewType: view });
+      const providerWithSearchPaths = createProvider({ idsCache, imodelAccess, searchPaths, hierarchyConfig, viewType: view });
       return {
         defaultVisibilityHandler,
         visibilityHandlerWithSearchPaths,
@@ -4045,19 +4018,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
       it("showing category changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-        const {
-          category,
-          element,
-          siblingElement,
-          parentElement1,
-          childElement11,
-          childElement12,
-          parentElement2,
-          childElement21,
-          defaultSubCategory,
-          siblingCategory,
-          defaultSiblingSubCategory,
-        } = createIModelResult;
+        const { category, element, siblingElement, parentElement1, childElement11, childElement12, parentElement2, childElement21, siblingCategory } =
+          createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
           createCategoryHierarchyNode({
             id: category.id,
@@ -4091,7 +4053,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [category.id]: "partial",
-              [defaultSubCategory.id]: "hidden",
               [element.id]: "hidden",
 
               [parentElement1.id]: "partial",
@@ -4103,7 +4064,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
             [siblingCategory.id]: "hidden",
               [siblingElement.id]: "hidden",
-              [defaultSiblingSubCategory.id]: "hidden",
           },
         });
       });
@@ -4119,9 +4079,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           childElement12,
           parentElement2,
           childElement21,
-          defaultSubCategory,
           siblingCategory,
-          defaultSiblingSubCategory,
           physicalModel,
         } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
@@ -4160,7 +4118,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [category.id]: "partial",
-              [defaultSubCategory.id]: "hidden",
               [element.id]: "hidden",
 
               [parentElement1.id]: "partial",
@@ -4172,7 +4129,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
             [siblingCategory.id]: "hidden",
               [siblingElement.id]: "hidden",
-              [defaultSiblingSubCategory.id]: "hidden",
           },
         });
       });
@@ -4188,9 +4144,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           childElement12,
           parentElement2,
           childElement21,
-          defaultSubCategory,
           siblingCategory,
-          defaultSiblingSubCategory,
           physicalModel,
         } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
@@ -4226,7 +4180,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [category.id]: "partial",
-              [defaultSubCategory.id]: "hidden",
               [element.id]: "hidden",
 
               [parentElement1.id]: "partial",
@@ -4238,7 +4191,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
             [siblingCategory.id]: "hidden",
               [siblingElement.id]: "hidden",
-              [defaultSiblingSubCategory.id]: "hidden",
           },
         });
       });
@@ -4254,9 +4206,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           childElement12,
           parentElement2,
           childElement21,
-          defaultSubCategory,
           siblingCategory,
-          defaultSiblingSubCategory,
           physicalModel,
         } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
@@ -4292,7 +4242,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [category.id]: "partial",
-              [defaultSubCategory.id]: "hidden",
               [element.id]: "hidden",
 
               [parentElement1.id]: "hidden",
@@ -4304,7 +4253,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
             [siblingCategory.id]: "hidden",
               [siblingElement.id]: "hidden",
-              [defaultSiblingSubCategory.id]: "hidden",
           },
         });
       });
@@ -4320,9 +4268,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           childElement12,
           parentElement2,
           childElement21,
-          defaultSubCategory,
           siblingCategory,
-          defaultSiblingSubCategory,
           physicalModel,
         } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
@@ -4358,7 +4304,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [category.id]: "partial",
-              [defaultSubCategory.id]: "hidden",
               [element.id]: "hidden",
 
               [parentElement1.id]: "hidden",
@@ -4370,7 +4315,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
             [siblingCategory.id]: "hidden",
               [siblingElement.id]: "hidden",
-              [defaultSiblingSubCategory.id]: "hidden",
           },
         });
       });
@@ -4447,7 +4391,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
       it("showing category changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-        const { category, element, parentElement, childElement, childOfChild1, childOfChild2, defaultSubCategory } = createIModelResult;
+        const { category, element, parentElement, childElement, childOfChild1, childOfChild2 } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
           createCategoryHierarchyNode({
             id: category.id,
@@ -4482,7 +4426,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [category.id]: "partial",
-              [defaultSubCategory.id]: "hidden",
               [element.id]: "hidden",
 
               [parentElement.id]: "visible",
@@ -4495,7 +4438,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
       it("showing search target parent element changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-        const { category, element, parentElement, childElement, childOfChild1, childOfChild2, defaultSubCategory, physicalModel } = createIModelResult;
+        const { category, element, parentElement, childElement, childOfChild1, childOfChild2, physicalModel } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
           createElementHierarchyNode({
             elementId: parentElement.id,
@@ -4528,7 +4471,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [category.id]: "partial",
-              [defaultSubCategory.id]: "hidden",
               [element.id]: "hidden",
 
               [parentElement.id]: "visible",
@@ -4541,7 +4483,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
       it("showing child element of search target parent element changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-        const { category, element, parentElement, childElement, childOfChild1, childOfChild2, defaultSubCategory, physicalModel } = createIModelResult;
+        const { category, element, parentElement, childElement, childOfChild1, childOfChild2, physicalModel } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
           createElementHierarchyNode({
             elementId: childElement.id,
@@ -4579,7 +4521,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [category.id]: "partial",
-              [defaultSubCategory.id]: "hidden",
               [element.id]: "hidden",
 
               [parentElement.id]: "partial",
@@ -4592,7 +4533,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
       it("showing nested child search target element with search target ancestor element changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-        const { category, element, parentElement, childElement, childOfChild1, childOfChild2, defaultSubCategory, physicalModel } = createIModelResult;
+        const { category, element, parentElement, childElement, childOfChild1, childOfChild2, physicalModel } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
           createElementHierarchyNode({
             elementId: childOfChild1.id,
@@ -4632,7 +4573,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [category.id]: "partial",
-              [defaultSubCategory.id]: "hidden",
               [element.id]: "hidden",
 
               [parentElement.id]: "partial",
@@ -4724,8 +4664,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
         it("showing intermediate category changes visibility for related nodes in search paths", async () => {
           const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-          const { categoryA, categoryB, defaultSubCategoryA, defaultSubCategoryB, parentElement, childElement1, childElement2, siblingElement, elementsModel } =
-            createIModelResult;
+          const { categoryA, categoryB, parentElement, childElement1, childElement2, siblingElement, elementsModel } = createIModelResult;
           await visibilityHandlerWithSearchPaths.changeVisibility(
             createCategoryHierarchyNode({
               id: categoryB.id,
@@ -4761,7 +4700,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
             // prettier-ignore
             expectations: {
               [categoryA.id]: "partial",
-                [defaultSubCategoryA.id]: "hidden",
                 [parentElement.id]: "partial",
                   [`${parentElement.id}-${categoryB.id}`]: "partial",
                     [childElement1.id]: "visible",
@@ -4769,15 +4707,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 [siblingElement.id]: "hidden",
 
               [categoryB.id]: "hidden",
-                [defaultSubCategoryB.id]: "hidden",
             },
           });
         });
 
         it("showing child element under intermediate category changes visibility for related nodes in search paths", async () => {
           const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-          const { categoryA, categoryB, defaultSubCategoryA, defaultSubCategoryB, parentElement, childElement1, childElement2, siblingElement, elementsModel } =
-            createIModelResult;
+          const { categoryA, categoryB, parentElement, childElement1, childElement2, siblingElement, elementsModel } = createIModelResult;
           await visibilityHandlerWithSearchPaths.changeVisibility(
             createElementHierarchyNode({
               elementId: childElement1.id,
@@ -4810,7 +4746,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
             // prettier-ignore
             expectations: {
               [categoryA.id]: "partial",
-                [defaultSubCategoryA.id]: "hidden",
                 [parentElement.id]: "partial",
                   [`${parentElement.id}-${categoryB.id}`]: "partial",
                     [childElement1.id]: "visible",
@@ -4818,15 +4753,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 [siblingElement.id]: "hidden",
 
               [categoryB.id]: "hidden",
-                [defaultSubCategoryB.id]: "hidden",
             },
           });
         });
 
         it("showing parent element changes visibility for intermediate category children in search paths", async () => {
           const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-          const { categoryA, categoryB, defaultSubCategoryA, defaultSubCategoryB, parentElement, childElement1, childElement2, siblingElement, elementsModel } =
-            createIModelResult;
+          const { categoryA, categoryB, parentElement, childElement1, childElement2, siblingElement, elementsModel } = createIModelResult;
           await visibilityHandlerWithSearchPaths.changeVisibility(
             createElementHierarchyNode({
               elementId: parentElement.id,
@@ -4862,7 +4795,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
             // prettier-ignore
             expectations: {
               [categoryA.id]: "partial",
-                [defaultSubCategoryA.id]: "hidden",
                 [parentElement.id]: "partial",
                   [`${parentElement.id}-${categoryB.id}`]: "partial",
                     [childElement1.id]: "visible",
@@ -4870,15 +4802,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 [siblingElement.id]: "hidden",
 
               [categoryB.id]: "hidden",
-                [defaultSubCategoryB.id]: "hidden",
             },
           });
         });
 
         it("showing root category changes visibility for intermediate category children in search paths", async () => {
           const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-          const { categoryA, categoryB, defaultSubCategoryA, defaultSubCategoryB, parentElement, childElement1, childElement2, siblingElement } =
-            createIModelResult;
+          const { categoryA, categoryB, parentElement, childElement1, childElement2, siblingElement } = createIModelResult;
           await visibilityHandlerWithSearchPaths.changeVisibility(
             createCategoryHierarchyNode({
               id: categoryA.id,
@@ -4911,7 +4841,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
             // prettier-ignore
             expectations: {
               [categoryA.id]: "partial",
-                [defaultSubCategoryA.id]: "hidden",
                 [parentElement.id]: "partial",
                   [`${parentElement.id}-${categoryB.id}`]: "partial",
                     [childElement1.id]: "visible",
@@ -4919,7 +4848,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 [siblingElement.id]: "hidden",
 
               [categoryB.id]: "hidden",
-                [defaultSubCategoryB.id]: "hidden",
             },
           });
         });
@@ -5002,8 +4930,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
         it("showing intermediate category under sub-model changes visibility for related nodes in search paths", async () => {
           const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-          const { categoryA, categoryB, defaultSubCategoryA, defaultSubCategoryB, modeledElement, subModel, subModelElement1, subModelElement2 } =
-            createIModelResult;
+          const { categoryA, categoryB, modeledElement, subModel, subModelElement1, subModelElement2 } = createIModelResult;
           await visibilityHandlerWithSearchPaths.changeVisibility(
             createCategoryHierarchyNode({
               id: categoryB.id,
@@ -5039,22 +4966,19 @@ describe("CategoriesTreeVisibilityHandler", () => {
             // prettier-ignore
             expectations: {
               [categoryA.id]: "partial",
-                [defaultSubCategoryA.id]: "hidden",
                 [modeledElement.id]: "partial",
                   [`${modeledElement.id}-${categoryB.id}`]: "partial",
                     [subModelElement1.id]: "visible",
                     [subModelElement2.id]: "hidden",
 
               [categoryB.id]: "hidden",
-                [defaultSubCategoryB.id]: "hidden",
             },
           });
         });
 
         it("showing element under intermediate category in sub-model changes visibility for related nodes in search paths", async () => {
           const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-          const { categoryA, categoryB, defaultSubCategoryA, defaultSubCategoryB, modeledElement, subModel, subModelElement1, subModelElement2 } =
-            createIModelResult;
+          const { categoryA, categoryB, modeledElement, subModel, subModelElement1, subModelElement2 } = createIModelResult;
           await visibilityHandlerWithSearchPaths.changeVisibility(
             createElementHierarchyNode({
               elementId: subModelElement1.id,
@@ -5087,31 +5011,19 @@ describe("CategoriesTreeVisibilityHandler", () => {
             // prettier-ignore
             expectations: {
               [categoryA.id]: "partial",
-                [defaultSubCategoryA.id]: "hidden",
                 [modeledElement.id]: "partial",
                   [`${modeledElement.id}-${categoryB.id}`]: "partial",
                     [subModelElement1.id]: "visible",
                     [subModelElement2.id]: "hidden",
 
               [categoryB.id]: "hidden",
-                [defaultSubCategoryB.id]: "hidden",
             },
           });
         });
 
         it("showing modeled element changes visibility for intermediate category children in search paths", async () => {
           const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-          const {
-            categoryA,
-            categoryB,
-            defaultSubCategoryA,
-            defaultSubCategoryB,
-            modeledElement,
-            subModel,
-            subModelElement1,
-            subModelElement2,
-            elementsModel,
-          } = createIModelResult;
+          const { categoryA, categoryB, modeledElement, subModel, subModelElement1, subModelElement2, elementsModel } = createIModelResult;
           await visibilityHandlerWithSearchPaths.changeVisibility(
             createElementHierarchyNode({
               elementId: modeledElement.id,
@@ -5148,14 +5060,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
             // prettier-ignore
             expectations: {
               [categoryA.id]: "partial",
-                [defaultSubCategoryA.id]: "hidden",
                 [modeledElement.id]: "partial",
                   [`${modeledElement.id}-${categoryB.id}`]: "partial",
                     [subModelElement1.id]: "visible",
                     [subModelElement2.id]: "hidden",
 
               [categoryB.id]: "hidden",
-                [defaultSubCategoryB.id]: "hidden",
             },
           });
         });
@@ -5272,14 +5182,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
           subModelElement,
           siblingCategory,
           siblingElement,
-          defaultSiblingSubCategory,
-          defaultSubCategoryOfSubModelCategory,
-          defaultSubCategory,
           element,
           subModelElement2,
           otherSubModelCategory,
           otherSubModelElement,
-          defaultSubCategoryOfOtherSubModelCategory,
         } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
           createCategoryHierarchyNode({
@@ -5317,7 +5223,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [category.id]: "partial",
-              [defaultSubCategory.id]: "hidden",
               [element.id]: "hidden",
 
               [modeledElement.id]: "partial",
@@ -5328,14 +5233,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
                   [otherSubModelElement.id]: "hidden",
 
             [otherSubModelCategory.id]: "hidden",
-              [defaultSubCategoryOfOtherSubModelCategory.id]: "hidden",
 
             [siblingCategory.id]: "hidden",
               [siblingElement.id]: "hidden",
-              [defaultSiblingSubCategory.id]: "hidden",
 
             [subModelCategory.id]: "hidden",
-              [defaultSubCategoryOfSubModelCategory.id]: "hidden",
           },
         });
       });
@@ -5350,14 +5252,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
           subModelElement,
           siblingCategory,
           siblingElement,
-          defaultSiblingSubCategory,
-          defaultSubCategoryOfSubModelCategory,
-          defaultSubCategory,
           element,
           subModelElement2,
           otherSubModelCategory,
           otherSubModelElement,
-          defaultSubCategoryOfOtherSubModelCategory,
           physicalModel,
         } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
@@ -5394,7 +5292,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [category.id]: "partial",
-              [defaultSubCategory.id]: "hidden",
               [element.id]: "hidden",
 
               [modeledElement.id]: "partial",
@@ -5405,14 +5302,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
                   [otherSubModelElement.id]: "hidden",
 
             [otherSubModelCategory.id]: "hidden",
-              [defaultSubCategoryOfOtherSubModelCategory.id]: "hidden",
 
             [siblingCategory.id]: "hidden",
               [siblingElement.id]: "hidden",
-              [defaultSiblingSubCategory.id]: "hidden",
 
             [subModelCategory.id]: "hidden",
-              [defaultSubCategoryOfSubModelCategory.id]: "hidden",
           },
         });
       });
@@ -5427,14 +5321,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
           subModelElement,
           siblingCategory,
           siblingElement,
-          defaultSiblingSubCategory,
-          defaultSubCategoryOfSubModelCategory,
-          defaultSubCategory,
           element,
           subModelElement2,
           otherSubModelCategory,
           otherSubModelElement,
-          defaultSubCategoryOfOtherSubModelCategory,
         } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
           createCategoryHierarchyNode({
@@ -5471,7 +5361,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [category.id]: "partial",
-              [defaultSubCategory.id]: "hidden",
               [element.id]: "hidden",
 
               [modeledElement.id]: "partial",
@@ -5482,14 +5371,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
                   [otherSubModelElement.id]: "hidden",
 
             [otherSubModelCategory.id]: "hidden",
-              [defaultSubCategoryOfOtherSubModelCategory.id]: "hidden",
 
             [siblingCategory.id]: "hidden",
               [siblingElement.id]: "hidden",
-              [defaultSiblingSubCategory.id]: "hidden",
 
             [subModelCategory.id]: "hidden",
-              [defaultSubCategoryOfSubModelCategory.id]: "hidden",
           },
         });
       });
@@ -5504,14 +5390,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
           subModelElement,
           siblingCategory,
           siblingElement,
-          defaultSiblingSubCategory,
-          defaultSubCategoryOfSubModelCategory,
-          defaultSubCategory,
           element,
           subModelElement2,
           otherSubModelCategory,
           otherSubModelElement,
-          defaultSubCategoryOfOtherSubModelCategory,
         } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
           createElementHierarchyNode({
@@ -5547,7 +5429,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [category.id]: "partial",
-              [defaultSubCategory.id]: "hidden",
               [element.id]: "hidden",
 
               [modeledElement.id]: "partial",
@@ -5558,14 +5439,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
                   [otherSubModelElement.id]: "hidden",
 
             [otherSubModelCategory.id]: "hidden",
-              [defaultSubCategoryOfOtherSubModelCategory.id]: "hidden",
 
             [siblingCategory.id]: "hidden",
               [siblingElement.id]: "hidden",
-              [defaultSiblingSubCategory.id]: "hidden",
 
             [subModelCategory.id]: "hidden",
-              [defaultSubCategoryOfSubModelCategory.id]: "hidden",
           },
         });
       });
@@ -5632,7 +5510,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
       it("showing definition container changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-        const { definitionContainer, category, siblingCategory, defaultSubCategory, defaultSiblingSubCategory, subCategory } = createIModelResult;
+        const { definitionContainer, category, siblingCategory, defaultSubCategory, subCategory } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
           createDefinitionContainerHierarchyNode({
             id: definitionContainer.id,
@@ -5668,14 +5546,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 [subCategory.id]: "hidden",
 
               [siblingCategory.id]: "hidden",
-                [defaultSiblingSubCategory.id]: "hidden",
           },
         });
       });
 
       it("showing category changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-        const { definitionContainer, category, siblingCategory, defaultSubCategory, defaultSiblingSubCategory, subCategory } = createIModelResult;
+        const { definitionContainer, category, siblingCategory, defaultSubCategory, subCategory } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
           createCategoryHierarchyNode({
             id: category.id,
@@ -5712,14 +5589,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 [subCategory.id]: "hidden",
 
               [siblingCategory.id]: "hidden",
-                [defaultSiblingSubCategory.id]: "hidden",
           },
         });
       });
 
       it("showing search target sub-category changes visibility for related nodes in search paths", async () => {
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-        const { definitionContainer, category, siblingCategory, defaultSubCategory, defaultSiblingSubCategory, subCategory } = createIModelResult;
+        const { definitionContainer, category, siblingCategory, defaultSubCategory, subCategory } = createIModelResult;
         await visibilityHandlerWithSearchPaths.changeVisibility(
           createSubCategoryHierarchyNode({
             id: defaultSubCategory.id,
@@ -5754,7 +5630,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 [subCategory.id]: "hidden",
 
               [siblingCategory.id]: "hidden",
-                [defaultSiblingSubCategory.id]: "hidden",
           },
         });
       });
