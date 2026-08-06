@@ -123,7 +123,7 @@ importers:
         version: file:../../packages/quantity-formatting(e1de7f3df5b65c7138a4ddb984087c31)
       '@itwin/tree-widget-react':
         specifier: workspace:*
-        version: file:../../packages/tree-widget(993a588be9aa68002f2966c52d49a67b)
+        version: file:../../packages/tree-widget(e942d4e344eb8a821b9da2e9fe112c5a)
       '@itwin/unified-selection':
         specifier: 2.0.0-alpha.0
         version: 2.0.0-alpha.0
@@ -147,7 +147,7 @@ importers:
         version: 0.5.3(@mui/material@9.2.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@7.2.0)
       '@stratakit/structures':
         specifier: ^0.5.7
-        version: 0.5.8(@types/react@18.3.31)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
+        version: 0.5.9(@types/react@18.3.31)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -850,7 +850,7 @@ packages:
       '@mui/material': ^9.0.0
       '@stratakit/icons': ^0.3.1
       '@stratakit/mui': ^0.5.3
-      '@stratakit/structures': ^0.5.6
+      '@stratakit/structures': ^0.5.9
       react: ^18.0.0
       react-dom: ^18.0.0
 
@@ -1276,8 +1276,8 @@ packages:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
 
-  '@stratakit/structures@0.5.8':
-    resolution: {integrity: sha512-/DA8h9BoWSSPvDJnTh3Y5NUEcuHgZfjICvlU41MpMndPQreeqi6/YInL7weAE9DRXbX9Z2XcGX5qSt9TRBHWwQ==}
+  '@stratakit/structures@0.5.9':
+    resolution: {integrity: sha512-lQktUISVodUuQbB3IDYcIfwPDu4AaCFKD8DytGBFYVo1SznjUI8jYIRF7E+0ooJ15AFTqc+ujcASJnNeBM0ygg==}
     peerDependencies:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
@@ -4153,7 +4153,7 @@ snapshots:
       '@itwin/presentation-shared': 2.0.0-alpha.12
       '@itwin/unified-selection': 2.0.0-alpha.0
       '@stratakit/icons': 0.4.2
-      '@stratakit/structures': 0.5.8(@types/react@18.3.31)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
+      '@stratakit/structures': 0.5.9(@types/react@18.3.31)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
       '@tanstack/react-virtual': 3.14.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
       immer: 10.2.0
@@ -4230,7 +4230,7 @@ snapshots:
       - debug
       - supports-color
 
-  '@itwin/tree-widget-react@file:../../packages/tree-widget(993a588be9aa68002f2966c52d49a67b)':
+  '@itwin/tree-widget-react@file:../../packages/tree-widget(e942d4e344eb8a821b9da2e9fe112c5a)':
     dependencies:
       '@itwin/appui-abstract': 5.11.3(@itwin/core-bentley@5.11.3)
       '@itwin/appui-react': 5.33.1(274bb627aa6e48fe630ab71305a2e17a)
@@ -4250,7 +4250,7 @@ snapshots:
       '@mui/material': 9.2.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@stratakit/icons': 0.4.2
       '@stratakit/mui': 0.5.3(@mui/material@9.2.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@7.2.0)
-      '@stratakit/structures': 0.5.8(@types/react@18.3.31)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
+      '@stratakit/structures': 0.5.9(@types/react@18.3.31)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
       classnames: 2.5.1
       react: 18.3.1
       react-compiler-runtime: 1.0.0(react@18.3.1)
@@ -4616,7 +4616,7 @@ snapshots:
   '@stratakit/bricks@0.5.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@ariakit/react': 0.4.35(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@stratakit/foundations': 0.4.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/foundations': 0.4.10(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
       react: 18.3.1
       react-compiler-runtime: 1.0.0(react@18.3.1)
@@ -4661,11 +4661,11 @@ snapshots:
       - '@types/react'
       - supports-color
 
-  '@stratakit/structures@0.5.8(@types/react@18.3.31)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))':
+  '@stratakit/structures@0.5.9(@types/react@18.3.31)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))':
     dependencies:
       '@ariakit/react': 0.4.35(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@stratakit/bricks': 0.5.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@stratakit/foundations': 0.4.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/foundations': 0.4.10(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
       react: 18.3.1
       react-compiler-runtime: 1.0.0(react@18.3.1)

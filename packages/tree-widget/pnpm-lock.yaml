@@ -24,6 +24,9 @@ importers:
       '@itwin/unified-selection':
         specifier: 2.0.0-alpha.0
         version: 2.0.0-alpha.0
+      '@mui/utils':
+        specifier: ^9.0.0
+        version: 9.2.0(@types/react@18.3.28)(react@18.3.1)
       '@stratakit/icons':
         specifier: ^0.4.0
         version: 0.4.2
@@ -132,7 +135,7 @@ importers:
         version: 0.5.3(@mui/material@9.1.2(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.28)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@8.1.1)
       '@stratakit/structures':
         specifier: ^0.5.7
-        version: 0.5.8(@types/react@18.3.28)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
+        version: 0.5.9(@types/react@18.3.28)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
@@ -1617,17 +1620,6 @@ packages:
       react-dom:
         optional: true
 
-  '@stratakit/foundations@0.4.9':
-    resolution: {integrity: sha512-juBKMLLsNTjbmwGNuHUS/MwSQgOSbAjD49fRzgQWfSvPlC1PmP+Zh+XeqWTleH3nh4DXZ2TFBgNuOYKfd5loSA==}
-    peerDependencies:
-      react: '>=18.0.0'
-      react-dom: '>=18.0.0'
-    peerDependenciesMeta:
-      react:
-        optional: true
-      react-dom:
-        optional: true
-
   '@stratakit/icons@0.4.2':
     resolution: {integrity: sha512-bKAwyESZZ6jrq903ROiMEnNhnHoadnmLmn32+b/7t80PU5YxM8hOhI9iUtpElbpMNZqJ55RK03EIEVYJpWFixQ==}
 
@@ -1641,8 +1633,8 @@ packages:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
 
-  '@stratakit/structures@0.5.8':
-    resolution: {integrity: sha512-/DA8h9BoWSSPvDJnTh3Y5NUEcuHgZfjICvlU41MpMndPQreeqi6/YInL7weAE9DRXbX9Z2XcGX5qSt9TRBHWwQ==}
+  '@stratakit/structures@0.5.9':
+    resolution: {integrity: sha512-lQktUISVodUuQbB3IDYcIfwPDu4AaCFKD8DytGBFYVo1SznjUI8jYIRF7E+0ooJ15AFTqc+ujcASJnNeBM0ygg==}
     peerDependencies:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
@@ -6122,7 +6114,7 @@ snapshots:
       '@itwin/presentation-shared': 2.0.0-alpha.12
       '@itwin/unified-selection': 2.0.0-alpha.0
       '@stratakit/icons': 0.4.2
-      '@stratakit/structures': 0.5.8(@types/react@18.3.28)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
+      '@stratakit/structures': 0.5.9(@types/react@18.3.28)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
       '@tanstack/react-virtual': 3.13.24(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
       immer: 10.2.0
@@ -6668,22 +6660,13 @@ snapshots:
   '@stratakit/bricks@0.5.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@ariakit/react': 0.4.35(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@stratakit/foundations': 0.4.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/foundations': 0.4.10(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
       react: 18.3.1
       react-compiler-runtime: 1.0.0(react@18.3.1)
       react-dom: 18.3.1(react@18.3.1)
 
   '@stratakit/foundations@0.4.10(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@ariakit/react': 0.4.35(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      classnames: 2.5.1
-      react-compiler-runtime: 1.0.0(react@18.3.1)
-    optionalDependencies:
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-
-  '@stratakit/foundations@0.4.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@ariakit/react': 0.4.35(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
@@ -6713,11 +6696,11 @@ snapshots:
       - '@types/react'
       - supports-color
 
-  '@stratakit/structures@0.5.8(@types/react@18.3.28)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))':
+  '@stratakit/structures@0.5.9(@types/react@18.3.28)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))':
     dependencies:
       '@ariakit/react': 0.4.35(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@stratakit/bricks': 0.5.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@stratakit/foundations': 0.4.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/foundations': 0.4.10(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
       react: 18.3.1
       react-compiler-runtime: 1.0.0(react@18.3.1)
