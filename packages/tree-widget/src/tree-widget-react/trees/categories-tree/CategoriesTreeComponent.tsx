@@ -133,7 +133,7 @@ function CategoriesTreeComponentImpl({
           <HideAllButton {...buttonProps} key="hide-all-btn" onFeatureUsed={onFeatureUsed} />,
           <InvertAllButton {...buttonProps} key="invert-all-btn" onFeatureUsed={onFeatureUsed} />,
         ]
-    : Array.from({ length: headerButtons?.length ?? 3 }, (_, index) => <Skeleton variant={"rounded"} width={28} height={28} key={index} />);
+    : Array.from({ length: headerButtons?.length ?? 3 }, (_, index) => <Skeleton variant={"rounded"} width={24} height={24} key={index} />);
 
   return (
     <TelemetryContextProvider componentIdentifier={CategoriesTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>

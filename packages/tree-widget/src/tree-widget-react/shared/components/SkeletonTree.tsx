@@ -30,8 +30,8 @@ export function SkeletonTree() {
 function SkeletonRow() {
   return (
     <div className="tw-skeleton-row">
-      <Skeleton variant={"rounded"} width={20} height={20} />
-      <Skeleton variant={"rounded"} style={{ flex: 1 }} />
+      <Skeleton variant={"rounded"} width={16} height={16} />
+      <Skeleton variant={"rounded"} width={"100%"} height={16} />
     </div>
   );
 }
