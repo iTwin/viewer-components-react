@@ -4,14 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 .tw-skeleton-container {
-  padding-top: var(--stratakit-space-x2);
+  padding-top: 8px;
 
   .tw-skeleton-row {
     display: flex;
-    gap: var(--stratakit-space-x1);
+    gap: 4px;
     height: 28px;
     width: 100%;
     align-items: center;
-    padding: 0 var(--stratakit-space-x3);
+    padding: 0 12px;
   }
 }
