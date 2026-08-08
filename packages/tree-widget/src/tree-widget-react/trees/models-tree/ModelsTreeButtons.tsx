@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { defaultIfEmpty, firstValueFrom, forkJoin, mergeAll, mergeMap, of, reduce, takeUntil } from "rxjs";
-import { IconButton, Tooltip } from "@mui/material";
+import { IconButton, ToggleButton, Tooltip } from "@mui/material";
 import toggle2DSvg from "@stratakit/icons/2d.svg";
 import toggle3DSvg from "@stratakit/icons/3d.svg";
 import focusModeSvg from "@stratakit/icons/cursor-click.svg";
@@ -223,18 +223,9 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
 
   const label = translate("modelsTree.buttons.toggle2d.tooltip");
   return (
-    <Tooltip title={label}>
-      <IconButton
-        size="small"
-        aria-label={label}
-        onClick={onClick}
-        disabled={models2d.length === 0}
-        color={is2dToggleActive ? "primary" : undefined}
-        aria-pressed={is2dToggleActive}
-      >
-        <Icon href={toggle2DSvg} />
-      </IconButton>
-    </Tooltip>
+    <ToggleButton value="toggle2d" size="small" label={label} onChange={onClick} disabled={models2d.length === 0} selected={is2dToggleActive}>
+      <Icon href={toggle2DSvg} />
+    </ToggleButton>
   );
 }
 
@@ -256,18 +247,9 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
 
   const label = translate("modelsTree.buttons.toggle3d.tooltip");
   return (
-    <Tooltip title={label}>
-      <IconButton
-        size="small"
-        aria-label={label}
-        onClick={onClick}
-        disabled={models3d.length === 0}
-        color={is3dToggleActive ? "primary" : undefined}
-        aria-pressed={is3dToggleActive}
-      >
-        <Icon href={toggle3DSvg} />
-      </IconButton>
-    </Tooltip>
+    <ToggleButton value="toggle3d" size="small" label={label} onChange={onClick} disabled={models3d.length === 0} selected={is3dToggleActive}>
+      <Icon href={toggle3DSvg} />
+    </ToggleButton>
   );
 }
 
@@ -281,22 +263,20 @@ export function ToggleInstancesFocusButton({ onFeatureUsed, disabled }: { onFeat
       ? translate("modelsTree.buttons.toggleFocusMode.disable.tooltip")
       : translate("modelsTree.buttons.toggleFocusMode.enable.tooltip");
   return (
-    <Tooltip title={label}>
-      <IconButton
-        size="small"
-        aria-label={label}
-        onClick={() => {
-          // cspell:disable-next-line
-          onFeatureUsed?.("models-tree-instancesfocus");
-          toggle();
-        }}
-        disabled={disabled}
-        color={enabled ? "primary" : undefined}
-        aria-pressed={enabled}
-      >
-        <Icon href={focusModeSvg} />
-      </IconButton>
-    </Tooltip>
+    <ToggleButton
+      value="instancesFocus"
+      size="small"
+      label={label}
+      onChange={() => {
+        // cspell:disable-next-line
+        onFeatureUsed?.("models-tree-instancesfocus");
+        toggle();
+      }}
+      disabled={disabled}
+      selected={enabled}
+    >
+      <Icon href={focusModeSvg} />
+    </ToggleButton>
   );
 }
 
