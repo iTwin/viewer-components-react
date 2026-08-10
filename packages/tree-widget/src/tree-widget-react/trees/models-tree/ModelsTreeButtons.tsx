@@ -137,7 +137,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
 
   const label = translate("modelsTree.buttons.showAll.tooltip");
   return (
-    <IconButton size="small" label={label} disabled={models.length === 0} onClick={() => void onClick()}>
+    <IconButton size="small" label={label} disabled={models.length === 0} onClick={onClick}>
       <Icon href={visibilityShowSvg} />
     </IconButton>
   );
@@ -189,7 +189,7 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
 
   const label = translate("modelsTree.buttons.invert.tooltip");
   return (
-    <IconButton size="small" label={label} disabled={models.length === 0} onClick={() => void onClick()}>
+    <IconButton size="small" label={label} disabled={models.length === 0} onClick={onClick}>
       <Icon href={visibilityInvertSvg} />
     </IconButton>
   );

@@ -149,7 +149,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
     } catch {}
   };
   return (
-    <IconButton size="small" label={translate("categoriesTree.buttons.hideAll.tooltip")} disabled={categories.length === 0} onClick={() => void onClick()}>
+    <IconButton size="small" label={translate("categoriesTree.buttons.hideAll.tooltip")} disabled={categories.length === 0} onClick={onClick}>
       <Icon href={visibilityHideSvg} />
     </IconButton>
   );
@@ -182,7 +182,7 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   };
 
   return (
-    <IconButton size="small" label={translate("categoriesTree.buttons.invert.tooltip")} disabled={categories.length === 0} onClick={() => void onClick()}>
+    <IconButton size="small" label={translate("categoriesTree.buttons.invert.tooltip")} disabled={categories.length === 0} onClick={onClick}>
       <Icon href={visibilityInvertSvg} />
     </IconButton>
   );
