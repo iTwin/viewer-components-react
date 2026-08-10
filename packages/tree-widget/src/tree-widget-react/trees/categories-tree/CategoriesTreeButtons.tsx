@@ -118,12 +118,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   };
 
   return (
-    <IconButton
-      size="small"
-      label={translate("categoriesTree.buttons.showAll.tooltip")}
-      disabled={categories.length === 0}
-      onClick={() => void onClick()}
-    >
+    <IconButton size="small" label={translate("categoriesTree.buttons.showAll.tooltip")} disabled={categories.length === 0} onClick={() => void onClick()}>
       <Icon href={visibilityShowSvg} />
     </IconButton>
   );
@@ -154,12 +149,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
     } catch {}
   };
   return (
-    <IconButton
-      size="small"
-      label={translate("categoriesTree.buttons.hideAll.tooltip")}
-      disabled={categories.length === 0}
-      onClick={() => void onClick()}
-    >
+    <IconButton size="small" label={translate("categoriesTree.buttons.hideAll.tooltip")} disabled={categories.length === 0} onClick={() => void onClick()}>
       <Icon href={visibilityHideSvg} />
     </IconButton>
   );
@@ -192,12 +182,7 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   };
 
   return (
-    <IconButton
-      size="small"
-      label={translate("categoriesTree.buttons.invert.tooltip")}
-      disabled={categories.length === 0}
-      onClick={() => void onClick()}
-    >
+    <IconButton size="small" label={translate("categoriesTree.buttons.invert.tooltip")} disabled={categories.length === 0} onClick={() => void onClick()}>
       <Icon href={visibilityInvertSvg} />
     </IconButton>
   );
