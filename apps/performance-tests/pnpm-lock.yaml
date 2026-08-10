@@ -68,13 +68,22 @@ importers:
         version: 2.0.0-alpha.12
       '@itwin/tree-widget-react':
         specifier: workspace:*
-        version: file:../../packages/tree-widget(ce747728ce78d888f3727ee44a982967)
+        version: file:../../packages/tree-widget(0f03eaa1eed1ac12092090d4559c0590)
       '@itwin/unified-selection':
         specifier: 2.0.0-alpha.0
         version: 2.0.0-alpha.0
+      '@mui/material':
+        specifier: ^9.0.0
+        version: 9.2.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@mui/utils':
+        specifier: ^9.0.0
+        version: 9.2.0(@types/react@18.3.31)(react@18.3.1)
       '@stratakit/icons':
         specifier: ^0.3.1
         version: 0.3.2
+      '@stratakit/mui':
+        specifier: ^0.5.3
+        version: 0.5.3(@mui/material@9.2.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@8.1.1)
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
@@ -548,7 +557,7 @@ packages:
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0 || ^5.0.0
       '@itwin/core-bentley': ^4.0.0 || ^5.0.0
-      '@itwin/itwinui-react': 3.21.2
+      '@itwin/itwinui-react': ^3.15.0
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
@@ -673,7 +682,7 @@ packages:
       '@itwin/core-react': ^4.9.0 || ^5.0.0
       '@itwin/ecschema-metadata': ^4.4.0 || ^5.0.0
       '@itwin/imodel-components-react': ^4.9.0 || ^5.0.0
-      '@itwin/itwinui-react': 3.21.2
+      '@itwin/itwinui-react': ^3.0.0
       '@itwin/presentation-common': ^4.4.0 || ^5.0.0
       '@itwin/presentation-frontend': ^4.4.0 || ^5.0.0
       '@itwin/unified-selection-react': ^1.0.0
@@ -747,7 +756,8 @@ packages:
       '@itwin/presentation-components': ^5.12.0
       '@itwin/presentation-frontend': ^5.8.0
       '@mui/material': ^9.0.0
-      '@stratakit/icons': ^0.3.1
+      '@mui/utils': ^9.0.0
+      '@stratakit/icons': ^0.4.0
       '@stratakit/mui': ^0.5.3
       '@stratakit/structures': ^0.5.6
       react: ^18.0.0
@@ -1181,9 +1191,6 @@ packages:
 
   '@stratakit/icons@0.3.2':
     resolution: {integrity: sha512-MXwpKADbIYZjDu5Cb29GeleqXp5kSInuAzp/ZMN30bhMxCjVeKufDHFMlf/5xYQuo4ierceDpz9fZt5wyQix+g==}
-
-  '@stratakit/icons@0.4.2':
-    resolution: {integrity: sha512-bKAwyESZZ6jrq903ROiMEnNhnHoadnmLmn32+b/7t80PU5YxM8hOhI9iUtpElbpMNZqJ55RK03EIEVYJpWFixQ==}
 
   '@stratakit/icons@0.4.3':
     resolution: {integrity: sha512-WiCRYKBuIOJ0te/bpIjpDsvF47C/wgwRIqxNktcLXm2nh+b4Xi43VAUoR86pnK+1P5ygAAhFihEtTqWd3x4zvw==}
@@ -4429,7 +4436,7 @@ snapshots:
       '@itwin/presentation-hierarchies': 2.0.0-alpha.17
       '@itwin/presentation-shared': 2.0.0-alpha.12
       '@itwin/unified-selection': 2.0.0-alpha.0
-      '@stratakit/icons': 0.4.2
+      '@stratakit/icons': 0.4.3
       '@stratakit/structures': 0.5.8(@types/react@18.3.31)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
       '@tanstack/react-virtual': 3.14.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
@@ -4463,7 +4470,7 @@ snapshots:
     dependencies:
       '@itwin/core-bentley': 5.11.3
 
-  '@itwin/tree-widget-react@file:../../packages/tree-widget(ce747728ce78d888f3727ee44a982967)':
+  '@itwin/tree-widget-react@file:../../packages/tree-widget(0f03eaa1eed1ac12092090d4559c0590)':
     dependencies:
       '@itwin/appui-abstract': 5.11.3(@itwin/core-bentley@5.11.3)
       '@itwin/appui-react': 5.33.2(ab177614829b086345e036523f962d16)
@@ -4481,6 +4488,7 @@ snapshots:
       '@itwin/presentation-shared': 2.0.0-alpha.12
       '@itwin/unified-selection': 2.0.0-alpha.0
       '@mui/material': 9.2.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@mui/utils': 9.2.0(@types/react@18.3.31)(react@18.3.1)
       '@stratakit/icons': 0.3.2
       '@stratakit/mui': 0.5.3(@mui/material@9.2.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@8.1.1)
       '@stratakit/structures': 0.5.8(@types/react@18.3.31)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
@@ -4900,8 +4908,6 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
 
   '@stratakit/icons@0.3.2': {}
-
-  '@stratakit/icons@0.4.2': {}
 
   '@stratakit/icons@0.4.3': {}
 

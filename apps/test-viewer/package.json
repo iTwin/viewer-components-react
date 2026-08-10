@@ -45,6 +45,7 @@
     "@itwin/web-viewer-react": "^5.0.1",
     "@itwin/webgl-compatibility": "^5.11.2",
     "@mui/material": "^9.0.0",
+    "@mui/utils": "^9.0.0",
     "@stratakit/foundations": "^0.4.9",
     "@stratakit/icons": "^0.4.1",
     "@stratakit/mui": "^0.5.3",
