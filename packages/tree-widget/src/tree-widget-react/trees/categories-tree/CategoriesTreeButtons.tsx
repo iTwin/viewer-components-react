@@ -118,7 +118,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   };
 
   return (
-    <IconButton size="small" label={translate("categoriesTree.buttons.showAll.tooltip")} disabled={categories.length === 0} onClick={() => void onClick()}>
+    <IconButton size="small" label={translate("categoriesTree.buttons.showAll.tooltip")} disabled={categories.length === 0} onClick={onClick}>
       <Icon href={visibilityShowSvg} />
     </IconButton>
   );
