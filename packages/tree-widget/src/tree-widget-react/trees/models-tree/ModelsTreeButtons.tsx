@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { defaultIfEmpty, firstValueFrom, forkJoin, mergeAll, mergeMap, of, reduce, takeUntil } from "rxjs";
-import { IconButton, ToggleButton, Tooltip } from "@mui/material";
+import { IconButton, ToggleButton } from "@mui/material";
 import toggle2DSvg from "@stratakit/icons/2d.svg";
 import toggle3DSvg from "@stratakit/icons/3d.svg";
 import focusModeSvg from "@stratakit/icons/cursor-click.svg";
@@ -137,11 +137,9 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
 
   const label = translate("modelsTree.buttons.showAll.tooltip");
   return (
-    <Tooltip title={label}>
-      <IconButton size="small" aria-label={label} disabled={models.length === 0} onClick={() => void onClick()}>
-        <Icon href={visibilityShowSvg} />
-      </IconButton>
-    </Tooltip>
+    <IconButton size="small" label={label} disabled={models.length === 0} onClick={() => void onClick()}>
+      <Icon href={visibilityShowSvg} />
+    </IconButton>
   );
 }
 
@@ -159,11 +157,9 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
 
   const label = translate("modelsTree.buttons.hideAll.tooltip");
   return (
-    <Tooltip title={label}>
-      <IconButton size="small" aria-label={label} disabled={models.length === 0} onClick={onClick}>
-        <Icon href={visibilityHideSvg} />
-      </IconButton>
-    </Tooltip>
+    <IconButton size="small" label={label} disabled={models.length === 0} onClick={onClick}>
+      <Icon href={visibilityHideSvg} />
+    </IconButton>
   );
 }
 
@@ -193,11 +189,9 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
 
   const label = translate("modelsTree.buttons.invert.tooltip");
   return (
-    <Tooltip title={label}>
-      <IconButton size="small" aria-label={label} disabled={models.length === 0} onClick={() => void onClick()}>
-        <Icon href={visibilityInvertSvg} />
-      </IconButton>
-    </Tooltip>
+    <IconButton size="small" label={label} disabled={models.length === 0} onClick={() => void onClick()}>
+      <Icon href={visibilityInvertSvg} />
+    </IconButton>
   );
 }
 
