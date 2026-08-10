@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { defaultIfEmpty, firstValueFrom, forkJoin, from, map, mergeAll, mergeMap, of, reduce, takeUntil, toArray } from "rxjs";
 import { useAsyncValue } from "@itwin/components-react";
-import { IconButton, Tooltip } from "@mui/material";
+import { IconButton } from "@mui/material";
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
 import visibilityInvertSvg from "@stratakit/icons/visibility-invert.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
@@ -118,16 +118,14 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   };
 
   return (
-    <Tooltip title={translate("categoriesTree.buttons.showAll.tooltip")}>
-      <IconButton
-        size="small"
-        aria-label={translate("categoriesTree.buttons.showAll.tooltip")}
-        disabled={categories.length === 0}
-        onClick={() => void onClick()}
-      >
-        <Icon href={visibilityShowSvg} />
-      </IconButton>
-    </Tooltip>
+    <IconButton
+      size="small"
+      label={translate("categoriesTree.buttons.showAll.tooltip")}
+      disabled={categories.length === 0}
+      onClick={() => void onClick()}
+    >
+      <Icon href={visibilityShowSvg} />
+    </IconButton>
   );
 }
 
@@ -156,16 +154,14 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
     } catch {}
   };
   return (
-    <Tooltip title={translate("categoriesTree.buttons.hideAll.tooltip")}>
-      <IconButton
-        size="small"
-        aria-label={translate("categoriesTree.buttons.hideAll.tooltip")}
-        disabled={categories.length === 0}
-        onClick={() => void onClick()}
-      >
-        <Icon href={visibilityHideSvg} />
-      </IconButton>
-    </Tooltip>
+    <IconButton
+      size="small"
+      label={translate("categoriesTree.buttons.hideAll.tooltip")}
+      disabled={categories.length === 0}
+      onClick={() => void onClick()}
+    >
+      <Icon href={visibilityHideSvg} />
+    </IconButton>
   );
 }
 
@@ -196,16 +192,14 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   };
 
   return (
-    <Tooltip title={translate("categoriesTree.buttons.invert.tooltip")}>
-      <IconButton
-        size="small"
-        aria-label={translate("categoriesTree.buttons.invert.tooltip")}
-        disabled={categories.length === 0}
-        onClick={() => void onClick()}
-      >
-        <Icon href={visibilityInvertSvg} />
-      </IconButton>
-    </Tooltip>
+    <IconButton
+      size="small"
+      label={translate("categoriesTree.buttons.invert.tooltip")}
+      disabled={categories.length === 0}
+      onClick={() => void onClick()}
+    >
+      <Icon href={visibilityInvertSvg} />
+    </IconButton>
   );
 }
 

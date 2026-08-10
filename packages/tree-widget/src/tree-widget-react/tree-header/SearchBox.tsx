@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useState } from "react";
-import { IconButton, TextField, Tooltip } from "@mui/material";
+import { IconButton, TextField } from "@mui/material";
 import dismissSvg from "@stratakit/icons/dismiss.svg";
 import searchSvg from "@stratakit/icons/search.svg";
 import { Icon } from "@stratakit/mui";
@@ -18,25 +18,6 @@ interface DebouncedSearchBoxProps {
   delay: number;
   className?: string;
 }
-
-// TODO: remove when fixed https://github.com/iTwin/stratakit/issues/1644
-const tooltipSlotProps = {
-  popper: {
-    popperOptions: {
-      strategy: "fixed" as const,
-      modifiers: [
-        {
-          name: "preventOverflow" as const,
-          options: {
-            rootBoundary: "viewport" as const,
-            altAxis: true,
-            padding: 8,
-          },
-        },
-      ],
-    },
-  },
-};
 
 /** @internal */
 export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, className }: DebouncedSearchBoxProps) {
@@ -56,19 +37,17 @@ export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, cla
   }, [inputValue, delay, onChangeRef]);
 
   return !isOpened ? (
-    <Tooltip title={translate("header.searchBox.searchForSomething")} slotProps={tooltipSlotProps}>
-      <IconButton
-        className={"tw-search-box-button"}
-        size="small"
-        aria-label={translate("header.searchBox.searchForSomething")}
-        onClick={() => {
-          setIsOpened(true);
-          setInputValue("");
-        }}
-      >
-        <Icon href={searchSvg} />
-      </IconButton>
-    </Tooltip>
+    <IconButton
+      className={"tw-search-box-button"}
+      size="small"
+      label={translate("header.searchBox.searchForSomething")}
+      onClick={() => {
+        setIsOpened(true);
+        setInputValue("");
+      }}
+    >
+      <Icon href={searchSvg} />
+    </IconButton>
   ) : (
     <>
       <TextField
@@ -78,19 +57,17 @@ export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, cla
         onChange={(e) => setInputValue(e.currentTarget.value)}
         placeholder={translate("header.searchBox.search")}
       />
-      <Tooltip title={translate("header.searchBox.close")} slotProps={tooltipSlotProps}>
-        <IconButton
-          className={"tw-search-box-button"}
-          size="small"
-          aria-label={translate("header.searchBox.close")}
-          onClick={() => {
-            setIsOpened(false);
-            setInputValue(undefined);
-          }}
-        >
-          <Icon href={dismissSvg} />
-        </IconButton>
-      </Tooltip>
+      <IconButton
+        className={"tw-search-box-button"}
+        size="small"
+        label={translate("header.searchBox.close")}
+        onClick={() => {
+          setIsOpened(false);
+          setInputValue(undefined);
+        }}
+      >
+        <Icon href={dismissSvg} />
+      </IconButton>
     </>
   );
 }
