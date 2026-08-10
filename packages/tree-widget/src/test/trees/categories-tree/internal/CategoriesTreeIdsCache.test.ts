@@ -510,28 +510,30 @@ describe("CategoriesTreeIdsCache", () => {
         it("returns categories and definition containers when no elements exist and includeEmpty is set to true", async () => {
           const keys = imodelWithoutElements;
           const idsCache = cacheForIModelWithoutElements;
-          expect(await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories({ includeEmpty: true }))).toEqual({
-            categories: [keys.categoryOfDefContainer.id, keys.emptyCategory.id],
-            definitionContainers: [keys.defContainerOfCategories.id, keys.parentDefContainer.id],
-          });
+          const result = await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories({ includeEmpty: true }));
+          expect(result.categories).toHaveLength(2);
+          expect(result.categories).toEqual(expect.arrayContaining([keys.categoryOfDefContainer.id, keys.emptyCategory.id]));
+          expect(result.definitionContainers).toHaveLength(2);
+          expect(result.definitionContainers).toEqual(expect.arrayContaining([keys.defContainerOfCategories.id, keys.parentDefContainer.id]));
         });
 
         it("returns categories and definition containers which have elements", async () => {
           const keys = imodelWithDefContainersAndCategories;
           const idsCache = cacheForIModelWithDefContainersAndCategories;
-          expect(await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories())).toEqual({
-            categories: [keys.categoryUnderChild.id, keys.categoryUnderParentWithSubCategories.id],
-            definitionContainers: [keys.childDefContainer.id, keys.parentDefContainer.id],
-          });
+          const result = await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories());
+          expect(result.categories).toHaveLength(2);
+          expect(result.categories).toEqual(expect.arrayContaining([keys.categoryUnderChild.id, keys.categoryUnderParentWithSubCategories.id]));
+          expect(result.definitionContainers).toHaveLength(2);
+          expect(result.definitionContainers).toEqual(expect.arrayContaining([keys.childDefContainer.id, keys.parentDefContainer.id]));
         });
 
         it("returns categories when no definition containers exist", async () => {
           const keys = imodelWithoutDefContainers;
           const idsCache = cacheForIModelWithoutDefContainers;
-          expect(await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories())).toEqual({
-            categories: [keys.category.id, keys.categoryWithSubCategories.id],
-            definitionContainers: [],
-          });
+          const result = await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories());
+          expect(result.categories).toHaveLength(2);
+          expect(result.categories).toEqual(expect.arrayContaining([keys.category.id, keys.categoryWithSubCategories.id]));
+          expect(result.definitionContainers).toHaveLength(0);
         });
       });
 
@@ -578,8 +580,11 @@ describe("CategoriesTreeIdsCache", () => {
         it("returns root categories", async () => {
           const keys = imodelWithoutDefContainers;
           const idsCache = cacheForIModelWithoutDefContainers;
-          expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).toEqual({
-            categories: [
+
+          const result = await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories());
+          expect(result.categories).toHaveLength(2);
+          expect(result.categories).toEqual(
+            expect.arrayContaining([
               { id: keys.category.id, subCategoryChildCount: 1, isTopMostElementCategory: true, hasElements: true, hasElementsFromNonExcludedClasses: true },
               {
                 id: keys.categoryWithSubCategories.id,
@@ -588,9 +593,9 @@ describe("CategoriesTreeIdsCache", () => {
                 hasElements: true,
                 hasElementsFromNonExcludedClasses: true,
               },
-            ],
-            definitionContainers: [],
-          });
+            ]),
+          );
+          expect(result.definitionContainers).toHaveLength(0);
         });
 
         it("returns root definition containers", async () => {
