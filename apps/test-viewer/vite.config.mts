@@ -78,15 +78,7 @@ export default defineConfig(({ mode }) => {
       ],
       // Dedupe tree-widget's deps so its source imports resolve from this app's node_modules
       // rather than tree-widget's own node_modules, preventing duplicate package instances.
-      dedupe: [
-        ...collectDepsFromPackage(treeWidgetRoot),
-        // These StrataKit packages create module-level React contexts (e.g. foundations' `RootContext`).
-        // They are transitive deps (via `@stratakit/mui` / `@itwin/presentation-hierarchies-react`), so they
-        // are not listed in tree-widget's peerDependencies and thus not covered by `collectDepsFromPackage`.
-        // Without deduping them, the build resolves them from both this app's and tree-widget's node_modules,
-        // producing distinct `RootContext` objects and a "RootContext is undefined" crash at runtime.
-        "@stratakit/foundations",
-      ],
+      dedupe: collectDepsFromPackage(treeWidgetRoot),
     },
     envPrefix: ENV_PREFIX,
     define: {
