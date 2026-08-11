@@ -9,26 +9,26 @@
   flex: 1;
   overflow: hidden;
 
-  .tw-content-header {
-    display: flex;
-    vertical-align: middle;
-    padding: var(--stratakit-space-x3) var(--stratakit-space-x3) var(--stratakit-space-x2) var(--stratakit-space-x3);
-    gap: var(--stratakit-space-x3);
-
-    .tw-content-header-selector {
-      width: 100%;
-    }
-
-    .tw-content-header-search {
-      width: 100%;
-    }
-  }
-
   .tw-content-wrapper {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
     height: 100%;
     overflow: hidden;
+  }
+}
+
+.tw-content-header {
+  display: flex;
+  vertical-align: middle;
+  padding: var(--stratakit-space-x3) var(--stratakit-space-x3) var(--stratakit-space-x2) var(--stratakit-space-x3);
+  gap: var(--stratakit-space-x3);
+
+  .tw-content-header-selector {
+    width: 100%;
+  }
+
+  .tw-content-header-search {
+    width: 100%;
   }
 }

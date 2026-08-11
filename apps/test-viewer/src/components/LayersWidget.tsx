@@ -9,8 +9,8 @@ import { ExpandableBlock } from "@itwin/itwinui-react";
 import { MapLayersPrefBrowserStorage, MapLayersUI, MapLayersWidget } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { CategoriesTreeIcon, createTreeWidgetViewport, Tree, TreeRenderer, TreeWidget, useCategoriesTree } from "@itwin/tree-widget-react";
-import { Icon } from "@stratakit/foundations";
-import { Chip } from "@stratakit/structures";
+import { Chip } from "@mui/material";
+import { Icon } from "@stratakit/mui";
 import { unifiedSelectionStorage } from "../SelectionStorage";
 
 import type { ComponentProps, PropsWithChildren, ReactNode } from "react";
@@ -138,8 +138,7 @@ function Elements({ view, ...rest }: ElementsProps) {
     getTreeItemProps: (node) => ({
       decorations: (
         <>
-          {/* eslint-disable-next-line @typescript-eslint/no-deprecated */}
-          <Chip label={node.label.substring(0, 1)} variant="outline" />
+          <Chip label={node.label.substring(0, 1)} variant="outlined" size="small" />
           <CategoriesTreeIcon node={node} />
         </>
       ),

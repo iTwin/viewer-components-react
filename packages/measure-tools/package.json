@@ -5,7 +5,8 @@
   "description": "Frontend framework and tools for measurements",
   "repository": {
     "type": "git",
-    "url": "https://github.com/iTwin/viewer-components-react/tree/master/packages/measure-tools"
+    "url": "https://github.com/iTwin/viewer-components-react.git",
+    "directory": "packages/measure-tools"
   },
   "type": "module",
   "types": "./lib/measure-tools-react.d.ts",

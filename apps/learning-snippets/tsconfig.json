@@ -9,6 +9,7 @@
     "noImplicitOverride": false,
     "resolveJsonModule": true,
     "noUnusedParameters": false,
+    "rootDir": "./src",
     "lib": ["DOM", "ES2023"],
     "outDir": "lib"
   },

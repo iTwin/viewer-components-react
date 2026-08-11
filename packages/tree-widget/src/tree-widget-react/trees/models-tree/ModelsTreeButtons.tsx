@@ -5,13 +5,14 @@
 
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { defaultIfEmpty, firstValueFrom, forkJoin, mergeAll, mergeMap, of, reduce, takeUntil } from "rxjs";
-import { IconButton } from "@stratakit/bricks";
+import { IconButton, ToggleButton } from "@mui/material";
 import toggle2DSvg from "@stratakit/icons/2d.svg";
 import toggle3DSvg from "@stratakit/icons/3d.svg";
 import focusModeSvg from "@stratakit/icons/cursor-click.svg";
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
 import visibilityInvertSvg from "@stratakit/icons/visibility-invert.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
+import { Icon } from "@stratakit/mui";
 import { useTranslation } from "../../shared/components/LocalizationContext.js";
 import { useFocusedInstancesContext } from "../../shared/FocusedInstancesContext.js";
 import { useSharedTreeContextInternal } from "../../shared/internal/SharedTreeContextProviderInternal.js";
@@ -134,14 +135,11 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
     } catch {}
   };
 
+  const label = translate("modelsTree.buttons.showAll.tooltip");
   return (
-    <IconButton
-      variant={"ghost"}
-      label={translate("modelsTree.buttons.showAll.tooltip")}
-      onClick={onClick}
-      icon={visibilityShowSvg}
-      aria-disabled={models.length === 0}
-    />
+    <IconButton size="small" label={label} disabled={models.length === 0} onClick={onClick}>
+      <Icon href={visibilityShowSvg} />
+    </IconButton>
   );
 }
 
@@ -150,7 +148,6 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
   const { models, viewport, onFeatureUsed } = props;
   const { cancelChangesInProgress } = useSharedTreeContextInternal();
   const translate = useTranslation();
-
   const onClick = () => {
     // cspell:disable-next-line
     onFeatureUsed?.("models-tree-hideall");
@@ -158,14 +155,11 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
     viewport.changeModelDisplay({ modelIds: models.map((model) => model.id), display: false });
   };
 
+  const label = translate("modelsTree.buttons.hideAll.tooltip");
   return (
-    <IconButton
-      variant={"ghost"}
-      label={translate("modelsTree.buttons.hideAll.tooltip")}
-      onClick={onClick}
-      icon={visibilityHideSvg}
-      aria-disabled={models.length === 0}
-    />
+    <IconButton size="small" label={label} disabled={models.length === 0} onClick={onClick}>
+      <Icon href={visibilityHideSvg} />
+    </IconButton>
   );
 }
 
@@ -175,7 +169,6 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
   const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContextInternal();
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
   const translate = useTranslation();
-
   const onClick = async () => {
     // cspell:disable-next-line
     onFeatureUsed?.("models-tree-invert");
@@ -194,14 +187,11 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
     } catch {}
   };
 
+  const label = translate("modelsTree.buttons.invert.tooltip");
   return (
-    <IconButton
-      variant={"ghost"}
-      label={translate("modelsTree.buttons.invert.tooltip")}
-      onClick={onClick}
-      icon={visibilityInvertSvg}
-      aria-disabled={models.length === 0}
-    />
+    <IconButton size="small" label={label} disabled={models.length === 0} onClick={onClick}>
+      <Icon href={visibilityInvertSvg} />
+    </IconButton>
   );
 }
 
@@ -225,15 +215,11 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
     viewport.changeModelDisplay({ modelIds: models2d, display: is2dToggleActive ? false : true });
   };
 
+  const label = translate("modelsTree.buttons.toggle2d.tooltip");
   return (
-    <IconButton
-      variant={"ghost"}
-      label={translate("modelsTree.buttons.toggle2d.tooltip")}
-      onClick={onClick}
-      aria-disabled={models2d.length === 0}
-      active={is2dToggleActive}
-      icon={toggle2DSvg}
-    />
+    <ToggleButton value="toggle2d" size="small" label={label} onChange={onClick} disabled={models2d.length === 0} selected={is2dToggleActive}>
+      <Icon href={toggle2DSvg} />
+    </ToggleButton>
   );
 }
 
@@ -253,15 +239,11 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
     viewport.changeModelDisplay({ modelIds: models3d, display: is3dToggleActive ? false : true });
   };
 
+  const label = translate("modelsTree.buttons.toggle3d.tooltip");
   return (
-    <IconButton
-      variant={"ghost"}
-      label={translate("modelsTree.buttons.toggle3d.tooltip")}
-      onClick={onClick}
-      aria-disabled={models3d.length === 0}
-      active={is3dToggleActive}
-      icon={toggle3DSvg}
-    />
+    <ToggleButton value="toggle3d" size="small" label={label} onChange={onClick} disabled={models3d.length === 0} selected={is3dToggleActive}>
+      <Icon href={toggle3DSvg} />
+    </ToggleButton>
   );
 }
 
@@ -275,18 +257,20 @@ export function ToggleInstancesFocusButton({ onFeatureUsed, disabled }: { onFeat
       ? translate("modelsTree.buttons.toggleFocusMode.disable.tooltip")
       : translate("modelsTree.buttons.toggleFocusMode.enable.tooltip");
   return (
-    <IconButton
-      variant={"ghost"}
+    <ToggleButton
+      value="instancesFocus"
+      size="small"
       label={label}
-      onClick={() => {
+      onChange={() => {
         // cspell:disable-next-line
         onFeatureUsed?.("models-tree-instancesfocus");
         toggle();
       }}
-      aria-disabled={disabled}
-      active={enabled}
-      icon={focusModeSvg}
-    />
+      disabled={disabled}
+      selected={enabled}
+    >
+      <Icon href={focusModeSvg} />
+    </ToggleButton>
   );
 }
 

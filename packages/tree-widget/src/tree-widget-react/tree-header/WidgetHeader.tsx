@@ -6,7 +6,7 @@
 import "./WidgetHeader.css";
 
 import { useState } from "react";
-import { Select, Skeleton } from "@stratakit/bricks";
+import { NativeSelect, Skeleton } from "@mui/material";
 import { DebouncedSearchBox } from "./SearchBox.js";
 
 import type { TreeRenderProps } from "../TreeWidgetComponentImpl.js";
@@ -60,22 +60,22 @@ export function WidgetHeader({ defaultSelectedContentId, trees, onSelect, onSear
   return (
     <div className="tw-content-header">
       {trees.length > 0 && !isSearchOpen && (
-        <Select.Root className={"tw-content-header-selector"}>
-          <Select.HtmlSelect
-            value={selectedContentId}
-            onChange={(e) => {
-              const treeId = e.target.value;
-              onSelect(treeId);
-              setSelectedContentId(treeId);
-            }}
-          >
-            {trees.map((tree) => (
-              <option key={tree.id} value={tree.id}>
-                {tree.label}
-              </option>
-            ))}
-          </Select.HtmlSelect>
-        </Select.Root>
+        <NativeSelect
+          className={"tw-content-header-selector"}
+          size="small"
+          value={selectedContentId}
+          onChange={(e) => {
+            const treeId = e.target.value;
+            onSelect(treeId);
+            setSelectedContentId(treeId);
+          }}
+        >
+          {trees.map((tree) => (
+            <option key={tree.id} value={tree.id}>
+              {tree.label}
+            </option>
+          ))}
+        </NativeSelect>
       )}
       {selectedContent.isSearchable && (
         <DebouncedSearchBox className={"tw-content-header-search"} isOpened={isSearchOpen} setIsOpened={setIsSearchOpen} onSearch={onSearch} delay={300} />
@@ -87,8 +87,8 @@ export function WidgetHeader({ defaultSelectedContentId, trees, onSelect, onSear
 function LoadingHeader() {
   return (
     <div className="tw-content-header">
-      <Skeleton variant={"text"} size={"xlarge"} />
-      <Skeleton variant={"object"} size={"medium"} />
+      <Skeleton variant={"rounded"} className={"tw-content-header-search"} height={24} />
+      <Skeleton variant={"rounded"} width={24} height={24} style={{ flexShrink: 0 }} />
     </div>
   );
 }

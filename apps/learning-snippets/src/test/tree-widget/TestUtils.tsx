@@ -9,7 +9,7 @@ import { BeEvent } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
-import { Root } from "@stratakit/foundations";
+import { Root } from "@stratakit/mui";
 import { render as rtlRender } from "@testing-library/react";
 // __PUBLISH_EXTRACT_START__ TreeWidget.TreeWidgetInitializeImports
 import { TreeWidget } from "@itwin/tree-widget-react";
@@ -20,18 +20,14 @@ import type { IModelConnection, ScreenViewport, Viewport } from "@itwin/core-fro
 import type { RenderOptions, RenderResult } from "@testing-library/react";
 
 /**
- * Wraps rendered tree components with the StrataKit `Root` context that the tree widget components require.
+ * Wraps rendered tree components with the StrataKit MUI `Root` context that the tree widget components require.
  */
 function TreeWidgetTestWrapper({ children }: PropsWithChildren<unknown>) {
-  return (
-    <Root colorScheme="light" density="dense">
-      {children}
-    </Root>
-  );
+  return <Root colorScheme="light">{children}</Root>;
 }
 
 /**
- * Custom `render` that always wraps the rendered UI with the StrataKit `Root` context required by the tree
+ * Custom `render` that always wraps the rendered UI with the StrataKit MUI `Root` context required by the tree
  * widget components. All other `@testing-library/react` utilities are re-exported below, so tests can import
  * everything (`render`, `waitFor`, `cleanup`, ...) from this module.
  */

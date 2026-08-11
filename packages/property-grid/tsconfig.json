@@ -9,6 +9,7 @@
     "esModuleInterop": true,
     "noImplicitOverride": false,
     "resolveJsonModule": true,
+    "types": ["node"],
     "lib": ["DOM", "ESNext"]
   },
   "include": ["src"]

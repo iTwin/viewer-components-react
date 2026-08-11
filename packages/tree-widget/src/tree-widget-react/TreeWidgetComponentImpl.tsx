@@ -7,7 +7,7 @@ import "./TreeWidgetComponentImpl.css";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { Skeleton } from "@stratakit/bricks";
+import { Skeleton } from "@mui/material";
 import { useTranslation } from "./shared/components/LocalizationContext.js";
 import { SkeletonTree } from "./shared/components/SkeletonTree.js";
 import { SelectableTree } from "./tree-header/SelectableTree.js";
@@ -221,12 +221,12 @@ function LoadingTree() {
     <SelectableTree
       buttons={
         <>
-          <Skeleton variant={"object"} size={"medium"} />
-          <Skeleton variant={"object"} size={"medium"} />
-          <Skeleton variant={"object"} size={"medium"} />
-          <Skeleton variant={"object"} size={"medium"} />
-          <Skeleton variant={"object"} size={"medium"} />
-          <Skeleton variant={"object"} size={"medium"} />
+          <Skeleton variant={"rounded"} width={28} height={28} />
+          <Skeleton variant={"rounded"} width={28} height={28} />
+          <Skeleton variant={"rounded"} width={28} height={28} />
+          <Skeleton variant={"rounded"} width={28} height={28} />
+          <Skeleton variant={"rounded"} width={28} height={28} />
+          <Skeleton variant={"rounded"} width={28} height={28} />
         </>
       }
     >

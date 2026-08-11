@@ -6,10 +6,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { defaultIfEmpty, firstValueFrom, forkJoin, from, map, mergeAll, mergeMap, of, reduce, takeUntil, toArray } from "rxjs";
 import { useAsyncValue } from "@itwin/components-react";
-import { IconButton } from "@stratakit/bricks";
+import { IconButton } from "@mui/material";
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
 import visibilityInvertSvg from "@stratakit/icons/visibility-invert.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
+import { Icon } from "@stratakit/mui";
 import { useTranslation } from "../../shared/components/LocalizationContext.js";
 import { useErrorState } from "../../shared/internal/hooks/UseErrorState.js";
 import { useSharedTreeContextInternal } from "../../shared/internal/SharedTreeContextProviderInternal.js";
@@ -117,13 +118,9 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   };
 
   return (
-    <IconButton
-      variant={"ghost"}
-      label={translate("categoriesTree.buttons.showAll.tooltip")}
-      onClick={onClick}
-      icon={visibilityShowSvg}
-      aria-disabled={categories.length === 0}
-    />
+    <IconButton size="small" label={translate("categoriesTree.buttons.showAll.tooltip")} disabled={categories.length === 0} onClick={onClick}>
+      <Icon href={visibilityShowSvg} />
+    </IconButton>
   );
 }
 
@@ -152,13 +149,9 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
     } catch {}
   };
   return (
-    <IconButton
-      variant={"ghost"}
-      label={translate("categoriesTree.buttons.hideAll.tooltip")}
-      onClick={onClick}
-      icon={visibilityHideSvg}
-      aria-disabled={categories.length === 0}
-    />
+    <IconButton size="small" label={translate("categoriesTree.buttons.hideAll.tooltip")} disabled={categories.length === 0} onClick={onClick}>
+      <Icon href={visibilityHideSvg} />
+    </IconButton>
   );
 }
 
@@ -189,13 +182,9 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   };
 
   return (
-    <IconButton
-      variant={"ghost"}
-      label={translate("categoriesTree.buttons.invert.tooltip")}
-      onClick={onClick}
-      icon={visibilityInvertSvg}
-      aria-disabled={categories.length === 0}
-    />
+    <IconButton size="small" label={translate("categoriesTree.buttons.invert.tooltip")} disabled={categories.length === 0} onClick={onClick}>
+      <Icon href={visibilityInvertSvg} />
+    </IconButton>
   );
 }
 

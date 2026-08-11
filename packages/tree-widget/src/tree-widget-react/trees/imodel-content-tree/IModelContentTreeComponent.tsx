@@ -8,6 +8,7 @@ import { TelemetryContextProvider } from "../../shared/UseTelemetryContext.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { IModelContentTree } from "./IModelContentTree.js";
 
+import type { JSX } from "react";
 import type { StandardTreeLabels } from "../../TreeWidgetComponentImpl.js";
 import type { IModelContentTreeProps } from "./IModelContentTree.js";
 
@@ -29,11 +30,20 @@ interface IModelContentTreeComponentProps extends Pick<
   onFeatureUsed?: (feature: string) => void;
 }
 
+/** @beta */
+interface IModelContentTreeComponentType {
+  (props: IModelContentTreeComponentProps): JSX.Element | null;
+  /** Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`. */
+  id: string;
+  /** Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`. */
+  getLabel({ standardLabels }: { standardLabels: StandardTreeLabels }): string;
+}
+
 /**
  * A component that renders `IModelContentTree`.
  * @beta
  */
-export const IModelContentTreeComponent = ({ onFeatureUsed, onPerformanceMeasured, treeLabel, ...props }: IModelContentTreeComponentProps) => {
+export const IModelContentTreeComponent: IModelContentTreeComponentType = ({ onFeatureUsed, onPerformanceMeasured, treeLabel, ...props }) => {
   const imodel = useActiveIModelConnection();
 
   if (!imodel) {
@@ -49,14 +59,6 @@ export const IModelContentTreeComponent = ({ onFeatureUsed, onPerformanceMeasure
   );
 };
 
-/**
- * Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
- * @beta
- */
 IModelContentTreeComponent.id = "imodel-content-tree-v2";
 
-/**
- * Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
- * @beta
- */
 IModelContentTreeComponent.getLabel = ({ standardLabels }: { standardLabels: StandardTreeLabels }) => standardLabels.imodelContent;

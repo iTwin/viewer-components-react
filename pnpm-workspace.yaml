@@ -10,7 +10,6 @@ packageConfigs:
       "@itwin/itwinui-react@^2": "2.12.26"
       "@itwin/itwinui-react@^3": "3.21.2"
 
-
 allowBuilds:
   '@bentley/imodeljs-native': true
   '@itwin/certa': true
@@ -31,3 +30,10 @@ sharedWorkspaceLockfile: false
 injectWorkspacePackages: true
 
 packageManagerStrict: false
+
+minimumReleaseAgeExclude:
+  - '@itwin/presentation-core-interop@2.0.0-alpha.3'
+  - '@itwin/presentation-hierarchies-react@2.0.0-alpha.64'
+  - '@itwin/presentation-hierarchies@2.0.0-alpha.17'
+  - '@itwin/presentation-shared@2.0.0-alpha.12'
+  - '@itwin/unified-selection@2.0.0-alpha.0'

@@ -3,12 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { Icon } from "@stratakit/foundations";
 import categorySvg from "@stratakit/icons/bis-category-3d.svg";
 import subcategorySvg from "@stratakit/icons/bis-category-subcategory.svg";
 import classSvg from "@stratakit/icons/bis-class.svg";
 import definitionContainerSvg from "@stratakit/icons/bis-definitions-container.svg";
 import elementSvg from "@stratakit/icons/bis-element.svg";
+import { Icon } from "@stratakit/mui";
 import { CategoriesTreeNode } from "./CategoriesTreeNode.js";
 
 import type { TreeNode } from "@itwin/presentation-hierarchies-react";

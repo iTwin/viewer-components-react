@@ -3,7 +3,7 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "rootDir": "src",
+    "rootDir": "./src",
     "jsx": "react-jsx",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
@@ -11,7 +11,7 @@
     "resolveJsonModule": true,
     "lib": ["DOM", "ESNext"],
     "noEmit": true,
-    "types": ["node"]
+    "types": ["node", "@stratakit/mui/types.d.ts"]
   },
   "include": ["src/**/*", "types.d.ts"]
 }

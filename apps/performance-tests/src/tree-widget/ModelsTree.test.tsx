@@ -59,7 +59,7 @@ describe("models tree", () => {
         ecsql: `SELECT CAST(IdToHex(ECInstanceId) AS TEXT) AS ECInstanceId FROM bis.GeometricElement3d`,
       };
       for await (const row of imodelAccess.createQueryReader(query, { limit: "unbounded" })) {
-        targetItems.push({ id: row.ECInstanceId, className: "Generic:PhysicalObject" });
+        targetItems.push({ id: row.ECInstanceId, className: "Generic.PhysicalObject" });
       }
       return {
         iModel,

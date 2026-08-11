@@ -50,7 +50,7 @@ export default defineConfig({
         // Experimental component (browser) tests. They render tree-widget components in a real browser and validate
         // them via screenshots, so we can catch unwanted visual changes (e.g. while migrating StrataKit -> MUI).
         plugins: [react()],
-        optimizeDeps: { include: ["@stratakit/foundations", "@stratakit/bricks", "@stratakit/structures", "vitest-browser-react", "axe-core"] },
+        optimizeDeps: { include: ["@stratakit/structures", "vitest-browser-react", "axe-core"] },
         test: {
           name: "tree-widget-components",
           include: ["src/test/components/**/*.test.{ts,tsx}"],

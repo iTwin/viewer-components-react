@@ -24,7 +24,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/iTwin/viewer-components-react/tree/master/packages/map-layers"
+    "url": "https://github.com/iTwin/viewer-components-react.git",
+    "directory": "packages/map-layers"
   },
   "keywords": [
     "iModel",
