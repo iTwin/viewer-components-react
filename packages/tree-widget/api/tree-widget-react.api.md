@@ -19,6 +19,7 @@ import type { IDisposable } from '@itwin/core-bentley';
 import type { IModelConnection } from '@itwin/core-frontend';
 import type { InstanceKey } from '@itwin/presentation-shared';
 import { JSX as JSX_2 } from 'react/jsx-runtime';
+import type { JSX as JSX_3 } from 'react';
 import type { Localization } from '@itwin/core-common';
 import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { PresentationTreeNode } from '@itwin/presentation-hierarchies-react';
@@ -37,14 +38,7 @@ import type { Viewport } from '@itwin/core-frontend';
 import type { Widget } from '@itwin/appui-react';
 
 // @public
-export const CategoriesTreeComponent: {
-    (props: CategoriesTreeComponentProps): JSX_2.Element | null;
-    ShowAllButton: CategoriesTreeHeaderButtonType;
-    HideAllButton: CategoriesTreeHeaderButtonType;
-    InvertAllButton: CategoriesTreeHeaderButtonType;
-    id: string;
-    getLabel(): string;
-};
+export const CategoriesTreeComponent: CategoriesTreeComponentType;
 
 // @public (undocumented)
 interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "hierarchyConfig"> {
@@ -53,6 +47,22 @@ interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "getSch
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
+}
+
+// @public (undocumented)
+interface CategoriesTreeComponentType {
+    // (undocumented)
+    (props: CategoriesTreeComponentProps): JSX_3.Element | null;
+    // (undocumented)
+    getLabel(): string;
+    // (undocumented)
+    HideAllButton: CategoriesTreeHeaderButtonType;
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    InvertAllButton: CategoriesTreeHeaderButtonType;
+    // (undocumented)
+    ShowAllButton: CategoriesTreeHeaderButtonType;
 }
 
 // @public
@@ -133,11 +143,7 @@ interface ElementsGroupInfo {
 }
 
 // @beta
-export const ExternalSourcesTreeComponent: {
-    (input: ExternalSourcesTreeComponentProps): JSX_2.Element | null;
-    id: string;
-    getLabel(): string;
-};
+export const ExternalSourcesTreeComponent: ExternalSourcesTreeComponentType;
 
 // @beta (undocumented)
 interface ExternalSourcesTreeComponentProps extends Pick<ExternalSourcesTreeProps, "getSchemaContext" | "selectionStorage" | "selectionMode" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
@@ -145,6 +151,16 @@ interface ExternalSourcesTreeComponentProps extends Pick<ExternalSourcesTreeProp
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
+}
+
+// @beta (undocumented)
+interface ExternalSourcesTreeComponentType {
+    // (undocumented)
+    (input: ExternalSourcesTreeComponentProps): JSX_3.Element | null;
+    // (undocumented)
+    getLabel(): string;
+    // (undocumented)
+    id: string;
 }
 
 // @beta (undocumented)
@@ -218,11 +234,7 @@ interface HighlightInfo {
 }
 
 // @beta
-export const IModelContentTreeComponent: {
-    (input: IModelContentTreeComponentProps): JSX_2.Element | null;
-    id: string;
-    getLabel(): string;
-};
+export const IModelContentTreeComponent: IModelContentTreeComponentType;
 
 // @beta (undocumented)
 interface IModelContentTreeComponentProps extends Pick<IModelContentTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyConfig" | "hierarchyLevelConfig" | "selectionMode"> {
@@ -230,6 +242,16 @@ interface IModelContentTreeComponentProps extends Pick<IModelContentTreeProps, "
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
+}
+
+// @beta (undocumented)
+interface IModelContentTreeComponentType {
+    // (undocumented)
+    (input: IModelContentTreeComponentProps): JSX_3.Element | null;
+    // (undocumented)
+    getLabel(): string;
+    // (undocumented)
+    id: string;
 }
 
 // @beta
@@ -254,17 +276,7 @@ interface ModelInfo {
 }
 
 // @public
-export const ModelsTreeComponent: {
-    (props: ModelsTreeComponentProps): JSX_2.Element | null;
-    ShowAllButton: ModelsTreeHeaderButtonType;
-    HideAllButton: ModelsTreeHeaderButtonType;
-    InvertButton: ModelsTreeHeaderButtonType;
-    View2DButton: ModelsTreeHeaderButtonType;
-    View3DButton: ModelsTreeHeaderButtonType;
-    ToggleInstancesFocusButton: ModelsTreeHeaderButtonType;
-    id: string;
-    getLabel(): string;
-};
+export const ModelsTreeComponent: ModelsTreeComponentType;
 
 // @public (undocumented)
 interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getFilteredPaths" | "getSubTreePaths"> {
@@ -273,6 +285,28 @@ interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "getSchemaConte
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
+}
+
+// @public (undocumented)
+interface ModelsTreeComponentType {
+    // (undocumented)
+    (props: ModelsTreeComponentProps): JSX_3.Element | null;
+    // (undocumented)
+    getLabel(): string;
+    // (undocumented)
+    HideAllButton: ModelsTreeHeaderButtonType;
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    InvertButton: ModelsTreeHeaderButtonType;
+    // (undocumented)
+    ShowAllButton: ModelsTreeHeaderButtonType;
+    // (undocumented)
+    ToggleInstancesFocusButton: ModelsTreeHeaderButtonType;
+    // (undocumented)
+    View2DButton: ModelsTreeHeaderButtonType;
+    // (undocumented)
+    View3DButton: ModelsTreeHeaderButtonType;
 }
 
 // @public

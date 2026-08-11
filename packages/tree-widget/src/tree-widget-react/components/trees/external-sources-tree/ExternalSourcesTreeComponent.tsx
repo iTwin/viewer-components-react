@@ -8,6 +8,7 @@ import { TreeWidget } from "../../../TreeWidget.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { ExternalSourcesTree } from "./ExternalSourcesTree.js";
 
+import type { JSX } from "react";
 import type { ExternalSourcesTreeProps } from "./ExternalSourcesTree.js";
 
 /** @beta */
@@ -19,11 +20,18 @@ interface ExternalSourcesTreeComponentProps extends Pick<
   onFeatureUsed?: (feature: string) => void;
 }
 
+/** @beta */
+interface ExternalSourcesTreeComponentType {
+  (input: ExternalSourcesTreeComponentProps): JSX.Element | null;
+  id: string;
+  getLabel(): string;
+}
+
 /**
  * A component that renders `ExternalSourcesTree`.
  * @beta
  */
-export const ExternalSourcesTreeComponent = ({ onFeatureUsed, onPerformanceMeasured, ...props }: ExternalSourcesTreeComponentProps) => {
+export const ExternalSourcesTreeComponent: ExternalSourcesTreeComponentType = ({ onFeatureUsed, onPerformanceMeasured, ...props }) => {
   const imodel = useActiveIModelConnection();
 
   if (!imodel) {

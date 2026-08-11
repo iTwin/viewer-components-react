@@ -8,7 +8,9 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noImplicitOverride": false,
+    "noUncheckedSideEffectImports": false,
     "resolveJsonModule": true,
+    "types": ["node"],
     "lib": ["DOM", "ESNext"]
   },
   "include": ["src"]

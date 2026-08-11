@@ -8,6 +8,7 @@ import { TreeWidget } from "../../../TreeWidget.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { IModelContentTree } from "./IModelContentTree.js";
 
+import type { JSX } from "react";
 import type { IModelContentTreeProps } from "./IModelContentTree.js";
 
 /** @beta */
@@ -19,11 +20,18 @@ interface IModelContentTreeComponentProps extends Pick<
   onFeatureUsed?: (feature: string) => void;
 }
 
+/** @beta */
+interface IModelContentTreeComponentType {
+  (input: IModelContentTreeComponentProps): JSX.Element | null;
+  id: string;
+  getLabel(): string;
+}
+
 /**
  * A component that renders `IModelContentTree`.
  * @beta
  */
-export const IModelContentTreeComponent = ({ onFeatureUsed, onPerformanceMeasured, ...props }: IModelContentTreeComponentProps) => {
+export const IModelContentTreeComponent: IModelContentTreeComponentType = ({ onFeatureUsed, onPerformanceMeasured, ...props }) => {
   const imodel = useActiveIModelConnection();
 
   if (!imodel) {

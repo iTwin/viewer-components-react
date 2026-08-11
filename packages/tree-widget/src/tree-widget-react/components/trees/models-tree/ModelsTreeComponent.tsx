@@ -22,7 +22,7 @@ import {
   View3DButton,
 } from "./ModelsTreeButtons.js";
 
-import type { ReactNode } from "react";
+import type { JSX, ReactNode } from "react";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import type { ModelsTreeProps } from "./ModelsTree.js";
 import type { ModelsTreeHeaderButtonProps, ModelsTreeHeaderButtonType } from "./ModelsTreeButtons.js";
@@ -59,13 +59,26 @@ interface ModelsTreeComponentProps extends Pick<
   onFeatureUsed?: (feature: string) => void;
 }
 
+/** @public */
+interface ModelsTreeComponentType {
+  (props: ModelsTreeComponentProps): JSX.Element | null;
+  ShowAllButton: ModelsTreeHeaderButtonType;
+  HideAllButton: ModelsTreeHeaderButtonType;
+  InvertButton: ModelsTreeHeaderButtonType;
+  View2DButton: ModelsTreeHeaderButtonType;
+  View3DButton: ModelsTreeHeaderButtonType;
+  ToggleInstancesFocusButton: ModelsTreeHeaderButtonType;
+  id: string;
+  getLabel(): string;
+}
+
 /**
  * A component that renders `ModelsTree` and a header with filtering capabilities
  * and header buttons.
  *
  * @public
  */
-export const ModelsTreeComponent = (props: ModelsTreeComponentProps) => {
+export const ModelsTreeComponent: ModelsTreeComponentType = (props) => {
   const iModel = useActiveIModelConnection();
   const viewport = useActiveViewport();
 

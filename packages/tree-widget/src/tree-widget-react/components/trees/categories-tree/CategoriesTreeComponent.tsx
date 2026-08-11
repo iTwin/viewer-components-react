@@ -13,7 +13,7 @@ import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { CategoriesTree } from "./CategoriesTree.js";
 import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonProps } from "./CategoriesTreeButtons.js";
 
-import type { ReactNode } from "react";
+import type { JSX, ReactNode } from "react";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import type { CategoriesTreeProps } from "./CategoriesTree.js";
 import type { CategoriesTreeHeaderButtonProps, CategoriesTreeHeaderButtonType } from "./CategoriesTreeButtons.js";
@@ -38,11 +38,21 @@ interface CategoriesTreeComponentProps extends Pick<
   onFeatureUsed?: (feature: string) => void;
 }
 
+/** @public */
+interface CategoriesTreeComponentType {
+  (props: CategoriesTreeComponentProps): JSX.Element | null;
+  ShowAllButton: CategoriesTreeHeaderButtonType;
+  HideAllButton: CategoriesTreeHeaderButtonType;
+  InvertAllButton: CategoriesTreeHeaderButtonType;
+  id: string;
+  getLabel(): string;
+}
+
 /**
  * A component that renders `CategoriesTree` and a header with filtering capabilities and header buttons.
  * @public
  */
-export const CategoriesTreeComponent = (props: CategoriesTreeComponentProps) => {
+export const CategoriesTreeComponent: CategoriesTreeComponentType = (props) => {
   const iModel = useActiveIModelConnection();
   const viewport = useActiveViewport();
 
