@@ -8,6 +8,7 @@ import { TreeWidget } from "../../../TreeWidget.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { ExternalSourcesTree } from "./ExternalSourcesTree.js";
 
+import type { JSX } from "react";
 import type { ExternalSourcesTreeProps } from "./ExternalSourcesTree.js";
 
 /** @beta */
@@ -19,11 +20,20 @@ interface ExternalSourcesTreeComponentProps extends Pick<
   onFeatureUsed?: (feature: string) => void;
 }
 
+/** @beta */
+interface ExternalSourcesTreeComponentType {
+  (props: ExternalSourcesTreeComponentProps): JSX.Element | null;
+  /** Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`. */
+  id: string;
+  /** Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`. */
+  getLabel(): string;
+}
+
 /**
  * A component that renders `ExternalSourcesTree`.
  * @beta
  */
-export const ExternalSourcesTreeComponent = ({ onFeatureUsed, onPerformanceMeasured, ...props }: ExternalSourcesTreeComponentProps) => {
+export const ExternalSourcesTreeComponent: ExternalSourcesTreeComponentType = ({ onFeatureUsed, onPerformanceMeasured, ...props }) => {
   const imodel = useActiveIModelConnection();
 
   if (!imodel) {
@@ -37,14 +47,6 @@ export const ExternalSourcesTreeComponent = ({ onFeatureUsed, onPerformanceMeasu
   );
 };
 
-/**
- * Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
- * @beta
- */
 ExternalSourcesTreeComponent.id = "external-sources-tree-v2";
 
-/**
- * Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
- * @beta
- */
 ExternalSourcesTreeComponent.getLabel = () => TreeWidget.translate("externalSourcesTree.label");

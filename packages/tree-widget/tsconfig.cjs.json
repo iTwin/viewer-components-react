@@ -2,7 +2,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "module": "CommonJS",
-    "moduleResolution": "Node",
+    "moduleResolution": "Bundler",
+    "customConditions": ["import"],
     "outDir": "lib/cjs"
   },
   "exclude": ["src/test/**/*", "src/e2e-tests/**/*"]

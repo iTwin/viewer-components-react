@@ -8,7 +8,8 @@
     "esModuleInterop": true,
     "noImplicitOverride": false,
     "resolveJsonModule": true,
-    "lib": ["DOM"]
+    "rootDir": "./src",
+    "lib": ["ES2023", "DOM", "DOM.Iterable", "ESNext.Disposable"]
   },
   "include": ["src"]
 }
