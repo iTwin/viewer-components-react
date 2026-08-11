@@ -87,8 +87,8 @@ export function WidgetHeader({ defaultSelectedContentId, trees, onSelect, onSear
 function LoadingHeader() {
   return (
     <div className="tw-content-header">
-      <Skeleton variant={"rounded"} width={"100%"} height={22} />
-      <Skeleton variant={"rounded"} width={22} height={22} />
+      <Skeleton variant={"rounded"} width={"100%"} height={24} />
+      <Skeleton variant={"rounded"} width={24} height={24} />
     </div>
   );
 }
