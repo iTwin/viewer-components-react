@@ -58,7 +58,6 @@ export function WidgetHeader({ defaultSelectedContentId, trees, onSelect, onSear
   }
 
   return (
-    <>
       <div className="tw-content-header">
         {trees.length > 0 && !isSearchOpen && (
           <NativeSelect
@@ -82,8 +81,6 @@ export function WidgetHeader({ defaultSelectedContentId, trees, onSelect, onSear
           <DebouncedSearchBox className={"tw-content-header-search"} isOpened={isSearchOpen} setIsOpened={setIsSearchOpen} onSearch={onSearch} delay={300} />
         )}
       </div>
-      <LoadingHeader />
-    </>
   );
 }
 
