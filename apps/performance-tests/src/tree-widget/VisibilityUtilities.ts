@@ -329,7 +329,7 @@ export function createCategoryHierarchyNode(categoryId: Id64String, modelId: Id6
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:SpatialCategory", id: categoryId }],
+      instanceKeys: [{ className: "bis.SpatialCategory", id: categoryId }],
     },
     children: hasChildren,
     label: "",
@@ -345,7 +345,7 @@ export function createModelHierarchyNode(modelId?: Id64String, hasChildren?: boo
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:Model", id: modelId ?? "" }],
+      instanceKeys: [{ className: "bis.Model", id: modelId ?? "" }],
     },
     children: !!hasChildren,
     label: "",
@@ -366,7 +366,7 @@ export function createElementHierarchyNode(props: {
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:GeometricalElement3d", id: props.elementId ?? "" }],
+      instanceKeys: [{ className: "bis.GeometricalElement3d", id: props.elementId ?? "" }],
     },
     children: !!props.hasChildren,
     label: "",
@@ -384,7 +384,7 @@ export function createDefinitionContainerHierarchyNode(definitionContainerId: Id
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:DefinitionContainer", id: definitionContainerId }],
+      instanceKeys: [{ className: "bis.DefinitionContainer", id: definitionContainerId }],
     },
     children: true,
     label: "",

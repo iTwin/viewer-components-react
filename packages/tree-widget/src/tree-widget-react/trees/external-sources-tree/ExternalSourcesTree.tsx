@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback } from "react";
-import { Icon } from "@stratakit/foundations";
 import classSvg from "@stratakit/icons/bis-class.svg";
 import elementSvg from "@stratakit/icons/bis-element.svg";
 import documentSvg from "@stratakit/icons/document.svg";
 import ecSchemaSvg from "@stratakit/icons/selection-children.svg";
+import { Icon } from "@stratakit/mui";
 import { EmptyTreeContent } from "../../shared/components/EmptyTree.js";
 import { Tree } from "../../shared/components/Tree.js";
 import { TreeRenderer } from "../../shared/components/TreeRenderer.js";

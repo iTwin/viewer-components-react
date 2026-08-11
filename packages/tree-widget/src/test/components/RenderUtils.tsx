@@ -6,7 +6,7 @@
 import axe from "axe-core";
 import { expect } from "vitest";
 import { render } from "vitest-browser-react";
-import { Root } from "@stratakit/foundations";
+import { Root } from "@stratakit/mui";
 import localeEn from "../../public/locales/en/TreeWidget.json" with { type: "json" };
 import { LocalizationContextProvider } from "../../tree-widget-react/shared/components/LocalizationContext.js";
 
@@ -41,7 +41,7 @@ interface RenderWithThemeOptions {
 function createWrapper(colorScheme: ColorScheme) {
   return function Wrapper({ children }: PropsWithChildren<unknown>) {
     return (
-      <Root colorScheme={colorScheme} density="dense" style={{ width: "100vw", height: "100vh" }}>
+      <Root colorScheme={colorScheme} style={{ width: "100vw", height: "100vh" }}>
         <LocalizationContextProvider localization={localization}>{children}</LocalizationContextProvider>
       </Root>
     );

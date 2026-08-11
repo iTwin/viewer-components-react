@@ -5,8 +5,8 @@
 
 import "./EmptyTree.css";
 
-import { Anchor, Text } from "@stratakit/bricks";
-import { Icon } from "@stratakit/foundations";
+import { Link, Typography } from "@mui/material";
+import { Icon } from "@stratakit/mui";
 import { useFocusedInstancesContext } from "../FocusedInstancesContext.js";
 import { useTranslation } from "./LocalizationContext.js";
 
@@ -19,8 +19,8 @@ export function TooManySearchMatches({ base }: SearchEmptyTreeProps) {
   const translate = useTranslation();
   return (
     <div className={"tw-search-empty-tree-container"}>
-      <Text variant={"body-sm"}>{translate(`${base}.search.tooManySearchMatches`)}</Text>
-      <Text variant={"body-sm"}>{translate(`${base}.search.tooManySearchMatchesRetry`)}</Text>
+      <Typography variant={"body-sm"}>{translate(`${base}.search.tooManySearchMatches`)}</Typography>
+      <Typography variant={"body-sm"}>{translate(`${base}.search.tooManySearchMatchesRetry`)}</Typography>
     </div>
   );
 }
@@ -30,8 +30,8 @@ export function NoSearchMatches({ base }: SearchEmptyTreeProps) {
   const translate = useTranslation();
   return (
     <div className={"tw-search-empty-tree-container"}>
-      <Text variant={"body-sm"}>{translate(`${base}.search.noMatches`)}</Text>
-      <Text variant={"body-sm"}>{translate(`${base}.search.noMatchesRetry`)}</Text>
+      <Typography variant={"body-sm"}>{translate(`${base}.search.noMatches`)}</Typography>
+      <Typography variant={"body-sm"}>{translate(`${base}.search.noMatchesRetry`)}</Typography>
     </div>
   );
 }
@@ -41,7 +41,7 @@ export function SearchUnknownError({ base }: SearchEmptyTreeProps) {
   const translate = useTranslation();
   return (
     <div className={"tw-search-empty-tree-container"}>
-      <Text variant={"body-sm"}>{translate(`${base}.search.unknownSearchError`)}</Text>
+      <Typography variant={"body-sm"}>{translate(`${base}.search.unknownSearchError`)}</Typography>
     </div>
   );
 }
@@ -55,18 +55,18 @@ export function TooManyInstancesFocused({ base }: FocusedInstancesErrorProps) {
   const translate = useTranslation();
   const { toggle } = useFocusedInstancesContext();
   return (
-    <Text variant="body-sm" className={"tw-search-empty-tree-container"}>
+    <Typography variant="body-sm" className={"tw-search-empty-tree-container"}>
       {translate(`${base}.search.tooManyInstancesFocused`)}
-      <Anchor
+      <Link
+        render={<button />}
         onClick={(e) => {
           e.stopPropagation();
           toggle();
         }}
-        render={<button />}
       >
         {translate(`${base}.search.disableInstanceFocusMode`)}
-      </Anchor>
-    </Text>
+      </Link>
+    </Typography>
   );
 }
 
@@ -75,18 +75,18 @@ export function UnknownInstanceFocusError({ base }: FocusedInstancesErrorProps) 
   const translate = useTranslation();
   const { toggle } = useFocusedInstancesContext();
   return (
-    <Text variant="body-sm" className={"tw-search-empty-tree-container"}>
+    <Typography variant="body-sm" className={"tw-search-empty-tree-container"}>
       {translate(`${base}.search.unknownInstanceFocusError`)}
-      <Anchor
+      <Link
+        render={<button />}
         onClick={(e) => {
           e.stopPropagation();
           toggle();
         }}
-        render={<button />}
       >
         {translate(`${base}.search.disableInstanceFocusMode`)}
-      </Anchor>
-    </Text>
+      </Link>
+    </Typography>
   );
 }
 
@@ -100,7 +100,7 @@ export function SubTreeError({ base, error }: SubTreeErrorProps) {
   const translate = useTranslation();
   return (
     <div className={"tw-search-empty-tree-container"}>
-      <Text variant={"body-sm"}>{translate(`${base}.subTree.${error}`)}</Text>
+      <Typography variant={"body-sm"}>{translate(`${base}.subTree.${error}`)}</Typography>
     </div>
   );
 }
@@ -115,9 +115,9 @@ export function EmptyTreeContent({ icon }: EmptyTreeContentProps) {
   return (
     <div className={"tw-empty-tree-container"}>
       {icon ? <Icon size="large" href={icon} /> : null}
-      <Text variant={"body-sm"} style={{ textAlign: "center" }}>
+      <Typography variant={"body-sm"} style={{ textAlign: "center" }}>
         {translate("baseTree.dataIsNotAvailable")}
-      </Text>
+      </Typography>
     </div>
   );
 }

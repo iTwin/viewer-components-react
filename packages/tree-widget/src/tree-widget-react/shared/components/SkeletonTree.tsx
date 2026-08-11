@@ -5,7 +5,8 @@
 
 import "./SkeletonTree.css";
 
-import { Skeleton, VisuallyHidden } from "@stratakit/bricks";
+import { Skeleton } from "@mui/material";
+import { visuallyHidden } from "@mui/utils";
 import { useTranslation } from "./LocalizationContext.js";
 
 /**
@@ -15,11 +16,13 @@ import { useTranslation } from "./LocalizationContext.js";
 export function SkeletonTree() {
   const translate = useTranslation();
   return (
-    <div className="tw-skeleton-container">
+    <div className="tw-skeleton-container" role="status">
       {Array.from({ length: 20 }, (_, index) => (
         <SkeletonRow key={index} />
       ))}
-      <VisuallyHidden id={"tw-progress-bar"}>{translate("loading.skeleton")}</VisuallyHidden>
+      <span id={"tw-progress-bar"} style={visuallyHidden}>
+        {translate("loading.skeleton")}
+      </span>
     </div>
   );
 }
@@ -27,8 +30,8 @@ export function SkeletonTree() {
 function SkeletonRow() {
   return (
     <div className="tw-skeleton-row">
-      <Skeleton variant={"object"} size={"small"} />
-      <Skeleton variant={"text"} />
+      <Skeleton variant={"rounded"} width={16} height={16} />
+      <Skeleton variant={"rounded"} width={"100%"} height={16} />
     </div>
   );
 }

@@ -3,9 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { Icon } from "@stratakit/foundations";
 import icon3d from "@stratakit/icons/3d.svg";
 import iconBisDefinitionsContainer from "@stratakit/icons/bis-definitions-container.svg";
+import { Icon } from "@stratakit/mui";
 import { ClassificationsTreeNode } from "./ClassificationsTreeNode.js";
 
 import type { TreeNode } from "@itwin/presentation-hierarchies-react";

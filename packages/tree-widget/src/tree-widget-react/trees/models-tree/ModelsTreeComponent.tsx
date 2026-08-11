@@ -5,7 +5,7 @@
 
 import { Fragment, useEffect } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { Skeleton } from "@stratakit/bricks";
+import { Skeleton } from "@mui/material";
 import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../shared/FocusedInstancesContext.js";
 import { useActiveTreeWidgetViewport } from "../../shared/internal/hooks/UseActiveTreeWidgetViewport.js";
 import { SharedTreeContextProviderInternal, useSharedTreeContextInternal } from "../../shared/internal/SharedTreeContextProviderInternal.js";
@@ -177,7 +177,7 @@ function ModelsTreeComponentImpl({
           <View3DButton {...buttonProps} key="view-3d-btn" onFeatureUsed={onFeatureUsed} />,
           <ToggleInstancesFocusButton disabled={searchText !== undefined} key="toggle-instances-focus-btn" onFeatureUsed={onFeatureUsed} />,
         ]
-    : Array.from({ length: headerButtons?.length ?? 6 }, (_, index) => <Skeleton variant={"object"} size={"medium"} key={index} />);
+    : Array.from({ length: headerButtons?.length ?? 6 }, (_, index) => <Skeleton variant={"rounded"} width={24} height={24} key={index} />);
 
   useEffect(() => {
     if (instanceFocusEnabled && searchText !== undefined) {

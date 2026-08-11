@@ -4,9 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useState } from "react";
-import { IconButton, TextBox } from "@stratakit/bricks";
+import { IconButton, TextField } from "@mui/material";
 import dismissSvg from "@stratakit/icons/dismiss.svg";
 import searchSvg from "@stratakit/icons/search.svg";
+import { Icon } from "@stratakit/mui";
 import { useTranslation } from "../shared/components/LocalizationContext.js";
 import { useLatest } from "../shared/internal/hooks/UseLatest.js";
 
@@ -38,29 +39,35 @@ export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, cla
   return !isOpened ? (
     <IconButton
       className={"tw-search-box-button"}
-      variant={"ghost"}
+      size="small"
       label={translate("header.searchBox.searchForSomething")}
-      icon={searchSvg}
       onClick={() => {
         setIsOpened(true);
         setInputValue("");
       }}
-    />
+    >
+      <Icon href={searchSvg} />
+    </IconButton>
   ) : (
     <>
-      <TextBox.Root className={className}>
-        <TextBox.Input type={"text"} onChange={(e) => setInputValue(e.currentTarget.value)} placeholder={translate("header.searchBox.search")} />
-      </TextBox.Root>
+      <TextField
+        className={className}
+        size="small"
+        type={"text"}
+        onChange={(e) => setInputValue(e.currentTarget.value)}
+        placeholder={translate("header.searchBox.search")}
+      />
       <IconButton
         className={"tw-search-box-button"}
-        variant={"ghost"}
+        size="small"
         label={translate("header.searchBox.close")}
-        icon={dismissSvg}
         onClick={() => {
           setIsOpened(false);
           setInputValue(undefined);
         }}
-      />
+      >
+        <Icon href={dismissSvg} />
+      </IconButton>
     </>
   );
 }

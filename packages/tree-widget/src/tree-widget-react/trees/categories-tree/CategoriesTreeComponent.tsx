@@ -5,7 +5,7 @@
 
 import { Fragment } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { Skeleton } from "@stratakit/bricks";
+import { Skeleton } from "@mui/material";
 import { useActiveTreeWidgetViewport } from "../../shared/internal/hooks/UseActiveTreeWidgetViewport.js";
 import { SharedTreeContextProviderInternal, useSharedTreeContextInternal } from "../../shared/internal/SharedTreeContextProviderInternal.js";
 import { getClassesByView } from "../../shared/internal/Utils.js";
@@ -133,7 +133,7 @@ function CategoriesTreeComponentImpl({
           <HideAllButton {...buttonProps} key="hide-all-btn" onFeatureUsed={onFeatureUsed} />,
           <InvertAllButton {...buttonProps} key="invert-all-btn" onFeatureUsed={onFeatureUsed} />,
         ]
-    : Array.from({ length: headerButtons?.length ?? 3 }, (_, index) => <Skeleton variant={"object"} size={"medium"} key={index} />);
+    : Array.from({ length: headerButtons?.length ?? 3 }, (_, index) => <Skeleton variant={"rounded"} width={24} height={24} key={index} />);
 
   return (
     <TelemetryContextProvider componentIdentifier={CategoriesTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
