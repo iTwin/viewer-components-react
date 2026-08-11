@@ -121,222 +121,25 @@ describe("CategoriesTreeVisibilityHandler", () => {
       };
     }
     describe(`${viewType} view`, () => {
-      let simpleIModel: Awaited<ReturnType<typeof createSimpleIModel>>;
-      let accessAndCacheSimpleIModel: ReturnType<typeof createAccessAndCache>;
-
-      let unrelatedDefContainersIModel: Awaited<ReturnType<typeof createUnrelatedDefContainersIModel>>;
-      let accessAndCacheUnrelatedDefContainersIModel: ReturnType<typeof createAccessAndCache>;
-
-      let siblingCategoriesIModel: Awaited<ReturnType<typeof createSiblingCategoriesIModel>>;
-      let accessAndCacheSiblingCategoriesIModel: ReturnType<typeof createAccessAndCache>;
-
-      let elementsModelsIModel: Awaited<ReturnType<typeof createElementsModelsIModel>>;
-      let accessAndCacheElementsModelsIModel: ReturnType<typeof createAccessAndCache>;
-
-      let intermediateCategoriesIModel: Awaited<ReturnType<typeof createIntermediateCategoriesIModel>>;
-      let accessAndCacheIntermediateCategoriesIModel: ReturnType<typeof createAccessAndCache>;
-
-      let subModelIntermediateCategoriesIModel: Awaited<ReturnType<typeof createSubModelIntermediateCategoriesIModel>>;
-      let accessAndCacheSubModelIntermediateCategoriesIModel: ReturnType<typeof createAccessAndCache>;
-
-      async function createSimpleIModel() {
-        return buildIModel(async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            // Structure of the iModel:
-            // - DefinitionContainer
-            //   - Category
-            //     - Default SubCategory
-            //     - SubCategory
-            //     - Element
-            const elementsModel = insertElementsModel({ txn, codeValue: "m" });
-            const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-            const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
-
-            const category = insertCategory({ txn, codeValue: "cat", modelId: definitionModel.id });
-            const element = insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
-            const subCategory = insertSubCategory({ txn, parentCategoryId: category.id, codeValue: "subCat", modelId: definitionModel.id });
-            return { definitionContainer, category, subCategory, elementsModel, element, defaultSubCategoryId: getDefaultSubCategoryId(category.id) };
-          }),
-        );
-      }
-
-      async function createUnrelatedDefContainersIModel() {
-        return buildIModel(async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            // Structure of the iModel:
-            // - DefinitionContainer
-            //   - Category
-            //     - Default SubCategory
-            //     - SubCategory
-            //     - Element
-            //
-            // - DefinitionContainer2
-            //   - Category2
-            //     - Default SubCategory2
-            //     - SubCategory2
-            //     - Element2
-            const elementsModel = insertElementsModel({ txn, codeValue: "m" });
-            const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-            const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
-            const category = insertCategory({ txn, codeValue: "cat", modelId: definitionModel.id });
-            const element = insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
-            const subCategory = insertSubCategory({ txn, parentCategoryId: category.id, codeValue: "subCat", modelId: definitionModel.id });
-
-            const definitionContainer2 = insertDefinitionContainer({ txn, codeValue: "dc2" });
-            const definitionModel2 = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer2.id });
-            const category2 = insertCategory({ txn, codeValue: "cat2", modelId: definitionModel2.id });
-            const element2 = insertElement({ txn, modelId: elementsModel.id, categoryId: category2.id });
-            const subCategory2 = insertSubCategory({ txn, parentCategoryId: category2.id, codeValue: "subCat2", modelId: definitionModel2.id });
-            return {
-              definitionContainer,
-              category,
-              subCategory,
-              elementsModel,
-              element,
-              defaultSubCategoryId: getDefaultSubCategoryId(category.id),
-              definitionContainer2,
-              category2,
-              subCategory2,
-              element2,
-              defaultSubCategoryId2: getDefaultSubCategoryId(category2.id),
-            };
-          }),
-        );
-      }
-
-      async function createSiblingCategoriesIModel() {
-        return buildIModel(async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            // Structure of the iModel:
-            // - Parent DefinitionContainer
-            //   - Category
-            //    - Element
-            //   - Child DefinitionContainer
-            //     - Child Category
-            //       - Child element
-            //     - Child Category2
-            //       - Child element2
-            const elementsModel = insertElementsModel({ txn, codeValue: "m" });
-            const parentDefinitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-            const parentDefinitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: parentDefinitionContainer.id });
-            const childDefinitionContainer = insertDefinitionContainer({ txn, codeValue: "child dc", modelId: parentDefinitionModel.id });
-            const childDefinitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: childDefinitionContainer.id });
-            const childCategory = insertCategory({ txn, codeValue: "child cat", modelId: childDefinitionModel.id });
-            const childElement = insertElement({ txn, modelId: elementsModel.id, categoryId: childCategory.id });
-            const childCategory2 = insertCategory({ txn, codeValue: "child cat2", modelId: childDefinitionModel.id });
-            const childElement2 = insertElement({ txn, modelId: elementsModel.id, categoryId: childCategory2.id });
-
-            const category = insertCategory({ txn, codeValue: "cat", modelId: parentDefinitionModel.id });
-            const element = insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
-            return {
-              parentDefinitionContainer,
-              childDefinitionContainer,
-              childCategory,
-              childElement,
-              childCategory2,
-              childElement2,
-              category,
-              elementsModel,
-              element,
-            };
-          }),
-        );
-      }
-
-      async function createElementsModelsIModel() {
-        return buildIModel(async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            // Structure of the iModel:
-            // - CategoryA
-            //   - ElementA1 (model1)
-            //   - ElementA2 (model2)
-            // - CategoryB
-            //   - ElementB1 (model1)
-            //   - ElementB2 (model2)
-            const elementsModel1 = insertElementsModel({ txn, codeValue: "m1" });
-            const elementsModel2 = insertElementsModel({ txn, codeValue: "m2" });
-            const categoryA = insertCategory({ txn, codeValue: "catA" });
-            const categoryB = insertCategory({ txn, codeValue: "catB" });
-            const elementA1 = insertElement({ txn, modelId: elementsModel1.id, categoryId: categoryA.id });
-            const elementA2 = insertElement({ txn, modelId: elementsModel2.id, categoryId: categoryA.id });
-            const elementB1 = insertElement({ txn, modelId: elementsModel1.id, categoryId: categoryB.id });
-            const elementB2 = insertElement({ txn, modelId: elementsModel2.id, categoryId: categoryB.id });
-            return { elementsModel1, elementsModel2, categoryA, categoryB, elementA1, elementA2, elementB1, elementB2 };
-          }),
-        );
-      }
-
-      async function createIntermediateCategoriesIModel() {
-        return buildIModel(async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            const elementsModel = insertElementsModel({ txn, codeValue: "m" });
-            const categoryA = insertCategory({ txn, codeValue: "catA" });
-            const categoryB = insertCategory({ txn, codeValue: "catB" });
-            const parentElement = insertElement({ txn, modelId: elementsModel.id, categoryId: categoryA.id });
-            const childElement = insertElement({ txn, modelId: elementsModel.id, categoryId: categoryB.id, parentId: parentElement.id });
-            return { categoryA, categoryB, parentElement, childElement, elementsModel };
-          }),
-        );
-      }
-
-      async function createSubModelIntermediateCategoriesIModel() {
-        return buildIModel(async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            const elementsModel = insertElementsModel({ txn, codeValue: "m" });
-            const categoryA = insertCategory({ txn, codeValue: "catA" });
-            const categoryB = insertCategory({ txn, codeValue: "catB" });
-            const modeledElement = insertModeledElement({
-              txn,
-              modelId: elementsModel.id,
-              categoryId: categoryA.id,
-            });
-            const subModel = insertElementsSubModel({ txn, modeledElementId: modeledElement.id });
-            const subModelElement = insertElement({ txn, modelId: subModel.id, categoryId: categoryB.id });
-            return { categoryA, categoryB, modeledElement, subModel, subModelElement, elementsModel };
-          }),
-        );
-      }
+      let datasets: Awaited<ReturnType<typeof createDatasets>>;
 
       beforeAll(async () => {
-        simpleIModel = await createSimpleIModel();
-        accessAndCacheSimpleIModel = createAccessAndCache({ imodelConnection: simpleIModel.imodelConnection, viewType });
-
-        unrelatedDefContainersIModel = await createUnrelatedDefContainersIModel();
-        accessAndCacheUnrelatedDefContainersIModel = createAccessAndCache({ imodelConnection: unrelatedDefContainersIModel.imodelConnection, viewType });
-
-        siblingCategoriesIModel = await createSiblingCategoriesIModel();
-        accessAndCacheSiblingCategoriesIModel = createAccessAndCache({ imodelConnection: siblingCategoriesIModel.imodelConnection, viewType });
-
-        elementsModelsIModel = await createElementsModelsIModel();
-        accessAndCacheElementsModelsIModel = createAccessAndCache({ imodelConnection: elementsModelsIModel.imodelConnection, viewType });
-
-        intermediateCategoriesIModel = await createIntermediateCategoriesIModel();
-        accessAndCacheIntermediateCategoriesIModel = createAccessAndCache({ imodelConnection: intermediateCategoriesIModel.imodelConnection, viewType });
-
-        subModelIntermediateCategoriesIModel = await createSubModelIntermediateCategoriesIModel();
-        accessAndCacheSubModelIntermediateCategoriesIModel = createAccessAndCache({
-          imodelConnection: subModelIntermediateCategoriesIModel.imodelConnection,
-          viewType,
-        });
+        datasets = await createDatasets(viewType);
       });
 
       afterAll(async () => {
-        await simpleIModel.imodelConnection.close();
-        await unrelatedDefContainersIModel.imodelConnection.close();
-        await siblingCategoriesIModel.imodelConnection.close();
-        await elementsModelsIModel.imodelConnection.close();
-        await intermediateCategoriesIModel.imodelConnection.close();
-        await subModelIntermediateCategoriesIModel.imodelConnection.close();
+        await datasets[Symbol.asyncDispose]();
       });
 
       describe("enabling visibility", () => {
         it("by default everything is hidden", async () => {
-          const { imodelConnection, ...keys } = simpleIModel;
+          const { imodelConnection, idsCache, imodelAccess, keys } = datasets.simple;
 
           using visibilityTestData = await createVisibilityTestData({
             imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
-            ...accessAndCacheSimpleIModel,
+            idsCache,
+            imodelAccess,
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -349,11 +152,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
 
         it("category is partial when multiple models contain category and override for one model is set to 'Show'", async () => {
-          const { imodelConnection, ...keys } = elementsModelsIModel;
+          const { imodelConnection, idsCache, imodelAccess, keys } = datasets.elementsModels;
 
           using visibilityTestData = await createVisibilityTestData({
             imodelConnection,
-            ...accessAndCacheElementsModelsIModel,
+            idsCache,
+            imodelAccess,
           });
           const { handler, provider, viewport } = visibilityTestData;
           setupInitialDisplayState({
@@ -383,13 +187,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
         describe("definitionContainers", () => {
           it("showing definition container turns on children", async () => {
-            const { imodelConnection, ...keys } = simpleIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.simple;
 
-            const accessAndCache = createAccessAndCache({ imodelConnection, viewType });
             using visibilityTestData = await createVisibilityTestData({
               imodelConnection,
               subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
-              ...accessAndCache,
+              idsCache,
+              imodelAccess,
             });
             const { handler, provider, viewport } = visibilityTestData;
 
@@ -403,7 +207,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
 
           it("showing definition container doesn't affect non contained definition containers", async () => {
-            const { imodelConnection, ...keys } = unrelatedDefContainersIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.unrelatedDefContainers;
 
             using visibilityTestData = await createVisibilityTestData({
               imodelConnection,
@@ -411,7 +215,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 { categoryId: keys.category.id, subCategories: keys.subCategory.id },
                 { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
               ],
-              ...accessAndCacheUnrelatedDefContainersIModel,
+              idsCache,
+              imodelAccess,
             });
             const { handler, provider, viewport } = visibilityTestData;
 
@@ -436,11 +241,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
 
           it("showing definition container affects parent", async () => {
-            const { imodelConnection, ...keys } = siblingCategoriesIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.siblingCategories;
 
             using visibilityTestData = await createVisibilityTestData({
               imodelConnection,
-              ...accessAndCacheSiblingCategoriesIModel,
+              idsCache,
+              imodelAccess,
             });
             const { handler, provider, viewport } = visibilityTestData;
 
@@ -464,10 +270,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
         describe("categories", () => {
           it("showing category of hidden model does not enable other categories", async () => {
-            const { imodelConnection, ...keys } = elementsModelsIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.elementsModels;
             using visibilityTestData = await createVisibilityTestData({
               imodelConnection,
-              ...accessAndCacheElementsModelsIModel,
+              idsCache,
+              imodelAccess,
               hierarchyConfig: { elements: { nodes: "include" } },
             });
             const { handler, provider, viewport } = visibilityTestData;
@@ -511,12 +318,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
 
           it("showing category turns on parents and children", async () => {
-            const { imodelConnection, ...keys } = simpleIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.simple;
 
             using visibilityTestData = await createVisibilityTestData({
               imodelConnection,
               subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
-              ...accessAndCacheSimpleIModel,
+              idsCache,
+              imodelAccess,
             });
             const { handler, provider, viewport } = visibilityTestData;
 
@@ -530,7 +338,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
 
           it("showing category doesn't affect unrelated nodes", async () => {
-            const { imodelConnection, ...keys } = unrelatedDefContainersIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.unrelatedDefContainers;
 
             using visibilityTestData = await createVisibilityTestData({
               imodelConnection,
@@ -538,7 +346,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 { categoryId: keys.category.id, subCategories: keys.subCategory.id },
                 { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
               ],
-              ...accessAndCacheUnrelatedDefContainersIModel,
+              idsCache,
+              imodelAccess,
             });
             const { handler, provider, viewport } = visibilityTestData;
 
@@ -563,11 +372,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
 
           it("showing category makes parent container partially visible if it has more direct child categories", async () => {
-            const { imodelConnection, ...keys } = siblingCategoriesIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.siblingCategories;
 
             using visibilityTestData = await createVisibilityTestData({
               imodelConnection,
-              ...accessAndCacheSiblingCategoriesIModel,
+              idsCache,
+              imodelAccess,
             });
             const { handler, provider, viewport } = visibilityTestData;
 
@@ -589,11 +399,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
 
           it("showing category makes parent container partially visible if it has more definition containers", async () => {
-            const { imodelConnection, ...keys } = siblingCategoriesIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.siblingCategories;
 
             using visibilityTestData = await createVisibilityTestData({
               imodelConnection,
-              ...accessAndCacheSiblingCategoriesIModel,
+              idsCache,
+              imodelAccess,
             });
             const { handler, provider, viewport } = visibilityTestData;
 
@@ -617,14 +428,15 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
         describe("subCategories", () => {
           it("showing subCategory of hidden model does not affect other categories", async () => {
-            const { imodelConnection, ...keys } = unrelatedDefContainersIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.unrelatedDefContainers;
             using visibilityTestData = await createVisibilityTestData({
               imodelConnection,
               subCategoriesOfCategories: [
                 { categoryId: keys.category.id, subCategories: keys.subCategory.id },
                 { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
               ],
-              ...accessAndCacheUnrelatedDefContainersIModel,
+              idsCache,
+              imodelAccess,
             });
             const { handler, provider, viewport } = visibilityTestData;
 
@@ -652,12 +464,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
 
           it("showing subCategory doesn't affect sibling subCategories", async () => {
-            const { imodelConnection, ...keys } = simpleIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.simple;
 
             using visibilityTestData = await createVisibilityTestData({
               imodelConnection,
               subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
-              ...accessAndCacheSimpleIModel,
+              idsCache,
+              imodelAccess,
             });
 
             const { handler, provider, viewport } = visibilityTestData;
@@ -679,7 +492,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
 
           it("showing subCategory doesn't affect non related nodes", async () => {
-            const { imodelConnection, ...keys } = unrelatedDefContainersIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.unrelatedDefContainers;
 
             using visibilityTestData = await createVisibilityTestData({
               imodelConnection,
@@ -687,7 +500,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 { categoryId: keys.category.id, subCategories: keys.subCategory.id },
                 { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
               ],
-              ...accessAndCacheUnrelatedDefContainersIModel,
+              idsCache,
+              imodelAccess,
             });
             const { handler, provider, viewport } = visibilityTestData;
 
@@ -715,13 +529,14 @@ describe("CategoriesTreeVisibilityHandler", () => {
         describe("elements set to 'include'", () => {
           describe("definitionContainers", () => {
             it("showing definition container turns on children", async () => {
-              const { imodelConnection, ...keys } = simpleIModel;
+              const { imodelConnection, idsCache, imodelAccess, keys } = datasets.simple;
 
               using visibilityTestData = await createVisibilityTestData({
                 imodelConnection,
                 subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
                 hierarchyConfig: { elements: { nodes: "include" } },
-                ...accessAndCacheSimpleIModel,
+                idsCache,
+                imodelAccess,
               });
               const { handler, provider, viewport } = visibilityTestData;
 
@@ -735,7 +550,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             });
 
             it("showing definition container doesn't affect non contained definition containers", async () => {
-              const { imodelConnection, ...keys } = unrelatedDefContainersIModel;
+              const { imodelConnection, idsCache, imodelAccess, keys } = datasets.unrelatedDefContainers;
 
               using visibilityTestData = await createVisibilityTestData({
                 imodelConnection,
@@ -743,7 +558,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
                   { categoryId: keys.category.id, subCategories: keys.subCategory.id },
                   { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
                 ],
-                ...accessAndCacheUnrelatedDefContainersIModel,
+                idsCache,
+                imodelAccess,
                 hierarchyConfig: { elements: { nodes: "include" } },
               });
               const { handler, provider, viewport } = visibilityTestData;
@@ -771,12 +587,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
             });
 
             it("showing child definition container affects parent", async () => {
-              const { imodelConnection, ...keys } = siblingCategoriesIModel;
+              const { imodelConnection, idsCache, imodelAccess, keys } = datasets.siblingCategories;
 
               using visibilityTestData = await createVisibilityTestData({
                 imodelConnection,
                 hierarchyConfig: { elements: { nodes: "include" } },
-                ...accessAndCacheSiblingCategoriesIModel,
+                idsCache,
+                imodelAccess,
               });
               const { handler, provider, viewport } = visibilityTestData;
 
@@ -804,13 +621,14 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
           describe("categories", () => {
             it("showing category turns on children", async () => {
-              const { imodelConnection, ...keys } = simpleIModel;
+              const { imodelConnection, idsCache, imodelAccess, keys } = datasets.simple;
 
               using visibilityTestData = await createVisibilityTestData({
                 imodelConnection,
                 subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
                 hierarchyConfig: { elements: { nodes: "include" } },
-                ...accessAndCacheSimpleIModel,
+                idsCache,
+                imodelAccess,
               });
               const { handler, provider, viewport } = visibilityTestData;
 
@@ -824,7 +642,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             });
 
             it("showing category doesn't affect other categories", async () => {
-              const { imodelConnection, ...keys } = unrelatedDefContainersIModel;
+              const { imodelConnection, idsCache, imodelAccess, keys } = datasets.unrelatedDefContainers;
 
               using visibilityTestData = await createVisibilityTestData({
                 imodelConnection,
@@ -833,7 +651,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
                   { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
                 ],
                 hierarchyConfig: { elements: { nodes: "include" } },
-                ...accessAndCacheUnrelatedDefContainersIModel,
+                idsCache,
+                imodelAccess,
               });
               const { handler, provider, viewport } = visibilityTestData;
 
@@ -860,7 +679,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             });
 
             it("showing category doesn't affect non related definition container", async () => {
-              const { imodelConnection, ...keys } = unrelatedDefContainersIModel;
+              const { imodelConnection, idsCache, imodelAccess, keys } = datasets.unrelatedDefContainers;
 
               using visibilityTestData = await createVisibilityTestData({
                 imodelConnection,
@@ -869,7 +688,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
                   { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
                 ],
                 hierarchyConfig: { elements: { nodes: "include" } },
-                ...accessAndCacheUnrelatedDefContainersIModel,
+                idsCache,
+                imodelAccess,
               });
               const { handler, provider, viewport } = visibilityTestData;
 
@@ -896,12 +716,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
             });
 
             it("showing category makes parent container partially visible if it has more direct child categories", async () => {
-              const { imodelConnection, ...keys } = siblingCategoriesIModel;
+              const { imodelConnection, idsCache, imodelAccess, keys } = datasets.siblingCategories;
 
               using visibilityTestData = await createVisibilityTestData({
                 imodelConnection,
                 hierarchyConfig: { elements: { nodes: "include" } },
-                ...accessAndCacheSiblingCategoriesIModel,
+                idsCache,
+                imodelAccess,
               });
               const { handler, provider, viewport } = visibilityTestData;
 
@@ -927,12 +748,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
             });
 
             it("showing category makes parent container partially visible if it has more definition containers", async () => {
-              const { imodelConnection, ...keys } = siblingCategoriesIModel;
+              const { imodelConnection, idsCache, imodelAccess, keys } = datasets.siblingCategories;
 
               using visibilityTestData = await createVisibilityTestData({
                 imodelConnection,
                 hierarchyConfig: { elements: { nodes: "include" } },
-                ...accessAndCacheSiblingCategoriesIModel,
+                idsCache,
+                imodelAccess,
               });
               const { handler, provider, viewport } = visibilityTestData;
 
@@ -960,13 +782,14 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
           describe("subCategories", () => {
             it("showing subCategory doesn't affect category elements", async () => {
-              const { imodelConnection, ...keys } = simpleIModel;
+              const { imodelConnection, idsCache, imodelAccess, keys } = datasets.simple;
 
               using visibilityTestData = await createVisibilityTestData({
                 imodelConnection,
                 subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
                 hierarchyConfig: { elements: { nodes: "include" } },
-                ...accessAndCacheSimpleIModel,
+                idsCache,
+                imodelAccess,
               });
               const { handler, provider, viewport } = visibilityTestData;
               setupInitialDisplayState({ viewport, elements: [{ id: keys.element.id, visible: false }] });
@@ -988,7 +811,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             });
 
             it("showing subCategory doesn't affect non related elements", async () => {
-              const { imodelConnection, ...keys } = unrelatedDefContainersIModel;
+              const { imodelConnection, idsCache, imodelAccess, keys } = datasets.unrelatedDefContainers;
 
               using visibilityTestData = await createVisibilityTestData({
                 imodelConnection,
@@ -997,7 +820,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
                   { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
                 ],
                 hierarchyConfig: { elements: { nodes: "include" } },
-                ...accessAndCacheUnrelatedDefContainersIModel,
+                idsCache,
+                imodelAccess,
               });
               const { handler, provider, viewport } = visibilityTestData;
               setupInitialDisplayState({
@@ -1086,7 +910,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             });
 
             it("showing element doesn't affect not related categories or subCategories", async () => {
-              const { imodelConnection, ...keys } = unrelatedDefContainersIModel;
+              const { imodelConnection, idsCache, imodelAccess, keys } = datasets.unrelatedDefContainers;
 
               using visibilityTestData = await createVisibilityTestData({
                 imodelConnection,
@@ -1095,7 +919,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
                   { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
                 ],
                 hierarchyConfig: { elements: { nodes: "include" } },
-                ...accessAndCacheUnrelatedDefContainersIModel,
+                idsCache,
+                imodelAccess,
               });
               const { handler, provider, viewport } = visibilityTestData;
 
@@ -1125,13 +950,14 @@ describe("CategoriesTreeVisibilityHandler", () => {
             });
 
             it("showing element turns on category and its parents", async () => {
-              const { imodelConnection, ...keys } = simpleIModel;
+              const { imodelConnection, idsCache, imodelAccess, keys } = datasets.simple;
 
               using visibilityTestData = await createVisibilityTestData({
                 imodelConnection,
                 subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
                 hierarchyConfig: { elements: { nodes: "include" } },
-                ...accessAndCacheSimpleIModel,
+                idsCache,
+                imodelAccess,
               });
               const { handler, provider, viewport } = visibilityTestData;
 
@@ -1159,10 +985,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
             let visibilityTestData: Awaited<ReturnType<typeof createVisibilityTestData>>;
 
             beforeEach(async () => {
+              const { imodelConnection, idsCache, imodelAccess } = datasets.intermediateCategories;
               visibilityTestData = await createVisibilityTestData({
-                imodelConnection: intermediateCategoriesIModel.imodelConnection,
+                imodelConnection,
                 hierarchyConfig: { elements: { nodes: "include" } },
-                ...accessAndCacheIntermediateCategoriesIModel,
+                idsCache,
+                imodelAccess,
               });
             });
 
@@ -1172,7 +1000,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
             it("showing intermediate category makes its elements visible and parent element partially visible", async () => {
               const { handler, provider, viewport } = visibilityTestData;
-              const keys = intermediateCategoriesIModel;
+              const { keys } = datasets.intermediateCategories;
 
               await handler.changeVisibility(
                 createCategoryHierarchyNode({
@@ -1202,7 +1030,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
             it("showing child element under intermediate category makes it visible and parents partially visible", async () => {
               const { handler, provider, viewport } = visibilityTestData;
-              const keys = intermediateCategoriesIModel;
+              const { keys } = datasets.intermediateCategories;
 
               await handler.changeVisibility(
                 createElementHierarchyNode({
@@ -1232,7 +1060,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
             it("showing parent element makes children under intermediate category visible", async () => {
               const { handler, provider, viewport } = visibilityTestData;
-              const keys = intermediateCategoriesIModel;
+              const { keys } = datasets.intermediateCategories;
 
               await handler.changeVisibility(
                 createElementHierarchyNode({
@@ -1266,10 +1094,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
             let visibilityTestData: Awaited<ReturnType<typeof createVisibilityTestData>>;
 
             beforeEach(async () => {
+              const { imodelConnection, idsCache, imodelAccess } = datasets.subModelIntermediateCategories;
               visibilityTestData = await createVisibilityTestData({
-                imodelConnection: subModelIntermediateCategoriesIModel.imodelConnection,
+                imodelConnection,
                 hierarchyConfig: { elements: { nodes: "include" } },
-                ...accessAndCacheSubModelIntermediateCategoriesIModel,
+                idsCache,
+                imodelAccess,
               });
             });
 
@@ -1279,7 +1109,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
             it("showing intermediate category under sub-model makes its elements visible and modeled element partially visible", async () => {
               const { handler, provider, viewport } = visibilityTestData;
-              const keys = subModelIntermediateCategoriesIModel;
+              const { keys } = datasets.subModelIntermediateCategories;
 
               await handler.changeVisibility(
                 createCategoryHierarchyNode({
@@ -1308,7 +1138,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
             it("showing element under intermediate category in sub-model makes it visible and parents partially visible", async () => {
               const { handler, provider, viewport } = visibilityTestData;
-              const keys = subModelIntermediateCategoriesIModel;
+              const { keys } = datasets.subModelIntermediateCategories;
 
               await handler.changeVisibility(
                 createElementHierarchyNode({
@@ -1337,7 +1167,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
             it("showing modeled element makes sub-model elements under intermediate category visible", async () => {
               const { handler, provider, viewport } = visibilityTestData;
-              const keys = subModelIntermediateCategoriesIModel;
+              const { keys } = datasets.subModelIntermediateCategories;
 
               await handler.changeVisibility(
                 createElementHierarchyNode({
@@ -1696,9 +1526,9 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
         describe("enabling category visibility through model selector", () => {
           it("category is visible when only one model contains category and model is enabled through model selector", async () => {
-            const { imodelConnection, ...keys } = simpleIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.simple;
 
-            using visibilityTestData = await createVisibilityTestData({ imodelConnection, ...accessAndCacheSimpleIModel });
+            using visibilityTestData = await createVisibilityTestData({ imodelConnection, idsCache, imodelAccess });
             const { handler, provider, viewport } = visibilityTestData;
             setupInitialDisplayState({ viewport, categories: [{ id: keys.category.id, visible: true }] });
 
@@ -1713,8 +1543,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
 
           it("category is partial when multiple models contain category and one model is enabled through model selector", async () => {
-            const { imodelConnection, ...keys } = elementsModelsIModel;
-            using visibilityTestData = await createVisibilityTestData({ imodelConnection, ...accessAndCacheElementsModelsIModel });
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.elementsModels;
+            using visibilityTestData = await createVisibilityTestData({ imodelConnection, idsCache, imodelAccess });
             const { handler, provider, viewport } = visibilityTestData;
             setupInitialDisplayState({ viewport, categories: [{ id: keys.categoryA.id, visible: true }] });
 
@@ -1735,12 +1565,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
       describe("disabling visibility", () => {
         it("by default everything is visible", async () => {
-          const { imodelConnection, ...keys } = simpleIModel;
+          const { imodelConnection, idsCache, imodelAccess, keys } = datasets.simple;
           using visibilityTestData = await createVisibilityTestData({
             imodelConnection,
             subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
             visibleByDefault: true,
-            ...accessAndCacheSimpleIModel,
+            idsCache,
+            imodelAccess,
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1753,8 +1584,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
 
         it("category is partial when multiple models contain category and override for one model is set to 'Hide'", async () => {
-          const { imodelConnection, ...keys } = elementsModelsIModel;
-          using visibilityTestData = await createVisibilityTestData({ imodelConnection, visibleByDefault: true, ...accessAndCacheElementsModelsIModel });
+          const { imodelConnection, idsCache, imodelAccess, keys } = datasets.elementsModels;
+          using visibilityTestData = await createVisibilityTestData({ imodelConnection, visibleByDefault: true, idsCache, imodelAccess });
           const { handler, provider, viewport } = visibilityTestData;
 
           viewport.setPerModelCategoryOverride({
@@ -1775,8 +1606,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
 
         it("category is partial when multiple models contain category and one model is disabled through model selector", async () => {
-          const { imodelConnection, ...keys } = elementsModelsIModel;
-          using visibilityTestData = await createVisibilityTestData({ imodelConnection, visibleByDefault: true, ...accessAndCacheElementsModelsIModel });
+          const { imodelConnection, idsCache, imodelAccess, keys } = datasets.elementsModels;
+          using visibilityTestData = await createVisibilityTestData({ imodelConnection, visibleByDefault: true, idsCache, imodelAccess });
           const { handler, provider, viewport } = visibilityTestData;
 
           viewport.changeModelDisplay({ modelIds: keys.elementsModel1.id, display: false });
@@ -1794,12 +1625,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
         describe("definitionContainers", () => {
           it("hiding definition container hides children", async () => {
-            const { imodelConnection, ...keys } = simpleIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.simple;
             using visibilityTestData = await createVisibilityTestData({
               imodelConnection,
               subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
               visibleByDefault: true,
-              ...accessAndCacheSimpleIModel,
+              idsCache,
+              imodelAccess,
             });
             const { handler, provider, viewport } = visibilityTestData;
 
@@ -1813,7 +1645,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
 
           it("hiding definition container doesn't affect non contained definition containers", async () => {
-            const { imodelConnection, ...keys } = unrelatedDefContainersIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.unrelatedDefContainers;
             using visibilityTestData = await createVisibilityTestData({
               imodelConnection,
               subCategoriesOfCategories: [
@@ -1821,7 +1653,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
               ],
               visibleByDefault: true,
-              ...accessAndCacheUnrelatedDefContainersIModel,
+              idsCache,
+              imodelAccess,
             });
             const { handler, provider, viewport } = visibilityTestData;
 
@@ -1846,11 +1679,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
 
           it("hiding definition affects parent", async () => {
-            const { imodelConnection, ...keys } = siblingCategoriesIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.siblingCategories;
             using visibilityTestData = await createVisibilityTestData({
               imodelConnection,
               visibleByDefault: true,
-              ...accessAndCacheSiblingCategoriesIModel,
+              idsCache,
+              imodelAccess,
             });
             const { handler, provider, viewport } = visibilityTestData;
 
@@ -1875,12 +1709,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
         describe("categories", () => {
           it("hiding category hides children", async () => {
-            const { imodelConnection, ...keys } = simpleIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.simple;
             using visibilityTestData = await createVisibilityTestData({
               imodelConnection,
               subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
               visibleByDefault: true,
-              ...accessAndCacheSimpleIModel,
+              idsCache,
+              imodelAccess,
             });
             const { handler, provider, viewport } = visibilityTestData;
 
@@ -1894,7 +1729,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
 
           it("hiding category doesn't affect non related nodes", async () => {
-            const { imodelConnection, ...keys } = unrelatedDefContainersIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.unrelatedDefContainers;
             using visibilityTestData = await createVisibilityTestData({
               imodelConnection,
               subCategoriesOfCategories: [
@@ -1902,7 +1737,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 { categoryId: keys.category2.id, subCategories: keys.subCategory2.id },
               ],
               visibleByDefault: true,
-              ...accessAndCacheUnrelatedDefContainersIModel,
+              idsCache,
+              imodelAccess,
             });
             const { handler, provider, viewport } = visibilityTestData;
 
@@ -1927,11 +1763,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
 
           it("hiding category makes parent container partially visible if it has more direct child categories", async () => {
-            const { imodelConnection, ...keys } = siblingCategoriesIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.siblingCategories;
             using visibilityTestData = await createVisibilityTestData({
               imodelConnection,
               visibleByDefault: true,
-              ...accessAndCacheSiblingCategoriesIModel,
+              idsCache,
+              imodelAccess,
             });
             const { handler, provider, viewport } = visibilityTestData;
 
@@ -1953,11 +1790,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
 
           it("hiding category makes parent container partially visible if it has more definition containers", async () => {
-            const { imodelConnection, ...keys } = siblingCategoriesIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.siblingCategories;
             using visibilityTestData = await createVisibilityTestData({
               imodelConnection,
               visibleByDefault: true,
-              ...accessAndCacheSiblingCategoriesIModel,
+              idsCache,
+              imodelAccess,
             });
             const { handler, provider, viewport } = visibilityTestData;
 
@@ -1982,12 +1820,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
         describe("subCategories", () => {
           it("hiding subCategory affects parents and doesn't affect other subCategories", async () => {
-            const { imodelConnection, ...keys } = simpleIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.simple;
             using visibilityTestData = await createVisibilityTestData({
               imodelConnection,
               subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
               visibleByDefault: true,
-              ...accessAndCacheSimpleIModel,
+              idsCache,
+              imodelAccess,
             });
             const { handler, provider, viewport } = visibilityTestData;
 
@@ -2007,12 +1846,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
 
           it("hiding subCategory doesn't affect not related nodes", async () => {
-            const { imodelConnection, ...keys } = unrelatedDefContainersIModel;
+            const { imodelConnection, idsCache, imodelAccess, keys } = datasets.unrelatedDefContainers;
             using visibilityTestData = await createVisibilityTestData({
               imodelConnection,
               subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: keys.subCategory.id }],
               visibleByDefault: true,
-              ...accessAndCacheUnrelatedDefContainersIModel,
+              idsCache,
+              imodelAccess,
             });
             const { handler, provider, viewport } = visibilityTestData;
 
@@ -2042,11 +1882,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
             let visibilityTestData: Awaited<ReturnType<typeof createVisibilityTestData>>;
 
             beforeEach(async () => {
+              const { imodelConnection, idsCache, imodelAccess } = datasets.intermediateCategories;
               visibilityTestData = await createVisibilityTestData({
-                imodelConnection: intermediateCategoriesIModel.imodelConnection,
+                imodelConnection,
                 hierarchyConfig: { elements: { nodes: "include" } },
                 visibleByDefault: true,
-                ...accessAndCacheIntermediateCategoriesIModel,
+                idsCache,
+                imodelAccess,
               });
             });
 
@@ -2056,7 +1898,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
             it("hiding intermediate category makes its elements hidden", async () => {
               const { handler, provider, viewport } = visibilityTestData;
-              const keys = intermediateCategoriesIModel;
+              const { keys } = datasets.intermediateCategories;
 
               await handler.changeVisibility(
                 createCategoryHierarchyNode({
@@ -2086,7 +1928,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
             it("hiding child element under intermediate category makes it hidden and parents partially visible", async () => {
               const { handler, provider, viewport } = visibilityTestData;
-              const keys = intermediateCategoriesIModel;
+              const { keys } = datasets.intermediateCategories;
 
               await handler.changeVisibility(
                 createElementHierarchyNode({
@@ -2116,7 +1958,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
             it("hiding parent element makes children under intermediate category hidden", async () => {
               const { handler, provider, viewport } = visibilityTestData;
-              const keys = intermediateCategoriesIModel;
+              const { keys } = datasets.intermediateCategories;
 
               await handler.changeVisibility(
                 createElementHierarchyNode({
@@ -2150,11 +1992,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
             let visibilityTestData: Awaited<ReturnType<typeof createVisibilityTestData>>;
 
             beforeEach(async () => {
+              const { imodelConnection, idsCache, imodelAccess } = datasets.subModelIntermediateCategories;
               visibilityTestData = await createVisibilityTestData({
-                imodelConnection: subModelIntermediateCategoriesIModel.imodelConnection,
+                imodelConnection,
                 hierarchyConfig: { elements: { nodes: "include" } },
                 visibleByDefault: true,
-                ...accessAndCacheSubModelIntermediateCategoriesIModel,
+                idsCache,
+                imodelAccess,
               });
             });
 
@@ -2164,7 +2008,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
             it("hiding intermediate category under sub-model makes its elements hidden", async () => {
               const { handler, provider, viewport } = visibilityTestData;
-              const keys = subModelIntermediateCategoriesIModel;
+              const { keys } = datasets.subModelIntermediateCategories;
 
               await handler.changeVisibility(
                 createCategoryHierarchyNode({
@@ -2193,7 +2037,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
             it("hiding element under intermediate category in sub-model makes it hidden and parents partially visible", async () => {
               const { handler, provider, viewport } = visibilityTestData;
-              const keys = subModelIntermediateCategoriesIModel;
+              const { keys } = datasets.subModelIntermediateCategories;
 
               await handler.changeVisibility(
                 createElementHierarchyNode({
@@ -2222,7 +2066,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
             it("hiding modeled element makes sub-model elements under intermediate category hidden", async () => {
               const { handler, provider, viewport } = visibilityTestData;
-              const keys = subModelIntermediateCategoriesIModel;
+              const { keys } = datasets.subModelIntermediateCategories;
 
               await handler.changeVisibility(
                 createElementHierarchyNode({
@@ -2256,12 +2100,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
       describe("elements.excludedClasses", () => {
         it("element of an excluded class participates in visibility", async () => {
-          const { imodelConnection, ...keys } = simpleIModel;
+          const { imodelConnection, idsCache, imodelAccess, keys } = datasets.simple;
 
           using visibilityTestData = await createVisibilityTestData({
             imodelConnection,
             hierarchyConfig: { elements: { nodes: "include", excludedClasses: [getClassesByView(viewType).elementClass] } },
-            ...accessAndCacheSimpleIModel,
+            idsCache,
+            imodelAccess,
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -2300,3 +2145,176 @@ describe("CategoriesTreeVisibilityHandler", () => {
     });
   });
 });
+
+async function createDatasets(viewType: "2d" | "3d") {
+  const imodels: IModelConnection[] = [];
+  const { insertElementsModel, insertModeledElement, insertCategory, insertElement, insertElementsSubModel } = getInsertFunctionByViewType(viewType);
+
+  return {
+    [Symbol.asyncDispose]: async () => Promise.all(imodels.map(async (imodel) => imodel.close())),
+    ["simple"]: await (async () => {
+      const { imodelConnection, ...keys } = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          // Structure of the iModel:
+          // - DefinitionContainer
+          //   - Category
+          //     - Default SubCategory
+          //     - SubCategory
+          //     - Element
+          const elementsModel = insertElementsModel({ txn, codeValue: "m" });
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
+          const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+
+          const category = insertCategory({ txn, codeValue: "cat", modelId: definitionModel.id });
+          const element = insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
+          const subCategory = insertSubCategory({ txn, parentCategoryId: category.id, codeValue: "subCat", modelId: definitionModel.id });
+          return { definitionContainer, category, subCategory, elementsModel, element, defaultSubCategoryId: getDefaultSubCategoryId(category.id) };
+        }),
+      );
+      imodels.push(imodelConnection);
+      return { imodelConnection, keys, ...createAccessAndCache({ imodelConnection, viewType }) };
+    })(),
+    ["unrelatedDefContainers"]: await (async () => {
+      const { imodelConnection, ...keys } = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          // Structure of the iModel:
+          // - DefinitionContainer
+          //   - Category
+          //     - Default SubCategory
+          //     - SubCategory
+          //     - Element
+          //
+          // - DefinitionContainer2
+          //   - Category2
+          //     - Default SubCategory2
+          //     - SubCategory2
+          //     - Element2
+          const elementsModel = insertElementsModel({ txn, codeValue: "m" });
+          const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
+          const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+          const category = insertCategory({ txn, codeValue: "cat", modelId: definitionModel.id });
+          const element = insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
+          const subCategory = insertSubCategory({ txn, parentCategoryId: category.id, codeValue: "subCat", modelId: definitionModel.id });
+
+          const definitionContainer2 = insertDefinitionContainer({ txn, codeValue: "dc2" });
+          const definitionModel2 = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer2.id });
+          const category2 = insertCategory({ txn, codeValue: "cat2", modelId: definitionModel2.id });
+          const element2 = insertElement({ txn, modelId: elementsModel.id, categoryId: category2.id });
+          const subCategory2 = insertSubCategory({ txn, parentCategoryId: category2.id, codeValue: "subCat2", modelId: definitionModel2.id });
+          return {
+            definitionContainer,
+            category,
+            subCategory,
+            elementsModel,
+            element,
+            defaultSubCategoryId: getDefaultSubCategoryId(category.id),
+            definitionContainer2,
+            category2,
+            subCategory2,
+            element2,
+            defaultSubCategoryId2: getDefaultSubCategoryId(category2.id),
+          };
+        }),
+      );
+      imodels.push(imodelConnection);
+      return { imodelConnection, keys, ...createAccessAndCache({ imodelConnection, viewType }) };
+    })(),
+    ["siblingCategories"]: await (async () => {
+      const { imodelConnection, ...keys } = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          // Structure of the iModel:
+          // - Parent DefinitionContainer
+          //   - Category
+          //    - Element
+          //   - Child DefinitionContainer
+          //     - Child Category
+          //       - Child element
+          //     - Child Category2
+          //       - Child element2
+          const elementsModel = insertElementsModel({ txn, codeValue: "m" });
+          const parentDefinitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
+          const parentDefinitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: parentDefinitionContainer.id });
+          const childDefinitionContainer = insertDefinitionContainer({ txn, codeValue: "child dc", modelId: parentDefinitionModel.id });
+          const childDefinitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: childDefinitionContainer.id });
+          const childCategory = insertCategory({ txn, codeValue: "child cat", modelId: childDefinitionModel.id });
+          const childElement = insertElement({ txn, modelId: elementsModel.id, categoryId: childCategory.id });
+          const childCategory2 = insertCategory({ txn, codeValue: "child cat2", modelId: childDefinitionModel.id });
+          const childElement2 = insertElement({ txn, modelId: elementsModel.id, categoryId: childCategory2.id });
+
+          const category = insertCategory({ txn, codeValue: "cat", modelId: parentDefinitionModel.id });
+          const element = insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
+          return {
+            parentDefinitionContainer,
+            childDefinitionContainer,
+            childCategory,
+            childElement,
+            childCategory2,
+            childElement2,
+            category,
+            elementsModel,
+            element,
+          };
+        }),
+      );
+      imodels.push(imodelConnection);
+      return { imodelConnection, keys, ...createAccessAndCache({ imodelConnection, viewType }) };
+    })(),
+    ["elementsModels"]: await (async () => {
+      const { imodelConnection, ...keys } = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          // Structure of the iModel:
+          // - CategoryA
+          //   - ElementA1 (model1)
+          //   - ElementA2 (model2)
+          // - CategoryB
+          //   - ElementB1 (model1)
+          //   - ElementB2 (model2)
+          const elementsModel1 = insertElementsModel({ txn, codeValue: "m1" });
+          const elementsModel2 = insertElementsModel({ txn, codeValue: "m2" });
+          const categoryA = insertCategory({ txn, codeValue: "catA" });
+          const categoryB = insertCategory({ txn, codeValue: "catB" });
+          const elementA1 = insertElement({ txn, modelId: elementsModel1.id, categoryId: categoryA.id });
+          const elementA2 = insertElement({ txn, modelId: elementsModel2.id, categoryId: categoryA.id });
+          const elementB1 = insertElement({ txn, modelId: elementsModel1.id, categoryId: categoryB.id });
+          const elementB2 = insertElement({ txn, modelId: elementsModel2.id, categoryId: categoryB.id });
+          return { elementsModel1, elementsModel2, categoryA, categoryB, elementA1, elementA2, elementB1, elementB2 };
+        }),
+      );
+      imodels.push(imodelConnection);
+      return { imodelConnection, keys, ...createAccessAndCache({ imodelConnection, viewType }) };
+    })(),
+    ["intermediateCategories"]: await (async () => {
+      const { imodelConnection, ...keys } = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const elementsModel = insertElementsModel({ txn, codeValue: "m" });
+          const categoryA = insertCategory({ txn, codeValue: "catA" });
+          const categoryB = insertCategory({ txn, codeValue: "catB" });
+          const parentElement = insertElement({ txn, modelId: elementsModel.id, categoryId: categoryA.id });
+          const childElement = insertElement({ txn, modelId: elementsModel.id, categoryId: categoryB.id, parentId: parentElement.id });
+          return { categoryA, categoryB, parentElement, childElement, elementsModel };
+        }),
+      );
+      imodels.push(imodelConnection);
+      return { imodelConnection, keys, ...createAccessAndCache({ imodelConnection, viewType }) };
+    })(),
+    ["subModelIntermediateCategories"]: await (async () => {
+      const { imodelConnection, ...keys } = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const elementsModel = insertElementsModel({ txn, codeValue: "m" });
+          const categoryA = insertCategory({ txn, codeValue: "catA" });
+          const categoryB = insertCategory({ txn, codeValue: "catB" });
+          const modeledElement = insertModeledElement({
+            txn,
+            modelId: elementsModel.id,
+            categoryId: categoryA.id,
+          });
+          const subModel = insertElementsSubModel({ txn, modeledElementId: modeledElement.id });
+          const subModelElement = insertElement({ txn, modelId: subModel.id, categoryId: categoryB.id });
+          return { categoryA, categoryB, modeledElement, subModel, subModelElement, elementsModel };
+        }),
+      );
+      imodels.push(imodelConnection);
+      return { imodelConnection, keys, ...createAccessAndCache({ imodelConnection, viewType }) };
+    })(),
+  };
+}

@@ -11,7 +11,7 @@ import type { ImportSchemaResult } from "test-utilities";
 import type { IModelDb } from "@itwin/core-backend";
 import type { IModelConnection } from "@itwin/core-frontend";
 
-function getTestName(): string {
+function getUniqueIModelName(): string {
   const testName = expect.getState().currentTestName?.replace(/[^\w]/gi, "-").replace(/-+/g, "-").toLowerCase() ?? "unknown";
   // `currentTestName` is the same for every `buildIModel` call made within a single test (or `undefined`/"unknown" when called
   // outside of a test, e.g. in `beforeAll`), and can also collide across different test files running in parallel. Appending a
@@ -33,7 +33,7 @@ export async function buildIModel<TResult extends object>(
   setup: (imodel: IModelDb, testSchema: TestSchemaDefinition) => Promise<TResult>,
 ): Promise<{ imodelConnection: IModelConnection } & TResult & AsyncDisposable>;
 export async function buildIModel<TResult extends object | undefined>(setup?: (imodel: IModelDb, testSchema: TestSchemaDefinition) => Promise<TResult>) {
-  const testName = getTestName();
+  const testName = getUniqueIModelName();
   const res = await buildNamedIModel(testName, async (imodel) => {
     const testSchema = (await importSchema({
       imodel,

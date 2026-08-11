@@ -17,7 +17,7 @@ import { buildIModel } from "../../../IModelUtils.js";
 import { getDefaultSubCategoryId } from "../../TreeUtils.js";
 import { createAccessAndCache, getInsertFunctionByViewType } from "./Utils.js";
 
-import type { CategoriesTreeIdsCache } from "../../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
+import type { IModelConnection } from "@itwin/core-frontend";
 
 describe("CategoriesTreeIdsCache", () => {
   beforeAll(async () => {
@@ -43,119 +43,18 @@ describe("CategoriesTreeIdsCache", () => {
   ["2d" as const, "3d" as const].forEach((viewType) => {
     const { insertCategory, insertElement, insertElementsModel, insertElementsSubModel, insertModeledElement } = getInsertFunctionByViewType(viewType);
     describe(`${viewType} view`, () => {
-      let imodelWithoutElements: Awaited<ReturnType<typeof createIModelWithoutElements>>;
-      let imodelWithoutDefContainers: Awaited<ReturnType<typeof createIModelWithoutDefContainers>>;
-      let imodelWithDefContainersAndCategories: Awaited<ReturnType<typeof createIModelWithDefContainersAndCategories>>;
-      let cacheForIModelWithoutElements: CategoriesTreeIdsCache;
-      let cacheForIModelWithoutDefContainers: CategoriesTreeIdsCache;
-      let cacheForIModelWithDefContainersAndCategories: CategoriesTreeIdsCache;
-      async function createIModelWithoutElements() {
-        return buildIModel(async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            const emptyDefContainer = insertDefinitionContainer({ txn, codeValue: "Empty dc" });
-            insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: emptyDefContainer.id });
-            const emptyParentDefContainer = insertDefinitionContainer({ txn, codeValue: "Parent dc" });
-            const emptyParentDefModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: emptyParentDefContainer.id });
-            const childDefContainer = insertDefinitionContainer({ txn, codeValue: "Child dc", modelId: emptyParentDefModel.id });
-            insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: childDefContainer.id });
-            const parentDefContainer = insertDefinitionContainer({ txn, codeValue: "Parent dc with cat" });
-            const parentDefModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: parentDefContainer.id });
-            const defContainerOfCategories = insertDefinitionContainer({ txn, codeValue: "Categories dc", modelId: parentDefModel.id });
-            const defModelOfCategories = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: defContainerOfCategories.id });
-            const categoryOfDefContainer = insertCategory({ txn, codeValue: "cat of child", modelId: defModelOfCategories.id });
-            const emptyCategory = insertCategory({ txn, codeValue: "Empty cat" });
-
-            return {
-              emptyDefContainer,
-              emptyParentDefContainer,
-              childDefContainer,
-              defContainerOfCategories,
-              parentDefContainer,
-              categoryOfDefContainer,
-              emptyCategory,
-            };
-          }),
-        );
-      }
-
-      async function createIModelWithoutDefContainers() {
-        return buildIModel(async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            const category = insertCategory({ txn, codeValue: "cat" });
-            const categoryWithSubCategories = insertCategory({ txn, codeValue: "cat with subCategories" });
-            const elementsModel = insertElementsModel({ txn, codeValue: "m" });
-            const element1 = insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
-            const element2 = insertElement({ txn, modelId: elementsModel.id, categoryId: categoryWithSubCategories.id });
-            const subCategory = insertSubCategory({ txn, parentCategoryId: categoryWithSubCategories.id, codeValue: "subCat" });
-
-            return {
-              category,
-              categoryWithSubCategories,
-              subCategory,
-              element1,
-              element2,
-            };
-          }),
-        );
-      }
-
-      async function createIModelWithDefContainersAndCategories() {
-        return buildIModel(async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            const parentDefContainer = insertDefinitionContainer({ txn, codeValue: "Parent dc" });
-            const parentDefModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: parentDefContainer.id });
-            const childDefContainer = insertDefinitionContainer({ txn, codeValue: "Child dc", modelId: parentDefModel.id });
-            const childDefModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: childDefContainer.id });
-            const emptyChildDefContainer = insertDefinitionContainer({ txn, codeValue: "empty dc", modelId: parentDefModel.id });
-            insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: emptyChildDefContainer.id });
-            const categoryUnderChild = insertCategory({ txn, codeValue: "cat", modelId: childDefModel.id });
-            const categoryUnderParentWithSubCategories = insertCategory({ txn, codeValue: "cat with subCategories", modelId: parentDefModel.id });
-            const elementsModel = insertElementsModel({ txn, codeValue: "m" });
-            const element1 = insertElement({ txn, modelId: elementsModel.id, categoryId: categoryUnderChild.id });
-            const element2 = insertElement({ txn, modelId: elementsModel.id, categoryId: categoryUnderParentWithSubCategories.id });
-            const subCategory = insertSubCategory({
-              txn,
-              parentCategoryId: categoryUnderParentWithSubCategories.id,
-              codeValue: "subCat",
-              modelId: parentDefModel.id,
-            });
-
-            return {
-              parentDefContainer,
-              childDefContainer,
-              emptyChildDefContainer,
-              categoryUnderChild,
-              categoryUnderParentWithSubCategories,
-              subCategory,
-              element1,
-              element2,
-            };
-          }),
-        );
-      }
-
+      let datasets: Awaited<ReturnType<typeof createDatasets>>;
       beforeAll(async () => {
-        imodelWithoutElements = await createIModelWithoutElements();
-        cacheForIModelWithoutElements = createAccessAndCache({ imodelConnection: imodelWithoutElements.imodelConnection, viewType }).idsCache;
-        imodelWithoutDefContainers = await createIModelWithoutDefContainers();
-        cacheForIModelWithoutDefContainers = createAccessAndCache({ imodelConnection: imodelWithoutDefContainers.imodelConnection, viewType }).idsCache;
-        imodelWithDefContainersAndCategories = await createIModelWithDefContainersAndCategories();
-        cacheForIModelWithDefContainersAndCategories = createAccessAndCache({
-          imodelConnection: imodelWithDefContainersAndCategories.imodelConnection,
-          viewType,
-        }).idsCache;
+        datasets = await createDatasets(viewType);
       });
 
       afterAll(async () => {
-        await imodelWithoutElements.imodelConnection.close();
-        await imodelWithoutDefContainers.imodelConnection.close();
-        await imodelWithDefContainersAndCategories.imodelConnection.close();
+        await datasets[Symbol.asyncDispose]();
       });
 
       describe("getDirectChildDefinitionContainersAndCategories", () => {
         it("returns empty list for empty definition containers", async () => {
-          const keys = imodelWithoutElements;
-          const idsCache = cacheForIModelWithoutElements;
+          const { keys, idsCache } = datasets.withoutElements;
           expect(
             await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.emptyDefContainer.id] })),
           ).toEqual({
@@ -165,8 +64,7 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns empty list when child definition container is empty", async () => {
-          const keys = imodelWithoutElements;
-          const idsCache = cacheForIModelWithoutElements;
+          const { keys, idsCache } = datasets.withoutElements;
           expect(
             await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.emptyParentDefContainer.id] })),
           ).toEqual({
@@ -176,8 +74,7 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns child non empty definition container", async () => {
-          const keys = imodelWithDefContainersAndCategories;
-          const idsCache = cacheForIModelWithDefContainersAndCategories;
+          const { keys, idsCache } = datasets.withDefContainersAndCategories;
           expect(
             await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.parentDefContainer.id] })),
           ).toEqual({
@@ -195,8 +92,7 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns child definition container when it has empty category and includeEmpty is true", async () => {
-          const keys = imodelWithoutElements;
-          const idsCache = cacheForIModelWithoutElements;
+          const { keys, idsCache } = datasets.withoutElements;
           expect(
             await firstValueFrom(
               idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.parentDefContainer.id], includeEmpty: true }),
@@ -208,8 +104,7 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns empty when child definition container has empty category and includeEmpty is false", async () => {
-          const keys = imodelWithoutElements;
-          const idsCache = cacheForIModelWithoutElements;
+          const { keys, idsCache } = datasets.withoutElements;
           expect(
             await firstValueFrom(
               idsCache.getDirectChildDefinitionContainersAndCategories({
@@ -224,8 +119,7 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns child categories when definition container contains categories", async () => {
-          const keys = imodelWithDefContainersAndCategories;
-          const idsCache = cacheForIModelWithDefContainersAndCategories;
+          const { keys, idsCache } = datasets.withDefContainersAndCategories;
           expect(
             await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.childDefContainer.id] })),
           ).toEqual({
@@ -243,8 +137,7 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns children without elements when includeEmpty is true", async () => {
-          const keys = imodelWithoutElements;
-          const idsCache = cacheForIModelWithoutElements;
+          const { keys, idsCache } = datasets.withoutElements;
           expect(
             await firstValueFrom(
               idsCache.getDirectChildDefinitionContainersAndCategories({
@@ -267,8 +160,7 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns empty when no elements exist", async () => {
-          const keys = imodelWithoutElements;
-          const idsCache = cacheForIModelWithoutElements;
+          const { keys, idsCache } = datasets.withoutElements;
           expect(
             await firstValueFrom(
               idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.defContainerOfCategories.id] }),
@@ -280,8 +172,7 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns only children which contain elements", async () => {
-          const keys = imodelWithDefContainersAndCategories;
-          const idsCache = cacheForIModelWithDefContainersAndCategories;
+          const { keys, idsCache } = datasets.withDefContainersAndCategories;
           expect(
             await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.parentDefContainer.id] })),
           ).toEqual({
@@ -299,8 +190,7 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns children when definition container has parent", async () => {
-          const keys = imodelWithDefContainersAndCategories;
-          const idsCache = cacheForIModelWithDefContainersAndCategories;
+          const { keys, idsCache } = datasets.withDefContainersAndCategories;
           expect(
             await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.childDefContainer.id] })),
           ).toEqual({
@@ -320,14 +210,12 @@ describe("CategoriesTreeIdsCache", () => {
 
       describe("getAllContainedCategories", () => {
         it("returns empty list when definition container is empty", async () => {
-          const keys = imodelWithoutElements;
-          const idsCache = cacheForIModelWithoutElements;
+          const { keys, idsCache } = datasets.withoutElements;
           expect(await collect(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.emptyDefContainer.id] }))).toEqual([]);
         });
 
         it("returns empty child categories", async () => {
-          const keys = imodelWithoutElements;
-          const idsCache = cacheForIModelWithoutElements;
+          const { keys, idsCache } = datasets.withoutElements;
           expect(await collect(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.defContainerOfCategories.id] }))).toEqual([
             {
               hasElements: false,
@@ -340,8 +228,7 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns direct and indirect child categories", async () => {
-          const keys = imodelWithDefContainersAndCategories;
-          const idsCache = cacheForIModelWithDefContainersAndCategories;
+          const { keys, idsCache } = datasets.withDefContainersAndCategories;
           expect(await collect(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.parentDefContainer.id] }))).toEqual([
             {
               hasElements: true,
@@ -361,8 +248,7 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns direct child categories", async () => {
-          const keys = imodelWithDefContainersAndCategories;
-          const idsCache = cacheForIModelWithDefContainersAndCategories;
+          const { keys, idsCache } = datasets.withDefContainersAndCategories;
           expect(await collect(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.childDefContainer.id] }))).toEqual([
             {
               hasElements: true,
@@ -377,13 +263,12 @@ describe("CategoriesTreeIdsCache", () => {
 
       describe("getSubCategoriesSearchPaths", () => {
         it("returns empty list when subcategory doesn't exist", async () => {
-          const idsCache = cacheForIModelWithoutElements;
+          const { idsCache } = datasets.withoutElements;
           expect(await firstValueFrom(idsCache.getSubCategoriesSearchPaths({ subCategoryIds: "0x123" }))).toEqual([]);
         });
 
         it("returns path to existing subCategory", async () => {
-          const keys = imodelWithoutDefContainers;
-          const idsCache = cacheForIModelWithoutDefContainers;
+          const { keys, idsCache } = datasets.withoutDefContainers;
           expect(await firstValueFrom(idsCache.getSubCategoriesSearchPaths({ subCategoryIds: keys.subCategory.id }))).toEqual([
             keys.categoryWithSubCategories,
             keys.subCategory,
@@ -391,8 +276,7 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns path to subCategory under definition container", async () => {
-          const keys = imodelWithDefContainersAndCategories;
-          const idsCache = cacheForIModelWithDefContainersAndCategories;
+          const { keys, idsCache } = datasets.withDefContainersAndCategories;
           expect(await firstValueFrom(idsCache.getSubCategoriesSearchPaths({ subCategoryIds: keys.subCategory.id }))).toEqual([
             keys.parentDefContainer,
             keys.categoryUnderParentWithSubCategories,
@@ -401,8 +285,7 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns empty list when subCategory does not have siblings", async () => {
-          const keys = imodelWithDefContainersAndCategories;
-          const idsCache = cacheForIModelWithDefContainersAndCategories;
+          const { keys, idsCache } = datasets.withDefContainersAndCategories;
           const defaultSubCategory = getDefaultSubCategoryId(keys.categoryUnderChild.id);
           expect(await firstValueFrom(idsCache.getSubCategoriesSearchPaths({ subCategoryIds: defaultSubCategory }))).toEqual([]);
         });
@@ -410,13 +293,12 @@ describe("CategoriesTreeIdsCache", () => {
 
       describe("getSearchPathsUpToRootCategory", () => {
         it("returns empty list when category doesn't exist", async () => {
-          const idsCache = cacheForIModelWithDefContainersAndCategories;
+          const { idsCache } = datasets.withDefContainersAndCategories;
           expect(await collect(idsCache.getSearchPathsUpToRootCategory({ categoryId: "0x123" }))).toEqual([]);
         });
 
         it("returns empty list when category does not have definition container", async () => {
-          const keys = imodelWithoutDefContainers;
-          const idsCache = cacheForIModelWithoutDefContainers;
+          const { keys, idsCache } = datasets.withoutDefContainers;
           expect(await collect(idsCache.getSearchPathsUpToRootCategory({ categoryId: keys.category.id }))).toEqual([[]]);
         });
 
@@ -450,16 +332,14 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns path up to category it has definition container", async () => {
-          const keys = imodelWithDefContainersAndCategories;
-          const idsCache = cacheForIModelWithDefContainersAndCategories;
+          const { keys, idsCache } = datasets.withDefContainersAndCategories;
           expect(await collect(idsCache.getSearchPathsUpToRootCategory({ categoryId: keys.categoryUnderParentWithSubCategories.id }))).toEqual([
             [keys.parentDefContainer],
           ]);
         });
 
         it("returns path up to nested category", async () => {
-          const keys = imodelWithDefContainersAndCategories;
-          const idsCache = cacheForIModelWithDefContainersAndCategories;
+          const { keys, idsCache } = datasets.withDefContainersAndCategories;
           expect(await collect(idsCache.getSearchPathsUpToRootCategory({ categoryId: keys.categoryUnderChild.id }))).toEqual([
             [keys.parentDefContainer, keys.childDefContainer],
           ]);
@@ -468,21 +348,19 @@ describe("CategoriesTreeIdsCache", () => {
 
       describe("getDefinitionContainersSearchPaths", () => {
         it("returns empty list when definition container doesn't exist", async () => {
-          const idsCache = cacheForIModelWithDefContainersAndCategories;
+          const { idsCache } = datasets.withDefContainersAndCategories;
           expect(await firstValueFrom(idsCache.getDefinitionContainersSearchPaths({ definitionContainerIds: "0x123" }))).toEqual([]);
         });
 
         it("returns definition container it has elements", async () => {
-          const keys = imodelWithDefContainersAndCategories;
-          const idsCache = cacheForIModelWithDefContainersAndCategories;
+          const { keys, idsCache } = datasets.withDefContainersAndCategories;
           expect(await firstValueFrom(idsCache.getDefinitionContainersSearchPaths({ definitionContainerIds: keys.parentDefContainer.id }))).toEqual([
             keys.parentDefContainer,
           ]);
         });
 
         it("returns path to definition container when it has parent", async () => {
-          const keys = imodelWithDefContainersAndCategories;
-          const idsCache = cacheForIModelWithDefContainersAndCategories;
+          const { keys, idsCache } = datasets.withDefContainersAndCategories;
           expect(await firstValueFrom(idsCache.getDefinitionContainersSearchPaths({ definitionContainerIds: keys.childDefContainer.id }))).toEqual([
             keys.parentDefContainer,
             keys.childDefContainer,
@@ -503,13 +381,12 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns empty list when no elements exist", async () => {
-          const idsCache = cacheForIModelWithoutElements;
+          const { idsCache } = datasets.withoutElements;
           expect(await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories())).toEqual({ categories: [], definitionContainers: [] });
         });
 
         it("returns categories and definition containers when no elements exist and includeEmpty is set to true", async () => {
-          const keys = imodelWithoutElements;
-          const idsCache = cacheForIModelWithoutElements;
+          const { keys, idsCache } = datasets.withoutElements;
           const result = await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories({ includeEmpty: true }));
           expect(result.categories).toHaveLength(2);
           expect(result.categories).toEqual(expect.arrayContaining([keys.categoryOfDefContainer.id, keys.emptyCategory.id]));
@@ -518,8 +395,7 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns categories and definition containers which have elements", async () => {
-          const keys = imodelWithDefContainersAndCategories;
-          const idsCache = cacheForIModelWithDefContainersAndCategories;
+          const { keys, idsCache } = datasets.withDefContainersAndCategories;
           const result = await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories());
           expect(result.categories).toHaveLength(2);
           expect(result.categories).toEqual(expect.arrayContaining([keys.categoryUnderChild.id, keys.categoryUnderParentWithSubCategories.id]));
@@ -528,8 +404,7 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns categories when no definition containers exist", async () => {
-          const keys = imodelWithoutDefContainers;
-          const idsCache = cacheForIModelWithoutDefContainers;
+          const { keys, idsCache } = datasets.withoutDefContainers;
           const result = await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories());
           expect(result.categories).toHaveLength(2);
           expect(result.categories).toEqual(expect.arrayContaining([keys.category.id, keys.categoryWithSubCategories.id]));
@@ -553,7 +428,7 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns empty list when no elements exist", async () => {
-          const idsCache = cacheForIModelWithoutElements;
+          const { idsCache } = datasets.withoutElements;
           expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).toEqual({
             categories: [],
             definitionContainers: [],
@@ -561,8 +436,7 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns root categories and definition containers when no elements exist and includeEmpty is set to true", async () => {
-          const keys = imodelWithoutElements;
-          const idsCache = cacheForIModelWithoutElements;
+          const { keys, idsCache } = datasets.withoutElements;
           expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories({ includeEmpty: true }))).toEqual({
             categories: [
               {
@@ -578,8 +452,7 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns root categories", async () => {
-          const keys = imodelWithoutDefContainers;
-          const idsCache = cacheForIModelWithoutDefContainers;
+          const { keys, idsCache } = datasets.withoutDefContainers;
 
           const result = await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories());
           expect(result.categories).toHaveLength(2);
@@ -599,8 +472,7 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns root definition containers", async () => {
-          const keys = imodelWithDefContainersAndCategories;
-          const idsCache = cacheForIModelWithDefContainersAndCategories;
+          const { keys, idsCache } = datasets.withDefContainersAndCategories;
           expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).toEqual({
             categories: [],
             definitionContainers: [keys.parentDefContainer.id],
@@ -610,19 +482,17 @@ describe("CategoriesTreeIdsCache", () => {
 
       describe("getSubCategories", () => {
         it("returns empty list when category doesn't exist", async () => {
-          const idsCache = cacheForIModelWithDefContainersAndCategories;
+          const { idsCache } = datasets.withDefContainersAndCategories;
           expect(await firstValueFrom(idsCache.getSubCategories({ categoryId: "0x123" }))).toEqual([]);
         });
 
         it("returns sub-category when category has one sub-category", async () => {
-          const keys = imodelWithoutDefContainers;
-          const idsCache = cacheForIModelWithoutDefContainers;
+          const { keys, idsCache } = datasets.withoutDefContainers;
           expect(await firstValueFrom(idsCache.getSubCategories({ categoryId: keys.category.id }))).toEqual([getDefaultSubCategoryId(keys.category.id)]);
         });
 
         it("returns sub-categories when category has multiple sub-categories", async () => {
-          const keys = imodelWithoutDefContainers;
-          const idsCache = cacheForIModelWithoutDefContainers;
+          const { keys, idsCache } = datasets.withoutDefContainers;
           const result = await firstValueFrom(idsCache.getSubCategories({ categoryId: keys.categoryWithSubCategories.id }));
           expect(result.includes(keys.subCategory.id)).toBe(true);
           expect(result.length).toBe(2);
@@ -631,3 +501,100 @@ describe("CategoriesTreeIdsCache", () => {
     });
   });
 });
+
+async function createDatasets(viewType: "2d" | "3d") {
+  const imodels: IModelConnection[] = [];
+  const { insertElementsModel, insertCategory, insertElement } = getInsertFunctionByViewType(viewType);
+
+  return {
+    [Symbol.asyncDispose]: async () => Promise.all(imodels.map(async (imodel) => imodel.close())),
+    ["withoutElements"]: await (async () => {
+      const { imodelConnection, ...keys } = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const emptyDefContainer = insertDefinitionContainer({ txn, codeValue: "Empty dc" });
+          insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: emptyDefContainer.id });
+          const emptyParentDefContainer = insertDefinitionContainer({ txn, codeValue: "Parent dc" });
+          const emptyParentDefModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: emptyParentDefContainer.id });
+          const childDefContainer = insertDefinitionContainer({ txn, codeValue: "Child dc", modelId: emptyParentDefModel.id });
+          insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: childDefContainer.id });
+          const parentDefContainer = insertDefinitionContainer({ txn, codeValue: "Parent dc with cat" });
+          const parentDefModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: parentDefContainer.id });
+          const defContainerOfCategories = insertDefinitionContainer({ txn, codeValue: "Categories dc", modelId: parentDefModel.id });
+          const defModelOfCategories = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: defContainerOfCategories.id });
+          const categoryOfDefContainer = insertCategory({ txn, codeValue: "cat of child", modelId: defModelOfCategories.id });
+          const emptyCategory = insertCategory({ txn, codeValue: "Empty cat" });
+
+          return {
+            emptyDefContainer,
+            emptyParentDefContainer,
+            childDefContainer,
+            defContainerOfCategories,
+            parentDefContainer,
+            categoryOfDefContainer,
+            emptyCategory,
+          };
+        }),
+      );
+      imodels.push(imodelConnection);
+      return { imodelConnection, keys, ...createAccessAndCache({ imodelConnection, viewType }) };
+    })(),
+    ["withoutDefContainers"]: await (async () => {
+      const { imodelConnection, ...keys } = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const category = insertCategory({ txn, codeValue: "cat" });
+          const categoryWithSubCategories = insertCategory({ txn, codeValue: "cat with subCategories" });
+          const elementsModel = insertElementsModel({ txn, codeValue: "m" });
+          const element1 = insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
+          const element2 = insertElement({ txn, modelId: elementsModel.id, categoryId: categoryWithSubCategories.id });
+          const subCategory = insertSubCategory({ txn, parentCategoryId: categoryWithSubCategories.id, codeValue: "subCat" });
+
+          return {
+            category,
+            categoryWithSubCategories,
+            subCategory,
+            element1,
+            element2,
+          };
+        }),
+      );
+      imodels.push(imodelConnection);
+      return { imodelConnection, keys, ...createAccessAndCache({ imodelConnection, viewType }) };
+    })(),
+    ["withDefContainersAndCategories"]: await (async () => {
+      const { imodelConnection, ...keys } = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const parentDefContainer = insertDefinitionContainer({ txn, codeValue: "Parent dc" });
+          const parentDefModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: parentDefContainer.id });
+          const childDefContainer = insertDefinitionContainer({ txn, codeValue: "Child dc", modelId: parentDefModel.id });
+          const childDefModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: childDefContainer.id });
+          const emptyChildDefContainer = insertDefinitionContainer({ txn, codeValue: "empty dc", modelId: parentDefModel.id });
+          insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: emptyChildDefContainer.id });
+          const categoryUnderChild = insertCategory({ txn, codeValue: "cat", modelId: childDefModel.id });
+          const categoryUnderParentWithSubCategories = insertCategory({ txn, codeValue: "cat with subCategories", modelId: parentDefModel.id });
+          const elementsModel = insertElementsModel({ txn, codeValue: "m" });
+          const element1 = insertElement({ txn, modelId: elementsModel.id, categoryId: categoryUnderChild.id });
+          const element2 = insertElement({ txn, modelId: elementsModel.id, categoryId: categoryUnderParentWithSubCategories.id });
+          const subCategory = insertSubCategory({
+            txn,
+            parentCategoryId: categoryUnderParentWithSubCategories.id,
+            codeValue: "subCat",
+            modelId: parentDefModel.id,
+          });
+
+          return {
+            parentDefContainer,
+            childDefContainer,
+            emptyChildDefContainer,
+            categoryUnderChild,
+            categoryUnderParentWithSubCategories,
+            subCategory,
+            element1,
+            element2,
+          };
+        }),
+      );
+      imodels.push(imodelConnection);
+      return { imodelConnection, keys, ...createAccessAndCache({ imodelConnection, viewType }) };
+    })(),
+  };
+}
