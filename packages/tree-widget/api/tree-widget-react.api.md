@@ -53,15 +53,10 @@ interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "getSch
 interface CategoriesTreeComponentType {
     // (undocumented)
     (props: CategoriesTreeComponentProps): JSX_3.Element | null;
-    // (undocumented)
     getLabel(): string;
-    // (undocumented)
     HideAllButton: CategoriesTreeHeaderButtonType;
-    // (undocumented)
     id: string;
-    // (undocumented)
     InvertAllButton: CategoriesTreeHeaderButtonType;
-    // (undocumented)
     ShowAllButton: CategoriesTreeHeaderButtonType;
 }
 
@@ -157,9 +152,7 @@ interface ExternalSourcesTreeComponentProps extends Pick<ExternalSourcesTreeProp
 interface ExternalSourcesTreeComponentType {
     // (undocumented)
     (input: ExternalSourcesTreeComponentProps): JSX_3.Element | null;
-    // (undocumented)
     getLabel(): string;
-    // (undocumented)
     id: string;
 }
 
@@ -248,9 +241,7 @@ interface IModelContentTreeComponentProps extends Pick<IModelContentTreeProps, "
 interface IModelContentTreeComponentType {
     // (undocumented)
     (input: IModelContentTreeComponentProps): JSX_3.Element | null;
-    // (undocumented)
     getLabel(): string;
-    // (undocumented)
     id: string;
 }
 
@@ -291,21 +282,13 @@ interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "getSchemaConte
 interface ModelsTreeComponentType {
     // (undocumented)
     (props: ModelsTreeComponentProps): JSX_3.Element | null;
-    // (undocumented)
     getLabel(): string;
-    // (undocumented)
     HideAllButton: ModelsTreeHeaderButtonType;
-    // (undocumented)
     id: string;
-    // (undocumented)
     InvertButton: ModelsTreeHeaderButtonType;
-    // (undocumented)
     ShowAllButton: ModelsTreeHeaderButtonType;
-    // (undocumented)
     ToggleInstancesFocusButton: ModelsTreeHeaderButtonType;
-    // (undocumented)
     View2DButton: ModelsTreeHeaderButtonType;
-    // (undocumented)
     View3DButton: ModelsTreeHeaderButtonType;
 }
 

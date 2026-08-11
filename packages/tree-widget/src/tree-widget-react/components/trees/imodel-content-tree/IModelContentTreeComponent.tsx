@@ -23,7 +23,9 @@ interface IModelContentTreeComponentProps extends Pick<
 /** @beta */
 interface IModelContentTreeComponentType {
   (input: IModelContentTreeComponentProps): JSX.Element | null;
+  /** Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`. */
   id: string;
+  /** Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`. */
   getLabel(): string;
 }
 
@@ -45,14 +47,6 @@ export const IModelContentTreeComponent: IModelContentTreeComponentType = ({ onF
   );
 };
 
-/**
- * Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
- * @beta
- */
 IModelContentTreeComponent.id = "imodel-content-tree-v2";
 
-/**
- * Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
- * @beta
- */
 IModelContentTreeComponent.getLabel = () => TreeWidget.translate("imodelContentTree.label");

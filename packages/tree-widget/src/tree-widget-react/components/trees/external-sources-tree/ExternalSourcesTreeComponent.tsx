@@ -23,7 +23,9 @@ interface ExternalSourcesTreeComponentProps extends Pick<
 /** @beta */
 interface ExternalSourcesTreeComponentType {
   (input: ExternalSourcesTreeComponentProps): JSX.Element | null;
+  /** Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`. */
   id: string;
+  /** Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`. */
   getLabel(): string;
 }
 
@@ -45,14 +47,6 @@ export const ExternalSourcesTreeComponent: ExternalSourcesTreeComponentType = ({
   );
 };
 
-/**
- * Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
- * @beta
- */
 ExternalSourcesTreeComponent.id = "external-sources-tree-v2";
 
-/**
- * Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
- * @beta
- */
 ExternalSourcesTreeComponent.getLabel = () => TreeWidget.translate("externalSourcesTree.label");

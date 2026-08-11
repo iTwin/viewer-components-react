@@ -41,10 +41,15 @@ interface CategoriesTreeComponentProps extends Pick<
 /** @public */
 interface CategoriesTreeComponentType {
   (props: CategoriesTreeComponentProps): JSX.Element | null;
+  /** Renders a "Show all" button that enables display of all categories and their subcategories. */
   ShowAllButton: CategoriesTreeHeaderButtonType;
+  /** Renders a "Hide all" button that disables display of all categories. */
   HideAllButton: CategoriesTreeHeaderButtonType;
+  /** Renders an "Invert all" button that inverts display of all categories. */
   InvertAllButton: CategoriesTreeHeaderButtonType;
+  /** Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`. */
   id: string;
+  /** Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`. */
   getLabel(): string;
 }
 
@@ -63,34 +68,14 @@ export const CategoriesTreeComponent: CategoriesTreeComponentType = (props) => {
   return <CategoriesTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />;
 };
 
-/**
- * Renders a "Show all" button that enables display of all categories and their subcategories.
- * @public
- */
 CategoriesTreeComponent.ShowAllButton = ShowAllButton as CategoriesTreeHeaderButtonType;
 
-/**
- * Renders a "Hide all" button that disables display of all categories.
- * @public
- */
 CategoriesTreeComponent.HideAllButton = HideAllButton as CategoriesTreeHeaderButtonType;
 
-/**
- * Renders an "Invert all" button that inverts display of all categories.
- * @public
- */
 CategoriesTreeComponent.InvertAllButton = InvertAllButton as CategoriesTreeHeaderButtonType;
 
-/**
- * Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
- * @public
- */
 CategoriesTreeComponent.id = "categories-tree-v2";
 
-/**
- * Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
- * @public
- */
 CategoriesTreeComponent.getLabel = () => TreeWidget.translate("categoriesTree.label");
 
 function CategoriesTreeComponentImpl({
