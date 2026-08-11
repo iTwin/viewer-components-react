@@ -13,20 +13,28 @@ import {
   insertSpatialCategory,
   insertSubModel,
 } from "test-utilities";
+import { BaseIdsCache } from "../../../../tree-widget-react/shared/internal/caches/BaseIdsCache.js";
 import {
   CLASS_NAME_DefinitionContainer,
   CLASS_NAME_Element,
   CLASS_NAME_SubCategory,
 } from "../../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
 import { getClassesByView } from "../../../../tree-widget-react/shared/internal/Utils.js";
+import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import { TestSchema } from "../../../IModelUtils.js";
+import { validateHierarchyVisibility } from "../../../shared/VisibilityValidation.js";
+import { createIModelAccess } from "../../Common.js";
+import { validateNodeVisibility } from "./VisibilityValidation.js";
 
 import type { EditTxn } from "@itwin/core-backend";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { ClassGroupingNodeKey, GroupingHierarchyNode, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
-import type { EC, InstanceKey } from "@itwin/presentation-shared";
+import type { EC, InstanceKey, Props } from "@itwin/presentation-shared";
 import type { ElementId, ModelId } from "../../../../tree-widget-react/shared/internal/Types.js";
 import type { ParentElementsPath } from "../../../../tree-widget-react/shared/internal/Utils.js";
+import type { IModelAccess } from "../../Common.js";
+import type { TreeWidgetTestingViewport } from "../../TreeUtils.js";
 
 /** @internal */
 export function createCategoryHierarchyNode(props: {
@@ -207,4 +215,62 @@ export function getInsertFunctionByViewType(viewType: "2d" | "3d") {
       classFullName: `${TestSchema.Name}.${viewType === "3d" ? TestSchema.ModeledElement3dClassName : TestSchema.ModeledElement2dClassName}`,
     });
   return { insertCategory, insertElement, insertElementsModel, insertElementsSubModel, insertModeledElement };
+}
+
+interface VisibilityInfo {
+  id: Id64String;
+  visible: boolean;
+}
+
+export function setupInitialDisplayState(props: {
+  viewport: TreeWidgetTestingViewport;
+  categories?: Array<VisibilityInfo>;
+  subCategories?: Array<VisibilityInfo>;
+  models?: Array<VisibilityInfo>;
+  elements?: Array<VisibilityInfo>;
+}) {
+  const { viewport } = props;
+  const categories = props.categories ?? [];
+  const elements = props.elements ?? [];
+  const subCategories = props.subCategories ?? [];
+  const models = props.models ?? [];
+  for (const subCategoryInfo of subCategories) {
+    viewport.changeSubCategoryDisplay({ subCategoryId: subCategoryInfo.id, display: subCategoryInfo.visible });
+  }
+  for (const categoryInfo of categories) {
+    viewport.changeCategoryDisplay({ categoryIds: categoryInfo.id, display: categoryInfo.visible, enableAllSubCategories: false });
+  }
+  const alwaysDrawn = elements.filter(({ visible }) => visible).map(({ id }) => id);
+  if (alwaysDrawn.length > 0) {
+    viewport.setAlwaysDrawn({ elementIds: new Set([...alwaysDrawn, ...(viewport.alwaysDrawn ?? [])]) });
+  }
+  const neverDrawn = elements.filter(({ visible }) => !visible).map(({ id }) => id);
+  if (neverDrawn.length > 0) {
+    viewport.setNeverDrawn({ elementIds: new Set([...neverDrawn, ...(viewport.neverDrawn ?? [])]) });
+  }
+
+  viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => visible).map(({ id }) => id), display: true });
+  viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => !visible).map(({ id }) => id), display: false });
+  viewport.renderFrame();
+}
+
+export async function validateCategoriesTreeHierarchyVisibility(props: Omit<Props<typeof validateHierarchyVisibility>, "validateNodeVisibility">) {
+  return validateHierarchyVisibility({
+    ...props,
+    validateNodeVisibility,
+  });
+}
+
+export function createAccessAndCache({ imodelConnection, viewType }: { imodelConnection: IModelConnection; viewType: "2d" | "3d" }): {
+  imodelAccess: IModelAccess;
+  idsCache: CategoriesTreeIdsCache;
+} {
+  const imodelAccess = createIModelAccess(imodelConnection);
+  const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+  const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
+
+  return {
+    imodelAccess,
+    idsCache,
+  };
 }
