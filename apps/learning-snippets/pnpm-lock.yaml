@@ -89,16 +89,13 @@ importers:
         version: file:../../packages/quantity-formatting(c8e896a5365358edc06b30b1048ddef2)
       '@itwin/tree-widget-react':
         specifier: workspace:*
-        version: file:../../packages/tree-widget(9f0d713c3678d8f5bda39daeeb68593a)
+        version: file:../../packages/tree-widget(7dc16ad68df09b8188a5b1c4abea76be)
       '@itwin/unified-selection':
         specifier: 2.0.0-alpha.0
         version: 2.0.0-alpha.0
       '@mui/material':
         specifier: ^9.0.0
         version: 9.2.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@mui/utils':
-        specifier: ^9.0.0
-        version: 9.2.0(@types/react@18.3.31)(react@18.3.1)
       '@stratakit/mui':
         specifier: ^0.5.3
         version: 0.5.3(@mui/material@9.2.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@8.1.1)
@@ -563,7 +560,7 @@ packages:
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0 || ^5.0.0
       '@itwin/core-bentley': ^4.0.0 || ^5.0.0
-      '@itwin/itwinui-react': ^3.15.0
+      '@itwin/itwinui-react': 3.21.2
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
@@ -610,7 +607,7 @@ packages:
       '@itwin/core-geometry': ^4.0.0 || ^5.0.0
       '@itwin/core-quantity': ^4.0.0 || ^5.0.0
       '@itwin/core-react': 5.33.1
-      '@itwin/itwinui-react': ^3.15.0
+      '@itwin/itwinui-react': 3.21.2
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
@@ -788,7 +785,6 @@ packages:
       '@itwin/presentation-components': ^5.12.0
       '@itwin/presentation-frontend': ^5.8.0
       '@mui/material': ^9.0.0
-      '@mui/utils': ^9.0.0
       '@stratakit/icons': ^0.4.0
       '@stratakit/mui': ^0.5.3
       '@stratakit/structures': ^0.5.6
@@ -4559,7 +4555,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@itwin/tree-widget-react@file:../../packages/tree-widget(9f0d713c3678d8f5bda39daeeb68593a)':
+  '@itwin/tree-widget-react@file:../../packages/tree-widget(7dc16ad68df09b8188a5b1c4abea76be)':
     dependencies:
       '@itwin/appui-abstract': 5.11.3(@itwin/core-bentley@5.11.3)
       '@itwin/appui-react': 5.33.1(910914859613feb6003f3866a3d7ebd2)

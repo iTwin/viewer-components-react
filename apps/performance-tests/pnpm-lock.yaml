@@ -68,16 +68,13 @@ importers:
         version: 2.0.0-alpha.12
       '@itwin/tree-widget-react':
         specifier: workspace:*
-        version: file:../../packages/tree-widget(0f03eaa1eed1ac12092090d4559c0590)
+        version: file:../../packages/tree-widget(ce747728ce78d888f3727ee44a982967)
       '@itwin/unified-selection':
         specifier: 2.0.0-alpha.0
         version: 2.0.0-alpha.0
       '@mui/material':
         specifier: ^9.0.0
         version: 9.2.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@mui/utils':
-        specifier: ^9.0.0
-        version: 9.2.0(@types/react@18.3.31)(react@18.3.1)
       '@stratakit/icons':
         specifier: ^0.3.1
         version: 0.3.2
@@ -557,7 +554,7 @@ packages:
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0 || ^5.0.0
       '@itwin/core-bentley': ^4.0.0 || ^5.0.0
-      '@itwin/itwinui-react': ^3.15.0
+      '@itwin/itwinui-react': 3.21.2
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
@@ -682,7 +679,7 @@ packages:
       '@itwin/core-react': ^4.9.0 || ^5.0.0
       '@itwin/ecschema-metadata': ^4.4.0 || ^5.0.0
       '@itwin/imodel-components-react': ^4.9.0 || ^5.0.0
-      '@itwin/itwinui-react': ^3.0.0
+      '@itwin/itwinui-react': 3.21.2
       '@itwin/presentation-common': ^4.4.0 || ^5.0.0
       '@itwin/presentation-frontend': ^4.4.0 || ^5.0.0
       '@itwin/unified-selection-react': ^1.0.0
@@ -756,7 +753,6 @@ packages:
       '@itwin/presentation-components': ^5.12.0
       '@itwin/presentation-frontend': ^5.8.0
       '@mui/material': ^9.0.0
-      '@mui/utils': ^9.0.0
       '@stratakit/icons': ^0.4.0
       '@stratakit/mui': ^0.5.3
       '@stratakit/structures': ^0.5.6
@@ -4470,7 +4466,7 @@ snapshots:
     dependencies:
       '@itwin/core-bentley': 5.11.3
 
-  '@itwin/tree-widget-react@file:../../packages/tree-widget(0f03eaa1eed1ac12092090d4559c0590)':
+  '@itwin/tree-widget-react@file:../../packages/tree-widget(ce747728ce78d888f3727ee44a982967)':
     dependencies:
       '@itwin/appui-abstract': 5.11.3(@itwin/core-bentley@5.11.3)
       '@itwin/appui-react': 5.33.2(ab177614829b086345e036523f962d16)

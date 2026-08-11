@@ -24,6 +24,9 @@ importers:
       '@itwin/unified-selection':
         specifier: 2.0.0-alpha.0
         version: 2.0.0-alpha.0
+      '@mui/utils':
+        specifier: ^9.0.0
+        version: 9.2.0(@types/react@18.3.28)(react@18.3.1)
       classnames:
         specifier: ^2.5.1
         version: 2.5.1
@@ -118,9 +121,6 @@ importers:
       '@mui/material':
         specifier: ^9.0.0
         version: 9.1.2(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.28)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@mui/utils':
-        specifier: ^9.0.0
-        version: 9.2.0(@types/react@18.3.28)(react@18.3.1)
       '@playwright/test':
         specifier: 1.56.1
         version: 1.56.1
