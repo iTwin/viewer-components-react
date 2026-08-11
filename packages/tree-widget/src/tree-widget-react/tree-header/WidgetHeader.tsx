@@ -58,29 +58,29 @@ export function WidgetHeader({ defaultSelectedContentId, trees, onSelect, onSear
   }
 
   return (
-      <div className="tw-content-header">
-        {trees.length > 0 && !isSearchOpen && (
-          <NativeSelect
-            className={"tw-content-header-selector"}
-            size="small"
-            value={selectedContentId}
-            onChange={(e) => {
-              const treeId = e.target.value;
-              onSelect(treeId);
-              setSelectedContentId(treeId);
-            }}
-          >
-            {trees.map((tree) => (
-              <option key={tree.id} value={tree.id}>
-                {tree.label}
-              </option>
-            ))}
-          </NativeSelect>
-        )}
-        {selectedContent.isSearchable && (
-          <DebouncedSearchBox className={"tw-content-header-search"} isOpened={isSearchOpen} setIsOpened={setIsSearchOpen} onSearch={onSearch} delay={300} />
-        )}
-      </div>
+    <div className="tw-content-header">
+      {trees.length > 0 && !isSearchOpen && (
+        <NativeSelect
+          className={"tw-content-header-selector"}
+          size="small"
+          value={selectedContentId}
+          onChange={(e) => {
+            const treeId = e.target.value;
+            onSelect(treeId);
+            setSelectedContentId(treeId);
+          }}
+        >
+          {trees.map((tree) => (
+            <option key={tree.id} value={tree.id}>
+              {tree.label}
+            </option>
+          ))}
+        </NativeSelect>
+      )}
+      {selectedContent.isSearchable && (
+        <DebouncedSearchBox className={"tw-content-header-search"} isOpened={isSearchOpen} setIsOpened={setIsSearchOpen} onSearch={onSearch} delay={300} />
+      )}
+    </div>
   );
 }
 
