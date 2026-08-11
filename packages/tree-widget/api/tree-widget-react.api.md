@@ -151,7 +151,7 @@ interface ExternalSourcesTreeComponentProps extends Pick<ExternalSourcesTreeProp
 // @beta (undocumented)
 interface ExternalSourcesTreeComponentType {
     // (undocumented)
-    (input: ExternalSourcesTreeComponentProps): JSX_3.Element | null;
+    (props: ExternalSourcesTreeComponentProps): JSX_3.Element | null;
     getLabel(): string;
     id: string;
 }
@@ -240,7 +240,7 @@ interface IModelContentTreeComponentProps extends Pick<IModelContentTreeProps, "
 // @beta (undocumented)
 interface IModelContentTreeComponentType {
     // (undocumented)
-    (input: IModelContentTreeComponentProps): JSX_3.Element | null;
+    (props: IModelContentTreeComponentProps): JSX_3.Element | null;
     getLabel(): string;
     id: string;
 }

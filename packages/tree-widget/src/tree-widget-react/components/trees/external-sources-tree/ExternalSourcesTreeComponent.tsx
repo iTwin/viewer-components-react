@@ -22,7 +22,7 @@ interface ExternalSourcesTreeComponentProps extends Pick<
 
 /** @beta */
 interface ExternalSourcesTreeComponentType {
-  (input: ExternalSourcesTreeComponentProps): JSX.Element | null;
+  (props: ExternalSourcesTreeComponentProps): JSX.Element | null;
   /** Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`. */
   id: string;
   /** Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`. */
