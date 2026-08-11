@@ -14,7 +14,7 @@ import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { CategoriesTree } from "./CategoriesTree.js";
 import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonProps } from "./CategoriesTreeButtons.js";
 
-import type { ReactNode } from "react";
+import type { JSX, ReactNode } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeWidgetViewport } from "../../shared/TreeWidgetViewport.js";
 import type { StandardTreeLabels } from "../../TreeWidgetComponentImpl.js";
@@ -57,13 +57,28 @@ interface CategoriesTreeComponentProps extends Pick<
   onFeatureUsed?: (feature: string) => void;
 }
 
+/** @public */
+interface CategoriesTreeComponentType {
+  (props: CategoriesTreeComponentProps): JSX.Element | null;
+  /** Renders a "Show all" button that enables display of all categories and their subcategories. */
+  ShowAllButton: CategoriesTreeHeaderButtonType;
+  /** Renders a "Hide all" button that disables display of all categories. */
+  HideAllButton: CategoriesTreeHeaderButtonType;
+  /** Renders an "Invert all" button that inverts display of all categories. */
+  InvertAllButton: CategoriesTreeHeaderButtonType;
+  /** Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`. */
+  id: string;
+  /** Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`. */
+  getLabel({ standardLabels }: { standardLabels: StandardTreeLabels }): string;
+}
+
 /**
  * A component that renders `CategoriesTree` and a header with search capabilities and header buttons.
  *
  * **Note:** Wrap tree components with a single `SharedTreeContextProvider` to improve trees' performance.`
  * @public
  */
-export const CategoriesTreeComponent = (props: CategoriesTreeComponentProps) => {
+export const CategoriesTreeComponent: CategoriesTreeComponentType = (props: CategoriesTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
   const viewport = useActiveTreeWidgetViewport({ treeWidgetViewport: props.viewport });
 
@@ -78,34 +93,14 @@ export const CategoriesTreeComponent = (props: CategoriesTreeComponentProps) => 
   );
 };
 
-/**
- * Renders a "Show all" button that enables display of all categories and their subcategories.
- * @public
- */
 CategoriesTreeComponent.ShowAllButton = ShowAllButton as CategoriesTreeHeaderButtonType;
 
-/**
- * Renders a "Hide all" button that disables display of all categories.
- * @public
- */
 CategoriesTreeComponent.HideAllButton = HideAllButton as CategoriesTreeHeaderButtonType;
 
-/**
- * Renders an "Invert all" button that inverts display of all categories.
- * @public
- */
 CategoriesTreeComponent.InvertAllButton = InvertAllButton as CategoriesTreeHeaderButtonType;
 
-/**
- * Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
- * @public
- */
 CategoriesTreeComponent.id = "categories-tree-v2";
 
-/**
- * Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
- * @public
- */
 CategoriesTreeComponent.getLabel = ({ standardLabels }: { standardLabels: StandardTreeLabels }) => standardLabels.categories;
 
 function CategoriesTreeComponentImpl({

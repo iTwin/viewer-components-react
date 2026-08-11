@@ -86,16 +86,7 @@ interface BaseTreeVisibilityHandlerOverrides {
 type CallbacksWithCommonTreeRendererProps<T extends BaseTreeRendererProps, K extends keyof T> = Omit<T, K> & { [P in keyof Pick<T, K>]?: T[P] extends ((props: any) => any) | undefined ? (args: Parameters<NonNullable<T[P]>>[0], treeRendererProps: CommonTreeRendererProps) => ReturnType<NonNullable<T[P]>> : never };
 
 // @public
-export const CategoriesTreeComponent: {
-    (props: CategoriesTreeComponentProps): _$react_jsx_runtime0.JSX.Element | null;
-    ShowAllButton: CategoriesTreeHeaderButtonType;
-    HideAllButton: CategoriesTreeHeaderButtonType;
-    InvertAllButton: CategoriesTreeHeaderButtonType;
-    id: string;
-    getLabel(input: {
-        standardLabels: StandardTreeLabels;
-    }): string;
-};
+export const CategoriesTreeComponent: CategoriesTreeComponentType;
 
 // @public (undocumented)
 interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "searchText" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "hierarchyConfig" | "treeLabel"> {
@@ -105,6 +96,19 @@ interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "select
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
     viewport?: TreeWidgetViewport;
+}
+
+// @public (undocumented)
+interface CategoriesTreeComponentType {
+    // (undocumented)
+    (props: CategoriesTreeComponentProps): JSX_2.Element | null;
+    getLabel(input: {
+        standardLabels: StandardTreeLabels;
+    }): string;
+    HideAllButton: CategoriesTreeHeaderButtonType;
+    id: string;
+    InvertAllButton: CategoriesTreeHeaderButtonType;
+    ShowAllButton: CategoriesTreeHeaderButtonType;
 }
 
 // @public
@@ -302,13 +306,7 @@ type ExtendedTreeRendererProps = CallbacksWithCommonTreeRendererProps<TreeRender
 type ExtendedVisibilityTreeRendererProps = CallbacksWithCommonTreeRendererProps<VisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps">;
 
 // @beta
-export const ExternalSourcesTreeComponent: {
-    (input: ExternalSourcesTreeComponentProps): _$react_jsx_runtime0.JSX.Element | null;
-    id: string;
-    getLabel(input: {
-        standardLabels: StandardTreeLabels;
-    }): string;
-};
+export const ExternalSourcesTreeComponent: ExternalSourcesTreeComponentType;
 
 // @beta (undocumented)
 interface ExternalSourcesTreeComponentProps extends Pick<ExternalSourcesTreeProps, "selectionStorage" | "selectionMode" | "hierarchyLevelConfig" | "selectionMode" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "treeLabel"> {
@@ -316,6 +314,16 @@ interface ExternalSourcesTreeComponentProps extends Pick<ExternalSourcesTreeProp
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
+}
+
+// @beta (undocumented)
+interface ExternalSourcesTreeComponentType {
+    // (undocumented)
+    (props: ExternalSourcesTreeComponentProps): JSX_2.Element | null;
+    getLabel(input: {
+        standardLabels: StandardTreeLabels;
+    }): string;
+    id: string;
 }
 
 // @beta (undocumented)
@@ -363,13 +371,7 @@ type HierarchyVisibilityHandlerOverridableMethodProps<TFunc> = TFunc extends ((p
 } : never;
 
 // @beta
-export const IModelContentTreeComponent: {
-    (input: IModelContentTreeComponentProps): _$react_jsx_runtime0.JSX.Element | null;
-    id: string;
-    getLabel(input: {
-        standardLabels: StandardTreeLabels;
-    }): string;
-};
+export const IModelContentTreeComponent: IModelContentTreeComponentType;
 
 // @beta (undocumented)
 interface IModelContentTreeComponentProps extends Pick<IModelContentTreeProps, "selectionStorage" | "hierarchyConfig" | "hierarchyLevelConfig" | "selectionMode" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "treeLabel"> {
@@ -377,6 +379,16 @@ interface IModelContentTreeComponentProps extends Pick<IModelContentTreeProps, "
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
+}
+
+// @beta (undocumented)
+interface IModelContentTreeComponentType {
+    // (undocumented)
+    (props: IModelContentTreeComponentProps): JSX_2.Element | null;
+    getLabel(input: {
+        standardLabels: StandardTreeLabels;
+    }): string;
+    id: string;
 }
 
 // @beta
@@ -425,19 +437,7 @@ interface ModelInfo {
 }
 
 // @public
-export const ModelsTreeComponent: {
-    (props: ModelsTreeComponentProps): _$react_jsx_runtime0.JSX.Element | null;
-    ShowAllButton: ModelsTreeHeaderButtonType;
-    HideAllButton: ModelsTreeHeaderButtonType;
-    InvertButton: ModelsTreeHeaderButtonType;
-    View2DButton: ModelsTreeHeaderButtonType;
-    View3DButton: ModelsTreeHeaderButtonType;
-    ToggleInstancesFocusButton: ModelsTreeHeaderButtonType;
-    id: string;
-    getLabel(input: {
-        standardLabels: StandardTreeLabels;
-    }): string;
-};
+export const ModelsTreeComponent: ModelsTreeComponentType;
 
 // @public (undocumented)
 interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getSearchPaths" | "searchText" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "getSubTreePaths" | "treeLabel"> {
@@ -447,6 +447,22 @@ interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "selectionStora
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
     viewport?: TreeWidgetViewport;
+}
+
+// @public (undocumented)
+interface ModelsTreeComponentType {
+    // (undocumented)
+    (props: ModelsTreeComponentProps): JSX_2.Element | null;
+    getLabel(input: {
+        standardLabels: StandardTreeLabels;
+    }): string;
+    HideAllButton: ModelsTreeHeaderButtonType;
+    id: string;
+    InvertButton: ModelsTreeHeaderButtonType;
+    ShowAllButton: ModelsTreeHeaderButtonType;
+    ToggleInstancesFocusButton: ModelsTreeHeaderButtonType;
+    View2DButton: ModelsTreeHeaderButtonType;
+    View3DButton: ModelsTreeHeaderButtonType;
 }
 
 // @public
@@ -889,9 +905,9 @@ interface UseModelsTreeResult {
 }
 
 // @beta
-export const VisibilityAction: _$react.NamedExoticComponent<{
+export const VisibilityAction: _$react.MemoExoticComponent<(input: {
     node: TreeNode;
-} & TreeActionBaseAttributes>;
+} & TreeActionBaseAttributes) => _$react_jsx_runtime0.JSX.Element>;
 
 // @beta (undocumented)
 interface VisibilityContext {

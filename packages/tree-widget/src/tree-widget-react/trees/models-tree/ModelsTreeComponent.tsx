@@ -23,7 +23,7 @@ import {
   View3DButton,
 } from "./ModelsTreeButtons.js";
 
-import type { ReactNode } from "react";
+import type { JSX, ReactNode } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeWidgetViewport } from "../../shared/TreeWidgetViewport.js";
 import type { StandardTreeLabels } from "../../TreeWidgetComponentImpl.js";
@@ -73,6 +73,33 @@ interface ModelsTreeComponentProps extends Pick<
   onFeatureUsed?: (feature: string) => void;
 }
 
+/** @public */
+interface ModelsTreeComponentType {
+  (props: ModelsTreeComponentProps): JSX.Element | null;
+  /** Renders a "Show all" button that enables display of all models. */
+  ShowAllButton: ModelsTreeHeaderButtonType;
+  /** Renders a "Hide all" button that disables display of all models. */
+  HideAllButton: ModelsTreeHeaderButtonType;
+  /** Renders an "Invert all" button that inverts display of all models. */
+  InvertButton: ModelsTreeHeaderButtonType;
+  /** Renders a "View 2D" button that enables display of all plan projection models and disables all others. */
+  View2DButton: ModelsTreeHeaderButtonType;
+  /** Renders a "View 3D" button that enables display of all non-plan projection models and disables all plan projection ones. */
+  View3DButton: ModelsTreeHeaderButtonType;
+  /**
+   * Renders an "Instance focus" toggle button that enables/disables instances focusing mode.
+   *
+   * Requires instances focus context to be provided using `FocusedInstancesContextProvider`. The context
+   * is provided automatically, when using `ModelsTreeComponent`, but needs to be provided by consumers
+   * when rendering `ToggleInstancesFocusButton` outside of `ModelsTreeComponent`.
+   */
+  ToggleInstancesFocusButton: ModelsTreeHeaderButtonType;
+  /** Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`. */
+  id: string;
+  /** Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`. */
+  getLabel({ standardLabels }: { standardLabels: StandardTreeLabels }): string;
+}
+
 /**
  * A component that renders `ModelsTree` and a header with filtering capabilities
  * and header buttons.
@@ -80,7 +107,7 @@ interface ModelsTreeComponentProps extends Pick<
  * **Note:** Wrap tree components with a single `SharedTreeContextProvider` to improve trees' performance.
  * @public
  */
-export const ModelsTreeComponent = (props: ModelsTreeComponentProps) => {
+export const ModelsTreeComponent: ModelsTreeComponentType = (props) => {
   const iModel = useActiveIModelConnection();
   const viewport = useActiveTreeWidgetViewport({ treeWidgetViewport: props.viewport });
 
@@ -97,57 +124,20 @@ export const ModelsTreeComponent = (props: ModelsTreeComponentProps) => {
   );
 };
 
-/**
- * Renders a "Show all" button that enables display of all models.
- * @public
- */
 ModelsTreeComponent.ShowAllButton = ShowAllButton as ModelsTreeHeaderButtonType;
 
-/**
- * Renders a "Hide all" button that disables display of all models.
- * @public
- */
 ModelsTreeComponent.HideAllButton = HideAllButton as ModelsTreeHeaderButtonType;
 
-/**
- * Renders an "Invert all" button that inverts display of all models.
- * @public
- */
 ModelsTreeComponent.InvertButton = InvertButton as ModelsTreeHeaderButtonType;
 
-/**
- * Renders a "View 2D" button that enables display of all plan projection models and disables all others.
- * @public
- */
 ModelsTreeComponent.View2DButton = View2DButton as ModelsTreeHeaderButtonType;
 
-/**
- * Renders a "View 3D" button that enables display of all non-plan projection models and disables all plan projection ones.
- * @public
- */
 ModelsTreeComponent.View3DButton = View3DButton as ModelsTreeHeaderButtonType;
 
-/**
- * Renders an "Instance focus" toggle button that enables/disables instances focusing mode.
- *
- * Requires instances focus context to be provided using `FocusedInstancesContextProvider`. The context
- * is provided automatically, when using `ModelsTreeComponent`, but needs to be provided by consumers
- * when rendering `ToggleInstancesFocusButton` outside of `ModelsTreeComponent`.
- *
- * @public
- */
 ModelsTreeComponent.ToggleInstancesFocusButton = ToggleInstancesFocusButton as ModelsTreeHeaderButtonType;
 
-/**
- * Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
- * @public
- */
 ModelsTreeComponent.id = "models-tree-v2";
 
-/**
- * Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
- * @public
- */
 ModelsTreeComponent.getLabel = ({ standardLabels }: { standardLabels: StandardTreeLabels }) => standardLabels.models;
 
 function ModelsTreeComponentImpl({

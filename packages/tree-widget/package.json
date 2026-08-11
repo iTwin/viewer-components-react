@@ -153,7 +153,8 @@
     "stylelint-config-standard": "^40.0.0",
     "test-utilities": "workspace:*",
     "tsdown": "^0.21.10",
-    "typescript": "~5.8.3",
+    "@typescript/native": "npm:typescript@~7.0.2",
+    "typescript": "npm:@typescript/typescript6@~6.0.2",
     "vitest": "^4.1.10",
     "vitest-browser-react": "^2.2.0"
   }
