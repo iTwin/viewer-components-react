@@ -12,8 +12,6 @@ import type { TreeNode } from "@itwin/presentation-hierarchies-react";
 import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../tree-widget-react/shared/internal/Types.js";
 import type { TreeWidgetViewport } from "../../tree-widget-react/shared/TreeWidgetViewport.js";
 
-export const CLASS_NAME_DefinitionModel = "BisCore.DefinitionModel";
-
 export function createTreeNode(partial?: Partial<TreeNode>): TreeNode {
   return {
     id: "test-node",

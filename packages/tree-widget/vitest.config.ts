@@ -11,6 +11,11 @@ const logsToIgnore = ["CSS variable not found", "ECClass 'PresentationRules.Rule
 
 export default defineConfig({
   test: {
+    onConsoleLog(log) {
+      if (logsToIgnore.some((logToIgnore) => log.includes(logToIgnore))) {
+        return false;
+      }
+    },
     projects: [
       {
         test: {
@@ -20,11 +25,6 @@ export default defineConfig({
           include: ["src/test/**/*.test.ts?(x)"],
           exclude: [...configDefaults.exclude, "src/test/components/**"],
           setupFiles: ["src/test/setup.ts"],
-          onConsoleLog(log) {
-            if (logsToIgnore.some((logToIgnore) => log.includes(logToIgnore))) {
-              return false;
-            }
-          },
           restoreMocks: true,
           testTimeout: 60000,
           server: {

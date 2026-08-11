@@ -105,7 +105,7 @@ export function createFakeViewport(
   return result;
 }
 
-type IModelAccess = ECSchemaProvider &
+export type IModelAccess = ECSchemaProvider &
   LimitingECSqlQueryExecutor &
   ECClassHierarchyInspector & {
     imodelKey: string;
