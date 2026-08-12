@@ -27,11 +27,7 @@
   "overrides": [
     {
       "files": ["**/*"],
-      "excludeFiles": [
-        "**/learning-snippets/**/*.ts*",
-        "**/test/**/setup.ts",
-        "**/README.md"
-      ],
+      "excludeFiles": ["**/learning-snippets/**/*.ts*", "**/test/**/setup.ts", "**/README.md"],
       "options": {
         "sortImports": {
           "newlinesBetween": false,
