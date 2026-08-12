@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { CompressedId64Set, Id64 } from "@itwin/core-bentley";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
@@ -31,7 +31,6 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { Visibility } from "../../../../tree-widget-react/shared/internal/Tooltip.js";
 import type { TreeWidgetViewport } from "../../../../tree-widget-react/shared/TreeWidgetViewport.js";
-import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/shared/UseHierarchyVisibility.js";
 import type { ModelsTreeVisibilityHandlerProps } from "../../../../tree-widget-react/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 import type { ModelsTreeHierarchyConfiguration } from "../../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
 
@@ -69,13 +68,6 @@ describe("ModelsTreeVisibilityHandler", () => {
   });
 
   describe("#unit", () => {
-    let createdHandlers = new Array<HierarchyVisibilityHandler>();
-
-    afterEach(() => {
-      createdHandlers.forEach((x) => x[Symbol.dispose]());
-      createdHandlers = [];
-    });
-
     function createFakeIModelAccess(): ECClassHierarchyInspector {
       return {
         classDerivesFrom: vi.fn(() => false),
