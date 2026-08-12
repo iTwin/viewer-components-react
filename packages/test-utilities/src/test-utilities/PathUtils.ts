@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { mkdirSync } from "fs";
 import path from "path";
 import sanitize from "sanitize-filename";
 import { IModelJsFs } from "@itwin/core-backend";
@@ -12,7 +13,9 @@ import type { LocalFileName } from "@itwin/core-common";
 
 export function setupOutputFileLocation(fileName: string): LocalFileName {
   const outputDirectoryPath = getTestOutputDir();
-  !IModelJsFs.existsSync(outputDirectoryPath) && IModelJsFs.mkdirSync(outputDirectoryPath);
+  // Some package-specific test setups bypass `initializeCore`, so the nested
+  // output directory and its parents may not exist yet.
+  mkdirSync(outputDirectoryPath, { recursive: true });
   const outputFilePath = limitFilePathLength(path.join(outputDirectoryPath, fileName));
   IModelJsFs.existsSync(outputFilePath) && IModelJsFs.unlinkSync(outputFilePath);
   return outputFilePath;

@@ -21,23 +21,13 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { EC } from "@itwin/presentation-shared";
 import type { ClassificationsTreeHierarchyConfiguration } from "../../../tree-widget-react/trees/classifications-tree/ClassificationsTreeDefinition.js";
+import type { ClassificationsTreeVisibilityHandlerConfiguration } from "../../../tree-widget-react/trees/classifications-tree/UseClassificationsTree.js";
 
 export function createClassificationsTreeProvider(
   imodel: IModelConnection,
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration,
 ): HierarchyProvider & Disposable {
-  const imodelAccess = createIModelAccess(imodel);
-  const baseIdsCache = new BaseIdsCache({
-    queryExecutor: imodelAccess,
-    elementClassName: CLASS_NAME_GeometricElement3d,
-    type: "3d",
-    excludedElementClassNames: hierarchyConfig.elements?.excludedClasses,
-  });
-  const idsCache = new ClassificationsTreeIdsCache({
-    queryExecutor: imodelAccess,
-    hierarchyConfig,
-    baseIdsCache,
-  });
+  const { imodelAccess, idsCache } = createAccessAndCache({ imodelConnection: imodel, hierarchyConfig });
   const hierarchyProvider = createIModelHierarchyProvider({
     imodelAccess,
     hierarchyDefinition: new ClassificationsTreeDefinition({
@@ -179,4 +169,29 @@ export async function importCategorySymbolizesClassificationSchema(imodel: IMode
     `,
   });
   // cspell:enable
+}
+
+export function createAccessAndCache({
+  imodelConnection,
+  hierarchyConfig,
+  visibilityHandlerConfig,
+}: {
+  imodelConnection: IModelConnection;
+  hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+  visibilityHandlerConfig?: ClassificationsTreeVisibilityHandlerConfiguration;
+}) {
+  const imodelAccess = createIModelAccess(imodelConnection);
+  const baseIdsCache = new BaseIdsCache({
+    queryExecutor: imodelAccess,
+    elementClassName: CLASS_NAME_GeometricElement3d,
+    type: "3d",
+    excludedElementClassNames: hierarchyConfig.elements?.excludedClasses,
+  });
+  const idsCache = new ClassificationsTreeIdsCache({
+    queryExecutor: imodelAccess,
+    hierarchyConfig,
+    baseIdsCache,
+    visibilityHandlerConfig,
+  });
+  return { imodelAccess, idsCache };
 }
