@@ -341,8 +341,7 @@ export function createVisibilityTestData(props: {
   idsCache: ModelsTreeIdsCache;
 }) {
   const { idsCache, imodelAccess, imodelConnection, hierarchyConfig, visibleByDefault } = props;
-  const defaultConfig = mergeWithDefaults({ defaults: defaultHierarchyConfiguration, overrides: { subjects: { root: "exclude" } } });
-  const hierarchyConfigWithDefaults = mergeWithDefaults({ defaults: defaultConfig, overrides: hierarchyConfig });
+  const hierarchyConfigWithDefaults = mergeWithDefaults({ defaults: defaultHierarchyConfiguration, overrides: hierarchyConfig });
   const viewport = createTreeWidgetTestingViewport({ iModel: imodelConnection, viewType: "3d", visibleByDefault });
   const handler = createModelsTreeVisibilityHandler({ viewport, imodelAccess, idsCache });
   const provider = createProvider({ hierarchyConfig: hierarchyConfigWithDefaults, idsCache, imodelAccess });

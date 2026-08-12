@@ -39,6 +39,7 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { GroupingHierarchyNode, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { InstanceKey, Props } from "@itwin/presentation-shared";
+import type { ModelsTreeHierarchyConfiguration } from "../../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
 import type { VisibilityExpectations } from "../../../shared/VisibilityValidation.js";
 
 describe("ModelsTreeVisibilityHandler", () => {
@@ -53,6 +54,7 @@ describe("ModelsTreeVisibilityHandler", () => {
   });
 
   describe("modeled elements", () => {
+    const hierarchyConfig: ModelsTreeHierarchyConfiguration = { subjects: { root: "exclude" } };
     let datasets: Awaited<ReturnType<typeof createDatasets>>;
     beforeAll(async () => {
       await initializeCore({
@@ -431,7 +433,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         beforeAll(async () => {
           const { imodelConnection, ...ids } = await createIModel();
           iModel = imodelConnection;
-          accessAndCache = createAccessAndCache({ imodelConnection: iModel });
+          accessAndCache = createAccessAndCache({ imodelConnection: iModel, hierarchyConfig });
           createdIds = ids;
         });
 
@@ -441,7 +443,7 @@ describe("ModelsTreeVisibilityHandler", () => {
 
         cases.forEach(({ name, getTargetNode, expectations, ...itProps }) => {
           (itProps.only ? it.only : it)(name, async function () {
-            using visibilityTestData = createVisibilityTestData({ imodelConnection: iModel, ...accessAndCache });
+            using visibilityTestData = createVisibilityTestData({ imodelConnection: iModel, hierarchyConfig, ...accessAndCache });
             const { handler, provider, viewport } = visibilityTestData;
 
             const nodeToChangeVisibility = getTargetNode(createdIds);
@@ -473,7 +475,7 @@ describe("ModelsTreeVisibilityHandler", () => {
     describe("intermediate categories", () => {
       it("showing intermediate category under sub-model makes its elements visible", async () => {
         const { imodelConnection, idsCache, imodelAccess, keys } = datasets.subModelIntermediateCategories;
-        using visibilityTestData = createVisibilityTestData({ imodelConnection, idsCache, imodelAccess });
+        using visibilityTestData = createVisibilityTestData({ imodelConnection, idsCache, imodelAccess, hierarchyConfig });
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(
@@ -502,7 +504,7 @@ describe("ModelsTreeVisibilityHandler", () => {
 
       it("showing element under intermediate category in sub-model makes it visible", async () => {
         const { imodelConnection, idsCache, imodelAccess, keys } = datasets.subModelIntermediateCategories;
-        using visibilityTestData = createVisibilityTestData({ imodelConnection, idsCache, imodelAccess });
+        using visibilityTestData = createVisibilityTestData({ imodelConnection, idsCache, imodelAccess, hierarchyConfig });
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(
@@ -531,7 +533,7 @@ describe("ModelsTreeVisibilityHandler", () => {
 
       it("hiding intermediate category under sub-model makes its elements hidden", async () => {
         const { imodelConnection, idsCache, imodelAccess, keys } = datasets.subModelIntermediateCategories;
-        using visibilityTestData = createVisibilityTestData({ imodelConnection, idsCache, imodelAccess, visibleByDefault: true });
+        using visibilityTestData = createVisibilityTestData({ imodelConnection, idsCache, imodelAccess, hierarchyConfig, visibleByDefault: true });
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(
