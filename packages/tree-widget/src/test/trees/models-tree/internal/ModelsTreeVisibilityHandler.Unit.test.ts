@@ -51,7 +51,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       type: "3d",
     });
     const idsCache = new ModelsTreeIdsCache({
-      queryExecutor: createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"),
+      queryExecutor,
       hierarchyConfig: resolvedHierarchyConfig,
       baseIdsCache,
     });

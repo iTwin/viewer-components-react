@@ -251,7 +251,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             }),
           },
           {
-            name: "parent element,modeled element, its model and category have partial visibility when its sub-model element's display is turned on",
+            name: "parent element, modeled element, its model and category have partial visibility when its sub-model element's display is turned on",
             getTargetNode: (ids: IModelWithSubModelIds) =>
               createElementHierarchyNode({
                 modelId: ids.modeledElementId,
