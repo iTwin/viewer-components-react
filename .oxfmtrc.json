@@ -17,8 +17,7 @@
     "packages/map-layers",
     "packages/measure-tools",
     "packages/quantity-formatting",
-    "packages/tree-widget/README.md",
-    "packages/property-grid/README.md",
+    "!packages/quantity-formatting/README.md",
     "CHANGELOG.md",
     "CHANGELOG.json",
     "pnpm-lock.yaml",
@@ -28,7 +27,11 @@
   "overrides": [
     {
       "files": ["**/*"],
-      "excludeFiles": ["**/learning-snippets/**/*.ts*", "**/test/**/setup.ts", "**/README.md"],
+      "excludeFiles": [
+        "**/learning-snippets/**/*.ts*",
+        "**/test/**/setup.ts",
+        "**/README.md"
+      ],
       "options": {
         "sortImports": {
           "newlinesBetween": false,
