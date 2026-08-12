@@ -89,7 +89,8 @@ describe("ModelsTreeVisibilityHandler", () => {
       using visibilityTestData = createVisibilityTestData({
         imodelConnection,
         hierarchyConfig,
-        ...createAccessAndCache({ imodelConnection, hierarchyConfig }),
+        imodelAccess,
+        idsCache,
       });
       const { handler, provider, viewport } = visibilityTestData;
       await validateModelsTreeHierarchyVisibility({
