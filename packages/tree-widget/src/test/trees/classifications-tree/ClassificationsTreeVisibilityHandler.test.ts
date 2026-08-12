@@ -7,19 +7,17 @@ import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialC
 import { afterAll, beforeAll, describe, it } from "vitest";
 import { withEditTxn } from "@itwin/core-backend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { BaseIdsCache } from "../../../tree-widget-react/shared/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_GeometricElement3d } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
 import { ClassificationsTreeDefinition } from "../../../tree-widget-react/trees/classifications-tree/ClassificationsTreeDefinition.js";
-import { ClassificationsTreeIdsCache } from "../../../tree-widget-react/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
 import { createClassificationsTreeVisibilityHandler } from "../../../tree-widget-react/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHandler.js";
 import { buildIModel } from "../../IModelUtils.js";
 import { initializeITwinJs, terminateITwinJs } from "../../Initialize.js";
 import { validateHierarchyVisibility } from "../../shared/VisibilityValidation.js";
-import { createIModelAccess } from "../Common.js";
 import { createTreeWidgetTestingViewport } from "../TreeUtils.js";
 import { createClassificationHierarchyNode, createClassificationTableHierarchyNode, createPhysicalElementHierarchyNode } from "./HierarchyNodeUtils.js";
 import {
   CATEGORY_SYMBOLIZES_CLASSIFICATION_RELATIONSHIP_SCHEMA,
+  createAccessAndCache,
   importCategorySymbolizesClassificationSchema,
   importClassificationSchema,
   insertCategorySymbolizesClassificationRelationship,
@@ -34,18 +32,23 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { Props } from "@itwin/presentation-shared";
 import type { ClassificationsTreeHierarchyConfiguration } from "../../../tree-widget-react/trees/classifications-tree/ClassificationsTreeDefinition.js";
+import type { ClassificationsTreeIdsCache } from "../../../tree-widget-react/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
 import type { ClassificationsTreeVisibilityHandlerConfiguration } from "../../../tree-widget-react/trees/classifications-tree/UseClassificationsTree.js";
+import type { createIModelAccess, IModelAccess } from "../Common.js";
 
 describe("ClassificationsTreeVisibilityHandler", () => {
+  const rootClassificationSystemCode = "clSystem";
+  let datasets: Awaited<ReturnType<typeof createDatasets>>;
+
   beforeAll(async () => {
     await initializeITwinJs();
+    datasets = await createDatasets(rootClassificationSystemCode);
   });
 
   afterAll(async () => {
     await terminateITwinJs();
+    await datasets[Symbol.asyncDispose]();
   });
-
-  const rootClassificationSystemCode = "TestClassificationSystem";
 
   function createProvider({
     idsCache,
@@ -70,27 +73,16 @@ describe("ClassificationsTreeVisibilityHandler", () => {
   async function createVisibilityTestData({
     imodelConnection,
     visibleByDefault,
-    visibilityHandlerConfig,
     hierarchyConfig,
+    idsCache,
+    imodelAccess,
   }: {
     imodelConnection: IModelConnection;
     visibleByDefault?: boolean;
-    visibilityHandlerConfig?: ClassificationsTreeVisibilityHandlerConfiguration;
     hierarchyConfig?: Partial<ClassificationsTreeHierarchyConfiguration>;
+    imodelAccess: IModelAccess;
+    idsCache: ClassificationsTreeIdsCache;
   }) {
-    const imodelAccess = createIModelAccess(imodelConnection);
-    const baseIdsCache = new BaseIdsCache({
-      queryExecutor: imodelAccess,
-      elementClassName: CLASS_NAME_GeometricElement3d,
-      type: "3d",
-      excludedElementClassNames: hierarchyConfig?.elements?.excludedClasses,
-    });
-    const idsCache = new ClassificationsTreeIdsCache({
-      queryExecutor: imodelAccess,
-      hierarchyConfig: { rootClassificationSystemCode, ...hierarchyConfig },
-      baseIdsCache,
-      visibilityHandlerConfig,
-    });
     const viewport = createTreeWidgetTestingViewport({
       iModel: imodelConnection,
       visibleByDefault,
@@ -101,8 +93,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     return {
       handler,
       provider,
-      imodelConnection,
-      imodelAccess,
       viewport,
       [Symbol.dispose]() {
         handler[Symbol.dispose]();
@@ -112,54 +102,13 @@ describe("ClassificationsTreeVisibilityHandler", () => {
   }
 
   describe("custom classification -> category relationship", () => {
-    let buildIModelResult: Awaited<ReturnType<typeof createIModel>>;
-    const visibilityHandlerConfig: ClassificationsTreeVisibilityHandlerConfiguration = {
-      classificationToCategoriesRelationshipSpecification: {
-        fullClassName: `${CATEGORY_SYMBOLIZES_CLASSIFICATION_RELATIONSHIP_SCHEMA}.CategorySymbolizesClassification`,
-        source: "category",
-      },
-    };
-    const createIModel = async () => {
-      return buildIModel(async (imodel) =>
-        withEditTxn(imodel, async (txn) => {
-          await importClassificationSchema(imodel);
-          await importCategorySymbolizesClassificationSchema(imodel);
-
-          const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
-          const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "TestClassificationTable" });
-          const classification = insertClassification({ txn, modelId: table.id, codeValue: "TestClassification" });
-
-          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
-          const spatialCategory = insertSpatialCategory({ txn, codeValue: "Test spatial category" });
-          const elementInHierarchy = insertPhysicalElement({
-            txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory.id,
-            codeValue: "Parent 3d element",
-          });
-          insertElementHasClassificationsRelationship({ txn, elementId: elementInHierarchy.id, classificationId: classification.id });
-          insertCategorySymbolizesClassificationRelationship({ txn, categoryId: spatialCategory.id, classificationId: classification.id });
-
-          const categoryFromCustomRelationship = insertSpatialCategory({ txn, codeValue: "Category from custom relationship" });
-          const elementNotInHierarchy = insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: categoryFromCustomRelationship.id });
-          insertCategorySymbolizesClassificationRelationship({ txn, categoryId: categoryFromCustomRelationship.id, classificationId: classification.id });
-          return { table, classification, spatialCategory, elementInHierarchy, categoryFromCustomRelationship, elementNotInHierarchy, physicalModel };
-        }),
-      );
-    };
-    beforeAll(async () => {
-      buildIModelResult = await createIModel();
-    });
-
-    afterAll(async () => {
-      await buildIModelResult[Symbol.asyncDispose]();
-    });
-
     it("does not turn on categories from custom classification -> category relationship when `visibilityHandlerConfig` is not provided", async () => {
-      const { imodelConnection, ...keys } = buildIModelResult;
-
+      const { imodelConnection, keys } = datasets.customRelationship;
+      const { idsCache, imodelAccess } = createAccessAndCache({ imodelConnection, hierarchyConfig: { rootClassificationSystemCode } });
       using visibilityTestData = await createVisibilityTestData({
         imodelConnection,
+        imodelAccess,
+        idsCache,
       });
       const { handler, provider, viewport } = visibilityTestData;
 
@@ -181,7 +130,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         node: createPhysicalElementHierarchyNode({
           id: keys.elementNotInHierarchy.id,
           categoryId: keys.categoryFromCustomRelationship.id,
-          modelId: keys.physicalModel.id,
+          modelId: keys.elementsModel.id,
         }),
         viewport,
         expectations: "all-hidden",
@@ -189,11 +138,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
 
     it("turns on categories from custom classification -> category relationship", async () => {
-      const { imodelConnection, ...keys } = buildIModelResult;
+      const { imodelConnection, imodelAccess, idsCache, keys } = datasets.customRelationship;
 
       using visibilityTestData = await createVisibilityTestData({
         imodelConnection,
-        visibilityHandlerConfig,
+        imodelAccess,
+        idsCache,
       });
       const { handler, provider, viewport } = visibilityTestData;
 
@@ -215,7 +165,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         node: createPhysicalElementHierarchyNode({
           id: keys.elementNotInHierarchy.id,
           categoryId: keys.categoryFromCustomRelationship.id,
-          modelId: keys.physicalModel.id,
+          modelId: keys.elementsModel.id,
         }),
         viewport,
         expectations: "all-visible",
@@ -223,11 +173,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
 
     it("classification visibility takes into account categories from custom classification -> category relationship", async () => {
-      const { imodelConnection, ...keys } = buildIModelResult;
+      const { imodelConnection, imodelAccess, idsCache, keys } = datasets.customRelationship;
 
       using visibilityTestData = await createVisibilityTestData({
         imodelConnection,
-        visibilityHandlerConfig,
+        idsCache,
+        imodelAccess,
       });
       const { handler, provider, viewport } = visibilityTestData;
 
@@ -261,7 +212,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         node: createPhysicalElementHierarchyNode({
           id: keys.elementNotInHierarchy.id,
           categoryId: keys.categoryFromCustomRelationship.id,
-          modelId: keys.physicalModel.id,
+          modelId: keys.elementsModel.id,
         }),
         viewport,
         expectations: "all-hidden",
@@ -271,37 +222,11 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
   describe("enabling visibility", () => {
     it("by default everything is hidden in 3d view with 3d elements' hierarchy", async () => {
-      await using buildIModelResult = await buildIModel(async (imodel) =>
-        withEditTxn(imodel, async (txn) => {
-          await importClassificationSchema(imodel);
-
-          const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
-          const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "TestClassificationTable" });
-          const classification = insertClassification({ txn, modelId: table.id, codeValue: "TestClassification" });
-
-          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
-          const spatialCategory = insertSpatialCategory({ txn, codeValue: "Test spatial category" });
-          const parentPhysicalElement = insertPhysicalElement({
-            txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory.id,
-            codeValue: "Parent 3d element",
-          });
-          insertPhysicalElement({
-            txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory.id,
-            parentId: parentPhysicalElement.id,
-            codeValue: "Child 3d element",
-          });
-          insertElementHasClassificationsRelationship({ txn, elementId: parentPhysicalElement.id, classificationId: classification.id });
-        }),
-      );
-
-      const { imodelConnection } = buildIModelResult;
-
+      const { idsCache, imodelAccess, imodelConnection } = datasets.simple;
       using visibilityTestData = await createVisibilityTestData({
         imodelConnection,
+        idsCache,
+        imodelAccess,
       });
       const { handler, provider, viewport } = visibilityTestData;
 
@@ -315,39 +240,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
     describe("classification table", () => {
       it("showing classification table makes contained elements under it visible", async () => {
-        await using buildIModelResult = await buildIModel(async (imodel) =>
-          withEditTxn(imodel, async (txn) => {
-            await importClassificationSchema(imodel);
-
-            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
-            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "TestClassificationTable" });
-            const classification = insertClassification({ txn, modelId: table.id, codeValue: "TestClassification" });
-
-            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
-            const spatialCategory = insertSpatialCategory({ txn, codeValue: "Test spatial category" });
-            const parentPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: spatialCategory.id,
-              codeValue: "Parent 3d element",
-            });
-            const childPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: spatialCategory.id,
-              parentId: parentPhysicalElement.id,
-              codeValue: "Child 3d element",
-            });
-            insertElementHasClassificationsRelationship({ txn, elementId: parentPhysicalElement.id, classificationId: classification.id });
-
-            return { table, classification, physicalModel, spatialCategory, parentPhysicalElement, childPhysicalElement };
-          }),
-        );
-
-        const { imodelConnection, ...keys } = buildIModelResult;
+        const { idsCache, imodelAccess, imodelConnection, keys } = datasets.simple;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
+          idsCache,
+          imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -363,49 +261,16 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
     describe("classification", () => {
       it("showing classification makes all ancestors and contained elements under it visible", async () => {
-        await using buildIModelResult = await buildIModel(async (imodel) =>
-          withEditTxn(imodel, async (txn) => {
-            await importClassificationSchema(imodel);
-
-            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
-            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "TestClassificationTable" });
-            const parentClassification = insertClassification({ txn, modelId: table.id, codeValue: "Parent classification" });
-            const childClassification = insertClassification({
-              txn,
-              modelId: table.id,
-              parentId: parentClassification.id,
-              codeValue: "Child classification",
-            });
-
-            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
-            const spatialCategory = insertSpatialCategory({ txn, codeValue: "Test spatial category" });
-            const parentPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: spatialCategory.id,
-              codeValue: "Parent 3d element",
-            });
-            const childPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: spatialCategory.id,
-              parentId: parentPhysicalElement.id,
-              codeValue: "Child 3d element",
-            });
-            insertElementHasClassificationsRelationship({ txn, elementId: parentPhysicalElement.id, classificationId: childClassification.id });
-
-            return { table, parentClassification, childClassification, physicalModel, spatialCategory, parentPhysicalElement, childPhysicalElement };
-          }),
-        );
-
-        const { imodelConnection, ...keys } = buildIModelResult;
+        const { idsCache, imodelAccess, imodelConnection, keys } = datasets.simple;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
+          idsCache,
+          imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createClassificationHierarchyNode({ id: keys.childClassification.id }), true);
+        await handler.changeVisibility(createClassificationHierarchyNode({ id: keys.classification.id }), true);
         await validateClassificationsTreeHierarchyVisibility({
           provider,
           handler,
@@ -415,77 +280,16 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       });
 
       it("showing classification makes all ancestors partially visible, and contained elements under it visible", async () => {
-        await using buildIModelResult = await buildIModel(async (imodel) =>
-          withEditTxn(imodel, async (txn) => {
-            await importClassificationSchema(imodel);
-
-            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
-            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "TestClassificationTable" });
-            const parentClassification = insertClassification({ txn, modelId: table.id, codeValue: "Parent classification" });
-            const childClassification1 = insertClassification({
-              txn,
-              modelId: table.id,
-              parentId: parentClassification.id,
-              codeValue: "Child classification 1",
-            });
-            const childClassification2 = insertClassification({
-              txn,
-              modelId: table.id,
-              parentId: parentClassification.id,
-              codeValue: "Child classification 2",
-            });
-
-            const physicalModel1 = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model 1" });
-            const spatialCategory1 = insertSpatialCategory({ txn, codeValue: "Test spatial category 1" });
-            const parentPhysicalElement1 = insertPhysicalElement({
-              txn,
-              modelId: physicalModel1.id,
-              categoryId: spatialCategory1.id,
-              codeValue: "Parent 3d element",
-            });
-            const childPhysicalElement1 = insertPhysicalElement({
-              txn,
-              modelId: physicalModel1.id,
-              categoryId: spatialCategory1.id,
-              parentId: parentPhysicalElement1.id,
-              codeValue: "Child 3d element",
-            });
-            insertElementHasClassificationsRelationship({ txn, elementId: parentPhysicalElement1.id, classificationId: childClassification1.id });
-
-            const physicalModel2 = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model 2" });
-            const spatialCategory2 = insertSpatialCategory({ txn, codeValue: "Test spatial category 2" });
-            const parentPhysicalElement2 = insertPhysicalElement({
-              txn,
-              modelId: physicalModel2.id,
-              categoryId: spatialCategory2.id,
-              codeValue: "3d element",
-            });
-            insertElementHasClassificationsRelationship({ txn, elementId: parentPhysicalElement2.id, classificationId: childClassification2.id });
-
-            return {
-              table,
-              parentClassification,
-              childClassification1,
-              physicalModel1,
-              spatialCategory1,
-              parentPhysicalElement1,
-              childPhysicalElement1,
-              physicalModel2,
-              spatialCategory2,
-              parentPhysicalElement2,
-              childClassification2,
-            };
-          }),
-        );
-
-        const { imodelConnection, ...keys } = buildIModelResult;
+        const { imodelConnection, idsCache, imodelAccess, keys } = datasets.multipleClassifications;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
+          idsCache,
+          imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createClassificationHierarchyNode({ id: keys.childClassification1.id }), true);
+        await handler.changeVisibility(createClassificationHierarchyNode({ id: keys.classification1.id }), true);
         await validateClassificationsTreeHierarchyVisibility({
           provider,
           handler,
@@ -493,13 +297,13 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [keys.table.id]: "partial",
-              [keys.parentClassification.id]: "partial",
-                [keys.childClassification1.id]: "visible",
-                  [keys.parentPhysicalElement1.id]: "visible",
-                    [keys.childPhysicalElement1.id]: "visible",
+              [keys.classification1.id]: "visible",
+                  [keys.parentElement1.id]: "visible",
+                    [keys.childElement1.id]: "visible",
 
-                [keys.childClassification2.id]: "hidden",
-                  [keys.parentPhysicalElement2.id]: "hidden",
+              [keys.classification2.id]: "hidden",
+                  [keys.parentElement2.id]: "hidden",
+                    [keys.childElement2.id]: "hidden",
           },
         });
       });
@@ -507,74 +311,17 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
     describe("geometric element", () => {
       it("showing geometric element makes ancestors partially visible, and the element visible", async () => {
-        await using buildIModelResult = await buildIModel(async (imodel) =>
-          withEditTxn(imodel, async (txn) => {
-            await importClassificationSchema(imodel);
-
-            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
-            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "TestClassificationTable" });
-            const parentClassification = insertClassification({ txn, modelId: table.id, codeValue: "Parent classification" });
-            const childClassification = insertClassification({
-              txn,
-              modelId: table.id,
-              parentId: parentClassification.id,
-              codeValue: "Child classification",
-            });
-
-            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
-            const spatialCategory = insertSpatialCategory({ txn, codeValue: "Test spatial category" });
-            const parentPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: spatialCategory.id,
-              codeValue: "Parent 3d element",
-            });
-            const siblingPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: spatialCategory.id,
-              parentId: parentPhysicalElement.id,
-              codeValue: "Sibling 3d element",
-            });
-            const targetPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: spatialCategory.id,
-              parentId: parentPhysicalElement.id,
-              codeValue: "Target 3d element",
-            });
-            const childPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: spatialCategory.id,
-              parentId: targetPhysicalElement.id,
-              codeValue: "Child 3d element",
-            });
-            insertElementHasClassificationsRelationship({ txn, elementId: parentPhysicalElement.id, classificationId: childClassification.id });
-
-            return {
-              table,
-              parentClassification,
-              childClassification,
-              physicalModel,
-              spatialCategory,
-              parentPhysicalElement,
-              targetPhysicalElement,
-              siblingPhysicalElement,
-              childPhysicalElement,
-            };
-          }),
-        );
-
-        const { imodelConnection, ...keys } = buildIModelResult;
+        const { imodelConnection, idsCache, imodelAccess, keys } = datasets.multipleClassifications;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
+          idsCache,
+          imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(
-          createPhysicalElementHierarchyNode({ id: keys.targetPhysicalElement.id, categoryId: keys.spatialCategory.id, modelId: keys.physicalModel.id }),
+          createPhysicalElementHierarchyNode({ id: keys.parentElement1.id, categoryId: keys.category1.id, modelId: keys.elementsModel.id }),
           true,
         );
         await validateClassificationsTreeHierarchyVisibility({
@@ -584,13 +331,13 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [keys.table.id]: "partial",
-              [keys.parentClassification.id]: "partial",
-                [keys.childClassification.id]: "partial",
-                  [keys.parentPhysicalElement.id]: "partial",
-                    [keys.siblingPhysicalElement.id]: "hidden",
+              [keys.classification1.id]: "visible",
+                [keys.parentElement1.id]: "visible",
+                  [keys.childElement1.id]: "visible",
 
-                    [keys.targetPhysicalElement.id]: "visible",
-                      [keys.childPhysicalElement.id]: "visible",
+              [keys.classification2.id]: "hidden",
+                [keys.parentElement2.id]: "hidden",
+                  [keys.childElement2.id]: "hidden",
           },
         });
       });
@@ -598,57 +345,21 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
     describe("element with different category than parent", () => {
       it("showing child element with different category makes it visible and parent partially visible", async () => {
-        await using buildIModelResult = await buildIModel(async (imodel) =>
-          withEditTxn(imodel, async (txn) => {
-            await importClassificationSchema(imodel);
-
-            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
-            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "TestClassificationTable" });
-            const classification = insertClassification({ txn, modelId: table.id, codeValue: "TestClassification" });
-
-            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
-            const categoryA = insertSpatialCategory({ txn, codeValue: "CategoryA" });
-            const categoryB = insertSpatialCategory({ txn, codeValue: "CategoryB" });
-            const parentPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: categoryA.id,
-              codeValue: "Parent element",
-            });
-            const childPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: categoryB.id,
-              parentId: parentPhysicalElement.id,
-              codeValue: "Child element",
-            });
-            insertElementHasClassificationsRelationship({ txn, elementId: parentPhysicalElement.id, classificationId: classification.id });
-
-            return {
-              table,
-              classification,
-              physicalModel,
-              categoryA,
-              categoryB,
-              parentPhysicalElement,
-              childPhysicalElement,
-            };
-          }),
-        );
-
-        const { imodelConnection, ...keys } = buildIModelResult;
+        const { imodelConnection, keys, idsCache, imodelAccess } = datasets.childrenOfDifferentCategories;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
+          idsCache,
+          imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(
           createPhysicalElementHierarchyNode({
-            id: keys.childPhysicalElement.id,
-            categoryId: keys.categoryB.id,
-            modelId: keys.physicalModel.id,
-            parentElementsPath: [{ elementIds: [keys.parentPhysicalElement.id], categoryIds: keys.categoryA.id }],
+            id: keys.childElement.id,
+            categoryId: keys.category2.id,
+            modelId: keys.elementsModel.id,
+            parentElementsPath: [{ elementIds: [keys.parentElement.id], categoryIds: keys.category.id }],
           }),
           true,
         );
@@ -660,63 +371,27 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           expectations: {
             [keys.table.id]: "partial",
               [keys.classification.id]: "partial",
-                [keys.parentPhysicalElement.id]: "partial",
-                  [keys.childPhysicalElement.id]: "visible",
+                [keys.parentElement.id]: "partial",
+                  [keys.childElement.id]: "visible",
           },
         });
       });
 
       it("showing parent element makes children with different category visible", async () => {
-        await using buildIModelResult = await buildIModel(async (imodel) =>
-          withEditTxn(imodel, async (txn) => {
-            await importClassificationSchema(imodel);
-
-            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
-            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "TestClassificationTable" });
-            const classification = insertClassification({ txn, modelId: table.id, codeValue: "TestClassification" });
-
-            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
-            const categoryA = insertSpatialCategory({ txn, codeValue: "CategoryA" });
-            const categoryB = insertSpatialCategory({ txn, codeValue: "CategoryB" });
-            const parentPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: categoryA.id,
-              codeValue: "Parent element",
-            });
-            const childPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: categoryB.id,
-              parentId: parentPhysicalElement.id,
-              codeValue: "Child element",
-            });
-            insertElementHasClassificationsRelationship({ txn, elementId: parentPhysicalElement.id, classificationId: classification.id });
-
-            return {
-              table,
-              classification,
-              physicalModel,
-              categoryA,
-              categoryB,
-              parentPhysicalElement,
-              childPhysicalElement,
-            };
-          }),
-        );
-
-        const { imodelConnection, ...keys } = buildIModelResult;
+        const { imodelConnection, keys, idsCache, imodelAccess } = datasets.childrenOfDifferentCategories;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
+          idsCache,
+          imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(
           createPhysicalElementHierarchyNode({
-            id: keys.parentPhysicalElement.id,
-            categoryId: keys.categoryA.id,
-            modelId: keys.physicalModel.id,
+            id: keys.parentElement.id,
+            categoryId: keys.category.id,
+            modelId: keys.elementsModel.id,
           }),
           true,
         );
@@ -728,8 +403,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           expectations: {
             [keys.table.id]: "visible",
               [keys.classification.id]: "visible",
-                [keys.parentPhysicalElement.id]: "visible",
-                  [keys.childPhysicalElement.id]: "visible",
+                [keys.parentElement.id]: "visible",
+                  [keys.childElement.id]: "visible",
           },
         });
       });
@@ -738,39 +413,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
   describe("disabling visibility", () => {
     it("by default everything is visible in 3d view with 3d elements' hierarchy", async () => {
-      await using buildIModelResult = await buildIModel(async (imodel) =>
-        withEditTxn(imodel, async (txn) => {
-          await importClassificationSchema(imodel);
-
-          const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
-          const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "TestClassificationTable" });
-          const classification = insertClassification({ txn, modelId: table.id, codeValue: "TestClassification" });
-
-          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
-          const spatialCategory = insertSpatialCategory({ txn, codeValue: "Test spatial category" });
-          const parentPhysicalElement = insertPhysicalElement({
-            txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory.id,
-            codeValue: "Parent 3d element",
-          });
-          const childPhysicalElement = insertPhysicalElement({
-            txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory.id,
-            parentId: parentPhysicalElement.id,
-            codeValue: "Child 3d element",
-          });
-          insertElementHasClassificationsRelationship({ txn, elementId: parentPhysicalElement.id, classificationId: classification.id });
-
-          return { table, classification, physicalModel, spatialCategory, parentPhysicalElement, childPhysicalElement };
-        }),
-      );
-
-      const { imodelConnection } = buildIModelResult;
+      const { imodelConnection, imodelAccess, idsCache } = datasets.simple;
       using visibilityTestData = await createVisibilityTestData({
         imodelConnection,
         visibleByDefault: true,
+        idsCache,
+        imodelAccess,
       });
       const { handler, provider, viewport } = visibilityTestData;
 
@@ -784,39 +432,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
     describe("classification table", () => {
       it("hiding classification table makes contained elements under it hidden", async () => {
-        await using buildIModelResult = await buildIModel(async (imodel) =>
-          withEditTxn(imodel, async (txn) => {
-            await importClassificationSchema(imodel);
-
-            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
-            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "TestClassificationTable" });
-            const classification = insertClassification({ txn, modelId: table.id, codeValue: "TestClassification" });
-
-            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
-            const spatialCategory = insertSpatialCategory({ txn, codeValue: "Test spatial category" });
-            const parentPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: spatialCategory.id,
-              codeValue: "Parent 3d element",
-            });
-            const childPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: spatialCategory.id,
-              parentId: parentPhysicalElement.id,
-              codeValue: "Child 3d element",
-            });
-            insertElementHasClassificationsRelationship({ txn, elementId: parentPhysicalElement.id, classificationId: classification.id });
-
-            return { table, classification, physicalModel, spatialCategory, parentPhysicalElement, childPhysicalElement };
-          }),
-        );
-
-        const { imodelConnection, ...keys } = buildIModelResult;
+        const { imodelConnection, keys, idsCache, imodelAccess } = datasets.simple;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
+          idsCache,
+          imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -832,78 +453,17 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
     describe("classification", () => {
       it("hiding classification makes all ancestors partially visible, and contained elements under it hidden", async () => {
-        await using buildIModelResult = await buildIModel(async (imodel) =>
-          withEditTxn(imodel, async (txn) => {
-            await importClassificationSchema(imodel);
-
-            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
-            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "TestClassificationTable" });
-            const parentClassification = insertClassification({ txn, modelId: table.id, codeValue: "Parent classification" });
-            const childClassification1 = insertClassification({
-              txn,
-              modelId: table.id,
-              parentId: parentClassification.id,
-              codeValue: "Child classification 1",
-            });
-            const childClassification2 = insertClassification({
-              txn,
-              modelId: table.id,
-              parentId: parentClassification.id,
-              codeValue: "Child classification 2",
-            });
-
-            const physicalModel1 = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model 1" });
-            const spatialCategory1 = insertSpatialCategory({ txn, codeValue: "Test spatial category 1" });
-            const parentPhysicalElement1 = insertPhysicalElement({
-              txn,
-              modelId: physicalModel1.id,
-              categoryId: spatialCategory1.id,
-              codeValue: "Parent 3d element",
-            });
-            const childPhysicalElement1 = insertPhysicalElement({
-              txn,
-              modelId: physicalModel1.id,
-              categoryId: spatialCategory1.id,
-              parentId: parentPhysicalElement1.id,
-              codeValue: "Child 3d element",
-            });
-            insertElementHasClassificationsRelationship({ txn, elementId: parentPhysicalElement1.id, classificationId: childClassification1.id });
-
-            const physicalModel2 = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model 2" });
-            const spatialCategory2 = insertSpatialCategory({ txn, codeValue: "Test spatial category 2" });
-            const parentPhysicalElement2 = insertPhysicalElement({
-              txn,
-              modelId: physicalModel2.id,
-              categoryId: spatialCategory2.id,
-              codeValue: "3d element",
-            });
-            insertElementHasClassificationsRelationship({ txn, elementId: parentPhysicalElement2.id, classificationId: childClassification2.id });
-
-            return {
-              table,
-              parentClassification,
-              childClassification1,
-              physicalModel1,
-              spatialCategory1,
-              parentPhysicalElement1,
-              childPhysicalElement1,
-              physicalModel2,
-              spatialCategory2,
-              parentPhysicalElement2,
-              childClassification2,
-            };
-          }),
-        );
-
-        const { imodelConnection, ...keys } = buildIModelResult;
+        const { imodelConnection, keys, idsCache, imodelAccess } = datasets.multipleClassifications;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
           visibleByDefault: true,
+          idsCache,
+          imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createClassificationHierarchyNode({ id: keys.childClassification1.id }), false);
+        await handler.changeVisibility(createClassificationHierarchyNode({ id: keys.classification1.id }), false);
         await validateClassificationsTreeHierarchyVisibility({
           provider,
           handler,
@@ -911,13 +471,13 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [keys.table.id]: "partial",
-              [keys.parentClassification.id]: "partial",
-                [keys.childClassification1.id]: "hidden",
-                  [keys.parentPhysicalElement1.id]: "hidden",
-                    [keys.childPhysicalElement1.id]: "hidden",
+              [keys.classification1.id]: "hidden",
+                [keys.parentElement1.id]: "hidden",
+                  [keys.childElement1.id]: "hidden",
 
-                [keys.childClassification2.id]: "visible",
-                  [keys.parentPhysicalElement2.id]: "visible",
+              [keys.classification2.id]: "visible",
+                [keys.parentElement2.id]: "visible",
+                  [keys.childElement2.id]: "visible",
           },
         });
       });
@@ -925,75 +485,18 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
     describe("geometric element", () => {
       it("hiding geometric element makes ancestors partially visible, element and its children hidden", async () => {
-        await using buildIModelResult = await buildIModel(async (imodel) =>
-          withEditTxn(imodel, async (txn) => {
-            await importClassificationSchema(imodel);
-
-            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
-            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "TestClassificationTable" });
-            const parentClassification = insertClassification({ txn, modelId: table.id, codeValue: "Parent classification" });
-            const childClassification = insertClassification({
-              txn,
-              modelId: table.id,
-              parentId: parentClassification.id,
-              codeValue: "Child classification",
-            });
-
-            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
-            const spatialCategory = insertSpatialCategory({ txn, codeValue: "Test spatial category" });
-            const parentPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: spatialCategory.id,
-              codeValue: "Parent 3d element",
-            });
-            const siblingPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: spatialCategory.id,
-              parentId: parentPhysicalElement.id,
-              codeValue: "Sibling 3d element",
-            });
-            const targetPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: spatialCategory.id,
-              parentId: parentPhysicalElement.id,
-              codeValue: "Target 3d element",
-            });
-            const childPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: spatialCategory.id,
-              parentId: targetPhysicalElement.id,
-              codeValue: "Child 3d element",
-            });
-            insertElementHasClassificationsRelationship({ txn, elementId: parentPhysicalElement.id, classificationId: childClassification.id });
-
-            return {
-              table,
-              parentClassification,
-              childClassification,
-              physicalModel,
-              spatialCategory,
-              parentPhysicalElement,
-              targetPhysicalElement,
-              siblingPhysicalElement,
-              childPhysicalElement,
-            };
-          }),
-        );
-
-        const { imodelConnection, ...keys } = buildIModelResult;
+        const { imodelConnection, keys, idsCache, imodelAccess } = datasets.multipleClassifications;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
           visibleByDefault: true,
+          idsCache,
+          imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(
-          createPhysicalElementHierarchyNode({ id: keys.targetPhysicalElement.id, categoryId: keys.spatialCategory.id, modelId: keys.physicalModel.id }),
+          createPhysicalElementHierarchyNode({ id: keys.parentElement1.id, categoryId: keys.category1.id, modelId: keys.elementsModel.id }),
           false,
         );
         await validateClassificationsTreeHierarchyVisibility({
@@ -1003,13 +506,13 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           // prettier-ignore
           expectations: {
             [keys.table.id]: "partial",
-              [keys.parentClassification.id]: "partial",
-                [keys.childClassification.id]: "partial",
-                  [keys.parentPhysicalElement.id]: "partial",
-                    [keys.siblingPhysicalElement.id]: "visible",
+              [keys.classification1.id]: "hidden",
+                [keys.parentElement1.id]: "hidden",
+                  [keys.childElement1.id]: "hidden",
 
-                    [keys.targetPhysicalElement.id]: "hidden",
-                      [keys.childPhysicalElement.id]: "hidden",
+              [keys.classification2.id]: "visible",
+                [keys.parentElement2.id]: "visible",
+                  [keys.childElement2.id]: "visible",
           },
         });
       });
@@ -1017,66 +520,22 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
     describe("element with different category than parent", () => {
       it("hiding child element with different category makes it hidden and parent partially visible", async () => {
-        await using buildIModelResult = await buildIModel(async (imodel) =>
-          withEditTxn(imodel, async (txn) => {
-            await importClassificationSchema(imodel);
-
-            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
-            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "TestClassificationTable" });
-            const classification = insertClassification({ txn, modelId: table.id, codeValue: "TestClassification" });
-
-            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
-            const categoryA = insertSpatialCategory({ txn, codeValue: "CategoryA" });
-            const categoryB = insertSpatialCategory({ txn, codeValue: "CategoryB" });
-            const parentPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: categoryA.id,
-              codeValue: "Parent element",
-            });
-            const siblingPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: categoryA.id,
-              parentId: parentPhysicalElement.id,
-              codeValue: "Sibling element",
-            });
-            const childPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: categoryB.id,
-              parentId: parentPhysicalElement.id,
-              codeValue: "Child element",
-            });
-            insertElementHasClassificationsRelationship({ txn, elementId: parentPhysicalElement.id, classificationId: classification.id });
-
-            return {
-              table,
-              classification,
-              physicalModel,
-              categoryA,
-              categoryB,
-              parentPhysicalElement,
-              siblingPhysicalElement,
-              childPhysicalElement,
-            };
-          }),
-        );
-
-        const { imodelConnection, ...keys } = buildIModelResult;
+        const { imodelConnection, keys, idsCache, imodelAccess } = datasets.childrenOfDifferentCategories;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
           visibleByDefault: true,
+          idsCache,
+          imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(
           createPhysicalElementHierarchyNode({
-            id: keys.childPhysicalElement.id,
-            categoryId: keys.categoryB.id,
-            modelId: keys.physicalModel.id,
-            parentElementsPath: [{ elementIds: [keys.parentPhysicalElement.id], categoryIds: keys.categoryA.id }],
+            id: keys.childElement.id,
+            categoryId: keys.category2.id,
+            modelId: keys.elementsModel.id,
+            parentElementsPath: [{ elementIds: [keys.parentElement.id], categoryIds: keys.category.id }],
           }),
           false,
         );
@@ -1088,65 +547,28 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           expectations: {
             [keys.table.id]: "partial",
               [keys.classification.id]: "partial",
-                [keys.parentPhysicalElement.id]: "partial",
-                  [keys.siblingPhysicalElement.id]: "visible",
-
-                  [keys.childPhysicalElement.id]: "hidden",
+                [keys.parentElement.id]: "partial",
+                  [keys.childElement.id]: "hidden",
           },
         });
       });
 
       it("hiding parent element makes children with different category hidden", async () => {
-        await using buildIModelResult = await buildIModel(async (imodel) =>
-          withEditTxn(imodel, async (txn) => {
-            await importClassificationSchema(imodel);
+        const { imodelConnection, keys, idsCache, imodelAccess } = datasets.childrenOfDifferentCategories;
 
-            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
-            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "TestClassificationTable" });
-            const classification = insertClassification({ txn, modelId: table.id, codeValue: "TestClassification" });
-
-            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
-            const categoryA = insertSpatialCategory({ txn, codeValue: "CategoryA" });
-            const categoryB = insertSpatialCategory({ txn, codeValue: "CategoryB" });
-            const parentPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: categoryA.id,
-              codeValue: "Parent element",
-            });
-            const childPhysicalElement = insertPhysicalElement({
-              txn,
-              modelId: physicalModel.id,
-              categoryId: categoryB.id,
-              parentId: parentPhysicalElement.id,
-              codeValue: "Child element",
-            });
-            insertElementHasClassificationsRelationship({ txn, elementId: parentPhysicalElement.id, classificationId: classification.id });
-
-            return {
-              table,
-              classification,
-              physicalModel,
-              categoryA,
-              categoryB,
-              parentPhysicalElement,
-              childPhysicalElement,
-            };
-          }),
-        );
-
-        const { imodelConnection, ...keys } = buildIModelResult;
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
           visibleByDefault: true,
+          idsCache,
+          imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(
           createPhysicalElementHierarchyNode({
-            id: keys.parentPhysicalElement.id,
-            categoryId: keys.categoryA.id,
-            modelId: keys.physicalModel.id,
+            id: keys.parentElement.id,
+            categoryId: keys.category.id,
+            modelId: keys.elementsModel.id,
           }),
           false,
         );
@@ -1158,8 +580,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           expectations: {
             [keys.table.id]: "hidden",
               [keys.classification.id]: "hidden",
-                [keys.parentPhysicalElement.id]: "hidden",
-                  [keys.childPhysicalElement.id]: "hidden",
+                [keys.parentElement.id]: "hidden",
+                  [keys.childElement.id]: "hidden",
           },
         });
       });
@@ -1167,79 +589,44 @@ describe("ClassificationsTreeVisibilityHandler", () => {
   });
 
   describe("search nodes", () => {
-    async function createFilteredVisibilityTestData({
-      imodelConnection,
-      searchPaths,
-      visibleByDefault,
-    }: Parameters<typeof createVisibilityTestData>[0] & {
-      searchPaths: HierarchySearchTree[];
-      visibleByDefault?: boolean;
-    }) {
-      const imodelAccess = createIModelAccess(imodelConnection);
-      const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: CLASS_NAME_GeometricElement3d, type: "3d" });
-      const idsCache = new ClassificationsTreeIdsCache({ queryExecutor: imodelAccess, hierarchyConfig: { rootClassificationSystemCode }, baseIdsCache });
-      const viewport = createTreeWidgetTestingViewport({
-        iModel: imodelConnection,
-        viewType: "3d",
-        visibleByDefault,
-      });
-      const visibilityHandlerWithSearchPaths = createClassificationsTreeVisibilityHandler({ idsCache, searchPaths, imodelAccess, viewport });
-      const defaultVisibilityHandler = createClassificationsTreeVisibilityHandler({ idsCache, imodelAccess, viewport });
-      const defaultProvider = createProvider({ idsCache, imodelAccess });
-      const providerWithSearchPaths = createProvider({ idsCache, imodelAccess, searchPaths });
-      return {
-        defaultVisibilityHandler,
-        visibilityHandlerWithSearchPaths,
-        defaultProvider,
-        providerWithSearchPaths,
-        imodelConnection,
-        imodelAccess,
-        viewport,
-        [Symbol.dispose]() {
-          defaultVisibilityHandler[Symbol.dispose]();
-          visibilityHandlerWithSearchPaths[Symbol.dispose]();
-          defaultProvider[Symbol.dispose]();
-          providerWithSearchPaths[Symbol.dispose]();
-        },
-      };
-    }
-
-    it("showing parent geometric element of search target changes visibility for nodes in search paths", async () => {
-      await using buildIModelResult = await buildIModel(async (imodel) =>
+    let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
+    let accessAndCache: ReturnType<typeof createAccessAndCache>;
+    async function createIModel() {
+      return buildIModel(async (imodel) =>
         withEditTxn(imodel, async (txn) => {
           await importClassificationSchema(imodel);
 
           const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
-          const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable" });
-          const classification = insertClassification({ txn, modelId: table.id, codeValue: "Classification" });
+          const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "clTable" });
+          const classification = insertClassification({ txn, modelId: table.id, codeValue: "cl" });
 
-          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "physical model" });
-          const spatialCategory = insertSpatialCategory({ txn, codeValue: "spatial category" });
+          const elementsModel = insertPhysicalModelWithPartition({ txn, codeValue: "m" });
+          const category = insertSpatialCategory({ txn, codeValue: "cat" });
           const parentOfSearchTargetElement = insertPhysicalElement({
             txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory.id,
-            codeValue: "3d parent of search target",
+            modelId: elementsModel.id,
+            categoryId: category.id,
+            codeValue: "parent of search target",
           });
           const searchTargetChildElement = insertPhysicalElement({
             txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory.id,
-            codeValue: "3d search target",
+            modelId: elementsModel.id,
+            categoryId: category.id,
+            codeValue: "search target",
             parentId: parentOfSearchTargetElement.id,
           });
           const childElement = insertPhysicalElement({
             txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory.id,
-            codeValue: "3d child",
+            modelId: elementsModel.id,
+            categoryId: category.id,
+            codeValue: "child",
             parentId: parentOfSearchTargetElement.id,
           });
           const siblingElement = insertPhysicalElement({
             txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory.id,
-            codeValue: "3d sibling",
+            modelId: elementsModel.id,
+            categoryId: category.id,
+            codeValue: "sibling",
           });
           insertElementHasClassificationsRelationship({ txn, elementId: parentOfSearchTargetElement.id, classificationId: classification.id });
           insertElementHasClassificationsRelationship({ txn, elementId: siblingElement.id, classificationId: classification.id });
@@ -1247,8 +634,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           return {
             table,
             classification,
-            physicalModel,
-            spatialCategory,
+            elementsModel,
+            category,
             parentOfSearchTargetElement,
             searchTargetChildElement,
             childElement,
@@ -1267,19 +654,69 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           };
         }),
       );
+    }
 
-      const { imodelConnection, searchPaths, ...keys } = buildIModelResult;
+    beforeAll(async () => {
+      createIModelResult = await createIModel();
+      accessAndCache = createAccessAndCache({ imodelConnection: createIModelResult.imodelConnection, hierarchyConfig: { rootClassificationSystemCode } });
+    });
+
+    afterAll(async () => {
+      await createIModelResult.imodelConnection.close();
+    });
+
+    async function createFilteredVisibilityTestData({
+      imodelConnection,
+      searchPaths,
+      visibleByDefault,
+      imodelAccess,
+      idsCache,
+    }: {
+      imodelConnection: IModelConnection;
+      imodelAccess: IModelAccess;
+      idsCache: ClassificationsTreeIdsCache;
+      searchPaths: HierarchySearchTree[];
+      visibleByDefault?: boolean;
+    }) {
+      const viewport = createTreeWidgetTestingViewport({
+        iModel: imodelConnection,
+        viewType: "3d",
+        visibleByDefault,
+      });
+      const visibilityHandlerWithSearchPaths = createClassificationsTreeVisibilityHandler({ idsCache, searchPaths, imodelAccess, viewport });
+      const defaultVisibilityHandler = createClassificationsTreeVisibilityHandler({ idsCache, imodelAccess, viewport });
+      const defaultProvider = createProvider({ idsCache, imodelAccess });
+      const providerWithSearchPaths = createProvider({ idsCache, imodelAccess, searchPaths });
+      return {
+        defaultVisibilityHandler,
+        visibilityHandlerWithSearchPaths,
+        defaultProvider,
+        providerWithSearchPaths,
+        viewport,
+        [Symbol.dispose]() {
+          defaultVisibilityHandler[Symbol.dispose]();
+          visibilityHandlerWithSearchPaths[Symbol.dispose]();
+          defaultProvider[Symbol.dispose]();
+          providerWithSearchPaths[Symbol.dispose]();
+        },
+      };
+    }
+
+    it("showing parent geometric element of search target changes visibility for nodes in search paths", async () => {
+      const { imodelConnection, searchPaths, ...keys } = createIModelResult;
       using visibilityTestData = await createFilteredVisibilityTestData({
         imodelConnection,
         searchPaths,
+        imodelAccess: accessAndCache.imodelAccess,
+        idsCache: accessAndCache.idsCache,
       });
       const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
 
       await visibilityHandlerWithSearchPaths.changeVisibility(
         createPhysicalElementHierarchyNode({
           id: keys.parentOfSearchTargetElement.id,
-          categoryId: keys.spatialCategory.id,
-          modelId: keys.physicalModel.id,
+          categoryId: keys.category.id,
+          modelId: keys.elementsModel.id,
           parentKeys: [keys.table, keys.classification],
           search: {
             isSearchTarget: false,
@@ -1314,81 +751,20 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
 
     it("showing search target geometric element changes visibility for nodes in search paths", async () => {
-      await using buildIModelResult = await buildIModel(async (imodel) =>
-        withEditTxn(imodel, async (txn) => {
-          await importClassificationSchema(imodel);
-
-          const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
-          const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable" });
-          const classification = insertClassification({ txn, modelId: table.id, codeValue: "Classification" });
-
-          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "physical model" });
-          const spatialCategory = insertSpatialCategory({ txn, codeValue: "spatial category" });
-          const parentOfSearchTargetElement = insertPhysicalElement({
-            txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory.id,
-            codeValue: "3d parent of search target",
-          });
-          const searchTargetChildElement = insertPhysicalElement({
-            txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory.id,
-            codeValue: "3d search target child",
-            parentId: parentOfSearchTargetElement.id,
-          });
-          const childElement = insertPhysicalElement({
-            txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory.id,
-            codeValue: "3d child",
-            parentId: parentOfSearchTargetElement.id,
-          });
-          const siblingElement = insertPhysicalElement({
-            txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory.id,
-            codeValue: "3d sibling",
-          });
-          insertElementHasClassificationsRelationship({ txn, elementId: parentOfSearchTargetElement.id, classificationId: classification.id });
-          insertElementHasClassificationsRelationship({ txn, elementId: siblingElement.id, classificationId: classification.id });
-
-          return {
-            table,
-            classification,
-            physicalModel,
-            spatialCategory,
-            parentOfSearchTargetElement,
-            searchTargetChildElement,
-            childElement,
-            siblingElement,
-            searchPaths: [
-              {
-                identifier: table,
-                children: [
-                  {
-                    identifier: classification,
-                    children: [{ identifier: parentOfSearchTargetElement, children: [{ identifier: searchTargetChildElement }] }],
-                  },
-                ],
-              },
-            ],
-          };
-        }),
-      );
-
-      const { imodelConnection, searchPaths, ...keys } = buildIModelResult;
+      const { imodelConnection, searchPaths, ...keys } = createIModelResult;
       using visibilityTestData = await createFilteredVisibilityTestData({
         imodelConnection,
         searchPaths,
+        imodelAccess: accessAndCache.imodelAccess,
+        idsCache: accessAndCache.idsCache,
       });
       const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
 
       await visibilityHandlerWithSearchPaths.changeVisibility(
         createPhysicalElementHierarchyNode({
           id: keys.searchTargetChildElement.id,
-          categoryId: keys.spatialCategory.id,
-          modelId: keys.physicalModel.id,
+          categoryId: keys.category.id,
+          modelId: keys.elementsModel.id,
           parentKeys: [keys.table, keys.classification, keys.parentOfSearchTargetElement],
           search: { isSearchTarget: true },
         }),
@@ -1426,89 +802,17 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
 
     it("showing classification of search target element changes visibility for nodes in search paths", async () => {
-      await using buildIModelResult = await buildIModel(async (imodel) =>
-        withEditTxn(imodel, async (txn) => {
-          await importClassificationSchema(imodel);
-
-          const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
-          const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable" });
-          const classification1 = insertClassification({ txn, modelId: table.id, codeValue: "Classification1" });
-          const classification2 = insertClassification({ txn, modelId: table.id, codeValue: "Classification2" });
-          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "physical model" });
-          const spatialCategory1 = insertSpatialCategory({ txn, codeValue: "spatial category1" });
-          const spatialCategory2 = insertSpatialCategory({ txn, codeValue: "spatial category2" });
-          const parentOfSearchTargetElement = insertPhysicalElement({
-            txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory1.id,
-            codeValue: "3d parent of search target",
-          });
-          const searchTargetChildElement = insertPhysicalElement({
-            txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory1.id,
-            codeValue: "3d search target",
-            parentId: parentOfSearchTargetElement.id,
-          });
-          const childElement = insertPhysicalElement({
-            txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory1.id,
-            codeValue: "3d child",
-            parentId: parentOfSearchTargetElement.id,
-          });
-          const siblingElement = insertPhysicalElement({
-            txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory1.id,
-            codeValue: "3d sibling",
-          });
-          const elementFromOtherClassification = insertPhysicalElement({
-            txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory2.id,
-            codeValue: "3d other classification",
-          });
-          insertElementHasClassificationsRelationship({ txn, elementId: parentOfSearchTargetElement.id, classificationId: classification1.id });
-          insertElementHasClassificationsRelationship({ txn, elementId: siblingElement.id, classificationId: classification1.id });
-          insertElementHasClassificationsRelationship({ txn, elementId: elementFromOtherClassification.id, classificationId: classification2.id });
-
-          return {
-            table,
-            classification1,
-            classification2,
-            physicalModel,
-            spatialCategory1,
-            spatialCategory2,
-            parentOfSearchTargetElement,
-            searchTargetChildElement,
-            childElement,
-            siblingElement,
-            elementFromOtherClassification,
-            searchPaths: [
-              {
-                identifier: table,
-                children: [
-                  {
-                    identifier: classification1,
-                    children: [{ identifier: parentOfSearchTargetElement, children: [{ identifier: searchTargetChildElement }] }],
-                  },
-                ],
-              },
-            ],
-          };
-        }),
-      );
-
-      const { imodelConnection, searchPaths, ...keys } = buildIModelResult;
+      const { imodelConnection, searchPaths, ...keys } = createIModelResult;
       using visibilityTestData = await createFilteredVisibilityTestData({
         imodelConnection,
         searchPaths,
+        idsCache: accessAndCache.idsCache,
+        imodelAccess: accessAndCache.imodelAccess,
       });
       const { visibilityHandlerWithSearchPaths, defaultVisibilityHandler, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
       await visibilityHandlerWithSearchPaths.changeVisibility(
         createClassificationHierarchyNode({
-          id: keys.classification1.id,
+          id: keys.classification.id,
           search: {
             isSearchTarget: false,
             childrenTargetPaths: [{ identifier: keys.parentOfSearchTargetElement, children: [{ identifier: keys.searchTargetChildElement }] }],
@@ -1532,98 +836,23 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         // prettier-ignore
         expectations: {
           [keys.table.id]: "partial",
-            [keys.classification1.id]: "partial",
+            [keys.classification.id]: "partial",
               [keys.siblingElement.id]: "hidden",
 
               [keys.parentOfSearchTargetElement.id]: "partial",
                 [keys.searchTargetChildElement.id]: "visible",
                 [keys.childElement.id]: "hidden",
-
-            [keys.classification2.id]: "hidden",
-              [keys.elementFromOtherClassification.id]: "hidden",
         },
       });
     });
 
     it("showing classification table of search target element changes visibility for nodes in search paths", async () => {
-      await using buildIModelResult = await buildIModel(async (imodel) =>
-        withEditTxn(imodel, async (txn) => {
-          await importClassificationSchema(imodel);
-
-          const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
-          const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable" });
-          const classification1 = insertClassification({ txn, modelId: table.id, codeValue: "Classification1" });
-          const classification2 = insertClassification({ txn, modelId: table.id, codeValue: "Classification2" });
-          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "physical model" });
-          const spatialCategory1 = insertSpatialCategory({ txn, codeValue: "spatial category1" });
-          const spatialCategory2 = insertSpatialCategory({ txn, codeValue: "spatial category2" });
-          const parentOfSearchTargetElement = insertPhysicalElement({
-            txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory1.id,
-            codeValue: "3d parent of search target",
-          });
-          const searchTargetChildElement = insertPhysicalElement({
-            txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory1.id,
-            codeValue: "3d search target",
-            parentId: parentOfSearchTargetElement.id,
-          });
-          const childElement = insertPhysicalElement({
-            txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory1.id,
-            codeValue: "3d child",
-            parentId: parentOfSearchTargetElement.id,
-          });
-          const siblingElement = insertPhysicalElement({
-            txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory1.id,
-            codeValue: "3d sibling",
-          });
-          const elementFromOtherClassification = insertPhysicalElement({
-            txn,
-            modelId: physicalModel.id,
-            categoryId: spatialCategory2.id,
-            codeValue: "3d other classification",
-          });
-          insertElementHasClassificationsRelationship({ txn, elementId: parentOfSearchTargetElement.id, classificationId: classification1.id });
-          insertElementHasClassificationsRelationship({ txn, elementId: siblingElement.id, classificationId: classification1.id });
-          insertElementHasClassificationsRelationship({ txn, elementId: elementFromOtherClassification.id, classificationId: classification2.id });
-
-          return {
-            table,
-            classification1,
-            classification2,
-            physicalModel,
-            spatialCategory1,
-            spatialCategory2,
-            parentOfSearchTargetElement,
-            searchTargetChildElement,
-            childElement,
-            siblingElement,
-            elementFromOtherClassification,
-            searchPaths: [
-              {
-                identifier: table,
-                children: [
-                  {
-                    identifier: classification1,
-                    children: [{ identifier: parentOfSearchTargetElement, children: [{ identifier: searchTargetChildElement }] }],
-                  },
-                ],
-              },
-            ],
-          };
-        }),
-      );
-
-      const { imodelConnection, searchPaths, ...keys } = buildIModelResult;
+      const { imodelConnection, searchPaths, ...keys } = createIModelResult;
       using visibilityTestData = await createFilteredVisibilityTestData({
         imodelConnection,
         searchPaths,
+        idsCache: accessAndCache.idsCache,
+        imodelAccess: accessAndCache.imodelAccess,
       });
       const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
       await visibilityHandlerWithSearchPaths.changeVisibility(
@@ -1634,7 +863,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
             isSearchTarget: false,
             childrenTargetPaths: [
               {
-                identifier: keys.classification1,
+                identifier: keys.classification,
                 children: [{ identifier: keys.parentOfSearchTargetElement, children: [{ identifier: keys.searchTargetChildElement }] }],
               },
             ],
@@ -1657,43 +886,26 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         // prettier-ignore
         expectations: {
           [keys.table.id]: "partial",
-            [keys.classification1.id]: "partial",
+            [keys.classification.id]: "partial",
               [keys.siblingElement.id]: "hidden",
 
               [keys.parentOfSearchTargetElement.id]: "partial",
                 [keys.searchTargetChildElement.id]: "visible",
                 [keys.childElement.id]: "hidden",
-
-            [keys.classification2.id]: "hidden",
-              [keys.elementFromOtherClassification.id]: "hidden",
         },
       });
     });
   });
 
   it("element of an excluded class still participates in visibility", async () => {
-    await using buildIModelResult = await buildIModel(async (imodel) =>
-      withEditTxn(imodel, async (txn) => {
-        await importClassificationSchema(imodel);
-
-        const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
-        const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "TestClassificationTable" });
-        const classification = insertClassification({ txn, modelId: table.id, codeValue: "TestClassification" });
-
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
-        const spatialCategory = insertSpatialCategory({ txn, codeValue: "Test spatial category" });
-        const excludedElement = insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: spatialCategory.id });
-        insertElementHasClassificationsRelationship({ txn, elementId: excludedElement.id, classificationId: classification.id });
-        return { classificationTable: table, excludedElement };
-      }),
-    );
-
-    const { imodelConnection, ...keys } = buildIModelResult;
+    const { imodelConnection, idsCache, imodelAccess, keys } = datasets.simple;
     using visibilityTestData = await createVisibilityTestData({
       imodelConnection,
       hierarchyConfig: {
         elements: { excludedClasses: [CLASS_NAME_GeometricElement3d] },
       },
+      idsCache,
+      imodelAccess,
     });
     const { handler, viewport, provider } = visibilityTestData;
 
@@ -1704,7 +916,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       expectations: "all-hidden",
     });
 
-    const classificationTableNode = createClassificationTableHierarchyNode({ id: keys.classificationTable.id });
+    const classificationTableNode = createClassificationTableHierarchyNode({ id: keys.table.id });
     await handler.changeVisibility(classificationTableNode, true);
     await validateClassificationsTreeHierarchyVisibility({
       provider,
@@ -1713,66 +925,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       expectations: "all-visible",
     });
 
-    viewport.setNeverDrawn({ elementIds: new Set([keys.excludedElement.id]) });
-
-    await validateClassificationsTreeHierarchyVisibility({
-      provider,
-      handler,
-      viewport,
-      expectations: "all-hidden",
-    });
-  });
-
-  it("child element of an excluded class still participates in visibility", async () => {
-    await using buildIModelResult = await buildIModel(async (imodel) =>
-      withEditTxn(imodel, async (txn) => {
-        await importClassificationSchema(imodel);
-
-        const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
-        const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "TestClassificationTable" });
-        const classification = insertClassification({ txn, modelId: table.id, codeValue: "TestClassification" });
-
-        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Test physical model" });
-        const spatialCategory = insertSpatialCategory({ txn, codeValue: "Test spatial category" });
-        const parentElement = insertPhysicalElement({ txn, modelId: physicalModel.id, categoryId: spatialCategory.id });
-        const excludedChildElement = insertPhysicalElement({
-          txn,
-          parentId: parentElement.id,
-          modelId: physicalModel.id,
-          categoryId: spatialCategory.id,
-          classFullName: "Generic.SpatialLocation",
-        });
-        insertElementHasClassificationsRelationship({ txn, elementId: parentElement.id, classificationId: classification.id });
-        return { classificationTable: table, parentElement, excludedChildElement, classification };
-      }),
-    );
-
-    const { imodelConnection, ...keys } = buildIModelResult;
-    using visibilityTestData = await createVisibilityTestData({
-      imodelConnection,
-      hierarchyConfig: {
-        elements: { excludedClasses: ["Generic.SpatialLocation"] },
-      },
-    });
-    const { handler, viewport, provider } = visibilityTestData;
-
-    await validateClassificationsTreeHierarchyVisibility({
-      provider,
-      handler,
-      viewport,
-      expectations: "all-hidden",
-    });
-
-    const classificationTableNode = createClassificationTableHierarchyNode({ id: keys.classificationTable.id });
-    await handler.changeVisibility(classificationTableNode, true);
-    await validateClassificationsTreeHierarchyVisibility({
-      provider,
-      handler,
-      viewport,
-      expectations: "all-visible",
-    });
-
-    viewport.setNeverDrawn({ elementIds: new Set([keys.excludedChildElement.id]) });
+    viewport.setNeverDrawn({ elementIds: new Set([keys.parentElement.id]) });
 
     await validateClassificationsTreeHierarchyVisibility({
       provider,
@@ -1780,9 +933,51 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       viewport,
       // prettier-ignore
       expectations: {
-        [keys.classificationTable.id]: "partial",
+        [keys.table.id]: "partial",
           [keys.classification.id]: "partial",
-            [keys.parentElement.id]: "partial",
+      },
+    });
+  });
+
+  it("child element of an excluded class still participates in visibility", async () => {
+    const { imodelConnection, idsCache, imodelAccess, keys } = datasets.simple;
+
+    using visibilityTestData = await createVisibilityTestData({
+      imodelConnection,
+      hierarchyConfig: {
+        elements: { excludedClasses: [CLASS_NAME_GeometricElement3d] },
+      },
+      idsCache,
+      imodelAccess,
+    });
+    const { handler, viewport, provider } = visibilityTestData;
+
+    await validateClassificationsTreeHierarchyVisibility({
+      provider,
+      handler,
+      viewport,
+      expectations: "all-hidden",
+    });
+
+    const classificationTableNode = createClassificationTableHierarchyNode({ id: keys.table.id });
+    await handler.changeVisibility(classificationTableNode, true);
+    await validateClassificationsTreeHierarchyVisibility({
+      provider,
+      handler,
+      viewport,
+      expectations: "all-visible",
+    });
+
+    viewport.setNeverDrawn({ elementIds: new Set([keys.childElement.id]) });
+
+    await validateClassificationsTreeHierarchyVisibility({
+      provider,
+      handler,
+      viewport,
+      // prettier-ignore
+      expectations: {
+        [keys.table.id]: "partial",
+          [keys.classification.id]: "partial",
       },
     });
   });
@@ -1793,4 +988,164 @@ async function validateClassificationsTreeHierarchyVisibility(props: Omit<Props<
     ...props,
     validateNodeVisibility,
   });
+}
+
+async function createDatasets(rootClassificationSystemCode: string) {
+  const imodels: IModelConnection[] = [];
+  return {
+    [Symbol.asyncDispose]: async () => Promise.all(imodels.map(async (imodel) => imodel.close())),
+    ["simple"]: await (async () => {
+      const { imodelConnection, ...keys } = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, async (txn) => {
+          await importClassificationSchema(imodel);
+
+          const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+          const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "clTable" });
+          const classification = insertClassification({ txn, modelId: table.id, codeValue: "cl" });
+
+          const elementsModel = insertPhysicalModelWithPartition({ txn, codeValue: "m" });
+          const category = insertSpatialCategory({ txn, codeValue: "cat" });
+          const parentElement = insertPhysicalElement({
+            txn,
+            modelId: elementsModel.id,
+            categoryId: category.id,
+            codeValue: "parent el",
+          });
+          const childElement = insertPhysicalElement({
+            txn,
+            modelId: elementsModel.id,
+            categoryId: category.id,
+            parentId: parentElement.id,
+            codeValue: "child el",
+          });
+          insertElementHasClassificationsRelationship({ txn, elementId: parentElement.id, classificationId: classification.id });
+
+          return { table, classification, elementsModel, category, parentElement, childElement };
+        }),
+      );
+      imodels.push(imodelConnection);
+      return { imodelConnection, keys, ...createAccessAndCache({ imodelConnection, hierarchyConfig: { rootClassificationSystemCode } }) };
+    })(),
+    ["customRelationship"]: await (async () => {
+      const { imodelConnection, ...keys } = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, async (txn) => {
+          await importClassificationSchema(imodel);
+          await importCategorySymbolizesClassificationSchema(imodel);
+
+          const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+          const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "clTable" });
+          const classification = insertClassification({ txn, modelId: table.id, codeValue: "cl" });
+
+          const elementsModel = insertPhysicalModelWithPartition({ txn, codeValue: "m" });
+          const category = insertSpatialCategory({ txn, codeValue: "cat" });
+          const elementInHierarchy = insertPhysicalElement({
+            txn,
+            modelId: elementsModel.id,
+            categoryId: category.id,
+            codeValue: "parent el",
+          });
+          insertElementHasClassificationsRelationship({ txn, elementId: elementInHierarchy.id, classificationId: classification.id });
+          insertCategorySymbolizesClassificationRelationship({ txn, categoryId: category.id, classificationId: classification.id });
+
+          const categoryFromCustomRelationship = insertSpatialCategory({ txn, codeValue: "cat custom" });
+          const elementNotInHierarchy = insertPhysicalElement({ txn, modelId: elementsModel.id, categoryId: categoryFromCustomRelationship.id });
+          insertCategorySymbolizesClassificationRelationship({ txn, categoryId: categoryFromCustomRelationship.id, classificationId: classification.id });
+          return { table, classification, category, elementInHierarchy, categoryFromCustomRelationship, elementNotInHierarchy, elementsModel };
+        }),
+      );
+      const visibilityHandlerConfig: ClassificationsTreeVisibilityHandlerConfiguration = {
+        classificationToCategoriesRelationshipSpecification: {
+          fullClassName: `${CATEGORY_SYMBOLIZES_CLASSIFICATION_RELATIONSHIP_SCHEMA}.CategorySymbolizesClassification`,
+          source: "category",
+        },
+      };
+      imodels.push(imodelConnection);
+      return {
+        imodelConnection,
+        keys,
+        ...createAccessAndCache({ imodelConnection, hierarchyConfig: { rootClassificationSystemCode }, visibilityHandlerConfig }),
+      };
+    })(),
+    ["multipleClassifications"]: await (async () => {
+      const { imodelConnection, ...keys } = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, async (txn) => {
+          await importClassificationSchema(imodel);
+
+          const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+          const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "clTable" });
+          const classification1 = insertClassification({ txn, modelId: table.id, codeValue: "cl" });
+          const classification2 = insertClassification({ txn, modelId: table.id, codeValue: "cl2" });
+
+          const elementsModel = insertPhysicalModelWithPartition({ txn, codeValue: "m" });
+          const category1 = insertSpatialCategory({ txn, codeValue: "cat" });
+          const category2 = insertSpatialCategory({ txn, codeValue: "cat2" });
+          const parentElement1 = insertPhysicalElement({
+            txn,
+            modelId: elementsModel.id,
+            categoryId: category1.id,
+            codeValue: "parent el",
+          });
+          const parentElement2 = insertPhysicalElement({
+            txn,
+            modelId: elementsModel.id,
+            categoryId: category2.id,
+            codeValue: "parent el2",
+          });
+          const childElement1 = insertPhysicalElement({
+            txn,
+            modelId: elementsModel.id,
+            categoryId: category1.id,
+            parentId: parentElement1.id,
+            codeValue: "child el",
+          });
+          const childElement2 = insertPhysicalElement({
+            txn,
+            modelId: elementsModel.id,
+            categoryId: category2.id,
+            parentId: parentElement2.id,
+            codeValue: "child el2",
+          });
+          insertElementHasClassificationsRelationship({ txn, elementId: parentElement1.id, classificationId: classification1.id });
+          insertElementHasClassificationsRelationship({ txn, elementId: parentElement2.id, classificationId: classification2.id });
+
+          return { table, classification1, classification2, elementsModel, category1, category2, parentElement1, childElement1, parentElement2, childElement2 };
+        }),
+      );
+      imodels.push(imodelConnection);
+      return { imodelConnection, keys, ...createAccessAndCache({ imodelConnection, hierarchyConfig: { rootClassificationSystemCode } }) };
+    })(),
+    ["childrenOfDifferentCategories"]: await (async () => {
+      const { imodelConnection, ...keys } = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, async (txn) => {
+          await importClassificationSchema(imodel);
+
+          const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+          const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "clTable" });
+          const classification = insertClassification({ txn, modelId: table.id, codeValue: "cl" });
+
+          const elementsModel = insertPhysicalModelWithPartition({ txn, codeValue: "m" });
+          const category = insertSpatialCategory({ txn, codeValue: "cat" });
+          const category2 = insertSpatialCategory({ txn, codeValue: "cat2" });
+          const parentElement = insertPhysicalElement({
+            txn,
+            modelId: elementsModel.id,
+            categoryId: category.id,
+            codeValue: "parent el",
+          });
+          const childElement = insertPhysicalElement({
+            txn,
+            modelId: elementsModel.id,
+            categoryId: category2.id,
+            parentId: parentElement.id,
+            codeValue: "child el",
+          });
+          insertElementHasClassificationsRelationship({ txn, elementId: parentElement.id, classificationId: classification.id });
+
+          return { table, classification, elementsModel, category, parentElement, childElement, category2 };
+        }),
+      );
+      imodels.push(imodelConnection);
+      return { imodelConnection, keys, ...createAccessAndCache({ imodelConnection, hierarchyConfig: { rootClassificationSystemCode } }) };
+    })(),
+  };
 }
