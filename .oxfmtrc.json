@@ -1,0 +1,76 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 160,
+  "trailingComma": "all",
+  "tabWidth": 2,
+  "singleQuote": false,
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    "change",
+    "lib",
+    "dist",
+    ".vscode",
+    ".pipelines",
+    ".github",
+    "archive",
+    "packages/geo-tools",
+    "packages/map-layers",
+    "packages/measure-tools",
+    "packages/quantity-formatting",
+    "packages/tree-widget/README.md",
+    "packages/property-grid/README.md",
+    "CHANGELOG.md",
+    "CHANGELOG.json",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml",
+    "packages/**/api"
+  ],
+  "overrides": [
+    {
+      "files": ["**/*"],
+      "excludeFiles": ["**/learning-snippets/**/*.ts*", "**/test/**/setup.ts", "**/README.md"],
+      "options": {
+        "sortImports": {
+          "newlinesBetween": false,
+          "sortSideEffects": true,
+          "groups": [
+            "side-effect-imports",
+            { "newlinesBetween": true },
+            "style-imports",
+            { "newlinesBetween": true },
+            ["value-builtin", "value-external"],
+            "scoped",
+            "value-internal",
+            ["value-parent", "value-sibling", "value-index"],
+            { "newlinesBetween": true },
+            ["type-builtin", "type-external"],
+            "type-scoped",
+            "type-import",
+            "unknown"
+          ],
+          "customGroups": [
+            {
+              "groupName": "side-effect-imports",
+              "modifiers": ["side_effect"],
+              "elementNamePattern": ["**/*.js", "@*/*"]
+            },
+            {
+              "groupName": "style-imports",
+              "elementNamePattern": ["**/*.css", "**/*.scss"]
+            },
+            {
+              "groupName": "scoped",
+              "modifiers": ["value"],
+              "elementNamePattern": ["@*/**"]
+            },
+            {
+              "groupName": "type-scoped",
+              "modifiers": ["type"],
+              "elementNamePattern": ["@*/**"]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

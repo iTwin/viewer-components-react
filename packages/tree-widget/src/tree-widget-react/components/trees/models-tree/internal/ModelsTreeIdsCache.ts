@@ -221,25 +221,22 @@ export class ModelsTreeIdsCache implements Disposable {
       firstValueFrom(
         this.queryChildren({ elementIds: batchedElementsToQuery }).pipe(
           // Want to have void at the end instead of void[], so using reduce
-          reduce(
-            (acc, { parentId, id }) => {
-              let entry = this.#childrenMap.get(parentId);
-              if (!entry) {
-                entry = { children: [] };
-                this.#childrenMap.set(parentId, entry);
-              }
-              if (!entry.children) {
-                entry.children = [];
-              }
-              // Add child to parent's entry and add child to children map
-              entry.children.push(id);
-              if (!this.#childrenMap.has(id)) {
-                this.#childrenMap.set(id, { children: undefined });
-              }
-              return acc;
-            },
-            (() => {})(),
-          ),
+          reduce((acc, { parentId, id }) => {
+            let entry = this.#childrenMap.get(parentId);
+            if (!entry) {
+              entry = { children: [] };
+              this.#childrenMap.set(parentId, entry);
+            }
+            if (!entry.children) {
+              entry.children = [];
+            }
+            // Add child to parent's entry and add child to children map
+            entry.children.push(id);
+            if (!this.#childrenMap.has(id)) {
+              this.#childrenMap.set(id, { children: undefined });
+            }
+            return acc;
+          }, (() => {})()),
           tap({ complete: () => batchedElementsToQuery.forEach((elementId) => this.#childrenLoadingMap.delete(elementId)) }),
           defaultIfEmpty((() => {})()),
         ),

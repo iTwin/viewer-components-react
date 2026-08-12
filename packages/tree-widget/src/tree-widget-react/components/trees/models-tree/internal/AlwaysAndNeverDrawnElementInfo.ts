@@ -223,22 +223,19 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
       : EMPTY;
     return elementInfo.pipe(
       releaseMainThreadOnItemsCount(500),
-      reduce(
-        (acc, { categoryId, rootCategoryId, modelId, elementsPath }) => {
-          const elementIdInList = elementsPath[elementsPath.length - 1];
-          const additionalPropsGetter = (id: Id64String, additionalProps?: MapEntry): MapEntry => {
-            if (id === elementIdInList) {
-              // Last element in elementsPath is in always/never drawn set. We want to mark, that it is in the set, and save it's categoryId.
-              return { isInAlwaysOrNeverDrawnSet: true, categoryId };
-            }
-            // Existing entries can keep their value, if it's a new entry it's not in the list.
-            return additionalProps ?? { isInAlwaysOrNeverDrawnSet: false };
-          };
-          updateChildrenTree({ tree: acc, idsToAdd: [modelId, rootCategoryId, ...elementsPath], additionalPropsGetter });
-          return acc;
-        },
-        ((): CachedNodesMap => new Map())(),
-      ),
+      reduce((acc, { categoryId, rootCategoryId, modelId, elementsPath }) => {
+        const elementIdInList = elementsPath[elementsPath.length - 1];
+        const additionalPropsGetter = (id: Id64String, additionalProps?: MapEntry): MapEntry => {
+          if (id === elementIdInList) {
+            // Last element in elementsPath is in always/never drawn set. We want to mark, that it is in the set, and save it's categoryId.
+            return { isInAlwaysOrNeverDrawnSet: true, categoryId };
+          }
+          // Existing entries can keep their value, if it's a new entry it's not in the list.
+          return additionalProps ?? { isInAlwaysOrNeverDrawnSet: false };
+        };
+        updateChildrenTree({ tree: acc, idsToAdd: [modelId, rootCategoryId, ...elementsPath], additionalPropsGetter });
+        return acc;
+      }, ((): CachedNodesMap => new Map())()),
     );
   }
 
