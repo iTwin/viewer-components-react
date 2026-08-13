@@ -3,9 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { CompressedId64Set, Id64 } from "@itwin/core-bentley";
-import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { BaseIdsCache } from "../../../../tree-widget-react/shared/internal/caches/BaseIdsCache.js";
@@ -14,7 +13,6 @@ import { mergeWithDefaults } from "../../../../tree-widget-react/shared/internal
 import { ModelsTreeIdsCache } from "../../../../tree-widget-react/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration } from "../../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
-import { TestUtils } from "../../../TestUtils.js";
 import { createFakeViewport } from "../../Common.js";
 import {
   createCategoryHierarchyNode,
@@ -56,17 +54,6 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
     return idsCache;
   }
-
-  beforeAll(async () => {
-    await NoRenderApp.startup();
-    await TestUtils.initialize();
-  });
-
-  afterAll(async () => {
-    TestUtils.terminate();
-    await IModelApp.shutdown();
-  });
-
   describe("#unit", () => {
     function createFakeIModelAccess(): ECClassHierarchyInspector {
       return {
