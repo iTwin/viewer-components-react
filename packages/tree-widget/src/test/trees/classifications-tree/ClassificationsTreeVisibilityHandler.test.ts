@@ -200,7 +200,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         provider,
         handler,
         viewport,
-        // prettier-ignore
+        // oxfmt-ignore
         expectations: {
           [keys.table.id]: "partial",
             [keys.classification.id]: "partial",
@@ -294,7 +294,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          // prettier-ignore
+          // oxfmt-ignore
           expectations: {
             [keys.table.id]: "partial",
               [keys.classification1.id]: "visible",
@@ -328,7 +328,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          // prettier-ignore
+          // oxfmt-ignore
           expectations: {
             [keys.table.id]: "partial",
               [keys.classification1.id]: "visible",
@@ -367,7 +367,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          // prettier-ignore
+          // oxfmt-ignore
           expectations: {
             [keys.table.id]: "partial",
               [keys.classification.id]: "partial",
@@ -399,7 +399,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          // prettier-ignore
+          // oxfmt-ignore
           expectations: {
             [keys.table.id]: "visible",
               [keys.classification.id]: "visible",
@@ -468,7 +468,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          // prettier-ignore
+          // oxfmt-ignore
           expectations: {
             [keys.table.id]: "partial",
               [keys.classification1.id]: "hidden",
@@ -503,7 +503,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          // prettier-ignore
+          // oxfmt-ignore
           expectations: {
             [keys.table.id]: "partial",
               [keys.classification1.id]: "hidden",
@@ -543,7 +543,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          // prettier-ignore
+          // oxfmt-ignore
           expectations: {
             [keys.table.id]: "partial",
               [keys.classification.id]: "partial",
@@ -576,7 +576,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          // prettier-ignore
+          // oxfmt-ignore
           expectations: {
             [keys.table.id]: "hidden",
               [keys.classification.id]: "hidden",
@@ -737,7 +737,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         provider: defaultProvider,
         handler: defaultVisibilityHandler,
         viewport,
-        // prettier-ignore
+        // oxfmt-ignore
         expectations: {
           [keys.table.id]: "partial",
             [keys.classification.id]: "partial",
@@ -775,7 +775,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         provider: providerWithSearchPaths,
         handler: visibilityHandlerWithSearchPaths,
         viewport,
-        // prettier-ignore
+        // oxfmt-ignore
         expectations: {
           [keys.table.id]: "partial",
             [keys.classification.id]: "partial",
@@ -788,7 +788,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         provider: defaultProvider,
         handler: defaultVisibilityHandler,
         viewport,
-        // prettier-ignore
+        // oxfmt-ignore
         expectations: {
           [keys.table.id]: "partial",
             [keys.classification.id]: "partial",
@@ -833,7 +833,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         provider: defaultProvider,
         handler: defaultVisibilityHandler,
         viewport,
-        // prettier-ignore
+        // oxfmt-ignore
         expectations: {
           [keys.table.id]: "partial",
             [keys.classification.id]: "partial",
@@ -883,7 +883,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         provider: defaultProvider,
         handler: defaultVisibilityHandler,
         viewport,
-        // prettier-ignore
+        // oxfmt-ignore
         expectations: {
           [keys.table.id]: "partial",
             [keys.classification.id]: "partial",
@@ -931,7 +931,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       provider,
       handler,
       viewport,
-      // prettier-ignore
+      // oxfmt-ignore
       expectations: {
         [keys.table.id]: "partial",
           [keys.classification.id]: "partial",
@@ -974,7 +974,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       provider,
       handler,
       viewport,
-      // prettier-ignore
+      // oxfmt-ignore
       expectations: {
         [keys.table.id]: "partial",
           [keys.classification.id]: "partial",
