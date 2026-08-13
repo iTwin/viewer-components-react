@@ -186,7 +186,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 categoryId: ids.categoryId,
                 elements: [ids.modeledElementId],
               }),
-            // prettier-ignore
+            // oxfmt-ignore
             expectations: (ids: IModelWithSubModelIds) => ({
               [ids.modelId]: "partial",
                 [`${ids.modelId}-${ids.categoryId}`]: "partial",
@@ -205,7 +205,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 elementId: ids.modeledElementId,
                 hasChildren: true,
               }),
-            // prettier-ignore
+            // oxfmt-ignore
             expectations: (ids: IModelWithSubModelIds) => ({
               [ids.modelId]: "partial",
                 [`${ids.modelId}-${ids.categoryId}`]: "partial",
@@ -222,7 +222,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 modelId: ids.modeledElementId,
                 hasChildren: true,
               }),
-            // prettier-ignore
+            // oxfmt-ignore
             expectations: (ids: IModelWithSubModelIds) => ({
               [ids.modelId]: "partial",
                 [`${ids.modelId}-${ids.categoryId}`]: "partial",
@@ -240,7 +240,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 categoryId: ids.subModelCategoryId,
                 hasChildren: true,
               }),
-            // prettier-ignore
+            // oxfmt-ignore
             expectations: (ids: IModelWithSubModelIds) => ({
               [ids.modelId]: "partial",
                 [`${ids.modelId}-${ids.categoryId}`]: "partial",
@@ -258,7 +258,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 categoryId: ids.subModelCategoryId,
                 elementId: ids.subModelElementId,
               }),
-            // prettier-ignore
+            // oxfmt-ignore
             expectations: (ids: IModelWithSubModelIds) => ({
               [ids.modelId]: "partial",
                 [`${ids.modelId}-${ids.categoryId}`]: "partial",
@@ -491,7 +491,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          // prettier-ignore
+          // oxfmt-ignore
           expectations: {
             [keys.model.id]: "partial",
               [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
@@ -520,7 +520,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          // prettier-ignore
+          // oxfmt-ignore
           expectations: {
             [keys.model.id]: "partial",
               [`${keys.model.id}-${keys.categoryA.id}`]: "partial",
@@ -549,7 +549,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          // prettier-ignore
+          // oxfmt-ignore
           expectations: {
             [keys.model.id]: "partial",
               [`${keys.model.id}-${keys.categoryA.id}`]: "partial",

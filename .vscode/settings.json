@@ -2,15 +2,15 @@
   "editor.insertSpaces": true,
   "editor.tabSize": 2,
   "editor.trimAutoWhitespace": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.defaultFormatter": "oxc.oxc-vscode",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
-    "source.fixAll.prettier": "explicit"
+    "source.format.oxc": "explicit"
   },
 
   "files.associations": {
-    ".nycrc": "json",
+    ".nycrc": "json"
   },
   "files.exclude": {
     "**/coverage": true,
@@ -23,7 +23,7 @@
   "files.trimTrailingWhitespace": true,
 
   "[markdown]": {
-    "editor.tabSize": 4,
+    "editor.tabSize": 4
   },
   "eslint.workingDirectories": [
     {
