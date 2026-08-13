@@ -70,6 +70,8 @@
     "reports-config-widget",
     "e2e.Dockerfile.dockerignore",
     "**/*.d.ts",
-    "scripts/cspellFileNames.js"
+    "scripts/cspellFileNames.js",
+    ".oxfmtrc.json",
+    "cspell.json"
   ]
 }
