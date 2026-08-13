@@ -195,7 +195,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             provider: providerWithSearchPaths,
             handler: visibilityHandlerWithoutSearchPaths,
             viewport,
-            // prettier-ignore
+            // oxfmt-ignore
             expectations: {
                 [keys.category.id]: "disabled",
                   [keys.subCategory.id]: "visible",
@@ -287,7 +287,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "visible",
                   [defaultSubCategory.id]: "visible",
@@ -298,7 +298,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [defaultSubCategory.id]: "visible",
@@ -328,7 +328,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "visible",
                   [defaultSubCategory.id]: "visible",
@@ -339,7 +339,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [defaultSubCategory.id]: "visible",
@@ -454,7 +454,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "visible",
                   [parentElement1.id]: "visible",
@@ -469,7 +469,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [element.id]: "hidden",
@@ -519,7 +519,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [parentElement1.id]: "visible",
@@ -534,7 +534,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [element.id]: "hidden",
@@ -581,7 +581,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [parentElement1.id]: "partial",
@@ -596,7 +596,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [element.id]: "hidden",
@@ -643,7 +643,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [parentElement1.id]: "hidden",
@@ -658,7 +658,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [element.id]: "hidden",
@@ -705,7 +705,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [parentElement1.id]: "hidden",
@@ -720,7 +720,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [element.id]: "hidden",
@@ -831,7 +831,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "visible",
                   [parentElement.id]: "visible",
@@ -845,7 +845,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [element.id]: "hidden",
@@ -876,7 +876,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "visible",
                   [parentElement.id]: "visible",
@@ -890,7 +890,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [element.id]: "hidden",
@@ -926,7 +926,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [parentElement.id]: "partial",
@@ -940,7 +940,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [element.id]: "hidden",
@@ -978,7 +978,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [parentElement.id]: "partial",
@@ -992,7 +992,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [element.id]: "hidden",
@@ -1107,7 +1107,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [categoryA.id]: "partial",
                   [parentElement.id]: "partial",
@@ -1120,7 +1120,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [categoryA.id]: "partial",
                   [parentElement.id]: "partial",
@@ -1153,7 +1153,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [categoryA.id]: "partial",
                   [parentElement.id]: "partial",
@@ -1166,7 +1166,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [categoryA.id]: "partial",
                   [parentElement.id]: "partial",
@@ -1202,7 +1202,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [categoryA.id]: "visible",
                   [parentElement.id]: "visible",
@@ -1215,7 +1215,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [categoryA.id]: "partial",
                   [parentElement.id]: "partial",
@@ -1248,7 +1248,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [categoryA.id]: "visible",
                   [parentElement.id]: "visible",
@@ -1261,7 +1261,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [categoryA.id]: "partial",
                   [parentElement.id]: "partial",
@@ -1375,7 +1375,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [categoryA.id]: "partial",
                   [modeledElement.id]: "partial",
@@ -1389,7 +1389,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [categoryA.id]: "partial",
                   [modeledElement.id]: "partial",
@@ -1420,7 +1420,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [categoryA.id]: "partial",
                   [modeledElement.id]: "partial",
@@ -1434,7 +1434,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [categoryA.id]: "partial",
                   [modeledElement.id]: "partial",
@@ -1469,7 +1469,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [categoryA.id]: "visible",
                   [modeledElement.id]: "visible",
@@ -1483,7 +1483,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [categoryA.id]: "partial",
                   [modeledElement.id]: "partial",
@@ -1634,7 +1634,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "visible",
                   [modeledElement.id]: "visible",
@@ -1647,7 +1647,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [element.id]: "hidden",
@@ -1703,7 +1703,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "visible",
                   [modeledElement.id]: "visible",
@@ -1716,7 +1716,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [element.id]: "hidden",
@@ -1772,7 +1772,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [modeledElement.id]: "partial",
@@ -1785,7 +1785,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [element.id]: "hidden",
@@ -1840,7 +1840,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [modeledElement.id]: "partial",
@@ -1853,7 +1853,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [category.id]: "partial",
                   [element.id]: "hidden",
@@ -1956,7 +1956,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [definitionContainer.id]: "visible",
                   [category.id]: "visible",
@@ -1968,7 +1968,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [definitionContainer.id]: "partial",
                   [category.id]: "partial",
@@ -1999,7 +1999,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [definitionContainer.id]: "visible",
                   [category.id]: "visible",
@@ -2011,7 +2011,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [definitionContainer.id]: "partial",
                   [category.id]: "partial",
@@ -2040,7 +2040,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: providerWithSearchPaths,
               handler: visibilityHandlerWithSearchPaths,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [definitionContainer.id]: "visible",
                   [category.id]: "visible",
@@ -2052,7 +2052,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider: defaultProvider,
               handler: defaultVisibilityHandler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [definitionContainer.id]: "partial",
                   [category.id]: "partial",

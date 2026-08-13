@@ -67,7 +67,7 @@ Every change must be tested with proper unit tests. Integration tests are highly
 - `pnpm build`
 - `pnpm test`
 - `pnpm lint`
-- `pnpm prettier`
+- `pnpm format`
 - `pnpm cspell`
 
 6. Commit and push your changes, then open a pull request.

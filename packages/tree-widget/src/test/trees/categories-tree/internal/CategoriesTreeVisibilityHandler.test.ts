@@ -225,7 +225,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider,
               handler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [keys.definitionContainer.id]: "visible",
                   [keys.category.id]: "visible",
@@ -255,7 +255,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider,
               handler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [keys.parentDefinitionContainer.id]: "partial",
                   [keys.category.id]: "hidden",
@@ -288,7 +288,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider,
               handler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [keys.categoryA.id]: "hidden",
                   [keys.elementA1.id]: "hidden",
@@ -304,7 +304,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider,
               handler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [keys.categoryA.id]: "visible",
                   [keys.elementA1.id]: "visible",
@@ -356,7 +356,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider,
               handler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [keys.definitionContainer.id]: "visible",
                   [keys.category.id]: "visible",
@@ -386,7 +386,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider,
               handler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [keys.parentDefinitionContainer.id]: "partial",
                   [keys.category.id]: "hidden",
@@ -413,7 +413,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider,
               handler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [keys.parentDefinitionContainer.id]: "partial",
                   [keys.category.id]: "visible",
@@ -448,7 +448,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider,
               handler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [keys.definitionContainer.id]: "partial",
                   [keys.category.id]: "partial",
@@ -481,7 +481,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider,
               handler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [keys.definitionContainer.id]: "partial",
                   [keys.category.id]: "partial",
@@ -510,7 +510,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider,
               handler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [keys.definitionContainer.id]: "partial",
                   [keys.category.id]: "partial",
@@ -569,7 +569,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.definitionContainer.id]: "visible",
                       [keys.category.id]: "visible",
@@ -602,7 +602,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.parentDefinitionContainer.id]: "partial",
                     [keys.category.id]: "hidden",
@@ -661,7 +661,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.definitionContainer.id]: "visible",
                     [keys.category.id]: "visible",
@@ -698,7 +698,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.definitionContainer.id]: "visible",
                     [keys.category.id]: "visible",
@@ -731,7 +731,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.parentDefinitionContainer.id]: "partial",
                     [keys.category.id]: "hidden",
@@ -763,7 +763,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.parentDefinitionContainer.id]: "partial",
                     [keys.category.id]: "visible",
@@ -799,7 +799,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.definitionContainer.id]: "partial",
                     [keys.category.id]: "partial",
@@ -837,7 +837,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.definitionContainer.id]: "partial",
                     [keys.category.id]: "partial",
@@ -897,7 +897,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.category.id]: "partial",
                     [getDefaultSubCategoryId(keys.category.id)]: "hidden",
@@ -932,7 +932,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.definitionContainer.id]: "partial",
                     [keys.category.id]: "partial",
@@ -969,7 +969,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.definitionContainer.id]: "partial",
                     [keys.category.id]: "partial",
@@ -1016,7 +1016,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.categoryA.id]: "partial",
                     [keys.parentElement.id]: "partial",
@@ -1046,7 +1046,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.categoryA.id]: "partial",
                     [keys.parentElement.id]: "partial",
@@ -1076,7 +1076,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.categoryA.id]: "partial",
                     // Category has a sub-category which is hidden
@@ -1124,7 +1124,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.categoryA.id]: "partial",
                     [keys.modeledElement.id]: "partial",
@@ -1153,7 +1153,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.categoryA.id]: "partial",
                     [keys.modeledElement.id]: "partial",
@@ -1183,7 +1183,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.categoryA.id]: "partial",
                     // Category has a sub-category which is hidden
@@ -1247,7 +1247,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 {
                   name: "modeled element's children display is turned on when its category display is turned on",
                   getTargetNode: (ids: IModelWithSubModelIds) => createCategoryHierarchyNode({ id: ids.category.id, hasChildren: true }),
-                  // prettier-ignore
+                  // oxfmt-ignore
                   expectations: (ids) => ({
                     [ids.category.id]: "visible",
                       [ids.modeledElement.id]: "visible",
@@ -1264,7 +1264,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                       categoryId: ids.category.id,
                       modelElementsMap: new Map([[ids.model.id, { elementIds: new Set([ids.modeledElement.id]) }]]),
                     }),
-                  // prettier-ignore
+                  // oxfmt-ignore
                   expectations: (ids: IModelWithSubModelIds) => ({
                     [ids.subModelCategory!.id]: "hidden",
 
@@ -1283,7 +1283,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                       elementId: ids.modeledElement.id,
                       hasChildren: true,
                     }),
-                  // prettier-ignore
+                  // oxfmt-ignore
                   expectations: (ids: IModelWithSubModelIds) => ({
                     [ids.subModelCategory!.id]: "hidden",
 
@@ -1296,7 +1296,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 {
                   name: "modeled element's children display is turned on when its sub-model display is turned on",
                   getTargetNode: (ids: IModelWithSubModelIds) => createModelHierarchyNode({ id: ids.modeledElement.id, hasChildren: true }),
-                  // prettier-ignore
+                  // oxfmt-ignore
                   expectations: (ids: IModelWithSubModelIds) => ({
                     [ids.subModelCategory!.id]: "hidden",
 
@@ -1310,7 +1310,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                   name: "modeled element, its model and category have partial visibility when its sub-model element's category display is turned on",
                   getTargetNode: (ids: IModelWithSubModelIds) =>
                     createCategoryHierarchyNode({ id: ids.subModelCategory!.id, modelIds: [ids.modeledElement.id] }),
-                  // prettier-ignore
+                  // oxfmt-ignore
                   expectations: (ids: IModelWithSubModelIds) => ({
                     [ids.subModelCategory!.id]: "hidden",
 
@@ -1328,7 +1328,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                       categoryId: ids.subModelCategory!.id,
                       elementId: ids.subModelElement!.id,
                     }),
-                  // prettier-ignore
+                  // oxfmt-ignore
                   expectations: (ids: IModelWithSubModelIds) => ({
                     [ids.subModelCategory!.id]: "hidden",
 
@@ -1371,7 +1371,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 {
                   name: "children are visible when category display is turned on",
                   getTargetNode: (ids: IModelWithSubModelIds) => createCategoryHierarchyNode({ id: ids.category.id, hasChildren: true }),
-                  // prettier-ignore
+                  // oxfmt-ignore
                   expectations: (ids: IModelWithSubModelIds) => ({
                     [ids.category.id]: "visible",
                       [ids.modeledElement.id]: "visible",
@@ -1384,7 +1384,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                       categoryId: ids.category.id,
                       modelElementsMap: new Map([[ids.model.id, { elementIds: new Set([ids.modeledElement.id]) }]]),
                     }),
-                  // prettier-ignore
+                  // oxfmt-ignore
                   expectations: (ids: IModelWithSubModelIds) => ({
                     [ids.category.id]: "partial",
                       // Category has hidden sub-category
@@ -1400,7 +1400,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                       elementId: ids.modeledElement.id,
                       hasChildren: false,
                     }),
-                  //prettier-ignore
+                  // oxfmt-ignore
                   expectations: (ids: IModelWithSubModelIds) => ({
                     [ids.category.id]: "partial",
                       // Category has hidden sub-category
@@ -1446,7 +1446,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                       modelElementsMap: new Map([[ids.model.id, { elementIds: new Set([ids.modeledElement.id]) }]]),
                     }),
                   // Category has partial visibility, since its sub-category is not visible
-                  // prettier-ignore
+                  // oxfmt-ignore
                   expectations: (ids) => ({
                     [ids.category.id]: "partial",
                       [ids.modeledElement.id]: "visible",
@@ -1462,7 +1462,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                       hasChildren: false,
                     }),
                   // Category has partial visibility, since its sub-category is not visible
-                  // prettier-ignore
+                  // oxfmt-ignore
                   expectations: (ids) => ({
                     [ids.category.id]: "partial",
                       [ids.modeledElement.id]: "visible",
@@ -1663,7 +1663,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider,
               handler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [keys.definitionContainer.id]: "hidden",
                   [keys.category.id]: "hidden",
@@ -1693,7 +1693,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider,
               handler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
 
               expectations: {
                 [keys.parentDefinitionContainer.id]: "partial",
@@ -1747,7 +1747,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider,
               handler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [keys.definitionContainer.id]: "hidden",
                   [keys.category.id]: "hidden",
@@ -1777,7 +1777,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider,
               handler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [keys.parentDefinitionContainer.id]: "partial",
                   [keys.category.id]: "visible",
@@ -1804,7 +1804,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider,
               handler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
 
               expectations: {
                 [keys.parentDefinitionContainer.id]: "partial",
@@ -1835,7 +1835,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider,
               handler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [keys.definitionContainer.id]: "partial",
                   [keys.category.id]: "partial",
@@ -1861,7 +1861,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               provider,
               handler,
               viewport,
-              // prettier-ignore
+              // oxfmt-ignore
               expectations: {
                 [keys.definitionContainer.id]: "partial",
                   [keys.category.id]: "partial",
@@ -1914,7 +1914,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.categoryA.id]: "partial",
                     [keys.parentElement.id]: "partial",
@@ -1944,7 +1944,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.categoryA.id]: "partial",
                     [keys.parentElement.id]: "partial",
@@ -1974,7 +1974,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.categoryA.id]: "partial",
                     // Category has a sub-category which is visible
@@ -2023,7 +2023,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.categoryA.id]: "partial",
                     [keys.modeledElement.id]: "partial",
@@ -2052,7 +2052,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   [keys.categoryA.id]: "partial",
                     [keys.modeledElement.id]: "partial",
@@ -2082,7 +2082,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 provider,
                 handler,
                 viewport,
-                // prettier-ignore
+                // oxfmt-ignore
                 expectations: {
                   // Category has a sub-category which is visible
                   [keys.categoryA.id]: "partial",
@@ -2132,7 +2132,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             provider,
             handler,
             viewport,
-            // prettier-ignore
+            // oxfmt-ignore
             expectations: {
               [keys.definitionContainer.id]: "partial",
                 [keys.category.id]: "partial",
