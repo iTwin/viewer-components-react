@@ -58,7 +58,7 @@ targets.split(",").forEach((target) => {
     process.exit(1);
   }
 
-  execFileSync("prettier", ["--write", target], { shell: true, encoding: "utf-8" });
+  execFileSync("oxfmt", [target], { shell: true, encoding: "utf-8" });
 
   if (isCheck) {
     const gitStatus = execFileSync("git", ["status", "--porcelain=v1", target], { encoding: "utf-8" });
