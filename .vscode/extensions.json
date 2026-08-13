@@ -1,9 +1,9 @@
 {
   "recommendations": [
     "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
     "streetsidesoftware.code-spell-checker",
     "mermaidchart.vscode-mermaid-chart",
-    "vitest.explorer"
+    "vitest.explorer",
+    "oxc.oxc-vscode"
   ]
 }
