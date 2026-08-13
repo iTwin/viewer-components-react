@@ -1400,7 +1400,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                       elementId: ids.modeledElement.id,
                       hasChildren: false,
                     }),
-                  //oxfmt-ignore
+                  // oxfmt-ignore
                   expectations: (ids: IModelWithSubModelIds) => ({
                     [ids.category.id]: "partial",
                       // Category has hidden sub-category
