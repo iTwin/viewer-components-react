@@ -6,7 +6,6 @@
   "singleQuote": false,
   "sortPackageJson": false,
   "ignorePatterns": [
-    "change",
     "lib",
     "dist",
     ".vscode",
