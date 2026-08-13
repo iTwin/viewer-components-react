@@ -87,8 +87,8 @@ jobs:
 
       - run: pnpm install
 
-      - name: Run prettier
-        run: pnpm prettier
+      - name: Run oxfmt
+        run: pnpm format
 
       - name: Run cspell
         run: pnpm cspell

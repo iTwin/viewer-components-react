@@ -32,7 +32,8 @@ export interface ValidateNodeProps {
       } &
         // instances: if node has this instanceId then it should have the specified visibility.
         // parentIds: if node has parent with this parentId then it should have the specified visibility.
-        (| { instances: { [id: string]: Visibility }; parentIds?: { [id: string]: Visibility } }
+        (
+          | { instances: { [id: string]: Visibility }; parentIds?: { [id: string]: Visibility } }
           | { instances?: { [id: string]: Visibility }; parentIds: { [id: string]: Visibility } }
         ));
 }
