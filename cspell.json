@@ -54,6 +54,7 @@
     "reports-config-widget",
     "e2e.Dockerfile.dockerignore",
     "**/*.d.ts",
-    ".prettierrc"
+    ".oxfmtrc.json",
+    "cspell.json"
   ]
 }
