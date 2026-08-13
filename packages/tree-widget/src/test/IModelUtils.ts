@@ -10,6 +10,7 @@ import { expect } from "vitest";
 import type { ImportSchemaResult } from "test-utilities";
 import type { IModelDb } from "@itwin/core-backend";
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { EC } from "@itwin/presentation-shared";
 
 function getUniqueIModelName(): string {
   const testName = expect.getState().currentTestName?.replace(/[^\w]/gi, "-").replace(/-+/g, "-").toLowerCase() ?? "unknown";
@@ -76,8 +77,8 @@ export async function buildIModel<TResult extends object | undefined>(setup?: (i
 
 interface TestSchemaDefinition extends ImportSchemaResult {
   items: {
-    [TestSchema.ModeledElement3dClassName]: { name: string; fullName: string; label: string };
-    [TestSchema.ModeledElement2dClassName]: { name: string; fullName: string; label: string };
-    [TestSchema.SubModel2dClassName]: { name: string; fullName: string; label: string };
+    [TestSchema.ModeledElement3dClassName]: { name: string; fullName: EC.FullClassNameDotNotation; label: string };
+    [TestSchema.ModeledElement2dClassName]: { name: string; fullName: EC.FullClassNameDotNotation; label: string };
+    [TestSchema.SubModel2dClassName]: { name: string; fullName: EC.FullClassNameDotNotation; label: string };
   };
 }

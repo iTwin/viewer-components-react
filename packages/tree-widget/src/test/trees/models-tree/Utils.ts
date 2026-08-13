@@ -17,8 +17,10 @@ import {
 } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
 import { mergeWithDefaults } from "../../../tree-widget-react/shared/internal/Utils.js";
 import { ModelsTreeIdsCache } from "../../../tree-widget-react/trees/models-tree/internal/ModelsTreeIdsCache.js";
+import { createModelsTreeVisibilityHandler } from "../../../tree-widget-react/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelAccess } from "../Common.js";
+import { createTreeWidgetTestingViewport } from "../TreeUtils.js";
 
 import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -31,7 +33,11 @@ import type {
 } from "@itwin/presentation-hierarchies";
 import type { EC, InstanceKey } from "@itwin/presentation-shared";
 import type { ParentElementsPath } from "../../../tree-widget-react/shared/internal/Utils.js";
-import type { ModelsTreeHierarchyConfiguration } from "../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
+import type {
+  ModelsTreeHierarchyConfiguration,
+  RequiredModelsTreeHierarchyConfiguration,
+} from "../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
+import type { IModelAccess } from "../Common.js";
 
 interface CreateModelsTreeProviderProps {
   imodelConnection: IModelConnection;
@@ -299,4 +305,66 @@ export function createClassGroupingHierarchyNode({
       ...(props.hasSearchTargetAncestor ? { hasSearchTargetAncestor: props.hasSearchTargetAncestor } : {}),
     },
   };
+}
+
+export function createAccessAndCache({
+  imodelConnection,
+  hierarchyConfig,
+}: {
+  imodelConnection: IModelConnection;
+  hierarchyConfig?: ModelsTreeHierarchyConfiguration;
+}) {
+  const imodelAccess = createIModelAccess(imodelConnection);
+  const mergedConfig = mergeWithDefaults({
+    defaults: defaultHierarchyConfiguration,
+    overrides: hierarchyConfig,
+  });
+  const baseIdsCache = new BaseIdsCache({
+    queryExecutor: imodelAccess,
+    elementClassName: mergedConfig.elements.baseClass,
+    type: "3d",
+    excludedElementClassNames: mergedConfig.elements.excludedClasses,
+  });
+  const idsCache = new ModelsTreeIdsCache({
+    queryExecutor: imodelAccess,
+    hierarchyConfig: mergedConfig,
+    baseIdsCache,
+  });
+  return { imodelAccess, idsCache };
+}
+
+export function createVisibilityTestData(props: {
+  imodelConnection: IModelConnection;
+  hierarchyConfig?: ModelsTreeHierarchyConfiguration;
+  visibleByDefault?: boolean;
+  imodelAccess: IModelAccess;
+  idsCache: ModelsTreeIdsCache;
+}) {
+  const { idsCache, imodelAccess, imodelConnection, hierarchyConfig, visibleByDefault } = props;
+  const hierarchyConfigWithDefaults = mergeWithDefaults({ defaults: defaultHierarchyConfiguration, overrides: hierarchyConfig });
+  const viewport = createTreeWidgetTestingViewport({ iModel: imodelConnection, viewType: "3d", visibleByDefault });
+  const handler = createModelsTreeVisibilityHandler({ viewport, imodelAccess, idsCache });
+  const provider = createProvider({ hierarchyConfig: hierarchyConfigWithDefaults, idsCache, imodelAccess });
+  return {
+    handler,
+    provider,
+    viewport,
+    [Symbol.dispose]() {
+      handler[Symbol.dispose]();
+      provider[Symbol.dispose]();
+    },
+  };
+}
+
+function createProvider(props: {
+  idsCache: ModelsTreeIdsCache;
+  imodelAccess: ReturnType<typeof createIModelAccess>;
+  hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
+  searchPaths?: HierarchySearchTree[];
+}) {
+  return createIModelHierarchyProvider({
+    hierarchyDefinition: new ModelsTreeDefinition(props),
+    imodelAccess: props.imodelAccess,
+    ...(props.searchPaths ? { search: { paths: props.searchPaths } } : undefined),
+  });
 }
