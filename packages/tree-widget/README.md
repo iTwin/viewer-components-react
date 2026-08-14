@@ -4,7 +4,31 @@ Copyright © Bentley Systems, Incorporated. All rights reserved.
 
 The `@itwin/tree-widget-react` package provides React components to build a widget with tree components' selector, along with all the building blocks that can be used individually.
 
-![Widget example](./media/widget.png)
+![Widget example](./media/widget-example.png)
+
+## Table of Contents
+
+- [Usage](#usage)
+- [Localization](#localization)
+- [Components](#components)
+  - [Selectable tree](#selectable-tree)
+  - [Models tree](#models-tree)
+    - [Focus mode](#focus-mode)
+    - [Custom models tree](#custom-models-tree)
+    - [Displaying a subset of the tree](#displaying-a-subset-of-the-tree)
+  - [Categories tree](#categories-tree)
+    - [Custom categories tree](#custom-categories-tree)
+  - [iModel content tree](#imodel-content-tree)
+  - [Custom trees](#custom-trees)
+    - [Custom basic tree](#custom-basic-tree)
+    - [Custom visibility tree](#custom-visibility-tree)
+  - [Hierarchy level size limiting](#hierarchy-level-size-limiting)
+  - [Hierarchy level filtering](#hierarchy-level-filtering)
+  - [Creating unified selection storage](#creating-unified-selection-storage)
+- [Telemetry](#telemetry)
+  - [Performance tracking](#performance-tracking)
+  - [Usage tracking](#usage-tracking)
+  - [Example](#example)
 
 ## Usage
 
@@ -528,7 +552,7 @@ function CustomModelsTreeComponentWithTargetItems({
 
 ### Categories tree
 
-The component, based on the active view, renders a hierarchy of either spatial (3d) or drawing (2d) categories. The hierarchy consists of two levels - the category (spatial or drawing) and its sub-categories. There's also a header that renders categories search box and various visibility control buttons.
+The component, based on the active view, renders a hierarchy of either spatial (3d) or drawing (2d) categories. The hierarchy consists of multiple levels - definition containers, their categories (spatial or drawing), categories' sub-categories and category elements (when enabled with hierarchy configuration options). Categories tree can be configured to show elements There's also a header that renders categories search box and various visibility control buttons.
 
 ![Categories tree example](./media/categories-tree.png)
 
