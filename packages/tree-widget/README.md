@@ -552,7 +552,7 @@ function CustomModelsTreeComponentWithTargetItems({
 
 ### Categories tree
 
-The component, based on the active view, renders a hierarchy of either spatial (3d) or drawing (2d) categories. The hierarchy consists of multiple levels - definition containers, their categories (spatial or drawing), categories' sub-categories and category elements (when enabled with hierarchy configuration options). Categories tree can be configured to show elements There's also a header that renders categories search box and various visibility control buttons.
+The component, based on the active view, renders a hierarchy of either spatial (3d) or drawing (2d) categories. The hierarchy consists of multiple levels: definition containers, their categories (spatial or drawing), categories' sub-categories, and (when enabled via hierarchy configuration options) category elements. There's also a header that renders a categories search box and various visibility control buttons
 
 ![Categories tree example](./media/categories-tree.png)
 
