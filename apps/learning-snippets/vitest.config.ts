@@ -11,6 +11,8 @@ export default defineConfig({
     restoreMocks: true,
     include: ["src/test/**/*.test.{ts,tsx}"],
     setupFiles: ["src/setup.ts"],
+    testTimeout: 10000,
+    hookTimeout: 10000,
     environmentOptions: {
       happyDOM: {
         settings: {

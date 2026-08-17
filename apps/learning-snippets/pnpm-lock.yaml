@@ -9,6 +9,9 @@ importers:
 
   .:
     dependencies:
+      '@bentley/classification-systems-schema':
+        specifier: 1.0.4
+        version: 1.0.4
       '@itwin/appui-abstract':
         specifier: ^5.11.2
         version: 5.11.3(@itwin/core-bentley@5.11.3)
@@ -299,6 +302,9 @@ packages:
     resolution: {integrity: sha512-4zBIxpPzowiZpusoFkyGVwakdRJUyuH5PxQ/PrqghfdFWWasvnCdPfQXHrenDai+gyLARulZjZowCOj6fjT4pA==}
     engines: {node: '>=6.9.0'}
 
+  '@bentley/classification-systems-schema@1.0.4':
+    resolution: {integrity: sha512-JLomG5uiTbDo6vfDI4cPxNT/ouiPjhNtvm5Dce2rfR1Ck3V4mqEsSY6iCkDBi0PPAQzxrVU7mbLBegJLZ8XG6g==}
+
   '@bentley/imodeljs-native@5.11.24':
     resolution: {integrity: sha512-1ltLSh1eDjTBER40W9Iwtl1T4vcT93C9WEG5S9vMnZZp5os/OEd6hYEU6qO4uAguFRx3zYm6OoR7862Rx4n9TQ==}
 
@@ -504,7 +510,7 @@ packages:
       '@itwin/appui-abstract': ^4.0.0 || ^5.0.0
       '@itwin/core-bentley': ^4.0.0 || ^5.0.0
       '@itwin/core-react': 5.33.1
-      '@itwin/itwinui-react': 3.21.2
+      '@itwin/itwinui-react': ^3.15.0
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
@@ -563,7 +569,7 @@ packages:
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0 || ^5.0.0
       '@itwin/core-bentley': ^4.0.0 || ^5.0.0
-      '@itwin/itwinui-react': 3.21.2
+      '@itwin/itwinui-react': ^3.15.0
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
@@ -610,7 +616,7 @@ packages:
       '@itwin/core-geometry': ^4.0.0 || ^5.0.0
       '@itwin/core-quantity': ^4.0.0 || ^5.0.0
       '@itwin/core-react': 5.33.1
-      '@itwin/itwinui-react': 3.21.2
+      '@itwin/itwinui-react': ^3.15.0
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
@@ -1219,9 +1225,6 @@ packages:
         optional: true
       react-dom:
         optional: true
-
-  '@stratakit/icons@0.4.2':
-    resolution: {integrity: sha512-bKAwyESZZ6jrq903ROiMEnNhnHoadnmLmn32+b/7t80PU5YxM8hOhI9iUtpElbpMNZqJ55RK03EIEVYJpWFixQ==}
 
   '@stratakit/icons@0.4.3':
     resolution: {integrity: sha512-WiCRYKBuIOJ0te/bpIjpDsvF47C/wgwRIqxNktcLXm2nh+b4Xi43VAUoR86pnK+1P5ygAAhFihEtTqWd3x4zvw==}
@@ -4058,6 +4061,8 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
+  '@bentley/classification-systems-schema@1.0.4': {}
+
   '@bentley/imodeljs-native@5.11.24': {}
 
   '@emnapi/core@1.11.1':
@@ -4622,7 +4627,7 @@ snapshots:
       '@itwin/presentation-hierarchies': 2.0.0-alpha.17
       '@itwin/presentation-shared': 2.0.0-alpha.12
       '@itwin/unified-selection': 2.0.0-alpha.0
-      '@stratakit/icons': 0.4.2
+      '@stratakit/icons': 0.4.3
       '@stratakit/structures': 0.5.8(@types/react@18.3.31)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
       '@tanstack/react-virtual': 3.14.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
@@ -5128,8 +5133,6 @@ snapshots:
     optionalDependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-
-  '@stratakit/icons@0.4.2': {}
 
   '@stratakit/icons@0.4.3': {}
 

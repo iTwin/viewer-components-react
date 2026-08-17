@@ -16,7 +16,7 @@ import { LOCALIZATION_NAMESPACES } from "@itwin/tree-widget-react";
 import { createTreeWidget, ModelsTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ TreeWidget.LocalizationContextProviderImports
-import { LocalizationContextProvider } from "@itwin/tree-widget-react";
+import { LocalizationContextProvider, SharedTreeContextProvider } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 import { UiItemsManager } from "@itwin/appui-react";
 import { createStorage } from "@itwin/unified-selection";
@@ -115,19 +115,21 @@ describe("Tree widget", () => {
         const getLocalizedStringSpy = vi.spyOn(IModelApp.localization, "getLocalizedString");
 
         // __PUBLISH_EXTRACT_START__ TreeWidget.LocalizationContextProvider
-        // When using lower level components directly they will need to be wrapped inside `LocalizationContextProvider`
+        // When using tree components directly, wrap them with the shared tree and localization providers.
         function TreeComponent() {
           return (
-            <LocalizationContextProvider localization={IModelApp.localization}>
-              <ModelsTreeComponent
-                treeLabel="Models tree"
-                selectionStorage={unifiedSelectionStorage}
-                headerButtons={[
-                  (props) => <ModelsTreeComponent.ShowAllButton {...props} key={"ShowAllButton"} />,
-                  (props) => <ModelsTreeComponent.HideAllButton {...props} key={"HideAllButton"} />,
-                ]}
-              />
-            </LocalizationContextProvider>
+            <SharedTreeContextProvider>
+              <LocalizationContextProvider localization={IModelApp.localization}>
+                <ModelsTreeComponent
+                  treeLabel="Models tree"
+                  selectionStorage={unifiedSelectionStorage}
+                  headerButtons={[
+                    (props) => <ModelsTreeComponent.ShowAllButton {...props} key={"ShowAllButton"} />,
+                    (props) => <ModelsTreeComponent.HideAllButton {...props} key={"HideAllButton"} />,
+                  ]}
+                />
+              </LocalizationContextProvider>
+            </SharedTreeContextProvider>
           );
         }
         // __PUBLISH_EXTRACT_END__
