@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 // Alpha APIs are used throughout - line-level disables can't be used because they'd leak into the extracted README snippets.
 /* eslint-disable import/no-duplicates, @itwin/no-internal */
+// cspell: ignore clsf
 
 import fs from "node:fs";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
