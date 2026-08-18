@@ -71,12 +71,15 @@ describe("Tree widget", () => {
                   // add the Models tree component delivered with the package
                   {
                     id: ModelsTreeComponent.id,
+                    // display the widget header search box for this tree
+                    isSearchable: true,
                     // use `ModelsTreeComponent.getLabel` to get the localized default label for models tree
                     getLabel: ({ standardLabels }) => ModelsTreeComponent.getLabel({ standardLabels }),
-                    render: ({ treeLabel }) => (
+                    render: ({ treeLabel, searchText }) => (
                       <ModelsTreeComponent
                         // label for the tree, used for accessibility purposes
                         treeLabel={treeLabel}
+                        searchText={searchText}
                         // see "Creating unified selection storage" section for example implementation
                         selectionStorage={unifiedSelectionStorage}
                       />
