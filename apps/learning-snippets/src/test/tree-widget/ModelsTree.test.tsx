@@ -172,13 +172,10 @@ describe("Tree widget", () => {
           const exportSvg = "#export-icon";
           const propertiesSvg = "#properties-icon";
 
-          type TreeActionsProps = Parameters<NonNullable<Parameters<typeof ModelsTreeComponent>[0]["getInlineActions"]>>[0];
-          type TreeActionTargetNode = TreeActionsProps["targetNode"];
-
           interface ModelsTreeWithActionsProps {
-            onInspect: (props: TreeActionsProps) => void;
-            onExport: (targetNode: TreeActionTargetNode) => void;
-            onShowProperties: (targetNode: TreeActionTargetNode) => void;
+            onInspect: (label: string) => void;
+            onExport: (label: string) => void;
+            onShowProperties: (label: string) => void;
           }
 
           function ModelsTreeWithActions({ onInspect, onExport, onShowProperties }: ModelsTreeWithActionsProps) {
@@ -189,26 +186,25 @@ describe("Tree widget", () => {
                   selectionStorage={unifiedSelectionStorage}
                   selectionMode="extended"
                   // rendered directly on the node
-                  getInlineActions={(actionProps, { selectionMode }) => [
-                    <TreeActionBase
-                      key="inspect"
-                      label="Inspect selection"
-                      icon={inspectSvg}
-                      visible={selectionMode === "extended"}
-                      onClick={() => onInspect(actionProps)}
-                    />,
+                  getInlineActions={(actionProps) => [
+                    <TreeActionBase key="inspect" label="Inspect selection" icon={inspectSvg} onClick={() => onInspect(actionProps.targetNode.label)} />,
                   ]}
                   // rendered in the node's overflow menu
-                  getMenuActions={({ targetNode }) => [
-                    <TreeActionBase key="export" label="Export node" icon={exportSvg} onClick={() => onExport(targetNode)} />,
+                  getMenuActions={(actionProps) => [
+                    <TreeActionBase key="export" label="Export node" icon={exportSvg} onClick={() => onExport(actionProps.targetNode.label)} />,
                   ]}
                   // rendered in the node's right-click context menu
-                  getContextMenuActions={({ targetNode }) => {
-                    if (ModelsTreeNode.getType(targetNode.nodeData) !== "model") {
+                  getContextMenuActions={(actionProps) => {
+                    if (ModelsTreeNode.getType(actionProps.targetNode.nodeData) !== "model") {
                       return [];
                     }
                     return [
-                      <TreeActionBase key="properties" label="Show model properties" icon={propertiesSvg} onClick={() => onShowProperties(targetNode)} />,
+                      <TreeActionBase
+                        key="properties"
+                        label="Show model properties"
+                        icon={propertiesSvg}
+                        onClick={() => onShowProperties(actionProps.targetNode.label)}
+                      />,
                     ];
                   }}
                 />
@@ -221,10 +217,12 @@ describe("Tree widget", () => {
           const showPropertiesSpy = vi.fn();
           const { getByText, getByRole } = render(<ModelsTreeWithActions onInspect={vi.fn()} onExport={vi.fn()} onShowProperties={showPropertiesSpy} />);
           await waitFor(() => getByText("Model with actions"));
-          // inline and overflow menu actions are only rendered for a hovered or focused node, so only the context menu is exercised here
-          fireEvent.contextMenu(getByRole("treeitem", { name: /Model with actions/ }));
+          const modelTreeItem = getByRole("treeitem", { name: /Model with actions/ });
+          // StrataKit lazy-mounts inline and overflow actions after IntersectionObserver reports the row as visible.
+          // happy-dom never reports that state, so fireEvent hover/focus cannot find those controls;
+          fireEvent.contextMenu(modelTreeItem);
           fireEvent.click(await waitFor(() => getByRole("menuitem", { name: "Show model properties" })));
-          expect(showPropertiesSpy).toHaveBeenCalledOnce();
+          expect(showPropertiesSpy).toHaveBeenCalledWith("Model with actions");
         });
 
         it("renders custom models tree", async function () {

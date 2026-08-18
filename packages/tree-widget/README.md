@@ -309,13 +309,10 @@ const inspectSvg = "#inspect-icon";
 const exportSvg = "#export-icon";
 const propertiesSvg = "#properties-icon";
 
-type TreeActionsProps = Parameters<NonNullable<Parameters<typeof ModelsTreeComponent>[0]["getInlineActions"]>>[0];
-type TreeActionTargetNode = TreeActionsProps["targetNode"];
-
 interface ModelsTreeWithActionsProps {
-  onInspect: (props: TreeActionsProps) => void;
-  onExport: (targetNode: TreeActionTargetNode) => void;
-  onShowProperties: (targetNode: TreeActionTargetNode) => void;
+  onInspect: (label: string) => void;
+  onExport: (label: string) => void;
+  onShowProperties: (label: string) => void;
 }
 
 function ModelsTreeWithActions({ onInspect, onExport, onShowProperties }: ModelsTreeWithActionsProps) {
@@ -326,23 +323,26 @@ function ModelsTreeWithActions({ onInspect, onExport, onShowProperties }: Models
         selectionStorage={unifiedSelectionStorage}
         selectionMode="extended"
         // rendered directly on the node
-        getInlineActions={(actionProps, { selectionMode }) => [
-          <TreeActionBase
-            key="inspect"
-            label="Inspect selection"
-            icon={inspectSvg}
-            visible={selectionMode === "extended"}
-            onClick={() => onInspect(actionProps)}
-          />,
+        getInlineActions={(actionProps) => [
+          <TreeActionBase key="inspect" label="Inspect selection" icon={inspectSvg} onClick={() => onInspect(actionProps.targetNode.label)} />,
         ]}
         // rendered in the node's overflow menu
-        getMenuActions={({ targetNode }) => [<TreeActionBase key="export" label="Export node" icon={exportSvg} onClick={() => onExport(targetNode)} />]}
+        getMenuActions={(actionProps) => [
+          <TreeActionBase key="export" label="Export node" icon={exportSvg} onClick={() => onExport(actionProps.targetNode.label)} />,
+        ]}
         // rendered in the node's right-click context menu
-        getContextMenuActions={({ targetNode }) => {
-          if (ModelsTreeNode.getType(targetNode.nodeData) !== "model") {
+        getContextMenuActions={(actionProps) => {
+          if (ModelsTreeNode.getType(actionProps.targetNode.nodeData) !== "model") {
             return [];
           }
-          return [<TreeActionBase key="properties" label="Show model properties" icon={propertiesSvg} onClick={() => onShowProperties(targetNode)} />];
+          return [
+            <TreeActionBase
+              key="properties"
+              label="Show model properties"
+              icon={propertiesSvg}
+              onClick={() => onShowProperties(actionProps.targetNode.label)}
+            />,
+          ];
         }}
       />
     </SharedTreeContextProvider>
@@ -959,7 +959,10 @@ function MyClassificationsTree({ selectionStorage }: MyClassificationsTreeProps)
       <ClassificationsTreeComponent
         treeLabel="Classifications tree"
         selectionStorage={selectionStorage}
-        hierarchyConfig={{ rootClassificationSystemCode: "My Classification System" }}
+        hierarchyConfig={{
+          // Set the code of the ClassificationSystem element that contains the classification tables to display.
+          rootClassificationSystemCode: "My Classification System",
+        }}
         emptyTreeContent={<>No classifications are available.</>}
       />
     </SharedTreeContextProvider>
@@ -971,7 +974,12 @@ function MyClassificationsTree({ selectionStorage }: MyClassificationsTreeProps)
 
 #### Configuring the hierarchy and visibility
 
-The `hierarchyConfig` can select a root classification system and exclude element classes. When classifications are related to categories through a custom relationship, that relationship can be configured for visibility resolution:
+The `hierarchyConfig` can select a root classification system and exclude element classes. `rootClassificationSystemCode` is the code value of the classification system that contains the desired classification tables and classifications.
+
+Classifications display is controlled using their associated categories. When the categories cannot be derived through the elements under that classification, the relationship can be configured explicitly using `classificationToCategoriesRelationshipSpecification`. This allows resolving related categories correctly, so changing a classification's display affects the intended categories. It also has these benefits:
+
+- Without this specification, the `Classification -> ClassificationSystems.ElementHasClassifications -> Element -> Category` relationship path is used, which results in slightly slower queries.
+- When a classification has no elements of its own, the fallback path cannot find its associated categories. Configuring the relationship allows those categories to be resolved and their visibility to be changed with the classification.
 
 <!-- [[include: [TreeWidget.ClassificationsTreeComponentImports, TreeWidget.SharedTreeContextProviderImports, TreeWidget.ClassificationsTreeSelectionStorageImports, TreeWidget.ClassificationsTreeConfigExample], tsx]] -->
 <!-- BEGIN EXTRACTION -->
@@ -990,6 +998,7 @@ function ConfiguredClassificationsTree({ selectionStorage }: { selectionStorage:
         treeLabel="Configured classifications tree"
         selectionStorage={selectionStorage}
         hierarchyConfig={{
+          // Set the code of the ClassificationSystem element that contains the classification tables to display.
           rootClassificationSystemCode: "My Classification System",
           // Exclude instances of this class and its subclasses from the tree.
           elements: { excludedClasses: ["BisCore.SpatialLocationElement"] },
@@ -1073,7 +1082,7 @@ function SearchableClassificationsTreeContent({ imodel, viewport, selectionStora
 
 #### Searching by instance key
 
-`useClassificationsTreeDefinition` supports searching for known classification or element instance keys. `onSearchPathsChanged` reports when matching paths change:
+`useClassificationsTreeDefinition` supports searching for known classification or element instance keys. `targetItems` contains the classification table, classification or element keys whose hierarchy paths should be revealed. `onSearchPathsChanged` reports when matching paths change:
 
 <!-- [[include: [TreeWidget.ClassificationsTreeIModelImports, TreeWidget.ClassificationsTreeInstanceSearchExampleImports, TreeWidget.ClassificationsTreeInstanceSearchExample], tsx]] -->
 <!-- BEGIN EXTRACTION -->
@@ -1120,15 +1129,13 @@ import type { InstanceKey } from "@itwin/presentation-shared";
 
 interface VersionedClassificationsTreeDefinitionProps {
   imodelVersions: IModelConnection[];
-  targetItems: InstanceKey[];
 }
 
-function useVersionedClassificationsTreeDefinition({ imodelVersions, targetItems }: VersionedClassificationsTreeDefinitionProps) {
+function useVersionedClassificationsTreeDefinition({ imodelVersions }: VersionedClassificationsTreeDefinitionProps) {
   return useClassificationsTreeDefinition({
     // Supply versions from earliest to latest.
     imodels: imodelVersions,
     hierarchyConfig: { rootClassificationSystemCode: "My Classification System" },
-    search: { targetItems, limit: "unbounded" },
   });
 }
 ```

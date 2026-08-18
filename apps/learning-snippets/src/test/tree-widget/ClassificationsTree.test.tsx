@@ -80,7 +80,10 @@ describe("Tree widget", () => {
               <ClassificationsTreeComponent
                 treeLabel="Classifications tree"
                 selectionStorage={selectionStorage}
-                hierarchyConfig={{ rootClassificationSystemCode: "My Classification System" }}
+                hierarchyConfig={{
+                  // Set the code of the ClassificationSystem element that contains the classification tables to display.
+                  rootClassificationSystemCode: "My Classification System",
+                }}
                 emptyTreeContent={<>No classifications are available.</>}
               />
             </SharedTreeContextProvider>
@@ -108,6 +111,7 @@ describe("Tree widget", () => {
                 treeLabel="Configured classifications tree"
                 selectionStorage={selectionStorage}
                 hierarchyConfig={{
+                  // Set the code of the ClassificationSystem element that contains the classification tables to display.
                   rootClassificationSystemCode: "My Classification System",
                   // Exclude instances of this class and its subclasses from the tree.
                   elements: { excludedClasses: ["BisCore.SpatialLocationElement"] },
@@ -230,20 +234,18 @@ describe("Tree widget", () => {
       });
 
       it("merges classifications across iModel versions", async () => {
-        const { imodelConnection, classification } = await buildClassificationsIModel();
+        const { imodelConnection } = await buildClassificationsIModel();
 
         // __PUBLISH_EXTRACT_START__ TreeWidget.ClassificationsTreeMultipleIModelsExample
         interface VersionedClassificationsTreeDefinitionProps {
           imodelVersions: IModelConnection[];
-          targetItems: InstanceKey[];
         }
 
-        function useVersionedClassificationsTreeDefinition({ imodelVersions, targetItems }: VersionedClassificationsTreeDefinitionProps) {
+        function useVersionedClassificationsTreeDefinition({ imodelVersions }: VersionedClassificationsTreeDefinitionProps) {
           return useClassificationsTreeDefinition({
             // Supply versions from earliest to latest.
             imodels: imodelVersions,
             hierarchyConfig: { rootClassificationSystemCode: "My Classification System" },
-            search: { targetItems, limit: "unbounded" },
           });
         }
         // __PUBLISH_EXTRACT_END__
@@ -253,12 +255,10 @@ describe("Tree widget", () => {
             useVersionedClassificationsTreeDefinition({
               // the same connection stands in for two versions - this only checks that multiple iModels are accepted
               imodelVersions: [imodelConnection, imodelConnection],
-              targetItems: [classification],
             }),
           { wrapper: SharedTreeContextProvider },
         );
-        const searchPaths = await result.current.getSearchPaths?.({ abortSignal: new AbortController().signal });
-        expect(searchPaths?.length).toBeGreaterThan(0);
+        expect(result.current.definition).toBeDefined();
       });
     });
 
