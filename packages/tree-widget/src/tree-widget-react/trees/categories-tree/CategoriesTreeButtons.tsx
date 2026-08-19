@@ -95,8 +95,7 @@ export type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonP
 /** @public */
 export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   const { categories, viewport, models } = props;
-  const telemetryContext = useTelemetryContext();
-  const onFeatureUsed = props.onFeatureUsed ?? ((featureId: string) => telemetryContext.onFeatureUsed({ featureId, reportInteraction: true }));
+  const { onFeatureUsed } = useTelemetryContext();
   const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContext();
   const viewType = viewport.viewType === "2d" ? "2d" : "3d";
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
@@ -104,7 +103,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
 
   const onClick = async () => {
     // cspell:disable-next-line
-    onFeatureUsed?.(`categories-tree-showall`);
+    onFeatureUsed({ featureId: `categories-tree-showall`, reportInteraction: true });
     cancelChangesInProgress.next();
     // wrap in try catch for getCategoryInfos call
     try {
@@ -130,8 +129,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
 /** @public */
 export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
   const { categories, viewport } = props;
-  const telemetryContext = useTelemetryContext();
-  const onFeatureUsed = props.onFeatureUsed ?? ((featureId: string) => telemetryContext.onFeatureUsed({ featureId, reportInteraction: true }));
+  const { onFeatureUsed } = useTelemetryContext();
   const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContext();
   const viewType = viewport.viewType === "2d" ? "2d" : "3d";
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
@@ -139,7 +137,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
 
   const onClick = async () => {
     // cspell:disable-next-line
-    onFeatureUsed?.(`categories-tree-hideall`);
+    onFeatureUsed({ featureId: `categories-tree-hideall`, reportInteraction: true });
     cancelChangesInProgress.next();
     // wrap in try catch for getCategoryInfos call
     try {
@@ -163,8 +161,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
 /** @public */
 export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   const { categories, viewport, models } = props;
-  const telemetryContext = useTelemetryContext();
-  const onFeatureUsed = props.onFeatureUsed ?? ((featureId: string) => telemetryContext.onFeatureUsed({ featureId, reportInteraction: true }));
+  const { onFeatureUsed } = useTelemetryContext();
   const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContext();
   const viewType = viewport.viewType === "2d" ? "2d" : "3d";
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
@@ -172,7 +169,7 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
 
   const onClick = async () => {
     // cspell:disable-next-line
-    onFeatureUsed?.(`categories-tree-invert`);
+    onFeatureUsed({ featureId: `categories-tree-invert`, reportInteraction: true });
     cancelChangesInProgress.next();
     // wrap in try catch for getCategoryInfos call
     try {

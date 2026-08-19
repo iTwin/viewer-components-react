@@ -114,15 +114,14 @@ export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) =>
  */
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   const { models, viewport } = props;
-  const telemetryContext = useTelemetryContext();
-  const onFeatureUsed = props.onFeatureUsed ?? ((featureId: string) => telemetryContext.onFeatureUsed({ featureId, reportInteraction: true }));
+  const { onFeatureUsed } = useTelemetryContext();
   const { getBaseIdsCache, cancelChangesInProgress } = useSharedTreeContext();
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
   const translate = useTranslation();
 
   const onClick = async () => {
     // cspell:disable-next-line
-    onFeatureUsed?.("models-tree-showall");
+    onFeatureUsed({ featureId: "models-tree-showall", reportInteraction: true });
     cancelChangesInProgress.next();
     // wrap in try catch for getCategoryInfos call
     try {
@@ -149,13 +148,12 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
 /** @public */
 export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
   const { models, viewport } = props;
-  const telemetryContext = useTelemetryContext();
-  const onFeatureUsed = props.onFeatureUsed ?? ((featureId: string) => telemetryContext.onFeatureUsed({ featureId, reportInteraction: true }));
+  const { onFeatureUsed } = useTelemetryContext();
   const { cancelChangesInProgress } = useSharedTreeContext();
   const translate = useTranslation();
   const onClick = () => {
     // cspell:disable-next-line
-    onFeatureUsed?.("models-tree-hideall");
+    onFeatureUsed({ featureId: "models-tree-hideall", reportInteraction: true });
     cancelChangesInProgress.next();
     viewport.changeModelDisplay({ modelIds: models.map((model) => model.id), display: false });
   };
@@ -171,14 +169,13 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
 /** @public */
 export function InvertButton(props: ModelsTreeHeaderButtonProps) {
   const { models, viewport } = props;
-  const telemetryContext = useTelemetryContext();
-  const onFeatureUsed = props.onFeatureUsed ?? ((featureId: string) => telemetryContext.onFeatureUsed({ featureId, reportInteraction: true }));
+  const { onFeatureUsed } = useTelemetryContext();
   const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContext();
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
   const translate = useTranslation();
   const onClick = async () => {
     // cspell:disable-next-line
-    onFeatureUsed?.("models-tree-invert");
+    onFeatureUsed({ featureId: "models-tree-invert", reportInteraction: true });
     cancelChangesInProgress.next();
     // wrap in try catch for getCategoryInfos call
     try {
@@ -211,15 +208,14 @@ function useAreAllModelsVisible({ modelIds, viewport }: { modelIds: Id64String[]
 /** @public */
 export function View2DButton(props: ModelsTreeHeaderButtonProps) {
   const { models, viewport } = props;
-  const telemetryContext = useTelemetryContext();
-  const onFeatureUsed = props.onFeatureUsed ?? ((featureId: string) => telemetryContext.onFeatureUsed({ featureId, reportInteraction: true }));
+  const { onFeatureUsed } = useTelemetryContext();
   const { cancelChangesInProgress } = useSharedTreeContext();
   const models2d = useMemo(() => models.filter((model) => model.isPlanProjection).map((model) => model.id), [models]);
   const is2dToggleActive = useAreAllModelsVisible({ modelIds: models2d, viewport });
   const translate = useTranslation();
 
   const onClick = () => {
-    onFeatureUsed?.("models-tree-view2d");
+    onFeatureUsed({ featureId: "models-tree-view2d", reportInteraction: true });
     cancelChangesInProgress.next();
     viewport.changeModelDisplay({ modelIds: models2d, display: is2dToggleActive ? false : true });
   };
@@ -235,8 +231,7 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
 /** @public */
 export function View3DButton(props: ModelsTreeHeaderButtonProps) {
   const { models, viewport } = props;
-  const telemetryContext = useTelemetryContext();
-  const onFeatureUsed = props.onFeatureUsed ?? ((featureId: string) => telemetryContext.onFeatureUsed({ featureId, reportInteraction: true }));
+  const { onFeatureUsed } = useTelemetryContext();
   const { cancelChangesInProgress } = useSharedTreeContext();
   const models3d = useMemo(() => {
     return models.filter((model) => !model.isPlanProjection).map((model) => model.id);
@@ -245,7 +240,7 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
   const translate = useTranslation();
 
   const onClick = () => {
-    onFeatureUsed?.("models-tree-view3d");
+    onFeatureUsed?.({ featureId: "models-tree-view3d", reportInteraction: true });
     cancelChangesInProgress.next();
     viewport.changeModelDisplay({ modelIds: models3d, display: is3dToggleActive ? false : true });
   };
@@ -259,12 +254,11 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
 }
 
 /** @public */
-export function ToggleInstancesFocusButton({ disabled, ...props }: { onFeatureUsed?: (feature: string) => void; disabled?: boolean }) {
-  const telemetryContext = useTelemetryContext();
-  const onFeatureUsed = props.onFeatureUsed ?? ((featureId: string) => telemetryContext.onFeatureUsed({ featureId, reportInteraction: true }));
+export function ToggleInstancesFocusButton(props?: { disabled?: boolean }) {
+  const { onFeatureUsed } = useTelemetryContext();
   const { enabled, toggle } = useFocusedInstancesContext();
   const translate = useTranslation();
-  const label = disabled
+  const label = props?.disabled
     ? translate("modelsTree.buttons.toggleFocusMode.disabled.tooltip")
     : enabled
       ? translate("modelsTree.buttons.toggleFocusMode.disable.tooltip")
@@ -276,10 +270,10 @@ export function ToggleInstancesFocusButton({ disabled, ...props }: { onFeatureUs
       label={label}
       onChange={() => {
         // cspell:disable-next-line
-        onFeatureUsed?.("models-tree-instancesfocus");
+        onFeatureUsed({ featureId: "models-tree-instancesfocus", reportInteraction: true });
         toggle();
       }}
-      disabled={disabled}
+      disabled={props?.disabled}
       selected={enabled}
     >
       <Icon href={focusModeSvg} />

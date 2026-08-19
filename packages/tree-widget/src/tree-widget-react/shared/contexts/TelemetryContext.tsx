@@ -17,8 +17,8 @@ const defaultLogger = createLogger(Logger);
 let registeredLogger: ILogger | undefined;
 
 interface TelemetryContext {
-  onPerformanceMeasured: (props: { featureId: string; duration: number }, componentIdentifierPrefix?: string) => void;
-  onFeatureUsed: (props: { featureId?: string; reportInteraction: boolean }, componentIdentifierPrefix?: string) => void;
+  onPerformanceMeasured: (props: { featureId: string; duration: number; componentIdentifierPrefix?: string }) => void;
+  onFeatureUsed: (props: { featureId?: string; reportInteraction: boolean; componentIdentifierPrefix?: string }) => void;
   logger: ILogger;
 }
 
@@ -52,16 +52,16 @@ export function TelemetryContextProvider({
     return {
       // Parent logger is the one which is registered first, so return it if it exists.
       logger: parentContext?.logger ?? logger ?? defaultLogger,
-      onPerformanceMeasured: ({ featureId, duration }, componentIdentifierPrefix = componentIdentifier) => {
+      onPerformanceMeasured: ({ featureId, duration, componentIdentifierPrefix = componentIdentifier }) => {
         if (onPerformanceMeasuredRef.current) {
           onPerformanceMeasuredRef.current(`${componentIdentifierPrefix}-${featureId}`, duration);
           return;
         }
-        parentContext?.onPerformanceMeasured({ featureId, duration }, componentIdentifierPrefix);
+        parentContext?.onPerformanceMeasured({ featureId, duration, componentIdentifierPrefix });
       },
-      onFeatureUsed: ({ featureId, reportInteraction }, componentIdentifierPrefix = componentIdentifier) => {
+      onFeatureUsed: ({ featureId, reportInteraction, componentIdentifierPrefix = componentIdentifier }) => {
         if (!onFeatureUsedRef.current) {
-          parentContext?.onFeatureUsed({ featureId, reportInteraction }, componentIdentifierPrefix);
+          parentContext?.onFeatureUsed({ featureId, reportInteraction, componentIdentifierPrefix });
           return;
         }
         if (reportInteraction !== false) {
