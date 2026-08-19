@@ -5,7 +5,6 @@
 
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { SchemaKey, SchemaMatchType } from "@itwin/ecschema-metadata";
-import { SharedTreeContextProvider } from "../../shared/contexts/SharedTreeContext.js";
 import { TelemetryContextProvider } from "../../shared/contexts/TelemetryContext.js";
 import { useActiveTreeWidgetViewport } from "../../shared/internal/hooks/UseActiveTreeWidgetViewport.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
@@ -58,9 +57,13 @@ export const ClassificationsTreeComponent = (props: ClassificationsTreeComponent
   }
 
   return (
-    <SharedTreeContextProvider showWarning={true}>
+    <TelemetryContextProvider
+      componentIdentifier={ClassificationsTreeComponent.id}
+      onFeatureUsed={props.onFeatureUsed}
+      onPerformanceMeasured={props.onPerformanceMeasured}
+    >
       <ClassificationsTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />
-    </SharedTreeContextProvider>
+    </TelemetryContextProvider>
   );
 };
 
@@ -88,17 +91,13 @@ ClassificationsTreeComponent.isSupportedByIModel = async (imodel: IModelConnecti
 function ClassificationsTreeComponentImpl({
   iModel,
   viewport,
-  onPerformanceMeasured,
-  onFeatureUsed,
   searchText,
   treeLabel,
   ...treeProps
 }: ClassificationsTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
   return (
-    <TelemetryContextProvider componentIdentifier={ClassificationsTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
-      <SelectableTree>
-        <ClassificationsTree {...treeProps} imodel={iModel} activeView={viewport} searchText={searchText} treeLabel={treeLabel} />
-      </SelectableTree>
-    </TelemetryContextProvider>
+    <SelectableTree>
+      <ClassificationsTree {...treeProps} imodel={iModel} activeView={viewport} searchText={searchText} treeLabel={treeLabel} />
+    </SelectableTree>
   );
 }

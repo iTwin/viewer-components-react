@@ -59,15 +59,7 @@ export function createTreeWidget(props: TreeWidgetProps): Widget {
         location: StagePanelLocation.Right,
       },
     },
-    content: (
-      <TreeWidgetComponent
-        localization={props.localization}
-        trees={props.trees}
-        onPerformanceMeasured={props.onPerformanceMeasured}
-        onFeatureUsed={props.onFeatureUsed}
-        logger={props.logger}
-      />
-    ),
+    content: <TreeWidgetComponent {...props} />,
   };
 }
 
@@ -75,13 +67,13 @@ export function createTreeWidget(props: TreeWidgetProps): Widget {
  * Tree widget component which allows selecting which tree to render.
  * @public
  */
-export function TreeWidgetComponent({ localization, logger, onPerformanceMeasured, onFeatureUsed, ...props }: TreeWidgetProps) {
+export function TreeWidgetComponent({ localization, logger, ...props }: TreeWidgetProps) {
   const ref = useTreeWidgetTransientState();
   return (
     <div ref={ref} className="tree-widget">
-      <TreeWidgetContextProvider localization={localization} logger={logger} onPerformanceMeasured={onPerformanceMeasured} onFeatureUsed={onFeatureUsed}>
+      <TreeWidgetContextProvider localization={localization} logger={logger}>
         <ErrorBoundary FallbackComponent={ErrorState}>
-          <TreeWidgetComponentImpl onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured} {...props} />
+          <TreeWidgetComponentImpl {...props} />
         </ErrorBoundary>
       </TreeWidgetContextProvider>
     </div>

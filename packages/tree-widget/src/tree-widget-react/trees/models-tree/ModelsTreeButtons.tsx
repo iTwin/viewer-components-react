@@ -240,7 +240,7 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
   const translate = useTranslation();
 
   const onClick = () => {
-    onFeatureUsed?.({ featureId: "models-tree-view3d", reportInteraction: true });
+    onFeatureUsed({ featureId: "models-tree-view3d", reportInteraction: true });
     cancelChangesInProgress.next();
     viewport.changeModelDisplay({ modelIds: models3d, display: is3dToggleActive ? false : true });
   };

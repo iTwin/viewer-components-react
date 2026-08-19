@@ -44,9 +44,9 @@ The `@itwin/tree-widget-react` package provides React components to build a widg
 
 ## Usage
 
-Typically, the package is used with an [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) based application, but the building blocks may as well be used with any other iTwin.js React app.
+Typically, the package is used with an [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) based application, but the building blocks may also be used with any other iTwin.js React app.
 
-Tree widget components should be wrapped in `TreeWidgetContextProvider`. The provider initializes the contexts and shared resources required by the components:
+Place a single `TreeWidgetContextProvider` near the root of the application, above all tree widget components. The provider initializes localization, logging, and shared tree resources required by the components. Standard tree components initialize their own telemetry context:
 
 <!-- [[include: [TreeWidget.TreeWidgetInitializeImports, TreeWidget.TreeWidgetInitialize], tsx]] -->
 <!-- BEGIN EXTRACTION -->
@@ -54,8 +54,10 @@ Tree widget components should be wrapped in `TreeWidgetContextProvider`. The pro
 ```tsx
 import { TreeWidgetContextProvider } from "@itwin/tree-widget-react";
 
-function MyTreeWidget() {
-  return <TreeWidgetContextProvider localization={IModelApp.localization}>{/* tree components */}</TreeWidgetContextProvider>;
+function App() {
+  return (
+    <TreeWidgetContextProvider localization={IModelApp.localization}>{/* application content, including all tree components */}</TreeWidgetContextProvider>
+  );
 }
 ```
 
@@ -253,7 +255,7 @@ function ModelsTreeWithCustomViewport({ viewport, selectionStorage }: { viewport
 
 ### Tree widget context
 
-When tree components are used directly, they should be wrapped with a single `TreeWidgetContextProvider`. The provider supplies localization, telemetry, logging, and shared tree resources:
+When tree components are used directly, place a single `TreeWidgetContextProvider` near the root of the application instead of wrapping each tree separately. The provider supplies localization, logging, and shared tree resources. Standard tree components supply their own telemetry context:
 
 <!-- [[include: [TreeWidget.TreeIntegrationCommonImports, TreeWidget.TreeWidgetContextExampleImports, TreeWidget.TreeWidgetContextExample], tsx]] -->
 <!-- BEGIN EXTRACTION -->
@@ -1395,9 +1397,9 @@ await Presentation.initialize({ selection: { selectionStorage: getUnifiedSelecti
 
 ### Performance tracking
 
-Components from this package allows consumers to track performance of specific features.
+Components from this package allow consumers to track the performance of specific features.
 
-This can be achieved by passing `onPerformanceMeasured` function to `CategoriesTreeComponent`, `ModelsTreeComponent`, `IModelContentTreeComponent`. The function is invoked with feature id and time elapsed as the component is being used. List of tracked features:
+Pass an `onPerformanceMeasured` callback directly to `CategoriesTreeComponent`, `ClassificationsTreeComponent`, `ExternalSourcesTreeComponent`, `IModelContentTreeComponent`, or `ModelsTreeComponent`. The callback receives the feature ID and elapsed time. Tracked features include:
 
 - `"{tree}-initial-load"` - time it takes to load initial nodes after the tree is created.
 - `"{tree}-hierarchy-level-load"` - time it takes to load child nodes when a node is expanded.
@@ -1407,9 +1409,9 @@ Where `{tree}` specifies which tree component the feature is of.
 
 ### Usage tracking
 
-Components from this package allows consumers to track the usage of specific features.
+Components from this package allow consumers to track the usage of specific features.
 
-This can be achieved by passing `onFeatureUsed` function to `CategoriesTreeComponent`, `ModelsTreeComponent`, `IModelContentTreeComponent`. The function is invoked with feature id as the component is being used. List of tracked features:
+Pass an `onFeatureUsed` callback directly to `CategoriesTreeComponent`, `ClassificationsTreeComponent`, `ExternalSourcesTreeComponent`, `IModelContentTreeComponent`, or `ModelsTreeComponent`. The callback receives the feature ID. Tracked features include:
 
 <!-- cspell:disable -->
 
@@ -1464,7 +1466,7 @@ Nested `TreeWidgetContextProvider` instances inherit the logger from the outer p
 
 ### Example
 
-Supply telemetry callbacks to `TreeWidgetContextProvider` when rendering individual tree components:
+Standard tree components own their telemetry context. Supply telemetry callbacks directly to the component:
 
 <!-- [[include: [TreeWidget.TelemetryTreeComponentExampleImports, TreeWidget.TelemetryTreeWidgetContextProviderImports, TreeWidget.TelemetryTreeComponentExample], tsx]] -->
 <!-- BEGIN EXTRACTION -->
@@ -1476,16 +1478,17 @@ import { TreeWidgetContextProvider } from "@itwin/tree-widget-react";
 
 function MyWidget() {
   return (
-    <TreeWidgetContextProvider
-      localization={IModelApp.localization}
-      onPerformanceMeasured={(feature, elapsedTime) => {
-        console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
-      }}
-      onFeatureUsed={(feature) => {
-        console.log(`TreeWidget [${feature}] used`);
-      }}
-    >
-      <IModelContentTreeComponent treeLabel="IModel content tree" selectionStorage={unifiedSelectionStorage} />
+    <TreeWidgetContextProvider localization={IModelApp.localization}>
+      <IModelContentTreeComponent
+        treeLabel="IModel content tree"
+        selectionStorage={unifiedSelectionStorage}
+        onPerformanceMeasured={(feature, elapsedTime) => {
+          console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
+        }}
+        onFeatureUsed={(feature) => {
+          console.log(`TreeWidget [${feature}] used`);
+        }}
+      />
     </TreeWidgetContextProvider>
   );
 }
@@ -1493,46 +1496,67 @@ function MyWidget() {
 
 <!-- END EXTRACTION -->
 
-Custom tree components use the same `TreeWidgetContextProvider`:
+Custom trees built from lower-level hooks and components do not create a telemetry context. Wrap them with `TelemetryContextProvider` inside `TreeWidgetContextProvider`. The `componentIdentifier` prefixes all feature IDs reported by the custom tree.
 
-<!-- [[include: [TreeWidget.TelemetryTreeWidgetContextProviderImports, TreeWidget.TelemetryCustomTreeExampleImports, TreeWidget.TelemetryCustomTreeExample], tsx]] -->
+When composing a custom tree from a `use*Tree` hook and header buttons, place both under the same `TelemetryContextProvider`. Tree interactions, performance measurements, and header-button usage will then report through the same callbacks and component identifier:
+
+<!-- [[include: [TreeWidget.TelemetryTreeWidgetContextProviderImports, TreeWidget.TelemetryContextProviderImports, TreeWidget.TelemetryCustomTreeExampleImports, TreeWidget.TelemetryCustomTreeExample], tsx]] -->
 <!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { TreeWidgetContextProvider } from "@itwin/tree-widget-react";
 
-import { createTreeWidgetViewport, useCategoriesTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+import { TelemetryContextProvider } from "@itwin/tree-widget-react";
+
+import {
+  CategoriesTreeComponent,
+  createTreeWidgetViewport,
+  SelectableTree,
+  useCategoriesTree,
+  useCategoriesTreeButtonProps,
+  VisibilityTree,
+  VisibilityTreeRenderer,
+} from "@itwin/tree-widget-react";
 
 function MyWidget({ viewport }: { viewport: Viewport }) {
   return (
-    <TreeWidgetContextProvider
-      localization={IModelApp.localization}
-      componentIdentifier="MyTree"
-      onPerformanceMeasured={(feature, elapsedTime) => {
-        console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
-      }}
-      onFeatureUsed={(feature) => {
-        console.log(`TreeWidget [${feature}] used`);
-      }}
-    >
-      <MyTree viewport={viewport} />
+    <TreeWidgetContextProvider localization={IModelApp.localization}>
+      <TelemetryContextProvider
+        componentIdentifier="MyTree"
+        onPerformanceMeasured={(feature, elapsedTime) => {
+          console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
+        }}
+        onFeatureUsed={(feature) => {
+          console.log(`TreeWidget [${feature}] used`);
+        }}
+      >
+        <MyTree viewport={viewport} />
+      </TelemetryContextProvider>
     </TreeWidgetContextProvider>
   );
 }
 
 function MyTree({ viewport }: { viewport: Viewport }) {
   const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
-  const { treeProps, getTreeItemProps } = useCategoriesTree({ activeView });
+  const { buttonProps, onCategoriesFiltered } = useCategoriesTreeButtonProps({ viewport: activeView });
+  const { treeProps, getTreeItemProps } = useCategoriesTree({ activeView, onCategoriesFiltered });
   return (
-    // VisibilityTree will use the provided tree widget context to report used features and their performance
-    <VisibilityTree
-      {...treeProps}
-      selectionStorage={unifiedSelectionStorage}
-      imodel={imodelConnection}
-      treeRenderer={(rendererProps) => (
-        <VisibilityTreeRenderer {...rendererProps} treeLabel="My tree" getTreeItemProps={(node) => getTreeItemProps(node, rendererProps)} />
-      )}
-    />
+    <SelectableTree
+      buttons={[
+        <CategoriesTreeComponent.ShowAllButton {...buttonProps} key="show-all" />,
+        <CategoriesTreeComponent.HideAllButton {...buttonProps} key="hide-all" />,
+      ]}
+    >
+      {/* The tree and header buttons report through the same telemetry context. */}
+      <VisibilityTree
+        {...treeProps}
+        selectionStorage={unifiedSelectionStorage}
+        imodel={imodelConnection}
+        treeRenderer={(rendererProps) => (
+          <VisibilityTreeRenderer {...rendererProps} treeLabel="My tree" getTreeItemProps={(node) => getTreeItemProps(node, rendererProps)} />
+        )}
+      />
+    </SelectableTree>
   );
   // see "Custom trees" section for more example implementations
 }

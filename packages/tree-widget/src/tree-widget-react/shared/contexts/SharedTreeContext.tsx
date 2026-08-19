@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 import { Subject } from "rxjs";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { BaseIdsCache } from "../internal/caches/BaseIdsCache.js";
@@ -33,24 +33,9 @@ export function useSharedTreeContext(): SharedTreeContext {
 }
 
 /** @internal */
-export function SharedTreeContextProvider({ children, showWarning }: PropsWithChildren<{ showWarning?: boolean }>) {
-  const context = useContext(sharedTreeContext);
-
-  if (context) {
-    return children;
-  }
-  return <SharedTreeContextProviderImpl showWarning={showWarning}>{children}</SharedTreeContextProviderImpl>;
-}
-
-function SharedTreeContextProviderImpl({ children, showWarning }: PropsWithChildren<{ showWarning?: boolean }>) {
+export function SharedTreeContextProvider({ children }: PropsWithChildren) {
   const { getCache } = useIdsCache();
   const [cancelChangesInProgress] = useState(() => new Subject<void>());
-  useEffect(() => {
-    if (showWarning) {
-      // eslint-disable-next-line no-console
-      console.warn("Wrap tree components with a single `TreeWidgetContextProvider` to provide shared tree resources.");
-    }
-  }, [showWarning]);
   const getBaseIdsCache = useCallback(
     ({ elementClassName, type, imodel, excludedElementClassNames }: Omit<BaseIdsCacheProps, "queryExecutor"> & { imodel: IModelConnection }) => {
       return getCache({

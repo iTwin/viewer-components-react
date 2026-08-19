@@ -420,6 +420,14 @@ interface LoadedTreeItemVisibilityButtonState {
 // @beta
 export const LOCALIZATION_NAMESPACES: string[];
 
+// @beta
+export function LocalizationContextProvider(input: PropsWithChildren<LocalizationContextProviderProps>): JSX_2.Element;
+
+// @beta
+interface LocalizationContextProviderProps {
+    localization: Pick<Localization, "getLocalizedString">;
+}
+
 // @public
 interface ModelInfo {
     // (undocumented)
@@ -580,6 +588,16 @@ interface StandardTreeLabels {
 }
 
 // @beta
+export function TelemetryContextProvider(input: PropsWithChildren<TelemetryContextProviderProps>): _$react_jsx_runtime0.JSX.Element;
+
+// @beta (undocumented)
+export interface TelemetryContextProviderProps {
+    componentIdentifier: string;
+    onFeatureUsed?: (featureId: string) => void;
+    onPerformanceMeasured?: (featureId: string, duration: number) => void;
+}
+
+// @beta
 export function Tree(input: TreeProps): _$react_jsx_runtime0.JSX.Element;
 
 export { TreeActionBase }
@@ -650,8 +668,6 @@ interface TreeRenderProps {
 // @public (undocumented)
 interface TreeToolbarButtonProps {
     // (undocumented)
-    onFeatureUsed?: (feature: string) => void;
-    // (undocumented)
     viewport: TreeWidgetViewport;
 }
 
@@ -659,15 +675,12 @@ interface TreeToolbarButtonProps {
 export function TreeWidgetComponent(input: TreeWidgetProps): _$react_jsx_runtime0.JSX.Element;
 
 // @beta
-export function TreeWidgetContextProvider(input: PropsWithChildren<TreeWidgetContextProviderProps>): _$react_jsx_runtime0.JSX.Element;
+export function TreeWidgetContextProvider(input: PropsWithChildren<TreeWidgetContextProviderProps>): string | number | boolean | Iterable<_$react.ReactNode> | _$react_jsx_runtime0.JSX.Element | null | undefined;
 
 // @beta
 export interface TreeWidgetContextProviderProps {
-    componentIdentifier?: string;
     localization: Pick<Localization, "getLocalizedString">;
     logger?: ILogger;
-    onFeatureUsed?: (featureId: string) => void;
-    onPerformanceMeasured?: (featureId: string, duration: number) => void;
 }
 
 // @public

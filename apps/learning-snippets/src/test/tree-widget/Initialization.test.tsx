@@ -14,12 +14,16 @@ describe("Tree widget", () => {
   describe("Learning snippets", () => {
     it("provides required tree widget context", () => {
       // __PUBLISH_EXTRACT_START__ TreeWidget.TreeWidgetInitialize
-      function MyTreeWidget() {
-        return <TreeWidgetContextProvider localization={IModelApp.localization}>{/* tree components */}</TreeWidgetContextProvider>;
+      function App() {
+        return (
+          <TreeWidgetContextProvider localization={IModelApp.localization}>
+            {/* application content, including all tree components */}
+          </TreeWidgetContextProvider>
+        );
       }
       // __PUBLISH_EXTRACT_END__
 
-      expect(() => render(<MyTreeWidget />)).not.toThrow();
+      expect(() => render(<App />)).not.toThrow();
     });
   });
 });

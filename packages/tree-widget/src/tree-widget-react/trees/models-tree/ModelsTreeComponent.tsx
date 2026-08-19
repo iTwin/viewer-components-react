@@ -7,7 +7,7 @@ import { Fragment, useEffect } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Skeleton } from "@mui/material";
 import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../shared/contexts/FocusedInstancesContext.js";
-import { SharedTreeContextProvider, useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
+import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
 import { TelemetryContextProvider } from "../../shared/contexts/TelemetryContext.js";
 import { useActiveTreeWidgetViewport } from "../../shared/internal/hooks/UseActiveTreeWidgetViewport.js";
 import { getClassesByView } from "../../shared/internal/Utils.js";
@@ -117,9 +117,13 @@ export const ModelsTreeComponent: ModelsTreeComponentType = (props) => {
 
   return (
     <FocusedInstancesContextProvider selectionStorage={props.selectionStorage} imodelKey={iModel.key}>
-      <SharedTreeContextProvider showWarning={true}>
+      <TelemetryContextProvider
+        componentIdentifier={ModelsTreeComponent.id}
+        onFeatureUsed={props.onFeatureUsed}
+        onPerformanceMeasured={props.onPerformanceMeasured}
+      >
         <ModelsTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />
-      </SharedTreeContextProvider>
+      </TelemetryContextProvider>
     </FocusedInstancesContextProvider>
   );
 };
@@ -144,8 +148,6 @@ function ModelsTreeComponentImpl({
   iModel,
   viewport,
   headerButtons,
-  onFeatureUsed,
-  onPerformanceMeasured,
   searchText,
   treeLabel,
   ...treeProps
@@ -158,14 +160,14 @@ function ModelsTreeComponentImpl({
     getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" }).elementModelCategoriesLoaded();
   const buttons: ReactNode = isLoaded
     ? headerButtons
-      ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ ...buttonProps, onFeatureUsed })}</Fragment>)
+      ? headerButtons.map((btn, index) => <Fragment key={index}>{btn(buttonProps)}</Fragment>)
       : [
-          <ShowAllButton {...buttonProps} key="show-all-btn" onFeatureUsed={onFeatureUsed} />,
-          <HideAllButton {...buttonProps} key="hide-all-btn" onFeatureUsed={onFeatureUsed} />,
-          <InvertButton {...buttonProps} key="invert-all-btn" onFeatureUsed={onFeatureUsed} />,
-          <View2DButton {...buttonProps} key="view-2d-btn" onFeatureUsed={onFeatureUsed} />,
-          <View3DButton {...buttonProps} key="view-3d-btn" onFeatureUsed={onFeatureUsed} />,
-          <ToggleInstancesFocusButton disabled={searchText !== undefined} key="toggle-instances-focus-btn" onFeatureUsed={onFeatureUsed} />,
+          <ShowAllButton {...buttonProps} key="show-all-btn" />,
+          <HideAllButton {...buttonProps} key="hide-all-btn" />,
+          <InvertButton {...buttonProps} key="invert-all-btn" />,
+          <View2DButton {...buttonProps} key="view-2d-btn" />,
+          <View3DButton {...buttonProps} key="view-3d-btn" />,
+          <ToggleInstancesFocusButton disabled={searchText !== undefined} key="toggle-instances-focus-btn" />,
         ]
     : Array.from({ length: headerButtons?.length ?? 6 }, (_, index) => <Skeleton variant={"rounded"} width={24} height={24} key={index} />);
 
@@ -176,10 +178,8 @@ function ModelsTreeComponentImpl({
   }, [instanceFocusEnabled, searchText, toggleInstanceFocus]);
 
   return (
-    <TelemetryContextProvider componentIdentifier={ModelsTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
-      <SelectableTree buttons={buttons}>
-        <ModelsTree {...treeProps} imodel={iModel} activeView={viewport} searchText={searchText} treeLabel={treeLabel} onModelsFiltered={onModelsFiltered} />
-      </SelectableTree>
-    </TelemetryContextProvider>
+    <SelectableTree buttons={buttons}>
+      <ModelsTree {...treeProps} imodel={iModel} activeView={viewport} searchText={searchText} treeLabel={treeLabel} onModelsFiltered={onModelsFiltered} />
+    </SelectableTree>
   );
 }

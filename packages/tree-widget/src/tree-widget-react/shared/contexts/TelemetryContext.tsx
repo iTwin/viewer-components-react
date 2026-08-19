@@ -3,28 +3,24 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { createContext, useCallback, useContext, useEffect, useMemo } from "react";
-import { Logger } from "@itwin/core-bentley";
-import { createLogger } from "@itwin/presentation-core-interop";
-import { setLogger as setHierarchiesLogger } from "@itwin/presentation-hierarchies";
-import { setLogger as setHierarchiesReactLogger } from "@itwin/presentation-hierarchies-react";
+import { createContext, useCallback, useContext, useMemo } from "react";
 import { useLatest } from "../internal/hooks/UseLatest.js";
 
 import type { PropsWithChildren } from "react";
-import type { ILogger } from "@itwin/presentation-shared";
-
-const defaultLogger = createLogger(Logger);
-let registeredLogger: ILogger | undefined;
 
 interface TelemetryContext {
-  onPerformanceMeasured: (props: { featureId: string; duration: number; componentIdentifierPrefix?: string }) => void;
-  onFeatureUsed: (props: { featureId?: string; reportInteraction: boolean; componentIdentifierPrefix?: string }) => void;
-  logger: ILogger;
+  onPerformanceMeasured: (props: { featureId: string; duration: number }) => void;
+  onFeatureUsed: (props: { featureId?: string; reportInteraction: boolean }) => void;
 }
 
-const telemetryContext = createContext<TelemetryContext | undefined>(undefined);
+const defaultContextValue: TelemetryContext = {
+  onPerformanceMeasured: () => {},
+  onFeatureUsed: () => {},
+};
 
-/** @internal */
+const telemetryContext = createContext<TelemetryContext>(defaultContextValue);
+
+/** @beta */
 export interface TelemetryContextProviderProps {
   /** Callback that is invoked when performance of tracked feature is measured. */
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
@@ -32,81 +28,46 @@ export interface TelemetryContextProviderProps {
   onFeatureUsed?: (featureId: string) => void;
   /** Unique identifier that is appended to feature id to help track which component used that feature. */
   componentIdentifier: string;
-  logger?: ILogger;
 }
 
-/** @internal */
+/**
+ * Provides telemetry reporting for a tree and prefixes reported feature IDs with `componentIdentifier`.
+ *
+ * Standard tree components create this context automatically. When composing a custom tree from
+ * `use*Tree` hooks, wrap the tree and any directly rendered header buttons with this provider so
+ * they report through the same callbacks and component identifier.
+ *
+ * @beta
+ */
 export function TelemetryContextProvider({
   children,
   onPerformanceMeasured,
   onFeatureUsed,
   componentIdentifier,
-  logger,
 }: PropsWithChildren<TelemetryContextProviderProps>) {
-  const parentContext = useContext(telemetryContext);
-
   const onPerformanceMeasuredRef = useLatest(onPerformanceMeasured);
   const onFeatureUsedRef = useLatest(onFeatureUsed);
 
   const contextValue = useMemo<TelemetryContext>(() => {
     return {
-      // Parent logger is the one which is registered first, so return it if it exists.
-      logger: parentContext?.logger ?? logger ?? defaultLogger,
-      onPerformanceMeasured: ({ featureId, duration, componentIdentifierPrefix = componentIdentifier }) => {
-        if (onPerformanceMeasuredRef.current) {
-          onPerformanceMeasuredRef.current(`${componentIdentifierPrefix}-${featureId}`, duration);
-          return;
-        }
-        parentContext?.onPerformanceMeasured({ featureId, duration, componentIdentifierPrefix });
-      },
-      onFeatureUsed: ({ featureId, reportInteraction, componentIdentifierPrefix = componentIdentifier }) => {
-        if (!onFeatureUsedRef.current) {
-          parentContext?.onFeatureUsed({ featureId, reportInteraction, componentIdentifierPrefix });
-          return;
-        }
+      onPerformanceMeasured: ({ featureId, duration }) => onPerformanceMeasuredRef.current?.(`${componentIdentifier}-${featureId}`, duration),
+      onFeatureUsed: ({ featureId, reportInteraction }) => {
         if (reportInteraction !== false) {
-          onFeatureUsedRef.current(`use-${componentIdentifierPrefix}`);
+          onFeatureUsedRef.current?.(`use-${componentIdentifier}`);
         }
         if (featureId) {
-          onFeatureUsedRef.current(`${componentIdentifierPrefix}-${featureId}`);
+          onFeatureUsedRef.current?.(`${componentIdentifier}-${featureId}`);
         }
       },
     };
-  }, [componentIdentifier, onPerformanceMeasuredRef, onFeatureUsedRef, parentContext, logger]);
-
-  useEffect(() => {
-    // Parent context already registered a logger, no need to do anything here.
-    if (parentContext) {
-      return;
-    }
-
-    const didRegister = registeredLogger === undefined;
-    if (didRegister) {
-      registeredLogger = contextValue.logger;
-      setHierarchiesLogger(contextValue.logger);
-      setHierarchiesReactLogger(contextValue.logger);
-    }
-    return () => {
-      if (didRegister) {
-        registeredLogger = undefined;
-        setHierarchiesLogger(undefined);
-        setHierarchiesReactLogger(undefined);
-      }
-    };
-  }, [contextValue.logger, parentContext]);
+  }, [componentIdentifier, onPerformanceMeasuredRef, onFeatureUsedRef]);
 
   return <telemetryContext.Provider value={contextValue}>{children}</telemetryContext.Provider>;
 }
 
-const defaultContextValue: TelemetryContext = {
-  onPerformanceMeasured: () => {},
-  onFeatureUsed: () => {},
-  logger: defaultLogger,
-};
-
 /** @internal */
 export function useTelemetryContext() {
-  return useContext(telemetryContext) ?? defaultContextValue;
+  return useContext(telemetryContext);
 }
 
 type TrackedFeatures =
@@ -117,7 +78,6 @@ type TrackedFeatures =
   | "zoom-to-node"
   | "error-timeout"
   | "error-unknown";
-
 interface UseReportingActionProps<TAction> {
   action: TAction;
   featureId?: TrackedFeatures;

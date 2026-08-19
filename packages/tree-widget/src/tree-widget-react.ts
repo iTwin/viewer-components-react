@@ -10,4 +10,6 @@ export type { TreeDefinition } from "./tree-widget-react/TreeWidgetComponentImpl
 export { SelectableTree } from "./tree-widget-react/tree-header/SelectableTree.js";
 export * from "./tree-widget-react/trees/index.js";
 
-export { LOCALIZATION_NAMESPACES } from "./tree-widget-react/shared/contexts/LocalizationContext.js";
+export { LocalizationContextProvider, LOCALIZATION_NAMESPACES } from "./tree-widget-react/shared/contexts/LocalizationContext.js";
+export { TelemetryContextProvider } from "./tree-widget-react/shared/contexts/TelemetryContext.js";
+export type { TelemetryContextProviderProps } from "./tree-widget-react/shared/contexts/TelemetryContext.js";

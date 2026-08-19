@@ -15,6 +15,7 @@ beta;interface;HierarchyVisibilityHandler
 beta;const;IModelContentTreeComponent
 beta;function;IModelContentTreeIcon
 beta;const;LOCALIZATION_NAMESPACES
+beta;function;LocalizationContextProvider
 public;const;ModelsTreeComponent
 beta;function;ModelsTreeIcon
 beta;namespace;ModelsTreeNode
@@ -22,6 +23,8 @@ beta;interface;ModelsTreeVisibilityHandlerOverrides
 beta;class;SearchLimitExceededError
 beta;function;SelectableTree
 beta;function;SkeletonTree
+beta;function;TelemetryContextProvider
+beta;interface;TelemetryContextProviderProps
 beta;function;Tree
 public;interface;TreeDefinition
 beta;function;TreeRenderer
