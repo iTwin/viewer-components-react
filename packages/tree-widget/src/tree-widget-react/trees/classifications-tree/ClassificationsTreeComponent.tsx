@@ -5,9 +5,9 @@
 
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { SchemaKey, SchemaMatchType } from "@itwin/ecschema-metadata";
+import { SharedTreeContextProvider } from "../../shared/contexts/SharedTreeContext.js";
+import { TelemetryContextProvider } from "../../shared/contexts/UseTelemetryContext.js";
 import { useActiveTreeWidgetViewport } from "../../shared/internal/hooks/UseActiveTreeWidgetViewport.js";
-import { SharedTreeContextProviderInternal } from "../../shared/internal/SharedTreeContextProviderInternal.js";
-import { TelemetryContextProvider } from "../../shared/UseTelemetryContext.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { ClassificationsTree } from "./ClassificationsTree.js";
 
@@ -46,7 +46,7 @@ interface ClassificationsTreeComponentProps extends Pick<
 /**
  * A component that renders `ClassificationsTree` with active iModel and viewport.
  *
- * **Note:** Wrap tree components with a single `SharedTreeContextProvider` to improve trees' performance.
+ * **Note:** Wrap tree components with a single `TreeWidgetContextProvider` to provide shared tree resources.
  * @alpha
  */
 export const ClassificationsTreeComponent = (props: ClassificationsTreeComponentProps) => {
@@ -58,9 +58,9 @@ export const ClassificationsTreeComponent = (props: ClassificationsTreeComponent
   }
 
   return (
-    <SharedTreeContextProviderInternal showWarning={true}>
+    <SharedTreeContextProvider showWarning={true}>
       <ClassificationsTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />
-    </SharedTreeContextProviderInternal>
+    </SharedTreeContextProvider>
   );
 };
 

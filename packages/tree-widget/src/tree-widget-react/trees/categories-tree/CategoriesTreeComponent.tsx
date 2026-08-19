@@ -6,10 +6,10 @@
 import { Fragment } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Skeleton } from "@mui/material";
+import { SharedTreeContextProvider, useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
+import { TelemetryContextProvider } from "../../shared/contexts/UseTelemetryContext.js";
 import { useActiveTreeWidgetViewport } from "../../shared/internal/hooks/UseActiveTreeWidgetViewport.js";
-import { SharedTreeContextProviderInternal, useSharedTreeContextInternal } from "../../shared/internal/SharedTreeContextProviderInternal.js";
 import { getClassesByView } from "../../shared/internal/Utils.js";
-import { TelemetryContextProvider } from "../../shared/UseTelemetryContext.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { CategoriesTree } from "./CategoriesTree.js";
 import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonProps } from "./CategoriesTreeButtons.js";
@@ -75,7 +75,7 @@ interface CategoriesTreeComponentType {
 /**
  * A component that renders `CategoriesTree` and a header with search capabilities and header buttons.
  *
- * **Note:** Wrap tree components with a single `SharedTreeContextProvider` to improve trees' performance.`
+ * **Note:** Wrap tree components with a single `TreeWidgetContextProvider` to provide shared tree resources.
  * @public
  */
 export const CategoriesTreeComponent: CategoriesTreeComponentType = (props: CategoriesTreeComponentProps) => {
@@ -87,9 +87,9 @@ export const CategoriesTreeComponent: CategoriesTreeComponentType = (props: Cate
   }
 
   return (
-    <SharedTreeContextProviderInternal showWarning={true}>
+    <SharedTreeContextProvider showWarning={true}>
       <CategoriesTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />
-    </SharedTreeContextProviderInternal>
+    </SharedTreeContextProvider>
   );
 };
 
@@ -114,7 +114,7 @@ function CategoriesTreeComponentImpl({
   ...treeProps
 }: CategoriesTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
   const { buttonProps, onCategoriesFiltered } = useCategoriesTreeButtonProps({ viewport });
-  const { getBaseIdsCache } = useSharedTreeContextInternal();
+  const { getBaseIdsCache } = useSharedTreeContext();
   const viewType = viewport.viewType === "2d" ? "2d" : "3d";
   const isLoaded =
     buttonProps.categories.length > 0 ||

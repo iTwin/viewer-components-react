@@ -7,7 +7,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { useCallback, useMemo } from "react";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
-import { createTreeWidgetViewport, SharedTreeContextProvider, useModelsTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+import { createTreeWidgetViewport, TreeWidgetContextProvider, useModelsTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 import { createStorage } from "@itwin/unified-selection";
 import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
 import { buildIModel } from "../../utils/IModelUtils.js";
@@ -95,14 +95,14 @@ describe("Tree widget", () => {
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText, queryByText } = render(
-            <SharedTreeContextProvider>
+            <TreeWidgetContextProvider localization={IModelApp.localization}>
               <CustomModelsTreeComponentWithTargetItems
                 selectionStorage={unifiedSelectionStorage}
                 imodel={imodelConnection}
                 viewport={testViewport}
                 targetItems={[keys.physicalModel]}
               />
-            </SharedTreeContextProvider>,
+            </TreeWidgetContextProvider>,
           );
 
           await waitFor(() => {

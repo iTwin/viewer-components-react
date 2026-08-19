@@ -5,7 +5,7 @@
 
 import { beforeEach, describe, expect, it } from "vitest";
 import { createStorage } from "@itwin/unified-selection";
-import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../tree-widget-react/shared/FocusedInstancesContext.js";
+import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../tree-widget-react/shared/contexts/FocusedInstancesContext.js";
 import { act, createAsyncIterator, renderHook, waitFor } from "../TestUtils.js";
 
 import type { PropsWithChildren } from "react";

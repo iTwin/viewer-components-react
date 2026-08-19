@@ -11,7 +11,7 @@ import { IModelApp } from "@itwin/core-frontend";
 import { useMemo } from "react";
 // __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ TreeWidget.TreeIntegrationCommonImports
-import { ModelsTreeComponent, SharedTreeContextProvider } from "@itwin/tree-widget-react";
+import { ModelsTreeComponent, TreeWidgetContextProvider } from "@itwin/tree-widget-react";
 import type { SelectionStorage } from "@itwin/unified-selection";
 // __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ TreeWidget.TreeWidgetViewportExampleImports
@@ -21,7 +21,7 @@ import type { Viewport } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_START__ TreeWidget.CustomTreeWidgetViewportExampleImports
 import type { TreeWidgetViewport } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
-// __PUBLISH_EXTRACT_START__ TreeWidget.SharedTreeContextExampleImports
+// __PUBLISH_EXTRACT_START__ TreeWidget.TreeWidgetContextExampleImports
 import { CategoriesTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 import { createStorage } from "@itwin/unified-selection";
@@ -68,9 +68,9 @@ describe("Tree widget", () => {
         function ModelsTreeWithViewport({ viewport, selectionStorage }: ModelsTreeWithViewportProps) {
           const treeViewport = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
           return (
-            <SharedTreeContextProvider>
+            <TreeWidgetContextProvider localization={IModelApp.localization}>
               <ModelsTreeComponent treeLabel="Models tree" viewport={treeViewport} selectionStorage={selectionStorage} />
-            </SharedTreeContextProvider>
+            </TreeWidgetContextProvider>
           );
         }
         // __PUBLISH_EXTRACT_END__
@@ -100,9 +100,9 @@ describe("Tree widget", () => {
 
         function ModelsTreeWithCustomViewport({ viewport, selectionStorage }: { viewport: CustomViewport; selectionStorage: SelectionStorage }) {
           return (
-            <SharedTreeContextProvider>
+            <TreeWidgetContextProvider localization={IModelApp.localization}>
               <ModelsTreeComponent treeLabel="Models tree" viewport={viewport} selectionStorage={selectionStorage} />
-            </SharedTreeContextProvider>
+            </TreeWidgetContextProvider>
           );
         }
         // __PUBLISH_EXTRACT_END__
@@ -129,10 +129,10 @@ describe("Tree widget", () => {
         vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(viewport);
         vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
 
-        // __PUBLISH_EXTRACT_START__ TreeWidget.SharedTreeContextExample
+        // __PUBLISH_EXTRACT_START__ TreeWidget.TreeWidgetContextExample
         function TreesWithSharedContext({ selectionStorage }: { selectionStorage: SelectionStorage }) {
           return (
-            <SharedTreeContextProvider>
+            <TreeWidgetContextProvider localization={IModelApp.localization}>
               <ModelsTreeComponent
                 treeLabel="Models tree"
                 selectionStorage={selectionStorage}
@@ -149,7 +149,7 @@ describe("Tree widget", () => {
                   (props) => <CategoriesTreeComponent.HideAllButton {...props} key="hide-all" />,
                 ]}
               />
-            </SharedTreeContextProvider>
+            </TreeWidgetContextProvider>
           );
         }
         // __PUBLISH_EXTRACT_END__

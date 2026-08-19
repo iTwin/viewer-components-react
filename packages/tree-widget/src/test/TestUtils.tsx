@@ -7,7 +7,6 @@ import { afterAll, beforeAll, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { TreeWidget } from "../tree-widget-react/TreeWidget.js";
 
 import type { ReactElement } from "react";
 import type { RenderHookOptions, RenderHookResult, RenderOptions, RenderResult } from "@testing-library/react";
@@ -22,13 +21,11 @@ export class TestUtils {
     }
 
     await UiFramework.initialize();
-    await TreeWidget.initialize();
     TestUtils._initialized = true;
   }
 
   public static terminate() {
     UiFramework.terminate();
-    TreeWidget.terminate();
     TestUtils._initialized = false;
   }
 }

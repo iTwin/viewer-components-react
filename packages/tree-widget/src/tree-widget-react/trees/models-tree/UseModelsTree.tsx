@@ -15,9 +15,9 @@ import {
   TooManySearchMatches,
   UnknownInstanceFocusError,
 } from "../../shared/components/EmptyTree.js";
+import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
 import { useCachedVisibility } from "../../shared/internal/hooks/UseCachedVisibility.js";
 import { useGuid } from "../../shared/internal/hooks/UseGuid.js";
-import { useSharedTreeContextInternal } from "../../shared/internal/SharedTreeContextProviderInternal.js";
 import { mergeWithDefaults, stableStringify } from "../../shared/internal/Utils.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 import { useSearchPaths } from "./internal/UseSearchPaths.js";
@@ -131,7 +131,7 @@ interface UseModelsTreeResult {
 /**
  * Custom hook to create and manage state for the models tree.
  *
- * **Note:** Requires `SharedTreeContextProvider` to be present in components tree above.
+ * **Note:** Requires `TreeWidgetContextProvider` to be present in components tree above.
  * @beta
  */
 export function useModelsTree({
@@ -302,7 +302,7 @@ function useModelsTreeIdsCache({
   imodel: IModelConnection;
   hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
 }): ModelsTreeIdsCache {
-  const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
+  const { getBaseIdsCache, getCache } = useSharedTreeContext();
   const baseIdsCache = getBaseIdsCache({
     type: "3d",
     elementClassName: hierarchyConfig.elements.baseClass,

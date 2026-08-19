@@ -8,12 +8,12 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { withEditTxn } from "@itwin/core-backend";
 import { Id64 } from "@itwin/core-bentley";
 import { act, renderHook } from "@testing-library/react";
+import { SharedTreeContextProvider } from "../../../tree-widget-react/shared/contexts/SharedTreeContext.js";
 import {
   CLASS_NAME_Classification,
   CLASS_NAME_ClassificationTable,
   CLASS_NAME_GeometricElement3d,
 } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
-import { SharedTreeContextProvider } from "../../../tree-widget-react/shared/SharedTreeContextProvider.js";
 import { useClassificationsTreeDefinition } from "../../../tree-widget-react/trees/classifications-tree/UseClassificationsTreeDefinition.js";
 import { buildIModel } from "../../IModelUtils.js";
 import { initializeITwinJs, terminateITwinJs } from "../../Initialize.js";

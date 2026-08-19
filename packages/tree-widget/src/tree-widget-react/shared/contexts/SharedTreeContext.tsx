@@ -6,49 +6,49 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { Subject } from "rxjs";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { BaseIdsCache } from "./caches/BaseIdsCache.js";
-import { useIdsCache } from "./hooks/UseIdsCache.js";
+import { BaseIdsCache } from "../internal/caches/BaseIdsCache.js";
+import { useIdsCache } from "../internal/hooks/UseIdsCache.js";
 
 import type { PropsWithChildren } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { BaseIdsCacheProps } from "./caches/BaseIdsCache.js";
-import type { GetCacheProps } from "./hooks/UseIdsCache.js";
+import type { BaseIdsCacheProps } from "../internal/caches/BaseIdsCache.js";
+import type { GetCacheProps } from "../internal/hooks/UseIdsCache.js";
 
 /** @internal */
-interface SharedTreeContextInternal {
+interface SharedTreeContext {
   getCache: <TCache extends object = {}>(props: GetCacheProps<TCache>) => TCache;
   getBaseIdsCache: (props: Omit<BaseIdsCacheProps, "queryExecutor"> & { imodel: IModelConnection }) => BaseIdsCache;
   cancelChangesInProgress: Subject<void>;
 }
 
-const treeWidgetContextInternal = createContext<SharedTreeContextInternal | undefined>(undefined);
+const sharedTreeContext = createContext<SharedTreeContext | undefined>(undefined);
 
 /** @internal */
-export function useSharedTreeContextInternal(): SharedTreeContextInternal {
-  const context = useContext(treeWidgetContextInternal);
+export function useSharedTreeContext(): SharedTreeContext {
+  const context = useContext(sharedTreeContext);
   if (!context) {
-    throw new Error("Requires `SharedTreeContextProvider` to be present in components tree above.");
+    throw new Error("Requires `TreeWidgetContextProvider` to be present in components tree above.");
   }
   return context;
 }
 
 /** @internal */
-export function SharedTreeContextProviderInternal({ children, showWarning }: PropsWithChildren<{ showWarning?: boolean }>) {
-  const context = useContext(treeWidgetContextInternal);
+export function SharedTreeContextProvider({ children, showWarning }: PropsWithChildren<{ showWarning?: boolean }>) {
+  const context = useContext(sharedTreeContext);
 
   if (context) {
     return children;
   }
-  return <SharedTreeContextProviderInternalImpl showWarning={showWarning}>{children}</SharedTreeContextProviderInternalImpl>;
+  return <SharedTreeContextProviderImpl showWarning={showWarning}>{children}</SharedTreeContextProviderImpl>;
 }
 
-function SharedTreeContextProviderInternalImpl({ children, showWarning }: PropsWithChildren<{ showWarning?: boolean }>) {
+function SharedTreeContextProviderImpl({ children, showWarning }: PropsWithChildren<{ showWarning?: boolean }>) {
   const { getCache } = useIdsCache();
   const [cancelChangesInProgress] = useState(() => new Subject<void>());
   useEffect(() => {
     if (showWarning) {
       // eslint-disable-next-line no-console
-      console.warn("Wrap tree components with a single `SharedTreeContextProvider` to improve trees' performance.");
+      console.warn("Wrap tree components with a single `TreeWidgetContextProvider` to provide shared tree resources.");
     }
   }, [showWarning]);
   const getBaseIdsCache = useCallback(
@@ -61,5 +61,5 @@ function SharedTreeContextProviderInternalImpl({ children, showWarning }: PropsW
     },
     [getCache],
   );
-  return <treeWidgetContextInternal.Provider value={{ getCache, getBaseIdsCache, cancelChangesInProgress }}>{children}</treeWidgetContextInternal.Provider>;
+  return <sharedTreeContext.Provider value={{ getCache, getBaseIdsCache, cancelChangesInProgress }}>{children}</sharedTreeContext.Provider>;
 }

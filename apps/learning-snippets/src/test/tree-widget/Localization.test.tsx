@@ -15,8 +15,8 @@ import { LOCALIZATION_NAMESPACES } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_START__ TreeWidget.LocalizationCreateTreeWidgetImports
 import { createTreeWidget, ModelsTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
-// __PUBLISH_EXTRACT_START__ TreeWidget.LocalizationContextProviderImports
-import { LocalizationContextProvider, SharedTreeContextProvider } from "@itwin/tree-widget-react";
+// __PUBLISH_EXTRACT_START__ TreeWidget.TreeWidgetContextProviderImports
+import { TreeWidgetContextProvider } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 import { UiItemsManager } from "@itwin/appui-react";
 import { createStorage } from "@itwin/unified-selection";
@@ -80,7 +80,7 @@ describe("Tree widget", () => {
         const getLocalizedStringSpy = vi.spyOn(IModelApp.localization, "getLocalizedString");
 
         // __PUBLISH_EXTRACT_START__ TreeWidget.LocalizationCreateTreeWidget
-        // When using `createTreeWidget` pass `localization` object and `LocalizationContextProvider` will be added at the widget scope automatically.
+        // When using `createTreeWidget`, the `localization` object is supplied to `TreeWidgetContextProvider` automatically.
         UiItemsManager.register({
           id: "tree-widget-provider",
           getWidgets: () =>
@@ -107,29 +107,27 @@ describe("Tree widget", () => {
         expect(getLocalizedStringSpy).toHaveBeenCalled();
       });
 
-      it("localizes strings when components wrapped in <LocalizationContextProvider />", async () => {
+      it("localizes strings when components are wrapped in <TreeWidgetContextProvider />", async () => {
         const testViewport = getTestViewer(imodelConnection, true);
         const unifiedSelectionStorage = createStorage();
         vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
         vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
         const getLocalizedStringSpy = vi.spyOn(IModelApp.localization, "getLocalizedString");
 
-        // __PUBLISH_EXTRACT_START__ TreeWidget.LocalizationContextProvider
-        // When using tree components directly, wrap them with the shared tree and localization providers.
+        // __PUBLISH_EXTRACT_START__ TreeWidget.TreeWidgetContextProvider
+        // When using tree components directly, wrap them with the tree widget context provider.
         function TreeComponent() {
           return (
-            <SharedTreeContextProvider>
-              <LocalizationContextProvider localization={IModelApp.localization}>
-                <ModelsTreeComponent
-                  treeLabel="Models tree"
-                  selectionStorage={unifiedSelectionStorage}
-                  headerButtons={[
-                    (props) => <ModelsTreeComponent.ShowAllButton {...props} key={"ShowAllButton"} />,
-                    (props) => <ModelsTreeComponent.HideAllButton {...props} key={"HideAllButton"} />,
-                  ]}
-                />
-              </LocalizationContextProvider>
-            </SharedTreeContextProvider>
+            <TreeWidgetContextProvider localization={IModelApp.localization}>
+              <ModelsTreeComponent
+                treeLabel="Models tree"
+                selectionStorage={unifiedSelectionStorage}
+                headerButtons={[
+                  (props) => <ModelsTreeComponent.ShowAllButton {...props} key={"ShowAllButton"} />,
+                  (props) => <ModelsTreeComponent.HideAllButton {...props} key={"HideAllButton"} />,
+                ]}
+              />
+            </TreeWidgetContextProvider>
           );
         }
         // __PUBLISH_EXTRACT_END__

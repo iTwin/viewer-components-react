@@ -9,7 +9,7 @@ import { afterAll, beforeAll, describe, it, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_START__ TreeWidget.CategoriesTreeExampleImports
-import { CategoriesTreeComponent, SharedTreeContextProvider } from "@itwin/tree-widget-react";
+import { CategoriesTreeComponent, TreeWidgetContextProvider } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ TreeWidget.CustomCategoriesTreeExampleImports
 import {
@@ -63,7 +63,7 @@ describe("Tree widget", () => {
           // __PUBLISH_EXTRACT_START__ TreeWidget.CategoriesTreeExample
           function MyWidget() {
             return (
-              <SharedTreeContextProvider>
+              <TreeWidgetContextProvider localization={IModelApp.localization}>
                 <CategoriesTreeComponent
                   // label for the tree, used for accessibility purposes
                   treeLabel="Categories tree"
@@ -74,7 +74,7 @@ describe("Tree widget", () => {
                     (props) => <CategoriesTreeComponent.HideAllButton {...props} />,
                   ]}
                 />
-              </SharedTreeContextProvider>
+              </TreeWidgetContextProvider>
             );
           }
           // __PUBLISH_EXTRACT_END__
@@ -107,7 +107,7 @@ describe("Tree widget", () => {
           // __PUBLISH_EXTRACT_START__ TreeWidget.CategoriesTreeHierarchyConfigExample
           function ConfiguredCategoriesTree() {
             return (
-              <SharedTreeContextProvider>
+              <TreeWidgetContextProvider localization={IModelApp.localization}>
                 <CategoriesTreeComponent
                   treeLabel="Configured categories tree"
                   selectionStorage={unifiedSelectionStorage}
@@ -123,7 +123,7 @@ describe("Tree widget", () => {
                     subCategories: { nodes: "exclude" },
                   }}
                 />
-              </SharedTreeContextProvider>
+              </TreeWidgetContextProvider>
             );
           }
           // __PUBLISH_EXTRACT_END__
@@ -198,9 +198,9 @@ describe("Tree widget", () => {
 
           function CustomCategoriesTreeComponent(props: CustomCategoriesTreeProps) {
             return (
-              <SharedTreeContextProvider>
+              <TreeWidgetContextProvider localization={IModelApp.localization}>
                 <CustomCategoriesTree {...props} />
-              </SharedTreeContextProvider>
+              </TreeWidgetContextProvider>
             );
           }
           // __PUBLISH_EXTRACT_END__

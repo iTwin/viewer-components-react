@@ -420,14 +420,6 @@ interface LoadedTreeItemVisibilityButtonState {
 // @beta
 export const LOCALIZATION_NAMESPACES: string[];
 
-// @beta
-export function LocalizationContextProvider(input: PropsWithChildren<LocalizationContextProviderProps>): JSX_2.Element;
-
-// @beta
-interface LocalizationContextProviderProps {
-    localization: Pick<Localization, "getLocalizedString">;
-}
-
 // @public
 interface ModelInfo {
     // (undocumented)
@@ -571,9 +563,6 @@ export class SearchLimitExceededError extends Error {
 export function SelectableTree(input: PropsWithChildren<TreeHeaderProps>): _$react_jsx_runtime0.JSX.Element;
 
 // @beta
-export function SharedTreeContextProvider(input: PropsWithChildren<{}>): _$react_jsx_runtime0.JSX.Element;
-
-// @beta
 export function SkeletonTree(): _$react_jsx_runtime0.JSX.Element;
 
 // @beta (undocumented)
@@ -588,16 +577,6 @@ interface StandardTreeLabels {
     imodelContent: string;
     // (undocumented)
     models: string;
-}
-
-// @beta (undocumented)
-export function TelemetryContextProvider(input: PropsWithChildren<TelemetryContextProviderProps>): _$react_jsx_runtime0.JSX.Element;
-
-// @beta (undocumented)
-interface TelemetryContextProviderProps {
-    componentIdentifier: string;
-    onFeatureUsed?: (featureId: string) => void;
-    onPerformanceMeasured?: (featureId: string, duration: number) => void;
 }
 
 // @beta
@@ -677,18 +656,24 @@ interface TreeToolbarButtonProps {
 }
 
 // @public
-export class TreeWidget {
-    static initialize(logger?: ILogger): Promise<void>;
-    static get logger(): ILogger;
-    static terminate(): void;
-}
-
-// @public
 export function TreeWidgetComponent(input: TreeWidgetProps): _$react_jsx_runtime0.JSX.Element;
+
+// @beta
+export function TreeWidgetContextProvider(input: PropsWithChildren<TreeWidgetContextProviderProps>): _$react_jsx_runtime0.JSX.Element;
+
+// @beta
+export interface TreeWidgetContextProviderProps {
+    componentIdentifier?: string;
+    localization: Pick<Localization, "getLocalizedString">;
+    logger?: ILogger;
+    onFeatureUsed?: (featureId: string) => void;
+    onPerformanceMeasured?: (featureId: string, duration: number) => void;
+}
 
 // @public
 interface TreeWidgetProps {
     localization: Pick<Localization, "getLocalizedString">;
+    logger?: ILogger;
     onFeatureUsed?: (feature: string) => void;
     onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
     trees: TreeDefinition[];

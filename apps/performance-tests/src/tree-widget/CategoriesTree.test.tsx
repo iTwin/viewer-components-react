@@ -5,8 +5,9 @@
 
 import { describe, expect } from "vitest";
 import { assert } from "@itwin/core-bentley";
+import { IModelApp, type IModelConnection } from "@itwin/core-frontend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { SharedTreeContextProvider, useCategoriesTree } from "@itwin/tree-widget-react";
+import { TreeWidgetContextProvider, useCategoriesTree } from "@itwin/tree-widget-react";
 import {
   BaseIdsCache,
   CategoriesTreeDefinition,
@@ -31,7 +32,6 @@ import {
 
 import type { SnapshotDb } from "@itwin/core-backend";
 import type { Id64String } from "@itwin/core-bentley";
-import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyDefinition, HierarchyNode, HierarchyProvider, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { EC, Props } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
@@ -316,7 +316,7 @@ describe("categories tree", () => {
 function renderUseCategoriesTreeHook(props: Props<typeof useCategoriesTree>) {
   const result = renderHook((hookProps) => useCategoriesTree(hookProps), {
     initialProps: props,
-    wrapper: ({ children }) => <SharedTreeContextProvider>{children}</SharedTreeContextProvider>,
+    wrapper: ({ children }) => <TreeWidgetContextProvider localization={IModelApp.localization}>{children}</TreeWidgetContextProvider>,
   });
   return { ...result, [Symbol.dispose]: () => result.unmount() };
 }

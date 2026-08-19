@@ -10,15 +10,15 @@ import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, useTransientState } from "@itwin/appui-react";
 import hierarchyTreeSvg from "@stratakit/icons/hierarchy-tree.svg";
 import { Icon } from "@stratakit/mui";
-import { LocalizationContextProvider } from "./shared/components/LocalizationContext.js";
 import { getLocalizationKey } from "./shared/internal/LocalizationHelpers.js";
 import { ErrorState } from "./tree-header/ErrorState.js";
-import { SharedTreeContextProvider } from "./trees/index.js";
 import { TreeWidgetComponentImpl } from "./TreeWidgetComponentImpl.js";
+import { TreeWidgetContextProvider } from "./TreeWidgetContext.js";
 
 import type { Ref } from "react";
 import type { Widget } from "@itwin/appui-react";
 import type { Localization } from "@itwin/core-common";
+import type { ILogger } from "@itwin/presentation-shared";
 import type { TreeDefinition } from "./TreeWidgetComponentImpl.js";
 
 /**
@@ -40,6 +40,8 @@ interface TreeWidgetProps {
   onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
   /** Callback that is invoked when a tracked feature is used. */
   onFeatureUsed?: (feature: string) => void;
+  /** Logger used by tree widget components. Defaults to `Logger` from `@itwin/core-bentley`. */
+  logger?: ILogger;
 }
 
 /**
@@ -63,6 +65,7 @@ export function createTreeWidget(props: TreeWidgetProps): Widget {
         trees={props.trees}
         onPerformanceMeasured={props.onPerformanceMeasured}
         onFeatureUsed={props.onFeatureUsed}
+        logger={props.logger}
       />
     ),
   };
@@ -72,17 +75,15 @@ export function createTreeWidget(props: TreeWidgetProps): Widget {
  * Tree widget component which allows selecting which tree to render.
  * @public
  */
-export function TreeWidgetComponent({ localization, ...props }: TreeWidgetProps) {
+export function TreeWidgetComponent({ localization, logger, onPerformanceMeasured, onFeatureUsed, ...props }: TreeWidgetProps) {
   const ref = useTreeWidgetTransientState();
   return (
     <div ref={ref} className="tree-widget">
-      <LocalizationContextProvider localization={localization}>
+      <TreeWidgetContextProvider localization={localization} logger={logger} onPerformanceMeasured={onPerformanceMeasured} onFeatureUsed={onFeatureUsed}>
         <ErrorBoundary FallbackComponent={ErrorState}>
-          <SharedTreeContextProvider>
-            <TreeWidgetComponentImpl {...props} />
-          </SharedTreeContextProvider>
+          <TreeWidgetComponentImpl onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured} {...props} />
         </ErrorBoundary>
-      </LocalizationContextProvider>
+      </TreeWidgetContextProvider>
     </div>
   );
 }

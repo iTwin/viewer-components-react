@@ -8,8 +8,8 @@ import "./TreeWidgetComponentImpl.css";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Skeleton } from "@mui/material";
-import { useTranslation } from "./shared/components/LocalizationContext.js";
 import { SkeletonTree } from "./shared/components/SkeletonTree.js";
+import { useTranslation } from "./shared/contexts/LocalizationContext.js";
 import { SelectableTree } from "./tree-header/SelectableTree.js";
 import { WidgetHeader } from "./tree-header/WidgetHeader.js";
 

@@ -6,11 +6,11 @@
 import { Fragment, useEffect } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Skeleton } from "@mui/material";
-import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../shared/FocusedInstancesContext.js";
+import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../shared/contexts/FocusedInstancesContext.js";
+import { SharedTreeContextProvider, useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
+import { TelemetryContextProvider } from "../../shared/contexts/UseTelemetryContext.js";
 import { useActiveTreeWidgetViewport } from "../../shared/internal/hooks/UseActiveTreeWidgetViewport.js";
-import { SharedTreeContextProviderInternal, useSharedTreeContextInternal } from "../../shared/internal/SharedTreeContextProviderInternal.js";
 import { getClassesByView } from "../../shared/internal/Utils.js";
-import { TelemetryContextProvider } from "../../shared/UseTelemetryContext.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { ModelsTree } from "./ModelsTree.js";
 import {
@@ -104,7 +104,7 @@ interface ModelsTreeComponentType {
  * A component that renders `ModelsTree` and a header with filtering capabilities
  * and header buttons.
  *
- * **Note:** Wrap tree components with a single `SharedTreeContextProvider` to improve trees' performance.
+ * **Note:** Wrap tree components with a single `TreeWidgetContextProvider` to provide shared tree resources.
  * @public
  */
 export const ModelsTreeComponent: ModelsTreeComponentType = (props) => {
@@ -117,9 +117,9 @@ export const ModelsTreeComponent: ModelsTreeComponentType = (props) => {
 
   return (
     <FocusedInstancesContextProvider selectionStorage={props.selectionStorage} imodelKey={iModel.key}>
-      <SharedTreeContextProviderInternal showWarning={true}>
+      <SharedTreeContextProvider showWarning={true}>
         <ModelsTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />
-      </SharedTreeContextProviderInternal>
+      </SharedTreeContextProvider>
     </FocusedInstancesContextProvider>
   );
 };
@@ -152,7 +152,7 @@ function ModelsTreeComponentImpl({
 }: ModelsTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
   const { buttonProps, onModelsFiltered } = useModelsTreeButtonProps({ imodel: iModel, viewport });
   const { enabled: instanceFocusEnabled, toggle: toggleInstanceFocus } = useFocusedInstancesContext();
-  const { getBaseIdsCache } = useSharedTreeContextInternal();
+  const { getBaseIdsCache } = useSharedTreeContext();
   const isLoaded =
     buttonProps.models.length > 0 ||
     getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" }).elementModelCategoriesLoaded();

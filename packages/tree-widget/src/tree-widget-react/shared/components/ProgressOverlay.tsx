@@ -7,7 +7,7 @@ import "./ProgressOverlay.css";
 
 import { LinearProgress } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
-import { useTranslation } from "./LocalizationContext.js";
+import { useTranslation } from "../contexts/LocalizationContext.js";
 
 /** @internal */
 export function ProgressOverlay() {

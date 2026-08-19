@@ -7,8 +7,8 @@ import "./EmptyTree.css";
 
 import { Link, Typography } from "@mui/material";
 import { Icon } from "@stratakit/mui";
-import { useFocusedInstancesContext } from "../FocusedInstancesContext.js";
-import { useTranslation } from "./LocalizationContext.js";
+import { useFocusedInstancesContext } from "../contexts/FocusedInstancesContext.js";
+import { useTranslation } from "../contexts/LocalizationContext.js";
 
 interface SearchEmptyTreeProps {
   base: "categoriesTree" | "modelsTree" | "classificationsTree";

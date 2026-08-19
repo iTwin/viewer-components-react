@@ -7,7 +7,7 @@ import "./SkeletonTree.css";
 
 import { Skeleton } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
-import { useTranslation } from "./LocalizationContext.js";
+import { useTranslation } from "../contexts/LocalizationContext.js";
 
 /**
  * Represents the loaded tree content before it finishes loading.

@@ -11,9 +11,10 @@ import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
 import visibilityInvertSvg from "@stratakit/icons/visibility-invert.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
 import { Icon } from "@stratakit/mui";
-import { useTranslation } from "../../shared/components/LocalizationContext.js";
+import { useTranslation } from "../../shared/contexts/LocalizationContext.js";
+import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
+import { useTelemetryContext } from "../../shared/contexts/UseTelemetryContext.js";
 import { useErrorState } from "../../shared/internal/hooks/UseErrorState.js";
-import { useSharedTreeContextInternal } from "../../shared/internal/SharedTreeContextProviderInternal.js";
 import { getClassesByView } from "../../shared/internal/Utils.js";
 import { hideAllCategories, invertAllCategories, showAll } from "../../shared/internal/VisibilityUtils.js";
 
@@ -62,7 +63,7 @@ export interface CategoriesTreeHeaderButtonProps extends TreeToolbarButtonProps 
  * </TreeWithHeader>
  * ```
  *
- * **Note:** Requires `SharedTreeContextProvider` to be present in components tree above.
+ * **Note:** Requires `TreeWidgetContextProvider` to be present in components tree above.
  * @public
  */
 export function useCategoriesTreeButtonProps({ viewport }: { viewport: TreeWidgetViewport }): {
@@ -93,8 +94,10 @@ export type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonP
 
 /** @public */
 export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
-  const { categories, viewport, onFeatureUsed, models } = props;
-  const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContextInternal();
+  const { categories, viewport, models } = props;
+  const telemetryContext = useTelemetryContext();
+  const onFeatureUsed = props.onFeatureUsed ?? ((featureId: string) => telemetryContext.onFeatureUsed({ featureId, reportInteraction: true }));
+  const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContext();
   const viewType = viewport.viewType === "2d" ? "2d" : "3d";
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
   const translate = useTranslation();
@@ -126,8 +129,10 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
 
 /** @public */
 export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
-  const { categories, viewport, onFeatureUsed } = props;
-  const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContextInternal();
+  const { categories, viewport } = props;
+  const telemetryContext = useTelemetryContext();
+  const onFeatureUsed = props.onFeatureUsed ?? ((featureId: string) => telemetryContext.onFeatureUsed({ featureId, reportInteraction: true }));
+  const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContext();
   const viewType = viewport.viewType === "2d" ? "2d" : "3d";
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
   const translate = useTranslation();
@@ -157,8 +162,10 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
 
 /** @public */
 export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
-  const { categories, viewport, onFeatureUsed, models } = props;
-  const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContextInternal();
+  const { categories, viewport, models } = props;
+  const telemetryContext = useTelemetryContext();
+  const onFeatureUsed = props.onFeatureUsed ?? ((featureId: string) => telemetryContext.onFeatureUsed({ featureId, reportInteraction: true }));
+  const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContext();
   const viewType = viewport.viewType === "2d" ? "2d" : "3d";
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
   const translate = useTranslation();
@@ -192,7 +199,7 @@ const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
 function useCategories(viewport: TreeWidgetViewport) {
   const setErrorState = useErrorState();
-  const { getBaseIdsCache } = useSharedTreeContextInternal();
+  const { getBaseIdsCache } = useSharedTreeContext();
   const baseIdsCache =
     viewport.viewType !== "other"
       ? getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewport.viewType).elementClass, type: viewport.viewType })
@@ -222,7 +229,7 @@ function useAvailableModels(viewport: TreeWidgetViewport): Array<ModelId> {
   const [availableModels, setAvailableModels] = useState<Array<ModelId>>([]);
   const setErrorState = useErrorState();
   const imodel = viewport.iModel;
-  const { getBaseIdsCache } = useSharedTreeContextInternal();
+  const { getBaseIdsCache } = useSharedTreeContext();
   const baseIdsCache =
     viewport.viewType !== "other"
       ? getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewport.viewType).elementClass, type: viewport.viewType })

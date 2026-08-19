@@ -7,7 +7,7 @@ import { useMemo } from "react";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
-import { TreeWidget } from "../../../TreeWidget.js";
+import { useTelemetryContext } from "../../contexts/UseTelemetryContext.js";
 import { LOGGING_NAMESPACE } from "../../Utils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -29,13 +29,11 @@ export function useIModelAccess({ imodel, treeName, imodelAccess: providedIModel
   currentHierarchyLevelSizeLimit: number;
 } {
   const defaultHierarchyLevelSizeLimit = hierarchyLevelSizeLimit ?? 1000;
+  const { logger } = useTelemetryContext();
   const imodelAccess = useMemo(() => {
-    TreeWidget.logger.logInfo(
-      `${LOGGING_NAMESPACE}.${treeName}`,
-      `iModel changed, now using ${providedIModelAccess ? "provided imodel access" : `"${imodel.name}"`}`,
-    );
+    logger.logInfo(`${LOGGING_NAMESPACE}.${treeName}`, `iModel changed, now using ${providedIModelAccess ? "provided imodel access" : `"${imodel.name}"`}`);
     return providedIModelAccess ?? createIModelAccess({ imodel, hierarchyLevelSizeLimit: defaultHierarchyLevelSizeLimit });
-  }, [providedIModelAccess, imodel, treeName, defaultHierarchyLevelSizeLimit]);
+  }, [providedIModelAccess, imodel, treeName, defaultHierarchyLevelSizeLimit, logger]);
 
   return {
     imodelAccess,

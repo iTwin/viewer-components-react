@@ -8,10 +8,13 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 // __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryTreeComponentExampleImports
-import { IModelContentTreeComponent, SharedTreeContextProvider } from "@itwin/tree-widget-react";
+import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
+// __PUBLISH_EXTRACT_END__
+// __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryTreeWidgetContextProviderImports
+import { TreeWidgetContextProvider } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryCustomTreeExampleImports
-import { createTreeWidgetViewport, TelemetryContextProvider, useCategoriesTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+import { createTreeWidgetViewport, useCategoriesTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 
 import { useMemo } from "react";
@@ -57,16 +60,17 @@ describe("Tree widget", () => {
           // __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryTreeComponentExample
           function MyWidget() {
             return (
-              <IModelContentTreeComponent
+              <TreeWidgetContextProvider
+                localization={IModelApp.localization}
                 onPerformanceMeasured={(feature, elapsedTime) => {
                   console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
                 }}
                 onFeatureUsed={(feature) => {
                   console.log(`TreeWidget [${feature}] used`);
                 }}
-                treeLabel="IModel content tree"
-                selectionStorage={unifiedSelectionStorage}
-              />
+              >
+                <IModelContentTreeComponent treeLabel="IModel content tree" selectionStorage={unifiedSelectionStorage} />
+              </TreeWidgetContextProvider>
             );
           }
           // __PUBLISH_EXTRACT_END__
@@ -96,7 +100,8 @@ describe("Tree widget", () => {
           // __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryCustomTreeExample
           function MyWidget({ viewport }: { viewport: Viewport }) {
             return (
-              <TelemetryContextProvider
+              <TreeWidgetContextProvider
+                localization={IModelApp.localization}
                 componentIdentifier="MyTree"
                 onPerformanceMeasured={(feature, elapsedTime) => {
                   console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
@@ -105,10 +110,8 @@ describe("Tree widget", () => {
                   console.log(`TreeWidget [${feature}] used`);
                 }}
               >
-                <SharedTreeContextProvider>
-                  <MyTree viewport={viewport} />
-                </SharedTreeContextProvider>
-              </TelemetryContextProvider>
+                <MyTree viewport={viewport} />
+              </TreeWidgetContextProvider>
             );
           }
 
@@ -116,7 +119,7 @@ describe("Tree widget", () => {
             const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
             const { treeProps, getTreeItemProps } = useCategoriesTree({ activeView });
             return (
-              // VisibilityTree will use provided telemetry context to report used features and their performance
+              // VisibilityTree will use the provided tree widget context to report used features and their performance
               <VisibilityTree
                 {...treeProps}
                 selectionStorage={unifiedSelectionStorage}

@@ -24,7 +24,7 @@ export const LOCALIZATION_NAMESPACES = [LOCALIZATION_NAMESPACE, ...HierarchiesRe
 
 /**
  * Properties for `LocalizationContextProvider`.
- * @beta
+ * @internal
  */
 interface LocalizationContextProviderProps {
   /** Localization object compatible with `@itwin/core-common` */
@@ -33,7 +33,7 @@ interface LocalizationContextProviderProps {
 
 /**
  * Context provider for localizing components.
- * @beta
+ * @internal
  */
 export function LocalizationContextProvider({ localization, children }: PropsWithChildren<LocalizationContextProviderProps>): JSX.Element {
   const translate = useMemo<TranslateFunc>(() => {

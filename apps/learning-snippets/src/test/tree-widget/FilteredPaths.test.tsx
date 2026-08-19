@@ -8,7 +8,7 @@ import { useCallback, useMemo } from "react";
 import { UiFramework } from "@itwin/appui-react";
 import { IModel, QueryBinder, QueryRowFormat } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
-import { createTreeWidgetViewport, SharedTreeContextProvider, useModelsTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+import { createTreeWidgetViewport, TreeWidgetContextProvider, useModelsTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 import { createStorage } from "@itwin/unified-selection";
 import { insertPhysicalElement, insertPhysicalModelWithPartition, insertPhysicalSubModel, insertSpatialCategory, insertSubject } from "test-utilities";
 import { buildIModel } from "../../utils/IModelUtils.js";
@@ -210,14 +210,14 @@ describe("Tree widget", () => {
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText, queryByText } = render(
-            <SharedTreeContextProvider>
+            <TreeWidgetContextProvider localization={IModelApp.localization}>
               <CustomModelsTreeComponentWithTargetItems
                 selectionStorage={unifiedSelectionStorage}
                 imodel={imodelConnection}
                 viewport={testViewport}
                 targetItems={[keys.physicalModel]}
               />
-            </SharedTreeContextProvider>,
+            </TreeWidgetContextProvider>,
           );
 
           await waitFor(() => {
@@ -252,9 +252,9 @@ describe("Tree widget", () => {
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText, queryByText } = render(
-            <SharedTreeContextProvider>
+            <TreeWidgetContextProvider localization={IModelApp.localization}>
               <CustomModelsTreeComponentWithPostProcessing selectionStorage={unifiedSelectionStorage} imodel={imodelConnection} viewport={testViewport} />
-            </SharedTreeContextProvider>,
+            </TreeWidgetContextProvider>,
           );
 
           await waitFor(() => {
@@ -299,14 +299,14 @@ describe("Tree widget", () => {
           using _ = { [Symbol.dispose]: cleanup };
 
           const { getByText, queryByText, rerender } = render(
-            <SharedTreeContextProvider>
+            <TreeWidgetContextProvider localization={IModelApp.localization}>
               <CustomModelsTreeComponentWithFilterAndTargetItems
                 selectionStorage={unifiedSelectionStorage}
                 imodel={imodelConnection}
                 viewport={testViewport}
                 filter={undefined}
               />
-            </SharedTreeContextProvider>,
+            </TreeWidgetContextProvider>,
           );
           await waitFor(() => {
             getByText("subject 1", { exact: false });
@@ -323,14 +323,14 @@ describe("Tree widget", () => {
           });
 
           rerender(
-            <SharedTreeContextProvider>
+            <TreeWidgetContextProvider localization={IModelApp.localization}>
               <CustomModelsTreeComponentWithFilterAndTargetItems
                 selectionStorage={unifiedSelectionStorage}
                 imodel={imodelConnection}
                 viewport={testViewport}
                 filter="match"
               />
-            </SharedTreeContextProvider>,
+            </TreeWidgetContextProvider>,
           );
           await waitFor(() => {
             getByText("subject 1", { exact: false });
