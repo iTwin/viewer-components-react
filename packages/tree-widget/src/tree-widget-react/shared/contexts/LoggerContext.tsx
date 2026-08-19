@@ -36,7 +36,7 @@ export function LoggerContextProvider({ children, logger }: PropsWithChildren<Lo
     const activeLogger = logger ?? defaultLogger;
     return {
       logger: {
-        isEnabled: activeLogger.isEnabled,
+        isEnabled: (category, severity) => activeLogger.isEnabled(`${LOGGING_NAMESPACE}.${category}`, severity),
         logError: (category, message) => {
           activeLogger.logError(`${LOGGING_NAMESPACE}.${category}`, message);
         },
