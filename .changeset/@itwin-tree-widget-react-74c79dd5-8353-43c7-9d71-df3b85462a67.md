@@ -7,7 +7,14 @@ Replace `TreeWidget.initialize`, `SharedTreeContextProvider`, and `TelemetryCont
 Before:
 
 ```tsx
-import { LOCALIZATION_NAMESPACES, ModelsTreeComponent, SharedTreeContextProvider, TelemetryContextProvider, TreeWidget } from "@itwin/tree-widget-react";
+import {
+  LOCALIZATION_NAMESPACES,
+  ModelsTreeComponent,
+  CategoriesTreeComponent,
+  SharedTreeContextProvider,
+  TelemetryContextProvider,
+  TreeWidget,
+} from "@itwin/tree-widget-react";
 
 for (const namespace of LOCALIZATION_NAMESPACES) {
   await IModelApp.localization.registerNamespace(namespace);
@@ -15,26 +22,18 @@ for (const namespace of LOCALIZATION_NAMESPACES) {
 
 await TreeWidget.initialize(logger);
 
-function ModelsTreeWidget() {
+function MyWidget() {
   return (
-    <SharedTreeContextProvider>
-      <ModelsTreeComponent
-        treeLabel="Models tree"
-        selectionStorage={selectionStorage}
-        onFeatureUsed={onFeatureUsed}
-        onPerformanceMeasured={onPerformanceMeasured}
-      />
-    </SharedTreeContextProvider>
-  );
-}
-
-function CustomTreeWidget() {
-  return (
-    <SharedTreeContextProvider>
-      <TelemetryContextProvider componentIdentifier="my-tree" onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
-        <MyTree />
-      </TelemetryContextProvider>
-    </SharedTreeContextProvider>
+    <LocalizationContextProvider localization={IModelApp.localization}>
+      <SharedTreeContextProvider>
+        <TelemetryContextProvider componentIdentifier="my-tree" onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
+          <ModelsTreeComponent treeLabel="Models tree" selectionStorage={selectionStorage} />
+          <CategoriesTreeComponent treeLabel="Categories tree" selectionStorage={selectionStorage} />
+          <CustomTree1 />
+          <CustomTree2 />
+        </TelemetryContextProvider>
+      </SharedTreeContextProvider>
+    </LocalizationContextProvider>
   );
 }
 ```
@@ -42,26 +41,13 @@ function CustomTreeWidget() {
 After:
 
 ```tsx
-import { LOCALIZATION_NAMESPACES, ModelsTreeComponent, TreeWidgetContextProvider } from "@itwin/tree-widget-react";
+import { LOCALIZATION_NAMESPACES, ModelsTreeComponent, CategoriesTreeComponent, TreeWidgetContextProvider } from "@itwin/tree-widget-react";
 
 for (const namespace of LOCALIZATION_NAMESPACES) {
   await IModelApp.localization.registerNamespace(namespace);
 }
 
-function ModelsTreeWidget() {
-  return (
-    <TreeWidgetContextProvider
-      localization={IModelApp.localization}
-      logger={logger}
-      onFeatureUsed={onFeatureUsed}
-      onPerformanceMeasured={onPerformanceMeasured}
-    >
-      <ModelsTreeComponent treeLabel="Models tree" selectionStorage={selectionStorage} />
-    </TreeWidgetContextProvider>
-  );
-}
-
-function CustomTreeWidget() {
+function MyWidget() {
   return (
     <TreeWidgetContextProvider
       componentIdentifier="my-tree"
@@ -70,8 +56,11 @@ function CustomTreeWidget() {
       onFeatureUsed={onFeatureUsed}
       onPerformanceMeasured={onPerformanceMeasured}
     >
-      <MyTree />
-    </TreeWidgetContextProvider>
+        <ModelsTreeComponent treeLabel="Models tree" selectionStorage={selectionStorage} />
+        <CategoriesTreeComponent treeLabel="Categories tree" selectionStorage={selectionStorage} />
+        <CustomTree1 />
+        <CustomTree2 />
+    </TelemetryContextProvider>
   );
 }
 ```
