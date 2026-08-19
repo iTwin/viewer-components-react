@@ -5,7 +5,7 @@
 
 import { LocalizationContextProvider } from "./shared/contexts/LocalizationContext.js";
 import { SharedTreeContextProvider } from "./shared/contexts/SharedTreeContext.js";
-import { TelemetryContextProvider } from "./shared/contexts/UseTelemetryContext.js";
+import { TelemetryContextProvider } from "./shared/contexts/TelemetryContext.js";
 
 import type { PropsWithChildren } from "react";
 import type { Localization } from "@itwin/core-common";

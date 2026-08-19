@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { firstValueFrom } from "rxjs";
 import { HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import { useFocusedInstancesContext } from "../../../shared/contexts/FocusedInstancesContext.js";
-import { useTelemetryContext } from "../../../shared/contexts/UseTelemetryContext.js";
+import { useTelemetryContext } from "../../../shared/contexts/TelemetryContext.js";
 import { CLASS_NAME_GeometricModel3d, CLASS_NAME_Subject } from "../../../shared/internal/ClassNameDefinitions.js";
 import { SearchLimitExceededError } from "../../../shared/TreeErrors.js";
 import { joinHierarchySearchTrees } from "../../../shared/Utils.js";

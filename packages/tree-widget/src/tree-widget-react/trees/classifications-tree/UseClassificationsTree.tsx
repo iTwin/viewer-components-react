@@ -8,7 +8,7 @@ import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import iconBisCategory3d from "@stratakit/icons/bis-category-3d.svg";
 import { EmptyTreeContent, NoSearchMatches, SearchUnknownError, TooManySearchMatches } from "../../shared/components/EmptyTree.js";
 import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
-import { useTelemetryContext } from "../../shared/contexts/UseTelemetryContext.js";
+import { useTelemetryContext } from "../../shared/contexts/TelemetryContext.js";
 import { useCachedVisibility } from "../../shared/internal/hooks/UseCachedVisibility.js";
 import { useGuid } from "../../shared/internal/hooks/UseGuid.js";
 import { getClassesByView, stableStringify } from "../../shared/internal/Utils.js";

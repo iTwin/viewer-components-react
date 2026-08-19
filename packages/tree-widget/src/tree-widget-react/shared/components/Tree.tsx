@@ -10,7 +10,7 @@ import { BeEvent } from "@itwin/core-bentley";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
 import { useIModelUnifiedSelectionTree, useNodeHighlighting } from "@itwin/presentation-hierarchies-react";
 import { StrataKitRootErrorRenderer } from "@itwin/presentation-hierarchies-react/stratakit";
-import { useReportingAction, useTelemetryContext } from "../contexts/UseTelemetryContext.js";
+import { useReportingAction, useTelemetryContext } from "../contexts/TelemetryContext.js";
 import { useHierarchyLevelFiltering } from "../internal/hooks/UseHierarchyFiltering.js";
 import { useIModelAccess } from "../internal/hooks/UseIModelAccess.js";
 import { useIModelChangeListener } from "../internal/hooks/UseIModelChangeListener.js";

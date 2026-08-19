@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { describe, expect, it, vi } from "vitest";
-import { useTelemetryContext } from "../tree-widget-react/shared/contexts/UseTelemetryContext.js";
+import { useTelemetryContext } from "../tree-widget-react/shared/contexts/TelemetryContext.js";
 import { TreeWidgetContextProvider } from "../tree-widget-react/TreeWidgetContext.js";
 import { renderHook } from "./TestUtils.js";
 

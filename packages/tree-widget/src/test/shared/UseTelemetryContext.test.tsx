@@ -6,7 +6,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { getLogger as getHierarchiesLogger } from "@itwin/presentation-hierarchies";
 import { getLogger as getHierarchiesReactLogger } from "@itwin/presentation-hierarchies-react";
-import { TelemetryContextProvider, useTelemetryContext } from "../../tree-widget-react/shared/contexts/UseTelemetryContext.js";
+import { TelemetryContextProvider, useTelemetryContext } from "../../tree-widget-react/shared/contexts/TelemetryContext.js";
 import { render, renderHook } from "../TestUtils.js";
 
 import type { PropsWithChildren } from "react";

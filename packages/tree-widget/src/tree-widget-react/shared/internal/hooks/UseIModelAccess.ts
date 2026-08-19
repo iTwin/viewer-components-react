@@ -7,7 +7,7 @@ import { useMemo } from "react";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
-import { useTelemetryContext } from "../../contexts/UseTelemetryContext.js";
+import { useTelemetryContext } from "../../contexts/TelemetryContext.js";
 import { LOGGING_NAMESPACE } from "../../Utils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";

@@ -13,7 +13,7 @@ import { GenericInstanceFilter, RowsLimitExceededError } from "@itwin/presentati
 import { CircularProgress } from "@mui/material";
 import { Delayed } from "../../components/Delayed.js";
 import { useTranslation } from "../../contexts/LocalizationContext.js";
-import { useTelemetryContext } from "../../contexts/UseTelemetryContext.js";
+import { useTelemetryContext } from "../../contexts/TelemetryContext.js";
 import { getOrCreate } from "../Utils.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";

@@ -16,7 +16,7 @@ import { Icon } from "@stratakit/mui";
 import { useFocusedInstancesContext } from "../../shared/contexts/FocusedInstancesContext.js";
 import { useTranslation } from "../../shared/contexts/LocalizationContext.js";
 import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
-import { useTelemetryContext } from "../../shared/contexts/UseTelemetryContext.js";
+import { useTelemetryContext } from "../../shared/contexts/TelemetryContext.js";
 import { getClassesByView } from "../../shared/internal/Utils.js";
 import { invertAllModels, showAll } from "../../shared/internal/VisibilityUtils.js";
 

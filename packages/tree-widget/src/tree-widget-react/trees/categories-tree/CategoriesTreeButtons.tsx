@@ -13,7 +13,7 @@ import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
 import { Icon } from "@stratakit/mui";
 import { useTranslation } from "../../shared/contexts/LocalizationContext.js";
 import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
-import { useTelemetryContext } from "../../shared/contexts/UseTelemetryContext.js";
+import { useTelemetryContext } from "../../shared/contexts/TelemetryContext.js";
 import { useErrorState } from "../../shared/internal/hooks/UseErrorState.js";
 import { getClassesByView } from "../../shared/internal/Utils.js";
 import { hideAllCategories, invertAllCategories, showAll } from "../../shared/internal/VisibilityUtils.js";

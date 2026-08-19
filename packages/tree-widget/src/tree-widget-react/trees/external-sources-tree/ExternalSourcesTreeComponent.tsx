@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { TelemetryContextProvider } from "../../shared/contexts/UseTelemetryContext.js";
+import { TelemetryContextProvider } from "../../shared/contexts/TelemetryContext.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { ExternalSourcesTree } from "./ExternalSourcesTree.js";
 

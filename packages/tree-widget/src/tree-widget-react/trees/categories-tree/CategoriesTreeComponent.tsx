@@ -7,7 +7,7 @@ import { Fragment } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Skeleton } from "@mui/material";
 import { SharedTreeContextProvider, useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
-import { TelemetryContextProvider } from "../../shared/contexts/UseTelemetryContext.js";
+import { TelemetryContextProvider } from "../../shared/contexts/TelemetryContext.js";
 import { useActiveTreeWidgetViewport } from "../../shared/internal/hooks/UseActiveTreeWidgetViewport.js";
 import { getClassesByView } from "../../shared/internal/Utils.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";

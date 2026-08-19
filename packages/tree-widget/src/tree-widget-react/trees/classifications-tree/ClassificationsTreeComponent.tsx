@@ -6,7 +6,7 @@
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { SchemaKey, SchemaMatchType } from "@itwin/ecschema-metadata";
 import { SharedTreeContextProvider } from "../../shared/contexts/SharedTreeContext.js";
-import { TelemetryContextProvider } from "../../shared/contexts/UseTelemetryContext.js";
+import { TelemetryContextProvider } from "../../shared/contexts/TelemetryContext.js";
 import { useActiveTreeWidgetViewport } from "../../shared/internal/hooks/UseActiveTreeWidgetViewport.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { ClassificationsTree } from "./ClassificationsTree.js";
