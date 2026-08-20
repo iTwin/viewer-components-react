@@ -4,11 +4,7 @@
 
 Replace `TreeWidget.initialize()` and direct use of `SharedTreeContextProvider` with a single `TreeWidgetContextProvider` near the root of the application. The provider supplies localization, logging, and shared tree resources to every tree below it. Continue registering `LOCALIZATION_NAMESPACES` during application startup. Applications using `createTreeWidget` can continue passing `localization` and `logger` to that function; it adds `TreeWidgetContextProvider` at the widget scope automatically.
 
-Telemetry is now scoped separately:
-
-- Standard tree components create their own telemetry context. Pass `onFeatureUsed` and `onPerformanceMeasured` directly to each standard tree component.
-- Custom trees composed from `use*Tree` hooks do not create a telemetry context. Wrap the custom tree and any directly rendered header buttons with `TelemetryContextProvider` so they report through the same callbacks and `componentIdentifier`.
-- `onFeatureUsed` has been removed from `TreeToolbarButtonProps` and therefore from the props supplied to standard tree header-button renderers. Header buttons now report through `TelemetryContextProvider` instead of receiving the callback as a prop.
+`onFeatureUsed` has also been removed from `TreeToolbarButtonProps`. Consumers that passed it directly to a standard tree header button should remove that prop.
 
 Before:
 
@@ -20,7 +16,6 @@ import {
   ModelsTreeComponent,
   SelectableTree,
   SharedTreeContextProvider,
-  TelemetryContextProvider,
   TreeWidget,
   useCategoriesTree,
   useCategoriesTreeButtonProps,
@@ -37,16 +32,9 @@ function App() {
   return (
     <LocalizationContextProvider localization={IModelApp.localization}>
       <SharedTreeContextProvider>
-        <ModelsTreeComponent
-          treeLabel="Models tree"
-          selectionStorage={selectionStorage}
-          onFeatureUsed={onFeatureUsed}
-          onPerformanceMeasured={onPerformanceMeasured}
-        />
+        <ModelsTreeComponent treeLabel="Models tree" selectionStorage={selectionStorage} />
 
-        <TelemetryContextProvider componentIdentifier="my-tree" onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
-          <MyTree />
-        </TelemetryContextProvider>
+        <MyTree />
       </SharedTreeContextProvider>
     </LocalizationContextProvider>
   );
@@ -72,7 +60,6 @@ import {
   LOCALIZATION_NAMESPACES,
   ModelsTreeComponent,
   SelectableTree,
-  TelemetryContextProvider,
   TreeWidgetContextProvider,
   useCategoriesTree,
   useCategoriesTreeButtonProps,
@@ -86,16 +73,9 @@ for (const namespace of LOCALIZATION_NAMESPACES) {
 function App() {
   return (
     <TreeWidgetContextProvider localization={IModelApp.localization} logger={logger}>
-      <ModelsTreeComponent
-        treeLabel="Models tree"
-        selectionStorage={selectionStorage}
-        onFeatureUsed={onFeatureUsed}
-        onPerformanceMeasured={onPerformanceMeasured}
-      />
+      <ModelsTreeComponent treeLabel="Models tree" selectionStorage={selectionStorage} />
 
-      <TelemetryContextProvider componentIdentifier="my-tree" onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
-        <MyTree />
-      </TelemetryContextProvider>
+      <MyTree />
     </TreeWidgetContextProvider>
   );
 }

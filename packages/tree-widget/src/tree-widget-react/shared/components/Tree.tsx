@@ -10,7 +10,7 @@ import { BeEvent } from "@itwin/core-bentley";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
 import { useIModelUnifiedSelectionTree, useNodeHighlighting } from "@itwin/presentation-hierarchies-react";
 import { StrataKitRootErrorRenderer } from "@itwin/presentation-hierarchies-react/stratakit";
-import { useLoggerContext } from "../contexts/LoggerContext.js";
+import { useLogger } from "../contexts/LoggerContext.js";
 import { useReportingAction, useTelemetryContext } from "../contexts/TelemetryContext.js";
 import { useHierarchyLevelFiltering } from "../internal/hooks/UseHierarchyFiltering.js";
 import { useIModelAccess } from "../internal/hooks/UseIModelAccess.js";
@@ -100,7 +100,7 @@ export function Tree({
   ...props
 }: TreeProps) {
   const { onFeatureUsed, onPerformanceMeasured } = useTelemetryContext();
-  const { logger } = useLoggerContext();
+  const { logger } = useLogger();
   const [imodelChanged] = useState(new BeEvent<() => void>());
 
   const { imodelAccess, currentHierarchyLevelSizeLimit } = useIModelAccess({

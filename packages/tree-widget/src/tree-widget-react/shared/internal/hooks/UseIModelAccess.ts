@@ -7,7 +7,7 @@ import { useMemo } from "react";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
-import { useLoggerContext } from "../../contexts/LoggerContext.js";
+import { useLogger } from "../../contexts/LoggerContext.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { useIModelTree } from "@itwin/presentation-hierarchies-react";
@@ -28,7 +28,7 @@ export function useIModelAccess({ imodel, treeName, imodelAccess: providedIModel
   currentHierarchyLevelSizeLimit: number;
 } {
   const defaultHierarchyLevelSizeLimit = hierarchyLevelSizeLimit ?? 1000;
-  const { logger } = useLoggerContext();
+  const { logger } = useLogger();
   const imodelAccess = useMemo(() => {
     logger.logInfo(treeName, `iModel changed, now using ${providedIModelAccess ? "provided imodel access" : `"${imodel.name}"`}`);
     return providedIModelAccess ?? createIModelAccess({ imodel, hierarchyLevelSizeLimit: defaultHierarchyLevelSizeLimit });

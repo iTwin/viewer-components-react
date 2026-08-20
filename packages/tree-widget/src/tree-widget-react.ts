@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 export { TreeWidgetContextProvider } from "./tree-widget-react/TreeWidgetContext.js";
-export type { TreeWidgetContextProviderProps } from "./tree-widget-react/TreeWidgetContext.js";
 export { createTreeWidget, TreeWidgetComponent } from "./tree-widget-react/TreeWidgetUiItemsProvider.js";
 export type { TreeDefinition } from "./tree-widget-react/TreeWidgetComponentImpl.js";
 export { SelectableTree } from "./tree-widget-react/tree-header/SelectableTree.js";

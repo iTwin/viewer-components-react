@@ -26,7 +26,7 @@ const treeWidgetContext = createContext<TreeWidgetContext>(defaultContextValue);
  * Properties for `TreeWidgetContextProvider`.
  * @beta
  */
-export interface TreeWidgetContextProviderProps {
+interface TreeWidgetContextProviderProps {
   /** Localization object for localizing tree widget components. */
   localization: Pick<Localization, "getLocalizedString">;
   /** Logger used by tree widget components. Defaults to `Logger` from `@itwin/core-bentley`. */
