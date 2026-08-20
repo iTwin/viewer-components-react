@@ -591,7 +591,7 @@ interface StandardTreeLabels {
 export function TelemetryContextProvider(input: PropsWithChildren<TelemetryContextProviderProps>): _$react_jsx_runtime0.JSX.Element;
 
 // @beta (undocumented)
-export interface TelemetryContextProviderProps {
+interface TelemetryContextProviderProps {
     componentIdentifier: string;
     onFeatureUsed?: (featureId: string) => void;
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
@@ -678,7 +678,7 @@ export function TreeWidgetComponent(input: TreeWidgetProps): _$react_jsx_runtime
 export function TreeWidgetContextProvider(input: PropsWithChildren<TreeWidgetContextProviderProps>): ReactNode;
 
 // @beta
-export interface TreeWidgetContextProviderProps {
+interface TreeWidgetContextProviderProps {
     localization: Pick<Localization, "getLocalizedString">;
     logger?: ILogger;
 }

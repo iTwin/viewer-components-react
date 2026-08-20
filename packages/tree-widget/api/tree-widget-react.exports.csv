@@ -24,13 +24,11 @@ beta;class;SearchLimitExceededError
 beta;function;SelectableTree
 beta;function;SkeletonTree
 beta;function;TelemetryContextProvider
-beta;interface;TelemetryContextProviderProps
 beta;function;Tree
 public;interface;TreeDefinition
 beta;function;TreeRenderer
 public;function;TreeWidgetComponent
 beta;function;TreeWidgetContextProvider
-beta;interface;TreeWidgetContextProviderProps
 public;interface;TreeWidgetViewport
 beta;function;useCategoriesTree
 public;function;useCategoriesTreeButtonProps
