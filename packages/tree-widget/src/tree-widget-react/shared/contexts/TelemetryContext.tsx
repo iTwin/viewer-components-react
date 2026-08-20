@@ -21,7 +21,7 @@ const defaultContextValue: TelemetryContext = {
 const telemetryContext = createContext<TelemetryContext>(defaultContextValue);
 
 /** @beta */
-export interface TelemetryContextProviderProps {
+interface TelemetryContextProviderProps {
   /** Callback that is invoked when performance of tracked feature is measured. */
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   /** Callback that is invoked when a tracked feature is used. */

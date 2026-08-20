@@ -11,4 +11,3 @@ export * from "./tree-widget-react/trees/index.js";
 
 export { LocalizationContextProvider, LOCALIZATION_NAMESPACES } from "./tree-widget-react/shared/contexts/LocalizationContext.js";
 export { TelemetryContextProvider } from "./tree-widget-react/shared/contexts/TelemetryContext.js";
-export type { TelemetryContextProviderProps } from "./tree-widget-react/shared/contexts/TelemetryContext.js";
