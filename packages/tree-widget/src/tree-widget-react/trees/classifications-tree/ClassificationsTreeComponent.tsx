@@ -5,9 +5,8 @@
 
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { SchemaKey, SchemaMatchType } from "@itwin/ecschema-metadata";
+import { TelemetryContextProvider } from "../../shared/contexts/TelemetryContext.js";
 import { useActiveTreeWidgetViewport } from "../../shared/internal/hooks/UseActiveTreeWidgetViewport.js";
-import { SharedTreeContextProviderInternal } from "../../shared/internal/SharedTreeContextProviderInternal.js";
-import { TelemetryContextProvider } from "../../shared/UseTelemetryContext.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { ClassificationsTree } from "./ClassificationsTree.js";
 
@@ -46,7 +45,7 @@ interface ClassificationsTreeComponentProps extends Pick<
 /**
  * A component that renders `ClassificationsTree` with active iModel and viewport.
  *
- * **Note:** Wrap tree components with a single `SharedTreeContextProvider` to improve trees' performance.
+ * **Note:** Wrap tree components with a single `TreeWidgetContextProvider` to provide shared tree resources.
  * @alpha
  */
 export const ClassificationsTreeComponent = (props: ClassificationsTreeComponentProps) => {
@@ -58,9 +57,13 @@ export const ClassificationsTreeComponent = (props: ClassificationsTreeComponent
   }
 
   return (
-    <SharedTreeContextProviderInternal showWarning={true}>
+    <TelemetryContextProvider
+      componentIdentifier={ClassificationsTreeComponent.id}
+      onFeatureUsed={props.onFeatureUsed}
+      onPerformanceMeasured={props.onPerformanceMeasured}
+    >
       <ClassificationsTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />
-    </SharedTreeContextProviderInternal>
+    </TelemetryContextProvider>
   );
 };
 
@@ -88,17 +91,13 @@ ClassificationsTreeComponent.isSupportedByIModel = async (imodel: IModelConnecti
 function ClassificationsTreeComponentImpl({
   iModel,
   viewport,
-  onPerformanceMeasured,
-  onFeatureUsed,
   searchText,
   treeLabel,
   ...treeProps
 }: ClassificationsTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
   return (
-    <TelemetryContextProvider componentIdentifier={ClassificationsTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
-      <SelectableTree>
-        <ClassificationsTree {...treeProps} imodel={iModel} activeView={viewport} searchText={searchText} treeLabel={treeLabel} />
-      </SelectableTree>
-    </TelemetryContextProvider>
+    <SelectableTree>
+      <ClassificationsTree {...treeProps} imodel={iModel} activeView={viewport} searchText={searchText} treeLabel={treeLabel} />
+    </SelectableTree>
   );
 }

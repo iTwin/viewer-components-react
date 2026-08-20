@@ -11,7 +11,6 @@ import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { Root } from "@stratakit/mui";
 import { render as rtlRender } from "@testing-library/react";
-import { TreeWidget } from "@itwin/tree-widget-react";
 
 import type { PropsWithChildren, ReactElement } from "react";
 import type { IModelConnection, ScreenViewport, Viewport } from "@itwin/core-frontend";
@@ -45,13 +44,11 @@ export class TreeWidgetTestUtils {
     }
 
     await UiFramework.initialize();
-    await TreeWidget.initialize();
     TreeWidgetTestUtils._initialized = true;
   }
 
   public static terminate() {
     UiFramework.terminate();
-    TreeWidget.terminate();
     TreeWidgetTestUtils._initialized = false;
   }
 }

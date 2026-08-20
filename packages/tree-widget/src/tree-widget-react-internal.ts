@@ -28,5 +28,6 @@ export { releaseMainThreadOnItemsCount } from "./tree-widget-react/shared/intern
 export { createClassificationsTreeVisibilityHandler } from "./tree-widget-react/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHandler.js";
 
 export { BaseIdsCache } from "./tree-widget-react/shared/internal/caches/BaseIdsCache.js";
+export { SharedTreeContextProvider } from "./tree-widget-react/shared/contexts/SharedTreeContext.js";
 
 export { SET_CHANGE_DEBOUNCE_TIME } from "./tree-widget-react/shared/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";

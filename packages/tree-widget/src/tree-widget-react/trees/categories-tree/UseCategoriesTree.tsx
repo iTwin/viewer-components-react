@@ -7,9 +7,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import categorySvg from "@stratakit/icons/bis-category-3d.svg";
 import { EmptyTreeContent, NoSearchMatches, SearchUnknownError, TooManySearchMatches } from "../../shared/components/EmptyTree.js";
+import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
 import { useCachedVisibility } from "../../shared/internal/hooks/UseCachedVisibility.js";
 import { useGuid } from "../../shared/internal/hooks/UseGuid.js";
-import { useSharedTreeContextInternal } from "../../shared/internal/SharedTreeContextProviderInternal.js";
 import { getClassesByView, mergeWithDefaults, stableStringify } from "../../shared/internal/Utils.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIcon } from "./CategoriesTreeIcon.js";
@@ -62,7 +62,7 @@ interface UseCategoriesTreeResult {
 /**
  * Custom hook to create and manage state for the categories tree.
  *
- * **Note:** Requires `SharedTreeContextProvider` to be present in components tree above.
+ * **Note:** Requires `TreeWidgetContextProvider` to be present in components tree above.
  * @beta
  */
 export function useCategoriesTree({
@@ -235,7 +235,7 @@ function useCategoriesTreeIdsCache({
   activeViewType: "2d" | "3d";
   excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
 }): CategoriesTreeIdsCache {
-  const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
+  const { getBaseIdsCache, getCache } = useSharedTreeContext();
 
   const baseIdsCache = getBaseIdsCache({
     type: activeViewType,

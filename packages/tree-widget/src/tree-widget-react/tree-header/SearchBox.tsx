@@ -8,7 +8,7 @@ import { IconButton, TextField } from "@mui/material";
 import dismissSvg from "@stratakit/icons/dismiss.svg";
 import searchSvg from "@stratakit/icons/search.svg";
 import { Icon } from "@stratakit/mui";
-import { useTranslation } from "../shared/components/LocalizationContext.js";
+import { useTranslation } from "../shared/contexts/LocalizationContext.js";
 import { useLatest } from "../shared/internal/hooks/UseLatest.js";
 
 interface DebouncedSearchBoxProps {

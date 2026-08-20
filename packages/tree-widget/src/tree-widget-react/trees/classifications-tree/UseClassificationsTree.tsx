@@ -7,12 +7,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import iconBisCategory3d from "@stratakit/icons/bis-category-3d.svg";
 import { EmptyTreeContent, NoSearchMatches, SearchUnknownError, TooManySearchMatches } from "../../shared/components/EmptyTree.js";
+import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
+import { useTelemetryContext } from "../../shared/contexts/TelemetryContext.js";
 import { useCachedVisibility } from "../../shared/internal/hooks/UseCachedVisibility.js";
 import { useGuid } from "../../shared/internal/hooks/UseGuid.js";
-import { useSharedTreeContextInternal } from "../../shared/internal/SharedTreeContextProviderInternal.js";
 import { getClassesByView, stableStringify } from "../../shared/internal/Utils.js";
 import { SearchLimitExceededError } from "../../shared/TreeErrors.js";
-import { useTelemetryContext } from "../../shared/UseTelemetryContext.js";
 import { ClassificationsTreeComponent } from "./ClassificationsTreeComponent.js";
 import { ClassificationsTreeIcon } from "./ClassificationsTreeIcon.js";
 import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
@@ -102,7 +102,7 @@ interface UseClassificationsTreeResult {
 /**
  * Custom hook to create and manage state for the classifications tree.
  *
- * **Note:** Requires `SharedTreeContextProvider` to be present in components tree above.
+ * **Note:** Requires `TreeWidgetContextProvider` to be present in components tree above.
  * @alpha
  */
 export function useClassificationsTree({
@@ -114,7 +114,7 @@ export function useClassificationsTree({
   visibilityHandlerConfig,
   ...rest
 }: UseClassificationsTreeProps): UseClassificationsTreeResult {
-  const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
+  const { getBaseIdsCache, getCache } = useSharedTreeContext();
   const { onFeatureUsed } = useTelemetryContext();
 
   const [searchError, setSearchError] = useState<ClassificationsTreeSearchError | undefined>();
@@ -254,8 +254,8 @@ export function getClassificationsTreeIdsCache({
   hierarchyConfig,
   visibilityHandlerConfig,
 }: {
-  getCache: ReturnType<typeof useSharedTreeContextInternal>["getCache"];
-  getBaseIdsCache: ReturnType<typeof useSharedTreeContextInternal>["getBaseIdsCache"];
+  getCache: ReturnType<typeof useSharedTreeContext>["getCache"];
+  getBaseIdsCache: ReturnType<typeof useSharedTreeContext>["getBaseIdsCache"];
   imodel: IModelConnection;
   hierarchyConfig: HierarchyConfigForClassificationsCache;
   visibilityHandlerConfig?: VisibilityHandlerConfigForClassificationsCache;

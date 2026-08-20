@@ -5,10 +5,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { asyncScheduler, catchError, defer, distinct, EMPTY, from, lastValueFrom, mergeMap, observeOn, Subject, takeUntil, tap, throttleTime } from "rxjs";
-import { useTranslation } from "./components/LocalizationContext.js";
+import { useTranslation } from "./contexts/LocalizationContext.js";
+import { useTelemetryContext } from "./contexts/TelemetryContext.js";
 import { useErrorState } from "./internal/hooks/UseErrorState.js";
 import { createTooltip } from "./internal/Tooltip.js";
-import { useTelemetryContext } from "./UseTelemetryContext.js";
 
 import type { Observable } from "rxjs";
 import type { BeEvent } from "@itwin/core-bentley";

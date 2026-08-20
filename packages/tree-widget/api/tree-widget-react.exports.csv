@@ -22,14 +22,13 @@ beta;namespace;ModelsTreeNode
 beta;interface;ModelsTreeVisibilityHandlerOverrides
 beta;class;SearchLimitExceededError
 beta;function;SelectableTree
-beta;function;SharedTreeContextProvider
 beta;function;SkeletonTree
 beta;function;TelemetryContextProvider
 beta;function;Tree
 public;interface;TreeDefinition
 beta;function;TreeRenderer
-public;class;TreeWidget
 public;function;TreeWidgetComponent
+beta;function;TreeWidgetContextProvider
 public;interface;TreeWidgetViewport
 beta;function;useCategoriesTree
 public;function;useCategoriesTreeButtonProps

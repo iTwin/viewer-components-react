@@ -8,7 +8,7 @@ import { expect } from "vitest";
 import { render } from "vitest-browser-react";
 import { Root } from "@stratakit/mui";
 import localeEn from "../../public/locales/en/TreeWidget.json" with { type: "json" };
-import { LocalizationContextProvider } from "../../tree-widget-react/shared/components/LocalizationContext.js";
+import { TreeWidgetContextProvider } from "../../tree-widget-react/TreeWidgetContext.js";
 
 import type { PropsWithChildren, ReactNode } from "react";
 import type { Locator } from "vitest/browser";
@@ -42,7 +42,7 @@ function createWrapper(colorScheme: ColorScheme) {
   return function Wrapper({ children }: PropsWithChildren<unknown>) {
     return (
       <Root colorScheme={colorScheme} style={{ width: "100vw", height: "100vh" }}>
-        <LocalizationContextProvider localization={localization}>{children}</LocalizationContextProvider>
+        <TreeWidgetContextProvider localization={localization}>{children}</TreeWidgetContextProvider>
       </Root>
     );
   };

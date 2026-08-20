@@ -4,28 +4,24 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { createContext, useCallback, useContext, useMemo } from "react";
-import { useLatest } from "./internal/hooks/UseLatest.js";
+import { useLatest } from "../internal/hooks/UseLatest.js";
 
 import type { PropsWithChildren } from "react";
 
-type TrackedFeatures =
-  | "visibility-change"
-  | "hierarchy-level-filtering"
-  | "search"
-  | "hierarchy-level-size-limit-hit"
-  | "zoom-to-node"
-  | "error-timeout"
-  | "error-unknown";
-
 interface TelemetryContext {
-  onPerformanceMeasured: (featureId: string, duration: number) => void;
-  onFeatureUsed: (props: { featureId?: TrackedFeatures; reportInteraction: boolean }) => void;
+  onPerformanceMeasured: (props: { featureId: string; duration: number }) => void;
+  onFeatureUsed: (props: { featureId?: string; reportInteraction: boolean }) => void;
 }
 
-const telemetryContext = createContext<TelemetryContext | undefined>(undefined);
+const defaultContextValue: TelemetryContext = {
+  onPerformanceMeasured: () => {},
+  onFeatureUsed: () => {},
+};
+
+const telemetryContext = createContext<TelemetryContext>(defaultContextValue);
 
 /** @beta */
-export interface TelemetryContextProviderProps {
+interface TelemetryContextProviderProps {
   /** Callback that is invoked when performance of tracked feature is measured. */
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   /** Callback that is invoked when a tracked feature is used. */
@@ -34,7 +30,15 @@ export interface TelemetryContextProviderProps {
   componentIdentifier: string;
 }
 
-/** @beta */
+/**
+ * Provides telemetry reporting for a tree and prefixes reported feature IDs with `componentIdentifier`.
+ *
+ * Standard tree components create this context automatically. When composing a custom tree from
+ * `use*Tree` hooks, wrap the tree and any directly rendered header buttons with this provider so
+ * they report through the same callbacks and component identifier.
+ *
+ * @beta
+ */
 export function TelemetryContextProvider({
   children,
   onPerformanceMeasured,
@@ -46,7 +50,7 @@ export function TelemetryContextProvider({
 
   const contextValue = useMemo<TelemetryContext>(() => {
     return {
-      onPerformanceMeasured: (featureId, duration) => onPerformanceMeasuredRef.current?.(`${componentIdentifier}-${featureId}`, duration),
+      onPerformanceMeasured: ({ featureId, duration }) => onPerformanceMeasuredRef.current?.(`${componentIdentifier}-${featureId}`, duration),
       onFeatureUsed: ({ featureId, reportInteraction }) => {
         if (reportInteraction !== false) {
           onFeatureUsedRef.current?.(`use-${componentIdentifier}`);
@@ -61,16 +65,19 @@ export function TelemetryContextProvider({
   return <telemetryContext.Provider value={contextValue}>{children}</telemetryContext.Provider>;
 }
 
-const defaultContextValue: TelemetryContext = {
-  onPerformanceMeasured: () => {},
-  onFeatureUsed: () => {},
-};
-
 /** @internal */
 export function useTelemetryContext() {
-  return useContext(telemetryContext) ?? defaultContextValue;
+  return useContext(telemetryContext);
 }
 
+type TrackedFeatures =
+  | "visibility-change"
+  | "hierarchy-level-filtering"
+  | "search"
+  | "hierarchy-level-size-limit-hit"
+  | "zoom-to-node"
+  | "error-timeout"
+  | "error-unknown";
 interface UseReportingActionProps<TAction> {
   action: TAction;
   featureId?: TrackedFeatures;

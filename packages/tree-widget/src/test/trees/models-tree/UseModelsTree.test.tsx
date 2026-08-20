@@ -18,10 +18,9 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createStorage } from "@itwin/unified-selection";
-import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../../tree-widget-react/shared/FocusedInstancesContext.js";
-import { SharedTreeContextProviderInternal } from "../../../tree-widget-react/shared/internal/SharedTreeContextProviderInternal.js";
+import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../../tree-widget-react/shared/contexts/FocusedInstancesContext.js";
+import { SharedTreeContextProvider } from "../../../tree-widget-react/shared/contexts/SharedTreeContext.js";
 import { useModelsTree } from "../../../tree-widget-react/trees/models-tree/UseModelsTree.js";
-import { TreeWidget } from "../../../tree-widget-react/TreeWidget.js";
 import { buildIModel } from "../../IModelUtils.js";
 import { act, renderHook, waitFor } from "../../TestUtils.js";
 import { createFakeViewport, createIModelAccess } from "../Common.js";
@@ -51,12 +50,10 @@ describe("useModelsTree", () => {
     });
     // eslint-disable-next-line @itwin/no-internal
     ECSchemaRpcImpl.register();
-    await TreeWidget.initialize();
   });
 
   afterAll(async () => {
     await terminateCore();
-    TreeWidget.terminate();
   });
 
   it("preserves cache when search changes", async () => {
@@ -82,7 +79,7 @@ describe("useModelsTree", () => {
         activeView: viewport,
         getSearchPaths: async () => [{ identifier: { id: keys.modelId, className: "BisCore.Model" } }],
       },
-      wrapper: ({ children }) => <SharedTreeContextProviderInternal>{children}</SharedTreeContextProviderInternal>,
+      wrapper: ({ children }) => <SharedTreeContextProvider>{children}</SharedTreeContextProvider>,
     });
     try {
       let getSearchPaths = renderHookResult.current.treeProps.getSearchPaths;
@@ -189,7 +186,7 @@ describe("useModelsTree", () => {
       it("getSearchPaths returns correct result when getSubTreePaths is not defined", async () => {
         const { result: renderHookResult } = renderHook(useModelsTree, {
           initialProps,
-          wrapper: ({ children }) => <SharedTreeContextProviderInternal>{children}</SharedTreeContextProviderInternal>,
+          wrapper: ({ children }) => <SharedTreeContextProvider>{children}</SharedTreeContextProvider>,
         });
         const { getSearchPaths } = renderHookResult.current.treeProps;
         expect(getSearchPaths).toBeUndefined();
@@ -198,7 +195,7 @@ describe("useModelsTree", () => {
       it("getSearchPaths returns correct result when getSubTreePaths is defined", async () => {
         const { result: renderHookResult } = renderHook(useModelsTree, {
           initialProps: { ...initialProps, getSubTreePaths },
-          wrapper: ({ children }) => <SharedTreeContextProviderInternal>{children}</SharedTreeContextProviderInternal>,
+          wrapper: ({ children }) => <SharedTreeContextProvider>{children}</SharedTreeContextProvider>,
         });
         const { getSearchPaths } = renderHookResult.current.treeProps;
         const abortSignal = new AbortController().signal;
@@ -232,7 +229,7 @@ describe("useModelsTree", () => {
       it("getSearchPaths returns correct result when getSubTreePaths and search text is defined", async () => {
         const { result: renderHookResult } = renderHook(useModelsTree, {
           initialProps: { ...initialProps, getSubTreePaths, searchText: "element2" },
-          wrapper: ({ children }) => <SharedTreeContextProviderInternal>{children}</SharedTreeContextProviderInternal>,
+          wrapper: ({ children }) => <SharedTreeContextProvider>{children}</SharedTreeContextProvider>,
         });
         const { getSearchPaths } = renderHookResult.current.treeProps;
         const abortSignal = new AbortController().signal;
@@ -272,7 +269,7 @@ describe("useModelsTree", () => {
         };
         const { result: renderHookResult } = renderHook(useModelsTree, {
           initialProps: { ...initialProps, getSubTreePaths, getSearchPaths: getSearchPathsForProps },
-          wrapper: ({ children }) => <SharedTreeContextProviderInternal>{children}</SharedTreeContextProviderInternal>,
+          wrapper: ({ children }) => <SharedTreeContextProvider>{children}</SharedTreeContextProvider>,
         });
         const { getSearchPaths } = renderHookResult.current.treeProps;
         const abortSignal = new AbortController().signal;
@@ -316,7 +313,7 @@ describe("useModelsTree", () => {
             initialProps: { ...initialProps, getSubTreePaths },
             wrapper: ({ children }) => (
               <FocusedInstancesContextProvider selectionStorage={selectionStorage} imodelKey={imodelConnection.key}>
-                <SharedTreeContextProviderInternal>{children}</SharedTreeContextProviderInternal>
+                <SharedTreeContextProvider>{children}</SharedTreeContextProvider>
               </FocusedInstancesContextProvider>
             ),
           },

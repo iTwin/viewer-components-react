@@ -9,7 +9,7 @@ import { UiFramework } from "@itwin/appui-react";
 import { IModel } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_START__ TreeWidget.ModelsTreeExampleImports
-import { ModelsTreeComponent, SharedTreeContextProvider } from "@itwin/tree-widget-react";
+import { ModelsTreeComponent, TreeWidgetContextProvider } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ TreeWidget.TreeActionsExampleImports
 import { ModelsTreeNode, TreeActionBase } from "@itwin/tree-widget-react";
@@ -69,7 +69,7 @@ describe("Tree widget", () => {
           // __PUBLISH_EXTRACT_START__ TreeWidget.ModelsTreeExample
           function MyWidget() {
             return (
-              <SharedTreeContextProvider>
+              <TreeWidgetContextProvider localization={IModelApp.localization}>
                 <ModelsTreeComponent
                   // label for the tree, used for accessibility purposes
                   treeLabel="Models tree"
@@ -80,7 +80,7 @@ describe("Tree widget", () => {
                     (props) => <ModelsTreeComponent.HideAllButton {...props} key={"HideAllButton"} />,
                   ]}
                 />
-              </SharedTreeContextProvider>
+              </TreeWidgetContextProvider>
             );
           }
           // __PUBLISH_EXTRACT_END__
@@ -120,7 +120,7 @@ describe("Tree widget", () => {
           // __PUBLISH_EXTRACT_START__ TreeWidget.ModelsTreeHierarchyConfigExample
           function ConfiguredModelsTree() {
             return (
-              <SharedTreeContextProvider>
+              <TreeWidgetContextProvider localization={IModelApp.localization}>
                 <ModelsTreeComponent
                   treeLabel="Configured models tree"
                   selectionStorage={unifiedSelectionStorage}
@@ -139,7 +139,7 @@ describe("Tree widget", () => {
                     models: { withoutElements: "include" },
                   }}
                 />
-              </SharedTreeContextProvider>
+              </TreeWidgetContextProvider>
             );
           }
           // __PUBLISH_EXTRACT_END__
@@ -180,7 +180,7 @@ describe("Tree widget", () => {
 
           function ModelsTreeWithActions({ onInspect, onExport, onShowProperties }: ModelsTreeWithActionsProps) {
             return (
-              <SharedTreeContextProvider>
+              <TreeWidgetContextProvider localization={IModelApp.localization}>
                 <ModelsTreeComponent
                   treeLabel="Models tree with actions"
                   selectionStorage={unifiedSelectionStorage}
@@ -208,7 +208,7 @@ describe("Tree widget", () => {
                     ];
                   }}
                 />
-              </SharedTreeContextProvider>
+              </TreeWidgetContextProvider>
             );
           }
           // __PUBLISH_EXTRACT_END__
@@ -300,9 +300,9 @@ describe("Tree widget", () => {
 
           function CustomModelsTreeComponent(props: CustomModelsTreeProps) {
             return (
-              <SharedTreeContextProvider>
+              <TreeWidgetContextProvider localization={IModelApp.localization}>
                 <CustomModelsTree {...props} />
-              </SharedTreeContextProvider>
+              </TreeWidgetContextProvider>
             );
           }
           // __PUBLISH_EXTRACT_END__

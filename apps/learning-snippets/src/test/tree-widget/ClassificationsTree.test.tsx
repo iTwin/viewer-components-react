@@ -14,8 +14,8 @@ import { IModelApp } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_START__ TreeWidget.ClassificationsTreeComponentImports
 import { ClassificationsTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
-// __PUBLISH_EXTRACT_START__ TreeWidget.SharedTreeContextProviderImports
-import { SharedTreeContextProvider } from "@itwin/tree-widget-react";
+// __PUBLISH_EXTRACT_START__ TreeWidget.TreeWidgetContextProviderImports
+import { TreeWidgetContextProvider } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ TreeWidget.ClassificationsTreeSelectionStorageImports
 import type { SelectionStorage } from "@itwin/unified-selection";
@@ -76,7 +76,7 @@ describe("Tree widget", () => {
 
         function MyClassificationsTree({ selectionStorage }: MyClassificationsTreeProps) {
           return (
-            <SharedTreeContextProvider>
+            <TreeWidgetContextProvider localization={IModelApp.localization}>
               <ClassificationsTreeComponent
                 treeLabel="Classifications tree"
                 selectionStorage={selectionStorage}
@@ -86,7 +86,7 @@ describe("Tree widget", () => {
                 }}
                 emptyTreeContent={<>No classifications are available.</>}
               />
-            </SharedTreeContextProvider>
+            </TreeWidgetContextProvider>
           );
         }
         // __PUBLISH_EXTRACT_END__
@@ -106,7 +106,7 @@ describe("Tree widget", () => {
         // __PUBLISH_EXTRACT_START__ TreeWidget.ClassificationsTreeConfigExample
         function ConfiguredClassificationsTree({ selectionStorage }: { selectionStorage: SelectionStorage }) {
           return (
-            <SharedTreeContextProvider>
+            <TreeWidgetContextProvider localization={IModelApp.localization}>
               <ClassificationsTreeComponent
                 treeLabel="Configured classifications tree"
                 selectionStorage={selectionStorage}
@@ -124,7 +124,7 @@ describe("Tree widget", () => {
                   },
                 }}
               />
-            </SharedTreeContextProvider>
+            </TreeWidgetContextProvider>
           );
         }
         // __PUBLISH_EXTRACT_END__
@@ -149,9 +149,9 @@ describe("Tree widget", () => {
 
         function SearchableClassificationsTree({ imodel, viewport, selectionStorage, searchText }: SearchableClassificationsTreeProps) {
           return (
-            <SharedTreeContextProvider>
+            <TreeWidgetContextProvider localization={IModelApp.localization}>
               <SearchableClassificationsTreeContent imodel={imodel} viewport={viewport} selectionStorage={selectionStorage} searchText={searchText} />
-            </SharedTreeContextProvider>
+            </TreeWidgetContextProvider>
           );
         }
 
@@ -225,7 +225,7 @@ describe("Tree widget", () => {
               targetItems: [classification],
               onSearchPathsChanged: searchPathsChanged,
             }),
-          { wrapper: SharedTreeContextProvider },
+          { wrapper: ({ children }) => <TreeWidgetContextProvider localization={IModelApp.localization}>{children}</TreeWidgetContextProvider> },
         );
         const searchPaths = await result.current.getSearchPaths?.({ abortSignal: new AbortController().signal });
         expect(searchPaths).not.toBeUndefined();
@@ -256,7 +256,7 @@ describe("Tree widget", () => {
               // the same connection stands in for two versions - this only checks that multiple iModels are accepted
               imodelVersions: [imodelConnection, imodelConnection],
             }),
-          { wrapper: SharedTreeContextProvider },
+          { wrapper: ({ children }) => <TreeWidgetContextProvider localization={IModelApp.localization}>{children}</TreeWidgetContextProvider> },
         );
         expect(result.current.definition).toBeDefined();
       });

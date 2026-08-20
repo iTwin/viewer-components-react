@@ -6,10 +6,10 @@
 import { Fragment } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Skeleton } from "@mui/material";
+import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
+import { TelemetryContextProvider } from "../../shared/contexts/TelemetryContext.js";
 import { useActiveTreeWidgetViewport } from "../../shared/internal/hooks/UseActiveTreeWidgetViewport.js";
-import { SharedTreeContextProviderInternal, useSharedTreeContextInternal } from "../../shared/internal/SharedTreeContextProviderInternal.js";
 import { getClassesByView } from "../../shared/internal/Utils.js";
-import { TelemetryContextProvider } from "../../shared/UseTelemetryContext.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { CategoriesTree } from "./CategoriesTree.js";
 import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonProps } from "./CategoriesTreeButtons.js";
@@ -75,7 +75,7 @@ interface CategoriesTreeComponentType {
 /**
  * A component that renders `CategoriesTree` and a header with search capabilities and header buttons.
  *
- * **Note:** Wrap tree components with a single `SharedTreeContextProvider` to improve trees' performance.`
+ * **Note:** Wrap tree components with a single `TreeWidgetContextProvider` to provide shared tree resources.
  * @public
  */
 export const CategoriesTreeComponent: CategoriesTreeComponentType = (props: CategoriesTreeComponentProps) => {
@@ -87,9 +87,13 @@ export const CategoriesTreeComponent: CategoriesTreeComponentType = (props: Cate
   }
 
   return (
-    <SharedTreeContextProviderInternal showWarning={true}>
+    <TelemetryContextProvider
+      componentIdentifier={CategoriesTreeComponent.id}
+      onFeatureUsed={props.onFeatureUsed}
+      onPerformanceMeasured={props.onPerformanceMeasured}
+    >
       <CategoriesTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />
-    </SharedTreeContextProviderInternal>
+    </TelemetryContextProvider>
   );
 };
 
@@ -107,14 +111,12 @@ function CategoriesTreeComponentImpl({
   iModel,
   viewport,
   headerButtons,
-  onPerformanceMeasured,
-  onFeatureUsed,
   searchText,
   treeLabel,
   ...treeProps
 }: CategoriesTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
   const { buttonProps, onCategoriesFiltered } = useCategoriesTreeButtonProps({ viewport });
-  const { getBaseIdsCache } = useSharedTreeContextInternal();
+  const { getBaseIdsCache } = useSharedTreeContext();
   const viewType = viewport.viewType === "2d" ? "2d" : "3d";
   const isLoaded =
     buttonProps.categories.length > 0 ||
@@ -122,26 +124,24 @@ function CategoriesTreeComponentImpl({
 
   const buttons: ReactNode = isLoaded
     ? headerButtons
-      ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ ...buttonProps, onFeatureUsed })}</Fragment>)
+      ? headerButtons.map((btn, index) => <Fragment key={index}>{btn(buttonProps)}</Fragment>)
       : [
-          <ShowAllButton {...buttonProps} key="show-all-btn" onFeatureUsed={onFeatureUsed} />,
-          <HideAllButton {...buttonProps} key="hide-all-btn" onFeatureUsed={onFeatureUsed} />,
-          <InvertAllButton {...buttonProps} key="invert-all-btn" onFeatureUsed={onFeatureUsed} />,
+          <ShowAllButton {...buttonProps} key="show-all-btn" />,
+          <HideAllButton {...buttonProps} key="hide-all-btn" />,
+          <InvertAllButton {...buttonProps} key="invert-all-btn" />,
         ]
     : Array.from({ length: headerButtons?.length ?? 3 }, (_, index) => <Skeleton variant={"rounded"} width={24} height={24} key={index} />);
 
   return (
-    <TelemetryContextProvider componentIdentifier={CategoriesTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
-      <SelectableTree buttons={buttons}>
-        <CategoriesTree
-          {...treeProps}
-          imodel={iModel}
-          activeView={viewport}
-          searchText={searchText}
-          treeLabel={treeLabel}
-          onCategoriesFiltered={onCategoriesFiltered}
-        />
-      </SelectableTree>
-    </TelemetryContextProvider>
+    <SelectableTree buttons={buttons}>
+      <CategoriesTree
+        {...treeProps}
+        imodel={iModel}
+        activeView={viewport}
+        searchText={searchText}
+        treeLabel={treeLabel}
+        onCategoriesFiltered={onCategoriesFiltered}
+      />
+    </SelectableTree>
   );
 }

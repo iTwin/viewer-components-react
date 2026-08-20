@@ -13,9 +13,10 @@ import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
 import visibilityInvertSvg from "@stratakit/icons/visibility-invert.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
 import { Icon } from "@stratakit/mui";
-import { useTranslation } from "../../shared/components/LocalizationContext.js";
-import { useFocusedInstancesContext } from "../../shared/FocusedInstancesContext.js";
-import { useSharedTreeContextInternal } from "../../shared/internal/SharedTreeContextProviderInternal.js";
+import { useFocusedInstancesContext } from "../../shared/contexts/FocusedInstancesContext.js";
+import { useTranslation } from "../../shared/contexts/LocalizationContext.js";
+import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
+import { useTelemetryContext } from "../../shared/contexts/TelemetryContext.js";
 import { getClassesByView } from "../../shared/internal/Utils.js";
 import { invertAllModels, showAll } from "../../shared/internal/VisibilityUtils.js";
 
@@ -62,7 +63,7 @@ export interface ModelsTreeHeaderButtonProps extends TreeToolbarButtonProps {
  *   <ModelsTree {...treeProps} onModelsFiltered={onModelsFiltered} />
  * </TreeWithHeader>
  * ```
- * **Note:** Requires `SharedTreeContextProvider` to be present in components tree above.
+ * **Note:** Requires `TreeWidgetContextProvider` to be present in components tree above.
  *
  * @public
  */
@@ -84,7 +85,7 @@ export function useModelsTreeButtonProps({ imodel, viewport }: { imodel: IModelC
 
 function useAvailableModels(imodel: IModelConnection): ModelInfo[] {
   const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
-  const { getBaseIdsCache } = useSharedTreeContextInternal();
+  const { getBaseIdsCache } = useSharedTreeContext();
   const baseIdsCache = getBaseIdsCache({ imodel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
   useEffect(() => {
     const getModels = async () => {
@@ -108,18 +109,19 @@ function useAvailableModels(imodel: IModelConnection): ModelInfo[] {
 export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => ReactElement | null;
 
 /**
- * Requires `SharedTreeContextProvider` to be present in component tree above.
+ * Requires `TreeWidgetContextProvider` to be present in component tree above.
  * @public
  */
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
-  const { models, viewport, onFeatureUsed } = props;
-  const { getBaseIdsCache, cancelChangesInProgress } = useSharedTreeContextInternal();
+  const { models, viewport } = props;
+  const { onFeatureUsed } = useTelemetryContext();
+  const { getBaseIdsCache, cancelChangesInProgress } = useSharedTreeContext();
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
   const translate = useTranslation();
 
   const onClick = async () => {
     // cspell:disable-next-line
-    onFeatureUsed?.("models-tree-showall");
+    onFeatureUsed({ featureId: "models-tree-showall", reportInteraction: true });
     cancelChangesInProgress.next();
     // wrap in try catch for getCategoryInfos call
     try {
@@ -145,12 +147,13 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
 
 /** @public */
 export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
-  const { models, viewport, onFeatureUsed } = props;
-  const { cancelChangesInProgress } = useSharedTreeContextInternal();
+  const { models, viewport } = props;
+  const { onFeatureUsed } = useTelemetryContext();
+  const { cancelChangesInProgress } = useSharedTreeContext();
   const translate = useTranslation();
   const onClick = () => {
     // cspell:disable-next-line
-    onFeatureUsed?.("models-tree-hideall");
+    onFeatureUsed({ featureId: "models-tree-hideall", reportInteraction: true });
     cancelChangesInProgress.next();
     viewport.changeModelDisplay({ modelIds: models.map((model) => model.id), display: false });
   };
@@ -165,13 +168,14 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
 
 /** @public */
 export function InvertButton(props: ModelsTreeHeaderButtonProps) {
-  const { models, viewport, onFeatureUsed } = props;
-  const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContextInternal();
+  const { models, viewport } = props;
+  const { onFeatureUsed } = useTelemetryContext();
+  const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContext();
   const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
   const translate = useTranslation();
   const onClick = async () => {
     // cspell:disable-next-line
-    onFeatureUsed?.("models-tree-invert");
+    onFeatureUsed({ featureId: "models-tree-invert", reportInteraction: true });
     cancelChangesInProgress.next();
     // wrap in try catch for getCategoryInfos call
     try {
@@ -203,14 +207,15 @@ function useAreAllModelsVisible({ modelIds, viewport }: { modelIds: Id64String[]
 
 /** @public */
 export function View2DButton(props: ModelsTreeHeaderButtonProps) {
-  const { models, viewport, onFeatureUsed } = props;
-  const { cancelChangesInProgress } = useSharedTreeContextInternal();
+  const { models, viewport } = props;
+  const { onFeatureUsed } = useTelemetryContext();
+  const { cancelChangesInProgress } = useSharedTreeContext();
   const models2d = useMemo(() => models.filter((model) => model.isPlanProjection).map((model) => model.id), [models]);
   const is2dToggleActive = useAreAllModelsVisible({ modelIds: models2d, viewport });
   const translate = useTranslation();
 
   const onClick = () => {
-    onFeatureUsed?.("models-tree-view2d");
+    onFeatureUsed({ featureId: "models-tree-view2d", reportInteraction: true });
     cancelChangesInProgress.next();
     viewport.changeModelDisplay({ modelIds: models2d, display: is2dToggleActive ? false : true });
   };
@@ -225,8 +230,9 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
 
 /** @public */
 export function View3DButton(props: ModelsTreeHeaderButtonProps) {
-  const { models, viewport, onFeatureUsed } = props;
-  const { cancelChangesInProgress } = useSharedTreeContextInternal();
+  const { models, viewport } = props;
+  const { onFeatureUsed } = useTelemetryContext();
+  const { cancelChangesInProgress } = useSharedTreeContext();
   const models3d = useMemo(() => {
     return models.filter((model) => !model.isPlanProjection).map((model) => model.id);
   }, [models]);
@@ -234,7 +240,7 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
   const translate = useTranslation();
 
   const onClick = () => {
-    onFeatureUsed?.("models-tree-view3d");
+    onFeatureUsed({ featureId: "models-tree-view3d", reportInteraction: true });
     cancelChangesInProgress.next();
     viewport.changeModelDisplay({ modelIds: models3d, display: is3dToggleActive ? false : true });
   };
@@ -248,10 +254,11 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
 }
 
 /** @public */
-export function ToggleInstancesFocusButton({ onFeatureUsed, disabled }: { onFeatureUsed?: (feature: string) => void; disabled?: boolean }) {
+export function ToggleInstancesFocusButton(props?: { disabled?: boolean }) {
+  const { onFeatureUsed } = useTelemetryContext();
   const { enabled, toggle } = useFocusedInstancesContext();
   const translate = useTranslation();
-  const label = disabled
+  const label = props?.disabled
     ? translate("modelsTree.buttons.toggleFocusMode.disabled.tooltip")
     : enabled
       ? translate("modelsTree.buttons.toggleFocusMode.disable.tooltip")
@@ -263,10 +270,10 @@ export function ToggleInstancesFocusButton({ onFeatureUsed, disabled }: { onFeat
       label={label}
       onChange={() => {
         // cspell:disable-next-line
-        onFeatureUsed?.("models-tree-instancesfocus");
+        onFeatureUsed({ featureId: "models-tree-instancesfocus", reportInteraction: true });
         toggle();
       }}
-      disabled={disabled}
+      disabled={props?.disabled}
       selected={enabled}
     >
       <Icon href={focusModeSvg} />
