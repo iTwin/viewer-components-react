@@ -4,7 +4,7 @@
 
 Replace `TreeWidget.initialize()` and direct use of `SharedTreeContextProvider` with a single `TreeWidgetContextProvider` near the root of the application. The provider supplies localization, logging, and shared tree resources to every tree below it. Continue registering `LOCALIZATION_NAMESPACES` during application startup. Applications using `createTreeWidget` can continue passing `localization` and `logger` to that function; it adds `TreeWidgetContextProvider` at the widget scope automatically.
 
-`onFeatureUsed` has also been removed from `TreeToolbarButtonProps`. Consumers that passed it directly to a standard tree header button should remove that prop.
+`onFeatureUsed` has also been removed from `TreeToolbarButtonProps`. For custom trees, provide `onFeatureUsed` and `onPerformanceMeasured` through a `TelemetryContextProvider` that wraps the tree and any directly rendered header buttons. Standard tree components continue to accept the callbacks directly.
 
 Before:
 
@@ -16,6 +16,7 @@ import {
   ModelsTreeComponent,
   SelectableTree,
   SharedTreeContextProvider,
+  TelemetryContextProvider,
   TreeWidget,
   useCategoriesTree,
   useCategoriesTreeButtonProps,
@@ -33,8 +34,9 @@ function App() {
     <LocalizationContextProvider localization={IModelApp.localization}>
       <SharedTreeContextProvider>
         <ModelsTreeComponent treeLabel="Models tree" selectionStorage={selectionStorage} />
-
-        <MyTree />
+        <TelemetryContextProvider componentIdentifier="my-tree" onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
+          <MyTree />
+        </TelemetryContextProvider>
       </SharedTreeContextProvider>
     </LocalizationContextProvider>
   );
@@ -60,6 +62,7 @@ import {
   LOCALIZATION_NAMESPACES,
   ModelsTreeComponent,
   SelectableTree,
+  TelemetryContextProvider,
   TreeWidgetContextProvider,
   useCategoriesTree,
   useCategoriesTreeButtonProps,
@@ -75,7 +78,9 @@ function App() {
     <TreeWidgetContextProvider localization={IModelApp.localization} logger={logger}>
       <ModelsTreeComponent treeLabel="Models tree" selectionStorage={selectionStorage} />
 
-      <MyTree />
+      <TelemetryContextProvider componentIdentifier="my-tree" onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
+        <MyTree />
+      </TelemetryContextProvider>
     </TreeWidgetContextProvider>
   );
 }
