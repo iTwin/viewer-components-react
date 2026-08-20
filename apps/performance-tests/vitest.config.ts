@@ -30,9 +30,6 @@ export default defineConfig({
   // Adding these aliases allows adding breakpoints straight into the source code and it does not need to be built.
   resolve: {
     alias: [
-      // Loading tree-widget from source would resolve this runtime from tree-widget's node_modules.
-      // Use the test app's copy so the runtime and react-dom share one React instance; otherwise hooks fail with "Invalid hook call".
-      { find: "react-compiler-runtime", replacement: reactCompilerRuntime },
       { find: "@itwin/tree-widget-react/internal", replacement: path.resolve(treeWidgetSrc, "tree-widget-react-internal.ts") },
       { find: "@itwin/tree-widget-react", replacement: path.resolve(treeWidgetSrc, "tree-widget-react.ts") },
     ],

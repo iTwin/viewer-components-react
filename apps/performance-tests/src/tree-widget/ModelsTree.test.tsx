@@ -4,15 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { describe, expect } from "vitest";
-import { IModelApp, type IModelConnection } from "@itwin/core-frontend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { ModelsTreeNode, TreeWidgetContextProvider, useModelsTree } from "@itwin/tree-widget-react";
+import { ModelsTreeNode, useModelsTree } from "@itwin/tree-widget-react";
 import {
   BaseIdsCache,
   createModelsTreeVisibilityHandler,
   defaultModelsTreeHierarchyConfiguration,
   ModelsTreeDefinition,
   ModelsTreeIdsCache,
+  SharedTreeContextProvider,
 } from "@itwin/tree-widget-react/internal";
 import { act, renderHook } from "@testing-library/react";
 import { Datasets } from "../util/Datasets.js";
@@ -33,6 +33,7 @@ import {
 
 import type { SnapshotDb } from "@itwin/core-backend";
 import type { Id64String } from "@itwin/core-bentley";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyDefinition, HierarchyNode, HierarchyProvider, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { EC, ECSqlQueryDef, InstanceKey, Props } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
@@ -529,7 +530,7 @@ describe("models tree", () => {
 function renderUseModelsTreeHook(props: Props<typeof useModelsTree>) {
   const result = renderHook((hookProps) => useModelsTree(hookProps), {
     initialProps: props,
-    wrapper: ({ children }) => <TreeWidgetContextProvider localization={IModelApp.localization}>{children}</TreeWidgetContextProvider>,
+    wrapper: ({ children }) => <SharedTreeContextProvider>{children}</SharedTreeContextProvider>,
   });
   return { ...result, [Symbol.dispose]: () => result.unmount() };
 }

@@ -4,14 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { describe, expect } from "vitest";
-import { IModelApp, type IModelConnection } from "@itwin/core-frontend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { ClassificationsTreeNode, TreeWidgetContextProvider, useClassificationsTree } from "@itwin/tree-widget-react";
+import { ClassificationsTreeNode, useClassificationsTree } from "@itwin/tree-widget-react";
 import {
   BaseIdsCache,
   ClassificationsTreeDefinition,
   ClassificationsTreeIdsCache,
   createClassificationsTreeVisibilityHandler,
+  SharedTreeContextProvider,
 } from "@itwin/tree-widget-react/internal";
 import { act, renderHook } from "@testing-library/react";
 import { Datasets } from "../util/Datasets.js";
@@ -30,6 +30,7 @@ import {
 
 import type { SnapshotDb } from "@itwin/core-backend";
 import type { Id64String } from "@itwin/core-bentley";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyDefinition, HierarchyNode, HierarchyProvider, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { EC, Props } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
@@ -229,7 +230,7 @@ describe("classifications tree", () => {
 function renderUseClassificationsTreeHook(props: Props<typeof useClassificationsTree>) {
   const result = renderHook((hookProps) => useClassificationsTree(hookProps), {
     initialProps: props,
-    wrapper: ({ children }) => <TreeWidgetContextProvider localization={IModelApp.localization}>{children}</TreeWidgetContextProvider>,
+    wrapper: ({ children }) => <SharedTreeContextProvider>{children}</SharedTreeContextProvider>,
   });
   return { ...result, [Symbol.dispose]: () => result.unmount() };
 }
