@@ -66,6 +66,6 @@ export function LoggerContextProvider({ children, logger }: PropsWithChildren<Lo
 }
 
 /** @internal */
-export function useLoggerContext() {
+export function useLogger() {
   return useContext(loggerContext);
 }
