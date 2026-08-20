@@ -12,7 +12,6 @@ import TestReporter from "./src/util/TestReporter.js";
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const treeWidgetRoot = path.resolve(rootDir, "../../packages/tree-widget");
 const treeWidgetSrc = path.resolve(treeWidgetRoot, "src");
-const reactCompilerRuntime = fileURLToPath(import.meta.resolve("react-compiler-runtime"));
 
 function collectDepsFromPackage(...packageDirs: string[]): string[] {
   const deps = new Set<string>();
