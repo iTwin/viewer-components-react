@@ -3,11 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { createContext, type PropsWithChildren, useContext, useMemo } from "react";
+import { createContext, useContext, useMemo } from "react";
 import { LocalizationContextProvider } from "./shared/contexts/LocalizationContext.js";
 import { LoggerContextProvider } from "./shared/contexts/LoggerContext.js";
 import { SharedTreeContextProvider } from "./shared/contexts/SharedTreeContext.js";
 
+import type { PropsWithChildren, ReactNode } from "react";
 import type { Localization } from "@itwin/core-common";
 import type { ILogger } from "@itwin/presentation-shared";
 
@@ -41,7 +42,7 @@ export interface TreeWidgetContextProviderProps {
  *
  * @beta
  */
-export function TreeWidgetContextProvider({ children, localization, logger }: PropsWithChildren<TreeWidgetContextProviderProps>) {
+export function TreeWidgetContextProvider({ children, localization, logger }: PropsWithChildren<TreeWidgetContextProviderProps>): ReactNode {
   const context = useContext(treeWidgetContext);
 
   if (context.isInitialized) {

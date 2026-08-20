@@ -675,7 +675,7 @@ interface TreeToolbarButtonProps {
 export function TreeWidgetComponent(input: TreeWidgetProps): _$react_jsx_runtime0.JSX.Element;
 
 // @beta
-export function TreeWidgetContextProvider(input: PropsWithChildren<TreeWidgetContextProviderProps>): string | number | boolean | Iterable<_$react.ReactNode> | _$react_jsx_runtime0.JSX.Element | null | undefined;
+export function TreeWidgetContextProvider(input: PropsWithChildren<TreeWidgetContextProviderProps>): ReactNode;
 
 // @beta
 export interface TreeWidgetContextProviderProps {
