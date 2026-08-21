@@ -5,9 +5,9 @@
 
 import { useEffect, useMemo } from "react";
 import { HierarchySearchTree } from "@itwin/presentation-hierarchies";
+import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
+import { useTelemetryContext } from "../../shared/contexts/TelemetryContext.js";
 import { createIModelAccess } from "../../shared/internal/hooks/UseIModelAccess.js";
-import { useSharedTreeContextInternal } from "../../shared/internal/SharedTreeContextProviderInternal.js";
-import { useTelemetryContext } from "../../shared/UseTelemetryContext.js";
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
 import { getClassificationsTreeIdsCache } from "./UseClassificationsTree.js";
 
@@ -68,7 +68,7 @@ interface UseClassificationsTreeDefinitionResult {
 }
 
 /**
- * Requires `SharedTreeContextProvider` to be present in components tree above.
+ * Requires `TreeWidgetContextProvider` to be present in components tree above.
  * @alpha
  */
 export function useClassificationsTreeDefinition(props: UseClassificationsTreeDefinitionProps): UseClassificationsTreeDefinitionResult {
@@ -80,7 +80,7 @@ export function useClassificationsTreeDefinitionInternal(
   props: UseClassificationsTreeDefinitionProps & { visibilityHandlerConfig?: ClassificationsTreeVisibilityHandlerConfiguration },
 ): UseClassificationsTreeDefinitionResult {
   const { imodels, hierarchyConfig, search, onSearchPathsChanged, visibilityHandlerConfig } = props;
-  const { getBaseIdsCache, getCache } = useSharedTreeContextInternal();
+  const { getBaseIdsCache, getCache } = useSharedTreeContext();
   const { onFeatureUsed } = useTelemetryContext();
 
   const imodelsWithCaches = useMemo(() => {

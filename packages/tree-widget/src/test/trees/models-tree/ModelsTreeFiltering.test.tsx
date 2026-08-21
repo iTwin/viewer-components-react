@@ -24,12 +24,12 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { renderHook } from "@testing-library/react";
+import { SharedTreeContextProvider } from "../../../tree-widget-react/shared/contexts/SharedTreeContext.js";
 import {
   CLASS_NAME_GeometricElement3d,
   CLASS_NAME_GeometricModel3d,
   CLASS_NAME_Subject,
 } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
-import { SharedTreeContextProvider } from "../../../tree-widget-react/shared/SharedTreeContextProvider.js";
 import { useModelsTree } from "../../../tree-widget-react/trees/models-tree/UseModelsTree.js";
 import { buildIModel } from "../../IModelUtils.js";
 import { createFakeViewport, createIModelAccess } from "../Common.js";

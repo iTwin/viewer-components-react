@@ -6,11 +6,11 @@
 import { useCallback, useMemo, useState } from "react";
 import { defaultIfEmpty, EMPTY, filter, firstValueFrom, from, fromEventPattern, map, mergeMap, Subject, takeUntil, tap } from "rxjs";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { useSharedTreeContext } from "../../contexts/SharedTreeContext.js";
 import { HierarchyVisibilityOverrideHandler } from "../../UseHierarchyVisibility.js";
 import { BufferingViewport } from "../BufferingViewport.js";
 import { AlwaysAndNeverDrawnElementInfoCache } from "../caches/AlwaysAndNeverDrawnElementInfoCache.js";
 import { toVoidPromise } from "../Rxjs.js";
-import { useSharedTreeContextInternal } from "../SharedTreeContextProviderInternal.js";
 import { createVisibilityStatus } from "../Tooltip.js";
 import { createVisibilityChangeEventListener } from "../VisibilityChangeEventListener.js";
 
@@ -53,7 +53,7 @@ export interface UseCachedVisibilityProps<TCache, TSearchTargets> {
 export function useCachedVisibility<TCache, TSearchTargets>(props: UseCachedVisibilityProps<TCache, TSearchTargets>) {
   const [searchPaths, setSearchPaths] = useState<HierarchySearchTree[] | undefined>(undefined);
   const { activeView, idsCache, createSearchResultsTree, createTreeSpecificVisibilityHandler, componentId } = props;
-  const { cancelChangesInProgress } = useSharedTreeContextInternal();
+  const { cancelChangesInProgress } = useSharedTreeContext();
 
   const visibilityHandlerFactory = useMemo<VisibilityTreeProps["visibilityHandlerFactory"]>(
     () =>
@@ -78,7 +78,7 @@ export function useCachedVisibility<TCache, TSearchTargets>(props: UseCachedVisi
 
 function createVisibilityHandlerFactory<TCache, TSearchTargets>(
   props: UseCachedVisibilityProps<TCache, TSearchTargets> &
-    Pick<ReturnType<typeof useSharedTreeContextInternal>, "cancelChangesInProgress"> & {
+    Pick<ReturnType<typeof useSharedTreeContext>, "cancelChangesInProgress"> & {
       searchPaths: HierarchySearchTree[] | undefined;
     },
 ): VisibilityTreeProps["visibilityHandlerFactory"] {

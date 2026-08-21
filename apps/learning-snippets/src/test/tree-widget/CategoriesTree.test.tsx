@@ -9,13 +9,12 @@ import { afterAll, beforeAll, describe, it, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_START__ TreeWidget.CategoriesTreeExampleImports
-import { CategoriesTreeComponent } from "@itwin/tree-widget-react";
+import { CategoriesTreeComponent, TreeWidgetContextProvider } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ TreeWidget.CustomCategoriesTreeExampleImports
 import {
   createTreeWidgetViewport,
   SelectableTree,
-  SharedTreeContextProvider,
   useCategoriesTree,
   useCategoriesTreeButtonProps,
   VisibilityTree,
@@ -26,7 +25,7 @@ import type { SelectionStorage } from "@itwin/unified-selection";
 import type { ComponentPropsWithoutRef } from "react";
 // __PUBLISH_EXTRACT_END__
 import { createStorage } from "@itwin/unified-selection";
-import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
+import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubCategory } from "test-utilities";
 import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
 import { cleanup, getTestViewer, mockGetBoundingClientRect, render, TreeWidgetTestUtils, waitFor } from "./TestUtils.js";
@@ -64,7 +63,7 @@ describe("Tree widget", () => {
           // __PUBLISH_EXTRACT_START__ TreeWidget.CategoriesTreeExample
           function MyWidget() {
             return (
-              <SharedTreeContextProvider>
+              <TreeWidgetContextProvider localization={IModelApp.localization}>
                 <CategoriesTreeComponent
                   // label for the tree, used for accessibility purposes
                   treeLabel="Categories tree"
@@ -75,7 +74,7 @@ describe("Tree widget", () => {
                     (props) => <CategoriesTreeComponent.HideAllButton {...props} />,
                   ]}
                 />
-              </SharedTreeContextProvider>
+              </TreeWidgetContextProvider>
             );
           }
           // __PUBLISH_EXTRACT_END__
@@ -83,6 +82,55 @@ describe("Tree widget", () => {
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText } = render(<MyWidget />);
           await waitFor(() => getByText("Test SpatialCategory"));
+        });
+
+        it("configures the categories tree hierarchy", async () => {
+          const { imodelConnection } = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Configured model" });
+              const category = insertSpatialCategory({ txn, codeValue: "Configured category" });
+              insertPhysicalElement({
+                txn,
+                userLabel: "Configured element",
+                modelId: physicalModel.id,
+                categoryId: category.id,
+              });
+              insertSpatialCategory({ txn, codeValue: "Empty category" });
+              insertSubCategory({ txn, codeValue: "Hidden subcategory", parentCategoryId: category.id });
+            }),
+          );
+          const testViewport = getTestViewer(imodelConnection);
+          const unifiedSelectionStorage = createStorage();
+          vi.spyOn(IModelApp.viewManager, "selectedView", "get").mockReturnValue(testViewport);
+          vi.spyOn(UiFramework, "getIModelConnection").mockReturnValue(imodelConnection);
+
+          // __PUBLISH_EXTRACT_START__ TreeWidget.CategoriesTreeHierarchyConfigExample
+          function ConfiguredCategoriesTree() {
+            return (
+              <TreeWidgetContextProvider localization={IModelApp.localization}>
+                <CategoriesTreeComponent
+                  treeLabel="Configured categories tree"
+                  selectionStorage={unifiedSelectionStorage}
+                  hierarchyConfig={{
+                    // Display element nodes, except instances of this class and its subclasses.
+                    elements: {
+                      nodes: "include",
+                      excludedClasses: ["BisCore.SpatialLocationElement"],
+                    },
+                    // Display categories that contain no elements.
+                    categories: { withoutElements: "include" },
+                    // Do not display subcategory nodes.
+                    subCategories: { nodes: "exclude" },
+                  }}
+                />
+              </TreeWidgetContextProvider>
+            );
+          }
+          // __PUBLISH_EXTRACT_END__
+
+          using _ = { [Symbol.dispose]: cleanup };
+          const { getByText } = render(<ConfiguredCategoriesTree />);
+          await waitFor(() => getByText("Empty category"));
         });
 
         it("renders custom categories tree", async () => {
@@ -150,9 +198,9 @@ describe("Tree widget", () => {
 
           function CustomCategoriesTreeComponent(props: CustomCategoriesTreeProps) {
             return (
-              <SharedTreeContextProvider>
+              <TreeWidgetContextProvider localization={IModelApp.localization}>
                 <CustomCategoriesTree {...props} />
-              </SharedTreeContextProvider>
+              </TreeWidgetContextProvider>
             );
           }
           // __PUBLISH_EXTRACT_END__

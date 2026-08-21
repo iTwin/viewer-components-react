@@ -6,13 +6,14 @@
 import { describe, expect } from "vitest";
 import { assert } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { SharedTreeContextProvider, useCategoriesTree } from "@itwin/tree-widget-react";
+import { useCategoriesTree } from "@itwin/tree-widget-react";
 import {
   BaseIdsCache,
   CategoriesTreeDefinition,
   CategoriesTreeIdsCache,
   createCategoriesTreeVisibilityHandler,
   defaultCategoriesTreeHierarchyConfiguration,
+  SharedTreeContextProvider,
 } from "@itwin/tree-widget-react/internal";
 import { act, renderHook } from "@testing-library/react";
 import { Datasets } from "../util/Datasets.js";

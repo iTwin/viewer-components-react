@@ -15,7 +15,6 @@ import type { TreeWidgetViewport } from "../shared/TreeWidgetViewport.js";
 /** @public */
 export interface TreeToolbarButtonProps {
   viewport: TreeWidgetViewport;
-  onFeatureUsed?: (feature: string) => void;
 }
 
 /** @beta */

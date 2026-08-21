@@ -27,7 +27,7 @@ export { IModelContentTreeIcon } from "./imodel-content-tree/IModelContentTree.j
 export { ExternalSourcesTreeComponent } from "./external-sources-tree/ExternalSourcesTreeComponent.js";
 export { ExternalSourcesTreeIcon } from "./external-sources-tree/ExternalSourcesTree.js";
 
-export { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../shared/FocusedInstancesContext.js";
+export { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../shared/contexts/FocusedInstancesContext.js";
 
 export { Tree } from "../shared/components/Tree.js";
 export type { TreeWidgetViewport } from "../shared/TreeWidgetViewport.js";
@@ -38,8 +38,6 @@ export { TreeRenderer } from "../shared/components/TreeRenderer.js";
 export { VisibilityTreeRenderer } from "../shared/components/VisibilityTreeRenderer.js";
 export { SkeletonTree } from "../shared/components/SkeletonTree.js";
 export type { HierarchyVisibilityHandler, VisibilityStatus } from "../shared/UseHierarchyVisibility.js";
-export { SharedTreeContextProvider } from "../shared/SharedTreeContextProvider.js";
-export { TelemetryContextProvider } from "../shared/UseTelemetryContext.js";
 export { SearchLimitExceededError } from "../shared/TreeErrors.js";
 
 export type { ModelsTreeVisibilityHandlerOverrides } from "./models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";

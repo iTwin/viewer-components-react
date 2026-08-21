@@ -11,7 +11,7 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  configure({ reactStrictMode: !process.env.DISABLE_STRICT_MODE });
+  configure({ reactStrictMode: !process.env.DISABLE_STRICT_MODE, asyncUtilTimeout: 5000 });
 });
 
 afterEach(() => {

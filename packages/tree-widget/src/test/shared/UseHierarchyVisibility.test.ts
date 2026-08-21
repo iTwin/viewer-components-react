@@ -3,10 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BeEvent } from "@itwin/core-bentley";
 import { useHierarchyVisibility } from "../../tree-widget-react/shared/UseHierarchyVisibility.js";
-import { TreeWidget } from "../../tree-widget-react/TreeWidget.js";
 import { act, renderHook, waitFor } from "../TestUtils.js";
 import { createTreeNode } from "../trees/TreeUtils.js";
 
@@ -27,18 +26,11 @@ describe("useHierarchyVisibility", () => {
   const initialProps: UseHierarchyVisibilityProps = {
     visibilityHandlerFactory: () => visibilityHandler,
   };
-  beforeAll(async () => {
-    await TreeWidget.initialize();
-  });
 
   beforeEach(() => {
     visibilityHandler.getVisibilityStatus.mockReset();
     visibilityHandler.changeVisibility.mockReset();
     visibilityHandler[Symbol.dispose].mockReset();
-  });
-
-  afterAll(() => {
-    TreeWidget.terminate();
   });
 
   it("checks visibility status only once", async () => {

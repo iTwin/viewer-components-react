@@ -5,10 +5,11 @@
 
 import { useState } from "react";
 import { StagePanelLocation, StagePanelSection, useActiveViewport, WidgetState } from "@itwin/appui-react";
+import { IModelApp } from "@itwin/core-frontend";
 import { ExpandableBlock } from "@itwin/itwinui-react";
 import { MapLayersPrefBrowserStorage, MapLayersUI, MapLayersWidget } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
-import { CategoriesTreeIcon, createTreeWidgetViewport, Tree, TreeRenderer, TreeWidget, useCategoriesTree } from "@itwin/tree-widget-react";
+import { CategoriesTreeIcon, createTreeWidgetViewport, Tree, TreeRenderer, TreeWidgetContextProvider, useCategoriesTree } from "@itwin/tree-widget-react";
 import { Chip } from "@mui/material";
 import { Icon } from "@stratakit/mui";
 import { unifiedSelectionStorage } from "../SelectionStorage";
@@ -23,7 +24,6 @@ const element3dIcon = new URL("@stratakit/icons/3d.svg", import.meta.url).href;
 export async function initializeLayers() {
   await MapLayersFormats.initialize();
   await MapLayersUI.initialize({ iTwinConfig: new MapLayersPrefBrowserStorage() });
-  await TreeWidget.initialize();
 }
 
 export function createLayersUiProvider(): UiItemsProvider {
@@ -34,7 +34,11 @@ export function createLayersUiProvider(): UiItemsProvider {
         {
           icon: <Icon href={element3dIcon} />,
           label: "Elements",
-          content: <ElementComponent selectionStorage={unifiedSelectionStorage} />,
+          content: (
+            <TreeWidgetContextProvider localization={IModelApp.localization}>
+              <ElementComponent selectionStorage={unifiedSelectionStorage} />
+            </TreeWidgetContextProvider>
+          ),
         },
         {
           icon: <Icon href={mapIcon} />,

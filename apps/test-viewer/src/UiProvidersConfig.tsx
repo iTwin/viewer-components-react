@@ -31,7 +31,6 @@ import {
   IModelContentTreeComponent,
   ModelsTreeComponent,
   TreeNodeRenameAction,
-  TreeWidget,
   LOCALIZATION_NAMESPACES as TreeWidgetLocalizationNamespaces,
 } from "@itwin/tree-widget-react";
 import { CustomClassificationsTree } from "./components/custom-classifications-tree/CustomClassificationsTree";
@@ -87,7 +86,6 @@ const configuredUiItems = new Map<string, UiItem>([
     "tree-widget",
     {
       initialize: async () => {
-        await TreeWidget.initialize();
         await Promise.all(TreeWidgetLocalizationNamespaces.map(async (ns) => IModelApp.localization.registerNamespace(ns)));
       },
       createUiItemsProviders: () => [

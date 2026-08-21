@@ -7,11 +7,11 @@ import { useEffect, useMemo, useState } from "react";
 import { filter, firstValueFrom, identity, tap } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { HierarchyNodeIdentifier, HierarchySearchTree } from "@itwin/presentation-hierarchies";
+import { useTelemetryContext } from "../../../shared/contexts/TelemetryContext.js";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_SubCategory } from "../../../shared/internal/ClassNameDefinitions.js";
 import { toVoidPromise } from "../../../shared/internal/Rxjs.js";
 import { getClassesByView, getOrCreate } from "../../../shared/internal/Utils.js";
 import { SearchLimitExceededError } from "../../../shared/TreeErrors.js";
-import { useTelemetryContext } from "../../../shared/UseTelemetryContext.js";
 import { CategoriesTreeDefinition } from "../CategoriesTreeDefinition.js";
 
 import type { GuidString } from "@itwin/core-bentley";

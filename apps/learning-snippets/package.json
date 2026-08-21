@@ -15,6 +15,7 @@
     "link:deps": "node ./scripts/linkWorkspaceDeps.cjs"
   },
   "dependencies": {
+    "@bentley/classification-systems-schema": "1.0.4",
     "@itwin/appui-abstract": "^5.11.2",
     "@itwin/appui-react": "^5.33.0",
     "@itwin/build-tools": "^5.11.2",

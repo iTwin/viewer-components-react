@@ -8,7 +8,7 @@ import { from, map } from "rxjs";
 import { HierarchyNode } from "@itwin/presentation-hierarchies-react";
 import { normalizeFullClassName } from "@itwin/presentation-shared";
 import { Selectable, Selectables } from "@itwin/unified-selection";
-import { eachValueFrom } from "./internal/EachValueFrom.js";
+import { eachValueFrom } from "../internal/EachValueFrom.js";
 
 import type { PropsWithChildren } from "react";
 import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";

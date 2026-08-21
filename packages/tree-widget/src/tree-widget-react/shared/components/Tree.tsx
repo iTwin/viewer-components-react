@@ -10,12 +10,11 @@ import { BeEvent } from "@itwin/core-bentley";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
 import { useIModelUnifiedSelectionTree, useNodeHighlighting } from "@itwin/presentation-hierarchies-react";
 import { StrataKitRootErrorRenderer } from "@itwin/presentation-hierarchies-react/stratakit";
-import { TreeWidget } from "../../TreeWidget.js";
+import { useLogger } from "../contexts/LoggerContext.js";
+import { useReportingAction, useTelemetryContext } from "../contexts/TelemetryContext.js";
 import { useHierarchyLevelFiltering } from "../internal/hooks/UseHierarchyFiltering.js";
 import { useIModelAccess } from "../internal/hooks/UseIModelAccess.js";
 import { useIModelChangeListener } from "../internal/hooks/UseIModelChangeListener.js";
-import { useReportingAction, useTelemetryContext } from "../UseTelemetryContext.js";
-import { LOGGING_NAMESPACE } from "../Utils.js";
 import { Delayed } from "./Delayed.js";
 import { EmptyTreeContent } from "./EmptyTree.js";
 import { ProgressOverlay } from "./ProgressOverlay.js";
@@ -101,6 +100,7 @@ export function Tree({
   ...props
 }: TreeProps) {
   const { onFeatureUsed, onPerformanceMeasured } = useTelemetryContext();
+  const { logger } = useLogger();
   const [imodelChanged] = useState(new BeEvent<() => void>());
 
   const { imodelAccess, currentHierarchyLevelSizeLimit } = useIModelAccess({
@@ -126,7 +126,7 @@ export function Tree({
       if (action === "reload") {
         onReload?.();
       }
-      onPerformanceMeasured(action, duration);
+      onPerformanceMeasured({ featureId: action, duration });
     },
     onHierarchyLimitExceeded: () => onFeatureUsed({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
     onHierarchyLoadError: ({ type, error }) => {
@@ -138,9 +138,9 @@ export function Tree({
   useIModelChangeListener({
     imodel: props.imodel,
     action: useCallback(() => {
-      TreeWidget.logger.logTrace(`${LOGGING_NAMESPACE}.${treeName}`, `iModel data changed`);
+      logger.logTrace(treeName, `iModel data changed`);
       imodelChanged.raiseEvent();
-    }, [imodelChanged, treeName]),
+    }, [imodelChanged, logger, treeName]),
   });
 
   if (treeProps.rootErrorRendererProps !== undefined) {

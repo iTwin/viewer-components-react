@@ -5,13 +5,14 @@
 
 import { describe, expect } from "vitest";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { ModelsTreeNode, SharedTreeContextProvider, useModelsTree } from "@itwin/tree-widget-react";
+import { ModelsTreeNode, useModelsTree } from "@itwin/tree-widget-react";
 import {
   BaseIdsCache,
   createModelsTreeVisibilityHandler,
   defaultModelsTreeHierarchyConfiguration,
   ModelsTreeDefinition,
   ModelsTreeIdsCache,
+  SharedTreeContextProvider,
 } from "@itwin/tree-widget-react/internal";
 import { act, renderHook } from "@testing-library/react";
 import { Datasets } from "../util/Datasets.js";

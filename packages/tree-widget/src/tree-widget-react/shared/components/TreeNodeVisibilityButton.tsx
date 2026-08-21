@@ -10,8 +10,8 @@ import { TreeActionBase } from "@itwin/presentation-hierarchies-react/stratakit"
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
 import visibilityPartialSvg from "@stratakit/icons/visibility-partial.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
+import { useTranslation } from "../contexts/LocalizationContext.js";
 import { createTooltip } from "../internal/Tooltip.js";
-import { useTranslation } from "./LocalizationContext.js";
 
 import type { PropsWithChildren } from "react";
 import type { TreeNode } from "@itwin/presentation-hierarchies-react";
