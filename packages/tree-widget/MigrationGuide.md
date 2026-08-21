@@ -1,7 +1,5 @@
 # Migrating from tree-widget v3 to v4
 
-Version 4 moves tree-widget to the current iTwin.js hierarchy and UI packages. This is a breaking release: update the application's dependencies and replace v3 initialization and rendering APIs before upgrading individual trees.
-
 This guide only covers changes required to preserve v3 behavior after upgrading. See the [package README](./README.md) for new v4 features and optional APIs.
 
 ## Contents
@@ -21,50 +19,51 @@ The sections are ordered so that the application compiles again as early as poss
 
 1. Sections 1-2 cover package setup and the removed global initialization APIs.
 2. Section 3 applies to applications that register the widget or render standard tree components.
-3. Sections 4-5 apply to applications that customize search, hierarchy configuration, or renderers.
-4. Sections 6-7 apply to applications with custom trees or custom visibility handlers.
-5. Section 8 applies to code or tests that depend on the Models tree hierarchy shape.
+3. Sections 4-5 apply to applications that customize search or hierarchy configuration.
+4. Section 6 applies to applications with custom widget layouts, tree renderers, or telemetry.
+5. Section 7 applies to applications with custom visibility handlers.
+6. Section 8 applies to code or tests that depend on the Models tree hierarchy shape.
 
 ## API quick reference
 
 Migration map for the v3 APIs covered by this guide. Each row links to the section with the details.
 
-| v3                                                   | v4                                                              | Details                                                              |
-| ---------------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `TreeWidget.initialize` / `TreeWidget.terminate`     | `TreeWidgetContextProvider` + `LOCALIZATION_NAMESPACES`         | [2](#2-replace-global-initialization-with-treewidgetcontextprovider) |
-| `TreeWidget.i18n` / `.i18nNamespace` / `.translate`  | removed, no replacement                                         | [2](#replace-treewidget-localization-helpers)                        |
-| `SelectableTree` (tree selector)                     | `TreeWidgetComponent`                                           | [6](#replace-the-widget-and-header-components)                       |
-| `SelectableTreeDefinition`                           | `TreeDefinition`                                                | [3](#3-update-widget-registration-and-standard-tree-components)      |
-| Standard tree `getLabel()`                           | `getLabel({ standardLabels })`                                  | [3](#3-update-widget-registration-and-standard-tree-components)      |
-| `TreeWithHeader`                                     | `SelectableTree` (header/container only)                        | [6](#replace-the-widget-and-header-components)                       |
-| `TreeWithHeader.filteringProps`                      | `TreeDefinition.isSearchable`, or an application-owned input    | [3](#preserve-search-ui)                                             |
-| `FilterLimitExceededError`                           | `SearchLimitExceededError`                                      | [4](#filterlimitexceedederror-to-searchlimitexceedederror)           |
-| `Viewport` in tree APIs                              | `TreeWidgetViewport` + `createTreeWidgetViewport`               | [3](#convert-viewport-values-used-by-hooks-and-header-buttons)       |
-| `filter`                                             | `searchText`                                                    | [4](#filter-to-searchtext)                                           |
-| `highlight`                                          | `highlightText`                                                 | [4](#highlight-to-highlighttext)                                     |
-| `getFilteredPaths`                                   | `getSearchPaths`                                                | [4](#getfilteredpaths-to-getsearchpaths)                             |
-| `HierarchyFilteringPath[]`                           | `HierarchySearchTree[]`                                         | [4](#hierarchyfilteringpath-to-hierarchysearchtree)                  |
-| `onFilterClick`                                      | `filterHierarchyLevel`                                          | [4](#onfilterclick-to-filterhierarchylevel)                          |
-| `noDataMessage`                                      | `emptyTreeContent`                                              | [4](#nodatamessage-to-emptytreecontent)                              |
-| `modelsTreeProps` / `categoriesTreeProps`            | `treeProps`                                                     | [4](#update-standard-tree-hook-results)                              |
-| `rendererProps`                                      | `getTreeItemProps`                                              | [4](#update-standard-tree-hook-results)                              |
-| `getCheckboxState`                                   | `getVisibilityButtonState`                                      | [6](#migrate-custom-visibility-renderers)                            |
-| `onCheckboxClicked`                                  | `onVisibilityButtonClick`                                       | [6](#migrate-custom-visibility-renderers)                            |
-| Checkbox states `"on"` / `"off"`                     | `"visible"` / `"hidden"`                                        | [6](#migrate-custom-visibility-renderers)                            |
-| `getActions`                                         | `getInlineActions` / `getMenuActions` / `getContextMenuActions` | [6](#migrate-node-actions)                                           |
-| `getLabel` / `getIcon` / `getSublabel`               | `getTreeItemProps`                                              | [6](#migrate-renderer-props)                                         |
-| `HierarchyVisibilityHandler.dispose`                 | `HierarchyVisibilityHandler[Symbol.dispose]`                    | [7](#7-update-custom-visibility-apis)                                |
-| `VisibilityStatus.tooltip`                           | removed from the handler                                        | [7](#7-update-custom-visibility-apis)                                |
-| `get*DisplayStatus` / `change*State` overrides       | `get*VisibilityStatus` / `change*VisibilityStatus`              | [7](#7-update-custom-visibility-apis)                                |
-| `onCategoriesFiltered(categories)`                   | `onCategoriesFiltered({ categories, models })`                  | [3](#convert-viewport-values-used-by-hooks-and-header-buttons)       |
-| `PresentationHierarchyNode` / `PresentationTreeNode` | `TreeNode` (`@itwin/presentation-hierarchies-react` v2)         | [6](#update-tree-and-visibilitytree-usage)                           |
+| v3                                                   | v4                                                               | Details                                                              |
+| ---------------------------------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `TreeWidget.initialize` / `TreeWidget.terminate`     | `TreeWidgetContextProvider` + `LOCALIZATION_NAMESPACES`          | [2](#2-replace-global-initialization-with-treewidgetcontextprovider) |
+| `TreeWidget.i18n` / `.i18nNamespace` / `.translate`  | removed, no replacement                                          | [2](#replace-treewidget-localization-helpers)                        |
+| `SelectableTree` (tree selector)                     | `TreeWidgetComponent`                                            | [6](#replace-the-widget-and-header-components)                       |
+| `SelectableTreeDefinition`                           | `TreeDefinition`                                                 | [3](#3-update-widget-registration-and-standard-tree-components)      |
+| Standard tree `getLabel()`                           | `getLabel({ standardLabels })`                                   | [3](#3-update-widget-registration-and-standard-tree-components)      |
+| `TreeWithHeader`                                     | `SelectableTree` (header/container only)                         | [6](#replace-the-widget-and-header-components)                       |
+| `TreeWithHeader.filteringProps`                      | `TreeDefinition.isSearchable`, or an application-owned input     | [3](#preserve-search-ui)                                             |
+| `FilterLimitExceededError`                           | `SearchLimitExceededError`                                       | [4](#filterlimitexceedederror-to-searchlimitexceedederror)           |
+| `Viewport` in tree APIs                              | `TreeWidgetViewport` + `createTreeWidgetViewport`                | [3](#convert-viewport-values-used-by-hooks-and-header-buttons)       |
+| `filter`                                             | `searchText`                                                     | [4](#filter-to-searchtext)                                           |
+| `highlight`                                          | `highlightText`                                                  | [4](#highlight-to-highlighttext)                                     |
+| `getFilteredPaths`                                   | `getSearchPaths`                                                 | [4](#getfilteredpaths-to-getsearchpaths)                             |
+| `HierarchyFilteringPath[]`                           | `HierarchySearchTree[]`                                          | [4](#hierarchyfilteringpath-to-hierarchysearchtree)                  |
+| `onFilterClick`                                      | `filterHierarchyLevel`                                           | [4](#onfilterclick-to-filterhierarchylevel)                          |
+| `noDataMessage`                                      | `emptyTreeContent`                                               | [4](#nodatamessage-to-emptytreecontent)                              |
+| `modelsTreeProps` / `categoriesTreeProps`            | `treeProps`                                                      | [4](#update-standard-tree-hook-results)                              |
+| `rendererProps`                                      | `getTreeItemProps`                                               | [4](#update-standard-tree-hook-results)                              |
+| `getCheckboxState`                                   | `getVisibilityButtonState`                                       | [6](#migrate-custom-visibility-renderers)                            |
+| `onCheckboxClicked`                                  | `onVisibilityButtonClick`                                        | [6](#migrate-custom-visibility-renderers)                            |
+| Checkbox states `"on"` / `"off"`                     | `"visible"` / `"hidden"`                                         | [6](#migrate-custom-visibility-renderers)                            |
+| `getActions`                                         | `getInlineActions`, `getMenuActions`, or `getContextMenuActions` | [6](#migrate-node-actions)                                           |
+| `getLabel` / `getIcon` / `getSublabel`               | `getTreeItemProps`                                               | [6](#migrate-renderer-props)                                         |
+| `HierarchyVisibilityHandler.dispose`                 | `HierarchyVisibilityHandler[Symbol.dispose]`                     | [7](#7-update-custom-visibility-apis)                                |
+| `VisibilityStatus.tooltip`                           | removed from the handler                                         | [7](#7-update-custom-visibility-apis)                                |
+| `get*DisplayStatus` / `change*State` overrides       | `get*VisibilityStatus` / `change*VisibilityStatus`               | [7](#7-update-custom-visibility-apis)                                |
+| `onCategoriesFiltered(categories)`                   | `onCategoriesFiltered({ categories, models })`                   | [3](#update-categories-tree-buttons-and-callbacks)                   |
+| `PresentationHierarchyNode` / `PresentationTreeNode` | `TreeNode` (`@itwin/presentation-hierarchies-react` v2)          | [6](#update-tree-and-visibilitytree-usage)                           |
 
 Props that were removed without a replacement:
 
 | Removed prop                                              | Removed from                                                                                                                                                                          | Details                                                         |
 | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
 | `density`                                                 | `createTreeWidget`, `TreeWidgetComponent`, `SelectableTree`, `TreeWithHeader`, `Tree`, `VisibilityTree`, standard tree components, header button props, `TreeDefinition.render` props | [3](#3-update-widget-registration-and-standard-tree-components) |
-| `getSchemaContext`                                        | `Tree`, `VisibilityTree`, all standard tree components                                                                                                                                | [3](#remove-getschemacontext-plumbing)                          |
+| `getSchemaContext`                                        | `Tree`, `VisibilityTree`, all standard tree components                                                                                                                                | [3](#3-update-widget-registration-and-standard-tree-components) |
 | `onFeatureUsed`                                           | header button renderer props                                                                                                                                                          | [3](#3-update-widget-registration-and-standard-tree-components) |
 | `filterButtonsVisibility`, `size`, `enableVirtualization` | `TreeRenderer`, `VisibilityTreeRenderer`                                                                                                                                              | [6](#migrate-renderer-props)                                    |
 
@@ -84,6 +83,7 @@ Version 4 requires React 18 and the iTwin.js, AppUI, presentation, MUI, and Stra
 {
   "dependencies": {
     // iTwin.js packages with the same version range
+    "@itwin/appui-abstract": "^5.8.0",
     "@itwin/core-bentley": "^5.8.0",
     "@itwin/core-common": "^5.8.0",
     "@itwin/core-frontend": "^5.8.0",
@@ -92,7 +92,6 @@ Version 4 requires React 18 and the iTwin.js, AppUI, presentation, MUI, and Stra
     "@itwin/presentation-frontend": "^5.8.0",
 
     // Other iTwin.js packages
-    "@itwin/appui-abstract": "^5.8.0",
     "@itwin/appui-react": "^5.5.0",
     "@itwin/components-react": "^5.5.0",
     "@itwin/presentation-components": "^5.12.0",
@@ -190,11 +189,17 @@ const label = IModelApp.localization.getLocalizedString("MyApplication:treeWidge
 
 ## 3. Update widget registration and standard tree components
 
-`createTreeWidget` and `TreeWidgetComponent` now require `localization`. In v4, `getLabel` receives `standardLabels`, which contains the localized default names for the built-in trees. The `render` callback no longer receives `density`; it now receives a required `treeLabel` and an optional `searchText`.
+Widget registration through `createTreeWidget` or `TreeWidgetComponent`:
 
-`treeLabel` is the resolved label of the tree definition and must be forwarded to the tree component. `searchText` is the widget header's current search string and is supplied when the definition sets `isSearchable`.
+- `localization` is now required.
+- `TreeDefinition` replaces `SelectableTreeDefinition`. Its `getLabel` receives `{ standardLabels }`, which contains the localized default names for the built-in trees.
+- `TreeDefinition.render` receives `treeLabel` to forward to the tree component, and `searchText` when the definition sets `isSearchable`.
 
-`ModelsTreeComponent`, `CategoriesTreeComponent`, `IModelContentTreeComponent`, and `ExternalSourcesTreeComponent` now require an accessible `treeLabel`. The v3 `getSchemaContext` and `density` props were removed from those standard tree components. `density` was also removed from `createTreeWidget`, `TreeWidgetComponent`, `SelectableTree`, `TreeWithHeader`, `Tree`, and `VisibilityTree`.
+Standard tree components - `ModelsTreeComponent`, `CategoriesTreeComponent`, `IModelContentTreeComponent`, and `ExternalSourcesTreeComponent` - now require `treeLabel`, which is used for accessibility purposes.
+
+`density` was removed from every API listed above, as well as from `SelectableTree`, `TreeWithHeader`, `Tree`, and `VisibilityTree`.
+
+`getSchemaContext` was removed from the standard tree components, `Tree`, and `VisibilityTree` - v4 creates the schema context internally.
 
 ```tsx
 // v3
@@ -219,7 +224,6 @@ import { IModelApp } from "@itwin/core-frontend";
 
 createTreeWidget({
   localization: IModelApp.localization,
-  // `density` has been removed.
   trees: [
     {
       id: ModelsTreeComponent.id,
@@ -230,10 +234,6 @@ createTreeWidget({
   ],
 });
 ```
-
-### Remove `getSchemaContext` plumbing
-
-v4 creates the schema context it needs internally. Remove the `getSchemaContext` prop from standard tree components, `Tree`, and `VisibilityTree`. If the application maintained a `SchemaContext` cache and `ECSchemaRpcLocater` only for tree-widget, remove that plumbing and its unused imports.
 
 ### Preserve search UI
 
@@ -247,49 +247,73 @@ In v3, `ModelsTreeComponent` and `CategoriesTreeComponent` rendered their own se
 Tree visibility hooks and header-button APIs no longer accept an iTwin.js `Viewport` directly. They use the narrower `TreeWidgetViewport` interface. Convert the existing viewport with `createTreeWidgetViewport`.
 
 ```tsx
-import { useMemo } from "react";
+// v3 - the same viewport is passed to every tree API
+import { useModelsTree, useModelsTreeButtonProps } from "@itwin/tree-widget-react";
 
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+
+function MyModelsTree({ imodel, viewport }: { imodel: IModelConnection; viewport: Viewport }) {
+  const { buttonProps } = useModelsTreeButtonProps({ imodel, viewport });
+  const { modelsTreeProps } = useModelsTree({ activeView: viewport });
+  // ...
+}
+```
+
+```tsx
+// v4 - create one adapter and pass it everywhere the viewport was used
+import { useMemo } from "react";
+import { createTreeWidgetViewport, useModelsTree, useModelsTreeButtonProps } from "@itwin/tree-widget-react";
+
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+
+function MyModelsTree({ imodel, viewport }: { imodel: IModelConnection; viewport: Viewport }) {
+  const treeWidgetViewport = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
+
+  const { buttonProps } = useModelsTreeButtonProps({ imodel, viewport: treeWidgetViewport });
+  const { treeProps } = useModelsTree({ activeView: treeWidgetViewport });
+  // ...
+}
+```
+
+This applies to `useModelsTree`, `useCategoriesTree`, `useModelsTreeButtonProps`, `useCategoriesTreeButtonProps`, and standard header buttons rendered directly.
+
+### Update Categories tree buttons and callbacks
+
+Category header button props now include the models available in the iModel. `useCategoriesTreeButtonProps` supplies them:
+
+```tsx
 // v3
-const modelsTree = useModelsTree({ activeView: viewport });
-const { buttonProps } = useModelsTreeButtonProps({ imodel, viewport });
+const { buttonProps } = useCategoriesTreeButtonProps({ viewport });
+
+<CategoriesTreeComponent.ShowAllButton viewport={buttonProps.viewport} categories={buttonProps.categories} />;
+
+// v4 - `models` was added
+const { buttonProps } = useCategoriesTreeButtonProps({ viewport: treeWidgetViewport });
+
+<CategoriesTreeComponent.ShowAllButton viewport={buttonProps.viewport} categories={buttonProps.categories} models={buttonProps.models} />;
+```
+
+Custom header-button renderers no longer receive `density` or `onFeatureUsed`. Remove either property when destructuring or forwarding the renderer props, and do not pass them when rendering standard buttons directly.
+
+`onCategoriesFiltered` now takes a single object argument holding the filtered `categories` and the `models` those categories belong to, instead of the categories array. Both values may be `undefined` when filtering is cleared:
+
+```tsx
+// v3
+const { categoriesTreeProps } = useCategoriesTree({
+  onCategoriesFiltered: (categories) => {
+    // ...
+  },
+  // ...
+});
 
 // v4
-const treeWidgetViewport = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
-const modelsTree = useModelsTree({ activeView: treeWidgetViewport });
-const { buttonProps } = useModelsTreeButtonProps({
-  imodel,
-  viewport: treeWidgetViewport,
+const { treeProps } = useCategoriesTree({
+  onCategoriesFiltered: ({ categories, models }) => {
+    // ...
+  },
+  // ...
 });
 ```
-
-Keep the adapter stable between renders, as shown above. This applies to `useModelsTree`, `useCategoriesTree`, `useModelsTreeButtonProps`, `useCategoriesTreeButtonProps`, and standard header buttons rendered directly.
-
-Category header button props now require the models available in the iModel:
-
-```tsx
-// v3
-<CategoriesTreeComponent.ShowAllButton viewport={viewport} categories={categories} />;
-
-// v4
-<CategoriesTreeComponent.ShowAllButton viewport={treeWidgetViewport} categories={categories} models={modelIds} />;
-```
-
-This only requires a manual `models` change when constructing the button props directly. In v4, `useCategoriesTreeButtonProps` includes `models` in its returned `buttonProps`, so buttons that spread those props receive it automatically.
-
-Header-button renderer props no longer contain `density` or `onFeatureUsed`; remove both when calling standard buttons directly.
-
-The Categories tree callback now includes the models associated with the filtered categories:
-
-```tsx
-// v3
-const onCategoriesFiltered = (categories) => {};
-
-// v4
-type UseCategoriesTreeProps = Parameters<typeof useCategoriesTree>[0];
-const onCategoriesFiltered: NonNullable<UseCategoriesTreeProps["onCategoriesFiltered"]> = ({ categories, models }) => {};
-```
-
-The `onCategoriesFiltered` returned by `useCategoriesTreeButtonProps` already has the v4 shape and can be passed directly to `useCategoriesTree`.
 
 ## 4. Rename search and renderer APIs
 
@@ -319,19 +343,66 @@ The results returned by `useModelsTree` and `useCategoriesTree` use the same ren
 
 ### `getFilteredPaths` to `getSearchPaths`
 
+The prop was renamed on `Tree`, `VisibilityTree`, and `useModelsTree`. Renaming it is not enough - the callback itself changed, and the two APIs take different arguments.
+
+On `Tree` and `VisibilityTree`, the arguments stay the same and only the returned value changes:
+
 ```tsx
-// v3: Tree, VisibilityTree, and useModelsTree
-<Tree {...treeProps} getFilteredPaths={getFilteredPaths} />;
+// v3
+<Tree
+  {...treeProps}
+  getFilteredPaths={async ({ imodelAccess, abortSignal }) => {
+    // returns HierarchyFilteringPath[]
+  }}
+/>;
 
 // v4
-<Tree {...treeProps} getSearchPaths={getSearchPaths} />;
+<Tree
+  {...treeProps}
+  getSearchPaths={async ({ imodelAccess, abortSignal }) => {
+    // returns HierarchySearchTree[]
+  }}
+/>;
 ```
+
+On `useModelsTree`, the callback takes different arguments. The search text it receives follows the same rename as the hook prop:
+
+```tsx
+// v3
+useModelsTree({
+  activeView: viewport,
+  getFilteredPaths: async ({ createInstanceKeyPaths, filter }) => {
+    // returns HierarchyFilteringPath[]
+  },
+});
+
+// v4
+useModelsTree({
+  activeView: treeWidgetViewport,
+  getSearchPaths: async ({ createInstanceKeyPaths, searchText }) => {
+    // returns HierarchySearchTree[]
+  },
+});
+```
+
+The next section covers converting the returned value, which applies to both.
 
 ### `HierarchyFilteringPath` to `HierarchySearchTree`
 
-Both `getSearchPaths` and `getSubTreePaths` now return `HierarchySearchTree[]`. This is not only a type rename: v3 returned a flat list of `HierarchyFilteringPath` values, while v4 uses a tree structure in which shared path prefixes are merged.
+Both `getSearchPaths` and `getSubTreePaths` now return `HierarchySearchTree[]`. In v3 each path was returned on its own, so nodes shared by several paths were repeated. In v4 the paths are returned as a tree, and shared nodes appear once:
 
-How the callback is migrated depends on where its paths come from.
+```
+// v3 - one entry per path
+[Subject, ModelA]
+[Subject, ModelB]
+
+// v4 - one tree, `Subject` appears once
+Subject
+├─ ModelA
+└─ ModelB
+```
+
+What to change depends on where the paths come from.
 
 #### Paths created with `createInstanceKeyPaths`
 
@@ -339,20 +410,23 @@ The helper supplied to the callback already returns the v4 structure, so its res
 
 ```tsx
 // v3
-const getFilteredPaths = async ({ createInstanceKeyPaths, filter }) => {
-  const paths = await createInstanceKeyPaths({ label: filter });
-  // `createInstanceKeyPaths` doesn't set the `autoExpand` flag - set it here
-  return paths.map((path) => ({ ...path, options: { autoExpand: true } }));
-};
+useModelsTree({
+  activeView: viewport,
+  getFilteredPaths: async ({ createInstanceKeyPaths, filter }) => {
+    const paths = await createInstanceKeyPaths({ label: filter });
+    // `createInstanceKeyPaths` doesn't set the `autoExpand` flag - set it here
+    return paths.map((path) => ({ ...path, options: { autoExpand: true } }));
+  },
+});
 
 // v4
-type UseModelsTreeProps = Parameters<typeof useModelsTree>[0];
-type GetSearchPaths = NonNullable<UseModelsTreeProps["getSearchPaths"]>;
-
-const getSearchPaths: GetSearchPaths = async ({ createInstanceKeyPaths, searchText }) => {
-  // search targets are revealed by the helper
-  return searchText ? createInstanceKeyPaths({ label: searchText }) : undefined;
-};
+useModelsTree({
+  activeView: treeWidgetViewport,
+  getSearchPaths: async ({ createInstanceKeyPaths, searchText }) => {
+    // search targets are revealed by the helper
+    return searchText ? createInstanceKeyPaths({ label: searchText }) : undefined;
+  },
+});
 ```
 
 #### Paths constructed by the application
@@ -363,10 +437,13 @@ A v3 callback that built its own paths returned the flat list directly:
 // v3
 import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 
-const getFilteredPaths = async (): Promise<HierarchyFilteringPath[]> => [
-  { path: [subjectIdentifier, modelIdentifier], options: { autoExpand: true } },
-  { path: [subjectIdentifier, otherModelIdentifier] },
-];
+useModelsTree({
+  activeView: viewport,
+  getFilteredPaths: async (): Promise<HierarchyFilteringPath[]> => [
+    { path: [subjectIdentifier, modelIdentifier], options: { autoExpand: true } },
+    { path: [subjectIdentifier, otherModelIdentifier] },
+  ],
+});
 ```
 
 In v4, keep building a flat list, but with the v2 `HierarchySearchPath` type, then convert it with `HierarchySearchTree.createFromPathsList` from `@itwin/presentation-hierarchies`:
@@ -374,28 +451,27 @@ In v4, keep building a flat list, but with the v2 `HierarchySearchPath` type, th
 ```tsx
 import { HierarchySearchTree, type HierarchySearchPath } from "@itwin/presentation-hierarchies";
 
-type UseModelsTreeProps = Parameters<typeof useModelsTree>[0];
-type GetSearchPaths = NonNullable<UseModelsTreeProps["getSearchPaths"]>;
+useModelsTree({
+  activeView: treeWidgetViewport,
+  getSearchPaths: async () => {
+    const paths: HierarchySearchPath[] = [
+      {
+        path: [subjectIdentifier, modelIdentifier],
+        options: { reveal: true },
+      },
+      {
+        path: [subjectIdentifier, otherModelIdentifier],
+      },
+    ];
 
-const getSearchPaths: GetSearchPaths = async () => {
-  const paths: HierarchySearchPath[] = [
-    {
-      path: [subjectIdentifier, modelIdentifier],
-      // nothing sets expansion options for application-built paths
-      options: { reveal: true },
-    },
-    {
-      path: [subjectIdentifier, otherModelIdentifier],
-    },
-  ];
-
-  return HierarchySearchTree.createFromPathsList(paths);
-};
+    return HierarchySearchTree.createFromPathsList(paths);
+  },
+});
 ```
 
 `createFromPathsList` merges shared path prefixes and returns a `Promise<HierarchySearchTree[]>`, so it can be returned directly from `getSearchPaths` or `getSubTreePaths`.
 
-Do not pass a v1 `HierarchyFilteringPath[]` to `createFromPathsList` unchanged. Migrate its identifiers and options to `HierarchySearchPath` first. The direct option mappings are:
+Do not pass a v1 `HierarchyFilteringPath[]` to `createFromPathsList` unchanged. Re-type the paths as v2 `HierarchySearchPath` values and migrate their options. The identifier shapes are unchanged, but the option meanings differ:
 
 | v1 `HierarchyFilteringPathOptions` | v2 `HierarchySearchPathOptions` | Effect                                                       |
 | ---------------------------------- | ------------------------------- | ------------------------------------------------------------ |
@@ -408,6 +484,16 @@ The v1 `{ depthInHierarchy }`, `{ depth, includeGroupingNodes }`, and `{ key, de
 - Use `reveal: { groupingLevel }` when a number of generated grouping levels immediately before a search target must be expanded.
 
 Do not rename v1 `autoExpand` to v2 `autoExpand`. In v2, `autoExpand` expands the search target itself; `reveal` expands its ancestors.
+
+If a callback combines trees returned by `createInstanceKeyPaths` with application-built trees, merge them through a builder instead of concatenating the arrays. Concatenation can produce duplicate roots when both sources share a path prefix:
+
+```tsx
+const builder = HierarchySearchTree.createBuilder();
+for (const tree of [...instanceKeyTrees, ...applicationTrees]) {
+  builder.accept({ tree });
+}
+return builder.getTree();
+```
 
 ### `FilterLimitExceededError` to `SearchLimitExceededError`
 
@@ -466,6 +552,8 @@ The returned `getTreeItemProps` receives both the node and the renderer props. A
 
 ```tsx
 // v3
+import { useModelsTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+
 const { modelsTreeProps, rendererProps } = useModelsTree({
   activeView: viewport,
 });
@@ -479,6 +567,9 @@ const { modelsTreeProps, rendererProps } = useModelsTree({
 />;
 
 // v4
+import { useMemo } from "react";
+import { createTreeWidgetViewport, useModelsTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+
 const treeWidgetViewport = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
 const { treeProps, getTreeItemProps } = useModelsTree({
   activeView: treeWidgetViewport,
@@ -544,14 +635,20 @@ Two v3 components changed roles, and the name `SelectableTree` was reused for a 
 
 ```tsx
 // v3
+import { SelectableTree } from "@itwin/tree-widget-react";
+
 <SelectableTree trees={trees} density="enlarged" />;
 
 // v4 - `TreeDefinition` replaces `SelectableTreeDefinition`
+import { TreeWidgetComponent } from "@itwin/tree-widget-react";
+
 <TreeWidgetComponent trees={trees} localization={IModelApp.localization} />;
 ```
 
 ```tsx
 // v3
+import { ModelsTreeComponent, TreeWithHeader } from "@itwin/tree-widget-react";
+
 <TreeWithHeader
   density="enlarged"
   filteringProps={{ onFilterStart, onFilterClear, resultCount }}
@@ -561,19 +658,24 @@ Two v3 components changed roles, and the name `SelectableTree` was reused for a 
 </TreeWithHeader>;
 
 // v4 - `density` and `filteringProps` are gone; supply a search input from the application
-<SelectableTree buttons={[<ModelsTreeComponent.ShowAllButton {...buttonProps} key="show-all" />]}>
-  <MyTree searchText={searchText} />
-</SelectableTree>;
+import { ModelsTreeComponent, SelectableTree } from "@itwin/tree-widget-react";
+
+<>
+  <label>
+    Search
+    <input value={searchText} onChange={(event) => setSearchText(event.target.value)} />
+  </label>
+  <SelectableTree buttons={[<ModelsTreeComponent.ShowAllButton {...buttonProps} key="show-all" />]}>
+    <MyTree searchText={searchText} />
+  </SelectableTree>
+</>;
 ```
 
 Search UI for widget tree definitions is enabled with `TreeDefinition.isSearchable`, and its value reaches the tree through the render callback's `searchText`. A directly rendered custom tree must provide its own search input.
 
 ### Update `Tree` and `VisibilityTree` usage
 
-- Remove `getSchemaContext` from low-level `Tree` and `VisibilityTree` usages as well as from the standard tree components.
-- Explicit node type annotations should use the v2 `TreeNode` type instead of v1 `PresentationHierarchyNode` or `PresentationTreeNode`.
-
-The renderer callback passed to `Tree` and `VisibilityTree` receives the hierarchy state props needed by the matching renderer. If the application only spread those callback props in v3, continue spreading them and add `treeLabel`. Additional v3 renderer customizations must be migrated as described below:
+A tree that only spread the renderer callback props needs two changes: drop `getSchemaContext`, and give the renderer a `treeLabel`.
 
 ```tsx
 // v3
@@ -583,7 +685,7 @@ The renderer callback passed to `Tree` and `VisibilityTree` receives the hierarc
   getSchemaContext={getSchemaContext}
   selectionStorage={selectionStorage}
   getHierarchyDefinition={getHierarchyDefinition}
-  treeRenderer={(props) => <TreeRenderer {...props} getIcon={getIcon} getSublabel={getSublabel} />}
+  treeRenderer={(props) => <TreeRenderer {...props} />}
 />;
 
 // v4
@@ -592,9 +694,11 @@ The renderer callback passed to `Tree` and `VisibilityTree` receives the hierarc
   treeName="my-tree"
   selectionStorage={selectionStorage}
   getHierarchyDefinition={getHierarchyDefinition}
-  treeRenderer={(props) => <TreeRenderer {...props} treeLabel="My tree" getTreeItemProps={getTreeItemProps} />}
+  treeRenderer={(props) => <TreeRenderer {...props} treeLabel="My tree" />}
 />;
 ```
+
+Trees that passed more than the spread props to the renderer need the changes described below as well.
 
 ### Migrate renderer props
 
@@ -621,104 +725,141 @@ Label, icon, and sublabel customizations are now returned together from a single
 
 ```tsx
 // v3
-<TreeRenderer
-  {...props}
-  getLabel={(node) => <>Custom - {node.label}</>}
-  getSublabel={(node) => <>Sublabel - {node.label}</>}
-  getIcon={(node) => <MyIcon node={node} />}
+import { Tree, TreeRenderer } from "@itwin/tree-widget-react";
+
+<Tree
+  {...treeProps}
+  treeRenderer={(rendererProps) => (
+    <TreeRenderer
+      {...rendererProps}
+      getLabel={(node) => <>Custom - {node.label}</>}
+      getSublabel={(node) => <>Sublabel - {node.label}</>}
+      getIcon={(node) => <MyIcon node={node} />}
+    />
+  )}
 />;
 
 // v4
-treeRenderer={(rendererProps) => (
-  <TreeRenderer
-    {...rendererProps}
-    treeLabel="My tree"
-    getTreeItemProps={(node) => {
-      const nodeProps = rendererProps.getTreeItemProps(node);
-      const label = nodeProps.label ?? node.label;
-      return {
-        ...nodeProps,
-        label: <>Custom - {label}</>,
-        description: <>Sublabel - {node.label}</>,
-        decorations: (
-          <>
-            {nodeProps.decorations}
-            <MyIcon node={node} />
-          </>
-        ),
-      };
-    }}
-  />
-)}
-```
+import { Tree, TreeRenderer } from "@itwin/tree-widget-react";
 
-Spread the incoming `getTreeItemProps(node)` result, as shown above. Returning a fresh object discards the properties the tree already supplies. Include `nodeProps.decorations` when augmenting the existing icon; omit it only when intentionally replacing the icon.
-
-The same rule applies to event handlers. If a returned `onClick` or `onKeyDown` replaces an existing handler, invoke the existing handler as part of the wrapper when the renderer's selection and keyboard behavior must be preserved. The v3 `onNodeClick` and `onNodeDoubleClick` `isSelected` argument is not supplied to v4 item event handlers.
-
-### Migrate node actions
-
-`getActions` was split into three callbacks by where the action is rendered. Each receives `{ targetNode, selectedNodes }` instead of a single node, and returns React elements instead of action definition objects:
-
-```tsx
-// v3
-<TreeRenderer {...props} getActions={(node) => [{ label: "Inspect", icon: <SvgInspect />, action: () => onInspect(node) }]} />;
-
-// v4 - `getInlineActions` renders on the node, `getMenuActions` in the overflow
-// menu, and `getContextMenuActions` in the right-click menu.
-<TreeRenderer
-  {...props}
-  treeLabel="My tree"
-  getInlineActions={({ targetNode }) => [<TreeActionBase key="inspect" label="Inspect" icon={inspectSvg} onClick={() => onInspect(targetNode)} />]}
+<Tree
+  {...treeProps}
+  treeRenderer={(rendererProps) => (
+    <TreeRenderer
+      {...rendererProps}
+      treeLabel="My tree"
+      getTreeItemProps={(node) => {
+        const nodeProps = rendererProps.getTreeItemProps(node);
+        return {
+          ...nodeProps,
+          label: <>Custom - {nodeProps.label ?? node.label}</>,
+          description: <>Sublabel - {node.label}</>,
+          decorations: (
+            <>
+              {nodeProps.decorations}
+              <MyIcon node={node} />
+            </>
+          ),
+        };
+      }}
+    />
+  )}
 />;
 ```
 
-`TreeActionBase` takes its icon as an SVG sprite href, for example `import inspectSvg from "@stratakit/icons/cursor-click.svg"`. `getInlineActions` is limited to two entries.
+Two things to watch for when building the returned object:
+
+- Spread `nodeProps`, so the properties the tree already set are kept.
+- Spreading is not enough for a property that is overwritten. `decorations` replaces the tree's own icon, so include `nodeProps.decorations` to keep it.
+
+The v3 `isSelected` argument of `onNodeClick` and `onNodeDoubleClick` has no v4 equivalent.
+
+### Migrate node actions
+
+v3 `getActions` rendered every action directly on the node. In v4, actions are separated by where they appear:
+
+| v4 callback             | Where the action appears    | What it may return                     | Example                                                   |
+| ----------------------- | --------------------------- | -------------------------------------- | --------------------------------------------------------- |
+| `getInlineActions`      | Directly on the node        | up to 2 `TreeActionBase` elements      | ![Inline actions](./media/inline-actions.png)             |
+| `getMenuActions`        | The node's overflow menu    | `TreeActionBase` or `Divider` elements | ![Menu actions](./media/menu-actions.png)                 |
+| `getContextMenuActions` | The node's right-click menu | `TreeActionBase` or `Divider` elements | ![Context menu actions](./media/context-menu-actions.png) |
+
+Use `getInlineActions` to preserve the v3 placement when a node has no more than two actions. If a v3 callback returned more than two actions, move them to `getMenuActions`, or keep the most important actions inline and move the remainder to the menu. Use `getContextMenuActions` only when the actions should be available from the node's right-click menu.
+
+All three callbacks receive `{ targetNode, selectedNodes }` instead of a single node and return React elements instead of action definition objects:
+
+```tsx
+// v3
+import { Tree, TreeRenderer } from "@itwin/tree-widget-react";
+
+<Tree
+  {...treeProps}
+  treeRenderer={(rendererProps) => (
+    <TreeRenderer {...rendererProps} getActions={(node) => [{ label: "Inspect", icon: <MyInspectIcon />, onClick: () => onInspect(node) }]} />
+  )}
+/>;
+
+// v4
+import { Tree, TreeActionBase, TreeRenderer } from "@itwin/tree-widget-react";
+
+<Tree
+  {...treeProps}
+  treeRenderer={(rendererProps) => (
+    <TreeRenderer
+      {...rendererProps}
+      treeLabel="My tree"
+      getInlineActions={({ targetNode }) => [<TreeActionBase key="inspect" label="Inspect" icon={<MyInspectIcon />} onClick={() => onInspect(targetNode)} />]}
+    />
+  )}
+/>;
+```
+
+The existing JSX icon can be passed to `TreeActionBase` unchanged.
 
 ### Migrate custom visibility renderers
 
-In custom visibility renderers, `getCheckboxState` became `getVisibilityButtonState`, and `onCheckboxClicked` became `onVisibilityButtonClick`. Code that references either callback directly must also update the state values and click callback semantics:
+`VisibilityTree` supplies both callbacks to its `treeRenderer`, so no callback rename is needed when they are only spread into `VisibilityTreeRenderer`; the renderer still needs the new required `treeLabel`. Rename the callbacks where they are referenced by name, such as when one is wrapped:
+
+```tsx
+// v3
+<VisibilityTree
+  {...treeProps}
+  treeRenderer={({ getCheckboxState, onCheckboxClicked, ...props }) => (
+    <VisibilityTreeRenderer
+      {...props}
+      getCheckboxState={(node) => (isLocked(node) ? { state: "off", isDisabled: true } : getCheckboxState(node))}
+      onCheckboxClicked={(node, checked) => {
+        logVisibilityChange(node, checked);
+        onCheckboxClicked(node, checked);
+      }}
+    />
+  )}
+/>;
+
+// v4 - the click callback's second argument is the current state, not the state to apply
+<VisibilityTree
+  {...treeProps}
+  treeRenderer={({ getVisibilityButtonState, onVisibilityButtonClick, ...props }) => (
+    <VisibilityTreeRenderer
+      {...props}
+      treeLabel="My tree"
+      getVisibilityButtonState={(node) => (isLocked(node) ? { state: "hidden", isDisabled: true } : getVisibilityButtonState(node))}
+      onVisibilityButtonClick={(node, currentState) => {
+        logVisibilityChange(node, currentState !== "visible");
+        onVisibilityButtonClick(node, currentState);
+      }}
+    />
+  )}
+/>;
+```
+
+The full set of state values a wrapped `getVisibilityButtonState` may return:
 
 | v3 checkbox state | v4 visibility button state |
 | ----------------- | -------------------------- |
 | `"on"`            | `"visible"`                |
 | `"off"`           | `"hidden"`                 |
 | `"partial"`       | `"partial"`                |
-
-```tsx
-// v3
-const getCheckboxState = (node) => ({
-  state: isVisible(node) ? "on" : "off",
-});
-const onCheckboxClicked = (node, checked) => {
-  setNodeVisibility(node, checked);
-};
-
-// v4
-const getVisibilityButtonState = (node) => ({
-  state: isVisible(node) ? "visible" : "hidden",
-});
-const onVisibilityButtonClick = (node, currentState) => {
-  setNodeVisibility(node, currentState !== "visible");
-};
-```
-
-The second v4 callback argument is the current state, not the desired boolean state that v3 supplied.
-
-### Adapt standard-tree callbacks
-
-`getTreeItemProps`, `getInlineActions`, `getMenuActions`, and `getContextMenuActions` passed to a standard tree component receive their normal callback argument followed by the current renderer props. The corresponding renderer callback receives only its normal argument, so adapt them at the call site:
-
-```tsx
-treeRenderer={(rendererProps) => (
-  <VisibilityTreeRenderer
-    {...rendererProps}
-    treeLabel="Models tree"
-    getTreeItemProps={(node) => getTreeItemProps(node, rendererProps)}
-    getInlineActions={(props) => getInlineActions(props, rendererProps)}
-  />
-)}
-```
 
 ### Telemetry
 
@@ -741,6 +882,8 @@ treeRenderer={(rendererProps) => (
 `VisibilityStatus.tooltip` was removed from custom hierarchy visibility handlers. Return only the visibility state and optional disabled state:
 
 ```tsx
+import type { VisibilityStatus } from "@itwin/tree-widget-react";
+
 // v3
 const status: VisibilityStatus = {
   state: "visible",
@@ -760,6 +903,8 @@ This does not remove tooltips from visibility buttons. A custom `getVisibilityBu
 `HierarchyVisibilityHandler` now implements the standard `Disposable` interface. Replace a `dispose` method with `[Symbol.dispose]`:
 
 ```tsx
+import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
+
 const handler: HierarchyVisibilityHandler = {
   onVisibilityChange,
   getVisibilityStatus,
@@ -802,6 +947,8 @@ Custom category overrides must now handle `modelId` being `undefined`.
 `originalImplementation` and `handler` continue to be included in each override callback's argument. Update destructuring when parameter names change:
 
 ```tsx
+import type { ModelsTreeVisibilityHandlerOverrides } from "@itwin/tree-widget-react";
+
 // v3
 const overrides: ModelsTreeVisibilityHandlerOverrides = {
   getModelDisplayStatus: ({ ids, originalImplementation }) => {
