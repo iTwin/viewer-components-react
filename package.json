@@ -15,7 +15,7 @@
     "clean": "lage clean --grouped --continue",
     "extract-api": "lage extract-api --grouped --continue",
     "check:versions": "node scripts/check-package-versions.js",
-    "change": "node scripts/create-changeset.js",
+    "changeset": "node scripts/create-changeset.js",
     "cspell": "cspell .",
     "check-inline-styles": "node scripts/check-inline-styles.js",
     "release": "pnpm build && changeset publish",
