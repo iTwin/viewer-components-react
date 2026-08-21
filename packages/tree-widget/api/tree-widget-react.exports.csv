@@ -3,7 +3,7 @@ Release Tag;API Item Type;API Item Name
 public;const;CategoriesTreeComponent
 beta;function;CategoriesTreeIcon
 beta;namespace;CategoriesTreeNode
-alpha;const;ClassificationsTreeComponent
+beta;const;ClassificationsTreeComponent
 beta;function;ClassificationsTreeIcon
 beta;namespace;ClassificationsTreeNode
 public;function;createTreeWidget
@@ -32,8 +32,8 @@ beta;function;TreeWidgetContextProvider
 public;interface;TreeWidgetViewport
 beta;function;useCategoriesTree
 public;function;useCategoriesTreeButtonProps
-alpha;function;useClassificationsTree
-alpha;function;useClassificationsTreeDefinition
+beta;function;useClassificationsTree
+beta;function;useClassificationsTreeDefinition
 public;function;useFocusedInstancesContext
 beta;function;useModelsTree
 public;function;useModelsTreeButtonProps

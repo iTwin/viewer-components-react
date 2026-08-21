@@ -40,7 +40,7 @@ import type { ClassificationsTreeSearchTargets } from "./internal/visibility/Sea
  *
  * By default, categories are determined using `ClassificationSystems.ElementHasClassifications` and `BisCore.GeometricElement3dIsInCategory` relationships.
  *
- * @alpha
+ * @beta
  */
 export interface ClassificationToCategoriesRelationshipSpecification {
   /**
@@ -56,7 +56,7 @@ export interface ClassificationToCategoriesRelationshipSpecification {
 
 /**
  * Configuration for classifications tree visibility handler.
- * @alpha
+ * @beta
  */
 export interface ClassificationsTreeVisibilityHandlerConfiguration {
   /**
@@ -67,7 +67,7 @@ export interface ClassificationsTreeVisibilityHandlerConfiguration {
   classificationToCategoriesRelationshipSpecification?: ClassificationToCategoriesRelationshipSpecification;
 }
 
-/** @alpha */
+/** @beta */
 export interface UseClassificationsTreeProps {
   activeView: TreeWidgetViewport;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
@@ -90,7 +90,7 @@ export interface UseClassificationsTreeProps {
 
 type ClassificationsTreeSearchError = "tooManySearchMatches" | "unknownSearchError";
 
-/** @alpha */
+/** @beta */
 interface UseClassificationsTreeResult {
   treeProps: Pick<
     VisibilityTreeProps,
@@ -103,7 +103,7 @@ interface UseClassificationsTreeResult {
  * Custom hook to create and manage state for the classifications tree.
  *
  * **Note:** Requires `TreeWidgetContextProvider` to be present in components tree above.
- * @alpha
+ * @beta
  */
 export function useClassificationsTree({
   activeView,

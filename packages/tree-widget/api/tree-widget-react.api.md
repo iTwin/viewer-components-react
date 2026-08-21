@@ -206,7 +206,7 @@ type ClassGroupingHierarchyNode = GroupingHierarchyNode & {
     key: ClassGroupingNodeKey;
 };
 
-// @alpha
+// @beta
 export const ClassificationsTreeComponent: {
     (props: ClassificationsTreeComponentProps): _$react_jsx_runtime0.JSX.Element | null;
     id: string;
@@ -216,7 +216,7 @@ export const ClassificationsTreeComponent: {
     isSupportedByIModel(imodel: IModelConnection): Promise<boolean>;
 };
 
-// @alpha (undocumented)
+// @beta (undocumented)
 interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "visibilityHandlerConfig" | "selectionMode" | "searchText" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "hierarchyConfig" | "getEditingProps" | "treeLabel"> {
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
@@ -225,7 +225,7 @@ interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProp
     viewport?: TreeWidgetViewport;
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 interface ClassificationsTreeHierarchyConfiguration {
     elements?: {
         excludedClasses?: EC.FullClassNameDotNotation[];
@@ -257,19 +257,19 @@ export namespace ClassificationsTreeNode {
     const getType: (node: HierarchyNode_2) => "classification-table" | "classification" | "element" | undefined;
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 type ClassificationsTreeProps = Pick<ExtendedVisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "getEditingProps" | "treeLabel"> & Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & UseClassificationsTreeProps & {
     hierarchyLevelConfig?: {
         sizeLimit?: number;
     };
 };
 
-// @alpha
+// @beta
 interface ClassificationsTreeVisibilityHandlerConfiguration {
     classificationToCategoriesRelationshipSpecification?: ClassificationToCategoriesRelationshipSpecification;
 }
 
-// @alpha
+// @beta
 interface ClassificationToCategoriesRelationshipSpecification {
     fullClassName: EC.FullClassNameDotNotation;
     source: "classification" | "category";
@@ -791,13 +791,13 @@ interface UseCategoriesTreeResult {
     treeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent">;
 }
 
-// @alpha
+// @beta
 export function useClassificationsTree(input: UseClassificationsTreeProps): UseClassificationsTreeResult;
 
-// @alpha
+// @beta
 export function useClassificationsTreeDefinition(props: UseClassificationsTreeDefinitionProps): UseClassificationsTreeDefinitionResult;
 
-// @alpha (undocumented)
+// @beta (undocumented)
 interface UseClassificationsTreeDefinitionProps {
     // (undocumented)
     hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
@@ -812,7 +812,7 @@ interface UseClassificationsTreeDefinitionProps {
     };
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 interface UseClassificationsTreeDefinitionResult {
     // (undocumented)
     definition: HierarchyDefinition;
@@ -820,7 +820,7 @@ interface UseClassificationsTreeDefinitionResult {
     getSearchPaths?: FunctionProps<typeof useTree>["getSearchPaths"];
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 interface UseClassificationsTreeProps {
     // (undocumented)
     activeView: TreeWidgetViewport;
@@ -836,7 +836,7 @@ interface UseClassificationsTreeProps {
     visibilityHandlerConfig?: ClassificationsTreeVisibilityHandlerConfiguration;
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 interface UseClassificationsTreeResult {
     // (undocumented)
     getTreeItemProps: Required<ExtendedVisibilityTreeRendererProps>["getTreeItemProps"];
