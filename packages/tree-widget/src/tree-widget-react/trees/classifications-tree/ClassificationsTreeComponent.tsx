@@ -15,7 +15,7 @@ import type { TreeWidgetViewport } from "../../shared/TreeWidgetViewport.js";
 import type { StandardTreeLabels } from "../../TreeWidgetComponentImpl.js";
 import type { ClassificationsTreeProps } from "./ClassificationsTree.js";
 
-/** @alpha */
+/** @beta */
 interface ClassificationsTreeComponentProps extends Pick<
   ClassificationsTreeProps,
   | "selectionStorage"
@@ -46,7 +46,7 @@ interface ClassificationsTreeComponentProps extends Pick<
  * A component that renders `ClassificationsTree` with active iModel and viewport.
  *
  * **Note:** Wrap tree components with a single `TreeWidgetContextProvider` to provide shared tree resources.
- * @alpha
+ * @beta
  */
 export const ClassificationsTreeComponent = (props: ClassificationsTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
@@ -69,17 +69,17 @@ export const ClassificationsTreeComponent = (props: ClassificationsTreeComponent
 
 /**
  * Id of the component. May be used when a creating a `TreeDefinition`.
- * @alpha
+ * @beta
  */
 ClassificationsTreeComponent.id = "classifications-tree";
 
 /**
  * Label of the component. May be used when a creating a `TreeDefinition`.
- * @alpha
+ * @beta
  */
 ClassificationsTreeComponent.getLabel = ({ standardLabels }: { standardLabels: StandardTreeLabels }) => standardLabels.classifications;
 
-/** @alpha */
+/** @beta */
 ClassificationsTreeComponent.isSupportedByIModel = async (imodel: IModelConnection) => {
   try {
     return !!(await imodel.schemaContext.getSchemaInfo(new SchemaKey("ClassificationSystems"), SchemaMatchType.Latest));
