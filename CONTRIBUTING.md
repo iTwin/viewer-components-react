@@ -82,7 +82,7 @@ Every change that requires a public package release must include a changeset. Do
 
 Before opening a pull request:
 
-1. Run `pnpm change`.
+1. Run `pnpm changeset`.
 2. Select each affected package and its release type:
 
 - `patch` for backward-compatible fixes.

@@ -15,7 +15,7 @@
     "clean": "lage clean --grouped --continue",
     "extract-api": "lage extract-api --grouped --continue",
     "check:versions": "node scripts/check-package-versions.js",
-    "change": "node scripts/create-changeset.js",
+    "changeset": "node scripts/create-changeset.js",
     "cspell:contents": "cspell .",
     "cspell:filenames": "node scripts/cspellFileNames.js",
     "cspell": "pnpm run cspell:contents && pnpm run cspell:filenames",
