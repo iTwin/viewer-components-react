@@ -1,5 +1,12 @@
 # Change Log - @itwin/tree-widget-react
 
+## 4.0.0-alpha.33
+
+### Patch Changes
+
+- [#1790](https://github.com/iTwin/viewer-components-react/pull/1790): Migrate Classifications tree API's from `@alpha` to `@beta`.
+- [#1788](https://github.com/iTwin/viewer-components-react/pull/1788): Added `data-visibility-state` attribute to visibility button HTML element for inspecting current state.
+
 ## 4.0.0-alpha.32
 
 ### Major Changes
