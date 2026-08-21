@@ -69,6 +69,7 @@ export const VisibilityAction = memo(function VisibilityAction({ node, ...action
       onClick={() => context.onVisibilityButtonClick(node, state.state)}
       visible={state.state !== "visible" ? true : undefined}
       icon={getIcon()}
+      data-visibility-state={state.state}
     />
   );
 });
