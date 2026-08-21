@@ -933,7 +933,7 @@ function CustomCategoriesTreeComponent(props: CustomCategoriesTreeProps) {
 
 ### Classifications tree
 
-The Classifications tree displays classifications and the 3D geometric elements assigned to them. It supports visibility controls, label search, classification and element instance-key search, and classification renaming. The APIs of this tree are `@alpha` and may change between releases.
+The Classifications tree displays classifications and the 3D geometric elements assigned to them. It supports visibility controls, label search, classification and element instance-key search, and classification renaming.
 
 ![Classifications tree example](./media/classifications-tree.png)
 

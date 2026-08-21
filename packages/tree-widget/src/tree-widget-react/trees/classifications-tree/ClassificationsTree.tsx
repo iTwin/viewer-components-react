@@ -11,7 +11,7 @@ import type { VisibilityTreeProps } from "../../shared/components/VisibilityTree
 import type { ExtendedVisibilityTreeRendererProps } from "../../shared/components/VisibilityTreeRenderer.js";
 import type { UseClassificationsTreeProps } from "./UseClassificationsTree.js";
 
-/** @alpha */
+/** @beta */
 export type ClassificationsTreeProps = Pick<
   ExtendedVisibilityTreeRendererProps,
   "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "getEditingProps" | "treeLabel"
@@ -23,7 +23,7 @@ export type ClassificationsTreeProps = Pick<
     };
   };
 
-/** @alpha */
+/** @beta */
 export function ClassificationsTree({
   imodel,
   selectionStorage,

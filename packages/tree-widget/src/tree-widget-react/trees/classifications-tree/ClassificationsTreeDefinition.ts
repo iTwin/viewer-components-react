@@ -72,7 +72,7 @@ interface ClassificationsTreeDefinitionProps {
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
 }
 
-/** @alpha */
+/** @beta */
 export interface ClassificationsTreeHierarchyConfiguration {
   /**
    * The classifications' hierarchy starts at the root `ClassificationSystem` element. This attribute identifiers that

@@ -19,7 +19,7 @@ import type { FunctionProps } from "../../shared/Utils.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
 import type { ClassificationsTreeVisibilityHandlerConfiguration } from "./UseClassificationsTree.js";
 
-/** @alpha */
+/** @beta */
 interface UseClassificationsTreeDefinitionProps {
   /**
    * A list of iModels to create merged hierarchy for.
@@ -61,7 +61,7 @@ interface UseClassificationsTreeDefinitionProps {
   onSearchPathsChanged?: (paths: HierarchySearchTree[] | undefined) => void;
 }
 
-/** @alpha */
+/** @beta */
 interface UseClassificationsTreeDefinitionResult {
   definition: HierarchyDefinition;
   getSearchPaths?: FunctionProps<typeof useTree>["getSearchPaths"];
@@ -69,7 +69,7 @@ interface UseClassificationsTreeDefinitionResult {
 
 /**
  * Requires `TreeWidgetContextProvider` to be present in components tree above.
- * @alpha
+ * @beta
  */
 export function useClassificationsTreeDefinition(props: UseClassificationsTreeDefinitionProps): UseClassificationsTreeDefinitionResult {
   return useClassificationsTreeDefinitionInternal(props);
