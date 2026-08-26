@@ -155,10 +155,9 @@
       "Detail": "Detail",
       "Elevation": "Elevation"
     },
-    "NoAllowedDrawingTypes": "No allowed drawing types were set for this measurement tool",
-    "OneMeasurementInvalid": "This measurement can only be used on {{drawingName}} drawings",
-    "MoreMeasurementsInvalidHead": "This measurement can only be used on {{drawingName}}",
+    "OneMeasurementInvalid": "This measurement cannot be used on {{drawingName}} drawings",
+    "MoreMeasurementsInvalidHead": "This measurement cannot be used on {{drawingName}}",
     "MoreMeasurementsInvalidMiddle": ", {{drawingName}}",
-    "MoreMeasurementsInvalidLast": " and {{drawingName}} drawings"
+    "MoreMeasurementsInvalidLast": " or {{drawingName}} drawings"
   }
 }
