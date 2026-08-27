@@ -55,7 +55,7 @@ Migration map for the v3 APIs covered by this guide. Each row links to the secti
 | `HierarchyVisibilityHandler.dispose`                 | `HierarchyVisibilityHandler[Symbol.dispose]`                     | [7](#7-update-custom-visibility-apis)                                |
 | `VisibilityStatus.tooltip`                           | removed from the handler                                         | [7](#7-update-custom-visibility-apis)                                |
 | `get*DisplayStatus` / `change*State` overrides       | `get*VisibilityStatus` / `change*VisibilityStatus`               | [7](#7-update-custom-visibility-apis)                                |
-| `onCategoriesFiltered(categories)`                   | `onCategoriesFiltered({ categories, models })`                   | [3](#update-categories-tree-buttons-and-callbacks)                   |
+| `onCategoriesFiltered(categories)`                   | `onCategoriesFiltered({ categories, models })`                   | [3](#update-oncategoriesfiltered-callback)                           |
 | `PresentationHierarchyNode` / `PresentationTreeNode` | `TreeNode` (`@itwin/presentation-hierarchies-react` v2)          | [6](#update-tree-and-visibilitytree-usage)                           |
 
 Props that were removed without a replacement:
@@ -113,9 +113,9 @@ These are all peer dependencies of tree-widget. Package managers that install pe
 
 Version 4 is ESM-only: the package no longer publishes a CommonJS build, and its `package.json` exposes only an `import` condition. Applications that load tree-widget through CommonJS `require`, or run tests in a CommonJS-only runner, must migrate that code and its build/test configuration to ESM.
 
-If the application imports types or APIs from tree-widget's hierarchy dependencies, migrate those imports to the matching v2 releases:
+Tree-widget and its hierarchy dependencies have independent major versions. Tree-widget v3 uses the v1 hierarchy packages, while tree-widget v4 uses the v2 hierarchy packages. If the application imports types or APIs from those dependencies, migrate the imports as follows:
 
-| v3                                         | v4                                         |
+| Tree-widget v3 dependency                  | Tree-widget v4 dependency                  |
 | ------------------------------------------ | ------------------------------------------ |
 | `@itwin/presentation-core-interop` v1      | `@itwin/presentation-core-interop` v2      |
 | `@itwin/presentation-hierarchies` v1       | `@itwin/presentation-hierarchies` v2       |
@@ -127,9 +127,24 @@ When these v2 packages are prereleases, use versions compatible with the install
 
 ## 2. Replace global initialization with `TreeWidgetContextProvider`
 
-`TreeWidget.initialize()` and `TreeWidget.terminate()` are removed. Delete both calls. Register localization namespaces during application startup, then place one `TreeWidgetContextProvider` above the tree-widget components rendered directly by the application. The provider owns the shared resources for its lifetime, so no replacement shutdown call is needed.
+1. Register tree-widget's localization namespaces during application startup:
 
-`createTreeWidget` and `TreeWidgetComponent` add this provider around their content automatically when they receive `localization`. No additional provider is needed solely for either API. If the application already has one shared provider near its root, they may be rendered beneath it.
+   ```ts
+   import { LOCALIZATION_NAMESPACES } from "@itwin/tree-widget-react";
+   import { IModelApp } from "@itwin/core-frontend";
+
+   for (const namespace of LOCALIZATION_NAMESPACES) {
+     await IModelApp.localization.registerNamespace(namespace);
+   }
+   ```
+
+2. Replace `TreeWidget` initialization and termination with the `TreeWidgetContextProvider` React context:
+
+   - Remove the `TreeWidget.initialize()` and `TreeWidget.terminate()` calls.
+   - When using `createTreeWidget` or `TreeWidgetComponent`, pass `localization: IModelApp.localization`. These APIs add the provider around their content automatically.
+   - When rendering lower-level tree components directly, make one `TreeWidgetContextProvider` available above them. An existing shared provider near the application root can serve all tree components below it.
+
+For example, an application that renders lower-level tree components directly changes as follows:
 
 ```tsx
 // v3
@@ -173,7 +188,7 @@ function App() {
 
 The `TreeWidget.i18n`, `TreeWidget.i18nNamespace`, and `TreeWidget.translate` static APIs were removed. There is no direct replacement: tree-widget translation keys are package implementation details and should not be resolved by consumers.
 
-Continue registering `LOCALIZATION_NAMESPACES` and pass the application localization service to `TreeWidgetContextProvider`, `createTreeWidget`, or `TreeWidgetComponent`. Tree-widget components then resolve their own strings internally. Use the `standardLabels` supplied to `TreeDefinition.getLabel` for standard tree names.
+Tree-widget components resolve their own strings internally. Use the `standardLabels` supplied to `TreeDefinition.getLabel` for standard tree names.
 
 If application UI previously reused a tree-widget translation through `TreeWidget.translate`, move that text to an application-owned localization namespace:
 
@@ -277,7 +292,7 @@ function MyModelsTree({ imodel, viewport }: { imodel: IModelConnection; viewport
 
 This applies to `useModelsTree`, `useCategoriesTree`, `useModelsTreeButtonProps`, `useCategoriesTreeButtonProps`, and standard header buttons rendered directly.
 
-### Update Categories tree buttons and callbacks
+### Update Categories tree buttons
 
 Category header button props now include the models available in the iModel. `useCategoriesTreeButtonProps` supplies them:
 
@@ -293,7 +308,15 @@ const { buttonProps } = useCategoriesTreeButtonProps({ viewport: treeWidgetViewp
 <CategoriesTreeComponent.ShowAllButton viewport={buttonProps.viewport} categories={buttonProps.categories} models={buttonProps.models} />;
 ```
 
+When all returned button props should be forwarded, spread them instead:
+
+```tsx
+<CategoriesTreeComponent.ShowAllButton {...buttonProps} />
+```
+
 Custom header-button renderers no longer receive `density` or `onFeatureUsed`. Remove either property when destructuring or forwarding the renderer props, and do not pass them when rendering standard buttons directly.
+
+### Update `onCategoriesFiltered` callback
 
 `onCategoriesFiltered` now takes a single object argument holding the filtered `categories` and the `models` those categories belong to, instead of the categories array. Both values may be `undefined` when filtering is cleared:
 
@@ -471,12 +494,12 @@ useModelsTree({
 
 `createFromPathsList` merges shared path prefixes and returns a `Promise<HierarchySearchTree[]>`, so it can be returned directly from `getSearchPaths` or `getSubTreePaths`.
 
-Do not pass a v1 `HierarchyFilteringPath[]` to `createFromPathsList` unchanged. Re-type the paths as v2 `HierarchySearchPath` values and migrate their options. The identifier shapes are unchanged, but the option meanings differ:
+Do not pass a `HierarchyFilteringPath[]` from the hierarchy v1 package used by tree-widget v3 to `createFromPathsList` unchanged. Re-type the paths as `HierarchySearchPath` values from the hierarchy v2 package used by tree-widget v4, and migrate their options. The identifier shapes are unchanged, but the option meanings differ:
 
-| v1 `HierarchyFilteringPathOptions` | v2 `HierarchySearchPathOptions` | Effect                                                       |
-| ---------------------------------- | ------------------------------- | ------------------------------------------------------------ |
-| `autoExpand: true`                 | `reveal: true`                  | Expands every ancestor so the search target becomes visible. |
-| `autoExpand: { depthInPath }`      | `reveal: { depthInPath }`       | Expands ancestors up to the given index in the path.         |
+| Hierarchy v1 `HierarchyFilteringPathOptions` | Hierarchy v2 `HierarchySearchPathOptions` | Effect                                                       |
+| -------------------------------------------- | ----------------------------------------- | ------------------------------------------------------------ |
+| `autoExpand: true`                           | `reveal: true`                            | Expands every ancestor so the search target becomes visible. |
+| `autoExpand: { depthInPath }`                | `reveal: { depthInPath }`                 | Expands ancestors up to the given index in the path.         |
 
 The v1 `{ depthInHierarchy }`, `{ depth, includeGroupingNodes }`, and `{ key, depth }` forms have no field-for-field replacement. Recalculate their intent:
 
