@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { EMPTY, filter, forkJoin, from, identity, map, mergeMap, of, reduce, shareReplay } from "rxjs";
+import { EMPTY, filter, forkJoin, from, identity, map, mergeMap, of, reduce, shareReplay, tap } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
 import { fromWithRelease } from "../Rxjs.js";
 import { ChildrenTree, getOrCreate } from "../Utils.js";
@@ -37,6 +37,7 @@ export class BaseIdsCache {
   readonly #subCategoriesCache: SubCategoriesCache;
   #elementClassName: EC.FullClassNameDotNotation;
   #modeledElementsCache: Observable<ModeledElementsCache> | undefined;
+  #modeledElementsLoaded = false;
   readonly #elementModelCategoriesCache: ElementModelCategoriesCache;
   #categoryModelsInfoWithoutSubModels:
     | Observable<
@@ -93,7 +94,12 @@ export class BaseIdsCache {
       ),
       shareReplay(),
     );
-    return this.#modeledElementsCache.pipe(mergeMap((modeledElementsCache) => modeledElementsCache.getModeledElementsInfo()));
+    return this.#modeledElementsCache.pipe(
+      mergeMap((modeledElementsCache) => modeledElementsCache.getModeledElementsInfo()),
+      tap(() => {
+        this.#modeledElementsLoaded = true;
+      }),
+    );
   }
 
   // Implement methods using each cache
@@ -252,6 +258,10 @@ export class BaseIdsCache {
 
   public elementModelCategoriesLoaded(): boolean {
     return this.#elementModelCategoriesCache.cachedDataLoaded();
+  }
+
+  public modeledElementsLoaded(): boolean {
+    return this.#modeledElementsLoaded;
   }
 
   public getAllModels(): Observable<Array<ModelId>> {
@@ -437,6 +447,14 @@ export class BaseIdsCacheImpl {
 
   public getChildElements(props: Props<BaseIdsCache["getChildElements"]>): ReturnType<BaseIdsCache["getChildElements"]> {
     return this.#baseIdsCache.getChildElements(props);
+  }
+
+  public elementModelCategoriesLoaded(): ReturnType<BaseIdsCache["elementModelCategoriesLoaded"]> {
+    return this.#baseIdsCache.elementModelCategoriesLoaded();
+  }
+
+  public modeledElementsLoaded(): ReturnType<BaseIdsCache["modeledElementsLoaded"]> {
+    return this.#baseIdsCache.modeledElementsLoaded();
   }
 
   public getSubCategories(props: Props<BaseIdsCache["getSubCategories"]>): ReturnType<BaseIdsCache["getSubCategories"]> {
