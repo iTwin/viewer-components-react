@@ -599,7 +599,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         fullClassName: CLASS_NAME_SpatialCategory,
         query: {
           ecsql: `
-            SELECT
+            SELECT ${!categoriesToShow ? "DISTINCT" : ""}
               ${await this.createCategoryNodeSelectClause({
                 createSelectClause,
                 extendedData: { modelIds: { selector: createIdsSelector(modelIds) } },
@@ -615,7 +615,12 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             }
             ${categoryInstanceFilterClauses.joins}
             ${createWhereClause({
-              conditions: [categoryInstanceFilterClauses.where, !categoriesToShow && "ce.Parent.Id IS NULL"],
+              conditions: [
+                categoryInstanceFilterClauses.where,
+                !categoriesToShow && "ce.Parent.Id IS NULL",
+                !categoriesToShow && createExcludedClassesClause({ alias: "ce", excludedClassNames: this.#hierarchyConfig.elements.excludedClasses }),
+                !categoriesToShow && modeledElementCategory !== undefined && `this.ECInstanceId <> ${modeledElementCategory}`,
+              ],
             })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
@@ -624,7 +629,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       });
     }
     // Show elements which match the sub-model element's category directly under the (hidden) sub-model node.
-    if (!categoriesToShow || categoriesToShow.length !== categoryIds!.length) {
+    if (modeledElementCategory !== undefined && (!categoriesToShow || categoriesToShow.length !== categoryIds!.length)) {
       const { selectClause, bindings } = await this.createElementNodeSelectClause({
         createSelectClause,
         // allSubModels are defined when modeledElementCategory is defined
