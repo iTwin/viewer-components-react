@@ -54,7 +54,7 @@
     "simple-react-validator": "^1.6.1"
   },
   "devDependencies": {
-    "@faker-js/faker": "6.2.0",
+    "@faker-js/faker": "10.5.0",
     "@itwin/appui-abstract": "^5.6.0",
     "@itwin/appui-react": "^5.6.0",
     "@itwin/build-tools": "^5.6.0",
