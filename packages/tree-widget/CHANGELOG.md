@@ -1,5 +1,11 @@
 # Change Log - @itwin/tree-widget-react
 
+## 4.0.0-alpha.34
+
+### Patch Changes
+
+- [#1794](https://github.com/iTwin/viewer-components-react/pull/1794): Models tree now displays model nodes without waiting for category and sub-model queries to complete.
+
 ## 4.0.0-alpha.33
 
 ### Patch Changes
