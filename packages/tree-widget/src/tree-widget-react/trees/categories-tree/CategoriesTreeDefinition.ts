@@ -409,47 +409,45 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  private async createGeometricModelChildrenQuery({
-    parentNodeInstanceIds: modelIds,
-    instanceFilter,
-    parentNode,
-    createSelectClause,
-    createFilterClauses,
-  }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const modeledElementCategory = parentNode.extendedData?.modeledElementCategory;
+  private async createGeometricModelChildrenQuery(props: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
+    const modeledElementCategory = props.parentNode.extendedData?.modeledElementCategory;
     assert(modeledElementCategory !== undefined, "Expected parent node to have modeledElementCategory extended data");
-    const [categoryInstanceFilterClauses, elementInstanceFilterClauses, allSubModels, categoryIds] = await Promise.all([
+
+    return this.#idsCache.elementModelCategoriesLoaded()
+      ? this.createCachedGeometricModelChildrenQuery(props, modeledElementCategory)
+      : this.createUncachedGeometricModelChildrenQuery(props, modeledElementCategory);
+  }
+
+  private async createCachedGeometricModelChildrenQuery(
+    { parentNodeInstanceIds: modelIds, instanceFilter, createSelectClause, createFilterClauses }: DefineInstanceNodeChildHierarchyLevelProps,
+    modeledElementCategory: CategoryId,
+  ): Promise<HierarchyLevelDefinition> {
+    const [categoryIds, categoryInstanceFilterClauses, modeledCategoryElementsDefinition] = await Promise.all([
+      firstValueFrom(
+        from(modelIds).pipe(
+          mergeMap((modelId) => this.#idsCache.getCategories({ modelId, includeOnlyIfCategoryOfTopMostElement: true, excludeIfOnlyExcludedClasses: true })),
+          reduce((acc, modelCategories) => {
+            for (const categoryId of modelCategories) {
+              acc.add(categoryId);
+            }
+            return acc;
+          }, new Set<CategoryId>()),
+          map((categoryIdsSet) => [...categoryIdsSet]),
+        ),
+      ),
       createFilterClauses({
         filter: instanceFilter,
         contentClass: { fullName: this.#categoryClass, alias: "this" },
       }),
-      createFilterClauses({
-        filter: instanceFilter,
-        contentClass: { fullName: this.#categoryElementClass, alias: "this" },
-      }),
-      this.#idsCache.modeledElementsLoaded() ? firstValueFrom(this.#idsCache.getAllSubModels({ excludeIfOnlyExcludedClasses: true })) : undefined,
-      this.#idsCache.elementModelCategoriesLoaded()
-        ? firstValueFrom(
-            from(modelIds).pipe(
-              mergeMap((modelId) => this.#idsCache.getCategories({ modelId, includeOnlyIfCategoryOfTopMostElement: true, excludeIfOnlyExcludedClasses: true })),
-              reduce((acc, modelCategories) => {
-                for (const categoryId of modelCategories) {
-                  acc.add(categoryId);
-                }
-                return acc;
-              }, new Set<CategoryId>()),
-              map((categoryIdsSet) => [...categoryIdsSet]),
-            ),
-          )
-        : undefined,
+      this.createModeledCategoryElementsQuery({ modelIds, modeledElementCategory, instanceFilter, createSelectClause, createFilterClauses }),
     ]);
-    if (categoryIds && categoryIds.length === 0) {
+    if (categoryIds.length === 0) {
       return [];
     }
-    const categoriesToShow = categoryIds?.filter((categoryId) => categoryId !== modeledElementCategory);
+
+    const categoriesToShow = categoryIds.filter((categoryId) => categoryId !== modeledElementCategory);
     const definitions: HierarchyLevelDefinition = [];
-    // Show categories which don't match modeled elements category
-    if (!categoriesToShow || categoriesToShow.length > 0) {
+    if (categoriesToShow.length > 0) {
       definitions.push({
         fullClassName: this.#categoryClass,
         query: {
@@ -457,60 +455,105 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             SELECT
               ${await this.createCategoryNodeSelectClause({ createSelectClause, hasChildren: true, extendedData: { modelIds: { selector: createIdsSelector(modelIds) } } })}
             FROM ${categoryInstanceFilterClauses.from} this
-            ${
-              categoriesToShow
-                ? "JOIN IdSet(?) categoryIdSet ON categoryIdSet.id = this.ECInstanceId"
-                : `
-                  JOIN ${this.#categoryElementClass} ce ON ce.Category.Id = this.ECInstanceId
-                  JOIN IdSet(?) modelIdSet ON ce.Model.Id = modelIdSet.id
-                `
-            }
+            JOIN IdSet(?) categoryIdSet ON categoryIdSet.id = this.ECInstanceId
             ${categoryInstanceFilterClauses.joins}
-            ${createWhereClause({
-              conditions: [
-                categoryInstanceFilterClauses.where,
-                !categoriesToShow && "ce.Parent.Id IS NULL",
-                !categoriesToShow && createExcludedClassesClause({ alias: "ce", excludedClassNames: this.#excludedClasses }),
-                !categoriesToShow && `this.ECInstanceId <> ${modeledElementCategory}`,
-                !categoriesToShow && "NOT this.IsPrivate",
-              ],
-            })}
+            ${createWhereClause({ conditions: [categoryInstanceFilterClauses.where] })}
             ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
-          bindings: [{ type: "idset", value: categoriesToShow ?? modelIds }],
+          bindings: [{ type: "idset", value: categoriesToShow }],
         },
       });
     }
-    // Show elements which match modeled elements category
-    if (!categoriesToShow || categoriesToShow.length !== categoryIds!.length) {
-      const { selectClause, bindings } = await this.createElementNodeSelectClause({
-        createSelectClause,
-        allSubModels: allSubModels ? [...allSubModels] : undefined,
-      });
-      definitions.push({
-        fullClassName: this.#categoryElementClass,
-        query: {
-          ecsql: `
-            SELECT
-              ${selectClause}
-            FROM ${elementInstanceFilterClauses.from} this
-            JOIN IdSet(?) modelIdSet ON this.Model.Id = modelIdSet.id
-            ${elementInstanceFilterClauses.joins}
-            ${createWhereClause({
-              conditions: [
-                "this.Parent.Id IS NULL",
-                `this.Category.Id = ${modeledElementCategory}`,
-                createExcludedClassesClause({ alias: "this", excludedClassNames: this.#excludedClasses }),
-                elementInstanceFilterClauses.where,
-              ],
-            })}
-            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
-            `,
-          bindings: [...bindings, { type: "idset", value: modelIds }],
-        },
-      });
+    if (categoriesToShow.length !== categoryIds.length) {
+      definitions.push(modeledCategoryElementsDefinition);
     }
     return definitions;
+  }
+
+  private async createUncachedGeometricModelChildrenQuery(
+    { parentNodeInstanceIds: modelIds, instanceFilter, createSelectClause, createFilterClauses }: DefineInstanceNodeChildHierarchyLevelProps,
+    modeledElementCategory: CategoryId,
+  ): Promise<HierarchyLevelDefinition> {
+    const [categoryInstanceFilterClauses, modeledCategoryElementsDefinition] = await Promise.all([
+      createFilterClauses({
+        filter: instanceFilter,
+        contentClass: { fullName: this.#categoryClass, alias: "this" },
+      }),
+      this.createModeledCategoryElementsQuery({ modelIds, modeledElementCategory, instanceFilter, createSelectClause, createFilterClauses }),
+    ]);
+    const categoryDefinition: HierarchyNodesDefinition = {
+      fullClassName: this.#categoryClass,
+      query: {
+        ecsql: `
+          SELECT
+            ${await this.createCategoryNodeSelectClause({ createSelectClause, hasChildren: true, extendedData: { modelIds: { selector: createIdsSelector(modelIds) } } })}
+          FROM ${categoryInstanceFilterClauses.from} this
+          JOIN ${this.#categoryElementClass} ce ON ce.Category.Id = this.ECInstanceId
+          JOIN IdSet(?) modelIdSet ON ce.Model.Id = modelIdSet.id
+          ${categoryInstanceFilterClauses.joins}
+          ${createWhereClause({
+            conditions: [
+              categoryInstanceFilterClauses.where,
+              "ce.Parent.Id IS NULL",
+              createExcludedClassesClause({ alias: "ce", excludedClassNames: this.#excludedClasses }),
+              `this.ECInstanceId <> ${modeledElementCategory}`,
+              "NOT this.IsPrivate",
+            ],
+          })}
+          ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+        `,
+        bindings: [{ type: "idset", value: modelIds }],
+      },
+    };
+    return [categoryDefinition, modeledCategoryElementsDefinition];
+  }
+
+  private async createModeledCategoryElementsQuery({
+    modelIds,
+    modeledElementCategory,
+    instanceFilter,
+    createSelectClause,
+    createFilterClauses,
+  }: {
+    modelIds: Id64Array;
+    modeledElementCategory: CategoryId;
+    instanceFilter?: GenericInstanceFilter;
+    createSelectClause: DefineHierarchyLevelProps["createSelectClause"];
+    createFilterClauses: DefineHierarchyLevelProps["createFilterClauses"];
+  }): Promise<HierarchyNodesDefinition> {
+    const [elementInstanceFilterClauses, allSubModels] = await Promise.all([
+      createFilterClauses({
+        filter: instanceFilter,
+        contentClass: { fullName: this.#categoryElementClass, alias: "this" },
+      }),
+      this.#idsCache.modeledElementsLoaded() ? firstValueFrom(this.#idsCache.getAllSubModels({ excludeIfOnlyExcludedClasses: true })) : undefined,
+    ]);
+    const { selectClause, bindings } = await this.createElementNodeSelectClause({
+      createSelectClause,
+      allSubModels: allSubModels ? [...allSubModels] : undefined,
+    });
+    return {
+      fullClassName: this.#categoryElementClass,
+      query: {
+        ecsql: `
+          SELECT
+            ${selectClause}
+          FROM ${elementInstanceFilterClauses.from} this
+          JOIN IdSet(?) modelIdSet ON this.Model.Id = modelIdSet.id
+          ${elementInstanceFilterClauses.joins}
+          ${createWhereClause({
+            conditions: [
+              "this.Parent.Id IS NULL",
+              `this.Category.Id = ${modeledElementCategory}`,
+              createExcludedClassesClause({ alias: "this", excludedClassNames: this.#excludedClasses }),
+              elementInstanceFilterClauses.where,
+            ],
+          })}
+          ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+        `,
+        bindings: [...bindings, { type: "idset", value: modelIds }],
+      },
+    };
   }
 
   private async createDefinitionContainersAndCategoriesQuery(
@@ -537,41 +580,44 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     const hierarchyDefinitionPromises = new Array<Promise<HierarchyNodesDefinition>>();
     if (!categories || categories.length > 0) {
       hierarchyDefinitionPromises.push(
-        this.createTopMostCategoriesQuery({
-          categories,
-          parentDefinitionContainerIds: parentNodeInstanceIds,
-          instanceFilter,
-          isDefinitionContainerSupported,
-          createSelectClause,
-          createFilterClauses,
-        }),
+        categories
+          ? this.createCachedTopMostCategoriesQuery({ categories, instanceFilter, createSelectClause, createFilterClauses })
+          : this.createUncachedTopMostCategoriesQuery({
+              parentDefinitionContainerIds: parentNodeInstanceIds,
+              isDefinitionContainerSupported,
+              instanceFilter,
+              createSelectClause,
+              createFilterClauses,
+            }),
       );
     }
-    if (isDefinitionContainerSupported) {
-      if (!definitionContainers || definitionContainers.length > 0) {
-        hierarchyDefinitionPromises.push(
-          this.createDefinitionContainersQuery({
-            parentDefinitionContainerIds: parentNodeInstanceIds,
-            definitionContainerIds: definitionContainers,
-            instanceFilter,
-            createSelectClause,
-            createFilterClauses,
-          }),
-        );
-      }
+    if (isDefinitionContainerSupported && (!definitionContainers || definitionContainers.length > 0)) {
+      hierarchyDefinitionPromises.push(
+        definitionContainers
+          ? this.createCachedDefinitionContainersQuery({
+              definitionContainerIds: definitionContainers,
+              instanceFilter,
+              createSelectClause,
+              createFilterClauses,
+            })
+          : this.createUncachedDefinitionContainersQuery({
+              parentDefinitionContainerIds: parentNodeInstanceIds,
+              instanceFilter,
+              createSelectClause,
+              createFilterClauses,
+            }),
+      );
     }
     return Promise.all(hierarchyDefinitionPromises);
   }
 
-  private async createDefinitionContainersQuery({
+  private async createCachedDefinitionContainersQuery({
     definitionContainerIds,
-    parentDefinitionContainerIds,
     instanceFilter,
     createSelectClause,
     createFilterClauses,
   }: {
-    definitionContainerIds?: Id64Array;
-    parentDefinitionContainerIds?: Id64Array;
+    definitionContainerIds: Id64Array;
     instanceFilter?: GenericInstanceFilter;
     createSelectClause: DefineHierarchyLevelProps["createSelectClause"];
     createFilterClauses: DefineHierarchyLevelProps["createFilterClauses"];
@@ -584,91 +630,124 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     return {
       fullClassName: CLASS_NAME_DefinitionContainer,
       query: {
-        ctes: definitionContainerIds
-          ? undefined
-          : [
-              `
-                AllContainers(id, modelId) AS (
-                  SELECT
-                    dc.ECInstanceId AS id,
-                    dc.Model.Id AS modelId
-                  FROM ${this.#categoryClass} cat
-                  JOIN ${CLASS_NAME_DefinitionContainer} dc ON cat.Model.Id = dc.ECInstanceId
-                  ${
-                    this.#hierarchyConfig.categories.withoutElements === "include"
-                      ? ""
-                      : `
-                    JOIN ${this.#categoryElementClass} ce ON cat.ECInstanceId = ce.Category.Id
-                    JOIN ${CLASS_NAME_Model} gm ON ce.Model.Id = gm.ECInstanceId
-                  `
-                  }
-                  ${createWhereClause({
-                    conditions: ["NOT cat.IsPrivate", "NOT dc.IsPrivate", this.#hierarchyConfig.categories.withoutElements === "exclude" && "NOT gm.IsPrivate"],
-                  })}
-
-                  UNION
-
-                  SELECT
-                    pdc.ECInstanceId AS id,
-                    pdc.Model.Id AS modelId
-                  FROM ${CLASS_NAME_DefinitionContainer} pdc
-                  JOIN AllContainers dc ON pdc.ECInstanceId = dc.modelId
-                  WHERE NOT pdc.IsPrivate
-                )
-              `,
-              `DefContainers(id, modelId) AS (
-                  SELECT id, modelId
-                  FROM AllContainers dc
-                  WHERE ${
-                    parentDefinitionContainerIds
-                      ? `modelId IN (${parentDefinitionContainerIds.join(",")})`
-                      : `NOT IFNULL((SELECT 1 FROM ${CLASS_NAME_DefinitionContainer} parentDc WHERE parentDc.ECInstanceId = dc.modelId), false)`
-                  }
-              )`,
-            ],
         ecsql: `
           SELECT
-            ${await createSelectClause({
-              ecClassId: { selector: ECSql.createRawPropertyValueSelector("this", "ECClassId") },
-              ecInstanceId: { selector: "this.ECInstanceId" },
-              nodeLabel: {
-                of: {
-                  classAlias: "this",
-                  className: CLASS_NAME_DefinitionContainer,
-                },
-              },
-              extendedData: {
-                type: "definition-container",
-              },
-              hasChildren: true,
-              supportsFiltering: true,
-            })}
+            ${await this.createDefinitionContainerNodeSelectClause(createSelectClause)}
           FROM ${instanceFilterClauses.from} this
-          ${
-            definitionContainerIds
-              ? `JOIN IdSet(?) definitionContainerIdSet ON this.ECInstanceId = definitionContainerIdSet.id`
-              : `JOIN DefContainers dc ON this.ECInstanceId = dc.id`
-          }
+          JOIN IdSet(?) definitionContainerIdSet ON this.ECInstanceId = definitionContainerIdSet.id
           ${instanceFilterClauses.joins}
-            ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
+          ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
           ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
-        bindings: definitionContainerIds ? [{ type: "idset", value: definitionContainerIds }] : [],
+        bindings: [{ type: "idset", value: definitionContainerIds }],
       },
     };
   }
 
-  private async createTopMostCategoriesQuery({
-    categories,
+  private async createUncachedDefinitionContainersQuery({
     parentDefinitionContainerIds,
-    isDefinitionContainerSupported,
     instanceFilter,
     createSelectClause,
     createFilterClauses,
   }: {
-    isDefinitionContainerSupported: boolean;
-    categories?: Array<CachedCategoryInfo>;
     parentDefinitionContainerIds?: Id64Array;
+    instanceFilter?: GenericInstanceFilter;
+    createSelectClause: DefineHierarchyLevelProps["createSelectClause"];
+    createFilterClauses: DefineHierarchyLevelProps["createFilterClauses"];
+  }): Promise<HierarchyNodesDefinition> {
+    const instanceFilterClauses = await createFilterClauses({
+      filter: instanceFilter,
+      contentClass: { fullName: CLASS_NAME_DefinitionContainer, alias: "this" },
+    });
+    const hasCategory =
+      this.#hierarchyConfig.categories.withoutElements === "include"
+        ? `
+          EXISTS (
+            SELECT 1
+            FROM ${this.#categoryClass} cat
+            WHERE cat.Model.Id = dc.ECInstanceId AND NOT cat.IsPrivate
+          )
+        `
+        : `
+          EXISTS (
+            SELECT 1
+            FROM ${this.#categoryClass} cat
+            JOIN ${this.#categoryElementClass} ce ON cat.ECInstanceId = ce.Category.Id
+            JOIN ${CLASS_NAME_Model} gm ON ce.Model.Id = gm.ECInstanceId
+            WHERE cat.Model.Id = dc.ECInstanceId AND NOT cat.IsPrivate AND NOT gm.IsPrivate
+          )
+        `;
+    return {
+      fullClassName: CLASS_NAME_DefinitionContainer,
+      query: {
+        ctes: [
+          `
+            AllContainers(id, modelId) AS (
+              SELECT
+                dc.ECInstanceId AS id,
+                dc.Model.Id AS modelId
+              FROM ${CLASS_NAME_DefinitionContainer} dc
+              WHERE NOT dc.IsPrivate AND ${hasCategory}
+
+              UNION ALL
+
+              SELECT
+                pdc.ECInstanceId AS id,
+                pdc.Model.Id AS modelId
+              FROM ${CLASS_NAME_DefinitionContainer} pdc
+              JOIN AllContainers dc ON pdc.ECInstanceId = dc.modelId
+              WHERE NOT pdc.IsPrivate
+            )
+          `,
+          `DefContainers(id, modelId) AS (
+            SELECT id, modelId
+            FROM AllContainers dc
+            WHERE ${
+              parentDefinitionContainerIds
+                ? `modelId IN (${parentDefinitionContainerIds.join(",")})`
+                : `NOT IFNULL((SELECT 1 FROM ${CLASS_NAME_DefinitionContainer} parentDc WHERE parentDc.ECInstanceId = dc.modelId), false)`
+            }
+          )`,
+        ],
+        ecsql: `
+          SELECT
+            ${await this.createDefinitionContainerNodeSelectClause(createSelectClause)}
+          FROM ${instanceFilterClauses.from} this
+          JOIN DefContainers dc ON this.ECInstanceId = dc.id
+          ${instanceFilterClauses.joins}
+          ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
+          ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+        `,
+        bindings: [],
+      },
+    };
+  }
+
+  private async createDefinitionContainerNodeSelectClause(createSelectClause: DefineHierarchyLevelProps["createSelectClause"]): Promise<string> {
+    return createSelectClause({
+      ecClassId: { selector: ECSql.createRawPropertyValueSelector("this", "ECClassId") },
+      ecInstanceId: { selector: "this.ECInstanceId" },
+      nodeLabel: {
+        of: {
+          classAlias: "this",
+          className: CLASS_NAME_DefinitionContainer,
+        },
+      },
+      extendedData: {
+        type: "definition-container",
+      },
+      hasChildren: true,
+      supportsFiltering: true,
+    });
+  }
+
+  private async createCachedTopMostCategoriesQuery({
+    categories,
+    instanceFilter,
+    createSelectClause,
+    createFilterClauses,
+  }: {
+    categories: Array<CachedCategoryInfo>;
     instanceFilter?: GenericInstanceFilter;
     createSelectClause: DefineHierarchyLevelProps["createSelectClause"];
     createFilterClauses: DefineHierarchyLevelProps["createFilterClauses"];
@@ -679,40 +758,108 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         contentClass: { fullName: this.#categoryClass, alias: "this" },
       }),
       this.#hierarchyConfig.elements.nodes === "include"
-        ? categories
-          ? firstValueFrom(
-              // Iterate over categories which will be returned by the query
-              from(categories).pipe(
-                // only categories that have at least one non-excluded element can have element children
-                mergeMap((categoryInfo) => (categoryInfo.hasElementsFromNonExcludedClasses ? of(categoryInfo) : EMPTY)),
-                mergeMap(({ id: categoryId }) =>
-                  // when category has element models, then it has element children
-                  this.#idsCache.getModels({ categoryId, excludeSubModels: true, includeOnlyTopMostElementCategory: true }).pipe(
-                    take(1),
-                    defaultIfEmpty(undefined),
-                    mergeMap((modelId) => (modelId ? of(categoryId) : EMPTY)),
-                  ),
+        ? firstValueFrom(
+            // Iterate over categories which will be returned by the query
+            from(categories).pipe(
+              // only categories that have at least one non-excluded element can have element children
+              mergeMap((categoryInfo) => (categoryInfo.hasElementsFromNonExcludedClasses ? of(categoryInfo) : EMPTY)),
+              mergeMap(({ id: categoryId }) =>
+                // when category has element models, then it has element children
+                this.#idsCache.getModels({ categoryId, excludeSubModels: true, includeOnlyTopMostElementCategory: true }).pipe(
+                  take(1),
+                  defaultIfEmpty(undefined),
+                  mergeMap((modelId) => (modelId ? of(categoryId) : EMPTY)),
                 ),
-                toArray(),
               ),
-            )
-          : undefined
+              toArray(),
+            ),
+          )
         : new Array<CategoryId>(),
     ]);
     const categoriesWithMultipleSubCategories = categories
-      ?.filter((categoryInfo) => categoryInfo.subCategoryChildCount > 1)
+      .filter((categoryInfo) => categoryInfo.subCategoryChildCount > 1)
       .map((categoryInfo) => categoryInfo.id);
 
     const categoriesWithChildren =
-      categoriesWithChildElements && categoriesWithMultipleSubCategories
-        ? this.#hierarchyConfig.subCategories.nodes === "include" && categoriesWithMultipleSubCategories.length > 0
-          ? categoriesWithChildElements.length > 0
-            ? // Want to filter out duplicate entries
-              [...new Set(categoriesWithChildElements.concat(categoriesWithMultipleSubCategories))]
-            : categoriesWithMultipleSubCategories
-          : categoriesWithChildElements
-        : undefined;
+      this.#hierarchyConfig.subCategories.nodes === "include" && categoriesWithMultipleSubCategories.length > 0
+        ? categoriesWithChildElements.length > 0
+          ? [...new Set(categoriesWithChildElements.concat(categoriesWithMultipleSubCategories))]
+          : categoriesWithMultipleSubCategories
+        : categoriesWithChildElements;
 
+    return {
+      fullClassName: this.#categoryClass,
+      query: {
+        ecsql: `
+          SELECT
+            ${await this.createCategoryNodeSelectClause({
+              createSelectClause,
+              hasChildren:
+                categoriesWithChildren.length > 0
+                  ? {
+                      selector: `IFNULL(
+                        (
+                          SELECT 1
+                          FROM IdSet(?) hasChildrenIdSet
+                          WHERE hasChildrenIdSet.id = this.ECInstanceId
+                          LIMIT 1
+                        ),
+                        0
+                      )`,
+                    }
+                  : false,
+              extendedData: {
+                type: "category",
+                description: { selector: "this.Description" },
+                modelIds: { selector: createIdsSelector(new Array<ModelId>()) },
+                hasSubCategories:
+                  categoriesWithMultipleSubCategories.length > 0
+                    ? {
+                        selector: `IFNULL(
+                          (
+                            SELECT 1
+                            FROM IdSet(?) hasSubCategoriesIdSet
+                            WHERE hasSubCategoriesIdSet.id = this.ECInstanceId
+                            LIMIT 1
+                          ),
+                          0
+                        )`,
+                      }
+                    : false,
+              },
+            })}
+          FROM ${instanceFilterClauses.from} this
+          JOIN IdSet(?) categoryIdSet ON this.ECInstanceId = categoryIdSet.id
+          ${instanceFilterClauses.joins}
+          ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
+          ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+        `,
+        bindings: [
+          ...(categoriesWithChildren.length > 0 ? [{ type: "idset" as const, value: categoriesWithChildren }] : []),
+          ...(categoriesWithMultipleSubCategories.length > 0 ? [{ type: "idset" as const, value: categoriesWithMultipleSubCategories }] : []),
+          { type: "idset", value: categories.map((category) => category.id) },
+        ],
+      },
+    };
+  }
+
+  private async createUncachedTopMostCategoriesQuery({
+    parentDefinitionContainerIds,
+    isDefinitionContainerSupported,
+    instanceFilter,
+    createSelectClause,
+    createFilterClauses,
+  }: {
+    isDefinitionContainerSupported: boolean;
+    parentDefinitionContainerIds?: Id64Array;
+    instanceFilter?: GenericInstanceFilter;
+    createSelectClause: DefineHierarchyLevelProps["createSelectClause"];
+    createFilterClauses: DefineHierarchyLevelProps["createFilterClauses"];
+  }): Promise<HierarchyNodesDefinition> {
+    const instanceFilterClauses = await createFilterClauses({
+      filter: instanceFilter,
+      contentClass: { fullName: this.#categoryClass, alias: "this" },
+    });
     const hasChildSubCategories = `
       SELECT 1
       FROM
@@ -749,79 +896,45 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       })}
       LIMIT 1
     `;
+    const hasChildren =
+      this.#hierarchyConfig.subCategories.nodes === "include"
+        ? this.#hierarchyConfig.elements.nodes === "include"
+          ? { selector: `IFNULL((${hasChildSubCategories}), IFNULL((${hasChildElements}), 0))` }
+          : { selector: `IFNULL((${hasChildSubCategories}), 0)` }
+        : this.#hierarchyConfig.elements.nodes === "include"
+          ? { selector: `IFNULL((${hasChildElements}), 0)` }
+          : false;
+
     return {
       fullClassName: this.#categoryClass,
       query: {
         ecsql: `
           SELECT
-              ${await this.createCategoryNodeSelectClause({
-                createSelectClause,
-                hasChildren: categoriesWithChildren
-                  ? categoriesWithChildren.length > 0
-                    ? {
-                        selector: `IFNULL(
-                        (
-                          SELECT 1
-                          FROM IdSet(?) hasChildrenIdSet
-                          WHERE hasChildrenIdSet.id = this.ECInstanceId
-                          LIMIT 1
-                        ),
-                        0
-                      )`,
-                      }
-                    : false
-                  : this.#hierarchyConfig.subCategories.nodes === "include"
-                    ? this.#hierarchyConfig.elements.nodes === "include"
-                      ? { selector: `IFNULL((${hasChildSubCategories}), IFNULL((${hasChildElements}), 0))` }
-                      : { selector: `IFNULL((${hasChildSubCategories}), 0)` }
-                    : this.#hierarchyConfig.elements.nodes === "include"
-                      ? { selector: `IFNULL((${hasChildElements}), 0)` }
-                      : false,
-                extendedData: {
-                  type: "category",
-                  description: { selector: "this.Description" },
-                  modelIds: { selector: createIdsSelector(new Array<ModelId>()) },
-                  hasSubCategories: categoriesWithMultipleSubCategories
-                    ? categoriesWithMultipleSubCategories.length > 0
-                      ? {
-                          selector: `IFNULL(
-                          (
-                            SELECT 1
-                            FROM IdSet(?) hasSubCategoriesIdSet
-                            WHERE hasSubCategoriesIdSet.id = this.ECInstanceId
-                            LIMIT 1
-                          ),
-                          0
-                        )`,
-                        }
-                      : false
-                    : { selector: `IFNULL((${hasChildSubCategories}), 0)` },
-                },
-              })}
+            ${await this.createCategoryNodeSelectClause({
+              createSelectClause,
+              hasChildren,
+              extendedData: {
+                type: "category",
+                description: { selector: "this.Description" },
+                modelIds: { selector: createIdsSelector(new Array<ModelId>()) },
+                hasSubCategories: { selector: `IFNULL((${hasChildSubCategories}), 0)` },
+              },
+            })}
           FROM ${instanceFilterClauses.from} this
-          ${categories ? `JOIN IdSet(?) categoryIdSet ON this.ECInstanceId = categoryIdSet.id` : ""}
           ${instanceFilterClauses.joins}
           ${createWhereClause({
             conditions: [
               instanceFilterClauses.where,
-              !categories && "NOT this.IsPrivate",
-              !categories &&
-                isDefinitionContainerSupported &&
+              "NOT this.IsPrivate",
+              isDefinitionContainerSupported &&
                 (parentDefinitionContainerIds
                   ? `this.Model.Id IN (${parentDefinitionContainerIds.join(",")})`
                   : `this.Model.Id NOT IN (SELECT dc.ECInstanceId FROM ${CLASS_NAME_DefinitionContainer} dc)`),
-              !categories && this.#hierarchyConfig.categories.withoutElements === "exclude" && `IFNULL((${hasElements}), 0)`,
+              this.#hierarchyConfig.categories.withoutElements === "exclude" && `IFNULL((${hasElements}), 0)`,
             ],
           })}
           ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
-        bindings: [
-          ...(categoriesWithChildren && categoriesWithChildren.length > 0 ? [{ type: "idset" as const, value: categoriesWithChildren }] : []),
-          ...(categoriesWithMultipleSubCategories && categoriesWithMultipleSubCategories.length > 0
-            ? [{ type: "idset" as const, value: categoriesWithMultipleSubCategories }]
-            : []),
-          ...(categories && categories.length > 0 ? [{ type: "idset" as const, value: categories.map((category) => category.id) }] : []),
-        ],
       },
     };
   }
