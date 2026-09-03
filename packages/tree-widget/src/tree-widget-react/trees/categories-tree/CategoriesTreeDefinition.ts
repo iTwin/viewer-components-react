@@ -414,14 +414,17 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     assert(modeledElementCategory !== undefined, "Expected parent node to have modeledElementCategory extended data");
 
     return this.#idsCache.elementModelCategoriesLoaded()
-      ? this.createCachedGeometricModelChildrenQuery(props, modeledElementCategory)
+      ? this.createCachedGeometricModelChildrenQuery({ ...props, modeledElementCategory })
       : this.createUncachedGeometricModelChildrenQuery(props, modeledElementCategory);
   }
 
-  private async createCachedGeometricModelChildrenQuery(
-    { parentNodeInstanceIds: modelIds, instanceFilter, createSelectClause, createFilterClauses }: DefineInstanceNodeChildHierarchyLevelProps,
-    modeledElementCategory: CategoryId,
-  ): Promise<HierarchyLevelDefinition> {
+  private async createCachedGeometricModelChildrenQuery({
+    parentNodeInstanceIds: modelIds,
+    instanceFilter,
+    createSelectClause,
+    createFilterClauses,
+    modeledElementCategory,
+  }: DefineInstanceNodeChildHierarchyLevelProps & { modeledElementCategory: CategoryId }): Promise<HierarchyLevelDefinition> {
     const [categoryIds, categoryInstanceFilterClauses, modeledCategoryElementsDefinition] = await Promise.all([
       firstValueFrom(
         from(modelIds).pipe(
@@ -446,6 +449,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     }
 
     const categoriesToShow = categoryIds.filter((categoryId) => categoryId !== modeledElementCategory);
+    const hasElementsWithTheSameCategory = categoriesToShow.length < categoryIds.length;
     const definitions: HierarchyLevelDefinition = [];
     if (categoriesToShow.length > 0) {
       definitions.push({
@@ -464,7 +468,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         },
       });
     }
-    if (categoriesToShow.length !== categoryIds.length) {
+    if (hasElementsWithTheSameCategory) {
       definitions.push(modeledCategoryElementsDefinition);
     }
     return definitions;

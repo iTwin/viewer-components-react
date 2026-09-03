@@ -586,13 +586,15 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           )
         : undefined,
     ]);
-    if (categoryIds && categoryIds.length === 0) {
+    const cachedDataExists = !!categoryIds;
+    if (cachedDataExists && categoryIds.length === 0) {
       return [];
     }
     // For top-level models show all categories of the top-most elements. For sub-models show only the categories
     // that don't match the sub-model element's category as intermediate category nodes - the elements matching
     // that category are shown directly (see below).
     const categoriesToShow = modeledElementCategory === undefined ? categoryIds : categoryIds?.filter((categoryId) => categoryId !== modeledElementCategory);
+    const hasElementsWithTheSameCategory = categoriesToShow?.length !== categoryIds?.length;
     const definitions: HierarchyLevelDefinition = [];
     if (!categoriesToShow || categoriesToShow.length > 0) {
       definitions.push({
@@ -629,7 +631,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       });
     }
     // Show elements which match the sub-model element's category directly under the (hidden) sub-model node.
-    if (modeledElementCategory !== undefined && (!categoriesToShow || categoriesToShow.length !== categoryIds!.length)) {
+    if (modeledElementCategory !== undefined && (!cachedDataExists || hasElementsWithTheSameCategory)) {
       const { selectClause, bindings } = await this.createElementNodeSelectClause({
         createSelectClause,
         // allSubModels are defined when modeledElementCategory is defined
