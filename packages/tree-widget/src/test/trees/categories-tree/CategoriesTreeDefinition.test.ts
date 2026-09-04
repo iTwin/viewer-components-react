@@ -310,6 +310,47 @@ describe("Categories tree", () => {
           });
         });
 
+        it("shows definition container once when it contains multiple categories and elements", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const elementsModel = insertElementsModel({ txn, codeValue: "m" });
+              const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const category1 = insertCategory({ txn, codeValue: "cat1", modelId: definitionModel.id });
+              const category2 = insertCategory({ txn, codeValue: "cat2", modelId: definitionModel.id });
+
+              insertElement({ txn, modelId: elementsModel.id, categoryId: category1.id });
+              insertElement({ txn, modelId: elementsModel.id, categoryId: category1.id });
+              insertElement({ txn, modelId: elementsModel.id, categoryId: category2.id });
+
+              return { definitionContainer, category1, category2 };
+            }),
+          );
+
+          const { imodelConnection, ...keys } = buildIModelResult;
+          using provider = createCategoryTreeProvider(imodelConnection, viewType);
+
+          await validateHierarchy({
+            provider,
+            expect: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.definitionContainer],
+                supportsFiltering: true,
+                children: [
+                  NodeValidators.createForInstanceNode({
+                    instanceKeys: [keys.category1],
+                    children: false,
+                  }),
+                  NodeValidators.createForInstanceNode({
+                    instanceKeys: [keys.category2],
+                    children: false,
+                  }),
+                ],
+              }),
+            ],
+          });
+        });
+
         it("shows element when 'elements' is set to 'include'", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
