@@ -415,7 +415,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
 
     return this.#idsCache.elementModelCategoriesLoaded()
       ? this.createCachedGeometricModelChildrenQuery({ ...props, modeledElementCategory })
-      : this.createUncachedGeometricModelChildrenQuery(props, modeledElementCategory);
+      : this.createUncachedGeometricModelChildrenQuery({ ...props, modeledElementCategory });
   }
 
   private async createCachedGeometricModelChildrenQuery({
@@ -474,10 +474,15 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     return definitions;
   }
 
-  private async createUncachedGeometricModelChildrenQuery(
-    { parentNodeInstanceIds: modelIds, instanceFilter, createSelectClause, createFilterClauses }: DefineInstanceNodeChildHierarchyLevelProps,
-    modeledElementCategory: CategoryId,
-  ): Promise<HierarchyLevelDefinition> {
+  private async createUncachedGeometricModelChildrenQuery({
+    createFilterClauses,
+    createSelectClause,
+    instanceFilter,
+    modeledElementCategory,
+    parentNodeInstanceIds: modelIds,
+  }: DefineInstanceNodeChildHierarchyLevelProps & {
+    modeledElementCategory: CategoryId;
+  }): Promise<HierarchyLevelDefinition> {
     const [categoryInstanceFilterClauses, modeledCategoryElementsDefinition] = await Promise.all([
       createFilterClauses({
         filter: instanceFilter,
