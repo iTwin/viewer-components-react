@@ -582,16 +582,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                   includeEmpty: this.#hierarchyConfig.categories.withoutElements === "include",
                 }),
           )
-        : (() => {
-            // Make a call to initiate loading cached data, but don't wait for it to complete.
-            // The data will be loaded in the background and cached for future calls.
-            void firstValueFrom(
-              this.#idsCache.getRootDefinitionContainersAndCategories({
-                includeEmpty: this.#hierarchyConfig.categories.withoutElements === "include",
-              }),
-            );
-            return undefined;
-          })(),
+        : undefined,
       firstValueFrom(this.#idsCache.getIsDefinitionContainerSupported()),
     ]);
     const { categories, definitionContainers } = values ?? {};
@@ -1128,14 +1119,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         filter: instanceFilter,
         contentClass: { fullName: this.#categoryElementClass, alias: "this" },
       }),
-      this.#idsCache.modeledElementsLoaded()
-        ? firstValueFrom(this.#idsCache.getAllSubModels({ excludeIfOnlyExcludedClasses: true }))
-        : (() => {
-            // Make a call to initiate loading sub-models, but don't wait for it to complete.
-            // The data will be loaded in the background and cached for future calls.
-            void firstValueFrom(this.#idsCache.getAllSubModels({ excludeIfOnlyExcludedClasses: true }));
-            return undefined;
-          })(),
+      this.#idsCache.modeledElementsLoaded() ? firstValueFrom(this.#idsCache.getAllSubModels({ excludeIfOnlyExcludedClasses: true })) : undefined,
     ]);
     const modelIds: Id64Array | undefined =
       parentNode.extendedData.modelIds.length > 0
