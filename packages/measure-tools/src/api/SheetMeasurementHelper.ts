@@ -5,9 +5,9 @@
 
 import { ColorDef, QueryBinder } from "@itwin/core-common";
 import type { DecorateContext, GraphicBuilder, HitDetail, ScreenViewport} from "@itwin/core-frontend";
-import { GraphicType, IModelApp, type IModelConnection } from "@itwin/core-frontend";
-import type { XYProps, XYZ, XYZProps} from "@itwin/core-geometry";
-import { Point3d, YawPitchRollAngles } from "@itwin/core-geometry";
+import { GraphicType, IModelApp, type IModelConnection, InputSource, LocateResponse } from "@itwin/core-frontend";
+import type { TransformProps, XYProps, XYZ, XYZProps} from "@itwin/core-geometry";
+import { Point3d, Range2d, YawPitchRollAngles } from "@itwin/core-geometry";
 import { Transform } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
 import { DrawingDataCache } from "./DrawingTypeDataCache.js";
@@ -35,14 +35,26 @@ export namespace SheetMeasurementHelper {
     sheetScale?: number;
     DVDOrigin?: XYProps;
     transformParams?: CivilSheetTransformParams;
+    /** Raw sheet-to-profile transform as authored on the drawing, present only on profile/elevation drawings. */
+    sheetToProfileTransformProps?: TransformProps;
   }
 
   export interface DrawingTypeData {
     id: string;
-    type?: number;
+    type?: DrawingType;
     origin: { x: number, y: number}
     bBoxLow: { x: number, y: number};
     bBoxHigh: { x: number, y: number};
+  }
+
+  /** Controls how the drawing under a point is resolved. */
+  export interface ResolveDrawingOptions {
+    /** When supplied, the drawing owning the element under the cursor is preferred over the containing rectangle.
+     * View attachment rectangles overlap, so the geometry actually picked is a stronger signal than the rectangles.
+     */
+    viewport?: ScreenViewport;
+    /** Input source used for the pick. Defaults to `InputSource.Mouse`. */
+    inputSource?: InputSource;
   }
 
   /** Information needed to use the old Civil transform but will eventually be removed @deprecated */
@@ -208,23 +220,60 @@ export namespace SheetMeasurementHelper {
   }
 
   /**
-   * Gives the first drawing which constains the mouse position, undefined otherwise
+   * Sheet-space rectangle covered by a view attachment.
+   * The placement bounding box is relative to the placement origin, so bBoxLow cannot be assumed to be zero.
+   */
+  export function getDrawingRange(drawing: DrawingTypeData): Range2d {
+    const origin = Point2d.fromJSON(drawing.origin);
+    const low = Point2d.fromJSON(drawing.bBoxLow);
+    const high = Point2d.fromJSON(drawing.bBoxHigh);
+    return Range2d.createXYXY(origin.x + low.x, origin.y + low.y, origin.x + high.x, origin.y + high.y);
+  }
+
+  /**
+   * Identifies the drawing from the element under the cursor.
+   * A drawing element and the model it breaks down share an id, so the hit's model id is the drawing id.
+   * @returns the picked drawing, or undefined when nothing was hit or the hit belongs to no drawing on the sheet
+   */
+  async function pickDrawing(mousePos: Point3d, drawingInfo: ReadonlyArray<DrawingTypeData>, options: ResolveDrawingOptions): Promise<DrawingTypeData | undefined> {
+    const viewport = options.viewport;
+    if (viewport === undefined)
+      return undefined;
+
+    const snappedHit = IModelApp.accuSnap.currHit;
+    const hit = snappedHit ?? await IModelApp.locateManager.doLocate(new LocateResponse(), true, mousePos, viewport, options.inputSource ?? InputSource.Mouse);
+    const hitModelId = hit?.modelId;
+    if (hitModelId === undefined)
+      return undefined;
+
+    return drawingInfo.find((info) => info.id === hitModelId);
+  }
+
+  /**
+   * Drawings whose rectangle contains the point.
+   * View attachment rectangles overlap, so more than one result means resolving from the point alone has to guess
+   * between them. Callers that cannot pick an element may want to surface that to the user.
+   */
+  export async function getDrawingsAtPoint(imodel: IModelConnection, sheetViewId: string, mousePos: Point3d): Promise<DrawingTypeData[]> {
+    if (imodel.isBlank) {
+      return [];
+    }
+
+    const drawingInfo = await DrawingDataCache.getInstance().querySheetDrawingData(imodel, sheetViewId);
+    return drawingInfo.filter((info) => getDrawingRange(info).containsXY(mousePos.x, mousePos.y));
+  }
+
+  /**
+   * Gives the first drawing which contains the mouse position, undefined otherwise
    * @param mousePos
    * @param drawingInfo
    * @returns
    */
   function getCorrectDrawing(mousePos: Point3d, drawingInfo: ReadonlyArray<DrawingTypeData>): DrawingTypeData | undefined {
-    const x = mousePos.x;
-    const y = mousePos.y;
-
     for (const info of drawingInfo) {
-      if (x >= info.origin.x && x <= info.origin.x + info.bBoxHigh.x) {
-        // Within x extents
-        if (y >= info.origin.y && y <= info.origin.y + info.bBoxHigh.y) {
-          // Within y extents
-          return info;
-        }
-      }
+      const range = getDrawingRange(info);
+      if (range.containsXY(mousePos.x, mousePos.y))
+        return info;
     }
     return undefined;
   }
@@ -338,7 +387,8 @@ export namespace SheetMeasurementHelper {
           const sheetToWorldTransform: CivilSheetTransformParams = { masterOrigin: Point3d.fromJSON(jsonProp.civilimodelconn.masterOrigin), sheetTov8Drawing: Transform.fromJSON(jsonProp.civilimodelconn.sheetToV8DrawingTransform), v8DrawingToDesign: Transform.fromJSON(jsonProp.civilimodelconn.v8DrawingToDesignTransform)};
           return {
             transformParams: sheetToWorldTransform,
-            sheetScale: jsonProp.scale
+            sheetScale: jsonProp.scale,
+            sheetToProfileTransformProps: jsonProp.civilimodelconn.sheetToProfileTransform ?? undefined
           };
         }
       }
@@ -352,12 +402,14 @@ export namespace SheetMeasurementHelper {
    * @param id
    * @param mousePos
    */
-  export async function getDrawingData(imodel: IModelConnection, id: string, mousePos: Point3d): Promise<{
+  export async function getDrawingData(imodel: IModelConnection, id: string, mousePos: Point3d, options: ResolveDrawingOptions = {}): Promise<{
     sheetToWorldTransform : Transform,
+    sheetToProfileTransform?: Transform,
     viewAttachmentOrigin: {x: number, y: number},
     viewAttachmentExtent: {x: number, y: number},
     transformProps: SheetToWorldTransformProps,
-    drawingId: string
+    drawingId: string,
+    drawingType?: DrawingType
   } | undefined> {
 
     if (imodel.isBlank) {
@@ -366,7 +418,8 @@ export namespace SheetMeasurementHelper {
 
     const drawingInfo = await DrawingDataCache.getInstance().querySheetDrawingData(imodel, id);
 
-    const correctVAData = getCorrectDrawing(mousePos, drawingInfo);
+    const pickedVAData = await pickDrawing(mousePos, drawingInfo, options);
+    const correctVAData = pickedVAData ?? getCorrectDrawing(mousePos, drawingInfo);
 
     if (correctVAData === undefined)
       return undefined;
@@ -376,16 +429,28 @@ export namespace SheetMeasurementHelper {
     if (spatialInfo === undefined)
       return undefined;
 
+    // Transform.fromJSON silently returns identity for missing or unrecognized props, which would leave profile
+    // measurements in sheet units, so only build one when the drawing actually defines it.
+    const rawProfileTransform = spatialInfo.sheetToProfileTransformProps;
+    const sheetToProfileTransform = rawProfileTransform ? Transform.fromJSON(rawProfileTransform) : undefined;
+
+    // Report the same rectangle the containment test used, so callers decorating it draw exactly that.
+    const range = getDrawingRange(correctVAData);
+    const viewAttachmentOrigin = { x: range.low.x, y: range.low.y };
+    const viewAttachmentExtent = { x: range.xLength(), y: range.yLength() };
+
     if (spatialInfo.transformParams === undefined) {
-      const transform = getTransform(correctVAData.origin, spatialInfo);
-      return {sheetToWorldTransform: transform, viewAttachmentOrigin: correctVAData.origin, viewAttachmentExtent: correctVAData.bBoxHigh, drawingId: correctVAData.id, transformProps: spatialInfo};
+      const transform = getTransform(viewAttachmentOrigin, spatialInfo);
+      return {sheetToWorldTransform: transform, sheetToProfileTransform, viewAttachmentOrigin, viewAttachmentExtent, drawingId: correctVAData.id, drawingType: correctVAData.type, transformProps: spatialInfo};
     } else {
       const sheetToWorldTransform: CivilSheetTransformParams = { masterOrigin: Point3d.fromJSON(spatialInfo.transformParams.masterOrigin), sheetTov8Drawing: spatialInfo.transformParams.sheetTov8Drawing, v8DrawingToDesign: spatialInfo.transformParams.v8DrawingToDesign};
       return {
         drawingId: correctVAData.id,
-        viewAttachmentOrigin: correctVAData.origin,
-        viewAttachmentExtent: correctVAData.bBoxHigh,
-        sheetToWorldTransform: getTransform(correctVAData.origin, {transformParams: sheetToWorldTransform}),
+        drawingType: correctVAData.type,
+        viewAttachmentOrigin,
+        viewAttachmentExtent,
+        sheetToWorldTransform: getTransform(viewAttachmentOrigin, {transformParams: sheetToWorldTransform}),
+        sheetToProfileTransform,
         transformProps: spatialInfo
       };
     }
@@ -447,7 +512,7 @@ export namespace SheetMeasurementHelper {
       return false;
     for (const drawing of DrawingDataCache.getInstance().getSheetDrawingDataForViewport(viewport)) {
       if (drawing.type !== undefined && allowedDrawingTypes.includes(drawing.type)) {
-        if (SheetMeasurementHelper.checkIfInDrawing(point, Point2d.fromJSON(drawing.origin), Point2d.fromJSON(drawing.bBoxHigh))) {
+        if (getDrawingRange(drawing).containsXY(point.x, point.y)) {
           return true;
         }
       }
@@ -455,11 +520,24 @@ export namespace SheetMeasurementHelper {
     return false;
   }
 
-  export async function getDrawingMetadata(imodel: IModelConnection, id: string, mousePos: Point3d): Promise<DrawingMetadata | undefined> {
-    const drawingData = await getDrawingData(imodel, id, mousePos);
-    if (drawingData?.drawingId !== undefined && drawingData.viewAttachmentOrigin !== undefined && drawingData.transformProps !== undefined)
-      return { origin: Point2d.fromJSON(drawingData.viewAttachmentOrigin), drawingId: drawingData.drawingId, sheetToWorldTransformProps: drawingData.transformProps, extents: Point2d.fromJSON(drawingData.viewAttachmentExtent), sheetToWorldTransformv2: drawingData.sheetToWorldTransform};
-    return undefined;
+  /**
+   * Resolves the drawing under the point along with everything needed to measure in it.
+   * @param options pass a viewport to resolve from the element under the cursor rather than the containing rectangle
+   */
+  export async function getDrawingMetadata(imodel: IModelConnection, id: string, mousePos: Point3d, options: ResolveDrawingOptions = {}): Promise<DrawingMetadata | undefined> {
+    const drawingData = await getDrawingData(imodel, id, mousePos, options);
+    if (drawingData?.drawingId === undefined || drawingData.viewAttachmentOrigin === undefined || drawingData.transformProps === undefined)
+      return undefined;
+
+    return {
+      origin: Point2d.fromJSON(drawingData.viewAttachmentOrigin),
+      drawingId: drawingData.drawingId,
+      drawingType: drawingData.drawingType,
+      sheetToWorldTransformProps: drawingData.transformProps,
+      extents: Point2d.fromJSON(drawingData.viewAttachmentExtent),
+      sheetToWorldTransformv2: drawingData.sheetToWorldTransform,
+      sheetToProfileTransform: drawingData.sheetToProfileTransform
+    };
   }
 
 }
@@ -525,7 +603,7 @@ export namespace SheetMeasurementsHelper {
           const jsonProp = JSON.parse(row[4]);
           const scale = jsonProp.scale;
           if (jsonProp.civilimodelconn) {
-            const sheetToProfileTransform = Transform.fromJSON(jsonProp.civilimodelconn.sheetToProfileTransform);
+            const sheetToProfileTransform = jsonProp.civilimodelconn.sheetToProfileTransform ? Transform.fromJSON(jsonProp.civilimodelconn.sheetToProfileTransform) : undefined;
             const sheetToWorldTransform: SheetTransformParams = { masterOrigin: Point3d.fromJSON(jsonProp.civilimodelconn.masterOrigin), sheetTov8Drawing: Transform.fromJSON(jsonProp.civilimodelconn.sheetToV8DrawingTransform), v8DrawingToDesign: Transform.fromJSON(jsonProp.civilimodelconn.v8DrawingToDesignTransform)};
             const result: DrawingMetadata = {
               drawingId: row[0],
@@ -644,7 +722,8 @@ export namespace SheetMeasurementsHelper {
     if (!viewport)
       return false;
     for (const drawing of DrawingDataCache.getInstance().getSheetDrawingDataForViewport(viewport)) {
-      if (drawing.type && allowedDrawingTypes.includes(drawing.type)) {
+      // The cached type is the wider SheetMeasurementHelper.DrawingType, which this deprecated overload cannot express.
+      if (drawing.type && (allowedDrawingTypes as number[]).includes(drawing.type)) {
         if (SheetMeasurementsHelper.checkIfInDrawing(point, Point2d.fromJSON(drawing.origin), Point2d.fromJSON(drawing.bBoxHigh))) {
           return true;
         }
