@@ -41,7 +41,7 @@ export namespace SheetMeasurementHelper {
 
   export interface DrawingTypeData {
     id: string;
-    type?: number;
+    type?: DrawingType;
     origin: { x: number, y: number}
     bBoxLow: { x: number, y: number};
     bBoxHigh: { x: number, y: number};
@@ -409,7 +409,7 @@ export namespace SheetMeasurementHelper {
     viewAttachmentExtent: {x: number, y: number},
     transformProps: SheetToWorldTransformProps,
     drawingId: string,
-    drawingType?: number
+    drawingType?: DrawingType
   } | undefined> {
 
     if (imodel.isBlank) {
@@ -722,7 +722,8 @@ export namespace SheetMeasurementsHelper {
     if (!viewport)
       return false;
     for (const drawing of DrawingDataCache.getInstance().getSheetDrawingDataForViewport(viewport)) {
-      if (drawing.type && allowedDrawingTypes.includes(drawing.type)) {
+      // The cached type is the wider SheetMeasurementHelper.DrawingType, which this deprecated overload cannot express.
+      if (drawing.type && (allowedDrawingTypes as number[]).includes(drawing.type)) {
         if (SheetMeasurementsHelper.checkIfInDrawing(point, Point2d.fromJSON(drawing.origin), Point2d.fromJSON(drawing.bBoxHigh))) {
           return true;
         }
