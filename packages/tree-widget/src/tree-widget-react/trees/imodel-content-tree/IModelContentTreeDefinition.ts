@@ -192,7 +192,6 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
             JOIN IdSet(?) childSubjectIdSet ON childSubjectIdSet.id = this.ECInstanceId
             ${subjectFilterClauses.joins}
             ${createWhereClause({ conditions: [subjectFilterClauses.where] })}
-            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [
             { type: "idset", value: await this.#idsCache.getParentSubjectIds() },
@@ -235,7 +234,6 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
               FROM ${CLASS_NAME_Model} m
               JOIN IdSet(?) childModelIdSet ON childModelIdSet.id = m.ECInstanceId
               JOIN ${CLASS_NAME_InformationPartitionElement} p ON p.ECInstanceId = m.ModeledElement.Id
-              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             ) model
             JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = model.ECInstanceId
             JOIN ${CLASS_NAME_InformationPartitionElement} [partition] ON [partition].ECInstanceId = this.ModeledElement.Id
@@ -270,7 +268,6 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
             FROM ${CLASS_NAME_Model} this
             JOIN IdSet(?) elementIdSet ON elementIdSet.id = this.ModeledElement.Id
             WHERE NOT this.IsPrivate
-            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: elementIds }],
         },
@@ -325,7 +322,6 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
             JOIN IdSet(?) childCategoryIdSet ON childCategoryIdSet.id = this.ECInstanceId
             ${categoryFilterClauses.joins}
             ${createWhereClause({ conditions: [categoryFilterClauses.where] })}
-            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: childCategoryIds }],
         },
@@ -354,7 +350,6 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
             JOIN IdSet(?) modelIdSet ON modelIdSet.id = this.Model.Id
             ${informationContentElementFilterClauses.joins}
             ${createWhereClause({ conditions: [informationContentElementFilterClauses.where] })}
-            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
         bindings: [{ type: "idset", value: modelIds }],
       },
@@ -407,7 +402,6 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
               JOIN IdSet(?) modelIdSet ON this.Model.Id = modelIdSet.id
               ${instanceFilterClauses.joins}
               ${createWhereClause({ conditions: ["this.Parent.Id IS NULL", whereClause, instanceFilterClauses.where] })}
-              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
             bindings: [
               { type: "idset", value: categoryIds },
@@ -458,7 +452,6 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
               JOIN IdSet(?) modelIdSet ON this.Model.Id = modelIdSet.id
               ${instanceFilterClauses.joins}
               ${createWhereClause({ conditions: ["this.Parent.Id IS NULL", whereClause, instanceFilterClauses.where] })}
-              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
             bindings: [{ type: "idset", value: modelIds }],
           },
@@ -540,7 +533,6 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
               JOIN IdSet(?) groupIdSet ON this.Parent.Id = groupIdSet.id
               ${instanceFilterClauses.joins}
               ${createWhereClause({ conditions: [whereClause, instanceFilterClauses.where] })}
-              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
             bindings: [{ type: "idset", value: groupIds }],
           },
@@ -588,7 +580,6 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
               JOIN IdSet(?) groupIdSet ON egm.SourceECInstanceId = groupIdSet.id
               ${instanceFilterClauses.joins}
               ${createWhereClause({ conditions: [whereClause, instanceFilterClauses.where] })}
-              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
             bindings: [{ type: "idset", value: groupIds }],
           },
@@ -635,7 +626,6 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
               JOIN IdSet(?) elementIdSet ON p.ECInstanceId = elementIdSet.id
               ${instanceFilterClauses.joins}
               ${createWhereClause({ conditions: [whereClause, instanceFilterClauses.where] })}
-              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
             bindings: [{ type: "idset", value: elementIds }],
           },

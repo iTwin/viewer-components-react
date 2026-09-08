@@ -195,7 +195,6 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
               SELECT modelId, reqParent, reqCategory, ownCategory, COUNT(*) as cnt
               FROM Descendants
               GROUP BY modelId, reqParent, reqCategory, ownCategory
-              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
             bindings: bindings.length > 0 ? bindings : undefined,
           },

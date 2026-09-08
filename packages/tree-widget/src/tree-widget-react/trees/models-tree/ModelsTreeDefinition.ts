@@ -429,7 +429,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             JOIN IdSet(?) childSubjectIdSet ON this.ECInstanceId = childSubjectIdSet.id
             ${subjectFilterClauses.joins}
             ${createWhereClause({ conditions: [subjectFilterClauses.where] })}
-            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [
             {
@@ -493,7 +492,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
               FROM ${CLASS_NAME_GeometricModel3d} m
               JOIN IdSet(?) childModelIdSet ON m.ECInstanceId = childModelIdSet.id
               JOIN ${CLASS_NAME_InformationPartitionElement} p ON p.ECInstanceId = m.ModeledElement.Id
-              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             ) model
             JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = model.ECInstanceId
             JOIN ${CLASS_NAME_InformationPartitionElement} [partition] ON [partition].ECInstanceId = this.ModeledElement.Id
@@ -545,7 +543,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 )`,
               ],
             })}
-            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: elementIds }],
         },
@@ -624,7 +621,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 !categoriesToShow && modeledElementCategory !== undefined && `this.ECInstanceId <> ${modeledElementCategory}`,
               ],
             })}
-            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: categoriesToShow ? categoriesToShow : modelIds }],
         },
@@ -647,7 +643,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             JOIN IdSet(?) modelIdSet ON this.Model.Id = modelIdSet.id
             ${elementInstanceFilterClauses.joins}
             ${createWhereClause({ conditions: ["this.Parent.Id IS NULL", `this.Category.Id = ${modeledElementCategory}`, createExcludedClassesClause({ alias: "this", excludedClassNames: this.#hierarchyConfig.elements.excludedClasses }), elementInstanceFilterClauses.where] })}
-            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [...bindings, { type: "idset", value: modelIds }],
         },
@@ -795,7 +790,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             ${parentIds ? `JOIN IdSet(?) parentIdSet ON this.Parent.Id = parentIdSet.id` : ""}
             ${instanceFilterClauses.joins}
             ${createWhereClause({ conditions: [!parentIds && "this.Parent.Id IS NULL", createExcludedClassesClause({ alias: "this", excludedClassNames: this.#hierarchyConfig.elements.excludedClasses }), instanceFilterClauses.where] })}
-            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [
             ...bindings,
@@ -846,7 +840,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           JOIN IdSet(?) elementIdSet ON this.Parent.Id = elementIdSet.id
           ${elementInstanceFilterClauses.joins}
           ${createWhereClause({ conditions: [`this.Category.Id = ${parentCategoryId}`, createExcludedClassesClause({ alias: "this", excludedClassNames: this.#hierarchyConfig.elements.excludedClasses }), elementInstanceFilterClauses.where] })}
-          ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
           bindings: [...bindings, { type: "idset", value: elementIds }],
         },
@@ -870,7 +863,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 FROM ${this.#hierarchyConfig.elements.baseClass} ce
                 JOIN IdSet(?) parentIdSet ON ce.Parent.Id = parentIdSet.id
                 ${createWhereClause({ conditions: [createExcludedClassesClause({ alias: "ce", excludedClassNames: this.#hierarchyConfig.elements.excludedClasses })] })}
-                ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
               )`,
               categoryInstanceFilterClauses.where,
             ],
@@ -967,7 +959,6 @@ export function createGeometricElementInstanceKeyPaths(props: {
             FROM ${elementClassName} e
             JOIN IdSet(?) elementIdSet ON e.ECInstanceId = elementIdSet.id
             ${createWhereClause({ conditions: [createExcludedClassesClause({ alias: "e", excludedClassNames: excludedElementClassNames })] })}
-            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `
           : undefined;
 
@@ -984,7 +975,6 @@ export function createGeometricElementInstanceKeyPaths(props: {
               createExcludedClassesClause({ alias: "e", excludedClassNames: excludedElementClassNames }),
             ],
           })}
-          ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
       );
 
@@ -1127,7 +1117,6 @@ export function createCategoriesSearchPaths(props: {
                 createExcludedClassesClause({ alias: "pe", excludedClassNames: excludedElementClassNames }),
               ],
             })}
-            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
             UNION ALL
 

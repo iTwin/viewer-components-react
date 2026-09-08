@@ -311,7 +311,6 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
           this.ECInstanceId id
         FROM ${CLASS_NAME_GeometricElement3d} this
         JOIN IdSet(?) elementIdSet ON ECInstanceId = elementIdSet.id
-        ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
       `;
       return this.#props.queryExecutor.createQueryReader(
         {
