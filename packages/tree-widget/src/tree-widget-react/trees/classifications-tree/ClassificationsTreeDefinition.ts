@@ -49,6 +49,7 @@ import type {
   HierarchyDefinition,
   HierarchyLevelDefinition,
   HierarchyNodeIdentifiersPath,
+  HierarchyNodesDefinition,
   InstancesNodeKey,
   LimitingECSqlQueryExecutor,
   NodePostProcessor,
@@ -236,52 +237,17 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     if (!imodelKey) {
       return [];
     }
-    const instanceFilterClauses = await createFilterClauses({
-      filter: instanceFilter,
-      contentClass: { fullName: CLASS_NAME_Classification, alias: "this" },
-    });
     const cache = this.#props.getIdsCache(imodelKey);
-    const { childClassifications, childClassificationsWithChildren } = await getChildClassifications({
-      classificationOrTableIds: classificationTableIds,
-      cache,
-    });
-
-    return childClassifications.length
-      ? [
-          {
-            fullClassName: CLASS_NAME_Classification,
-            query: {
-              ecsql: `
-                SELECT
-                  ${await createSelectClause({
-                    ecClassId: { selector: ECSql.createRawPropertyValueSelector("this", "ECClassId") },
-                    ecInstanceId: { selector: "this.ECInstanceId" },
-                    nodeLabel: {
-                      of: {
-                        classAlias: "this",
-                        className: CLASS_NAME_Classification,
-                      },
-                    },
-                    hasChildren: childClassificationsWithChildren.length > 0 ? { selector: createClassificationHasChildrenSelector("this") } : false,
-                    extendedData: {
-                      type: "classification",
-                    },
-                    supportsFiltering: true,
-                  })}
-                FROM ${instanceFilterClauses.from} this
-                JOIN IdSet(?) classificationIdSet ON this.ECInstanceId = classificationIdSet.id
-                ${instanceFilterClauses.joins}
-                ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
-                ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
-              `,
-              bindings: [
-                ...(childClassificationsWithChildren.length > 0 ? [{ type: "idset" as const, value: childClassificationsWithChildren }] : []),
-                { type: "idset", value: childClassifications },
-              ],
-            },
-          },
-        ]
-      : [];
+    const childClassificationsDefinition = cache.isDataLoaded
+      ? await this.#createCachedChildClassificationsQuery({ parentIds: classificationTableIds, cache, instanceFilter, createSelectClause, createFilterClauses })
+      : await this.#createUncachedChildClassificationsQuery({
+          parentIds: classificationTableIds,
+          parentType: "classification-table",
+          instanceFilter,
+          createSelectClause,
+          createFilterClauses,
+        });
+    return childClassificationsDefinition ? [childClassificationsDefinition] : [];
   }
 
   async #createClassificationChildrenQuery({
@@ -296,14 +262,21 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
       return [];
     }
     const cache = this.#props.getIdsCache(parentImodelKey);
-    const { childClassifications, childClassificationsWithChildren } = await getChildClassifications({
-      classificationOrTableIds: parentClassificationIds,
-      cache,
-    });
-    const elementsInstanceFilterClauses = await createFilterClauses({
-      filter: instanceFilter,
-      contentClass: { fullName: CLASS_NAME_GeometricElement3d, alias: "this" },
-    });
+    const [elementsInstanceFilterClauses, childClassificationsDefinition] = await Promise.all([
+      createFilterClauses({
+        filter: instanceFilter,
+        contentClass: { fullName: CLASS_NAME_GeometricElement3d, alias: "this" },
+      }),
+      cache.isDataLoaded
+        ? this.#createCachedChildClassificationsQuery({ parentIds: parentClassificationIds, cache, instanceFilter, createSelectClause, createFilterClauses })
+        : this.#createUncachedChildClassificationsQuery({
+            parentIds: parentClassificationIds,
+            parentType: "classification",
+            instanceFilter,
+            createSelectClause,
+            createFilterClauses,
+          }),
+    ]);
     return [
       // load classification elements
       {
@@ -328,49 +301,137 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
         },
       },
       // load child classifications
-      ...(childClassifications.length
-        ? [
-            await (async () => {
-              const instanceFilterClauses = await createFilterClauses({
-                filter: instanceFilter,
-                contentClass: { fullName: CLASS_NAME_Classification, alias: "this" },
-              });
-              return {
-                fullClassName: CLASS_NAME_Classification,
-                query: {
-                  ecsql: `
-                    SELECT
-                      ${await createSelectClause({
-                        ecClassId: { selector: ECSql.createRawPropertyValueSelector("this", "ECClassId") },
-                        ecInstanceId: { selector: "this.ECInstanceId" },
-                        nodeLabel: {
-                          of: {
-                            classAlias: "this",
-                            className: CLASS_NAME_Classification,
-                          },
-                        },
-                        hasChildren: childClassificationsWithChildren.length > 0 ? { selector: createClassificationHasChildrenSelector("this") } : false,
-                        extendedData: {
-                          type: "classification",
-                        },
-                        supportsFiltering: true,
-                      })}
-                    FROM ${instanceFilterClauses.from} this
-                    JOIN IdSet(?) classificationIdSet ON this.ECInstanceId = classificationIdSet.id
-                    ${instanceFilterClauses.joins}
-                    ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
-                    ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
-                  `,
-                  bindings: [
-                    ...(childClassificationsWithChildren.length > 0 ? [{ type: "idset" as const, value: childClassificationsWithChildren }] : []),
-                    { type: "idset" as const, value: childClassifications },
-                  ],
-                },
-              };
-            })(),
-          ]
-        : []),
+      ...(childClassificationsDefinition ? [childClassificationsDefinition] : []),
     ];
+  }
+
+  /** Returns `undefined` when cached data indicates that there are no child classifications. */
+  async #createCachedChildClassificationsQuery({
+    parentIds,
+    cache,
+    instanceFilter,
+    createSelectClause,
+    createFilterClauses,
+  }: {
+    parentIds: Id64Array;
+    cache: ClassificationsTreeIdsCache;
+    instanceFilter: DefineHierarchyLevelProps["instanceFilter"];
+    createSelectClause: DefineHierarchyLevelProps["createSelectClause"];
+    createFilterClauses: DefineHierarchyLevelProps["createFilterClauses"];
+  }): Promise<HierarchyNodesDefinition | undefined> {
+    const [instanceFilterClauses, { childClassifications, childClassificationsWithChildren }] = await Promise.all([
+      createFilterClauses({
+        filter: instanceFilter,
+        contentClass: { fullName: CLASS_NAME_Classification, alias: "this" },
+      }),
+      getChildClassifications({ classificationOrTableIds: parentIds, cache }),
+    ]);
+    if (childClassifications.length === 0) {
+      return undefined;
+    }
+    return {
+      fullClassName: CLASS_NAME_Classification,
+      query: {
+        ecsql: `
+          SELECT
+            ${await this.#createClassificationNodeSelectClause({
+              createSelectClause,
+              hasChildren: childClassificationsWithChildren.length > 0 ? { selector: createClassificationHasChildrenSelector("this") } : false,
+            })}
+          FROM ${instanceFilterClauses.from} this
+          JOIN IdSet(?) classificationIdSet ON this.ECInstanceId = classificationIdSet.id
+          ${instanceFilterClauses.joins}
+          ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
+          ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+        `,
+        bindings: [
+          ...(childClassificationsWithChildren.length > 0 ? [{ type: "idset" as const, value: childClassificationsWithChildren }] : []),
+          { type: "idset", value: childClassifications },
+        ],
+      },
+    };
+  }
+
+  async #createUncachedChildClassificationsQuery({
+    parentIds,
+    parentType,
+    instanceFilter,
+    createSelectClause,
+    createFilterClauses,
+  }: {
+    parentIds: Id64Array;
+    parentType: "classification-table" | "classification";
+    instanceFilter: DefineHierarchyLevelProps["instanceFilter"];
+    createSelectClause: DefineHierarchyLevelProps["createSelectClause"];
+    createFilterClauses: DefineHierarchyLevelProps["createFilterClauses"];
+  }): Promise<HierarchyNodesDefinition> {
+    const instanceFilterClauses = await createFilterClauses({
+      filter: instanceFilter,
+      contentClass: { fullName: CLASS_NAME_Classification, alias: "this" },
+    });
+    const hasChildClassifications = `
+      SELECT 1
+      FROM ${CLASS_NAME_Classification} cc
+      ${createWhereClause({ conditions: ["cc.Parent.Id = this.ECInstanceId", "NOT cc.IsPrivate"] })}
+      LIMIT 1
+    `;
+    const hasElements = `
+      SELECT 1
+      FROM ${CLASS_NAME_GeometricElement3d} e
+      JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = e.ECInstanceId
+      ${createWhereClause({
+        conditions: [
+          "ehc.TargetECInstanceId = this.ECInstanceId",
+          "e.Parent.Id IS NULL",
+          createExcludedClassesClause({ alias: "e", excludedClassNames: this.#props.hierarchyConfig.elements?.excludedClasses }),
+        ],
+      })}
+      LIMIT 1
+    `;
+    return {
+      fullClassName: CLASS_NAME_Classification,
+      query: {
+        ecsql: `
+          SELECT
+            ${await this.#createClassificationNodeSelectClause({
+              createSelectClause,
+              hasChildren: { selector: `IFNULL((${hasChildClassifications}), IFNULL((${hasElements}), 0))` },
+            })}
+          FROM ${instanceFilterClauses.from} this
+          JOIN IdSet(?) parentIdSet ON ${parentType === "classification-table" ? "this.Model.Id" : "this.Parent.Id"} = parentIdSet.id
+          ${instanceFilterClauses.joins}
+          ${createWhereClause({
+            conditions: [parentType === "classification-table" && "this.Parent.Id IS NULL", "NOT this.IsPrivate", instanceFilterClauses.where],
+          })}
+          ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
+        `,
+        bindings: [{ type: "idset", value: parentIds }],
+      },
+    };
+  }
+
+  async #createClassificationNodeSelectClause({
+    createSelectClause,
+    hasChildren,
+  }: {
+    createSelectClause: DefineHierarchyLevelProps["createSelectClause"];
+    hasChildren: boolean | { selector: string };
+  }): Promise<string> {
+    return createSelectClause({
+      ecClassId: { selector: ECSql.createRawPropertyValueSelector("this", "ECClassId") },
+      ecInstanceId: { selector: "this.ECInstanceId" },
+      nodeLabel: {
+        of: {
+          classAlias: "this",
+          className: CLASS_NAME_Classification,
+        },
+      },
+      hasChildren,
+      extendedData: {
+        type: "classification",
+      },
+      supportsFiltering: true,
+    });
   }
 
   async #createGeometricElementChildrenQuery({
