@@ -5,7 +5,7 @@
 
 import { ColorDef, QueryBinder } from "@itwin/core-common";
 import type { DecorateContext, GraphicBuilder, HitDetail, ScreenViewport} from "@itwin/core-frontend";
-import { GraphicType, IModelApp, type IModelConnection } from "@itwin/core-frontend";
+import { GraphicType, IModelApp, type IModelConnection, InputSource, LocateResponse } from "@itwin/core-frontend";
 import type { TransformProps, XYProps, XYZ, XYZProps} from "@itwin/core-geometry";
 import { Point3d, Range2d, YawPitchRollAngles } from "@itwin/core-geometry";
 import { Transform } from "@itwin/core-geometry";
@@ -45,6 +45,16 @@ export namespace SheetMeasurementHelper {
     origin: { x: number, y: number}
     bBoxLow: { x: number, y: number};
     bBoxHigh: { x: number, y: number};
+  }
+
+  /** Controls how the drawing under a point is resolved. */
+  export interface ResolveDrawingOptions {
+    /** When supplied, the drawing owning the element under the cursor is preferred over the containing rectangle.
+     * View attachment rectangles overlap, so the geometry actually picked is a stronger signal than the rectangles.
+     */
+    viewport?: ScreenViewport;
+    /** Input source used for the pick. Defaults to `InputSource.Mouse`. */
+    inputSource?: InputSource;
   }
 
   /** Information needed to use the old Civil transform but will eventually be removed @deprecated */
@@ -221,6 +231,39 @@ export namespace SheetMeasurementHelper {
   }
 
   /**
+   * Identifies the drawing from the element under the cursor.
+   * A drawing element and the model it breaks down share an id, so the hit's model id is the drawing id.
+   * @returns the picked drawing, or undefined when nothing was hit or the hit belongs to no drawing on the sheet
+   */
+  async function pickDrawing(mousePos: Point3d, drawingInfo: ReadonlyArray<DrawingTypeData>, options: ResolveDrawingOptions): Promise<DrawingTypeData | undefined> {
+    const viewport = options.viewport;
+    if (viewport === undefined)
+      return undefined;
+
+    const snappedHit = IModelApp.accuSnap.currHit;
+    const hit = snappedHit ?? await IModelApp.locateManager.doLocate(new LocateResponse(), true, mousePos, viewport, options.inputSource ?? InputSource.Mouse);
+    const hitModelId = hit?.modelId;
+    if (hitModelId === undefined)
+      return undefined;
+
+    return drawingInfo.find((info) => info.id === hitModelId);
+  }
+
+  /**
+   * Drawings whose rectangle contains the point.
+   * View attachment rectangles overlap, so more than one result means resolving from the point alone has to guess
+   * between them. Callers that cannot pick an element may want to surface that to the user.
+   */
+  export async function getDrawingsAtPoint(imodel: IModelConnection, sheetViewId: string, mousePos: Point3d): Promise<DrawingTypeData[]> {
+    if (imodel.isBlank) {
+      return [];
+    }
+
+    const drawingInfo = await DrawingDataCache.getInstance().querySheetDrawingData(imodel, sheetViewId);
+    return drawingInfo.filter((info) => getDrawingRange(info).containsXY(mousePos.x, mousePos.y));
+  }
+
+  /**
    * Gives the first drawing which contains the mouse position, undefined otherwise
    * @param mousePos
    * @param drawingInfo
@@ -359,7 +402,7 @@ export namespace SheetMeasurementHelper {
    * @param id
    * @param mousePos
    */
-  export async function getDrawingData(imodel: IModelConnection, id: string, mousePos: Point3d): Promise<{
+  export async function getDrawingData(imodel: IModelConnection, id: string, mousePos: Point3d, options: ResolveDrawingOptions = {}): Promise<{
     sheetToWorldTransform : Transform,
     sheetToProfileTransform?: Transform,
     viewAttachmentOrigin: {x: number, y: number},
@@ -375,7 +418,8 @@ export namespace SheetMeasurementHelper {
 
     const drawingInfo = await DrawingDataCache.getInstance().querySheetDrawingData(imodel, id);
 
-    const correctVAData = getCorrectDrawing(mousePos, drawingInfo);
+    const pickedVAData = await pickDrawing(mousePos, drawingInfo, options);
+    const correctVAData = pickedVAData ?? getCorrectDrawing(mousePos, drawingInfo);
 
     if (correctVAData === undefined)
       return undefined;
@@ -478,9 +522,10 @@ export namespace SheetMeasurementHelper {
 
   /**
    * Resolves the drawing under the point along with everything needed to measure in it.
+   * @param options pass a viewport to resolve from the element under the cursor rather than the containing rectangle
    */
-  export async function getDrawingMetadata(imodel: IModelConnection, id: string, mousePos: Point3d): Promise<DrawingMetadata | undefined> {
-    const drawingData = await getDrawingData(imodel, id, mousePos);
+  export async function getDrawingMetadata(imodel: IModelConnection, id: string, mousePos: Point3d, options: ResolveDrawingOptions = {}): Promise<DrawingMetadata | undefined> {
+    const drawingData = await getDrawingData(imodel, id, mousePos, options);
     if (drawingData?.drawingId === undefined || drawingData.viewAttachmentOrigin === undefined || drawingData.transformProps === undefined)
       return undefined;
 

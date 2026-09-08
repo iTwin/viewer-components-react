@@ -3,7 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { IModelConnection } from "@itwin/core-frontend";
+import type { HitDetail, IModelConnection, ScreenViewport } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import { Point2d, Point3d, Transform } from "@itwin/core-geometry";
 import { assert } from "chai";
 import { afterEach, describe, it, vi } from "vitest";
@@ -13,8 +14,7 @@ import { SheetMeasurementHelper } from "../../api/SheetMeasurementHelper.js";
 import { WellKnownViewType } from "../../api/MeasurementEnums.js";
 import { DistanceMeasurement } from "../../measurements/DistanceMeasurement.js";
 
-// From a real plan-and-profile sheet. The plan's placement bounding box starts well above its origin, so ignoring
-// bBoxLow stretched its rectangle down over the profile band.
+// Plan-and-profile sheet: the plan occupies the upper band, the profile the lower one.
 const planDrawing: SheetMeasurementHelper.DrawingTypeData = {
   id: "0x20000000161",
   type: SheetMeasurementHelper.DrawingTypeEnum.Plan,
@@ -38,6 +38,11 @@ const pointInsideBothDrawings = Point3d.create(0.7278001436368169, 0.22686231342
 const sheetViewId = "0x1";
 const imodel = { isBlank: false } as unknown as IModelConnection;
 
+function stubPickedDrawingId(modelId?: string) {
+  const hit = modelId === undefined ? undefined : ({ modelId } as unknown as HitDetail);
+  vi.spyOn(IModelApp.locateManager, "doLocate").mockResolvedValue(hit);
+}
+
 function stubDrawingCache(drawings: SheetMeasurementHelper.DrawingTypeData[], profileDrawingHasTransform = true) {
   vi.spyOn(DrawingDataCache, "getInstance").mockReturnValue({
     querySheetDrawingData: async () => drawings,
@@ -57,7 +62,6 @@ describe("SheetMeasurementHelper.getDrawingMetadata", () => {
   });
 
   it("resolves the drawing whose rectangle contains the point", async () => {
-    // Resolving the plan here left profile measurements in sheet units.
     stubDrawingCache([planDrawing, profileDrawing]);
 
     const metadata = await SheetMeasurementHelper.getDrawingMetadata(imodel, sheetViewId, pointInsideBothDrawings);
@@ -81,6 +85,40 @@ describe("SheetMeasurementHelper.getDrawingMetadata", () => {
     const metadata = await SheetMeasurementHelper.getDrawingMetadata(imodel, sheetViewId, Point3d.create(5, 5));
 
     assert.isUndefined(metadata);
+  });
+
+  it("prefers the drawing owning the picked element over the containing rectangle", async () => {
+    // Attachment rectangles can overlap heavily, so the geometry actually under the cursor decides.
+    stubDrawingCache([planDrawing, profileDrawing]);
+    stubPickedDrawingId(profileDrawing.id);
+
+    const metadata = await SheetMeasurementHelper.getDrawingMetadata(imodel, sheetViewId, Point3d.create(0.5, 0.5), {
+      viewport: {} as ScreenViewport,
+    });
+
+    assert.strictEqual(metadata?.drawingId, profileDrawing.id);
+  });
+
+  it("falls back to the containing rectangle when nothing is picked", async () => {
+    stubDrawingCache([profileDrawing]);
+    stubPickedDrawingId(undefined);
+
+    const metadata = await SheetMeasurementHelper.getDrawingMetadata(imodel, sheetViewId, pointInsideBothDrawings, {
+      viewport: {} as ScreenViewport,
+    });
+
+    assert.strictEqual(metadata?.drawingId, profileDrawing.id);
+  });
+
+  it("reports every drawing containing the point", async () => {
+    const overlappingPlan = { ...planDrawing, bBoxLow: { x: 0, y: 0 } };
+    stubDrawingCache([overlappingPlan, profileDrawing]);
+
+    const atPoint = await SheetMeasurementHelper.getDrawingsAtPoint(imodel, sheetViewId, pointInsideBothDrawings);
+    const outside = await SheetMeasurementHelper.getDrawingsAtPoint(imodel, sheetViewId, Point3d.create(5, 5));
+
+    assert.deepStrictEqual(atPoint.map((d) => d.id), [overlappingPlan.id, profileDrawing.id]);
+    assert.isEmpty(outside);
   });
 
   it("offsets the drawing rectangle by bBoxLow", async () => {
