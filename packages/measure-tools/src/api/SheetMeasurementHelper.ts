@@ -7,7 +7,7 @@ import { ColorDef, QueryBinder } from "@itwin/core-common";
 import type { DecorateContext, GraphicBuilder, HitDetail, ScreenViewport} from "@itwin/core-frontend";
 import { GraphicType, IModelApp, type IModelConnection } from "@itwin/core-frontend";
 import type { TransformProps, XYProps, XYZ, XYZProps} from "@itwin/core-geometry";
-import { Point3d, YawPitchRollAngles } from "@itwin/core-geometry";
+import { Point3d, Range2d, YawPitchRollAngles } from "@itwin/core-geometry";
 import { Transform } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
 import { DrawingDataCache } from "./DrawingTypeDataCache.js";
@@ -210,28 +210,27 @@ export namespace SheetMeasurementHelper {
   }
 
   /**
+   * Sheet-space rectangle covered by a view attachment.
+   * The placement bounding box is relative to the placement origin, so bBoxLow cannot be assumed to be zero.
+   */
+  export function getDrawingRange(drawing: DrawingTypeData): Range2d {
+    const origin = Point2d.fromJSON(drawing.origin);
+    const low = Point2d.fromJSON(drawing.bBoxLow);
+    const high = Point2d.fromJSON(drawing.bBoxHigh);
+    return Range2d.createXYXY(origin.x + low.x, origin.y + low.y, origin.x + high.x, origin.y + high.y);
+  }
+
+  /**
    * Gives the first drawing which contains the mouse position, undefined otherwise
    * @param mousePos
    * @param drawingInfo
-   * @param allowedDrawingTypes When provided, drawings of any other type are skipped so an overlapping drawing the
-   * caller cannot measure in does not mask the one it can.
    * @returns
    */
-  function getCorrectDrawing(mousePos: Point3d, drawingInfo: ReadonlyArray<DrawingTypeData>, allowedDrawingTypes?: DrawingType[]): DrawingTypeData | undefined {
-    const x = mousePos.x;
-    const y = mousePos.y;
-
+  function getCorrectDrawing(mousePos: Point3d, drawingInfo: ReadonlyArray<DrawingTypeData>): DrawingTypeData | undefined {
     for (const info of drawingInfo) {
-      if (allowedDrawingTypes !== undefined && (info.type === undefined || !allowedDrawingTypes.includes(info.type)))
-        continue;
-
-      if (x >= info.origin.x && x <= info.origin.x + info.bBoxHigh.x) {
-        // Within x extents
-        if (y >= info.origin.y && y <= info.origin.y + info.bBoxHigh.y) {
-          // Within y extents
-          return info;
-        }
-      }
+      const range = getDrawingRange(info);
+      if (range.containsXY(mousePos.x, mousePos.y))
+        return info;
     }
     return undefined;
   }
@@ -360,7 +359,7 @@ export namespace SheetMeasurementHelper {
    * @param id
    * @param mousePos
    */
-  export async function getDrawingData(imodel: IModelConnection, id: string, mousePos: Point3d, allowedDrawingTypes?: DrawingType[]): Promise<{
+  export async function getDrawingData(imodel: IModelConnection, id: string, mousePos: Point3d): Promise<{
     sheetToWorldTransform : Transform,
     sheetToProfileTransform?: Transform,
     viewAttachmentOrigin: {x: number, y: number},
@@ -376,7 +375,7 @@ export namespace SheetMeasurementHelper {
 
     const drawingInfo = await DrawingDataCache.getInstance().querySheetDrawingData(imodel, id);
 
-    const correctVAData = getCorrectDrawing(mousePos, drawingInfo, allowedDrawingTypes);
+    const correctVAData = getCorrectDrawing(mousePos, drawingInfo);
 
     if (correctVAData === undefined)
       return undefined;
@@ -391,17 +390,22 @@ export namespace SheetMeasurementHelper {
     const rawProfileTransform = spatialInfo.sheetToProfileTransformProps;
     const sheetToProfileTransform = rawProfileTransform ? Transform.fromJSON(rawProfileTransform) : undefined;
 
+    // Report the same rectangle the containment test used, so callers decorating it draw exactly that.
+    const range = getDrawingRange(correctVAData);
+    const viewAttachmentOrigin = { x: range.low.x, y: range.low.y };
+    const viewAttachmentExtent = { x: range.xLength(), y: range.yLength() };
+
     if (spatialInfo.transformParams === undefined) {
-      const transform = getTransform(correctVAData.origin, spatialInfo);
-      return {sheetToWorldTransform: transform, sheetToProfileTransform, viewAttachmentOrigin: correctVAData.origin, viewAttachmentExtent: correctVAData.bBoxHigh, drawingId: correctVAData.id, drawingType: correctVAData.type, transformProps: spatialInfo};
+      const transform = getTransform(viewAttachmentOrigin, spatialInfo);
+      return {sheetToWorldTransform: transform, sheetToProfileTransform, viewAttachmentOrigin, viewAttachmentExtent, drawingId: correctVAData.id, drawingType: correctVAData.type, transformProps: spatialInfo};
     } else {
       const sheetToWorldTransform: CivilSheetTransformParams = { masterOrigin: Point3d.fromJSON(spatialInfo.transformParams.masterOrigin), sheetTov8Drawing: spatialInfo.transformParams.sheetTov8Drawing, v8DrawingToDesign: spatialInfo.transformParams.v8DrawingToDesign};
       return {
         drawingId: correctVAData.id,
         drawingType: correctVAData.type,
-        viewAttachmentOrigin: correctVAData.origin,
-        viewAttachmentExtent: correctVAData.bBoxHigh,
-        sheetToWorldTransform: getTransform(correctVAData.origin, {transformParams: sheetToWorldTransform}),
+        viewAttachmentOrigin,
+        viewAttachmentExtent,
+        sheetToWorldTransform: getTransform(viewAttachmentOrigin, {transformParams: sheetToWorldTransform}),
         sheetToProfileTransform,
         transformProps: spatialInfo
       };
@@ -464,7 +468,7 @@ export namespace SheetMeasurementHelper {
       return false;
     for (const drawing of DrawingDataCache.getInstance().getSheetDrawingDataForViewport(viewport)) {
       if (drawing.type !== undefined && allowedDrawingTypes.includes(drawing.type)) {
-        if (SheetMeasurementHelper.checkIfInDrawing(point, Point2d.fromJSON(drawing.origin), Point2d.fromJSON(drawing.bBoxHigh))) {
+        if (getDrawingRange(drawing).containsXY(point.x, point.y)) {
           return true;
         }
       }
@@ -474,11 +478,9 @@ export namespace SheetMeasurementHelper {
 
   /**
    * Resolves the drawing under the point along with everything needed to measure in it.
-   * @param allowedDrawingTypes When provided, drawings of any other type are skipped while resolving, so an overlapping
-   * drawing the caller cannot measure in does not mask the one it can.
    */
-  export async function getDrawingMetadata(imodel: IModelConnection, id: string, mousePos: Point3d, allowedDrawingTypes?: DrawingType[]): Promise<DrawingMetadata | undefined> {
-    const drawingData = await getDrawingData(imodel, id, mousePos, allowedDrawingTypes);
+  export async function getDrawingMetadata(imodel: IModelConnection, id: string, mousePos: Point3d): Promise<DrawingMetadata | undefined> {
+    const drawingData = await getDrawingData(imodel, id, mousePos);
     if (drawingData?.drawingId === undefined || drawingData.viewAttachmentOrigin === undefined || drawingData.transformProps === undefined)
       return undefined;
 
