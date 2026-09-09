@@ -1,6 +1,6 @@
 {
   "name": "@itwin/geo-tools-react",
-  "version": "6.0.1",
+  "version": "6.0.2",
   "description": "React Geospatial Tools",
   "keywords": [
     "Bentley",
@@ -13,7 +13,8 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/itwin/viewer-components-react/tree/master/packages/geo-tools"
+    "url": "https://github.com/iTwin/viewer-components-react.git",
+    "directory": "packages/geo-tools"
   },
   "license": "MIT",
   "author": {

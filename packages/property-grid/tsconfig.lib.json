@@ -2,6 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": false,
+    "rootDir": "./src",
     "outDir": "lib"
   },
   "exclude": ["src/e2e-tests/**/*"]

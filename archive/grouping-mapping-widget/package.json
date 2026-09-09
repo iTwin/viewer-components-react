@@ -11,7 +11,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/iTwin/viewer-components-react.git",
-    "directory": "packages/grouping-mapping-widget"
+    "directory": "archive/grouping-mapping-widget"
   },
   "license": "MIT",
   "author": {

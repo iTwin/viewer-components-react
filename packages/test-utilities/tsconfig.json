@@ -2,6 +2,7 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "rootDir": "./src",
     "outDir": "lib",
     "lib": ["dom", "ES2022"],
     "strict": true,

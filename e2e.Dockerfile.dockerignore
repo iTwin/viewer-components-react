@@ -38,5 +38,4 @@ e2e.Dockerfile.dockerignore
 **/.idea
 .vscode
 .editorconfig
-.prettierignore
-.prettierrc
+.oxfmtrc.json
