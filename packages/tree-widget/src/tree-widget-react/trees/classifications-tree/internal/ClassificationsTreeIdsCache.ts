@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, expand, from, map, merge, mergeMap, of, reduce, shareReplay } from "rxjs";
+import { defer, EMPTY, expand, from, map, merge, mergeMap, of, reduce, shareReplay, tap } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { BaseIdsCacheImpl } from "../../../shared/internal/caches/BaseIdsCache.js";
 import {
@@ -67,6 +67,7 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
   #componentId: GuidString;
   #componentName: string;
   #rowLimit = 7500;
+  #cachedDataLoaded = false;
 
   constructor(props: ClassificationsTreeIdsCacheProps) {
     super(props);
@@ -223,9 +224,16 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
           ),
         ),
       ),
+      tap(() => {
+        this.#cachedDataLoaded = true;
+      }),
       shareReplay(),
     );
     return this.#cachedData;
+  }
+
+  public get isDataLoaded(): boolean {
+    return this.#cachedDataLoaded;
   }
 
   public hasChildren(classificationId: ClassificationId): Observable<boolean> {
