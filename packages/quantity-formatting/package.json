@@ -85,7 +85,7 @@
     "rimraf": "^6.1.2",
     "typescript": "~5.9.3",
     "vite": "^7.2.6",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.11"
   },
   "dependencies": {
     "@itwin/itwinui-icons-react": "^2.11.0"
