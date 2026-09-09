@@ -41,8 +41,8 @@ MeasureDistanceToolModel
 
   private _useMultiPointMeasurement: boolean = false;
 
-  protected override get allowedDrawingTypes(): SheetMeasurementHelper.DrawingType[] {
-    return [SheetMeasurementHelper.DrawingTypeEnum.Section, SheetMeasurementHelper.DrawingTypeEnum.Plan, SheetMeasurementHelper.DrawingTypeEnum.ProfileOrElevation];
+  protected override get forbiddenDrawingTypes(): SheetMeasurementHelper.DrawingType[] {
+    return [SheetMeasurementHelper.DrawingTypeEnum.Detail];
   }
 
   public static override get flyover() {
@@ -139,7 +139,7 @@ MeasureDistanceToolModel
     if (!this._enableSheetMeasurements || !ev.viewport?.view.isSheetView())
       return true;
 
-    if (!SheetMeasurementHelper.checkIfAllowedDrawingType(ev.viewport, ev.point, this.allowedDrawingTypes))
+    if (!SheetMeasurementHelper.checkIfNotForbiddenDrawingType(ev.viewport, ev.point, this.forbiddenDrawingTypes))
       return false;
 
     if (this.toolModel.drawingMetadata?.drawingId === undefined || this.toolModel.drawingMetadata?.origin === undefined || this.toolModel.drawingMetadata?.extents === undefined)
