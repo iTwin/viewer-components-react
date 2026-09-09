@@ -164,7 +164,6 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
             LEFT JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
             ${instanceFilterClauses.joins}
             ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
-            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: groupIds }],
         },
@@ -209,7 +208,6 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
             LEFT JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
             ${instanceFilterClauses.joins}
             ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
-            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: sourceIds }],
         },
@@ -282,7 +280,6 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
             JOIN IdSet(?) sourceIdSet ON sourceIdSet.id = esa.Source.Id
             ${instanceFilterClauses.joins}
             ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
-            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: sourceIds }],
         },

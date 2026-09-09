@@ -85,7 +85,6 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
         SELECT Model.Id modelId, ECInstanceId id
         FROM ${this.#categoryElementClass}
         JOIN IdSet(?) filteredElementIdSet ON ECInstanceId = filteredElementIdSet.id
-        ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
       `;
       return this.#queryExecutor.createQueryReader(
         { ecsql: query, bindings: [{ type: "idset", value: filteredElementIds }] },

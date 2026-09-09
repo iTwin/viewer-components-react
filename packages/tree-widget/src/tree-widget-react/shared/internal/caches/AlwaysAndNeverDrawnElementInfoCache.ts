@@ -332,7 +332,6 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
                 CAST(IdToHex(Category.Id) AS TEXT) || ';' || CAST(IdToHex(ECInstanceId) AS TEXT) categoryElementPath
               FROM ${this.#elementClassName}
               JOIN IdSet(?) elementIdSet ON elementIdSet.id = ECInstanceId
-              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
               UNION ALL
 

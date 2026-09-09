@@ -295,7 +295,6 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                 elementsInstanceFilterClauses.where,
               ],
             })}
-            ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
           `,
           bindings: [{ type: "idset", value: parentClassificationIds }],
         },
@@ -342,7 +341,6 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
           JOIN IdSet(?) classificationIdSet ON this.ECInstanceId = classificationIdSet.id
           ${instanceFilterClauses.joins}
           ${createWhereClause({ conditions: [instanceFilterClauses.where] })}
-          ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
         bindings: [
           ...(childClassificationsWithChildren.length > 0 ? [{ type: "idset" as const, value: childClassificationsWithChildren }] : []),
@@ -403,7 +401,6 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
           ${createWhereClause({
             conditions: [parentType === "classification-table" && "this.Parent.Id IS NULL", "NOT this.IsPrivate", instanceFilterClauses.where],
           })}
-          ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
         bindings: [{ type: "idset", value: parentIds }],
       },
@@ -459,7 +456,6 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
               instanceFilterClauses.where,
             ],
           })}
-          ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
         `,
           bindings: [{ type: "idset", value: parentElementIds }],
         },
@@ -604,7 +600,6 @@ function createInstanceKeyPathsFromInstanceLabelObs({
                 ${classificationLabelSelectClause}
               FROM ${CLASS_NAME_Classification} this
               JOIN IdSet(?) classificationIdSet ON this.ECInstanceId = classificationIdSet.id
-              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             )`,
             `${ELEMENTS_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
               SELECT
@@ -615,7 +610,6 @@ function createInstanceKeyPathsFromInstanceLabelObs({
               JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = this.ECInstanceId
               JOIN IdSet(?) classificationIdSet ON ehc.TargetECInstanceId = classificationIdSet.id
               ${createWhereClause({ conditions: ["this.Parent.Id IS NULL", createExcludedClassesClause({ alias: "this", excludedClassNames: props.hierarchyConfig.elements?.excludedClasses })] })}
-              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
               UNION ALL
 
@@ -825,7 +819,6 @@ function createGeometricElementInstanceKeyPaths(props: {
         FROM  ${CLASS_NAME_Element} e
         JOIN IdSet(?) targetItemIdSet ON e.ECInstanceId = targetItemIdSet.id
         ${createWhereClause({ conditions: [createExcludedClassesClause({ alias: "e", excludedClassNames: excludedElementClassNames })] })}
-        ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
 
         UNION ALL
 
