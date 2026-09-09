@@ -1,5 +1,14 @@
 # Change Log - @itwin/tree-widget-react
 
+## 4.0.0-alpha.34
+
+### Patch Changes
+
+- [#1799](https://github.com/iTwin/viewer-components-react/pull/1799): Categories tree now displays root nodes without waiting for the element-model categories or sub-model queries to complete.
+- [#1802](https://github.com/iTwin/viewer-components-react/pull/1802): Remove the unnecessary `ENABLE_EXPERIMENTAL_FEATURES` option from ECSQL queries.
+- [#1794](https://github.com/iTwin/viewer-components-react/pull/1794): Models tree now displays model nodes without waiting for category and sub-model queries to complete.
+- [#1801](https://github.com/iTwin/viewer-components-react/pull/1801): Classifications tree now displays classification nodes without waiting for the classifications cache query to complete.
+
 ## 4.0.0-alpha.33
 
 ### Patch Changes
