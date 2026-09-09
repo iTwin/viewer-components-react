@@ -228,7 +228,12 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         childNodes: [
           {
             parentInstancesNodePredicate: CLASS_NAME_Subject,
-            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createSubjectChildrenQuery(requestProps),
+            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
+              if (requestProps.parentNodeInstanceIds.length > 0) {
+                void this.#idsCache.preloadCachedData();
+              }
+              return this.createSubjectChildrenQuery(requestProps);
+            },
           },
           {
             parentInstancesNodePredicate: CLASS_NAME_ISubModeledElement,
@@ -236,7 +241,12 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           },
           {
             parentInstancesNodePredicate: CLASS_NAME_GeometricModel3d,
-            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createGeometricModel3dChildrenQuery(requestProps),
+            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
+              if (requestProps.parentNodeInstanceIds.length > 0) {
+                void this.#idsCache.preloadCachedData();
+              }
+              return this.createGeometricModel3dChildrenQuery(requestProps);
+            },
           },
           {
             parentInstancesNodePredicate: CLASS_NAME_SpatialCategory,

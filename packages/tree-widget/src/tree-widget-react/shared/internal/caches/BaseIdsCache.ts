@@ -5,7 +5,7 @@
 
 import { EMPTY, filter, forkJoin, from, identity, map, mergeMap, of, reduce, shareReplay, tap } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
-import { fromWithRelease } from "../Rxjs.js";
+import { fromWithRelease, toVoidPromise } from "../Rxjs.js";
 import { ChildrenTree, getOrCreate } from "../Utils.js";
 import { ChildElementsCache } from "./ChildElementsCache.js";
 import { DescendantsCountCache } from "./DescendantsCountCache.js";
@@ -103,6 +103,13 @@ export class BaseIdsCache {
   }
 
   // Implement methods using each cache
+
+  public async preloadCachedData(): Promise<void> {
+    try {
+      // Loading modeled elements also preloads element-model-category data.
+      await toVoidPromise(this.getModeledElementsInfo());
+    } catch {}
+  }
 
   // ModeledElementsCache methods
   public getCategoryModeledElements({
@@ -444,6 +451,10 @@ export class BaseIdsCacheImpl {
   }
 
   // Implement IBaseIdsCache by re-exporting BaseIdsCache methods
+
+  public async preloadCachedData(): ReturnType<BaseIdsCache["preloadCachedData"]> {
+    return this.#baseIdsCache.preloadCachedData();
+  }
 
   public getChildElements(props: Props<BaseIdsCache["getChildElements"]>): ReturnType<BaseIdsCache["getChildElements"]> {
     return this.#baseIdsCache.getChildElements(props);

@@ -336,15 +336,24 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
               : [
                   {
                     parentInstancesNodePredicate: this.#categoryClass,
-                    definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createCategoryChildrenQuery(requestProps),
+                    definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
+                      if (requestProps.parentNodeInstanceIds.length > 0) {
+                        void this.#idsCache.preloadCachedData();
+                      }
+                      return this.createCategoryChildrenQuery(requestProps);
+                    },
                   },
                 ]),
             ...(isDefinitionContainerSupported
               ? [
                   {
                     parentInstancesNodePredicate: CLASS_NAME_DefinitionContainer,
-                    definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) =>
-                      this.createDefinitionContainersAndCategoriesQuery(requestProps),
+                    definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
+                      if (requestProps.parentNodeInstanceIds.length > 0) {
+                        void this.#idsCache.preloadCachedData();
+                      }
+                      return this.createDefinitionContainersAndCategoriesQuery(requestProps);
+                    },
                   },
                 ]
               : []),

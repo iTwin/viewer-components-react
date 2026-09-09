@@ -132,7 +132,12 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
         childNodes: [
           {
             parentInstancesNodePredicate: CLASS_NAME_ClassificationTable,
-            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.#createClassificationTableChildrenQuery(requestProps),
+            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
+              if (requestProps.parentNodeInstanceIds.length > 0) {
+                void this.#props.getIdsCache(this.#props.imodelAccess.imodelKey).preloadCachedData();
+              }
+              return this.#createClassificationTableChildrenQuery(requestProps);
+            },
           },
           {
             parentInstancesNodePredicate: CLASS_NAME_Classification,
