@@ -8,7 +8,7 @@ import { Guid, Id64 } from "@itwin/core-bentley";
 import { BaseIdsCacheImpl } from "../../../shared/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../../shared/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../../shared/internal/hooks/UseErrorState.js";
-import { fromWithRelease } from "../../../shared/internal/Rxjs.js";
+import { fromWithRelease, toVoidPromise } from "../../../shared/internal/Rxjs.js";
 import { createWhereClause, getClassesByView, getOrCreate } from "../../../shared/internal/Utils.js";
 
 import type { Observable } from "rxjs";
@@ -74,6 +74,12 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
     this.#categoryElementClass = elementClass;
     this.#componentId = Guid.createValue();
     this.#componentName = "CategoriesTreeIdsCache";
+  }
+
+  public async preloadDefinitionContainers(): Promise<void> {
+    try {
+      await toVoidPromise(this.getDefinitionContainersInfo());
+    } catch {}
   }
 
   private queryFilteredElementsModels(filteredElementIds: Id64Array): Observable<{

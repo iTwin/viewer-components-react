@@ -30,7 +30,7 @@ import { ModelsTreeNode } from "./ModelsTreeNode.js";
 import type { ReactNode } from "react";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
+import type { DefineHierarchyLevelProps, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { TreeNode } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../../shared/components/VisibilityTree.js";
@@ -174,9 +174,19 @@ export function useModelsTree({
     componentId,
   });
 
+  const onHierarchyLevelRequested = useCallback(
+    (parentNode?: DefineHierarchyLevelProps["parentNode"]) => {
+      if (parentNode && parentNode.parentKeys.length === 0) {
+        void idsCache.preloadElementModelCategories();
+        void idsCache.preloadModeledElements();
+      }
+    },
+    [idsCache],
+  );
+
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
-    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache, hierarchyConfig: hierarchyConfiguration, componentId }),
-    [idsCache, hierarchyConfiguration, componentId],
+    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache, hierarchyConfig: hierarchyConfiguration, componentId, onHierarchyLevelRequested }),
+    [idsCache, hierarchyConfiguration, componentId, onHierarchyLevelRequested],
   );
 
   const { getPaths, searchError, subTreeError } = useSearchPaths({

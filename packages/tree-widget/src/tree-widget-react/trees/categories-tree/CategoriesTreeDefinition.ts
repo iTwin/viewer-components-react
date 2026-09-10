@@ -86,6 +86,7 @@ interface CategoriesTreeDefinitionProps {
   viewType: "2d" | "3d";
   idsCache: CategoriesTreeIdsCache;
   hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
+  onHierarchyLevelRequested?: (parentNode?: DefineInstanceNodeChildHierarchyLevelProps["parentNode"]) => void;
 }
 
 interface CategoriesTreeInstanceKeyPathsBaseProps {
@@ -191,6 +192,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   #categoryElementClass: EC.FullClassNameDotNotation;
   #categoryModelClass: EC.FullClassNameDotNotation;
   static #componentName = "CategoriesTreeDefinition";
+  #onHierarchyLevelRequested?: (parentNode?: DefineInstanceNodeChildHierarchyLevelProps["parentNode"]) => void;
 
   public constructor(props: CategoriesTreeDefinitionProps) {
     this.#iModelAccess = props.imodelAccess;
@@ -201,6 +203,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     this.#categoryElementClass = elementClass;
     this.#categoryModelClass = modelClass;
     this.#excludedClasses = this.#hierarchyConfig.elements.nodes === "include" ? this.#hierarchyConfig.elements.excludedClasses : undefined;
+    this.#onHierarchyLevelRequested = props.onHierarchyLevelRequested;
   }
 
   public preProcessNode: NodePreProcessor = async ({ node }) => {
@@ -312,21 +315,33 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       return createPredicateBasedHierarchyDefinition({
         classHierarchyInspector: this.#iModelAccess,
         hierarchy: {
-          rootNodes: async (requestProps: DefineRootHierarchyLevelProps) => this.createDefinitionContainersAndCategoriesQuery(requestProps),
+          rootNodes: async (requestProps: DefineRootHierarchyLevelProps) => {
+            this.#onHierarchyLevelRequested?.();
+            return this.createDefinitionContainersAndCategoriesQuery(requestProps);
+          },
           childNodes: [
             ...(this.#hierarchyConfig.elements.nodes === "include"
               ? [
                   {
                     parentInstancesNodePredicate: this.#categoryElementClass,
-                    definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createElementChildrenQuery(requestProps),
+                    definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
+                      this.#onHierarchyLevelRequested?.(requestProps.parentNode);
+                      return this.createElementChildrenQuery(requestProps);
+                    },
                   },
                   {
                     parentInstancesNodePredicate: CLASS_NAME_ISubModeledElement,
-                    definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createISubModeledElementChildrenQuery(requestProps),
+                    definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
+                      this.#onHierarchyLevelRequested?.(requestProps.parentNode);
+                      return this.createISubModeledElementChildrenQuery(requestProps);
+                    },
                   },
                   {
                     parentInstancesNodePredicate: this.#categoryModelClass,
-                    definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createGeometricModelChildrenQuery(requestProps),
+                    definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
+                      this.#onHierarchyLevelRequested?.(requestProps.parentNode);
+                      return this.createGeometricModelChildrenQuery(requestProps);
+                    },
                   },
                 ]
               : []),
@@ -336,15 +351,20 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
               : [
                   {
                     parentInstancesNodePredicate: this.#categoryClass,
-                    definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createCategoryChildrenQuery(requestProps),
+                    definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
+                      this.#onHierarchyLevelRequested?.(requestProps.parentNode);
+                      return this.createCategoryChildrenQuery(requestProps);
+                    },
                   },
                 ]),
             ...(isDefinitionContainerSupported
               ? [
                   {
                     parentInstancesNodePredicate: CLASS_NAME_DefinitionContainer,
-                    definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) =>
-                      this.createDefinitionContainersAndCategoriesQuery(requestProps),
+                    definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
+                      this.#onHierarchyLevelRequested?.(requestProps.parentNode);
+                      return this.createDefinitionContainersAndCategoriesQuery(requestProps);
+                    },
                   },
                 ]
               : []),

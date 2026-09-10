@@ -15,7 +15,7 @@ import {
   CLASS_NAME_SpatialCategory,
 } from "../../../shared/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../../shared/internal/hooks/UseErrorState.js";
-import { fromWithRelease } from "../../../shared/internal/Rxjs.js";
+import { fromWithRelease, toVoidPromise } from "../../../shared/internal/Rxjs.js";
 import { createWhereClause, getOrCreate } from "../../../shared/internal/Utils.js";
 
 import type { Observable } from "rxjs";
@@ -74,6 +74,12 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
     this.#props = props;
     this.#componentId = Guid.createValue();
     this.#componentName = "ClassificationsTreeIdsCache";
+  }
+
+  public async preloadClassifications(): Promise<void> {
+    try {
+      await toVoidPromise(this.getCachedData());
+    } catch {}
   }
 
   private queryClassifications(): Observable<
