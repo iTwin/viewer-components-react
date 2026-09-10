@@ -229,9 +229,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           {
             parentInstancesNodePredicate: CLASS_NAME_Subject,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
-              if (requestProps.parentNodeInstanceIds.length > 0) {
-                void this.#idsCache.preloadCachedData();
-              }
+              void this.#idsCache.preloadElementModelCategories();
+              void this.#idsCache.preloadModeledElements();
               return this.createSubjectChildrenQuery(requestProps);
             },
           },
@@ -242,9 +241,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           {
             parentInstancesNodePredicate: CLASS_NAME_GeometricModel3d,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
-              if (requestProps.parentNodeInstanceIds.length > 0) {
-                void this.#idsCache.preloadCachedData();
-              }
+              void this.#idsCache.preloadElementModelCategories();
+              void this.#idsCache.preloadModeledElements();
               return this.createGeometricModel3dChildrenQuery(requestProps);
             },
           },

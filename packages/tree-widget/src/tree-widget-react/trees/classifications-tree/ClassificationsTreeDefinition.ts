@@ -239,7 +239,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     }
     const cache = this.#props.getIdsCache(imodelKey);
     if (classificationTableIds.length > 0) {
-      void cache.preloadCachedData();
+      void cache.preloadClassifications();
     }
     const childClassificationsDefinition = cache.isDataLoaded
       ? await this.#createCachedChildClassificationsQuery({ parentIds: classificationTableIds, cache, instanceFilter, createSelectClause, createFilterClauses })

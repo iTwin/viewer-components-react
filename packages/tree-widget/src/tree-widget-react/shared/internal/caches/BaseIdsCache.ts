@@ -104,10 +104,15 @@ export class BaseIdsCache {
 
   // Implement methods using each cache
 
-  public async preloadCachedData(): Promise<void> {
+  public async preloadModeledElements(): Promise<void> {
     try {
-      // Loading modeled elements also preloads element-model-category data.
       await toVoidPromise(this.getModeledElementsInfo());
+    } catch {}
+  }
+
+  public async preloadElementModelCategories(): Promise<void> {
+    try {
+      await toVoidPromise(this.#elementModelCategoriesCache.getCachedData());
     } catch {}
   }
 
@@ -452,8 +457,12 @@ export class BaseIdsCacheImpl {
 
   // Implement IBaseIdsCache by re-exporting BaseIdsCache methods
 
-  public async preloadCachedData(): ReturnType<BaseIdsCache["preloadCachedData"]> {
-    return this.#baseIdsCache.preloadCachedData();
+  public async preloadModeledElements(): ReturnType<BaseIdsCache["preloadModeledElements"]> {
+    return this.#baseIdsCache.preloadModeledElements();
+  }
+
+  public async preloadElementModelCategories(): ReturnType<BaseIdsCache["preloadElementModelCategories"]> {
+    return this.#baseIdsCache.preloadElementModelCategories();
   }
 
   public getChildElements(props: Props<BaseIdsCache["getChildElements"]>): ReturnType<BaseIdsCache["getChildElements"]> {

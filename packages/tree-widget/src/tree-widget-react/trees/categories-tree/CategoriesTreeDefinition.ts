@@ -337,8 +337,9 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                   {
                     parentInstancesNodePredicate: this.#categoryClass,
                     definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
-                      if (requestProps.parentNodeInstanceIds.length > 0) {
-                        void this.#idsCache.preloadCachedData();
+                      void this.#idsCache.preloadDefinitionContainers();
+                      if (this.#hierarchyConfig.elements.nodes === "include") {
+                        void this.#idsCache.preloadModeledElements();
                       }
                       return this.createCategoryChildrenQuery(requestProps);
                     },
@@ -349,8 +350,9 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                   {
                     parentInstancesNodePredicate: CLASS_NAME_DefinitionContainer,
                     definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
-                      if (requestProps.parentNodeInstanceIds.length > 0) {
-                        void this.#idsCache.preloadCachedData();
+                      void this.#idsCache.preloadDefinitionContainers();
+                      if (this.#hierarchyConfig.elements.nodes === "include") {
+                        void this.#idsCache.preloadModeledElements();
                       }
                       return this.createDefinitionContainersAndCategoriesQuery(requestProps);
                     },

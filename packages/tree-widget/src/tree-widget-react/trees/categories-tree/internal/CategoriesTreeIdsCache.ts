@@ -76,9 +76,9 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
     this.#componentName = "CategoriesTreeIdsCache";
   }
 
-  public override async preloadCachedData(): Promise<void> {
+  public async preloadDefinitionContainers(): Promise<void> {
     try {
-      await Promise.all([super.preloadCachedData(), toVoidPromise(this.getDefinitionContainersInfo())]);
+      await toVoidPromise(this.getDefinitionContainersInfo());
     } catch {}
   }
 
