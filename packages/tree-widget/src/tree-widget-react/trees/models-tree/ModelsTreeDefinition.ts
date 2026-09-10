@@ -161,6 +161,7 @@ interface ModelsTreeDefinitionProps {
   idsCache: ModelsTreeIdsCache;
   hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
   componentId?: GuidString;
+  onHierarchyLevelRequested?: (parentNode?: DefineHierarchyLevelProps["parentNode"]) => void;
 }
 
 /** @beta */
@@ -220,39 +221,48 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     this.#impl = createPredicateBasedHierarchyDefinition({
       classHierarchyInspector: props.imodelAccess,
       hierarchy: {
-        rootNodes: async (requestProps) =>
-          this.createSubjectChildrenQuery({
+        rootNodes: async (requestProps) => {
+          props.onHierarchyLevelRequested?.();
+          return this.createSubjectChildrenQuery({
             ...requestProps,
             parentNodeInstanceIds: this.#hierarchyConfig.subjects.root === "exclude" ? [IModel.rootSubjectId] : [],
-          }),
+          });
+        },
         childNodes: [
           {
             parentInstancesNodePredicate: CLASS_NAME_Subject,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
-              void this.#idsCache.preloadElementModelCategories();
-              void this.#idsCache.preloadModeledElements();
+              props.onHierarchyLevelRequested?.(requestProps.parentNode);
               return this.createSubjectChildrenQuery(requestProps);
             },
           },
           {
             parentInstancesNodePredicate: CLASS_NAME_ISubModeledElement,
-            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createISubModeledElementChildrenQuery(requestProps),
+            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
+              props.onHierarchyLevelRequested?.(requestProps.parentNode);
+              return this.createISubModeledElementChildrenQuery(requestProps);
+            },
           },
           {
             parentInstancesNodePredicate: CLASS_NAME_GeometricModel3d,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
-              void this.#idsCache.preloadElementModelCategories();
-              void this.#idsCache.preloadModeledElements();
+              props.onHierarchyLevelRequested?.(requestProps.parentNode);
               return this.createGeometricModel3dChildrenQuery(requestProps);
             },
           },
           {
             parentInstancesNodePredicate: CLASS_NAME_SpatialCategory,
-            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createSpatialCategoryChildrenQuery(requestProps),
+            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
+              props.onHierarchyLevelRequested?.(requestProps.parentNode);
+              return this.createSpatialCategoryChildrenQuery(requestProps);
+            },
           },
           {
             parentInstancesNodePredicate: CLASS_NAME_GeometricElement3d,
-            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createGeometricElement3dChildrenQuery(requestProps),
+            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
+              props.onHierarchyLevelRequested?.(requestProps.parentNode);
+              return this.createGeometricElement3dChildrenQuery(requestProps);
+            },
           },
         ],
       },

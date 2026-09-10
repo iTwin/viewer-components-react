@@ -3,7 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
+import { assert } from "@itwin/core-bentley";
 import { HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
 import { useTelemetryContext } from "../../shared/contexts/TelemetryContext.js";
@@ -12,7 +13,7 @@ import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.j
 import { getClassificationsTreeIdsCache } from "./UseClassificationsTree.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { HierarchyDefinition } from "@itwin/presentation-hierarchies";
+import type { DefineHierarchyLevelProps, HierarchyDefinition } from "@itwin/presentation-hierarchies";
 import type { useTree } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { FunctionProps } from "../../shared/Utils.js";
@@ -98,13 +99,26 @@ export function useClassificationsTreeDefinitionInternal(
     });
   }, [imodels, getBaseIdsCache, getCache, hierarchyConfig, visibilityHandlerConfig]);
 
+  const onHierarchyLevelRequested = useCallback(
+    (parentNode?: DefineHierarchyLevelProps["parentNode"]) => {
+      if (parentNode && parentNode.parentKeys.length === 0) {
+        assert(parentNode.key.type === "instances");
+        const imodelKey = parentNode.key.instanceKeys[0].imodelKey;
+        const cache = imodelsWithCaches.find(({ imodelAccess }) => imodelAccess.imodelKey === imodelKey)?.cache;
+        void cache?.preloadClassifications();
+      }
+    },
+    [imodelsWithCaches],
+  );
+
   const definition = useMemo(() => {
     return new ClassificationsTreeDefinition({
       imodelAccess: imodelsWithCaches[imodelsWithCaches.length - 1].imodelAccess,
       getIdsCache: (imodelKey: string) => imodelsWithCaches.find(({ imodelAccess }) => imodelAccess.imodelKey === imodelKey)!.cache,
       hierarchyConfig,
+      onHierarchyLevelRequested,
     });
-  }, [hierarchyConfig, imodelsWithCaches]);
+  }, [hierarchyConfig, imodelsWithCaches, onHierarchyLevelRequested]);
 
   const searchTerm = search ? ("searchText" in search ? search.searchText : search.targetItems) : undefined;
   const searchLimit = search?.limit;
