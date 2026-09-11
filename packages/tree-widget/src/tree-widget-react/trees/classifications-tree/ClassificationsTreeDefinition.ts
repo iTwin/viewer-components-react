@@ -661,7 +661,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
             : ""
         }
       )
-      ${props.limit === undefined ? `LIMIT ${MAX_SEARCH_INSTANCE_KEY_COUNT + 1}` : props.limit !== "unbounded" ? `LIMIT ${props.limit}` : ""}
+      ${props.limit === "unbounded" ? "" : `LIMIT ${(props.limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT) + 1}`}
     `;
     const bindings = [
       ...(classificationIds.length > 0

@@ -103,6 +103,66 @@ describe("Models tree", () => {
       await terminateCore();
     });
 
+    describe("label search limits", () => {
+      let imodelConnection: IModelConnection;
+      let keys: { model: InstanceKey; category: InstanceKey; elements: InstanceKey[] };
+
+      beforeAll(async () => {
+        const setupResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: "model", partitionParentId: IModel.rootSubjectId });
+            const category = insertSpatialCategory({ txn, codeValue: "category" });
+            const elements = Array.from({ length: 103 }, (_, index) =>
+              insertPhysicalElement({ txn, userLabel: `matching element ${index}`, modelId: model.id, categoryId: category.id }),
+            );
+            return { model, category, elements };
+          }),
+        );
+        imodelConnection = setupResult.imodelConnection;
+        keys = setupResult;
+      });
+
+      afterAll(async () => {
+        await imodelConnection.close();
+      });
+
+      it.each([
+        { limit: undefined, exceedsLimit: true },
+        { limit: 2, exceedsLimit: true },
+        { limit: 103, exceedsLimit: false },
+        { limit: "unbounded" as const, exceedsLimit: false },
+      ])("honors label search limit $limit with 103 matches", async ({ limit, exceedsLimit }) => {
+        const imodelAccess = createIModelAccess(imodelConnection);
+        using hook = renderUseModelsTreeHook({
+          imodelConnection,
+          hierarchyConfig: { subjects: { root: "exclude" } },
+          searchText: "matching element",
+          searchLimit: limit,
+        });
+        const searchPaths = await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }));
+        expect(searchPaths).toEqual(
+          exceedsLimit
+            ? []
+            : [
+                {
+                  identifier: adjustedModelKey(keys.model),
+                  options: { autoExpand: true },
+                  children: [
+                    {
+                      identifier: keys.category,
+                      options: { autoExpand: true },
+                      children: keys.elements.map((element) => ({
+                        identifier: { ...element, className: CLASS_NAME_GeometricElement3d },
+                        options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                      })),
+                    },
+                  ],
+                },
+              ],
+        );
+      });
+    });
+
     it("sets auto-expand on correct nodes with merged sub-tree and search paths", async () => {
       await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
