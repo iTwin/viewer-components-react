@@ -12,6 +12,7 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { act, renderHook } from "@testing-library/react";
+import { TooManySearchMatches } from "../../../tree-widget-react/shared/components/EmptyTree.js";
 import { SharedTreeContextProvider } from "../../../tree-widget-react/shared/contexts/SharedTreeContext.js";
 import { CLASS_NAME_DefinitionModel } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
 import { getClassesByView } from "../../../tree-widget-react/shared/internal/Utils.js";
@@ -102,6 +103,9 @@ describe("Categories tree", () => {
                 },
               ],
         );
+        if (exceedsLimit) {
+          expect(hook.result.current.treeProps.emptyTreeContent).toMatchObject({ type: TooManySearchMatches, props: { base: "categoriesTree" } });
+        }
       });
     });
 

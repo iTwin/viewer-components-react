@@ -7,7 +7,6 @@ import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialC
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { withEditTxn } from "@itwin/core-backend";
 import { Id64 } from "@itwin/core-bentley";
-import { RowsLimitExceededError } from "@itwin/presentation-hierarchies";
 import { act, renderHook } from "@testing-library/react";
 import { SharedTreeContextProvider } from "../../../tree-widget-react/shared/contexts/SharedTreeContext.js";
 import {
@@ -77,7 +76,7 @@ describe("Classifications tree", () => {
 
       it.each([
         { limit: undefined, expectedError: new SearchLimitExceededError(100) },
-        { limit: 2, expectedError: new RowsLimitExceededError(2) },
+        { limit: 2, expectedError: new SearchLimitExceededError(2) },
         { limit: 103, expectedError: undefined },
         { limit: "unbounded" as const, expectedError: undefined },
       ])("honors label search limit $limit with 103 matches", async ({ limit, expectedError }) => {

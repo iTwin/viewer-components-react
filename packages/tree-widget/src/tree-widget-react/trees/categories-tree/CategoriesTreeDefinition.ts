@@ -1434,7 +1434,7 @@ function createInstanceKeyPathsFromInstanceLabel(
         if (!queryProps) {
           return EMPTY;
         }
-        return imodelAccess.createQueryReader(queryProps, { restartToken: `${componentName}/${componentId}/filter-by-label`, limit });
+        return imodelAccess.createQueryReader(queryProps, { restartToken: `${componentName}/${componentId}/filter-by-label`, limit: "unbounded" });
       }),
       catchBeSQLiteInterrupts,
       map((row): { key: Id64String; type: number } => {

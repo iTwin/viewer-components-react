@@ -24,6 +24,7 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { renderHook } from "@testing-library/react";
+import { TooManySearchMatches } from "../../../tree-widget-react/shared/components/EmptyTree.js";
 import { SharedTreeContextProvider } from "../../../tree-widget-react/shared/contexts/SharedTreeContext.js";
 import {
   CLASS_NAME_GeometricElement3d,
@@ -160,6 +161,9 @@ describe("Models tree", () => {
                 },
               ],
         );
+        if (exceedsLimit) {
+          expect(hook.result.current.treeProps.emptyTreeContent).toMatchObject({ type: TooManySearchMatches, props: { base: "modelsTree" } });
+        }
       });
     });
 

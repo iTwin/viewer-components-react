@@ -1398,7 +1398,7 @@ function createInstanceKeyPathsFromInstanceLabelObs(
       return imodelAccess.createQueryReader(queryProps, {
         rowFormat: "Indexes",
         restartToken: `${props.componentName}/${props.componentId}/filter-by-label`,
-        limit,
+        limit: "unbounded",
       });
     }),
     catchBeSQLiteInterrupts,

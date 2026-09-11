@@ -681,7 +681,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
     return { ctes, ecsql, bindings };
   }).pipe(
     mergeMap((queryProps) =>
-      props.imodelAccess.createQueryReader(queryProps, { restartToken: `${props.componentName}/${props.componentId}/filter-by-label`, limit: props.limit }),
+      props.imodelAccess.createQueryReader(queryProps, { restartToken: `${props.componentName}/${props.componentId}/filter-by-label`, limit: "unbounded" }),
     ),
     catchBeSQLiteInterrupts,
     map((row): { key: Id64String; type: number } => {
