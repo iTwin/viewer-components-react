@@ -14,6 +14,7 @@ import {
   CLASS_NAME_ClassificationTable,
   CLASS_NAME_GeometricElement3d,
 } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { SearchLimitExceededError } from "../../../tree-widget-react/shared/TreeErrors.js";
 import { useClassificationsTreeDefinition } from "../../../tree-widget-react/trees/classifications-tree/UseClassificationsTreeDefinition.js";
 import { buildIModel } from "../../IModelUtils.js";
 import { initializeITwinJs, terminateITwinJs } from "../../Initialize.js";
@@ -25,7 +26,8 @@ import {
   insertElementHasClassificationsRelationship,
 } from "./Utils.js";
 
-import type { Props } from "@itwin/presentation-shared";
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { InstanceKey, Props } from "@itwin/presentation-shared";
 
 const rootClassificationSystemCode = "TestClassificationSystem";
 const defaultHierarchyConfiguration = {
@@ -40,6 +42,73 @@ describe("Classifications tree", () => {
 
     afterAll(async () => {
       await terminateITwinJs();
+    });
+
+    describe("label search limits", () => {
+      let imodelConnection: IModelConnection;
+      let keys: { table: InstanceKey; classification: InstanceKey; elements: InstanceKey[] };
+
+      beforeAll(async () => {
+        const setupResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, async (txn) => {
+            await importClassificationSchema(imodel);
+
+            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable" });
+            const classification = insertClassification({ txn, modelId: table.id, codeValue: "Classification" });
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: "Model" });
+            const category = insertSpatialCategory({ txn, codeValue: "Category" });
+            const elements = Array.from({ length: 103 }, (_, index) => {
+              const element = insertPhysicalElement({ txn, userLabel: `matching element ${index}`, modelId: model.id, categoryId: category.id });
+              insertElementHasClassificationsRelationship({ txn, elementId: element.id, classificationId: classification.id });
+              return element;
+            });
+            return { table, classification, elements };
+          }),
+        );
+        imodelConnection = setupResult.imodelConnection;
+        keys = setupResult;
+      });
+
+      afterAll(async () => {
+        await imodelConnection.close();
+      });
+
+      it.each([
+        { limit: undefined, expectedError: new SearchLimitExceededError(100) },
+        { limit: 2, expectedError: new SearchLimitExceededError(2) },
+        { limit: 103, expectedError: undefined },
+        { limit: "unbounded" as const, expectedError: undefined },
+      ])("honors label search limit $limit with 103 matches", async ({ limit, expectedError }) => {
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodelConnection],
+          hierarchyConfig: defaultHierarchyConfiguration,
+          search: { searchText: "matching element", limit },
+        });
+        if (expectedError) {
+          await act(async () => {
+            await expect(hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal })).rejects.toThrow(expectedError);
+          });
+          return;
+        }
+
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
+          {
+            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: true },
+            children: [
+              {
+                identifier: { id: keys.classification.id, className: CLASS_NAME_Classification },
+                options: { autoExpand: true },
+                children: keys.elements.map((element) => ({
+                  identifier: { id: element.id, className: CLASS_NAME_GeometricElement3d },
+                  options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                })),
+              },
+            ],
+          },
+        ]);
+      });
     });
 
     ["Test", "_", "%"].forEach((label) => {

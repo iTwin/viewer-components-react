@@ -661,7 +661,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
             : ""
         }
       )
-      ${props.limit === undefined ? `LIMIT ${MAX_SEARCH_INSTANCE_KEY_COUNT + 1}` : props.limit !== "unbounded" ? `LIMIT ${props.limit}` : ""}
+      ${props.limit === "unbounded" ? "" : `LIMIT ${(props.limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT) + 1}`}
     `;
     const bindings = [
       ...(classificationIds.length > 0
@@ -681,7 +681,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
     return { ctes, ecsql, bindings };
   }).pipe(
     mergeMap((queryProps) =>
-      props.imodelAccess.createQueryReader(queryProps, { restartToken: `${props.componentName}/${props.componentId}/filter-by-label`, limit: props.limit }),
+      props.imodelAccess.createQueryReader(queryProps, { restartToken: `${props.componentName}/${props.componentId}/filter-by-label`, limit: "unbounded" }),
     ),
     catchBeSQLiteInterrupts,
     map((row): { key: Id64String; type: number } => {
