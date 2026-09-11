@@ -608,7 +608,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
               categoriesToShow
                 ? "JOIN IdSet(?) categoryIdSet ON categoryIdSet.id = this.ECInstanceId"
                 : `
-                  JOIN ${CLASS_NAME_GeometricElement3d} ce ON ce.Category.Id = this.ECInstanceId
+                  JOIN ${this.#hierarchyConfig.elements.baseClass} ce ON ce.Category.Id = this.ECInstanceId
                   JOIN IdSet(?) modelIdSet ON ce.Model.Id = modelIdSet.id
                 `
             }
@@ -1389,7 +1389,7 @@ function createInstanceKeyPathsFromInstanceLabelObs(
           })}
         )
         WHERE Label LIKE '%' || ? || '%' ESCAPE '\\'
-        LIMIT ${MAX_SEARCH_INSTANCE_KEY_COUNT + 1}
+        ${limit === "unbounded" ? "" : `LIMIT ${(limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT) + 1}`}
       `;
     const bindings: ECSqlBinding[] = [{ type: "string", value: label.replace(/[%_\\]/g, "\\$&") }];
     return { ecsql, bindings };
