@@ -260,18 +260,17 @@ describe("ModelsTreeDefinition", () => {
       });
     });
 
-    it("uses custom element class specification and excludes categories containing only other classes", async () => {
+    it("uses custom element class specification", async () => {
       await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
         withEditTxn(imodel, (txn) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
           const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
           const category = insertSpatialCategory({ txn, codeValue: "category" });
-          const excludedCategory = insertSpatialCategory({ txn, codeValue: "excluded category" });
           const parentElement1 = insertPhysicalElement({
             txn,
             userLabel: `parent element 1`,
             modelId: model.id,
-            categoryId: excludedCategory.id,
+            categoryId: category.id,
           });
           const parentElement2 = insertPhysicalElement({
             txn,
@@ -284,7 +283,7 @@ describe("ModelsTreeDefinition", () => {
             txn,
             userLabel: `child element 1`,
             modelId: model.id,
-            categoryId: excludedCategory.id,
+            categoryId: category.id,
             parentId: parentElement1.id,
           });
           const childElement2 = insertPhysicalElement({
@@ -325,6 +324,51 @@ describe("ModelsTreeDefinition", () => {
                         children: false,
                       }),
                     ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      });
+    });
+
+    it("excludes categories containing only elements outside the custom element class specification", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
+        withEditTxn(imodel, (txn) => {
+          const model = insertPhysicalModelWithPartition({ txn, codeValue: "model", partitionParentId: IModel.rootSubjectId });
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const excludedCategory = insertSpatialCategory({ txn, codeValue: "excluded category" });
+          const element = insertPhysicalElement({
+            txn,
+            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+            modelId: model.id,
+            categoryId: category.id,
+          });
+          insertPhysicalElement({ txn, modelId: model.id, categoryId: excludedCategory.id });
+          return { model, category, element };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({
+        imodelConnection,
+        hierarchyConfig: { elements: { baseClass: keys.element.className, classGrouping: "disable" } },
+      });
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.model],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.category],
+                supportsFiltering: true,
+                children: [
+                  NodeValidators.createForInstanceNode({
+                    instanceKeys: [keys.element],
+                    supportsFiltering: true,
+                    children: false,
                   }),
                 ],
               }),
