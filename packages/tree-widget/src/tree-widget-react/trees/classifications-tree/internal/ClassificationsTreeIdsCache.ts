@@ -77,6 +77,9 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
   }
 
   public async preloadClassifications(): Promise<void> {
+    if (this.#cachedData !== undefined) {
+      return;
+    }
     try {
       await toVoidPromise(this.getCachedData());
     } catch {}

@@ -102,6 +102,10 @@ export class ElementModelCategoriesCache {
     return !!this.#dataResolved;
   }
 
+  public cachedDataDefined() {
+    return this.#cachedData !== undefined;
+  }
+
   public getCachedData() {
     this.#cachedData ??= this.queryElementModelCategories().pipe(
       reduce(

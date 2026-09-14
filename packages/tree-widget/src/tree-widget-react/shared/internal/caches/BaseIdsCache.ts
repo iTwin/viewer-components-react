@@ -105,12 +105,18 @@ export class BaseIdsCache {
   // Implement methods using each cache
 
   public async preloadModeledElements(): Promise<void> {
+    if (this.#modeledElementsCache !== undefined) {
+      return;
+    }
     try {
       await toVoidPromise(this.getModeledElementsInfo());
     } catch {}
   }
 
   public async preloadElementModelCategories(): Promise<void> {
+    if (this.#elementModelCategoriesCache.cachedDataDefined()) {
+      return;
+    }
     try {
       await toVoidPromise(this.#elementModelCategoriesCache.getCachedData());
     } catch {}

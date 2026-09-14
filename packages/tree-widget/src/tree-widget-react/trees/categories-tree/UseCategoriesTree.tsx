@@ -21,7 +21,6 @@ import { createCategoriesSearchResultsTree } from "./internal/visibility/SearchR
 import type { ReactNode } from "react";
 import type { GuidString, Id64Array } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { TreeNode } from "@itwin/presentation-hierarchies-react";
 import type { EC } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../../shared/components/VisibilityTree.js";
 import type { ExtendedVisibilityTreeRendererProps } from "../../shared/components/VisibilityTreeRenderer.js";
@@ -109,17 +108,12 @@ export function useCategoriesTree({
     hierarchyConfig: hierarchyConfiguration,
   });
 
-  const onNodeExpanded = useCallback(
-    (node: TreeNode) => {
-      if (node.nodeData.parentKeys.length === 0) {
-        void idsCache.preloadDefinitionContainers();
-        if (hierarchyConfiguration.elements.nodes === "include") {
-          void idsCache.preloadElementModelCategories();
-        }
-      }
-    },
-    [idsCache, hierarchyConfiguration],
-  );
+  const onNodeExpanded = useCallback(() => {
+    void idsCache.preloadDefinitionContainers();
+    if (hierarchyConfiguration.elements.nodes === "include") {
+      void idsCache.preloadElementModelCategories();
+    }
+  }, [idsCache, hierarchyConfiguration]);
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     (props) => {

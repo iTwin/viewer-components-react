@@ -173,14 +173,9 @@ export function useClassificationsTree({
     };
   }, [searchText, getSearchPaths, onFeatureUsed]);
 
-  const onNodeExpanded = useCallback(
-    (node: Parameters<NonNullable<VisibilityTreeProps["onNodeExpanded"]>>[0]) => {
-      if (node.nodeData.parentKeys.length === 0) {
-        void idsCache.preloadClassifications();
-      }
-    },
-    [idsCache],
-  );
+  const onNodeExpanded = useCallback(() => {
+    void idsCache.preloadClassifications();
+  }, [idsCache]);
 
   return {
     treeProps: {

@@ -77,6 +77,9 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
   }
 
   public async preloadDefinitionContainers(): Promise<void> {
+    if (this.#definitionContainersInfo !== undefined) {
+      return;
+    }
     try {
       await toVoidPromise(this.getDefinitionContainersInfo());
     } catch {}

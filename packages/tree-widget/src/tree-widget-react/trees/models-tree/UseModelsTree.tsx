@@ -181,15 +181,10 @@ export function useModelsTree({
     componentId,
   });
 
-  const onNodeExpanded = useCallback(
-    (node: TreeNode) => {
-      if (node.nodeData.parentKeys.length === 0) {
-        void idsCache.preloadElementModelCategories();
-        void idsCache.preloadModeledElements();
-      }
-    },
-    [idsCache],
-  );
+  const onNodeExpanded = useCallback(() => {
+    void idsCache.preloadElementModelCategories();
+    void idsCache.preloadModeledElements();
+  }, [idsCache]);
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache, hierarchyConfig: hierarchyConfiguration, componentId }),
