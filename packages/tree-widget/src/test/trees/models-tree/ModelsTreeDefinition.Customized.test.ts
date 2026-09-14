@@ -333,6 +333,51 @@ describe("ModelsTreeDefinition", () => {
       });
     });
 
+    it("excludes categories containing only elements outside the custom element class specification", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
+        withEditTxn(imodel, (txn) => {
+          const model = insertPhysicalModelWithPartition({ txn, codeValue: "model", partitionParentId: IModel.rootSubjectId });
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const excludedCategory = insertSpatialCategory({ txn, codeValue: "excluded category" });
+          const element = insertPhysicalElement({
+            txn,
+            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+            modelId: model.id,
+            categoryId: category.id,
+          });
+          insertPhysicalElement({ txn, modelId: model.id, categoryId: excludedCategory.id });
+          return { model, category, element };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({
+        imodelConnection,
+        hierarchyConfig: { elements: { baseClass: keys.element.className, classGrouping: "disable" } },
+      });
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.model],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.category],
+                supportsFiltering: true,
+                children: [
+                  NodeValidators.createForInstanceNode({
+                    instanceKeys: [keys.element],
+                    supportsFiltering: true,
+                    children: false,
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      });
+    });
+
     it("returns empty hierarchy when the iModel doesn't have any elements of `elements.baseClass` class", async () => {
       await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {

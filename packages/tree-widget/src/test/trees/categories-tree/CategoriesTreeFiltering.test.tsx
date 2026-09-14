@@ -12,6 +12,7 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { act, renderHook } from "@testing-library/react";
+import { TooManySearchMatches } from "../../../tree-widget-react/shared/components/EmptyTree.js";
 import { SharedTreeContextProvider } from "../../../tree-widget-react/shared/contexts/SharedTreeContext.js";
 import { CLASS_NAME_DefinitionModel } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
 import { getClassesByView } from "../../../tree-widget-react/shared/internal/Utils.js";
@@ -21,7 +22,7 @@ import { createFakeViewport, createIModelAccess } from "../Common.js";
 import { getInsertFunctionByViewType } from "./internal/Utils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { EC, Props } from "@itwin/presentation-shared";
+import type { EC, InstanceKey, Props } from "@itwin/presentation-shared";
 import type { CategoryInfo } from "../../../tree-widget-react/trees/categories-tree/CategoriesTreeButtons.js";
 
 // cspell:words egory
@@ -47,6 +48,65 @@ describe("Categories tree", () => {
 
     afterAll(async () => {
       await terminateCore();
+    });
+
+    describe("label search limits", () => {
+      let imodelConnection: IModelConnection;
+      let keys: { category: InstanceKey; elements: InstanceKey[] };
+
+      beforeAll(async () => {
+        const { insertCategory, insertElement, insertElementsModel } = getInsertFunctionByViewType("3d");
+        const setupResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, (txn) => {
+            const model = insertElementsModel({ txn, codeValue: "model" });
+            const category = insertCategory({ txn, codeValue: "category" });
+            const elements = Array.from({ length: 103 }, (_, index) =>
+              insertElement({ txn, userLabel: `matching element ${index}`, modelId: model.id, categoryId: category.id }),
+            );
+            return { category, elements };
+          }),
+        );
+        imodelConnection = setupResult.imodelConnection;
+        keys = setupResult;
+      });
+
+      afterAll(async () => {
+        await imodelConnection.close();
+      });
+
+      it.each([
+        { limit: undefined, exceedsLimit: true },
+        { limit: 2, exceedsLimit: true },
+        { limit: 103, exceedsLimit: false },
+        { limit: "unbounded" as const, exceedsLimit: false },
+      ])("honors label search limit $limit with 103 matches", async ({ limit, exceedsLimit }) => {
+        const imodelAccess = createIModelAccess(imodelConnection);
+        using hook = renderUseCategoriesTreeHook({
+          imodelConnection,
+          hierarchyConfig: { elements: { nodes: "include" } },
+          viewType: "3d",
+          searchText: "matching element",
+          searchLimit: limit,
+        });
+        const searchPaths = await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }));
+        expect(searchPaths).toEqual(
+          exceedsLimit
+            ? []
+            : [
+                {
+                  identifier: keys.category,
+                  options: { autoExpand: true },
+                  children: keys.elements.map((element) => ({
+                    identifier: { ...element, className: getClassesByView("3d").elementClass },
+                    options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                  })),
+                },
+              ],
+        );
+        if (exceedsLimit) {
+          expect(hook.result.current.treeProps.emptyTreeContent).toMatchObject({ type: TooManySearchMatches, props: { base: "categoriesTree" } });
+        }
+      });
     });
 
     ["2d" as const, "3d" as const].forEach((viewType) => {
