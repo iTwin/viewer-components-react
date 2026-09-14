@@ -71,7 +71,6 @@ interface ClassificationsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor & { imodelKey: string };
   getIdsCache: (imodelKey: string) => ClassificationsTreeIdsCache;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
-  onHierarchyLevelRequested?: (parentNode?: DefineHierarchyLevelProps["parentNode"]) => void;
 }
 
 /** @beta */
@@ -129,31 +128,19 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     this.#impl = createPredicateBasedHierarchyDefinition({
       classHierarchyInspector: props.imodelAccess,
       hierarchy: {
-        rootNodes: async (requestProps: DefineRootHierarchyLevelProps) => {
-          props.onHierarchyLevelRequested?.();
-          return this.#createClassificationTablesQuery(requestProps);
-        },
+        rootNodes: async (requestProps: DefineRootHierarchyLevelProps) => this.#createClassificationTablesQuery(requestProps),
         childNodes: [
           {
             parentInstancesNodePredicate: CLASS_NAME_ClassificationTable,
-            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
-              props.onHierarchyLevelRequested?.(requestProps.parentNode);
-              return this.#createClassificationTableChildrenQuery(requestProps);
-            },
+            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.#createClassificationTableChildrenQuery(requestProps),
           },
           {
             parentInstancesNodePredicate: CLASS_NAME_Classification,
-            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
-              props.onHierarchyLevelRequested?.(requestProps.parentNode);
-              return this.#createClassificationChildrenQuery(requestProps);
-            },
+            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.#createClassificationChildrenQuery(requestProps),
           },
           {
             parentInstancesNodePredicate: CLASS_NAME_GeometricElement,
-            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => {
-              props.onHierarchyLevelRequested?.(requestProps.parentNode);
-              return this.#createGeometricElementChildrenQuery(requestProps);
-            },
+            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.#createGeometricElementChildrenQuery(requestProps),
           },
         ],
       },

@@ -30,7 +30,7 @@ import { ModelsTreeNode } from "./ModelsTreeNode.js";
 import type { ReactNode } from "react";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { DefineHierarchyLevelProps, HierarchySearchTree } from "@itwin/presentation-hierarchies";
+import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { TreeNode } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../../shared/components/VisibilityTree.js";
@@ -123,7 +123,14 @@ export interface UseModelsTreeProps {
 interface UseModelsTreeResult {
   treeProps: Pick<
     VisibilityTreeProps,
-    "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent" | "selectionPredicate"
+    | "treeName"
+    | "getHierarchyDefinition"
+    | "getSearchPaths"
+    | "visibilityHandlerFactory"
+    | "highlightText"
+    | "emptyTreeContent"
+    | "selectionPredicate"
+    | "onNodeExpanded"
   >;
   getTreeItemProps: Required<ExtendedVisibilityTreeRendererProps>["getTreeItemProps"];
 }
@@ -174,9 +181,9 @@ export function useModelsTree({
     componentId,
   });
 
-  const onHierarchyLevelRequested = useCallback(
-    (parentNode?: DefineHierarchyLevelProps["parentNode"]) => {
-      if (parentNode && parentNode.parentKeys.length === 0) {
+  const onNodeExpanded = useCallback(
+    (node: TreeNode) => {
+      if (node.nodeData.parentKeys.length === 0) {
         void idsCache.preloadElementModelCategories();
         void idsCache.preloadModeledElements();
       }
@@ -185,8 +192,8 @@ export function useModelsTree({
   );
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
-    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache, hierarchyConfig: hierarchyConfiguration, componentId, onHierarchyLevelRequested }),
-    [idsCache, hierarchyConfiguration, componentId, onHierarchyLevelRequested],
+    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache, hierarchyConfig: hierarchyConfiguration, componentId }),
+    [idsCache, hierarchyConfiguration, componentId],
   );
 
   const { getPaths, searchError, subTreeError } = useSearchPaths({
@@ -228,6 +235,7 @@ export function useModelsTree({
       ),
       highlightText: searchText,
       selectionPredicate: nodeSelectionPredicate,
+      onNodeExpanded,
     },
     getTreeItemProps: (node, rendererProps) => ({
       ...rendererProps.getTreeItemProps?.(node),

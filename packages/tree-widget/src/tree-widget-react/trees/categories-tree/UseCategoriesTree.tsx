@@ -21,7 +21,7 @@ import { createCategoriesSearchResultsTree } from "./internal/visibility/SearchR
 import type { ReactNode } from "react";
 import type { GuidString, Id64Array } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { DefineHierarchyLevelProps } from "@itwin/presentation-hierarchies";
+import type { TreeNode } from "@itwin/presentation-hierarchies-react";
 import type { EC } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../../shared/components/VisibilityTree.js";
 import type { ExtendedVisibilityTreeRendererProps } from "../../shared/components/VisibilityTreeRenderer.js";
@@ -55,7 +55,7 @@ export interface UseCategoriesTreeProps {
 interface UseCategoriesTreeResult {
   treeProps: Pick<
     VisibilityTreeProps,
-    "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent"
+    "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent" | "onNodeExpanded"
   >;
   getTreeItemProps: Required<ExtendedVisibilityTreeRendererProps>["getTreeItemProps"];
 }
@@ -109,9 +109,9 @@ export function useCategoriesTree({
     hierarchyConfig: hierarchyConfiguration,
   });
 
-  const onHierarchyLevelRequested = useCallback(
-    (parentNode?: DefineHierarchyLevelProps["parentNode"]) => {
-      if (parentNode && parentNode.parentKeys.length === 0) {
+  const onNodeExpanded = useCallback(
+    (node: TreeNode) => {
+      if (node.nodeData.parentKeys.length === 0) {
         void idsCache.preloadDefinitionContainers();
         if (hierarchyConfiguration.elements.nodes === "include") {
           void idsCache.preloadElementModelCategories();
@@ -128,10 +128,9 @@ export function useCategoriesTree({
         viewType,
         idsCache,
         hierarchyConfig: hierarchyConfiguration,
-        onHierarchyLevelRequested,
       });
     },
-    [viewType, idsCache, hierarchyConfiguration, onHierarchyLevelRequested],
+    [viewType, idsCache, hierarchyConfiguration],
   );
 
   const { getPaths, searchError } = useSearchPaths({
@@ -153,6 +152,7 @@ export function useCategoriesTree({
       visibilityHandlerFactory,
       emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(searchText, searchError, emptyTreeContent), [searchText, searchError, emptyTreeContent]),
       highlightText: searchText,
+      onNodeExpanded,
     },
     getTreeItemProps: (node, rendererProps) => ({
       ...rendererProps.getTreeItemProps?.(node),
