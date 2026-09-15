@@ -1,5 +1,21 @@
 # Change Log - @itwin/tree-widget-react
 
+## 4.0.0-alpha.34
+
+### Minor Changes
+
+- [#1804](https://github.com/iTwin/viewer-components-react/pull/1804): Preload tree caches on root node expansion.
+
+  Added an optional `onNodeExpanded` callback to `Tree` for reacting to node expansion events. The `useModelsTree`, `useCategoriesTree`, and `useClassificationsTree` hooks now expose this callback.
+
+### Patch Changes
+
+- [#1799](https://github.com/iTwin/viewer-components-react/pull/1799): Categories tree now displays root nodes without waiting for the element-model categories or sub-model queries to complete.
+- [#1802](https://github.com/iTwin/viewer-components-react/pull/1802): Remove the unnecessary `ENABLE_EXPERIMENTAL_FEATURES` option from ECSQL queries.
+- [#1794](https://github.com/iTwin/viewer-components-react/pull/1794): Models tree now displays model nodes without waiting for category and sub-model queries to complete.
+- [#1801](https://github.com/iTwin/viewer-components-react/pull/1801): Classifications tree now displays classification nodes without waiting for the classifications cache query to complete.
+- [#1809](https://github.com/iTwin/viewer-components-react/pull/1809): Fix models tree search to respect custom and unbounded search limits and correctly detect exceeded limits. Fix the models tree to exclude categories containing only elements outside the configured base class.
+
 ## 4.0.0-alpha.33
 
 ### Patch Changes
