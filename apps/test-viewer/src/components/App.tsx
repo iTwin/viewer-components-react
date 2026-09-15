@@ -11,19 +11,24 @@ import { FillCentered } from "@itwin/core-react";
 import { SvgError } from "@itwin/itwinui-illustrations-react";
 import { NonIdealState, ProgressLinear, ThemeProvider } from "@itwin/itwinui-react";
 import { Root } from "@stratakit/mui";
+import { useColorScheme } from "../UseColorScheme";
 import { ArcGisOauthRedirect } from "./ArcGisOauthRedirect";
 import { AuthorizationProvider, AuthorizationState, SignInRedirect, useAuthorizationContext } from "./Authorization";
+import { ColorThemeDropdown } from "./ColorThemeDropdown";
 import { Viewer } from "./Viewer";
 
 import type { FallbackProps } from "react-error-boundary";
 
 export function App() {
+  const { colorScheme, setColorScheme, isDefault } = useColorScheme();
+
   return (
     <BrowserRouter>
-      <ThemeProvider theme={"light"} future={true} as={Root} colorScheme={"light"}>
+      <ThemeProvider theme={colorScheme} future={{ themeBridge: true }} as={Root} colorScheme={colorScheme}>
         <ErrorBoundary FallbackComponent={ErrorState}>
           <AuthorizationProvider>
             <AppRoutes />
+            <ColorThemeDropdown colorScheme={isDefault ? "system" : colorScheme} setColorScheme={setColorScheme} />
           </AuthorizationProvider>
         </ErrorBoundary>
       </ThemeProvider>
