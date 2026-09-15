@@ -61,7 +61,7 @@ export function Viewer() {
 function ViewerWithOptions() {
   const { client: authClient } = useAuthorizationContext();
   const { iTwinId, iModelId, changesetId } = useIModelInfo();
-  const [uiConfig, setUiConfig] = useState<UiProvidersConfig | undefined>(() => (IModelApp.initialized ? getUiProvidersConfig() : undefined));
+  const [uiConfig, setUiConfig] = useState<UiProvidersConfig | undefined>();
 
   const onIModelAppInit = useCallback(async () => {
     const providersConfig = getUiProvidersConfig();
