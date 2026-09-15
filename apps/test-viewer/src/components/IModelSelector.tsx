@@ -69,7 +69,7 @@ export function IModelSelector() {
 
   return (
     <NativeSelect
-      style={{ position: "fixed", top: 6, right: 40, zIndex: 9999, width: "min(280px, 45vw)" }}
+      style={{ width: "min(280px, 45vw)" }}
       size="small"
       value={options.length ? iModelId : ""}
       disabled={!viewerReady || loading || failed || options.length === 0}
