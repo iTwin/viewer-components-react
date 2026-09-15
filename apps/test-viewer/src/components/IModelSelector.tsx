@@ -65,7 +65,6 @@ export function IModelSelector() {
   const loading = !currentState || currentState.status === "loading";
   const failed = currentState?.status === "error";
   const options = currentState?.status === "ready" ? currentState.options : [];
-  const currentOption = { value: iModelId, label: iModelId };
   const placeholder = loading ? "Loading iModels..." : failed ? "Could not load iModels" : "No iModels available";
 
   return (
@@ -76,7 +75,7 @@ export function IModelSelector() {
       disabled={!viewerReady || loading || failed || options.length === 0}
       inputProps={{
         "aria-label": "Switch iModel",
-        title: options.find((option) => option.value === iModelId)?.label ?? (options.length > 0 ? currentOption.label : placeholder),
+        title: options.find((option) => option.value === iModelId)?.label ?? (options.length > 0 ? iModelId : placeholder),
       }}
       onChange={(event) => {
         const nextIModelId = event.target.value;
@@ -96,7 +95,7 @@ export function IModelSelector() {
           {placeholder}
         </option>
       ) : (
-        (options.some((option) => option.value === iModelId) ? options : [currentOption, ...options]).map((option) => (
+        options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
