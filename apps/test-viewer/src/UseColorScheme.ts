@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
 import { useCallback, useEffect, useState } from "react";
 
 export type ColorScheme = "light" | "dark";

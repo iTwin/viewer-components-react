@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
 import { IconButton, Tooltip } from "@mui/material";
 import sunIcon from "@stratakit/icons/sun.svg";
 import { Icon } from "@stratakit/mui";

@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useSearchParams } from "react-router-dom";
 import { UiFramework } from "@itwin/appui-react";
@@ -69,7 +74,10 @@ export function IModelSelector() {
       size="small"
       value={options.length ? iModelId : ""}
       disabled={!viewerReady || loading || failed || options.length === 0}
-      inputProps={{ "aria-label": "Switch iModel", title: options.find((option) => option.value === iModelId)?.label ?? placeholder }}
+      inputProps={{
+        "aria-label": "Switch iModel",
+        title: options.find((option) => option.value === iModelId)?.label ?? (options.length > 0 ? currentOption.label : placeholder),
+      }}
       onChange={(event) => {
         const nextIModelId = event.target.value;
         if (nextIModelId === iModelId) {
