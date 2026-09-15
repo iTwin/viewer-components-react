@@ -54,7 +54,7 @@ export interface UseCategoriesTreeProps {
 interface UseCategoriesTreeResult {
   treeProps: Pick<
     VisibilityTreeProps,
-    "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent"
+    "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent" | "onNodeExpanded"
   >;
   getTreeItemProps: Required<ExtendedVisibilityTreeRendererProps>["getTreeItemProps"];
 }
@@ -108,6 +108,13 @@ export function useCategoriesTree({
     hierarchyConfig: hierarchyConfiguration,
   });
 
+  const onNodeExpanded = useCallback(() => {
+    void idsCache.preloadDefinitionContainers();
+    if (hierarchyConfiguration.elements.nodes === "include") {
+      void idsCache.preloadElementModelCategories();
+    }
+  }, [idsCache, hierarchyConfiguration]);
+
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     (props) => {
       return new CategoriesTreeDefinition({
@@ -139,6 +146,7 @@ export function useCategoriesTree({
       visibilityHandlerFactory,
       emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(searchText, searchError, emptyTreeContent), [searchText, searchError, emptyTreeContent]),
       highlightText: searchText,
+      onNodeExpanded,
     },
     getTreeItemProps: (node, rendererProps) => ({
       ...rendererProps.getTreeItemProps?.(node),

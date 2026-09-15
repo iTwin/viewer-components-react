@@ -70,6 +70,10 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPath
      */
     onReload?: () => void;
     /**
+     * Callback that is invoked when a tree node is expanded.
+     */
+    onNodeExpanded?: (node: TreeNode) => void;
+    /**
      * Text that should be highlighted in node labels.
      */
     highlightText?: string;
@@ -191,6 +195,7 @@ function TreeBaseImpl({
   treeRendererProps,
   isReloading,
   getNode,
+  onNodeExpanded,
 }: Omit<TreeBaseProps, "getSchemaContext" | "treeRendererProps"> & Required<Pick<TreeBaseProps, "treeRendererProps">>) {
   const selectNodes = useSelectionPredicate({
     action: useReportingAction({ action: treeRendererProps.selectNodes }),
@@ -202,6 +207,18 @@ function TreeBaseImpl({
     defaultHierarchyLevelSizeLimit: currentHierarchyLevelSizeLimit,
   });
   const reportingExpandNode = useReportingAction({ action: treeRendererProps.expandNode });
+  const expandNode = useCallback<TreeRendererProps["expandNode"]>(
+    (nodeId, isExpanded) => {
+      reportingExpandNode(nodeId, isExpanded);
+      if (isExpanded) {
+        const node = getNode(nodeId);
+        if (node) {
+          onNodeExpanded?.(node);
+        }
+      }
+    },
+    [getNode, onNodeExpanded, reportingExpandNode],
+  );
   const reportingOnFilterClicked = useReportingAction({ action: onFilterClick });
   // Don't highlight nodes if tree is reloading
   const { getLabel } = useNodeHighlighting({ highlightText: isReloading ? undefined : highlightText });
@@ -214,7 +231,7 @@ function TreeBaseImpl({
     ...treeRendererProps,
     selectNodes,
     selectionMode: selectionMode ?? "single",
-    expandNode: reportingExpandNode,
+    expandNode,
     filterHierarchyLevel: reportingOnFilterClicked,
     getTreeItemProps: (node) => ({
       label: getLabel(node),

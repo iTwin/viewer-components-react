@@ -644,6 +644,7 @@ type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPaths" | "g
     hierarchyLevelSizeLimit?: number;
     emptyTreeContent?: ReactNode;
     onReload?: () => void;
+    onNodeExpanded?: (node: TreeNode) => void;
     highlightText?: string;
 };
 
@@ -788,7 +789,7 @@ interface UseCategoriesTreeResult {
     // (undocumented)
     getTreeItemProps: Required<ExtendedVisibilityTreeRendererProps>["getTreeItemProps"];
     // (undocumented)
-    treeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent">;
+    treeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent" | "onNodeExpanded">;
 }
 
 // @beta
@@ -841,7 +842,7 @@ interface UseClassificationsTreeResult {
     // (undocumented)
     getTreeItemProps: Required<ExtendedVisibilityTreeRendererProps>["getTreeItemProps"];
     // (undocumented)
-    treeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "getSearchPaths" | "emptyTreeContent" | "highlightText">;
+    treeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "getSearchPaths" | "emptyTreeContent" | "highlightText" | "onNodeExpanded">;
 }
 
 // @public
@@ -899,7 +900,7 @@ interface UseModelsTreeResult {
     // (undocumented)
     getTreeItemProps: Required<ExtendedVisibilityTreeRendererProps>["getTreeItemProps"];
     // (undocumented)
-    treeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent" | "selectionPredicate">;
+    treeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent" | "selectionPredicate" | "onNodeExpanded">;
 }
 
 // @beta

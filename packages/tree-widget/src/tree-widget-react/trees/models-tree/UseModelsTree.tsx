@@ -123,7 +123,14 @@ export interface UseModelsTreeProps {
 interface UseModelsTreeResult {
   treeProps: Pick<
     VisibilityTreeProps,
-    "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent" | "selectionPredicate"
+    | "treeName"
+    | "getHierarchyDefinition"
+    | "getSearchPaths"
+    | "visibilityHandlerFactory"
+    | "highlightText"
+    | "emptyTreeContent"
+    | "selectionPredicate"
+    | "onNodeExpanded"
   >;
   getTreeItemProps: Required<ExtendedVisibilityTreeRendererProps>["getTreeItemProps"];
 }
@@ -174,6 +181,11 @@ export function useModelsTree({
     componentId,
   });
 
+  const onNodeExpanded = useCallback(() => {
+    void idsCache.preloadElementModelCategories();
+    void idsCache.preloadModeledElements();
+  }, [idsCache]);
+
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache, hierarchyConfig: hierarchyConfiguration, componentId }),
     [idsCache, hierarchyConfiguration, componentId],
@@ -218,6 +230,7 @@ export function useModelsTree({
       ),
       highlightText: searchText,
       selectionPredicate: nodeSelectionPredicate,
+      onNodeExpanded,
     },
     getTreeItemProps: (node, rendererProps) => ({
       ...rendererProps.getTreeItemProps?.(node),

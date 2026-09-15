@@ -94,7 +94,7 @@ type ClassificationsTreeSearchError = "tooManySearchMatches" | "unknownSearchErr
 interface UseClassificationsTreeResult {
   treeProps: Pick<
     VisibilityTreeProps,
-    "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "getSearchPaths" | "emptyTreeContent" | "highlightText"
+    "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "getSearchPaths" | "emptyTreeContent" | "highlightText" | "onNodeExpanded"
   >;
   getTreeItemProps: Required<ExtendedVisibilityTreeRendererProps>["getTreeItemProps"];
 }
@@ -173,6 +173,10 @@ export function useClassificationsTree({
     };
   }, [searchText, getSearchPaths, onFeatureUsed]);
 
+  const onNodeExpanded = useCallback(() => {
+    void idsCache.preloadClassifications();
+  }, [idsCache]);
+
   return {
     treeProps: {
       treeName: ClassificationsTreeComponent.id,
@@ -181,6 +185,7 @@ export function useClassificationsTree({
       getSearchPaths: getPaths,
       emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(searchText, searchError, emptyTreeContent), [searchText, searchError, emptyTreeContent]),
       highlightText: searchText,
+      onNodeExpanded,
     },
     getTreeItemProps: (node, rendererProps) => ({
       ...rendererProps.getTreeItemProps?.(node),
