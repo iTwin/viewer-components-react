@@ -17,6 +17,7 @@ import { unifiedSelectionStorage } from "../SelectionStorage";
 import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
+import { IModelSelector } from "./IModelSelector";
 import { FormatManager } from "./quantity-formatting/FormatManager";
 import { statusBarActionsProvider, ViewerOptionsProvider } from "./ViewerOptions";
 
@@ -54,6 +55,7 @@ export function Viewer() {
   return (
     <ViewerOptionsProvider>
       <ViewerWithOptions />
+      <IModelSelector />
     </ViewerOptionsProvider>
   );
 }
@@ -61,7 +63,7 @@ export function Viewer() {
 function ViewerWithOptions() {
   const { client: authClient } = useAuthorizationContext();
   const { iTwinId, iModelId, changesetId } = useIModelInfo();
-  const [uiConfig, setUiConfig] = useState<UiProvidersConfig | undefined>();
+  const [uiConfig, setUiConfig] = useState<UiProvidersConfig | undefined>(() => (IModelApp.initialized ? getUiProvidersConfig() : undefined));
 
   const onIModelAppInit = useCallback(async () => {
     const providersConfig = getUiProvidersConfig();
