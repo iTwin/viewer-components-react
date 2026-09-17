@@ -54,21 +54,14 @@ import type {
   LimitingECSqlQueryExecutor,
   NodePostProcessor,
 } from "@itwin/presentation-hierarchies";
-import type {
-  EC,
-  ECClassHierarchyInspector,
-  ECSchemaProvider,
-  ECSqlQueryRow,
-  IInstanceLabelSelectClauseFactory,
-  InstanceKey,
-} from "@itwin/presentation-shared";
+import type { EC, ECSchemaProvider, ECSqlQueryRow, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
 import type { ClassificationId, ClassificationTableId, ElementId } from "../../shared/internal/Types.js";
 import type { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
 
 const MAX_SEARCH_INSTANCE_KEY_COUNT = 100;
 
 interface ClassificationsTreeDefinitionProps {
-  imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor & { imodelKey: string };
+  imodelAccess: ECSchemaProvider & LimitingECSqlQueryExecutor & { imodelKey: string };
   getIdsCache: (imodelKey: string) => ClassificationsTreeIdsCache;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
 }
@@ -99,7 +92,7 @@ export interface ClassificationsTreeHierarchyConfiguration {
 }
 
 interface ClassificationsTreeInstanceKeyPathsBaseProps {
-  imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
+  imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom"> & LimitingECSqlQueryExecutor;
   limit?: number | "unbounded";
   idsCache: ClassificationsTreeIdsCache;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
@@ -126,7 +119,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
   public constructor(props: ClassificationsTreeDefinitionProps) {
     this.#props = props;
     this.#impl = createPredicateBasedHierarchyDefinition({
-      classHierarchyInspector: props.imodelAccess,
+      imodelAccess: props.imodelAccess,
       hierarchy: {
         rootNodes: async (requestProps: DefineRootHierarchyLevelProps) => this.#createClassificationTablesQuery(requestProps),
         childNodes: [
@@ -504,7 +497,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
       defer(() => {
         const componentInfo = { componentId: props.componentId ?? Guid.createValue(), componentName: this.#componentName };
         if ("label" in props) {
-          const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
+          const labelsFactory = createBisInstanceLabelSelectClauseFactory({ imodelAccess: props.imodelAccess });
           return createInstanceKeyPathsFromInstanceLabelObs({ ...props, ...componentInfo, labelsFactory });
         }
         return createInstanceKeyPathsFromTargetItemsObs({ ...props, ...componentInfo });
@@ -795,7 +788,7 @@ function createSearchPathsForDifferentTypes(
 
 function createGeometricElementInstanceKeyPaths(props: {
   idsCache: ClassificationsTreeIdsCache;
-  imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
+  imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom"> & LimitingECSqlQueryExecutor;
   targetItems: Id64Array;
   componentId: GuidString;
   componentName: string;

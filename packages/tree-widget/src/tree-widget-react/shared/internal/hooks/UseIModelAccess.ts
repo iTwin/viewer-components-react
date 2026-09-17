@@ -6,7 +6,6 @@
 import { useMemo } from "react";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 import { useLogger } from "../../contexts/LoggerContext.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -42,11 +41,10 @@ export function useIModelAccess({ imodel, treeName, imodelAccess: providedIModel
 
 /** @internal */
 export function createIModelAccess({ imodel, hierarchyLevelSizeLimit }: { imodel: IModelConnection; hierarchyLevelSizeLimit: number | "unbounded" }) {
-  const schemaProvider = createECSchemaProvider(imodel.schemaContext);
+  const schemaProvider = createECSchemaProvider(imodel);
   return {
     imodelKey: imodel.key,
     ...schemaProvider,
-    ...createCachingECClassHierarchyInspector({ schemaProvider, cacheSize: 100 }),
     ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(imodel), hierarchyLevelSizeLimit),
   };
 }

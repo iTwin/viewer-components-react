@@ -64,16 +64,7 @@ import type {
   NodePostProcessor,
   NodePreProcessor,
 } from "@itwin/presentation-hierarchies";
-import type {
-  EC,
-  ECClassHierarchyInspector,
-  ECSchemaProvider,
-  ECSqlBinding,
-  ECSqlQueryRow,
-  IInstanceLabelSelectClauseFactory,
-  InstanceKey,
-  Props,
-} from "@itwin/presentation-shared";
+import type { EC, ECSchemaProvider, ECSqlBinding, ECSqlQueryRow, IInstanceLabelSelectClauseFactory, InstanceKey, Props } from "@itwin/presentation-shared";
 import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategoryId } from "../../shared/internal/Types.js";
 import type { DeepRequired } from "../../shared/internal/Utils.js";
 import type { CachedCategoryInfo, CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
@@ -82,14 +73,14 @@ import type { CategoryNodeProps, ElementNodeProps } from "./internal/CategoriesT
 const MAX_SEARCH_INSTANCE_KEY_COUNT = 100;
 
 interface CategoriesTreeDefinitionProps {
-  imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
+  imodelAccess: ECSchemaProvider & LimitingECSqlQueryExecutor;
   viewType: "2d" | "3d";
   idsCache: CategoriesTreeIdsCache;
   hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
 }
 
 interface CategoriesTreeInstanceKeyPathsBaseProps {
-  imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
+  imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom"> & LimitingECSqlQueryExecutor;
   limit?: number | "unbounded";
   viewType: "2d" | "3d";
   idsCache: CategoriesTreeIdsCache;
@@ -186,7 +177,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   #idsCache: CategoriesTreeIdsCache;
   #hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
   #excludedClasses?: EC.FullClassNameDotNotation[];
-  #iModelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
+  #iModelAccess: ECSchemaProvider & LimitingECSqlQueryExecutor;
   #categoryClass: EC.FullClassNameDotNotation;
   #categoryElementClass: EC.FullClassNameDotNotation;
   #categoryModelClass: EC.FullClassNameDotNotation;
@@ -310,7 +301,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     this.#impl ??= (async () => {
       const isDefinitionContainerSupported = await firstValueFrom(this.#idsCache.getIsDefinitionContainerSupported());
       return createPredicateBasedHierarchyDefinition({
-        classHierarchyInspector: this.#iModelAccess,
+        imodelAccess: this.#iModelAccess,
         hierarchy: {
           rootNodes: async (requestProps: DefineRootHierarchyLevelProps) => this.createDefinitionContainersAndCategoriesQuery(requestProps),
           childNodes: [
@@ -1251,7 +1242,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   public static createInstanceKeyPaths(
     props: CategoriesTreeInstanceKeyPathsFromInstanceLabelProps,
   ): AsyncIterableIterator<{ path: HierarchyNodeIdentifiersPath; target: Id64String }> {
-    const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
+    const labelsFactory = createBisInstanceLabelSelectClauseFactory({ imodelAccess: props.imodelAccess });
     return eachValueFrom(
       createInstanceKeyPathsFromInstanceLabel({
         ...props,

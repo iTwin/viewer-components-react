@@ -10,7 +10,6 @@ import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/present
 import { createLimitingECSqlQueryExecutor, createMergedIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { useTree } from "@itwin/presentation-hierarchies-react";
 import { StrataKitTreeRenderer } from "@itwin/presentation-hierarchies-react/stratakit";
-import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 import { useClassificationsTreeDefinition } from "@itwin/tree-widget-react";
 
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -69,21 +68,17 @@ function CustomClassificationTreeImpl({
   searchText?: string;
 }) {
   const latestAccess = useMemo(() => {
-    const schemaProvider = createECSchemaProvider(latestIModel.schemaContext);
     return {
       imodelKey: latestIModel.key,
-      ...createECSchemaProvider(latestIModel.schemaContext),
-      ...createCachingECClassHierarchyInspector({ schemaProvider, cacheSize: 100 }),
+      ...createECSchemaProvider(latestIModel),
       ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(latestIModel), 1000),
     };
   }, [latestIModel]);
 
   const checkpointAccess = useMemo(() => {
-    const schemaProvider = createECSchemaProvider(checkpointIModel.schemaContext);
     return {
       imodelKey: checkpointIModel.key,
-      ...createECSchemaProvider(checkpointIModel.schemaContext),
-      ...createCachingECClassHierarchyInspector({ schemaProvider, cacheSize: 100 }),
+      ...createECSchemaProvider(checkpointIModel),
       ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(checkpointIModel), 1000),
     };
   }, [checkpointIModel]);
