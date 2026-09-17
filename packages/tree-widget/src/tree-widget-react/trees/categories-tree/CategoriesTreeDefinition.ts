@@ -64,15 +64,7 @@ import type {
   NodePostProcessor,
   NodePreProcessor,
 } from "@itwin/presentation-hierarchies";
-import type {
-  EC,
-  ECSchemaProvider,
-  ECSqlBinding,
-  ECSqlQueryRow,
-  IInstanceLabelSelectClauseFactory,
-  InstanceKey,
-  Props,
-} from "@itwin/presentation-shared";
+import type { EC, ECSchemaProvider, ECSqlBinding, ECSqlQueryRow, IInstanceLabelSelectClauseFactory, InstanceKey, Props } from "@itwin/presentation-shared";
 import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategoryId } from "../../shared/internal/Types.js";
 import type { DeepRequired } from "../../shared/internal/Utils.js";
 import type { CachedCategoryInfo, CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";

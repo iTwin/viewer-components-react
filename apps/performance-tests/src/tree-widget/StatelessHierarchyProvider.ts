@@ -15,10 +15,7 @@ import type { CategoriesTreeIdsCache, ModelsTreeIdsCache } from "@itwin/tree-wid
 
 interface ProviderOptionsBase {
   rowLimit?: number | "unbounded";
-  getHierarchyFactory(
-    imodelAccess: ECSchemaProvider,
-    idsCache?: typeof ModelsTreeIdsCache | typeof CategoriesTreeIdsCache,
-  ): HierarchyDefinition;
+  getHierarchyFactory(imodelAccess: ECSchemaProvider, idsCache?: typeof ModelsTreeIdsCache | typeof CategoriesTreeIdsCache): HierarchyDefinition;
   search?: {
     paths: HierarchySearchTree[];
   };

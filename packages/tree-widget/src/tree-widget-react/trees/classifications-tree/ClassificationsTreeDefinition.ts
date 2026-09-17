@@ -54,13 +54,7 @@ import type {
   LimitingECSqlQueryExecutor,
   NodePostProcessor,
 } from "@itwin/presentation-hierarchies";
-import type {
-  EC,
-  ECSchemaProvider,
-  ECSqlQueryRow,
-  IInstanceLabelSelectClauseFactory,
-  InstanceKey,
-} from "@itwin/presentation-shared";
+import type { EC, ECSchemaProvider, ECSqlQueryRow, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
 import type { ClassificationId, ClassificationTableId, ElementId } from "../../shared/internal/Types.js";
 import type { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
 
