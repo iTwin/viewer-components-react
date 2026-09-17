@@ -142,7 +142,7 @@
     "fast-xml-parser": "^5.7.3",
     "http-server": "^14.1.1",
     "jsdom": "^29.1.1",
-    "playwright": "^1.56.1",
+    "playwright": "1.56.1",
     "postcss": "^8.5.14",
     "raf": "^3.4.1",
     "react": "^18.3.1",

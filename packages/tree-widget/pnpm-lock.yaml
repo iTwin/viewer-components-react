@@ -171,7 +171,7 @@ importers:
         version: 6.1.1(babel-plugin-react-compiler@1.0.0)(vite@8.3.0(@types/node@22.20.2)(sass@1.99.0)(yaml@2.9.1))
       '@vitest/browser-playwright':
         specifier: ^4.1.10
-        version: 4.1.11(playwright@1.63.0)(vite@8.3.0(@types/node@22.20.2)(sass@1.99.0)(yaml@2.9.1))(vitest@4.1.11)
+        version: 4.1.11(playwright@1.56.1)(vite@8.3.0(@types/node@22.20.2)(sass@1.99.0)(yaml@2.9.1))(vitest@4.1.11)
       '@vitest/coverage-v8':
         specifier: ^4.1.10
         version: 4.1.11(@vitest/browser@4.1.11)(vitest@4.1.11)
@@ -221,8 +221,8 @@ importers:
         specifier: ^29.1.1
         version: 29.1.1
       playwright:
-        specifier: ^1.56.1
-        version: 1.63.0
+        specifier: 1.56.1
+        version: 1.56.1
       postcss:
         specifier: ^8.5.14
         version: 8.5.28
@@ -4003,19 +4003,9 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  playwright-core@1.63.0:
-    resolution: {integrity: sha512-rYCsBF/M5HjUch52bbtVONEFjv6Xu8sm8h72dNlR5bzIE1fvC/bxgspzkjSfU+MweEMmPM8KJebG6nnyxo5mCg==}
-    engines: {node: '>=20'}
-    hasBin: true
-
   playwright@1.56.1:
     resolution: {integrity: sha512-aFi5B0WovBHTEvpM3DzXTUaeN6eN0qWnTkKx4NQaH4Wvcmc153PdaY2UBdSYKaGYw+UyWXSVyxDUg5DoPEttjw==}
     engines: {node: '>=18'}
-    hasBin: true
-
-  playwright@1.63.0:
-    resolution: {integrity: sha512-+7ziBLidS4NaNCdt57SUDT+wYmmd5fmiQejUic/kb+YsYSCPyOOE9sebzMjNmQrsnNpDJqd4WHvV/8lfKfUDUg==}
-    engines: {node: '>=20'}
     hasBin: true
 
   pngjs@7.0.0:
@@ -6975,11 +6965,11 @@ snapshots:
     optionalDependencies:
       babel-plugin-react-compiler: 1.0.0
 
-  '@vitest/browser-playwright@4.1.11(playwright@1.63.0)(vite@8.3.0(@types/node@22.20.2)(sass@1.99.0)(yaml@2.9.1))(vitest@4.1.11)':
+  '@vitest/browser-playwright@4.1.11(playwright@1.56.1)(vite@8.3.0(@types/node@22.20.2)(sass@1.99.0)(yaml@2.9.1))(vitest@4.1.11)':
     dependencies:
       '@vitest/browser': 4.1.11(vite@8.3.0(@types/node@22.20.2)(sass@1.99.0)(yaml@2.9.1))(vitest@4.1.11)
       '@vitest/mocker': 4.1.11(vite@8.3.0(@types/node@22.20.2)(sass@1.99.0)(yaml@2.9.1))
-      playwright: 1.63.0
+      playwright: 1.56.1
       tinyrainbow: 3.1.1
       vitest: 4.1.11(@types/node@22.20.2)(@vitest/browser-playwright@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@29.1.1)(vite@8.3.0(@types/node@22.20.2)(sass@1.99.0)(yaml@2.9.1))
     transitivePeerDependencies:
@@ -9206,17 +9196,11 @@ snapshots:
 
   playwright-core@1.56.1: {}
 
-  playwright-core@1.63.0: {}
-
   playwright@1.56.1:
     dependencies:
       playwright-core: 1.56.1
     optionalDependencies:
       fsevents: 2.3.2
-
-  playwright@1.63.0:
-    dependencies:
-      playwright-core: 1.63.0
 
   pngjs@7.0.0: {}
 
@@ -10189,7 +10173,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.20.2
-      '@vitest/browser-playwright': 4.1.11(playwright@1.63.0)(vite@8.3.0(@types/node@22.20.2)(sass@1.99.0)(yaml@2.9.1))(vitest@4.1.11)
+      '@vitest/browser-playwright': 4.1.11(playwright@1.56.1)(vite@8.3.0(@types/node@22.20.2)(sass@1.99.0)(yaml@2.9.1))(vitest@4.1.11)
       '@vitest/coverage-v8': 4.1.11(@vitest/browser@4.1.11)(vitest@4.1.11)
       jsdom: 29.1.1
     transitivePeerDependencies:

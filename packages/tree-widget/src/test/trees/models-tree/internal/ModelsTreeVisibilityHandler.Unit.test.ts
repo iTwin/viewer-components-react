@@ -26,7 +26,7 @@ import {
 import type { Id64String } from "@itwin/core-bentley";
 import type { QueryBinder } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
+import type { ECSchemaProvider } from "@itwin/presentation-shared";
 import type { Visibility } from "../../../../tree-widget-react/shared/internal/Tooltip.js";
 import type { TreeWidgetViewport } from "../../../../tree-widget-react/shared/TreeWidgetViewport.js";
 import type { ModelsTreeVisibilityHandlerProps } from "../../../../tree-widget-react/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
@@ -55,7 +55,7 @@ describe("ModelsTreeVisibilityHandler", () => {
     return idsCache;
   }
   describe("#unit", () => {
-    function createFakeIModelAccess(): ECClassHierarchyInspector {
+    function createFakeIModelAccess(): Pick<ECSchemaProvider, "classDerivesFrom"> {
       return {
         classDerivesFrom: vi.fn(() => false),
       };
