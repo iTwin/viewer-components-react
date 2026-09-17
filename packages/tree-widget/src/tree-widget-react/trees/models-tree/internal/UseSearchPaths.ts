@@ -16,7 +16,7 @@ import { ModelsTreeNode } from "../ModelsTreeNode.js";
 
 import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
+import type { ECSchemaProvider, InstanceKey } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../../../shared/components/VisibilityTree.js";
 import type { ClassGroupingHierarchyNode, ElementsGroupInfo, RequiredModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
 import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache.js";
@@ -115,7 +115,7 @@ export function useSearchPaths({
   }, [idsCache, hierarchyConfig, getSubTreePaths, componentId]);
 
   const getPaths = useMemo<VisibilityTreeProps["getSearchPaths"] | undefined>(() => {
-    const handlePaths = async (searchPaths: HierarchySearchTree[] | undefined, classInspector: ECClassHierarchyInspector) => {
+    const handlePaths = async (searchPaths: HierarchySearchTree[] | undefined, classInspector: Pick<ECSchemaProvider, "classDerivesFrom">) => {
       onSearchPathsChanged(searchPaths);
       if (!onModelsFiltered) {
         return;
@@ -249,7 +249,7 @@ export function useSearchPaths({
   };
 }
 
-async function getModels(trees: HierarchySearchTree[], idsCache: ModelsTreeIdsCache, classInspector: ECClassHierarchyInspector) {
+async function getModels(trees: HierarchySearchTree[], idsCache: ModelsTreeIdsCache, classInspector: Pick<ECSchemaProvider, "classDerivesFrom">) {
   const targetModelIds = new Set<Id64String>();
   const targetSubjectIds = new Set<Id64String>();
 

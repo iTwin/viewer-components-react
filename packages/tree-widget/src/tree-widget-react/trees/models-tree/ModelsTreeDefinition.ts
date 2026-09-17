@@ -51,7 +51,6 @@ import type {
 } from "@itwin/presentation-hierarchies";
 import type {
   EC,
-  ECClassHierarchyInspector,
   ECSchemaProvider,
   ECSqlBinding,
   ECSqlQueryDef,
@@ -157,7 +156,7 @@ export const defaultHierarchyConfiguration: RequiredModelsTreeHierarchyConfigura
 };
 
 interface ModelsTreeDefinitionProps {
-  imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
+  imodelAccess: ECSchemaProvider & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
   hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
   componentId?: GuidString;
@@ -179,7 +178,7 @@ export interface ElementsGroupInfo {
 }
 
 interface ModelsTreeInstanceKeyPathsBaseProps {
-  imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
+  imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom"> & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
   hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
   limit?: number | "unbounded";
@@ -218,7 +217,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   public constructor(props: ModelsTreeDefinitionProps) {
     this.#hierarchyConfig = props.hierarchyConfig;
     this.#impl = createPredicateBasedHierarchyDefinition({
-      classHierarchyInspector: props.imodelAccess,
+      imodelAccess: props.imodelAccess,
       hierarchy: {
         rootNodes: async (requestProps) =>
           this.createSubjectChildrenQuery({
@@ -879,7 +878,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       defer(() => {
         const componentInfo = { componentId: props.componentId ?? Guid.createValue(), componentName: this.#componentName };
         if (ModelsTreeInstanceKeyPathsProps.isLabelProps(props)) {
-          const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
+          const labelsFactory = createBisInstanceLabelSelectClauseFactory({ imodelAccess: props.imodelAccess });
           return createInstanceKeyPathsFromInstanceLabelObs({ ...props, ...componentInfo, labelsFactory });
         }
         return createInstanceKeyPathsFromTargetItemsObs({ ...props, ...componentInfo });

@@ -1206,7 +1206,7 @@ const getHierarchyDefinition: TreeProps["getHierarchyDefinition"] = ({ imodelAcc
   // create a hierarchy definition that defines what should be shown in the tree
   // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/learning/imodel/HierarchyDefinition.md
   return createPredicateBasedHierarchyDefinition({
-    classHierarchyInspector: imodelAccess,
+    imodelAccess,
     hierarchy: {
       // For root nodes, select all BisCore.GeometricModel3d instances
       rootNodes: async ({ createSelectClause }) => [
@@ -1275,7 +1275,7 @@ const getHierarchyDefinition: VisibilityTreeProps["getHierarchyDefinition"] = ({
   // create a hierarchy definition that defines what should be shown in the tree
   // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/learning/imodel/HierarchyDefinition.md
   return createPredicateBasedHierarchyDefinition({
-    classHierarchyInspector: imodelAccess,
+    imodelAccess,
     hierarchy: {
       // For root nodes, select all BisCore.GeometricModel3d instances
       rootNodes: async ({ createSelectClause }) => [
