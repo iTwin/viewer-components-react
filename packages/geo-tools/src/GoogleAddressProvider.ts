@@ -73,20 +73,19 @@ export class GoogleAddressProvider implements AddressProvider {
       } });
     const json: any = await response.json();
 
-    // Google Address Validation API response shape: { location: { latitude, longitude } }
-    // @see https://developers.google.com/maps/documentation/address-validation/reference/rest/v1/TopLevel/validateAddress#Location
+    // Google Places API (New) Place response.
+    // @see https://developers.google.com/maps/documentation/places/web-service/reference/rest/v1/places#Place
     const lat = json?.location?.latitude
-      // Google Geocoding API response shape: { result: { geometry: { location: { lat, lng } } } }
-      // @see https://developers.google.com/maps/documentation/geocoding/requests-geocoding#Results
+      // Provider wrapper response containing a Google Geocoding result.
       ?? json?.result?.geometry?.location?.lat
-      // Legacy/wrapper format: { location: { geometry: { latitude, longitude } } }
+      // Legacy provider wrapper response.
       ?? json?.location?.geometry?.latitude;
 
     const long = json?.location?.longitude
       ?? json?.result?.geometry?.location?.lng
       ?? json?.location?.geometry?.longitude;
 
-    if (lat === undefined || long === undefined) {
+    if (typeof lat !== "number" || !Number.isFinite(lat) || typeof long !== "number" || !Number.isFinite(long)) {
       throw new Error("Invalid location data");
     }
     return Cartographic.fromDegrees({longitude: long, latitude: lat});
