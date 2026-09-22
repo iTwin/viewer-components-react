@@ -66,8 +66,8 @@
     "@stratakit/icons": "^0.4.0",
     "@stratakit/mui": "^0.5.3",
     "@stratakit/structures": "^0.5.6",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
   },
   "dependencies": {
     "@itwin/presentation-core-interop": "2.0.0-alpha.3",
