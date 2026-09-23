@@ -144,7 +144,10 @@ export function useCategoriesTree({
       getHierarchyDefinition,
       getSearchPaths: getPaths,
       visibilityHandlerFactory,
-      emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(searchText, searchError, emptyTreeContent), [searchText, searchError, emptyTreeContent]),
+      emptyTreeContent: useMemo(
+        (): ReactNode => getEmptyTreeContentComponent(searchText, searchError, emptyTreeContent),
+        [searchText, searchError, emptyTreeContent],
+      ),
       highlightText: searchText,
       onNodeExpanded,
     },
@@ -157,7 +160,7 @@ export function useCategoriesTree({
   };
 }
 
-function getEmptyTreeContentComponent(searchText?: string, error?: CategoriesTreeSearchError, emptyTreeContent?: React.ReactNode) {
+function getEmptyTreeContentComponent(searchText?: string, error?: CategoriesTreeSearchError, emptyTreeContent?: React.ReactNode): ReactNode {
   if (error) {
     if (error === "tooManySearchMatches") {
       return <TooManySearchMatches base={"categoriesTree"} />;

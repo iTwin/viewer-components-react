@@ -225,7 +225,7 @@ export function useModelsTree({
       getHierarchyDefinition,
       getSearchPaths: getPaths,
       emptyTreeContent: useMemo(
-        () => getEmptyTreeContentComponent(searchText, subTreeError, searchError, emptyTreeContent),
+        (): ReactNode => getEmptyTreeContentComponent(searchText, subTreeError, searchError, emptyTreeContent),
         [searchText, subTreeError, searchError, emptyTreeContent],
       ),
       highlightText: searchText,
@@ -267,7 +267,7 @@ function getEmptyTreeContentComponent(
   subTreeError?: ModelsTreeSubTreeError,
   error?: ModelsTreeSearchError,
   emptyTreeContent?: React.ReactNode,
-) {
+): ReactNode {
   if (isSubTreeError(subTreeError)) {
     return <SubTreeError base={"modelsTree"} error={subTreeError} />;
   }

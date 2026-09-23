@@ -183,7 +183,10 @@ export function useClassificationsTree({
       getHierarchyDefinition: useCallback(() => definition, [definition]),
       visibilityHandlerFactory,
       getSearchPaths: getPaths,
-      emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(searchText, searchError, emptyTreeContent), [searchText, searchError, emptyTreeContent]),
+      emptyTreeContent: useMemo(
+        (): ReactNode => getEmptyTreeContentComponent(searchText, searchError, emptyTreeContent),
+        [searchText, searchError, emptyTreeContent],
+      ),
       highlightText: searchText,
       onNodeExpanded,
     },
@@ -195,7 +198,7 @@ export function useClassificationsTree({
   };
 }
 
-function getEmptyTreeContentComponent(searchText?: string, error?: ClassificationsTreeSearchError, emptyTreeContent?: React.ReactNode) {
+function getEmptyTreeContentComponent(searchText?: string, error?: ClassificationsTreeSearchError, emptyTreeContent?: React.ReactNode): ReactNode {
   if (error) {
     if (error === "tooManySearchMatches") {
       return <TooManySearchMatches base={"classificationsTree"} />;
