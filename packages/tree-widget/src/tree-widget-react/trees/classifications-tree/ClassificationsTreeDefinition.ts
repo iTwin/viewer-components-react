@@ -32,6 +32,7 @@ import {
   CLASS_NAME_ElementHasClassifications,
   CLASS_NAME_GeometricElement,
   CLASS_NAME_GeometricElement3d,
+  CLASS_NAME_Model,
 } from "../../shared/internal/ClassNameDefinitions.js";
 import { eachValueFrom } from "../../shared/internal/EachValueFrom.js";
 import { catchBeSQLiteInterrupts } from "../../shared/internal/hooks/UseErrorState.js";
@@ -285,12 +286,15 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
           ecsql: `
             SELECT ${await this.#createElementSelectClause({ createSelectClause })}
             FROM ${elementsInstanceFilterClauses.from} this
+            JOIN ${CLASS_NAME_Model} m ON m.ECInstanceId = this.Model.Id
             JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = this.ECInstanceId
             JOIN IdSet(?) parentClassificationIdSet ON ehc.TargetECInstanceId = parentClassificationIdSet.id
             ${elementsInstanceFilterClauses.joins}
             ${createWhereClause({
               conditions: [
                 "this.Parent.Id IS NULL",
+                "NOT m.IsPrivate",
+                "NOT m.IsTemplate",
                 createExcludedClassesClause({ alias: "this", excludedClassNames: this.#props.hierarchyConfig.elements?.excludedClasses }),
                 elementsInstanceFilterClauses.where,
               ],
@@ -376,11 +380,14 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     const hasElements = `
       SELECT 1
       FROM ${CLASS_NAME_GeometricElement3d} e
+      JOIN ${CLASS_NAME_Model} m ON m.ECInstanceId = e.Model.Id
       JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = e.ECInstanceId
       ${createWhereClause({
         conditions: [
           "ehc.TargetECInstanceId = this.ECInstanceId",
           "e.Parent.Id IS NULL",
+          "NOT m.IsPrivate",
+          "NOT m.IsTemplate",
           createExcludedClassesClause({ alias: "e", excludedClassNames: this.#props.hierarchyConfig.elements?.excludedClasses }),
         ],
       })}
