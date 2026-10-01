@@ -22,7 +22,7 @@ import { ILogger } from '@itwin/presentation-shared';
 import { IModelConnection } from '@itwin/core-frontend';
 import { InstanceKey } from '@itwin/presentation-shared';
 import { InstancesNodeKey } from '@itwin/presentation-hierarchies';
-import { JSX as JSX_2 } from 'react';
+import { JSX } from 'react';
 import { Localization } from '@itwin/core-common';
 import { NonGroupingHierarchyNode } from '@itwin/presentation-hierarchies';
 import { PropsWithChildren } from 'react';
@@ -100,7 +100,7 @@ interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "select
 // @public (undocumented)
 interface CategoriesTreeComponentType {
     // (undocumented)
-    (props: CategoriesTreeComponentProps): JSX_2.Element | null;
+    (props: CategoriesTreeComponentProps): JSX.Element | null;
     getLabel(input: {
         standardLabels: StandardTreeLabels;
     }): string;
@@ -318,7 +318,7 @@ interface ExternalSourcesTreeComponentProps extends Pick<ExternalSourcesTreeProp
 // @beta (undocumented)
 interface ExternalSourcesTreeComponentType {
     // (undocumented)
-    (props: ExternalSourcesTreeComponentProps): JSX_2.Element | null;
+    (props: ExternalSourcesTreeComponentProps): JSX.Element | null;
     getLabel(input: {
         standardLabels: StandardTreeLabels;
     }): string;
@@ -383,7 +383,7 @@ interface IModelContentTreeComponentProps extends Pick<IModelContentTreeProps, "
 // @beta (undocumented)
 interface IModelContentTreeComponentType {
     // (undocumented)
-    (props: IModelContentTreeComponentProps): JSX_2.Element | null;
+    (props: IModelContentTreeComponentProps): JSX.Element | null;
     getLabel(input: {
         standardLabels: StandardTreeLabels;
     }): string;
@@ -420,7 +420,7 @@ interface LoadedTreeItemVisibilityButtonState {
 export const LOCALIZATION_NAMESPACES: string[];
 
 // @beta
-export function LocalizationContextProvider(input: PropsWithChildren<LocalizationContextProviderProps>): JSX_2.Element;
+export function LocalizationContextProvider(input: PropsWithChildren<LocalizationContextProviderProps>): JSX.Element;
 
 // @beta
 interface LocalizationContextProviderProps {
@@ -451,7 +451,7 @@ interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "selectionStora
 // @public (undocumented)
 interface ModelsTreeComponentType {
     // (undocumented)
-    (props: ModelsTreeComponentProps): JSX_2.Element | null;
+    (props: ModelsTreeComponentProps): JSX.Element | null;
     getLabel(input: {
         standardLabels: StandardTreeLabels;
     }): string;

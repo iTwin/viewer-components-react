@@ -51,7 +51,7 @@ export function VisibilityTree({ visibilityHandlerFactory, treeRenderer, hierarc
       onReload={triggerRefresh}
       imodelAccess={imodelAccess}
       hierarchyLevelSizeLimit={currentHierarchyLevelSizeLimit}
-      treeRenderer={(treeProps) => treeRenderer({ ...treeProps, getVisibilityButtonState, onVisibilityButtonClick })}
+      treeRenderer={(treeProps): ReactNode => treeRenderer({ ...treeProps, getVisibilityButtonState, onVisibilityButtonClick })}
     />
   );
 }

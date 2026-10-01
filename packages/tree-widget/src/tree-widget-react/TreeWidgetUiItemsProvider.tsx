@@ -94,7 +94,7 @@ interface UseTreeStorageResult {
 
 function useTreeStorage(): UseTreeStorageResult {
   const ref = useRef<HTMLDivElement>(null);
-  const scrollTop = useRef<number | undefined>();
+  const scrollTop = useRef<number | undefined>(undefined);
 
   const getContainer = () => {
     return ref.current?.querySelector("#tw-tree-renderer");
