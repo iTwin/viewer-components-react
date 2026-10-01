@@ -76,7 +76,7 @@ export class ElementModelCategoriesCache {
             ${excludedClause ? `, MAX(IIF((${excludedClause}), 1, 0)) hasElementsFromNonExcludedClasses` : ""}
           FROM ${this.#elementClassName} this
           JOIN ${CLASS_NAME_Model} m ON m.ECInstanceId = this.Model.Id
-          WHERE m.IsPrivate = false
+          WHERE m.IsPrivate = false AND m.IsTemplate = false
           GROUP BY modelId, categoryId
         `;
       return this.#queryExecutor.createQueryReader(
