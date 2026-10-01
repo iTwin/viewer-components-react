@@ -74,6 +74,35 @@ describe("<ElementList />", () => {
     expect(getLabelsStub).toHaveBeenCalledWith(instanceKeys.slice(1000));
   });
 
+  it("does not overwrite current labels with an outdated load", async () => {
+    const firstRequest = createResolvablePromise<string[]>();
+    getLabelsStub.mockImplementation(async () => firstRequest.promise);
+    const firstInstanceKeys = [{ id: "0x1", className: "Schema:Class" }];
+    const { rerender, queryByText, getByText } = render(
+      <ElementList imodel={imodel} instanceKeys={firstInstanceKeys} onBack={() => {}} onSelect={() => {}} />,
+    );
+    await waitFor(() => expect(getLabelsStub).toHaveBeenCalled());
+
+    // start a newer load before the first one resolves
+    const secondRequest = createResolvablePromise<string[]>();
+    getLabelsStub.mockImplementation(async () => secondRequest.promise);
+    const secondInstanceKeys = [{ id: "0x2", className: "Schema:Class" }];
+    rerender(<ElementList imodel={imodel} instanceKeys={secondInstanceKeys} onBack={() => {}} onSelect={() => {}} />);
+
+    // resolve the newer load first and make sure it is rendered
+    await act(async () => {
+      await secondRequest.resolve(["Current-label"]);
+    });
+    getByText("Current-label");
+
+    // resolving the outdated load must not overwrite the current labels
+    await act(async () => {
+      await firstRequest.resolve(["Outdated-label"]);
+    });
+    expect(queryByText("Outdated-label")).toBeNull();
+    getByText("Current-label");
+  });
+
   it("invokes `onSelect` when item is clicked", async () => {
     const instanceKeys = Array(5)
       .fill(0)
