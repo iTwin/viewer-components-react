@@ -78,9 +78,7 @@ describe("<ElementList />", () => {
     const firstRequest = createResolvablePromise<string[]>();
     getLabelsStub.mockImplementation(async () => firstRequest.promise);
     const firstInstanceKeys = [{ id: "0x1", className: "Schema:Class" }];
-    const { rerender, queryByText, getByText } = render(
-      <ElementList imodel={imodel} instanceKeys={firstInstanceKeys} onBack={() => {}} onSelect={() => {}} />,
-    );
+    const { rerender, queryByText, getByText } = render(<ElementList imodel={imodel} instanceKeys={firstInstanceKeys} onBack={() => {}} onSelect={() => {}} />);
     await waitFor(() => expect(getLabelsStub).toHaveBeenCalled());
 
     // start a newer load before the first one resolves
