@@ -4,23 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { firstValueFrom } from "rxjs";
-import {
-  initializeCore,
-  insertPhysicalElement,
-  insertPhysicalModelWithPartition,
-  insertPhysicalPartition,
-  insertPhysicalSubModel,
-  insertSpatialCategory,
-  terminateCore,
-} from "test-utilities";
+import { initializeCore, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, terminateCore } from "test-utilities";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { withEditTxn } from "@itwin/core-backend";
-import { IModel } from "@itwin/core-common";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { ElementModelCategoriesCache } from "../../../tree-widget-react/shared/internal/caches/ElementModelCategoriesCache.js";
 import { CLASS_NAME_GeometricElement3d } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
-import { buildIModel } from "../../IModelUtils.js";
+import { buildIModel, insertGeometricModelWithPartition } from "../../IModelUtils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 
@@ -45,10 +36,8 @@ describe("ElementModelCategoriesCache", () => {
     await using buildIModelResult = await buildIModel(async (imodel) =>
       withEditTxn(imodel, (txn) => {
         const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
-        const partition = insertPhysicalPartition({ txn, codeValue: "private", parentId: IModel.rootSubjectId });
-        const privateModel = insertPhysicalSubModel({ txn, modeledElementId: partition.id, isPrivate: true });
-        const templatePartition = insertPhysicalPartition({ txn, codeValue: "template", parentId: IModel.rootSubjectId });
-        const templateModel = insertPhysicalSubModel({ txn, modeledElementId: templatePartition.id, isTemplate: true });
+        const privateModel = insertGeometricModelWithPartition({ txn, codeValue: "private", isPrivate: true });
+        const templateModel = insertGeometricModelWithPartition({ txn, codeValue: "template", isTemplate: true });
         const category = insertSpatialCategory({ txn, codeValue: "category" });
         insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id });
         insertPhysicalElement({ txn, modelId: privateModel.id, categoryId: category.id });
