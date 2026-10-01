@@ -21,7 +21,7 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { CLASS_NAME_Subject } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
-import { buildIModel, TestSchema } from "../../IModelUtils.js";
+import { buildIModel, insertGeometricModelWithPartition, TestSchema } from "../../IModelUtils.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 import { createAccessAndCache, createModelsTreeProvider } from "./Utils.js";
 
@@ -242,8 +242,12 @@ describe("ModelsTreeDefinition", () => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
           const category = insertSpatialCategory({ txn, codeValue: "category" });
           const templateSubject = insertSubject({ txn, codeValue: "template subject", parentId: rootSubject.id });
-          const templatePartition = insertPhysicalPartition({ txn, codeValue: "template model", parentId: templateSubject.id });
-          const templateModel = insertPhysicalSubModel({ txn, modeledElementId: templatePartition.id, isTemplate: true });
+          const templateModel = insertGeometricModelWithPartition({
+            txn,
+            codeValue: "template model",
+            partitionParentId: templateSubject.id,
+            isTemplate: true,
+          });
           insertPhysicalElement({ txn, userLabel: "element", modelId: templateModel.id, categoryId: category.id });
           insertSubject({
             txn,
@@ -252,8 +256,12 @@ describe("ModelsTreeDefinition", () => {
             jsonProperties: { Subject: { Model: { TargetPartition: templateModel.id } } },
           });
           const privateSubject = insertSubject({ txn, codeValue: "private subject", parentId: rootSubject.id });
-          const privatePartition = insertPhysicalPartition({ txn, codeValue: "private model", parentId: privateSubject.id });
-          const privateModel = insertPhysicalSubModel({ txn, modeledElementId: privatePartition.id, isPrivate: true });
+          const privateModel = insertGeometricModelWithPartition({
+            txn,
+            codeValue: "private model",
+            partitionParentId: privateSubject.id,
+            isPrivate: true,
+          });
           insertPhysicalElement({ txn, userLabel: "element", modelId: privateModel.id, categoryId: category.id });
           insertSubject({
             txn,
@@ -498,13 +506,10 @@ describe("ModelsTreeDefinition", () => {
     it("hides private and template models and their content", async () => {
       await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
-          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
           const category = insertSpatialCategory({ txn, codeValue: "category" });
-          const templatePartition = insertPhysicalPartition({ txn, codeValue: "template model", parentId: rootSubject.id });
-          const templateModel = insertPhysicalSubModel({ txn, modeledElementId: templatePartition.id, isTemplate: true });
+          const templateModel = insertGeometricModelWithPartition({ txn, codeValue: "template model", isTemplate: true });
           insertPhysicalElement({ txn, userLabel: "element", modelId: templateModel.id, categoryId: category.id });
-          const privatePartition = insertPhysicalPartition({ txn, codeValue: "private model", parentId: rootSubject.id });
-          const privateModel = insertPhysicalSubModel({ txn, modeledElementId: privatePartition.id, isPrivate: true });
+          const privateModel = insertGeometricModelWithPartition({ txn, codeValue: "private model", isPrivate: true });
           insertPhysicalElement({ txn, userLabel: "element", modelId: privateModel.id, categoryId: category.id });
         }),
       );

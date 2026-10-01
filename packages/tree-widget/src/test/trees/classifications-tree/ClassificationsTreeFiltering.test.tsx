@@ -3,17 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  insertPhysicalElement,
-  insertPhysicalModelWithPartition,
-  insertPhysicalPartition,
-  insertPhysicalSubModel,
-  insertSpatialCategory,
-} from "test-utilities";
+import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { withEditTxn } from "@itwin/core-backend";
 import { Id64 } from "@itwin/core-bentley";
-import { IModel } from "@itwin/core-common";
 import { act, renderHook } from "@testing-library/react";
 import { SharedTreeContextProvider } from "../../../tree-widget-react/shared/contexts/SharedTreeContext.js";
 import {
@@ -23,7 +16,7 @@ import {
 } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
 import { SearchLimitExceededError } from "../../../tree-widget-react/shared/TreeErrors.js";
 import { useClassificationsTreeDefinition } from "../../../tree-widget-react/trees/classifications-tree/UseClassificationsTreeDefinition.js";
-import { buildIModel } from "../../IModelUtils.js";
+import { buildIModel, insertGeometricModelWithPartition } from "../../IModelUtils.js";
 import { initializeITwinJs, terminateITwinJs } from "../../Initialize.js";
 import {
   importClassificationSchema,
@@ -63,8 +56,7 @@ describe("Classifications tree", () => {
           const element = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id, userLabel: "matching element" });
           insertElementHasClassificationsRelationship({ txn, elementId: element.id, classificationId: classification.id });
 
-          const templatePartition = insertPhysicalPartition({ txn, codeValue: "template model", parentId: IModel.rootSubjectId });
-          const templateModel = insertPhysicalSubModel({ txn, modeledElementId: templatePartition.id, isTemplate: true });
+          const templateModel = insertGeometricModelWithPartition({ txn, codeValue: "template model", isTemplate: true });
           const elementInTemplateModel = insertPhysicalElement({
             txn,
             modelId: templateModel.id,
@@ -73,8 +65,7 @@ describe("Classifications tree", () => {
           });
           insertElementHasClassificationsRelationship({ txn, elementId: elementInTemplateModel.id, classificationId: classification.id });
 
-          const privatePartition = insertPhysicalPartition({ txn, codeValue: "private model", parentId: IModel.rootSubjectId });
-          const privateModel = insertPhysicalSubModel({ txn, modeledElementId: privatePartition.id, isPrivate: true });
+          const privateModel = insertGeometricModelWithPartition({ txn, codeValue: "private model", isPrivate: true });
           const elementInPrivateModel = insertPhysicalElement({
             txn,
             modelId: privateModel.id,

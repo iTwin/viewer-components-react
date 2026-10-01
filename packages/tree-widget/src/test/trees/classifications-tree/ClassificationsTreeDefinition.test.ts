@@ -3,19 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  insertPhysicalElement,
-  insertPhysicalModelWithPartition,
-  insertPhysicalPartition,
-  insertPhysicalSubModel,
-  insertSpatialCategory,
-} from "test-utilities";
+import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
 import { afterAll, beforeAll, describe, it } from "vitest";
 import { withEditTxn } from "@itwin/core-backend";
-import { IModel } from "@itwin/core-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ClassificationsTreeDefinition } from "../../../tree-widget-react/trees/classifications-tree/ClassificationsTreeDefinition.js";
-import { buildIModel } from "../../IModelUtils.js";
+import { buildIModel, insertGeometricModelWithPartition } from "../../IModelUtils.js";
 import { initializeITwinJs, terminateITwinJs } from "../../Initialize.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 import {
@@ -53,14 +46,12 @@ describe("Classifications tree", () => {
           const element = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id });
           insertElementHasClassificationsRelationship({ txn, elementId: element.id, classificationId: sharedClassification.id });
 
-          const templatePartition = insertPhysicalPartition({ txn, codeValue: "template model", parentId: IModel.rootSubjectId });
-          const templateModel = insertPhysicalSubModel({ txn, modeledElementId: templatePartition.id, isTemplate: true });
+          const templateModel = insertGeometricModelWithPartition({ txn, codeValue: "template model", isTemplate: true });
           const templateElement = insertPhysicalElement({ txn, modelId: templateModel.id, categoryId: category.id });
           insertElementHasClassificationsRelationship({ txn, elementId: templateElement.id, classificationId: sharedClassification.id });
           insertElementHasClassificationsRelationship({ txn, elementId: templateElement.id, classificationId: excludedClassification.id });
 
-          const privatePartition = insertPhysicalPartition({ txn, codeValue: "private model", parentId: IModel.rootSubjectId });
-          const privateModel = insertPhysicalSubModel({ txn, modeledElementId: privatePartition.id, isPrivate: true });
+          const privateModel = insertGeometricModelWithPartition({ txn, codeValue: "private model", isPrivate: true });
           const privateElement = insertPhysicalElement({ txn, modelId: privateModel.id, categoryId: category.id });
           insertElementHasClassificationsRelationship({ txn, elementId: privateElement.id, classificationId: sharedClassification.id });
           insertElementHasClassificationsRelationship({ txn, elementId: privateElement.id, classificationId: excludedClassification.id });

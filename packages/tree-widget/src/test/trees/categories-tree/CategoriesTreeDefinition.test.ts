@@ -3,18 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  HierarchyCacheMode,
-  initializeCore,
-  insertDefinitionContainer,
-  insertDrawingPartition,
-  insertDrawingSubModel,
-  insertPhysicalPartition,
-  insertPhysicalSubModel,
-  insertSubCategory,
-  insertSubModel,
-  terminateCore,
-} from "test-utilities";
+import { HierarchyCacheMode, initializeCore, insertDefinitionContainer, insertSubCategory, insertSubModel, terminateCore } from "test-utilities";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { withEditTxn } from "@itwin/core-backend";
 import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
@@ -27,7 +16,7 @@ import { CLASS_NAME_DefinitionModel } from "../../../tree-widget-react/shared/in
 import { getClassesByView, mergeWithDefaults } from "../../../tree-widget-react/shared/internal/Utils.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "../../../tree-widget-react/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
-import { buildIModel, TestSchema } from "../../IModelUtils.js";
+import { buildIModel, insertGeometricModelWithPartition, TestSchema } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 import { createAccessAndCache, getInsertFunctionByViewType } from "./internal/Utils.js";
@@ -63,16 +52,13 @@ describe("Categories tree", () => {
       describe(`${viewType} view`, () => {
         const { insertCategory, insertElement, insertElementsModel, insertElementsSubModel, insertModeledElement } = getInsertFunctionByViewType(viewType);
         it("excludes private and template model content with and without preloaded caches", async () => {
-          const insertModelPartition = viewType === "3d" ? insertPhysicalPartition : insertDrawingPartition;
-          const insertModel = viewType === "3d" ? insertPhysicalSubModel : insertDrawingSubModel;
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
               const model = insertElementsModel({ txn, codeValue: "model" });
               const category = insertCategory({ txn, codeValue: "shared category" });
               const element = insertElement({ txn, modelId: model.id, categoryId: category.id });
 
-              const templatePartition = insertModelPartition({ txn, codeValue: "template model", parentId: IModel.rootSubjectId });
-              const templateModel = insertModel({ txn, modeledElementId: templatePartition.id, isTemplate: true });
+              const templateModel = insertGeometricModelWithPartition({ txn, codeValue: "template model", viewType, isTemplate: true });
               insertElement({ txn, modelId: templateModel.id, categoryId: category.id });
               const templateModelCategory = insertCategory({ txn, codeValue: "template model category" });
               insertElement({ txn, modelId: templateModel.id, categoryId: templateModelCategory.id });
@@ -81,8 +67,7 @@ describe("Categories tree", () => {
               const templateContainedCategory = insertCategory({ txn, codeValue: "contained category", modelId: templateDefinitionModel.id });
               insertElement({ txn, modelId: templateModel.id, categoryId: templateContainedCategory.id });
 
-              const privatePartition = insertModelPartition({ txn, codeValue: "private model", parentId: IModel.rootSubjectId });
-              const privateModel = insertModel({ txn, modeledElementId: privatePartition.id, isPrivate: true });
+              const privateModel = insertGeometricModelWithPartition({ txn, codeValue: "private model", viewType, isPrivate: true });
               insertElement({ txn, modelId: privateModel.id, categoryId: category.id });
               const privateModelCategory = insertCategory({ txn, codeValue: "private model category" });
               insertElement({ txn, modelId: privateModel.id, categoryId: privateModelCategory.id });
