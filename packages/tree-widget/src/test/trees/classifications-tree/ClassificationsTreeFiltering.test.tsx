@@ -16,7 +16,7 @@ import {
 } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
 import { SearchLimitExceededError } from "../../../tree-widget-react/shared/TreeErrors.js";
 import { useClassificationsTreeDefinition } from "../../../tree-widget-react/trees/classifications-tree/UseClassificationsTreeDefinition.js";
-import { buildIModel } from "../../IModelUtils.js";
+import { buildIModel, insertGeometricModelWithPartition } from "../../IModelUtils.js";
 import { initializeITwinJs, terminateITwinJs } from "../../Initialize.js";
 import {
   importClassificationSchema,
@@ -42,6 +42,66 @@ describe("Classifications tree", () => {
 
     afterAll(async () => {
       await terminateITwinJs();
+    });
+
+    it("excludes private and template model elements from label and target-item searches", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, async (txn) => {
+          await importClassificationSchema(imodel);
+          const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+          const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "table" });
+          const classification = insertClassification({ txn, modelId: table.id, codeValue: "classification" });
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
+          const element = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id, userLabel: "matching element" });
+          insertElementHasClassificationsRelationship({ txn, elementId: element.id, classificationId: classification.id });
+
+          const templateModel = insertGeometricModelWithPartition({ txn, codeValue: "template model", isTemplate: true });
+          const elementInTemplateModel = insertPhysicalElement({
+            txn,
+            modelId: templateModel.id,
+            categoryId: category.id,
+            userLabel: "matching element in template model",
+          });
+          insertElementHasClassificationsRelationship({ txn, elementId: elementInTemplateModel.id, classificationId: classification.id });
+
+          const privateModel = insertGeometricModelWithPartition({ txn, codeValue: "private model", isPrivate: true });
+          const elementInPrivateModel = insertPhysicalElement({
+            txn,
+            modelId: privateModel.id,
+            categoryId: category.id,
+            userLabel: "matching element in private model",
+          });
+          insertElementHasClassificationsRelationship({ txn, elementId: elementInPrivateModel.id, classificationId: classification.id });
+          return { table, classification, element, elementInTemplateModel, elementInPrivateModel };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      for (const search of [{ searchText: "matching", limit: 1 }, { targetItems: [keys.element, keys.elementInTemplateModel, keys.elementInPrivateModel] }]) {
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodelConnection],
+          hierarchyConfig: defaultHierarchyConfiguration,
+          search,
+        });
+        expect.soft(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
+          {
+            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: true },
+            children: [
+              {
+                identifier: { id: keys.classification.id, className: CLASS_NAME_Classification },
+                options: { autoExpand: true },
+                children: [
+                  {
+                    identifier: { id: keys.element.id, className: CLASS_NAME_GeometricElement3d },
+                    options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                  },
+                ],
+              },
+            ],
+          },
+        ]);
+      }
     });
 
     describe("label search limits", () => {

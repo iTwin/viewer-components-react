@@ -534,6 +534,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             ${createWhereClause({
               conditions: [
                 "NOT this.IsPrivate",
+                "NOT this.IsTemplate",
                 `this.ECInstanceId IN (
                   SELECT c.Model.Id
                   FROM ${this.#hierarchyConfig.elements.baseClass} c
@@ -706,6 +707,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                           conditions: [
                             "m.ECInstanceId = this.ECInstanceId",
                             "NOT m.IsPrivate",
+                            "NOT m.IsTemplate",
                             createExcludedClassesClause({ alias: "ce", excludedClassNames: this.#hierarchyConfig.elements.excludedClasses }),
                           ],
                         })}
@@ -1381,6 +1383,7 @@ function createInstanceKeyPathsFromInstanceLabelObs(
           ${createWhereClause({
             conditions: [
               "NOT m.IsPrivate",
+              "NOT m.IsTemplate",
               hierarchyConfig.models.withoutElements === "exclude" &&
                 `EXISTS (SELECT 1 FROM ${hierarchyConfig.elements.baseClass} WHERE Model.Id = m.ECInstanceId)`,
               "json_extract(e.JsonProperties, '$.PhysicalPartition.Model.Content') IS NULL",
