@@ -614,9 +614,17 @@ function createInstanceKeyPathsFromInstanceLabelObs({
                 this.ECInstanceId,
                 ${elementLabelSelectClause}
               FROM ${CLASS_NAME_GeometricElement3d} this
+              JOIN ${CLASS_NAME_Model} m ON m.ECInstanceId = this.Model.Id
               JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = this.ECInstanceId
               JOIN IdSet(?) classificationIdSet ON ehc.TargetECInstanceId = classificationIdSet.id
-              ${createWhereClause({ conditions: ["this.Parent.Id IS NULL", createExcludedClassesClause({ alias: "this", excludedClassNames: props.hierarchyConfig.elements?.excludedClasses })] })}
+              ${createWhereClause({
+                conditions: [
+                  "this.Parent.Id IS NULL",
+                  "NOT m.IsPrivate",
+                  "NOT m.IsTemplate",
+                  createExcludedClassesClause({ alias: "this", excludedClassNames: props.hierarchyConfig.elements?.excludedClasses }),
+                ],
+              })}
 
               UNION ALL
 
@@ -824,8 +832,11 @@ function createGeometricElementInstanceKeyPaths(props: {
           e.Parent.Id,
           '${ELEMENT_CLASS_NAME_QUERY_ALIAS}${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT)
         FROM  ${CLASS_NAME_Element} e
+        JOIN ${CLASS_NAME_Model} m ON m.ECInstanceId = e.Model.Id
         JOIN IdSet(?) targetItemIdSet ON e.ECInstanceId = targetItemIdSet.id
-        ${createWhereClause({ conditions: [createExcludedClassesClause({ alias: "e", excludedClassNames: excludedElementClassNames })] })}
+        ${createWhereClause({
+          conditions: ["NOT m.IsPrivate", "NOT m.IsTemplate", createExcludedClassesClause({ alias: "e", excludedClassNames: excludedElementClassNames })],
+        })}
 
         UNION ALL
 

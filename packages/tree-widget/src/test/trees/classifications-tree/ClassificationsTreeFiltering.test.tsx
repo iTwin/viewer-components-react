@@ -3,10 +3,17 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
+import {
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
+  insertPhysicalPartition,
+  insertPhysicalSubModel,
+  insertSpatialCategory,
+} from "test-utilities";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { withEditTxn } from "@itwin/core-backend";
 import { Id64 } from "@itwin/core-bentley";
+import { IModel } from "@itwin/core-common";
 import { act, renderHook } from "@testing-library/react";
 import { SharedTreeContextProvider } from "../../../tree-widget-react/shared/contexts/SharedTreeContext.js";
 import {
@@ -42,6 +49,68 @@ describe("Classifications tree", () => {
 
     afterAll(async () => {
       await terminateITwinJs();
+    });
+
+    it("excludes private and template model elements from label and target-item searches", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, async (txn) => {
+          await importClassificationSchema(imodel);
+          const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+          const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "table" });
+          const classification = insertClassification({ txn, modelId: table.id, codeValue: "classification" });
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
+          const element = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id, userLabel: "matching element" });
+          insertElementHasClassificationsRelationship({ txn, elementId: element.id, classificationId: classification.id });
+
+          const templatePartition = insertPhysicalPartition({ txn, codeValue: "template model", parentId: IModel.rootSubjectId });
+          const templateModel = insertPhysicalSubModel({ txn, modeledElementId: templatePartition.id, isTemplate: true });
+          const elementInTemplateModel = insertPhysicalElement({
+            txn,
+            modelId: templateModel.id,
+            categoryId: category.id,
+            userLabel: "matching element in template model",
+          });
+          insertElementHasClassificationsRelationship({ txn, elementId: elementInTemplateModel.id, classificationId: classification.id });
+
+          const privatePartition = insertPhysicalPartition({ txn, codeValue: "private model", parentId: IModel.rootSubjectId });
+          const privateModel = insertPhysicalSubModel({ txn, modeledElementId: privatePartition.id, isPrivate: true });
+          const elementInPrivateModel = insertPhysicalElement({
+            txn,
+            modelId: privateModel.id,
+            categoryId: category.id,
+            userLabel: "matching element in private model",
+          });
+          insertElementHasClassificationsRelationship({ txn, elementId: elementInPrivateModel.id, classificationId: classification.id });
+          return { table, classification, element, elementInTemplateModel, elementInPrivateModel };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      for (const search of [{ searchText: "matching", limit: 1 }, { targetItems: [keys.element, keys.elementInTemplateModel, keys.elementInPrivateModel] }]) {
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodelConnection],
+          hierarchyConfig: defaultHierarchyConfiguration,
+          search,
+        });
+        expect.soft(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
+          {
+            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: true },
+            children: [
+              {
+                identifier: { id: keys.classification.id, className: CLASS_NAME_Classification },
+                options: { autoExpand: true },
+                children: [
+                  {
+                    identifier: { id: keys.element.id, className: CLASS_NAME_GeometricElement3d },
+                    options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                  },
+                ],
+              },
+            ],
+          },
+        ]);
+      }
     });
 
     describe("label search limits", () => {
