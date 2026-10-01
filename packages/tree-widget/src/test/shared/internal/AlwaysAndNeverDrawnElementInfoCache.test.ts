@@ -314,7 +314,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const set = new Set(
         Array(ALWAYS_NEVER_BUFFER_THRESHOLD + 1)
           .fill(0)
-          .map((_, i) => `0x${i}`),
+          .map((_, i) => `0x${i + 1}`),
       );
 
       using vp = createFakeViewport({
@@ -327,7 +327,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const newSet = new Set(
         Array(ALWAYS_NEVER_BUFFER_THRESHOLD * 2 + 1)
           .fill(0)
-          .map((_, i) => `0x${i}`),
+          .map((_, i) => `0x${i + 1}`),
       );
       setterFunction(newSet, vp);
       // Second set contains more than twice the threshold, so there should be 3 new queries
@@ -344,7 +344,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const set = new Set(
         Array(ALWAYS_NEVER_BUFFER_THRESHOLD * 2 + 1)
           .fill(0)
-          .map((_, i) => `0x${i}`),
+          .map((_, i) => `0x${i + 1}`),
       );
 
       const queryStartedPromise = createResolvablePromise<void>();
@@ -375,7 +375,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const newSet = new Set(
         Array(ALWAYS_NEVER_BUFFER_THRESHOLD * 2 + 1)
           .fill(0)
-          .map((_, i) => `0x${i}`),
+          .map((_, i) => `0x${i + 1}`),
       );
 
       setterFunction(newSet, vp);
@@ -401,7 +401,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const set = new Set(
         Array(ALWAYS_NEVER_BUFFER_THRESHOLD * 2 + 1)
           .fill(0)
-          .map((_, i) => `0x${i}`),
+          .map((_, i) => `0x${i + 1}`),
       );
 
       const queryStartedPromise = createResolvablePromise<void>();
@@ -437,7 +437,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const newSet = new Set(
         Array(ALWAYS_NEVER_BUFFER_THRESHOLD + 1)
           .fill(0)
-          .map((_, i) => `0x${i}`),
+          .map((_, i) => `0x${i + 1}`),
       );
       setterFunction(newSet, vp);
       queryPausePromise.resolve();
@@ -457,7 +457,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const set = new Set(
         Array(ALWAYS_NEVER_BUFFER_THRESHOLD * 2 + 1)
           .fill(0)
-          .map((_, i) => `0x${i}`),
+          .map((_, i) => `0x${i + 1}`),
       );
 
       const queryStartedPromise = createResolvablePromise<void>();
@@ -494,7 +494,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       const newSet = new Set(
         Array(ALWAYS_NEVER_BUFFER_THRESHOLD * 3 + 1)
           .fill(0)
-          .map((_, i) => `0x${i}`),
+          .map((_, i) => `0x${i + 1}`),
       );
       setterFunction(newSet, vp);
       queryPausePromise.resolve();
