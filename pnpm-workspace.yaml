@@ -5,6 +5,14 @@ packages:
   - apps/performance-tests
 
 packageConfigs:
+  "@itwin/property-grid-react":
+    overrides:
+      "@playwright/test": 1.61.1
+      playwright: 1.61.1
+  "@itwin/tree-widget-react":
+    overrides:
+      "@playwright/test": 1.61.1
+      playwright: 1.61.1
   "test-viewer":
     overrides:
       "@itwin/itwinui-react@^2": "2.12.26"
