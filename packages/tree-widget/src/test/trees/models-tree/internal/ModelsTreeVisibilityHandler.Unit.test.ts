@@ -26,7 +26,7 @@ import {
 import type { Id64String } from "@itwin/core-bentley";
 import type { QueryBinder } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
+import type { ECSchemaProvider } from "@itwin/presentation-shared";
 import type { Visibility } from "../../../../tree-widget-react/shared/internal/Tooltip.js";
 import type { TreeWidgetViewport } from "../../../../tree-widget-react/shared/TreeWidgetViewport.js";
 import type { ModelsTreeVisibilityHandlerProps } from "../../../../tree-widget-react/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
@@ -55,7 +55,7 @@ describe("ModelsTreeVisibilityHandler", () => {
     return idsCache;
   }
   describe("#unit", () => {
-    function createFakeIModelAccess(): ECClassHierarchyInspector {
+    function createFakeIModelAccess(): Pick<ECSchemaProvider, "classDerivesFrom"> {
       return {
         classDerivesFrom: vi.fn(() => false),
       };
@@ -1248,9 +1248,8 @@ describe("ModelsTreeVisibilityHandler", () => {
             const modelId = "0x1";
             const node = createModelHierarchyNode({ modelId });
             using viewport = createFakeViewport({
-              // cspell:disable-next-line
-              alwaysDrawn: new Set(["abcd", "efgh"]),
-              neverDrawn: new Set(["1234", "3456"]),
+              alwaysDrawn: new Set(["0xa1", "0xa2"]),
+              neverDrawn: new Set(["0xb1", "0xb2"]),
             });
             using handlerResult = createHandler({
               viewport,
@@ -1277,22 +1276,22 @@ describe("ModelsTreeVisibilityHandler", () => {
             const neverDrawnElements = ["0x300", "0x400"];
             const otherModelId = "0xff";
             const otherCategoryId = "0x2";
-            const otherAlwaysDrawnElement = "abcd";
-            const otherNeverDrawnElement = "1234";
+            const otherAlwaysDrawnElement = "0xabc";
+            const otherNeverDrawnElement = "0xdef";
             const node = createModelHierarchyNode({ modelId });
             using viewport = createFakeViewport({
               alwaysDrawn: new Set([...alwaysDrawnElements, otherAlwaysDrawnElement]),
               neverDrawn: new Set([...neverDrawnElements, otherNeverDrawnElement]),
               queryHandler: vi.fn(async (_query: string, binder?: QueryBinder) => {
                 const ids = CompressedId64Set.decompressSet((binder?.serialize() as any)[1].value);
-                if (ids.size === 2 && alwaysDrawnElements.every((id) => ids.has(id))) {
+                if (ids.size === 3 && [...alwaysDrawnElements, otherAlwaysDrawnElement].every((id) => ids.has(id))) {
                   return [
                     ...alwaysDrawnElements.map((elementId) => ({ categoryElementPath: `${categoryId};${elementId}`, modelId })),
                     { categoryElementPath: `${otherCategoryId};${otherAlwaysDrawnElement}`, modelId: otherModelId },
                   ];
                 }
 
-                if (ids.size === 2 && neverDrawnElements.every((id) => ids.has(id))) {
+                if (ids.size === 3 && [...neverDrawnElements, otherNeverDrawnElement].every((id) => ids.has(id))) {
                   return [
                     ...neverDrawnElements.map((elementId) => ({ categoryElementPath: `${categoryId};${elementId}`, modelId })),
                     { categoryElementPath: `${otherCategoryId};${otherNeverDrawnElement}`, modelId: otherModelId },

@@ -17,7 +17,7 @@ import { createVisibilityChangeEventListener } from "../VisibilityChangeEventLis
 import type { Observable } from "rxjs";
 import type { GuidString } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, HierarchySearchTree, InstancesNodeKey } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
+import type { ECSchemaProvider } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../../components/VisibilityTree.js";
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
 import type { HierarchyVisibilityHandler, VisibilityStatus } from "../../UseHierarchyVisibility.js";
@@ -28,7 +28,7 @@ import type { IVisibilityChangeEventListener } from "../VisibilityChangeEventLis
 /** @internal */
 export interface CreateSearchResultsTreeProps<TCache> {
   idsCache: TCache;
-  imodelAccess: ECClassHierarchyInspector;
+  imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom">;
   searchPaths: HierarchySearchTree[];
 }
 

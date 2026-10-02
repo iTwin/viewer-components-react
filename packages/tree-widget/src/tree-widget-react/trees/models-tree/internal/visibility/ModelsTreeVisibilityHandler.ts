@@ -16,7 +16,7 @@ import { createModelsSearchResultsTree } from "./SearchResultsTree.js";
 import type { Observable } from "rxjs";
 import type { Id64Arg } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode, HierarchyNode, HierarchySearchTree } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
+import type { ECSchemaProvider } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfoCache } from "../../../../shared/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
 import type { SearchResultsTree } from "../../../../shared/internal/visibility/BaseSearchResultsTree.js";
 import type { BaseTreeVisibilityHandlerOverrides, TreeSpecificVisibilityHandler } from "../../../../shared/internal/visibility/BaseVisibilityHelper.js";
@@ -331,7 +331,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
 export function createModelsTreeVisibilityHandler(props: {
   viewport: TreeWidgetViewport;
   idsCache: ModelsTreeIdsCache;
-  imodelAccess: ECClassHierarchyInspector;
+  imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom">;
   overrides?: ModelsTreeVisibilityHandlerOverrides;
   searchPaths?: HierarchySearchTree[];
 }) {

@@ -40,7 +40,7 @@ export type TreeItemVisibilityButtonState = (
  * Should be used with `VisibilityTreeRenderer`.
  * @beta
  */
-export const VisibilityAction = memo(function VisibilityAction({ node, ...actionAttributes }: { node: TreeNode } & TreeActionBaseAttributes) {
+export const VisibilityAction = memo(function VisibilityActionComponent({ node, ...actionAttributes }: { node: TreeNode } & TreeActionBaseAttributes) {
   const context = useVisibilityContext();
   const state = context?.getVisibilityButtonState(node);
   const translate = useTranslation();
