@@ -39,4 +39,21 @@ describe("QuantityFormatting", () => {
     await QuantityFormatting.startup({ localization });
     expect(QuantityFormatting.isInitialized).toBe(true);
   });
+
+  it("ignores a startup that completes after terminate", async () => {
+    QuantityFormatting.terminate();
+    const stale = new EmptyLocalization();
+    let rejectStale!: (error: Error) => void;
+    vi.spyOn(stale, "registerNamespace").mockReturnValueOnce(new Promise<void>((_resolve, reject) => (rejectStale = reject)));
+    const staleStartup = QuantityFormatting.startup({ localization: stale });
+
+    QuantityFormatting.terminate();
+    const current = new EmptyLocalization();
+    await QuantityFormatting.startup({ localization: current });
+
+    rejectStale(new Error("stale failure"));
+    await expect(staleStartup).rejects.toThrow("stale failure");
+    expect(QuantityFormatting.isInitialized).toBe(true);
+    expect(QuantityFormatting.localization).toBe(current);
+  });
 });
