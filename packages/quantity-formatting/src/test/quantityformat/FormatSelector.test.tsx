@@ -11,6 +11,7 @@ vi.mock("../../useTranslation.js", () => ({
     translate: (key: string) => {
       const translations: Record<string, string> = {
         "QuantityFormat:labels.formatSetSectionLabel": "Format Selection",
+        "QuantityFormat:labels.noFormatsFound": "No formats found matching",
       };
       return translations[key] || key;
     },
@@ -181,6 +182,22 @@ describe("FormatSelector", () => {
   });
 
   describe("User Interactions", () => {
+    it("should return the latest definition after the format set is updated in place", async () => {
+      // FormatSetFormatsProvider.addFormat replaces entries in `formats` without changing the format set identity.
+      const formatSet = { ...mockFormatSet, formats: { ...mockFormatSet.formats } } as FormatSet;
+      const user = userEvent.setup();
+      const { rerender } = render(<FormatSelector {...defaultProps} activeFormatSet={formatSet} />);
+
+      const updatedDefinition: FormatDefinition = { ...mockFormatDefinition1, decimalSeparator: "," };
+      formatSet.formats["length-format"] = updatedDefinition;
+      rerender(<FormatSelector {...defaultProps} activeFormatSet={formatSet} />);
+
+      await user.click(screen.getByText("Area Format"));
+      await user.click(screen.getByText("Length Format"));
+
+      expect(mockOnListItemChange).toHaveBeenLastCalledWith(updatedDefinition, "length-format");
+    });
+
     it("should call onListItemChange when a format is clicked", async () => {
       const user = userEvent.setup();
       render(<FormatSelector {...defaultProps} />);
