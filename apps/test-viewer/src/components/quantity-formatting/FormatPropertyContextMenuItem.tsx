@@ -55,7 +55,6 @@ interface QuantityFormatPanelDialogWithoutFormatSelectorProps {
 
 const QuantityFormatPanelDialogWithoutFormatSelector: React.FC<QuantityFormatPanelDialogWithoutFormatSelectorProps> = ({ formatDefinition, formatKey }) => {
   const [isModalOpen, setIsModalOpen] = useState(true);
-  const [unitsProvider, setUnitsProvider] = useState(IModelApp.quantityFormatter.unitsProvider);
 
   const handleFormatChange = async (newFormat: FormatDefinition): Promise<void> => {
     await FormatManager.instance?.updateActiveFormat(formatKey, newFormat);
@@ -66,17 +65,11 @@ const QuantityFormatPanelDialogWithoutFormatSelector: React.FC<QuantityFormatPan
     UiFramework.dialogs.modal.close();
   }, []);
 
-  React.useEffect(() => {
-    return IModelApp.quantityFormatter.onUnitsProviderChanged.addListener(() => {
-      setUnitsProvider(IModelApp.quantityFormatter.unitsProvider);
-    });
-  }, []);
-
   const title = `Format Selected: ${formatDefinition.label ?? formatDefinition.name}`;
   return (
     <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={title}>
       <ModalContent>
-        <QuantityFormatPanel formatDefinition={formatDefinition} unitsProvider={unitsProvider} onFormatChange={handleFormatChange} />
+        <QuantityFormatPanel formatDefinition={formatDefinition} onFormatChange={handleFormatChange} />
       </ModalContent>
 
       <ModalButtonBar>

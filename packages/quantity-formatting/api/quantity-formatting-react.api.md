@@ -22,8 +22,7 @@ export interface FormatPanelProps {
     onFormatChange: (formatProps: FormatDefinition) => void;
     // (undocumented)
     persistenceUnit?: UnitProps;
-    // (undocumented)
-    unitsProvider: UnitsProvider;
+    unitsProvider?: UnitsProvider;
 }
 
 // @beta
@@ -37,8 +36,7 @@ export interface FormatSampleProps {
     initialMagnitude?: number;
     // (undocumented)
     persistenceUnit?: UnitProps;
-    // (undocumented)
-    unitsProvider: UnitsProvider;
+    unitsProvider?: UnitsProvider;
 }
 
 // @beta
@@ -91,8 +89,7 @@ export interface QuantityFormatPanelProps {
     onFormatChange: (formatProps: FormatDefinition) => void;
     // (undocumented)
     showSample?: boolean;
-    // (undocumented)
-    unitsProvider: UnitsProvider;
+    unitsProvider?: UnitsProvider;
 }
 
 // @beta

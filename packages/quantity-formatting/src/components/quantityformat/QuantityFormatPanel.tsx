@@ -9,6 +9,7 @@ import { Button, Flex } from "@itwin/itwinui-react";
 import { useTranslation } from "../../useTranslation.js";
 import { FormatPanel } from "./FormatPanel.js";
 import { FormatSample } from "./FormatSample.js";
+import { useUnitsProvider } from "./internal/useUnitsProvider.js";
 import { BentleyError, Logger } from "@itwin/core-bentley";
 import { QuantityFormattingLoggerCategory } from "../../QuantityFormatting.js";
 
@@ -18,7 +19,8 @@ import type { UnitProps, FormatDefinition, UnitsProvider } from "@itwin/core-qua
  */
 export interface QuantityFormatPanelProps {
   formatDefinition: FormatDefinition;
-  unitsProvider: UnitsProvider;
+  /** Units used to look up and convert units. Defaults to `IModelApp.quantityFormatter.unitsProvider`. */
+  unitsProvider?: UnitsProvider;
   /** Called with the edited definition when the user selects Apply. Edits are discarded when `formatDefinition` changes. */
   onFormatChange: (formatProps: FormatDefinition) => void;
   initialMagnitude?: number;
@@ -31,10 +33,10 @@ export interface QuantityFormatPanelProps {
 export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
   const {
     formatDefinition,
-    unitsProvider,
     onFormatChange,
     showSample = true,
   } = props;
+  const unitsProvider = useUnitsProvider(props.unitsProvider);
 
   const { translate } = useTranslation();
 

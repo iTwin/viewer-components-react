@@ -8,6 +8,7 @@ import * as React from "react";
 import { FormatType, parseFormatType } from "@itwin/core-quantity";
 import { Divider, ExpandableBlock, Flex, Surface, Text } from "@itwin/itwinui-react";
 import { useTranslation } from "../../useTranslation.js";
+import { useUnitsProvider } from "./internal/useUnitsProvider.js";
 import { AzimuthPrimaryChildren, AzimuthSecondaryChildren } from "./panels/Azimuth.js";
 import { BearingPrimaryChildren, BearingSecondaryChildren } from "./panels/Bearing.js";
 import { DecimalPrimaryChildren, DecimalSecondaryChildren } from "./panels/Decimal.js";
@@ -23,7 +24,8 @@ import type { UnitsProvider , FormatDefinition, UnitProps } from "@itwin/core-qu
  */
 export interface FormatPanelProps {
   formatProps: FormatDefinition;
-  unitsProvider: UnitsProvider;
+  /** Units used to look up and convert units. Defaults to `IModelApp.quantityFormatter.unitsProvider`. */
+  unitsProvider?: UnitsProvider;
   /** Called with the full updated definition after every edit made in the panel. Debounce before persisting. */
   onFormatChange: (formatProps: FormatDefinition) => void;
   persistenceUnit?: UnitProps;
@@ -33,7 +35,8 @@ export interface FormatPanelProps {
  * @beta
  */
 export function FormatPanel(props: FormatPanelProps) {
-  const { formatProps, unitsProvider, onFormatChange, persistenceUnit } = props;
+  const { formatProps, onFormatChange, persistenceUnit } = props;
+  const unitsProvider = useUnitsProvider(props.unitsProvider);
   const [isExpanded, setIsExpanded] = React.useState(false);
   const { translate } = useTranslation();
 

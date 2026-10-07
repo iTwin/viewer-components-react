@@ -8,6 +8,7 @@ import * as React from "react";
 import { Format, FormatterSpec } from "@itwin/core-quantity";
 import { Divider, Input, Label } from "@itwin/itwinui-react";
 import { useTranslation } from "../../useTranslation.js";
+import { useUnitsProvider } from "./internal/useUnitsProvider.js";
 import { BentleyError, Logger } from "@itwin/core-bentley";
 import { QuantityFormattingLoggerCategory } from "../../QuantityFormatting.js";
 
@@ -18,7 +19,8 @@ import type { UnitsProvider } from "@itwin/core-quantity";
 */
 export interface FormatSampleProps {
   formatProps: FormatDefinition;
-  unitsProvider: UnitsProvider;
+  /** Units used to look up and convert units. Defaults to `IModelApp.quantityFormatter.unitsProvider`. */
+  unitsProvider?: UnitsProvider;
   persistenceUnit?: UnitProps;
   initialMagnitude?: number;
 }
@@ -28,8 +30,8 @@ export interface FormatSampleProps {
  * @beta
  */
 export function FormatSample(props: FormatSampleProps) {
-  const { formatProps, unitsProvider, persistenceUnit, initialMagnitude } =
-    props;
+  const { formatProps, persistenceUnit, initialMagnitude } = props;
+  const unitsProvider = useUnitsProvider(props.unitsProvider);
   const initialValue = initialMagnitude ?? 0;
   const [magnitude, setMagnitude] = React.useState(initialValue);
   const [sampleValue, setSampleValue] = React.useState(initialValue.toString());
