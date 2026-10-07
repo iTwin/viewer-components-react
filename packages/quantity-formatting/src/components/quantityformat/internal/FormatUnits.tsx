@@ -10,6 +10,8 @@ import { SvgHelpCircularHollow } from "@itwin/itwinui-icons-react";
 import { IconButton, Input, Label, Select } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../useTranslation.js";
 import { getUnitName } from "./misc/UnitDescr.js";
+import { BentleyError, Logger } from "@itwin/core-bentley";
+import { QuantityFormattingLoggerCategory } from "../../../QuantityFormatting.js";
 
 import type {
   FormatDefinition,
@@ -27,6 +29,17 @@ async function getUnitConversionData(
     return { conversion, unitProps: unit };
   });
   return unitConversionEntries;
+}
+
+/** A composite sub-unit must split its parent into a whole number (at least 2) of parts, e.g. 60 arc minutes per degree.
+ * This rejects GRAD (0.9 degree) as a sub-unit of ARC_DEG, and a unit as its own sub-unit when floating-point
+ * conversion reports a factor such as 0.9999999999999999 (ARC_MINUTE to ARC_MINUTE).
+ */
+function isWholeSubdivision(factor: number): boolean {
+  if (factor <= 0) return false;
+  const parts = 1 / factor;
+  const wholeParts = Math.round(parts);
+  return wholeParts >= 2 && Math.abs(parts - wholeParts) < 1e-6 * parts;
 }
 
 async function getPossibleUnits(
@@ -49,7 +62,7 @@ async function getPossibleUnits(
     .filter(
       (entry) =>
         entry.unitProps.system === parentUnit.system &&
-        entry.conversion.factor < 1
+        isWholeSubdivision(entry.conversion.factor)
     )
     .sort((a, b) => b.conversion.factor - a.conversion.factor)
     .map((value) => value.unitProps);
@@ -160,7 +173,7 @@ function UnitDescr(props: {
         }
       } catch (error) {
         // Fallback to current unit if there's an error
-        console.warn("Failed to load unit options:", error);
+        Logger.logWarning(QuantityFormattingLoggerCategory, "Failed to load unit options", () => ({ unit: name, error: BentleyError.getErrorMessage(error) }));
         if (disposed) return;
         setUnitOptions([
           { value: `${name}:${label}`, label: getUnitName(name) },
@@ -199,6 +212,7 @@ function UnitDescr(props: {
         id={labelInputId}
         data-testid={`unit-label-${currentUnit.name}`}
         value={label}
+        placeholder={currentUnit.label}
         onChange={handleOnLabelChange}
         size="small"
         disabled={readonly}
