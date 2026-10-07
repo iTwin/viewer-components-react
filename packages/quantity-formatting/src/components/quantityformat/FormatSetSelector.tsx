@@ -13,7 +13,7 @@ import type { FormatSet } from "@itwin/ecschema-metadata";
  * Props for the FormatSetSelector component
  * @beta
  */
-interface FormatSetSelectorProps {
+export interface FormatSetSelectorProps {
   /** Array of format sets to display in the selector */
   formatSets: FormatSet[];
   /**
@@ -58,13 +58,8 @@ export const FormatSetSelector: React.FC<FormatSetSelectorProps> = ({
     );
   }, [formatSets, searchTerm]);
 
-  const handleFormatSetSelect = React.useCallback(
-    (formatSet: FormatSet) => {
-      const key = formatSet.name || `formatSet-${formatSets.indexOf(formatSet)}`;
-      onFormatSetChange(formatSet, key);
-    },
-    [onFormatSetChange, formatSets]
-  );
+  // Keys use the position in `formatSets`, not in the filtered list, so they stay stable while searching.
+  const getFormatSetKey = (formatSet: FormatSet) => formatSet.name || `formatSet-${formatSets.indexOf(formatSet)}`;
 
   return (
     <Flex flexDirection="column" gap="none" alignItems="flex-start" className="quantityFormat--formatSetSelector-container">
@@ -74,12 +69,12 @@ export const FormatSetSelector: React.FC<FormatSetSelectorProps> = ({
         placeholder={translate("QuantityFormat:labels.searchFormatSets")}
       />
       <List className="quantityFormat--formatSetSelector-list">
-        {filteredFormatSets.map((formatSet, index) => {
-          const key = formatSet.name || `formatSet-${index}`;
+        {filteredFormatSets.map((formatSet) => {
+          const key = getFormatSetKey(formatSet);
           return (
             <ListItem
               key={key}
-              onClick={() => handleFormatSetSelect(formatSet)}
+              onClick={() => onFormatSetChange(formatSet, key)}
               active={selectedFormatSetKey === key}
               className="quantityFormat--formatSetSelector-listItem"
             >

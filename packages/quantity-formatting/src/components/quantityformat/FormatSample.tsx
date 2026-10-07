@@ -8,13 +8,15 @@ import * as React from "react";
 import { Format, FormatterSpec } from "@itwin/core-quantity";
 import { Divider, Input, Label } from "@itwin/itwinui-react";
 import { useTranslation } from "../../useTranslation.js";
+import { BentleyError, Logger } from "@itwin/core-bentley";
+import { QuantityFormattingLoggerCategory } from "../../QuantityFormatting.js";
 
 import type { FormatDefinition, UnitProps } from "@itwin/core-quantity";
 import type { UnitsProvider } from "@itwin/core-quantity";
 /**
  * @beta
 */
-interface FormatSampleProps {
+export interface FormatSampleProps {
   formatProps: FormatDefinition;
   unitsProvider: UnitsProvider;
   persistenceUnit?: UnitProps;
@@ -60,7 +62,8 @@ export function FormatSample(props: FormatSampleProps) {
         );
         if (disposed) return;
         setFormatSpec(spec);
-      } catch {
+      } catch (error) {
+        Logger.logError(QuantityFormattingLoggerCategory, "Failed to create the formatter for the format sample", () => ({ error: BentleyError.getErrorMessage(error) }));
         if (disposed) return;
         setFormatSpec(undefined);
       }

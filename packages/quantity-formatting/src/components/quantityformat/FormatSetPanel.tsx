@@ -5,7 +5,7 @@
 
 import React from "react";
 import { SvgHelpCircularHollow } from "@itwin/itwinui-icons-react";
-import { ComboBox, Flex, IconButton, Input, Label, Text, Textarea } from "@itwin/itwinui-react";
+import { ComboBox, Flex, IconButton, Input, Label, Textarea } from "@itwin/itwinui-react";
 import { useTranslation } from "../../useTranslation.js";
 
 import type { UnitSystemKey } from "@itwin/core-quantity";
@@ -14,7 +14,7 @@ import type { FormatSet } from "@itwin/ecschema-metadata";
  * Props for the FormatSetPanel component
  * @beta
  */
-type FormatSetPanelProps = {
+export type FormatSetPanelProps = {
   formatSet: FormatSet;
 } & ({
   editable: true,
@@ -30,8 +30,8 @@ type FormatSetPanelProps = {
  */
 export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, editable = false, onFormatSetChange }) => {
   const [label, setLabel] = React.useState(formatSet.label || "");
-  const [description, setDescription] = React.useState("");
-  const [unitSystem, setUnitSystem] = React.useState<string>("metric");
+  const [description, setDescription] = React.useState(formatSet.description || "");
+  const [unitSystem, setUnitSystem] = React.useState<string>(formatSet.unitSystem || "metric");
   const { translate } = useTranslation();
 
   // Generate unique IDs for form elements

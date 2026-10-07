@@ -20,8 +20,9 @@ export const QuantityFormattingLoggerCategory = "QuantityFormat"
  */
 export class QuantityFormatting {
   private static _isInitialized = false;
+  private static _startupPromise: Promise<void> | undefined;
   private static _i18nNamespace = "QuantityFormat";
-  private static _localization: Localization;
+  private static _localization: Localization | undefined;
 
   /**
    * Returns true if the QuantityFormatting class has been initialized.
@@ -34,6 +35,8 @@ export class QuantityFormatting {
    * Returns the localization instance used by quantity formatting components.
    */
   public static get localization(): Localization {
+    if (!QuantityFormatting._localization)
+      throw new Error("QuantityFormatting.startup() must be called before rendering quantity formatting components.");
     return QuantityFormatting._localization;
   }
 
@@ -49,14 +52,19 @@ export class QuantityFormatting {
    * @param options Optional startup options including custom localization instance
    */
   public static async startup(options?: { localization?: Localization }): Promise<void> {
-    if (QuantityFormatting.isInitialized) return;
+    // Share one in-flight startup so concurrent callers don't register the namespace twice.
+    QuantityFormatting._startupPromise ??= QuantityFormatting.initialize(options?.localization ?? IModelApp.localization).catch((error) => {
+      QuantityFormatting._startupPromise = undefined;
+      QuantityFormatting._localization = undefined;
+      throw error;
+    });
+    return QuantityFormatting._startupPromise;
+  }
 
-    QuantityFormatting._localization =
-      options?.localization ?? IModelApp.localization;
-    await QuantityFormatting._localization.registerNamespace(
-      QuantityFormatting._i18nNamespace
-    );
-
+  private static async initialize(localization: Localization): Promise<void> {
+    // Assigned before awaiting so components rendered while the namespace loads keep working.
+    QuantityFormatting._localization = localization;
+    await localization.registerNamespace(QuantityFormatting._i18nNamespace);
     QuantityFormatting._isInitialized = true;
   }
 
@@ -65,8 +73,10 @@ export class QuantityFormatting {
    */
   public static terminate(): void {
     if (QuantityFormatting._isInitialized) {
-      QuantityFormatting._localization.unregisterNamespace(QuantityFormatting._i18nNamespace)
+      QuantityFormatting._localization?.unregisterNamespace(QuantityFormatting._i18nNamespace);
+      QuantityFormatting._localization = undefined;
       QuantityFormatting._isInitialized = false;
     }
+    QuantityFormatting._startupPromise = undefined;
   }
 }

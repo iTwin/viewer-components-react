@@ -16,10 +16,9 @@ import type { UnitsProvider } from '@itwin/core-quantity';
 export function FormatPanel(props: FormatPanelProps): React_2.JSX.Element;
 
 // @beta (undocumented)
-interface FormatPanelProps {
+export interface FormatPanelProps {
     // (undocumented)
     formatProps: FormatDefinition;
-    // (undocumented)
     onFormatChange: (formatProps: FormatDefinition) => void;
     // (undocumented)
     persistenceUnit?: UnitProps;
@@ -31,7 +30,7 @@ interface FormatPanelProps {
 export function FormatSample(props: FormatSampleProps): React_2.JSX.Element;
 
 // @beta (undocumented)
-interface FormatSampleProps {
+export interface FormatSampleProps {
     // (undocumented)
     formatProps: FormatDefinition;
     // (undocumented)
@@ -46,7 +45,7 @@ interface FormatSampleProps {
 export const FormatSelector: React_2.FC<FormatSelectorProps>;
 
 // @beta (undocumented)
-interface FormatSelectorProps {
+export interface FormatSelectorProps {
     // (undocumented)
     activeFormatDefinitionKey?: string;
     // (undocumented)
@@ -59,7 +58,7 @@ interface FormatSelectorProps {
 export const FormatSetPanel: React_3.FC<FormatSetPanelProps>;
 
 // @beta
-type FormatSetPanelProps = {
+export type FormatSetPanelProps = {
     formatSet: FormatSet;
 } & ({
     editable: true;
@@ -73,7 +72,7 @@ type FormatSetPanelProps = {
 export const FormatSetSelector: React_3.FC<FormatSetSelectorProps>;
 
 // @beta
-interface FormatSetSelectorProps {
+export interface FormatSetSelectorProps {
     activeFormatSetKey?: string;
     formatSets: FormatSet[];
     onFormatSetChange: (formatSet: FormatSet, key: string) => void;
@@ -84,12 +83,11 @@ interface FormatSetSelectorProps {
 export function QuantityFormatPanel(props: QuantityFormatPanelProps): React_2.JSX.Element;
 
 // @beta
-interface QuantityFormatPanelProps {
+export interface QuantityFormatPanelProps {
     // (undocumented)
     formatDefinition: FormatDefinition;
     // (undocumented)
     initialMagnitude?: number;
-    // (undocumented)
     onFormatChange: (formatProps: FormatDefinition) => void;
     // (undocumented)
     showSample?: boolean;

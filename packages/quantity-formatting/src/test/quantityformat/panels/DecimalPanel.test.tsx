@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { describe, beforeEach, it, vi, expect } from "vitest";
-import * as React from "react";
 import { render, waitFor } from "@testing-library/react";
 import type { FormatProps, UnitProps, UnitsProvider } from "@itwin/core-quantity";
 import { DecimalPrimaryChildren, DecimalSecondaryChildren } from "../../../components/quantityformat/panels/Decimal.js";

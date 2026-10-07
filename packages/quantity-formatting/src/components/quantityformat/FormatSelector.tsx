@@ -16,7 +16,7 @@ const logCategory = QuantityFormattingLoggerCategory;
 /**
  * @beta
  */
-interface FormatSelectorProps {
+export interface FormatSelectorProps {
   activeFormatSet?: FormatSet;
   activeFormatDefinitionKey?: string;
   onListItemChange: (formatDefinition: FormatDefinition, key: string) => void;

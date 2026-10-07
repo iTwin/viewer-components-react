@@ -5,10 +5,12 @@
 
 import "./FormatPanel.scss";
 import * as React from "react";
-import { Button, Flex, Text } from "@itwin/itwinui-react";
+import { Button, Flex } from "@itwin/itwinui-react";
 import { useTranslation } from "../../useTranslation.js";
 import { FormatPanel } from "./FormatPanel.js";
 import { FormatSample } from "./FormatSample.js";
+import { BentleyError, Logger } from "@itwin/core-bentley";
+import { QuantityFormattingLoggerCategory } from "../../QuantityFormatting.js";
 
 import type { UnitProps, FormatDefinition, UnitsProvider } from "@itwin/core-quantity";
 /** Properties of [[QuantityFormatPanel]] component.
@@ -17,6 +19,7 @@ import type { UnitProps, FormatDefinition, UnitsProvider } from "@itwin/core-qua
 export interface QuantityFormatPanelProps {
   formatDefinition: FormatDefinition;
   unitsProvider: UnitsProvider;
+  /** Called with the edited definition when the user selects Apply. Edits are discarded when `formatDefinition` changes. */
   onFormatChange: (formatProps: FormatDefinition) => void;
   initialMagnitude?: number;
   showSample?: boolean;
@@ -52,25 +55,21 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
     setSaveEnabled(false);
   }, [formatDefinition]);
 
-  // Generate persistenceUnit from first composite unit
+  // Generate persistenceUnit from first composite unit. Keyed on the unit name so unrelated edits don't reload it.
+  const firstUnitName = clonedFormatDefinition.composite?.units[0]?.name;
   React.useEffect(() => {
     let disposed = false;
     const loadPersistenceUnit = async () => {
-      if (
-        clonedFormatDefinition.composite &&
-        clonedFormatDefinition.composite.units &&
-        clonedFormatDefinition.composite.units.length > 0
-      ) {
-        const firstUnitName = clonedFormatDefinition.composite.units[0].name;
-        try {
-          const unit = await unitsProvider.findUnitByName(firstUnitName);
-          if (disposed) return;
-          setPersistenceUnit(unit);
-        } catch {
-          if (disposed) return;
-          setPersistenceUnit(undefined);
-        }
-      } else {
+      if (!firstUnitName) {
+        setPersistenceUnit(undefined);
+        return;
+      }
+      try {
+        const unit = await unitsProvider.findUnitByName(firstUnitName);
+        if (disposed) return;
+        setPersistenceUnit(unit);
+      } catch (error) {
+        Logger.logError(QuantityFormattingLoggerCategory, "Failed to load the persistence unit", () => ({ unit: firstUnitName, error: BentleyError.getErrorMessage(error) }));
         if (disposed) return;
         setPersistenceUnit(undefined);
       }
@@ -80,18 +79,15 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
     return () => {
       disposed = true;
     };
-  }, [clonedFormatDefinition.composite, unitsProvider]);
+  }, [firstUnitName, unitsProvider]);
 
-  const handleOnFormatChanged = React.useCallback(
-    async (newProps: FormatDefinition) => {
-      setClonedFormatDefinition(newProps);
-      setSaveEnabled(true);
-    },
-    []
-  );
+  const handleOnFormatChanged = React.useCallback((newProps: FormatDefinition) => {
+    setClonedFormatDefinition(newProps);
+    setSaveEnabled(true);
+  }, []);
 
   const handleSave = React.useCallback(() => {
-    onFormatChange && onFormatChange(clonedFormatDefinition);
+    onFormatChange(clonedFormatDefinition);
     setSaveEnabled(false);
   }, [onFormatChange, clonedFormatDefinition]);
 

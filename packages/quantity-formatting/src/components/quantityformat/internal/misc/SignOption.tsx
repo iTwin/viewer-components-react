@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 
-import * as React from "react";
 import { ShowSignOption } from "@itwin/core-quantity";
 import type { SelectOption } from "@itwin/itwinui-react";
 import { Select } from "@itwin/itwinui-react";

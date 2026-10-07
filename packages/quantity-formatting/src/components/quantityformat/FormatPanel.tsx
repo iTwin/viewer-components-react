@@ -21,9 +21,10 @@ import type { UnitsProvider , FormatDefinition, UnitProps } from "@itwin/core-qu
 /**
  * @beta
  */
-interface FormatPanelProps {
+export interface FormatPanelProps {
   formatProps: FormatDefinition;
   unitsProvider: UnitsProvider;
+  /** Called with the full updated definition after every edit made in the panel. Debounce before persisting. */
   onFormatChange: (formatProps: FormatDefinition) => void;
   persistenceUnit?: UnitProps;
 }
