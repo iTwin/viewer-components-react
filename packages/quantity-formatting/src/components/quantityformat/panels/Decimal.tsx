@@ -44,7 +44,7 @@ export function DecimalPrimaryChildren(props: PanelProps): React.ReactElement {
   return (
     <div className="quantityFormat--formatPanel-primaryChildren">
       <div className="quantityFormat--formatTypeRow">
-        <FormatTypeOption formatProps={formatProps} onChange={onFormatChange} />
+        <FormatTypeOption formatProps={formatProps} unitsProvider={unitsProvider} onChange={onFormatChange} />
       </div>
       <Text variant="small" isMuted={true}>
         {translate("QuantityFormat:labels.formatTypeSublabel")}
