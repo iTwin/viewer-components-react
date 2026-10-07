@@ -6,7 +6,8 @@
 
 import * as React from "react";
 import type { FormatProps } from "@itwin/core-quantity";
-import { Format, FormatTraits, getTraitString } from "@itwin/core-quantity";
+import { FormatTraits } from "@itwin/core-quantity";
+import { isFormatTraitSet, resolveSeparatorConflict, setFormatTrait } from "./FormatPropsUtils.js";
 import { Checkbox, IconButton, Label } from "@itwin/itwinui-react";
 import { SvgHelpCircularHollow } from "@itwin/itwinui-icons-react";
 import { useTranslation } from "../../../useTranslation.js";
@@ -29,44 +30,12 @@ export function UseThousandsSeparator(props: UseThousandsSeparatorProps) {
 
   const useThousandsId = React.useId();
 
-  const setFormatTrait = React.useCallback(
-    (trait: FormatTraits, setActive: boolean) => {
-      const traitStr = getTraitString(trait);
-      let formatTraits: string[] = [traitStr];
-      if (setActive) {
-        // setting trait
-        if (formatProps.formatTraits) {
-          const traits = Array.isArray(formatProps.formatTraits)
-            ? formatProps.formatTraits
-            : formatProps.formatTraits.split(/,|;|\|/);
-          formatTraits = [...traits, traitStr];
-        }
-      } else {
-        // clearing trait
-        if (formatProps.formatTraits) {
-          const traits = Array.isArray(formatProps.formatTraits)
-            ? formatProps.formatTraits
-            : formatProps.formatTraits.split(/,|;|\|/);
-          formatTraits = traits.filter((traitEntry) => traitEntry !== traitStr);
-        }
-      }
-      onChange({ ...formatProps, formatTraits });
-    },
-    [formatProps, onChange]
-  );
-
   const handleUseThousandsSeparatorChange = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormatTrait(FormatTraits.Use1000Separator, e.target.checked);
+      const newFormatProps = setFormatTrait(formatProps, FormatTraits.Use1000Separator, e.target.checked);
+      onChange(resolveSeparatorConflict(newFormatProps, "decimalSeparator"));
     },
-    [setFormatTrait]
-  );
-
-  const isFormatTraitSet = React.useCallback(
-    (trait: FormatTraits) => {
-      return Format.isFormatTraitSetInProps(formatProps, trait);
-    },
-    [formatProps]
+    [formatProps, onChange]
   );
 
   return (
@@ -76,7 +45,7 @@ export function UseThousandsSeparator(props: UseThousandsSeparatorProps) {
       </Label>
       <Checkbox
         id={useThousandsId}
-        checked={isFormatTraitSet(FormatTraits.Use1000Separator)}
+        checked={isFormatTraitSet(formatProps, FormatTraits.Use1000Separator)}
         onChange={handleUseThousandsSeparatorChange}
       />
     </div>
@@ -102,33 +71,15 @@ export function ThousandsSeparatorSelector(
 
   const thousandsSelectorId = React.useId();
 
-  const isFormatTraitSet = React.useCallback(
-    (trait: FormatTraits) => {
-      return Format.isFormatTraitSetInProps(formatProps, trait);
-    },
-    [formatProps]
-  );
-
   const handleThousandSeparatorChange = React.useCallback(
     (thousandSeparator: string) => {
-      let decimalSeparator = formatProps.decimalSeparator;
-      // make sure 1000 and decimal separator do not match
-      if (isFormatTraitSet(FormatTraits.Use1000Separator)) {
-        if (thousandSeparator === ".") decimalSeparator = ",";
-        // thousandSeparator === ","
-        else decimalSeparator = ".";
-      }
-      onChange({
-        ...formatProps,
-        thousandSeparator,
-        decimalSeparator,
-      });
+      onChange(resolveSeparatorConflict({ ...formatProps, thousandSeparator }, "thousandSeparator"));
     },
-    [formatProps, isFormatTraitSet]
+    [formatProps, onChange]
   );
 
   // Only show if the Use1000Separator trait is set
-  if (!isFormatTraitSet(FormatTraits.Use1000Separator)) {
+  if (!isFormatTraitSet(formatProps, FormatTraits.Use1000Separator)) {
     return null;
   }
 

@@ -6,7 +6,8 @@
 
 import * as React from "react";
 import type { FormatDefinition } from "@itwin/core-quantity";
-import { Format, FormatTraits, getTraitString } from "@itwin/core-quantity";
+import { FormatTraits } from "@itwin/core-quantity";
+import { isFormatTraitSet, setFormatTrait } from "./FormatPropsUtils.js";
 import type { SelectOption } from "@itwin/itwinui-react";
 import { Checkbox, Label, LabeledSelect } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../useTranslation.js";
@@ -78,39 +79,9 @@ export function AppendUnitLabel(props: AppendUnitLabelProps) {
   const { translate } = useTranslation();
   const appendUnitLabelId = React.useId();
 
-  const setFormatTrait = React.useCallback(
-    (trait: FormatTraits, setActive: boolean) => {
-      if (setActive) {
-        const newFormatProps = {
-          ...formatProps,
-          formatTraits: formatProps.formatTraits
-            ? [...formatProps.formatTraits, getTraitString(trait)]
-            : [getTraitString(trait)],
-        };
-        onFormatChange(newFormatProps);
-      } else {
-        const formatTraits = formatProps.formatTraits;
-        if (Array.isArray(formatTraits)) {
-          const newFormatProps = {
-            ...formatProps,
-            formatTraits: formatTraits.filter(
-              (entry: string) => entry !== getTraitString(trait)
-            ),
-          };
-          onFormatChange(newFormatProps);
-        } else {
-          onFormatChange({ ...formatProps, formatTraits: [] });
-        }
-      }
-    },
+  const handleTraitChange = React.useCallback(
+    (trait: FormatTraits, setActive: boolean) => onFormatChange(setFormatTrait(formatProps, trait, setActive)),
     [formatProps, onFormatChange]
-  );
-
-  const isFormatTraitSet = React.useCallback(
-    (trait: FormatTraits) => {
-      return Format.isFormatTraitSetInProps(formatProps, trait);
-    },
-    [formatProps]
   );
 
   return (
@@ -120,8 +91,8 @@ export function AppendUnitLabel(props: AppendUnitLabelProps) {
       </Label>
       <Checkbox
         id={appendUnitLabelId}
-        checked={isFormatTraitSet(FormatTraits.ShowUnitLabel)}
-        onChange={(e) => setFormatTrait(FormatTraits.ShowUnitLabel, e.target.checked)}
+        checked={isFormatTraitSet(formatProps, FormatTraits.ShowUnitLabel)}
+        onChange={(e) => handleTraitChange(FormatTraits.ShowUnitLabel, e.target.checked)}
       />
     </div>
   );

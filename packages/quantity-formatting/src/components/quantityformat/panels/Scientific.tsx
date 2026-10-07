@@ -6,7 +6,7 @@
 
 import "../FormatPanel.scss";
 import * as React from "react";
-import { Format, FormatTraits } from "@itwin/core-quantity";
+import { FormatTraits } from "@itwin/core-quantity";
 import { Divider, Label, Text } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../useTranslation.js";
 import { DecimalSeparator } from "../internal/DecimalSeparator.js";
@@ -23,6 +23,7 @@ import { ThousandsSeparatorSelector, UseThousandsSeparator } from "../internal/T
 import { ZeroEmpty } from "../internal/ZeroEmpty.js";
 
 import type { PanelProps } from "./Decimal.js";
+import { isFormatTraitSet } from "../internal/FormatPropsUtils.js";
 /** Primary children component for scientific format
  * @internal
  */
@@ -53,10 +54,7 @@ export function ScientificPrimaryChildren(
         formatProps={formatProps}
         onFormatChange={onFormatChange}
       />
-      {Format.isFormatTraitSetInProps(
-        formatProps,
-        FormatTraits.ShowUnitLabel
-      ) && (
+      {isFormatTraitSet(formatProps, FormatTraits.ShowUnitLabel) && (
         <UomSeparatorSelector
           formatProps={formatProps}
           onFormatChange={onFormatChange}

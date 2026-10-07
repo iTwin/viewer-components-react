@@ -65,6 +65,19 @@ describe("UseThousandsSeparator", () => {
       formatTraits: ["showTrailingZeros"],
     });
   });
+  it("should switch the thousands separator when enabling it would collide with a comma decimal separator", () => {
+    const onChange = vi.fn();
+    const formatProps: FormatProps = { ...defaultFormatProps, decimalSeparator: "," };
+    render(<UseThousandsSeparator formatProps={formatProps} onChange={onChange} />);
+
+    fireEvent.click(screen.getByRole("checkbox"));
+
+    expect(onChange).toHaveBeenCalledWith({
+      ...formatProps,
+      formatTraits: ["use1000Separator"],
+      thousandSeparator: ".",
+    });
+  });
 });
 
 describe("ThousandsSeparatorSelector", () => {
@@ -138,5 +151,16 @@ describe("ThousandsSeparatorSelector", () => {
         thousandSeparator: ".",
         decimalSeparator: ",", // Should change to avoid conflict
       });
+  });
+
+  it("should keep a custom decimal separator that does not collide", () => {
+    const formatProps: FormatProps = { ...formatPropsWithThousands, thousandSeparator: " ", decimalSeparator: "," };
+    const onChange = vi.fn();
+    render(<ThousandsSeparatorSelector formatProps={formatProps} onChange={onChange} />);
+
+    fireEvent.click(screen.getByRole("combobox"));
+    fireEvent.click(screen.getByRole("option", { name: "thousand_separator.point" }));
+
+    expect(onChange).toHaveBeenCalledWith({ ...formatProps, thousandSeparator: ".", decimalSeparator: "," });
   });
 });

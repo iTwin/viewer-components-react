@@ -6,7 +6,7 @@
 
 import "../FormatPanel.scss";
 import * as React from "react";
-import { Format, FormatTraits } from "@itwin/core-quantity";
+import { FormatTraits } from "@itwin/core-quantity";
 import { Divider, Label, Text } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../useTranslation.js";
 import { DecimalSeparator } from "../internal/DecimalSeparator.js";
@@ -23,6 +23,7 @@ import { ZeroEmpty } from "../internal/ZeroEmpty.js";
 
 import type { FormatDefinition, UnitProps } from "@itwin/core-quantity";
 import type { UnitsProvider } from "@itwin/core-quantity";
+import { isFormatTraitSet } from "../internal/FormatPropsUtils.js";
 /** Common props for all format panel components
  * @internal
  */
@@ -61,10 +62,7 @@ export function DecimalPrimaryChildren(props: PanelProps): React.ReactElement {
         formatProps={formatProps}
         onFormatChange={onFormatChange}
       />
-      {Format.isFormatTraitSetInProps(
-        formatProps,
-        FormatTraits.ShowUnitLabel
-      ) && (
+      {isFormatTraitSet(formatProps, FormatTraits.ShowUnitLabel) && (
         <UomSeparatorSelector
           formatProps={formatProps}
           onFormatChange={onFormatChange}

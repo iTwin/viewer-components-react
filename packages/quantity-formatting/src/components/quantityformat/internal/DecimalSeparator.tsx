@@ -6,9 +6,9 @@
 
 import * as React from "react";
 import type { FormatDefinition } from "@itwin/core-quantity";
-import { Format, FormatTraits } from "@itwin/core-quantity";
 import { Label } from "@itwin/itwinui-react";
 import { DecimalSeparatorSelector } from "./misc/DecimalSeparator.js";
+import { resolveSeparatorConflict } from "./FormatPropsUtils.js";
 import { useTranslation } from "../../../useTranslation.js";
 
 /** Properties of [[DecimalSeparator]] component.
@@ -30,29 +30,7 @@ export function DecimalSeparator(props: DecimalSeparatorProps) {
 
   const handleDecimalSeparatorChange = React.useCallback(
     (decimalSeparator: string) => {
-      let thousandSeparator = formatProps.thousandSeparator;
-      // make sure 1000 and decimal separator do not match
-      if (
-        Format.isFormatTraitSetInProps(
-          formatProps,
-          FormatTraits.Use1000Separator
-        )
-      ) {
-        switch (decimalSeparator) {
-          case ".":
-            thousandSeparator = ",";
-            break;
-          case ",":
-            thousandSeparator = ".";
-            break;
-        }
-      }
-      const newFormatProps = {
-        ...formatProps,
-        thousandSeparator,
-        decimalSeparator,
-      };
-      onChange(newFormatProps);
+      onChange(resolveSeparatorConflict({ ...formatProps, decimalSeparator }, "decimalSeparator"));
     },
     [formatProps, onChange]
   );
