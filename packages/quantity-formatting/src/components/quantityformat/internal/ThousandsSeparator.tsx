@@ -7,7 +7,7 @@
 import * as React from "react";
 import type { FormatProps } from "@itwin/core-quantity";
 import { FormatTraits } from "@itwin/core-quantity";
-import { isFormatTraitSet, resolveSeparatorConflict, setFormatTrait } from "./FormatPropsUtils.js";
+import { getThousandSeparator, isFormatTraitSet, resolveSeparatorConflict, setFormatTrait } from "./FormatPropsUtils.js";
 import { Checkbox, IconButton, Label } from "@itwin/itwinui-react";
 import { SvgHelpCircularHollow } from "@itwin/itwinui-icons-react";
 import { useTranslation } from "../../../useTranslation.js";
@@ -33,7 +33,7 @@ export function UseThousandsSeparator(props: UseThousandsSeparatorProps) {
   const handleUseThousandsSeparatorChange = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const newFormatProps = setFormatTrait(formatProps, FormatTraits.Use1000Separator, e.target.checked);
-      onChange(resolveSeparatorConflict(newFormatProps, "decimalSeparator"));
+      onChange(e.target.checked ? resolveSeparatorConflict(newFormatProps, "decimalSeparator") : newFormatProps);
     },
     [formatProps, onChange]
   );
@@ -97,7 +97,7 @@ export function ThousandsSeparatorSelector(
         <SvgHelpCircularHollow />
       </IconButton>
       <ThousandsSelector
-        separator={formatProps.thousandSeparator ?? ","}
+        separator={getThousandSeparator(formatProps)}
         onChange={handleThousandSeparatorChange}
         id={thousandsSelectorId}
       />

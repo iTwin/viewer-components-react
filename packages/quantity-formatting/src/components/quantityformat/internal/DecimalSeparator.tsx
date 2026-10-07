@@ -6,9 +6,10 @@
 
 import * as React from "react";
 import type { FormatDefinition } from "@itwin/core-quantity";
+import { FormatTraits } from "@itwin/core-quantity";
 import { Label } from "@itwin/itwinui-react";
 import { DecimalSeparatorSelector } from "./misc/DecimalSeparator.js";
-import { resolveSeparatorConflict } from "./FormatPropsUtils.js";
+import { getDecimalSeparator, isFormatTraitSet, resolveSeparatorConflict } from "./FormatPropsUtils.js";
 import { useTranslation } from "../../../useTranslation.js";
 
 /** Properties of [[DecimalSeparator]] component.
@@ -30,7 +31,8 @@ export function DecimalSeparator(props: DecimalSeparatorProps) {
 
   const handleDecimalSeparatorChange = React.useCallback(
     (decimalSeparator: string) => {
-      onChange(resolveSeparatorConflict({ ...formatProps, decimalSeparator }, "decimalSeparator"));
+      const newFormatProps = { ...formatProps, decimalSeparator };
+      onChange(isFormatTraitSet(newFormatProps, FormatTraits.Use1000Separator) ? resolveSeparatorConflict(newFormatProps, "decimalSeparator") : newFormatProps);
     },
     [formatProps, onChange]
   );
@@ -41,7 +43,7 @@ export function DecimalSeparator(props: DecimalSeparatorProps) {
         {translate("QuantityFormat:labels.decimalSeparatorLabel")}
       </Label>
       <DecimalSeparatorSelector
-        separator={formatProps.decimalSeparator ?? "."}
+        separator={getDecimalSeparator(formatProps)}
         onChange={handleDecimalSeparatorChange}
         aria-labelledby={decimalSeparatorSelectorId}
       />

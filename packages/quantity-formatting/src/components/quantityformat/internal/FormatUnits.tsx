@@ -39,7 +39,8 @@ function isWholeSubdivision(factor: number): boolean {
   if (factor <= 0) return false;
   const parts = 1 / factor;
   const wholeParts = Math.round(parts);
-  return wholeParts >= 2 && Math.abs(parts - wholeParts) < 1e-6 * parts;
+  // Relative bound sized for floating-point error in schema conversion chains, not for genuinely fractional ratios.
+  return wholeParts >= 2 && Math.abs(parts - wholeParts) < 1e-9 * parts;
 }
 
 async function getPossibleUnits(

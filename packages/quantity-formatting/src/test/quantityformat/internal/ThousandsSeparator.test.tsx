@@ -2,11 +2,16 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import { describe, it, vi, expect } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import * as React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { FormatProps } from "@itwin/core-quantity";
+import { Format } from "@itwin/core-quantity";
 import { UseThousandsSeparator, ThousandsSeparatorSelector } from "../../../components/quantityformat/internal/ThousandsSeparator.js";
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe("UseThousandsSeparator", () => {
   const defaultFormatProps: FormatProps = {
@@ -66,6 +71,8 @@ describe("UseThousandsSeparator", () => {
     });
   });
   it("should switch the thousands separator when enabling it would collide with a comma decimal separator", () => {
+    // Pin the en-US defaults core uses for an unset thousands separator.
+    vi.spyOn(Format.prototype, "thousandSeparator", "get").mockReturnValue(",");
     const onChange = vi.fn();
     const formatProps: FormatProps = { ...defaultFormatProps, decimalSeparator: "," };
     render(<UseThousandsSeparator formatProps={formatProps} onChange={onChange} />);

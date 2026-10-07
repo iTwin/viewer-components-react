@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { getTraitString } from "@itwin/core-quantity";
+import { Format, getTraitString } from "@itwin/core-quantity";
 
 import type { FormatProps, FormatTraits } from "@itwin/core-quantity";
 
@@ -39,16 +39,30 @@ export function setFormatTrait<T extends FormatProps>(formatProps: T, trait: For
   return { ...formatProps, formatTraits };
 }
 
+/** Decimal separator the formatter uses for these props; core falls back to the locale default when unset.
+ * @internal
+ */
+export function getDecimalSeparator(formatProps: FormatProps): string {
+  return formatProps.decimalSeparator ?? new Format("").decimalSeparator;
+}
+
+/** Thousands separator the formatter uses for these props; core falls back to the locale default when unset.
+ * @internal
+ */
+export function getThousandSeparator(formatProps: FormatProps): string {
+  return formatProps.thousandSeparator ?? new Format("").thousandSeparator;
+}
+
 /**
- * Returns format props whose decimal and thousands separators differ. When they collide, the separator named by
- * `keep` wins and the other one is switched between "." and ",". Unset separators are treated as the editor
- * defaults: "." for decimal and "," for thousands.
+ * Returns format props whose effective decimal and thousands separators differ. Only call this while the
+ * Use1000Separator trait is active; otherwise the thousands separator is unused and should be left alone.
+ * When the separators collide, the one named by `keep` wins and the other is switched between "." and ",".
+ * Empty separators never collide: an empty thousands separator disables grouping.
  * @internal
  */
 export function resolveSeparatorConflict<T extends FormatProps>(formatProps: T, keep: "decimalSeparator" | "thousandSeparator"): T {
-  const decimalSeparator = formatProps.decimalSeparator ?? ".";
-  const thousandSeparator = formatProps.thousandSeparator ?? ",";
-  if (decimalSeparator !== thousandSeparator) return formatProps;
+  const decimalSeparator = getDecimalSeparator(formatProps);
+  if (decimalSeparator === "" || decimalSeparator !== getThousandSeparator(formatProps)) return formatProps;
 
   const replacement = decimalSeparator === "," ? "." : ",";
   return keep === "decimalSeparator"

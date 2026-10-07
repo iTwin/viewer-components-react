@@ -7,22 +7,20 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { IModelApp } from "@itwin/core-frontend";
 import { FormatUnits } from "../../../components/quantityformat/internal/FormatUnits.js";
 
-import type { FormatDefinition } from "@itwin/core-quantity";
+import type { FormatDefinition, UnitProps, UnitsProvider } from "@itwin/core-quantity";
 
 describe("FormatUnits", () => {
-  /** Opens the unit dropdown once its options have loaded from the units provider. */
-  async function openUnitOptions(unitName: string) {
-    // The label placeholder is set from the same async lookup that loads the options.
-    await waitFor(() => expect((screen.getByTestId(`unit-label-${unitName}`) as HTMLInputElement).placeholder).not.toBe(""));
+  /** Opens the unit dropdown and waits for `optionName`, which only appears once options load from the provider. */
+  async function openUnitOptions(unitName: string, optionName: string) {
     fireEvent.click(screen.getByTestId(`unit-${unitName}`).querySelector("[role=combobox]")!);
+    return screen.findByRole("option", { name: optionName });
   }
 
-  async function addSubUnit(format: FormatDefinition, unitName: string) {
+  async function addSubUnit(format: FormatDefinition, unitName: string, unitsProvider: UnitsProvider = IModelApp.quantityFormatter.unitsProvider) {
     const onUnitsChange = vi.fn();
-    render(<FormatUnits initialFormat={format} unitsProvider={IModelApp.quantityFormatter.unitsProvider} onUnitsChange={onUnitsChange} />);
+    render(<FormatUnits initialFormat={format} unitsProvider={unitsProvider} onUnitsChange={onUnitsChange} />);
 
-    await openUnitOptions(unitName);
-    fireEvent.click(screen.getByRole("option", { name: "labels.addSubUnit" }));
+    fireEvent.click(await openUnitOptions(unitName, "labels.addSubUnit"));
     return onUnitsChange;
   }
 
@@ -68,9 +66,22 @@ describe("FormatUnits", () => {
     };
     render(<FormatUnits initialFormat={format} unitsProvider={IModelApp.quantityFormatter.unitsProvider} onUnitsChange={vi.fn()} />);
 
-    await openUnitOptions("Units.ARC_MINUTE");
-    expect(screen.getByRole("option", { name: "ARC_SECOND" })).toBeDefined();
+    await openUnitOptions("Units.ARC_MINUTE", "ARC_SECOND");
     expect(screen.queryByRole("option", { name: "GRAD" })).toBeNull();
+  });
+
+  it("does not offer a sub-unit whose ratio is large but not whole", async () => {
+    const parent = { name: "Test.PARENT", label: "p", phenomenon: "Test.PHEN", system: "Test.SYS", isValid: true } as UnitProps;
+    const child = { ...parent, name: "Test.CHILD", label: "c" };
+    const unitsProvider = {
+      findUnitByName: async (name: string) => (name === child.name ? child : parent),
+      getUnitsByFamily: async () => [parent, child],
+      getConversion: async (from: UnitProps, to: UnitProps) => ({ factor: from.name === to.name ? 1 : from.name === child.name ? 1 / 1_000_000.5 : 1_000_000.5, offset: 0 }),
+    } as unknown as UnitsProvider;
+    render(<FormatUnits initialFormat={{ type: "decimal", composite: { units: [{ name: parent.name, label: "p" }] } }} unitsProvider={unitsProvider} onUnitsChange={vi.fn()} />);
+
+    await openUnitOptions(parent.name, "CHILD");
+    expect(screen.queryByRole("option", { name: "labels.addSubUnit" })).toBeNull();
   });
 
   // Civil-iTwin #2096646: an unset composite label falls back to the unit label when formatting, so show it.
