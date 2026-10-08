@@ -9,6 +9,7 @@ The `@itwin/tree-widget-react` package provides React components to build a widg
 ## Table of Contents
 
 - [Usage](#usage)
+  - [StrataKit configuration](#stratakit-configuration)
 - [Localization](#localization)
 - [Tree integration](#tree-integration)
   - [Using an explicit viewport](#using-an-explicit-viewport)
@@ -45,6 +46,10 @@ The `@itwin/tree-widget-react` package provides React components to build a widg
 ## Usage
 
 Typically, the package is used with an [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) based application, but the building blocks may also be used with any other iTwin.js React app.
+
+### StrataKit configuration
+
+The tree components render their UI using [StrataKit](https://stratakit.bentley.com/docs), Bentley's design system. The StrataKit packages (`@stratakit/foundations`, `@stratakit/mui`, `@stratakit/structures`) are declared as peer dependencies and must be installed and configured by the consuming application. See the [StrataKit configuration documentation](https://stratakit.bentley.com/docs) for setup instructions.
 
 Place a single `TreeWidgetContextProvider` near the root of the application, above all tree widget components. The provider initializes localization, logging, and shared tree resources required by the components. Standard tree components initialize their own telemetry context:
 
