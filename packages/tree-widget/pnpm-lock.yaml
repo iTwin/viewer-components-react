@@ -34,6 +34,9 @@ importers:
       '@stratakit/icons':
         specifier: ^0.4.3
         version: 0.4.6
+      '@stratakit/structures':
+        specifier: ^0.6.0
+        version: 0.6.1(@stratakit/foundations@1.0.2(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@types/react@19.3.0)(immer@10.2.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(use-sync-external-store@1.7.0(react@19.3.0))
       classnames:
         specifier: ^2.5.1
         version: 2.5.1
@@ -140,9 +143,6 @@ importers:
       '@stratakit/mui':
         specifier: ^1.1.0
         version: 1.1.0(@mui/material@9.4.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@stratakit/foundations@1.0.2(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)
-      '@stratakit/structures':
-        specifier: ^0.6.0
-        version: 0.6.1(@stratakit/foundations@1.0.2(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@types/react@19.3.0)(immer@10.2.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(use-sync-external-store@1.7.0(react@19.3.0))
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.2
