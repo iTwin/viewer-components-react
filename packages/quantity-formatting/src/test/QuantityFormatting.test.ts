@@ -56,4 +56,37 @@ describe("QuantityFormatting", () => {
     expect(QuantityFormatting.isInitialized).toBe(true);
     expect(QuantityFormatting.localization).toBe(current);
   });
+
+  it("unregisters a namespace whose registration completes after terminate", async () => {
+    QuantityFormatting.terminate();
+    const stale = new EmptyLocalization();
+    let resolveStale!: () => void;
+    vi.spyOn(stale, "registerNamespace").mockReturnValueOnce(new Promise<void>((resolve) => (resolveStale = resolve)));
+    const unregister = vi.spyOn(stale, "unregisterNamespace");
+    const staleStartup = QuantityFormatting.startup({ localization: stale });
+
+    QuantityFormatting.terminate();
+    resolveStale();
+    await staleStartup;
+
+    expect(unregister).toHaveBeenCalledWith("QuantityFormat");
+    expect(QuantityFormatting.isInitialized).toBe(false);
+  });
+
+  it("keeps the namespace when a newer startup reuses the same localization", async () => {
+    QuantityFormatting.terminate();
+    const localization = new EmptyLocalization();
+    let resolveFirst!: () => void;
+    vi.spyOn(localization, "registerNamespace").mockReturnValueOnce(new Promise<void>((resolve) => (resolveFirst = resolve)));
+    const unregister = vi.spyOn(localization, "unregisterNamespace");
+    const firstStartup = QuantityFormatting.startup({ localization });
+
+    QuantityFormatting.terminate();
+    await QuantityFormatting.startup({ localization });
+    resolveFirst();
+    await firstStartup;
+
+    expect(unregister).not.toHaveBeenCalled();
+    expect(QuantityFormatting.isInitialized).toBe(true);
+  });
 });

@@ -72,7 +72,13 @@ export class QuantityFormatting {
       }
       throw error;
     }
-    if (generation === QuantityFormatting._generation) QuantityFormatting._isInitialized = true;
+    if (generation === QuantityFormatting._generation) {
+      QuantityFormatting._isInitialized = true;
+      return;
+    }
+    // terminate() ran while registering. Undo this registration unless a newer startup uses the same instance.
+    if (localization !== QuantityFormatting._localization)
+      localization.unregisterNamespace(QuantityFormatting._i18nNamespace);
   }
 
   /**
