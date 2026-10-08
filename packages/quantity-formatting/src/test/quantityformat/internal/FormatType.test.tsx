@@ -47,4 +47,29 @@ describe("FormatTypeOption", () => {
     expect(formatProps).toMatchObject({ revolutionUnit: "Units.REVOLUTION", azimuthBaseUnit: "Units.ARC_DEG", azimuthBase: 0 });
     expect(await formatValue(formatProps, "Units.ARC_DEG", 45)).toBe("45");
   });
+
+  it("drops a pending azimuth lookup when the format changes before it resolves", async () => {
+    let resolveLookup!: () => void;
+    const realProvider = IModelApp.quantityFormatter.unitsProvider;
+    const unitsProvider = {
+      ...realProvider,
+      findUnitByName: async (name: string) => {
+        await new Promise<void>((resolve) => (resolveLookup = resolve));
+        return realProvider.findUnitByName(name);
+      },
+    } as typeof realProvider;
+    const onChange = vi.fn();
+    const formatProps: FormatProps = { type: "decimal", precision: 2, composite: { units: [{ name: "Units.ARC_DEG" }] } };
+    const { rerender } = render(<FormatTypeOption formatProps={formatProps} unitsProvider={unitsProvider} onChange={onChange} />);
+
+    fireEvent.click(screen.getByRole("combobox"));
+    fireEvent.click(screen.getByRole("option", { name: "azimuth" }));
+    // Another edit lands while the lookup is pending.
+    rerender(<FormatTypeOption formatProps={{ ...formatProps, precision: 4 }} unitsProvider={unitsProvider} onChange={onChange} />);
+    await waitFor(() => expect(resolveLookup).toBeDefined());
+    resolveLookup();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });

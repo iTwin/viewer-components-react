@@ -70,13 +70,13 @@ describe("FormatUnits", () => {
     expect(screen.queryByRole("option", { name: "GRAD" })).toBeNull();
   });
 
-  it("does not offer a sub-unit whose ratio is large but not whole", async () => {
+  it.each([1_000_000.5, 1_000_000_000.5])("does not offer a sub-unit with a large non-whole ratio of %d parts", async (ratio) => {
     const parent = { name: "Test.PARENT", label: "p", phenomenon: "Test.PHEN", system: "Test.SYS", isValid: true } as UnitProps;
     const child = { ...parent, name: "Test.CHILD", label: "c" };
     const unitsProvider = {
       findUnitByName: async (name: string) => (name === child.name ? child : parent),
       getUnitsByFamily: async () => [parent, child],
-      getConversion: async (from: UnitProps, to: UnitProps) => ({ factor: from.name === to.name ? 1 : from.name === child.name ? 1 / 1_000_000.5 : 1_000_000.5, offset: 0 }),
+      getConversion: async (from: UnitProps, to: UnitProps) => ({ factor: from.name === to.name ? 1 : from.name === child.name ? 1 / ratio : ratio, offset: 0 }),
     } as unknown as UnitsProvider;
     render(<FormatUnits initialFormat={{ type: "decimal", composite: { units: [{ name: parent.name, label: "p" }] } }} unitsProvider={unitsProvider} onUnitsChange={vi.fn()} />);
 
