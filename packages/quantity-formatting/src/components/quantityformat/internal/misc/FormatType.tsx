@@ -128,9 +128,16 @@ interface FormatTypeOptionProps {
  */
 export function FormatTypeOption(props: FormatTypeOptionProps) {
   const { formatProps, unitsProvider, onChange } = props;
+  // Bearing/azimuth defaults need an async unit lookup. A newer type change or any props change makes a pending
+  // lookup stale, so its result must not overwrite the newer edit.
+  const requestRef = React.useRef(0);
+  React.useEffect(() => {
+    requestRef.current++;
+  }, [formatProps, unitsProvider]);
 
   const handleFormatTypeChange = React.useCallback(
     async (type: FormatType) => {
+      const request = ++requestRef.current;
       let precision: number | undefined;
       let stationOffsetSize: number | undefined;
       let scientificType: string | undefined;
@@ -168,6 +175,7 @@ export function FormatTypeOption(props: FormatTypeOptionProps) {
           ratioType = RatioType.NToOne; // Default to N:1 ratio
           break;
       }
+      if (request !== requestRef.current) return;
       const newFormatProps: FormatProps = {
         ...formatProps,
         composite: formatProps.composite
