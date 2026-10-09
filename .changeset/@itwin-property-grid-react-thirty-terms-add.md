@@ -1,5 +1,5 @@
 ---
-"@itwin/property-grid-react": minor
+"@itwin/property-grid-react": patch
 ---
 
 Add virtualization to element list component.
