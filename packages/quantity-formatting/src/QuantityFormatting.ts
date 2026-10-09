@@ -21,7 +21,6 @@ export const QuantityFormattingLoggerCategory = "QuantityFormat"
 export class QuantityFormatting {
   private static _isInitialized = false;
   private static _startupPromise: Promise<void> | undefined;
-  private static _generation = 0;
   private static _i18nNamespace = "QuantityFormat";
   private static _localization: Localization | undefined;
 
@@ -50,35 +49,24 @@ export class QuantityFormatting {
 
   /**
    * Initializes the QuantityFormatting class with localization support.
-   * Concurrent calls share the first call's initialization, including its localization instance; call
-   * [[terminate]] before starting up again with a different instance.
+   * Calls made while startup is in progress share it, including the first call's localization instance.
    * @param options Optional startup options including custom localization instance
    */
   public static async startup(options?: { localization?: Localization }): Promise<void> {
-    QuantityFormatting._startupPromise ??= QuantityFormatting.initialize(options?.localization ?? IModelApp.localization, QuantityFormatting._generation);
+    QuantityFormatting._startupPromise ??= QuantityFormatting.initialize(options?.localization ?? IModelApp.localization);
     return QuantityFormatting._startupPromise;
   }
 
-  private static async initialize(localization: Localization, generation: number): Promise<void> {
+  private static async initialize(localization: Localization): Promise<void> {
     // Assigned before awaiting so components rendered while the namespace loads keep working.
     QuantityFormatting._localization = localization;
     try {
       await localization.registerNamespace(QuantityFormatting._i18nNamespace);
     } catch (error) {
-      // Allow a retry, unless terminate() already reset the state for a newer startup.
-      if (generation === QuantityFormatting._generation) {
-        QuantityFormatting._startupPromise = undefined;
-        QuantityFormatting._localization = undefined;
-      }
+      QuantityFormatting._startupPromise = undefined; // Allow a retry.
       throw error;
     }
-    if (generation === QuantityFormatting._generation) {
-      QuantityFormatting._isInitialized = true;
-      return;
-    }
-    // terminate() ran while registering. Undo this registration unless a newer startup uses the same instance.
-    if (localization !== QuantityFormatting._localization)
-      localization.unregisterNamespace(QuantityFormatting._i18nNamespace);
+    QuantityFormatting._isInitialized = true;
   }
 
   /**
@@ -87,8 +75,6 @@ export class QuantityFormatting {
   public static terminate(): void {
     if (QuantityFormatting._isInitialized)
       QuantityFormatting._localization?.unregisterNamespace(QuantityFormatting._i18nNamespace);
-    // Invalidate any startup still in flight so it cannot overwrite state set after this call.
-    QuantityFormatting._generation++;
     QuantityFormatting._startupPromise = undefined;
     QuantityFormatting._localization = undefined;
     QuantityFormatting._isInitialized = false;

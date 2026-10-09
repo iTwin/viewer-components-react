@@ -42,4 +42,25 @@ describe("useUnitsProvider", () => {
 
     expect(result.current).toBe(explicit);
   });
+
+  it("never renders a stale app provider after an explicit provider is removed", async () => {
+    const rendered: UnitsProvider[] = [];
+    const { rerender } = renderHook(
+      ({ provider }) => {
+        const result = useUnitsProvider(provider);
+        rendered.push(result);
+        return result;
+      },
+      { initialProps: { provider: undefined as UnitsProvider | undefined } }
+    );
+    rerender({ provider: new BasicUnitsProvider() });
+    const replacement = new BasicUnitsProvider();
+    await act(async () => IModelApp.quantityFormatter.setUnitsProvider(replacement));
+
+    rendered.length = 0;
+    rerender({ provider: undefined });
+
+    expect(rendered.length).toBeGreaterThan(0);
+    expect(rendered.every((provider) => provider === replacement)).toBe(true);
+  });
 });
