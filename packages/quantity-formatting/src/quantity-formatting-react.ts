@@ -13,8 +13,14 @@ export { QuantityFormatting, QuantityFormattingLoggerCategory } from "./Quantity
 
 // Export React components here
 export { QuantityFormatPanel } from "./components/quantityformat/QuantityFormatPanel.js";
+export type { QuantityFormatPanelProps } from "./components/quantityformat/QuantityFormatPanel.js";
 export { FormatSample } from "./components/quantityformat/FormatSample.js";
+export type { FormatSampleProps } from "./components/quantityformat/FormatSample.js";
 export { FormatPanel } from "./components/quantityformat/FormatPanel.js";
+export type { FormatPanelProps } from "./components/quantityformat/FormatPanel.js";
 export { FormatSelector } from "./components/quantityformat/FormatSelector.js";
+export type { FormatSelectorProps } from "./components/quantityformat/FormatSelector.js";
 export { FormatSetPanel } from "./components/quantityformat/FormatSetPanel.js";
+export type { FormatSetPanelProps } from "./components/quantityformat/FormatSetPanel.js";
 export { FormatSetSelector } from "./components/quantityformat/FormatSetSelector.js";
+export type { FormatSetSelectorProps } from "./components/quantityformat/FormatSetSelector.js";

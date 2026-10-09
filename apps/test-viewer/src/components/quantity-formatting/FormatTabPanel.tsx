@@ -7,14 +7,13 @@ import React from "react";
 import { Flex, Text } from "@itwin/itwinui-react";
 import { FormatSelector, QuantityFormatPanel } from "@itwin/quantity-formatting-react";
 
-import type { FormatDefinition, UnitsProvider } from "@itwin/core-quantity";
+import type { FormatDefinition } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
 
 interface FormatTabPanelProps {
   activeFormatSet: FormatSet | undefined;
   activeFormatDefinitionKey: string | undefined;
   formatDefinition: FormatDefinition | undefined;
-  unitsProvider: UnitsProvider;
   onListItemChange: (formatDef: FormatDefinition, key: string) => void;
   onFormatChange: (newFormat: FormatDefinition) => Promise<void>;
 }
@@ -24,7 +23,6 @@ export const FormatTabPanel: React.FC<FormatTabPanelProps> = ({
   activeFormatSet,
   activeFormatDefinitionKey,
   formatDefinition,
-  unitsProvider,
   onListItemChange,
   onFormatChange,
 }) => {
@@ -47,7 +45,7 @@ export const FormatTabPanel: React.FC<FormatTabPanelProps> = ({
                 )}
               </Flex>
             )}
-            <QuantityFormatPanel formatDefinition={formatDefinition} unitsProvider={unitsProvider} onFormatChange={onFormatChange} />
+            <QuantityFormatPanel formatDefinition={formatDefinition} onFormatChange={onFormatChange} />
           </>
         ) : (
           <Flex flexDirection="column" justifyContent="center" alignItems="center" className="quantity-format-empty-state">

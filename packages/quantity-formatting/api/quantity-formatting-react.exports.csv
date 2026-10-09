@@ -1,10 +1,16 @@
 sep=;
 Release Tag;API Item Type;API Item Name
 beta;function;FormatPanel
+beta;interface;FormatPanelProps
 beta;function;FormatSample
+beta;interface;FormatSampleProps
 beta;const;FormatSelector
+beta;interface;FormatSelectorProps
 beta;const;FormatSetPanel
+beta;type;FormatSetPanelProps
 beta;const;FormatSetSelector
+beta;interface;FormatSetSelectorProps
 beta;function;QuantityFormatPanel
+beta;interface;QuantityFormatPanelProps
 beta;class;QuantityFormatting
 beta;const;QuantityFormattingLoggerCategory
