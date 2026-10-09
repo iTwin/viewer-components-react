@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { AppendUnitLabel } from "../../../components/quantityformat/internal/FormatUnitLabel.js";
+import { AppendUnitLabel } from "../../../components/quantityformat/internal/AppendUnitLabel.js";
 
 import type { FormatDefinition } from "@itwin/core-quantity";
 

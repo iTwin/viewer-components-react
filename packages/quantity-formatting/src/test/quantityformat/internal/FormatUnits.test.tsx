@@ -24,7 +24,7 @@ describe("FormatUnits", () => {
     return onUnitsChange;
   }
 
-  // Civil-iTwin #2096641: DDMMSS angle formats need arc minutes, not GRAD, as the sub-unit of degrees.
+  // DDMMSS angle formats need arc minutes, not GRAD, as the sub-unit of degrees.
   it("offers arc minutes as the sub-unit of an angle in degrees", async () => {
     const format: FormatDefinition = { type: "decimal", composite: { units: [{ name: "Units.ARC_DEG", label: "°" }] } };
     const onUnitsChange = await addSubUnit(format, "Units.ARC_DEG");
@@ -48,7 +48,7 @@ describe("FormatUnits", () => {
     });
   });
 
-  // Civil-iTwin #2096642: azimuth formats use horizontal-direction units.
+  // Azimuth formats use horizontal-direction units.
   it("offers arc minutes as the sub-unit of a horizontal direction in degrees", async () => {
     const format: FormatDefinition = { type: "azimuth", composite: { units: [{ name: "Units.HORIZONTAL_DIR_ARC_DEG", label: "°" }] } };
     const onUnitsChange = await addSubUnit(format, "Units.HORIZONTAL_DIR_ARC_DEG");
@@ -84,7 +84,7 @@ describe("FormatUnits", () => {
     expect(screen.queryByRole("option", { name: "labels.addSubUnit" })).toBeNull();
   });
 
-  // Civil-iTwin #2096646: an unset composite label falls back to the unit label when formatting, so show it.
+  // An unset composite label falls back to the unit label when formatting, so show it.
   it("shows the default unit label as a placeholder when the composite label is unset", async () => {
     const format: FormatDefinition = { type: "decimal", composite: { units: [{ name: "Units.FT" }] } };
     render(<FormatUnits initialFormat={format} unitsProvider={IModelApp.quantityFormatter.unitsProvider} onUnitsChange={vi.fn()} />);

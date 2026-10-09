@@ -33,13 +33,6 @@ export function FractionDash(props: FractionDashProps) {
     [formatProps, onChange]
   );
 
-  const handleUseFractionDashChange = React.useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      handleTraitChange(FormatTraits.FractionDash, e.target.checked);
-    },
-    [setFormatTrait]
-  );
-
   return (
     <div className="quantityFormat--formatInlineRow">
       <Label displayStyle="inline" htmlFor={fractionDashId}>
