@@ -3,12 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { IModelApp } from "@itwin/core-frontend";
 import { Format, FormatterSpec } from "@itwin/core-quantity";
 import { FormatTypeOption } from "../../../components/quantityformat/internal/misc/FormatType.js";
 
-import type { FormatProps } from "@itwin/core-quantity";
+import type { FormatProps, UnitProps, UnitsProvider } from "@itwin/core-quantity";
 
 describe("FormatTypeOption", () => {
   async function switchType(unitName: string, typeLabel: string): Promise<FormatProps> {
@@ -29,7 +29,7 @@ describe("FormatTypeOption", () => {
     return spec.applyFormatting(value);
   }
 
-  // Civil azimuths are persisted in horizontal-direction units, which cannot be converted to angle units.
+  // Horizontal-direction units cannot be converted to angle units.
   it.each([
     ["azimuth", "45"],
     ["bearing", "N45E"],
@@ -48,28 +48,43 @@ describe("FormatTypeOption", () => {
     expect(await formatValue(formatProps, "Units.ARC_DEG", 45)).toBe("45");
   });
 
-  it("drops a pending azimuth lookup when the format changes before it resolves", async () => {
-    let resolveLookup!: () => void;
-    const realProvider = IModelApp.quantityFormatter.unitsProvider;
-    const unitsProvider = {
-      ...realProvider,
-      findUnitByName: async (name: string) => {
-        await new Promise<void>((resolve) => (resolveLookup = resolve));
-        return realProvider.findUnitByName(name);
-      },
-    } as typeof realProvider;
-    const onChange = vi.fn();
-    const formatProps: FormatProps = { type: "decimal", precision: 2, composite: { units: [{ name: "Units.ARC_DEG" }] } };
-    const { rerender } = render(<FormatTypeOption formatProps={formatProps} unitsProvider={unitsProvider} onChange={onChange} />);
+  describe("pending azimuth lookup", () => {
+    function renderWithPendingLookup() {
+      let resolveLookup!: () => void;
+      const lookup = new Promise<UnitProps>((resolve) => (resolveLookup = () => resolve({ phenomenon: "Units.ANGLE" } as UnitProps)));
+      const unitsProvider = { findUnitByName: vi.fn(async () => lookup) } as unknown as UnitsProvider;
+      const onChange = vi.fn();
+      const formatProps: FormatProps = { type: "decimal", precision: 2, composite: { units: [{ name: "Units.ARC_DEG" }] } };
+      const view = render(<FormatTypeOption formatProps={formatProps} unitsProvider={unitsProvider} onChange={onChange} />);
+      fireEvent.click(screen.getByRole("combobox"));
+      fireEvent.click(screen.getByRole("option", { name: "azimuth" }));
+      expect(unitsProvider.findUnitByName).toHaveBeenCalledOnce();
+      // Resolves the lookup and lets the type change handler finish.
+      const finishLookup = async () => act(async () => {
+        resolveLookup();
+        await lookup;
+      });
+      return { ...view, formatProps, unitsProvider, onChange, finishLookup };
+    }
 
-    fireEvent.click(screen.getByRole("combobox"));
-    fireEvent.click(screen.getByRole("option", { name: "azimuth" }));
-    // Another edit lands while the lookup is pending.
-    rerender(<FormatTypeOption formatProps={{ ...formatProps, precision: 4 }} unitsProvider={unitsProvider} onChange={onChange} />);
-    await waitFor(() => expect(resolveLookup).toBeDefined());
-    resolveLookup();
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    it("applies the azimuth defaults when nothing changed while it was pending", async () => {
+      const { onChange, finishLookup } = renderWithPendingLookup();
+      await finishLookup();
+      expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ type: "Azimuth", revolutionUnit: "Units.REVOLUTION" }));
+    });
 
-    expect(onChange).not.toHaveBeenCalled();
+    it("is dropped when the format changes before it resolves", async () => {
+      const { rerender, formatProps, unitsProvider, onChange, finishLookup } = renderWithPendingLookup();
+      rerender(<FormatTypeOption formatProps={{ ...formatProps, precision: 4 }} unitsProvider={unitsProvider} onChange={onChange} />);
+      await finishLookup();
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it("is dropped when the picker unmounts before it resolves", async () => {
+      const { unmount, onChange, finishLookup } = renderWithPendingLookup();
+      unmount();
+      await finishLookup();
+      expect(onChange).not.toHaveBeenCalled();
+    });
   });
 });

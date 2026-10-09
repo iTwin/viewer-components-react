@@ -128,12 +128,15 @@ interface FormatTypeOptionProps {
  */
 export function FormatTypeOption(props: FormatTypeOptionProps) {
   const { formatProps, unitsProvider, onChange } = props;
-  // Bearing/azimuth defaults need an async unit lookup. A newer type change or any props change makes a pending
-  // lookup stale, so its result must not overwrite the newer edit.
+  // Bearing/azimuth defaults need an async unit lookup. A newer type change, a props change, or unmounting makes a
+  // pending lookup stale, so its result must not overwrite the newer edit.
   const requestRef = React.useRef(0);
-  React.useEffect(() => {
-    requestRef.current++;
-  }, [formatProps, unitsProvider]);
+  React.useEffect(
+    () => () => {
+      requestRef.current++;
+    },
+    [formatProps, unitsProvider]
+  );
 
   const handleFormatTypeChange = React.useCallback(
     async (type: FormatType) => {
