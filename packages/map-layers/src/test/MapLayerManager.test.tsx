@@ -434,4 +434,90 @@ describe("MapLayerManager", () => {
     await checkLayerSection(layersSections[0]);
     await checkLayerSection(layersSections[1]);
   });
+
+  describe("read-only mode", () => {
+    const layerSettings = ImageMapLayerSettings.fromJSON({
+      formatId: "WMS",
+      name: "background",
+      visible: true,
+      transparentBackground: true,
+      subLayers: [{ name: "subLayer1", visible: false }],
+      accessKey: undefined,
+      transparency: 0,
+      url: "https://server/MapServer",
+    });
+
+    async function renderManager(readOnly: boolean) {
+      viewportMock.reset();
+      viewportMock.backgroundLayers = [layerSettings];
+      viewportMock.overlayLayers = [ImageMapLayerSettings.fromJSON({ ...layerSettings.toJSON(), name: "overlay" })];
+      viewportMock.setup();
+
+      const result = render(
+        <div>
+          <MapLayerManager activeViewport={viewportMock.object} mapLayerOptions={{ readOnly }}></MapLayerManager>
+        </div>,
+      );
+      await act(async () => {
+        await TestUtils.flushAsyncOperations();
+      });
+      return result.container;
+    }
+
+    it("hides actions that change map layer configuration", async () => {
+      const container = await renderManager(true);
+
+      expect(container.querySelector(attachLayerButtonSelector)).toBeNull();
+      expect(container.querySelector(".maplayers-settings-popup-button")).toBeNull();
+      expect(queryAllByTestId(container, "select-all-checkbox")).toHaveLength(0);
+      expect(queryAllByTestId(container, "detach-label-button")).toHaveLength(0);
+      expect(queryAllByTestId(container, "select-item-checkbox")).toHaveLength(0);
+
+      const baseMapSelect = getByTestId(container, "base-map-select").querySelector('div[role="combobox"]');
+      expect(baseMapSelect?.getAttribute("aria-disabled")).toBe("true");
+    });
+
+    it("hides detach from the layer menu but keeps zoom to layer", async () => {
+      const container = await renderManager(true);
+
+      const moreOptionsButton = container.querySelector<HTMLElement>('[aria-label="LayerMenu.MoreOptions"]');
+      expect(moreOptionsButton).not.toBeNull();
+      fireEvent.click(moreOptionsButton!);
+
+      expect(queryByText(document.body, "LayerMenu.ZoomToLayer")).not.toBeNull();
+      expect(queryByText(document.body, "LayerMenu.Detach")).toBeNull();
+    });
+
+    it("keeps layer visibility controls", async () => {
+      const container = await renderManager(true);
+
+      const sections = getAllByTestId(container, "map-manager-layer-section");
+      expect(sections).toHaveLength(2);
+      sections.forEach((section) => {
+        expect(queryAllByTestId(section, "layer-visibility-icon-show")).toHaveLength(1);
+        expect(getByTestId<HTMLButtonElement>(section, "hide-all-label-button").disabled).toBe(false);
+        expect(getByTestId<HTMLButtonElement>(section, "show-all-label-button").disabled).toBe(false);
+        expect(getByTestId<HTMLButtonElement>(section, "invert-all-label-button").disabled).toBe(false);
+      });
+    });
+
+    it("does not load map layer sources", async () => {
+      const getSourcesSpy = vi.spyOn(MapLayerPreferences, "getSources");
+      const createSourcesSpy = vi.spyOn(MapLayerSources, "create");
+
+      await renderManager(true);
+
+      expect(getSourcesSpy).not.toHaveBeenCalled();
+      expect(createSourcesSpy).not.toHaveBeenCalled();
+    });
+
+    it("shows all actions when not read-only", async () => {
+      const container = await renderManager(false);
+
+      expect(container.querySelector(attachLayerButtonSelector)).not.toBeNull();
+      expect(container.querySelector(".maplayers-settings-popup-button")).not.toBeNull();
+      expect(queryAllByTestId(container, "detach-label-button")).toHaveLength(2);
+      expect(queryAllByTestId(container, "select-item-checkbox")).toHaveLength(2);
+    });
+  });
 });

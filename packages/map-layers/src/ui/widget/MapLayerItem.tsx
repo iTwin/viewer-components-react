@@ -25,6 +25,7 @@ interface MapLayerItemProps {
 
 export function MapLayerItem(props: MapLayerItemProps) {
   const context = useMapLayerListContext();
+  const readOnly = context.mapLayerOptions?.readOnly ?? false;
   const { layer, index, sortable } = props;
   const toggleVisibility = MapLayersUI.localization.getLocalizedString("mapLayers:Widget.ToggleVisibility");
   const requireAuthTooltip = MapLayersUI.localization.getLocalizedString("mapLayers:Widget.RequireAuthTooltip");
@@ -85,14 +86,16 @@ export function MapLayerItem(props: MapLayerItemProps) {
         boxShadow: sortable.isDragging ? "10px 5px 5px rgba(0, 0, 0, 0.15)" : undefined,
       }}
     >
-      <Checkbox
-        data-testid={"select-item-checkbox"}
-        checked={layer.selected}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-          layer.selected = event.target.checked;
-          context.onItemSelected(layer.isOverlay, index);
-        }}
-      />
+      {!readOnly && (
+        <Checkbox
+          data-testid={"select-item-checkbox"}
+          checked={layer.selected}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+            layer.selected = event.target.checked;
+            context.onItemSelected(layer.isOverlay, index);
+          }}
+        />
+      )}
       <IconButton
         disabled={context.disabled}
         size="small"
@@ -109,11 +112,11 @@ export function MapLayerItem(props: MapLayerItemProps) {
       <span
         className={context.disabled || outOfRange ? "map-manager-item-label-disabled" : "map-manager-item-label"}
         ref={sortable.handleRef}
-        style={{ cursor: context.disabled ? undefined : sortable.isDragging ? "grabbing" : "grab" }}
+        style={{ cursor: context.disabled || readOnly ? undefined : sortable.isDragging ? "grabbing" : "grab" }}
         title={outOfRange ? outOfRangeTitle : undefined}
       >
         {layer.name}
-        {layer.provider?.status === MapLayerImageryProviderStatus.RequireAuth && (
+        {!readOnly && layer.provider?.status === MapLayerImageryProviderStatus.RequireAuth && (
           <IconButton
             disabled={context.disabled}
             size="small"
@@ -162,7 +165,7 @@ export function MapLayerItem(props: MapLayerItemProps) {
           />
         )}
       </div>
-      {layer.provider?.status === MapLayerImageryProviderStatus.RequireAuth && (
+      {!readOnly && layer.provider?.status === MapLayerImageryProviderStatus.RequireAuth && (
         <IconButton
           disabled={context.disabled}
           size="small"
@@ -202,6 +205,7 @@ export function MapLayerItem(props: MapLayerItemProps) {
           mapLayerSettings={layer}
           onMenuItemSelection={context.onMenuItemSelected}
           disabled={context.disabled}
+          readOnly={readOnly}
         />
       </div>
     </div>

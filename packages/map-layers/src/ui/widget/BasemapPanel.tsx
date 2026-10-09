@@ -39,6 +39,7 @@ interface ExtraFormat {
 
 interface BasemapPanelProps {
   disabled?: boolean;
+  readOnly?: boolean;
 }
 
 /** @internal */
@@ -407,9 +408,9 @@ export function BasemapPanel(props: BasemapPanelProps) {
           value={selectedBaseMapValue.value}
           onChange={handleBaseMapSelection}
           size="small"
-          disabled={props.disabled}
+          disabled={props.disabled || props.readOnly}
           // Use key to reset internal state of Select when disabled changes, ensuring the dropdown menu is responsive.
-          key={String(props.disabled)}
+          key={String(props.disabled || props.readOnly)}
         />
         {baseIsColor && (
           <Popover

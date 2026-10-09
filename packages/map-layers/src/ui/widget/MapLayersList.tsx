@@ -35,7 +35,7 @@ export function MapLayersList(props: MapLayersListProps) {
     <div className="map-manager-layer-wrapper" data-testid="map-manager-layer-section">
       <div className="map-manager-layers">
         <span className="map-manager-layers-label">{props.isOverlay ? overlaysLabel : backgroundsLabel}</span>
-        <AttachLayerPopupButton disabled={context.disabled} isOverlay={props.isOverlay} />
+        {!context.mapLayerOptions?.readOnly && <AttachLayerPopupButton disabled={context.disabled} isOverlay={props.isOverlay} />}
       </div>
       <MapLayerActionButtons
         isOverlay={props.isOverlay}

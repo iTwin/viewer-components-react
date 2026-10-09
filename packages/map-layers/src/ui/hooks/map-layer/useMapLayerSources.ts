@@ -37,13 +37,18 @@ export function useMapLayerSources(args: {
   activeViewport: ScreenViewport;
   fetchPublicMapLayerSources: boolean;
   hideExternalMapLayersSection: boolean;
+  skipLoading?: boolean;
 }): MapLayerSourcesState {
-  const { activeViewport, fetchPublicMapLayerSources, hideExternalMapLayersSection } = args;
+  const { activeViewport, fetchPublicMapLayerSources, hideExternalMapLayersSection, skipLoading } = args;
   const [mapSources, setMapSources] = React.useState<MapLayerSource[] | undefined>();
   const [loadingSources, setLoadingSources] = React.useState(false);
   const isMounted = useIsMountedRef();
 
   React.useEffect(() => {
+    if (skipLoading) {
+      return;
+    }
+
     async function fetchSources() {
       let preferenceSources: MapLayerSource[] = [];
       const sourceLayers = await MapLayerSources.create(undefined, fetchPublicMapLayerSources && !hideExternalMapLayersSection);
@@ -98,7 +103,7 @@ export function useMapLayerSources(args: {
           setLoadingSources(false);
         }
       });
-  }, [activeViewport.iModel, fetchPublicMapLayerSources, hideExternalMapLayersSection, isMounted]);
+  }, [activeViewport.iModel, fetchPublicMapLayerSources, hideExternalMapLayersSection, isMounted, skipLoading]);
 
   React.useEffect(() => {
     const handleLayerSourceChange = async (changeType: MapLayerSourceChangeType, oldSource?: MapLayerSource, newSource?: MapLayerSource) => {

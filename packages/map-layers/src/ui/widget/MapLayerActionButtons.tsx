@@ -20,7 +20,8 @@ export const MapLayerActionButtons = ({ isOverlay, layersList }: MapLayerActionB
   const invertAllLabel = MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.InvertAllLabel");
   const detachSelectedLabel = MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.DetachSelectedLabel");
 
-  const { disabled: mapLayerDisabled, activeViewport, onSelectAllLayers } = useMapLayerListContext();
+  const { disabled: mapLayerDisabled, activeViewport, onSelectAllLayers, mapLayerOptions } = useMapLayerListContext();
+  const readOnly = mapLayerOptions?.readOnly ?? false;
   const disabled = mapLayerDisabled || layersList.length === 0;
   const hasSelected = layersList.some((l) => l.selected);
 
@@ -57,10 +58,14 @@ export const MapLayerActionButtons = ({ isOverlay, layersList }: MapLayerActionB
 
   return (
     <div className="map-manager-layer-action-buttons">
-      <Checkbox data-testid="select-all-checkbox" disabled={disabled} checked={hasSelected} onChange={selectAll} className="map-manager-layer-action-unlink-button" />
-      <IconButton disabled={disabled || !hasSelected} data-testid="detach-label-button" label={detachSelectedLabel} size="small" styleType="borderless" onClick={unlink}>
-        <SvgUnlink />
-      </IconButton>
+      {!readOnly && (
+        <>
+          <Checkbox data-testid="select-all-checkbox" disabled={disabled} checked={hasSelected} onChange={selectAll} className="map-manager-layer-action-unlink-button" />
+          <IconButton disabled={disabled || !hasSelected} data-testid="detach-label-button" label={detachSelectedLabel} size="small" styleType="borderless" onClick={unlink}>
+            <SvgUnlink />
+          </IconButton>
+        </>
+      )}
       <ButtonGroup className="map-manager-layer-action-buttons-inside-separator">
         <IconButton disabled={disabled} data-testid="show-all-label-button" label={showAllLabel} size="small" onClick={showAll} styleType="borderless">
           <SvgVisibilityShow />
