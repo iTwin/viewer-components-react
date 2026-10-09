@@ -7,8 +7,9 @@ import "./ElementList.scss";
 
 import classnames from "classnames";
 import * as React from "react";
-import { MenuItem, Text } from "@itwin/itwinui-react";
+import { List, ListItem, Text } from "@itwin/itwinui-react";
 import { PresentationLabelsProvider } from "@itwin/presentation-components";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { trackTime } from "../common/TimeTracker.js";
 import { useTelemetryContext } from "../hooks/UseTelemetryContext.js";
 import { PropertyGridManager } from "../PropertyGridManager.js";
@@ -16,6 +17,9 @@ import { Header } from "./Header.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
+
+// Initial row height estimate (px). Actual height is theme-dependent, so each row is measured after mount.
+const INITIAL_ROW_HEIGHT = 29;
 
 /**
  * Props for `ElementList` component.
@@ -72,6 +76,14 @@ export function ElementList({ imodel, instanceKeys, onBack, onSelect, className 
 
   const title = `${PropertyGridManager.translate("element-list.title")} (${instanceKeys.length})`;
 
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+  const virtualizer = useVirtualizer({
+    count: data?.length ?? 0,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => INITIAL_ROW_HEIGHT,
+    overscan: 10,
+  });
+
   return (
     <div className={classnames("property-grid-react-element-list", className)}>
       <Header
@@ -82,20 +94,37 @@ export function ElementList({ imodel, instanceKeys, onBack, onSelect, className 
           </Text>
         }
       />
-      <div className="property-grid-react-element-list-container" role="list">
-        {data?.map((dataItem, index) => (
-          <MenuItem
-            key={index}
-            className="property-grid-react-element-list-item"
-            role="listitem"
-            onClick={() => {
-              onSelect(dataItem.instanceKey);
-            }}
-          >
-            {dataItem.label}
-          </MenuItem>
-        ))}
-      </div>
+      <List ref={scrollContainerRef} className="property-grid-react-element-list-container">
+        <div style={{ height: virtualizer.getTotalSize(), width: "100%", position: "relative", contain: "layout" }}>
+          {virtualizer.getVirtualItems().map((virtualRow) => {
+            const dataItem = data?.[virtualRow.index];
+            if (!dataItem) {
+              return null;
+            }
+            return (
+              <ListItem
+                key={virtualRow.key}
+                ref={virtualizer.measureElement}
+                data-index={virtualRow.index}
+                className="property-grid-react-element-list-item"
+                actionable
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+                onClick={() => {
+                  onSelect(dataItem.instanceKey);
+                }}
+              >
+                {dataItem.label}
+              </ListItem>
+            );
+          })}
+        </div>
+      </List>
     </div>
   );
 }
@@ -103,12 +132,6 @@ export function ElementList({ imodel, instanceKeys, onBack, onSelect, className 
 /** Queries labels and orders Label-InstanceKey pairs in ascending order */
 async function getSortedLabelInstanceKeyPairs(labelsProvider: PresentationLabelsProvider, instanceKeys: InstanceKey[]): Promise<RowElementData[]> {
   const labels = await getLabels(labelsProvider, instanceKeys);
-  const labelKeyPairs: RowElementData[] = [];
-
-  labels.forEach((label, index) => {
-    labelKeyPairs.push({ label, instanceKey: instanceKeys[index] });
-  });
-
   return labels.map((label, index) => ({ label, instanceKey: instanceKeys[index] })).sort((a, b) => a.label.localeCompare(b.label));
 }
 
