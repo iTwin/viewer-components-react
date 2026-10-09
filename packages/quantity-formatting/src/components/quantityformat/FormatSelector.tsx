@@ -17,6 +17,7 @@ const logCategory = QuantityFormattingLoggerCategory;
  * @beta
  */
 export interface FormatSelectorProps {
+  /** Treated as immutable: pass a new object when its formats change, e.g. after `FormatSetFormatsProvider.onFormatsChanged`. */
   activeFormatSet?: FormatSet;
   activeFormatDefinitionKey?: string;
   onListItemChange: (formatDefinition: FormatDefinition, key: string) => void;
@@ -34,30 +35,48 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
   const { translate } = useTranslation();
   const [searchTerm, setSearchTerm] = React.useState("");
 
-  // Not memoized: format set providers (e.g. FormatSetFormatsProvider.addFormat) update `formats` in place, so the
-  // object identity does not change after a format is applied.
-  const formatEntries = Object.entries(activeFormatSet?.formats ?? {})
-    .filter((entry): entry is [string, FormatDefinition] => typeof entry[1] === "object" && entry[1] !== null)
-    .map(([key, formatDef]) => ({ key, formatDef, label: formatDef.label || key }));
-
-  const lowerSearchTerm = searchTerm.trim().toLowerCase();
-  const filteredFormats = lowerSearchTerm
-    ? formatEntries.filter(({ label }) => label.toLowerCase().includes(lowerSearchTerm))
-    : formatEntries;
-
-  const handleFormatSelect = (key: string) => {
-    // Read the definition at selection time rather than from render-time entries for the same reason.
-    const formatDef = activeFormatSet?.formats[key];
-    if (typeof formatDef === "object" && formatDef !== null) {
-      onListItemChange(formatDef, key);
-      return;
+  // Prepare format entries
+  const formatEntries = React.useMemo(() => {
+    if (!activeFormatSet?.formats) {
+      return [];
     }
-    Logger.logWarning(logCategory, `Format entry not found for key: ${key}`, {
-      key,
-      availableKeys: formatEntries.map((e) => e.key),
-      activeFormatSet: activeFormatSet?.name,
-    });
-  };
+
+    return Object.entries(activeFormatSet.formats)
+      .filter(([, formatDef]) => typeof formatDef === "object" && formatDef !== null)
+      .map(([key, formatDef]) => ({
+        key,
+        formatDef: formatDef as FormatDefinition,
+        label: (formatDef as FormatDefinition).label || key,
+      }));
+  }, [activeFormatSet?.formats]);
+
+  // Filter formats based on search term
+  const filteredFormats = React.useMemo(() => {
+    if (!searchTerm.trim()) {
+      return formatEntries;
+    }
+
+    const lowerSearchTerm = searchTerm.toLowerCase();
+    return formatEntries.filter(({ label }) =>
+      label.toLowerCase().includes(lowerSearchTerm)
+    );
+  }, [formatEntries, searchTerm]);
+
+  const handleFormatSelect = React.useCallback(
+    (key: string) => {
+      const formatEntry = formatEntries.find(entry => entry.key === key);
+      if (formatEntry) {
+        onListItemChange(formatEntry.formatDef, key);
+      } else {
+        Logger.logWarning(logCategory,`Format entry not found for key: ${key}`, {
+          key,
+          availableKeys: formatEntries.map(e => e.key),
+          activeFormatSet: activeFormatSet?.name
+        });
+      }
+    },
+    [onListItemChange, formatEntries]
+  );
 
   const handleSearchChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -10,7 +10,7 @@ import { Divider, Label, Text } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../useTranslation.js";
 import { DecimalSeparator } from "../internal/DecimalSeparator.js";
 import { FormatPrecision } from "../internal/FormatPrecision.js";
-import { AppendUnitLabel } from "../internal/FormatUnitLabel.js";
+import { AppendUnitLabel } from "../internal/AppendUnitLabel.js";
 import { FormatUnits } from "../internal/FormatUnits.js";
 import { KeepDecimalPoint } from "../internal/KeepDecimalPoint.js";
 import { KeepSingleZero } from "../internal/KeepSingleZero.js";

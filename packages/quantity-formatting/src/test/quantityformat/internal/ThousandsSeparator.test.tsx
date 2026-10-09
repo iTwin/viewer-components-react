@@ -8,11 +8,11 @@ import type { FormatProps } from "@itwin/core-quantity";
 import { Format } from "@itwin/core-quantity";
 import { UseThousandsSeparator, ThousandsSeparatorSelector } from "../../../components/quantityformat/internal/ThousandsSeparator.js";
 
-afterEach(() => {
-  vi.restoreAllMocks();
-});
-
 describe("UseThousandsSeparator", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   const defaultFormatProps: FormatProps = {
     type: "decimal",
     precision: 2,
@@ -87,6 +87,10 @@ describe("UseThousandsSeparator", () => {
 });
 
 describe("ThousandsSeparatorSelector", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   const formatPropsWithThousands: FormatProps = {
     type: "decimal",
     precision: 2,

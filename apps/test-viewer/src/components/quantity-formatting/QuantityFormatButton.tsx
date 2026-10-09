@@ -57,6 +57,9 @@ export const QuantityFormatButton: React.FC = () => {
     });
   }, [formatManager]);
 
+  // FormatSelector needs a new format set object to show saved changes.
+  React.useEffect(() => formatManager?.onActiveFormatSetFormatsChanged.addListener(setActiveFormatSet), [formatManager]);
+
   // Don't render if FormatManager is not initialized
   if (!formatManager) {
     return null;
