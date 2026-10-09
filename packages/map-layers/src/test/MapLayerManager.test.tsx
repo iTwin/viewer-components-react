@@ -469,9 +469,9 @@ describe("MapLayerManager", () => {
       url: "https://server/MapServer",
     });
 
-    const managerElement = (readOnly: boolean) => (
+    const managerElement = (readOnly?: boolean) => (
       <div>
-        <MapLayerManager activeViewport={viewportMock.object} mapLayerOptions={{ readOnly }}></MapLayerManager>
+        <MapLayerManager activeViewport={viewportMock.object} mapLayerOptions={readOnly === undefined ? undefined : { readOnly }}></MapLayerManager>
       </div>
     );
 
@@ -481,7 +481,7 @@ describe("MapLayerManager", () => {
       });
     }
 
-    async function renderManager(readOnly: boolean, setupViewport?: () => void) {
+    async function renderManager(readOnly?: boolean, setupViewport?: () => void) {
       viewportMock.reset();
       viewportMock.backgroundLayers = [layerSettings];
       viewportMock.overlayLayers = [ImageMapLayerSettings.fromJSON({ ...layerSettings.toJSON(), name: "overlay" })];
@@ -551,6 +551,21 @@ describe("MapLayerManager", () => {
       expect(createSourcesSpy).toHaveBeenCalledTimes(1);
     });
 
+    it("stops a pending source load when switching to read-only", async () => {
+      let resolveCreate: (value: MapLayerSources) => void = () => {};
+      vi.spyOn(MapLayerSources, "create").mockImplementation(async () => new Promise<MapLayerSources>((resolve) => (resolveCreate = resolve)));
+      const getSourcesSpy = vi.spyOn(MapLayerPreferences, "getSources").mockResolvedValue([]);
+
+      const { rerender } = await renderManager(false);
+      rerender(managerElement(true));
+      await act(async () => {
+        resolveCreate({ allSource: [] } as unknown as MapLayerSources);
+        await TestUtils.flushAsyncOperations();
+      });
+
+      expect(getSourcesSpy).not.toHaveBeenCalled();
+    });
+
     it("closes the sign-in dialog when switching to read-only", async () => {
       const openSpy = vi.spyOn(UiFramework.dialogs.modal, "open").mockImplementation(() => {});
       const closeSpy = vi.spyOn(UiFramework.dialogs.modal, "close").mockImplementation(() => {});
@@ -576,8 +591,8 @@ describe("MapLayerManager", () => {
       expect(queryAllByRole(container, "button", { name: "Widget.RequireAuthTooltip" })).toHaveLength(0);
     });
 
-    it("shows all actions when not read-only", async () => {
-      const { container } = await renderManager(false);
+    it("shows all actions when readOnly is not set", async () => {
+      const { container } = await renderManager();
 
       expect(container.querySelector(attachLayerButtonSelector)).not.toBeNull();
       expect(container.querySelector(".maplayers-settings-popup-button")).not.toBeNull();

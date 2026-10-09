@@ -49,9 +49,14 @@ export function useMapLayerSources(args: {
       return;
     }
 
+    let cancelled = false;
+
     async function fetchSources() {
       let preferenceSources: MapLayerSource[] = [];
       const sourceLayers = await MapLayerSources.create(undefined, fetchPublicMapLayerSources && !hideExternalMapLayersSection);
+      if (cancelled) {
+        return;
+      }
 
       const iModel = activeViewport.iModel;
       try {
@@ -59,6 +64,9 @@ export function useMapLayerSources(args: {
           preferenceSources = await MapLayerPreferences.getSources(iModel.iTwinId, iModel.iModelId);
         }
       } catch (err) {
+        if (cancelled) {
+          return;
+        }
         IModelApp.notifications.outputMessage(
           new NotifyMessageDetails(
             OutputMessagePriority.Error,
@@ -68,7 +76,7 @@ export function useMapLayerSources(args: {
         );
       }
 
-      if (!isMounted.current) {
+      if (!isMounted.current || cancelled) {
         return;
       }
 
@@ -94,15 +102,19 @@ export function useMapLayerSources(args: {
 
     fetchSources()
       .then(() => {
-        if (isMounted.current) {
+        if (isMounted.current && !cancelled) {
           setLoadingSources(false);
         }
       })
       .catch(() => {
-        if (isMounted.current) {
+        if (isMounted.current && !cancelled) {
           setLoadingSources(false);
         }
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, [activeViewport.iModel, fetchPublicMapLayerSources, hideExternalMapLayersSection, isMounted, skipLoading]);
 
   React.useEffect(() => {
