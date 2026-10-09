@@ -5,6 +5,7 @@
     "rootDir": "./src",
     "outDir": "lib",
     "lib": ["dom", "ES2022"],
+    "types": ["node"],
     "strict": true,
     "skipLibCheck": true,
     "experimentalDecorators": true,

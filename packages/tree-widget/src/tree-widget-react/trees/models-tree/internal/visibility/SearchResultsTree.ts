@@ -16,7 +16,7 @@ import {
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
-import type { EC, ECClassHierarchyInspector } from "@itwin/presentation-shared";
+import type { EC, ECSchemaProvider } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId } from "../../../../shared/internal/Types.js";
 import type {
   BaseSearchResultsTreeNode,
@@ -42,7 +42,7 @@ export interface ModelsTreeSearchTargets {
 
 /** @internal */
 export async function createModelsSearchResultsTree(props: {
-  imodelAccess: ECClassHierarchyInspector;
+  imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom">;
   searchPaths: HierarchySearchTree[];
   idsCache: ModelsTreeIdsCache;
 }): Promise<SearchResultsTree<ModelsTreeSearchTargets>> {
@@ -109,7 +109,7 @@ interface ProcessedNodes {
 }
 
 interface ModelsTreeSearchResultsNodesHandlerProps {
-  imodelAccess: ECClassHierarchyInspector;
+  imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom">;
   idsCache: ModelsTreeIdsCache;
 }
 

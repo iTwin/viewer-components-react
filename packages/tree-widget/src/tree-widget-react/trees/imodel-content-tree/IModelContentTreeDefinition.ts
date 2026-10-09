@@ -27,7 +27,7 @@ import type {
   HierarchyNodesDefinition,
   NodePostProcessor,
 } from "@itwin/presentation-hierarchies";
-import type { EC, ECClassHierarchyInspector, ECSchemaProvider } from "@itwin/presentation-shared";
+import type { EC, ECSchemaProvider } from "@itwin/presentation-shared";
 import type { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.js";
 
 /**
@@ -45,7 +45,7 @@ export const defaultHierarchyConfiguration: IModelContentTreeHierarchyConfigurat
 };
 
 interface IModelContentTreeDefinitionProps {
-  imodelAccess: ECSchemaProvider & ECClassHierarchyInspector;
+  imodelAccess: ECSchemaProvider;
   idsCache: IModelContentTreeIdsCache;
   hierarchyConfig: IModelContentTreeHierarchyConfiguration;
 }
@@ -60,7 +60,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
     this.#idsCache = props.idsCache;
     this.#hierarchyConfig = props.hierarchyConfig;
     this.#impl = createPredicateBasedHierarchyDefinition({
-      classHierarchyInspector: props.imodelAccess,
+      imodelAccess: props.imodelAccess,
       hierarchy: {
         rootNodes: async (requestProps) =>
           this.createSubjectChildrenQuery({ ...requestProps, parentNodeInstanceIds: this.#hierarchyConfig.hideRootSubject ? [IModel.rootSubjectId] : [] }),

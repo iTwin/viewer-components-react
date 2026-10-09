@@ -15,7 +15,7 @@ import { createClassificationsSearchResultsTree } from "./SearchResultsTree.js";
 
 import type { Observable } from "rxjs";
 import type { HierarchyNode, HierarchySearchTree } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
+import type { ECSchemaProvider } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfoCache } from "../../../../shared/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
 import type { SearchResultsTree } from "../../../../shared/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeSpecificVisibilityHandler } from "../../../../shared/internal/visibility/BaseVisibilityHelper.js";
@@ -234,7 +234,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
 export function createClassificationsTreeVisibilityHandler(props: {
   viewport: TreeWidgetViewport;
   idsCache: ClassificationsTreeIdsCache;
-  imodelAccess: ECClassHierarchyInspector;
+  imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom">;
   searchPaths?: HierarchySearchTree[];
 }) {
   return new HierarchyVisibilityHandlerImpl<ClassificationsTreeSearchTargets>({

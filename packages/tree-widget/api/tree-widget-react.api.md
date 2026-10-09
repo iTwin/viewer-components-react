@@ -9,7 +9,7 @@ import { BeEvent } from '@itwin/core-bentley';
 import { ClassGroupingNodeKey } from '@itwin/presentation-hierarchies';
 import { ComponentProps } from 'react';
 import { EC } from '@itwin/presentation-shared';
-import { ECClassHierarchyInspector } from '@itwin/presentation-shared';
+import { ECSchemaProvider } from '@itwin/presentation-shared';
 import { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
 import { HierarchyDefinition } from '@itwin/presentation-hierarchies';
 import { HierarchyNode } from '@itwin/presentation-hierarchies-react';
@@ -925,7 +925,7 @@ export function VisibilityTree(input: VisibilityTreeProps): _$react.JSX.Element;
 // @beta (undocumented)
 type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess"> & {
     visibilityHandlerFactory: (props: {
-        imodelAccess: ECClassHierarchyInspector;
+        imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom">;
     }) => HierarchyVisibilityHandler;
     treeRenderer: (treeProps: FunctionProps<TreeProps["treeRenderer"]> & Pick<VisibilityContext, "getVisibilityButtonState" | "onVisibilityButtonClick">) => ReactNode;
 };
