@@ -15,10 +15,7 @@
   }
 
   .property-grid-react-element-list-container {
+    flex: 1 1 auto;
     overflow: auto;
-
-    .property-grid-react-element-list-item:nth-child(odd) {
-      background-color: var(--iui-color-background-zebra);
-    }
   }
 }
