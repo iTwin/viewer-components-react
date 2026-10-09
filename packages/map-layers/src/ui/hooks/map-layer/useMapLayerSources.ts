@@ -37,16 +37,26 @@ export function useMapLayerSources(args: {
   activeViewport: ScreenViewport;
   fetchPublicMapLayerSources: boolean;
   hideExternalMapLayersSection: boolean;
+  skipLoading?: boolean;
 }): MapLayerSourcesState {
-  const { activeViewport, fetchPublicMapLayerSources, hideExternalMapLayersSection } = args;
+  const { activeViewport, fetchPublicMapLayerSources, hideExternalMapLayersSection, skipLoading } = args;
   const [mapSources, setMapSources] = React.useState<MapLayerSource[] | undefined>();
   const [loadingSources, setLoadingSources] = React.useState(false);
   const isMounted = useIsMountedRef();
 
   React.useEffect(() => {
+    if (skipLoading) {
+      return;
+    }
+
+    let cancelled = false;
+
     async function fetchSources() {
       let preferenceSources: MapLayerSource[] = [];
       const sourceLayers = await MapLayerSources.create(undefined, fetchPublicMapLayerSources && !hideExternalMapLayersSection);
+      if (cancelled) {
+        return;
+      }
 
       const iModel = activeViewport.iModel;
       try {
@@ -54,6 +64,9 @@ export function useMapLayerSources(args: {
           preferenceSources = await MapLayerPreferences.getSources(iModel.iTwinId, iModel.iModelId);
         }
       } catch (err) {
+        if (cancelled) {
+          return;
+        }
         IModelApp.notifications.outputMessage(
           new NotifyMessageDetails(
             OutputMessagePriority.Error,
@@ -63,7 +76,7 @@ export function useMapLayerSources(args: {
         );
       }
 
-      if (!isMounted.current) {
+      if (!isMounted.current || cancelled) {
         return;
       }
 
@@ -89,16 +102,20 @@ export function useMapLayerSources(args: {
 
     fetchSources()
       .then(() => {
-        if (isMounted.current) {
+        if (isMounted.current && !cancelled) {
           setLoadingSources(false);
         }
       })
       .catch(() => {
-        if (isMounted.current) {
+        if (isMounted.current && !cancelled) {
           setLoadingSources(false);
         }
       });
-  }, [activeViewport.iModel, fetchPublicMapLayerSources, hideExternalMapLayersSection, isMounted]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeViewport.iModel, fetchPublicMapLayerSources, hideExternalMapLayersSection, isMounted, skipLoading]);
 
   React.useEffect(() => {
     const handleLayerSourceChange = async (changeType: MapLayerSourceChangeType, oldSource?: MapLayerSource, newSource?: MapLayerSource) => {

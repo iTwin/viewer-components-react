@@ -59,11 +59,13 @@ export function MapLayerManager(props: MapLayerManagerProps) {
   }, [mapLayerOptions?.baseMapLayers]);
   const hideExternalMapLayersSection = mapLayerOptions?.hideExternalMapLayers ?? false;
   const fetchPublicMapLayerSources = mapLayerOptions?.fetchPublicMapLayerSources ?? false;
+  const readOnly = mapLayerOptions?.readOnly ?? false;
 
   const { loadingSources, mapSources } = useMapLayerSources({
     activeViewport,
     fetchPublicMapLayerSources,
     hideExternalMapLayersSection,
+    skipLoading: readOnly,
   });
   const {
     backgroundMapVisible,
@@ -107,14 +109,14 @@ export function MapLayerManager(props: MapLayerManagerProps) {
         <span className="map-manager-header-label">{MapLayersUI.localization.getLocalizedString("mapLayers:Basemap.BaseMapPanelTitle")}</span>}
         <div className="map-manager-header-buttons-group">
           <ToggleSwitch className="map-manager-toggle" checked={backgroundMapVisible} onChange={handleMapLayersToggle} />
-          <MapLayerSettingsPopupButton disabled={!backgroundMapVisible} />
+          {!readOnly && <MapLayerSettingsPopupButton disabled={!backgroundMapVisible} />}
         </div>
       </div>
 
       <div className="map-manager-container">
         {/* Base map*/}
         <div className="map-manager-basemap">
-          <BasemapPanel disabled={!backgroundMapVisible} />
+          <BasemapPanel disabled={!backgroundMapVisible} readOnly={readOnly} />
         </div>
 
         {/* List of Layers (droppable) */}
