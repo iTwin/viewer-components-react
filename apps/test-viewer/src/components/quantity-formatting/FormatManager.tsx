@@ -130,9 +130,13 @@ export class FormatManager {
   private _activeFormatSetFormatsProvider?: FormatSetFormatsProvider;
   private _iModelOpened: boolean = false;
   private _removeListeners: (() => void)[] = [];
+  private _removeFormatsChangedListener?: () => void;
 
   /** Event raised when the active format set changes */
   public readonly onActiveFormatSetChanged = new BeEvent<(formatSet: FormatSet | undefined) => void>();
+
+  /** Event raised with a new copy of the active format set after one of its formats is added, updated, or removed. */
+  public readonly onActiveFormatSetFormatsChanged = new BeEvent<(formatSet: FormatSet) => void>();
 
   public static get instance(): FormatManager | undefined {
     return this._instance;
@@ -181,7 +185,19 @@ export class FormatManager {
     this._fallbackFormatProvider = fallbackProvider;
   }
 
+  private setActiveFormatSetFormatsProvider(provider: FormatSetFormatsProvider): void {
+    this._removeFormatsChangedListener?.();
+    this._activeFormatSetFormatsProvider = provider;
+    this._removeFormatsChangedListener = provider.onFormatsChanged.addListener(() => {
+      const formatSet = this.activeFormatSet;
+      // FormatSetFormatsProvider updates the format set in place, so publish a new object for React consumers.
+      if (formatSet) this.onActiveFormatSetFormatsChanged.raiseEvent({ ...formatSet, formats: { ...formatSet.formats } });
+    });
+  }
+
   public [Symbol.dispose](): void {
+    this._removeFormatsChangedListener?.();
+    this._removeFormatsChangedListener = undefined;
     for (const listener of this._removeListeners) {
       listener();
     }
@@ -191,7 +207,7 @@ export class FormatManager {
   public setActiveFormatSet(formatSet: FormatSet): void {
     const formatSetFormatsProvider = new FormatSetFormatsProvider({ formatSet, fallbackProvider: this._fallbackFormatProvider });
     this._activeFormatSetName = formatSet.name;
-    this._activeFormatSetFormatsProvider = formatSetFormatsProvider;
+    this.setActiveFormatSetFormatsProvider(formatSetFormatsProvider);
 
     if (this._iModelOpened) {
       IModelApp.formatsProvider = formatSetFormatsProvider;
@@ -207,7 +223,7 @@ export class FormatManager {
     if (activeSet) {
       // If we have an active format set, we need to update the formats provider to include the new fallback.
       const newFormatSetFormatsProvider = new FormatSetFormatsProvider({ formatSet: activeSet, fallbackProvider: this._fallbackFormatProvider });
-      this._activeFormatSetFormatsProvider = newFormatSetFormatsProvider;
+      this.setActiveFormatSetFormatsProvider(newFormatSetFormatsProvider);
       IModelApp.formatsProvider = newFormatSetFormatsProvider;
     }
   }
