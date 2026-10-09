@@ -2,13 +2,18 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import { describe, it, vi, expect } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import * as React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { FormatProps } from "@itwin/core-quantity";
+import { Format } from "@itwin/core-quantity";
 import { UseThousandsSeparator, ThousandsSeparatorSelector } from "../../../components/quantityformat/internal/ThousandsSeparator.js";
 
 describe("UseThousandsSeparator", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   const defaultFormatProps: FormatProps = {
     type: "decimal",
     precision: 2,
@@ -65,9 +70,28 @@ describe("UseThousandsSeparator", () => {
       formatTraits: ["showTrailingZeros"],
     });
   });
+  it("should switch the thousands separator when enabling it would collide with a comma decimal separator", () => {
+    // Pin the en-US defaults core uses for an unset thousands separator.
+    vi.spyOn(Format.prototype, "thousandSeparator", "get").mockReturnValue(",");
+    const onChange = vi.fn();
+    const formatProps: FormatProps = { ...defaultFormatProps, decimalSeparator: "," };
+    render(<UseThousandsSeparator formatProps={formatProps} onChange={onChange} />);
+
+    fireEvent.click(screen.getByRole("checkbox"));
+
+    expect(onChange).toHaveBeenCalledWith({
+      ...formatProps,
+      formatTraits: ["use1000Separator"],
+      thousandSeparator: ".",
+    });
+  });
 });
 
 describe("ThousandsSeparatorSelector", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   const formatPropsWithThousands: FormatProps = {
     type: "decimal",
     precision: 2,
@@ -138,5 +162,16 @@ describe("ThousandsSeparatorSelector", () => {
         thousandSeparator: ".",
         decimalSeparator: ",", // Should change to avoid conflict
       });
+  });
+
+  it("should keep a custom decimal separator that does not collide", () => {
+    const formatProps: FormatProps = { ...formatPropsWithThousands, thousandSeparator: " ", decimalSeparator: "," };
+    const onChange = vi.fn();
+    render(<ThousandsSeparatorSelector formatProps={formatProps} onChange={onChange} />);
+
+    fireEvent.click(screen.getByRole("combobox"));
+    fireEvent.click(screen.getByRole("option", { name: "thousand_separator.point" }));
+
+    expect(onChange).toHaveBeenCalledWith({ ...formatProps, thousandSeparator: ".", decimalSeparator: "," });
   });
 });

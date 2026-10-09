@@ -5,7 +5,8 @@
 
 
 import * as React from "react";
-import type { FormatProps } from "@itwin/core-quantity";
+import { BentleyError, Logger } from "@itwin/core-bentley";
+import type { FormatProps, UnitsProvider } from "@itwin/core-quantity";
 import {
   DecimalPrecision,
   FormatType,
@@ -16,6 +17,7 @@ import {
 } from "@itwin/core-quantity";
 import type { SelectOption } from "@itwin/itwinui-react";
 import { LabeledSelect } from "@itwin/itwinui-react";
+import { QuantityFormattingLoggerCategory } from "../../../../QuantityFormatting.js";
 import { useTranslation } from "../../../../useTranslation.js";
 
 /** Properties of [[FormatTypeSelector]] component.
@@ -96,8 +98,28 @@ const handleUnitsWhenFormatTypeChange = (
   return units;
 };
 
+/**
+ * Picks the revolution and azimuth base units for bearing/azimuth formats. They must belong to the same phenomenon as the
+ * format's unit, otherwise the formatter cannot convert between them: for example, Units.HORIZONTAL_DIR_ARC_DEG cannot be
+ * converted to Units.REVOLUTION.
+ */
+async function getDirectionUnits(formatProps: FormatProps, unitsProvider: UnitsProvider) {
+  const unitName = formatProps.composite?.units[0]?.name;
+  if (unitName) {
+    try {
+      const unit = await unitsProvider.findUnitByName(unitName);
+      if (unit.phenomenon === "Units.HORIZONTAL_DIRECTION")
+        return { revolutionUnit: "Units.HORIZONTAL_DIR_REVOLUTION", azimuthBaseUnit: "Units.HORIZONTAL_DIR_ARC_DEG" };
+    } catch (error) {
+      Logger.logWarning(QuantityFormattingLoggerCategory, "Failed to look up the format unit", () => ({ unit: unitName, error: BentleyError.getErrorMessage(error) }));
+    }
+  }
+  return { revolutionUnit: "Units.REVOLUTION", azimuthBaseUnit: "Units.ARC_DEG" };
+}
+
 interface FormatTypeOptionProps {
   formatProps: FormatProps;
+  unitsProvider: UnitsProvider;
   onChange: (format: FormatProps) => void;
 }
 
@@ -105,10 +127,20 @@ interface FormatTypeOptionProps {
  * @internal
  */
 export function FormatTypeOption(props: FormatTypeOptionProps) {
-  const { formatProps, onChange } = props;
+  const { formatProps, unitsProvider, onChange } = props;
+  // Bearing/azimuth defaults need an async unit lookup. A newer type change, a props change, or unmounting makes a
+  // pending lookup stale, so its result must not overwrite the newer edit.
+  const requestRef = React.useRef(0);
+  React.useEffect(
+    () => () => {
+      requestRef.current++;
+    },
+    [formatProps, unitsProvider]
+  );
 
   const handleFormatTypeChange = React.useCallback(
-    (type: FormatType) => {
+    async (type: FormatType) => {
+      const request = ++requestRef.current;
       let precision: number | undefined;
       let stationOffsetSize: number | undefined;
       let scientificType: string | undefined;
@@ -136,17 +168,17 @@ export function FormatTypeOption(props: FormatTypeOptionProps) {
           precision = FractionalPrecision.Eight;
           break;
         case FormatType.Bearing:
-          revolutionUnit = "Units.REVOLUTION"; // Warning: By default, BasicUnitsProvider does not contain this unit.
+          ({ revolutionUnit } = await getDirectionUnits(formatProps, unitsProvider));
           break;
         case FormatType.Azimuth:
-          revolutionUnit = "Units.REVOLUTION"; // Warning: By default, BasicUnitsProvider does not contain this unit.
-          azimuthBaseUnit = "Units.ARC_DEG";
+          ({ revolutionUnit, azimuthBaseUnit } = await getDirectionUnits(formatProps, unitsProvider));
           azimuthBase = 0.0;
           break;
         case FormatType.Ratio:
           ratioType = RatioType.NToOne; // Default to N:1 ratio
           break;
       }
+      if (request !== requestRef.current) return;
       const newFormatProps: FormatProps = {
         ...formatProps,
         composite: formatProps.composite
@@ -169,7 +201,7 @@ export function FormatTypeOption(props: FormatTypeOptionProps) {
       };
       onChange(newFormatProps);
     },
-    [formatProps, onChange]
+    [formatProps, unitsProvider, onChange]
   );
 
   const formatType = parseFormatType(formatProps.type, "format");
@@ -178,7 +210,7 @@ export function FormatTypeOption(props: FormatTypeOptionProps) {
     <>
       <FormatTypeSelector
         type={formatType}
-        onChange={handleFormatTypeChange}
+        onChange={(type) => void handleFormatTypeChange(type)}
       />
     </>
   );

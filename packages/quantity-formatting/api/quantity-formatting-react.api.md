@@ -49,7 +49,6 @@ export const FormatSelector: React_2.FC<FormatSelectorProps>;
 interface FormatSelectorProps {
     // (undocumented)
     activeFormatDefinitionKey?: string;
-    // (undocumented)
     activeFormatSet?: FormatSet;
     // (undocumented)
     onListItemChange: (formatDefinition: FormatDefinition, key: string) => void;
