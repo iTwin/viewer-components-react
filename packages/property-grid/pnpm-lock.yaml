@@ -87,7 +87,7 @@ importers:
         specifier: ^5.33.0
         version: 5.33.2(2551108b4275092efb29d52899dadc78)
       '@itwin/itwinui-react':
-        specifier: ^3.21.2
+        specifier: ^3.22.0
         version: 3.22.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@itwin/oidc-signin-tool':
         specifier: ^5.1.3
