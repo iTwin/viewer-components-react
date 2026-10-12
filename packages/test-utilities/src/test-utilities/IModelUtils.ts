@@ -360,7 +360,7 @@ export function insertPhysicalElement<TAdditionalProps extends object>(
         }
       : undefined),
     ...elementProps,
-  } as PhysicalElementProps);
+  });
   return { className: normalizeFullClassName(className), id };
 }
 
@@ -387,7 +387,7 @@ export function insertDrawingGraphic<TAdditionalProps extends object>(
         }
       : undefined),
     ...elementProps,
-  } as GeometricElement2dProps);
+  });
   return { className: normalizeFullClassName(className), id };
 }
 
@@ -426,7 +426,7 @@ export function insertRepositoryLink(props: BaseInstanceInsertProps & { codeValu
     model: IModel.repositoryModelId,
     code: codeValue ? createCode({ imodel: txn.iModel, scopeId: IModel.repositoryModelId, codeValue }) : Code.createEmpty(),
     ...repoLinkProps,
-  } as RepositoryLinkProps);
+  });
   return { className: normalizeFullClassName(className), id };
 }
 
@@ -553,7 +553,7 @@ export function insertFunctionalElement(
         }
       : undefined,
     ...elementProps,
-  } as FunctionalElementProps);
+  });
   txn.insertRelationship({
     sourceId: representedElementId,
     targetId: id,

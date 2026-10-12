@@ -16,7 +16,7 @@ import {
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
-import type { EC, ECClassHierarchyInspector } from "@itwin/presentation-shared";
+import type { EC, ECSchemaProvider } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../../../shared/internal/Types.js";
 import type {
   BaseSearchResultsTreeNode,
@@ -42,7 +42,7 @@ export interface CategoriesTreeSearchTargets {
 
 /** @internal */
 export async function createCategoriesSearchResultsTree(props: {
-  imodelAccess: ECClassHierarchyInspector;
+  imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom">;
   searchPaths: HierarchySearchTree[];
   categoryClassName: EC.FullClassNameDotNotation;
   categoryElementClassName: EC.FullClassNameDotNotation;
@@ -131,7 +131,7 @@ interface ProcessedNodes {
 
 interface CategoriesTreeSearchResultsNodesHandlerProps {
   idsCache: CategoriesTreeIdsCache;
-  imodelAccess: ECClassHierarchyInspector;
+  imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom">;
   categoryClassName: EC.FullClassNameDotNotation;
   categoryElementClassName: EC.FullClassNameDotNotation;
   categoryModelClassName: EC.FullClassNameDotNotation;

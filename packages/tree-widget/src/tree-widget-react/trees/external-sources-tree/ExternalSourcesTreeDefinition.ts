@@ -20,10 +20,10 @@ import type {
   LimitingECSqlQueryExecutor,
   NodePostProcessor,
 } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector, ECSchemaProvider, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
+import type { ECSchemaProvider, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 
 interface ExternalSourcesTreeDefinitionProps {
-  imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
+  imodelAccess: ECSchemaProvider & LimitingECSqlQueryExecutor;
   componentId?: GuidString;
 }
 
@@ -37,9 +37,9 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
   #componentName: string;
 
   public constructor(props: ExternalSourcesTreeDefinitionProps) {
-    this.#labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
+    this.#labelsFactory = createBisInstanceLabelSelectClauseFactory({ imodelAccess: props.imodelAccess });
     this.#impl = createPredicateBasedHierarchyDefinition({
-      classHierarchyInspector: props.imodelAccess,
+      imodelAccess: props.imodelAccess,
       hierarchy: {
         rootNodes: async (requestProps) => this.createRootHierarchyLevelDefinition(requestProps),
         childNodes: [

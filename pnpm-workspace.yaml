@@ -5,10 +5,18 @@ packages:
   - apps/performance-tests
 
 packageConfigs:
+  "@itwin/property-grid-react":
+    overrides:
+      "@playwright/test": 1.61.1
+      playwright: 1.61.1
+  "@itwin/tree-widget-react":
+    overrides:
+      "@playwright/test": 1.61.1
+      playwright: 1.61.1
   "test-viewer":
     overrides:
       "@itwin/itwinui-react@^2": "2.12.26"
-      "@itwin/itwinui-react@^3": "3.21.2"
+      "@itwin/itwinui-react@^3": "3.22.0"
 
 allowBuilds:
   '@bentley/imodeljs-native': true
@@ -30,10 +38,3 @@ sharedWorkspaceLockfile: false
 injectWorkspacePackages: true
 
 packageManagerStrict: false
-
-minimumReleaseAgeExclude:
-  - '@itwin/presentation-core-interop@2.0.0-alpha.3'
-  - '@itwin/presentation-hierarchies-react@2.0.0-alpha.64'
-  - '@itwin/presentation-hierarchies@2.0.0-alpha.17'
-  - '@itwin/presentation-shared@2.0.0-alpha.12'
-  - '@itwin/unified-selection@2.0.0-alpha.0'

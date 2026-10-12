@@ -11,10 +11,10 @@
   flex-direction: column;
 
   .tw-tree-toolbar {
-    padding: 0 var(--stratakit-space-x3) var(--stratakit-space-x2) var(--stratakit-space-x3);
+    padding: 0 var(--stratakit-space-300) var(--stratakit-space-200) var(--stratakit-space-300);
     display: flex;
     align-items: center;
-    gap: var(--stratakit-space-x1);
+    gap: var(--stratakit-space-100);
   }
 
   .tw-tree-content {

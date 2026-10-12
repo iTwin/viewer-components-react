@@ -5,16 +5,13 @@
 
 import { vi } from "vitest";
 import { BeEvent } from "@itwin/core-bentley";
-import { SchemaContext } from "@itwin/ecschema-metadata";
-import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 
 import type { QueryBinder, QueryOptions } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector, ECSchemaProvider } from "@itwin/presentation-shared";
+import type { ECSchemaProvider } from "@itwin/presentation-shared";
 import type { TreeWidgetViewport } from "../../tree-widget-react/shared/TreeWidgetViewport.js";
 import type { TreeWidgetTestingViewport } from "./TreeUtils.js";
 
@@ -106,19 +103,15 @@ export function createFakeViewport(
 }
 
 export type IModelAccess = ECSchemaProvider &
-  LimitingECSqlQueryExecutor &
-  ECClassHierarchyInspector & {
+  LimitingECSqlQueryExecutor & {
     imodelKey: string;
   };
 
 export function createIModelAccess(imodel: IModelConnection): IModelAccess {
-  const schemas = new SchemaContext();
-  schemas.addLocater(new ECSchemaRpcLocater(imodel.getRpcProps()));
-  const schemaProvider = createECSchemaProvider(schemas);
+  const schemaProvider = createECSchemaProvider(imodel);
   return {
     imodelKey: imodel.key,
     ...schemaProvider,
-    ...createCachingECClassHierarchyInspector({ schemaProvider }),
     ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(imodel), 1000),
   };
 }
