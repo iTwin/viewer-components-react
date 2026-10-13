@@ -6,6 +6,7 @@
 import React, { useCallback, useState } from "react";
 import { IModelApp } from "@itwin/core-frontend";
 import { Button, Modal, Tabs } from "@itwin/itwinui-react";
+import { useFormatSet } from "@itwin/quantity-formatting-react";
 import { FormatManager } from "./FormatManager";
 import { FormatSetsTabPanel } from "./FormatSetsTabPanel";
 import { FormatTabPanel } from "./FormatTabPanel";
@@ -24,6 +25,8 @@ export const QuantityFormatButton: React.FC = () => {
   const [activeFormatDefinitionKey, setActiveFormatDefinitionKey] = useState<string | undefined>();
 
   const formatManager = FormatManager.instance;
+  // The provider updates activeFormatSet in place; FormatSelector needs a new object to show applied changes.
+  const currentFormatSet = useFormatSet(activeFormatSet, formatManager?.activeFormatSetFormatsProvider);
 
   const handleFormatChange = useCallback(
     async (newFormat: FormatDefinition) => {
@@ -66,9 +69,6 @@ export const QuantityFormatButton: React.FC = () => {
     });
   }, [formatManager]);
 
-  // FormatSelector needs a new format set object to show saved changes.
-  React.useEffect(() => formatManager?.onActiveFormatSetFormatsChanged.addListener(setActiveFormatSet), [formatManager]);
-
   // Don't render if FormatManager is not initialized
   if (!formatManager) {
     return null;
@@ -88,7 +88,7 @@ export const QuantityFormatButton: React.FC = () => {
           </Tabs.TabList>
           <Tabs.Panel value="formats" key="formats">
             <FormatTabPanel
-              activeFormatSet={activeFormatSet}
+              activeFormatSet={currentFormatSet}
               activeFormatDefinitionKey={activeFormatDefinitionKey}
               formatDefinition={formatDefinition}
               unitsProvider={unitsProvider}
