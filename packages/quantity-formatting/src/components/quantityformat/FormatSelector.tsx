@@ -16,7 +16,7 @@ const logCategory = QuantityFormattingLoggerCategory;
 /**
  * @beta
  */
-export interface FormatSelectorProps {
+interface FormatSelectorProps {
   /** Treated as immutable: pass a new object when its formats change, e.g. after `FormatSetFormatsProvider.onFormatsChanged`. */
   activeFormatSet?: FormatSet;
   activeFormatDefinitionKey?: string;

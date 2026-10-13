@@ -17,7 +17,7 @@ import type { UnitsProvider } from "@itwin/core-quantity";
 /**
  * @beta
 */
-export interface FormatSampleProps {
+interface FormatSampleProps {
   formatProps: FormatDefinition;
   /** Units used to look up and convert units. Defaults to `IModelApp.quantityFormatter.unitsProvider`. */
   unitsProvider?: UnitsProvider;

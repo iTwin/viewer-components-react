@@ -13,7 +13,7 @@ import type { FormatSet } from "@itwin/ecschema-metadata";
  * Props for the FormatSetSelector component
  * @beta
  */
-export interface FormatSetSelectorProps {
+interface FormatSetSelectorProps {
   /** Array of format sets to display in the selector */
   formatSets: FormatSet[];
   /**

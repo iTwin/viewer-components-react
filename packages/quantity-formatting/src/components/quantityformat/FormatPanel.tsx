@@ -22,7 +22,7 @@ import type { UnitsProvider , FormatDefinition, UnitProps } from "@itwin/core-qu
 /**
  * @beta
  */
-export interface FormatPanelProps {
+interface FormatPanelProps {
   formatProps: FormatDefinition;
   /** Units used to look up and convert units. Defaults to `IModelApp.quantityFormatter.unitsProvider`. */
   unitsProvider?: UnitsProvider;

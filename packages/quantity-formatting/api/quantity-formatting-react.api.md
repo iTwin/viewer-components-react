@@ -16,7 +16,7 @@ import type { UnitsProvider } from '@itwin/core-quantity';
 export function FormatPanel(props: FormatPanelProps): React_2.JSX.Element;
 
 // @beta (undocumented)
-export interface FormatPanelProps {
+interface FormatPanelProps {
     // (undocumented)
     formatProps: FormatDefinition;
     onFormatChange: (formatProps: FormatDefinition) => void;
@@ -29,7 +29,7 @@ export interface FormatPanelProps {
 export function FormatSample(props: FormatSampleProps): React_2.JSX.Element;
 
 // @beta (undocumented)
-export interface FormatSampleProps {
+interface FormatSampleProps {
     // (undocumented)
     formatProps: FormatDefinition;
     // (undocumented)
@@ -43,7 +43,7 @@ export interface FormatSampleProps {
 export const FormatSelector: React_2.FC<FormatSelectorProps>;
 
 // @beta (undocumented)
-export interface FormatSelectorProps {
+interface FormatSelectorProps {
     // (undocumented)
     activeFormatDefinitionKey?: string;
     activeFormatSet?: FormatSet;
@@ -55,7 +55,7 @@ export interface FormatSelectorProps {
 export const FormatSetPanel: React_3.FC<FormatSetPanelProps>;
 
 // @beta
-export type FormatSetPanelProps = {
+type FormatSetPanelProps = {
     formatSet: FormatSet;
 } & ({
     editable: true;
@@ -69,7 +69,7 @@ export type FormatSetPanelProps = {
 export const FormatSetSelector: React_3.FC<FormatSetSelectorProps>;
 
 // @beta
-export interface FormatSetSelectorProps {
+interface FormatSetSelectorProps {
     activeFormatSetKey?: string;
     formatSets: FormatSet[];
     onFormatSetChange: (formatSet: FormatSet, key: string) => void;
@@ -80,7 +80,7 @@ export interface FormatSetSelectorProps {
 export function QuantityFormatPanel(props: QuantityFormatPanelProps): React_2.JSX.Element;
 
 // @beta
-export interface QuantityFormatPanelProps {
+interface QuantityFormatPanelProps {
     // (undocumented)
     formatDefinition: FormatDefinition;
     // (undocumented)

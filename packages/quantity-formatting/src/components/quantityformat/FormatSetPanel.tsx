@@ -14,7 +14,7 @@ import type { FormatSet } from "@itwin/ecschema-metadata";
  * Props for the FormatSetPanel component
  * @beta
  */
-export type FormatSetPanelProps = {
+type FormatSetPanelProps = {
   formatSet: FormatSet;
 } & ({
   editable: true,
