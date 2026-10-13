@@ -254,7 +254,12 @@ interface FormatSelectorProps {
 }
 ```
 
-Treat `activeFormatSet` as immutable. `FormatSetFormatsProvider` updates its format set in place, so after a format is added, updated, or removed, listen to `onFormatsChanged` and pass a new object, for example `{ ...formatSet, formats: { ...formatSet.formats } }`. Otherwise `FormatSelector` keeps showing and returning the old definitions.
+Treat `activeFormatSet` as immutable. `FormatSetFormatsProvider` updates its format set in place, so `FormatSelector` would keep showing the old definitions. Use `useFormatSet` to get a copy that is replaced after each `onFormatsChanged`. Pass the same format set object the provider was created with:
+
+```tsx
+const activeFormatSet = useFormatSet(formatSet, formatSetFormatsProvider);
+<FormatSelector activeFormatSet={activeFormatSet} onListItemChange={handleFormatSelection} />;
+```
 
 #### FormatSelector Usage
 

@@ -8,3 +8,4 @@ beta;const;FormatSetSelector
 beta;function;QuantityFormatPanel
 beta;class;QuantityFormatting
 beta;const;QuantityFormattingLoggerCategory
+beta;function;useFormatSet

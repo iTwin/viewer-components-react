@@ -6,6 +6,7 @@
 
 import type { FormatDefinition } from '@itwin/core-quantity';
 import type { FormatSet } from '@itwin/ecschema-metadata';
+import type { FormatsProvider } from '@itwin/core-quantity';
 import type { Localization } from '@itwin/core-common';
 import * as React_2 from 'react';
 import { default as React_3 } from 'react';
@@ -104,5 +105,8 @@ export class QuantityFormatting {
 
 // @beta
 export const QuantityFormattingLoggerCategory = "QuantityFormat";
+
+// @beta
+export function useFormatSet(formatSet: FormatSet | undefined, formatsProvider: FormatsProvider | undefined): FormatSet | undefined;
 
 ```
