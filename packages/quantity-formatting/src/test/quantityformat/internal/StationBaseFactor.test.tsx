@@ -83,6 +83,7 @@ describe("StationBaseFactor", () => {
     render(<StationBaseFactor formatProps={defaultStationFormatProps} onChange={onChange} />);
 
     const input = screen.getByRole("textbox");
+    input.focus(); // ToolAdmin suppresses Ctrl shortcuts unless an editable element has focus
     expect(fireEvent.keyDown(input, { key: "v", ctrlKey: true })).toBe(true);
   });
 
@@ -99,6 +100,7 @@ describe("StationBaseFactor", () => {
     render(<StationBaseFactor formatProps={defaultStationFormatProps} onChange={onChange} />);
 
     const input = screen.getByRole("textbox");
+    input.focus(); // ToolAdmin suppresses Ctrl shortcuts unless an editable element has focus
     expect(fireEvent.keyDown(input, { key: "a", ctrlKey: true })).toBe(true);
   });
 

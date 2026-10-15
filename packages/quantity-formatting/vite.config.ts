@@ -7,13 +7,6 @@ export default defineConfig({
   // look for all static in the dist folder
   publicDir: "./public",
   assetsInclude: "./public/*",
-  css: {
-    preprocessorOptions: {
-      scss: {
-        api: 'modern-compiler'
-      }
-    }
-  },
   test: {
     globals: true,
     environment: "jsdom",

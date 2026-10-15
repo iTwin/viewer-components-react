@@ -6,7 +6,6 @@
 
 import type { FormatDefinition } from '@itwin/core-quantity';
 import type { FormatSet } from '@itwin/ecschema-metadata';
-import { JSX as JSX_2 } from 'react/jsx-runtime';
 import type { Localization } from '@itwin/core-common';
 import * as React_2 from 'react';
 import { default as React_3 } from 'react';
@@ -14,7 +13,7 @@ import type { UnitProps } from '@itwin/core-quantity';
 import type { UnitsProvider } from '@itwin/core-quantity';
 
 // @beta
-export function FormatPanel(props: FormatPanelProps): JSX_2.Element;
+export function FormatPanel(props: FormatPanelProps): React_2.JSX.Element;
 
 // @beta (undocumented)
 interface FormatPanelProps {
@@ -29,7 +28,7 @@ interface FormatPanelProps {
 }
 
 // @beta
-export function FormatSample(props: FormatSampleProps): JSX_2.Element;
+export function FormatSample(props: FormatSampleProps): React_2.JSX.Element;
 
 // @beta (undocumented)
 interface FormatSampleProps {
@@ -82,7 +81,7 @@ interface FormatSetSelectorProps {
 }
 
 // @beta
-export function QuantityFormatPanel(props: QuantityFormatPanelProps): JSX_2.Element;
+export function QuantityFormatPanel(props: QuantityFormatPanelProps): React_2.JSX.Element;
 
 // @beta
 interface QuantityFormatPanelProps {

@@ -61,6 +61,8 @@ describe("FormatSample", () => {
       render(<FormatSample formatProps={formatProps} unitsProvider={unitsProvider} />);
       const input = screen.getByRole("textbox");
 
+      input.focus(); // ToolAdmin suppresses Ctrl shortcuts unless an editable element has focus
+
       expect(fireEvent.keyDown(input, { key: "v", ctrlKey: true })).toBe(true);
     });
 
@@ -74,6 +76,8 @@ describe("FormatSample", () => {
     it("should pass through Ctrl+A (select-all)", () => {
       render(<FormatSample formatProps={formatProps} unitsProvider={unitsProvider} />);
       const input = screen.getByRole("textbox");
+
+      input.focus(); // ToolAdmin suppresses Ctrl shortcuts unless an editable element has focus
 
       expect(fireEvent.keyDown(input, { key: "a", ctrlKey: true })).toBe(true);
     });

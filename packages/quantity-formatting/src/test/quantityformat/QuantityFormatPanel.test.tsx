@@ -6,7 +6,8 @@
 import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { userEvent } from '@testing-library/user-event';
-import { vi, describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { Mock } from "vitest";
 import type { FormatDefinition, UnitsProvider, UnitProps } from "@itwin/core-quantity";
 import { QuantityFormatPanel } from "../../components/quantityformat/QuantityFormatPanel.js";
 import { QuantityFormatting } from "../../QuantityFormatting.js";
@@ -45,7 +46,7 @@ vi.mock("../../components/quantityformat/FormatSample.js", () => ({
 describe("QuantityFormatPanel", () => {
   let mockUnitsProvider: UnitsProvider;
   let mockFormatDefinition: FormatDefinition;
-  let mockOnFormatChange: ReturnType<typeof vi.fn>;
+  let mockOnFormatChange: Mock<(formatProps: FormatDefinition) => void>;
   let user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(() => {
