@@ -69,7 +69,7 @@ describe("ShowTrailingZeros", () => {
   it("should handle string formatTraits", () => {
     const formatPropsWithStringTraits: FormatProps = {
       ...defaultFormatProps,
-      formatTraits: ["trailZeroes", "use1000Separator"],
+      formatTraits: "trailZeroes,use1000Separator",
     };
     const onChange = vi.fn();
     render(<ShowTrailingZeros formatProps={formatPropsWithStringTraits} onChange={onChange} />);

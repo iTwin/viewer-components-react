@@ -254,6 +254,8 @@ interface FormatSelectorProps {
 }
 ```
 
+Treat `activeFormatSet` as immutable. `FormatSetFormatsProvider` updates its format set in place, so after a format is added, updated, or removed, listen to `onFormatsChanged` and pass a new object, for example `{ ...formatSet, formats: { ...formatSet.formats } }`. Otherwise `FormatSelector` keeps showing and returning the old definitions.
+
 #### FormatSelector Usage
 
 <details>

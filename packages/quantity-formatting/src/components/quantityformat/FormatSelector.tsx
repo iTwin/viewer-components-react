@@ -17,6 +17,7 @@ const logCategory = QuantityFormattingLoggerCategory;
  * @beta
  */
 interface FormatSelectorProps {
+  /** Treated as immutable: pass a new object when its formats change, e.g. after `FormatSetFormatsProvider.onFormatsChanged`. */
   activeFormatSet?: FormatSet;
   activeFormatDefinitionKey?: string;
   onListItemChange: (formatDefinition: FormatDefinition, key: string) => void;
@@ -109,7 +110,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
             {filteredFormats.length === 0 && searchTerm.trim() && (
               <ListItem disabled>
                 <Text variant="body" isMuted>
-                  No formats found matching "{searchTerm}"
+                  {translate("QuantityFormat:labels.noFormatsFound")} &quot;{searchTerm}&quot;
                 </Text>
               </ListItem>
             )}

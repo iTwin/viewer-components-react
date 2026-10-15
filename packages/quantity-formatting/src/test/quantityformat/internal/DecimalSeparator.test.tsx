@@ -3,10 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import { render } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import type { FormatProps } from "@itwin/core-quantity";
+import { Format } from "@itwin/core-quantity";
 import { DecimalSeparator } from "../../../components/quantityformat/internal/DecimalSeparator.js";
 
 describe("DecimalSeparator", () => {
@@ -24,6 +25,7 @@ describe("DecimalSeparator", () => {
   });
 
   afterEach(async () => {
+    vi.restoreAllMocks();
     await IModelApp.shutdown();
     Object.defineProperty(
       IModelApp,
@@ -32,7 +34,8 @@ describe("DecimalSeparator", () => {
     );
   });
 
-  it("should render with default decimal separator", async () => {
+  it("should render the locale default decimal separator when unset", async () => {
+    vi.spyOn(Format.prototype, "decimalSeparator", "get").mockReturnValue(".");
     const formatProps: FormatProps = {
       type: "decimal",
       precision: 2,
@@ -69,5 +72,38 @@ describe("DecimalSeparator", () => {
     expect(
       renderedComponent.getByText("decimal_separator.comma")
     ).toBeTruthy();
+  });
+
+  it("should switch the thousands separator when the decimal separator collides with it", () => {
+    const formatProps: FormatProps = { type: "decimal", precision: 2, formatTraits: ["Use1000Separator"], thousandSeparator: ",", decimalSeparator: "." };
+    const onChange = vi.fn();
+    render(<DecimalSeparator formatProps={formatProps} onChange={onChange} />);
+
+    fireEvent.click(screen.getByRole("combobox"));
+    fireEvent.click(screen.getByRole("option", { name: "decimal_separator.comma" }));
+
+    expect(onChange).toHaveBeenCalledWith({ ...formatProps, decimalSeparator: ",", thousandSeparator: "." });
+  });
+
+  it("should leave the unused thousands separator alone while grouping is disabled", () => {
+    const formatProps: FormatProps = { type: "decimal", precision: 2, thousandSeparator: "," };
+    const onChange = vi.fn();
+    render(<DecimalSeparator formatProps={formatProps} onChange={onChange} />);
+
+    fireEvent.click(screen.getByRole("combobox"));
+    fireEvent.click(screen.getByRole("option", { name: "decimal_separator.comma" }));
+
+    expect(onChange).toHaveBeenCalledWith({ ...formatProps, decimalSeparator: "," });
+  });
+
+  it("should not replace a non-conflicting thousands separator", () => {
+    const formatProps: FormatProps = { type: "decimal", precision: 2, formatTraits: ["use1000Separator"], thousandSeparator: " ", decimalSeparator: "." };
+    const onChange = vi.fn();
+    render(<DecimalSeparator formatProps={formatProps} onChange={onChange} />);
+
+    fireEvent.click(screen.getByRole("combobox"));
+    fireEvent.click(screen.getByRole("option", { name: "decimal_separator.comma" }));
+
+    expect(onChange).toHaveBeenCalledWith({ ...formatProps, decimalSeparator: "," });
   });
 });
