@@ -19,12 +19,10 @@ export function FormatPanel(props: FormatPanelProps): React_2.JSX.Element;
 interface FormatPanelProps {
     // (undocumented)
     formatProps: FormatDefinition;
-    // (undocumented)
     onFormatChange: (formatProps: FormatDefinition) => void;
     // (undocumented)
     persistenceUnit?: UnitProps;
-    // (undocumented)
-    unitsProvider: UnitsProvider;
+    unitsProvider?: UnitsProvider;
 }
 
 // @beta
@@ -38,8 +36,7 @@ interface FormatSampleProps {
     initialMagnitude?: number;
     // (undocumented)
     persistenceUnit?: UnitProps;
-    // (undocumented)
-    unitsProvider: UnitsProvider;
+    unitsProvider?: UnitsProvider;
 }
 
 // @beta
@@ -88,12 +85,10 @@ interface QuantityFormatPanelProps {
     formatDefinition: FormatDefinition;
     // (undocumented)
     initialMagnitude?: number;
-    // (undocumented)
     onFormatChange: (formatProps: FormatDefinition) => void;
     // (undocumented)
     showSample?: boolean;
-    // (undocumented)
-    unitsProvider: UnitsProvider;
+    unitsProvider?: UnitsProvider;
 }
 
 // @beta

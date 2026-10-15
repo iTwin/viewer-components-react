@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import React, { useCallback, useState } from "react";
-import { IModelApp } from "@itwin/core-frontend";
 import { Button, Modal, Tabs } from "@itwin/itwinui-react";
 import { FormatManager } from "./FormatManager";
 import { FormatSetsTabPanel } from "./FormatSetsTabPanel";
@@ -19,7 +18,6 @@ export const QuantityFormatButton: React.FC = () => {
   const [formatDefinition, setFormatDefinition] = useState<FormatDefinition | undefined>(undefined);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [unitsProvider, setUnitsProvider] = useState(() => IModelApp.quantityFormatter.unitsProvider);
   const [activeFormatSet, setActiveFormatSet] = useState<FormatSet | undefined>(FormatManager.instance?.activeFormatSet);
   const [activeFormatDefinitionKey, setActiveFormatDefinitionKey] = useState<string | undefined>();
 
@@ -48,13 +46,6 @@ export const QuantityFormatButton: React.FC = () => {
 
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
-  }, []);
-
-  React.useEffect(() => {
-    return IModelApp.quantityFormatter.onUnitsProviderChanged.addListener(() => {
-      // Handle units provider changes if needed
-      setUnitsProvider(IModelApp.quantityFormatter.unitsProvider);
-    });
   }, []);
 
   // Listen for active format set changes
@@ -91,7 +82,6 @@ export const QuantityFormatButton: React.FC = () => {
               activeFormatSet={activeFormatSet}
               activeFormatDefinitionKey={activeFormatDefinitionKey}
               formatDefinition={formatDefinition}
-              unitsProvider={unitsProvider}
               onListItemChange={handleFormatSelectorChange}
               onFormatChange={handleFormatChange}
             />

@@ -26,7 +26,7 @@ export function StationBaseFactor(props: StationBaseFactorProps) {
   const { translate } = useTranslation();
   const stationBaseFactorInputId = React.useId();
 
-  const currentValue = (formatProps as any).stationBaseFactor ?? 1;
+  const currentValue = formatProps.stationBaseFactor ?? 1;
 
   const [inputValue, setInputValue] = React.useState(currentValue.toString());
 

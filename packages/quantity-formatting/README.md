@@ -89,7 +89,7 @@ The main component for configuring quantity formatting. It provides a complete u
 ```typescript
 interface QuantityFormatPanelProps {
   formatDefinition: FormatDefinition; // Current format configuration
-  unitsProvider: UnitsProvider; // Provider for unit definitions
+  unitsProvider?: UnitsProvider; // Defaults to IModelApp.quantityFormatter.unitsProvider (bundled BIS units unless the app replaces it)
   onFormatChange: (formatProps: FormatDefinition) => void; // Callback when format changes
   initialMagnitude?: number; // Initial value for sample preview (default: 0)
   showSample?: boolean; // Whether to show the format sample (default: true)
@@ -144,7 +144,7 @@ A flexible component for editing format properties with customizable primary and
 ```typescript
 interface FormatPanelProps {
   formatDefinition: FormatDefinition; // Current format configuration
-  unitsProvider: UnitsProvider; // Provider for unit definitions
+  unitsProvider?: UnitsProvider; // Defaults to IModelApp.quantityFormatter.unitsProvider (bundled BIS units unless the app replaces it)
   onFormatChange: (formatProps: FormatDefinition) => void; // Callback when format changes
   persistenceUnit?: UnitProps; // Unit for persistence/storage
 }
@@ -202,7 +202,7 @@ A component that provides real-time preview of how values will be formatted usin
 ```typescript
 interface FormatSampleProps {
   formatProps: FormatDefinition; // Format configuration to preview
-  unitsProvider: UnitsProvider; // Provider for unit definitions
+  unitsProvider?: UnitsProvider; // Defaults to IModelApp.quantityFormatter.unitsProvider (bundled BIS units unless the app replaces it)
   persistenceUnit?: UnitProps; // Unit for the input value
   initialMagnitude?: number; // Initial value to display (default: 0)
 }

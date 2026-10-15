@@ -3,14 +3,13 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
+import { Logger } from "@itwin/core-bentley";
 import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Mock } from "vitest";
 import type { FormatDefinition, UnitsProvider, UnitProps } from "@itwin/core-quantity";
 import { QuantityFormatPanel } from "../../components/quantityformat/QuantityFormatPanel.js";
-import { QuantityFormatting } from "../../QuantityFormatting.js";
 
 // Mock the useTranslation hook
 vi.mock("../../useTranslation.js", () => ({
@@ -52,16 +51,6 @@ describe("QuantityFormatPanel", () => {
   beforeEach(() => {
     // Set up user-event
     user = userEvent.setup();
-
-    // Mock QuantityFormatting.localization
-    if (!QuantityFormatting.localization) {
-      Object.defineProperty(QuantityFormatting, "localization", {
-        value: {
-          getLocalizedString: (key: string) => key,
-        },
-        writable: true,
-      });
-    }
 
     mockUnitsProvider = {
       findUnitByName: vi.fn().mockResolvedValue({
@@ -204,10 +193,17 @@ describe("QuantityFormatPanel", () => {
     await user.click(triggerChangeButton);
     expect(applyButton.getAttribute("aria-disabled")).toBeNull();
 
-    await user.click(applyButton);
+    // Switching to another format discards the pending edit
+    rerender(
+      <QuantityFormatPanel
+        formatDefinition={{ ...mockFormatDefinition, precision: 4 }}
+        unitsProvider={mockUnitsProvider}
+        onFormatChange={mockOnFormatChange}
+      />
+    );
 
-    // Apply button should be disabled again
     expect(applyButton.getAttribute("aria-disabled")).toEqual("true");
+    expect(mockOnFormatChange).not.toHaveBeenCalled();
   });
 
   it("should not show sample when showSample is false", () => {
@@ -234,5 +230,24 @@ describe("QuantityFormatPanel", () => {
     );
 
     expect(screen.getByTestId("format-sample")).toBeDefined();
+  });
+
+  it("does not reload the persistence unit for edits that keep the same unit", async () => {
+    render(<QuantityFormatPanel formatDefinition={mockFormatDefinition} unitsProvider={mockUnitsProvider} onFormatChange={mockOnFormatChange} />);
+    await waitFor(() => expect(mockUnitsProvider.findUnitByName).toHaveBeenCalledTimes(1));
+
+    await user.click(screen.getByTestId("trigger-format-change"));
+
+    expect(mockUnitsProvider.findUnitByName).toHaveBeenCalledTimes(1);
+  });
+
+  it("logs when the persistence unit cannot be loaded", async () => {
+    const logError = vi.spyOn(Logger, "logError").mockImplementation(() => {});
+    vi.mocked(mockUnitsProvider.findUnitByName).mockRejectedValueOnce(new Error("unknown unit"));
+
+    render(<QuantityFormatPanel formatDefinition={mockFormatDefinition} unitsProvider={mockUnitsProvider} onFormatChange={mockOnFormatChange} />);
+
+    await waitFor(() => expect(logError).toHaveBeenCalledWith("QuantityFormat", "Failed to load the persistence unit", expect.any(Function)));
+    logError.mockRestore();
   });
 });
