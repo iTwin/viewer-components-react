@@ -25,9 +25,11 @@ import {
   queryAllByTestId,
   queryByText,
   render,
+  renderHook,
   RenderResult,
 } from "@testing-library/react";
 import { MapLayerPreferences, MapLayerSourceChangeType } from "../MapLayerPreferences";
+import { useMapLayerSources } from "../ui/hooks/map-layer/useMapLayerSources";
 import { MapLayerManager } from "../ui/widget/MapLayerManager";
 import { TestUtils } from "./TestUtils";
 import { ViewportMock } from "./ViewportMock";
@@ -564,6 +566,20 @@ describe("MapLayerManager", () => {
       });
 
       expect(getSourcesSpy).not.toHaveBeenCalled();
+    });
+
+    it("clears the loading state when switching to read-only during a source load", async () => {
+      vi.spyOn(MapLayerSources, "create").mockImplementation(async () => new Promise<MapLayerSources>(() => {}));
+
+      const { result, rerender } = renderHook((skipLoading: boolean) =>
+        useMapLayerSources({ activeViewport: viewportMock.object, fetchPublicMapLayerSources: false, hideExternalMapLayersSection: false, skipLoading }),
+        { initialProps: false },
+      );
+      expect(result.current.loadingSources).toBe(true);
+
+      rerender(true);
+      await flush();
+      expect(result.current.loadingSources).toBe(false);
     });
 
     it("closes the sign-in dialog when switching to read-only", async () => {

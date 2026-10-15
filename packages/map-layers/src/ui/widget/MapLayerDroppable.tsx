@@ -28,7 +28,6 @@ interface MapLayerDroppableProps {
 /** @internal */
 export function MapLayerDroppable(props: MapLayerDroppableProps) {
   const context = useMapLayerListContext();
-  const readOnly = context.mapLayerOptions?.readOnly ?? false;
   const droppableId = props.isOverlay ? overlayMapLayersId : backgroundMapLayersId;
   const { isDropTarget, ref } = useDroppable({
     id: droppableId,
@@ -58,7 +57,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
             <SortableMapLayerItem
               key={mapLayerSettings.id}
               layer={mapLayerSettings}
-              disabled={context.disabled || readOnly}
+              disabled={context.disabled || context.readOnly}
               droppableId={droppableId}
               index={i}
               renderItem={(sortable) =>
@@ -75,7 +74,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
         : props.hideEmptyPlaceholder ? undefined
         : <div title={title} className="map-manager-no-layers-container">
             <span className="map-manager-no-layers-label">{showEmptyDropHint ? dropLayerLabel : title}</span>
-            {!showEmptyDropHint && !readOnly && <AttachLayerPopupButton disabled={context.disabled} buttonType={AttachLayerButtonType.Blue} isOverlay={props.isOverlay} />}
+            {!showEmptyDropHint && !context.readOnly && <AttachLayerPopupButton disabled={context.disabled} buttonType={AttachLayerButtonType.Blue} isOverlay={props.isOverlay} />}
           </div>
       }
     </div>

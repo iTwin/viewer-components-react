@@ -25,13 +25,11 @@ interface MapLayerItemProps {
 
 export function MapLayerItem(props: MapLayerItemProps) {
   const context = useMapLayerListContext();
-  const readOnly = context.mapLayerOptions?.readOnly ?? false;
-  const signInOpenRef = React.useRef(false);
   const { layer, index, sortable } = props;
   const toggleVisibility = MapLayersUI.localization.getLocalizedString("mapLayers:Widget.ToggleVisibility");
-  const requireAuthTooltip = MapLayersUI.localization.getLocalizedString("mapLayers:Widget.RequireAuthTooltip");
   const outOfRangeTitle = MapLayersUI.localization.getLocalizedString("mapLayers:Widget.layerOutOfRange");
   const outOfRange = layer.treeVisibility === MapTileTreeScaleRangeVisibility.Hidden;
+  const showSignIn = !context.readOnly && layer.provider?.status === MapLayerImageryProviderStatus.RequireAuth;
 
   const onSubLayerStateChange = React.useCallback(
     (activeLayer: StyleMapLayerSettings, subLayerId: SubLayerId, isSelected: boolean) => {
@@ -46,44 +44,6 @@ export function MapLayerItem(props: MapLayerItemProps) {
     [context.activeViewport],
   );
 
-  React.useEffect(() => {
-    if (readOnly && signInOpenRef.current) {
-      signInOpenRef.current = false;
-      UiFramework.dialogs.modal.close();
-    }
-  }, [readOnly]);
-
-  const handleOk = React.useCallback(
-    (mapLayerIndex: MapLayerIndex, sourceState?: SourceState) => {
-      signInOpenRef.current = false;
-      UiFramework.dialogs.modal.close();
-
-      const source = sourceState?.source;
-      if (sourceState === undefined || source === undefined) {
-        const error = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachMissingViewOrSource");
-        const msg = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachError", { error, sourceName: source?.name ?? "" });
-        IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
-        return;
-      }
-
-      const validation = sourceState.validation;
-
-      // Layer is already attached,
-      // This calls invalidateRenderPlan()
-      context.activeViewport.displayStyle.changeMapLayerProps({ subLayers: validation.subLayers }, mapLayerIndex);
-      context.activeViewport.displayStyle.changeMapLayerCredentials(mapLayerIndex, source.userName, source.password);
-
-      // Either initial attach/initialize failed or the layer failed to load at least one tile
-      // because of an invalid token; in both cases tile tree needs to be fully reset
-      const provider = context.activeViewport.getMapLayerImageryProvider(mapLayerIndex);
-      provider?.resetStatus();
-      context.activeViewport.resetMapLayer(mapLayerIndex);
-
-      context.onItemEdited();
-    },
-    [context],
-  );
-
   return (
     <div
       className="map-manager-source-item"
@@ -95,7 +55,7 @@ export function MapLayerItem(props: MapLayerItemProps) {
         boxShadow: sortable.isDragging ? "10px 5px 5px rgba(0, 0, 0, 0.15)" : undefined,
       }}
     >
-      {!readOnly && (
+      {!context.readOnly && (
         <Checkbox
           data-testid={"select-item-checkbox"}
           checked={layer.selected}
@@ -121,46 +81,11 @@ export function MapLayerItem(props: MapLayerItemProps) {
       <span
         className={context.disabled || outOfRange ? "map-manager-item-label-disabled" : "map-manager-item-label"}
         ref={sortable.handleRef}
-        style={{ cursor: context.disabled || readOnly ? undefined : sortable.isDragging ? "grabbing" : "grab" }}
+        style={{ cursor: context.disabled || context.readOnly ? undefined : sortable.isDragging ? "grabbing" : "grab" }}
         title={outOfRange ? outOfRangeTitle : undefined}
       >
         {layer.name}
-        {!readOnly && layer.provider?.status === MapLayerImageryProviderStatus.RequireAuth && (
-          <IconButton
-            disabled={context.disabled}
-            size="small"
-            styleType="borderless"
-            onClick={() => {
-              const indexInDisplayStyle = context.activeViewport.displayStyle.findMapLayerIndexByNameAndSource(
-                layer.name,
-                layer.source,
-                layer.isOverlay,
-              );
-              if (indexInDisplayStyle !== undefined && indexInDisplayStyle >= 0) {
-                const mapLayerIndex = { index: indexInDisplayStyle, isOverlay: layer.isOverlay };
-                const layerSettings = context.activeViewport.displayStyle.mapLayerAtIndex(mapLayerIndex);
-                if (layerSettings instanceof ImageMapLayerSettings) {
-                  signInOpenRef.current = true;
-                  UiFramework.dialogs.modal.open(
-                    <MapUrlDialog
-                      activeViewport={context.activeViewport}
-                      signInModeArgs={{ layer: layerSettings }}
-                      onOkResult={(sourceState?: SourceState) => handleOk(mapLayerIndex, sourceState)}
-                      onCancelResult={() => {
-                        signInOpenRef.current = false;
-                        UiFramework.dialogs.modal.close();
-                      }}
-                      mapLayerOptions={context.mapLayerOptions}
-                    />,
-                  );
-                }
-              }
-            }}
-            label={requireAuthTooltip}
-          >
-            <SvgStatusWarning />
-          </IconButton>
-        )}
+        {showSignIn && <MapLayerSignInButton layer={layer} />}
       </span>
 
       <div className="map-manager-item-sub-layer-container map-layer-settings-sublayers-menu">
@@ -176,51 +101,94 @@ export function MapLayerItem(props: MapLayerItemProps) {
           />
         )}
       </div>
-      {!readOnly && layer.provider?.status === MapLayerImageryProviderStatus.RequireAuth && (
-        <IconButton
-          disabled={context.disabled}
-          size="small"
-          styleType="borderless"
-          onClick={() => {
-            const indexInDisplayStyle = context.activeViewport.displayStyle.findMapLayerIndexByNameAndSource(
-              layer.name,
-              layer.source,
-              layer.isOverlay,
-            );
-            if (indexInDisplayStyle !== undefined && indexInDisplayStyle >= 0) {
-              const mapLayerIndex = { index: indexInDisplayStyle, isOverlay: layer.isOverlay };
-              const layerSettings = context.activeViewport.displayStyle.mapLayerAtIndex(mapLayerIndex);
-              if (layerSettings instanceof ImageMapLayerSettings) {
-                signInOpenRef.current = true;
-                UiFramework.dialogs.modal.open(
-                  <MapUrlDialog
-                    activeViewport={context.activeViewport}
-                    signInModeArgs={{ layer: layerSettings }}
-                    onOkResult={(sourceState?: SourceState) => handleOk(mapLayerIndex, sourceState)}
-                    onCancelResult={() => {
-                      signInOpenRef.current = false;
-                      UiFramework.dialogs.modal.close();
-                    }}
-                    mapLayerOptions={context.mapLayerOptions}
-                  />,
-                );
-              }
-            }
-          }}
-          label={requireAuthTooltip}
-        >
-          <SvgStatusWarning />
-        </IconButton>
-      )}
+      {showSignIn && <MapLayerSignInButton layer={layer} />}
       <div className="map-layer-settings-menu-wrapper">
         <MapLayerSettingsMenu
           activeViewport={context.activeViewport}
           mapLayerSettings={layer}
           onMenuItemSelection={context.onMenuItemSelected}
           disabled={context.disabled}
-          readOnly={readOnly}
+          readOnly={context.readOnly}
         />
       </div>
     </div>
+  );
+}
+
+function MapLayerSignInButton({ layer }: { layer: StyleMapLayerSettings }) {
+  const context = useMapLayerListContext();
+  const requireAuthTooltip = MapLayersUI.localization.getLocalizedString("mapLayers:Widget.RequireAuthTooltip");
+  const dialogOpenRef = React.useRef(false);
+
+  React.useEffect(
+    () => () => {
+      if (dialogOpenRef.current) {
+        UiFramework.dialogs.modal.close();
+      }
+    },
+    [],
+  );
+
+  const closeDialog = React.useCallback(() => {
+    dialogOpenRef.current = false;
+    UiFramework.dialogs.modal.close();
+  }, []);
+
+  const handleOk = React.useCallback(
+    (mapLayerIndex: MapLayerIndex, sourceState?: SourceState) => {
+      closeDialog();
+
+      const source = sourceState?.source;
+      if (sourceState === undefined || source === undefined) {
+        const error = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachMissingViewOrSource");
+        const msg = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachError", { error, sourceName: source?.name ?? "" });
+        IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
+        return;
+      }
+
+      const validation = sourceState.validation;
+
+      // Layer is already attached,
+      // This calls invalidateRenderPlan()
+      context.activeViewport.displayStyle.changeMapLayerProps({ subLayers: validation.subLayers }, mapLayerIndex);
+      context.activeViewport.displayStyle.changeMapLayerCredentials(mapLayerIndex, source.userName, source.password);
+
+      // Either initial attach/initialize failed or the layer failed to load at least one tile
+      // because of an invalid token; in both cases tile tree needs to be fully reset
+      const provider = context.activeViewport.getMapLayerImageryProvider(mapLayerIndex);
+      provider?.resetStatus();
+      context.activeViewport.resetMapLayer(mapLayerIndex);
+
+      context.onItemEdited();
+    },
+    [closeDialog, context],
+  );
+
+  const openDialog = () => {
+    const indexInDisplayStyle = context.activeViewport.displayStyle.findMapLayerIndexByNameAndSource(layer.name, layer.source, layer.isOverlay);
+    if (indexInDisplayStyle === undefined || indexInDisplayStyle < 0) {
+      return;
+    }
+    const mapLayerIndex = { index: indexInDisplayStyle, isOverlay: layer.isOverlay };
+    const layerSettings = context.activeViewport.displayStyle.mapLayerAtIndex(mapLayerIndex);
+    if (!(layerSettings instanceof ImageMapLayerSettings)) {
+      return;
+    }
+    dialogOpenRef.current = true;
+    UiFramework.dialogs.modal.open(
+      <MapUrlDialog
+        activeViewport={context.activeViewport}
+        signInModeArgs={{ layer: layerSettings }}
+        onOkResult={(sourceState?: SourceState) => handleOk(mapLayerIndex, sourceState)}
+        onCancelResult={closeDialog}
+        mapLayerOptions={context.mapLayerOptions}
+      />,
+    );
+  };
+
+  return (
+    <IconButton disabled={context.disabled} size="small" styleType="borderless" onClick={openDialog} label={requireAuthTooltip}>
+      <SvgStatusWarning />
+    </IconButton>
   );
 }

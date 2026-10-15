@@ -136,6 +136,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
                 onMenuItemSelected={handleOnMenuItemSelection}
                 onSelectAllLayers={selectAllLayers}
                 overlayLayers={overlayLayers}
+                readOnly={readOnly}
               >
                 {backgroundLayers && overlayLayers && (
                   <>

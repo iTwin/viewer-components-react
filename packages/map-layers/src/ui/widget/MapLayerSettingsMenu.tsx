@@ -80,21 +80,24 @@ export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, ac
     [transparency, applyTransparencyChange],
   );
 
-  const dropdownMenuItems = () => [
-    <MenuItem disabled={!hasRangeData} key={0} onClick={() => handleZoomToLayer()}>
-      {labelZoomToLayer}
-    </MenuItem>,
-    ...(readOnly
-      ? []
-      : [
-          <MenuItem key={1} onClick={() => handleRemoveLayer()}>
-            {labelDetach}
-          </MenuItem>,
-        ]),
-    <MenuItem key={2}>
-      <Slider className="map-manager-item-dropdown-slider" min={0} max={100} values={[transparency * 100]} step={1} onChange={handleTransparencyChange} />
-    </MenuItem>,
-  ];
+  const dropdownMenuItems = () => {
+    const zoomItem = (
+      <MenuItem disabled={!hasRangeData} key={0} onClick={() => handleZoomToLayer()}>
+        {labelZoomToLayer}
+      </MenuItem>
+    );
+    const detachItem = (
+      <MenuItem key={1} onClick={() => handleRemoveLayer()}>
+        {labelDetach}
+      </MenuItem>
+    );
+    const transparencyItem = (
+      <MenuItem key={2}>
+        <Slider className="map-manager-item-dropdown-slider" min={0} max={100} values={[transparency * 100]} step={1} onChange={handleTransparencyChange} />
+      </MenuItem>
+    );
+    return [zoomItem, ...(readOnly ? [] : [detachItem]), transparencyItem];
+  };
 
   return (
     <>

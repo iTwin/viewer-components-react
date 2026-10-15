@@ -20,8 +20,7 @@ export const MapLayerActionButtons = ({ isOverlay, layersList }: MapLayerActionB
   const invertAllLabel = MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.InvertAllLabel");
   const detachSelectedLabel = MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.DetachSelectedLabel");
 
-  const { disabled: mapLayerDisabled, activeViewport, onSelectAllLayers, mapLayerOptions } = useMapLayerListContext();
-  const readOnly = mapLayerOptions?.readOnly ?? false;
+  const { disabled: mapLayerDisabled, activeViewport, onSelectAllLayers, readOnly } = useMapLayerListContext();
   const disabled = mapLayerDisabled || layersList.length === 0;
   const hasSelected = layersList.some((l) => l.selected);
 

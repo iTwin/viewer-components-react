@@ -44,6 +44,7 @@ interface BasemapPanelProps {
 
 /** @internal */
 export function BasemapPanel(props: BasemapPanelProps) {
+  const selectDisabled = !!(props.disabled || props.readOnly);
   const [useColorLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Basemap.ColorFill"));
   const { activeViewport, bases } = useSourceMapContext();
   const [selectedBaseMap, setSelectedBaseMap] = React.useState<BaseLayerSettings | undefined>(() => {
@@ -408,9 +409,9 @@ export function BasemapPanel(props: BasemapPanelProps) {
           value={selectedBaseMapValue.value}
           onChange={handleBaseMapSelection}
           size="small"
-          disabled={props.disabled || props.readOnly}
+          disabled={selectDisabled}
           // Use key to reset internal state of Select when disabled changes, ensuring the dropdown menu is responsive.
-          key={String(props.disabled || props.readOnly)}
+          key={String(selectDisabled)}
         />
         {baseIsColor && (
           <Popover
