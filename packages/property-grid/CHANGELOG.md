@@ -1,5 +1,11 @@
 # Change Log - @itwin/property-grid-react
 
+## 2.0.2
+
+### Patch Changes
+
+- [#1830](https://github.com/iTwin/viewer-components-react/pull/1830): Add virtualization to element list component.
+
 ## 2.0.1
 
 ### Patch Changes
