@@ -5,7 +5,9 @@
     "module": "NodeNext",
     "moduleResolution": "nodenext",
     "target": "ES2023",
-    "outDir": "./lib"
+    "outDir": "./lib",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   },
   "include": [
     "./src/**/*.ts*"
