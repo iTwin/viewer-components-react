@@ -22,6 +22,7 @@ export interface MapLayerListContextProps {
   readonly onMenuItemSelected: (action: string, mapLayerSettings: StyleMapLayerSettings) => void;
   readonly onSelectAllLayers: (isOverlay: boolean) => void;
   readonly overlayLayers: StyleMapLayerSettings[];
+  readonly readOnly: boolean;
 }
 
 /** @internal */
@@ -48,6 +49,7 @@ export function MapLayerListProvider(props: MapLayerListProviderProps): React.Re
       onMenuItemSelected: props.onMenuItemSelected,
       onSelectAllLayers: props.onSelectAllLayers,
       overlayLayers: props.overlayLayers,
+      readOnly: props.readOnly,
     }),
     [
       props.activeViewport,
@@ -62,6 +64,7 @@ export function MapLayerListProvider(props: MapLayerListProviderProps): React.Re
       props.onMenuItemSelected,
       props.onSelectAllLayers,
       props.overlayLayers,
+      props.readOnly,
     ],
   );
 

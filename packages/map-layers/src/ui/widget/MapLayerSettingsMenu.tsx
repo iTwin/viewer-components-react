@@ -15,9 +15,10 @@ interface MapLayerSettingsMenuProps {
   onMenuItemSelection: (action: string, mapLayerSettings: StyleMapLayerSettings) => void;
   activeViewport: ScreenViewport;
   disabled?: boolean;
+  readOnly?: boolean;
 }
 
-export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, activeViewport, disabled }: MapLayerSettingsMenuProps) {
+export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, activeViewport, disabled, readOnly }: MapLayerSettingsMenuProps) {
   const [labelDetach] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:LayerMenu.Detach"));
   const [labelZoomToLayer] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:LayerMenu.ZoomToLayer"));
   const [hasRangeData, setHasRangeData] = React.useState<boolean | undefined>();
@@ -79,17 +80,24 @@ export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, ac
     [transparency, applyTransparencyChange],
   );
 
-  const dropdownMenuItems = () => [
-    <MenuItem disabled={!hasRangeData} key={0} onClick={() => handleZoomToLayer()}>
-      {labelZoomToLayer}
-    </MenuItem>,
-    <MenuItem key={1} onClick={() => handleRemoveLayer()}>
-      {labelDetach}
-    </MenuItem>,
-    <MenuItem key={2}>
-      <Slider className="map-manager-item-dropdown-slider" min={0} max={100} values={[transparency * 100]} step={1} onChange={handleTransparencyChange} />
-    </MenuItem>,
-  ];
+  const dropdownMenuItems = () => {
+    const zoomItem = (
+      <MenuItem disabled={!hasRangeData} key={0} onClick={() => handleZoomToLayer()}>
+        {labelZoomToLayer}
+      </MenuItem>
+    );
+    const detachItem = (
+      <MenuItem key={1} onClick={() => handleRemoveLayer()}>
+        {labelDetach}
+      </MenuItem>
+    );
+    const transparencyItem = (
+      <MenuItem key={2}>
+        <Slider className="map-manager-item-dropdown-slider" min={0} max={100} values={[transparency * 100]} step={1} onChange={handleTransparencyChange} />
+      </MenuItem>
+    );
+    return [zoomItem, ...(readOnly ? [] : [detachItem]), transparencyItem];
+  };
 
   return (
     <>

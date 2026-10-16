@@ -52,6 +52,14 @@ export interface MapLayerOptions {
 
   /** Optionally hide the header label */
   hideHeaderLabel?: boolean;
+
+  /**
+   * Optionally show the widget in read-only mode (e.g. while the application is offline). Defaults to false.
+   * Attached layers can still be shown, hidden and made transparent, but layers cannot be attached, detached, reordered or signed in to,
+   * and the base map provider and map settings cannot be changed. Base map visibility, transparency and color stay editable.
+   * Map layer sources are not loaded.
+   */
+  readOnly?: boolean;
 }
 
 export interface MapFeatureInfoPropertyGridOptions {
