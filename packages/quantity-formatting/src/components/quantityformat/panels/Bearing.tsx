@@ -10,7 +10,7 @@ import { Divider, Label, Text } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../useTranslation.js";
 import { DecimalSeparator } from "../internal/DecimalSeparator.js";
 import { FormatPrecision } from "../internal/FormatPrecision.js";
-import { AppendUnitLabel } from "../internal/FormatUnitLabel.js";
+import { AppendUnitLabel } from "../internal/AppendUnitLabel.js";
 import { FormatUnits } from "../internal/FormatUnits.js";
 import { KeepDecimalPoint } from "../internal/KeepDecimalPoint.js";
 import { KeepSingleZero } from "../internal/KeepSingleZero.js";
@@ -28,7 +28,7 @@ export function BearingPrimaryChildren(props: PanelProps): React.ReactElement {
   return (
     <div className="quantityFormat--formatPanel-primaryChildren">
       <div className="quantityFormat--formatTypeRow">
-        <FormatTypeOption formatProps={formatProps} onChange={onFormatChange} />
+        <FormatTypeOption formatProps={formatProps} unitsProvider={unitsProvider} onChange={onFormatChange} />
       </div>
       <Text variant="small" isMuted={true}>
         {translate("QuantityFormat:labels.formatTypeSublabel")}

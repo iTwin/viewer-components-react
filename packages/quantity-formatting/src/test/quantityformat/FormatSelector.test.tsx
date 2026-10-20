@@ -11,6 +11,7 @@ vi.mock("../../useTranslation.js", () => ({
     translate: (key: string) => {
       const translations: Record<string, string> = {
         "QuantityFormat:labels.formatSetSectionLabel": "Format Selection",
+        "QuantityFormat:labels.noFormatsFound": "No formats found matching",
       };
       return translations[key] || key;
     },

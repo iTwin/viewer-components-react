@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { describe, beforeEach, it, vi, expect } from "vitest";
-import * as React from "react";
-import { render, waitFor } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import type { FormatProps, UnitProps, UnitsProvider } from "@itwin/core-quantity";
 import { BearingPrimaryChildren, BearingSecondaryChildren } from "../../../components/quantityformat/panels/Bearing.js";
 import { IModelApp } from "@itwin/core-frontend";
