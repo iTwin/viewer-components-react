@@ -97,14 +97,15 @@ function CustomClassificationTreeImpl({
   const treeProps = useTree({
     getHierarchyProvider: useCallback(() => {
       return createMergedIModelHierarchyProvider({
-        hierarchyDefinition: definition,
+        // TODO: should create different definition for each imodel?
+        getHierarchyDefinition: () => definition,
         imodels: imodelConnections,
       });
     }, [definition, imodelConnections]),
     getSearchPaths,
   });
 
-  if (treeProps.isReloading) {
+  if (treeProps.isLoading) {
     return null;
   }
 

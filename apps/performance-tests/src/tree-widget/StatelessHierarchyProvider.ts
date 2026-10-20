@@ -9,8 +9,8 @@ import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor } from 
 import { LOGGER } from "../util/Logging.js";
 
 import type { IModelDb } from "@itwin/core-backend";
-import type { HierarchyDefinition, HierarchyNode, HierarchyProvider, HierarchySearchTree } from "@itwin/presentation-hierarchies";
-import type { EC, ECSchemaProvider, ECSqlQueryDef, ECSqlQueryExecutor, ECSqlQueryReaderOptions } from "@itwin/presentation-shared";
+import type { HierarchyDefinition, HierarchyNode, HierarchyProvider, HierarchySearchTree, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { ECSchemaProvider } from "@itwin/presentation-shared";
 import type { CategoriesTreeIdsCache, ModelsTreeIdsCache } from "@itwin/tree-widget-react/internal";
 
 interface ProviderOptionsBase {
@@ -38,17 +38,10 @@ function log(messageOrCallback: string | (() => string)) {
 
 const DEFAULT_ROW_LIMIT = 1000;
 
-export interface IModelAccess {
-  createQueryReader(
-    query: ECSqlQueryDef,
-    config?: ECSqlQueryReaderOptions & {
-      limit?: number | "unbounded";
-    },
-  ): ReturnType<ECSqlQueryExecutor["createQueryReader"]>;
-  classDerivesFrom(derivedClassFullName: string, candidateBaseClassFullName: string): Promise<boolean> | boolean;
-  getSchema(schemaName: string): Promise<EC.Schema | undefined>;
-  imodelKey: string;
-}
+export type IModelAccess = ECSchemaProvider &
+  LimitingECSqlQueryExecutor & {
+    imodelKey: string;
+  };
 
 export class StatelessHierarchyProvider implements Disposable {
   readonly #provider: HierarchyProvider & Disposable;

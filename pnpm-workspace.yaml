@@ -38,3 +38,10 @@ sharedWorkspaceLockfile: false
 injectWorkspacePackages: true
 
 packageManagerStrict: false
+
+minimumReleaseAgeExclude:
+  - '@itwin/presentation-core-interop@2.0.0-alpha.7'
+  - '@itwin/presentation-hierarchies-react@2.0.0-alpha.70'
+  - '@itwin/presentation-hierarchies@2.0.0-alpha.21'
+  - '@itwin/presentation-shared@2.0.0-alpha.16'
+  - '@itwin/unified-selection@2.0.0-alpha.4'

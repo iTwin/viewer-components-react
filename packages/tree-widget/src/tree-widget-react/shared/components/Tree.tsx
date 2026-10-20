@@ -117,7 +117,7 @@ export function Tree({
   const {
     getNode,
     setFormatter: _setFormatter,
-    isReloading,
+    isLoading,
     ...treeProps
   } = useIModelUnifiedSelectionTree({
     imodelAccess,
@@ -154,7 +154,7 @@ export function Tree({
   return (
     <TreeBase
       {...props}
-      isReloading={isReloading}
+      isLoading={isLoading}
       treeRendererProps={treeProps.treeRendererProps}
       getNode={getNode}
       currentHierarchyLevelSizeLimit={currentHierarchyLevelSizeLimit}
@@ -167,7 +167,7 @@ type TreeBaseProps = {
   getNode: (nodeId: string) => TreeNode | undefined;
   treeRendererProps?: TreeRendererProps;
 } & Omit<TreeProps, "selectionStorage" | "treeName" | "getHierarchyDefinition"> &
-  Pick<ReturnType<typeof useTree>, "getNode" | "isReloading">;
+  Pick<ReturnType<typeof useTree>, "getNode" | "isLoading">;
 
 /** @internal */
 function TreeBase({ treeRendererProps, ...props }: TreeBaseProps) {
@@ -193,7 +193,7 @@ function TreeBaseImpl({
   treeRenderer,
   highlightText,
   treeRendererProps,
-  isReloading,
+  isLoading,
   getNode,
   onNodeExpanded,
 }: Omit<TreeBaseProps, "getSchemaContext" | "treeRendererProps"> & Required<Pick<TreeBaseProps, "treeRendererProps">>) {
@@ -221,9 +221,9 @@ function TreeBaseImpl({
   );
   const reportingOnFilterClicked = useReportingAction({ action: onFilterClick });
   // Don't highlight nodes if tree is reloading
-  const { getLabel } = useNodeHighlighting({ highlightText: isReloading ? undefined : highlightText });
+  const { getLabel } = useNodeHighlighting({ highlightText: isLoading ? undefined : highlightText });
 
-  if (treeRendererProps.rootNodes.length === 0 && !isReloading) {
+  if (treeRendererProps.rootNodes.length === 0 && !isLoading) {
     return <>{emptyTreeContent ? emptyTreeContent : <EmptyTreeContent />}</>;
   }
 
@@ -244,7 +244,7 @@ function TreeBaseImpl({
         {treeRenderer(treeRenderProps)}
         {filteringDialog}
       </div>
-      <Delayed show={isReloading}>
+      <Delayed show={isLoading}>
         <ProgressOverlay />
       </Delayed>
     </div>
