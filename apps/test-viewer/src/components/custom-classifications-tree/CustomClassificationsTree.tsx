@@ -84,7 +84,7 @@ function CustomClassificationTreeImpl({
   }, [checkpointIModel]);
   const imodelConnections = useMemo(() => [{ imodelAccess: checkpointAccess }, { imodelAccess: latestAccess }], [latestAccess, checkpointAccess]);
   const imodels = useMemo(() => [checkpointIModel, latestIModel], [latestIModel, checkpointIModel]);
-  const { definition, getSearchPaths } = useClassificationsTreeDefinition({
+  const { getHierarchyDefinition, getSearchPaths } = useClassificationsTreeDefinition({
     imodels,
     hierarchyConfig: useMemo(
       () => ({
@@ -97,11 +97,10 @@ function CustomClassificationTreeImpl({
   const treeProps = useTree({
     getHierarchyProvider: useCallback(() => {
       return createMergedIModelHierarchyProvider({
-        // TODO: should create different definition for each imodel?
-        getHierarchyDefinition: () => definition,
+        getHierarchyDefinition: (imodelAccess) => getHierarchyDefinition({ imodelAccess }),
         imodels: imodelConnections,
       });
-    }, [definition, imodelConnections]),
+    }, [getHierarchyDefinition, imodelConnections]),
     getSearchPaths,
   });
 
