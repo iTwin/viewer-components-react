@@ -6,7 +6,7 @@
 import * as fs from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
-import { IModelHost } from "@itwin/core-backend";
+import { IModelHost, SettingsPriority } from "@itwin/core-backend";
 import { Guid, Logger, LogLevel } from "@itwin/core-bentley";
 import { IModelReadRpcInterface, RpcConfiguration, RpcDefaultConfiguration } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
@@ -103,6 +103,7 @@ export async function initializeCore(props?: InitializeCoreProps) {
     cacheDir: join(getTestOutputDir(), ".cache", `${process.pid}`),
     ...props.backendHostProps,
   });
+  IModelHost.appWorkspace.settings.addDictionary({ name: "tests", priority: SettingsPriority.application }, { "itwin/core/gcs/disableWorkspaces": true });
   PresentationBackend.initialize(props.backendProps);
 
   // init frontend

@@ -140,7 +140,7 @@ export function useClassificationsTree({
     componentId,
   });
 
-  const { getSearchPaths, definition } = useClassificationsTreeDefinitionInternal({
+  const { getSearchPaths, getHierarchyDefinition } = useClassificationsTreeDefinitionInternal({
     imodels: useMemo(() => [activeView.iModel], [activeView.iModel]),
     hierarchyConfig,
     search: useMemo(() => (searchText ? { searchText, limit: searchLimit } : undefined), [searchText, searchLimit]),
@@ -180,7 +180,7 @@ export function useClassificationsTree({
   return {
     treeProps: {
       treeName: ClassificationsTreeComponent.id,
-      getHierarchyDefinition: useCallback(() => definition, [definition]),
+      getHierarchyDefinition,
       visibilityHandlerFactory,
       getSearchPaths: getPaths,
       emptyTreeContent: useMemo(

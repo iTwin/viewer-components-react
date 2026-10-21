@@ -10,8 +10,8 @@ importers:
   .:
     dependencies:
       '@itwin/presentation-shared':
-        specifier: 2.0.0-alpha.13
-        version: 2.0.0-alpha.13
+        specifier: 2.0.0-alpha.16
+        version: 2.0.0-alpha.16
       fast-xml-parser:
         specifier: ^5.7.0
         version: 5.11.1
@@ -241,6 +241,9 @@ packages:
   '@itwin/core-bentley@5.13.2':
     resolution: {integrity: sha512-gU7RvE48UhxO/fC9h9vBFKhPofE9oOQgaj9sHlXYSy8lZj7uxbvTnJgk19/O/sOvIwmSRhRQQXhykpQ4njHjAg==}
 
+  '@itwin/core-bentley@5.14.3':
+    resolution: {integrity: sha512-jsO+lIz+TcJkHSZjtTlOdjIYudvUvvTxzdm5bV1IPUveSFhvbPJLqT3JjuOQmRCIspIv/m2VJTWRGfEgRJtVow==}
+
   '@itwin/core-common@5.13.2':
     resolution: {integrity: sha512-l0AjrN+noL8yj5zUiEoLf8SWAZTyu74QusxIYkTWAv1JDFIiNQBhztCn7bhYShtsdraAsY77bx8uYxYmGArCnw==}
     peerDependencies:
@@ -350,8 +353,8 @@ packages:
   '@itwin/presentation-shared@1.2.22':
     resolution: {integrity: sha512-BQprDWQbXn3Ei/gWpqIgVTn3d8no7lCYQrf1QBl4rhvgGZp1Bpn4wJUdeJ7crd/3hKGaLKWqMajX+NecoQLYgw==}
 
-  '@itwin/presentation-shared@2.0.0-alpha.13':
-    resolution: {integrity: sha512-SBna+xHqa5/lx6PeNppOuc6zpuwmrnslWpdrcx4FwK2E+95BOXt1jfeeYJSNqm1YRjYyGL1/wuInxm0rh+EzJg==}
+  '@itwin/presentation-shared@2.0.0-alpha.16':
+    resolution: {integrity: sha512-QlEC+F/Glv4gLO1DsXRdZGSDFCR5v4tzlGLknvNV9Qv8Gey87eWAFclJFLUeOX0WRxgzVlom5f1JtdpWxpOC5A==}
 
   '@itwin/unified-selection@1.8.6':
     resolution: {integrity: sha512-ph7AWX4s4+rRLzr7QOiUQWIHV5lOEY1QUjCLvTX8cRSISqDmApQ5rdyV2XR6+gv8Df3OZy8wwZHq7TKqUlWfpQ==}
@@ -2181,6 +2184,8 @@ snapshots:
 
   '@itwin/core-bentley@5.13.2': {}
 
+  '@itwin/core-bentley@5.14.3': {}
+
   '@itwin/core-common@5.13.2(@itwin/core-bentley@5.13.2)(@itwin/core-geometry@5.13.2)':
     dependencies:
       '@itwin/core-bentley': 5.13.2
@@ -2316,9 +2321,10 @@ snapshots:
     dependencies:
       '@itwin/core-bentley': 5.13.2
 
-  '@itwin/presentation-shared@2.0.0-alpha.13':
+  '@itwin/presentation-shared@2.0.0-alpha.16':
     dependencies:
-      '@itwin/core-bentley': 5.13.2
+      '@itwin/core-bentley': 5.14.3
+      rxjs: 7.8.2
 
   '@itwin/unified-selection@1.8.6':
     dependencies:

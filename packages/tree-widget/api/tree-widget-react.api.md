@@ -8,6 +8,7 @@ import * as _$react from 'react';
 import { BeEvent } from '@itwin/core-bentley';
 import { ClassGroupingNodeKey } from '@itwin/presentation-hierarchies';
 import { ComponentProps } from 'react';
+import { createIModelHierarchyProvider } from '@itwin/presentation-hierarchies';
 import { EC } from '@itwin/presentation-shared';
 import { ECSchemaProvider } from '@itwin/presentation-shared';
 import { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
@@ -25,6 +26,7 @@ import { InstancesNodeKey } from '@itwin/presentation-hierarchies';
 import { JSX } from 'react';
 import { Localization } from '@itwin/core-common';
 import { NonGroupingHierarchyNode } from '@itwin/presentation-hierarchies';
+import { Props } from '@itwin/presentation-shared';
 import { PropsWithChildren } from 'react';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
@@ -368,6 +370,9 @@ type HierarchyVisibilityHandlerOverridableMethodProps<TFunc> = TFunc extends ((p
     readonly originalImplementation: () => TResult;
     readonly handler: HierarchyVisibilityHandler;
 } : never;
+
+// @beta (undocumented)
+type IModelAccess = Props<typeof createIModelHierarchyProvider>["imodelAccess"];
 
 // @beta
 export const IModelContentTreeComponent: IModelContentTreeComponentType;
@@ -815,7 +820,9 @@ interface UseClassificationsTreeDefinitionProps {
 // @beta (undocumented)
 interface UseClassificationsTreeDefinitionResult {
     // (undocumented)
-    definition: HierarchyDefinition;
+    getHierarchyDefinition: (props: {
+        imodelAccess: IModelAccess;
+    }) => HierarchyDefinition;
     // (undocumented)
     getSearchPaths?: FunctionProps<typeof useTree>["getSearchPaths"];
 }
