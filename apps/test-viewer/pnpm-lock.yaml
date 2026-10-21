@@ -107,11 +107,11 @@ importers:
         specifier: ^5.13.0
         version: 5.13.3(702e9d5fbcd2bc74f1614474e9623dfd)
       '@itwin/presentation-hierarchies':
-        specifier: 2.0.0-alpha.21
-        version: 2.0.0-alpha.21
+        specifier: 2.0.0-alpha.22
+        version: 2.0.0-alpha.22
       '@itwin/presentation-hierarchies-react':
-        specifier: 2.0.0-alpha.70
-        version: 2.0.0-alpha.70(3845feaf0595f2a6140db24469996907)
+        specifier: 2.0.0-alpha.71
+        version: 2.0.0-alpha.71(3845feaf0595f2a6140db24469996907)
       '@itwin/presentation-shared':
         specifier: 2.0.0-alpha.16
         version: 2.0.0-alpha.16
@@ -808,8 +808,8 @@ packages:
       '@itwin/ecschema-metadata': 5.13.3
       '@itwin/presentation-common': 5.13.3
 
-  '@itwin/presentation-hierarchies-react@2.0.0-alpha.70':
-    resolution: {integrity: sha512-tm77EwLrMzd8TfJFjaB4M4dd2Y2fd7lT+zlnS6ltF0bmviwtd5/mX8oO9Nqr7pHNP9WJC8ZYfU/MsjMmcC8lFA==}
+  '@itwin/presentation-hierarchies-react@2.0.0-alpha.71':
+    resolution: {integrity: sha512-sAEYGS1QIbcN8LDIkuEK8j83p/sN+02mtpDkOV+ZcpLcUS3jSaUo/EUMVyrEXjG41BXDC4tFo+9bn7E7pBI+GQ==}
     peerDependencies:
       '@mui/material': ^9.4.0
       '@stratakit/foundations': ^1.0.0
@@ -824,8 +824,8 @@ packages:
       '@stratakit/mui':
         optional: true
 
-  '@itwin/presentation-hierarchies@2.0.0-alpha.21':
-    resolution: {integrity: sha512-hfO3aL6iAMbskSfd6jt2AI5NbT2e6r4/mMI7WkVQXm5hKkaA0gMWk/bYIBpdP0cjY3DrZNzLCuAkWvWaYw6SNA==}
+  '@itwin/presentation-hierarchies@2.0.0-alpha.22':
+    resolution: {integrity: sha512-aungRsjONKGQwudj/oCppdD+l/Mz8uf4qGkiO4Lr7h75c7RplhF3KLLHjpSEXUXL0mCBsLMvdOXDIJ/P3hqGRA==}
 
   '@itwin/presentation-shared@1.2.18':
     resolution: {integrity: sha512-4f1J/GAztvw6faxbzyxFnNrmVWBSY2rF3yTCCecTHyvameA15/tOKLKYu1TkrhU9t9YByUjCQpHeRTMEXqgvRw==}
@@ -880,9 +880,9 @@ packages:
       '@itwin/presentation-common': ^5.8.0
       '@itwin/presentation-components': ^5.12.0
       '@itwin/presentation-frontend': ^5.8.0
-      '@mui/material': ^9.4.0
-      '@stratakit/foundations': ^1.0.0
-      '@stratakit/mui': ^1.1.0
+      '@mui/material': ^9.5.0
+      '@stratakit/foundations': ^1.0.4
+      '@stratakit/mui': ^1.2.0
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
@@ -4359,10 +4359,10 @@ snapshots:
       rxjs: 7.8.2
       rxjs-for-await: 1.0.0(rxjs@7.8.2)
 
-  '@itwin/presentation-hierarchies-react@2.0.0-alpha.70(3845feaf0595f2a6140db24469996907)':
+  '@itwin/presentation-hierarchies-react@2.0.0-alpha.71(3845feaf0595f2a6140db24469996907)':
     dependencies:
       '@itwin/core-bentley': 5.14.3
-      '@itwin/presentation-hierarchies': 2.0.0-alpha.21
+      '@itwin/presentation-hierarchies': 2.0.0-alpha.22
       '@itwin/presentation-shared': 2.0.0-alpha.16
       '@itwin/unified-selection': 2.0.0-alpha.4
       '@stratakit/icons': 0.4.6
@@ -4383,7 +4383,7 @@ snapshots:
       - '@types/react'
       - use-sync-external-store
 
-  '@itwin/presentation-hierarchies@2.0.0-alpha.21':
+  '@itwin/presentation-hierarchies@2.0.0-alpha.22':
     dependencies:
       '@itwin/core-bentley': 5.14.3
       '@itwin/core-common': 5.14.3(@itwin/core-bentley@5.14.3)(@itwin/core-geometry@5.14.3)
@@ -4462,8 +4462,8 @@ snapshots:
       '@itwin/presentation-components': 5.16.3(7f40a50de1c086e52abdbb35b773b8f5)
       '@itwin/presentation-core-interop': 2.0.0-alpha.7(@itwin/core-bentley@5.13.2)(@itwin/core-common@5.13.2(@itwin/core-bentley@5.13.2)(@itwin/core-geometry@5.13.2))(@itwin/core-geometry@5.13.2)(@itwin/core-quantity@5.13.3(@itwin/core-bentley@5.13.2))(@itwin/ecschema-metadata@5.13.3(@itwin/core-bentley@5.13.2)(@itwin/core-quantity@5.13.3(@itwin/core-bentley@5.13.2)))
       '@itwin/presentation-frontend': 5.13.3(702e9d5fbcd2bc74f1614474e9623dfd)
-      '@itwin/presentation-hierarchies': 2.0.0-alpha.21
-      '@itwin/presentation-hierarchies-react': 2.0.0-alpha.70(3845feaf0595f2a6140db24469996907)
+      '@itwin/presentation-hierarchies': 2.0.0-alpha.22
+      '@itwin/presentation-hierarchies-react': 2.0.0-alpha.71(3845feaf0595f2a6140db24469996907)
       '@itwin/presentation-shared': 2.0.0-alpha.16
       '@itwin/unified-selection': 1.8.7
       '@mui/material': 9.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
