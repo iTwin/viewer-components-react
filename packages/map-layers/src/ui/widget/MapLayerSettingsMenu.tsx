@@ -15,10 +15,10 @@ interface MapLayerSettingsMenuProps {
   onMenuItemSelection: (action: string, mapLayerSettings: StyleMapLayerSettings) => void;
   activeViewport: ScreenViewport;
   disabled?: boolean;
-  readOnly?: boolean;
+  offlineMode?: boolean;
 }
 
-export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, activeViewport, disabled, readOnly }: MapLayerSettingsMenuProps) {
+export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, activeViewport, disabled, offlineMode }: MapLayerSettingsMenuProps) {
   const [labelDetach] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:LayerMenu.Detach"));
   const [labelZoomToLayer] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:LayerMenu.ZoomToLayer"));
   const [hasRangeData, setHasRangeData] = React.useState<boolean | undefined>();
@@ -96,7 +96,7 @@ export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, ac
         <Slider className="map-manager-item-dropdown-slider" min={0} max={100} values={[transparency * 100]} step={1} onChange={handleTransparencyChange} />
       </MenuItem>
     );
-    return [zoomItem, ...(readOnly ? [] : [detachItem]), transparencyItem];
+    return [zoomItem, ...(offlineMode ? [] : [detachItem]), transparencyItem];
   };
 
   return (

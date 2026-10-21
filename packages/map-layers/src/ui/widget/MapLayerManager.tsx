@@ -59,13 +59,13 @@ export function MapLayerManager(props: MapLayerManagerProps) {
   }, [mapLayerOptions?.baseMapLayers]);
   const hideExternalMapLayersSection = mapLayerOptions?.hideExternalMapLayers ?? false;
   const fetchPublicMapLayerSources = mapLayerOptions?.fetchPublicMapLayerSources ?? false;
-  const readOnly = mapLayerOptions?.readOnly ?? false;
+  const offlineMode = mapLayerOptions?.offlineMode ?? false;
 
   const { loadingSources, mapSources } = useMapLayerSources({
     activeViewport,
     fetchPublicMapLayerSources,
     hideExternalMapLayersSection,
-    skipLoading: readOnly,
+    skipLoading: offlineMode,
   });
   const {
     backgroundMapVisible,
@@ -109,14 +109,14 @@ export function MapLayerManager(props: MapLayerManagerProps) {
         <span className="map-manager-header-label">{MapLayersUI.localization.getLocalizedString("mapLayers:Basemap.BaseMapPanelTitle")}</span>}
         <div className="map-manager-header-buttons-group">
           <ToggleSwitch className="map-manager-toggle" checked={backgroundMapVisible} onChange={handleMapLayersToggle} />
-          {!readOnly && <MapLayerSettingsPopupButton disabled={!backgroundMapVisible} />}
+          {!offlineMode && <MapLayerSettingsPopupButton disabled={!backgroundMapVisible} />}
         </div>
       </div>
 
       <div className="map-manager-container">
         {/* Base map*/}
         <div className="map-manager-basemap">
-          <BasemapPanel disabled={!backgroundMapVisible} readOnly={readOnly} />
+          <BasemapPanel disabled={!backgroundMapVisible} offlineMode={offlineMode} />
         </div>
 
         {/* List of Layers (droppable) */}
@@ -136,7 +136,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
                 onMenuItemSelected={handleOnMenuItemSelection}
                 onSelectAllLayers={selectAllLayers}
                 overlayLayers={overlayLayers}
-                readOnly={readOnly}
+                offlineMode={offlineMode}
               >
                 {backgroundLayers && overlayLayers && (
                   <>

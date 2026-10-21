@@ -29,7 +29,7 @@ export function MapLayerItem(props: MapLayerItemProps) {
   const toggleVisibility = MapLayersUI.localization.getLocalizedString("mapLayers:Widget.ToggleVisibility");
   const outOfRangeTitle = MapLayersUI.localization.getLocalizedString("mapLayers:Widget.layerOutOfRange");
   const outOfRange = layer.treeVisibility === MapTileTreeScaleRangeVisibility.Hidden;
-  const showSignIn = !context.readOnly && layer.provider?.status === MapLayerImageryProviderStatus.RequireAuth;
+  const showSignIn = !context.offlineMode && layer.provider?.status === MapLayerImageryProviderStatus.RequireAuth;
 
   const onSubLayerStateChange = React.useCallback(
     (activeLayer: StyleMapLayerSettings, subLayerId: SubLayerId, isSelected: boolean) => {
@@ -55,7 +55,7 @@ export function MapLayerItem(props: MapLayerItemProps) {
         boxShadow: sortable.isDragging ? "10px 5px 5px rgba(0, 0, 0, 0.15)" : undefined,
       }}
     >
-      {!context.readOnly && (
+      {!context.offlineMode && (
         <Checkbox
           data-testid={"select-item-checkbox"}
           checked={layer.selected}
@@ -81,7 +81,7 @@ export function MapLayerItem(props: MapLayerItemProps) {
       <span
         className={context.disabled || outOfRange ? "map-manager-item-label-disabled" : "map-manager-item-label"}
         ref={sortable.handleRef}
-        style={{ cursor: context.disabled || context.readOnly ? undefined : sortable.isDragging ? "grabbing" : "grab" }}
+        style={{ cursor: context.disabled || context.offlineMode ? undefined : sortable.isDragging ? "grabbing" : "grab" }}
         title={outOfRange ? outOfRangeTitle : undefined}
       >
         {layer.name}
@@ -108,7 +108,7 @@ export function MapLayerItem(props: MapLayerItemProps) {
           mapLayerSettings={layer}
           onMenuItemSelection={context.onMenuItemSelected}
           disabled={context.disabled}
-          readOnly={context.readOnly}
+          offlineMode={context.offlineMode}
         />
       </div>
     </div>

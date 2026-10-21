@@ -57,7 +57,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
             <SortableMapLayerItem
               key={mapLayerSettings.id}
               layer={mapLayerSettings}
-              disabled={context.disabled || context.readOnly}
+              disabled={context.disabled || context.offlineMode}
               droppableId={droppableId}
               index={i}
               renderItem={(sortable) =>
@@ -74,7 +74,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
         : props.hideEmptyPlaceholder ? undefined
         : <div title={title} className="map-manager-no-layers-container">
             <span className="map-manager-no-layers-label">{showEmptyDropHint ? dropLayerLabel : title}</span>
-            {!showEmptyDropHint && !context.readOnly && <AttachLayerPopupButton disabled={context.disabled} buttonType={AttachLayerButtonType.Blue} isOverlay={props.isOverlay} />}
+            {!showEmptyDropHint && !context.offlineMode && <AttachLayerPopupButton disabled={context.disabled} buttonType={AttachLayerButtonType.Blue} isOverlay={props.isOverlay} />}
           </div>
       }
     </div>

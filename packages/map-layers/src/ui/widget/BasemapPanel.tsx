@@ -39,12 +39,12 @@ interface ExtraFormat {
 
 interface BasemapPanelProps {
   disabled?: boolean;
-  readOnly?: boolean;
+  offlineMode?: boolean;
 }
 
 /** @internal */
 export function BasemapPanel(props: BasemapPanelProps) {
-  const selectDisabled = !!(props.disabled || props.readOnly);
+  const selectDisabled = !!(props.disabled || props.offlineMode);
   const [useColorLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Basemap.ColorFill"));
   const { activeViewport, bases } = useSourceMapContext();
   const [selectedBaseMap, setSelectedBaseMap] = React.useState<BaseLayerSettings | undefined>(() => {

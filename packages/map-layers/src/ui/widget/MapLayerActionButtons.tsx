@@ -20,7 +20,7 @@ export const MapLayerActionButtons = ({ isOverlay, layersList }: MapLayerActionB
   const invertAllLabel = MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.InvertAllLabel");
   const detachSelectedLabel = MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.DetachSelectedLabel");
 
-  const { disabled: mapLayerDisabled, activeViewport, onSelectAllLayers, readOnly } = useMapLayerListContext();
+  const { disabled: mapLayerDisabled, activeViewport, onSelectAllLayers, offlineMode } = useMapLayerListContext();
   const disabled = mapLayerDisabled || layersList.length === 0;
   const hasSelected = layersList.some((l) => l.selected);
 
@@ -57,7 +57,7 @@ export const MapLayerActionButtons = ({ isOverlay, layersList }: MapLayerActionB
 
   return (
     <div className="map-manager-layer-action-buttons">
-      {!readOnly && (
+      {!offlineMode && (
         <>
           <Checkbox data-testid="select-all-checkbox" disabled={disabled} checked={hasSelected} onChange={selectAll} className="map-manager-layer-action-unlink-button" />
           <IconButton disabled={disabled || !hasSelected} data-testid="detach-label-button" label={detachSelectedLabel} size="small" styleType="borderless" onClick={unlink}>

@@ -459,7 +459,7 @@ describe("MapLayerManager", () => {
     await checkLayerSection(layersSections[1]);
   });
 
-  describe("read-only mode", () => {
+  describe("offline mode", () => {
     const layerSettings = ImageMapLayerSettings.fromJSON({
       formatId: "WMS",
       name: "background",
@@ -471,9 +471,9 @@ describe("MapLayerManager", () => {
       url: "https://server/MapServer",
     });
 
-    const managerElement = (readOnly?: boolean) => (
+    const managerElement = (offlineMode?: boolean) => (
       <div>
-        <MapLayerManager activeViewport={viewportMock.object} mapLayerOptions={readOnly === undefined ? undefined : { readOnly }}></MapLayerManager>
+        <MapLayerManager activeViewport={viewportMock.object} mapLayerOptions={offlineMode === undefined ? undefined : { offlineMode }}></MapLayerManager>
       </div>
     );
 
@@ -483,14 +483,14 @@ describe("MapLayerManager", () => {
       });
     }
 
-    async function renderManager(readOnly?: boolean, setupViewport?: () => void) {
+    async function renderManager(offlineMode?: boolean, setupViewport?: () => void) {
       viewportMock.reset();
       viewportMock.backgroundLayers = [layerSettings];
       viewportMock.overlayLayers = [ImageMapLayerSettings.fromJSON({ ...layerSettings.toJSON(), name: "overlay" })];
       viewportMock.setup();
       setupViewport?.();
 
-      const result = render(managerElement(readOnly));
+      const result = render(managerElement(offlineMode));
       await flush();
       return result;
     }
@@ -542,7 +542,7 @@ describe("MapLayerManager", () => {
       expect(createSourcesSpy).not.toHaveBeenCalled();
     });
 
-    it("loads map layer sources when read-only is turned off", async () => {
+    it("loads map layer sources when offline mode is turned off", async () => {
       const createSourcesSpy = vi.spyOn(MapLayerSources, "create");
 
       const { rerender } = await renderManager(true);
@@ -553,7 +553,7 @@ describe("MapLayerManager", () => {
       expect(createSourcesSpy).toHaveBeenCalledTimes(1);
     });
 
-    it("stops a pending source load when switching to read-only", async () => {
+    it("stops a pending source load when switching to offline mode", async () => {
       let resolveCreate: (value: MapLayerSources) => void = () => {};
       vi.spyOn(MapLayerSources, "create").mockImplementation(async () => new Promise<MapLayerSources>((resolve) => (resolveCreate = resolve)));
       const getSourcesSpy = vi.spyOn(MapLayerPreferences, "getSources").mockResolvedValue([]);
@@ -568,7 +568,7 @@ describe("MapLayerManager", () => {
       expect(getSourcesSpy).not.toHaveBeenCalled();
     });
 
-    it("clears the loading state when switching to read-only during a source load", async () => {
+    it("clears the loading state when switching to offline mode during a source load", async () => {
       vi.spyOn(MapLayerSources, "create").mockImplementation(async () => new Promise<MapLayerSources>(() => {}));
 
       const { result, rerender } = renderHook((skipLoading: boolean) =>
@@ -582,7 +582,7 @@ describe("MapLayerManager", () => {
       expect(result.current.loadingSources).toBe(false);
     });
 
-    it("closes the sign-in dialog when switching to read-only", async () => {
+    it("closes the sign-in dialog when switching to offline mode", async () => {
       const openSpy = vi.spyOn(UiFramework.dialogs.modal, "open").mockImplementation(() => {});
       const closeSpy = vi.spyOn(UiFramework.dialogs.modal, "close").mockImplementation(() => {});
 
@@ -607,7 +607,7 @@ describe("MapLayerManager", () => {
       expect(queryAllByRole(container, "button", { name: "Widget.RequireAuthTooltip" })).toHaveLength(0);
     });
 
-    it("shows all actions when readOnly is not set", async () => {
+    it("shows all actions when offlineMode is not set", async () => {
       const { container } = await renderManager();
 
       expect(container.querySelector(attachLayerButtonSelector)).not.toBeNull();
