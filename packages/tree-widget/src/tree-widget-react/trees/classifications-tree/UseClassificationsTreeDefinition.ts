@@ -61,6 +61,7 @@ interface UseClassificationsTreeDefinitionProps {
   onSearchPathsChanged?: (paths: HierarchySearchTree[] | undefined) => void;
 }
 
+/** @beta */
 type IModelAccess = Props<typeof createIModelHierarchyProvider>["imodelAccess"];
 
 /** @beta */
