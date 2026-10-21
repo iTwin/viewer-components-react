@@ -1,5 +1,11 @@
 # Change Log - @itwin/tree-widget-react
 
+## 4.0.0-alpha.35
+
+### Major Changes
+
+- [#1835](https://github.com/iTwin/viewer-components-react/pull/1835): Replaced `UseClassificationsTreeDefinitionResult.definition` with `getHierarchyDefinition` callback, which takes `{ imodelAccess }` and creates a hierarchy definition for the given iModel.
+
 ## 4.0.0-alpha.34
 
 ### Minor Changes
