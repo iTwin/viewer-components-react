@@ -45,3 +45,4 @@ minimumReleaseAgeExclude:
   - '@itwin/presentation-hierarchies@2.0.0'
   - '@itwin/presentation-shared@2.0.0'
   - '@itwin/unified-selection@2.0.0'
+  - '@itwin/presentation-components@6.0.1'
