@@ -46,7 +46,7 @@
     "@itwin/webgl-compatibility": "^5.13.0",
     "@mui/material": "^9.5.0",
     "@stratakit/foundations": "^1.0.4",
-    "@stratakit/icons": "^0.4.6",
+    "@stratakit/icons": "^0.4.7",
     "@stratakit/mui": "^1.2.0",
     "@stratakit/structures": "^0.6.2",
     "react": "^18.3.1",

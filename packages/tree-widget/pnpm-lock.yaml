@@ -21,7 +21,7 @@ importers:
         version: 2.0.0
       '@itwin/presentation-hierarchies-react':
         specifier: ^2.0.0
-        version: 2.0.0(d6afe02f4d0af33d5f7aa164b4695db7)
+        version: 2.0.0(bd4a7e99601a4814ca23957ed02a38b3)
       '@itwin/presentation-shared':
         specifier: ^2.0.0
         version: 2.0.0
@@ -31,9 +31,6 @@ importers:
       '@mui/utils':
         specifier: ^9.5.0
         version: 9.5.0(@types/react@19.3.0)(react@19.3.0)
-      '@stratakit/icons':
-        specifier: ^0.4.6
-        version: 0.4.6
       '@stratakit/structures':
         specifier: ^0.6.2
         version: 0.6.2(@stratakit/foundations@1.0.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@types/react@19.3.0)(immer@10.2.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(use-sync-external-store@1.7.0(react@19.3.0))
@@ -140,6 +137,9 @@ importers:
       '@stratakit/foundations':
         specifier: ^1.0.4
         version: 1.0.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@stratakit/icons':
+        specifier: ^0.4.7
+        version: 0.4.7
       '@stratakit/mui':
         specifier: ^1.2.0
         version: 1.2.0(@mui/material@9.5.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@stratakit/foundations@1.0.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)
@@ -1646,8 +1646,8 @@ packages:
       react-dom:
         optional: true
 
-  '@stratakit/icons@0.4.6':
-    resolution: {integrity: sha512-VFKafaYh7ixHY0L5VU8mYDQ/ovGOlAyfYiVJ97ESm2ty4ijgmn5yV1LFF1HzwJypoS+0fHBA187R5OjtpWjI5g==}
+  '@stratakit/icons@0.4.7':
+    resolution: {integrity: sha512-cbhrToc4yQ2x3Zc5rx4ViyI1265E7w9nrc77inp16S1dmEfChI1nQ5S5jBOokaw4UZcDxzOZe45siFJ/h3d7EQ==}
 
   '@stratakit/internal-utils@0.2.1':
     resolution: {integrity: sha512-E8oDOJubxcB7Yr6zeb55PqKTvelJjsqjNHulcmOJr443wgZNvLEqEFmCUWZ7uW2xbMBRFgbVqoxdGtrkQkravQ==}
@@ -6128,7 +6128,7 @@ snapshots:
       rxjs: 7.8.2
       rxjs-for-await: 1.0.0(rxjs@7.8.2)
 
-  '@itwin/presentation-hierarchies-react@2.0.0(d6afe02f4d0af33d5f7aa164b4695db7)':
+  '@itwin/presentation-hierarchies-react@2.0.0(bd4a7e99601a4814ca23957ed02a38b3)':
     dependencies:
       '@itwin/core-bentley': 5.14.3
       '@itwin/presentation-hierarchies': 2.0.0
@@ -6146,7 +6146,7 @@ snapshots:
     optionalDependencies:
       '@mui/material': 9.5.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@stratakit/foundations': 1.0.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      '@stratakit/icons': 0.4.6
+      '@stratakit/icons': 0.4.7
       '@stratakit/mui': 1.2.0(@mui/material@9.5.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@stratakit/foundations@1.0.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)
     transitivePeerDependencies:
       - '@types/react'
@@ -6672,7 +6672,7 @@ snapshots:
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
 
-  '@stratakit/icons@0.4.6': {}
+  '@stratakit/icons@0.4.7': {}
 
   '@stratakit/internal-utils@0.2.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
     dependencies:
@@ -6688,7 +6688,7 @@ snapshots:
       '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1)
       '@mui/material': 9.5.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@stratakit/foundations': 1.0.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      '@stratakit/icons': 0.4.6
+      '@stratakit/icons': 0.4.7
       '@stratakit/internal-utils': 0.2.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       classnames: 2.5.1
       react: 19.3.0

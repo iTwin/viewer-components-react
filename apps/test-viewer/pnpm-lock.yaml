@@ -111,7 +111,7 @@ importers:
         version: 2.0.0
       '@itwin/presentation-hierarchies-react':
         specifier: ^2.0.0
-        version: 2.0.0(2d4bfd52501bb810a3227f29869d930c)
+        version: 2.0.0(456cbd85b78bfa8368cef28e29d04c4d)
       '@itwin/presentation-shared':
         specifier: ^2.0.0
         version: 2.0.0
@@ -123,7 +123,7 @@ importers:
         version: file:../../packages/quantity-formatting(9af89bb85f8b5d138a96f574ee4b1152)
       '@itwin/tree-widget-react':
         specifier: workspace:*
-        version: file:../../packages/tree-widget(226c5ed47ffb1ba08fbd28c058b1922f)
+        version: file:../../packages/tree-widget(dde5beefc72b694afcd2e9a3b706e3bb)
       '@itwin/unified-selection':
         specifier: ^2.0.0
         version: 2.0.0
@@ -140,8 +140,8 @@ importers:
         specifier: ^1.0.4
         version: 1.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@stratakit/icons':
-        specifier: ^0.4.6
-        version: 0.4.6
+        specifier: ^0.4.7
+        version: 0.4.7
       '@stratakit/mui':
         specifier: ^1.2.0
         version: 1.2.0(@mui/material@9.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/foundations@1.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@7.2.0)
@@ -882,6 +882,7 @@ packages:
       '@itwin/presentation-frontend': ^5.8.0
       '@mui/material': ^9.5.0
       '@stratakit/foundations': ^1.0.4
+      '@stratakit/icons': ^0.4.7
       '@stratakit/mui': ^1.2.0
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
@@ -1285,8 +1286,8 @@ packages:
       react-dom:
         optional: true
 
-  '@stratakit/icons@0.4.6':
-    resolution: {integrity: sha512-VFKafaYh7ixHY0L5VU8mYDQ/ovGOlAyfYiVJ97ESm2ty4ijgmn5yV1LFF1HzwJypoS+0fHBA187R5OjtpWjI5g==}
+  '@stratakit/icons@0.4.7':
+    resolution: {integrity: sha512-cbhrToc4yQ2x3Zc5rx4ViyI1265E7w9nrc77inp16S1dmEfChI1nQ5S5jBOokaw4UZcDxzOZe45siFJ/h3d7EQ==}
 
   '@stratakit/internal-utils@0.2.1':
     resolution: {integrity: sha512-E8oDOJubxcB7Yr6zeb55PqKTvelJjsqjNHulcmOJr443wgZNvLEqEFmCUWZ7uW2xbMBRFgbVqoxdGtrkQkravQ==}
@@ -4359,7 +4360,7 @@ snapshots:
       rxjs: 7.8.2
       rxjs-for-await: 1.0.0(rxjs@7.8.2)
 
-  '@itwin/presentation-hierarchies-react@2.0.0(2d4bfd52501bb810a3227f29869d930c)':
+  '@itwin/presentation-hierarchies-react@2.0.0(456cbd85b78bfa8368cef28e29d04c4d)':
     dependencies:
       '@itwin/core-bentley': 5.14.3
       '@itwin/presentation-hierarchies': 2.0.0
@@ -4377,7 +4378,7 @@ snapshots:
     optionalDependencies:
       '@mui/material': 9.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@stratakit/foundations': 1.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@stratakit/icons': 0.4.6
+      '@stratakit/icons': 0.4.7
       '@stratakit/mui': 1.2.0(@mui/material@9.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/foundations@1.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@7.2.0)
     transitivePeerDependencies:
       - '@types/react'
@@ -4445,7 +4446,7 @@ snapshots:
       - debug
       - supports-color
 
-  '@itwin/tree-widget-react@file:../../packages/tree-widget(226c5ed47ffb1ba08fbd28c058b1922f)':
+  '@itwin/tree-widget-react@file:../../packages/tree-widget(dde5beefc72b694afcd2e9a3b706e3bb)':
     dependencies:
       '@itwin/appui-abstract': 5.13.3(@itwin/core-bentley@5.13.2)
       '@itwin/appui-react': 5.33.1(01ae633e2aec9496afe7e1dbfa7379a1)
@@ -4459,13 +4460,13 @@ snapshots:
       '@itwin/presentation-core-interop': 2.0.0(@itwin/core-bentley@5.13.2)(@itwin/core-common@5.13.2(@itwin/core-bentley@5.13.2)(@itwin/core-geometry@5.13.2))(@itwin/core-geometry@5.13.2)(@itwin/core-quantity@5.13.3(@itwin/core-bentley@5.13.2))(@itwin/ecschema-metadata@5.13.3(@itwin/core-bentley@5.13.2)(@itwin/core-quantity@5.13.3(@itwin/core-bentley@5.13.2)))
       '@itwin/presentation-frontend': 5.13.3(702e9d5fbcd2bc74f1614474e9623dfd)
       '@itwin/presentation-hierarchies': 2.0.0
-      '@itwin/presentation-hierarchies-react': 2.0.0(2d4bfd52501bb810a3227f29869d930c)
+      '@itwin/presentation-hierarchies-react': 2.0.0(456cbd85b78bfa8368cef28e29d04c4d)
       '@itwin/presentation-shared': 2.0.0
       '@itwin/unified-selection': 2.0.0
       '@mui/material': 9.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@mui/utils': 9.5.0(@types/react@18.3.31)(react@18.3.1)
       '@stratakit/foundations': 1.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@stratakit/icons': 0.4.6
+      '@stratakit/icons': 0.4.7
       '@stratakit/mui': 1.2.0(@mui/material@9.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/foundations@1.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@7.2.0)
       '@stratakit/structures': 0.6.2(@stratakit/foundations@1.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.31)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
       classnames: 2.5.1
@@ -4851,7 +4852,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@stratakit/icons@0.4.6': {}
+  '@stratakit/icons@0.4.7': {}
 
   '@stratakit/internal-utils@0.2.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -4867,7 +4868,7 @@ snapshots:
       '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0)
       '@mui/material': 9.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react@18.3.1)(supports-color@7.2.0))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@stratakit/foundations': 1.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@stratakit/icons': 0.4.6
+      '@stratakit/icons': 0.4.7
       '@stratakit/internal-utils': 0.2.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
       react: 18.3.1
