@@ -3,12 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defaultIfEmpty, defer, EMPTY, forkJoin, from, map, merge, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
+import { defaultIfEmpty, defer, EMPTY, forkJoin, from, map, merge, mergeMap, of, reduce, shareReplay, tap, toArray } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { BaseIdsCacheImpl } from "../../../shared/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../../shared/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../../shared/internal/hooks/UseErrorState.js";
-import { fromWithRelease } from "../../../shared/internal/Rxjs.js";
+import { fromWithRelease, toVoidPromise } from "../../../shared/internal/Rxjs.js";
 import { createWhereClause, getClassesByView, getOrCreate } from "../../../shared/internal/Utils.js";
 
 import type { Observable } from "rxjs";
@@ -61,6 +61,8 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
   #isDefinitionContainerSupported: Observable<boolean> | undefined;
   #filteredElementsModels: Observable<Map<ElementId, ModelId>> | undefined;
   #queryExecutor: LimitingECSqlQueryExecutor;
+  #defContainersDataLoaded = false;
+  #categoriesDataLoaded = false;
   #componentId: GuidString;
   #componentName: string;
 
@@ -74,6 +76,15 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
     this.#componentName = "CategoriesTreeIdsCache";
   }
 
+  public async preloadDefinitionContainers(): Promise<void> {
+    if (this.#definitionContainersInfo !== undefined) {
+      return;
+    }
+    try {
+      await toVoidPromise(this.getDefinitionContainersInfo());
+    } catch {}
+  }
+
   private queryFilteredElementsModels(filteredElementIds: Id64Array): Observable<{
     modelId: Id64String;
     id: ElementId;
@@ -83,7 +94,6 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
         SELECT Model.Id modelId, ECInstanceId id
         FROM ${this.#categoryElementClass}
         JOIN IdSet(?) filteredElementIdSet ON ECInstanceId = filteredElementIdSet.id
-        ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
       `;
       return this.#queryExecutor.createQueryReader(
         { ecsql: query, bindings: [{ type: "idset", value: filteredElementIds }] },
@@ -291,7 +301,12 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
           },
         ),
       )
-      .pipe(shareReplay());
+      .pipe(
+        tap(() => {
+          this.#categoriesDataLoaded = true;
+        }),
+        shareReplay(),
+      );
     return this.#cachedCategoryData;
   }
 
@@ -343,7 +358,12 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
           );
         }),
       )
-      .pipe(shareReplay());
+      .pipe(
+        tap(() => {
+          this.#defContainersDataLoaded = true;
+        }),
+        shareReplay(),
+      );
     return this.#definitionContainersInfo;
   }
 
@@ -554,6 +574,10 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
         }, new Array<Id64String>()),
       ),
     });
+  }
+
+  public get isDataLoaded(): boolean {
+    return this.#defContainersDataLoaded && this.#categoriesDataLoaded;
   }
 
   public getIsDefinitionContainerSupported(): Observable<boolean> {

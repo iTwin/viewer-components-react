@@ -16,10 +16,10 @@ import { CLASS_NAME_DefinitionModel } from "../../../tree-widget-react/shared/in
 import { getClassesByView, mergeWithDefaults } from "../../../tree-widget-react/shared/internal/Utils.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "../../../tree-widget-react/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
-import { buildIModel, TestSchema } from "../../IModelUtils.js";
+import { buildIModel, insertGeometricModelWithPartition, TestSchema } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
-import { getInsertFunctionByViewType } from "./internal/Utils.js";
+import { createAccessAndCache, getInsertFunctionByViewType } from "./internal/Utils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
@@ -51,6 +51,73 @@ describe("Categories tree", () => {
     ["2d" as const, "3d" as const].forEach((viewType) => {
       describe(`${viewType} view`, () => {
         const { insertCategory, insertElement, insertElementsModel, insertElementsSubModel, insertModeledElement } = getInsertFunctionByViewType(viewType);
+        it("excludes private and template model content with and without preloaded caches", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const model = insertElementsModel({ txn, codeValue: "model" });
+              const category = insertCategory({ txn, codeValue: "shared category" });
+              const element = insertElement({ txn, modelId: model.id, categoryId: category.id });
+
+              const templateModel = insertGeometricModelWithPartition({ txn, codeValue: "template model", viewType, isTemplate: true });
+              insertElement({ txn, modelId: templateModel.id, categoryId: category.id });
+              const templateModelCategory = insertCategory({ txn, codeValue: "template model category" });
+              insertElement({ txn, modelId: templateModel.id, categoryId: templateModelCategory.id });
+              const templateModelContainer = insertDefinitionContainer({ txn, codeValue: "template model container" });
+              const templateDefinitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: templateModelContainer.id });
+              const templateContainedCategory = insertCategory({ txn, codeValue: "contained category", modelId: templateDefinitionModel.id });
+              insertElement({ txn, modelId: templateModel.id, categoryId: templateContainedCategory.id });
+
+              const privateModel = insertGeometricModelWithPartition({ txn, codeValue: "private model", viewType, isPrivate: true });
+              insertElement({ txn, modelId: privateModel.id, categoryId: category.id });
+              const privateModelCategory = insertCategory({ txn, codeValue: "private model category" });
+              insertElement({ txn, modelId: privateModel.id, categoryId: privateModelCategory.id });
+              const privateModelContainer = insertDefinitionContainer({ txn, codeValue: "private model container" });
+              const privateDefinitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: privateModelContainer.id });
+              const privateContainedCategory = insertCategory({ txn, codeValue: "contained category", modelId: privateDefinitionModel.id });
+              insertElement({ txn, modelId: privateModel.id, categoryId: privateContainedCategory.id });
+              return { category, element };
+            }),
+          );
+          const { imodelConnection, ...keys } = buildIModelResult;
+          for (const preloadCache of [false, true]) {
+            const { imodelAccess, idsCache } = createAccessAndCache({ imodelConnection, viewType });
+            if (preloadCache) {
+              await idsCache.preloadElementModelCategories();
+              await idsCache.preloadDefinitionContainers();
+            }
+            expect(idsCache.elementModelCategoriesLoaded()).toBe(preloadCache);
+            expect(idsCache.isDataLoaded).toBe(preloadCache);
+            using provider = createIModelHierarchyProvider({
+              imodelAccess,
+              hierarchyDefinition: new CategoriesTreeDefinition({
+                imodelAccess,
+                viewType,
+                idsCache,
+                hierarchyConfig: mergeWithDefaults({
+                  defaults: defaultHierarchyConfiguration,
+                  overrides: { elements: { nodes: "include" }, subCategories: { nodes: "exclude" } },
+                }),
+              }),
+            });
+            await validateHierarchy({
+              provider,
+              expect: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.category],
+                  supportsFiltering: true,
+                  children: [
+                    NodeValidators.createForClassGroupingNode({
+                      className: keys.element.className,
+                      label: viewType === "3d" ? "Physical Object" : "Drawing Graphic",
+                      children: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.element], supportsFiltering: true, children: false })],
+                    }),
+                  ],
+                }),
+              ],
+            });
+          }
+        });
+
         it("does not show private categories", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
@@ -303,6 +370,90 @@ describe("Categories tree", () => {
                     instanceKeys: [keys.category],
                     label: "cat",
                     children: false,
+                  }),
+                ],
+              }),
+            ],
+          });
+        });
+
+        it("shows definition container once when it contains multiple categories and elements", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const elementsModel = insertElementsModel({ txn, codeValue: "m" });
+              const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const category1 = insertCategory({ txn, codeValue: "cat1", modelId: definitionModel.id });
+              const category2 = insertCategory({ txn, codeValue: "cat2", modelId: definitionModel.id });
+
+              insertElement({ txn, modelId: elementsModel.id, categoryId: category1.id });
+              insertElement({ txn, modelId: elementsModel.id, categoryId: category1.id });
+              insertElement({ txn, modelId: elementsModel.id, categoryId: category2.id });
+
+              return { definitionContainer, category1, category2 };
+            }),
+          );
+
+          const { imodelConnection, ...keys } = buildIModelResult;
+          using provider = createCategoryTreeProvider(imodelConnection, viewType);
+
+          await validateHierarchy({
+            provider,
+            expect: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.definitionContainer],
+                supportsFiltering: true,
+                children: [
+                  NodeValidators.createForInstanceNode({
+                    instanceKeys: [keys.category1],
+                    children: false,
+                  }),
+                  NodeValidators.createForInstanceNode({
+                    instanceKeys: [keys.category2],
+                    children: false,
+                  }),
+                ],
+              }),
+            ],
+          });
+        });
+
+        it("shows categories only under their containing definition container", async () => {
+          await using buildIModelResult = await buildIModel(async (imodel) =>
+            withEditTxn(imodel, (txn) => {
+              const elementsModel = insertElementsModel({ txn, codeValue: "m" });
+              const rootDefinitionContainer = insertDefinitionContainer({ txn, codeValue: "root dc" });
+              const rootDefinitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: rootDefinitionContainer.id });
+              const definitionContainer1 = insertDefinitionContainer({ txn, codeValue: "dc1", modelId: rootDefinitionModel.id });
+              const definitionContainer2 = insertDefinitionContainer({ txn, codeValue: "dc2", modelId: rootDefinitionModel.id });
+              const definitionModel1 = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer1.id });
+              const definitionModel2 = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer2.id });
+              const category1 = insertCategory({ txn, codeValue: "cat1", modelId: definitionModel1.id });
+              const category2 = insertCategory({ txn, codeValue: "cat2", modelId: definitionModel2.id });
+
+              insertElement({ txn, modelId: elementsModel.id, categoryId: category1.id });
+              insertElement({ txn, modelId: elementsModel.id, categoryId: category2.id });
+
+              return { rootDefinitionContainer, definitionContainer1, definitionContainer2, category1, category2 };
+            }),
+          );
+
+          const { imodelConnection, ...keys } = buildIModelResult;
+          using provider = createCategoryTreeProvider(imodelConnection, viewType);
+
+          await validateHierarchy({
+            provider,
+            expect: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.rootDefinitionContainer],
+                children: [
+                  NodeValidators.createForInstanceNode({
+                    instanceKeys: [keys.definitionContainer1],
+                    children: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.category1], children: false })],
+                  }),
+                  NodeValidators.createForInstanceNode({
+                    instanceKeys: [keys.definitionContainer2],
+                    children: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.category2], children: false })],
                   }),
                 ],
               }),

@@ -144,7 +144,7 @@ export class ChildElementsCache extends BatchingCache<ChildElementsRequest, Id64
             }
             if (categoryMapKeys.length > 0) {
               clauses.push({
-                whereClause: `Model.Id = ${modelId} AND Category.Id IN (SELECT categoryIdSet${idx}.id FROM IdSet(?) categoryIdSet${idx} ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES) ${parentElementId === undefined ? "AND Parent.Id IS NULL" : `AND Parent.Id = ${parentElementId}`}`,
+                whereClause: `Model.Id = ${modelId} AND Category.Id IN (SELECT categoryIdSet${idx}.id FROM IdSet(?) categoryIdSet${idx}) ${parentElementId === undefined ? "AND Parent.Id IS NULL" : `AND Parent.Id = ${parentElementId}`}`,
                 type: "category",
                 childCategoryIds: allChildCategoryIds,
                 bindings: [{ type: "idset", value: categoryMapKeys }],
@@ -221,7 +221,6 @@ export class ChildElementsCache extends BatchingCache<ChildElementsRequest, Id64
               SELECT d.modelId modelId, d.reqParent reqParent, d.reqCategory reqCategory, d.ownCategory ownCategory, d.id id
               FROM Descendants d
               JOIN IdSet(?) allChildCategoryIdSet ON d.ownCategory = allChildCategoryIdSet.id
-              ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
             `,
             bindings: [
               ...categoryClauses.map((c) => c.bindings ?? []).flat(),

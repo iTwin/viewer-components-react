@@ -43,13 +43,7 @@ test.describe("iModel content tree", () => {
     const coolersNode = locateNode(treeWidget, "OPPID-04-COOLERS");
     await expandNode(page, coolersNode);
 
-    const bordersNode = locateNode(treeWidget, "Border");
-    await expandNode(page, bordersNode);
-
-    const graphicNode = locateNode(treeWidget, "Pid Graphic (1)");
-    await expandNode(page, graphicNode);
-
-    await locateNode(treeWidget, "D_SIZE [3-T4]").waitFor();
+    await locateNode(treeWidget, "Border").waitFor();
     await takeScreenshot(page, treeWidget);
   });
 

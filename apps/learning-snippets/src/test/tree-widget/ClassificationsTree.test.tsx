@@ -258,7 +258,7 @@ describe("Tree widget", () => {
             }),
           { wrapper: ({ children }) => <TreeWidgetContextProvider localization={IModelApp.localization}>{children}</TreeWidgetContextProvider> },
         );
-        expect(result.current.definition).toBeDefined();
+        expect(result.current.getHierarchyDefinition).toBeDefined();
       });
     });
 

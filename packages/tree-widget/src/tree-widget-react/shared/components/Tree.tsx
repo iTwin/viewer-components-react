@@ -70,6 +70,10 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPath
      */
     onReload?: () => void;
     /**
+     * Callback that is invoked when a tree node is expanded.
+     */
+    onNodeExpanded?: (node: TreeNode) => void;
+    /**
      * Text that should be highlighted in node labels.
      */
     highlightText?: string;
@@ -113,7 +117,7 @@ export function Tree({
   const {
     getNode,
     setFormatter: _setFormatter,
-    isReloading,
+    isLoading,
     ...treeProps
   } = useIModelUnifiedSelectionTree({
     imodelAccess,
@@ -150,7 +154,7 @@ export function Tree({
   return (
     <TreeBase
       {...props}
-      isReloading={isReloading}
+      isLoading={isLoading}
       treeRendererProps={treeProps.treeRendererProps}
       getNode={getNode}
       currentHierarchyLevelSizeLimit={currentHierarchyLevelSizeLimit}
@@ -163,7 +167,7 @@ type TreeBaseProps = {
   getNode: (nodeId: string) => TreeNode | undefined;
   treeRendererProps?: TreeRendererProps;
 } & Omit<TreeProps, "selectionStorage" | "treeName" | "getHierarchyDefinition"> &
-  Pick<ReturnType<typeof useTree>, "getNode" | "isReloading">;
+  Pick<ReturnType<typeof useTree>, "getNode" | "isLoading">;
 
 /** @internal */
 function TreeBase({ treeRendererProps, ...props }: TreeBaseProps) {
@@ -189,8 +193,9 @@ function TreeBaseImpl({
   treeRenderer,
   highlightText,
   treeRendererProps,
-  isReloading,
+  isLoading,
   getNode,
+  onNodeExpanded,
 }: Omit<TreeBaseProps, "getSchemaContext" | "treeRendererProps"> & Required<Pick<TreeBaseProps, "treeRendererProps">>) {
   const selectNodes = useSelectionPredicate({
     action: useReportingAction({ action: treeRendererProps.selectNodes }),
@@ -202,11 +207,23 @@ function TreeBaseImpl({
     defaultHierarchyLevelSizeLimit: currentHierarchyLevelSizeLimit,
   });
   const reportingExpandNode = useReportingAction({ action: treeRendererProps.expandNode });
+  const expandNode = useCallback<TreeRendererProps["expandNode"]>(
+    (nodeId, isExpanded) => {
+      reportingExpandNode(nodeId, isExpanded);
+      if (isExpanded) {
+        const node = getNode(nodeId);
+        if (node) {
+          onNodeExpanded?.(node);
+        }
+      }
+    },
+    [getNode, onNodeExpanded, reportingExpandNode],
+  );
   const reportingOnFilterClicked = useReportingAction({ action: onFilterClick });
   // Don't highlight nodes if tree is reloading
-  const { getLabel } = useNodeHighlighting({ highlightText: isReloading ? undefined : highlightText });
+  const { getLabel } = useNodeHighlighting({ highlightText: isLoading ? undefined : highlightText });
 
-  if (treeRendererProps.rootNodes.length === 0 && !isReloading) {
+  if (treeRendererProps.rootNodes.length === 0 && !isLoading) {
     return <>{emptyTreeContent ? emptyTreeContent : <EmptyTreeContent />}</>;
   }
 
@@ -214,7 +231,7 @@ function TreeBaseImpl({
     ...treeRendererProps,
     selectNodes,
     selectionMode: selectionMode ?? "single",
-    expandNode: reportingExpandNode,
+    expandNode,
     filterHierarchyLevel: reportingOnFilterClicked,
     getTreeItemProps: (node) => ({
       label: getLabel(node),
@@ -227,7 +244,7 @@ function TreeBaseImpl({
         {treeRenderer(treeRenderProps)}
         {filteringDialog}
       </div>
-      <Delayed show={isReloading}>
+      <Delayed show={isLoading}>
         <ProgressOverlay />
       </Delayed>
     </div>

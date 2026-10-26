@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
 import { useTelemetryContext } from "../../shared/contexts/TelemetryContext.js";
@@ -12,9 +12,9 @@ import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.j
 import { getClassificationsTreeIdsCache } from "./UseClassificationsTree.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { HierarchyDefinition } from "@itwin/presentation-hierarchies";
+import type { createIModelHierarchyProvider, HierarchyDefinition } from "@itwin/presentation-hierarchies";
 import type { useTree } from "@itwin/presentation-hierarchies-react";
-import type { InstanceKey } from "@itwin/presentation-shared";
+import type { InstanceKey, Props } from "@itwin/presentation-shared";
 import type { FunctionProps } from "../../shared/Utils.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
 import type { ClassificationsTreeVisibilityHandlerConfiguration } from "./UseClassificationsTree.js";
@@ -62,8 +62,11 @@ interface UseClassificationsTreeDefinitionProps {
 }
 
 /** @beta */
+type IModelAccess = Props<typeof createIModelHierarchyProvider>["imodelAccess"];
+
+/** @beta */
 interface UseClassificationsTreeDefinitionResult {
-  definition: HierarchyDefinition;
+  getHierarchyDefinition: (props: { imodelAccess: IModelAccess }) => HierarchyDefinition;
   getSearchPaths?: FunctionProps<typeof useTree>["getSearchPaths"];
 }
 
@@ -98,13 +101,16 @@ export function useClassificationsTreeDefinitionInternal(
     });
   }, [imodels, getBaseIdsCache, getCache, hierarchyConfig, visibilityHandlerConfig]);
 
-  const definition = useMemo(() => {
-    return new ClassificationsTreeDefinition({
-      imodelAccess: imodelsWithCaches[imodelsWithCaches.length - 1].imodelAccess,
-      getIdsCache: (imodelKey: string) => imodelsWithCaches.find(({ imodelAccess }) => imodelAccess.imodelKey === imodelKey)!.cache,
-      hierarchyConfig,
-    });
-  }, [hierarchyConfig, imodelsWithCaches]);
+  const getHierarchyDefinition = useCallback(
+    (definitionProps: { imodelAccess: IModelAccess }) => {
+      return new ClassificationsTreeDefinition({
+        imodelAccess: definitionProps.imodelAccess,
+        getIdsCache: (imodelKey: string) => imodelsWithCaches.find(({ imodelAccess }) => imodelAccess.imodelKey === imodelKey)!.cache,
+        hierarchyConfig,
+      });
+    },
+    [hierarchyConfig, imodelsWithCaches],
+  );
 
   const searchTerm = search ? ("searchText" in search ? search.searchText : search.targetItems) : undefined;
   const searchLimit = search?.limit;
@@ -145,7 +151,7 @@ export function useClassificationsTreeDefinitionInternal(
   }, [searchTerm, searchLimit, onFeatureUsed, imodelsWithCaches, onSearchPathsChanged, hierarchyConfig]);
 
   return {
-    definition,
+    getHierarchyDefinition,
     getSearchPaths,
   };
 }

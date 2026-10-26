@@ -9,7 +9,7 @@ import { useHierarchyVisibility } from "../UseHierarchyVisibility.js";
 import { Tree } from "./Tree.js";
 
 import type { ReactNode } from "react";
-import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
+import type { ECSchemaProvider } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "../UseHierarchyVisibility.js";
 import type { FunctionProps } from "../Utils.js";
 import type { TreeProps } from "./Tree.js";
@@ -20,7 +20,7 @@ export type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess
   /**
    * Callback for creating visibility handler used to control visibility of instances represented by tree nodes.
    */
-  visibilityHandlerFactory: (props: { imodelAccess: ECClassHierarchyInspector }) => HierarchyVisibilityHandler;
+  visibilityHandlerFactory: (props: { imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom"> }) => HierarchyVisibilityHandler;
   /**
    * Tree renderer that should be used to render tree data.
    */
@@ -51,7 +51,7 @@ export function VisibilityTree({ visibilityHandlerFactory, treeRenderer, hierarc
       onReload={triggerRefresh}
       imodelAccess={imodelAccess}
       hierarchyLevelSizeLimit={currentHierarchyLevelSizeLimit}
-      treeRenderer={(treeProps) => treeRenderer({ ...treeProps, getVisibilityButtonState, onVisibilityButtonClick })}
+      treeRenderer={(treeProps): ReactNode => treeRenderer({ ...treeProps, getVisibilityButtonState, onVisibilityButtonClick })}
     />
   );
 }

@@ -126,7 +126,7 @@ describe("classifications tree", () => {
       iModelConnection: IModelConnection;
       hierarchyNodes: HierarchyNode[];
     }>({
-      testName: `50k classifications${excludedElementClassNames ? " and excluded classes" : ""}`,
+      testName: `50k classifications${excludedElementClassNames.length ? " and excluded classes" : ""}`,
       setup: async () => {
         const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k classifications"));
         const imodelAccess = StatelessHierarchyProvider.createIModelAccess(iModel, "unbounded");

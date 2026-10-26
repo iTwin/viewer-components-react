@@ -94,7 +94,7 @@ type ClassificationsTreeSearchError = "tooManySearchMatches" | "unknownSearchErr
 interface UseClassificationsTreeResult {
   treeProps: Pick<
     VisibilityTreeProps,
-    "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "getSearchPaths" | "emptyTreeContent" | "highlightText"
+    "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "getSearchPaths" | "emptyTreeContent" | "highlightText" | "onNodeExpanded"
   >;
   getTreeItemProps: Required<ExtendedVisibilityTreeRendererProps>["getTreeItemProps"];
 }
@@ -140,7 +140,7 @@ export function useClassificationsTree({
     componentId,
   });
 
-  const { getSearchPaths, definition } = useClassificationsTreeDefinitionInternal({
+  const { getSearchPaths, getHierarchyDefinition } = useClassificationsTreeDefinitionInternal({
     imodels: useMemo(() => [activeView.iModel], [activeView.iModel]),
     hierarchyConfig,
     search: useMemo(() => (searchText ? { searchText, limit: searchLimit } : undefined), [searchText, searchLimit]),
@@ -173,14 +173,22 @@ export function useClassificationsTree({
     };
   }, [searchText, getSearchPaths, onFeatureUsed]);
 
+  const onNodeExpanded = useCallback(() => {
+    void idsCache.preloadClassifications();
+  }, [idsCache]);
+
   return {
     treeProps: {
       treeName: ClassificationsTreeComponent.id,
-      getHierarchyDefinition: useCallback(() => definition, [definition]),
+      getHierarchyDefinition,
       visibilityHandlerFactory,
       getSearchPaths: getPaths,
-      emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(searchText, searchError, emptyTreeContent), [searchText, searchError, emptyTreeContent]),
+      emptyTreeContent: useMemo(
+        (): ReactNode => getEmptyTreeContentComponent(searchText, searchError, emptyTreeContent),
+        [searchText, searchError, emptyTreeContent],
+      ),
       highlightText: searchText,
+      onNodeExpanded,
     },
     getTreeItemProps: (node, rendererProps) => ({
       ...rendererProps.getTreeItemProps?.(node),
@@ -190,7 +198,7 @@ export function useClassificationsTree({
   };
 }
 
-function getEmptyTreeContentComponent(searchText?: string, error?: ClassificationsTreeSearchError, emptyTreeContent?: React.ReactNode) {
+function getEmptyTreeContentComponent(searchText?: string, error?: ClassificationsTreeSearchError, emptyTreeContent?: React.ReactNode): ReactNode {
   if (error) {
     if (error === "tooManySearchMatches") {
       return <TooManySearchMatches base={"classificationsTree"} />;

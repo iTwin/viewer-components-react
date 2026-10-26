@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, expand, from, map, merge, mergeMap, of, reduce, shareReplay } from "rxjs";
+import { defer, EMPTY, expand, from, map, merge, mergeMap, of, reduce, shareReplay, tap } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { BaseIdsCacheImpl } from "../../../shared/internal/caches/BaseIdsCache.js";
 import {
@@ -12,10 +12,11 @@ import {
   CLASS_NAME_ClassificationTable,
   CLASS_NAME_ElementHasClassifications,
   CLASS_NAME_GeometricElement3d,
+  CLASS_NAME_Model,
   CLASS_NAME_SpatialCategory,
 } from "../../../shared/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../../shared/internal/hooks/UseErrorState.js";
-import { fromWithRelease } from "../../../shared/internal/Rxjs.js";
+import { fromWithRelease, toVoidPromise } from "../../../shared/internal/Rxjs.js";
 import { createWhereClause, getOrCreate } from "../../../shared/internal/Utils.js";
 
 import type { Observable } from "rxjs";
@@ -67,12 +68,22 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
   #componentId: GuidString;
   #componentName: string;
   #rowLimit = 7500;
+  #cachedDataLoaded = false;
 
   constructor(props: ClassificationsTreeIdsCacheProps) {
     super(props);
     this.#props = props;
     this.#componentId = Guid.createValue();
     this.#componentName = "ClassificationsTreeIdsCache";
+  }
+
+  public async preloadClassifications(): Promise<void> {
+    if (this.#cachedData !== undefined) {
+      return;
+    }
+    try {
+      await toVoidPromise(this.getCachedData());
+    } catch {}
   }
 
   private queryClassifications(): Observable<
@@ -134,10 +145,11 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
         categoriesOfClassificationSelector = `
           SELECT group_concat(IdToHex(cat.ECInstanceId))
           FROM ${CLASS_NAME_GeometricElement3d} e
+          JOIN ${CLASS_NAME_Model} m ON m.ECInstanceId = e.Model.Id
           JOIN ${CLASS_NAME_SpatialCategory} cat ON cat.ECInstanceId = e.Category.Id
           JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = e.ECInstanceId
           ${createWhereClause({
-            conditions: ["e.Parent.Id IS NULL", "NOT cat.IsPrivate", "ehc.TargetECInstanceId = cl.ClassificationId"],
+            conditions: ["e.Parent.Id IS NULL", "NOT cat.IsPrivate", "NOT m.IsPrivate", "NOT m.IsTemplate", "ehc.TargetECInstanceId = cl.ClassificationId"],
           })}
           GROUP BY ehc.TargetECInstanceId
         `;
@@ -223,9 +235,16 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
           ),
         ),
       ),
+      tap(() => {
+        this.#cachedDataLoaded = true;
+      }),
       shareReplay(),
     );
     return this.#cachedData;
+  }
+
+  public get isDataLoaded(): boolean {
+    return this.#cachedDataLoaded;
   }
 
   public hasChildren(classificationId: ClassificationId): Observable<boolean> {
@@ -311,7 +330,6 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
           this.ECInstanceId id
         FROM ${CLASS_NAME_GeometricElement3d} this
         JOIN IdSet(?) elementIdSet ON ECInstanceId = elementIdSet.id
-        ECSQLOPTIONS ENABLE_EXPERIMENTAL_FEATURES
       `;
       return this.#props.queryExecutor.createQueryReader(
         {

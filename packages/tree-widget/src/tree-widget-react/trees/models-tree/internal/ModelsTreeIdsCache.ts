@@ -68,6 +68,7 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
               conditions: [
                 "m.ECInstanceId = HexToId(json_extract(s.JsonProperties, '$.Subject.Model.TargetPartition'))",
                 "NOT m.IsPrivate",
+                "NOT m.IsTemplate",
                 this.#hierarchyConfig.models.withoutElements === "exclude" &&
                   `EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elements.baseClass} WHERE Model.Id = m.ECInstanceId)`,
               ],
@@ -100,7 +101,7 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
         SELECT p.ECInstanceId id, p.Parent.Id parentId
         FROM ${CLASS_NAME_InformationPartitionElement} p
         INNER JOIN ${CLASS_NAME_GeometricModel3d} m ON m.ModeledElement.Id = p.ECInstanceId
-        ${createWhereClause({ conditions: ["NOT m.IsPrivate", this.#hierarchyConfig.models.withoutElements === "exclude" && `EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elements.baseClass} WHERE Model.Id = m.ECInstanceId)`] })}
+        ${createWhereClause({ conditions: ["NOT m.IsPrivate", "NOT m.IsTemplate", this.#hierarchyConfig.models.withoutElements === "exclude" && `EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elements.baseClass} WHERE Model.Id = m.ECInstanceId)`] })}
       `;
       return this.#queryExecutor.createQueryReader(
         { ecsql: modelsQuery },

@@ -419,7 +419,7 @@ describe("models tree", () => {
       iModelConnection: IModelConnection;
       hierarchyNodes: HierarchyNode[];
     }>({
-      testName: `50k 3D child elements with different categories${excludedElementClassNames ? " and excluded classes" : ""}`,
+      testName: `50k 3D child elements with different categories${excludedElementClassNames.length ? " and excluded classes" : ""}`,
       setup: async () => {
         const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k 3D child elements with different categories"));
         const imodelAccess = StatelessHierarchyProvider.createIModelAccess(iModel, "unbounded");

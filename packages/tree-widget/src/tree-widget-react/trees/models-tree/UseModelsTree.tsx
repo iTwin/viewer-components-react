@@ -123,7 +123,14 @@ export interface UseModelsTreeProps {
 interface UseModelsTreeResult {
   treeProps: Pick<
     VisibilityTreeProps,
-    "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent" | "selectionPredicate"
+    | "treeName"
+    | "getHierarchyDefinition"
+    | "getSearchPaths"
+    | "visibilityHandlerFactory"
+    | "highlightText"
+    | "emptyTreeContent"
+    | "selectionPredicate"
+    | "onNodeExpanded"
   >;
   getTreeItemProps: Required<ExtendedVisibilityTreeRendererProps>["getTreeItemProps"];
 }
@@ -174,6 +181,11 @@ export function useModelsTree({
     componentId,
   });
 
+  const onNodeExpanded = useCallback(() => {
+    void idsCache.preloadElementModelCategories();
+    void idsCache.preloadModeledElements();
+  }, [idsCache]);
+
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache, hierarchyConfig: hierarchyConfiguration, componentId }),
     [idsCache, hierarchyConfiguration, componentId],
@@ -213,11 +225,12 @@ export function useModelsTree({
       getHierarchyDefinition,
       getSearchPaths: getPaths,
       emptyTreeContent: useMemo(
-        () => getEmptyTreeContentComponent(searchText, subTreeError, searchError, emptyTreeContent),
+        (): ReactNode => getEmptyTreeContentComponent(searchText, subTreeError, searchError, emptyTreeContent),
         [searchText, subTreeError, searchError, emptyTreeContent],
       ),
       highlightText: searchText,
       selectionPredicate: nodeSelectionPredicate,
+      onNodeExpanded,
     },
     getTreeItemProps: (node, rendererProps) => ({
       ...rendererProps.getTreeItemProps?.(node),
@@ -254,7 +267,7 @@ function getEmptyTreeContentComponent(
   subTreeError?: ModelsTreeSubTreeError,
   error?: ModelsTreeSearchError,
   emptyTreeContent?: React.ReactNode,
-) {
+): ReactNode {
   if (isSubTreeError(subTreeError)) {
     return <SubTreeError base={"modelsTree"} error={subTreeError} />;
   }
