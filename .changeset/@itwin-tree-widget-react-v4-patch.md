@@ -17,6 +17,10 @@
 - **Visibility buttons and header controls report the correct state.** Buttons remain available for hidden and partially visible nodes, unresolved nodes initially appear visible rather than hidden, unavailable actions are not rendered, Categories tree grouping nodes no longer remain in a Determining visibility state, and the 2D toggle is no longer permanently disabled. Tooltips describe the available Show, Hide, Disabled, or Determining visibility action. (PRs: [#1211](https://github.com/iTwin/viewer-components-react/pull/1211), [#1216](https://github.com/iTwin/viewer-components-react/pull/1216), [#1276](https://github.com/iTwin/viewer-components-react/pull/1276), [#1278](https://github.com/iTwin/viewer-components-react/pull/1278), [#1286](https://github.com/iTwin/viewer-components-react/pull/1286), [#1331](https://github.com/iTwin/viewer-components-react/pull/1331), [#1751](https://github.com/iTwin/viewer-components-react/pull/1751))
 - **Visibility and category query errors are handled safely.** `CategoriesTreeComponent` no longer logs a "no current row" error while loading category data, interrupted visibility queries no longer crash the application, and transient element IDs are not sent to backend visibility queries. (PRs: [#1505](https://github.com/iTwin/viewer-components-react/pull/1505), [#1543](https://github.com/iTwin/viewer-components-react/pull/1543), [#1728](https://github.com/iTwin/viewer-components-react/pull/1728))
 
+#### Hierarchies
+
+- **Template models are no longer displayed.** Template models and their contents are excluded from Models, Categories, and Classifications tree hierarchies. Header buttons no longer affect their display. (PRs: [#1819](https://github.com/iTwin/viewer-components-react/pull/1819), [#1821](https://github.com/iTwin/viewer-components-react/pull/1821))
+
 #### Loading and extensibility
 
 - **Trees display an error message and Retry action when loading fails.** (PRs: [#1217](https://github.com/iTwin/viewer-components-react/pull/1217))
@@ -24,7 +28,7 @@
 
 #### Performance improvements
 
-The following PRs improve tree visibility and search performance:
+The following PRs improve tree loading, visibility, and search performance:
 
 [#1280](https://github.com/iTwin/viewer-components-react/pull/1280),
 [#1492](https://github.com/iTwin/viewer-components-react/pull/1492),
@@ -54,5 +58,9 @@ The following PRs improve tree visibility and search performance:
 [#1681](https://github.com/iTwin/viewer-components-react/pull/1681),
 [#1682](https://github.com/iTwin/viewer-components-react/pull/1682),
 [#1726](https://github.com/iTwin/viewer-components-react/pull/1726),
-[#1730](https://github.com/iTwin/viewer-components-react/pull/1730), and
-[#1731](https://github.com/iTwin/viewer-components-react/pull/1731).
+[#1730](https://github.com/iTwin/viewer-components-react/pull/1730),
+[#1731](https://github.com/iTwin/viewer-components-react/pull/1731),
+[#1794](https://github.com/iTwin/viewer-components-react/pull/1794),
+[#1799](https://github.com/iTwin/viewer-components-react/pull/1799),
+[#1801](https://github.com/iTwin/viewer-components-react/pull/1801), and
+[#1804](https://github.com/iTwin/viewer-components-react/pull/1804).

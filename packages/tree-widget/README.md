@@ -49,7 +49,7 @@ Typically, the package is used with an [AppUI](https://github.com/iTwin/appui/tr
 
 ### StrataKit configuration
 
-The tree components render their UI using [StrataKit](https://stratakit.bentley.com/docs), Bentley's design system. The StrataKit packages (`@stratakit/foundations`, `@stratakit/mui`, `@stratakit/structures`) are declared as peer dependencies and must be installed and configured by the consuming application. See the [StrataKit configuration documentation](https://stratakit.bentley.com/docs) for setup instructions.
+The tree components render their UI using [StrataKit](https://stratakit.bentley.com/docs), Bentley's design system. The StrataKit packages (`@stratakit/foundations`, `@stratakit/icons`, `@stratakit/mui`) are declared as peer dependencies and must be installed and configured by the consuming application. See the [StrataKit configuration documentation](https://stratakit.bentley.com/docs) for setup instructions.
 
 Place a single `TreeWidgetContextProvider` near the root of the application, above all tree widget components. The provider initializes localization, logging, and shared tree resources required by the components. Standard tree components initialize their own telemetry context:
 
