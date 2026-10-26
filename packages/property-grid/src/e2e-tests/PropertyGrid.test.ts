@@ -108,7 +108,7 @@ test.describe("property grid", () => {
       const elementList = propertyWidget.getByRole("list");
       await elementList.getByRole("listitem").filter({ hasText: "Equipment" }).click();
 
-      await propertyWidget.getByTitle("BisCore.DictionaryModel").waitFor();
+      await propertyWidget.getByText("BisCore.DictionaryModel").waitFor();
 
       return propertyWidget;
     };
