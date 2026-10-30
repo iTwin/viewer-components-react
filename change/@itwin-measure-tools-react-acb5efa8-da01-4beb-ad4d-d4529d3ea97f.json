@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "inverted",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "maxime.brassard@bentley.com",
+  "dependentChangeType": "patch"
+}
