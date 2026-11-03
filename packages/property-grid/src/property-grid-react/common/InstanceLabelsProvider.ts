@@ -51,19 +51,17 @@ export class InstanceLabelsProvider {
       }
     }
 
-    const labels = new Map<string, string>();
+    const labelsByClass = new Map<string, Map<Id64String, string>>();
     await Promise.all(
       [...idsByClass.entries()].map(async ([fullClassName, ids]) => {
-        for (const { id, label } of await this.#queryLabels(fullClassName, ids)) {
-          labels.set(createKey(fullClassName, id), label);
-        }
+        labelsByClass.set(fullClassName, await this.#queryLabels(fullClassName, ids));
       }),
     );
 
-    return normalizedKeys.map(({ fullClassName, id }) => labels.get(createKey(fullClassName, id)) ?? "");
+    return normalizedKeys.map(({ fullClassName, id }) => labelsByClass.get(fullClassName)?.get(id) ?? "");
   }
 
-  async #queryLabels(fullClassName: string, ids: Id64String[]): Promise<LabeledInstance[]> {
+  async #queryLabels(fullClassName: string, ids: Id64String[]): Promise<Map<Id64String, string>> {
     const { schemaName, className } = parseFullClassName(fullClassName);
     const labelSelectClause = await this.#labelSelectClauseFactory.createSelectClause({ classAlias: "this", className: fullClassName });
     const reader = this.#queryExecutor.createQueryReader(
@@ -71,30 +69,21 @@ export class InstanceLabelsProvider {
         ecsql: `
           SELECT this.ECInstanceId AS id, ${labelSelectClause} AS label
           FROM [${schemaName}].[${className}] AS this
-          WHERE InVirtualSet(?, this.ECInstanceId)
+          JOIN IdSet(?) AS ids ON ids.id = this.ECInstanceId
         `,
         bindings: [{ type: "idset", value: ids }],
       },
       { rowFormat: "ECSqlPropertyNames" },
     );
     // start formatting each label as soon as its row arrives, without blocking the reader
-    const results = new Array<Promise<LabeledInstance>>();
+    const entries = new Array<Promise<[Id64String, string]>>();
     for await (const row of reader) {
-      results.push(this.#formatLabel(row.label).then((label) => ({ id: row.id, label })));
+      entries.push(this.#formatLabel(row.label).then((label) => [row.id, label]));
     }
-    return Promise.all(results);
+    return new Map(await Promise.all(entries));
   }
 
   async #formatLabel(rawLabel: string | undefined): Promise<string> {
     return formatConcatenatedValue({ value: parseInstanceLabel(rawLabel), valueFormatter: this.#valueFormatter });
   }
-}
-
-interface LabeledInstance {
-  id: Id64String;
-  label: string;
-}
-
-function createKey(fullClassName: string, id: Id64String) {
-  return `${fullClassName}:${id}`;
 }
