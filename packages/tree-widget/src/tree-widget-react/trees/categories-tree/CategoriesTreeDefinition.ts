@@ -27,6 +27,7 @@ import { createPredicateBasedHierarchyDefinition, ProcessedHierarchyNode } from 
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import {
   CLASS_NAME_DefinitionContainer,
+  CLASS_NAME_Element,
   CLASS_NAME_ISubModeledElement,
   CLASS_NAME_Model,
   CLASS_NAME_SubCategory,
@@ -1008,9 +1009,13 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
           IFNULL(
             (
               SELECT 1
-              FROM ${this.#categoryElementClass} ce
+              FROM ${CLASS_NAME_Element} ce
               ${createWhereClause({
-                conditions: ["ce.Parent.Id = this.ECInstanceId", createExcludedClassesClause({ alias: "ce", excludedClassNames: this.#excludedClasses })],
+                conditions: [
+                  `ce.ECClassId IS (${this.#categoryElementClass})`,
+                  "ce.Parent.Id = this.ECInstanceId",
+                  createExcludedClassesClause({ alias: "ce", excludedClassNames: this.#excludedClasses }),
+                ],
               })}
               LIMIT 1
             ),
@@ -1031,9 +1036,10 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                     (
                       SELECT 1
                       FROM ${CLASS_NAME_Model} m
-                      JOIN ${this.#categoryElementClass} ce ON ce.Model.Id = m.ECInstanceId
+                      JOIN ${CLASS_NAME_Element} ce ON ce.Model.Id = m.ECInstanceId
                       ${createWhereClause({
                         conditions: [
+                          `ce.ECClassId IS (${this.#categoryElementClass})`,
                           "m.ECInstanceId = this.ECInstanceId",
                           "NOT m.IsPrivate",
                           "NOT m.IsTemplate",
