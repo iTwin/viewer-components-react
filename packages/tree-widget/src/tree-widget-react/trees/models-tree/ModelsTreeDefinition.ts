@@ -598,26 +598,32 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         fullClassName: CLASS_NAME_SpatialCategory,
         query: {
           ecsql: `
-            SELECT ${!categoriesToShow ? "DISTINCT" : ""}
+            SELECT
               ${await this.createCategoryNodeSelectClause({
                 createSelectClause,
                 extendedData: { modelIds: { selector: createIdsSelector(modelIds) } },
               })}
             FROM ${categoryInstanceFilterClauses.from} this
-            ${
-              categoriesToShow
-                ? "JOIN IdSet(?) categoryIdSet ON categoryIdSet.id = this.ECInstanceId"
-                : `
-                  JOIN ${this.#hierarchyConfig.elements.baseClass} ce ON ce.Category.Id = this.ECInstanceId
-                  JOIN IdSet(?) modelIdSet ON ce.Model.Id = modelIdSet.id
-                `
-            }
+            ${categoriesToShow ? "JOIN IdSet(?) categoryIdSet ON categoryIdSet.id = this.ECInstanceId" : ""}
             ${categoryInstanceFilterClauses.joins}
             ${createWhereClause({
               conditions: [
                 categoryInstanceFilterClauses.where,
-                !categoriesToShow && "ce.Parent.Id IS NULL",
-                !categoriesToShow && createExcludedClassesClause({ alias: "ce", excludedClassNames: this.#hierarchyConfig.elements.excludedClasses }),
+                !categoriesToShow &&
+                  `
+                  this.ECInstanceId IN (
+                    SELECT ce.Category.Id
+                    FROM IdSet(?) modelIdSet
+                    CROSS JOIN ${CLASS_NAME_Element} e ON e.Model.Id = modelIdSet.id
+                    CROSS JOIN ${this.#hierarchyConfig.elements.baseClass} ce ON ce.ECInstanceId = e.ECInstanceId
+                    ${createWhereClause({
+                      conditions: [
+                        "e.Parent.Id IS NULL",
+                        createExcludedClassesClause({ alias: "e", excludedClassNames: this.#hierarchyConfig.elements.excludedClasses }),
+                      ],
+                    })}
+                  )
+                `,
                 !categoriesToShow && modeledElementCategory !== undefined && `this.ECInstanceId <> ${modeledElementCategory}`,
               ],
             })}
