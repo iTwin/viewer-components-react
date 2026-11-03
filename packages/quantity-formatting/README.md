@@ -88,6 +88,8 @@ Bearing and Azimuth are available only for angular units (`Units.ANGLE` or `Unit
 
 Apply validates the edited format and its unit conversions before calling `onFormatChange`, even when `showSample` is `false`. Invalid formats remain editable and display an error; they are not passed to the callback.
 
+Apply and Revert stay visible at the bottom of the nearest scrolling container while you scroll through the settings. Validation feedback stays with the action buttons.
+
 #### QuantityFormatPanel Properties
 
 ```typescript

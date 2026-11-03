@@ -143,15 +143,17 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
         onFormatChange={handleOnFormatChanged}
         persistenceUnit={persistenceUnit}
       />
-      <Flex justifyContent="flex-end" gap="xs">
-        <Button size="small" styleType="default" onClick={handleClear} disabled={!saveEnabled}>
-          {translate("QuantityFormat:labels.revert")}
-        </Button>
-        <Button size="small" styleType="high-visibility" onClick={() => void handleSave()} disabled={!saveEnabled || isSaving}>
-          {translate("QuantityFormat:labels.apply")}
-        </Button>
-      </Flex>
-      {saveError && <div role="alert">{translate("QuantityFormat:errors.invalidFormat")}</div>}
+      <div className="quantityFormat--quantityPanel-footer">
+        <Flex justifyContent="flex-end" gap="xs">
+          <Button size="small" styleType="default" onClick={handleClear} disabled={!saveEnabled}>
+            {translate("QuantityFormat:labels.revert")}
+          </Button>
+          <Button size="small" styleType="high-visibility" onClick={() => void handleSave()} disabled={!saveEnabled || isSaving}>
+            {translate("QuantityFormat:labels.apply")}
+          </Button>
+        </Flex>
+        {saveError && <div role="alert">{translate("QuantityFormat:errors.invalidFormat")}</div>}
+      </div>
     </div>
   );
 }
