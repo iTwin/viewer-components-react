@@ -84,6 +84,10 @@ This package provides six main React components for quantity formatting:
 
 The main component for configuring quantity formatting. It provides a complete user interface for setting up format properties and includes a live formatting preview.
 
+Bearing and Azimuth are available only for angular units (`Units.ANGLE` or `Units.HORIZONTAL_DIRECTION`). They are disabled while the unit is being resolved and for non-angular quantities such as slopes or coefficients. Preview errors are displayed in the editor rather than propagated to the host application.
+
+Apply validates the edited format and its unit conversions before calling `onFormatChange`, even when `showSample` is `false`. Invalid formats remain editable and display an error; they are not passed to the callback.
+
 #### QuantityFormatPanel Properties
 
 ```typescript

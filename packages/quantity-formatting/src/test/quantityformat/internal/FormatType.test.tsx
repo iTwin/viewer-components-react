@@ -2,89 +2,121 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { IModelApp } from "@itwin/core-frontend";
-import { Format, FormatterSpec } from "@itwin/core-quantity";
+import { Logger } from "@itwin/core-bentley";
+import { BasicUnitsProvider, Format, FormatterSpec } from "@itwin/core-quantity";
 import { FormatTypeOption } from "../../../components/quantityformat/internal/misc/FormatType.js";
 
-import type { FormatProps, UnitProps, UnitsProvider } from "@itwin/core-quantity";
+import type { FormatProps, UnitProps } from "@itwin/core-quantity";
+
+afterEach(() => vi.restoreAllMocks());
 
 describe("FormatTypeOption", () => {
+  function decimalFormat(unitName: string): FormatProps {
+    return { type: "decimal", precision: 2, composite: { units: [{ name: unitName }] } };
+  }
+
   async function switchType(unitName: string, typeLabel: string): Promise<FormatProps> {
-    const onChange = vi.fn();
-    const formatProps: FormatProps = { type: "decimal", precision: 2, composite: { units: [{ name: unitName }] } };
-    render(<FormatTypeOption formatProps={formatProps} unitsProvider={IModelApp.quantityFormatter.unitsProvider} onChange={onChange} />);
+    const unitsProvider = new BasicUnitsProvider();
+    const onChange = vi.fn<(format: FormatProps) => void>();
+    render(<FormatTypeOption formatProps={decimalFormat(unitName)} unitsProvider={unitsProvider} onChange={onChange} />);
 
     fireEvent.click(screen.getByRole("combobox"));
-    fireEvent.click(screen.getByRole("option", { name: typeLabel }));
-    await waitFor(() => expect(onChange).toHaveBeenCalled());
+    const option = screen.getByRole("option", { name: typeLabel });
+    await waitFor(() => expect(option.getAttribute("aria-disabled")).not.toBe("true"));
+    fireEvent.click(option);
+    expect(onChange).toHaveBeenCalledOnce();
     return onChange.mock.calls[0][0];
   }
 
   async function formatValue(formatProps: FormatProps, unitName: string, value: number) {
-    const unitsProvider = IModelApp.quantityFormatter.unitsProvider;
+    const unitsProvider = new BasicUnitsProvider();
     const format = await Format.createFromJSON("test", unitsProvider, formatProps);
     const spec = await FormatterSpec.create("test", format, unitsProvider, await unitsProvider.findUnitByName(unitName));
     return spec.applyFormatting(value);
   }
 
-  // Horizontal-direction units cannot be converted to angle units.
   it.each([
-    ["azimuth", "45"],
-    ["bearing", "N45E"],
-  ])("uses horizontal-direction units for %s formats of horizontal directions", async (typeLabel, expected) => {
-    const formatProps = await switchType("Units.HORIZONTAL_DIR_ARC_DEG", typeLabel);
-
-    expect(formatProps.revolutionUnit).toBe("Units.HORIZONTAL_DIR_REVOLUTION");
-    if (typeLabel === "azimuth") expect(formatProps.azimuthBaseUnit).toBe("Units.HORIZONTAL_DIR_ARC_DEG");
-    expect(await formatValue(formatProps, "Units.HORIZONTAL_DIR_ARC_DEG", 45)).toBe(expected);
+    ["Units.HORIZONTAL_DIR_ARC_DEG", "azimuth", "45"],
+    ["Units.HORIZONTAL_DIR_ARC_DEG", "bearing", "N45E"],
+    ["Units.ARC_DEG", "azimuth", "45"],
+    ["Units.ARC_DEG", "bearing", "N45E"],
+  ])("formats %s as %s without incompatible conversions", async (unitName, typeLabel, expected) => {
+    const formatProps = await switchType(unitName, typeLabel);
+    expect(await formatValue(formatProps, unitName, 45)).toBe(expected);
   });
 
-  it("uses angle units for azimuth formats of angles", async () => {
-    const formatProps = await switchType("Units.ARC_DEG", "azimuth");
-
-    expect(formatProps).toMatchObject({ revolutionUnit: "Units.REVOLUTION", azimuthBaseUnit: "Units.ARC_DEG", azimuthBase: 0 });
-    expect(await formatValue(formatProps, "Units.ARC_DEG", 45)).toBe("45");
-  });
-
-  describe("pending azimuth lookup", () => {
-    function renderWithPendingLookup() {
-      let resolveLookup!: () => void;
-      const lookup = new Promise<UnitProps>((resolve) => (resolveLookup = () => resolve({ phenomenon: "Units.ANGLE" } as UnitProps)));
-      const unitsProvider = { findUnitByName: vi.fn(async () => lookup) } as unknown as UnitsProvider;
+  it.each(["Units.PERCENT_SLOPE", "Units.COEFFICIENT", "Units.M", "Units.UNKNOWN"])(
+    "disables directional formats for %s without changing the selected format",
+    async (unitName) => {
+      const unitsProvider = new BasicUnitsProvider();
+      const lookup = vi.spyOn(unitsProvider, "findUnitByName");
       const onChange = vi.fn();
-      const formatProps: FormatProps = { type: "decimal", precision: 2, composite: { units: [{ name: "Units.ARC_DEG" }] } };
-      const view = render(<FormatTypeOption formatProps={formatProps} unitsProvider={unitsProvider} onChange={onChange} />);
+      render(<FormatTypeOption formatProps={decimalFormat(unitName)} unitsProvider={unitsProvider} onChange={onChange} />);
+      await waitFor(() => expect(lookup).toHaveResolved());
+
       fireEvent.click(screen.getByRole("combobox"));
-      fireEvent.click(screen.getByRole("option", { name: "azimuth" }));
-      expect(unitsProvider.findUnitByName).toHaveBeenCalledOnce();
-      // Resolves the lookup and lets the type change handler finish.
-      const finishLookup = async () => act(async () => {
-        resolveLookup();
-        await lookup;
-      });
-      return { ...view, formatProps, unitsProvider, onChange, finishLookup };
-    }
-
-    it("applies the azimuth defaults when nothing changed while it was pending", async () => {
-      const { onChange, finishLookup } = renderWithPendingLookup();
-      await finishLookup();
-      expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ type: "Azimuth", revolutionUnit: "Units.REVOLUTION" }));
-    });
-
-    it("is dropped when the format changes before it resolves", async () => {
-      const { rerender, formatProps, unitsProvider, onChange, finishLookup } = renderWithPendingLookup();
-      rerender(<FormatTypeOption formatProps={{ ...formatProps, precision: 4 }} unitsProvider={unitsProvider} onChange={onChange} />);
-      await finishLookup();
+      for (const name of ["bearing", "azimuth"]) {
+        const option = screen.getByRole("option", { name });
+        expect(option.getAttribute("aria-disabled")).toBe("true");
+        fireEvent.click(option);
+      }
       expect(onChange).not.toHaveBeenCalled();
-    });
+      expect(screen.getByRole("combobox").textContent).toContain("decimal");
+      expect(screen.getByText("labels.directionFormatsRequireAngles")).toBeTruthy();
+    },
+  );
 
-    it("is dropped when the picker unmounts before it resolves", async () => {
-      const { unmount, onChange, finishLookup } = renderWithPendingLookup();
-      unmount();
-      await finishLookup();
-      expect(onChange).not.toHaveBeenCalled();
-    });
+  it("keeps numeric formats available without a display unit", () => {
+    const onChange = vi.fn();
+    render(<FormatTypeOption formatProps={{ type: "decimal" }} unitsProvider={new BasicUnitsProvider()} onChange={onChange} />);
+    fireEvent.click(screen.getByRole("combobox"));
+    expect(screen.getByRole("option", { name: "bearing" }).getAttribute("aria-disabled")).toBe("true");
+    fireEvent.click(screen.getByRole("option", { name: "scientific" }));
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ type: "Scientific", precision: 6 }));
+  });
+
+  it("reports lookup failures instead of enabling angular defaults", async () => {
+    const unitsProvider = new BasicUnitsProvider();
+    vi.spyOn(unitsProvider, "findUnitByName").mockRejectedValue(new Error("unit unavailable"));
+    const logError = vi.spyOn(Logger, "logError").mockImplementation(() => {});
+    render(<FormatTypeOption formatProps={decimalFormat("Units.ARC_DEG")} unitsProvider={unitsProvider} onChange={vi.fn()} />);
+
+    expect((await screen.findByRole("alert")).textContent).toBe("errors.unitLookup");
+    fireEvent.click(screen.getByRole("combobox"));
+    expect(screen.getByRole("option", { name: "azimuth" }).getAttribute("aria-disabled")).toBe("true");
+    expect(logError).toHaveBeenCalledWith("QuantityFormat", "Failed to look up the format unit", expect.any(Function));
+  });
+
+  it("does not enable angular formats from a stale unit lookup", async () => {
+    const unitsProvider = new BasicUnitsProvider();
+    const angle = await unitsProvider.findUnitByName("Units.ARC_DEG");
+    let resolveLookup!: (unit: UnitProps) => void;
+    const lookup = new Promise<UnitProps>((resolve) => { resolveLookup = resolve; });
+    vi.spyOn(unitsProvider, "findUnitByName").mockImplementationOnce(async () => lookup);
+    const onChange = vi.fn();
+    const { rerender } = render(<FormatTypeOption formatProps={decimalFormat("Units.ARC_DEG")} unitsProvider={unitsProvider} onChange={onChange} />);
+    fireEvent.click(screen.getByRole("combobox"));
+    expect(screen.getByRole("option", { name: "azimuth" }).getAttribute("aria-disabled")).toBe("true");
+
+    rerender(<FormatTypeOption formatProps={decimalFormat("Units.PERCENT_SLOPE")} unitsProvider={unitsProvider} onChange={onChange} />);
+    await act(async () => { resolveLookup(angle); await lookup; });
+
+    expect(screen.getByRole("option", { name: "azimuth" }).getAttribute("aria-disabled")).toBe("true");
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("drops a pending unit lookup when the picker unmounts", async () => {
+    const unitsProvider = new BasicUnitsProvider();
+    const angle = await unitsProvider.findUnitByName("Units.ARC_DEG");
+    let resolveLookup!: (unit: UnitProps) => void;
+    const lookup = new Promise<UnitProps>((resolve) => { resolveLookup = resolve; });
+    vi.spyOn(unitsProvider, "findUnitByName").mockImplementationOnce(async () => lookup);
+    const onChange = vi.fn();
+    const { unmount } = render(<FormatTypeOption formatProps={decimalFormat("Units.ARC_DEG")} unitsProvider={unitsProvider} onChange={onChange} />);
+    unmount();
+    await act(async () => { resolveLookup(angle); await lookup; });
+    expect(onChange).not.toHaveBeenCalled();
   });
 });
