@@ -5,14 +5,14 @@ on:
   pull_request:
     paths:
       - ".github/CODEOWNERS"
-      - ".github/workflows/sanity.yaml"
+      - ".github/workflows/sanity.yml"
   schedule:
     # Runs at 08:00 UTC every day
     - cron: "0 8 * * *"
 
 jobs:
   sanity:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       # Checks-out your repository, which is validated in the next step
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
