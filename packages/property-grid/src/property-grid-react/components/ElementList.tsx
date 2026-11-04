@@ -8,8 +8,8 @@ import "./ElementList.scss";
 import classnames from "classnames";
 import * as React from "react";
 import { List, ListItem, Text } from "@itwin/itwinui-react";
-import { PresentationLabelsProvider } from "@itwin/presentation-components";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { InstanceLabelsProvider } from "../common/InstanceLabelsProvider.js";
 import { trackTime } from "../common/TimeTracker.js";
 import { useTelemetryContext } from "../hooks/UseTelemetryContext.js";
 import { PropertyGridManager } from "../PropertyGridManager.js";
@@ -48,7 +48,7 @@ interface RowElementData {
  */
 export function ElementList({ imodel, instanceKeys, onBack, onSelect, className }: ElementListProps) {
   const [data, setData] = React.useState<RowElementData[]>();
-  const labelsProvider: PresentationLabelsProvider = React.useMemo(() => new PresentationLabelsProvider({ imodel }), [imodel]);
+  const labelsProvider = React.useMemo(() => new InstanceLabelsProvider({ imodel }), [imodel]);
 
   const { onPerformanceMeasured } = useTelemetryContext();
 
@@ -130,29 +130,7 @@ export function ElementList({ imodel, instanceKeys, onBack, onSelect, className 
 }
 
 /** Queries labels and orders Label-InstanceKey pairs in ascending order */
-async function getSortedLabelInstanceKeyPairs(labelsProvider: PresentationLabelsProvider, instanceKeys: InstanceKey[]): Promise<RowElementData[]> {
-  const labels = await getLabels(labelsProvider, instanceKeys);
+async function getSortedLabelInstanceKeyPairs(labelsProvider: InstanceLabelsProvider, instanceKeys: InstanceKey[]): Promise<RowElementData[]> {
+  const labels = await labelsProvider.getLabels(instanceKeys);
   return labels.map((label, index) => ({ label, instanceKey: instanceKeys[index] })).sort((a, b) => a.label.localeCompare(b.label));
-}
-
-/** Gets labels from presentation layer, chunks up requests if necessary */
-async function getLabels(labelsProvider: PresentationLabelsProvider, instanceKeys: InstanceKey[]): Promise<string[]> {
-  const chunkSize = 1000;
-  if (instanceKeys.length < chunkSize) {
-    return labelsProvider.getLabels(instanceKeys.map(normalizeInstanceKey));
-  } else {
-    const labels: string[] = [];
-    for (let i = 0; i < instanceKeys.length; i += chunkSize) {
-      const end = Math.min(i + chunkSize, instanceKeys.length);
-      const chunk = instanceKeys.slice(i, end).map(normalizeInstanceKey);
-      const currentLabels = await labelsProvider.getLabels(chunk);
-      labels.push(...currentLabels);
-    }
-    return labels;
-  }
-}
-
-function normalizeInstanceKey(instanceKey: InstanceKey) {
-  // Presentation content APIs expect `:` instead of `.` in full class names...
-  return { className: instanceKey.className.replace(".", ":"), id: instanceKey.id };
 }
