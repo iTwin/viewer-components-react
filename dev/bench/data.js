@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1786607083318,
+  "lastUpdate": 1793802480362,
   "repoUrl": "https://github.com/iTwin/viewer-components-react",
   "entries": {
     "Tree-Widget benchmark": [
@@ -12981,6 +12981,129 @@ window.BENCHMARK_DATA = {
             "value": 104,
             "unit": "ms",
             "extra": "count: 7\nmax: 104\np95: 104\nmedian: 58"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "87df32076e3cf8d29e9aa0dc49121a8e31995a14",
+          "message": "Bump happy-dom from 20.10.6 to 21.0.4 in /apps/performance-tests (#1851)\n\nBumps [happy-dom](https://github.com/capricorn86/happy-dom) from 20.10.6 to 21.0.4.\n- [Release notes](https://github.com/capricorn86/happy-dom/releases)\n- [Commits](https://github.com/capricorn86/happy-dom/compare/v20.10.6...v21.0.4)\n\n---\nupdated-dependencies:\n- dependency-name: happy-dom\n  dependency-version: 21.0.4\n  dependency-type: direct:development\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2026-11-04T14:22:13Z",
+          "tree_id": "9bf26349e7d7f188b5b6bf21ffe6476898324b02",
+          "url": "https://github.com/iTwin/viewer-components-react/commit/87df32076e3cf8d29e9aa0dc49121a8e31995a14"
+        },
+        "date": 1793802477424,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "models tree creates initial filtered view for 50k target items",
+            "value": 831,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree creates initial filtered view for 50k target items (P95 of main thread blocks)",
+            "value": 94,
+            "unit": "ms",
+            "extra": "count: 8\nmax: 94\np95: 94\nmedian: 38.5"
+          },
+          {
+            "name": "models tree validates categories visibility for imodel with 50k categories",
+            "value": 8351,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree validates categories visibility for imodel with 50k categories (P95 of main thread blocks)",
+            "value": 61,
+            "unit": "ms",
+            "extra": "count: 7\nmax: 61\np95: 61\nmedian: 29"
+          },
+          {
+            "name": "models tree changing model visibility changes visibility for 50k elements",
+            "value": 2811,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing model visibility changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 88,
+            "unit": "ms",
+            "extra": "count: 1\nmax: 88\np95: 88\nmedian: 88"
+          },
+          {
+            "name": "models tree changing category visibility changes visibility for 50k elements",
+            "value": 2792,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing category visibility changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 52,
+            "unit": "ms",
+            "extra": "count: 3\nmax: 52\np95: 52\nmedian: 27"
+          },
+          {
+            "name": "models tree changing per-model-category override changes visibility for 50k elements",
+            "value": 2798,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing per-model-category override changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 96,
+            "unit": "ms",
+            "extra": "count: 1\nmax: 96\np95: 96\nmedian: 96"
+          },
+          {
+            "name": "models tree changing element visibility changes only parent nodes visibility with 50k elements",
+            "value": 4745,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing element visibility changes only parent nodes visibility with 50k elements (P95 of main thread blocks)",
+            "value": 101,
+            "unit": "ms",
+            "extra": "count: 10\nmax: 101\np95: 101\nmedian: 36"
+          },
+          {
+            "name": "categories tree creates initial filtered view for 50k items",
+            "value": 1444,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree creates initial filtered view for 50k items (P95 of main thread blocks)",
+            "value": 518,
+            "unit": "ms",
+            "extra": "count: 6\nmax: 518\np95: 518\nmedian: 35"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k subCategories",
+            "value": 2173,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k subCategories (P95 of main thread blocks)",
+            "value": 32,
+            "unit": "ms",
+            "extra": "count: 1\nmax: 32\np95: 32\nmedian: 32"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k categories",
+            "value": 4346,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k categories (P95 of main thread blocks)",
+            "value": 87,
+            "unit": "ms",
+            "extra": "count: 6\nmax: 87\np95: 87\nmedian: 46.5"
           }
         ]
       }
