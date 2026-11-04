@@ -113,7 +113,7 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-unused-imports": "^4.4.1",
-    "happy-dom": "^20.9.0",
+    "happy-dom": "^21.0.4",
     "http-server": "^14.1.1",
     "ignore-styles": "^5.0.1",
     "postcss": "^8.5.15",
