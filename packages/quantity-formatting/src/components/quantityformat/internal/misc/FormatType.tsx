@@ -232,7 +232,7 @@ export function FormatTypeOption(props: FormatTypeOptionProps) {
       />
       {currentLookup?.failed ? (
         <div role="alert">{translate("QuantityFormat:errors.unitLookup")}</div>
-      ) : !directionUnits && (
+      ) : (!unitName || currentLookup !== undefined) && !directionUnits && (
         <div>{translate("QuantityFormat:labels.directionFormatsRequireAngles")}</div>
       )}
     </>

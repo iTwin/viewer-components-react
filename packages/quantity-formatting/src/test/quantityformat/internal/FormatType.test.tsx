@@ -89,6 +89,35 @@ describe("FormatTypeOption", () => {
     expect(logError).toHaveBeenCalledWith("QuantityFormat", "Failed to look up the format unit", expect.any(Function));
   });
 
+  it.each(["Units.ARC_DEG", "Units.PERCENT_SLOPE"])(
+    "waits for %s to resolve before showing incompatibility guidance",
+    async (unitName) => {
+      const unitsProvider = new BasicUnitsProvider();
+      const unit = await unitsProvider.findUnitByName(unitName);
+      let resolveLookup!: (value: UnitProps) => void;
+      const lookup = new Promise<UnitProps>((resolve) => { resolveLookup = resolve; });
+      vi.spyOn(unitsProvider, "findUnitByName").mockImplementationOnce(async () => lookup);
+      render(<FormatTypeOption formatProps={decimalFormat(unitName)} unitsProvider={unitsProvider} onChange={vi.fn()} />);
+
+      expect(screen.queryByText("labels.directionFormatsRequireAngles")).toBeNull();
+      fireEvent.click(screen.getByRole("combobox"));
+      expect(screen.getByRole("option", { name: "bearing" }).getAttribute("aria-disabled")).toBe("true");
+      expect(screen.getByRole("option", { name: "azimuth" }).getAttribute("aria-disabled")).toBe("true");
+
+      await act(async () => { resolveLookup(unit); await lookup; });
+
+      if (unitName === "Units.ARC_DEG") {
+        expect(screen.queryByText("labels.directionFormatsRequireAngles")).toBeNull();
+        expect(screen.getByRole("option", { name: "bearing" }).getAttribute("aria-disabled")).not.toBe("true");
+        expect(screen.getByRole("option", { name: "azimuth" }).getAttribute("aria-disabled")).not.toBe("true");
+      } else {
+        expect(screen.getByText("labels.directionFormatsRequireAngles")).toBeTruthy();
+        expect(screen.getByRole("option", { name: "bearing" }).getAttribute("aria-disabled")).toBe("true");
+        expect(screen.getByRole("option", { name: "azimuth" }).getAttribute("aria-disabled")).toBe("true");
+      }
+    },
+  );
+
   it("does not enable angular formats from a stale unit lookup", async () => {
     const unitsProvider = new BasicUnitsProvider();
     const angle = await unitsProvider.findUnitByName("Units.ARC_DEG");
