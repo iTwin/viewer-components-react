@@ -104,7 +104,7 @@ describe("InstanceLabelsProvider", () => {
     await expectLabels([keys.model, keys.partition], ["user label", "user label"]);
   });
 
-  it("returns labels in input order for keys of different classes, with either class name separator", async () => {
+  it("loads labels of keys of different classes with a single query, in input order and with either class name separator", async () => {
     const keys = await buildIModel((txn) => {
       const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
       const category = insertSpatialCategory({ txn, codeValue: "category" });
@@ -115,9 +115,11 @@ describe("InstanceLabelsProvider", () => {
         subject: insertSubject({ txn, codeValue: "subject", fullClassNameSeparator: ":" }),
       };
     });
+    const createQueryReader = vi.spyOn(imodel, "createQueryReader");
 
     const element = `element ${idSuffix(keys.element.id)}`;
     await expectLabels([keys.element, keys.subject, keys.model, keys.element, keys.category], [element, "subject", "model", element, "category"]);
+    expect(createQueryReader).toHaveBeenCalledOnce();
   });
 
   it("returns empty labels for instances that don't exist", async () => {

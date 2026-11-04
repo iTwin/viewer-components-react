@@ -39,6 +39,10 @@ export class InstanceLabelsProvider {
 
   /** Returns labels in the same order as given `instanceKeys`. Instances that don't exist in the iModel get an empty label. */
   public async getLabels(instanceKeys: InstanceKey[]): Promise<string[]> {
+    if (instanceKeys.length === 0) {
+      return [];
+    }
+
     const normalizedKeys = instanceKeys.map(({ className, id }) => ({ fullClassName: normalizeFullClassName(className), id }));
 
     const idsByClass = new Map<string, Id64String[]>();
@@ -51,36 +55,47 @@ export class InstanceLabelsProvider {
       }
     }
 
-    const labelsByClass = new Map<string, Map<Id64String, string>>();
-    await Promise.all(
-      [...idsByClass.entries()].map(async ([fullClassName, ids]) => {
-        labelsByClass.set(fullClassName, await this.#queryLabels(fullClassName, ids));
-      }),
-    );
-
+    const labelsByClass = await this.#queryLabels(idsByClass);
     return normalizedKeys.map(({ fullClassName, id }) => labelsByClass.get(fullClassName)?.get(id) ?? "");
   }
 
-  async #queryLabels(fullClassName: string, ids: Id64String[]): Promise<Map<Id64String, string>> {
-    const { schemaName, className } = parseFullClassName(fullClassName);
-    const labelSelectClause = await this.#labelSelectClauseFactory.createSelectClause({ classAlias: "this", className: fullClassName });
-    const reader = this.#queryExecutor.createQueryReader(
-      {
-        ecsql: `
-          SELECT this.ECInstanceId AS id, ${labelSelectClause} AS label
+  /** Runs a single query that selects labels of all classes at once, by combining per-class selects with `UNION ALL`. */
+  async #queryLabels(idsByClass: Map<string, Id64String[]>): Promise<Map<string, Map<Id64String, string>>> {
+    const selects = await Promise.all(
+      [...idsByClass.keys()].map(async (fullClassName) => {
+        const { schemaName, className } = parseFullClassName(fullClassName);
+        const labelSelectClause = await this.#labelSelectClauseFactory.createSelectClause({ classAlias: "this", className: fullClassName });
+        return `
+          SELECT this.ECInstanceId AS id, '${fullClassName}' AS className, ${labelSelectClause} AS label
           FROM [${schemaName}].[${className}] AS this
           JOIN IdSet(?) AS ids ON ids.id = this.ECInstanceId
-        `,
-        bindings: [{ type: "idset", value: ids }],
+        `;
+      }),
+    );
+    const reader = this.#queryExecutor.createQueryReader(
+      {
+        ecsql: selects.join(" UNION ALL "),
+        bindings: [...idsByClass.values()].map((ids) => ({ type: "idset", value: ids })),
       },
       { rowFormat: "ECSqlPropertyNames" },
     );
+
     // start formatting each label as soon as its row arrives, without blocking the reader
-    const entries = new Array<Promise<[Id64String, string]>>();
+    const entries = new Array<Promise<{ className: string; id: Id64String; label: string }>>();
     for await (const row of reader) {
-      entries.push(this.#formatLabel(row.label).then((label) => [row.id, label]));
+      entries.push(this.#formatLabel(row.label).then((label) => ({ className: row.className, id: row.id, label })));
     }
-    return new Map(await Promise.all(entries));
+
+    const labelsByClass = new Map<string, Map<Id64String, string>>();
+    for (const { className, id, label } of await Promise.all(entries)) {
+      let labels = labelsByClass.get(className);
+      if (!labels) {
+        labels = new Map();
+        labelsByClass.set(className, labels);
+      }
+      labels.set(id, label);
+    }
+    return labelsByClass;
   }
 
   async #formatLabel(rawLabel: string | undefined): Promise<string> {
