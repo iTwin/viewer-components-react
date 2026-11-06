@@ -26,7 +26,38 @@
 - **Trees display an error message and Retry action when loading fails.** (PRs: [#1217](https://github.com/iTwin/viewer-components-react/pull/1217))
 - **Visibility buttons expose their current state in the DOM.** The button element includes a `data-visibility-state` attribute for styling, testing, and inspection. (PRs: [#1788](https://github.com/iTwin/viewer-components-react/pull/1788))
 
-#### Performance improvements
+### Performance improvements
+
+v4 loads the Models tree significantly faster and keeps the UI responsive, with the largest gains in large iModels.
+
+**What was improved**
+
+- **Optimized queries.** The structure of queries that load hierarchies and determine visibility was improved, making them run more efficiently.
+- **Less work on hot paths.** The most frequently executed code paths were identified and streamlined, so less work is done for each node and visibility change.
+- **More caching.** More data is cached and reused, avoiding repeated queries and calculations.
+- **Shorter UI blocking.** Long-running tasks were minimized so they no longer block the UI for long periods of time.
+
+**Faster loading**
+
+Load times were measured for the Models tree on more than 40 real-world iModels of various sizes, opened both locally and through a remote backend. Each iModel was loaded three times in both v3 and v4, and its fastest time was kept. _v3_ and _v4_ show the total of those times across all iModels, and negative values mean v4 is faster. _Worst slowdown_ and _Best improvement_ show the largest change for a single iModel.
+
+_Initial view_: loading the nodes displayed when the tree first opens.
+
+| Backend |     v3 |     v4 | Difference | Percentage | Worst slowdown | Best improvement |
+| :------ | -----: | -----: | ---------: | ---------: | -------------: | ---------------: |
+| Local   |  9.6 s |  4.3 s |     -5.3 s |    🟢 -55% |       +0.146 s |         -4.752 s |
+| Remote  | 67.1 s | 64.6 s |     -2.5 s |     🟢 -4% |       +0.178 s |         -4.536 s |
+
+_First branch_: expanding the first node at every level, from the root down to elements. _Faster iModels_ and _Slower iModels_ show how many iModels loaded faster or slower in v4.
+
+| Backend |      v3 |      v4 | Difference | Percentage | Faster iModels | Slower iModels | Worst slowdown | Best improvement |
+| :------ | ------: | ------: | ---------: | ---------: | -------------: | -------------: | -------------: | ---------------: |
+| Local   |  73.1 s |  16.5 s |    -56.6 s |    🟢 -77% |        45 / 46 |         1 / 46 |       +0.003 s |         -8.102 s |
+| Remote  | 200.8 s | 107.6 s |    -93.2 s |    🟢 -46% |        42 / 42 |         0 / 42 |           None |        -19.858 s |
+
+**More responsive UI**
+
+In v3, users could encounter the UI being blocked for 400 ms or more at a time while visibility was updated in large hierarchies, making the tree feel sluggish and unresponsive. In v4, the longest measured block is around 110 ms, and **the UI should never be blocked for long periods of time**.
 
 The following PRs improve tree loading, visibility, and search performance:
 
@@ -62,5 +93,6 @@ The following PRs improve tree loading, visibility, and search performance:
 [#1731](https://github.com/iTwin/viewer-components-react/pull/1731),
 [#1794](https://github.com/iTwin/viewer-components-react/pull/1794),
 [#1799](https://github.com/iTwin/viewer-components-react/pull/1799),
-[#1801](https://github.com/iTwin/viewer-components-react/pull/1801), and
-[#1804](https://github.com/iTwin/viewer-components-react/pull/1804).
+[#1801](https://github.com/iTwin/viewer-components-react/pull/1801),
+[#1804](https://github.com/iTwin/viewer-components-react/pull/1804), and
+[#1847](https://github.com/iTwin/viewer-components-react/pull/1847).
