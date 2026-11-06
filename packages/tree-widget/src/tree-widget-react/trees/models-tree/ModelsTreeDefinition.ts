@@ -609,15 +609,12 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 extendedData: { modelIds: { selector: createIdsSelector(modelIds) } },
               })}
             FROM ${categoryInstanceFilterClauses.from} this
-            ${categoriesToShow ? "JOIN IdSet(?) categoryIdSet ON categoryIdSet.id = this.ECInstanceId" : ""}
-            ${categoryInstanceFilterClauses.joins}
-            ${createWhereClause({
-              conditions: [
-                categoryInstanceFilterClauses.where,
-                !categoriesToShow &&
-                  `
-                  this.ECInstanceId IN (
-                    SELECT ce.Category.Id
+            ${
+              categoriesToShow
+                ? "JOIN IdSet(?) categoryIdSet ON categoryIdSet.id = this.ECInstanceId"
+                : `
+                  JOIN (
+                    SELECT DISTINCT ce.Category.Id categoryId
                     FROM IdSet(?) modelIdSet
                     CROSS JOIN ${CLASS_NAME_Element} e ON e.Model.Id = modelIdSet.id
                     CROSS JOIN ${this.#hierarchyConfig.elements.baseClass} ce ON ce.ECInstanceId = e.ECInstanceId
@@ -627,8 +624,13 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                         createExcludedClassesClause({ alias: "e", excludedClassNames: this.#hierarchyConfig.elements.excludedClasses }),
                       ],
                     })}
-                  )
-                `,
+                  ) c ON c.categoryId = this.ECInstanceId
+                `
+            }
+            ${categoryInstanceFilterClauses.joins}
+            ${createWhereClause({
+              conditions: [
+                categoryInstanceFilterClauses.where,
                 !categoriesToShow && modeledElementCategory !== undefined && `this.ECInstanceId <> ${modeledElementCategory}`,
               ],
             })}
