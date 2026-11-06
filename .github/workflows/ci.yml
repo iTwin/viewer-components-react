@@ -2,7 +2,7 @@ name: CI
 
 on:
   pull_request:
-    branches: ["master", "tree-widget/next"]
+    branches: ["master"]
     types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
