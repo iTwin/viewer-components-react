@@ -1,5 +1,11 @@
 # Change Log - @itwin/tree-widget-react
 
+## 4.0.0-alpha.36
+
+### Patch Changes
+
+- [#1847](https://github.com/iTwin/viewer-components-react/pull/1847): Improve query performance
+
 ## 4.0.0-alpha.35
 
 ### Major Changes
