@@ -4,7 +4,7 @@
 
 ### Major Changes
 
-- [#1795](https://github.com/iTwin/viewer-components-react/pull/1795): Tree Widget v4 is here. This release introduces a new design system, powerful ways to explore and customize iModel content, more reliable visibility controls, and broad performance and stability improvements. Here is why you should upgrade.
+-  Tree Widget v4 is here. This release introduces a new design system, powerful ways to explore and customize iModel content, more reliable visibility controls, and broad performance and stability improvements. Here is why you should upgrade.
 
   ## Why upgrade?
 
@@ -138,7 +138,7 @@
 
 ### Minor Changes
 
-- [#1795](https://github.com/iTwin/viewer-components-react/pull/1795): #### Search and loading
+  #### Search and loading
 
   - **Built-in widget-header search.** Search can be enabled per tree with `TreeDefinition.isSearchable`, and the debounced value is delivered through `searchText`. The UI includes no-results, too-many-results, and instance-focus warning states. (PRs: [#1186](https://github.com/iTwin/viewer-components-react/pull/1186), [#1235](https://github.com/iTwin/viewer-components-react/pull/1235), [#1240](https://github.com/iTwin/viewer-components-react/pull/1240), [#1289](https://github.com/iTwin/viewer-components-react/pull/1289))
   - **Loading placeholders for built-in and custom trees.** Trees show skeletons during initial loading and search, the widget header has a loading state, and the exported `SkeletonTree` lets custom trees use the same placeholder. (PRs: [#1252](https://github.com/iTwin/viewer-components-react/pull/1252), [#1299](https://github.com/iTwin/viewer-components-react/pull/1299), [#1504](https://github.com/iTwin/viewer-components-react/pull/1504))
@@ -177,7 +177,7 @@
 
 ### Patch Changes
 
-- [#1795](https://github.com/iTwin/viewer-components-react/pull/1795): #### Search
+  #### Search
 
   - **Models and Categories tree search now finds categories nested beneath sub-models.** (PRs: [#1619](https://github.com/iTwin/viewer-components-react/pull/1619))
 
@@ -236,41 +236,7 @@
 
   The following PRs improve tree loading, visibility, and search performance:
 
-  [#1280](https://github.com/iTwin/viewer-components-react/pull/1280),
-  [#1492](https://github.com/iTwin/viewer-components-react/pull/1492),
-  [#1527](https://github.com/iTwin/viewer-components-react/pull/1527),
-  [#1532](https://github.com/iTwin/viewer-components-react/pull/1532),
-  [#1537](https://github.com/iTwin/viewer-components-react/pull/1537),
-  [#1571](https://github.com/iTwin/viewer-components-react/pull/1571),
-  [#1572](https://github.com/iTwin/viewer-components-react/pull/1572),
-  [#1578](https://github.com/iTwin/viewer-components-react/pull/1578),
-  [#1584](https://github.com/iTwin/viewer-components-react/pull/1584),
-  [#1586](https://github.com/iTwin/viewer-components-react/pull/1586),
-  [#1588](https://github.com/iTwin/viewer-components-react/pull/1588),
-  [#1593](https://github.com/iTwin/viewer-components-react/pull/1593),
-  [#1597](https://github.com/iTwin/viewer-components-react/pull/1597),
-  [#1599](https://github.com/iTwin/viewer-components-react/pull/1599),
-  [#1600](https://github.com/iTwin/viewer-components-react/pull/1600),
-  [#1610](https://github.com/iTwin/viewer-components-react/pull/1610),
-  [#1620](https://github.com/iTwin/viewer-components-react/pull/1620),
-  [#1629](https://github.com/iTwin/viewer-components-react/pull/1629),
-  [#1646](https://github.com/iTwin/viewer-components-react/pull/1646),
-  [#1652](https://github.com/iTwin/viewer-components-react/pull/1652),
-  [#1661](https://github.com/iTwin/viewer-components-react/pull/1661),
-  [#1662](https://github.com/iTwin/viewer-components-react/pull/1662),
-  [#1667](https://github.com/iTwin/viewer-components-react/pull/1667),
-  [#1673](https://github.com/iTwin/viewer-components-react/pull/1673),
-  [#1680](https://github.com/iTwin/viewer-components-react/pull/1680),
-  [#1681](https://github.com/iTwin/viewer-components-react/pull/1681),
-  [#1682](https://github.com/iTwin/viewer-components-react/pull/1682),
-  [#1726](https://github.com/iTwin/viewer-components-react/pull/1726),
-  [#1730](https://github.com/iTwin/viewer-components-react/pull/1730),
-  [#1731](https://github.com/iTwin/viewer-components-react/pull/1731),
-  [#1794](https://github.com/iTwin/viewer-components-react/pull/1794),
-  [#1799](https://github.com/iTwin/viewer-components-react/pull/1799),
-  [#1801](https://github.com/iTwin/viewer-components-react/pull/1801),
-  [#1804](https://github.com/iTwin/viewer-components-react/pull/1804), and
-  [#1847](https://github.com/iTwin/viewer-components-react/pull/1847).
+  [#1280](https://github.com/iTwin/viewer-components-react/pull/1280), [#1492](https://github.com/iTwin/viewer-components-react/pull/1492), [#1527](https://github.com/iTwin/viewer-components-react/pull/1527), [#1532](https://github.com/iTwin/viewer-components-react/pull/1532), [#1537](https://github.com/iTwin/viewer-components-react/pull/1537), [#1571](https://github.com/iTwin/viewer-components-react/pull/1571), [#1572](https://github.com/iTwin/viewer-components-react/pull/1572), [#1578](https://github.com/iTwin/viewer-components-react/pull/1578), [#1584](https://github.com/iTwin/viewer-components-react/pull/1584), [#1586](https://github.com/iTwin/viewer-components-react/pull/1586), [#1588](https://github.com/iTwin/viewer-components-react/pull/1588), [#1593](https://github.com/iTwin/viewer-components-react/pull/1593), [#1597](https://github.com/iTwin/viewer-components-react/pull/1597), [#1599](https://github.com/iTwin/viewer-components-react/pull/1599), [#1600](https://github.com/iTwin/viewer-components-react/pull/1600), [#1610](https://github.com/iTwin/viewer-components-react/pull/1610), [#1620](https://github.com/iTwin/viewer-components-react/pull/1620), [#1629](https://github.com/iTwin/viewer-components-react/pull/1629), [#1646](https://github.com/iTwin/viewer-components-react/pull/1646), [#1652](https://github.com/iTwin/viewer-components-react/pull/1652), [#1661](https://github.com/iTwin/viewer-components-react/pull/1661), [#1662](https://github.com/iTwin/viewer-components-react/pull/1662), [#1667](https://github.com/iTwin/viewer-components-react/pull/1667), [#1673](https://github.com/iTwin/viewer-components-react/pull/1673), [#1680](https://github.com/iTwin/viewer-components-react/pull/1680), [#1681](https://github.com/iTwin/viewer-components-react/pull/1681), [#1682](https://github.com/iTwin/viewer-components-react/pull/1682), [#1726](https://github.com/iTwin/viewer-components-react/pull/1726), [#1730](https://github.com/iTwin/viewer-components-react/pull/1730), [#1731](https://github.com/iTwin/viewer-components-react/pull/1731), [#1794](https://github.com/iTwin/viewer-components-react/pull/1794), [#1799](https://github.com/iTwin/viewer-components-react/pull/1799), [#1801](https://github.com/iTwin/viewer-components-react/pull/1801), [#1804](https://github.com/iTwin/viewer-components-react/pull/1804) and [#1847](https://github.com/iTwin/viewer-components-react/pull/1847).
 
 ## 4.0.0-alpha.35
 
