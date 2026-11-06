@@ -10,9 +10,9 @@ Tree Widget v4 is here. This release introduces a new design system, powerful wa
 
 Tree Widget has been rebuilt with [MUI](https://mui.com/material-ui/getting-started/) and [StrataKit](https://stratakit.bentley.com/), bringing it in line with the latest iTwin application design system. The new foundation provides a cleaner visual language, accessible labels, consistent keyboard and focus behavior, and semantic controls supplied by MUI and StrataKit.
 
-| v3 - iTwinUI                                                                                                  | v4 - MUI and StrataKit                                                                                       |
-| ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| <img src="../packages/tree-widget/media/tree-widget-3.0.png" alt="Tree Widget v3" width="450" height="295" /> | <img src="../packages/tree-widget/media/widget-example.png" alt="Tree Widget v4" width="450" height="295" /> |
+| v3 - iTwinUI                                                                            | v4 - MUI and StrataKit                                                                 |
+| --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| <img src="./media/tree-widget-3.0.png" alt="Tree Widget v3" width="450" height="295" /> | <img src="./media/widget-example.png" alt="Tree Widget v4" width="450" height="295" /> |
 
 ### 2. New features
 
@@ -30,9 +30,9 @@ Tree Widget v4 introduces several new features for both end users and applicatio
     </thead>
     <tbody>
       <tr>
-        <td valign="top"><img src="../packages/tree-widget/media/inline-actions.png" alt="Inline node actions" width="300" /></td>
-        <td valign="top"><img src="../packages/tree-widget/media/menu-actions.png" alt="Node actions in an overflow menu" width="300" /></td>
-        <td valign="top"><img src="../packages/tree-widget/media/context-menu-actions.png" alt="Node actions in a context menu" width="300" /></td>
+        <td valign="top"><img src="./media/inline-actions.png" alt="Inline node actions" width="300" /></td>
+        <td valign="top"><img src="./media/menu-actions.png" alt="Node actions in an overflow menu" width="300" /></td>
+        <td valign="top"><img src="./media/context-menu-actions.png" alt="Node actions in a context menu" width="300" /></td>
       </tr>
     </tbody>
   </table>
@@ -49,16 +49,16 @@ Tree Widget v4 introduces several new features for both end users and applicatio
     </thead>
     <tbody>
       <tr>
-        <td valign="top"><img src="../packages/tree-widget/media/loading-state.png" alt="Skeleton placeholders displayed while a tree loads" width="300" /></td>
-        <td valign="top"><img src="../packages/tree-widget/media/too-many-nodes.png" alt="Hierarchy size warning with actions to increase the limit or add a filter" width="300" /></td>
-        <td valign="top"><img src="../packages/tree-widget/media/failed-to-load-tree.png" alt="Failed tree load with a Retry action" width="300" /></td>
+        <td valign="top"><img src="./media/loading-state.png" alt="Skeleton placeholders displayed while a tree loads" width="300" /></td>
+        <td valign="top"><img src="./media/too-many-nodes.png" alt="Hierarchy size warning with actions to increase the limit or add a filter" width="300" /></td>
+        <td valign="top"><img src="./media/failed-to-load-tree.png" alt="Failed tree load with a Retry action" width="300" /></td>
       </tr>
     </tbody>
   </table>
 
 - **A new Classifications tree** for applications that work with classification systems, including selection, visibility controls, node actions, label editing, and search.
 
-  <img src="../packages/tree-widget/media/classifications-tree.png" alt="Classifications tree" width="300" />
+  <img src="./media/classifications-tree.png" alt="Classifications tree" width="300" />
 
 - **Easier integration with different viewports.** Tree Widget is now less tightly coupled to the iTwin.js viewport, making it much easier to integrate with different viewport implementations (e.g., Unity).
 - **More configurable Models and Categories hierarchies.** New options provide greater control over the contents of each tree. For example, the Categories tree can now include element nodes.
@@ -111,7 +111,7 @@ Migrating to v4 should be straightforward for most applications. In the vast maj
 #### Tree renderer and action APIs
 
 - **Node customization moved to `getTreeItemProps`.** The single callback supersedes the v3 `getLabel`, `getIcon`, and `getSublabel` renderer props through its `label`, `decorations`, and `description` results. Its `onClick`, `onKeyDown`, and `onDoubleClick` handlers supersede the corresponding v3 node handlers. Callback nodes now use `TreeNode` from `@itwin/presentation-hierarchies-react` v2, and click handlers no longer receive the v3 `isSelected` argument. The `filterButtonsVisibility`, `size`, and `enableVirtualization` renderer props were removed without replacement. ([migration](https://github.com/iTwin/viewer-components-react/blob/tree-widget/next/packages/tree-widget/MigrationGuide.md#migrate-renderer-props), PRs: [#1540](https://github.com/iTwin/viewer-components-react/pull/1540), [#1557](https://github.com/iTwin/viewer-components-react/pull/1557))
-- **Tree actions were redesigned and expanded.** The v3 `getActions` callback was replaced by `getInlineActions`, `getMenuActions`, and `getContextMenuActions`. These callbacks receive `{ targetNode, selectedNodes }`, provide the current renderer props as their second argument, and return React elements: up to two `TreeActionBase` elements inline, and `TreeActionBase` or divider elements in the menus. ([migration](https://github.com/iTwin/viewer-components-react/blob/tree-widget/next/packages/tree-widget/MigrationGuide.md#migrate-node-actions), PRs: [#1394](https://github.com/iTwin/viewer-components-react/pull/1394), [#1485](https://github.com/iTwin/viewer-components-react/pull/1485), [#1522](https://github.com/iTwin/viewer-components-react/pull/1522), [#1534](https://github.com/iTwin/viewer-components-react/pull/1534))
+- **Tree actions were redesigned and expanded.** The v3 `getActions` callback was replaced by `getInlineActions`, `getMenuActions`, and `getContextMenuActions`. These callbacks receive `{ targetNode, selectedNodes }` and return React elements: up to two `TreeActionBase` elements inline, and `TreeActionBase` or divider elements in the menus. Standard tree components additionally supply the current renderer props as a second argument; callbacks passed directly to `TreeRenderer` or `VisibilityTreeRenderer` receive only the action context. ([migration](https://github.com/iTwin/viewer-components-react/blob/tree-widget/next/packages/tree-widget/MigrationGuide.md#migrate-node-actions), PRs: [#1394](https://github.com/iTwin/viewer-components-react/pull/1394), [#1485](https://github.com/iTwin/viewer-components-react/pull/1485), [#1522](https://github.com/iTwin/viewer-components-react/pull/1522), [#1534](https://github.com/iTwin/viewer-components-react/pull/1534))
 - **The hierarchy level filter callback was renamed.** The `onFilterClick` renderer prop is now `filterHierarchyLevel`. ([migration](https://github.com/iTwin/viewer-components-react/blob/tree-widget/next/packages/tree-widget/MigrationGuide.md#onfilterclick-to-filterhierarchylevel), PRs: [#1557](https://github.com/iTwin/viewer-components-react/pull/1557))
 - **Visibility renderer callbacks were renamed.** `getCheckboxState` and `onCheckboxClicked` became `getVisibilityButtonState` and `onVisibilityButtonClick`, the `"on"` and `"off"` states became `"visible"` and `"hidden"`, and the click callback now receives the node's current state instead of the state to apply. ([migration](https://github.com/iTwin/viewer-components-react/blob/tree-widget/next/packages/tree-widget/MigrationGuide.md#migrate-custom-visibility-renderers), PRs: [#1320](https://github.com/iTwin/viewer-components-react/pull/1320))
 
