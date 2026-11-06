@@ -4,6 +4,8 @@ Copyright © Bentley Systems, Incorporated. All rights reserved.
 
 The `@itwin/tree-widget-react` package provides React components to build a widget with tree components' selector, along with all the building blocks that can be used individually.
 
+**Upgrading from `3.x`?** `4.0` contains breaking changes. Read the [`3.x` to `4.0` migration guide](./docs/MigrationGuide.md) - or hand it to your AI assistant - before updating to understand what needs to change in your code.
+
 ![Widget example](./media/widget-example.png)
 
 ## Table of Contents
