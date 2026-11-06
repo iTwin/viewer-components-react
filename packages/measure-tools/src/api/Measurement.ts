@@ -9,7 +9,7 @@ import type { GeometryStreamProps } from "@itwin/core-common";
 import type { DecorateContext, HitDetail } from "@itwin/core-frontend";
 import { BeButton, BeButtonEvent, IModelApp } from "@itwin/core-frontend";
 import type { TransformProps, XYProps, XYZProps , Point3d} from "@itwin/core-geometry";
-import type { Transform } from "@itwin/core-geometry";
+import { Transform } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
 import type { FormatterSpec } from "@itwin/core-quantity";
 import { MeasurementButtonHandledEvent, WellKnownMeasurementStyle, WellKnownViewType } from "./MeasurementEnums.js";
@@ -63,6 +63,9 @@ export namespace DrawingMetadata {
     if (origin !== undefined) {
       return {
         origin, extents, drawingId: obj.drawingId,
+        drawingType: obj.drawingType,
+        worldScale: obj.worldScale,
+        sheetToProfileTransform: obj.sheetToProfileTransform?.toJSON(),
         sheetToWorldTransformProps: obj.sheetToWorldTransformProps ? { ...obj.sheetToWorldTransformProps } : undefined
       };
     }
@@ -79,7 +82,10 @@ export namespace DrawingMetadata {
     return {
       origin: Point2d.fromJSON(json.origin),
       drawingId: json.drawingId,
+      drawingType: json.drawingType,
       extents: Point2d.fromJSON(json.extents),
+      worldScale: json.worldScale,
+      sheetToProfileTransform: json.sheetToProfileTransform ? Transform.fromJSON(json.sheetToProfileTransform) : undefined,
       sheetToWorldTransformProps,
       sheetToWorldTransformv2
     };
@@ -275,7 +281,7 @@ export interface MeasurementEqualityOptions {
   angleTolerance?: number;
 }
 
-export interface DrawingMetadataProps extends Omit<DrawingMetadata, "origin" | "extents" | "sheetToWorldTransform"> {
+export interface DrawingMetadataProps extends Omit<DrawingMetadata, "origin" | "extents" | "sheetToWorldTransform" | "sheetToProfileTransform"> {
   origin: XYProps;
   extents?: XYProps;
   /** @deprecated Will be removed, use sheetToWorldTransformProps.transformParams instead */
@@ -284,12 +290,18 @@ export interface DrawingMetadataProps extends Omit<DrawingMetadata, "origin" | "
     sheetTov8Drawing: TransformProps;
     v8DrawingToDesign: TransformProps;
   };
+  sheetToProfileTransform?: TransformProps;
   sheetToWorldTransformProps?: SheetMeasurementHelper.SheetToWorldTransformProps;
 }
 
 export interface DrawingMetadata {
   /** Id of the drawing */
   drawingId?: string;
+
+  /** Type of the drawing the metadata was resolved from. Kept alongside the transforms so callers cannot pair a
+   * drawing type with another drawing's transform.
+   */
+  drawingType?: SheetMeasurementHelper.DrawingType;
 
   /** Origin of the drawing in sheet coordinates */
   origin: Point2d;
@@ -311,9 +323,10 @@ export interface DrawingMetadata {
   */
   sheetToWorldTransform?: SheetMeasurementsHelper.SheetTransformParams;
 
-  /** Represents the transform from sheet points to distance along alignment (X) and vertical position related to alignment (Y)
-   * @deprecated
-  */
+  /** Represents the transform from sheet points to distance along alignment (X) and vertical position related to
+   * alignment (Y). Only profile/elevation drawings define one; it is undefined when the drawing has none, since these
+   * drawings are anisotropic and the isotropic sheet scale cannot stand in for it.
+   */
   sheetToProfileTransform?: Transform;
 }
 
@@ -751,7 +764,10 @@ export abstract class Measurement {
       this._drawingMetadata = {
         origin: other.drawingMetadata.origin.clone(),
         drawingId: other.drawingMetadata.drawingId,
+        drawingType: other.drawingMetadata.drawingType,
         extents: other.drawingMetadata.extents?.clone(),
+        worldScale: other.drawingMetadata.worldScale,
+        sheetToProfileTransform: other.drawingMetadata.sheetToProfileTransform?.clone(),
         sheetToWorldTransformv2: SheetMeasurementHelper.getTransform(other.drawingMetadata.origin.clone(), other.drawingMetadata.sheetToWorldTransformProps),
         sheetToWorldTransformProps: other.drawingMetadata.sheetToWorldTransformProps
     };

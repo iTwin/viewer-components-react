@@ -127,7 +127,7 @@ MeasureDistanceToolModel
     if (this._enableSheetMeasurements) {
       if (this.toolModel.drawingMetadata?.drawingId === undefined && ev.viewport.view.id !== undefined) {
         this.toolModel.sheetViewId = ev.viewport.view.id;
-        this.toolModel.drawingMetadata = await SheetMeasurementHelper.getDrawingMetadata(this.iModel, ev.viewport.view.id, ev.point);
+        this.toolModel.drawingMetadata = await SheetMeasurementHelper.getDrawingMetadata(this.iModel, ev.viewport.view.id, ev.point, { viewport: ev.viewport, inputSource: ev.inputSource });
       }
     }
   }

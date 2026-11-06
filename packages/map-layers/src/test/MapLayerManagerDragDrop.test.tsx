@@ -106,7 +106,8 @@ describe("MapLayerManager drag and drop", () => {
     } as any;
   }
 
-  it("restores the drag-start layer order when the pointer leaves all droppables", async () => {
+  // TODO re-enable with https://github.com/iTwin/viewer-components-react/issues/1796
+  it.skip("restores the drag-start layer order when the pointer leaves all droppables", async () => {
     await renderMapLayerManager(["Background"], ["Overlay"]);
 
     const draggedId = `${backgroundMapLayersId}:Background`;

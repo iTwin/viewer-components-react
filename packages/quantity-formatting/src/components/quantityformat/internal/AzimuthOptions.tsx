@@ -16,6 +16,8 @@ import {
 } from "@itwin/itwinui-react";
 import type { SelectOption } from "@itwin/itwinui-react";
 import { getUnitName } from "./misc/UnitDescr.js";
+import { BentleyError, Logger } from "@itwin/core-bentley";
+import { QuantityFormattingLoggerCategory } from "../../../QuantityFormatting.js";
 
 /**
  * Non-exported component for selecting azimuth base unit.
@@ -54,7 +56,8 @@ function AzimuthBaseUnitSelector(props: {
         }
       } catch (error) {
         // Fallback to current unit if there's an error
-        console.warn("Failed to load unit family:", error);
+        Logger.logWarning(QuantityFormattingLoggerCategory, "Failed to load unit family", () => ({ unit: currentUnit, error: BentleyError.getErrorMessage(error) }));
+        if (disposed) return;
         setUnitOptions([{ value: currentUnit, label: currentUnit }]);
       }
     }

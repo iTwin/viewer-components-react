@@ -293,6 +293,23 @@ describe("FormatSetSelector", () => {
       expect(screen.getByText("Format Set 1")).toBeTruthy();
       expect(screen.getByText("Format Set 2")).toBeTruthy();
     });
+
+    it("should keep index-based keys stable while search filters the list", async () => {
+      const formatSetsWithoutNames = [
+        { label: "Alpha" } as FormatSet,
+        { label: "Beta" } as FormatSet,
+      ];
+      const { rerender } = render(<FormatSetSelector formatSets={formatSetsWithoutNames} onFormatSetChange={mockOnFormatSetChange} />);
+
+      await user.type(screen.getByPlaceholderText("Search format sets..."), "Beta");
+      await user.click(screen.getByText("Beta"));
+      expect(mockOnFormatSetChange).toHaveBeenCalledWith(formatSetsWithoutNames[1], "formatSet-1");
+
+      rerender(<FormatSetSelector formatSets={formatSetsWithoutNames} selectedFormatSetKey="formatSet-1" onFormatSetChange={mockOnFormatSetChange} />);
+      // Search is still active, so only the filtered item is rendered; it must be highlighted.
+      const selectedItem = screen.getByText("Beta").closest(".quantityFormat--formatSetSelector-listItem");
+      expect(selectedItem?.getAttribute("data-iui-active")).toBe("true");
+    });
   });
 
   describe("Empty States", () => {

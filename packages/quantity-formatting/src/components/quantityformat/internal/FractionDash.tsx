@@ -6,7 +6,8 @@
 
 import * as React from "react";
 import type { FormatProps } from "@itwin/core-quantity";
-import { Format, FormatTraits, getTraitString } from "@itwin/core-quantity";
+import { FormatTraits } from "@itwin/core-quantity";
+import { isFormatTraitSet, setFormatTrait } from "./FormatPropsUtils.js";
 import { Checkbox, Label } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../useTranslation.js";
 
@@ -27,44 +28,9 @@ export function FractionDash(props: FractionDashProps) {
 
   const fractionDashId = React.useId();
 
-  const setFormatTrait = React.useCallback(
-    (trait: FormatTraits, setActive: boolean) => {
-      const traitStr = getTraitString(trait);
-      let formatTraits: string[] = [traitStr];
-      if (setActive) {
-        // setting trait
-        if (formatProps.formatTraits) {
-          const traits = Array.isArray(formatProps.formatTraits)
-            ? formatProps.formatTraits
-            : formatProps.formatTraits.split(/,|;|\|/);
-          formatTraits = [...traits, traitStr];
-        }
-      } else {
-        // clearing trait
-        if (formatProps.formatTraits) {
-          const traits = Array.isArray(formatProps.formatTraits)
-            ? formatProps.formatTraits
-            : formatProps.formatTraits.split(/,|;|\|/);
-          formatTraits = traits.filter((traitEntry) => traitEntry !== traitStr);
-        }
-      }
-      onChange({ ...formatProps, formatTraits });
-    },
+  const handleTraitChange = React.useCallback(
+    (trait: FormatTraits, setActive: boolean) => onChange(setFormatTrait(formatProps, trait, setActive)),
     [formatProps, onChange]
-  );
-
-  const handleUseFractionDashChange = React.useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormatTrait(FormatTraits.FractionDash, e.target.checked);
-    },
-    [setFormatTrait]
-  );
-
-  const isFormatTraitSet = React.useCallback(
-    (trait: FormatTraits) => {
-      return Format.isFormatTraitSetInProps(formatProps, trait);
-    },
-    [formatProps]
   );
 
   return (
@@ -74,8 +40,8 @@ export function FractionDash(props: FractionDashProps) {
       </Label>
       <Checkbox
         id={fractionDashId}
-        checked={isFormatTraitSet(FormatTraits.FractionDash)}
-        onChange={(e) => setFormatTrait(FormatTraits.FractionDash, e.target.checked)}
+        checked={isFormatTraitSet(formatProps, FormatTraits.FractionDash)}
+        onChange={(e) => handleTraitChange(FormatTraits.FractionDash, e.target.checked)}
       />
     </div>
   );
