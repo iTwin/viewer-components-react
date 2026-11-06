@@ -372,11 +372,12 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     `;
     const hasElements = `
       SELECT 1
-      FROM ${CLASS_NAME_GeometricElement3d} e
+      FROM ${CLASS_NAME_Element} e
       JOIN ${CLASS_NAME_Model} m ON m.ECInstanceId = e.Model.Id
       JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = e.ECInstanceId
       ${createWhereClause({
         conditions: [
+          `e.ECClassId IS (${CLASS_NAME_GeometricElement3d})`,
           "ehc.TargetECInstanceId = this.ECInstanceId",
           "e.Parent.Id IS NULL",
           "NOT m.IsPrivate",
