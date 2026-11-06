@@ -7,7 +7,12 @@ import { defer, filter, forkJoin, map, mergeMap, of, reduce, shareReplay } from 
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { BaseIdsCacheImpl } from "../../../shared/internal/caches/BaseIdsCache.js";
-import { CLASS_NAME_GeometricModel3d, CLASS_NAME_InformationPartitionElement, CLASS_NAME_Subject } from "../../../shared/internal/ClassNameDefinitions.js";
+import {
+  CLASS_NAME_Element,
+  CLASS_NAME_GeometricModel3d,
+  CLASS_NAME_InformationPartitionElement,
+  CLASS_NAME_Subject,
+} from "../../../shared/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../../shared/internal/hooks/UseErrorState.js";
 import { createWhereClause, getOrCreate } from "../../../shared/internal/Utils.js";
 
@@ -70,7 +75,13 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
                 "NOT m.IsPrivate",
                 "NOT m.IsTemplate",
                 this.#hierarchyConfig.models.withoutElements === "exclude" &&
-                  `EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elements.baseClass} WHERE Model.Id = m.ECInstanceId)`,
+                  `EXISTS (
+                    SELECT 1
+                    FROM ${CLASS_NAME_Element}
+                    ${createWhereClause({
+                      conditions: ["Model.Id = m.ECInstanceId", `ECClassId IS (${this.#hierarchyConfig.elements.baseClass})`],
+                    })}
+                  )`,
               ],
             })}
           ) targetPartitionId,
@@ -101,7 +112,20 @@ export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
         SELECT p.ECInstanceId id, p.Parent.Id parentId
         FROM ${CLASS_NAME_InformationPartitionElement} p
         INNER JOIN ${CLASS_NAME_GeometricModel3d} m ON m.ModeledElement.Id = p.ECInstanceId
-        ${createWhereClause({ conditions: ["NOT m.IsPrivate", "NOT m.IsTemplate", this.#hierarchyConfig.models.withoutElements === "exclude" && `EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elements.baseClass} WHERE Model.Id = m.ECInstanceId)`] })}
+        ${createWhereClause({
+          conditions: [
+            "NOT m.IsPrivate",
+            "NOT m.IsTemplate",
+            this.#hierarchyConfig.models.withoutElements === "exclude" &&
+              `EXISTS (
+                SELECT 1
+                FROM ${CLASS_NAME_Element}
+                ${createWhereClause({
+                  conditions: ["Model.Id = m.ECInstanceId", `ECClassId IS (${this.#hierarchyConfig.elements.baseClass})`],
+                })}
+              )`,
+          ],
+        })}
       `;
       return this.#queryExecutor.createQueryReader(
         { ecsql: modelsQuery },
