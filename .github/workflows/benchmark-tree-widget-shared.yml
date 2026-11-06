@@ -24,7 +24,7 @@ on:
 jobs:
   benchmark:
     name: ${{ inputs.display-name }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       # deployments permission to deploy GitHub pages website
       deployments: write

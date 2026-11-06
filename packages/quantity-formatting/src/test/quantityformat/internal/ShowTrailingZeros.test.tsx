@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { describe, it, vi, expect } from "vitest";
-import * as React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { FormatProps } from "@itwin/core-quantity";
 import { ShowTrailingZeros } from "../../../components/quantityformat/internal/ShowTrailingZeros.js";
@@ -69,7 +68,7 @@ describe("ShowTrailingZeros", () => {
   it("should handle string formatTraits", () => {
     const formatPropsWithStringTraits: FormatProps = {
       ...defaultFormatProps,
-      formatTraits: ["trailZeroes", "use1000Separator"],
+      formatTraits: "trailZeroes,use1000Separator",
     };
     const onChange = vi.fn();
     render(<ShowTrailingZeros formatProps={formatPropsWithStringTraits} onChange={onChange} />);

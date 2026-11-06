@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { describe, it, vi, expect } from "vitest";
-import * as React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { FormatDefinition } from "@itwin/core-quantity";
 import type { UnitsProvider } from "@itwin/core-quantity";
@@ -61,6 +60,8 @@ describe("FormatSample", () => {
       render(<FormatSample formatProps={formatProps} unitsProvider={unitsProvider} />);
       const input = screen.getByRole("textbox");
 
+      input.focus(); // ToolAdmin suppresses Ctrl shortcuts unless an editable element has focus
+
       expect(fireEvent.keyDown(input, { key: "v", ctrlKey: true })).toBe(true);
     });
 
@@ -74,6 +75,8 @@ describe("FormatSample", () => {
     it("should pass through Ctrl+A (select-all)", () => {
       render(<FormatSample formatProps={formatProps} unitsProvider={unitsProvider} />);
       const input = screen.getByRole("textbox");
+
+      input.focus(); // ToolAdmin suppresses Ctrl shortcuts unless an editable element has focus
 
       expect(fireEvent.keyDown(input, { key: "a", ctrlKey: true })).toBe(true);
     });

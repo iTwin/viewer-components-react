@@ -6,12 +6,13 @@
 
 import "../FormatPanel.scss";
 import * as React from "react";
-import { Format, FormatTraits } from "@itwin/core-quantity";
+import { FormatTraits } from "@itwin/core-quantity";
 import { Divider, Label, Text } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../useTranslation.js";
 import { DecimalSeparator } from "../internal/DecimalSeparator.js";
 import { FormatPrecision } from "../internal/FormatPrecision.js";
-import { AppendUnitLabel, UomSeparatorSelector } from "../internal/FormatUnitLabel.js";
+import { AppendUnitLabel } from "../internal/AppendUnitLabel.js";
+import { UomSeparatorSelector } from "../internal/UomSeparatorSelector.js";
 import { FormatUnits } from "../internal/FormatUnits.js";
 import { KeepDecimalPoint } from "../internal/KeepDecimalPoint.js";
 import { KeepSingleZero } from "../internal/KeepSingleZero.js";
@@ -23,6 +24,7 @@ import { ZeroEmpty } from "../internal/ZeroEmpty.js";
 
 import type { FormatDefinition, UnitProps } from "@itwin/core-quantity";
 import type { UnitsProvider } from "@itwin/core-quantity";
+import { isFormatTraitSet } from "../internal/FormatPropsUtils.js";
 /** Common props for all format panel components
  * @internal
  */
@@ -43,7 +45,7 @@ export function DecimalPrimaryChildren(props: PanelProps): React.ReactElement {
   return (
     <div className="quantityFormat--formatPanel-primaryChildren">
       <div className="quantityFormat--formatTypeRow">
-        <FormatTypeOption formatProps={formatProps} onChange={onFormatChange} />
+        <FormatTypeOption formatProps={formatProps} unitsProvider={unitsProvider} onChange={onFormatChange} />
       </div>
       <Text variant="small" isMuted={true}>
         {translate("QuantityFormat:labels.formatTypeSublabel")}
@@ -61,10 +63,7 @@ export function DecimalPrimaryChildren(props: PanelProps): React.ReactElement {
         formatProps={formatProps}
         onFormatChange={onFormatChange}
       />
-      {Format.isFormatTraitSetInProps(
-        formatProps,
-        FormatTraits.ShowUnitLabel
-      ) && (
+      {isFormatTraitSet(formatProps, FormatTraits.ShowUnitLabel) && (
         <UomSeparatorSelector
           formatProps={formatProps}
           onFormatChange={onFormatChange}

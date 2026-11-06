@@ -1,5 +1,11 @@
 # Change Log - @itwin/geo-tools-react
 
+## 6.0.3
+
+### Patch Changes
+
+- [#1719](https://github.com/iTwin/viewer-components-react/pull/1719): Handle supported Google address provider location response variants correctly.
+
 ## 6.0.2
 
 ### Patch Changes
@@ -52,7 +58,7 @@ Mon, 29 Apr 2024 14:59:26 GMT
 
 ### Minor changes
 
-- updated packages @itwin/appui-react, @itwin/components-react, and @itwin/core-react. the css style uicore-autosuggest__input was also updated. ([#822](https://github.com/iTwin/viewer-components-react/pull/822))
+- updated packages @itwin/appui-react, @itwin/components-react, and @itwin/core-react. the css style uicore-autosuggest\_\_input was also updated. ([#822](https://github.com/iTwin/viewer-components-react/pull/822))
 
 ## 5.0.0
 

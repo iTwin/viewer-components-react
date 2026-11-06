@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { describe, it, vi, expect } from "vitest";
-import * as React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { FormatProps } from "@itwin/core-quantity";
 import { FractionDash } from "../../../components/quantityformat/internal/FractionDash.js";

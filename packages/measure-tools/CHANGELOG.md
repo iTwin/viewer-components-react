@@ -1,5 +1,21 @@
 # Change Log - @itwin/measure-tools-react
 
+## 0.34.0
+
+### Minor Changes
+
+- [#1805](https://github.com/iTwin/viewer-components-react/pull/1805): Fix sheet measurements resolving the wrong view attachment.
+
+  `getDrawingMetadata` and `getDrawingData` take an optional `ResolveDrawingOptions`. When a `viewport` is supplied, the drawing that owns the element under the cursor is preferred over the drawing whose rectangle contains the point, falling back to the rectangle when nothing is picked. View attachment rectangles overlap — a drawing's rectangle can be much larger than its visible content and cover a neighbouring drawing — so on plan-and-profile sheets a measurement taken in the profile could be resolved against the enclosing plan and computed with its isotropic transforms, losing the profile's vertical exaggeration.
+
+  `SheetMeasurementHelper.getDrawingsAtPoint` returns every drawing whose rectangle contains a point, so callers that cannot pick an element can detect that resolution was ambiguous and tell the user the measurement may not use the intended drawing.
+
+  A view attachment's sheet-space rectangle is now derived from its placement origin **and** `bBoxLow`, via the new `SheetMeasurementHelper.getDrawingRange`. Previously `bBoxLow` was queried but never used, so every containment test assumed the placement bounding box started at local `(0,0)` and computed a displaced rectangle for any attachment where it does not. `getDrawingData` reports that same rectangle as `viewAttachmentOrigin`/`viewAttachmentExtent`, so `DrawingMetadata.origin`/`extents` and anything decorating them match what was actually hit-tested.
+
+  `DrawingMetadata` now carries `drawingType`, so the resolved drawing's type and its transforms can no longer come from two different view attachments. `drawingType`, `worldScale` and `sheetToProfileTransform` are now preserved by `DrawingMetadata.toJSON`/`fromJSON` and by `Measurement.copyFrom`, so they survive serialization and cloning.
+
+  `sheetToProfileTransform` is now populated by `getDrawingMetadata` and is left `undefined` when the drawing does not define one. Previously it was only available from the deprecated `SheetMeasurementsHelper.getDrawingId`, which passed the missing property to `Transform.fromJSON` and silently produced an identity transform — indistinguishable from a genuine 1:1 scale.
+
 <!-- This log was last generated on Tue, 12 May 2026 16:14:28 GMT and should not be manually modified. -->
 
 <!-- Start content -->
@@ -305,6 +321,7 @@ Wed, 29 May 2024 18:39:36 GMT
 - Measurement in sheets ([#837](https://github.com/iTwin/viewer-components-react/pull/837))
 
 ## 0.14.2
+
 Thu, 05 Oct 2023 18:48:11 GMT
 
 ### Patches
@@ -312,6 +329,7 @@ Thu, 05 Oct 2023 18:48:11 GMT
 - Clean up files delivered
 
 ## 0.14.1
+
 Tue, 22 Aug 2023 14:39:05 GMT
 
 ### Patches
@@ -319,6 +337,7 @@ Tue, 22 Aug 2023 14:39:05 GMT
 - Fix measurement action toolbar to close for scroll/click outside
 
 ## 0.14.0
+
 Thu, 17 Aug 2023 14:42:37 GMT
 
 ### Minor changes
@@ -326,6 +345,7 @@ Thu, 17 Aug 2023 14:42:37 GMT
 - Switch to Toolbar instead of ToolbarComposer for Measure Actions toolbar
 
 ## 0.13.0
+
 Mon, 24 Jul 2023 17:26:29 GMT
 
 ### Minor changes
@@ -333,6 +353,7 @@ Mon, 24 Jul 2023 17:26:29 GMT
 - Added allowActions property to Measurement base class to let measurements to opt out of the popup action toolbar. Fixed up internal usage of currentInputState with (soon to be) public APIs
 
 ## 0.12.2
+
 Thu, 20 Jul 2023 20:15:05 GMT
 
 ### Patches
@@ -340,6 +361,7 @@ Thu, 20 Jul 2023 20:15:05 GMT
 - Add listeners for unit system changes when starting decorator
 
 ## 0.12.1
+
 Fri, 23 Jun 2023 15:11:15 GMT
 
 ### Patches
@@ -347,11 +369,13 @@ Fri, 23 Jun 2023 15:11:15 GMT
 - Content in measurements widget needs some padding
 
 ## 0.12.0
+
 Tue, 23 May 2023 13:16:11 GMT
 
 _Version update only_
 
 ## 0.11.0
+
 Tue, 02 May 2023 16:12:17 GMT
 
 ### Minor changes
@@ -359,6 +383,7 @@ Tue, 02 May 2023 16:12:17 GMT
 - Updated to AppUI 4.0 and Presentation 4.0
 
 ## 0.10.6
+
 Thu, 01 Dec 2022 14:13:39 GMT
 
 ### Patches
@@ -366,6 +391,7 @@ Thu, 01 Dec 2022 14:13:39 GMT
 - Add listeners to quantityFormatter events we did not account for. Fix issues where a qf override was being set and the measure-tools weren't picking up the change.
 
 ## 0.10.5
+
 Wed, 16 Nov 2022 19:55:30 GMT
 
 ### Patches
@@ -373,6 +399,7 @@ Wed, 16 Nov 2022 19:55:30 GMT
 - Hide perpendicular measure tool for drawing view
 
 ## 0.10.4
+
 Mon, 31 Oct 2022 19:03:27 GMT
 
 ### Patches
@@ -380,6 +407,7 @@ Mon, 31 Oct 2022 19:03:27 GMT
 - Hide measurement tools button on sheet view.
 
 ## 0.10.3
+
 Wed, 19 Oct 2022 14:17:36 GMT
 
 ### Patches
@@ -387,6 +415,7 @@ Wed, 19 Oct 2022 14:17:36 GMT
 - customize widget placement in ui items provider
 
 ## 0.10.2
+
 Mon, 17 Oct 2022 17:36:46 GMT
 
 ### Patches
@@ -394,6 +423,7 @@ Mon, 17 Oct 2022 17:36:46 GMT
 - Added launch configs to debug tests properly. Change the minute/second symbols to match what is being used in IModelApp.quantityFormatter. Fix inconsistencies with the slope formatting.
 
 ## 0.10.1
+
 Mon, 26 Sep 2022 17:13:11 GMT
 
 ### Patches
@@ -404,6 +434,7 @@ Mon, 26 Sep 2022 17:13:11 GMT
 - Factor our the point adjustment logic into a helper function. Add listener for the onGlobalOriginChanged event in the ui 2.0 widget.
 
 ## 0.10.0
+
 Wed, 03 Aug 2022 16:36:24 GMT
 
 ### Minor changes
@@ -411,6 +442,7 @@ Wed, 03 Aug 2022 16:36:24 GMT
 - Temporarily fix a problem in core-geometry where Ray3d.createStartEnd captures the origin point instead of copying it. This solves an issue where the DistanceMeasurement's start point was being modified when it shouldn't have. (This will be fixed with PR #4012 on itwinjs-core.)
 
 ## 0.9.0
+
 Thu, 28 Jul 2022 13:50:39 GMT
 
 ### Minor changes
@@ -418,6 +450,7 @@ Thu, 28 Jul 2022 13:50:39 GMT
 - Fix obtaining the initial tool settings value. onPostInstall is called after the tool settings is created. Ensure we only notify user once if the iModel is not geolocated. Found a problem where we would output a message on each mouse motion (using dynamic measurement) which would clutter the whole screen.
 
 ## 0.8.0
+
 Mon, 18 Jul 2022 13:24:31 GMT
 
 ### Minor changes
@@ -425,6 +458,7 @@ Mon, 18 Jul 2022 13:24:31 GMT
 - Added toolsettings to the MeasureLocationTool.
 
 ## 0.7.3
+
 Thu, 16 Jun 2022 14:09:35 GMT
 
 ### Patches
@@ -432,6 +466,7 @@ Thu, 16 Jun 2022 14:09:35 GMT
 - Add option to set itemPriority for MeasureToolsUiItemsProvider
 
 ## 0.7.2
+
 Thu, 26 May 2022 15:54:07 GMT
 
 ### Patches
@@ -440,6 +475,7 @@ Thu, 26 May 2022 15:54:07 GMT
 - Fixed an issue where cumulative diameter is incorrect for RadiusMeasurement. Also, changed the way we compute the text position for DistanceMeasurement such that it should not display if the measurement is 'behind' the camera eye.
 
 ## 0.7.1
+
 Wed, 18 May 2022 15:36:43 GMT
 
 ### Patches
@@ -447,6 +483,7 @@ Wed, 18 May 2022 15:36:43 GMT
 - Modify MeasurementPropertyWidget such that adding or removing measurements one by one does not collapse them. This was working in the MeasurementWidget.
 
 ## 0.7.0
+
 Wed, 06 Apr 2022 13:48:44 GMT
 
 ### Minor changes
@@ -459,6 +496,7 @@ Wed, 06 Apr 2022 13:48:44 GMT
 - Add transitive peers as dev deps
 
 ## 0.6.0
+
 Wed, 02 Mar 2022 21:38:51 GMT
 
 ### Minor changes
@@ -470,6 +508,7 @@ Wed, 02 Mar 2022 21:38:51 GMT
 - Update license year
 
 ## 0.1.2
+
 Wed, 19 Jan 2022 17:39:40 GMT
 
 ### Patches
@@ -477,6 +516,7 @@ Wed, 19 Jan 2022 17:39:40 GMT
 - updated to latest rc, dev-185, and updated deps
 
 ## 0.1.1
+
 Wed, 12 Jan 2022 13:59:35 GMT
 
 ### Patches
@@ -484,6 +524,7 @@ Wed, 12 Jan 2022 13:59:35 GMT
 - iTwin.js 3.0 first rc
 
 ## 0.5.0
+
 Sun, 10 Oct 2021 03:39:20 GMT
 
 ### Minor changes
@@ -492,6 +533,7 @@ Sun, 10 Oct 2021 03:39:20 GMT
 - Added decorateCached to measurement base class, allowing for subclasses to participate in cached graphics drawing (rather than having to manage their own cached graphics like AreaMeasurement had to do for performance reasons). Added methods to invalidate both regular decorations and cached decorations.
 
 ## 0.4.1
+
 Thu, 16 Sep 2021 17:55:54 GMT
 
 ### Patches
@@ -499,6 +541,7 @@ Thu, 16 Sep 2021 17:55:54 GMT
 - Stop delivering psuedo-localized strings
 
 ## 0.4.0
+
 Thu, 19 Aug 2021 20:11:48 GMT
 
 ### Minor changes
@@ -511,6 +554,7 @@ Thu, 19 Aug 2021 20:11:48 GMT
 - Do not activate Accudraw by default in the measure tools, but setup the hints so if it is activated or get activated it will be setup correctly
 
 ## 0.3.0
+
 Tue, 13 Jul 2021 17:43:28 GMT
 
 ### Minor changes
@@ -518,6 +562,7 @@ Tue, 13 Jul 2021 17:43:28 GMT
 - Update iTwin.js minimum dependencies to ^2.17.0
 
 ## 0.2.0
+
 Tue, 08 Jun 2021 21:23:59 GMT
 
 ### Minor changes

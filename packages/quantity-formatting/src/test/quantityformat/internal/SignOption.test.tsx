@@ -2,8 +2,7 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import * as React from "react";
-import { render, within } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import type { FormatProps } from "@itwin/core-quantity";
 import { ShowSignOption } from "@itwin/core-quantity";

@@ -108,7 +108,7 @@ MeasureLocationToolModel
     if (this._enableSheetMeasurements) {
       if (ev.viewport.view.id !== undefined) {
         this.toolModel.sheetViewId = ev.viewport.view.id;
-        return await SheetMeasurementHelper.getDrawingMetadata(this.iModel, ev.viewport.view.id, ev.point);
+        return await SheetMeasurementHelper.getDrawingMetadata(this.iModel, ev.viewport.view.id, ev.point, { viewport: ev.viewport, inputSource: ev.inputSource });
       }
     }
     return undefined;

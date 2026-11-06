@@ -59,6 +59,7 @@
       "formatSetDescription": "Format set description",
       "searchFormatSets": "Search format sets...",
       "noFormatSetsFound": "No format sets found matching",
+      "noFormatsFound": "No formats found matching",
       "noFormatSetsAvailable": "No format sets available",
       "unitSystemMetric": "Metric",
       "unitSystemImperial": "Imperial",
