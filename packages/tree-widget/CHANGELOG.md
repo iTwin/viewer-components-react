@@ -1,5 +1,277 @@
 # Change Log - @itwin/tree-widget-react
 
+## 4.0.0
+
+### Major Changes
+
+- [#1795](https://github.com/iTwin/viewer-components-react/pull/1795): Tree Widget v4 is here. This release introduces a new design system, powerful ways to explore and customize iModel content, more reliable visibility controls, and broad performance and stability improvements. Here is why you should upgrade.
+
+  ## Why upgrade?
+
+  ### 1. A modern, accessible design system
+
+  Tree Widget has been rebuilt with [MUI](https://mui.com/material-ui/getting-started/) and [StrataKit](https://stratakit.bentley.com/), bringing it in line with the latest iTwin application design system. The new foundation provides a cleaner visual language, accessible labels, consistent keyboard and focus behavior, and semantic controls supplied by MUI and StrataKit.
+
+  | v3 - iTwinUI                                                                            | v4 - MUI and StrataKit                                                                 |
+  | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+  | <img src="./media/tree-widget-3.0.png" alt="Tree Widget v3" width="450" height="295" /> | <img src="./media/widget-example.png" alt="Tree Widget v4" width="450" height="295" /> |
+
+  ### 2. New features
+
+  Tree Widget v4 introduces several new features for both end users and applications building custom tree workflows:
+
+  - **Flexible node actions** can display frequently used actions inline, place additional commands in an overflow menu, and provide contextual actions when a user opens a node's context menu.
+
+    <table>
+      <thead>
+        <tr>
+          <th>Inline actions</th>
+          <th>Overflow menu</th>
+          <th>Context menu</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td valign="top"><img src="./media/inline-actions.png" alt="Inline node actions" width="300" /></td>
+          <td valign="top"><img src="./media/menu-actions.png" alt="Node actions in an overflow menu" width="300" /></td>
+          <td valign="top"><img src="./media/context-menu-actions.png" alt="Node actions in a context menu" width="300" /></td>
+        </tr>
+      </tbody>
+    </table>
+
+  - **Clearer loading, warning, and error states** with skeleton placeholders, actionable hierarchy warnings, and a Retry action when loading fails.
+
+    <table>
+      <thead>
+        <tr>
+          <th>Loading placeholders</th>
+          <th>Actionable hierarchy warnings</th>
+          <th>Error and retry</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td valign="top"><img src="./media/loading-state.png" alt="Skeleton placeholders displayed while a tree loads" width="300" /></td>
+          <td valign="top"><img src="./media/too-many-nodes.png" alt="Hierarchy size warning with actions to increase the limit or add a filter" width="300" /></td>
+          <td valign="top"><img src="./media/failed-to-load-tree.png" alt="Failed tree load with a Retry action" width="300" /></td>
+        </tr>
+      </tbody>
+    </table>
+
+  - **A new Classifications tree** for applications that work with classification systems, including selection, visibility controls, node actions, label editing, and search.
+
+    <img src="./media/classifications-tree.png" alt="Classifications tree" width="300" />
+
+  - **Easier integration with different viewports.** Tree Widget is now less tightly coupled to the iTwin.js viewport, making it much easier to integrate with different viewport implementations (e.g., Unity).
+  - **More configurable Models and Categories hierarchies.** New options provide greater control over the contents of each tree. For example, the Categories tree can now include element nodes.
+  - **New customization building blocks** including exported node type guards, renderer props, actions, and icons.
+
+  ### 3. Reliable and consistent visibility controls
+
+  Visibility controls now behave consistently across complete, nested, and filtered hierarchies:
+
+  - Changing an ancestor's visibility updates all of its nested children.
+  - Changes to children are reflected in the visibility states of all ancestor nodes.
+  - When a search results hierarchy is displayed, visibility changes affect only the nodes represented in those results.
+  - Visibility states update optimistically for immediate feedback.
+  - Rapid or superseded operations no longer leave visibility controls out of sync.
+
+  ### 4. Performance improvements
+
+  Version 4 includes extensive performance work across hierarchy queries, search, visibility calculations, and rendering. These improvements reduce repeated work when loading and expanding large trees, searching Models and Categories trees, and updating visibility throughout nested content.
+
+  ### 5. Bug fixes and improved resilience
+
+  In addition to the larger improvements above, v4 resolves issues that could affect everyday use of v3. Some highlights include:
+
+  - Label search now consistently finds matching nodes throughout nested hierarchies, including categories beneath sub-models that could be missed in v3.
+  - Loading failures display a clear error message and Retry action.
+  - Interrupted visibility queries no longer crash the application.
+
+  These are only a few of the bug fixes and stability improvements included in v4.
+
+  ## Breaking changes and migrating from v3
+
+  Migrating to v4 should be straightforward for most applications. In the vast majority of cases, only sections 1–3 of the [migration guide](./docs/Migration_v3_v4.md) are needed. Applications with more extensive customization or direct use of lower-level components may also require changes from sections 4–8. The guide is comprehensive: it covers every breaking change and provides instructions and examples for migrating each one.
+
+  #### Application setup
+
+  - **Rendering and theming moved to MUI and StrataKit.** Tree Widget no longer renders with `@itwin/itwinui-react`; rendering now depends on compatible MUI and StrataKit themes and peer dependencies. ([migration](./docs/Migration_v3_v4.md#1-update-dependencies), PRs: [#1169](https://github.com/iTwin/viewer-components-react/pull/1169), [#1320](https://github.com/iTwin/viewer-components-react/pull/1320), [#1748](https://github.com/iTwin/viewer-components-react/pull/1748))
+  - **Runtime and package requirements changed.** v4 requires React 18 or 19, the peer dependency versions declared by the package—including iTwin.js 5.14, AppUI 5.35, `@itwin/presentation-components` 6, MUI, and StrataKit—and an ESM-compatible application and test setup. `@stratakit/foundations` is a new peer dependency that the application must install and configure. The package no longer publishes a CommonJS build. ([migration](./docs/Migration_v3_v4.md#1-update-dependencies), PRs: [#1642](https://github.com/iTwin/viewer-components-react/pull/1642), [#1748](https://github.com/iTwin/viewer-components-react/pull/1748), [#1811](https://github.com/iTwin/viewer-components-react/pull/1811), [#1813](https://github.com/iTwin/viewer-components-react/pull/1813), [#1835](https://github.com/iTwin/viewer-components-react/pull/1835), [#1843](https://github.com/iTwin/viewer-components-react/pull/1843))
+  - **Global initialization was replaced by `TreeWidgetContextProvider`.** The `TreeWidget` class and its initialization, termination, and localization helpers were removed. `TreeWidgetContextProvider`, `createTreeWidget`, and `TreeWidgetComponent` now receive localization and optional logging services, and the widget APIs add the provider automatically. ([migration](./docs/Migration_v3_v4.md#2-replace-global-initialization-with-treewidgetcontextprovider), PRs: [#1303](https://github.com/iTwin/viewer-components-react/pull/1303), [#1617](https://github.com/iTwin/viewer-components-react/pull/1617), [#1783](https://github.com/iTwin/viewer-components-react/pull/1783))
+  - **Header-button telemetry is provided through context.** `onFeatureUsed` was removed from standard header-button props, and custom-tree telemetry is now supplied through `TelemetryContextProvider`. ([migration](./docs/Migration_v3_v4.md#telemetry), PRs: [#1783](https://github.com/iTwin/viewer-components-react/pull/1783))
+  - **Tree components and renderers now require `treeLabel`.** The label is required by standard tree components, `TreeRenderer`, and `VisibilityTreeRenderer`, and widget tree definitions receive it through their render callback. ([migration](./docs/Migration_v3_v4.md#3-update-widget-registration-and-standard-tree-components), PRs: [#1495](https://github.com/iTwin/viewer-components-react/pull/1495))
+  - **The `density` and `getSchemaContext` props were removed.** `density` is no longer accepted by tree components, header-button renderer props, or `TreeDefinition.render` props, and the schema context is now created internally. ([migration](./docs/Migration_v3_v4.md#3-update-widget-registration-and-standard-tree-components), PRs: [#1186](https://github.com/iTwin/viewer-components-react/pull/1186), [#1331](https://github.com/iTwin/viewer-components-react/pull/1331))
+
+  #### Widget and tree composition
+
+  - **The widget and header components changed roles, and the `SelectableTree` name was reused.** The v3 tree selector `SelectableTree` is now `TreeWidgetComponent`, and the v3 header container `TreeWithHeader` is now `SelectableTree`. `SelectableTreeDefinition` was replaced by `TreeDefinition`, whose `getLabel` receives `{ standardLabels }` and whose `render` receives `treeLabel` and, for searchable definitions, `searchText`. ([migration](./docs/Migration_v3_v4.md#replace-the-widget-and-header-components), PRs: [#1186](https://github.com/iTwin/viewer-components-react/pull/1186))
+  - **Standard tree components no longer render their own search input.** `TreeWithHeader.filteringProps` was removed, widget-header search is now controlled by `TreeDefinition.isSearchable`, and directly rendered standard trees accept search text through `searchText`. ([migration](./docs/Migration_v3_v4.md#preserve-search-ui), PRs: [#1186](https://github.com/iTwin/viewer-components-react/pull/1186), [#1289](https://github.com/iTwin/viewer-components-react/pull/1289))
+  - **Standard tree hooks return different values.** `useModelsTree` and `useCategoriesTree` return `treeProps` and `getTreeItemProps` instead of `modelsTreeProps` or `categoriesTreeProps` together with `rendererProps`. ([migration](./docs/Migration_v3_v4.md#update-standard-tree-hook-results), PRs: [#1540](https://github.com/iTwin/viewer-components-react/pull/1540))
+  - **Categories tree header buttons require `models`.** `CategoriesTreeHeaderButtonProps` gained a required `models` property, and `onCategoriesFiltered` now receives `{ categories, models }` instead of a categories array. `useCategoriesTreeButtonProps` supplies both. ([migration](./docs/Migration_v3_v4.md#update-categories-tree-buttons), PRs: [#1265](https://github.com/iTwin/viewer-components-react/pull/1265))
+
+  #### Tree renderer and action APIs
+
+  - **Node customization moved to `getTreeItemProps`.** The single callback supersedes the v3 `getLabel`, `getIcon`, and `getSublabel` renderer props through its `label`, `decorations`, and `description` results. Its `onClick`, `onKeyDown`, and `onDoubleClick` handlers supersede the corresponding v3 node handlers. Callback nodes now use `TreeNode` from `@itwin/presentation-hierarchies-react` v2, and click handlers no longer receive the v3 `isSelected` argument. The `filterButtonsVisibility`, `size`, and `enableVirtualization` renderer props were removed without replacement. ([migration](./docs/Migration_v3_v4.md#migrate-renderer-props), PRs: [#1540](https://github.com/iTwin/viewer-components-react/pull/1540), [#1557](https://github.com/iTwin/viewer-components-react/pull/1557))
+  - **Tree actions were redesigned and expanded.** The v3 `getActions` callback was replaced by `getInlineActions`, `getMenuActions`, and `getContextMenuActions`. These callbacks receive `{ targetNode, selectedNodes }` and return React elements: up to two `TreeActionBase` elements inline, and `TreeActionBase` or divider elements in the menus. Standard tree components additionally supply the current renderer props as a second argument; callbacks passed directly to `TreeRenderer` or `VisibilityTreeRenderer` receive only the action context. ([migration](./docs/Migration_v3_v4.md#migrate-node-actions), PRs: [#1394](https://github.com/iTwin/viewer-components-react/pull/1394), [#1485](https://github.com/iTwin/viewer-components-react/pull/1485), [#1522](https://github.com/iTwin/viewer-components-react/pull/1522), [#1534](https://github.com/iTwin/viewer-components-react/pull/1534))
+  - **The hierarchy level filter callback was renamed.** The `onFilterClick` renderer prop is now `filterHierarchyLevel`. ([migration](./docs/Migration_v3_v4.md#onfilterclick-to-filterhierarchylevel), PRs: [#1557](https://github.com/iTwin/viewer-components-react/pull/1557))
+  - **Visibility renderer callbacks were renamed.** `getCheckboxState` and `onCheckboxClicked` became `getVisibilityButtonState` and `onVisibilityButtonClick`, the `"on"` and `"off"` states became `"visible"` and `"hidden"`, and the click callback now receives the node's current state instead of the state to apply. ([migration](./docs/Migration_v3_v4.md#migrate-custom-visibility-renderers), PRs: [#1320](https://github.com/iTwin/viewer-components-react/pull/1320))
+
+  #### Search APIs
+
+  - **Filtering APIs were renamed to search APIs.** `filter` became `searchText`, `getFilteredPaths` became `getSearchPaths`, and `FilterLimitExceededError` became `SearchLimitExceededError`. Localized keys under `*tree.filtering` moved to `*tree.search`, including `tooManySearchMatches` and `unknownSearchError`. ([migration](./docs/Migration_v3_v4.md#4-rename-search-and-renderer-apis), PRs: [#1539](https://github.com/iTwin/viewer-components-react/pull/1539))
+  - **Hierarchy search and EC class-name types changed.** `getSearchPaths` and `getSubTreePaths` now return `HierarchySearchTree[]` instead of the v3 `HierarchyFilteringPath[]` representation, and the path option `autoExpand` became `reveal`. Configuration APIs that accept full EC class names now use `EC.FullClassNameDotNotation` and require dot notation such as `BisCore.GeometricElement3d`; colon notation is no longer accepted. ([migration](./docs/Migration_v3_v4.md#hierarchyfilteringpath-to-hierarchysearchtree), PRs: [#1636](https://github.com/iTwin/viewer-components-react/pull/1636))
+  - **Tree highlighting now uses a text value.** The `highlight` object prop on `Tree` and `VisibilityTree` was replaced by the `highlightText` string prop. The tree props returned by the standard-tree hooks use the same name. ([migration](./docs/Migration_v3_v4.md#highlight-to-highlighttext), PRs: [#1408](https://github.com/iTwin/viewer-components-react/pull/1408))
+  - **Custom empty-tree content uses `emptyTreeContent`.** The v3 `noDataMessage` prop on `Tree`, `VisibilityTree`, standard tree components, and standard-tree hook results was renamed to `emptyTreeContent`. ([migration](./docs/Migration_v3_v4.md#nodatamessage-to-emptytreecontent), PRs: [#1214](https://github.com/iTwin/viewer-components-react/pull/1214))
+
+  #### Visibility APIs
+
+  - **Tree visibility APIs now use `TreeWidgetViewport`.** Models, Categories, and Classifications tree components accept an optional `TreeWidgetViewport` and otherwise use AppUI's active viewport. Hooks and header-button APIs that previously accepted an iTwin.js `Viewport` now use the narrower abstraction, and `createTreeWidgetViewport` adapts an iTwin.js viewport. ([migration](./docs/Migration_v3_v4.md#convert-viewport-values-used-by-hooks-and-header-buttons), PRs: [#1466](https://github.com/iTwin/viewer-components-react/pull/1466))
+  - **Custom hierarchy visibility handlers use standard disposal.** `HierarchyVisibilityHandler` now extends `Disposable`, and its disposal API changed from `dispose()` to `[Symbol.dispose]()`. ([migration](./docs/Migration_v3_v4.md#7-update-custom-visibility-apis), PRs: [#1320](https://github.com/iTwin/viewer-components-react/pull/1320))
+  - **Models tree visibility override callbacks changed.** `ModelsTreeVisibilityHandlerOverrides` callbacks now use `get*VisibilityStatus` and `change*VisibilityStatus` names, accept entity-specific `Id64Arg` parameters, and allow `modelId` to be omitted from category callbacks. ([migration](./docs/Migration_v3_v4.md#7-update-custom-visibility-apis), PRs: [#1401](https://github.com/iTwin/viewer-components-react/pull/1401), [#1403](https://github.com/iTwin/viewer-components-react/pull/1403))
+  - **Custom visibility status APIs changed.** `VisibilityStatus.tooltip` was removed from custom hierarchy visibility handlers. Renderer-specific visibility button state may still supply a tooltip. ([migration](./docs/Migration_v3_v4.md#7-update-custom-visibility-apis), PRs: [#1286](https://github.com/iTwin/viewer-components-react/pull/1286))
+
+  #### Hierarchy
+
+  - **Models and Categories hierarchy configuration is now organized by node type.** Settings for categories, subjects, models, and elements use a new nested structure, and the `enableWithCounts` grouping value is now `enable-with-counts`. Omitted settings continue to preserve the v3 defaults. ([migration](./docs/Migration_v3_v4.md#5-update-hierarchy-configuration), PRs: [#1738](https://github.com/iTwin/viewer-components-react/pull/1738))
+  - **Models and Categories trees now display intermediate category nodes.** When a child element uses a different category than its parent, it is grouped beneath an intermediate node for its own category instead of appearing directly beneath the parent element. This adds another level to affected hierarchy paths. ([migration](./docs/Migration_v3_v4.md#8-account-for-tree-content-changes), PRs: [#1716](https://github.com/iTwin/viewer-components-react/pull/1716))
+
+### Minor Changes
+
+- [#1795](https://github.com/iTwin/viewer-components-react/pull/1795): #### Search and loading
+
+  - **Built-in widget-header search.** Search can be enabled per tree with `TreeDefinition.isSearchable`, and the debounced value is delivered through `searchText`. The UI includes no-results, too-many-results, and instance-focus warning states. (PRs: [#1186](https://github.com/iTwin/viewer-components-react/pull/1186), [#1235](https://github.com/iTwin/viewer-components-react/pull/1235), [#1240](https://github.com/iTwin/viewer-components-react/pull/1240), [#1289](https://github.com/iTwin/viewer-components-react/pull/1289))
+  - **Loading placeholders for built-in and custom trees.** Trees show skeletons during initial loading and search, the widget header has a loading state, and the exported `SkeletonTree` lets custom trees use the same placeholder. (PRs: [#1252](https://github.com/iTwin/viewer-components-react/pull/1252), [#1299](https://github.com/iTwin/viewer-components-react/pull/1299), [#1504](https://github.com/iTwin/viewer-components-react/pull/1504))
+  - **Categories trees can search for elements by ID.** (PRs: [#1710](https://github.com/iTwin/viewer-components-react/pull/1710))
+  - **Search result limits are configurable.** `useCategoriesTree`, `useModelsTree`, and `useClassificationsTree` accept `searchLimit` as a number or `"unbounded"`. Searches supplied to `useClassificationsTreeDefinition` support the same values through `search.limit`. (PRs: [#1636](https://github.com/iTwin/viewer-components-react/pull/1636))
+
+  #### Customization
+
+  - **Standard tree nodes can be identified through exported helpers.** The `ModelsTreeNode`, `CategoriesTreeNode`, and `ClassificationsTreeNode` namespaces provide type guards for individual node types and a `getType` helper for identifying any supported type from node metadata. (PRs: [#1548](https://github.com/iTwin/viewer-components-react/pull/1548), [#1742](https://github.com/iTwin/viewer-components-react/pull/1742))
+  - **Tree renderers expose the underlying StrataKit tree props.** Applications can pass supported props through exported renderers to customize the underlying `Tree.Root` and `Tree.Item` elements. (PRs: [#1540](https://github.com/iTwin/viewer-components-react/pull/1540))
+  - **Building blocks for custom node actions and icons are exported.** `TreeActionBase` and `TreeActionBaseAttributes` define custom actions, `TreeNodeRenameAction`, `TreeNodeFilterAction`, and `VisibilityAction` provide the standard ones, and `ModelsTreeIcon`, `CategoriesTreeIcon`, `ClassificationsTreeIcon`, `IModelContentTreeIcon`, and `ExternalSourcesTreeIcon` render the standard node icons. (PRs: [#1534](https://github.com/iTwin/viewer-components-react/pull/1534), [#1557](https://github.com/iTwin/viewer-components-react/pull/1557))
+  - **Node expansion can be observed.** `Tree` accepts an optional `onNodeExpanded` callback, and the tree props returned by `useModelsTree`, `useCategoriesTree`, and `useClassificationsTree` include it. (PRs: [#1804](https://github.com/iTwin/viewer-components-react/pull/1804))
+
+  #### Hierarchies
+
+  - **Configurable Categories tree hierarchy.** The new `hierarchyConfig` prop controls which nodes are included in a Categories tree:
+
+    - `elements.nodes` includes or excludes element nodes. Element nodes are excluded by default.
+    - `elements.excludedClasses` omits elements whose class is, or derives from, one of the supplied EC class names. Descendants of omitted elements are also omitted from the hierarchy. This option is available when `elements.nodes` is `"include"`.
+    - `categories.withoutElements` includes or excludes categories that contain no elements. Empty categories are excluded by default.
+    - `subCategories.nodes` includes or excludes sub-category nodes. Sub-category nodes are included by default.
+
+    Excluding elements changes only the hierarchy: those elements may still be rendered in the viewport. The visibility handler therefore accounts for omitted elements when calculating ancestor state and updates omitted descendants when an ancestor's visibility changes. (PRs: [#1247](https://github.com/iTwin/viewer-components-react/pull/1247), [#1265](https://github.com/iTwin/viewer-components-react/pull/1265), [#1735](https://github.com/iTwin/viewer-components-react/pull/1735), [#1738](https://github.com/iTwin/viewer-components-react/pull/1738))
+
+  - **Models tree hierarchies can exclude element classes.** Set `hierarchyConfig.elements.excludedClasses` to omit elements whose class is, or derives from, one of the supplied EC class names. Descendants of an omitted element are omitted from the hierarchy as well. (PRs: [#1735](https://github.com/iTwin/viewer-components-react/pull/1735))
+  - **New Classifications tree.** v4 introduces a complete Classifications tree for displaying classification tables, classifications, and the 3D geometric elements assigned to them:
+
+    - `ClassificationsTreeComponent` provides the ready-to-use tree with selection, visibility controls, node actions, label editing, and search.
+    - `hierarchyConfig.rootClassificationSystemCode` selects the classification system to display, while `hierarchyConfig.elements.excludedClasses` omits specified element classes and their subclasses.
+    - Search supports labels, classification or element instance keys, and element IDs, with a configurable or unbounded result limit.
+    - Classification visibility is controlled through associated categories. `visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification` can specify a custom classification-to-category relationship.
+    - `useClassificationsTree` exposes the building blocks for custom rendering. `useClassificationsTreeDefinition` returns a `getHierarchyDefinition({ imodelAccess })` callback that creates the hierarchy definition for fully custom trees, can operate on one or multiple versions of an iModel, and reports matching paths through `onSearchPathsChanged`.
+    - The Classifications tree and its related APIs are available as `@beta`.
+
+    (PRs: [#1331](https://github.com/iTwin/viewer-components-react/pull/1331), [#1334](https://github.com/iTwin/viewer-components-react/pull/1334), [#1342](https://github.com/iTwin/viewer-components-react/pull/1342), [#1361](https://github.com/iTwin/viewer-components-react/pull/1361), [#1380](https://github.com/iTwin/viewer-components-react/pull/1380), [#1524](https://github.com/iTwin/viewer-components-react/pull/1524), [#1529](https://github.com/iTwin/viewer-components-react/pull/1529), [#1536](https://github.com/iTwin/viewer-components-react/pull/1536), [#1579](https://github.com/iTwin/viewer-components-react/pull/1579), [#1610](https://github.com/iTwin/viewer-components-react/pull/1610), [#1626](https://github.com/iTwin/viewer-components-react/pull/1626), [#1710](https://github.com/iTwin/viewer-components-react/pull/1710), [#1790](https://github.com/iTwin/viewer-components-react/pull/1790), [#1835](https://github.com/iTwin/viewer-components-react/pull/1835))
+
+### Patch Changes
+
+- [#1795](https://github.com/iTwin/viewer-components-react/pull/1795): #### Search
+
+  - **Models and Categories tree search now finds categories nested beneath sub-models.** (PRs: [#1619](https://github.com/iTwin/viewer-components-react/pull/1619))
+
+  #### Visibility handling
+
+  - **Visibility changes propagate through the complete nested hierarchy.** Changing an ancestor's visibility updates all nested child elements and sub-models, and ancestor visibility states account for the contents of nested sub-models. (PRs: [#1558](https://github.com/iTwin/viewer-components-react/pull/1558), [#1589](https://github.com/iTwin/viewer-components-react/pull/1589))
+  - **Children assigned to a different category from their parent are handled correctly.** Parent visibility accounts for each descendant's actual category, and changing parent visibility applies the appropriate per-category overrides to those descendants. (PRs: [#1686](https://github.com/iTwin/viewer-components-react/pull/1686), [#1687](https://github.com/iTwin/viewer-components-react/pull/1687), [#1694](https://github.com/iTwin/viewer-components-react/pull/1694), [#1716](https://github.com/iTwin/viewer-components-react/pull/1716))
+  - **Sub-category visibility is independent of model and per-model category state.** Sub-category visibility is no longer affected by per-model category overrides or model visibility, enabling a sub-category no longer makes other categories visible when their elements belong to a hidden model, and tree icons refresh after a sub-category visibility change. (PRs: [#1535](https://github.com/iTwin/viewer-components-react/pull/1535), [#1552](https://github.com/iTwin/viewer-components-react/pull/1552), [#1559](https://github.com/iTwin/viewer-components-react/pull/1559))
+  - **Tree visibility reflects the active view and complete category contents.** Models and Classifications trees keep displaying hierarchy nodes outside a 3D view, but their visibility controls are disabled. Categories tree visibility always accounts for descendant elements and sub-categories, including when they are omitted from the configured hierarchy. (PRs: [#1401](https://github.com/iTwin/viewer-components-react/pull/1401), [#1403](https://github.com/iTwin/viewer-components-react/pull/1403))
+  - **Filtered trees only change the visibility of their represented nodes.** While search is active, showing or hiding a node no longer affects elements, categories, sub-categories, or sub-models outside the search-results tree. Reported visibility is likewise scoped to the descendants represented by the filtered tree. (PRs: [#1406](https://github.com/iTwin/viewer-components-react/pull/1406), [#1568](https://github.com/iTwin/viewer-components-react/pull/1568))
+  - **Visibility controls remain consistent during rapid interaction.** Repeated clicks no longer leave the visibility icon out of sync, child states update optimistically, and the Show all, Hide all, and Invert header actions cancel superseded visibility changes. (PRs: [#1650](https://github.com/iTwin/viewer-components-react/pull/1650), [#1651](https://github.com/iTwin/viewer-components-react/pull/1651), [#1657](https://github.com/iTwin/viewer-components-react/pull/1657))
+  - **Visibility buttons and header controls report the correct state.** Buttons remain available for hidden and partially visible nodes, unresolved nodes initially appear visible rather than hidden, unavailable actions are not rendered, Categories tree grouping nodes no longer remain in a Determining visibility state, and the 2D toggle is no longer permanently disabled. Tooltips describe the available Show, Hide, Disabled, or Determining visibility action. (PRs: [#1211](https://github.com/iTwin/viewer-components-react/pull/1211), [#1216](https://github.com/iTwin/viewer-components-react/pull/1216), [#1276](https://github.com/iTwin/viewer-components-react/pull/1276), [#1278](https://github.com/iTwin/viewer-components-react/pull/1278), [#1286](https://github.com/iTwin/viewer-components-react/pull/1286), [#1331](https://github.com/iTwin/viewer-components-react/pull/1331), [#1751](https://github.com/iTwin/viewer-components-react/pull/1751))
+  - **Visibility and category query errors are handled safely.** `CategoriesTreeComponent` no longer logs a "no current row" error while loading category data, interrupted visibility queries no longer crash the application, and transient element IDs are not sent to backend visibility queries. (PRs: [#1505](https://github.com/iTwin/viewer-components-react/pull/1505), [#1543](https://github.com/iTwin/viewer-components-react/pull/1543), [#1728](https://github.com/iTwin/viewer-components-react/pull/1728))
+
+  #### Hierarchies
+
+  - **Template models are no longer displayed.** Template models and their contents are excluded from Models, Categories, and Classifications tree hierarchies. Header buttons no longer affect their display. (PRs: [#1819](https://github.com/iTwin/viewer-components-react/pull/1819), [#1821](https://github.com/iTwin/viewer-components-react/pull/1821))
+
+  #### Loading and extensibility
+
+  - **Trees display an error message and Retry action when loading fails.** (PRs: [#1217](https://github.com/iTwin/viewer-components-react/pull/1217))
+  - **Visibility buttons expose their current state in the DOM.** The button element includes a `data-visibility-state` attribute for styling, testing, and inspection. (PRs: [#1788](https://github.com/iTwin/viewer-components-react/pull/1788))
+
+  ### Performance improvements
+
+  v4 loads the Models tree significantly faster and keeps the UI responsive, with the largest gains in large iModels.
+
+  **What was improved**
+
+  - **Optimized queries.** The structure of queries that load hierarchies and determine visibility was improved, making them run more efficiently.
+  - **Less work on hot paths.** The most frequently executed code paths were identified and streamlined, so less work is done for each node and visibility change.
+  - **More caching.** More data is cached and reused, avoiding repeated queries and calculations.
+  - **Shorter UI blocking.** Long-running tasks were minimized so they no longer block the UI for long periods of time.
+
+  **Faster loading**
+
+  Load times were measured for the Models tree on more than 40 real-world iModels of various sizes, opened both locally and through a remote backend. Each iModel was loaded three times in both v3 and v4, and its fastest time was kept. _v3_ and _v4_ show the total of those times across all iModels, and negative values mean v4 is faster. _Worst slowdown_ and _Best improvement_ show the largest change for a single iModel.
+
+  _Initial view_: loading the nodes displayed when the tree first opens.
+
+  | Backend |     v3 |     v4 | Difference | Percentage | Worst slowdown | Best improvement |
+  | :------ | -----: | -----: | ---------: | ---------: | -------------: | ---------------: |
+  | Local   |  9.6 s |  4.3 s |     -5.3 s |    🟢 -55% |       +0.146 s |         -4.752 s |
+  | Remote  | 67.1 s | 64.6 s |     -2.5 s |     🟢 -4% |       +0.178 s |         -4.536 s |
+
+  _First branch_: expanding the first node at every level, from the root down to elements. _Faster iModels_ and _Slower iModels_ show how many iModels loaded faster or slower in v4.
+
+  | Backend |      v3 |      v4 | Difference | Percentage | Faster iModels | Slower iModels | Worst slowdown | Best improvement |
+  | :------ | ------: | ------: | ---------: | ---------: | -------------: | -------------: | -------------: | ---------------: |
+  | Local   |  73.1 s |  16.5 s |    -56.6 s |    🟢 -77% |        45 / 46 |         1 / 46 |       +0.003 s |         -8.102 s |
+  | Remote  | 200.8 s | 107.6 s |    -93.2 s |    🟢 -46% |        42 / 42 |         0 / 42 |           None |        -19.858 s |
+
+  **More responsive UI**
+
+  In v3, users could encounter the UI being blocked for 400 ms or more at a time while visibility was updated in large hierarchies, making the tree feel sluggish and unresponsive. In v4, the longest measured block is around 110 ms, and **the UI should never be blocked for long periods of time**.
+
+  The following PRs improve tree loading, visibility, and search performance:
+
+  [#1280](https://github.com/iTwin/viewer-components-react/pull/1280),
+  [#1492](https://github.com/iTwin/viewer-components-react/pull/1492),
+  [#1527](https://github.com/iTwin/viewer-components-react/pull/1527),
+  [#1532](https://github.com/iTwin/viewer-components-react/pull/1532),
+  [#1537](https://github.com/iTwin/viewer-components-react/pull/1537),
+  [#1571](https://github.com/iTwin/viewer-components-react/pull/1571),
+  [#1572](https://github.com/iTwin/viewer-components-react/pull/1572),
+  [#1578](https://github.com/iTwin/viewer-components-react/pull/1578),
+  [#1584](https://github.com/iTwin/viewer-components-react/pull/1584),
+  [#1586](https://github.com/iTwin/viewer-components-react/pull/1586),
+  [#1588](https://github.com/iTwin/viewer-components-react/pull/1588),
+  [#1593](https://github.com/iTwin/viewer-components-react/pull/1593),
+  [#1597](https://github.com/iTwin/viewer-components-react/pull/1597),
+  [#1599](https://github.com/iTwin/viewer-components-react/pull/1599),
+  [#1600](https://github.com/iTwin/viewer-components-react/pull/1600),
+  [#1610](https://github.com/iTwin/viewer-components-react/pull/1610),
+  [#1620](https://github.com/iTwin/viewer-components-react/pull/1620),
+  [#1629](https://github.com/iTwin/viewer-components-react/pull/1629),
+  [#1646](https://github.com/iTwin/viewer-components-react/pull/1646),
+  [#1652](https://github.com/iTwin/viewer-components-react/pull/1652),
+  [#1661](https://github.com/iTwin/viewer-components-react/pull/1661),
+  [#1662](https://github.com/iTwin/viewer-components-react/pull/1662),
+  [#1667](https://github.com/iTwin/viewer-components-react/pull/1667),
+  [#1673](https://github.com/iTwin/viewer-components-react/pull/1673),
+  [#1680](https://github.com/iTwin/viewer-components-react/pull/1680),
+  [#1681](https://github.com/iTwin/viewer-components-react/pull/1681),
+  [#1682](https://github.com/iTwin/viewer-components-react/pull/1682),
+  [#1726](https://github.com/iTwin/viewer-components-react/pull/1726),
+  [#1730](https://github.com/iTwin/viewer-components-react/pull/1730),
+  [#1731](https://github.com/iTwin/viewer-components-react/pull/1731),
+  [#1794](https://github.com/iTwin/viewer-components-react/pull/1794),
+  [#1799](https://github.com/iTwin/viewer-components-react/pull/1799),
+  [#1801](https://github.com/iTwin/viewer-components-react/pull/1801),
+  [#1804](https://github.com/iTwin/viewer-components-react/pull/1804), and
+  [#1847](https://github.com/iTwin/viewer-components-react/pull/1847).
+
 ## 4.0.0-alpha.35
 
 ### Major Changes
