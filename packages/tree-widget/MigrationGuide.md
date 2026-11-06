@@ -77,39 +77,39 @@ New required props:
 
 ## 1. Update dependencies
 
-Version 4 requires React 18 and the iTwin.js, AppUI, presentation, MUI, and StrataKit peer dependency ranges listed below. Add them to the application's `package.json`, or update the existing ranges.
+Version 4 requires React 18 or 19 and the iTwin.js, AppUI, presentation, MUI, and StrataKit peer dependency ranges listed below. Add them to the application's `package.json`, or update the existing ranges.
 
 ```jsonc
 {
   "dependencies": {
     // iTwin.js packages with the same version range
-    "@itwin/appui-abstract": "^5.8.0",
-    "@itwin/core-bentley": "^5.8.0",
-    "@itwin/core-common": "^5.8.0",
-    "@itwin/core-frontend": "^5.8.0",
-    "@itwin/ecschema-metadata": "^5.8.0",
-    "@itwin/presentation-common": "^5.8.0",
-    "@itwin/presentation-frontend": "^5.8.0",
+    "@itwin/appui-abstract": "^5.14.0",
+    "@itwin/core-bentley": "^5.14.0",
+    "@itwin/core-common": "^5.14.0",
+    "@itwin/core-frontend": "^5.14.0",
+    "@itwin/ecschema-metadata": "^5.14.0",
+    "@itwin/presentation-common": "^5.14.0",
+    "@itwin/presentation-frontend": "^5.14.0",
 
     // Other iTwin.js packages
-    "@itwin/appui-react": "^5.5.0",
-    "@itwin/components-react": "^5.5.0",
-    "@itwin/presentation-components": "^5.12.0",
+    "@itwin/appui-react": "^5.35.0",
+    "@itwin/components-react": "^5.35.0",
+    "@itwin/presentation-components": "^6.0.0",
 
     // StrataKit and MUI packages
-    "@mui/material": "^9.0.0",
-    "@stratakit/icons": "^0.4.0",
-    "@stratakit/mui": "^0.5.3",
-    "@stratakit/structures": "^0.5.6",
+    "@mui/material": "^9.5.0",
+    "@stratakit/foundations": "^1.0.4",
+    "@stratakit/icons": "^0.4.7",
+    "@stratakit/mui": "^1.2.0",
 
     // React packages
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0",
   },
 }
 ```
 
-These are all peer dependencies of tree-widget. Package managers that install peer dependencies automatically may resolve the MUI and StrataKit entries without changes to `package.json`; declare them explicitly when the application needs to control their versions. Only the ranges that the application does not already satisfy have to be added.
+These are all peer dependencies of tree-widget. Package managers that install peer dependencies automatically may resolve the MUI and StrataKit entries without changes to `package.json`; declare them explicitly when the application needs to control their versions. Only the ranges that the application does not already satisfy have to be added. The StrataKit packages must also be configured by the application; see the [StrataKit documentation](https://stratakit.bentley.com/docs) for setup instructions.
 
 Version 4 is ESM-only: the package no longer publishes a CommonJS build, and its `package.json` exposes only an `import` condition. Applications that load tree-widget through CommonJS `require`, or run tests in a CommonJS-only runner, must migrate that code and its build/test configuration to ESM.
 
@@ -122,8 +122,6 @@ Tree-widget and its hierarchy dependencies have independent major versions. Tree
 | `@itwin/presentation-hierarchies-react` v1 | `@itwin/presentation-hierarchies-react` v2 |
 | `@itwin/presentation-shared` v1            | `@itwin/presentation-shared` v2            |
 | `@itwin/unified-selection` v1              | `@itwin/unified-selection` v2              |
-
-When these v2 packages are prereleases, use versions compatible with the installed tree-widget version rather than selecting their versions independently.
 
 ## 2. Replace global initialization with `TreeWidgetContextProvider`
 

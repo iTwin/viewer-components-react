@@ -88,6 +88,9 @@
     "@itwin-tree-widget-react-quick-classifications-load",
     "@itwin-tree-widget-react-small-houses-beg",
     "@itwin-tree-widget-react-tough-planets-smile",
-    "tree-widget-react-react-19"
+    "tree-widget-react-react-19",
+    "@itwin-tree-widget-react-v4-major",
+    "@itwin-tree-widget-react-v4-minor",
+    "@itwin-tree-widget-react-v4-patch"
   ]
 }
