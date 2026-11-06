@@ -28,6 +28,9 @@ importers:
       '@itwin/unified-selection':
         specifier: ^1.7.4
         version: 1.8.3
+      '@tanstack/react-virtual':
+        specifier: ^3.13.12
+        version: 3.14.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames:
         specifier: ^2.5.1
         version: 2.5.1
@@ -156,8 +159,8 @@ importers:
         specifier: ^4.4.1
         version: 4.4.1(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(@typescript/typescript6@6.0.2)(eslint@9.39.5(supports-color@8.1.1))(supports-color@8.1.1))(@typescript/typescript6@6.0.2)(eslint@9.39.5(supports-color@8.1.1))(supports-color@8.1.1))(eslint@9.39.5(supports-color@8.1.1))
       happy-dom:
-        specifier: ^20.9.0
-        version: 20.10.6
+        specifier: ^21.0.4
+        version: 21.0.4
       http-server:
         specifier: ^14.1.1
         version: 14.1.1(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
@@ -202,7 +205,7 @@ importers:
         version: 8.1.5(@types/node@22.20.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0)
       vitest:
         specifier: ^4.1.7
-        version: 4.1.10(@types/node@22.20.1)(@vitest/coverage-v8@4.1.10)(happy-dom@20.10.6)(vite@8.1.5(@types/node@22.20.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))
+        version: 4.1.10(@types/node@22.20.1)(@vitest/coverage-v8@4.1.10)(happy-dom@21.0.4)(vite@8.1.5(@types/node@22.20.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))
       xmlhttprequest:
         specifier: ^1.8.0
         version: 1.8.0
@@ -2250,8 +2253,8 @@ packages:
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
-  happy-dom@20.10.6:
-    resolution: {integrity: sha512-6QD0ilzDDt93tX44y8tbmZdAcdTRYDhUP+Asgi6pC8Pp5IA3cvaZGyoVN/EGtlq9ziT65iPuBBn3ASLr6hCgVw==}
+  happy-dom@21.0.4:
+    resolution: {integrity: sha512-tFm+GaLBgo6o0awHnvHaNoraVo27qJ+2tZEtZ+cIa08hXbeitrxAJajLI05hsUy/2/YTKcUjQYzHe5mCcraLBw==}
     engines: {node: '>=20.0.0'}
 
   has-bigints@1.1.0:
@@ -5268,7 +5271,7 @@ snapshots:
       obug: 2.1.4
       std-env: 4.2.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.10(@types/node@22.20.1)(@vitest/coverage-v8@4.1.10)(happy-dom@20.10.6)(vite@8.1.5(@types/node@22.20.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))
+      vitest: 4.1.10(@types/node@22.20.1)(@vitest/coverage-v8@4.1.10)(happy-dom@21.0.4)(vite@8.1.5(@types/node@22.20.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))
 
   '@vitest/expect@4.1.10':
     dependencies:
@@ -6444,7 +6447,7 @@ snapshots:
 
   graceful-fs@4.2.11: {}
 
-  happy-dom@20.10.6:
+  happy-dom@21.0.4:
     dependencies:
       '@types/node': 22.20.1
       '@types/whatwg-mimetype': 3.0.2
@@ -8205,7 +8208,7 @@ snapshots:
       sass-embedded: 1.100.0
       yaml: 2.9.0
 
-  vitest@4.1.10(@types/node@22.20.1)(@vitest/coverage-v8@4.1.10)(happy-dom@20.10.6)(vite@8.1.5(@types/node@22.20.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0)):
+  vitest@4.1.10(@types/node@22.20.1)(@vitest/coverage-v8@4.1.10)(happy-dom@21.0.4)(vite@8.1.5(@types/node@22.20.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0)):
     dependencies:
       '@vitest/expect': 4.1.10
       '@vitest/mocker': 4.1.10(vite@8.1.5(@types/node@22.20.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))
@@ -8230,7 +8233,7 @@ snapshots:
     optionalDependencies:
       '@types/node': 22.20.1
       '@vitest/coverage-v8': 4.1.10(vitest@4.1.10)
-      happy-dom: 20.10.6
+      happy-dom: 21.0.4
     transitivePeerDependencies:
       - msw
 

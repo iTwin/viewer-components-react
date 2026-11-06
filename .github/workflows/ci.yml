@@ -99,7 +99,7 @@ jobs:
           TF_BUILD: 1
 
   detect:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: Detect component test changes
     outputs:
       # JSON array of package names (without the @itwin/ prefix) whose files changed (e.g. ["tree-widget-react"]).
@@ -119,7 +119,7 @@ jobs:
               - 'packages/tree-widget/**'
 
   component-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [install, detect]
     if: needs.detect.outputs.packages != '[]'
     name: Component tests (${{ matrix.package }})
