@@ -6,7 +6,7 @@
 
 import * as React from "react";
 import { BentleyError, Logger } from "@itwin/core-bentley";
-import type { FormatProps, UnitsProvider } from "@itwin/core-quantity";
+import type { FormatProps, UnitProps, UnitsProvider } from "@itwin/core-quantity";
 import {
   DecimalPrecision,
   FormatType,
@@ -25,6 +25,7 @@ import { useTranslation } from "../../../../useTranslation.js";
  */
 interface FormatTypeSelectorProps {
   type: FormatType;
+  allowDirectionFormats: boolean;
   onChange: (value: FormatType) => void;
 }
 
@@ -32,7 +33,7 @@ interface FormatTypeSelectorProps {
  * @internal
  */
 function FormatTypeSelector(props: FormatTypeSelectorProps) {
-  const { type, onChange } = props;
+  const { type, allowDirectionFormats, onChange } = props;
   const { translate } = useTranslation();
   const formatOptions = React.useMemo<SelectOption<FormatType>[]>(
     () => [
@@ -55,17 +56,19 @@ function FormatTypeSelector(props: FormatTypeSelectorProps) {
       {
         value: FormatType.Bearing,
         label: translate("QuantityFormat:bearing"),
+        disabled: !allowDirectionFormats,
       },
       {
         value: FormatType.Azimuth,
         label: translate("QuantityFormat:azimuth"),
+        disabled: !allowDirectionFormats,
       },
       {
         value: FormatType.Ratio,
         label: translate("QuantityFormat:ratio"),
       },
     ],
-    [translate]
+    [translate, allowDirectionFormats]
   );
 
 
@@ -103,18 +106,13 @@ const handleUnitsWhenFormatTypeChange = (
  * format's unit, otherwise the formatter cannot convert between them: for example, Units.HORIZONTAL_DIR_ARC_DEG cannot be
  * converted to Units.REVOLUTION.
  */
-async function getDirectionUnits(formatProps: FormatProps, unitsProvider: UnitsProvider) {
-  const unitName = formatProps.composite?.units[0]?.name;
-  if (unitName) {
-    try {
-      const unit = await unitsProvider.findUnitByName(unitName);
-      if (unit.phenomenon === "Units.HORIZONTAL_DIRECTION")
-        return { revolutionUnit: "Units.HORIZONTAL_DIR_REVOLUTION", azimuthBaseUnit: "Units.HORIZONTAL_DIR_ARC_DEG" };
-    } catch (error) {
-      Logger.logWarning(QuantityFormattingLoggerCategory, "Failed to look up the format unit", () => ({ unit: unitName, error: BentleyError.getErrorMessage(error) }));
-    }
-  }
-  return { revolutionUnit: "Units.REVOLUTION", azimuthBaseUnit: "Units.ARC_DEG" };
+function getDirectionUnits(unit: UnitProps | undefined) {
+  if (!unit?.isValid) return undefined;
+  if (unit.phenomenon === "Units.HORIZONTAL_DIRECTION")
+    return { revolutionUnit: "Units.HORIZONTAL_DIR_REVOLUTION", azimuthBaseUnit: "Units.HORIZONTAL_DIR_ARC_DEG" };
+  if (unit.phenomenon === "Units.ANGLE")
+    return { revolutionUnit: "Units.REVOLUTION", azimuthBaseUnit: "Units.ARC_DEG" };
+  return undefined;
 }
 
 interface FormatTypeOptionProps {
@@ -128,19 +126,37 @@ interface FormatTypeOptionProps {
  */
 export function FormatTypeOption(props: FormatTypeOptionProps) {
   const { formatProps, unitsProvider, onChange } = props;
-  // Bearing/azimuth defaults need an async unit lookup. A newer type change, a props change, or unmounting makes a
-  // pending lookup stale, so its result must not overwrite the newer edit.
-  const requestRef = React.useRef(0);
-  React.useEffect(
-    () => () => {
-      requestRef.current++;
-    },
-    [formatProps, unitsProvider]
-  );
+  const { translate } = useTranslation();
+  const unitName = formatProps.composite?.units[0]?.name;
+  const [lookup, setLookup] = React.useState<{
+    unitName: string;
+    unitsProvider: UnitsProvider;
+    unit?: UnitProps;
+    failed: boolean;
+  }>();
+
+  React.useEffect(() => {
+    let disposed = false;
+    if (!unitName) return;
+    const loadUnit = async () => {
+      try {
+        const unit = await unitsProvider.findUnitByName(unitName);
+        if (!disposed) setLookup({ unitName, unitsProvider, unit, failed: false });
+      } catch (error) {
+        if (disposed) return;
+        Logger.logError(QuantityFormattingLoggerCategory, "Failed to look up the format unit", () => ({ unit: unitName, error: BentleyError.getErrorMessage(error) }));
+        setLookup({ unitName, unitsProvider, failed: true });
+      }
+    };
+    void loadUnit();
+    return () => { disposed = true; };
+  }, [unitName, unitsProvider]);
+
+  const currentLookup = lookup?.unitName === unitName && lookup?.unitsProvider === unitsProvider ? lookup : undefined;
+  const directionUnits = getDirectionUnits(currentLookup?.unit);
 
   const handleFormatTypeChange = React.useCallback(
-    async (type: FormatType) => {
-      const request = ++requestRef.current;
+    (type: FormatType) => {
       let precision: number | undefined;
       let stationOffsetSize: number | undefined;
       let scientificType: string | undefined;
@@ -168,17 +184,18 @@ export function FormatTypeOption(props: FormatTypeOptionProps) {
           precision = FractionalPrecision.Eight;
           break;
         case FormatType.Bearing:
-          ({ revolutionUnit } = await getDirectionUnits(formatProps, unitsProvider));
+          if (!directionUnits) return;
+          ({ revolutionUnit } = directionUnits);
           break;
         case FormatType.Azimuth:
-          ({ revolutionUnit, azimuthBaseUnit } = await getDirectionUnits(formatProps, unitsProvider));
+          if (!directionUnits) return;
+          ({ revolutionUnit, azimuthBaseUnit } = directionUnits);
           azimuthBase = 0.0;
           break;
         case FormatType.Ratio:
           ratioType = RatioType.NToOne; // Default to N:1 ratio
           break;
       }
-      if (request !== requestRef.current) return;
       const newFormatProps: FormatProps = {
         ...formatProps,
         composite: formatProps.composite
@@ -201,7 +218,7 @@ export function FormatTypeOption(props: FormatTypeOptionProps) {
       };
       onChange(newFormatProps);
     },
-    [formatProps, unitsProvider, onChange]
+    [formatProps, directionUnits, onChange]
   );
 
   const formatType = parseFormatType(formatProps.type, "format");
@@ -210,8 +227,14 @@ export function FormatTypeOption(props: FormatTypeOptionProps) {
     <>
       <FormatTypeSelector
         type={formatType}
-        onChange={(type) => void handleFormatTypeChange(type)}
+        allowDirectionFormats={directionUnits !== undefined}
+        onChange={handleFormatTypeChange}
       />
+      {currentLookup?.failed ? (
+        <div role="alert">{translate("QuantityFormat:errors.unitLookup")}</div>
+      ) : (!unitName || currentLookup !== undefined) && !directionUnits && (
+        <div>{translate("QuantityFormat:labels.directionFormatsRequireAngles")}</div>
+      )}
     </>
   );
 }

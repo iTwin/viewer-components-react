@@ -8,6 +8,14 @@
   flex-direction: column;
 }
 
+.quantityFormat--quantityPanel-footer {
+  position: sticky;
+  inset-block-end: 0;
+  z-index: 1;
+  padding-block: var(--iui-size-xs);
+  background-color: var(--iui-color-background-base);
+}
+
 .quantityFormat--formatPanel
   .quantityFormat--formatPanel-primaryChildren {
   /* Always visible primary controls */
