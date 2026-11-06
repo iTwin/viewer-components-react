@@ -1,6 +1,6 @@
 # Migrating from tree-widget v3 to v4
 
-This guide only covers changes required to preserve v3 behavior after upgrading. See the [package README](./README.md) for new v4 features and optional APIs.
+This guide only covers changes required to preserve v3 behavior after upgrading. See the [package README](../README.md) for new v4 features and optional APIs.
 
 ## Contents
 
@@ -799,11 +799,11 @@ The v3 `isSelected` argument of `onNodeClick` and `onNodeDoubleClick` has no v4 
 
 v3 `getActions` rendered every action directly on the node. In v4, actions are separated by where they appear:
 
-| v4 callback             | Where the action appears    | What it may return                     | Example                                                   |
-| ----------------------- | --------------------------- | -------------------------------------- | --------------------------------------------------------- |
-| `getInlineActions`      | Directly on the node        | up to 2 `TreeActionBase` elements      | ![Inline actions](./media/inline-actions.png)             |
-| `getMenuActions`        | The node's overflow menu    | `TreeActionBase` or `Divider` elements | ![Menu actions](./media/menu-actions.png)                 |
-| `getContextMenuActions` | The node's right-click menu | `TreeActionBase` or `Divider` elements | ![Context menu actions](./media/context-menu-actions.png) |
+| v4 callback             | Where the action appears    | What it may return                     | Example                                                    |
+| ----------------------- | --------------------------- | -------------------------------------- | ---------------------------------------------------------- |
+| `getInlineActions`      | Directly on the node        | up to 2 `TreeActionBase` elements      | ![Inline actions](../media/inline-actions.png)             |
+| `getMenuActions`        | The node's overflow menu    | `TreeActionBase` or `Divider` elements | ![Menu actions](../media/menu-actions.png)                 |
+| `getContextMenuActions` | The node's right-click menu | `TreeActionBase` or `Divider` elements | ![Context menu actions](../media/context-menu-actions.png) |
 
 Use `getInlineActions` to preserve the v3 placement when a node has no more than two actions. If a v3 callback returned more than two actions, move them to `getMenuActions`, or keep the most important actions inline and move the remainder to the menu. Use `getContextMenuActions` only when the actions should be available from the node's right-click menu.
 
