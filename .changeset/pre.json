@@ -1,5 +1,5 @@
 {
-  "mode": "pre",
+  "mode": "exit",
   "tag": "alpha",
   "initialVersions": {
     "learning-snippets": "0.0.0",
@@ -13,5 +13,9 @@
     "test-utilities": "0.0.0",
     "@itwin/tree-widget-react": "3.18.0"
   },
-  "changesets": ["@itwin-tree-widget-react-v4-major", "@itwin-tree-widget-react-v4-minor", "@itwin-tree-widget-react-v4-patch"]
+  "changesets": [
+    "@itwin-tree-widget-react-v4-major",
+    "@itwin-tree-widget-react-v4-minor",
+    "@itwin-tree-widget-react-v4-patch"
+  ]
 }
