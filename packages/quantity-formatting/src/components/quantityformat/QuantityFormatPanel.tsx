@@ -12,6 +12,7 @@ import { FormatSample } from "./FormatSample.js";
 import { useUnitsProvider } from "./internal/useUnitsProvider.js";
 import { BentleyError, Logger } from "@itwin/core-bentley";
 import { QuantityFormattingLoggerCategory } from "../../QuantityFormatting.js";
+import { Format, FormatterSpec, FormatType } from "@itwin/core-quantity";
 
 import type { UnitProps, FormatDefinition, UnitsProvider } from "@itwin/core-quantity";
 /** Properties of [[QuantityFormatPanel]] component.
@@ -46,6 +47,15 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
   );
 
   const [saveEnabled, setSaveEnabled] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
+  const [saveError, setSaveError] = React.useState(false);
+  const saveRequest = React.useRef(0);
+
+  React.useEffect(() => {
+    setSaveError(false);
+    setIsSaving(false);
+    return () => { saveRequest.current++; };
+  }, [clonedFormatDefinition, unitsProvider]);
 
   const [persistenceUnit, setPersistenceUnit] = React.useState<
     UnitProps | undefined
@@ -88,10 +98,29 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
     setSaveEnabled(true);
   }, []);
 
-  const handleSave = React.useCallback(() => {
+  const handleSave = React.useCallback(async () => {
+    const request = ++saveRequest.current;
+    setIsSaving(true);
+    setSaveError(false);
+    try {
+      const format = await Format.createFromJSON("custom", unitsProvider, clonedFormatDefinition);
+      if (format.units?.length || format.type === FormatType.Bearing || format.type === FormatType.Azimuth) {
+        const spec = await FormatterSpec.create(format.name, format, unitsProvider, format.units?.[0][0]);
+        // Some providers return invalid conversion metadata rather than rejecting spec creation.
+        spec.applyFormatting(1);
+      }
+    } catch (error) {
+      if (request !== saveRequest.current) return;
+      Logger.logError(QuantityFormattingLoggerCategory, "Failed to validate the edited format", () => ({ error: BentleyError.getErrorMessage(error) }));
+      setSaveError(true);
+      setIsSaving(false);
+      return;
+    }
+    if (request !== saveRequest.current) return;
+    setIsSaving(false);
     onFormatChange(clonedFormatDefinition);
     setSaveEnabled(false);
-  }, [onFormatChange, clonedFormatDefinition]);
+  }, [onFormatChange, clonedFormatDefinition, unitsProvider]);
 
   const handleClear = React.useCallback(() => {
     setClonedFormatDefinition({...formatDefinition});
@@ -114,14 +143,17 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
         onFormatChange={handleOnFormatChanged}
         persistenceUnit={persistenceUnit}
       />
-      <Flex justifyContent="flex-end" gap="xs">
-        <Button size="small" styleType="default" onClick={handleClear} disabled={!saveEnabled}>
-          {translate("QuantityFormat:labels.revert")}
-        </Button>
-        <Button size="small" styleType="high-visibility" onClick={handleSave} disabled={!saveEnabled}>
-          {translate("QuantityFormat:labels.apply")}
-        </Button>
-      </Flex>
+      <div className="quantityFormat--quantityPanel-footer">
+        <Flex justifyContent="flex-end" gap="xs">
+          <Button size="small" styleType="default" onClick={handleClear} disabled={!saveEnabled}>
+            {translate("QuantityFormat:labels.revert")}
+          </Button>
+          <Button size="small" styleType="high-visibility" onClick={() => void handleSave()} disabled={!saveEnabled || isSaving}>
+            {translate("QuantityFormat:labels.apply")}
+          </Button>
+        </Flex>
+        {saveError && <div role="alert">{translate("QuantityFormat:errors.invalidFormat")}</div>}
+      </div>
     </div>
   );
 }

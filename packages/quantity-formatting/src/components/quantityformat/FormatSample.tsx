@@ -39,11 +39,14 @@ export function FormatSample(props: FormatSampleProps) {
     undefined
   );
   const [formattedValue, setFormattedValue] = React.useState("");
+  const [formatError, setFormatError] = React.useState(false);
   const { translate } = useTranslation();
   const inputId = React.useId();
   // Create FormatterSpec when formatProps or persistenceUnit changes
   React.useEffect(() => {
     let disposed = false;
+    setFormatSpec(undefined);
+    setFormatError(false);
     const createFormatterSpec = async () => {
       if (!persistenceUnit) {
         setFormatSpec(undefined);
@@ -68,6 +71,7 @@ export function FormatSample(props: FormatSampleProps) {
         Logger.logError(QuantityFormattingLoggerCategory, "Failed to create the formatter for the format sample", () => ({ error: BentleyError.getErrorMessage(error) }));
         if (disposed) return;
         setFormatSpec(undefined);
+        setFormatError(true);
       }
     };
 
@@ -85,10 +89,17 @@ export function FormatSample(props: FormatSampleProps) {
 
   // Update formatted value when magnitude or formatSpec changes
   React.useEffect(() => {
-    if (formatSpec) {
-      setFormattedValue(formatSpec.applyFormatting(magnitude));
-    } else {
+    if (!formatSpec) {
       setFormattedValue("");
+      return;
+    }
+    try {
+      setFormattedValue(formatSpec.applyFormatting(magnitude));
+      setFormatError(false);
+    } catch (error) {
+      Logger.logError(QuantityFormattingLoggerCategory, "Failed to evaluate the format sample", () => ({ error: BentleyError.getErrorMessage(error) }));
+      setFormattedValue("");
+      setFormatError(true);
     }
   }, [magnitude, formatSpec]);
 
@@ -172,9 +183,13 @@ export function FormatSample(props: FormatSampleProps) {
           </div>
           <Divider orientation="vertical" />
           <div className="quantityFormat--formatSample-resultSection">
-            <Label className="quantityFormat--formattedValueLabel">
-              {formattedValue}
-            </Label>
+            {formatError ? (
+              <div role="alert">{translate("QuantityFormat:errors.invalidFormat")}</div>
+            ) : (
+              <Label className="quantityFormat--formattedValueLabel">
+                {formattedValue}
+              </Label>
+            )}
           </div>
         </div>
     </div>
