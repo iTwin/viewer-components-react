@@ -1,0 +1,112 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
+import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { ClassGroupingNodeKey, GroupingHierarchyNode, InstancesNodeKey, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+
+/**
+ * Contains utility functions for working with Categories Tree nodes.
+ * @beta
+ */
+export namespace CategoriesTreeNode {
+  /** Checks if the given node represents a `BisCore.DefinitionContainer` element. */
+  export const isDefinitionContainerNode = (node: Pick<HierarchyNode, "extendedData">): node is NonGroupingHierarchyNode & { key: InstancesNodeKey } =>
+    node.extendedData?.type === "definition-container";
+
+  /**
+   * Checks if the given node represents a `BisCore.Category` element.
+   *
+   * If it does, the node's `extendedData` will contain the following properties:
+   * - `description`: Optional description of the category
+   * - `hasSubCategories`: Indicates whether the category has sub-categories
+   * - `modelIds`: Ids of models that this category node is contained under
+   */
+  export const isCategoryNode = (
+    node: Pick<HierarchyNode, "extendedData">,
+  ): node is Omit<NonGroupingHierarchyNode, "extendedData"> & { key: InstancesNodeKey } & {
+    extendedData: {
+      description?: string;
+      hasSubCategories?: boolean;
+      modelIds: Id64Array;
+    };
+  } => node.extendedData?.type === "category";
+
+  /** Checks if the given node represents a `BisCore.Model`. */
+  export const isModelNode = (node: Pick<HierarchyNode, "extendedData">): node is NonGroupingHierarchyNode & { key: InstancesNodeKey } =>
+    node.extendedData?.type === "model";
+
+  /**
+   * Checks if the given node represents a `BisCore.GeometricElement` element.
+   *
+   * If it does, the node's `extendedData` will contain the following properties:
+   * - `modelId`: `Id64String` of the model containing the element
+   * - `categoryId`: `Id64String` of the category of the element
+   */
+  export const isElementNode = (
+    node: Pick<HierarchyNode, "extendedData">,
+  ): node is Omit<NonGroupingHierarchyNode, "extendedData"> & { key: InstancesNodeKey } & {
+    extendedData: {
+      modelId: Id64String;
+      categoryId: Id64String;
+    };
+  } => node.extendedData?.type === "element";
+
+  /**
+   * Checks if the given node is a class grouping node of `BisCore.GeometricElement` nodes.
+   *
+   * If it does, the node's `extendedData` will contain the following properties:
+   * - `categoryId`: `Id64String` of the category of the element
+   * - `modelElementsMap`: A map of model's `Id64String` -> Set of elements' `Id64String`s contained within this grouping node
+   */
+  export const isElementClassGroupingNode = (
+    node: Pick<HierarchyNode, "key">,
+  ): node is Omit<GroupingHierarchyNode, "extendedData"> & { key: ClassGroupingNodeKey } & {
+    extendedData: {
+      categoryId: Id64String;
+      modelElementsMap: Map<Id64String, { elementIds: Set<Id64String> }>;
+    };
+  } => HierarchyNode.isClassGroupingNode(node);
+
+  /**
+   * Checks if the given node represents a `BisCore.SubCategory` element.
+   *
+   * If it does, the node's `extendedData` will contain the following properties:
+   * - `categoryId`: `Id64String` of the parent category
+   */
+  export const isSubCategoryNode = (
+    node: Pick<HierarchyNode, "extendedData">,
+  ): node is Omit<NonGroupingHierarchyNode, "extendedData"> & { key: InstancesNodeKey } & {
+    extendedData: {
+      categoryId: Id64String;
+    };
+  } => node.extendedData?.type === "sub-category";
+
+  /** Returns type of the node. */
+  export const getType = (
+    node: HierarchyNode,
+  ): "definition-container" | "category" | "element" | "sub-category" | "model" | "elements-class-group" | undefined => {
+    if (HierarchyNodeKey.isClassGrouping(node.key)) {
+      return "elements-class-group";
+    }
+    if (isCategoryNode(node)) {
+      return "category";
+    }
+    if (isDefinitionContainerNode(node)) {
+      return "definition-container";
+    }
+    if (isSubCategoryNode(node)) {
+      return "sub-category";
+    }
+    if (isElementNode(node)) {
+      return "element";
+    }
+    if (isModelNode(node)) {
+      return "model";
+    }
+    return undefined;
+  };
+}

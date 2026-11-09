@@ -4,52 +4,68 @@ Copyright © Bentley Systems, Incorporated. All rights reserved.
 
 The `@itwin/tree-widget-react` package provides React components to build a widget with tree components' selector, along with all the building blocks that can be used individually.
 
-![Widget example](./media/widget.png)
+**Upgrading from `3.x`?** Read the [`3.x` to `4.0` migration guide](./docs/Migration_v3_v4.md) - or hand it to your AI assistant - before updating to understand what needs to change in your code.
 
-## 3.0 highlights
+![Widget example](./media/widget-example.png)
 
-The new `3.0` version of the package contains a few notable changes, compared to the previous `2.x` generation.
+## Table of Contents
 
-- To allow easier customization of widget placement, the package now delivers a `createTreeWidget()` function that creates a tree widget definition, instead of a full `UiItemsProvider` implementation. See [Usage](#usage) section for details on how to use the new function.
-
-- The underlying engine for building hierarchies has been changed from `@itwin/presentation-components` to `@itwin/presentation-hierarchies-react`. This is a significant change as the new library runs plain ECSQL queries and handles hierarchy creation on the frontend, as opposed to the previous version that relied on the backend to provide hierarchy data. This change allows this package to use more optimal queries and to be more flexible in terms of hierarchy creation. As a result, we're seeing 30-40% performance improvement for loading nodes in the Models tree when using a web backend and orders of magnitude improvement when using a local backend (desktop & mobile case).
-
-  This change adds a requirement for all tree components in this package to access iModels' metadata, which is achieved through a required `getSchemaContext` prop. See [Creating schema context](#creating-schema-context) section for an example implementation of this function. This also adds an `@itwin/ecschema-metadata` peer dependency on version `^4.0.0`.
-
-  In addition, the new tree components don't rely on the global selection manager provided by `@itwin/presentation-frontend` package. Instead, they require a unified selection storage object created using `createStorage()` function from `@itwin/unified-selection` package. See sections of individual tree components for how to supply it to them, and [Creating unified selection storage](#creating-unified-selection-storage) section for an example for how to create the storage.
-
-- The tree components delivered with the package have been updated to use the [`Tree` component from `@itwin/itwinui-react` package](https://itwinui.bentley.com/docs/tree) instead of [`ControlledTree` from `@itwin/components-react`](https://www.itwinjs.org/reference/components-react/tree/controlledtree/). The new component is a little less dense, provides better accessibility and customization options.
-
-  | 2.x                                             | 3.0                                             |
-  | ----------------------------------------------- | ----------------------------------------------- |
-  | ![Tree widget 2.x](./media/tree-widget-2.x.png) | ![Tree widget 3.0](./media/tree-widget-3.0.png) |
-
-  This change introduces an `@itwin/itwinui-react` peer dependency on version `^3.11.0`.
-
-- The tree components now have hierarchy level size limiting and filtering features always turned on. The features were already available in `2.x` versions, but were not enabled by default. See [Hierarchy level size limiting](#hierarchy-level-size-limiting) and [Hierarchy level filtering](#hierarchy-level-filtering) sections for more details.
-
-- Behavior of header buttons like "Show all", "Hide all", etc. has been changed in filtered hierarchies' case. Previously they applied the visibility change on everything, no matter if the hierarchy is filtered or not. Now, when a hierarchy is filtered, only the nodes in the filtered hierarchy are affected.
-
-- Models tree:
-  - The label filtering feature has been expanded to filter not only up to Models, but the whole hierarchy. This allows filtering the hierarchy to additionally find Category or Element nodes.
-  - [Focus mode](#focus-mode) feature has been added to allow automatic hierarchy filtering as the application selection changes.
-  - In addition to the two filtering-related improvements above, we now allow displaying a subset of the tree by providing a `getFilteredPaths` function. See [Displaying a subset of the tree](#displaying-a-subset-of-the-tree) section for more details.
-  - Display states' control has been modified to be hierarchy based. This means that changing display state of something deep in the hierarchy affects checkbox state of all its ancestors. And vice versa - changing display state of an ancestor affects all its descendants.
+- [Usage](#usage)
+  - [StrataKit configuration](#stratakit-configuration)
+- [Localization](#localization)
+- [Tree integration](#tree-integration)
+  - [Using an explicit viewport](#using-an-explicit-viewport)
+  - [Tree widget context](#tree-widget-context)
+  - [Tree actions](#tree-actions)
+- [Components](#components)
+  - [Selectable tree](#selectable-tree)
+  - [Models tree](#models-tree)
+    - [Configuring the hierarchy](#configuring-the-hierarchy)
+    - [Focus mode](#focus-mode)
+    - [Custom models tree](#custom-models-tree)
+    - [Displaying a subset of the tree](#displaying-a-subset-of-the-tree)
+  - [Categories tree](#categories-tree)
+    - [Configuring the hierarchy](#configuring-the-hierarchy-1)
+    - [Custom categories tree](#custom-categories-tree)
+  - [Classifications tree](#classifications-tree)
+    - [Configuring the hierarchy and visibility](#configuring-the-hierarchy-and-visibility)
+    - [Custom classifications tree and label search](#custom-classifications-tree-and-label-search)
+    - [Searching by instance key](#searching-by-instance-key)
+    - [Merging multiple iModel versions](#merging-multiple-imodel-versions)
+  - [iModel content tree](#imodel-content-tree)
+  - [Custom trees](#custom-trees)
+    - [Custom basic tree](#custom-basic-tree)
+    - [Custom visibility tree](#custom-visibility-tree)
+  - [Hierarchy level size limiting](#hierarchy-level-size-limiting)
+  - [Hierarchy level filtering](#hierarchy-level-filtering)
+  - [Creating unified selection storage](#creating-unified-selection-storage)
+- [Telemetry](#telemetry)
+  - [Performance tracking](#performance-tracking)
+  - [Usage tracking](#usage-tracking)
+  - [Logging](#logging)
+  - [Example](#example)
 
 ## Usage
 
-Typically, the package is used with an [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) based application, but the building blocks may as well be used with any other iTwin.js React app.
+Typically, the package is used with an [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) based application, but the building blocks may also be used with any other iTwin.js React app.
 
-In any case, **before** using any APIs or components delivered with the package, it needs to be initialized:
+### StrataKit configuration
+
+The tree components render their UI using [StrataKit](https://stratakit.bentley.com/docs), Bentley's design system. The StrataKit packages (`@stratakit/foundations`, `@stratakit/icons`, `@stratakit/mui`) are declared as peer dependencies and must be installed and configured by the consuming application. See the [StrataKit configuration documentation](https://stratakit.bentley.com/docs) for setup instructions.
+
+Place a single `TreeWidgetContextProvider` near the root of the application, above all tree widget components. The provider initializes localization, logging, and shared tree resources required by the components. Standard tree components initialize their own telemetry context:
 
 <!-- [[include: [TreeWidget.TreeWidgetInitializeImports, TreeWidget.TreeWidgetInitialize], tsx]] -->
 <!-- BEGIN EXTRACTION -->
 
 ```tsx
-import { TreeWidget } from "@itwin/tree-widget-react";
-import { IModelApp } from "@itwin/core-frontend";
+import { TreeWidgetContextProvider } from "@itwin/tree-widget-react";
 
-await TreeWidget.initialize(IModelApp.localization);
+function App() {
+  return (
+    <TreeWidgetContextProvider localization={IModelApp.localization}>{/* application content, including all tree components */}</TreeWidgetContextProvider>
+  );
+}
 ```
 
 <!-- END EXTRACTION -->
@@ -68,17 +84,23 @@ UiItemsManager.register({
   getWidgets: () =>
     [
       createTreeWidget({
+        // localization object for localizing widget components
+        localization: IModelApp.localization,
         trees: [
           // add a custom component
           { id: "my-tree-id", startIcon: <svg />, getLabel: () => "My Custom Tree", render: () => <>This is my custom tree.</> },
           // add the Models tree component delivered with the package
           {
             id: ModelsTreeComponent.id,
-            getLabel: () => ModelsTreeComponent.getLabel(),
-            render: (props) => (
+            // display the widget header search box for this tree
+            isSearchable: true,
+            // use `ModelsTreeComponent.getLabel` to get the localized default label for models tree
+            getLabel: ({ standardLabels }) => ModelsTreeComponent.getLabel({ standardLabels }),
+            render: ({ treeLabel, searchText }) => (
               <ModelsTreeComponent
-                // see "Creating schema context" section for example implementation
-                getSchemaContext={getSchemaContext}
+                // label for the tree, used for accessibility purposes
+                treeLabel={treeLabel}
+                searchText={searchText}
                 // see "Creating unified selection storage" section for example implementation
                 selectionStorage={unifiedSelectionStorage}
               />
@@ -92,11 +114,254 @@ UiItemsManager.register({
 
 <!-- END EXTRACTION -->
 
+When `isSearchable` is set on a tree definition, the widget header search box is displayed for that tree. The `searchText` received by the render callback can be forwarded to the tree component, as shown above.
+
 As seen in the above code snippet, `createTreeWidget` takes a list of trees that are displayed in the widget. This package delivers a number of tree components for everyone's use (see below), but providing custom trees is also an option.
+
+## Localization
+
+This package delivers a locale JSON file with English strings that follows the [`i18next JSON format`](https://www.i18next.com/misc/json-format). To enable localization, register `LOCALIZATION_NAMESPACES` during initialization:
+
+<!-- [[include: [TreeWidget.LocalizationRegisterNamespacesImports, TreeWidget.LocalizationRegisterNamespaces], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { LOCALIZATION_NAMESPACES } from "@itwin/tree-widget-react";
+
+// Register localization namespaces with `i18next` based localization provider.
+for (const namespace of LOCALIZATION_NAMESPACES) {
+  await IModelApp.localization.registerNamespace(namespace);
+}
+```
+
+<!-- END EXTRACTION -->
+
+When using `createTreeWidget`, pass a `localization` object and `TreeWidgetContextProvider` will be added at the widget scope automatically:
+
+<!-- [[include: [TreeWidget.LocalizationCreateTreeWidgetImports, TreeWidget.LocalizationCreateTreeWidget], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { createTreeWidget, ModelsTreeComponent } from "@itwin/tree-widget-react";
+
+// When using `createTreeWidget`, the `localization` object is supplied to `TreeWidgetContextProvider` automatically.
+UiItemsManager.register({
+  id: "tree-widget-provider",
+  getWidgets: () =>
+    [
+      createTreeWidget({
+        localization: IModelApp.localization,
+        trees: [
+          {
+            id: ModelsTreeComponent.id,
+            getLabel: ({ standardLabels }) => ModelsTreeComponent.getLabel({ standardLabels }),
+            render: ({ treeLabel }) => <ModelsTreeComponent treeLabel={treeLabel} selectionStorage={unifiedSelectionStorage} />,
+          },
+        ],
+      }),
+    ] as readonly Widget[],
+});
+```
+
+<!-- END EXTRACTION -->
+
+When using tree components directly, wrap them with `TreeWidgetContextProvider`:
+
+<!-- [[include: [TreeWidget.TreeWidgetContextProviderImports, TreeWidget.TreeWidgetContextProvider], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { TreeWidgetContextProvider } from "@itwin/tree-widget-react";
+
+// When using tree components directly, wrap them with the tree widget context provider.
+function TreeComponent() {
+  return (
+    <TreeWidgetContextProvider localization={IModelApp.localization}>
+      <ModelsTreeComponent
+        treeLabel="Models tree"
+        selectionStorage={unifiedSelectionStorage}
+        headerButtons={[
+          (props) => <ModelsTreeComponent.ShowAllButton {...props} key={"ShowAllButton"} />,
+          (props) => <ModelsTreeComponent.HideAllButton {...props} key={"HideAllButton"} />,
+        ]}
+      />
+    </TreeWidgetContextProvider>
+  );
+}
+```
+
+<!-- END EXTRACTION -->
+
+`TreeWidgetContextProvider` accepts a `localization` prop — an object with a `getLocalizedString(key: string): string` method. It is designed to work with the `Localization` interface from `@itwin/core-common`, but a custom implementation can be used as well by providing an object with a custom `getLocalizedString` function.
+
+## Tree integration
+
+The building blocks in this section apply to all tree components delivered with the package.
+
+### Using an explicit viewport
+
+`TreeWidgetViewport` decouples tree visibility from AppUI's active viewport. It may adapt an iTwin.js viewport or be implemented by another viewport integration.
+
+An existing iTwin.js viewport can be adapted with `createTreeWidgetViewport` and passed directly to a tree:
+
+<!-- [[include: [TreeWidget.TreeWidgetViewportReactImports, TreeWidget.TreeIntegrationCommonImports, TreeWidget.TreeWidgetViewportExampleImports, TreeWidget.TreeWidgetViewportExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { useMemo } from "react";
+
+import { ModelsTreeComponent, TreeWidgetContextProvider } from "@itwin/tree-widget-react";
+import type { SelectionStorage } from "@itwin/unified-selection";
+
+import { createTreeWidgetViewport } from "@itwin/tree-widget-react";
+import type { Viewport } from "@itwin/core-frontend";
+
+interface ModelsTreeWithViewportProps {
+  viewport: Viewport;
+  selectionStorage: SelectionStorage;
+}
+
+function ModelsTreeWithViewport({ viewport, selectionStorage }: ModelsTreeWithViewportProps) {
+  const treeViewport = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
+  return (
+    <TreeWidgetContextProvider localization={IModelApp.localization}>
+      <ModelsTreeComponent treeLabel="Models tree" viewport={treeViewport} selectionStorage={selectionStorage} />
+    </TreeWidgetContextProvider>
+  );
+}
+```
+
+<!-- END EXTRACTION -->
+
+Alternatively, a non-iTwin.js viewport can integrate with tree visibility by implementing `TreeWidgetViewport`:
+
+<!-- [[include: [TreeWidget.TreeIntegrationCommonImports, TreeWidget.CustomTreeWidgetViewportExampleImports, TreeWidget.CustomTreeWidgetViewportExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { ModelsTreeComponent, TreeWidgetContextProvider } from "@itwin/tree-widget-react";
+import type { SelectionStorage } from "@itwin/unified-selection";
+
+import type { TreeWidgetViewport } from "@itwin/tree-widget-react";
+
+interface CustomViewport extends TreeWidgetViewport {
+  readonly viewType: "3d";
+  // ...the custom viewport implements the remaining TreeWidgetViewport members.
+}
+
+function ModelsTreeWithCustomViewport({ viewport, selectionStorage }: { viewport: CustomViewport; selectionStorage: SelectionStorage }) {
+  return (
+    <TreeWidgetContextProvider localization={IModelApp.localization}>
+      <ModelsTreeComponent treeLabel="Models tree" viewport={viewport} selectionStorage={selectionStorage} />
+    </TreeWidgetContextProvider>
+  );
+}
+```
+
+<!-- END EXTRACTION -->
+
+### Tree widget context
+
+When tree components are used directly, place a single `TreeWidgetContextProvider` near the root of the application instead of wrapping each tree separately. The provider supplies localization, logging, and shared tree resources. Standard tree components supply their own telemetry context:
+
+<!-- [[include: [TreeWidget.TreeIntegrationCommonImports, TreeWidget.TreeWidgetContextExampleImports, TreeWidget.TreeWidgetContextExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { ModelsTreeComponent, TreeWidgetContextProvider } from "@itwin/tree-widget-react";
+import type { SelectionStorage } from "@itwin/unified-selection";
+
+import { CategoriesTreeComponent } from "@itwin/tree-widget-react";
+
+function TreesWithSharedContext({ selectionStorage }: { selectionStorage: SelectionStorage }) {
+  return (
+    <TreeWidgetContextProvider localization={IModelApp.localization}>
+      <ModelsTreeComponent
+        treeLabel="Models tree"
+        selectionStorage={selectionStorage}
+        headerButtons={[
+          (props) => <ModelsTreeComponent.ShowAllButton {...props} key="show-all" />,
+          (props) => <ModelsTreeComponent.HideAllButton {...props} key="hide-all" />,
+        ]}
+      />
+      <CategoriesTreeComponent
+        treeLabel="Categories tree"
+        selectionStorage={selectionStorage}
+        headerButtons={[
+          (props) => <CategoriesTreeComponent.ShowAllButton {...props} key="show-all" />,
+          (props) => <CategoriesTreeComponent.HideAllButton {...props} key="hide-all" />,
+        ]}
+      />
+    </TreeWidgetContextProvider>
+  );
+}
+```
+
+<!-- END EXTRACTION -->
+
+### Tree actions
+
+Tree components support separate inline, overflow-menu, and context-menu action callbacks. Each callback receives the target node and selected nodes, while the second callback argument provides access to the current tree renderer state. Node types can be determined using `ModelsTreeNode.getType`, `CategoriesTreeNode.getType`, or `ClassificationsTreeNode.getType`, which allows rendering actions only for the applicable nodes:
+
+<!-- [[include: [TreeWidget.ModelsTreeExampleImports, TreeWidget.TreeActionsExampleImports, TreeWidget.TreeActionsExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { ModelsTreeComponent, TreeWidgetContextProvider } from "@itwin/tree-widget-react";
+
+import { ModelsTreeNode, TreeActionBase } from "@itwin/tree-widget-react";
+
+// `TreeActionBase` renders icons from an svg sprite href, e.g. `import inspectSvg from "@stratakit/icons/cursor-click.svg"`.
+const inspectSvg = "#inspect-icon";
+const exportSvg = "#export-icon";
+const propertiesSvg = "#properties-icon";
+
+interface ModelsTreeWithActionsProps {
+  onInspect: (label: string) => void;
+  onExport: (label: string) => void;
+  onShowProperties: (label: string) => void;
+}
+
+function ModelsTreeWithActions({ onInspect, onExport, onShowProperties }: ModelsTreeWithActionsProps) {
+  return (
+    <TreeWidgetContextProvider localization={IModelApp.localization}>
+      <ModelsTreeComponent
+        treeLabel="Models tree with actions"
+        selectionStorage={unifiedSelectionStorage}
+        selectionMode="extended"
+        // rendered directly on the node
+        getInlineActions={(actionProps) => [
+          <TreeActionBase key="inspect" label="Inspect selection" icon={inspectSvg} onClick={() => onInspect(actionProps.targetNode.label)} />,
+        ]}
+        // rendered in the node's overflow menu
+        getMenuActions={(actionProps) => [
+          <TreeActionBase key="export" label="Export node" icon={exportSvg} onClick={() => onExport(actionProps.targetNode.label)} />,
+        ]}
+        // rendered in the node's right-click context menu
+        getContextMenuActions={(actionProps) => {
+          if (ModelsTreeNode.getType(actionProps.targetNode.nodeData) !== "model") {
+            return [];
+          }
+          return [
+            <TreeActionBase
+              key="properties"
+              label="Show model properties"
+              icon={propertiesSvg}
+              onClick={() => onShowProperties(actionProps.targetNode.label)}
+            />,
+          ];
+        }}
+      />
+    </TreeWidgetContextProvider>
+  );
+}
+```
+
+<!-- END EXTRACTION -->
 
 ## Components
 
-While we expect this package to be mostly used with [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) and widget created through `createTreeWidget`, the package delivers components used within the widget to meet other use cases.
+While it is expected that this package will be mostly used with [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) and widget created through `createTreeWidget`, the package delivers components used within the widget to meet other use cases.
 
 ### Selectable tree
 
@@ -114,20 +379,60 @@ Typical usage:
 <!-- BEGIN EXTRACTION -->
 
 ```tsx
-import { ModelsTreeComponent } from "@itwin/tree-widget-react";
+import { ModelsTreeComponent, TreeWidgetContextProvider } from "@itwin/tree-widget-react";
 
 function MyWidget() {
   return (
-    <ModelsTreeComponent
-      // see "Creating schema context" section for example implementation
-      getSchemaContext={getSchemaContext}
-      // see "Creating unified selection storage" section for example implementation
-      selectionStorage={unifiedSelectionStorage}
-      headerButtons={[
-        (props) => <ModelsTreeComponent.ShowAllButton {...props} key={"ShowAllButton"} />,
-        (props) => <ModelsTreeComponent.HideAllButton {...props} key={"HideAllButton"} />,
-      ]}
-    />
+    <TreeWidgetContextProvider localization={IModelApp.localization}>
+      <ModelsTreeComponent
+        // label for the tree, used for accessibility purposes
+        treeLabel="Models tree"
+        // see "Creating unified selection storage" section for example implementation
+        selectionStorage={unifiedSelectionStorage}
+        headerButtons={[
+          (props) => <ModelsTreeComponent.ShowAllButton {...props} key={"ShowAllButton"} />,
+          (props) => <ModelsTreeComponent.HideAllButton {...props} key={"HideAllButton"} />,
+        ]}
+      />
+    </TreeWidgetContextProvider>
+  );
+}
+```
+
+<!-- END EXTRACTION -->
+
+#### Configuring the hierarchy
+
+Models hierarchy options are grouped by node type. EC class names use dot notation.
+
+<!-- [[include: [TreeWidget.ModelsTreeExampleImports, TreeWidget.ModelsTreeHierarchyConfigExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { ModelsTreeComponent, TreeWidgetContextProvider } from "@itwin/tree-widget-react";
+
+function ConfiguredModelsTree() {
+  return (
+    <TreeWidgetContextProvider localization={IModelApp.localization}>
+      <ModelsTreeComponent
+        treeLabel="Configured models tree"
+        selectionStorage={unifiedSelectionStorage}
+        hierarchyConfig={{
+          // Do not display the root subject node.
+          subjects: { root: "exclude" },
+          elements: {
+            // Display this class and its sub-classes as element nodes.
+            baseClass: "BisCore.PhysicalElement",
+            // Exclude this class and its sub-classes from the tree.
+            excludedClasses: ["BisCore.SpatialLocationElement"],
+            // Show class grouping nodes with children counts
+            classGrouping: "enable-with-counts",
+          },
+          // Display models that contain no elements.
+          models: { withoutElements: "include" },
+        }}
+      />
+    </TreeWidgetContextProvider>
   );
 }
 ```
@@ -145,7 +450,7 @@ Available header buttons:
 
 #### Focus mode
 
-The Models tree can be used in a "focus mode" where the tree is automatically filtered to show only elements that are selected in the application. The mode can be controlled through a toggle button in the component's header. Since the feature is mutually exclusive with the "search" feature, enabling it automatically disables the search functionality.
+The Models tree can be used in a "focus mode" where the tree is automatically filtered to show only elements that are selected in the application. The mode can be controlled through a toggle button in the component's header. The feature is mutually exclusive with "search" - the toggle button is disabled while a search is active, and activating a search turns focus mode off.
 
 ![Models tree focus mode demo](./media/models-tree-focus-mode.gif)
 
@@ -158,58 +463,76 @@ This package provides building blocks for custom models tree:
 
 Example:
 
-<!-- [[include: [TreeWidget.CustomModelsTreeExampleImports, TreeWidget.CustomModelsTreeExample], tsx]] -->
+<!-- [[include: [TreeWidget.ModelsTreeExampleImports, TreeWidget.CustomModelsTreeExampleImports, TreeWidget.CustomModelsTreeExample], tsx]] -->
 <!-- BEGIN EXTRACTION -->
 
 ```tsx
-import { useCallback } from "react";
-import { TreeWithHeader, useModelsTree, useModelsTreeButtonProps, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+import { ModelsTreeComponent, TreeWidgetContextProvider } from "@itwin/tree-widget-react";
+
+import { useCallback, useMemo } from "react";
+import {
+  createTreeWidgetViewport,
+  SelectableTree,
+  useModelsTree,
+  useModelsTreeButtonProps,
+  VisibilityTree,
+  VisibilityTreeRenderer,
+} from "@itwin/tree-widget-react";
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { ComponentPropsWithoutRef } from "react";
 
 type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
 type CustomModelsTreeRendererProps = Parameters<ComponentPropsWithoutRef<typeof VisibilityTree>["treeRenderer"]>[0];
 function CustomModelsTreeRenderer(props: CustomModelsTreeRendererProps) {
-  const getLabel = props.getLabel;
-  const getLabelCallback = useCallback<Required<VisibilityTreeRendererProps>["getLabel"]>(
+  const getTreeItemProps = props.getTreeItemProps;
+  const getTreeItemPropsCallback = useCallback<Required<VisibilityTreeRendererProps>["getTreeItemProps"]>(
     (node) => {
-      const originalLabel = getLabel(node);
-      return <>Custom node - {originalLabel}</>;
+      const nodeProps = getTreeItemProps(node);
+      return {
+        ...nodeProps,
+        label: <>Custom node - {nodeProps.label}</>,
+        description: <>Sublabel - {node.label}</>,
+      };
     },
-    [getLabel],
+    [getTreeItemProps],
   );
-  const getSublabelCallback = useCallback<Required<VisibilityTreeRendererProps>["getSublabel"]>((node) => <>Sublabel - {node.label}</>, []);
-  return <VisibilityTreeRenderer {...props} getLabel={getLabelCallback} getSublabel={getSublabelCallback} />;
+  return <VisibilityTreeRenderer {...props} treeLabel="Custom models tree" getTreeItemProps={getTreeItemPropsCallback} />;
 }
 
 interface CustomModelsTreeProps {
   imodel: IModelConnection;
   viewport: Viewport;
-  getSchemaContext: (imodel: IModelConnection) => SchemaContext;
   selectionStorage: SelectionStorage;
 }
 
-function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage }: CustomModelsTreeProps) {
-  const { buttonProps } = useModelsTreeButtonProps({ imodel, viewport });
-  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport });
+function CustomModelsTree({ imodel, viewport, selectionStorage }: CustomModelsTreeProps) {
+  const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
+  const { buttonProps } = useModelsTreeButtonProps({ imodel, viewport: activeView });
+  const { treeProps, getTreeItemProps } = useModelsTree({ activeView });
 
   return (
-    <TreeWithHeader
+    <SelectableTree
       buttons={[
         <ModelsTreeComponent.ShowAllButton {...buttonProps} key={"ShowAllButton"} />,
         <ModelsTreeComponent.HideAllButton {...buttonProps} key={"HideAllButton"} />,
       ]}
     >
       <VisibilityTree
-        {...modelsTreeProps}
-        getSchemaContext={getSchemaContext}
+        {...treeProps}
         selectionStorage={selectionStorage}
         imodel={imodel}
-        treeRenderer={(props) => <CustomModelsTreeRenderer {...props} {...rendererProps} />}
+        treeRenderer={(rendererProps) => <CustomModelsTreeRenderer {...rendererProps} getTreeItemProps={(node) => getTreeItemProps(node, rendererProps)} />}
       />
-    </TreeWithHeader>
+    </SelectableTree>
+  );
+}
+
+function CustomModelsTreeComponent(props: CustomModelsTreeProps) {
+  return (
+    <TreeWidgetContextProvider localization={IModelApp.localization}>
+      <CustomModelsTree {...props} />
+    </TreeWidgetContextProvider>
   );
 }
 ```
@@ -218,8 +541,8 @@ function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selecti
 
 #### Displaying a subset of the tree
 
-Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` or `getSubTreePaths` functions. These functions receive a helper function called `createInstanceKeyPaths`.
-For `getFilteredPaths` this helper function can generate paths from either:
+Models tree allows displaying a subset of all nodes by providing a `getSearchPaths` or `getSubTreePaths` functions. These functions receive a helper function called `createInstanceKeyPaths`.
+For `getSearchPaths` this helper function can generate paths from either:
 
 - a list of instance keys (`targetItems`)
 - a label string
@@ -230,15 +553,16 @@ For `getSubTreePaths` this helper function can generate paths from:
 
 Based on the returned paths, the displayed hierarchy consists only of the targeted nodes, their ancestors, and their children.
 
-Use `getFilteredPaths` when you need more control over filtering behaviour. Here are some example use cases:
+Use `getSearchPaths` when you need more control over filtering behaviour. Here are some example use cases:
 
 - **Filter by known instance keys**: You already have a list of `InstanceKey` items that should remain in the tree. Pass them as `targetItems` to `createInstanceKeyPaths`.
+
   <!-- [[include: [TreeWidget.GetFilteredPathsComponentWithTargetItemsExample], tsx]] -->
   <!-- BEGIN EXTRACTION -->
 
   ```tsx
   type UseModelsTreeProps = Parameters<typeof useModelsTree>[0];
-  type GetFilteredPathsType = Exclude<UseModelsTreeProps["getFilteredPaths"], undefined>;
+  type GetSearchPathsType = Exclude<UseModelsTreeProps["getSearchPaths"], undefined>;
 
   function CustomModelsTreeComponentWithTargetItems({
     viewport,
@@ -251,7 +575,7 @@ Use `getFilteredPaths` when you need more control over filtering behaviour. Here
     imodel: IModelConnection;
     targetItems: InstanceKey[];
   }) {
-    const getFilteredPaths = useCallback<GetFilteredPathsType>(
+    const getSearchPaths = useCallback<GetSearchPathsType>(
       async ({ createInstanceKeyPaths }) => {
         return createInstanceKeyPaths({
           // list of instance keys representing nodes that should be displayed in the hierarchy
@@ -261,15 +585,17 @@ Use `getFilteredPaths` when you need more control over filtering behaviour. Here
       [targetItems],
     );
 
-    const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
+    const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
+    const { treeProps, getTreeItemProps } = useModelsTree({ activeView, getSearchPaths });
 
     return (
       <VisibilityTree
-        {...modelsTreeProps}
-        getSchemaContext={getSchemaContext}
+        {...treeProps}
         selectionStorage={selectionStorage}
         imodel={imodel}
-        treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+        treeRenderer={(rendererProps) => (
+          <VisibilityTreeRenderer {...rendererProps} treeLabel="Custom models tree" getTreeItemProps={(node) => getTreeItemProps(node, rendererProps)} />
+        )}
       />
     );
   }
@@ -277,7 +603,8 @@ Use `getFilteredPaths` when you need more control over filtering behaviour. Here
 
   <!-- END EXTRACTION -->
 
-- **Post-process the paths created `createInstanceKeyPaths`**: Use `filter` string to generate the paths, then apply additional filtering - e.g., remove paths that are too long.
+- **Post-process the paths created `createInstanceKeyPaths`**: Use `searchText` string to generate the paths, then apply additional filtering - e.g., remove paths that are too long.
+
   <!-- [[include: [TreeWidget.GetFilteredPathsComponentWithPostProcessingExample], tsx]] -->
   <!-- BEGIN EXTRACTION -->
 
@@ -291,28 +618,34 @@ Use `getFilteredPaths` when you need more control over filtering behaviour. Here
     selectionStorage: SelectionStorage;
     imodel: IModelConnection;
   }) {
-    const getFilteredPaths = useCallback<GetFilteredPathsType>(async ({ createInstanceKeyPaths, filter }) => {
-      const defaultPaths = await createInstanceKeyPaths({ label: filter ?? "test" });
-      const result = new Array<HierarchyFilteringPath>();
-      for (const path of defaultPaths) {
-        const normalizedPath = HierarchyFilteringPath.normalize(path);
-        if (normalizedPath.path.length < 5) {
-          normalizedPath.options = { autoExpand: true };
-          result.push(normalizedPath);
+    const getSearchPaths = useCallback<GetSearchPathsType>(async ({ createInstanceKeyPaths, searchText }) => {
+      const searchTree = await createInstanceKeyPaths({ label: searchText ?? "test" });
+      // post-process the search tree - e.g. limit displayed depth and auto-expand the remaining nodes
+      const limitDepthAndAutoExpand = (entries: HierarchySearchTree[], depth: number): HierarchySearchTree[] => {
+        if (depth >= 5) {
+          return [];
         }
-      }
-      return result;
+        const result = new Array<HierarchySearchTree>();
+        for (const entry of entries) {
+          const children = entry.children ? limitDepthAndAutoExpand(entry.children, depth + 1) : undefined;
+          result.push({ ...entry, options: { autoExpand: true }, children });
+        }
+        return result;
+      };
+      return limitDepthAndAutoExpand(searchTree, 1);
     }, []);
 
-    const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
+    const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
+    const { treeProps, getTreeItemProps } = useModelsTree({ activeView, getSearchPaths });
 
     return (
       <VisibilityTree
-        {...modelsTreeProps}
-        getSchemaContext={getSchemaContext}
+        {...treeProps}
         selectionStorage={selectionStorage}
         imodel={imodel}
-        treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+        treeRenderer={(rendererProps) => (
+          <VisibilityTreeRenderer {...rendererProps} treeLabel="Custom models tree" getTreeItemProps={(node) => getTreeItemProps(node, rendererProps)} />
+        )}
       />
     );
   }
@@ -321,8 +654,10 @@ Use `getFilteredPaths` when you need more control over filtering behaviour. Here
   <!-- END EXTRACTION -->
 
 - **Apply custom logic to generate instance keys**: Generate instance keys using custom implementation. For example: only apply the given filter string to `bis.Subject` and `bis.Model` instances, but not others (`bis.Category`, `bis.GeometricElement`).
+
   <!-- [[include: [TreeWidget.GetFilteredPathsComponentWithFilterAndTargetItemsExample], tsx]] -->
   <!-- BEGIN EXTRACTION -->
+
   ```tsx
   function CustomModelsTreeComponentWithFilterAndTargetItems({
     viewport,
@@ -335,10 +670,10 @@ Use `getFilteredPaths` when you need more control over filtering behaviour. Here
     imodel: IModelConnection;
     filter: string | undefined;
   }) {
-    const getFilteredPaths = useCallback<GetFilteredPathsType>(
-      async ({ createInstanceKeyPaths, filter: activeFilter }) => {
-        if (!activeFilter) {
-          // if filter is not defined, return `undefined` to avoid applying empty filter
+    const getSearchPaths = useCallback<GetSearchPathsType>(
+      async ({ createInstanceKeyPaths, searchText }) => {
+        if (!searchText) {
+          // if search text is not defined, return `undefined` to avoid applying empty filter
           return undefined;
         }
         const targetItems = new Array<InstanceKey>();
@@ -365,32 +700,35 @@ Use `getFilteredPaths` when you need more control over filtering behaviour. Here
                 AND json_extract(e.JsonProperties, '$.PhysicalPartition.Model.Content') IS NULL
                 AND json_extract(e.JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NULL
             )
-            WHERE Label LIKE '%${activeFilter.replaceAll(/[%_\\]/g, "\\$&")}%' ESCAPE '\\'
+            WHERE Label LIKE '%' || ? || '%' ESCAPE '\\'
           `,
-          undefined,
+          QueryBinder.from([searchText]),
           { rowFormat: QueryRowFormat.UseECSqlPropertyIndexes },
         )) {
           targetItems.push({ id: row[1], className: row[0] });
         }
         // `createInstanceKeyPaths` doesn't automatically set the `autoExpand` flag - set it here
-        const paths = await createInstanceKeyPaths({ targetItems });
-        return paths.map((path) => ({ ...path, options: { autoExpand: true } }));
+        const searchTree = await createInstanceKeyPaths({ targetItems });
+        return searchTree.map((entry) => ({ ...entry, options: { autoExpand: true } }));
       },
       [imodel],
     );
 
-    const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths, filter });
+    const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
+    const { treeProps, getTreeItemProps } = useModelsTree({ activeView, getSearchPaths, searchText: filter });
     return (
       <VisibilityTree
-        {...modelsTreeProps}
-        getSchemaContext={getSchemaContext}
+        {...treeProps}
         selectionStorage={selectionStorage}
         imodel={imodel}
-        treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+        treeRenderer={(rendererProps) => (
+          <VisibilityTreeRenderer {...rendererProps} treeLabel="Custom models tree" getTreeItemProps={(node) => getTreeItemProps(node, rendererProps)} />
+        )}
       />
     );
   }
   ```
+
   <!-- END EXTRACTION -->
 
 Use `getSubTreePaths` when you need to restrict the visible hierarchy to a specific sub-tree of nodes, without changing how filtering works. Here is an example use case:
@@ -426,15 +764,17 @@ function CustomModelsTreeComponentWithTargetItems({
     [targetItems],
   );
 
-  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getSubTreePaths });
+  const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
+  const { treeProps, getTreeItemProps } = useModelsTree({ activeView, getSubTreePaths });
 
   return (
     <VisibilityTree
-      {...modelsTreeProps}
-      getSchemaContext={getSchemaContext}
+      {...treeProps}
       selectionStorage={selectionStorage}
       imodel={imodel}
-      treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+      treeRenderer={(rendererProps) => (
+        <VisibilityTreeRenderer {...rendererProps} treeLabel="Custom models tree" getTreeItemProps={(node) => getTreeItemProps(node, rendererProps)} />
+      )}
     />
   );
 }
@@ -444,7 +784,7 @@ function CustomModelsTreeComponentWithTargetItems({
 
 ### Categories tree
 
-The component, based on the active view, renders a hierarchy of either spatial (3d) or drawing (2d) categories. The hierarchy consists of two levels - the category (spatial or drawing) and its sub-categories. There's also a header that renders categories search box and various visibility control buttons.
+The component, based on the active view, renders a hierarchy of either spatial (3d) or drawing (2d) categories. The hierarchy consists of multiple levels: definition containers, their categories (spatial or drawing), categories' sub-categories, and (when enabled via hierarchy configuration options) category elements. There's also a header that renders a categories search box and various visibility control buttons.
 
 ![Categories tree example](./media/categories-tree.png)
 
@@ -454,17 +794,54 @@ Typical usage:
 <!-- BEGIN EXTRACTION -->
 
 ```tsx
-import { CategoriesTreeComponent } from "@itwin/tree-widget-react";
+import { CategoriesTreeComponent, TreeWidgetContextProvider } from "@itwin/tree-widget-react";
 
 function MyWidget() {
   return (
-    <CategoriesTreeComponent
-      // see "Creating schema context" section for example implementation
-      getSchemaContext={getSchemaContext}
-      // see "Creating unified selection storage" section for example implementation
-      selectionStorage={unifiedSelectionStorage}
-      headerButtons={[(props) => <CategoriesTreeComponent.ShowAllButton {...props} />, (props) => <CategoriesTreeComponent.HideAllButton {...props} />]}
-    />
+    <TreeWidgetContextProvider localization={IModelApp.localization}>
+      <CategoriesTreeComponent
+        // label for the tree, used for accessibility purposes
+        treeLabel="Categories tree"
+        // see "Creating unified selection storage" section for example implementation
+        selectionStorage={unifiedSelectionStorage}
+        headerButtons={[(props) => <CategoriesTreeComponent.ShowAllButton {...props} />, (props) => <CategoriesTreeComponent.HideAllButton {...props} />]}
+      />
+    </TreeWidgetContextProvider>
+  );
+}
+```
+
+<!-- END EXTRACTION -->
+
+#### Configuring the hierarchy
+
+Categories trees can display element nodes, exclude element classes, hide subcategories, and display categories without elements:
+
+<!-- [[include: [TreeWidget.CategoriesTreeExampleImports, TreeWidget.CategoriesTreeHierarchyConfigExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { CategoriesTreeComponent, TreeWidgetContextProvider } from "@itwin/tree-widget-react";
+
+function ConfiguredCategoriesTree() {
+  return (
+    <TreeWidgetContextProvider localization={IModelApp.localization}>
+      <CategoriesTreeComponent
+        treeLabel="Configured categories tree"
+        selectionStorage={unifiedSelectionStorage}
+        hierarchyConfig={{
+          // Display element nodes, except instances of this class and its subclasses.
+          elements: {
+            nodes: "include",
+            excludedClasses: ["BisCore.SpatialLocationElement"],
+          },
+          // Display categories that contain no elements.
+          categories: { withoutElements: "include" },
+          // Do not display subcategory nodes.
+          subCategories: { nodes: "exclude" },
+        }}
+      />
+    </TreeWidgetContextProvider>
   );
 }
 ```
@@ -486,64 +863,293 @@ This package provides building blocks for custom categories tree:
 
 Example:
 
-<!-- [[include: [TreeWidget.CustomCategoriesTreeExampleImports, TreeWidget.CustomCategoriesTreeExample], tsx]] -->
+<!-- [[include: [TreeWidget.CategoriesTreeExampleImports, TreeWidget.CustomCategoriesTreeExampleImports, TreeWidget.CustomCategoriesTreeExample], tsx]] -->
 <!-- BEGIN EXTRACTION -->
 
 ```tsx
-import { TreeWithHeader, useCategoriesTree, useCategoriesTreeButtonProps, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+import { CategoriesTreeComponent, TreeWidgetContextProvider } from "@itwin/tree-widget-react";
+
+import {
+  createTreeWidgetViewport,
+  SelectableTree,
+  useCategoriesTree,
+  useCategoriesTreeButtonProps,
+  VisibilityTree,
+  VisibilityTreeRenderer,
+} from "@itwin/tree-widget-react";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { SelectionStorage } from "@itwin/unified-selection";
-import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { ComponentPropsWithoutRef } from "react";
 
 type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
 type CustomCategoriesTreeRendererProps = Parameters<ComponentPropsWithoutRef<typeof VisibilityTree>["treeRenderer"]>[0];
 
 function CustomCategoriesTreeRenderer(props: CustomCategoriesTreeRendererProps) {
-  const getLabel = props.getLabel;
-  const getLabelCallback = useCallback<Required<VisibilityTreeRendererProps>["getLabel"]>(
+  const getTreeItemProps = props.getTreeItemProps;
+  const getTreeItemPropsCallback = useCallback<Required<VisibilityTreeRendererProps>["getTreeItemProps"]>(
     (node) => {
-      const originalLabel = getLabel(node);
-      return <>Custom node - {originalLabel}</>;
+      const nodeProps = getTreeItemProps(node);
+      return {
+        ...nodeProps,
+        label: <>Custom node - {nodeProps.label}</>,
+        description: <>Custom sub label</>,
+      };
     },
-    [getLabel],
+    [getTreeItemProps],
   );
-  const getSublabel = useCallback<Required<VisibilityTreeRendererProps>["getSublabel"]>(() => {
-    return <>Custom sub label</>;
-  }, []);
-  return <VisibilityTreeRenderer {...props} getLabel={getLabelCallback} getSublabel={getSublabel} />;
+  return <VisibilityTreeRenderer {...props} treeLabel="Custom categories tree" getTreeItemProps={getTreeItemPropsCallback} />;
 }
 
 interface CustomCategoriesTreeProps {
   imodel: IModelConnection;
   viewport: Viewport;
-  getSchemaContext: (imodel: IModelConnection) => SchemaContext;
   selectionStorage: SelectionStorage;
 }
 
-function CustomCategoriesTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage }: CustomCategoriesTreeProps) {
-  const { buttonProps } = useCategoriesTreeButtonProps({ viewport });
-  const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: viewport, filter: "" });
+function CustomCategoriesTree({ imodel, viewport, selectionStorage }: CustomCategoriesTreeProps) {
+  const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
+  const { buttonProps } = useCategoriesTreeButtonProps({ viewport: activeView });
+  const { treeProps, getTreeItemProps } = useCategoriesTree({ activeView });
   return (
-    <TreeWithHeader
+    <SelectableTree
       buttons={[
         <CategoriesTreeComponent.ShowAllButton {...buttonProps} key={"ShowAllButton"} />,
         <CategoriesTreeComponent.HideAllButton {...buttonProps} key={"HideAllButton"} />,
       ]}
     >
       <VisibilityTree
-        {...categoriesTreeProps}
-        getSchemaContext={getSchemaContext}
+        {...treeProps}
         selectionStorage={selectionStorage}
         imodel={imodel}
-        treeRenderer={(props) => <CustomCategoriesTreeRenderer {...props} {...rendererProps} />}
+        treeRenderer={(rendererProps) => <CustomCategoriesTreeRenderer {...rendererProps} getTreeItemProps={(node) => getTreeItemProps(node, rendererProps)} />}
       />
-    </TreeWithHeader>
+    </SelectableTree>
+  );
+}
+
+function CustomCategoriesTreeComponent(props: CustomCategoriesTreeProps) {
+  return (
+    <TreeWidgetContextProvider localization={IModelApp.localization}>
+      <CustomCategoriesTree {...props} />
+    </TreeWidgetContextProvider>
   );
 }
 ```
 
 <!-- END EXTRACTION -->
+
+### Classifications tree
+
+The Classifications tree displays classifications and the 3D geometric elements assigned to them. It supports visibility controls, label search, classification and element instance-key search, and classification renaming.
+
+![Classifications tree example](./media/classifications-tree.png)
+
+Typical usage:
+
+<!-- [[include: [TreeWidget.ClassificationsTreeComponentImports, TreeWidget.TreeWidgetContextProviderImports, TreeWidget.ClassificationsTreeSelectionStorageImports, TreeWidget.ClassificationsTreeExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { ClassificationsTreeComponent } from "@itwin/tree-widget-react";
+
+import { TreeWidgetContextProvider } from "@itwin/tree-widget-react";
+
+import type { SelectionStorage } from "@itwin/unified-selection";
+
+interface MyClassificationsTreeProps {
+  selectionStorage: SelectionStorage;
+}
+
+function MyClassificationsTree({ selectionStorage }: MyClassificationsTreeProps) {
+  return (
+    <TreeWidgetContextProvider localization={IModelApp.localization}>
+      <ClassificationsTreeComponent
+        treeLabel="Classifications tree"
+        selectionStorage={selectionStorage}
+        hierarchyConfig={{
+          // Set the code of the ClassificationSystem element that contains the classification tables to display.
+          rootClassificationSystemCode: "My Classification System",
+        }}
+        emptyTreeContent={<>No classifications are available.</>}
+      />
+    </TreeWidgetContextProvider>
+  );
+}
+```
+
+<!-- END EXTRACTION -->
+
+#### Configuring the hierarchy and visibility
+
+The `hierarchyConfig` can select a root classification system and exclude element classes. `rootClassificationSystemCode` is the code value of the classification system that contains the desired classification tables and classifications.
+
+Classifications display is controlled using their associated categories. When the categories cannot be derived through the elements under that classification, the relationship can be configured explicitly using `classificationToCategoriesRelationshipSpecification`. This allows resolving related categories correctly, so changing a classification's display affects the intended categories. It also has these benefits:
+
+- Without this specification, the `Classification -> ClassificationSystems.ElementHasClassifications -> Element -> Category` relationship path is used, which results in slightly slower queries.
+- When a classification has no elements of its own, the fallback path cannot find its associated categories. Configuring the relationship allows those categories to be resolved and their visibility to be changed with the classification.
+
+<!-- [[include: [TreeWidget.ClassificationsTreeComponentImports, TreeWidget.TreeWidgetContextProviderImports, TreeWidget.ClassificationsTreeSelectionStorageImports, TreeWidget.ClassificationsTreeConfigExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { ClassificationsTreeComponent } from "@itwin/tree-widget-react";
+
+import { TreeWidgetContextProvider } from "@itwin/tree-widget-react";
+
+import type { SelectionStorage } from "@itwin/unified-selection";
+
+function ConfiguredClassificationsTree({ selectionStorage }: { selectionStorage: SelectionStorage }) {
+  return (
+    <TreeWidgetContextProvider localization={IModelApp.localization}>
+      <ClassificationsTreeComponent
+        treeLabel="Configured classifications tree"
+        selectionStorage={selectionStorage}
+        hierarchyConfig={{
+          // Set the code of the ClassificationSystem element that contains the classification tables to display.
+          rootClassificationSystemCode: "My Classification System",
+          // Exclude instances of this class and its subclasses from the tree.
+          elements: { excludedClasses: ["BisCore.SpatialLocationElement"] },
+        }}
+        visibilityHandlerConfig={{
+          // Use a custom relationship to determine the categories related to a classification.
+          classificationToCategoriesRelationshipSpecification: {
+            fullClassName: "MySchema.ClassificationHasCategory",
+            source: "classification",
+          },
+        }}
+      />
+    </TreeWidgetContextProvider>
+  );
+}
+```
+
+<!-- END EXTRACTION -->
+
+#### Custom classifications tree and label search
+
+A custom classifications tree can be built with `useClassificationsTree`. The search limit may be a number or `"unbounded"`:
+
+<!-- [[include: [TreeWidget.TreeWidgetContextProviderImports, TreeWidget.ClassificationsTreeSelectionStorageImports, TreeWidget.ClassificationsTreeIModelImports, TreeWidget.ClassificationsTreeSearchExampleImports, TreeWidget.ClassificationsTreeSearchExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { TreeWidgetContextProvider } from "@itwin/tree-widget-react";
+
+import type { SelectionStorage } from "@itwin/unified-selection";
+
+import type { IModelConnection } from "@itwin/core-frontend";
+
+import { useMemo } from "react";
+import { createTreeWidgetViewport, useClassificationsTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+import type { Viewport } from "@itwin/core-frontend";
+
+interface SearchableClassificationsTreeProps {
+  imodel: IModelConnection;
+  viewport: Viewport;
+  selectionStorage: SelectionStorage;
+  searchText: string;
+}
+
+function SearchableClassificationsTree({ imodel, viewport, selectionStorage, searchText }: SearchableClassificationsTreeProps) {
+  return (
+    <TreeWidgetContextProvider localization={IModelApp.localization}>
+      <SearchableClassificationsTreeContent imodel={imodel} viewport={viewport} selectionStorage={selectionStorage} searchText={searchText} />
+    </TreeWidgetContextProvider>
+  );
+}
+
+function SearchableClassificationsTreeContent({ imodel, viewport, selectionStorage, searchText }: SearchableClassificationsTreeProps) {
+  const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
+  const { treeProps, getTreeItemProps } = useClassificationsTree({
+    activeView,
+    hierarchyConfig: { rootClassificationSystemCode: "My Classification System" },
+    searchText,
+    // Use "unbounded" instead when every match must be returned.
+    searchLimit: 250,
+  });
+
+  return (
+    <VisibilityTree
+      {...treeProps}
+      imodel={imodel}
+      selectionStorage={selectionStorage}
+      treeRenderer={(rendererProps) => (
+        <VisibilityTreeRenderer
+          {...rendererProps}
+          treeLabel="Searchable classifications tree"
+          getTreeItemProps={(node) => getTreeItemProps(node, rendererProps)}
+        />
+      )}
+    />
+  );
+}
+```
+
+<!-- END EXTRACTION -->
+
+#### Searching by instance key
+
+`useClassificationsTreeDefinition` supports searching for known classification or element instance keys. `targetItems` contains the classification table, classification or element keys whose hierarchy paths should be revealed. `onSearchPathsChanged` reports when matching paths change:
+
+<!-- [[include: [TreeWidget.ClassificationsTreeIModelImports, TreeWidget.ClassificationsTreeInstanceSearchExampleImports, TreeWidget.ClassificationsTreeInstanceSearchExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import type { IModelConnection } from "@itwin/core-frontend";
+
+import { useClassificationsTreeDefinition } from "@itwin/tree-widget-react";
+import type { InstanceKey } from "@itwin/presentation-shared";
+
+interface ClassificationsTreeDefinitionProps {
+  imodel: IModelConnection;
+  targetItems: InstanceKey[];
+  onSearchPathsChanged: (pathsFound: boolean) => void;
+}
+
+function useMyClassificationsTreeDefinition({ imodel, targetItems, onSearchPathsChanged }: ClassificationsTreeDefinitionProps) {
+  return useClassificationsTreeDefinition({
+    imodels: [imodel],
+    hierarchyConfig: { rootClassificationSystemCode: "My Classification System" },
+    search: {
+      targetItems,
+      limit: 250,
+    },
+    onSearchPathsChanged: (paths) => onSearchPathsChanged(paths !== undefined && paths.length > 0),
+  });
+}
+```
+
+<!-- END EXTRACTION -->
+
+#### Merging multiple iModel versions
+
+`useClassificationsTreeDefinition` can merge classifications from multiple versions of the same iModel. The versions are supplied in chronological order, from earliest to latest:
+
+<!-- [[include: [TreeWidget.ClassificationsTreeIModelImports, TreeWidget.ClassificationsTreeInstanceSearchExampleImports, TreeWidget.ClassificationsTreeMultipleIModelsExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import type { IModelConnection } from "@itwin/core-frontend";
+
+import { useClassificationsTreeDefinition } from "@itwin/tree-widget-react";
+import type { InstanceKey } from "@itwin/presentation-shared";
+
+interface VersionedClassificationsTreeDefinitionProps {
+  imodelVersions: IModelConnection[];
+}
+
+function useVersionedClassificationsTreeDefinition({ imodelVersions }: VersionedClassificationsTreeDefinitionProps) {
+  return useClassificationsTreeDefinition({
+    // Supply versions from earliest to latest.
+    imodels: imodelVersions,
+    hierarchyConfig: { rootClassificationSystemCode: "My Classification System" },
+  });
+}
+```
+
+<!-- END EXTRACTION -->
+
+This hook requires a `TreeWidgetContextProvider` above it in the component tree.
 
 ### iModel content tree
 
@@ -569,8 +1175,8 @@ import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
 function MyWidget() {
   return (
     <IModelContentTreeComponent
-      // see "Creating schema context" section for example implementation
-      getSchemaContext={getSchemaContext}
+      // label for the tree, used for accessibility purposes
+      treeLabel="IModel content tree"
       // see "Creating unified selection storage" section for example implementation
       selectionStorage={unifiedSelectionStorage}
     />
@@ -600,30 +1206,27 @@ Example:
 import type { ComponentPropsWithoutRef } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { Tree, TreeRenderer } from "@itwin/tree-widget-react";
-import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
-import { createBisInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
+import { createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 
 type TreeProps = ComponentPropsWithoutRef<typeof Tree>;
 const getHierarchyDefinition: TreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
   // create a hierarchy definition that defines what should be shown in the tree
   // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/learning/imodel/HierarchyDefinition.md
-  const labelsQueryFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: imodelAccess });
-  const nodesQueryFactory = createNodesQueryClauseFactory({ imodelAccess, instanceLabelSelectClauseFactory: labelsQueryFactory });
   return createPredicateBasedHierarchyDefinition({
-    classHierarchyInspector: imodelAccess,
+    imodelAccess,
     hierarchy: {
       // For root nodes, select all BisCore.GeometricModel3d instances
-      rootNodes: async () => [
+      rootNodes: async ({ createSelectClause }) => [
         {
           fullClassName: "BisCore.GeometricModel3d",
           query: {
             ecsql: `
               SELECT
-                ${await nodesQueryFactory.createSelectClause({
+                ${await createSelectClause({
                   ecClassId: { selector: "this.ECClassId" },
                   ecInstanceId: { selector: "this.ECInstanceId" },
                   nodeLabel: {
-                    selector: await labelsQueryFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
+                    of: { classAlias: "this", className: "BisCore.GeometricModel3d" },
                   },
                 })}
               FROM BisCore.GeometricModel3d this
@@ -646,9 +1249,8 @@ function MyTree({ imodel }: MyTreeProps) {
       treeName="MyTree"
       imodel={imodel}
       selectionStorage={unifiedSelectionStorage}
-      getSchemaContext={getSchemaContext}
       getHierarchyDefinition={getHierarchyDefinition}
-      treeRenderer={(props) => <TreeRenderer {...props} />}
+      treeRenderer={(props) => <TreeRenderer {...props} treeLabel="My tree" />}
     />
   );
 }
@@ -671,8 +1273,7 @@ Example:
 ```tsx
 import { BeEvent } from "@itwin/core-bentley";
 import { VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
-import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
-import { createBisInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
+import { createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import type { ComponentPropsWithoutRef } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 
@@ -680,23 +1281,21 @@ type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
 const getHierarchyDefinition: VisibilityTreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
   // create a hierarchy definition that defines what should be shown in the tree
   // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/learning/imodel/HierarchyDefinition.md
-  const labelsQueryFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: imodelAccess });
-  const nodesQueryFactory = createNodesQueryClauseFactory({ imodelAccess, instanceLabelSelectClauseFactory: labelsQueryFactory });
   return createPredicateBasedHierarchyDefinition({
-    classHierarchyInspector: imodelAccess,
+    imodelAccess,
     hierarchy: {
       // For root nodes, select all BisCore.GeometricModel3d instances
-      rootNodes: async () => [
+      rootNodes: async ({ createSelectClause }) => [
         {
           fullClassName: "BisCore.GeometricModel3d",
           query: {
             ecsql: `
               SELECT
-                ${await nodesQueryFactory.createSelectClause({
+                ${await createSelectClause({
                   ecClassId: { selector: "this.ECClassId" },
                   ecInstanceId: { selector: "this.ECInstanceId" },
                   nodeLabel: {
-                    selector: await labelsQueryFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
+                    of: { classAlias: "this", className: "BisCore.GeometricModel3d" },
                   },
                 })}
               FROM BisCore.GeometricModel3d this
@@ -720,7 +1319,7 @@ const visibilityHandlerFactory: VisibilityTreeProps["visibilityHandlerFactory"] 
     async changeVisibility(node: HierarchyNode, on: boolean): Promise<void> {
       // change visibility of the instance represented by tree node.
     },
-    dispose() {
+    [Symbol.dispose]() {
       // if necessary, do some clean up before new visibility handler is created or component is unmounted.
     },
   };
@@ -736,10 +1335,9 @@ function MyVisibilityTree({ imodel }: MyVisibilityTreeProps) {
       treeName="MyVisibilityTree"
       imodel={imodel}
       selectionStorage={unifiedSelectionStorage}
-      getSchemaContext={getSchemaContext}
       getHierarchyDefinition={getHierarchyDefinition}
       visibilityHandlerFactory={visibilityHandlerFactory}
-      treeRenderer={(props) => <VisibilityTreeRenderer {...props} />}
+      treeRenderer={(props) => <VisibilityTreeRenderer {...props} treeLabel="My visibility tree" />}
     />
   );
 }
@@ -802,46 +1400,13 @@ await Presentation.initialize({ selection: { selectionStorage: getUnifiedSelecti
 
 <!-- END EXTRACTION -->
 
-### Creating schema context
-
-All tree components delivered with the package require a [`SchemaContext`](https://www.itwinjs.org/reference/ecschema-metadata/context/schemacontext/) to be able to access iModels metadata.
-
-Typically, we want one schema context per iModel per application - this allows schema information to be shared across components, saving memory and time required to access the metadata. Below is an example implementation of `getSchemaContext` function, required by tree components:
-
-<!-- [[include: [TreeWidget.GetSchemaContextExampleImports, TreeWidget.GetSchemaContextExample], tsx]] -->
-<!-- BEGIN EXTRACTION -->
-
-```tsx
-import { SchemaContext } from "@itwin/ecschema-metadata";
-import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
-import type { IModelConnection } from "@itwin/core-frontend";
-
-const schemaContextCache = new Map<string, SchemaContext>();
-function getSchemaContext(imodel: IModelConnection) {
-  const key = imodel.getRpcProps().key;
-  let schemaContext = schemaContextCache.get(key);
-  if (!schemaContext) {
-    const schemaLocater = new ECSchemaRpcLocater(imodel.getRpcProps());
-    schemaContext = new SchemaContext();
-    schemaContext.addLocater(schemaLocater);
-    schemaContextCache.set(key, schemaContext);
-    imodel.onClose.addOnce(() => schemaContextCache.delete(key));
-  }
-  return schemaContext;
-}
-```
-
-<!-- END EXTRACTION -->
-
-Note: Using `ECSchemaRpcLocater` requires the application to support [ECSchemaRpcInterface](https://github.com/iTwin/itwinjs-core/blob/111ab9053f4718896de17bdaeb8de037bad281bd/core/ecschema-rpc/common/src/ECSchemaRpcInterface.ts#L14). This means [registering the interface](https://www.itwinjs.org/learning/rpcinterface/#configure-interfaces) and, on the backend, [registering the implementation](https://www.itwinjs.org/learning/rpcinterface/#server-side-configuration) by calling [ECSchemaRpcImpl.register()](https://github.com/iTwin/itwinjs-core/blob/111ab9053f4718896de17bdaeb8de037bad281bd/core/ecschema-rpc/impl/src/ECSchemaRpcImpl.ts#L29).
-
 ## Telemetry
 
 ### Performance tracking
 
-Components from this package allows consumers to track performance of specific features.
+Components from this package allow consumers to track the performance of specific features.
 
-This can be achieved by passing `onPerformanceMeasured` function to `CategoriesTreeComponent`, `ModelsTreeComponent`, `IModelContentTreeComponent`. The function is invoked with feature id and time elapsed as the component is being used. List of tracked features:
+Pass an `onPerformanceMeasured` callback directly to `CategoriesTreeComponent`, `ClassificationsTreeComponent`, `ExternalSourcesTreeComponent`, `IModelContentTreeComponent`, or `ModelsTreeComponent`. The callback receives the feature ID and elapsed time. Tracked features include:
 
 - `"{tree}-initial-load"` - time it takes to load initial nodes after the tree is created.
 - `"{tree}-hierarchy-level-load"` - time it takes to load child nodes when a node is expanded.
@@ -851,9 +1416,9 @@ Where `{tree}` specifies which tree component the feature is of.
 
 ### Usage tracking
 
-Components from this package allows consumers to track the usage of specific features.
+Components from this package allow consumers to track the usage of specific features.
 
-This can be achieved by passing `onFeatureUsed` function to `CategoriesTreeComponent`, `ModelsTreeComponent`, `IModelContentTreeComponent`. The function is invoked with feature id as the component is being used. List of tracked features:
+Pass an `onFeatureUsed` callback directly to `CategoriesTreeComponent`, `ClassificationsTreeComponent`, `ExternalSourcesTreeComponent`, `IModelContentTreeComponent`, or `ModelsTreeComponent`. The callback receives the feature ID. Tracked features include:
 
 <!-- cspell:disable -->
 
@@ -880,69 +1445,125 @@ This can be achieved by passing `onFeatureUsed` function to `CategoriesTreeCompo
 
 Where `{tree}` specifies which tree component the feature is of.
 
-### Example
+### Logging
 
-For individual tree components the callbacks should be supplied through props:
+By default, tree widget components log through `Logger` from `@itwin/core-bentley`. To use a custom logger, pass an `ILogger` from `@itwin/presentation-shared` to `TreeWidgetContextProvider`:
 
-<!-- [[include: [TreeWidget.TelemetryTreeComponentExampleImports, TreeWidget.TelemetryTreeComponentExample], tsx]] -->
+<!-- [[include: [TreeWidget.TreeWidgetLoggerImports, TreeWidget.TreeWidgetLogger], tsx]] -->
 <!-- BEGIN EXTRACTION -->
 
 ```tsx
-import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
+import { TreeWidgetContextProvider } from "@itwin/tree-widget-react";
+import type { ILogger } from "@itwin/presentation-shared";
 
-function MyWidget() {
+function MyTreeWidget({ logger }: { logger: ILogger }) {
   return (
-    <IModelContentTreeComponent
-      onPerformanceMeasured={(feature, elapsedTime) => {
-        console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
-      }}
-      onFeatureUsed={(feature) => {
-        console.log(`TreeWidget [${feature}] used`);
-      }}
-      getSchemaContext={getSchemaContext}
-      selectionStorage={unifiedSelectionStorage}
-    />
+    <TreeWidgetContextProvider localization={IModelApp.localization} logger={logger}>
+      {/* tree components */}
+    </TreeWidgetContextProvider>
   );
 }
 ```
 
 <!-- END EXTRACTION -->
 
-For custom tree components `TelemetryContextProvider` should be used:
+The `createTreeWidget` function accepts the same `logger` option and supplies it to its `TreeWidgetContextProvider` automatically.
 
-<!-- [[include: [TreeWidget.TelemetryCustomTreeExampleImports, TreeWidget.TelemetryCustomTreeExample], tsx]] -->
+Nested `TreeWidgetContextProvider` instances inherit the logger from the outer provider. The hierarchy packages use a process-wide logger, so the first top-level provider that mounts owns that logger registration until it unmounts. Applications supplying a custom logger should therefore use a single top-level provider where possible.
+
+### Example
+
+Standard tree components own their telemetry context. Supply telemetry callbacks directly to the component:
+
+<!-- [[include: [TreeWidget.TelemetryTreeComponentExampleImports, TreeWidget.TelemetryTreeWidgetContextProviderImports, TreeWidget.TelemetryTreeComponentExample], tsx]] -->
 <!-- BEGIN EXTRACTION -->
 
 ```tsx
-import { TelemetryContextProvider, useCategoriesTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
+
+import { TreeWidgetContextProvider } from "@itwin/tree-widget-react";
 
 function MyWidget() {
   return (
-    <TelemetryContextProvider
-      componentIdentifier="MyTree"
-      onPerformanceMeasured={(feature, elapsedTime) => {
-        console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
-      }}
-      onFeatureUsed={(feature) => {
-        console.log(`TreeWidget [${feature}] used`);
-      }}
-    >
-      <MyTree />
-    </TelemetryContextProvider>
+    <TreeWidgetContextProvider localization={IModelApp.localization}>
+      <IModelContentTreeComponent
+        treeLabel="IModel content tree"
+        selectionStorage={unifiedSelectionStorage}
+        onPerformanceMeasured={(feature, elapsedTime) => {
+          console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
+        }}
+        onFeatureUsed={(feature) => {
+          console.log(`TreeWidget [${feature}] used`);
+        }}
+      />
+    </TreeWidgetContextProvider>
+  );
+}
+```
+
+<!-- END EXTRACTION -->
+
+Custom trees built from lower-level hooks and components do not create a telemetry context. Wrap them with `TelemetryContextProvider` inside `TreeWidgetContextProvider`. The `componentIdentifier` prefixes all feature IDs reported by the custom tree.
+
+When composing a custom tree from a `use*Tree` hook and header buttons, place both under the same `TelemetryContextProvider`. Tree interactions, performance measurements, and header-button usage will then report through the same callbacks and component identifier:
+
+<!-- [[include: [TreeWidget.TelemetryTreeWidgetContextProviderImports, TreeWidget.TelemetryContextProviderImports, TreeWidget.TelemetryCustomTreeExampleImports, TreeWidget.TelemetryCustomTreeExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { TreeWidgetContextProvider } from "@itwin/tree-widget-react";
+
+import { TelemetryContextProvider } from "@itwin/tree-widget-react";
+
+import {
+  CategoriesTreeComponent,
+  createTreeWidgetViewport,
+  SelectableTree,
+  useCategoriesTree,
+  useCategoriesTreeButtonProps,
+  VisibilityTree,
+  VisibilityTreeRenderer,
+} from "@itwin/tree-widget-react";
+
+function MyWidget({ viewport }: { viewport: Viewport }) {
+  return (
+    <TreeWidgetContextProvider localization={IModelApp.localization}>
+      <TelemetryContextProvider
+        componentIdentifier="MyTree"
+        onPerformanceMeasured={(feature, elapsedTime) => {
+          console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
+        }}
+        onFeatureUsed={(feature) => {
+          console.log(`TreeWidget [${feature}] used`);
+        }}
+      >
+        <MyTree viewport={viewport} />
+      </TelemetryContextProvider>
+    </TreeWidgetContextProvider>
   );
 }
 
-function MyTree() {
-  const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: viewport, filter: "" });
+function MyTree({ viewport }: { viewport: Viewport }) {
+  const activeView = useMemo(() => createTreeWidgetViewport(viewport), [viewport]);
+  const { buttonProps, onCategoriesFiltered } = useCategoriesTreeButtonProps({ viewport: activeView });
+  const { treeProps, getTreeItemProps } = useCategoriesTree({ activeView, onCategoriesFiltered });
   return (
-    // VisibilityTree will use provided telemetry context to report used features and their performance
-    <VisibilityTree
-      {...categoriesTreeProps}
-      getSchemaContext={getSchemaContext}
-      selectionStorage={unifiedSelectionStorage}
-      imodel={imodelConnection}
-      treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
-    />
+    <SelectableTree
+      buttons={[
+        <CategoriesTreeComponent.ShowAllButton {...buttonProps} key="show-all" />,
+        <CategoriesTreeComponent.HideAllButton {...buttonProps} key="hide-all" />,
+      ]}
+    >
+      {/* The tree and header buttons report through the same telemetry context. */}
+      <VisibilityTree
+        {...treeProps}
+        selectionStorage={unifiedSelectionStorage}
+        imodel={imodelConnection}
+        treeRenderer={(rendererProps) => (
+          <VisibilityTreeRenderer {...rendererProps} treeLabel="My tree" getTreeItemProps={(node) => getTreeItemProps(node, rendererProps)} />
+        )}
+      />
+    </SelectableTree>
   );
   // see "Custom trees" section for more example implementations
 }

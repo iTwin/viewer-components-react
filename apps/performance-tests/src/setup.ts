@@ -5,13 +5,11 @@
 
 import { HierarchyCacheMode, initializeCore, terminateCore } from "test-utilities";
 import { afterAll, beforeAll } from "vitest";
-import { UiFramework } from "@itwin/appui-react";
-import { EmptyLocalization, IModelReadRpcInterface } from "@itwin/core-common";
+import { IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { setLogger } from "@itwin/presentation-hierarchies";
-import { TreeWidget } from "@itwin/tree-widget-react";
 import { Datasets } from "./util/Datasets.js";
 import { LOGGER } from "./util/Logging.js";
 
@@ -35,12 +33,8 @@ beforeAll(async () => {
 
   ECSchemaRpcImpl.register();
   await Datasets.initialize("./datasets");
-  await UiFramework.initialize();
-  await TreeWidget.initialize(new EmptyLocalization());
-});
+}, 60_000);
 
 afterAll(async () => {
   await terminateCore();
-  UiFramework.terminate();
-  TreeWidget.terminate();
 });

@@ -1,0 +1,274 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
+import { useEffect, useRef, useState } from "react";
+import { asyncScheduler, catchError, defer, distinct, EMPTY, from, lastValueFrom, mergeMap, observeOn, Subject, takeUntil, tap, throttleTime } from "rxjs";
+import { useTranslation } from "./contexts/LocalizationContext.js";
+import { useTelemetryContext } from "./contexts/TelemetryContext.js";
+import { useErrorState } from "./internal/hooks/UseErrorState.js";
+import { createTooltip } from "./internal/Tooltip.js";
+
+import type { Observable } from "rxjs";
+import type { BeEvent } from "@itwin/core-bentley";
+import type { HierarchyNode, TreeNode } from "@itwin/presentation-hierarchies-react";
+import type { TreeItemVisibilityButtonState, VisibilityContext } from "./components/TreeNodeVisibilityButton.js";
+
+/**
+ * Data structure that describes instance visibility status.
+ * @beta
+ */
+export interface VisibilityStatus {
+  /** Instance visibility state. */
+  state: "visible" | "partial" | "hidden";
+  /** Specifies whether visibility changing is disabled or not. */
+  isDisabled?: boolean;
+}
+
+/**
+ * Handler that can be used to determine and change visibility of instances represented by tree nodes.
+ * @beta
+ */
+export interface HierarchyVisibilityHandler extends Disposable {
+  /** Event used to notify tree about visibility changes from outside. */
+  readonly onVisibilityChange: BeEvent<() => void>;
+  /** Returns current visibility status for tree node. */
+  getVisibilityStatus(node: HierarchyNode): Promise<VisibilityStatus> | VisibilityStatus;
+  /** Changes visibility of the instance represented by tree node. */
+  changeVisibility(node: HierarchyNode, on: boolean): Promise<void>;
+}
+
+interface UseHierarchyVisibilityProps {
+  visibilityHandlerFactory: () => HierarchyVisibilityHandler;
+}
+
+type VisibilityStatusMap = Map<
+  string,
+  {
+    node: TreeNode;
+    status: TreeItemVisibilityButtonState;
+    needsRefresh: boolean;
+  }
+>;
+
+/** @internal */
+export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarchyVisibilityProps): VisibilityContext & { triggerRefresh: () => void } {
+  const visibilityStatusMap = useRef<VisibilityStatusMap>(new Map());
+  const [state, setState] = useState<VisibilityContext & { triggerRefresh: () => void }>({
+    getVisibilityButtonState: () => ({ isLoading: true }),
+    onVisibilityButtonClick: () => {},
+    triggerRefresh: () => {},
+  });
+  const { onFeatureUsed } = useTelemetryContext();
+  const setErrorState = useErrorState();
+  const translate = useTranslation();
+
+  useEffect(() => {
+    visibilityStatusMap.current.clear();
+    const handler = visibilityHandlerFactory();
+
+    const visibilityChanged = new Subject<void>();
+    const calculate = new Subject<TreeNode>();
+    const calculateNodeStatus = (node: TreeNode) => {
+      calculate.next(node);
+    };
+
+    const resetCache = () => {
+      for (const value of visibilityStatusMap.current.values()) {
+        value.needsRefresh = true;
+      }
+      visibilityChanged.next();
+    };
+
+    const triggerCheckboxUpdate = () => {
+      setState((prev) => ({
+        ...prev,
+        getVisibilityButtonState: createStateGetter(visibilityStatusMap.current, calculateNodeStatus),
+      }));
+    };
+
+    const subscription = calculate
+      .pipe(
+        distinct(undefined, visibilityChanged),
+        observeOn(asyncScheduler),
+        mergeMap((node) =>
+          defer(async () => handler.getVisibilityStatus(node.nodeData)).pipe(
+            tap({
+              next: (status) => {
+                visibilityStatusMap.current.set(node.id, {
+                  node,
+                  status: {
+                    ...status,
+                    tooltip: createTooltip(status.state, translate),
+                  },
+                  needsRefresh: false,
+                });
+              },
+            }),
+            takeUntil(visibilityChanged),
+            catchError((error) => {
+              setErrorState(error);
+              return EMPTY;
+            }),
+          ),
+        ),
+        throttleTime(100, undefined, { leading: false, trailing: true }),
+      )
+      .subscribe({
+        next: () => {
+          triggerCheckboxUpdate();
+        },
+      });
+
+    const changeVisibility: VisibilityContext["onVisibilityButtonClick"] = (node, visibilityState) => {
+      onFeatureUsed({ featureId: "visibility-change", reportInteraction: true });
+      const { on, newState } = visibilityState === "visible" ? { on: false, newState: "hidden" as const } : { on: true, newState: "visible" as const };
+      void (async () => {
+        try {
+          await handler.changeVisibility(node.nodeData, on);
+        } catch (error) {
+          setErrorState(error);
+          resetCache();
+          triggerCheckboxUpdate();
+        }
+      })();
+      const tooltip = createTooltip("determining", translate);
+      const entry = visibilityStatusMap.current.get(node.id);
+      setChildrenStateRecursively({
+        node,
+        newState,
+        tooltip,
+        map: visibilityStatusMap.current,
+      });
+      if (!entry) {
+        return;
+      }
+      entry.status = {
+        ...entry.status,
+        state: newState,
+        tooltip,
+      };
+      entry.needsRefresh = true;
+      triggerCheckboxUpdate();
+    };
+
+    setState({
+      onVisibilityButtonClick: changeVisibility,
+      getVisibilityButtonState: createStateGetter(visibilityStatusMap.current, calculateNodeStatus),
+      triggerRefresh: () => {
+        resetCache();
+        triggerCheckboxUpdate();
+      },
+    });
+
+    const removeListener = handler.onVisibilityChange.addListener(() => {
+      resetCache();
+      triggerCheckboxUpdate();
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      removeListener();
+      handler[Symbol.dispose]();
+    };
+  }, [visibilityHandlerFactory, onFeatureUsed, setErrorState, translate]);
+
+  return state;
+}
+
+function setChildrenStateRecursively({
+  node,
+  newState,
+  tooltip,
+  map,
+}: {
+  node: TreeNode;
+  newState: "visible" | "hidden";
+  tooltip: string;
+  map: VisibilityStatusMap;
+}) {
+  if (Array.isArray(node.children)) {
+    for (const child of node.children) {
+      const childEntry = map.get(child.id);
+      if (childEntry) {
+        childEntry.status = {
+          ...childEntry.status,
+          state: newState,
+          tooltip,
+        };
+        childEntry.needsRefresh = true;
+      }
+      setChildrenStateRecursively({
+        node: child,
+        newState,
+        tooltip,
+        map,
+      });
+    }
+  }
+}
+
+function createStateGetter(map: VisibilityStatusMap, calculateVisibility: (node: TreeNode) => void): VisibilityContext["getVisibilityButtonState"] {
+  return (node) => {
+    const entry = map.get(node.id);
+    if (entry === undefined) {
+      calculateVisibility(node);
+      return { isLoading: true };
+    }
+
+    if (entry.needsRefresh) {
+      calculateVisibility(node);
+    }
+
+    return entry.status;
+  };
+}
+
+/**
+ * Properties for an overridden method of a `HierarchyVisibilityHandler` implementation.
+ * @beta
+ */
+type HierarchyVisibilityHandlerOverridableMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult
+  ? TProps & {
+      /** A callback that produces the value from the original implementation. */
+      readonly originalImplementation: () => TResult;
+      /**
+       * Reference to the hierarchy based handler.
+       * @note Calling `getVisibility` or `changeVisibility` of this object invokes the overridden implementation as well.
+       */
+      readonly handler: HierarchyVisibilityHandler;
+    }
+  : never;
+
+/**
+ * Function type for an overridden method of `HierarchyVisibilityHandler`.
+ * @beta
+ */
+export type HierarchyVisibilityHandlerOverridableMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult
+  ? (props: HierarchyVisibilityHandlerOverridableMethodProps<TFunc>) => TResult
+  : never;
+
+/** @internal */
+export class HierarchyVisibilityOverrideHandler {
+  #baseHandler: HierarchyVisibilityHandler;
+  constructor(baseHandler: HierarchyVisibilityHandler) {
+    this.#baseHandler = baseHandler;
+  }
+  public createVisibilityHandlerResult<TResult, TOverrideProps>(props: {
+    nonOverriddenResult: Observable<TResult>;
+    override: HierarchyVisibilityHandlerOverridableMethod<(props: TOverrideProps) => Promise<TResult>> | undefined;
+    overrideProps: TOverrideProps;
+  }): Observable<TResult> {
+    const { nonOverriddenResult, override, overrideProps } = props;
+    return override
+      ? from(
+          override({
+            ...overrideProps,
+            originalImplementation: async () => lastValueFrom(nonOverriddenResult, { defaultValue: undefined as TResult }),
+            handler: this.#baseHandler,
+          }),
+        )
+      : nonOverriddenResult;
+  }
+}

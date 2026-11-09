@@ -1,0 +1,101 @@
+name: Tree-Widget benchmark (shared)
+
+on:
+  workflow_call:
+    inputs:
+      display-name:
+        description: Job name shown in Actions
+        required: true
+        type: string
+      benchmark-name:
+        description: Name used by github-action-benchmark
+        required: true
+        type: string
+      gh-pages-branch:
+        description: GitHub Pages branch (e.g. gh-pages)
+        required: false
+        type: string
+        default: gh-pages
+      mode:
+        description: For 'pr' or 'push'
+        required: true
+        type: string
+
+jobs:
+  benchmark:
+    name: ${{ inputs.display-name }}
+    runs-on: ubuntu-24.04
+    permissions:
+      # deployments permission to deploy GitHub pages website
+      deployments: write
+      # contents permission to update benchmark contents in gh-pages branch
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093
+
+      - name: Use Node.js 24
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: 24.15.0
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build benchmark tests
+        run: pnpm lage build --to vcr-performance-tests
+
+      - name: Restore dataset from cache
+        uses: actions/cache/restore@v4
+        id: cache-restore
+        env:
+          cache-name: cache-dataset
+        with:
+          path: "./apps/performance-tests/datasets/*.bim"
+          key: performance-test-dataset-${{ hashFiles('./apps/performance-tests/src/util/Datasets.ts') }}
+
+      - name: Run benchmark tests for PR
+        if: ${{ inputs.mode == 'pr' }}
+        run: pnpm benchmark:tree-widget
+
+      - name: Run benchmark tests for push
+        if: ${{ inputs.mode == 'push' }}
+        run: pnpm benchmark:tree-widget-median
+
+      - name: Save generated datasets
+        uses: actions/cache/save@v4
+        if: steps.cache-restore.outputs.cache-hit != 'true'
+        with:
+          path: "./apps/performance-tests/datasets/*.bim"
+          key: performance-test-dataset-${{ hashFiles('./apps/performance-tests/src/util/Datasets.ts') }}
+
+      # 'push' mode: store results in gh-pages branch
+      - name: Store benchmark result
+        if: ${{ inputs.mode == 'push' }}
+        uses: JonasDov/github-action-benchmark@04d30c72aa7aad091b58aacbb6c182ebb2ecb6c0
+        with:
+          name: ${{ inputs.benchmark-name }}
+          tool: 'customSmallerIsBetter'
+          output-file-path: ./apps/performance-tests/tree-widget-benchmark.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # Push and deploy GitHub pages branch automatically
+          auto-push: true
+          gh-pages-branch: ${{ inputs.gh-pages-branch }}
+
+      # 'pr' mode: post summary as a PR comment
+      - name: Post benchmark summary
+        if: ${{ inputs.mode == 'pr' }}
+        uses: JonasDov/github-action-benchmark@04d30c72aa7aad091b58aacbb6c182ebb2ecb6c0
+        with:
+          name: ${{ inputs.benchmark-name }}
+          tool: 'customSmallerIsBetter'
+          output-file-path: ./apps/performance-tests/tree-widget-benchmark.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          save-data-file: false
+          comment-on-pull-request: true
+          gh-pages-branch: ${{ inputs.gh-pages-branch }}

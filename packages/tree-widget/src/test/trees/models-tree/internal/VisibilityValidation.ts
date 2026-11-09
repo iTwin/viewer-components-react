@@ -3,145 +3,78 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { assert, expect } from "chai";
-import { EMPTY, expand, from, mergeMap } from "rxjs";
-import { PerModelCategoryVisibility } from "@itwin/core-frontend";
-import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { toVoidPromise } from "../../../../tree-widget-react/components/trees/common/Rxjs.js";
-import { ModelsTreeNode } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeNode.js";
-import { waitFor } from "../../../TestUtils.js";
+import { expect } from "vitest";
+import { ModelsTreeNodeInternal } from "../../../../tree-widget-react/trees/models-tree/internal/ModelsTreeNodeInternal.js";
+import { ModelsTreeNode } from "../../../../tree-widget-react/trees/models-tree/ModelsTreeNode.js";
 
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import type { Viewport } from "@itwin/core-frontend";
-import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
-import type { Visibility } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
-import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
-import type { waitForOptions } from "../../../TestUtils.js";
+import type { HierarchyNode } from "@itwin/presentation-hierarchies";
+import type { ValidateNodeProps } from "../../../shared/VisibilityValidation.js";
 
-interface VisibilityExpectations {
-  subject(id: string): Visibility;
-  element(props: { modelId: Id64String; categoryId: Id64String; elementId: Id64String }): Visibility;
-  groupingNode(props: { modelId: Id64String; categoryId: Id64String; elementIds: Id64Array }): Visibility;
-  category(props: { modelId: Id64String; categoryId: Id64String }):
-    | Visibility
-    | {
-        tree: Visibility;
-        categorySelector: boolean;
-        perModelCategoryOverride: "show" | "hide" | "none";
-      };
-  model(modelId: Id64String):
-    | Visibility
-    | {
-        tree: Visibility;
-        modelSelector: boolean;
-      };
-}
-
-export namespace VisibilityExpectations {
-  export function all(visibility: "visible" | "hidden"): VisibilityExpectations {
-    return {
-      subject: () => visibility,
-      model: () => visibility,
-      category: () => visibility,
-      groupingNode: () => visibility,
-      element: () => visibility,
-    };
-  }
-}
-
-export interface ValidateNodeProps {
-  handler: HierarchyVisibilityHandler;
-  viewport: Viewport;
-  visibilityExpectations: VisibilityExpectations;
-}
-
-export async function validateNodeVisibility({ node, handler, visibilityExpectations, viewport }: ValidateNodeProps & { node: HierarchyNode }) {
+export async function validateNodeVisibility({
+  node,
+  handler,
+  expectations,
+  validatedIds,
+}: ValidateNodeProps & { node: HierarchyNode; validatedIds: Set<string> }) {
   const actualVisibility = await handler.getVisibilityStatus(node);
 
-  // modelId, categoryId, id are redefined at the bottom
-  /* eslint-disable @typescript-eslint/no-shadow */
-
-  if (HierarchyNode.isClassGroupingNode(node)) {
-    assert(!!node.extendedData);
-    const modelId = ModelsTreeNode.getModelId(node)!;
-    const categoryId = ModelsTreeNode.getCategoryId(node)!;
-    const elementIds = node.groupedInstanceKeys.map(({ id }) => id);
-    const expected = visibilityExpectations.groupingNode({ modelId, categoryId, elementIds });
-    expect(actualVisibility.state).to.eq(expected, JSON.stringify({ className: node.key.className, ids: node.groupedInstanceKeys.map(({ id }) => id) }));
+  if (expectations === "all-hidden" || expectations === "all-visible") {
+    expect(actualVisibility.state, `Node, ${node.label}`).toBe(expectations === "all-hidden" ? "hidden" : "visible");
     return;
   }
 
-  assert(HierarchyNode.isInstancesNode(node));
-  const { id } = node.key.instanceKeys[0];
+  if (ModelsTreeNode.isElementClassGroupingNode(node)) {
+    const elementIds = node.groupedInstanceKeys.map(({ id: elementId }) => elementId);
+    let visibleCount = 0;
+    let hiddenCount = 0;
 
-  if (ModelsTreeNode.isSubjectNode(node)) {
-    expect(actualVisibility.state).to.eq(visibilityExpectations.subject(id), `Subject ${id}`);
-    return;
-  }
-
-  if (ModelsTreeNode.isModelNode(node)) {
-    const expected = visibilityExpectations.model(id);
-    if (typeof expected === "string") {
-      expect(actualVisibility.state).to.eq(expected, `Model ${id}`);
-      return;
+    for (const elementId of elementIds) {
+      validatedIds.add(elementId);
+      if (expectations[elementId] === "visible") {
+        ++visibleCount;
+      } else if (expectations[elementId] === "hidden") {
+        ++hiddenCount;
+      } else if (expectations[elementId] === "partial") {
+        ++hiddenCount;
+        ++visibleCount;
+      } else if (expectations[elementId] === "disabled") {
+        expect(actualVisibility.isDisabled, `Node, ${JSON.stringify(node)}`).toBe(true);
+        return;
+      }
+      if (visibleCount > 0 && hiddenCount > 0) {
+        expect(actualVisibility.state, `Node, ${JSON.stringify(node)}`).toBe("partial");
+        return;
+      }
     }
-
-    const { tree: handlerVisibility, modelSelector } = expected;
-    expect(actualVisibility.state).to.eq(handlerVisibility, `Model ${id}`);
-    expect(viewport.viewsModel(id)).to.eq(modelSelector, `Model ${id}`);
+    expect(actualVisibility.state, `Node, ${JSON.stringify(node)}`).toBe(visibleCount > 0 ? "visible" : "hidden");
     return;
   }
 
-  if (ModelsTreeNode.isCategoryNode(node)) {
-    const modelId = ModelsTreeNode.getModelId(node)!;
-    const expected = visibilityExpectations.category({ modelId, categoryId: id });
-    if (typeof expected === "string") {
-      expect(actualVisibility.state).to.eq(expected, JSON.stringify({ modelId, categoryId: id }));
-      return;
+  if (ModelsTreeNode.isSubjectNode(node) || ModelsTreeNode.isElementNode(node) || ModelsTreeNode.isModelNode(node)) {
+    const { id } = node.key.instanceKeys[0];
+    validatedIds.add(id);
+    if (expectations[id] === "disabled") {
+      expect(actualVisibility.isDisabled, `Node, ${JSON.stringify(node)}`).toBe(true);
+    } else {
+      expect(actualVisibility.state, `Node, ${JSON.stringify(node)}`).toBe(expectations[id]);
     }
-
-    const { tree: handlerVisibility, categorySelector, perModelCategoryOverride } = expected;
-    expect(actualVisibility.state).to.eq(handlerVisibility, JSON.stringify({ modelId, categoryId: id }));
-    expect(viewport.view.viewsCategory(id)).to.eq(categorySelector, `Category selector for: ${JSON.stringify({ modelId, categoryId: id })}`);
-
-    const ovr = viewport.perModelCategoryVisibility.getOverride(modelId, id);
-    expect(overrideToString(ovr)).to.eq(perModelCategoryOverride, JSON.stringify({ modelId, categoryId: id }));
     return;
   }
 
-  const modelId = ModelsTreeNode.getModelId(node)!;
-  const categoryId = ModelsTreeNode.getCategoryId(node)!;
-  const expected = visibilityExpectations.element({ modelId, categoryId, elementId: id });
-  expect(actualVisibility.state).to.eq(expected, JSON.stringify({ modelId, categoryId, elementId: id }));
-}
-
-export async function validateHierarchyVisibility({
-  provider,
-  waitForOptions,
-  ...props
-}: Omit<ValidateNodeProps, "visibilityExpectations"> & {
-  visibilityExpectations: VisibilityExpectations;
-  provider: HierarchyProvider;
-  waitForOptions?: waitForOptions;
-}) {
-  props.viewport.renderFrame();
-  // This promise allows handler change event to fire if it was scheduled.
-  await new Promise((resolve) => setTimeout(resolve));
-  await toVoidPromise(
-    from(provider.getNodes({ parentNode: undefined })).pipe(
-      expand((node) => (node.children ? provider.getNodes({ parentNode: node }) : EMPTY)),
-      mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }), waitForOptions)),
-    ),
-  );
-}
-
-export function overrideToString(ovr: PerModelCategoryVisibility.Override) {
-  switch (ovr) {
-    case PerModelCategoryVisibility.Override.None:
-      return "none";
-    case PerModelCategoryVisibility.Override.Show:
-      return "show";
-    case PerModelCategoryVisibility.Override.Hide:
-      return "hide";
+  if (ModelsTreeNodeInternal.isCategoryNode(node)) {
+    const { id } = node.key.instanceKeys[0];
+    const parentOrModelId =
+      node.extendedData.parentElementsPath.length > 0
+        ? node.extendedData.parentElementsPath[node.extendedData.parentElementsPath.length - 1].elementIds[0]
+        : node.extendedData.modelIds[0];
+    const idToUse = `${parentOrModelId}-${id}`;
+    validatedIds.add(idToUse);
+    if (expectations[idToUse] === "disabled") {
+      expect(actualVisibility.isDisabled, `Node, ${JSON.stringify(node)}`).toBe(true);
+    } else {
+      expect(actualVisibility.state, `Node, ${JSON.stringify(node)}`).toBe(expectations[idToUse]);
+    }
+    return;
   }
+  throw new Error(`Expected hierarchy to contain only subjects, models, categories and elements got ${JSON.stringify(node)}`);
 }

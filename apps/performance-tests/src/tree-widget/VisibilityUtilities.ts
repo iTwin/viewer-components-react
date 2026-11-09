@@ -3,49 +3,39 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  bufferCount,
-  concatMap,
-  defaultIfEmpty,
-  delay,
-  EMPTY,
-  expand,
-  firstValueFrom,
-  from,
-  identity,
-  mergeMap,
-  of,
-  queueScheduler,
-  takeLast,
-  toArray,
-} from "rxjs";
+import { bufferCount, concatMap, delay, firstValueFrom, from, identity, mergeMap, of, toArray } from "rxjs";
 import { expect } from "vitest";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { createTreeWidgetViewport } from "@itwin/tree-widget-react";
 import { toVoidPromise } from "@itwin/tree-widget-react/internal";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { IModelConnection, ViewState } from "@itwin/core-frontend";
 import type { HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ECSqlQueryDef } from "@itwin/presentation-shared";
-import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
+import type { HierarchyVisibilityHandler, TreeWidgetViewport } from "@itwin/tree-widget-react";
 import type { IModelAccess } from "./StatelessHierarchyProvider.js";
 
 type Visibility = "visible" | "hidden" | "partial";
 
 export interface ValidateNodeProps {
   handler: HierarchyVisibilityHandler;
-  viewport: Viewport;
+  viewport: TreeWidgetTestingViewport;
   expectations:
     | "all-visible"
     | "all-hidden"
-    | {
+    | ({
         default: "all-visible" | "all-hidden";
-        instances: { [id: string]: Visibility };
-        parentIds?: { [id: string]: Visibility };
-      };
+      } &
+        // instances: if node has this instanceId then it should have the specified visibility.
+        // parentIds: if node has parent with this parentId then it should have the specified visibility.
+        (
+          | { instances: { [id: string]: Visibility }; parentIds?: { [id: string]: Visibility } }
+          | { instances?: { [id: string]: Visibility }; parentIds: { [id: string]: Visibility } }
+        ));
 }
 
 async function validateNodeVisibility({ node, handler, expectations }: ValidateNodeProps & { node: HierarchyNode }) {
@@ -59,11 +49,13 @@ async function validateNodeVisibility({ node, handler, expectations }: ValidateN
     expect(actualVisibility.state, node.label).toBe(expectations === "all-hidden" ? "hidden" : "visible");
     return;
   }
-  const idInExpectations = ids.find((id) => id in expectations.instances);
-  if (idInExpectations) {
-    const expectedVisibility = expectations.instances[idInExpectations];
-    expect(actualVisibility.state, node.label).toBe(expectedVisibility);
-    return;
+  if (expectations.instances) {
+    const idInExpectations = ids.find((id) => id in expectations.instances!);
+    if (idInExpectations) {
+      const expectedVisibility = expectations.instances[idInExpectations];
+      expect(actualVisibility.state, node.label).toBe(expectedVisibility);
+      return;
+    }
   }
 
   if (expectations.parentIds) {
@@ -88,12 +80,31 @@ export async function collectNodes({
   ignoreChildren?: (node: HierarchyNode) => boolean;
   provider: HierarchyProvider;
 }): Promise<HierarchyNode[]> {
-  return firstValueFrom(
-    from(provider.getNodes({ parentNode: undefined })).pipe(
-      expand((node) => (node.children && !ignoreChildren(node) ? provider.getNodes({ parentNode: node }) : EMPTY), 1000, queueScheduler),
-      toArray(),
-    ),
-  );
+  return firstValueFrom(from(getNodesAndChildren({ provider, ignoreChildren })).pipe(toArray()));
+}
+
+async function* getNodesAndChildren({
+  provider,
+  parentNode,
+  ignoreChildren,
+}: {
+  ignoreChildren: (node: HierarchyNode) => boolean;
+  provider: HierarchyProvider;
+  parentNode?: HierarchyNode;
+}): AsyncIterableIterator<HierarchyNode> {
+  const releaseAfterProcessing = 500;
+  let nodesProcessed = 0;
+  for await (const node of provider.getNodes({ parentNode })) {
+    ++nodesProcessed;
+    if (nodesProcessed >= releaseAfterProcessing) {
+      await new Promise((resolve) => setTimeout(resolve));
+      nodesProcessed = 0;
+    }
+    yield node;
+    if (node.children && !ignoreChildren(node)) {
+      yield* getNodesAndChildren({ provider, parentNode: node, ignoreChildren });
+    }
+  }
 }
 
 export async function validateHierarchyVisibility(
@@ -112,16 +123,10 @@ export async function validateHierarchyVisibility(
       bufferCount(releaseAfterCount),
       concatMap((nodes, index) => {
         const isDelayed = nodes.length === releaseAfterCount || index > 0;
-        return of({ nodes, isDelayed }).pipe(isDelayed ? delay(0) : identity);
+        return of(nodes).pipe(isDelayed ? delay(0) : identity);
       }),
-      concatMap(({ nodes: delayedNodes, isDelayed }) => {
-        return from(delayedNodes).pipe(
-          mergeMap(async (node) => validateNodeVisibility({ ...props, node })),
-          takeLast(1),
-          defaultIfEmpty(undefined),
-          // Release again after validating the delayed nodes.
-          isDelayed ? delay(0) : identity,
-        );
+      mergeMap((bufferedNodes) => {
+        return from(bufferedNodes).pipe(mergeMap(async (node) => validateNodeVisibility({ ...props, node })));
       }),
     ),
   );
@@ -132,14 +137,18 @@ export async function createViewport({
   testData,
 }: {
   iModelConnection: IModelConnection;
-  testData: {
+  testData?: {
     categories: VisibilityInfo[];
-    subCategories: VisibilityInfo[];
-    elements: VisibilityInfo[];
     models: VisibilityInfo[];
   };
-}): Promise<Viewport> {
+}): Promise<TreeWidgetTestingViewport> {
   const model = IModel.dictionaryId;
+  if (!testData) {
+    testData = {
+      categories: [],
+      models: [],
+    };
+  }
   const viewState = SpatialViewState.createFromProps(
     {
       categorySelectorProps: {
@@ -182,10 +191,70 @@ export async function createViewport({
     }
   });
   await viewState.load();
-  return OffScreenViewport.create({
+  return createTreeWidgetTestingViewport({ viewState });
+}
+
+export type TreeWidgetTestingViewport = TreeWidgetViewport & { renderFrame: () => void } & Disposable;
+
+export function createTreeWidgetTestingViewport({ viewState }: { viewState: ViewState }): TreeWidgetTestingViewport {
+  const viewport = OffScreenViewport.create({
     view: viewState,
     viewRect: new ViewRect(),
   });
+  const treeWidgetViewport = createTreeWidgetViewport(viewport);
+  return {
+    iModel: treeWidgetViewport.iModel,
+    get alwaysDrawn() {
+      return treeWidgetViewport.alwaysDrawn;
+    },
+    get neverDrawn() {
+      return treeWidgetViewport.neverDrawn;
+    },
+    get viewType() {
+      return treeWidgetViewport.viewType;
+    },
+    get isAlwaysDrawnExclusive() {
+      return treeWidgetViewport.isAlwaysDrawnExclusive;
+    },
+    changeCategoryDisplay: (props) => treeWidgetViewport.changeCategoryDisplay(props),
+    changeModelDisplay: (props) => treeWidgetViewport.changeModelDisplay(props),
+    changeSubCategoryDisplay: (props) => treeWidgetViewport.changeSubCategoryDisplay(props),
+    clearNeverDrawn: () => treeWidgetViewport.clearNeverDrawn(),
+    clearAlwaysDrawn: () => treeWidgetViewport.clearAlwaysDrawn(),
+    setNeverDrawn: (props) => treeWidgetViewport.setNeverDrawn(props),
+    setAlwaysDrawn: (props) => treeWidgetViewport.setAlwaysDrawn(props),
+    setPerModelCategoryOverride: (props) => treeWidgetViewport.setPerModelCategoryOverride(props),
+    getPerModelCategoryOverride: (props) => treeWidgetViewport.getPerModelCategoryOverride(props),
+    clearPerModelCategoryOverrides: (props) => treeWidgetViewport.clearPerModelCategoryOverrides(props),
+    get onAlwaysDrawnChanged() {
+      return treeWidgetViewport.onAlwaysDrawnChanged;
+    },
+    get onDisplayedCategoriesChanged() {
+      return treeWidgetViewport.onDisplayedCategoriesChanged;
+    },
+    get onDisplayedModelsChanged() {
+      return treeWidgetViewport.onDisplayedModelsChanged;
+    },
+    get onNeverDrawnChanged() {
+      return treeWidgetViewport.onNeverDrawnChanged;
+    },
+    get onDisplayStyleChanged() {
+      return treeWidgetViewport.onDisplayStyleChanged;
+    },
+    get onPerModelCategoriesOverridesChanged() {
+      return treeWidgetViewport.onPerModelCategoriesOverridesChanged;
+    },
+    get perModelCategoryOverrides() {
+      return treeWidgetViewport.perModelCategoryOverrides;
+    },
+    viewsCategory: (props) => treeWidgetViewport.viewsCategory(props),
+    viewsModel: (props) => treeWidgetViewport.viewsModel(props),
+    viewsSubCategory: (props) => treeWidgetViewport.viewsSubCategory(props),
+    renderFrame: () => viewport.renderFrame(),
+    [Symbol.dispose]() {
+      viewport[Symbol.dispose]();
+    },
+  };
 }
 
 interface VisibilityInfo {
@@ -194,7 +263,7 @@ interface VisibilityInfo {
 }
 
 export function setupInitialDisplayState(props: {
-  viewport: Viewport;
+  viewport: TreeWidgetTestingViewport;
   categories?: Array<VisibilityInfo>;
   subCategories?: Array<VisibilityInfo>;
   models?: Array<VisibilityInfo>;
@@ -206,27 +275,41 @@ export function setupInitialDisplayState(props: {
   const subCategories = props.subCategories ?? [];
   const models = props.models ?? [];
   for (const subCategoryInfo of subCategories) {
-    viewport.changeSubCategoryDisplay(subCategoryInfo.id, subCategoryInfo.visible);
+    viewport.changeSubCategoryDisplay({ subCategoryId: subCategoryInfo.id, display: subCategoryInfo.visible });
   }
-  for (const categoryInfo of categories) {
-    viewport.changeCategoryDisplay(categoryInfo.id, categoryInfo.visible, false, true);
+  const visibleCategories = categories.filter(({ visible }) => visible).map(({ id }) => id);
+  if (visibleCategories.length > 0) {
+    viewport.changeCategoryDisplay({
+      categoryIds: visibleCategories,
+      display: true,
+      enableAllSubCategories: false,
+    });
+  }
+  const hiddenCategories = categories.filter(({ visible }) => !visible).map(({ id }) => id);
+  if (hiddenCategories.length > 0) {
+    viewport.changeCategoryDisplay({
+      categoryIds: hiddenCategories,
+      display: false,
+      enableAllSubCategories: false,
+    });
   }
 
-  for (const elementInfo of elements) {
-    if (elementInfo.visible) {
-      viewport.alwaysDrawn?.add(elementInfo.id);
-      continue;
-    }
-    viewport.neverDrawn?.add(elementInfo.id);
+  const alwaysDrawn = elements.filter(({ visible }) => visible).map(({ id }) => id);
+  if (alwaysDrawn.length > 0) {
+    viewport.setAlwaysDrawn({ elementIds: new Set([...alwaysDrawn, ...(viewport.alwaysDrawn ?? [])]) });
   }
-  if (!viewport.alwaysDrawn) {
-    viewport.setAlwaysDrawn(new Set(elements.filter(({ visible }) => visible).map(({ id }) => id)));
+  const neverDrawn = elements.filter(({ visible }) => !visible).map(({ id }) => id);
+  if (neverDrawn.length > 0) {
+    viewport.setNeverDrawn({ elementIds: new Set([...neverDrawn, ...(viewport.neverDrawn ?? [])]) });
   }
-  if (!viewport.neverDrawn) {
-    viewport.setNeverDrawn(new Set(elements.filter(({ visible }) => !visible).map(({ id }) => id)));
+
+  const visibleModels = models.filter(({ visible }) => visible).map(({ id }) => id);
+  if (visibleModels.length > 0) {
+    viewport.changeModelDisplay({ modelIds: visibleModels, display: true });
   }
-  for (const modelInfo of models) {
-    viewport.changeModelDisplay(modelInfo.id, modelInfo.visible);
+  const hiddenModels = models.filter(({ visible }) => !visible).map(({ id }) => id);
+  if (hiddenModels.length > 0) {
+    viewport.changeModelDisplay({ modelIds: hiddenModels, display: false });
   }
   viewport.renderFrame();
 }
@@ -243,18 +326,19 @@ export function createTestDataForInitialDisplay(props: {
   };
 }
 
-export function createCategoryHierarchyNode(categoryId: Id64String, hasChildren = false, modelId?: Id64String): NonGroupingHierarchyNode {
+export function createCategoryHierarchyNode(categoryId: Id64String, modelId: Id64String, hasChildren = false): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:SpatialCategory", id: categoryId }],
+      instanceKeys: [{ className: "bis.SpatialCategory", id: categoryId }],
     },
     children: hasChildren,
     label: "",
     parentKeys: [],
     extendedData: {
-      isCategory: true,
-      modelId,
+      type: "category",
+      modelIds: [modelId],
+      parentElementsPath: [],
     },
   };
 }
@@ -262,13 +346,13 @@ export function createModelHierarchyNode(modelId?: Id64String, hasChildren?: boo
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:Model", id: modelId ?? "" }],
+      instanceKeys: [{ className: "bis.Model", id: modelId ?? "" }],
     },
     children: !!hasChildren,
     label: "",
     parentKeys: [],
     extendedData: {
-      isModel: true,
+      type: "model",
       modelId: modelId ?? "0x1",
     },
   };
@@ -283,37 +367,61 @@ export function createElementHierarchyNode(props: {
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:GeometricalElement3d", id: props.elementId ?? "" }],
+      instanceKeys: [{ className: "bis.GeometricalElement3d", id: props.elementId ?? "" }],
     },
     children: !!props.hasChildren,
     label: "",
     parentKeys: [],
     extendedData: {
+      type: "element",
       modelId: props.modelId,
       categoryId: props.categoryId,
+      parentElementsPath: [],
     },
   };
 }
 
-/** @internal */
 export function createDefinitionContainerHierarchyNode(definitionContainerId: Id64String): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:DefinitionContainer", id: definitionContainerId }],
+      instanceKeys: [{ className: "bis.DefinitionContainer", id: definitionContainerId }],
     },
     children: true,
     label: "",
     parentKeys: [],
     extendedData: {
-      isDefinitionContainer: true,
+      type: "definition-container",
+    },
+  };
+}
+
+export function createClassificationTableHierarchyNode(classificationTableId: Id64String): NonGroupingHierarchyNode {
+  return {
+    key: {
+      type: "instances",
+      instanceKeys: [{ className: "ClassificationSystems.ClassificationTable", id: classificationTableId }],
+    },
+    children: true,
+    label: "",
+    parentKeys: [],
+    extendedData: {
+      type: "classification-table",
     },
   };
 }
 
 export async function getVisibilityTargets(
   imodelAccess: IModelAccess,
-): Promise<{ models: Id64Array; categories: Id64Array; subCategories: Id64Array; elements: Id64Array; definitionContainers: Id64Array }> {
+  rootClassificationSystemCode?: string,
+): Promise<{
+  models: Id64Array;
+  categories: Id64Array;
+  subCategories: Id64Array;
+  elements: Id64Array;
+  definitionContainers: Id64Array;
+  classificationTables: Id64Array;
+}> {
   const query: ECSqlQueryDef = {
     ecsql: `
       SELECT
@@ -340,6 +448,19 @@ export async function getVisibilityTargets(
         CAST(IdToHex(ECInstanceId) AS TEXT) AS ECInstanceId,
         'BisCore.DefinitionContainer' as ClassName
       FROM bis.DefinitionContainer
+      ${
+        rootClassificationSystemCode
+          ? `
+            UNION ALL
+            SELECT
+              CAST(IdToHex(this.ECInstanceId) AS TEXT) AS ECInstanceId,
+              'BisCore.ClassificationTable' as ClassName
+            FROM ClassificationSystems.ClassificationTable this
+            JOIN ClassificationSystems.ClassificationSystem system ON system.ECInstanceId = this.Parent.Id
+            WHERE system.CodeValue = '${rootClassificationSystemCode}'
+          `
+          : ""
+      }
     `,
   };
   const categories = new Array<Id64String>();
@@ -347,6 +468,7 @@ export async function getVisibilityTargets(
   const elements = new Array<Id64String>();
   const models = new Array<Id64String>();
   const definitionContainers = new Array<Id64String>();
+  const classificationTables = new Array<Id64String>();
   for await (const row of imodelAccess.createQueryReader(query, { limit: "unbounded" })) {
     if (row.ClassName.toLowerCase().includes("subcategory")) {
       subCategories.push(row.ECInstanceId);
@@ -367,6 +489,9 @@ export async function getVisibilityTargets(
     if (row.ClassName.toLowerCase().includes("container")) {
       definitionContainers.push(row.ECInstanceId);
     }
+    if (row.ClassName.toLowerCase().includes("classificationTable".toLowerCase())) {
+      classificationTables.push(row.ECInstanceId);
+    }
   }
-  return { categories, subCategories, elements, models, definitionContainers };
+  return { categories, subCategories, elements, models, definitionContainers, classificationTables };
 }

@@ -3,11 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { StagePanelLocation, StagePanelSection } from "@itwin/appui-react";
-import { SchemaContext } from "@itwin/ecschema-metadata";
-import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
+import { IModelApp } from "@itwin/core-frontend";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
-import { SvgHierarchyTree, SvgTechnicalPreviewMiniBw } from "@itwin/itwinui-icons-react";
 import {
   createDefaultGoogleMapsBaseMaps,
   FeatureInfoUiItemsProvider,
@@ -28,21 +25,23 @@ import {
 } from "@itwin/property-grid-react";
 import {
   CategoriesTreeComponent,
+  ClassificationsTreeComponent,
+  createTreeWidget,
   ExternalSourcesTreeComponent,
   IModelContentTreeComponent,
   ModelsTreeComponent,
-  TreeWidget,
-  TreeWidgetComponent,
+  TreeNodeRenameAction,
+  LOCALIZATION_NAMESPACES as TreeWidgetLocalizationNamespaces,
 } from "@itwin/tree-widget-react";
+import { CustomClassificationsTree } from "./components/custom-classifications-tree/CustomClassificationsTree";
+import { createLayersUiProvider, initializeLayers } from "./components/LayersWidget";
 import { CustomizeFormatPropertyContextMenuItem } from "./components/quantity-formatting/FormatPropertyContextMenuItem";
-import { RepositoriesTreeComponent } from "./components/repositories-tree/RepositoriesTree";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
 import { unifiedSelectionStorage } from "./SelectionStorage";
 
-import type { ComponentPropsWithRef } from "react";
+import type { ComponentProps } from "react";
 import type { UiItemsProvider } from "@itwin/appui-react";
-import type { IModelConnection } from "@itwin/core-frontend";
-import type { SelectableTreeDefinition } from "@itwin/tree-widget-react";
+import type { TreeDefinition } from "@itwin/tree-widget-react";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -82,113 +81,122 @@ interface UiItem {
   createUiItemsProviders: () => UiItemsProvider[];
 }
 
-const schemaContextCache = new Map<string, SchemaContext>();
-function getSchemaContext(imodel: IModelConnection) {
-  const key = imodel.getRpcProps().key;
-  let schemaContext = schemaContextCache.get(key);
-  if (!schemaContext) {
-    const schemaLocater = new ECSchemaRpcLocater(imodel.getRpcProps());
-    schemaContext = new SchemaContext();
-    schemaContext.addLocater(schemaLocater);
-    schemaContextCache.set(key, schemaContext);
-    imodel.onClose.addOnce(() => schemaContextCache.delete(key));
-  }
-  return schemaContext;
-}
-
 const configuredUiItems = new Map<string, UiItem>([
   [
     "tree-widget",
     {
       initialize: async () => {
-        await TreeWidget.initialize();
+        await Promise.all(TreeWidgetLocalizationNamespaces.map(async (ns) => IModelApp.localization.registerNamespace(ns)));
       },
       createUiItemsProviders: () => [
         {
           id: "TreeWidgetUIProvider",
           getWidgets: () => {
-            const trees: SelectableTreeDefinition[] = [
+            const trees: TreeDefinition[] = [
               {
                 id: ModelsTreeComponent.id,
-                getLabel: () => ModelsTreeComponent.getLabel(),
-                render: (props) => {
-                  return (
-                    <ModelsTreeWithOption
-                      getSchemaContext={getSchemaContext}
-                      hierarchyConfig={{
-                        hideRootSubject: true,
-                      }}
-                      density={props.density}
-                      selectionStorage={unifiedSelectionStorage}
-                      selectionMode={"extended"}
-                      onPerformanceMeasured={props.onPerformanceMeasured}
-                      onFeatureUsed={props.onFeatureUsed}
-                    />
-                  );
-                },
+                // eslint-disable-next-line @typescript-eslint/unbound-method
+                getLabel: ModelsTreeComponent.getLabel,
+                isSearchable: true,
+                render: (props) => (
+                  <ModelsTreeWithOptions
+                    hierarchyConfig={{
+                      subjects: {
+                        root: "exclude",
+                      },
+                    }}
+                    searchText={props.searchText}
+                    selectionStorage={unifiedSelectionStorage}
+                    selectionMode={"extended"}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
+                    treeLabel={props.treeLabel}
+                  />
+                ),
               },
               {
                 id: CategoriesTreeComponent.id,
-                getLabel: () => CategoriesTreeComponent.getLabel(),
+                // eslint-disable-next-line @typescript-eslint/unbound-method
+                getLabel: CategoriesTreeComponent.getLabel,
+                isSearchable: true,
                 render: (props) => (
                   <CategoriesTreeComponent
-                    getSchemaContext={getSchemaContext}
-                    density={props.density}
+                    searchText={props.searchText}
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
+                    treeLabel={props.treeLabel}
+                    hierarchyConfig={{ elements: { nodes: "include" } }}
                   />
                 ),
               },
               {
                 id: IModelContentTreeComponent.id,
-                getLabel: () => IModelContentTreeComponent.getLabel(),
+                // eslint-disable-next-line @typescript-eslint/unbound-method
+                getLabel: IModelContentTreeComponent.getLabel,
                 render: (props) => (
                   <IModelContentTreeComponent
-                    getSchemaContext={getSchemaContext}
                     hierarchyConfig={{
                       hideRootSubject: true,
                     }}
-                    density={props.density}
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
+                    treeLabel={props.treeLabel}
                   />
                 ),
               },
               {
                 id: ExternalSourcesTreeComponent.id,
-                startIcon: <SvgTechnicalPreviewMiniBw />,
-                getLabel: () => ExternalSourcesTreeComponent.getLabel(),
+                // eslint-disable-next-line @typescript-eslint/unbound-method
+                getLabel: ExternalSourcesTreeComponent.getLabel,
                 render: (props) => (
                   <ExternalSourcesTreeComponent
-                    getSchemaContext={getSchemaContext}
-                    density={props.density}
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
+                    treeLabel={props.treeLabel}
                   />
                 ),
               },
               {
-                id: "RepositoriesTree",
-                getLabel: () => "Repositories tree",
-                render: () => <RepositoriesTreeComponent baseUrl={`https://${globalThis.IMJS_URL_PREFIX ?? ""}api.bentley.com`} />,
+                id: ClassificationsTreeComponent.id,
+                getLabel: () => "Classifications tree",
+                isSearchable: true,
+                render: (props) => (
+                  <ClassificationsTreeComponent
+                    searchText={props.searchText}
+                    selectionStorage={unifiedSelectionStorage}
+                    hierarchyConfig={{ rootClassificationSystemCode: "50k classifications" }}
+                    getMenuActions={({ targetNode }) => [<TreeNodeRenameAction key={"renameAction"} node={targetNode} />]}
+                    getEditingProps={(node) => ({
+                      onLabelChanged: (newLabel: string) => {
+                        console.log("node label changed", node, newLabel);
+                      },
+                    })}
+                    treeLabel={props.treeLabel}
+                  />
+                ),
+                shouldShow: async (imodel) => ClassificationsTreeComponent.isSupportedByIModel(imodel),
+              },
+              {
+                id: "CustomClassificationsTree",
+                getLabel: () => "Custom Classifications tree",
+                isSearchable: true,
+                render: (props) => <CustomClassificationsTree searchText={props.searchText} />,
               },
             ];
             return [
-              {
-                id: "tree-widget",
-                label: TreeWidget.translate("widget.label"),
-                icon: <SvgHierarchyTree />,
-                layouts: {
-                  standard: {
-                    section: StagePanelSection.Start,
-                    location: StagePanelLocation.Right,
-                  },
+              createTreeWidget({
+                localization: IModelApp.localization,
+                trees,
+                onPerformanceMeasured: (feature: string, elapsedTime: number) => {
+                  console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
                 },
-                content: <TreeWidgetWithOptions trees={trees} />,
-              },
+                onFeatureUsed: (feature: string) => {
+                  console.log(`TreeWidget [${feature}] used`);
+                },
+              }),
             ];
           },
         },
@@ -277,27 +285,20 @@ const configuredUiItems = new Map<string, UiItem>([
       createUiItemsProviders: () => [new GeoToolsAddressSearchProvider()],
     },
   ],
+  [
+    "layers-widget",
+    {
+      initialize: async () => {
+        await initializeLayers();
+      },
+      createUiItemsProviders: () => [createLayersUiProvider()],
+    },
+  ],
 ]);
 
-function ModelsTreeWithOption(props: ComponentPropsWithRef<typeof ModelsTreeComponent>) {
+function ModelsTreeWithOptions(props: ComponentProps<typeof ModelsTreeComponent>) {
   const { disableNodesSelection } = useViewerOptionsContext();
   return <ModelsTreeComponent {...props} selectionPredicate={disableNodesSelection ? disabledSelectionPredicate : undefined} />;
-}
-
-function TreeWidgetWithOptions(props: { trees: SelectableTreeDefinition[] }) {
-  const { density } = useViewerOptionsContext();
-  return (
-    <TreeWidgetComponent
-      trees={props.trees}
-      density={density}
-      onPerformanceMeasured={(feature: string, elapsedTime: number) => {
-        console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
-      }}
-      onFeatureUsed={(feature: string) => {
-        console.log(`TreeWidget [${feature}] used`);
-      }}
-    />
-  );
 }
 
 function disabledSelectionPredicate() {

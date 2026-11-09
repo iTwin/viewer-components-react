@@ -9,6 +9,7 @@ import { TransientIdSequence } from "@itwin/core-bentley";
 import { EmphasizeElements } from "@itwin/core-frontend";
 import { SvgIsolate, SvgSelection, SvgVisibilityShow, SvgZoomInCircular } from "@itwin/itwinui-icons-react";
 import { IconButton, ToggleSwitch } from "@itwin/itwinui-react";
+import { IModelSelector } from "./IModelSelector";
 import { QuantityFormatButton } from "./quantity-formatting/QuantityFormatButton";
 
 import type { PropsWithChildren } from "react";
@@ -48,6 +49,12 @@ export function useViewerActionsContext() {
 export const statusBarActionsProvider: UiItemsProvider = {
   id: "ViewerOptionsUiItemsProvider",
   getStatusBarItems: () => [
+    {
+      id: "iModelSelector",
+      content: <IModelSelector />,
+      itemPriority: 0,
+      section: StatusBarSection.Left,
+    },
     {
       id: `toggleExpandedLayoutButton`,
       content: <ToggleExpandedLayoutButton />,

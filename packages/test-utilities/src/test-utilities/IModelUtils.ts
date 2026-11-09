@@ -10,6 +10,7 @@ import { SnapshotDb } from "@itwin/core-backend";
 import { assert, Id64 } from "@itwin/core-bentley";
 import { BisCodeSpec, Code, IModel } from "@itwin/core-common";
 import { IModelConnection } from "@itwin/core-frontend";
+import { normalizeFullClassName } from "@itwin/presentation-shared";
 import { createFileNameFromString, setupOutputFileLocation } from "./PathUtils.js";
 
 import type { EditTxn, IModelDb } from "@itwin/core-backend";
@@ -31,6 +32,7 @@ import type {
   SubCategoryProps,
   SubjectProps,
 } from "@itwin/core-common";
+import type { EC } from "@itwin/presentation-shared";
 
 export async function buildIModel(name: string, setup?: (imodel: IModelDb) => Promise<void>): Promise<{ imodelConnection: IModelConnection }>;
 export async function buildIModel<TResult extends object>(
@@ -134,7 +136,7 @@ function getFullSchemaXml(props: { schemaName: string; schemaAlias?: string; sch
   `;
 }
 
-function createCode(props: { imodel: IModelDb; scopeId: Id64String; codeSpecName?: BisCodeSpec; codeValue: string }) {
+export function createCode(props: { imodel: IModelDb; scopeId: Id64String; codeSpecName?: BisCodeSpec; codeValue: string }) {
   const codeSpec = props.imodel.codeSpecs.getByName(props.codeSpecName ?? BisCodeSpec.nullCodeSpec);
   return new Code({ spec: codeSpec.id, scope: props.scopeId, value: props.codeValue });
 }
@@ -159,7 +161,7 @@ export function insertDefinitionContainer(
     code: createCode({ imodel: txn.iModel, scopeId: model, codeValue }),
     ...elementProps,
   });
-  return { className, id };
+  return { className: normalizeFullClassName(className), id };
 }
 
 export function insertSubject(
@@ -178,7 +180,7 @@ export function insertSubject(
     },
     ...subjectProps,
   });
-  return { className, id };
+  return { className: normalizeFullClassName(className), id };
 }
 
 export function insertModelWithPartition(
@@ -205,19 +207,21 @@ export function insertPartition(
     },
     ...partitionProps,
   });
-  return { className: classFullName, id: partitionId };
+  return { className: normalizeFullClassName(classFullName), id: partitionId };
 }
 
 export function insertSubModel(
-  props: BaseInstanceInsertProps & { classFullName: string; modeledElementId: Id64String } & Partial<Omit<ModelProps, "id" | "modeledElement" | "parentModel">>,
+  props: BaseInstanceInsertProps & { classFullName: string; modeledElementId: Id64String; relationshipName?: EC.FullClassNameDotNotation } & Partial<
+      Omit<ModelProps, "id" | "modeledElement" | "parentModel">
+    >,
 ) {
-  const { txn, classFullName, modeledElementId, ...modelProps } = props;
+  const { txn, classFullName, modeledElementId, relationshipName, ...modelProps } = props;
   const modelId = txn.insertModel({
     classFullName,
-    modeledElement: { id: modeledElementId },
+    modeledElement: { id: modeledElementId, relClassName: relationshipName },
     ...modelProps,
   });
-  return { className: classFullName, id: modelId };
+  return { className: normalizeFullClassName(classFullName), id: modelId };
 }
 
 export function insertPhysicalModelWithPartition(props: BaseInstanceInsertProps & { codeValue: string; partitionParentId?: Id64String }) {
@@ -283,7 +287,7 @@ export function insertSpatialCategory(
     code: createCode({ imodel: txn.iModel, scopeId: model, codeSpecName: BisCodeSpec.spatialCategory, codeValue }),
     ...categoryProps,
   });
-  return { className, id };
+  return { className: normalizeFullClassName(className), id };
 }
 
 export function insertDrawingCategory(
@@ -299,14 +303,14 @@ export function insertDrawingCategory(
     code: createCode({ imodel: txn.iModel, scopeId: model, codeSpecName: BisCodeSpec.drawingCategory, codeValue }),
     ...categoryProps,
   });
-  return { className, id };
+  return { className: normalizeFullClassName(className), id };
 }
 
 export function getDefaultSubcategoryKey(categoryId: Id64String, fullClassNameSeparator?: string) {
   const pair = Id64.getUint32Pair(categoryId);
   pair.lower++; // id of default subcategory is always `category id + 1`
   return {
-    className: `BisCore${fullClassNameSeparator ?? "."}SubCategory`,
+    className: `BisCore${fullClassNameSeparator ?? "."}SubCategory` as EC.FullClassNameDotNotation,
     id: Id64.fromUint32PairObject(pair),
   };
 }
@@ -330,7 +334,7 @@ export function insertSubCategory(
     },
     ...subCategoryProps,
   });
-  return { className, id };
+  return { className: normalizeFullClassName(className), id };
 }
 
 export function insertPhysicalElement<TAdditionalProps extends object>(
@@ -356,8 +360,8 @@ export function insertPhysicalElement<TAdditionalProps extends object>(
         }
       : undefined),
     ...elementProps,
-  } as PhysicalElementProps);
-  return { className, id };
+  });
+  return { className: normalizeFullClassName(className), id };
 }
 
 export function insertDrawingGraphic<TAdditionalProps extends object>(
@@ -383,8 +387,8 @@ export function insertDrawingGraphic<TAdditionalProps extends object>(
         }
       : undefined),
     ...elementProps,
-  } as GeometricElement2dProps);
-  return { className, id };
+  });
+  return { className: normalizeFullClassName(className), id };
 }
 
 export function insertDrawingElement<TAdditionalProps extends object>(
@@ -410,7 +414,7 @@ export function insertDrawingElement<TAdditionalProps extends object>(
       : undefined),
     ...elementProps,
   } satisfies ElementProps);
-  return { className, id };
+  return { className: normalizeFullClassName(className), id };
 }
 
 export function insertRepositoryLink(props: BaseInstanceInsertProps & { codeValue?: string } & Partial<Omit<RepositoryLinkProps, "id" | "model" | "code">>) {
@@ -422,8 +426,8 @@ export function insertRepositoryLink(props: BaseInstanceInsertProps & { codeValu
     model: IModel.repositoryModelId,
     code: codeValue ? createCode({ imodel: txn.iModel, scopeId: IModel.repositoryModelId, codeValue }) : Code.createEmpty(),
     ...repoLinkProps,
-  } as RepositoryLinkProps);
-  return { className, id };
+  });
+  return { className: normalizeFullClassName(className), id };
 }
 
 export function insertExternalSourceAspect(
@@ -448,7 +452,7 @@ export function insertExternalSourceAspect(
     ...externalSourceAspectProps,
   } as ExternalSourceAspectProps);
 
-  return { className, id };
+  return { className: normalizeFullClassName(className), id };
 }
 
 export function insertExternalSource(
@@ -476,7 +480,7 @@ export function insertExternalSource(
       : undefined,
     ...externalSourceProps,
   } as RepositoryLinkProps);
-  return { className, id };
+  return { className: normalizeFullClassName(className), id };
 }
 
 export function insertExternalSourceAttachment(
@@ -501,7 +505,7 @@ export function insertExternalSourceAttachment(
     },
     ...externalSourceAttachmentProps,
   } as RepositoryLinkProps);
-  return { className, id };
+  return { className: normalizeFullClassName(className), id };
 }
 
 export function insertFunctionalModelWithPartition(props: BaseInstanceInsertProps & { codeValue: string; partitionParentId?: Id64String }) {
@@ -549,13 +553,13 @@ export function insertFunctionalElement(
         }
       : undefined,
     ...elementProps,
-  } as FunctionalElementProps);
+  });
   txn.insertRelationship({
     sourceId: representedElementId,
     targetId: id,
     classFullName: `Functional.${relationshipName}`,
   });
-  return { className, id };
+  return { className: normalizeFullClassName(className), id };
 }
 
 export function insertGroupInformationModelWithPartition(props: BaseInstanceInsertProps & { codeValue: string; partitionParentId?: Id64String }) {
@@ -603,7 +607,7 @@ export function insertGroupInformationElement(
       : undefined,
     ...elementProps,
   });
-  return { className, id };
+  return { className: normalizeFullClassName(className), id };
 }
 
 export function insertDefinitionModelWithPartition(props: BaseInstanceInsertProps & { codeValue: string; partitionParentId?: Id64String }) {
@@ -622,7 +626,9 @@ export function insertDefinitionPartition(
 }
 
 export function insertDefinitionSubModel(
-  props: BaseInstanceInsertProps & { modeledElementId: Id64String } & Partial<Omit<GeometricModel3dProps, "id" | "modeledElement" | "parentModel">>,
+  props: BaseInstanceInsertProps & { modeledElementId: Id64String; relationshipName?: EC.FullClassNameDotNotation } & Partial<
+      Omit<GeometricModel3dProps, "id" | "modeledElement" | "parentModel">
+    >,
 ) {
   return insertSubModel({
     classFullName: `BisCore${props.fullClassNameSeparator ?? "."}DefinitionModel`,
