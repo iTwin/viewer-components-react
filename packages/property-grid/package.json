@@ -28,8 +28,9 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "npm run -s build:lib && npm run -s copy:assets",
+    "build": "npm run -s link:deps && npm run -s build:lib && npm run -s copy:assets",
     "build:lib": "tsc -p tsconfig.lib.json",
+    "link:deps": "node ./scripts/linkWorkspaceDeps.cjs",
     "copy:assets": "npm run -s copy:public && npm run -s copy:styles",
     "copy:public": "cpx \"./public/**/*\" ./lib/public",
     "copy:styles": "cpx \"./src/**/*.scss\" ./lib",
