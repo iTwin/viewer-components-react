@@ -2,6 +2,7 @@
   "recommendations": [
     "dbaeumer.vscode-eslint",
     "streetsidesoftware.code-spell-checker",
+    "mermaidchart.vscode-mermaid-chart",
     "vitest.explorer",
     "oxc.oxc-vscode"
   ]

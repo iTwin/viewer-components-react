@@ -16,7 +16,9 @@
     "extract-api": "lage extract-api --grouped --continue",
     "check:versions": "node scripts/check-package-versions.js",
     "changeset": "node scripts/create-changeset.js",
-    "cspell": "cspell .",
+    "cspell:contents": "cspell .",
+    "cspell:filenames": "node scripts/cspellFileNames.js",
+    "cspell": "pnpm run cspell:contents && pnpm run cspell:filenames",
     "check-inline-styles": "node scripts/check-inline-styles.js",
     "release": "pnpm build && changeset publish",
     "format": "oxfmt --check",
@@ -24,7 +26,8 @@
     "gather-docs": "node ./scripts/gatherDocs.js",
     "update-extractions": "npm run docs:all && npm run gather-docs && lage update-extractions",
     "check-extractions": "npm run docs:all && npm run gather-docs && lage check-extractions",
-    "benchmark:tree-widget": "pnpm run -C ./apps/performance-tests benchmark:tree-widget"
+    "benchmark:tree-widget": "pnpm run -C ./apps/performance-tests benchmark:tree-widget",
+    "benchmark:tree-widget-median": "node scripts/getMedianBenchmarkResults.js"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.1",

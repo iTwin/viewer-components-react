@@ -3,13 +3,15 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "rootDir": "./src",
     "jsx": "react-jsx",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noImplicitOverride": false,
     "resolveJsonModule": true,
-    "rootDir": "./src",
-    "lib": ["ES2023", "DOM", "DOM.Iterable", "ESNext.Disposable"]
+    "lib": ["DOM", "ESNext"],
+    "noEmit": true,
+    "types": ["node", "@stratakit/mui/types.d.ts"]
   },
-  "include": ["src"]
+  "include": ["src/**/*", "types.d.ts"]
 }

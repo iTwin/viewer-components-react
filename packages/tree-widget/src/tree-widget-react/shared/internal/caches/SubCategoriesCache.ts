@@ -1,0 +1,91 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
+import { defer, EMPTY, expand, map, reduce, shareReplay } from "rxjs";
+import { Guid } from "@itwin/core-bentley";
+import { CLASS_NAME_SubCategory } from "../ClassNameDefinitions.js";
+import { catchBeSQLiteInterrupts } from "../hooks/UseErrorState.js";
+import { createWhereClause, getOrCreate } from "../Utils.js";
+
+import type { Observable } from "rxjs";
+import type { GuidString } from "@itwin/core-bentley";
+import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { CategoryId, SubCategoryId } from "../Types.js";
+
+interface SubCategoriesCacheProps {
+  queryExecutor: LimitingECSqlQueryExecutor;
+  componentId?: GuidString;
+}
+
+/** @internal */
+export class SubCategoriesCache {
+  #queryExecutor: LimitingECSqlQueryExecutor;
+  #componentId: GuidString;
+  #componentName: string;
+  #subCategoriesInfo:
+    | Observable<{ subCategoryCategories: Map<SubCategoryId, CategoryId>; categorySubCategories: Map<CategoryId, Array<SubCategoryId>> }>
+    | undefined;
+  #rowLimit = 7500;
+
+  constructor(props: SubCategoriesCacheProps) {
+    this.#queryExecutor = props.queryExecutor;
+    this.#componentId = props.componentId ?? Guid.createValue();
+    this.#componentName = "SubCategoriesCache";
+  }
+
+  private querySubCategories(): Observable<{ id: SubCategoryId; parentId: CategoryId }> {
+    const getQueryReader = (lastSubCategoryId?: SubCategoryId) => {
+      const ecsql = `
+        SELECT
+          sc.ECInstanceId id,
+          sc.Parent.Id categoryId
+        FROM
+          ${CLASS_NAME_SubCategory} sc
+        ${createWhereClause({ conditions: ["NOT sc.IsPrivate", lastSubCategoryId !== undefined && `sc.ECInstanceId > ${lastSubCategoryId}`] })}
+        ORDER BY sc.ECInstanceId
+        LIMIT ${this.#rowLimit}
+      `;
+      return this.#queryExecutor.createQueryReader(
+        { ecsql },
+        {
+          rowFormat: "ECSqlPropertyNames",
+          limit: "unbounded",
+          restartToken: `${this.#componentName}/${this.#componentId}/sub-categories/${lastSubCategoryId ?? "0"}`,
+        },
+      );
+    };
+    return defer(() => getQueryReader()).pipe(
+      // Note: if the total row count is an exact multiple of `#rowLimit`, an extra request that returns
+      // 0 rows will be sent. This is acceptable to keep the implementation simple.
+      expand((row, idx) => {
+        if (idx % this.#rowLimit === this.#rowLimit - 1) {
+          return getQueryReader(row.id);
+        }
+        return EMPTY;
+      }),
+      catchBeSQLiteInterrupts,
+      map((row) => {
+        return { id: row.id, parentId: row.categoryId };
+      }),
+    );
+  }
+
+  public getSubCategoriesInfo() {
+    this.#subCategoriesInfo ??= this.querySubCategories()
+      .pipe(
+        reduce(
+          (acc, queriedSubCategory) => {
+            acc.subCategoryCategories.set(queriedSubCategory.id, queriedSubCategory.parentId);
+            const entry = getOrCreate({ map: acc.categorySubCategories, key: queriedSubCategory.parentId, createFunc: () => new Array<SubCategoryId>() });
+            entry.push(queriedSubCategory.id);
+            return acc;
+          },
+          { subCategoryCategories: new Map<SubCategoryId, CategoryId>(), categorySubCategories: new Map<CategoryId, Array<SubCategoryId>>() },
+        ),
+      )
+      .pipe(shareReplay());
+    return this.#subCategoriesInfo;
+  }
+}

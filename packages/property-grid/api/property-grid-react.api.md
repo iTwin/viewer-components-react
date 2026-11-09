@@ -12,7 +12,7 @@ import type { IModelConnection } from '@itwin/core-frontend';
 import type { InstanceKey } from '@itwin/presentation-common';
 import type { IPresentationPropertyDataProvider } from '@itwin/presentation-components';
 import type { IPropertyDataFilterer } from '@itwin/components-react';
-import { JSX as JSX_2 } from 'react/jsx-runtime';
+import { JSX as JSX_2 } from 'react';
 import type { Localization } from '@itwin/core-common';
 import type { OmitOverUnion } from '@itwin/presentation-shared';
 import type { PropertyCategory } from '@itwin/components-react';

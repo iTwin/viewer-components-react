@@ -39,3 +39,6 @@ package-lock.json
 
 # no internal tool csv output
 /**/no-internal-summary.csv
+
+# Vitest browser-mode failure attachments
+**/.vitest-attachments/

@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
 import {
   HierarchyCacheMode,
   initializeCore,
@@ -16,16 +15,25 @@ import {
   insertSubject,
   terminateCore,
 } from "test-utilities";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { ElementOwnsMultiAspects, ExternalSourceAspect, PhysicalModel, SpatialCategory, Subject, withEditTxn } from "@itwin/core-backend";
 import { IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { DefaultContentDisplayTypes, KeySet, PresentationRpcInterface, PropertyValueFormat } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
+import { normalizeFullClassName } from "@itwin/presentation-shared";
+import { CLASS_NAME_Subject } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
 import { buildIModel } from "../../IModelUtils.js";
 import { collect } from "../Common.js";
 import { NodeValidators, validateHierarchyLevel } from "../HierarchyValidation.js";
-import { createModelsTreeProvider } from "./Utils.js";
+import {
+  createCategoryHierarchyNode,
+  createElementHierarchyNode,
+  createModelHierarchyNode,
+  createModelsTreeProvider,
+  createSubjectHierarchyNode,
+} from "./Utils.js";
 
 import type { GenericInstanceFilter, GenericInstanceFilterRule } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -34,7 +42,7 @@ import type { DefineHierarchyLevelProps, HierarchyProvider } from "@itwin/presen
 
 describe("Models tree", () => {
   describe("Hierarchy level filtering", () => {
-    before(async function () {
+    beforeAll(async () => {
       await initializeCore({
         backendProps: {
           caching: {
@@ -50,14 +58,14 @@ describe("Models tree", () => {
       ECSchemaRpcImpl.register();
     });
 
-    after(async function () {
+    afterAll(async () => {
       await terminateCore();
     });
 
-    it("can filter root level", async function () {
-      await using imodelResult = await buildIModel(this, async (imodel) =>
+    it("can filter root level", async () => {
+      await using imodelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
-          const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+          const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
           const childSubject = insertSubject({ txn, codeValue: "child subject 1", description: "", parentId: rootSubject.id });
           const category = insertSpatialCategory({ txn, codeValue: "category" });
           const model = insertPhysicalModelWithPartition({ txn, codeValue: `model 1`, partitionParentId: childSubject.id });
@@ -67,7 +75,6 @@ describe("Models tree", () => {
             modelId: model.id,
             categoryId: category.id,
           });
-
           return { rootSubject, childSubject, model, category };
         }),
       );
@@ -104,7 +111,7 @@ describe("Models tree", () => {
         nodes: await collect(
           provider.getNodes({
             parentNode: undefined,
-            instanceFilter: createInstanceFilter("BisCore.Subject", {
+            instanceFilter: createInstanceFilter(CLASS_NAME_Subject, {
               sourceAlias: "this",
               propertyName: "Description",
               propertyTypeName: "string",
@@ -119,7 +126,7 @@ describe("Models tree", () => {
         nodes: await collect(
           provider.getNodes({
             parentNode: undefined,
-            instanceFilter: createInstanceFilter("BisCore.Subject", {
+            instanceFilter: createInstanceFilter(CLASS_NAME_Subject, {
               sourceAlias: "this",
               propertyName: "Description",
               propertyTypeName: "string",
@@ -132,10 +139,10 @@ describe("Models tree", () => {
       });
     });
 
-    it("can filter Subject children level", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+    it("can filter Subject children level", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
-          const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+          const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
           const category = insertSpatialCategory({ txn, codeValue: "category" });
 
           // set up child subject node
@@ -161,7 +168,6 @@ describe("Models tree", () => {
                 txn,
                 codeValue: `model 3`,
                 parentId: rootSubject.id,
-
                 jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
               }).id,
             }).id,
@@ -173,14 +179,7 @@ describe("Models tree", () => {
       );
       const { imodelConnection, ...keys } = buildIModelResult;
       using provider = createModelsTreeProvider({ imodelConnection });
-      const parentNode = {
-        key: {
-          type: "instances" as const,
-          instanceKeys: [keys.rootSubject],
-        },
-        parentKeys: [],
-        label: "",
-      };
+      const parentNode = createSubjectHierarchyNode({ ids: keys.rootSubject.id });
 
       // validate hierarchy level without filter
       validateHierarchyLevel({
@@ -200,16 +199,16 @@ describe("Models tree", () => {
         expected: {
           selectClasses: [
             {
-              selectClassInfo: { name: Subject.classFullName },
-            },
-            {
               selectClassInfo: { name: PhysicalModel.classFullName },
             },
             {
               selectClassInfo: { name: SpatialCategory.classFullName },
             },
+            {
+              selectClassInfo: { name: Subject.classFullName },
+            },
           ],
-          fields: mergeFieldLists([subjectFields, physicalModelFields, spatialCategoryFields]),
+          fields: mergeFieldLists([physicalModelFields, spatialCategoryFields, subjectFields]),
         },
       });
 
@@ -258,10 +257,10 @@ describe("Models tree", () => {
       });
     });
 
-    it("can filter Model children level", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+    it("can filter Model children level", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
-          const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+          const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
           const category1 = insertSpatialCategory({ txn, codeValue: "category1" });
           const category2 = insertSpatialCategory({ txn, codeValue: "category2" });
           const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
@@ -272,19 +271,12 @@ describe("Models tree", () => {
       );
       const { imodelConnection, ...keys } = buildIModelResult;
       using provider = createModelsTreeProvider({ imodelConnection });
-      const parentNode = {
-        key: {
-          type: "instances" as const,
-          instanceKeys: [keys.model],
-        },
-        parentKeys: [
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.rootSubject],
-          },
-        ],
-        label: "",
-      };
+      const parentNode = createModelHierarchyNode({
+        modelId: keys.model.id,
+        hasChildren: true,
+        className: keys.model.className,
+        parentKeys: [keys.rootSubject],
+      });
 
       // validate hierarchy level without filter
       validateHierarchyLevel({
@@ -328,10 +320,10 @@ describe("Models tree", () => {
       });
     });
 
-    it("can filter Category children level", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+    it("can filter Category children level", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
-          const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+          const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
           const category = insertSpatialCategory({ txn, codeValue: "category" });
           const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
           const element = insertPhysicalElement({ txn, userLabel: `element`, modelId: model.id, categoryId: category.id });
@@ -340,26 +332,12 @@ describe("Models tree", () => {
       );
       const { imodelConnection, ...keys } = buildIModelResult;
       using provider = createModelsTreeProvider({ imodelConnection });
-      const parentNode = {
-        key: {
-          type: "instances" as const,
-          instanceKeys: [keys.category],
-        },
-        parentKeys: [
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.rootSubject],
-          },
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.model],
-          },
-        ],
-        extendedData: {
-          modelIds: [keys.model.id],
-        },
-        label: "",
-      };
+      const parentNode = createCategoryHierarchyNode({
+        modelId: keys.model.id,
+        categoryId: keys.category.id,
+        hasChildren: true,
+        parentKeys: [keys.rootSubject, keys.model],
+      });
 
       // validate hierarchy level without filter
       validateHierarchyLevel({
@@ -414,10 +392,10 @@ describe("Models tree", () => {
       });
     });
 
-    it("can filter Element children level with child elements", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+    it("can filter Element children level with child elements", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
-          const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+          const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
           const category = insertSpatialCategory({ txn, codeValue: "category" });
           const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
           const parentElement = insertPhysicalElement({ txn, userLabel: `parent element`, modelId: model.id, categoryId: category.id });
@@ -433,27 +411,13 @@ describe("Models tree", () => {
       );
       const { imodelConnection, ...keys } = buildIModelResult;
       using provider = createModelsTreeProvider({ imodelConnection });
-      const parentNode = {
-        key: {
-          type: "instances" as const,
-          instanceKeys: [keys.parentElement],
-        },
-        parentKeys: [
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.rootSubject],
-          },
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.model],
-          },
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.category],
-          },
-        ],
-        label: "",
-      };
+      const parentNode = createElementHierarchyNode({
+        modelId: keys.model.id,
+        categoryId: keys.category.id,
+        elementId: keys.parentElement.id,
+        hasChildren: true,
+        parentKeys: [keys.rootSubject, keys.model, keys.category],
+      });
 
       // validate hierarchy level without filter
       validateHierarchyLevel({
@@ -508,11 +472,12 @@ describe("Models tree", () => {
       });
     });
 
-    it("can filter Element children level with modeling elements", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel, testSchema) =>
+    it("can filter Element children level with modeling elements", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
         withEditTxn(imodel, (txn) => {
-          const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+          const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
           const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const modelingElementCategory = insertSpatialCategory({ txn, codeValue: "category2" });
           const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
           const modeledElement = insertPhysicalElement({
             txn,
@@ -526,39 +491,26 @@ describe("Models tree", () => {
             txn,
             userLabel: `modeling element`,
             modelId: subModel.id,
-            categoryId: category.id,
+            categoryId: modelingElementCategory.id,
           });
-          return { rootSubject, model, category, modeledElement, modelingElement };
+          return { rootSubject, model, category, modelingElementCategory, modeledElement, modelingElement };
         }),
       );
       const { imodelConnection, ...keys } = buildIModelResult;
       using provider = createModelsTreeProvider({ imodelConnection });
-      const parentNode = {
-        key: {
-          type: "instances" as const,
-          instanceKeys: [keys.modeledElement],
-        },
-        parentKeys: [
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.rootSubject],
-          },
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.model],
-          },
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.category],
-          },
-        ],
-        label: "",
-      };
+      const parentNode = createElementHierarchyNode({
+        modelId: keys.model.id,
+        categoryId: keys.category.id,
+        elementId: keys.modeledElement.id,
+        hasChildren: true,
+        parentKeys: [keys.rootSubject, keys.model, keys.category],
+        className: keys.modeledElement.className,
+      });
 
       // validate hierarchy level without filter
       validateHierarchyLevel({
         nodes: await collect(provider.getNodes({ parentNode })),
-        expect: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.category] })],
+        expect: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.modelingElementCategory] })],
       });
 
       // validate descriptor, that is required for creating the filter
@@ -581,22 +533,22 @@ describe("Models tree", () => {
         nodes: await collect(
           provider.getNodes({
             parentNode,
-            instanceFilter: createInstanceFilter(keys.category.className, {
+            instanceFilter: createInstanceFilter(keys.modelingElementCategory.className, {
               sourceAlias: "",
               propertyName: "CodeValue",
               propertyTypeName: "string",
               operator: "is-equal",
-              value: { rawValue: "category", displayValue: "" },
+              value: { rawValue: "category2", displayValue: "" },
             }),
           }),
         ),
-        expect: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.category] })],
+        expect: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.modelingElementCategory] })],
       });
       validateHierarchyLevel({
         nodes: await collect(
           provider.getNodes({
             parentNode,
-            instanceFilter: createInstanceFilter(keys.category.className, {
+            instanceFilter: createInstanceFilter(keys.modelingElementCategory.className, {
               sourceAlias: "",
               propertyName: "UserLabel",
               propertyTypeName: "string",
@@ -604,14 +556,14 @@ describe("Models tree", () => {
             }),
           }),
         ),
-        expect: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.category] })],
+        expect: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.modelingElementCategory] })],
       });
     });
 
-    it("creates descriptor with related properties", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel) =>
+    it("creates descriptor with related properties", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
-          const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+          const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
           const category = insertSpatialCategory({ txn, codeValue: "category" });
           const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
           const element = insertPhysicalElement({ txn, userLabel: `element`, modelId: model.id, categoryId: category.id });
@@ -621,26 +573,12 @@ describe("Models tree", () => {
       );
       const { imodelConnection, ...keys } = buildIModelResult;
       using provider = createModelsTreeProvider({ imodelConnection });
-      const parentNode = {
-        key: {
-          type: "instances" as const,
-          instanceKeys: [keys.category],
-        },
-        parentKeys: [
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.rootSubject],
-          },
-          {
-            type: "instances" as const,
-            instanceKeys: [keys.model],
-          },
-        ],
-        extendedData: {
-          modelIds: [keys.model.id],
-        },
-        label: "",
-      };
+      const parentNode = createCategoryHierarchyNode({
+        modelId: keys.model.id,
+        hasChildren: true,
+        parentKeys: [keys.rootSubject, keys.model],
+        categoryId: keys.category.id,
+      });
       validateHierarchyLevel({
         nodes: await collect(provider.getNodes({ parentNode })),
         expect: [NodeValidators.createForClassGroupingNode({ className: keys.element.className })],
@@ -688,10 +626,10 @@ describe("Models tree", () => {
     });
 
     describe("Hierarchy configuration", () => {
-      it("filters empty models when `showEmptyModels` set to true", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) =>
+      it("includes models without elements when `models.withoutElements` is set to 'include'", async () => {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
           withEditTxn(imodel, (txn) => {
-            const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+            const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
 
             // set up child model node
             const model = insertPhysicalModelWithPartition({ txn, codeValue: `model 2`, partitionParentId: rootSubject.id });
@@ -700,15 +638,10 @@ describe("Models tree", () => {
           }),
         );
         const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { showEmptyModels: true } });
-        const parentNode = {
-          key: {
-            type: "instances" as const,
-            instanceKeys: [keys.rootSubject],
-          },
-          parentKeys: [],
-          label: "",
-        };
+        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { models: { withoutElements: "include" } } });
+        const parentNode = createSubjectHierarchyNode({
+          ids: keys.rootSubject.id,
+        });
 
         // validate hierarchy level without filter
         validateHierarchyLevel({
@@ -748,10 +681,10 @@ describe("Models tree", () => {
         });
       });
 
-      it("filters elements when `elementClassSpecification` is provided", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel, testSchema) =>
+      it("filters elements when `elements.baseClass` is provided", async () => {
+        await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
           withEditTxn(imodel, (txn) => {
-            const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+            const rootSubject = { className: normalizeFullClassName(Subject.classFullName), id: "0x1" };
             const category = insertSpatialCategory({ txn, codeValue: "category" });
             const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
             const element1 = insertPhysicalElement({
@@ -771,27 +704,13 @@ describe("Models tree", () => {
           }),
         );
         const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { elementClassSpecification: keys.element1.className } });
-        const parentNode = {
-          key: {
-            type: "instances" as const,
-            instanceKeys: [keys.category],
-          },
-          parentKeys: [
-            {
-              type: "instances" as const,
-              instanceKeys: [keys.rootSubject],
-            },
-            {
-              type: "instances" as const,
-              instanceKeys: [keys.model],
-            },
-          ],
-          extendedData: {
-            modelIds: [keys.model.id],
-          },
-          label: "",
-        };
+        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { elements: { baseClass: keys.element1.className } } });
+        const parentNode = createCategoryHierarchyNode({
+          modelId: keys.model.id,
+          categoryId: keys.category.id,
+          hasChildren: true,
+          parentKeys: [keys.rootSubject, keys.model],
+        });
 
         // validate hierarchy level without filter
         validateHierarchyLevel({
@@ -889,7 +808,7 @@ async function validateHierarchyLevelDescriptor(props: {
     displayType: DefaultContentDisplayTypes.PropertyPane,
     keys: new KeySet(inputKeys),
   });
-  expect(result).to.containSubset(expected);
+  expect(result).toMatchObject(expected);
 }
 
 function mergeFieldLists<TField extends Pick<PropertiesField, "label">>(fieldLists: TField[][]): TField[] {

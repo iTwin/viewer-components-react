@@ -5,10 +5,10 @@
 
 /** @type {import('stylelint').Config} */
 export default {
-  extends: ["stylelint-config-standard-scss"],
+  extends: ["stylelint-config-standard"],
   overrides: [
     {
-      files: ["./src/**/*.scss"],
+      files: ["./src/**/*.css"],
       rules: {
         "comment-whitespace-inside": null,
       },

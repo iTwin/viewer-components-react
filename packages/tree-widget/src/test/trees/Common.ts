@@ -3,68 +3,69 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import sinon from "sinon";
+import { vi } from "vitest";
 import { BeEvent } from "@itwin/core-bentley";
-import { PerModelCategoryVisibility } from "@itwin/core-frontend";
-import { SchemaContext } from "@itwin/ecschema-metadata";
-import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 
 import type { QueryBinder, QueryOptions } from "@itwin/core-common";
-import type { IModelConnection, Viewport, ViewState } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { ECSchemaProvider } from "@itwin/presentation-shared";
+import type { TreeWidgetViewport } from "../../tree-widget-react/shared/TreeWidgetViewport.js";
+import type { TreeWidgetTestingViewport } from "./TreeUtils.js";
 
-export function createIModelMock(queryHandler?: (query: string, params?: QueryBinder, config?: QueryOptions) => any[] | Promise<any[]>) {
+type QueryHandler = (query: string, params?: QueryBinder, config?: QueryOptions) => any[] | Promise<any[]>;
+type GetCategoryInfo = IModelConnection["categories"]["getCategoryInfo"];
+
+export function createIModelMock(props: { queryHandler?: QueryHandler; getCategoryInfo?: GetCategoryInfo }) {
   return {
-    isBriefcaseConnection: sinon.fake.returns(false),
-    createQueryReader: sinon.fake(async function* (query: string, params?: QueryBinder, config?: QueryOptions): AsyncIterableIterator<any> {
-      const result = (await queryHandler?.(query, params, config)) ?? [];
+    isBriefcaseConnection: vi.fn(() => false),
+    createQueryReader: vi.fn(async function* (query: string, params?: QueryBinder, config?: QueryOptions): AsyncIterableIterator<any> {
+      const result = (await props.queryHandler?.(query, params, config)) ?? [];
       for (const item of result) {
         yield { ...item, toRow: () => item, toArray: () => Object.values(item) };
       }
     }),
+    categories: {
+      getCategoryInfo: props.getCategoryInfo,
+    },
+    onClose: new BeEvent(),
   } as unknown as IModelConnection;
 }
 
-export function createFakeSinonViewport(
-  props?: Partial<Omit<Viewport, "view" | "perModelCategoryVisibility">> & {
-    view?: Partial<Omit<ViewState, "isSpatialView">> & { isSpatialView?: () => boolean };
-    perModelCategoryVisibility?: Partial<PerModelCategoryVisibility.Overrides>;
-    queryHandler?: Parameters<typeof createIModelMock>[0];
+export function createFakeViewport(
+  props?: Partial<Omit<TreeWidgetViewport, "alwaysDrawn" | "neverDrawn">> & {
+    neverDrawn?: Set<string>;
+    alwaysDrawn?: Set<string>;
+    queryHandler?: QueryHandler;
+    getCategoryInfo?: GetCategoryInfo;
   },
-): Viewport {
+): TreeWidgetTestingViewport & Disposable {
   let alwaysDrawn = props?.alwaysDrawn;
   let neverDrawn = props?.neverDrawn;
 
-  // Stubs are defined as partial to ensure that the overridden implementation is compatible with original interfaces
-  const perModelCategoryVisibility: Partial<PerModelCategoryVisibility.Overrides> = {
-    getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.None),
-    setOverride: sinon.fake(),
-    clearOverrides: sinon.fake(),
-    ...props?.perModelCategoryVisibility,
-  };
-
-  const view: NonNullable<typeof props>["view"] = {
-    isSpatialView: sinon.fake.returns(true),
-    viewsCategory: sinon.fake.returns(true),
-    viewsModel: sinon.fake.returns(true),
-    ...props?.view,
-  };
-
   const onAlwaysDrawnChanged = new BeEvent();
   const onNeverDrawnChanged = new BeEvent();
-
-  const result: Partial<Viewport> = {
-    addViewedModels: sinon.fake.resolves(undefined),
-    changeCategoryDisplay: sinon.fake(),
-    changeModelDisplay: sinon.fake.returns(true),
+  const result: TreeWidgetTestingViewport & Disposable = {
+    changeCategoryDisplay: vi.fn(),
+    changeModelDisplay: vi.fn(),
     isAlwaysDrawnExclusive: false,
-    onViewedCategoriesPerModelChanged: new BeEvent(),
-    onViewedCategoriesChanged: new BeEvent(),
-    onViewedModelsChanged: new BeEvent(),
+    onPerModelCategoriesOverridesChanged: new BeEvent(),
+    onDisplayedCategoriesChanged: new BeEvent(),
+    onDisplayStyleChanged: new BeEvent(),
+    onDisplayedModelsChanged: new BeEvent(),
     onAlwaysDrawnChanged,
     onNeverDrawnChanged,
+    changeSubCategoryDisplay: vi.fn(),
+    clearPerModelCategoryOverrides: vi.fn(),
+    getPerModelCategoryOverride: vi.fn(() => "none" as const),
+    setPerModelCategoryOverride: vi.fn(),
+    viewsCategory: vi.fn(() => true),
+    viewsModel: vi.fn(() => true),
+    viewsSubCategory: vi.fn(() => true),
+    viewType: "3d",
+    perModelCategoryOverrides: [],
     ...props,
     get alwaysDrawn() {
       return alwaysDrawn;
@@ -72,43 +73,45 @@ export function createFakeSinonViewport(
     get neverDrawn() {
       return neverDrawn;
     },
-    setAlwaysDrawn: sinon.fake((x) => {
-      alwaysDrawn = x;
+    setAlwaysDrawn: vi.fn((x) => {
+      alwaysDrawn = x.elementIds;
       onAlwaysDrawnChanged.raiseEvent(result);
     }),
-    setNeverDrawn: sinon.fake((x) => {
-      neverDrawn = x;
+    setNeverDrawn: vi.fn((x) => {
+      neverDrawn = x.elementIds;
       onNeverDrawnChanged.raiseEvent(result);
     }),
-    clearAlwaysDrawn: sinon.fake(() => {
+    clearAlwaysDrawn: vi.fn(() => {
       if (alwaysDrawn?.size) {
         alwaysDrawn.clear();
         onAlwaysDrawnChanged.raiseEvent(result);
       }
     }),
-    clearNeverDrawn: sinon.fake(() => {
+    clearNeverDrawn: vi.fn(() => {
       if (neverDrawn?.size) {
         neverDrawn.clear();
         onNeverDrawnChanged.raiseEvent(result);
       }
     }),
-    perModelCategoryVisibility: perModelCategoryVisibility as PerModelCategoryVisibility.Overrides,
-    view: view as ViewState,
-    iModel: createIModelMock(props?.queryHandler),
+    iModel: props?.iModel ?? createIModelMock({ queryHandler: props?.queryHandler, getCategoryInfo: props?.getCategoryInfo }),
+    renderFrame: vi.fn(),
+    [Symbol.dispose]() {
+      this.iModel.onClose.raiseEvent(this.iModel);
+    },
   };
-
-  return result as Viewport;
+  return result;
 }
 
-export function createIModelAccess(imodel: IModelConnection) {
-  const schemas = new SchemaContext();
+export type IModelAccess = ECSchemaProvider &
+  LimitingECSqlQueryExecutor & {
+    imodelKey: string;
+  };
 
-  schemas.addLocater(new ECSchemaRpcLocater(imodel.getRpcProps()));
-  const schemaProvider = createECSchemaProvider(schemas);
+export function createIModelAccess(imodel: IModelConnection): IModelAccess {
+  const schemaProvider = createECSchemaProvider(imodel);
   return {
     imodelKey: imodel.key,
     ...schemaProvider,
-    ...createCachingECClassHierarchyInspector({ schemaProvider }),
     ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(imodel), 1000),
   };
 }

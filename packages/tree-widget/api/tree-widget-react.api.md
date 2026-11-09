@@ -4,56 +4,108 @@
 
 ```ts
 
-import type { BeEvent } from '@itwin/core-bentley';
-import type { ClassGroupingNodeKey } from '@itwin/presentation-hierarchies';
-import type { ComponentPropsWithoutRef } from 'react';
-import type { ECClassHierarchyInspector } from '@itwin/presentation-shared';
-import type { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
-import { HierarchyFilteringPath } from '@itwin/presentation-hierarchies';
-import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
-import type { Id64Arg } from '@itwin/core-bentley';
-import type { Id64Array } from '@itwin/core-bentley';
-import type { Id64Set } from '@itwin/core-bentley';
-import type { Id64String } from '@itwin/core-bentley';
-import type { IDisposable } from '@itwin/core-bentley';
-import type { IModelConnection } from '@itwin/core-frontend';
-import type { InstanceKey } from '@itwin/presentation-shared';
-import { JSX as JSX_2 } from 'react/jsx-runtime';
-import type { JSX as JSX_3 } from 'react';
-import type { Localization } from '@itwin/core-common';
-import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
-import type { PresentationTreeNode } from '@itwin/presentation-hierarchies-react';
-import type { PropsWithChildren } from 'react';
-import type { ReactElement } from 'react';
-import type { ReactNode } from 'react';
-import type { RenderedTreeNode } from '@itwin/presentation-hierarchies-react';
-import type { SchemaContext } from '@itwin/ecschema-metadata';
-import type { SelectionStorage } from '@itwin/presentation-hierarchies-react';
-import type { TranslationOptions } from '@itwin/core-common';
-import { Tree as Tree_2 } from '@itwin/itwinui-react';
-import { TreeNodeRenderer } from '@itwin/presentation-hierarchies-react';
-import type { useIModelTree } from '@itwin/presentation-hierarchies-react';
-import { useSelectionHandler } from '@itwin/presentation-hierarchies-react';
-import type { Viewport } from '@itwin/core-frontend';
-import type { Widget } from '@itwin/appui-react';
+import * as _$react from 'react';
+import { BeEvent } from '@itwin/core-bentley';
+import { ClassGroupingNodeKey } from '@itwin/presentation-hierarchies';
+import { ComponentProps } from 'react';
+import { createIModelHierarchyProvider } from '@itwin/presentation-hierarchies';
+import { EC } from '@itwin/presentation-shared';
+import { ECSchemaProvider } from '@itwin/presentation-shared';
+import { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
+import { HierarchyDefinition } from '@itwin/presentation-hierarchies';
+import { HierarchyNode } from '@itwin/presentation-hierarchies-react';
+import { HierarchyNode as HierarchyNode_2 } from '@itwin/presentation-hierarchies';
+import { HierarchySearchTree } from '@itwin/presentation-hierarchies';
+import { Id64Arg } from '@itwin/core-bentley';
+import { Id64Array } from '@itwin/core-bentley';
+import { Id64String } from '@itwin/core-bentley';
+import { ILogger } from '@itwin/presentation-shared';
+import { IModelConnection } from '@itwin/core-frontend';
+import { InstanceKey } from '@itwin/presentation-shared';
+import { InstancesNodeKey } from '@itwin/presentation-hierarchies';
+import { JSX } from 'react';
+import { Localization } from '@itwin/core-common';
+import { NonGroupingHierarchyNode } from '@itwin/presentation-hierarchies';
+import { Props } from '@itwin/presentation-shared';
+import { PropsWithChildren } from 'react';
+import { ReactElement } from 'react';
+import { ReactNode } from 'react';
+import { SelectionStorage } from '@itwin/presentation-hierarchies-react';
+import { StrataKitTreeRenderer } from '@itwin/presentation-hierarchies-react/stratakit';
+import { TreeActionBase } from '@itwin/presentation-hierarchies-react/stratakit';
+import { TreeActionBaseAttributes } from '@itwin/presentation-hierarchies-react/stratakit';
+import { TreeNode } from '@itwin/presentation-hierarchies-react';
+import { TreeNodeFilterAction } from '@itwin/presentation-hierarchies-react/stratakit';
+import { TreeNodeRenameAction } from '@itwin/presentation-hierarchies-react/stratakit';
+import { TreeRendererProps } from '@itwin/presentation-hierarchies-react';
+import { useIModelTree } from '@itwin/presentation-hierarchies-react';
+import { useTree } from '@itwin/presentation-hierarchies-react';
+import { Viewport } from '@itwin/core-frontend';
+import { Widget } from '@itwin/appui-react';
+
+// @beta (undocumented)
+type BaseTreeRendererProps = ComponentProps<typeof StrataKitTreeRenderer>;
+
+// @beta
+interface BaseTreeVisibilityHandlerOverrides {
+    // (undocumented)
+    changeCategoriesVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        categoryIds: Id64Arg;
+        modelId?: Id64String;
+        on: boolean;
+    }) => Promise<void>>;
+    // (undocumented)
+    changeElementsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        elementIds: Id64Arg;
+        modelId: Id64String;
+        categoryId: Id64String;
+        on: boolean;
+    }) => Promise<void>>;
+    // (undocumented)
+    changeModelsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        modelIds: Id64Arg;
+        on: boolean;
+    }) => Promise<void>>;
+    // (undocumented)
+    getCategoriesVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        categoryIds: Id64Arg;
+        modelId?: Id64String;
+    }) => Promise<VisibilityStatus>>;
+    // (undocumented)
+    getElementsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        elementIds: Id64Arg;
+        modelId: Id64String;
+        categoryId: Id64String;
+    }) => Promise<VisibilityStatus>>;
+    // (undocumented)
+    getModelsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        modelIds: Id64Arg;
+    }) => Promise<VisibilityStatus>>;
+}
+
+// @beta (undocumented)
+type CallbacksWithCommonTreeRendererProps<T extends BaseTreeRendererProps, K extends keyof T> = Omit<T, K> & { [P in keyof Pick<T, K>]?: T[P] extends ((props: any) => any) | undefined ? (args: Parameters<NonNullable<T[P]>>[0], treeRendererProps: CommonTreeRendererProps) => ReturnType<NonNullable<T[P]>> : never };
 
 // @public
 export const CategoriesTreeComponent: CategoriesTreeComponentType;
 
 // @public (undocumented)
-interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "hierarchyConfig"> {
+interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "searchText" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "hierarchyConfig" | "treeLabel"> {
     headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
+    viewport?: TreeWidgetViewport;
 }
 
 // @public (undocumented)
 interface CategoriesTreeComponentType {
     // (undocumented)
-    (props: CategoriesTreeComponentProps): JSX_3.Element | null;
-    getLabel(): string;
+    (props: CategoriesTreeComponentProps): JSX.Element | null;
+    getLabel(input: {
+        standardLabels: StandardTreeLabels;
+    }): string;
     HideAllButton: CategoriesTreeHeaderButtonType;
     id: string;
     InvertAllButton: CategoriesTreeHeaderButtonType;
@@ -61,20 +113,82 @@ interface CategoriesTreeComponentType {
 }
 
 // @public
-interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
+interface CategoriesTreeHeaderButtonProps extends TreeToolbarButtonProps {
     categories: CategoryInfo[];
+    models: Id64Array;
 }
 
 // @public (undocumented)
-type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) => ReactElement | null;
+type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) => React.ReactElement | null;
 
 // @beta
 interface CategoriesTreeHierarchyConfiguration {
-    showEmptyCategories: boolean;
+    categories?: {
+        withoutElements?: "include" | "exclude";
+    };
+    elements?: {
+        nodes?: "exclude";
+    } | {
+        nodes: "include";
+        excludedClasses?: EC.FullClassNameDotNotation[];
+    };
+    subCategories?: {
+        nodes?: "include" | "exclude";
+    };
 }
 
 // @beta (undocumented)
-type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> & UseCategoriesTreeProps & {
+export function CategoriesTreeIcon(input: {
+    node: TreeNode;
+}): _$react.JSX.Element | undefined;
+
+// @beta
+export namespace CategoriesTreeNode {
+    const isDefinitionContainerNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is NonGroupingHierarchyNode & {
+        key: InstancesNodeKey;
+    };
+    const isCategoryNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is Omit<NonGroupingHierarchyNode, "extendedData"> & {
+        key: InstancesNodeKey;
+    } & {
+        extendedData: {
+            description?: string;
+            hasSubCategories?: boolean;
+            modelIds: Id64Array;
+        };
+    };
+    const isModelNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is NonGroupingHierarchyNode & {
+        key: InstancesNodeKey;
+    };
+    const isElementNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is Omit<NonGroupingHierarchyNode, "extendedData"> & {
+        key: InstancesNodeKey;
+    } & {
+        extendedData: {
+            modelId: Id64String;
+            categoryId: Id64String;
+        };
+    };
+    const isElementClassGroupingNode: (node: Pick<HierarchyNode_2, "key">) => node is Omit<GroupingHierarchyNode, "extendedData"> & {
+        key: ClassGroupingNodeKey;
+    } & {
+        extendedData: {
+            categoryId: Id64String;
+            modelElementsMap: Map<Id64String, {
+                elementIds: Set<Id64String>;
+            }>;
+        };
+    };
+    const isSubCategoryNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is Omit<NonGroupingHierarchyNode, "extendedData"> & {
+        key: InstancesNodeKey;
+    } & {
+        extendedData: {
+            categoryId: Id64String;
+        };
+    };
+    const getType: (node: HierarchyNode_2) => "definition-container" | "category" | "element" | "sub-category" | "model" | "elements-class-group" | undefined;
+}
+
+// @beta (undocumented)
+type CategoriesTreeProps = Pick<ExtendedVisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "treeLabel"> & Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & UseCategoriesTreeProps & {
     hierarchyLevelConfig?: {
         sizeLimit?: number;
     };
@@ -83,35 +197,9 @@ type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContex
 // @beta
 interface CategoryInfo {
     // (undocumented)
-    categoryId: string;
-    // (undocumented)
-    subCategoryIds?: string[];
-}
-
-// @beta (undocumented)
-interface ChangeCategoryVisibilityStateProps extends GetCategoryVisibilityStatusProps {
-    // (undocumented)
-    on: boolean;
-}
-
-// @beta (undocumented)
-interface ChangeGeometricElementsDisplayStateProps {
-    // (undocumented)
     categoryId: Id64String;
     // (undocumented)
-    elementIds: Id64Set;
-    // (undocumented)
-    modelId: Id64String;
-    // (undocumented)
-    on: boolean;
-}
-
-// @beta (undocumented)
-interface ChangeModelVisibilityStateProps {
-    // (undocumented)
-    ids: Id64Arg;
-    // (undocumented)
-    on: boolean;
+    subCategoryIds?: Id64Array;
 }
 
 // @beta (undocumented)
@@ -119,8 +207,83 @@ type ClassGroupingHierarchyNode = GroupingHierarchyNode & {
     key: ClassGroupingNodeKey;
 };
 
+// @beta
+export const ClassificationsTreeComponent: {
+    (props: ClassificationsTreeComponentProps): _$react.JSX.Element | null;
+    id: string;
+    getLabel(input: {
+        standardLabels: StandardTreeLabels;
+    }): string;
+    isSupportedByIModel(imodel: IModelConnection): Promise<boolean>;
+};
+
+// @beta (undocumented)
+interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "visibilityHandlerConfig" | "selectionMode" | "searchText" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "hierarchyConfig" | "getEditingProps" | "treeLabel"> {
+    // (undocumented)
+    onFeatureUsed?: (feature: string) => void;
+    // (undocumented)
+    onPerformanceMeasured?: (featureId: string, duration: number) => void;
+    viewport?: TreeWidgetViewport;
+}
+
+// @beta (undocumented)
+interface ClassificationsTreeHierarchyConfiguration {
+    elements?: {
+        excludedClasses?: EC.FullClassNameDotNotation[];
+    };
+    rootClassificationSystemCode: string;
+}
+
+// @beta (undocumented)
+export function ClassificationsTreeIcon(input: {
+    node: TreeNode;
+}): _$react.JSX.Element | undefined;
+
+// @beta
+export namespace ClassificationsTreeNode {
+    const isClassificationTableNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is NonGroupingHierarchyNode & {
+        key: InstancesNodeKey;
+    };
+    const isClassificationNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is NonGroupingHierarchyNode & {
+        key: InstancesNodeKey;
+    };
+    const isGeometricElementNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is Omit<NonGroupingHierarchyNode, "extendedData"> & {
+        key: InstancesNodeKey;
+    } & {
+        extendedData: {
+            modelId: Id64String;
+            categoryId: Id64String;
+        };
+    };
+    const getType: (node: HierarchyNode_2) => "classification-table" | "classification" | "element" | undefined;
+}
+
+// @beta (undocumented)
+type ClassificationsTreeProps = Pick<ExtendedVisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "getEditingProps" | "treeLabel"> & Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & UseClassificationsTreeProps & {
+    hierarchyLevelConfig?: {
+        sizeLimit?: number;
+    };
+};
+
+// @beta
+interface ClassificationsTreeVisibilityHandlerConfiguration {
+    classificationToCategoriesRelationshipSpecification?: ClassificationToCategoriesRelationshipSpecification;
+}
+
+// @beta
+interface ClassificationToCategoriesRelationshipSpecification {
+    fullClassName: EC.FullClassNameDotNotation;
+    source: "classification" | "category";
+}
+
+// @beta (undocumented)
+type CommonTreeRendererProps = Pick<BaseTreeRendererProps, "filterHierarchyLevel" | "selectionMode" | "getTreeItemProps"> & TreeRendererProps;
+
 // @public
 export function createTreeWidget(props: TreeWidgetProps): Widget;
+
+// @beta
+export function createTreeWidgetViewport(viewport: Viewport): TreeWidgetViewport;
 
 // @beta (undocumented)
 interface ElementsGroupInfo {
@@ -137,11 +300,17 @@ interface ElementsGroupInfo {
     };
 }
 
+// @beta (undocumented)
+type ExtendedTreeRendererProps = CallbacksWithCommonTreeRendererProps<TreeRendererProps_2, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps">;
+
+// @beta (undocumented)
+type ExtendedVisibilityTreeRendererProps = CallbacksWithCommonTreeRendererProps<VisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps">;
+
 // @beta
 export const ExternalSourcesTreeComponent: ExternalSourcesTreeComponentType;
 
 // @beta (undocumented)
-interface ExternalSourcesTreeComponentProps extends Pick<ExternalSourcesTreeProps, "getSchemaContext" | "selectionStorage" | "selectionMode" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+interface ExternalSourcesTreeComponentProps extends Pick<ExternalSourcesTreeProps, "selectionStorage" | "selectionMode" | "hierarchyLevelConfig" | "selectionMode" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "treeLabel"> {
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
@@ -151,24 +320,24 @@ interface ExternalSourcesTreeComponentProps extends Pick<ExternalSourcesTreeProp
 // @beta (undocumented)
 interface ExternalSourcesTreeComponentType {
     // (undocumented)
-    (props: ExternalSourcesTreeComponentProps): JSX_3.Element | null;
-    getLabel(): string;
+    (props: ExternalSourcesTreeComponentProps): JSX.Element | null;
+    getLabel(input: {
+        standardLabels: StandardTreeLabels;
+    }): string;
     id: string;
 }
 
 // @beta (undocumented)
-type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> & {
+export function ExternalSourcesTreeIcon(input: {
+    node: TreeNode;
+}): _$react.JSX.Element | undefined;
+
+// @beta (undocumented)
+type ExternalSourcesTreeProps = Pick<ExtendedTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "treeLabel"> & Pick<TreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & {
     hierarchyLevelConfig?: {
         sizeLimit?: number;
     };
 };
-
-// @beta
-export class FilterLimitExceededError extends Error {
-    constructor(limit: number);
-    // (undocumented)
-    readonly limit: number;
-}
 
 // @public (undocumented)
 interface FocusedInstancesContext {
@@ -181,56 +350,35 @@ interface FocusedInstancesContext {
 export function FocusedInstancesContextProvider(input: PropsWithChildren<{
     selectionStorage: SelectionStorage;
     imodelKey: string;
-}>): JSX_2.Element;
+}>): _$react.JSX.Element;
 
 // @beta (undocumented)
 type FunctionProps<THook extends (props: any) => any> = Parameters<THook>[0];
 
-// @beta (undocumented)
-interface GetCategoryVisibilityStatusProps {
-    // (undocumented)
-    categoryIds: Id64Arg;
-    // (undocumented)
-    modelId: Id64String;
-}
-
-// @beta (undocumented)
-interface GetGeometricElementVisibilityStatusProps {
-    // (undocumented)
-    categoryId: Id64String;
-    // (undocumented)
-    elementId: Id64String;
-    // (undocumented)
-    modelId: Id64String;
-}
-
 // @beta
-export interface HierarchyVisibilityHandler extends IDisposable {
+export interface HierarchyVisibilityHandler extends Disposable {
     changeVisibility(node: HierarchyNode, on: boolean): Promise<void>;
     getVisibilityStatus(node: HierarchyNode): Promise<VisibilityStatus> | VisibilityStatus;
     readonly onVisibilityChange: BeEvent<() => void>;
 }
 
 // @beta
-type HierarchyVisibilityHandlerOverridableMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult ? (props: HierarchyVisibilityHandlerOverridableMethodProps<TFunc>) => TResult : never;
+type HierarchyVisibilityHandlerOverridableMethod<TFunc> = TFunc extends ((...args: any[]) => infer TResult) ? (props: HierarchyVisibilityHandlerOverridableMethodProps<TFunc>) => TResult : never;
 
 // @beta
-type HierarchyVisibilityHandlerOverridableMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult ? TProps & {
+type HierarchyVisibilityHandlerOverridableMethodProps<TFunc> = TFunc extends ((props: infer TProps) => infer TResult) ? TProps & {
     readonly originalImplementation: () => TResult;
     readonly handler: HierarchyVisibilityHandler;
 } : never;
 
 // @beta (undocumented)
-interface HighlightInfo {
-    // (undocumented)
-    text: string;
-}
+type IModelAccess = Props<typeof createIModelHierarchyProvider>["imodelAccess"];
 
 // @beta
 export const IModelContentTreeComponent: IModelContentTreeComponentType;
 
 // @beta (undocumented)
-interface IModelContentTreeComponentProps extends Pick<IModelContentTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyConfig" | "hierarchyLevelConfig" | "selectionMode"> {
+interface IModelContentTreeComponentProps extends Pick<IModelContentTreeProps, "selectionStorage" | "hierarchyConfig" | "hierarchyLevelConfig" | "selectionMode" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "treeLabel"> {
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
@@ -240,8 +388,10 @@ interface IModelContentTreeComponentProps extends Pick<IModelContentTreeProps, "
 // @beta (undocumented)
 interface IModelContentTreeComponentType {
     // (undocumented)
-    (props: IModelContentTreeComponentProps): JSX_3.Element | null;
-    getLabel(): string;
+    (props: IModelContentTreeComponentProps): JSX.Element | null;
+    getLabel(input: {
+        standardLabels: StandardTreeLabels;
+    }): string;
     id: string;
 }
 
@@ -251,12 +401,36 @@ interface IModelContentTreeHierarchyConfiguration {
 }
 
 // @beta (undocumented)
-type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> & {
+export function IModelContentTreeIcon(input: {
+    node: TreeNode;
+}): _$react.JSX.Element | undefined;
+
+// @beta (undocumented)
+type IModelContentTreeProps = Pick<ExtendedTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "treeLabel"> & Pick<TreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & {
     hierarchyLevelConfig?: {
         sizeLimit?: number;
     };
     hierarchyConfig?: Partial<IModelContentTreeHierarchyConfiguration>;
 };
+
+// @beta (undocumented)
+interface LoadedTreeItemVisibilityButtonState {
+    // (undocumented)
+    isDisabled?: boolean;
+    // (undocumented)
+    state: "visible" | "hidden" | "partial";
+}
+
+// @beta
+export const LOCALIZATION_NAMESPACES: string[];
+
+// @beta
+export function LocalizationContextProvider(input: PropsWithChildren<LocalizationContextProviderProps>): JSX.Element;
+
+// @beta
+interface LocalizationContextProviderProps {
+    localization: Pick<Localization, "getLocalizedString">;
+}
 
 // @public
 interface ModelInfo {
@@ -270,19 +444,22 @@ interface ModelInfo {
 export const ModelsTreeComponent: ModelsTreeComponentType;
 
 // @public (undocumented)
-interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getFilteredPaths" | "getSubTreePaths"> {
+interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getSearchPaths" | "searchText" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "getSubTreePaths" | "treeLabel"> {
     headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
+    viewport?: TreeWidgetViewport;
 }
 
 // @public (undocumented)
 interface ModelsTreeComponentType {
     // (undocumented)
-    (props: ModelsTreeComponentProps): JSX_3.Element | null;
-    getLabel(): string;
+    (props: ModelsTreeComponentProps): JSX.Element | null;
+    getLabel(input: {
+        standardLabels: StandardTreeLabels;
+    }): string;
     HideAllButton: ModelsTreeHeaderButtonType;
     id: string;
     InvertButton: ModelsTreeHeaderButtonType;
@@ -293,7 +470,7 @@ interface ModelsTreeComponentType {
 }
 
 // @public
-interface ModelsTreeHeaderButtonProps extends TreeHeaderButtonProps {
+interface ModelsTreeHeaderButtonProps extends TreeToolbarButtonProps {
     models: ModelInfo[];
 }
 
@@ -302,95 +479,120 @@ type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => ReactE
 
 // @beta
 interface ModelsTreeHierarchyConfiguration {
-    elementClassGrouping: "enable" | "enableWithCounts" | "disable";
-    elementClassSpecification: string;
-    hideRootSubject: boolean;
-    hierarchyLevelFiltering: "enable" | "disable";
-    showEmptyModels: boolean;
+    elements?: {
+        baseClass?: EC.FullClassNameDotNotation;
+        excludedClasses?: EC.FullClassNameDotNotation[];
+        classGrouping?: "enable" | "enable-with-counts" | "disable";
+    };
+    hierarchyLevelFiltering?: "enable" | "disable";
+    models?: {
+        withoutElements?: "include" | "exclude";
+    };
+    subjects?: {
+        root?: "include" | "exclude";
+    };
 }
 
 // @beta (undocumented)
-type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> & UseModelsTreeProps & {
+export function ModelsTreeIcon(input: {
+    node: TreeNode;
+}): _$react.JSX.Element | undefined;
+
+// @beta
+export namespace ModelsTreeNode {
+    const isSubjectNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is NonGroupingHierarchyNode & {
+        key: InstancesNodeKey;
+    };
+    const isModelNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is NonGroupingHierarchyNode & {
+        key: InstancesNodeKey;
+    };
+    const isCategoryNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is Omit<NonGroupingHierarchyNode, "extendedData"> & {
+        key: InstancesNodeKey;
+    } & {
+        extendedData: {
+            modelIds: Id64String[];
+        };
+    };
+    const isElementNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is Omit<NonGroupingHierarchyNode, "extendedData"> & {
+        key: InstancesNodeKey;
+    } & {
+        extendedData: {
+            modelId: Id64String;
+            categoryId: Id64String;
+        };
+    };
+    const isElementClassGroupingNode: (node: Pick<HierarchyNode_2, "key">) => node is Omit<GroupingHierarchyNode, "extendedData"> & {
+        key: ClassGroupingNodeKey;
+    } & {
+        extendedData: {
+            modelId: Id64String;
+            categoryId: Id64String;
+        };
+    };
+    const getType: (node: HierarchyNode_2) => "subject" | "model" | "category" | "element" | "elements-class-group" | undefined;
+}
+
+// @beta (undocumented)
+type ModelsTreeProps = Pick<ExtendedVisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "treeLabel"> & Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & UseModelsTreeProps & {
     hierarchyLevelConfig?: {
         sizeLimit?: number;
     };
 };
 
 // @beta
-export interface ModelsTreeVisibilityHandlerOverrides {
+export interface ModelsTreeVisibilityHandlerOverrides extends BaseTreeVisibilityHandlerOverrides {
     // (undocumented)
-    changeCategoryState?: HierarchyVisibilityHandlerOverridableMethod<(props: ChangeCategoryVisibilityStateProps) => Promise<void>>;
-    // (undocumented)
-    changeElementGroupingNodeState?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+    changeElementGroupingNodeVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
         node: GroupingHierarchyNode;
         on: boolean;
     }) => Promise<void>>;
     // (undocumented)
-    changeElementsState?: HierarchyVisibilityHandlerOverridableMethod<(props: ChangeGeometricElementsDisplayStateProps) => Promise<void>>;
-    // (undocumented)
-    changeModelState?: HierarchyVisibilityHandlerOverridableMethod<(props: ChangeModelVisibilityStateProps) => Promise<void>>;
-    // (undocumented)
-    changeSubjectNodeState?: HierarchyVisibilityHandlerOverridableMethod<(props: {
-        ids: Id64Array;
+    changeSubjectsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        subjectIds: Id64Arg;
         on: boolean;
     }) => Promise<void>>;
     // (undocumented)
-    getCategoryDisplayStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: GetCategoryVisibilityStatusProps) => Promise<VisibilityStatus>>;
-    // (undocumented)
-    getElementDisplayStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: GetGeometricElementVisibilityStatusProps) => Promise<VisibilityStatus>>;
-    // (undocumented)
-    getElementGroupingNodeDisplayStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+    getElementGroupingNodeVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
         node: GroupingHierarchyNode;
     }) => Promise<VisibilityStatus>>;
     // (undocumented)
-    getModelDisplayStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
-        ids: Id64Arg;
-    }) => Promise<VisibilityStatus>>;
-    // (undocumented)
-    getSubjectNodeVisibility?: HierarchyVisibilityHandlerOverridableMethod<(props: {
-        ids: Id64Array;
+    getSubjectsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        subjectIds: Id64Arg;
     }) => Promise<VisibilityStatus>>;
 }
 
 // @public (undocumented)
-type NormalizedHierarchyFilteringPath = ReturnType<(typeof HierarchyFilteringPath)["normalize"]>;
+type PerModelCategoryOverride = "show" | "hide" | "none";
 
-// @public
-export function SelectableTree(props: SelectableTreeProps): JSX_2.Element | null;
-
-// @public
-export interface SelectableTreeDefinition {
-    getLabel: () => string;
-    id: string;
-    render: (props: SelectableTreeRenderProps) => React.ReactNode;
-    shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
-    startIcon?: React.ReactNode;
-}
-
-// @public
-interface SelectableTreeProps {
+// @beta
+export class SearchLimitExceededError extends Error {
+    constructor(limit: number);
     // (undocumented)
-    density?: "enlarged" | "default";
-    // (undocumented)
-    onFeatureUsed?: (feature: string) => void;
-    // (undocumented)
-    onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
-    // (undocumented)
-    trees: SelectableTreeDefinition[];
-}
-
-// @public
-interface SelectableTreeRenderProps {
-    // (undocumented)
-    density?: "enlarged" | "default";
-    // (undocumented)
-    onFeatureUsed?: (feature: string) => void;
-    // (undocumented)
-    onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
+    readonly limit: number;
 }
 
 // @beta (undocumented)
-export function TelemetryContextProvider(input: PropsWithChildren<TelemetryContextProviderProps>): JSX_2.Element;
+export function SelectableTree(input: PropsWithChildren<TreeHeaderProps>): _$react.JSX.Element;
+
+// @beta
+export function SkeletonTree(): _$react.JSX.Element;
+
+// @beta (undocumented)
+interface StandardTreeLabels {
+    // (undocumented)
+    categories: string;
+    // (undocumented)
+    classifications: string;
+    // (undocumented)
+    externalSources: string;
+    // (undocumented)
+    imodelContent: string;
+    // (undocumented)
+    models: string;
+}
+
+// @beta
+export function TelemetryContextProvider(input: PropsWithChildren<TelemetryContextProviderProps>): _$react.JSX.Element;
 
 // @beta (undocumented)
 interface TelemetryContextProviderProps {
@@ -400,106 +602,156 @@ interface TelemetryContextProviderProps {
 }
 
 // @beta
-export function Tree(input: TreeProps): JSX_2.Element;
+export function Tree(input: TreeProps): _$react.JSX.Element;
 
-// @beta (undocumented)
-interface TreeCheckboxProps {
-    getCheckboxState: (node: PresentationHierarchyNode) => TreeNodeCheckboxState;
-    onCheckboxClicked: (node: PresentationHierarchyNode, checked: boolean) => void;
+export { TreeActionBase }
+
+export { TreeActionBaseAttributes }
+
+// @public
+export interface TreeDefinition {
+    getLabel: (props: {
+        standardLabels: StandardTreeLabels;
+    }) => string;
+    id: string;
+    isSearchable?: boolean;
+    render: (props: TreeRenderProps) => React.ReactNode;
+    shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
+    startIcon?: React.ReactNode;
 }
 
 // @beta (undocumented)
-interface TreeFilteringProps {
-    isDisabled?: boolean;
-    onFilterClear: () => void;
-    onFilterStart: (newFilter: string) => void;
-    onSelectedChanged?: (index: number) => void;
-    resultCount?: number;
-    selectedIndex?: number;
-}
-
-// @public (undocumented)
-interface TreeHeaderButtonProps {
+interface TreeHeaderProps {
     // (undocumented)
-    density?: "default" | "enlarged";
-    // (undocumented)
-    onFeatureUsed?: (feature: string) => void;
-    // (undocumented)
-    viewport: Viewport;
+    buttons?: ReactNode;
 }
 
 // @beta
-type TreeNodeCheckboxState = ({
-    state: "on" | "off" | "partial";
-    isDisabled?: boolean;
-} | {
+type TreeItemVisibilityButtonState = (LoadedTreeItemVisibilityButtonState | {
     isLoading: true;
 }) & {
     tooltip?: string;
 };
 
-// @beta (undocumented)
-type TreeNodeRendererProps = ComponentPropsWithoutRef<typeof TreeNodeRenderer> & {
-    checkboxProps?: TreeCheckboxProps;
-};
+export { TreeNodeFilterAction }
+
+export { TreeNodeRenameAction }
 
 // @beta (undocumented)
-type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | "getHierarchyDefinition"> & Partial<Pick<FunctionProps<typeof useSelectionHandler>, "selectionMode">> & {
+type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPaths" | "getHierarchyDefinition"> & Pick<BaseTreeRendererProps, "selectionMode"> & {
     imodel: IModelConnection;
-    getSchemaContext: (imodel: IModelConnection) => SchemaContext;
     treeName: string;
     selectionStorage: SelectionStorage;
-    selectionPredicate?: (node: PresentationHierarchyNode) => boolean;
-    treeRenderer: (treeProps: Required<Pick<TreeRendererProps, "rootNodes" | "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "isNodeSelected" | "getHierarchyLevelDetails" | "size" | "getLabel">>) => ReactNode;
+    selectionPredicate?: (node: TreeNode) => boolean;
+    treeRenderer: (treeProps: Required<CommonTreeRendererProps & Pick<BaseTreeRendererProps, "getTreeItemProps">>) => ReactNode;
     imodelAccess?: FunctionProps<typeof useIModelTree>["imodelAccess"];
     hierarchyLevelSizeLimit?: number;
-    density?: "default" | "enlarged";
-    noDataMessage?: ReactNode;
+    emptyTreeContent?: ReactNode;
     onReload?: () => void;
-    highlight?: HighlightInfo;
+    onNodeExpanded?: (node: TreeNode) => void;
+    highlightText?: string;
 };
 
 // @beta
-export function TreeRenderer(input: TreeRendererProps): JSX_2.Element;
+export function TreeRenderer(props: TreeRendererProps_2): _$react.JSX.Element;
 
 // @beta (undocumented)
-type TreeRendererProps = Pick<TreeNodeRendererProps, "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "getIcon" | "getLabel" | "getSublabel" | "getActions" | "getHierarchyLevelDetails" | "checkboxProps" | "reloadTree" | "filterButtonsVisibility"> & Omit<ComponentPropsWithoutRef<typeof Tree_2<RenderedTreeNode>>, "data" | "nodeRenderer" | "getNode"> & {
-    rootNodes: PresentationTreeNode[];
-    isNodeSelected: (nodeId: string) => boolean;
-    onNodeDoubleClick?: (node: PresentationHierarchyNode, isSelected: boolean) => void;
-};
+type TreeRendererProps_2 = ComponentProps<typeof StrataKitTreeRenderer>;
 
 // @public
-export class TreeWidget {
-    static get i18n(): Localization;
-    static get i18nNamespace(): string;
-    static initialize(i18n?: Localization): Promise<void>;
-    static terminate(): void;
-    static translate(key: string | string[], options?: TranslationOptions): string;
+interface TreeRenderProps {
+    // (undocumented)
+    onFeatureUsed?: (feature: string) => void;
+    // (undocumented)
+    onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
+    // (undocumented)
+    searchText?: string;
+    // (undocumented)
+    treeLabel: string;
+}
+
+// @public (undocumented)
+interface TreeToolbarButtonProps {
+    // (undocumented)
+    viewport: TreeWidgetViewport;
 }
 
 // @public
-export function TreeWidgetComponent(props: SelectableTreeProps): JSX_2.Element;
+export function TreeWidgetComponent(input: TreeWidgetProps): _$react.JSX.Element;
+
+// @beta
+export function TreeWidgetContextProvider(input: PropsWithChildren<TreeWidgetContextProviderProps>): ReactNode;
+
+// @beta
+interface TreeWidgetContextProviderProps {
+    localization: Pick<Localization, "getLocalizedString">;
+    logger?: ILogger;
+}
 
 // @public
 interface TreeWidgetProps {
-    density?: "enlarged" | "default";
+    localization: Pick<Localization, "getLocalizedString">;
+    logger?: ILogger;
     onFeatureUsed?: (feature: string) => void;
     onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
-    trees: SelectableTreeDefinition[];
+    trees: TreeDefinition[];
 }
 
-// @beta (undocumented)
-export function TreeWithHeader(input: PropsWithChildren<TreeWithHeaderProps>): JSX_2.Element;
-
-// @beta (undocumented)
-interface TreeWithHeaderProps {
-    // (undocumented)
-    buttons?: ReactNode;
-    // (undocumented)
-    density?: "enlarged" | "default";
-    // (undocumented)
-    filteringProps?: TreeFilteringProps;
+// @public
+export interface TreeWidgetViewport {
+    alwaysDrawn: ReadonlySet<Id64String> | undefined;
+    changeCategoryDisplay: (props: {
+        categoryIds: Id64Arg;
+        display: boolean;
+        enableAllSubCategories?: boolean;
+    }) => void;
+    changeModelDisplay: (props: {
+        modelIds: Id64Arg;
+        display: boolean;
+    }) => void;
+    changeSubCategoryDisplay: (props: {
+        subCategoryId: Id64String;
+        display: boolean;
+    }) => void;
+    clearAlwaysDrawn: () => void;
+    clearNeverDrawn: () => void;
+    clearPerModelCategoryOverrides: (props?: {
+        modelIds?: Id64Arg;
+    }) => void;
+    getPerModelCategoryOverride: (props: {
+        modelId: Id64String;
+        categoryId: Id64String;
+    }) => PerModelCategoryOverride;
+    iModel: IModelConnection;
+    readonly isAlwaysDrawnExclusive: boolean;
+    neverDrawn: ReadonlySet<Id64String> | undefined;
+    onAlwaysDrawnChanged: BeEvent<() => void>;
+    onDisplayedCategoriesChanged: BeEvent<() => void>;
+    onDisplayedModelsChanged: BeEvent<() => void>;
+    onDisplayStyleChanged: BeEvent<() => void>;
+    onNeverDrawnChanged: BeEvent<() => void>;
+    onPerModelCategoriesOverridesChanged: BeEvent<() => void>;
+    perModelCategoryOverrides: Readonly<Iterable<{
+        modelId: Id64String;
+        categoryId: Id64String;
+        visible: boolean;
+    }>>;
+    setAlwaysDrawn: (props: {
+        elementIds: Set<Id64String>;
+        exclusive?: boolean;
+    }) => void;
+    setNeverDrawn: (props: {
+        elementIds: Set<Id64String>;
+    }) => void;
+    setPerModelCategoryOverride: (props: {
+        modelIds: Id64Arg;
+        categoryIds: Id64Arg;
+        override: PerModelCategoryOverride;
+    }) => void;
+    viewsCategory: (categoryId: Id64String) => boolean;
+    viewsModel: (modelId: Id64String) => boolean;
+    viewsSubCategory: (subCategoryId: Id64String) => boolean;
+    viewType: "2d" | "3d" | "other";
 }
 
 // @beta
@@ -507,30 +759,96 @@ export function useCategoriesTree(input: UseCategoriesTreeProps): UseCategoriesT
 
 // @public
 export function useCategoriesTreeButtonProps(input: {
-    viewport: Viewport;
+    viewport: TreeWidgetViewport;
 }): {
-    buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport">;
-    onCategoriesFiltered: (categories: CategoryInfo[] | undefined) => void;
+    buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport" | "models">;
+    onCategoriesFiltered: (props: {
+        categories: CategoryInfo[] | undefined;
+        models?: Id64Array;
+    }) => void;
 };
 
 // @beta (undocumented)
 interface UseCategoriesTreeProps {
     // (undocumented)
-    activeView: Viewport;
+    activeView: TreeWidgetViewport;
     // (undocumented)
-    filter: string;
+    emptyTreeContent?: ReactNode;
     // (undocumented)
-    hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
+    getTreeItemProps?: ExtendedVisibilityTreeRendererProps["getTreeItemProps"];
     // (undocumented)
-    onCategoriesFiltered?: (categories: CategoryInfo[] | undefined) => void;
+    hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
+    // (undocumented)
+    onCategoriesFiltered?: (props: {
+        categories: CategoryInfo[] | undefined;
+        models?: Id64Array;
+    }) => void;
+    searchLimit?: number | "unbounded";
+    // (undocumented)
+    searchText?: string;
 }
 
 // @beta (undocumented)
 interface UseCategoriesTreeResult {
     // (undocumented)
-    categoriesTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "noDataMessage">;
+    getTreeItemProps: Required<ExtendedVisibilityTreeRendererProps>["getTreeItemProps"];
     // (undocumented)
-    rendererProps: Required<Pick<VisibilityTreeRendererProps, "getIcon" | "getSublabel">>;
+    treeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent" | "onNodeExpanded">;
+}
+
+// @beta
+export function useClassificationsTree(input: UseClassificationsTreeProps): UseClassificationsTreeResult;
+
+// @beta
+export function useClassificationsTreeDefinition(props: UseClassificationsTreeDefinitionProps): UseClassificationsTreeDefinitionResult;
+
+// @beta (undocumented)
+interface UseClassificationsTreeDefinitionProps {
+    // (undocumented)
+    hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+    imodels: Array<IModelConnection>;
+    onSearchPathsChanged?: (paths: HierarchySearchTree[] | undefined) => void;
+    search?: ({
+        searchText: string;
+    } | {
+        targetItems: Array<InstanceKey>;
+    }) & {
+        limit?: number | "unbounded";
+    };
+}
+
+// @beta (undocumented)
+interface UseClassificationsTreeDefinitionResult {
+    // (undocumented)
+    getHierarchyDefinition: (props: {
+        imodelAccess: IModelAccess;
+    }) => HierarchyDefinition;
+    // (undocumented)
+    getSearchPaths?: FunctionProps<typeof useTree>["getSearchPaths"];
+}
+
+// @beta (undocumented)
+interface UseClassificationsTreeProps {
+    // (undocumented)
+    activeView: TreeWidgetViewport;
+    // (undocumented)
+    emptyTreeContent?: ReactNode;
+    // (undocumented)
+    getTreeItemProps?: ExtendedVisibilityTreeRendererProps["getTreeItemProps"];
+    // (undocumented)
+    hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+    searchLimit?: number | "unbounded";
+    // (undocumented)
+    searchText?: string;
+    visibilityHandlerConfig?: ClassificationsTreeVisibilityHandlerConfiguration;
+}
+
+// @beta (undocumented)
+interface UseClassificationsTreeResult {
+    // (undocumented)
+    getTreeItemProps: Required<ExtendedVisibilityTreeRendererProps>["getTreeItemProps"];
+    // (undocumented)
+    treeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "getSearchPaths" | "emptyTreeContent" | "highlightText" | "onNodeExpanded">;
 }
 
 // @public
@@ -542,7 +860,7 @@ export function useModelsTree(input: UseModelsTreeProps): UseModelsTreeResult;
 // @public
 export function useModelsTreeButtonProps(input: {
     imodel: IModelConnection;
-    viewport: Viewport;
+    viewport: TreeWidgetViewport;
 }): {
     buttonProps: Pick<ModelsTreeHeaderButtonProps, "models" | "viewport">;
     onModelsFiltered: (models: Id64String[] | undefined) => void;
@@ -551,27 +869,32 @@ export function useModelsTreeButtonProps(input: {
 // @beta (undocumented)
 interface UseModelsTreeProps {
     // (undocumented)
-    activeView: Viewport;
-    filter?: string;
-    getFilteredPaths?: (props: {
+    activeView: TreeWidgetViewport;
+    // (undocumented)
+    emptyTreeContent?: ReactNode;
+    getSearchPaths?: (props: {
         createInstanceKeyPaths: (props: {
             targetItems: Array<InstanceKey | ElementsGroupInfo>;
         } | {
             label: string;
-        }) => Promise<NormalizedHierarchyFilteringPath[]>;
-        filter?: string;
-    }) => Promise<HierarchyFilteringPath[] | undefined>;
+        }) => Promise<HierarchySearchTree[]>;
+        searchText?: string;
+    }) => Promise<HierarchySearchTree[] | undefined>;
     getSubTreePaths?: (props: {
         createInstanceKeyPaths: (props: {
             targetItems: Array<InstanceKey | ElementsGroupInfo>;
-        }) => Promise<NormalizedHierarchyFilteringPath[]>;
-    }) => Promise<HierarchyFilteringPath[]>;
+        }) => Promise<HierarchySearchTree[]>;
+    }) => Promise<HierarchySearchTree[]>;
     // (undocumented)
-    hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
+    getTreeItemProps?: ExtendedVisibilityTreeRendererProps["getTreeItemProps"];
+    // (undocumented)
+    hierarchyConfig?: ModelsTreeHierarchyConfiguration;
     // (undocumented)
     onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
+    searchLimit?: number | "unbounded";
+    searchText?: string;
     selectionPredicate?: (props: {
-        node: PresentationHierarchyNode;
+        node: TreeNode;
         type: "subject" | "model" | "category" | "element" | "elements-class-group";
     }) => boolean;
     // (undocumented)
@@ -581,34 +904,44 @@ interface UseModelsTreeProps {
 // @beta (undocumented)
 interface UseModelsTreeResult {
     // (undocumented)
-    modelsTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "noDataMessage" | "selectionPredicate">;
+    getTreeItemProps: Required<ExtendedVisibilityTreeRendererProps>["getTreeItemProps"];
     // (undocumented)
-    rendererProps: Required<Pick<VisibilityTreeRendererProps, "getIcon" | "onNodeDoubleClick">>;
+    treeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent" | "selectionPredicate" | "onNodeExpanded">;
+}
+
+// @beta
+export const VisibilityAction: _$react.MemoExoticComponent<(input: {
+    node: TreeNode;
+} & TreeActionBaseAttributes) => _$react.JSX.Element>;
+
+// @beta (undocumented)
+interface VisibilityContext {
+    getVisibilityButtonState: (node: TreeNode) => TreeItemVisibilityButtonState;
+    onVisibilityButtonClick: (node: TreeNode, state: LoadedTreeItemVisibilityButtonState["state"]) => void;
 }
 
 // @beta
 export interface VisibilityStatus {
     isDisabled?: boolean;
     state: "visible" | "partial" | "hidden";
-    tooltip?: string;
 }
 
 // @beta
-export function VisibilityTree(input: VisibilityTreeProps): JSX_2.Element;
+export function VisibilityTree(input: VisibilityTreeProps): _$react.JSX.Element;
 
 // @beta (undocumented)
 type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess"> & {
     visibilityHandlerFactory: (props: {
-        imodelAccess: ECClassHierarchyInspector;
+        imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom">;
     }) => HierarchyVisibilityHandler;
-    treeRenderer: (treeProps: FunctionProps<TreeProps["treeRenderer"]> & Pick<VisibilityTreeRendererProps, "getCheckboxState" | "onCheckboxClicked">) => ReactNode;
+    treeRenderer: (treeProps: FunctionProps<TreeProps["treeRenderer"]> & Pick<VisibilityContext, "getVisibilityButtonState" | "onVisibilityButtonClick">) => ReactNode;
 };
 
 // @beta
-export function VisibilityTreeRenderer(input: VisibilityTreeRendererProps): JSX_2.Element;
+export function VisibilityTreeRenderer(props: VisibilityTreeRendererProps): _$react.JSX.Element;
 
 // @beta (undocumented)
-type VisibilityTreeRendererProps = TreeRendererProps & TreeCheckboxProps;
+type VisibilityTreeRendererProps = ComponentProps<typeof StrataKitTreeRenderer> & VisibilityContext;
 
 // (No @packageDocumentation comment for this package)
 

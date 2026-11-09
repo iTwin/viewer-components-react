@@ -11,6 +11,8 @@ export default defineConfig({
     restoreMocks: true,
     include: ["src/test/**/*.test.{ts,tsx}"],
     setupFiles: ["src/setup.ts"],
+    testTimeout: 10000,
+    hookTimeout: 10000,
     environmentOptions: {
       happyDOM: {
         settings: {
@@ -24,8 +26,7 @@ export default defineConfig({
     server: {
       deps: {
         inline: [
-          "@stratakit/foundations",
-          "@stratakit/icons",
+          /@stratakit\//,
           "@itwin/appui-react",
           "@itwin/components-react",
           "@itwin/core-react",

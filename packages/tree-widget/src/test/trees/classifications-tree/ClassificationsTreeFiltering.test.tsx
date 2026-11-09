@@ -1,0 +1,903 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
+import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { withEditTxn } from "@itwin/core-backend";
+import { Id64 } from "@itwin/core-bentley";
+import { act, renderHook } from "@testing-library/react";
+import { SharedTreeContextProvider } from "../../../tree-widget-react/shared/contexts/SharedTreeContext.js";
+import {
+  CLASS_NAME_Classification,
+  CLASS_NAME_ClassificationTable,
+  CLASS_NAME_GeometricElement3d,
+} from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { SearchLimitExceededError } from "../../../tree-widget-react/shared/TreeErrors.js";
+import { useClassificationsTreeDefinition } from "../../../tree-widget-react/trees/classifications-tree/UseClassificationsTreeDefinition.js";
+import { buildIModel, insertGeometricModelWithPartition } from "../../IModelUtils.js";
+import { initializeITwinJs, terminateITwinJs } from "../../Initialize.js";
+import {
+  importClassificationSchema,
+  insertClassification,
+  insertClassificationSystem,
+  insertClassificationTable,
+  insertElementHasClassificationsRelationship,
+} from "./Utils.js";
+
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { InstanceKey, Props } from "@itwin/presentation-shared";
+
+const rootClassificationSystemCode = "TestClassificationSystem";
+const defaultHierarchyConfiguration = {
+  rootClassificationSystemCode,
+};
+
+describe("Classifications tree", () => {
+  describe("Hierarchy search", () => {
+    beforeAll(async () => {
+      await initializeITwinJs();
+    });
+
+    afterAll(async () => {
+      await terminateITwinJs();
+    });
+
+    it("excludes private and template model elements from label and target-item searches", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, async (txn) => {
+          await importClassificationSchema(imodel);
+          const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+          const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "table" });
+          const classification = insertClassification({ txn, modelId: table.id, codeValue: "classification" });
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
+          const element = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id, userLabel: "matching element" });
+          insertElementHasClassificationsRelationship({ txn, elementId: element.id, classificationId: classification.id });
+
+          const templateModel = insertGeometricModelWithPartition({ txn, codeValue: "template model", isTemplate: true });
+          const elementInTemplateModel = insertPhysicalElement({
+            txn,
+            modelId: templateModel.id,
+            categoryId: category.id,
+            userLabel: "matching element in template model",
+          });
+          insertElementHasClassificationsRelationship({ txn, elementId: elementInTemplateModel.id, classificationId: classification.id });
+
+          const privateModel = insertGeometricModelWithPartition({ txn, codeValue: "private model", isPrivate: true });
+          const elementInPrivateModel = insertPhysicalElement({
+            txn,
+            modelId: privateModel.id,
+            categoryId: category.id,
+            userLabel: "matching element in private model",
+          });
+          insertElementHasClassificationsRelationship({ txn, elementId: elementInPrivateModel.id, classificationId: classification.id });
+          return { table, classification, element, elementInTemplateModel, elementInPrivateModel };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      for (const search of [{ searchText: "matching", limit: 1 }, { targetItems: [keys.element, keys.elementInTemplateModel, keys.elementInPrivateModel] }]) {
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodelConnection],
+          hierarchyConfig: defaultHierarchyConfiguration,
+          search,
+        });
+        expect.soft(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
+          {
+            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: true },
+            children: [
+              {
+                identifier: { id: keys.classification.id, className: CLASS_NAME_Classification },
+                options: { autoExpand: true },
+                children: [
+                  {
+                    identifier: { id: keys.element.id, className: CLASS_NAME_GeometricElement3d },
+                    options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                  },
+                ],
+              },
+            ],
+          },
+        ]);
+      }
+    });
+
+    describe("label search limits", () => {
+      let imodelConnection: IModelConnection;
+      let keys: { table: InstanceKey; classification: InstanceKey; elements: InstanceKey[] };
+
+      beforeAll(async () => {
+        const setupResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, async (txn) => {
+            await importClassificationSchema(imodel);
+
+            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable" });
+            const classification = insertClassification({ txn, modelId: table.id, codeValue: "Classification" });
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: "Model" });
+            const category = insertSpatialCategory({ txn, codeValue: "Category" });
+            const elements = Array.from({ length: 103 }, (_, index) => {
+              const element = insertPhysicalElement({ txn, userLabel: `matching element ${index}`, modelId: model.id, categoryId: category.id });
+              insertElementHasClassificationsRelationship({ txn, elementId: element.id, classificationId: classification.id });
+              return element;
+            });
+            return { table, classification, elements };
+          }),
+        );
+        imodelConnection = setupResult.imodelConnection;
+        keys = setupResult;
+      });
+
+      afterAll(async () => {
+        await imodelConnection.close();
+      });
+
+      it.each([
+        { limit: undefined, expectedError: new SearchLimitExceededError(100) },
+        { limit: 2, expectedError: new SearchLimitExceededError(2) },
+        { limit: 103, expectedError: undefined },
+        { limit: "unbounded" as const, expectedError: undefined },
+      ])("honors label search limit $limit with 103 matches", async ({ limit, expectedError }) => {
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodelConnection],
+          hierarchyConfig: defaultHierarchyConfiguration,
+          search: { searchText: "matching element", limit },
+        });
+        if (expectedError) {
+          await act(async () => {
+            await expect(hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal })).rejects.toThrow(expectedError);
+          });
+          return;
+        }
+
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
+          {
+            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: true },
+            children: [
+              {
+                identifier: { id: keys.classification.id, className: CLASS_NAME_Classification },
+                options: { autoExpand: true },
+                children: keys.elements.map((element) => ({
+                  identifier: { id: element.id, className: CLASS_NAME_GeometricElement3d },
+                  options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                })),
+              },
+            ],
+          },
+        ]);
+      });
+    });
+
+    ["Test", "_", "%"].forEach((label) => {
+      it(`finds classification table by label when it contains '${label}'`, async function () {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, async (txn) => {
+            await importClassificationSchema(imodel);
+
+            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable", userLabel: `${label}Table` });
+            const classification = insertClassification({ txn, modelId: table.id, codeValue: "Classification" });
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Model" });
+            const spatialCategory = insertSpatialCategory({ txn, codeValue: "Category" });
+            const element = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "Element",
+            });
+            insertElementHasClassificationsRelationship({ txn, elementId: element.id, classificationId: classification.id });
+
+            return { table };
+          }),
+        );
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodelConnection],
+          hierarchyConfig: defaultHierarchyConfiguration,
+          search: { searchText: label },
+        });
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
+          {
+            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+          },
+        ]);
+      });
+
+      it(`finds classification by label when it contains '${label}'`, async function () {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, async (txn) => {
+            await importClassificationSchema(imodel);
+
+            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable" });
+            const classification = insertClassification({ txn, modelId: table.id, codeValue: "Classification", userLabel: `${label}Cl` });
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Model" });
+            const spatialCategory = insertSpatialCategory({ txn, codeValue: "Category" });
+            const element = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "Element",
+            });
+            insertElementHasClassificationsRelationship({ txn, elementId: element.id, classificationId: classification.id });
+
+            return { table, classification };
+          }),
+        );
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodelConnection],
+          hierarchyConfig: defaultHierarchyConfiguration,
+          search: { searchText: label },
+        });
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
+          {
+            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: true },
+            children: [
+              {
+                identifier: { id: keys.classification.id, className: CLASS_NAME_Classification },
+                options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+              },
+            ],
+          },
+        ]);
+      });
+
+      it(`finds 3d element by label when it contains '${label}'`, async function () {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, async (txn) => {
+            await importClassificationSchema(imodel);
+
+            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable" });
+            const classification = insertClassification({ txn, modelId: table.id, codeValue: "Classification" });
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Model" });
+            const spatialCategory = insertSpatialCategory({ txn, codeValue: "Category" });
+            const element = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "Element",
+              userLabel: `${label}El`,
+            });
+            insertElementHasClassificationsRelationship({ txn, elementId: element.id, classificationId: classification.id });
+
+            return { table, classification, element };
+          }),
+        );
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodelConnection],
+          hierarchyConfig: defaultHierarchyConfiguration,
+          search: { searchText: label },
+        });
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
+          {
+            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: true },
+            children: [
+              {
+                identifier: { id: keys.classification.id, className: CLASS_NAME_Classification },
+                options: { autoExpand: true },
+                children: [
+                  {
+                    identifier: { id: keys.element.id, className: CLASS_NAME_GeometricElement3d },
+                    options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                  },
+                ],
+              },
+            ],
+          },
+        ]);
+      });
+
+      it(`finds 3d child element by label when it contains '${label}'`, async function () {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, async (txn) => {
+            await importClassificationSchema(imodel);
+
+            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable" });
+            const classification = insertClassification({ txn, modelId: table.id, codeValue: "Classification" });
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Model" });
+            const spatialCategory = insertSpatialCategory({ txn, codeValue: "Category" });
+            const parentElement = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "Parent Element",
+            });
+            insertElementHasClassificationsRelationship({ txn, elementId: parentElement.id, classificationId: classification.id });
+            const childElement = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "Child Element",
+              userLabel: `${label}ChildEl`,
+              parentId: parentElement.id,
+            });
+
+            return { table, classification, parentElement, childElement };
+          }),
+        );
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodelConnection],
+          hierarchyConfig: defaultHierarchyConfiguration,
+          search: { searchText: label },
+        });
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
+          {
+            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: true },
+            children: [
+              {
+                identifier: { id: keys.classification.id, className: CLASS_NAME_Classification },
+                options: { autoExpand: true },
+                children: [
+                  {
+                    identifier: { id: keys.parentElement.id, className: CLASS_NAME_GeometricElement3d },
+                    options: { autoExpand: true },
+                    children: [
+                      {
+                        identifier: { id: keys.childElement.id, className: CLASS_NAME_GeometricElement3d },
+                        options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ]);
+      });
+    });
+
+    describe("excludedElementClassNames", () => {
+      it("excludes elements of excluded classes from search paths", async () => {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, async (txn) => {
+            await importClassificationSchema(imodel);
+
+            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable" });
+            const classification = insertClassification({ txn, modelId: table.id, codeValue: "Classification" });
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Model" });
+            const spatialCategory = insertSpatialCategory({ txn, codeValue: "Category" });
+            const element = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "Element",
+              userLabel: "matching excluded element",
+            });
+            insertElementHasClassificationsRelationship({ txn, elementId: element.id, classificationId: classification.id });
+          }),
+        );
+        const { imodelConnection } = buildIModelResult;
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodelConnection],
+          hierarchyConfig: { ...defaultHierarchyConfiguration, elements: { excludedClasses: ["Generic.PhysicalObject"] } },
+          search: { searchText: "matching" },
+        });
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([]);
+      });
+
+      it("excludes elements of classes derived from excluded classes from search paths", async () => {
+        await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
+          withEditTxn(imodel, async (txn) => {
+            await importClassificationSchema(imodel);
+
+            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable" });
+            const classification = insertClassification({ txn, modelId: table.id, codeValue: "Classification" });
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Model" });
+            const spatialCategory = insertSpatialCategory({ txn, codeValue: "Category" });
+            const element = insertPhysicalElement({
+              txn,
+              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "Element",
+              userLabel: "matching excluded element",
+            });
+            insertElementHasClassificationsRelationship({ txn, elementId: element.id, classificationId: classification.id });
+          }),
+        );
+        const { imodelConnection } = buildIModelResult;
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodelConnection],
+          hierarchyConfig: { ...defaultHierarchyConfiguration, elements: { excludedClasses: ["BisCore.PhysicalElement"] } },
+          search: { searchText: "matching" },
+        });
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([]);
+      });
+
+      it("returns the classification even when its only element is excluded", async () => {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, async (txn) => {
+            await importClassificationSchema(imodel);
+
+            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable" });
+            const classification = insertClassification({ txn, modelId: table.id, codeValue: "Classification", userLabel: "matching excluded classification" });
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Model" });
+            const spatialCategory = insertSpatialCategory({ txn, codeValue: "Category" });
+            const element = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "Element",
+              userLabel: "excluded element",
+            });
+            insertElementHasClassificationsRelationship({ txn, elementId: element.id, classificationId: classification.id });
+
+            return { table, classification };
+          }),
+        );
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodelConnection],
+          hierarchyConfig: { ...defaultHierarchyConfiguration, elements: { excludedClasses: ["Generic.PhysicalObject"] } },
+          search: { searchText: "matching" },
+        });
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
+          {
+            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: true },
+            children: [
+              {
+                identifier: { id: keys.classification.id, className: CLASS_NAME_Classification },
+                options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+              },
+            ],
+          },
+        ]);
+      });
+
+      it("does not return child elements of filtered out parent elements", async () => {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, async (txn) => {
+            await importClassificationSchema(imodel);
+
+            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable" });
+            const classification = insertClassification({ txn, modelId: table.id, codeValue: "Classification" });
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Model" });
+            const spatialCategory = insertSpatialCategory({ txn, codeValue: "Category" });
+            const excludedParent = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "Parent",
+              userLabel: "excluded parent",
+            });
+            insertPhysicalElement({
+              txn,
+              classFullName: "Generic.SpatialLocation",
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              parentId: excludedParent.id,
+              codeValue: "Child",
+              userLabel: "matching child of excluded parent",
+            });
+            insertElementHasClassificationsRelationship({ txn, elementId: excludedParent.id, classificationId: classification.id });
+          }),
+        );
+        const { imodelConnection } = buildIModelResult;
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodelConnection],
+          hierarchyConfig: { ...defaultHierarchyConfiguration, elements: { excludedClasses: ["Generic.PhysicalObject"] } },
+          search: { searchText: "matching" },
+        });
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([]);
+      });
+
+      it("does not return excluded child elements when their parent is not excluded", async () => {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, async (txn) => {
+            await importClassificationSchema(imodel);
+
+            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable" });
+            const classification = insertClassification({ txn, modelId: table.id, codeValue: "Classification" });
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Model" });
+            const spatialCategory = insertSpatialCategory({ txn, codeValue: "Category" });
+            const keptParent = insertPhysicalElement({
+              txn,
+              classFullName: "Generic.SpatialLocation",
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "Parent",
+              userLabel: "kept parent",
+            });
+            insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              parentId: keptParent.id,
+              codeValue: "Child",
+              userLabel: "matching excluded child",
+            });
+            insertElementHasClassificationsRelationship({ txn, elementId: keptParent.id, classificationId: classification.id });
+          }),
+        );
+        const { imodelConnection } = buildIModelResult;
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodelConnection],
+          hierarchyConfig: { ...defaultHierarchyConfiguration, elements: { excludedClasses: ["Generic.PhysicalObject"] } },
+          search: { searchText: "matching" },
+        });
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([]);
+      });
+    });
+
+    describe("by instance key", () => {
+      it("finds classifications table", async () => {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, async (txn) => {
+            await importClassificationSchema(imodel);
+
+            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+            const table1 = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable1" });
+            const classification1 = insertClassification({ txn, modelId: table1.id, codeValue: "Classification1" });
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Model1" });
+            const spatialCategory = insertSpatialCategory({ txn, codeValue: "Category1" });
+            const element1 = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "Element1",
+              userLabel: "Element1",
+            });
+            insertElementHasClassificationsRelationship({ txn, elementId: element1.id, classificationId: classification1.id });
+
+            const table2 = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable2" });
+            const classification2 = insertClassification({ txn, modelId: table2.id, codeValue: "Classification2" });
+            const element2 = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "Element2",
+              userLabel: "Element2",
+            });
+            insertElementHasClassificationsRelationship({ txn, elementId: element2.id, classificationId: classification2.id });
+
+            return { table1, table2 };
+          }),
+        );
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodelConnection],
+          hierarchyConfig: defaultHierarchyConfiguration,
+          search: { targetItems: [keys.table2] },
+        });
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
+          {
+            identifier: { id: keys.table2.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+          },
+        ]);
+      });
+
+      it("finds classifications", async () => {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, async (txn) => {
+            await importClassificationSchema(imodel);
+
+            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+            const table1 = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable1" });
+            const classification1 = insertClassification({ txn, modelId: table1.id, codeValue: "Classification1" });
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Model1" });
+            const spatialCategory = insertSpatialCategory({ txn, codeValue: "Category1" });
+            const element1 = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "Element1",
+              userLabel: "Element1",
+            });
+            insertElementHasClassificationsRelationship({ txn, elementId: element1.id, classificationId: classification1.id });
+
+            const table2 = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable2" });
+            const classification2 = insertClassification({ txn, modelId: table2.id, codeValue: "Classification2" });
+            const element2 = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "Element2",
+              userLabel: "Element2",
+            });
+            insertElementHasClassificationsRelationship({ txn, elementId: element2.id, classificationId: classification2.id });
+
+            return { table1, table2, classification1, classification2 };
+          }),
+        );
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodelConnection],
+          hierarchyConfig: defaultHierarchyConfiguration,
+          search: { targetItems: [keys.classification2] },
+        });
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
+          {
+            identifier: { id: keys.table2.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: true },
+            children: [
+              {
+                identifier: { id: keys.classification2.id, className: CLASS_NAME_Classification },
+                options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+              },
+            ],
+          },
+        ]);
+      });
+
+      it("finds geometric element 3d", async () => {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, async (txn) => {
+            await importClassificationSchema(imodel);
+
+            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+            const table1 = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable1" });
+            const classification1 = insertClassification({ txn, modelId: table1.id, codeValue: "Classification1" });
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Model1" });
+            const spatialCategory = insertSpatialCategory({ txn, codeValue: "Category1" });
+            const element1 = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "Element1",
+              userLabel: "Element1",
+            });
+            insertElementHasClassificationsRelationship({ txn, elementId: element1.id, classificationId: classification1.id });
+
+            const table2 = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable2" });
+            const classification2 = insertClassification({ txn, modelId: table2.id, codeValue: "Classification2" });
+            const element2 = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "Element2",
+              userLabel: "Element2",
+            });
+            insertElementHasClassificationsRelationship({ txn, elementId: element2.id, classificationId: classification2.id });
+
+            return { table1, table2, classification1, classification2, element1, element2 };
+          }),
+        );
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodelConnection],
+          hierarchyConfig: defaultHierarchyConfiguration,
+          search: { targetItems: [keys.element2] },
+        });
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
+          {
+            identifier: { id: keys.table2.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: true },
+            children: [
+              {
+                identifier: { id: keys.classification2.id, className: CLASS_NAME_Classification },
+                options: { autoExpand: true },
+                children: [
+                  {
+                    identifier: { id: keys.element2.id, className: CLASS_NAME_GeometricElement3d },
+                    options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                  },
+                ],
+              },
+            ],
+          },
+        ]);
+      });
+
+      it("finds child geometric element 3d", async () => {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, async (txn) => {
+            await importClassificationSchema(imodel);
+
+            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+            const table1 = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable1" });
+            const classification1 = insertClassification({ txn, modelId: table1.id, codeValue: "Classification1" });
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Model1" });
+            const spatialCategory = insertSpatialCategory({ txn, codeValue: "Category1" });
+            const element1 = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "Element1",
+              userLabel: "Element1",
+            });
+            insertElementHasClassificationsRelationship({ txn, elementId: element1.id, classificationId: classification1.id });
+
+            const table2 = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable2" });
+            const classification2 = insertClassification({ txn, modelId: table2.id, codeValue: "Classification2" });
+            const element2 = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "element",
+              userLabel: "Element2",
+            });
+
+            insertElementHasClassificationsRelationship({ txn, elementId: element2.id, classificationId: classification2.id });
+            const childElement = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "Child Element",
+              userLabel: `ChildEl2`,
+              parentId: element2.id,
+            });
+
+            return { table1, table2, classification1, classification2, element1, element2, childElement };
+          }),
+        );
+        const { imodelConnection, ...keys } = buildIModelResult;
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodelConnection],
+          hierarchyConfig: defaultHierarchyConfiguration,
+          search: { targetItems: [keys.childElement] },
+        });
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
+          {
+            identifier: { id: keys.table2.id, className: CLASS_NAME_ClassificationTable },
+            options: { autoExpand: true },
+            children: [
+              {
+                identifier: { id: keys.classification2.id, className: CLASS_NAME_Classification },
+                options: { autoExpand: true },
+                children: [
+                  {
+                    identifier: { id: keys.element2.id, className: CLASS_NAME_GeometricElement3d },
+                    options: { autoExpand: true },
+                    children: [
+                      {
+                        identifier: { id: keys.childElement.id, className: CLASS_NAME_GeometricElement3d },
+                        options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ]);
+      });
+
+      it("finds 3d element by base36 ECInstanceId suffix", async function () {
+        await using buildIModelResult = await buildIModel(async (imodel) =>
+          withEditTxn(imodel, async (txn) => {
+            await importClassificationSchema(imodel);
+
+            const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+            const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable" });
+            const classification = insertClassification({ txn, modelId: table.id, codeValue: "Classification" });
+            const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Model" });
+            const spatialCategory = insertSpatialCategory({ txn, codeValue: "Category" });
+            const element = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              codeValue: "Element",
+            });
+            insertElementHasClassificationsRelationship({ txn, elementId: element.id, classificationId: classification.id });
+
+            return { table, classification, element };
+          }),
+        );
+        const { imodelConnection, ...keys } = buildIModelResult;
+
+        const briefcaseId = Id64.getBriefcaseId(keys.element.id).toString(36).toLocaleUpperCase();
+        const localId = Id64.getLocalId(keys.element.id).toString(36).toLocaleUpperCase();
+        using hook = renderUseClassificationsTreeDefinitionHook({
+          imodels: [imodelConnection],
+          hierarchyConfig: defaultHierarchyConfiguration,
+          search: { searchText: `[${briefcaseId}-${localId}]` },
+        });
+        expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
+          {
+            identifier: keys.table,
+            options: { autoExpand: true },
+            children: [
+              {
+                identifier: keys.classification,
+                options: { autoExpand: true },
+                children: [
+                  {
+                    identifier: { ...keys.element, className: CLASS_NAME_GeometricElement3d },
+                    options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+                  },
+                ],
+              },
+            ],
+          },
+        ]);
+      });
+    });
+
+    it("returns empty array when nothing matches provided search text", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, async (txn) => {
+          await importClassificationSchema(imodel);
+
+          const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+          const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable" });
+          const classification = insertClassification({ txn, modelId: table.id, codeValue: "Classification" });
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "physical model" });
+          const spatialCategory = insertSpatialCategory({ txn, codeValue: "physical category" });
+          const physicalElement = insertPhysicalElement({
+            txn,
+            modelId: physicalModel.id,
+            categoryId: spatialCategory.id,
+            codeValue: "Physical element",
+          });
+          insertElementHasClassificationsRelationship({ txn, elementId: physicalElement.id, classificationId: classification.id });
+        }),
+      );
+      const { imodelConnection } = buildIModelResult;
+      using hook = renderUseClassificationsTreeDefinitionHook({
+        imodels: [imodelConnection],
+        hierarchyConfig: defaultHierarchyConfiguration,
+        search: { searchText: "Test" },
+      });
+      expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([]);
+    });
+
+    it("aborts when abort signal fires", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, async (txn) => {
+          await importClassificationSchema(imodel);
+
+          const system = insertClassificationSystem({ txn, codeValue: rootClassificationSystemCode });
+          const table = insertClassificationTable({ txn, parentId: system.id, codeValue: "ClassificationTable", userLabel: `TestTable` });
+          const classification = insertClassification({ txn, modelId: table.id, codeValue: "Classification" });
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "physical model" });
+          const spatialCategory = insertSpatialCategory({ txn, codeValue: "physical category" });
+          const physicalElement = insertPhysicalElement({
+            txn,
+            modelId: physicalModel.id,
+            categoryId: spatialCategory.id,
+            codeValue: "Physical element",
+          });
+          insertElementHasClassificationsRelationship({ txn, elementId: physicalElement.id, classificationId: classification.id });
+          return { classificationTable: table };
+        }),
+      );
+      const { imodelConnection, ...ids } = buildIModelResult;
+      using hook = renderUseClassificationsTreeDefinitionHook({
+        imodels: [imodelConnection],
+        hierarchyConfig: defaultHierarchyConfiguration,
+        search: { searchText: "Test" },
+      });
+
+      const abortController1 = new AbortController();
+      const pathsPromiseAborted = act(async () => hook.result.current.getSearchPaths?.({ abortSignal: abortController1.signal }));
+      abortController1.abort();
+      expect(await pathsPromiseAborted).toEqual([]);
+
+      const abortController2 = new AbortController();
+      const pathsPromise = act(async () => hook.result.current.getSearchPaths?.({ abortSignal: abortController2.signal }));
+      expect(await pathsPromise).toEqual([
+        {
+          identifier: { className: ids.classificationTable.className, id: ids.classificationTable.id },
+          options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
+        },
+      ]);
+    });
+  });
+});
+
+function renderUseClassificationsTreeDefinitionHook(props: Props<typeof useClassificationsTreeDefinition>) {
+  const result = renderHook((hookProps) => useClassificationsTreeDefinition(hookProps), {
+    initialProps: props,
+    wrapper: ({ children }) => <SharedTreeContextProvider>{children}</SharedTreeContextProvider>,
+  });
+  return { ...result, [Symbol.dispose]: () => result.unmount() };
+}

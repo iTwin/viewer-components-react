@@ -90,8 +90,7 @@ export async function selectValueInDialog(page: Page, valueText: string) {
 
 export async function selectTree(widget: Locator, treeLabel: string) {
   await widget.getByText("ProcessPhysicalModel").waitFor();
-  await widget.getByRole("combobox").click();
-  await widget.page().getByRole("listbox").getByText(treeLabel, { exact: true }).click();
+  await widget.getByRole("combobox").selectOption({ label: treeLabel });
 }
 
 export async function scrollTree(page: Page, x: number, y: number) {
@@ -161,4 +160,15 @@ async function getBoundedBoundingBox(component: Locator, boundingComponent?: Loc
   }
 
   return box;
+}
+
+export async function expandNode(page: Page, node: Locator) {
+  await node.focus();
+  await page.keyboard.press("ArrowRight");
+}
+
+export async function getErrorDropdown(treeWidget: Locator, errorAmount: number = 1) {
+  const dropdown = treeWidget.getByRole("button", { name: `${errorAmount} issue(s) found` });
+  await dropdown.waitFor();
+  return dropdown;
 }

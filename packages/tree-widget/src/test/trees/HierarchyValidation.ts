@@ -9,7 +9,7 @@ import { collect } from "./Common.js";
 
 import type { GenericNodeKey, HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 
-export interface HierarchyDef<TNode> {
+interface HierarchyDef<TNode> {
   node: TNode;
   children?: Array<HierarchyDef<TNode>> | boolean;
 }

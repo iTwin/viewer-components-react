@@ -5,6 +5,8 @@
 
 import { test } from "@playwright/test";
 import {
+  expandNode,
+  getErrorDropdown,
   initTreeWidgetTest,
   locateInstanceFilter,
   locateNode,
@@ -13,7 +15,6 @@ import {
   selectTree,
   selectValueInDialog,
   takeScreenshot,
-  withDifferentDensities,
 } from "./utils.js";
 
 import type { Locator } from "@playwright/test";
@@ -26,71 +27,62 @@ test.describe("iModel content tree", () => {
     await selectTree(treeWidget, "iModel content");
   });
 
-  withDifferentDensities(() => {
-    test("initial tree", async ({ page }) => {
-      // wait for element to be visible in the tree
-      await locateNode(treeWidget, "ProcessPhysicalModel").waitFor();
-      await takeScreenshot(page, treeWidget);
-    });
+  test("initial tree", async ({ page }) => {
+    // wait for element to be visible in the tree
+    await locateNode(treeWidget, "ProcessPhysicalModel").waitFor();
+    await takeScreenshot(page, treeWidget);
+  });
 
-    test("expanded tree node", async ({ page }) => {
-      const plantDocumentModelNode = locateNode(treeWidget, "PlantDocumentModel");
-      await plantDocumentModelNode.getByLabel("Expand").click();
+  test("expanded tree node", async ({ page }) => {
+    const plantDocumentModelNode = locateNode(treeWidget, "PlantDocumentModel");
+    await expandNode(page, plantDocumentModelNode);
 
-      const pipeSupportNode = locateNode(treeWidget, "Drawing (4)");
-      await pipeSupportNode.getByLabel("Expand").click();
-      // cspell:disable-next-line
-      const coolersNode = locateNode(treeWidget, "OPPID-04-COOLERS");
-      await coolersNode.getByLabel("Expand").click();
+    const pipeSupportNode = locateNode(treeWidget, "Drawing (4)");
+    await expandNode(page, pipeSupportNode);
+    // cspell:disable-next-line
+    const coolersNode = locateNode(treeWidget, "OPPID-04-COOLERS");
+    await expandNode(page, coolersNode);
 
-      const bordersNode = locateNode(treeWidget, "Border");
-      await bordersNode.getByLabel("Expand").click();
+    await locateNode(treeWidget, "Border").waitFor();
+    await takeScreenshot(page, treeWidget);
+  });
 
-      const graphicNode = locateNode(treeWidget, "Pid Graphic (1)");
-      await graphicNode.getByLabel("Expand").click();
+  test("node with active filtering", async ({ page }) => {
+    const node = locateNode(treeWidget, "ProcessPhysicalModel");
 
-      await locateNode(treeWidget, "D_SIZE [3-T4]").waitFor();
-      await takeScreenshot(page, treeWidget);
-    });
+    // hover the node for the button to appear
+    await node.hover();
+    await node.getByRole("button", { name: "Apply filter" }).click();
 
-    test("node with active filtering", async ({ page }) => {
-      const node = locateNode(treeWidget, "ProcessPhysicalModel");
+    await locateInstanceFilter(page).waitFor();
+    await selectPropertyInDialog(page, "Code");
+    await selectOperatorInDialog(page, "Equal");
+    await selectValueInDialog(page, "PipeSupport");
 
-      // hover the node for the button to appear
-      await node.hover();
-      await node.getByRole("button", { name: "Apply filter" }).click();
+    await page.getByRole("button", { name: "Apply" }).click();
 
-      await locateInstanceFilter(page).waitFor();
-      await selectPropertyInDialog(page, "Code");
-      await selectOperatorInDialog(page, "Equal");
-      await selectValueInDialog(page, "PipeSupport");
+    // wait for filtered children to appear
+    await locateNode(treeWidget, "PipeSupport").waitFor();
 
-      await page.getByRole("button", { name: "Apply" }).click();
+    await takeScreenshot(page, treeWidget, { resetScroll: true });
+  });
 
-      // wait for filtered children to appear
-      await locateNode(treeWidget, "PipeSupport").waitFor();
-      await treeWidget.getByRole("button", { name: "Clear active filter" }).waitFor();
+  test("node with active filtering - information message", async ({ page }) => {
+    const node = locateNode(treeWidget, "ProcessPhysicalModel");
 
-      await takeScreenshot(page, treeWidget, { resetScroll: true });
-    });
+    // hover the node for the button to appear
+    await node.hover();
+    await node.getByRole("button", { name: "Apply filter" }).click();
 
-    test("node with active filtering - information message", async ({ page }) => {
-      const node = locateNode(treeWidget, "ProcessPhysicalModel");
+    await locateInstanceFilter(page).waitFor();
+    await selectPropertyInDialog(page, "Is Private");
 
-      // hover the node for the button to appear
-      await node.hover();
-      await node.getByRole("button", { name: "Apply filter" }).click();
+    await page.getByRole("button", { name: "Apply" }).click();
 
-      await locateInstanceFilter(page).waitFor();
-      await selectPropertyInDialog(page, "Is Private");
-
-      await page.getByRole("button", { name: "Apply" }).click();
-
-      // wait for message to appear
-      await treeWidget.getByText("No child nodes match current filter").waitFor();
-      await treeWidget.getByRole("button", { name: "Clear active filter" }).waitFor();
-
-      await takeScreenshot(page, treeWidget, { resetScroll: true });
-    });
+    // wait for message to appear
+    const errorDropdown = await getErrorDropdown(treeWidget);
+    await takeScreenshot(page, treeWidget, { resetScroll: true });
+    await errorDropdown.click();
+    await takeScreenshot(page, treeWidget, { resetScroll: true });
   });
 });

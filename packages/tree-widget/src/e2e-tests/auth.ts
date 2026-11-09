@@ -14,7 +14,6 @@ setup("authenticate", async ({ page }) => {
   if (!process.env.IMJS_AUTH_CLIENT_CLIENT_ID) {
     throw new Error(`Auth client id needs to be supplied through IMJS_AUTH_CLIENT_CLIENT_ID environment variable.`);
   }
-  // eslint-disable-next-line @itwin/no-internal
   const accessToken = await getTestAccessToken(
     {
       authority: "https://qa-ims.bentley.com",

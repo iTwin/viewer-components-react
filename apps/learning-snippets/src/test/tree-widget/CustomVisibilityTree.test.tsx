@@ -9,18 +9,16 @@ import { UiFramework } from "@itwin/appui-react";
 // __PUBLISH_EXTRACT_START__ TreeWidget.CustomVisibilityTreeExampleImports
 import { BeEvent } from "@itwin/core-bentley";
 import { VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
-import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
-import { createBisInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
+import { createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import type { ComponentPropsWithoutRef } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_END__
 import { IModelApp } from "@itwin/core-frontend";
 import { createStorage } from "@itwin/unified-selection";
-import { cleanup, render, waitFor } from "@testing-library/react";
 import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
 import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
-import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
+import { cleanup, getTestViewer, mockGetBoundingClientRect, render, TreeWidgetTestUtils, waitFor } from "./TestUtils.js";
 
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { VisibilityStatus } from "@itwin/tree-widget-react";
@@ -59,23 +57,21 @@ describe("Tree widget", () => {
         const getHierarchyDefinition: VisibilityTreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
           // create a hierarchy definition that defines what should be shown in the tree
           // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/learning/imodel/HierarchyDefinition.md
-          const labelsQueryFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: imodelAccess });
-          const nodesQueryFactory = createNodesQueryClauseFactory({ imodelAccess, instanceLabelSelectClauseFactory: labelsQueryFactory });
           return createPredicateBasedHierarchyDefinition({
-            classHierarchyInspector: imodelAccess,
+            imodelAccess,
             hierarchy: {
               // For root nodes, select all BisCore.GeometricModel3d instances
-              rootNodes: async () => [
+              rootNodes: async ({ createSelectClause }) => [
                 {
                   fullClassName: "BisCore.GeometricModel3d",
                   query: {
                     ecsql: `
                       SELECT
-                        ${await nodesQueryFactory.createSelectClause({
+                        ${await createSelectClause({
                           ecClassId: { selector: "this.ECClassId" },
                           ecInstanceId: { selector: "this.ECInstanceId" },
                           nodeLabel: {
-                            selector: await labelsQueryFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
+                            of: { classAlias: "this", className: "BisCore.GeometricModel3d" },
                           },
                         })}
                       FROM BisCore.GeometricModel3d this
@@ -99,7 +95,7 @@ describe("Tree widget", () => {
             async changeVisibility(node: HierarchyNode, on: boolean): Promise<void> {
               // change visibility of the instance represented by tree node.
             },
-            dispose() {
+            [Symbol.dispose]() {
               // if necessary, do some clean up before new visibility handler is created or component is unmounted.
             },
           };
@@ -115,10 +111,9 @@ describe("Tree widget", () => {
               treeName="MyVisibilityTree"
               imodel={imodel}
               selectionStorage={unifiedSelectionStorage}
-              getSchemaContext={getSchemaContext}
               getHierarchyDefinition={getHierarchyDefinition}
               visibilityHandlerFactory={visibilityHandlerFactory}
-              treeRenderer={(props) => <VisibilityTreeRenderer {...props} />}
+              treeRenderer={(props) => <VisibilityTreeRenderer {...props} treeLabel="My visibility tree" />}
             />
           );
         }

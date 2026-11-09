@@ -4,7 +4,10 @@
   "editor.trimAutoWhitespace": true,
   "editor.defaultFormatter": "oxc.oxc-vscode",
   "editor.formatOnSave": true,
-  "editor.codeActionsOnSave": ["source.fixAll"],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.format.oxc": "explicit"
+  },
 
   "files.associations": {
     ".nycrc": "json"
@@ -12,7 +15,7 @@
   "files.exclude": {
     "**/coverage": true,
     "**/node_modules": true,
-    "**/lib": true,
+    "**/lib": false,
     "**/build": true
   },
   "files.insertFinalNewline": true,

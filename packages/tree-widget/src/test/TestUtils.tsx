@@ -3,20 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import deepEqual from "deep-equal";
-import sinon from "sinon";
-import * as moq from "typemoq";
+import { afterAll, beforeAll, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
-import { BeEvent } from "@itwin/core-bentley";
-import { EmptyLocalization } from "@itwin/core-common";
 import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { TreeWidget } from "../tree-widget-react/TreeWidget.js";
 
 import type { ReactElement } from "react";
-import type { IModelConnection, PerModelCategoryVisibility, Viewport, ViewState } from "@itwin/core-frontend";
-import type { RegisteredRuleset, Ruleset, VariableValue } from "@itwin/presentation-common";
-import type { IModelHierarchyChangeEventArgs, PresentationManager, RulesetManager, RulesetVariablesManager } from "@itwin/presentation-frontend";
 import type { RenderHookOptions, RenderHookResult, RenderOptions, RenderResult } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
 
@@ -29,111 +21,23 @@ export class TestUtils {
     }
 
     await UiFramework.initialize();
-    await TreeWidget.initialize(new EmptyLocalization());
     TestUtils._initialized = true;
   }
 
   public static terminate() {
     UiFramework.terminate();
-    TreeWidget.terminate();
     TestUtils._initialized = false;
   }
-}
-
-/** typemoq matcher for deep equality */
-export function deepEquals<T>(expected: T) {
-  return moq.It.is((actual: T) => deepEqual(actual, expected));
-}
-
-export function mockPresentationManager() {
-  const onRulesetVariableChanged = new BeEvent<(variableId: string, prevValue: VariableValue, currValue: VariableValue) => void>();
-  const rulesetVariablesManagerMock = moq.Mock.ofType<RulesetVariablesManager>();
-  rulesetVariablesManagerMock.setup((x) => x.onVariableChanged).returns(() => onRulesetVariableChanged);
-
-  const onRulesetModified = new BeEvent<(curr: RegisteredRuleset, prev: Ruleset) => void>();
-  const rulesetsManagerMock = moq.Mock.ofType<RulesetManager>();
-  rulesetsManagerMock.setup((x) => x.onRulesetModified).returns(() => onRulesetModified);
-
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  const onIModelHierarchyChanged = new BeEvent<(args: IModelHierarchyChangeEventArgs) => void>();
-  const presentationManagerMock = moq.Mock.ofType<PresentationManager>();
-  presentationManagerMock.setup((x) => x.vars(moq.It.isAny())).returns(() => rulesetVariablesManagerMock.object);
-
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  presentationManagerMock.setup((x) => x.onIModelHierarchyChanged).returns(() => onIModelHierarchyChanged);
-  presentationManagerMock.setup((x) => x.rulesets()).returns(() => rulesetsManagerMock.object);
-
-  return {
-    rulesetVariablesManager: rulesetVariablesManagerMock,
-    presentationManager: presentationManagerMock,
-    rulesetsManager: rulesetsManagerMock,
-  };
 }
 
 export async function flushAsyncOperations() {
   return new Promise((resolve) => setTimeout(resolve));
 }
 
-interface ViewportMockProps {
-  viewState?: ViewState;
-  perModelCategoryVisibility?: PerModelCategoryVisibility.Overrides;
-  onViewedCategoriesPerModelChanged?: BeEvent<(vp: Viewport) => void>;
-  onViewedCategoriesChanged?: BeEvent<(vp: Viewport) => void>;
-  onViewedModelsChanged?: BeEvent<(vp: Viewport) => void>;
-  onAlwaysDrawnChanged?: BeEvent<() => void>;
-  onNeverDrawnChanged?: BeEvent<() => void>;
-  onDisplayStyleChanged?: BeEvent<(vp: Viewport) => void>;
-  imodel?: IModelConnection;
-}
-
-export function mockViewport(props?: ViewportMockProps) {
-  if (!props) {
-    props = {};
-  }
-  if (!props.viewState) {
-    props.viewState = moq.Mock.ofType<ViewState>().object;
-  }
-  if (!props.perModelCategoryVisibility) {
-    props.perModelCategoryVisibility = moq.Mock.ofType<PerModelCategoryVisibility.Overrides>().object;
-  }
-  if (!props.onViewedCategoriesPerModelChanged) {
-    props.onViewedCategoriesPerModelChanged = new BeEvent<(vp: Viewport) => void>();
-  }
-  if (!props.onDisplayStyleChanged) {
-    props.onDisplayStyleChanged = new BeEvent<(vp: Viewport) => void>();
-  }
-  if (!props.onViewedCategoriesChanged) {
-    props.onViewedCategoriesChanged = new BeEvent<(vp: Viewport) => void>();
-  }
-  if (!props.onViewedModelsChanged) {
-    props.onViewedModelsChanged = new BeEvent<(vp: Viewport) => void>();
-  }
-  if (!props.onAlwaysDrawnChanged) {
-    props.onAlwaysDrawnChanged = new BeEvent<() => void>();
-  }
-  if (!props.onNeverDrawnChanged) {
-    props.onNeverDrawnChanged = new BeEvent<() => void>();
-  }
-  if (!props.imodel) {
-    props.imodel = moq.Mock.ofType<IModelConnection>().object;
-  }
-  const vpMock = moq.Mock.ofType<Viewport>();
-  vpMock.setup((x) => x.iModel).returns(() => props.imodel!);
-  vpMock.setup((x) => x.view).returns(() => props.viewState!);
-  vpMock.setup((x) => x.perModelCategoryVisibility).returns(() => props.perModelCategoryVisibility!);
-  vpMock.setup((x) => x.onViewedCategoriesPerModelChanged).returns(() => props.onViewedCategoriesPerModelChanged!);
-  vpMock.setup((x) => x.onDisplayStyleChanged).returns(() => props.onDisplayStyleChanged!);
-  vpMock.setup((x) => x.onViewedCategoriesChanged).returns(() => props.onViewedCategoriesChanged!);
-  vpMock.setup((x) => x.onViewedModelsChanged).returns(() => props.onViewedModelsChanged!);
-  vpMock.setup((x) => x.onAlwaysDrawnChanged).returns(() => props.onAlwaysDrawnChanged!);
-  vpMock.setup((x) => x.onNeverDrawnChanged).returns(() => props.onNeverDrawnChanged!);
-  return vpMock;
-}
-
 export function stubCancelAnimationFrame() {
   const originalCaf = global.cancelAnimationFrame;
 
-  before(() => {
+  beforeAll(() => {
     Object.defineProperty(global, "cancelAnimationFrame", {
       writable: true,
       value: (handle: number) => {
@@ -142,7 +46,7 @@ export function stubCancelAnimationFrame() {
     });
   });
 
-  after(() => {
+  afterAll(() => {
     Object.defineProperty(global, "cancelAnimationFrame", {
       writable: true,
       value: originalCaf,
@@ -163,14 +67,14 @@ export function createResolvablePromise<T>() {
 export function stubDOMMatrix() {
   const domMatrix = global.DOMMatrix;
 
-  before(() => {
+  beforeAll(() => {
     Object.defineProperty(global, "DOMMatrix", {
       writable: true,
-      value: sinon.fake(() => ({ m41: 0, m42: 0 })),
+      value: vi.fn(() => ({ m41: 0, m42: 0 })),
     });
   });
 
-  after(() => {
+  afterAll(() => {
     Object.defineProperty(global, "DOMGlobal", {
       writable: true,
       value: domMatrix,
