@@ -89,7 +89,7 @@ importers:
         version: file:../../packages/property-grid(f0bf56397c419b65f01e6ba47e561d48)
       '@itwin/quantity-formatting-react':
         specifier: workspace:*
-        version: file:../../packages/quantity-formatting(9af2dccf1c592ee59ca600e17fde8d84)
+        version: file:../../packages/quantity-formatting(52af9b847364516982050aa34bd672ce)
       '@itwin/tree-widget-react':
         specifier: workspace:*
         version: file:../../packages/tree-widget(debfacfc652646eb7cb84018d8d07417)
@@ -145,8 +145,8 @@ importers:
         specifier: ^4.4.1
         version: 4.4.1(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.62.1(@typescript/typescript6@6.0.2)(eslint@9.39.5(supports-color@8.1.1))(supports-color@8.1.1))(@typescript/typescript6@6.0.2)(eslint@9.39.5(supports-color@8.1.1))(supports-color@8.1.1))(eslint@9.39.5(supports-color@8.1.1))
       happy-dom:
-        specifier: ^20.9.0
-        version: 20.11.1
+        specifier: ^21.0.4
+        version: 21.0.4
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -170,7 +170,7 @@ importers:
         version: 8.1.3(@types/node@22.20.1)(sass@1.98.0)(yaml@2.9.0)
       vitest:
         specifier: ^4.1.5
-        version: 4.1.10(@types/node@22.20.1)(happy-dom@20.11.1)(vite@8.1.3(@types/node@22.20.1)(sass@1.98.0)(yaml@2.9.0))
+        version: 4.1.10(@types/node@22.20.1)(happy-dom@21.0.4)(vite@8.1.3(@types/node@22.20.1)(sass@1.98.0)(yaml@2.9.0))
 
 packages:
 
@@ -513,7 +513,7 @@ packages:
       '@itwin/appui-abstract': ^4.0.0 || ^5.0.0
       '@itwin/core-bentley': ^4.0.0 || ^5.0.0
       '@itwin/core-react': 5.35.1
-      '@itwin/itwinui-react': 3.22.0
+      '@itwin/itwinui-react': ^3.15.0
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
@@ -573,7 +573,7 @@ packages:
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0 || ^5.0.0
       '@itwin/core-bentley': ^4.0.0 || ^5.0.0
-      '@itwin/itwinui-react': 3.22.0
+      '@itwin/itwinui-react': ^3.15.0
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
@@ -620,7 +620,7 @@ packages:
       '@itwin/core-geometry': ^4.0.0 || ^5.0.0
       '@itwin/core-quantity': ^4.0.0 || ^5.0.0
       '@itwin/core-react': 5.35.1
-      '@itwin/itwinui-react': 3.22.0
+      '@itwin/itwinui-react': ^3.15.0
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
@@ -698,7 +698,7 @@ packages:
       '@itwin/core-react': ^5.33.0
       '@itwin/ecschema-metadata': ^5.11.2
       '@itwin/imodel-components-react': ^5.33.0
-      '@itwin/itwinui-react': 3.22.0
+      '@itwin/itwinui-react': ^3.21.0
       '@itwin/presentation-common': ^5.11.2
       '@itwin/presentation-frontend': ^5.11.2
       '@itwin/unified-selection-react': ^1.0.0
@@ -784,8 +784,10 @@ packages:
     resolution: {directory: ../../packages/quantity-formatting, type: directory}
     peerDependencies:
       '@itwin/core-bentley': ^5.3.0
+      '@itwin/core-common': ^5.3.0
       '@itwin/core-frontend': ^5.3.0
       '@itwin/core-quantity': ^5.3.0
+      '@itwin/ecschema-metadata': ^5.3.0
       '@itwin/itwinui-react': ^3.19.0
       react: ^18.0.0
       react-dom: ^18.0.0
@@ -1338,6 +1340,9 @@ packages:
   '@types/node@22.20.1':
     resolution: {integrity: sha512-EANqOCF9QFyra+4pfxUcX9STKJpCLjMbObVzljIJomAWSnuSIEAvyzEU53GaajbXJEgdh0iEcPL+DGvpUd4k1Q==}
 
+  '@types/node@22.20.5':
+    resolution: {integrity: sha512-U2+DNr+wSjpsTS/wZGYHq7GcwfuSmKiKvoPvK22zwTlRhU91yOniN4qRR5KhIjvif7ysw/dz/hKmfDH0Ris4aA==}
+
   '@types/node@25.9.9':
     resolution: {integrity: sha512-b4e2xxj/yMeT2hNlD6x7zNFiQK2Dlmkb9CQ6v3/1G2RezKN4YS2lcEv8lzGm1mhs4f2lM4yNAMI/zUDBZBBt7w==}
 
@@ -1372,8 +1377,8 @@ packages:
   '@types/whatwg-mimetype@3.0.2':
     resolution: {integrity: sha512-c2AKvDT8ToxLIOUlN51gTiHXflsfIFisS4pO7pDPoKouJCESkhZnEy623gwP9laCy5lnLDAw1vAzu2vM2YLOrA==}
 
-  '@types/ws@8.18.1':
-    resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
+  '@types/ws@8.18.2':
+    resolution: {integrity: sha512-67MQl+fpWKVTT1NYdnmo3U4sc/xPo/zQBncVnI74qmQa0z/b+1g6iYqNmGCPbxO+zz2aklb08a0oHfegiVd0/w==}
 
   '@typescript-eslint/eslint-plugin@8.65.0':
     resolution: {integrity: sha512-IEgob78X12rHpUmtcwFsXhZdVGJtwTVP8FiCLZkR6GlYVrl2PcuB+KhCE5BlVC/eQpQnu8WXRtkHZuPar+gCRA==}
@@ -2408,8 +2413,8 @@ packages:
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
-  happy-dom@20.11.1:
-    resolution: {integrity: sha512-XSt8tMzbW9ymE7687xztkO1ckR7qJNQ3LywY9vlYGhGi3zXrGBHuUo2Cl1ztZaICW+1eAGdkLbj6iwVqDT33kg==}
+  happy-dom@21.0.4:
+    resolution: {integrity: sha512-tFm+GaLBgo6o0awHnvHaNoraVo27qJ+2tZEtZ+cIa08hXbeitrxAJajLI05hsUy/2/YTKcUjQYzHe5mCcraLBw==}
     engines: {node: '>=20.0.0'}
 
   has-bigints@1.1.0:
@@ -3799,8 +3804,8 @@ packages:
       utf-8-validate:
         optional: true
 
-  ws@8.21.1:
-    resolution: {integrity: sha512-+0NTnW77fFN/DjQi6k/Sq/Yvk4Sgajw7urW8V+asjXnRgDs9gyGkdb7EzgfhA4goXsRIZKE28fzIXBHEzhuiWw==}
+  ws@8.22.1:
+    resolution: {integrity: sha512-oyL6OPYme/CmiFvNuGzeoxCJ4nOrZE2O1FwM9MWM1AsGri6nLXB2pg+lNA8aLeXMSav0J6eIVS1j6vUPzUtK9g==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -4717,6 +4722,7 @@ snapshots:
       '@itwin/presentation-frontend': 5.14.3(3bd165e0f8bb986d3dfb06e16855e380)
       '@itwin/presentation-shared': 1.2.23
       '@itwin/unified-selection': 1.8.7
+      '@tanstack/react-virtual': 3.14.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -4726,11 +4732,13 @@ snapshots:
       - '@itwin/core-quantity'
       - '@itwin/ecschema-metadata'
 
-  '@itwin/quantity-formatting-react@file:../../packages/quantity-formatting(9af2dccf1c592ee59ca600e17fde8d84)':
+  '@itwin/quantity-formatting-react@file:../../packages/quantity-formatting(52af9b847364516982050aa34bd672ce)':
     dependencies:
       '@itwin/core-bentley': 5.14.3
+      '@itwin/core-common': 5.14.3(@itwin/core-bentley@5.14.3)(@itwin/core-geometry@5.14.3)
       '@itwin/core-frontend': 5.14.3(@itwin/appui-abstract@5.14.3(@itwin/core-bentley@5.14.3))(@itwin/core-bentley@5.14.3)(@itwin/core-common@5.14.3(@itwin/core-bentley@5.14.3)(@itwin/core-geometry@5.14.3))(@itwin/core-geometry@5.14.3)(@itwin/core-orbitgt@5.14.3)(@itwin/core-quantity@5.14.3(@itwin/core-bentley@5.14.3))(@itwin/ecschema-metadata@5.14.3(@itwin/core-bentley@5.14.3)(@itwin/core-quantity@5.14.3(@itwin/core-bentley@5.14.3)))(@itwin/ecschema-rpcinterface-common@5.14.3(@itwin/core-bentley@5.14.3)(@itwin/core-common@5.14.3(@itwin/core-bentley@5.14.3)(@itwin/core-geometry@5.14.3))(@itwin/core-geometry@5.14.3)(@itwin/ecschema-metadata@5.14.3(@itwin/core-bentley@5.14.3)(@itwin/core-quantity@5.14.3(@itwin/core-bentley@5.14.3))))
       '@itwin/core-quantity': 5.14.3(@itwin/core-bentley@5.14.3)
+      '@itwin/ecschema-metadata': 5.14.3(@itwin/core-bentley@5.14.3)(@itwin/core-quantity@5.14.3(@itwin/core-bentley@5.14.3))
       '@itwin/itwinui-icons-react': 2.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@itwin/itwinui-react': 3.22.0(@stratakit/mui@1.2.0(@mui/material@9.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/foundations@1.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@8.1.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
@@ -5303,6 +5311,10 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
+  '@types/node@22.20.5':
+    dependencies:
+      undici-types: 6.21.0
+
   '@types/node@25.9.9':
     dependencies:
       undici-types: 7.24.6
@@ -5333,9 +5345,9 @@ snapshots:
 
   '@types/whatwg-mimetype@3.0.2': {}
 
-  '@types/ws@8.18.1':
+  '@types/ws@8.18.2':
     dependencies:
-      '@types/node': 22.20.1
+      '@types/node': 22.20.5
 
   '@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.62.1(@typescript/typescript6@6.0.2)(eslint@9.39.5(supports-color@8.1.1))(supports-color@8.1.1))(@typescript/typescript6@6.0.2)(eslint@9.39.5(supports-color@8.1.1))(supports-color@8.1.1)':
     dependencies:
@@ -5789,7 +5801,7 @@ snapshots:
 
   buffer-image-size@0.6.4:
     dependencies:
-      '@types/node': 22.20.1
+      '@types/node': 22.20.5
 
   call-bind-apply-helpers@1.0.2:
     dependencies:
@@ -6530,15 +6542,15 @@ snapshots:
 
   graceful-fs@4.2.11: {}
 
-  happy-dom@20.11.1:
+  happy-dom@21.0.4:
     dependencies:
-      '@types/node': 22.20.1
+      '@types/node': 22.20.5
       '@types/whatwg-mimetype': 3.0.2
-      '@types/ws': 8.18.1
+      '@types/ws': 8.18.2
       buffer-image-size: 0.6.4
       entities: 7.0.1
       whatwg-mimetype: 3.0.0
-      ws: 8.21.1
+      ws: 8.22.1
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -7828,7 +7840,7 @@ snapshots:
       sass: 1.98.0
       yaml: 2.9.0
 
-  vitest@4.1.10(@types/node@22.20.1)(happy-dom@20.11.1)(vite@8.1.3(@types/node@22.20.1)(sass@1.98.0)(yaml@2.9.0)):
+  vitest@4.1.10(@types/node@22.20.1)(happy-dom@21.0.4)(vite@8.1.3(@types/node@22.20.1)(sass@1.98.0)(yaml@2.9.0)):
     dependencies:
       '@vitest/expect': 4.1.10
       '@vitest/mocker': 4.1.10(vite@8.1.3(@types/node@22.20.1)(sass@1.98.0)(yaml@2.9.0))
@@ -7852,7 +7864,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.20.1
-      happy-dom: 20.11.1
+      happy-dom: 21.0.4
     transitivePeerDependencies:
       - msw
 
@@ -7945,7 +7957,7 @@ snapshots:
 
   ws@7.5.13: {}
 
-  ws@8.21.1: {}
+  ws@8.22.1: {}
 
   wtfnode@0.9.4: {}
 
