@@ -21,12 +21,29 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { PresentationLabelsProvider } from "@itwin/presentation-components";
+import * as interop from "@itwin/presentation-core-interop";
+import * as shared from "@itwin/presentation-shared";
 import { InstanceLabelsProvider } from "../../property-grid-react/common/InstanceLabelsProvider.js";
 
 import type { EditTxn, IModelDb } from "@itwin/core-backend";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
+
+vi.mock("@itwin/presentation-core-interop", async (importOriginal) => {
+  const actual = await importOriginal<typeof interop>();
+  return {
+    ...actual,
+    createECSqlQueryExecutor: vi.fn(actual.createECSqlQueryExecutor),
+  };
+});
+vi.mock("@itwin/presentation-shared", async (importOriginal) => {
+  const actual = await importOriginal<typeof shared>();
+  return {
+    ...actual,
+    createBisInstanceLabelSelectClauseFactory: vi.fn(actual.createBisInstanceLabelSelectClauseFactory),
+  };
+});
 
 describe("InstanceLabelsProvider", () => {
   let imodel: IModelConnection;
@@ -38,6 +55,8 @@ describe("InstanceLabelsProvider", () => {
   });
 
   afterEach(async () => {
+    vi.mocked(interop.createECSqlQueryExecutor).mockReset();
+    vi.mocked(shared.createBisInstanceLabelSelectClauseFactory).mockReset();
     await imodel.close();
   });
 
@@ -150,6 +169,30 @@ describe("InstanceLabelsProvider", () => {
     const labels = await new InstanceLabelsProvider({ imodel }).getLabels([]);
     expect(labels).toEqual([]);
     expect(createQueryReader).not.toHaveBeenCalled();
+  });
+
+  it.each([500, 501])("batches %i classes into queries of at most 500 selects", async (classCount) => {
+    await buildIModel(() => ({}));
+    vi.mocked(shared.createBisInstanceLabelSelectClauseFactory).mockReturnValue({ createSelectClause: async () => "NULL" });
+    const keys = Array.from({ length: classCount }, (_, index) => ({ className: `Test.Class${index}`, id: `0x${(index + 1).toString(16)}` }));
+    const createQueryReader = vi.fn<shared.ECSqlQueryExecutor["createQueryReader"]>().mockImplementation((query) => {
+      const classNames = [...query.ecsql.matchAll(/'([^']+)' AS className/g)].map((match) => match[1]);
+      const batchKeys = keys.filter((key) => classNames.includes(key.className));
+      expect(classNames).toEqual(batchKeys.map((key) => key.className));
+      expect(query.bindings).toEqual(batchKeys.map((key) => ({ type: "idset", value: [key.id] })));
+      return (async function* () {
+        for (const key of batchKeys.toReversed()) {
+          yield { className: key.className, id: key.id, label: key.className };
+        }
+      })();
+    });
+    vi.mocked(interop.createECSqlQueryExecutor).mockReturnValue({ createQueryReader });
+
+    const labels = await new InstanceLabelsProvider({ imodel }).getLabels(keys);
+
+    expect(labels).toEqual(keys.map((key) => key.className));
+    expect(createQueryReader).toHaveBeenCalledTimes(Math.ceil(classCount / 500));
+    expect(createQueryReader.mock.calls.map(([query]) => query.ecsql.split(" UNION ALL ").length)).toEqual(classCount === 500 ? [500] : [500, 1]);
   });
 });
 

@@ -71,7 +71,8 @@
     "@itwin/unified-selection": "^1.7.4",
     "@tanstack/react-virtual": "^3.13.12",
     "classnames": "^2.5.1",
-    "react-error-boundary": "^6.1.1"
+    "react-error-boundary": "^6.1.1",
+    "rxjs": "^7.8.2"
   },
   "devDependencies": {
     "@itwin/appui-abstract": "^5.11.2",
