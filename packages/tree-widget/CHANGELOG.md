@@ -62,7 +62,7 @@
 
     <img src="./media/classifications-tree.png" alt="Classifications tree" width="300" />
 
-  - **Easier integration with different viewports.** Tree Widget is now less tightly coupled to the iTwin.js viewport, making it much easier to integrate with different viewport implementations (e.g., Unity).
+  - **Easier integration with different viewports.** Tree Widget is now less tightly coupled to the iTwin.js viewport, making it much easier to integrate with different viewport implementations (e.g., Unreal).
   - **More configurable Models and Categories hierarchies.** New options provide greater control over the contents of each tree. For example, the Categories tree can now include element nodes.
   - **New customization building blocks** including exported node type guards, renderer props, actions, and icons.
 
