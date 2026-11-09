@@ -91,7 +91,7 @@ export class InstanceLabelsProvider {
           ),
         2,
       ),
-      mergeMap(async (row) => ({ className: row.className, id: row.id, label: await this.#formatLabel(row.label) }), 16),
+      mergeMap(async (row) => ({ className: row.className, id: row.id, label: await this.#formatLabel(row.label) })),
     );
 
     const labelsByClass = new Map<string, Map<Id64String, string>>();

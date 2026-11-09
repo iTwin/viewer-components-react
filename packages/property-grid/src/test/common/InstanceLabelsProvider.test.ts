@@ -178,8 +178,6 @@ describe("InstanceLabelsProvider", () => {
     const createQueryReader = vi.fn<shared.ECSqlQueryExecutor["createQueryReader"]>().mockImplementation((query) => {
       const classNames = [...query.ecsql.matchAll(/'([^']+)' AS className/g)].map((match) => match[1]);
       const batchKeys = keys.filter((key) => classNames.includes(key.className));
-      expect(classNames).toEqual(batchKeys.map((key) => key.className));
-      expect(query.bindings).toEqual(batchKeys.map((key) => ({ type: "idset", value: [key.id] })));
       return (async function* () {
         for (const key of batchKeys.toReversed()) {
           yield { className: key.className, id: key.id, label: key.className };
@@ -190,9 +188,16 @@ describe("InstanceLabelsProvider", () => {
 
     const labels = await new InstanceLabelsProvider({ imodel }).getLabels(keys);
 
+    const expected = classCount === 500 ? { queryCount: 1, classesPerQuery: [500] } : { queryCount: 2, classesPerQuery: [500, 1] };
     expect(labels).toEqual(keys.map((key) => key.className));
-    expect(createQueryReader).toHaveBeenCalledTimes(Math.ceil(classCount / 500));
-    expect(createQueryReader.mock.calls.map(([query]) => query.ecsql.split(" UNION ALL ").length)).toEqual(classCount === 500 ? [500] : [500, 1]);
+    expect(createQueryReader).toHaveBeenCalledTimes(expected.queryCount);
+    expect(createQueryReader.mock.calls.map(([query]) => query.ecsql.split(" UNION ALL ").length)).toEqual(expected.classesPerQuery);
+    createQueryReader.mock.calls.forEach(([query], index) => {
+      const batchKeys = keys.slice(index * 500, (index + 1) * 500);
+      const classNames = [...query.ecsql.matchAll(/'([^']+)' AS className/g)].map((match) => match[1]);
+      expect(classNames).toEqual(batchKeys.map((key) => key.className));
+      expect(query.bindings).toEqual(batchKeys.map((key) => ({ type: "idset", value: [key.id] })));
+    });
   });
 });
 
