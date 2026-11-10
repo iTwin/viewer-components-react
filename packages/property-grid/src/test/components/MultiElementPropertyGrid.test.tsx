@@ -35,13 +35,14 @@ describe("<MultiElementPropertyGrid />", () => {
   } as IModelConnection;
 
   let getDataStub: ReturnType<typeof vi.spyOn>;
-  let getLabelsStub: MockInstance<(keys: InstanceKey[]) => Promise<string[]>>;
+  let getLabelsStub: MockInstance<InstanceLabelsProvider["getLabelsPage"]>;
+  const buildPage = async (keys: InstanceKey[]) => ({ items: keys.map((instanceKey) => ({ instanceKey, label: buildLabel(instanceKey) })), hasMore: false });
   let selectionStorage: ReturnType<typeof stubSelectionStorage>;
   const getParentInstanceKeyStub = vi.fn<(key: InstanceKey) => Promise<InstanceKey | undefined>>();
 
   beforeEach(() => {
     getDataStub = vi.spyOn(PresentationPropertyDataProvider.prototype, "getData");
-    getLabelsStub = vi.spyOn(InstanceLabelsProvider.prototype, "getLabels").mockImplementation(async (keys) => keys.map(buildLabel));
+    getLabelsStub = vi.spyOn(InstanceLabelsProvider.prototype, "getLabelsPage").mockImplementation(buildPage);
 
     vi.spyOn(PropertyGridManager, "translate").mockImplementation((key) => key);
 
@@ -117,7 +118,7 @@ describe("<MultiElementPropertyGrid />", () => {
     const expectedLabels = instanceKeys.map(buildLabel);
 
     setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-    getLabelsStub.mockImplementation(async (keys) => keys.map(buildLabel));
+    getLabelsStub.mockImplementation(buildPage);
 
     const { getByText, getByRole, user } = render(<MultiElementPropertyGrid {...getProps()} />);
 
@@ -139,7 +140,7 @@ describe("<MultiElementPropertyGrid />", () => {
     const expectedLabels = instanceKeys.map(buildLabel);
 
     setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-    getLabelsStub.mockImplementation(async (keys) => keys.map(buildLabel));
+    getLabelsStub.mockImplementation(buildPage);
 
     const { getByText, getByRole, user } = render(<MultiElementPropertyGrid {...getProps()} />);
 
@@ -164,7 +165,7 @@ describe("<MultiElementPropertyGrid />", () => {
     const expectedLabels = instanceKeys.map(buildLabel);
 
     setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-    getLabelsStub.mockImplementation(async (keys) => keys.map(buildLabel));
+    getLabelsStub.mockImplementation(buildPage);
 
     const { getByText, getByRole, container, user } = render(<MultiElementPropertyGrid {...getProps()} />);
 
@@ -205,7 +206,7 @@ describe("<MultiElementPropertyGrid />", () => {
     const expectedLabels = instanceKeys.map(buildLabel);
 
     setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-    getLabelsStub.mockImplementation(async (keys) => keys.map(buildLabel));
+    getLabelsStub.mockImplementation(buildPage);
 
     const { getByText, getByRole, user, unmount } = render(<MultiElementPropertyGrid {...getProps()} />);
 
@@ -326,7 +327,7 @@ describe("<MultiElementPropertyGrid />", () => {
       const expectedLabels = instanceKeys.map(buildLabel);
 
       setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-      getLabelsStub.mockImplementation(async (keys) => keys.map(buildLabel));
+      getLabelsStub.mockImplementation(buildPage);
 
       const { getByText, getByRole, user } = render(
         <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
@@ -354,7 +355,7 @@ describe("<MultiElementPropertyGrid />", () => {
       const expectedLabels = instanceKeys.map(buildLabel);
 
       setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-      getLabelsStub.mockImplementation(async (keys) => keys.map(buildLabel));
+      getLabelsStub.mockImplementation(buildPage);
 
       const { getByText, getByRole, user } = render(
         <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
@@ -385,7 +386,7 @@ describe("<MultiElementPropertyGrid />", () => {
       const expectedLabels = instanceKeys.map(buildLabel);
 
       setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-      getLabelsStub.mockImplementation(async (keys) => keys.map(buildLabel));
+      getLabelsStub.mockImplementation(buildPage);
 
       const { container, getByText, getByRole, user } = render(
         <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>

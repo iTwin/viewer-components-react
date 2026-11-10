@@ -17,9 +17,11 @@ import { Header } from "./Header.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
+import type { LabeledInstanceKey } from "../common/InstanceLabelsProvider.js";
 
 // Initial row height estimate (px). Actual height is theme-dependent, so each row is measured after mount.
 const INITIAL_ROW_HEIGHT = 29;
+const PAGE_SIZE = 100;
 
 /**
  * Props for `ElementList` component.
@@ -34,12 +36,14 @@ export interface ElementListProps {
 }
 
 /**
- * Props for data that is needed for displaying an element in a list.
+ * State for the loaded pages of selected elements.
  * @internal
  */
-interface RowElementData {
-  label: string;
-  instanceKey: InstanceKey;
+interface ElementListData {
+  items: LabeledInstanceKey[];
+  hasMore: boolean;
+  loading: boolean;
+  error: boolean;
 }
 
 /**
@@ -47,42 +51,69 @@ interface RowElementData {
  * @internal
  */
 export function ElementList({ imodel, instanceKeys, onBack, onSelect, className }: ElementListProps) {
-  const [data, setData] = React.useState<RowElementData[]>();
+  const [data, setData] = React.useState<ElementListData>({ items: [], hasMore: false, loading: false, error: false });
   const labelsProvider = React.useMemo(() => new InstanceLabelsProvider({ imodel }), [imodel]);
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+  const loadNextPage = React.useRef<(() => Promise<void>) | undefined>(undefined);
 
   const { onPerformanceMeasured } = useTelemetryContext();
 
   React.useEffect(() => {
     let disposed = false;
+    let loading = false;
+    let items: LabeledInstanceKey[] = [];
+    let hasMore = true;
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
     const { finish, dispose: disposeTimeTracker } = trackTime(instanceKeys.length > 0, (elapsedTime) => {
       onPerformanceMeasured("elements-list-load", elapsedTime);
     });
 
-    void (async () => {
-      const sortedRowElementData = await getSortedLabelInstanceKeyPairs(labelsProvider, instanceKeys);
-      // ignore results from an outdated load (keys changed or component unmounted)
-      if (disposed) {
+    const loadPage = async () => {
+      if (disposed || loading || !hasMore) {
         return;
       }
-      finish();
-      setData(sortedRowElementData);
-    })();
+      loading = true;
+      setData({ items, hasMore, loading: true, error: false });
+      try {
+        const page = await labelsProvider.getLabelsPage(instanceKeys, { offset: items.length, limit: PAGE_SIZE });
+        if (disposed) {
+          return;
+        }
+        if (items.length === 0) {
+          finish();
+        }
+        items = [...items, ...page.items];
+        hasMore = page.hasMore;
+        setData({ items, hasMore, loading: false, error: false });
+      } catch {
+        if (!disposed) {
+          setData({ items, hasMore, loading: false, error: true });
+        }
+      } finally {
+        loading = false;
+      }
+    };
+    loadNextPage.current = loadPage;
+    void loadPage();
 
     return () => {
       disposed = true;
+      loadNextPage.current = undefined;
       disposeTimeTracker();
     };
   }, [labelsProvider, instanceKeys, onPerformanceMeasured]);
 
   const title = `${PropertyGridManager.translate("element-list.title")} (${instanceKeys.length})`;
 
-  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const virtualizer = useVirtualizer({
-    count: data?.length ?? 0,
+    count: data.items.length + (data.hasMore ? 1 : 0),
     getScrollElement: () => scrollContainerRef.current,
     estimateSize: () => INITIAL_ROW_HEIGHT,
     overscan: 10,
   });
+  const virtualRows = virtualizer.getVirtualItems();
 
   return (
     <div className={classnames("property-grid-react-element-list", className)}>
@@ -96,18 +127,16 @@ export function ElementList({ imodel, instanceKeys, onBack, onSelect, className 
       />
       <List ref={scrollContainerRef} className="property-grid-react-element-list-container">
         <div style={{ height: virtualizer.getTotalSize(), width: "100%", position: "relative", contain: "layout" }}>
-          {virtualizer.getVirtualItems().map((virtualRow) => {
-            const dataItem = data?.[virtualRow.index];
-            if (!dataItem) {
-              return null;
-            }
+          {virtualRows.map((virtualRow) => {
+            const dataItem = data.items[virtualRow.index];
             return (
               <ListItem
                 key={virtualRow.key}
                 ref={virtualizer.measureElement}
                 data-index={virtualRow.index}
                 className="property-grid-react-element-list-item"
-                actionable
+                actionable={!!dataItem || !data.loading}
+                aria-busy={!dataItem && data.loading ? true : undefined}
                 style={{
                   position: "absolute",
                   top: 0,
@@ -116,10 +145,16 @@ export function ElementList({ imodel, instanceKeys, onBack, onSelect, className 
                   transform: `translateY(${virtualRow.start}px)`,
                 }}
                 onClick={() => {
-                  onSelect(dataItem.instanceKey);
+                  if (dataItem) {
+                    onSelect(dataItem.instanceKey);
+                  } else {
+                    void loadNextPage.current?.();
+                  }
                 }}
               >
-                {dataItem.label}
+                {dataItem
+                  ? dataItem.label
+                  : PropertyGridManager.translate(data.error ? "retry" : data.loading ? "element-list.loading" : "element-list.load-more")}
               </ListItem>
             );
           })}
@@ -127,10 +162,4 @@ export function ElementList({ imodel, instanceKeys, onBack, onSelect, className 
       </List>
     </div>
   );
-}
-
-/** Queries labels and orders Label-InstanceKey pairs in ascending order */
-async function getSortedLabelInstanceKeyPairs(labelsProvider: InstanceLabelsProvider, instanceKeys: InstanceKey[]): Promise<RowElementData[]> {
-  const labels = await labelsProvider.getLabels(instanceKeys);
-  return labels.map((label, index) => ({ label, instanceKey: instanceKeys[index] })).sort((a, b) => a.label.localeCompare(b.label));
 }

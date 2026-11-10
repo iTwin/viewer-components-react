@@ -8,24 +8,31 @@ import { InstanceLabelsProvider } from "../../property-grid-react/common/Instanc
 import { ElementList } from "../../property-grid-react/components/ElementList.js";
 import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTelemetryContext.js";
 import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
-import { act, createResolvablePromise, render, waitFor } from "../TestUtils.js";
+import { act, createResolvablePromise, fireEvent, render, waitFor } from "../TestUtils.js";
 
 import type { PropsWithChildren } from "react";
 import type { MockInstance } from "vitest";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
+import type { LabelsPage } from "../../property-grid-react/common/InstanceLabelsProvider.js";
 import type { PerformanceTrackedFeatures } from "../../property-grid-react/hooks/UseTelemetryContext.js";
 
 describe("<ElementList />", () => {
   const imodel = {} as IModelConnection;
   const buildLabel = (key: InstanceKey) => `${key.className}-${key.id}`;
+  const buildPage = async (keys: InstanceKey[], page: { offset: number; limit: number }) => {
+    const sorted = keys
+      .map((instanceKey) => ({ instanceKey, label: buildLabel(instanceKey) }))
+      .sort((first, second) => first.label.localeCompare(second.label));
+    return { items: sorted.slice(page.offset, page.offset + page.limit), hasMore: sorted.length > page.offset + page.limit };
+  };
 
-  let getLabelsStub: MockInstance<InstanceLabelsProvider["getLabels"]>;
+  let getLabelsStub: MockInstance<InstanceLabelsProvider["getLabelsPage"]>;
 
   beforeEach(() => {
     vi.spyOn(PropertyGridManager, "translate").mockImplementation((key) => key);
-    getLabelsStub = vi.spyOn(InstanceLabelsProvider.prototype, "getLabels");
-    getLabelsStub.mockImplementation(async (keys) => keys.map(buildLabel));
+    getLabelsStub = vi.spyOn(InstanceLabelsProvider.prototype, "getLabelsPage");
+    getLabelsStub.mockImplementation(buildPage);
   });
 
   it("loads and renders instance labels", async () => {
@@ -40,7 +47,7 @@ describe("<ElementList />", () => {
       await waitFor(() => getByText(expected));
     }
 
-    expect(getLabelsStub).toHaveBeenCalledWith(instanceKeys);
+    expect(getLabelsStub).toHaveBeenCalledWith(instanceKeys, { offset: 0, limit: 100 });
   });
 
   it("loads and orders elements by labels", async () => {
@@ -61,27 +68,27 @@ describe("<ElementList />", () => {
   });
 
   it("does not overwrite current labels with an outdated load", async () => {
-    const firstRequest = createResolvablePromise<string[]>();
+    const firstRequest = createResolvablePromise<LabelsPage>();
     getLabelsStub.mockImplementation(async () => firstRequest.promise);
     const firstInstanceKeys = [{ id: "0x1", className: "Schema:Class" }];
     const { rerender, queryByText, getByText } = render(<ElementList imodel={imodel} instanceKeys={firstInstanceKeys} onBack={() => {}} onSelect={() => {}} />);
     await waitFor(() => expect(getLabelsStub).toHaveBeenCalled());
 
     // start a newer load before the first one resolves
-    const secondRequest = createResolvablePromise<string[]>();
+    const secondRequest = createResolvablePromise<LabelsPage>();
     getLabelsStub.mockImplementation(async () => secondRequest.promise);
     const secondInstanceKeys = [{ id: "0x2", className: "Schema:Class" }];
     rerender(<ElementList imodel={imodel} instanceKeys={secondInstanceKeys} onBack={() => {}} onSelect={() => {}} />);
 
     // resolve the newer load first and make sure it is rendered
     await act(async () => {
-      await secondRequest.resolve(["Current-label"]);
+      await secondRequest.resolve({ items: [{ instanceKey: secondInstanceKeys[0], label: "Current-label" }], hasMore: false });
     });
     getByText("Current-label");
 
     // resolving the outdated load must not overwrite the current labels
     await act(async () => {
-      await firstRequest.resolve(["Outdated-label"]);
+      await firstRequest.resolve({ items: [{ instanceKey: firstInstanceKeys[0], label: "Outdated-label" }], hasMore: false });
     });
     expect(queryByText("Outdated-label")).toBeNull();
     getByText("Current-label");
@@ -121,6 +128,97 @@ describe("<ElementList />", () => {
     expect(onBackSpy).toHaveBeenCalledOnce();
   });
 
+  describe("paging", () => {
+    const instanceKeys = Array.from({ length: 105 }, (_, index) => ({ id: `0x${String(index + 1).padStart(3, "0")}`, className: "TestClass" }));
+
+    beforeEach(() => {
+      vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockImplementation(function (this: HTMLElement) {
+        return this.getAttribute("role") === "listitem" ? 29 : 600;
+      });
+    });
+
+    it("loads only the first 100 rows until Load More is clicked, then appends the next page once", async () => {
+      const next = createResolvablePromise<LabelsPage>();
+      getLabelsStub.mockImplementation(async (keys, page) => (page.offset === 100 ? next.promise : buildPage(keys, page)));
+      const { getByRole, findByText, queryByText, user } = render(
+        <ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={() => {}} onSelect={() => {}} />,
+        {
+          disableStrictMode: true,
+        },
+      );
+      await findByText(buildLabel(instanceKeys[0]));
+      const initialRequests = getLabelsStub.mock.calls.length;
+      expect(getLabelsStub.mock.calls.every(([, page]) => page.offset === 0)).toBe(true);
+      expect(getLabelsStub).toHaveBeenLastCalledWith(instanceKeys, { offset: 0, limit: 100 });
+
+      fireEvent.scroll(getByRole("list"), { target: { scrollTop: 2300 } });
+      await findByText("element-list.load-more");
+      expect(getLabelsStub).toHaveBeenCalledTimes(initialRequests);
+      fireEvent.scroll(getByRole("list"), { target: { scrollTop: 2900 } });
+      const loadMore = await findByText("element-list.load-more");
+      expect(getLabelsStub).toHaveBeenCalledTimes(initialRequests);
+      await user.click(loadMore);
+      await waitFor(() => expect(getLabelsStub).toHaveBeenCalledTimes(initialRequests + 1));
+      expect(getLabelsStub).toHaveBeenLastCalledWith(instanceKeys, { offset: 100, limit: 100 });
+      await user.click(await findByText("element-list.loading"));
+      fireEvent.scroll(getByRole("list"), { target: { scrollTop: 2901 } });
+      expect(getLabelsStub).toHaveBeenCalledTimes(initialRequests + 1);
+
+      await act(async () => next.resolve(await buildPage(instanceKeys, { offset: 100, limit: 100 })));
+      await findByText(buildLabel(instanceKeys[104]));
+      expect(queryByText("element-list.load-more")).toBeNull();
+      expect(queryByText("element-list.loading")).toBeNull();
+      expect(getLabelsStub).toHaveBeenCalledTimes(initialRequests + 1);
+    });
+
+    it("resets paging and scrolling on selection changes and ignores an outdated next page", async () => {
+      const next = createResolvablePromise<LabelsPage>();
+      getLabelsStub.mockImplementation(async (keys, page) => (page.offset === 100 ? next.promise : buildPage(keys, page)));
+      const { getByRole, findByText, queryByText, rerender, user } = render(
+        <ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={() => {}} onSelect={() => {}} />,
+        { disableStrictMode: true },
+      );
+      await findByText(buildLabel(instanceKeys[0]));
+      fireEvent.scroll(getByRole("list"), { target: { scrollTop: 2900 } });
+      await user.click(await findByText("element-list.load-more"));
+      await waitFor(() => expect(getLabelsStub).toHaveBeenCalledWith(instanceKeys, { offset: 100, limit: 100 }));
+
+      const selection = [{ className: "NewSelection", id: "0x1" }];
+      rerender(<ElementList imodel={imodel} instanceKeys={selection} onBack={() => {}} onSelect={() => {}} />);
+      await findByText(buildLabel(selection[0]));
+      expect(getByRole("list").scrollTop).toBe(0);
+      expect(getLabelsStub).toHaveBeenLastCalledWith(selection, { offset: 0, limit: 100 });
+      await act(async () => next.resolve(await buildPage(instanceKeys, { offset: 100, limit: 100 })));
+      expect(queryByText(buildLabel(instanceKeys[104]))).toBeNull();
+      await findByText(buildLabel(selection[0]));
+    });
+
+    it("keeps existing rows and retries a failed next page without skipping its offset", async () => {
+      let failed = false;
+      getLabelsStub.mockImplementation(async (keys, page) => {
+        if (page.offset === 100 && !failed) {
+          failed = true;
+          throw new Error("Failed to load page");
+        }
+        return buildPage(keys, page);
+      });
+      const { getByRole, findByText, user } = render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={() => {}} onSelect={() => {}} />, {
+        disableStrictMode: true,
+      });
+      await findByText(buildLabel(instanceKeys[0]));
+      const initialRequests = getLabelsStub.mock.calls.length;
+      fireEvent.scroll(getByRole("list"), { target: { scrollTop: 2900 } });
+      await user.click(await findByText("element-list.load-more"));
+      const retry = await findByText("retry");
+      expect(getLabelsStub).toHaveBeenCalledTimes(initialRequests + 1);
+      await findByText(buildLabel(instanceKeys[99]));
+      await user.click(retry);
+      await findByText(buildLabel(instanceKeys[104]));
+      expect(getLabelsStub).toHaveBeenLastCalledWith(instanceKeys, { offset: 100, limit: 100 });
+      expect(getLabelsStub).toHaveBeenCalledTimes(initialRequests + 2);
+    });
+  });
+
   describe("performance tracking", () => {
     const onPerformanceMeasuredStub = vi.fn<(feature: PerformanceTrackedFeatures, duration: number) => void>();
 
@@ -143,7 +241,7 @@ describe("<ElementList />", () => {
     });
 
     it("logs metrics only for latest request", async () => {
-      const firstRequest = createResolvablePromise<string[]>();
+      const firstRequest = createResolvablePromise<LabelsPage>();
       getLabelsStub.mockImplementation(async () => firstRequest.promise);
       const instanceKeys = [{ id: "0x1", className: "Schema:Class" }];
       const { rerender } = render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={() => {}} onSelect={() => {}} />, { wrapper: Wrapper });
@@ -154,7 +252,7 @@ describe("<ElementList />", () => {
       });
       getLabelsStub.mockReset();
 
-      const secondRequest = createResolvablePromise<string[]>();
+      const secondRequest = createResolvablePromise<LabelsPage>();
       getLabelsStub.mockImplementation(async () => secondRequest.promise);
       const secondInstanceKeys = [{ id: "0x2", className: "Schema:Class" }];
       rerender(<ElementList imodel={imodel} instanceKeys={secondInstanceKeys} onBack={() => {}} onSelect={() => {}} />);
@@ -164,12 +262,12 @@ describe("<ElementList />", () => {
       });
 
       await act(async () => {
-        await firstRequest.resolve(["Test-instance-1"]);
+        await firstRequest.resolve({ items: [{ instanceKey: instanceKeys[0], label: "Test-instance-1" }], hasMore: false });
       });
       expect(onPerformanceMeasuredStub).not.toHaveBeenCalled();
 
       await act(async () => {
-        await secondRequest.resolve(["Test-instance-2"]);
+        await secondRequest.resolve({ items: [{ instanceKey: secondInstanceKeys[0], label: "Test-instance-2" }], hasMore: false });
       });
       expect(onPerformanceMeasuredStub).toHaveBeenCalledOnce();
       expect(onPerformanceMeasuredStub).toHaveBeenCalledWith("elements-list-load", expect.any(Number));

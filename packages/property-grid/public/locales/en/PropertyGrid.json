@@ -4,7 +4,9 @@
   "retry": "Retry",
   "generic-error-description": "An error occurred while loading properties.",
   "element-list": {
-    "title": "Selected Elements"
+    "title": "Selected Elements",
+    "loading": "Loading...",
+    "load-more": "Load More"
   },
   "header": {
     "navigateUp": "Navigate Up",
