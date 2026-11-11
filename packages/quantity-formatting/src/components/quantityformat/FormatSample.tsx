@@ -8,6 +8,9 @@ import * as React from "react";
 import { Format, FormatterSpec } from "@itwin/core-quantity";
 import { Divider, Input, Label } from "@itwin/itwinui-react";
 import { useTranslation } from "../../useTranslation.js";
+import { useUnitsProvider } from "./internal/useUnitsProvider.js";
+import { BentleyError, Logger } from "@itwin/core-bentley";
+import { QuantityFormattingLoggerCategory } from "../../QuantityFormatting.js";
 
 import type { FormatDefinition, UnitProps } from "@itwin/core-quantity";
 import type { UnitsProvider } from "@itwin/core-quantity";
@@ -16,7 +19,8 @@ import type { UnitsProvider } from "@itwin/core-quantity";
 */
 interface FormatSampleProps {
   formatProps: FormatDefinition;
-  unitsProvider: UnitsProvider;
+  /** Units used to look up and convert units. Defaults to `IModelApp.quantityFormatter.unitsProvider`. */
+  unitsProvider?: UnitsProvider;
   persistenceUnit?: UnitProps;
   initialMagnitude?: number;
 }
@@ -26,8 +30,8 @@ interface FormatSampleProps {
  * @beta
  */
 export function FormatSample(props: FormatSampleProps) {
-  const { formatProps, unitsProvider, persistenceUnit, initialMagnitude } =
-    props;
+  const { formatProps, persistenceUnit, initialMagnitude } = props;
+  const unitsProvider = useUnitsProvider(props.unitsProvider);
   const initialValue = initialMagnitude ?? 0;
   const [magnitude, setMagnitude] = React.useState(initialValue);
   const [sampleValue, setSampleValue] = React.useState(initialValue.toString());
@@ -35,11 +39,14 @@ export function FormatSample(props: FormatSampleProps) {
     undefined
   );
   const [formattedValue, setFormattedValue] = React.useState("");
+  const [formatError, setFormatError] = React.useState(false);
   const { translate } = useTranslation();
   const inputId = React.useId();
   // Create FormatterSpec when formatProps or persistenceUnit changes
   React.useEffect(() => {
     let disposed = false;
+    setFormatSpec(undefined);
+    setFormatError(false);
     const createFormatterSpec = async () => {
       if (!persistenceUnit) {
         setFormatSpec(undefined);
@@ -60,9 +67,11 @@ export function FormatSample(props: FormatSampleProps) {
         );
         if (disposed) return;
         setFormatSpec(spec);
-      } catch {
+      } catch (error) {
+        Logger.logError(QuantityFormattingLoggerCategory, "Failed to create the formatter for the format sample", () => ({ error: BentleyError.getErrorMessage(error) }));
         if (disposed) return;
         setFormatSpec(undefined);
+        setFormatError(true);
       }
     };
 
@@ -80,10 +89,17 @@ export function FormatSample(props: FormatSampleProps) {
 
   // Update formatted value when magnitude or formatSpec changes
   React.useEffect(() => {
-    if (formatSpec) {
-      setFormattedValue(formatSpec.applyFormatting(magnitude));
-    } else {
+    if (!formatSpec) {
       setFormattedValue("");
+      return;
+    }
+    try {
+      setFormattedValue(formatSpec.applyFormatting(magnitude));
+      setFormatError(false);
+    } catch (error) {
+      Logger.logError(QuantityFormattingLoggerCategory, "Failed to evaluate the format sample", () => ({ error: BentleyError.getErrorMessage(error) }));
+      setFormattedValue("");
+      setFormatError(true);
     }
   }, [magnitude, formatSpec]);
 
@@ -167,9 +183,13 @@ export function FormatSample(props: FormatSampleProps) {
           </div>
           <Divider orientation="vertical" />
           <div className="quantityFormat--formatSample-resultSection">
-            <Label className="quantityFormat--formattedValueLabel">
-              {formattedValue}
-            </Label>
+            {formatError ? (
+              <div role="alert">{translate("QuantityFormat:errors.invalidFormat")}</div>
+            ) : (
+              <Label className="quantityFormat--formattedValueLabel">
+                {formattedValue}
+              </Label>
+            )}
           </div>
         </div>
     </div>

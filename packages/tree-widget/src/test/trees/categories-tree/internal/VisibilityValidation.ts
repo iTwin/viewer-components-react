@@ -3,72 +3,93 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
-import { EMPTY, expand, from, mergeMap } from "rxjs";
-import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { CategoriesTreeNode } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeNode.js";
-import { toVoidPromise } from "../../../../tree-widget-react/components/trees/common/Rxjs.js";
+import { expect } from "vitest";
+import { CategoriesTreeNode } from "../../../../tree-widget-react/trees/categories-tree/CategoriesTreeNode.js";
+import { CategoriesTreeNodeInternal } from "../../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeNodeInternal.js";
 
-import type { Viewport } from "@itwin/core-frontend";
-import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
-import type { Visibility } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
-import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
+import type { HierarchyNode } from "@itwin/presentation-hierarchies";
+import type { ValidateNodeProps } from "../../../shared/VisibilityValidation.js";
 
-interface VisibilityExpectations {
-  [id: string]: Visibility;
-}
-
-export interface ValidateNodeProps {
-  handler: HierarchyVisibilityHandler;
-  viewport: Viewport;
-  expectations: "all-visible" | "all-hidden" | VisibilityExpectations;
-}
-
-export async function validateNodeVisibility({ node, handler, expectations }: ValidateNodeProps & { node: HierarchyNode }) {
+export async function validateNodeVisibility({
+  node,
+  handler,
+  expectations,
+  validatedIds,
+}: ValidateNodeProps & { node: HierarchyNode; validatedIds: Set<string> }) {
   const actualVisibility = await handler.getVisibilityStatus(node);
-  if (!HierarchyNode.isInstancesNode(node)) {
-    throw new Error(`Expected hierarchy to only have instance nodes, got ${JSON.stringify(node)}`);
-  }
 
   if (expectations === "all-hidden" || expectations === "all-visible") {
-    expect(actualVisibility.state).to.eq(expectations === "all-hidden" ? "hidden" : "visible");
+    expect(actualVisibility.state, `Node, ${JSON.stringify(node)}`).toBe(expectations === "all-hidden" ? "hidden" : "visible");
     return;
   }
 
-  const { id } = node.key.instanceKeys[0];
+  if (CategoriesTreeNode.isElementClassGroupingNode(node)) {
+    const elementIds = node.groupedInstanceKeys.map(({ id: elementId }) => elementId);
+    let visibleCount = 0;
+    let hiddenCount = 0;
 
-  if (CategoriesTreeNode.isCategoryNode(node)) {
-    expect(actualVisibility.state).to.eq(expectations[id]);
+    for (const elementId of elementIds) {
+      validatedIds.add(elementId);
+      if (expectations[elementId] === "visible") {
+        ++visibleCount;
+      } else if (expectations[elementId] === "hidden") {
+        ++hiddenCount;
+      } else if (expectations[elementId] === "partial") {
+        ++hiddenCount;
+        ++visibleCount;
+      } else if (expectations[elementId] === "disabled") {
+        expect(actualVisibility.isDisabled, `Node, ${JSON.stringify(node)}`).toBe(true);
+        return;
+      }
+      if (visibleCount > 0 && hiddenCount > 0) {
+        expect(actualVisibility.state, `Node, ${JSON.stringify(node)}`).toBe("partial");
+        return;
+      }
+    }
+    expect(actualVisibility.state, `Node, ${JSON.stringify(node)}`).toBe(visibleCount > 0 ? "visible" : "hidden");
     return;
   }
+
   if (CategoriesTreeNode.isSubCategoryNode(node)) {
+    const { id } = node.key.instanceKeys[0];
+    validatedIds.add(id);
     // One subCategory gets added when category is inserted
-    if (expectations[id] !== undefined) {
-      expect(actualVisibility.state).to.eq(expectations[id]);
+    if (expectations[id] === "disabled") {
+      expect(actualVisibility.isDisabled, `Node, ${JSON.stringify(node)}`).toBe(true);
+    } else {
+      expect(actualVisibility.state, `Node, ${JSON.stringify(node)}`).toBe(expectations[id]);
     }
     return;
   }
-  if (CategoriesTreeNode.isDefinitionContainerNode(node)) {
-    expect(actualVisibility.state).to.eq(expectations[id]);
+  if (CategoriesTreeNodeInternal.isCategoryNode(node)) {
+    const { id } = node.key.instanceKeys[0];
+    let idToUse = id;
+    const parentOrModelId =
+      node.extendedData.parentElementsPath.length > 0
+        ? node.extendedData.parentElementsPath[node.extendedData.parentElementsPath.length - 1].elementIds[0]
+        : node.extendedData.modelIds.length > 0
+          ? node.extendedData.modelIds[0]
+          : undefined;
+    if (parentOrModelId !== undefined) {
+      idToUse = `${parentOrModelId}-${id}`;
+    }
+    validatedIds.add(idToUse);
+    if (expectations[idToUse] === "disabled") {
+      expect(actualVisibility.isDisabled, `Node, ${JSON.stringify(node)}`).toBe(true);
+    } else {
+      expect(actualVisibility.state, `Node, ${JSON.stringify(node)}`).toBe(expectations[idToUse]);
+    }
     return;
   }
-
-  throw new Error(`Expected hierarchy to contain only definitionContainers, categories and subcategories, got ${JSON.stringify(node)}`);
-}
-
-export async function validateHierarchyVisibility({
-  provider,
-  ...props
-}: ValidateNodeProps & {
-  provider: HierarchyProvider;
-}) {
-  props.viewport.renderFrame();
-  // This promise allows handler change event to fire if it was scheduled.
-  await new Promise((resolve) => setTimeout(resolve));
-  await toVoidPromise(
-    from(provider.getNodes({ parentNode: undefined })).pipe(
-      expand((node) => (node.children ? provider.getNodes({ parentNode: node }) : EMPTY)),
-      mergeMap(async (node) => validateNodeVisibility({ ...props, node })),
-    ),
-  );
+  if (CategoriesTreeNode.isModelNode(node) || CategoriesTreeNode.isDefinitionContainerNode(node) || CategoriesTreeNode.isElementNode(node)) {
+    const { id } = node.key.instanceKeys[0];
+    validatedIds.add(id);
+    if (expectations[id] === "disabled") {
+      expect(actualVisibility.isDisabled, `Node, ${JSON.stringify(node)}`).toBe(true);
+    } else {
+      expect(actualVisibility.state, `Node, ${JSON.stringify(node)}`).toBe(expectations[id]);
+    }
+    return;
+  }
+  throw new Error(`Expected hierarchy to contain only definitionContainers, categories, subcategories, models and elements got ${JSON.stringify(node)}`);
 }

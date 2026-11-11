@@ -23,10 +23,10 @@ function isiOsDevice(): boolean {
   const iDevices = ["iPad Simulator", "iPhone Simulator", "iPad", "iPhone", "iPod"];
 
   let iOS = false;
-  if (window.navigator.platform !== undefined) { // eslint-disable-line @typescript-eslint/no-deprecated
+  if (window.navigator.platform !== undefined) {
     if (
       iDevices.find(
-        (device: string) => device.indexOf(window.navigator.platform) !== -1, // eslint-disable-line @typescript-eslint/no-deprecated
+        (device: string) => device.indexOf(window.navigator.platform) !== -1,
       )
     ) {
       iOS = true;

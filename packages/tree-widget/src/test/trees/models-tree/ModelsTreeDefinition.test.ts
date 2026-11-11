@@ -14,133 +14,595 @@ import {
   insertSubject,
   terminateCore,
 } from "test-utilities";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { withEditTxn } from "@itwin/core-backend";
 import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { buildIModel } from "../../IModelUtils.js";
+import { CLASS_NAME_Subject } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { buildIModel, insertGeometricModelWithPartition, TestSchema } from "../../IModelUtils.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
-import { createModelsTreeProvider } from "./Utils.js";
+import { createAccessAndCache, createModelsTreeProvider } from "./Utils.js";
 
 import type { InstanceKey } from "@itwin/presentation-shared";
 
-describe("Models tree", () => {
-  describe("Hierarchy definition", () => {
-    before(async function () {
-      await initializeCore({
-        backendProps: {
-          caching: {
-            hierarchies: {
-              // eslint-disable-next-line @typescript-eslint/no-deprecated
-              mode: HierarchyCacheMode.Memory,
-            },
+describe("ModelsTreeDefinition", () => {
+  beforeAll(async () => {
+    await initializeCore({
+      backendProps: {
+        caching: {
+          hierarchies: {
+            // eslint-disable-next-line @typescript-eslint/no-deprecated
+            mode: HierarchyCacheMode.Memory,
           },
         },
-        rpcs: [IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
-      });
-      // eslint-disable-next-line @itwin/no-internal
-      ECSchemaRpcImpl.register();
+      },
+      rpcs: [IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
     });
+    // eslint-disable-next-line @itwin/no-internal
+    ECSchemaRpcImpl.register();
+  });
 
-    after(async function () {
-      await terminateCore();
+  afterAll(async () => {
+    await terminateCore();
+  });
+
+  it("creates Subject - Model - Category - Element hierarchy", async () => {
+    await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
+      withEditTxn(imodel, (txn) => {
+        const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+        const childSubject = insertSubject({ txn, codeValue: "child subject", parentId: rootSubject.id });
+        const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: childSubject.id });
+        const category = insertSpatialCategory({ txn, codeValue: "category" });
+        const rootElement1 = insertPhysicalElement({ txn, userLabel: `root element 1`, modelId: model.id, categoryId: category.id });
+        const childElement = insertPhysicalElement({
+          txn,
+          userLabel: `child element`,
+          modelId: model.id,
+          categoryId: category.id,
+          parentId: rootElement1.id,
+        });
+        const rootElement2 = insertPhysicalElement({
+          txn,
+          classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+          userLabel: `root element 2`,
+          modelId: model.id,
+          categoryId: category.id,
+        });
+        const subModel = insertPhysicalSubModel({ txn, modeledElementId: rootElement2.id });
+        const modelingElement = insertPhysicalElement({ txn, userLabel: `modeling element`, modelId: subModel.id, categoryId: category.id });
+        return { rootSubject, childSubject, model, category, rootElement1, rootElement2, childElement, modelingElement };
+      }),
+    );
+    const { imodelConnection, ...keys } = buildIModelResult;
+    using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { subjects: { root: "include" } } });
+    await validateHierarchy({
+      provider,
+      expect: [
+        NodeValidators.createForInstanceNode({
+          instanceKeys: [keys.rootSubject],
+          autoExpand: true,
+          supportsFiltering: true,
+          children: [
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.childSubject],
+              supportsFiltering: true,
+              children: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.model],
+                  supportsFiltering: true,
+                  children: [
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.category],
+                      supportsFiltering: true,
+                      children: [
+                        NodeValidators.createForClassGroupingNode({
+                          className: keys.rootElement1.className,
+                          label: "Physical Object",
+                          children: [
+                            NodeValidators.createForInstanceNode({
+                              instanceKeys: [keys.rootElement1],
+                              supportsFiltering: true,
+                              children: [
+                                NodeValidators.createForClassGroupingNode({
+                                  className: keys.childElement.className,
+                                  label: "Physical Object",
+                                  children: [
+                                    NodeValidators.createForInstanceNode({
+                                      instanceKeys: [keys.childElement],
+                                      supportsFiltering: true,
+                                      children: false,
+                                    }),
+                                  ],
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                        NodeValidators.createForClassGroupingNode({
+                          className: keys.rootElement2.className,
+                          label: "Test Physical Object",
+                          children: [
+                            NodeValidators.createForInstanceNode({
+                              instanceKeys: [keys.rootElement2],
+                              supportsFiltering: true,
+                              children: [
+                                NodeValidators.createForClassGroupingNode({
+                                  className: keys.modelingElement.className,
+                                  label: "Physical Object",
+                                  children: [
+                                    NodeValidators.createForInstanceNode({
+                                      instanceKeys: [keys.modelingElement],
+                                      supportsFiltering: true,
+                                      children: false,
+                                    }),
+                                  ],
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        }),
+      ],
     });
+  });
 
-    it("creates Subject - Model - Category - Element hierarchy", async function () {
-      await using buildIModelResult = await buildIModel(this, async (imodel, testSchema) =>
+  describe("Subjects", () => {
+    it(`hides subjects with \`Subject.Model.Type = "Hierarchy"\` json property`, async function () {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
-          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-          const childSubject = insertSubject({ txn, codeValue: "child subject", parentId: rootSubject.id });
+          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const childSubject = insertSubject({
+            txn,
+            codeValue: "child subject",
+            parentId: rootSubject.id,
+            jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } },
+          });
           const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: childSubject.id });
           const category = insertSpatialCategory({ txn, codeValue: "category" });
-          const rootElement1 = insertPhysicalElement({ txn, userLabel: `root element 1`, modelId: model.id, categoryId: category.id });
+          const element = insertPhysicalElement({ txn, userLabel: `element`, modelId: model.id, categoryId: category.id });
+          return { rootSubject, childSubject, model, category, element };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.model],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.category],
+                supportsFiltering: true,
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.element.className,
+                    children: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.element], supportsFiltering: true, children: false })],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      });
+    });
+
+    it("hides childless subjects", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const childSubject = insertSubject({ txn, codeValue: "child subject", parentId: rootSubject.id });
+          return { rootSubject, childSubject };
+        }),
+      );
+      const { imodelConnection } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
+      await validateHierarchy({
+        provider,
+        expect: [],
+      });
+    });
+
+    it("hides subjects with childless models", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const childSubject1 = insertSubject({ txn, codeValue: "child subject 1", parentId: rootSubject.id });
+          const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: childSubject1.id });
+          const childSubject2 = insertSubject({
+            txn,
+            codeValue: "child subject 2",
+            parentId: rootSubject.id,
+            jsonProperties: { Subject: { Model: { TargetPartition: model.id } } },
+          });
+          return { rootSubject, childSubject1, childSubject2, model };
+        }),
+      );
+      const { imodelConnection } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
+      await validateHierarchy({
+        provider,
+        expect: [],
+      });
+    });
+
+    it("hides subjects with private or template models", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const templateSubject = insertSubject({ txn, codeValue: "template subject", parentId: rootSubject.id });
+          const templateModel = insertGeometricModelWithPartition({
+            txn,
+            codeValue: "template model",
+            partitionParentId: templateSubject.id,
+            isTemplate: true,
+          });
+          insertPhysicalElement({ txn, userLabel: "element", modelId: templateModel.id, categoryId: category.id });
+          insertSubject({
+            txn,
+            codeValue: "template target partition subject",
+            parentId: rootSubject.id,
+            jsonProperties: { Subject: { Model: { TargetPartition: templateModel.id } } },
+          });
+          const privateSubject = insertSubject({ txn, codeValue: "private subject", parentId: rootSubject.id });
+          const privateModel = insertGeometricModelWithPartition({
+            txn,
+            codeValue: "private model",
+            partitionParentId: privateSubject.id,
+            isPrivate: true,
+          });
+          insertPhysicalElement({ txn, userLabel: "element", modelId: privateModel.id, categoryId: category.id });
+          insertSubject({
+            txn,
+            codeValue: "private target partition subject",
+            parentId: rootSubject.id,
+            jsonProperties: { Subject: { Model: { TargetPartition: privateModel.id } } },
+          });
+        }),
+      );
+      const { imodelConnection } = buildIModelResult;
+      for (const preloadCache of [false, true]) {
+        const { imodelAccess, idsCache } = createAccessAndCache({ imodelConnection, hierarchyConfig: { subjects: { root: "exclude" } } });
+        if (preloadCache) {
+          await idsCache.preloadElementModelCategories();
+          await idsCache.preloadModeledElements();
+        }
+        expect(idsCache.elementModelCategoriesLoaded()).toBe(preloadCache);
+        expect(idsCache.modeledElementsLoaded()).toBe(preloadCache);
+        using provider = createModelsTreeProvider({ imodelConnection, imodelAccess, idsCache });
+        await validateHierarchy({
+          provider,
+          expect: [],
+        });
+      }
+    });
+
+    it("shows subjects with child models related with subject through `Subject.Model.TargetPartition` json property", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const childSubject1 = insertSubject({ txn, codeValue: "child subject 1", parentId: rootSubject.id });
+          const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: childSubject1.id });
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const element = insertPhysicalElement({ txn, userLabel: `element`, modelId: model.id, categoryId: category.id });
+          const childSubject2 = insertSubject({
+            txn,
+            codeValue: "child subject 2",
+            parentId: rootSubject.id,
+            jsonProperties: { Subject: { Model: { TargetPartition: model.id } } },
+          });
+          return { rootSubject, childSubject1, childSubject2, model, category, element };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.childSubject1],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.model],
+                supportsFiltering: true,
+                children: [
+                  NodeValidators.createForInstanceNode({
+                    instanceKeys: [keys.category],
+                    supportsFiltering: true,
+                    children: [
+                      NodeValidators.createForClassGroupingNode({
+                        className: keys.element.className,
+                        children: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.element], supportsFiltering: true, children: false })],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.childSubject2],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.model],
+                supportsFiltering: true,
+                children: [
+                  NodeValidators.createForInstanceNode({
+                    instanceKeys: [keys.category],
+                    supportsFiltering: true,
+                    children: [
+                      NodeValidators.createForClassGroupingNode({
+                        className: keys.element.className,
+                        children: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.element], supportsFiltering: true, children: false })],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      });
+    });
+
+    it("merges subjects from different parts of hierarchy", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const hiddenSubject1 = insertSubject({
+            txn,
+            codeValue: "hidden subject 1",
+            parentId: rootSubject.id,
+            jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } },
+          });
+          const hiddenSubject2 = insertSubject({
+            txn,
+            codeValue: "hidden subject 2",
+            parentId: rootSubject.id,
+            jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } },
+          });
+          const mergedSubject1 = insertSubject({ txn, codeValue: "merged subject", parentId: hiddenSubject1.id });
+          const mergedSubject2 = insertSubject({ txn, codeValue: "merged subject", parentId: hiddenSubject2.id });
+          const model1 = insertPhysicalModelWithPartition({ txn, codeValue: `model1`, partitionParentId: mergedSubject1.id });
+          const element1 = insertPhysicalElement({ txn, userLabel: `element1`, modelId: model1.id, categoryId: category.id });
+          const model2 = insertPhysicalModelWithPartition({ txn, codeValue: `model2`, partitionParentId: mergedSubject2.id });
+          const element2 = insertPhysicalElement({ txn, userLabel: `element1`, modelId: model2.id, categoryId: category.id });
+          return { rootSubject, mergedSubject1, mergedSubject2, model1, model2, category, element1, element2 };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.mergedSubject1, keys.mergedSubject2],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.model1],
+                supportsFiltering: true,
+                children: [
+                  NodeValidators.createForInstanceNode({
+                    instanceKeys: [keys.category],
+                    supportsFiltering: true,
+                    children: [
+                      NodeValidators.createForClassGroupingNode({
+                        className: keys.element1.className,
+                        children: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.element1], supportsFiltering: true, children: false })],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.model2],
+                supportsFiltering: true,
+                children: [
+                  NodeValidators.createForInstanceNode({
+                    instanceKeys: [keys.category],
+                    supportsFiltering: true,
+                    children: [
+                      NodeValidators.createForClassGroupingNode({
+                        className: keys.element2.className,
+                        children: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.element2], supportsFiltering: true, children: false })],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      });
+    });
+  });
+
+  describe("Models", () => {
+    it("hides models with `PhysicalPartition.Model.Content` json property", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const partition = insertPhysicalPartition({
+            txn,
+            codeValue: "model",
+            parentId: rootSubject.id,
+            jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
+          });
+          const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const element = insertPhysicalElement({ txn, userLabel: `element`, modelId: model.id, categoryId: category.id });
+          return { rootSubject, model, category, element };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.category],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForClassGroupingNode({
+                className: keys.element.className,
+                children: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.element], supportsFiltering: true, children: false })],
+              }),
+            ],
+          }),
+        ],
+      });
+    });
+
+    it("hides models with `GraphicalPartition3d.Model.Content` json property", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const partition = insertPhysicalPartition({
+            txn,
+            codeValue: "model",
+            parentId: rootSubject.id,
+            jsonProperties: { GraphicalPartition3d: { Model: { Content: true } } },
+          });
+          const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const element = insertPhysicalElement({ txn, userLabel: `element`, modelId: model.id, categoryId: category.id });
+          return { rootSubject, model, category, element };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.category],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForClassGroupingNode({
+                className: keys.element.className,
+                children: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.element], supportsFiltering: true, children: false })],
+              }),
+            ],
+          }),
+        ],
+      });
+    });
+
+    it("hides private and template models and their content", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const templateModel = insertGeometricModelWithPartition({ txn, codeValue: "template model", isTemplate: true });
+          insertPhysicalElement({ txn, userLabel: "element", modelId: templateModel.id, categoryId: category.id });
+          const privateModel = insertGeometricModelWithPartition({ txn, codeValue: "private model", isPrivate: true });
+          insertPhysicalElement({ txn, userLabel: "element", modelId: privateModel.id, categoryId: category.id });
+        }),
+      );
+      const { imodelConnection } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
+      await validateHierarchy({
+        provider,
+        expect: [],
+      });
+    });
+
+    it("hides empty models", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
+          const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
+          return { rootSubject, model };
+        }),
+      );
+      const { imodelConnection } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
+      await validateHierarchy({
+        provider,
+        expect: [],
+      });
+    });
+
+    it("children of child element is set to true when child element has subModel that contains children", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
+          const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const rootElement = insertPhysicalElement({
+            txn,
+            userLabel: `root element`,
+            modelId: model.id,
+            categoryId: category.id,
+          });
           const childElement = insertPhysicalElement({
             txn,
             userLabel: `child element`,
             modelId: model.id,
             categoryId: category.id,
-            parentId: rootElement1.id,
-          });
-          const rootElement2 = insertPhysicalElement({
-            txn,
+            parentId: rootElement.id,
             classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-            userLabel: `root element 2`,
-            modelId: model.id,
+          });
+          const subModel = insertPhysicalSubModel({ txn, modeledElementId: childElement.id });
+          const childOfChild = insertPhysicalElement({
+            txn,
+            userLabel: `child element2`,
+            modelId: subModel.id,
             categoryId: category.id,
           });
-          const subModel = insertPhysicalSubModel({ txn, modeledElementId: rootElement2.id });
-          const modelingElement = insertPhysicalElement({ txn, userLabel: `modeling element`, modelId: subModel.id, categoryId: category.id });
-          return { rootSubject, childSubject, model, category, rootElement1, rootElement2, childElement, modelingElement };
+          return { rootSubject, model, category, rootElement, childElement, childOfChild };
         }),
       );
       const { imodelConnection, ...keys } = buildIModelResult;
-      using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { hideRootSubject: false } });
+      using provider = createModelsTreeProvider({ imodelConnection });
       await validateHierarchy({
         provider,
         expect: [
           NodeValidators.createForInstanceNode({
-            instanceKeys: [keys.rootSubject],
-            autoExpand: true,
+            instanceKeys: [keys.model],
             supportsFiltering: true,
             children: [
               NodeValidators.createForInstanceNode({
-                instanceKeys: [keys.childSubject],
+                instanceKeys: [keys.category],
                 supportsFiltering: true,
                 children: [
-                  NodeValidators.createForInstanceNode({
-                    instanceKeys: [keys.model],
-                    supportsFiltering: true,
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.rootElement.className,
                     children: [
                       NodeValidators.createForInstanceNode({
-                        instanceKeys: [keys.category],
+                        instanceKeys: [keys.rootElement],
                         supportsFiltering: true,
                         children: [
                           NodeValidators.createForClassGroupingNode({
-                            className: keys.rootElement1.className,
-                            label: "Physical Object",
+                            className: keys.childElement.className,
                             children: [
                               NodeValidators.createForInstanceNode({
-                                instanceKeys: [keys.rootElement1],
+                                instanceKeys: [keys.childElement],
                                 supportsFiltering: true,
                                 children: [
                                   NodeValidators.createForClassGroupingNode({
-                                    className: keys.childElement.className,
-                                    label: "Physical Object",
+                                    className: keys.childOfChild.className,
                                     children: [
                                       NodeValidators.createForInstanceNode({
-                                        instanceKeys: [keys.childElement],
+                                        instanceKeys: [keys.childOfChild],
                                         supportsFiltering: true,
                                         children: false,
-                                      }),
-                                    ],
-                                  }),
-                                ],
-                              }),
-                            ],
-                          }),
-                          NodeValidators.createForClassGroupingNode({
-                            className: keys.rootElement2.className,
-                            label: "Test Physical Object",
-                            children: [
-                              NodeValidators.createForInstanceNode({
-                                instanceKeys: [keys.rootElement2],
-                                supportsFiltering: true,
-                                children: [
-                                  NodeValidators.createForInstanceNode({
-                                    instanceKeys: [keys.category],
-                                    supportsFiltering: true,
-                                    children: [
-                                      NodeValidators.createForClassGroupingNode({
-                                        className: keys.modelingElement.className,
-                                        label: "Physical Object",
-                                        children: [
-                                          NodeValidators.createForInstanceNode({
-                                            instanceKeys: [keys.modelingElement],
-                                            supportsFiltering: true,
-                                            children: false,
-                                          }),
-                                        ],
                                       }),
                                     ],
                                   }),
@@ -160,1213 +622,738 @@ describe("Models tree", () => {
       });
     });
 
-    describe("Subjects", () => {
-      it(`hides subjects with \`Subject.Model.Type = "Hierarchy"\` json property`, async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const childSubject = insertSubject({
-              txn,
-              codeValue: "child subject",
-              parentId: rootSubject.id,
-
-              jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } },
-            });
-            const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: childSubject.id });
-            const category = insertSpatialCategory({ txn, codeValue: "category" });
-            const element = insertPhysicalElement({ txn, userLabel: `element`, modelId: model.id, categoryId: category.id });
-            return { rootSubject, childSubject, model, category, element };
+    it("child elements have no children when their subModels are private or template", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
+          const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const rootElement = insertPhysicalElement({
+            txn,
+            userLabel: `root element`,
+            modelId: model.id,
+            categoryId: category.id,
+          });
+          const childElementWithTemplateSubModel = insertPhysicalElement({
+            txn,
+            userLabel: "child element with template sub-model",
+            modelId: model.id,
+            categoryId: category.id,
+            parentId: rootElement.id,
+            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+          });
+          const templateSubModel = insertPhysicalSubModel({ txn, modeledElementId: childElementWithTemplateSubModel.id, isTemplate: true });
+          insertPhysicalElement({ txn, userLabel: "element", modelId: templateSubModel.id, categoryId: category.id });
+          const childElementWithPrivateSubModel = insertPhysicalElement({
+            txn,
+            userLabel: "child element with private sub-model",
+            modelId: model.id,
+            categoryId: category.id,
+            parentId: rootElement.id,
+            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+          });
+          const privateSubModel = insertPhysicalSubModel({ txn, modeledElementId: childElementWithPrivateSubModel.id, isPrivate: true });
+          insertPhysicalElement({ txn, userLabel: "element", modelId: privateSubModel.id, categoryId: category.id });
+          return { rootSubject, model, category, rootElement, childElementWithTemplateSubModel, childElementWithPrivateSubModel };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.model],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.category],
+                supportsFiltering: true,
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.rootElement.className,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.rootElement],
+                        supportsFiltering: true,
+                        children: [
+                          NodeValidators.createForClassGroupingNode({
+                            className: keys.childElementWithPrivateSubModel.className,
+                            children: [
+                              NodeValidators.createForInstanceNode({
+                                instanceKeys: [keys.childElementWithPrivateSubModel],
+                                supportsFiltering: true,
+                                children: false,
+                              }),
+                              NodeValidators.createForInstanceNode({
+                                instanceKeys: [keys.childElementWithTemplateSubModel],
+                                supportsFiltering: true,
+                                children: false,
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
           }),
-        );
-        const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection });
-        await validateHierarchy({
-          provider,
-          expect: [
-            NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.model],
-              supportsFiltering: true,
-              children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.category],
-                  supportsFiltering: true,
-                  children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.element.className,
-                      children: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.element], supportsFiltering: true, children: false })],
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ],
-        });
-      });
-
-      it("hides childless subjects", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const childSubject = insertSubject({ txn, codeValue: "child subject", parentId: rootSubject.id });
-            return { rootSubject, childSubject };
-          }),
-        );
-        const { imodelConnection } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection });
-        await validateHierarchy({
-          provider,
-          expect: [],
-        });
-      });
-
-      it("hides subjects with childless models", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const childSubject1 = insertSubject({ txn, codeValue: "child subject 1", parentId: rootSubject.id });
-            const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: childSubject1.id });
-            const childSubject2 = insertSubject({
-              txn,
-              codeValue: "child subject 2",
-              parentId: rootSubject.id,
-              jsonProperties: { Subject: { Model: { TargetPartition: model.id } } },
-            });
-            return { rootSubject, childSubject1, childSubject2, model };
-          }),
-        );
-        const { imodelConnection } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection });
-        await validateHierarchy({
-          provider,
-          expect: [],
-        });
-      });
-
-      it("hides subjects with private models", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const childSubject1 = insertSubject({ txn, codeValue: "child subject 1", parentId: rootSubject.id });
-            const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
-            const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id, isPrivate: true });
-            const childSubject2 = insertSubject({
-              txn,
-              codeValue: "child subject 2",
-              parentId: rootSubject.id,
-              jsonProperties: { Subject: { Model: { TargetPartition: model.id } } },
-            });
-            const category = insertSpatialCategory({ txn, codeValue: "category" });
-            insertPhysicalElement({ txn, userLabel: `element`, modelId: model.id, categoryId: category.id });
-            return { rootSubject, childSubject1, childSubject2, model };
-          }),
-        );
-        const { imodelConnection } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection });
-        await validateHierarchy({
-          provider,
-          expect: [],
-        });
-      });
-
-      it("shows subjects with child models related with subject through `Subject.Model.TargetPartition` json property", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const childSubject1 = insertSubject({ txn, codeValue: "child subject 1", parentId: rootSubject.id });
-            const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: childSubject1.id });
-            const category = insertSpatialCategory({ txn, codeValue: "category" });
-            const element = insertPhysicalElement({ txn, userLabel: `element`, modelId: model.id, categoryId: category.id });
-            const childSubject2 = insertSubject({
-              txn,
-              codeValue: "child subject 2",
-              parentId: rootSubject.id,
-              jsonProperties: { Subject: { Model: { TargetPartition: model.id } } },
-            });
-            return { rootSubject, childSubject1, childSubject2, model, category, element };
-          }),
-        );
-        const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection });
-        await validateHierarchy({
-          provider,
-          expect: [
-            NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.childSubject1],
-              supportsFiltering: true,
-              children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.model],
-                  supportsFiltering: true,
-                  children: [
-                    NodeValidators.createForInstanceNode({
-                      instanceKeys: [keys.category],
-                      supportsFiltering: true,
-                      children: [
-                        NodeValidators.createForClassGroupingNode({
-                          className: keys.element.className,
-                          children: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.element], supportsFiltering: true, children: false })],
-                        }),
-                      ],
-                    }),
-                  ],
-                }),
-              ],
-            }),
-            NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.childSubject2],
-              supportsFiltering: true,
-              children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.model],
-                  supportsFiltering: true,
-                  children: [
-                    NodeValidators.createForInstanceNode({
-                      instanceKeys: [keys.category],
-                      supportsFiltering: true,
-                      children: [
-                        NodeValidators.createForClassGroupingNode({
-                          className: keys.element.className,
-                          children: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.element], supportsFiltering: true, children: false })],
-                        }),
-                      ],
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ],
-        });
-      });
-
-      it("merges subjects from different parts of hierarchy", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            const category = insertSpatialCategory({ txn, codeValue: "category" });
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const hiddenSubject1 = insertSubject({
-              txn,
-              codeValue: "hidden subject 1",
-              parentId: rootSubject.id,
-              jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } },
-            });
-            const hiddenSubject2 = insertSubject({
-              txn,
-              codeValue: "hidden subject 2",
-              parentId: rootSubject.id,
-              jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } },
-            });
-            const mergedSubject1 = insertSubject({ txn, codeValue: "merged subject", parentId: hiddenSubject1.id });
-            const mergedSubject2 = insertSubject({ txn, codeValue: "merged subject", parentId: hiddenSubject2.id });
-            const model1 = insertPhysicalModelWithPartition({ txn, codeValue: `model1`, partitionParentId: mergedSubject1.id });
-            const element1 = insertPhysicalElement({ txn, userLabel: `element1`, modelId: model1.id, categoryId: category.id });
-            const model2 = insertPhysicalModelWithPartition({ txn, codeValue: `model2`, partitionParentId: mergedSubject2.id });
-            const element2 = insertPhysicalElement({ txn, userLabel: `element1`, modelId: model2.id, categoryId: category.id });
-            return { rootSubject, mergedSubject1, mergedSubject2, model1, model2, category, element1, element2 };
-          }),
-        );
-        const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection });
-        await validateHierarchy({
-          provider,
-          expect: [
-            NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.mergedSubject1, keys.mergedSubject2],
-              supportsFiltering: true,
-              children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.model1],
-                  supportsFiltering: true,
-                  children: [
-                    NodeValidators.createForInstanceNode({
-                      instanceKeys: [keys.category],
-                      supportsFiltering: true,
-                      children: [
-                        NodeValidators.createForClassGroupingNode({
-                          className: keys.element1.className,
-                          children: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.element1], supportsFiltering: true, children: false })],
-                        }),
-                      ],
-                    }),
-                  ],
-                }),
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.model2],
-                  supportsFiltering: true,
-                  children: [
-                    NodeValidators.createForInstanceNode({
-                      instanceKeys: [keys.category],
-                      supportsFiltering: true,
-                      children: [
-                        NodeValidators.createForClassGroupingNode({
-                          className: keys.element2.className,
-                          children: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.element2], supportsFiltering: true, children: false })],
-                        }),
-                      ],
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ],
-        });
+        ],
       });
     });
 
-    describe("Models", () => {
-      it("hides models with `PhysicalPartition.Model.Content` json property", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const partition = insertPhysicalPartition({
-              txn,
-              codeValue: "model",
-              parentId: rootSubject.id,
-              jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
-            });
-            const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
-            const category = insertSpatialCategory({ txn, codeValue: "category" });
-            const element = insertPhysicalElement({ txn, userLabel: `element`, modelId: model.id, categoryId: category.id });
-            return { rootSubject, model, category, element };
+    it("children of child element is set to false when it's subModel has no children", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
+          const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const rootElement = insertPhysicalElement({
+            txn,
+            userLabel: `root element`,
+            modelId: model.id,
+            categoryId: category.id,
+          });
+          const childElement = insertPhysicalElement({
+            txn,
+            userLabel: `child element`,
+            modelId: model.id,
+            categoryId: category.id,
+            parentId: rootElement.id,
+            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+          });
+          insertPhysicalSubModel({ txn, modeledElementId: childElement.id });
+          return { rootSubject, model, category, rootElement, childElement };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.model],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.category],
+                supportsFiltering: true,
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.rootElement.className,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.rootElement],
+                        supportsFiltering: true,
+                        children: [
+                          NodeValidators.createForClassGroupingNode({
+                            className: keys.childElement.className,
+                            children: [
+                              NodeValidators.createForInstanceNode({
+                                instanceKeys: [keys.childElement],
+                                supportsFiltering: true,
+                                children: false,
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
           }),
-        );
-        const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection });
-        await validateHierarchy({
-          provider,
-          expect: [
-            NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.category],
-              supportsFiltering: true,
-              children: [
-                NodeValidators.createForClassGroupingNode({
-                  className: keys.element.className,
-                  children: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.element], supportsFiltering: true, children: false })],
-                }),
-              ],
-            }),
-          ],
-        });
-      });
-
-      it("hides models with `GraphicalPartition3d.Model.Content` json property", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const partition = insertPhysicalPartition({
-              txn,
-              codeValue: "model",
-              parentId: rootSubject.id,
-              jsonProperties: { GraphicalPartition3d: { Model: { Content: true } } },
-            });
-            const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
-            const category = insertSpatialCategory({ txn, codeValue: "category" });
-            const element = insertPhysicalElement({ txn, userLabel: `element`, modelId: model.id, categoryId: category.id });
-            return { rootSubject, model, category, element };
-          }),
-        );
-        const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection });
-        await validateHierarchy({
-          provider,
-          expect: [
-            NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.category],
-              supportsFiltering: true,
-              children: [
-                NodeValidators.createForClassGroupingNode({
-                  className: keys.element.className,
-                  children: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.element], supportsFiltering: true, children: false })],
-                }),
-              ],
-            }),
-          ],
-        });
-      });
-
-      it("hides private models and their content", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
-            const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id, isPrivate: true });
-            const category = insertSpatialCategory({ txn, codeValue: "category" });
-            const element = insertPhysicalElement({ txn, userLabel: `element`, modelId: model.id, categoryId: category.id });
-            return { rootSubject, model, category, element };
-          }),
-        );
-        const { imodelConnection } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection });
-        await validateHierarchy({
-          provider,
-          expect: [],
-        });
-      });
-
-      it("hides empty models", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
-            const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
-            return { rootSubject, model };
-          }),
-        );
-        const { imodelConnection } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection });
-        await validateHierarchy({
-          provider,
-          expect: [],
-        });
-      });
-
-      it("children of child element is set to true when child element has subModel that contains children", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel, testSchema) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
-            const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
-            const category = insertSpatialCategory({ txn, codeValue: "category" });
-            const rootElement = insertPhysicalElement({
-              txn,
-              userLabel: `root element`,
-              modelId: model.id,
-              categoryId: category.id,
-            });
-            const childElement = insertPhysicalElement({
-              txn,
-              userLabel: `child element`,
-              modelId: model.id,
-              categoryId: category.id,
-              parentId: rootElement.id,
-              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-            });
-            const subModel = insertPhysicalSubModel({ txn, modeledElementId: childElement.id });
-            const childOfChild = insertPhysicalElement({
-              txn,
-              userLabel: `child element2`,
-              modelId: subModel.id,
-              categoryId: category.id,
-            });
-            return { rootSubject, model, category, rootElement, childElement, childOfChild };
-          }),
-        );
-        const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection });
-        await validateHierarchy({
-          provider,
-          expect: [
-            NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.model],
-              supportsFiltering: true,
-              children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.category],
-                  supportsFiltering: true,
-                  children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.rootElement.className,
-                      children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.rootElement],
-                          supportsFiltering: true,
-                          children: [
-                            NodeValidators.createForClassGroupingNode({
-                              className: keys.childElement.className,
-                              children: [
-                                NodeValidators.createForInstanceNode({
-                                  instanceKeys: [keys.childElement],
-                                  supportsFiltering: true,
-                                  children: [
-                                    NodeValidators.createForInstanceNode({
-                                      instanceKeys: [keys.category],
-                                      supportsFiltering: true,
-                                      children: [
-                                        NodeValidators.createForClassGroupingNode({
-                                          className: keys.childOfChild.className,
-                                          children: [
-                                            NodeValidators.createForInstanceNode({
-                                              instanceKeys: [keys.childOfChild],
-                                              supportsFiltering: true,
-                                              children: false,
-                                            }),
-                                          ],
-                                        }),
-                                      ],
-                                    }),
-                                  ],
-                                }),
-                              ],
-                            }),
-                          ],
-                        }),
-                      ],
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ],
-        });
-      });
-
-      it("children of child element is set to false when it's subModel is private", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel, testSchema) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
-            const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
-            const category = insertSpatialCategory({ txn, codeValue: "category" });
-            const rootElement = insertPhysicalElement({
-              txn,
-              userLabel: `root element`,
-              modelId: model.id,
-              categoryId: category.id,
-            });
-            const childElement = insertPhysicalElement({
-              txn,
-              userLabel: `child element`,
-              modelId: model.id,
-              categoryId: category.id,
-              parentId: rootElement.id,
-              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-            });
-            const subModel = insertPhysicalSubModel({ txn, modeledElementId: childElement.id, isPrivate: true });
-            insertPhysicalElement({
-              txn,
-              userLabel: `child element2`,
-              modelId: subModel.id,
-              categoryId: category.id,
-            });
-            return { rootSubject, model, category, rootElement, childElement };
-          }),
-        );
-        const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection });
-        await validateHierarchy({
-          provider,
-          expect: [
-            NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.model],
-              supportsFiltering: true,
-              children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.category],
-                  supportsFiltering: true,
-                  children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.rootElement.className,
-                      children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.rootElement],
-                          supportsFiltering: true,
-                          children: [
-                            NodeValidators.createForClassGroupingNode({
-                              className: keys.childElement.className,
-                              children: [
-                                NodeValidators.createForInstanceNode({
-                                  instanceKeys: [keys.childElement],
-                                  supportsFiltering: true,
-                                  children: false,
-                                }),
-                              ],
-                            }),
-                          ],
-                        }),
-                      ],
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ],
-        });
-      });
-
-      it("children of child element is set to false when it's subModel has no children", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel, testSchema) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
-            const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
-            const category = insertSpatialCategory({ txn, codeValue: "category" });
-            const rootElement = insertPhysicalElement({
-              txn,
-              userLabel: `root element`,
-              modelId: model.id,
-              categoryId: category.id,
-            });
-            const childElement = insertPhysicalElement({
-              txn,
-              userLabel: `child element`,
-              modelId: model.id,
-              categoryId: category.id,
-              parentId: rootElement.id,
-              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-            });
-            insertPhysicalSubModel({ txn, modeledElementId: childElement.id });
-            return { rootSubject, model, category, rootElement, childElement };
-          }),
-        );
-        const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection });
-        await validateHierarchy({
-          provider,
-          expect: [
-            NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.model],
-              supportsFiltering: true,
-              children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.category],
-                  supportsFiltering: true,
-                  children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.rootElement.className,
-                      children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.rootElement],
-                          supportsFiltering: true,
-                          children: [
-                            NodeValidators.createForClassGroupingNode({
-                              className: keys.childElement.className,
-                              children: [
-                                NodeValidators.createForInstanceNode({
-                                  instanceKeys: [keys.childElement],
-                                  supportsFiltering: true,
-                                  children: false,
-                                }),
-                              ],
-                            }),
-                          ],
-                        }),
-                      ],
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ],
-        });
-      });
-
-      it("children of element is set to true when element has subModel that contains children", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel, testSchema) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
-            const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
-            const category = insertSpatialCategory({ txn, codeValue: "category" });
-            const rootElement = insertPhysicalElement({
-              txn,
-              userLabel: `root element`,
-              modelId: model.id,
-              categoryId: category.id,
-              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-            });
-            const subModel = insertPhysicalSubModel({ txn, modeledElementId: rootElement.id });
-            const childElement = insertPhysicalElement({
-              txn,
-              userLabel: `child element`,
-              modelId: subModel.id,
-              categoryId: category.id,
-            });
-            return { rootSubject, model, category, rootElement, childElement };
-          }),
-        );
-        const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection });
-        await validateHierarchy({
-          provider,
-          expect: [
-            NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.model],
-              supportsFiltering: true,
-              children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.category],
-                  supportsFiltering: true,
-                  children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.rootElement.className,
-                      children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.rootElement],
-                          supportsFiltering: true,
-                          children: [
-                            NodeValidators.createForInstanceNode({
-                              instanceKeys: [keys.category],
-                              supportsFiltering: true,
-                              children: [
-                                NodeValidators.createForClassGroupingNode({
-                                  className: keys.childElement.className,
-                                  children: [
-                                    NodeValidators.createForInstanceNode({
-                                      instanceKeys: [keys.childElement],
-                                      supportsFiltering: true,
-                                      children: false,
-                                    }),
-                                  ],
-                                }),
-                              ],
-                            }),
-                          ],
-                        }),
-                      ],
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ],
-        });
-      });
-
-      it("children of element is set to false when it's subModel is private", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel, testSchema) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
-            const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
-            const category = insertSpatialCategory({ txn, codeValue: "category" });
-            const rootElement = insertPhysicalElement({
-              txn,
-              userLabel: `root element`,
-              modelId: model.id,
-              categoryId: category.id,
-              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-            });
-            const subModel = insertPhysicalSubModel({ txn, modeledElementId: rootElement.id, isPrivate: true });
-            insertPhysicalElement({
-              txn,
-              userLabel: `root element`,
-              modelId: subModel.id,
-              categoryId: category.id,
-            });
-            return { rootSubject, model, category, rootElement };
-          }),
-        );
-        const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection });
-        await validateHierarchy({
-          provider,
-          expect: [
-            NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.model],
-              supportsFiltering: true,
-              children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.category],
-                  supportsFiltering: true,
-                  children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.rootElement.className,
-                      children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.rootElement],
-                          supportsFiltering: true,
-                          children: false,
-                        }),
-                      ],
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ],
-        });
-      });
-
-      it("children of element is set to false when it's subModel has no children", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel, testSchema) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
-            const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
-            const category = insertSpatialCategory({ txn, codeValue: "category" });
-            const rootElement = insertPhysicalElement({
-              txn,
-              userLabel: `root element`,
-              modelId: model.id,
-              categoryId: category.id,
-              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-            });
-            insertPhysicalSubModel({ txn, modeledElementId: rootElement.id });
-            return { rootSubject, model, category, rootElement };
-          }),
-        );
-        const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection });
-        await validateHierarchy({
-          provider,
-          expect: [
-            NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.model],
-              supportsFiltering: true,
-              children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.category],
-                  supportsFiltering: true,
-                  children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.rootElement.className,
-                      children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.rootElement],
-                          supportsFiltering: true,
-                          children: false,
-                        }),
-                      ],
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ],
-        });
+        ],
       });
     });
 
-    describe("Categories", () => {
-      it("merges categories from different parts of hierarchy", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            const category1 = insertSpatialCategory({ txn, codeValue: "category1", userLabel: "merged category" });
-            const category2 = insertSpatialCategory({ txn, codeValue: "category2", userLabel: "merged category" });
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const hiddenSubject1 = insertSubject({
-              txn,
-              codeValue: "hidden subject 1",
-              parentId: rootSubject.id,
-              jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } },
-            });
-            const hiddenSubject2 = insertSubject({
-              txn,
-              codeValue: "hidden subject 2",
-              parentId: rootSubject.id,
-              jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } },
-            });
-            const partition1 = insertPhysicalPartition({
-              txn,
-              codeValue: "model1",
-              parentId: hiddenSubject1.id,
-              jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
-            });
-            const model1 = insertPhysicalSubModel({ txn, modeledElementId: partition1.id });
-            const element1 = insertPhysicalElement({ txn, userLabel: `element1`, modelId: model1.id, categoryId: category1.id });
-            const partition2 = insertPhysicalPartition({
-              txn,
-              codeValue: "model2",
-              parentId: hiddenSubject2.id,
-              jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
-            });
-            const model2 = insertPhysicalSubModel({ txn, modeledElementId: partition2.id });
-            const element2 = insertPhysicalElement({ txn, userLabel: `element2`, modelId: model2.id, categoryId: category2.id });
-            return { rootSubject, model1, model2, category1, category2, element1, element2 };
+    it("children of element is set to true when element has subModel that contains children", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
+          const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const rootElement = insertPhysicalElement({
+            txn,
+            userLabel: `root element`,
+            modelId: model.id,
+            categoryId: category.id,
+            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+          });
+          const subModel = insertPhysicalSubModel({ txn, modeledElementId: rootElement.id });
+          const childElement = insertPhysicalElement({
+            txn,
+            userLabel: `child element`,
+            modelId: subModel.id,
+            categoryId: category.id,
+          });
+          return { rootSubject, model, category, rootElement, childElement };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.model],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.category],
+                supportsFiltering: true,
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.rootElement.className,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.rootElement],
+                        supportsFiltering: true,
+                        children: [
+                          NodeValidators.createForClassGroupingNode({
+                            className: keys.childElement.className,
+                            children: [
+                              NodeValidators.createForInstanceNode({
+                                instanceKeys: [keys.childElement],
+                                supportsFiltering: true,
+                                children: false,
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
           }),
-        );
-        const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection });
-        await validateHierarchy({
-          provider,
-          expect: [
-            NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.category1, keys.category2],
-              supportsFiltering: true,
-              children: [
-                NodeValidators.createForClassGroupingNode({
-                  className: keys.element1.className,
-                  children: [
-                    NodeValidators.createForInstanceNode({ instanceKeys: [keys.element1], supportsFiltering: true, children: false }),
-                    NodeValidators.createForInstanceNode({ instanceKeys: [keys.element2], supportsFiltering: true, children: false }),
-                  ],
-                }),
-              ],
-            }),
-          ],
-        });
+        ],
       });
     });
 
-    describe("Hierarchy customization", () => {
-      it("shows empty models when `showEmptyModels` is set to true", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
-            const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
-            return { rootSubject, model };
+    it("elements have no children when their subModels are private or template", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
+          const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const rootElementWithTemplateSubModel = insertPhysicalElement({
+            txn,
+            userLabel: "root element with template sub-model",
+            modelId: model.id,
+            categoryId: category.id,
+            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+          });
+          const templateSubModel = insertPhysicalSubModel({ txn, modeledElementId: rootElementWithTemplateSubModel.id, isTemplate: true });
+          insertPhysicalElement({ txn, userLabel: "element", modelId: templateSubModel.id, categoryId: category.id });
+          const rootElementWithPrivateSubModel = insertPhysicalElement({
+            txn,
+            userLabel: "root element with private sub-model",
+            modelId: model.id,
+            categoryId: category.id,
+            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+          });
+          const privateSubModel = insertPhysicalSubModel({ txn, modeledElementId: rootElementWithPrivateSubModel.id, isPrivate: true });
+          insertPhysicalElement({ txn, userLabel: "element", modelId: privateSubModel.id, categoryId: category.id });
+          return { rootSubject, model, category, rootElementWithTemplateSubModel, rootElementWithPrivateSubModel };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.model],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.category],
+                supportsFiltering: true,
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.rootElementWithPrivateSubModel.className,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.rootElementWithPrivateSubModel],
+                        supportsFiltering: true,
+                        children: false,
+                      }),
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.rootElementWithTemplateSubModel],
+                        supportsFiltering: true,
+                        children: false,
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
           }),
-        );
-        const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { showEmptyModels: true } });
-        await validateHierarchy({
-          provider,
-          expect: [
-            NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.model],
-              autoExpand: false,
-              supportsFiltering: true,
-            }),
-          ],
-        });
+        ],
       });
+    });
 
-      it("does not group elements when `elementClassGrouping` set to `disable`", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel, testSchema) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const childSubject = insertSubject({ txn, codeValue: "child subject", parentId: rootSubject.id });
-            const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: childSubject.id });
-            const category = insertSpatialCategory({ txn, codeValue: "category" });
-            const rootElement1 = insertPhysicalElement({ txn, userLabel: `root element 1`, modelId: model.id, categoryId: category.id });
-            const childElement = insertPhysicalElement({
-              txn,
-              userLabel: `child element`,
-              modelId: model.id,
-              categoryId: category.id,
-              parentId: rootElement1.id,
-            });
-            const rootElement2 = insertPhysicalElement({
-              txn,
-              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-              userLabel: `root element 2`,
-              modelId: model.id,
-              categoryId: category.id,
-            });
-            const subModel = insertPhysicalSubModel({ txn, modeledElementId: rootElement2.id });
-            const modelingElement = insertPhysicalElement({ txn, userLabel: `modeling element`, modelId: subModel.id, categoryId: category.id });
-            return { rootSubject, childSubject, model, category, rootElement1, rootElement2, childElement, modelingElement };
+    it("children of element is set to false when it's subModel has no children", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
+          const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const rootElement = insertPhysicalElement({
+            txn,
+            userLabel: `root element`,
+            modelId: model.id,
+            categoryId: category.id,
+            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+          });
+          insertPhysicalSubModel({ txn, modeledElementId: rootElement.id });
+          return { rootSubject, model, category, rootElement };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.model],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.category],
+                supportsFiltering: true,
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.rootElement.className,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.rootElement],
+                        supportsFiltering: true,
+                        children: false,
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
           }),
-        );
-        const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { elementClassGrouping: "disable" } });
-        await validateHierarchy({
-          provider,
-          expect: [
-            NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.childSubject],
-              supportsFiltering: true,
-              children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.model],
-                  supportsFiltering: true,
-                  children: [
-                    NodeValidators.createForInstanceNode({
-                      instanceKeys: [keys.category],
-                      supportsFiltering: true,
-                      children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.rootElement1],
-                          supportsFiltering: true,
-                          children: [
-                            NodeValidators.createForInstanceNode({
-                              instanceKeys: [keys.childElement],
-                              supportsFiltering: true,
-                              children: false,
-                            }),
-                          ],
-                        }),
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.rootElement2],
-                          supportsFiltering: true,
-                          children: [
-                            NodeValidators.createForInstanceNode({
-                              instanceKeys: [keys.category],
-                              supportsFiltering: true,
-                              children: [
-                                NodeValidators.createForInstanceNode({
-                                  instanceKeys: [keys.modelingElement],
-                                  supportsFiltering: true,
-                                  children: false,
-                                }),
-                              ],
-                            }),
-                          ],
-                        }),
-                      ],
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ],
-        });
+        ],
       });
+    });
+  });
 
-      it("displays element count for grouping nodes when `elementClassGrouping` set to `enableWithCounts`", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel, testSchema) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const childSubject = insertSubject({ txn, codeValue: "child subject", parentId: rootSubject.id });
-            const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: childSubject.id });
-            const category = insertSpatialCategory({ txn, codeValue: "category" });
-            const rootElement1 = insertPhysicalElement({ txn, userLabel: `root element 1`, modelId: model.id, categoryId: category.id });
-            const childElement1 = insertPhysicalElement({
-              txn,
-              userLabel: `child element 1`,
-              modelId: model.id,
-              categoryId: category.id,
-              parentId: rootElement1.id,
-            });
-            const childElement2 = insertPhysicalElement({
-              txn,
-              userLabel: `child element 2`,
-              modelId: model.id,
-              categoryId: category.id,
-              parentId: rootElement1.id,
-            });
-            const rootElement2 = insertPhysicalElement({
-              txn,
-              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-              userLabel: `root element 2`,
-              modelId: model.id,
-              categoryId: category.id,
-            });
-            const subModel = insertPhysicalSubModel({ txn, modeledElementId: rootElement2.id });
-            const modelingElement = insertPhysicalElement({ txn, userLabel: `modeling element`, modelId: subModel.id, categoryId: category.id });
-            return { rootSubject, childSubject, model, category, rootElement1, rootElement2, childElement1, childElement2, modelingElement };
+  describe("Categories", () => {
+    it("merges categories from different parts of hierarchy", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const category1 = insertSpatialCategory({ txn, codeValue: "category1", userLabel: "merged category" });
+          const category2 = insertSpatialCategory({ txn, codeValue: "category2", userLabel: "merged category" });
+          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const hiddenSubject1 = insertSubject({
+            txn,
+            codeValue: "hidden subject 1",
+            parentId: rootSubject.id,
+            jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } },
+          });
+          const hiddenSubject2 = insertSubject({
+            txn,
+            codeValue: "hidden subject 2",
+            parentId: rootSubject.id,
+            jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } },
+          });
+          const partition1 = insertPhysicalPartition({
+            txn,
+            codeValue: "model1",
+            parentId: hiddenSubject1.id,
+            jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
+          });
+          const model1 = insertPhysicalSubModel({ txn, modeledElementId: partition1.id });
+          const element1 = insertPhysicalElement({ txn, userLabel: `element1`, modelId: model1.id, categoryId: category1.id });
+          const partition2 = insertPhysicalPartition({
+            txn,
+            codeValue: "model2",
+            parentId: hiddenSubject2.id,
+            jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
+          });
+          const model2 = insertPhysicalSubModel({ txn, modeledElementId: partition2.id });
+          const element2 = insertPhysicalElement({ txn, userLabel: `element2`, modelId: model2.id, categoryId: category2.id });
+          return { rootSubject, model1, model2, category1, category2, element1, element2 };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.category1, keys.category2],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForClassGroupingNode({
+                className: keys.element1.className,
+                children: [
+                  NodeValidators.createForInstanceNode({ instanceKeys: [keys.element1], supportsFiltering: true, children: false }),
+                  NodeValidators.createForInstanceNode({ instanceKeys: [keys.element2], supportsFiltering: true, children: false }),
+                ],
+              }),
+            ],
           }),
-        );
-        const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { elementClassGrouping: "enableWithCounts" } });
-        await validateHierarchy({
-          provider,
-          expect: [
-            NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.childSubject],
-              supportsFiltering: true,
-              children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.model],
-                  supportsFiltering: true,
-                  children: [
-                    NodeValidators.createForInstanceNode({
-                      instanceKeys: [keys.category],
-                      supportsFiltering: true,
-                      children: [
-                        NodeValidators.createForClassGroupingNode({
-                          className: keys.rootElement1.className,
-                          label: "Physical Object (1)",
-                          children: [
-                            NodeValidators.createForInstanceNode({
-                              instanceKeys: [keys.rootElement1],
-                              supportsFiltering: true,
-                              children: [
-                                NodeValidators.createForClassGroupingNode({
-                                  className: keys.childElement1.className,
-                                  label: "Physical Object (2)",
-                                  children: [
-                                    NodeValidators.createForInstanceNode({
-                                      instanceKeys: [keys.childElement1],
-                                      supportsFiltering: true,
-                                      children: false,
-                                    }),
-                                    NodeValidators.createForInstanceNode({
-                                      instanceKeys: [keys.childElement2],
-                                      supportsFiltering: true,
-                                      children: false,
-                                    }),
-                                  ],
-                                }),
-                              ],
-                            }),
-                          ],
-                        }),
-                        NodeValidators.createForClassGroupingNode({
-                          className: keys.rootElement2.className,
-                          label: "Test Physical Object (1)",
-                          children: [
-                            NodeValidators.createForInstanceNode({
-                              instanceKeys: [keys.rootElement2],
-                              supportsFiltering: true,
-                              children: [
-                                NodeValidators.createForInstanceNode({
-                                  instanceKeys: [keys.category],
-                                  supportsFiltering: true,
-                                  children: [
-                                    NodeValidators.createForClassGroupingNode({
-                                      className: keys.modelingElement.className,
-                                      label: "Physical Object (1)",
-                                      children: [
-                                        NodeValidators.createForInstanceNode({
-                                          instanceKeys: [keys.modelingElement],
-                                          supportsFiltering: true,
-                                          children: false,
-                                        }),
-                                      ],
-                                    }),
-                                  ],
-                                }),
-                              ],
-                            }),
-                          ],
-                        }),
-                      ],
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ],
-        });
+        ],
       });
+    });
 
-      it("uses custom element class specification", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel, testSchema) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
-            const category = insertSpatialCategory({ txn, codeValue: "category" });
-            const parentElement1 = insertPhysicalElement({
-              txn,
-              userLabel: `parent element 1`,
-              modelId: model.id,
-              categoryId: category.id,
-            });
-            const parentElement2 = insertPhysicalElement({
-              txn,
-              userLabel: `parent element 2`,
-              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-              modelId: model.id,
-              categoryId: category.id,
-            });
-            const childElement1 = insertPhysicalElement({
-              txn,
-              userLabel: `child element 1`,
-              modelId: model.id,
-              categoryId: category.id,
-              parentId: parentElement1.id,
-            });
-            const childElement2 = insertPhysicalElement({
-              txn,
-              userLabel: `child element 2`,
-              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-              modelId: model.id,
-              categoryId: category.id,
-              parentId: parentElement2.id,
-            });
-            return { rootSubject, model, category, parentElement1, childElement1, parentElement2, childElement2 };
+    it("does not show intermediate category when child element has same category as parent", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const parentElement = insertPhysicalElement({ txn, userLabel: "parent element", modelId: model.id, categoryId: category.id });
+          const childElement = insertPhysicalElement({
+            txn,
+            userLabel: "child element",
+            modelId: model.id,
+            categoryId: category.id,
+            parentId: parentElement.id,
+          });
+          return { rootSubject, model, category, parentElement, childElement };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.model],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.category],
+                supportsFiltering: true,
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.parentElement.className,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.parentElement],
+                        supportsFiltering: true,
+                        children: [
+                          NodeValidators.createForClassGroupingNode({
+                            className: keys.childElement.className,
+                            children: [
+                              NodeValidators.createForInstanceNode({
+                                instanceKeys: [keys.childElement],
+                                supportsFiltering: true,
+                                children: false,
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
           }),
-        );
-
-        const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({
-          imodelConnection,
-          hierarchyConfig: { elementClassSpecification: keys.parentElement2.className, elementClassGrouping: "disable" },
-        });
-        await validateHierarchy({
-          provider,
-          expect: [
-            NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.model],
-              supportsFiltering: true,
-              children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.category],
-                  supportsFiltering: true,
-                  children: [
-                    NodeValidators.createForInstanceNode({
-                      instanceKeys: [keys.parentElement2],
-                      supportsFiltering: true,
-                      children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.childElement2],
-                          supportsFiltering: true,
-                          children: false,
-                        }),
-                      ],
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ],
-        });
+        ],
       });
+    });
 
-      it("returns empty hierarchy when the iModel doesn't have any elements of `elementClassSpecification` class", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
-            const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
-            return { rootSubject, model };
+    it("shows intermediate category when child element has different category than parent", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
+          const categoryA = insertSpatialCategory({ txn, codeValue: "category A" });
+          const categoryB = insertSpatialCategory({ txn, codeValue: "category B" });
+          const parentElement = insertPhysicalElement({ txn, userLabel: "parent element", modelId: model.id, categoryId: categoryA.id });
+          const childElement = insertPhysicalElement({
+            txn,
+            userLabel: "child element",
+            modelId: model.id,
+            categoryId: categoryB.id,
+            parentId: parentElement.id,
+          });
+          return { rootSubject, model, categoryA, categoryB, parentElement, childElement };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.model],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.categoryA],
+                supportsFiltering: true,
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.parentElement.className,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.parentElement],
+                        supportsFiltering: true,
+                        children: [
+                          NodeValidators.createForInstanceNode({
+                            instanceKeys: [keys.categoryB],
+                            supportsFiltering: true,
+                            children: [
+                              NodeValidators.createForClassGroupingNode({
+                                className: keys.childElement.className,
+                                children: [
+                                  NodeValidators.createForInstanceNode({
+                                    instanceKeys: [keys.childElement],
+                                    supportsFiltering: true,
+                                    children: false,
+                                  }),
+                                ],
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
           }),
-        );
-        const { imodelConnection } = buildIModelResult;
-        using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { elementClassSpecification: "BisCore.GeometricElement2d" } });
-        await validateHierarchy({
-          provider,
-          expect: [],
-        });
+        ],
       });
+    });
 
-      it("disables hierarchy level filtering support when `hierarchyLevelFiltering` is set to `disable`", async function () {
-        await using buildIModelResult = await buildIModel(this, async (imodel) =>
-          withEditTxn(imodel, (txn) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-            const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
-            const category = insertSpatialCategory({ txn, codeValue: "category" });
-            const parentElement = insertPhysicalElement({
-              txn,
-              userLabel: `parent element 1`,
-              modelId: model.id,
-              categoryId: category.id,
-            });
-            const childElement = insertPhysicalElement({
-              txn,
-              userLabel: `child element 1`,
-              modelId: model.id,
-              categoryId: category.id,
-              parentId: parentElement.id,
-            });
-            return { rootSubject, model, category, parentElement, childElement };
+    it("does not show intermediate category when modeling element has the same category as modeled element", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Elements Model" });
+          const categoryA = insertSpatialCategory({ txn, codeValue: "category A" });
+          const modeledElement = insertPhysicalElement({
+            txn,
+            modelId: physicalModel.id,
+            categoryId: categoryA.id,
+            classFullName: `${TestSchema.Name}.${TestSchema.ModeledElement3dClassName}`,
+          });
+          const subModel = insertPhysicalSubModel({ txn, modeledElementId: modeledElement.id });
+          const modelingElement = insertPhysicalElement({
+            txn,
+            modelId: subModel.id,
+            categoryId: categoryA.id,
+          });
+          return { categoryA, modeledElement, modelingElement, physicalModel };
+        }),
+      );
+
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
+
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.physicalModel],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.categoryA],
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.modeledElement.className,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.modeledElement],
+                        children: [
+                          NodeValidators.createForClassGroupingNode({
+                            className: keys.modelingElement.className,
+                            children: [
+                              NodeValidators.createForInstanceNode({
+                                instanceKeys: [keys.modelingElement],
+                                children: false,
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
           }),
-        );
+        ],
+      });
+    });
 
-        const { imodelConnection, ...keys } = buildIModelResult;
-        using provider = createModelsTreeProvider({
-          imodelConnection,
-          hierarchyConfig: { hierarchyLevelFiltering: "disable" },
-        });
-        await validateHierarchy({
-          provider,
-          expect: [
-            NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.model],
-              supportsFiltering: false,
-              children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.category],
-                  supportsFiltering: false,
-                  children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.parentElement.className,
-                      children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.parentElement],
-                          supportsFiltering: false,
-                          children: [
-                            NodeValidators.createForClassGroupingNode({
-                              className: keys.childElement.className,
-                              children: [
-                                NodeValidators.createForInstanceNode({
-                                  instanceKeys: [keys.childElement],
-                                  supportsFiltering: false,
-                                  children: false,
-                                }),
-                              ],
-                            }),
-                          ],
-                        }),
-                      ],
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ],
-        });
+    it("shows intermediate category when modeling element has different category than modeled element", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "Elements Model" });
+          const categoryA = insertSpatialCategory({ txn, codeValue: "category A" });
+          const categoryB = insertSpatialCategory({ txn, codeValue: "category B" });
+          const modeledElement = insertPhysicalElement({
+            txn,
+            userLabel: "modeled element",
+            modelId: physicalModel.id,
+            categoryId: categoryA.id,
+            classFullName: `${TestSchema.Name}.${TestSchema.ModeledElement3dClassName}`,
+          });
+          const subModel = insertPhysicalSubModel({ txn, modeledElementId: modeledElement.id });
+          const modelingElement = insertPhysicalElement({
+            txn,
+            userLabel: "modeling element",
+            modelId: subModel.id,
+            categoryId: categoryB.id,
+          });
+          return { categoryA, categoryB, modeledElement, modelingElement, physicalModel };
+        }),
+      );
+
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
+
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.physicalModel],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.categoryA],
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.modeledElement.className,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.modeledElement],
+                        children: [
+                          NodeValidators.createForInstanceNode({
+                            instanceKeys: [keys.categoryB],
+                            children: [
+                              NodeValidators.createForClassGroupingNode({
+                                className: keys.modelingElement.className,
+                                children: [
+                                  NodeValidators.createForInstanceNode({
+                                    instanceKeys: [keys.modelingElement],
+                                    children: false,
+                                  }),
+                                ],
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      });
+    });
+
+    it("shows intermediate category for deeply nested elements with different categories", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
+          const categoryA = insertSpatialCategory({ txn, codeValue: "category A" });
+          const categoryB = insertSpatialCategory({ txn, codeValue: "category B" });
+          const parentElement = insertPhysicalElement({ txn, userLabel: "parent element", modelId: model.id, categoryId: categoryA.id });
+          const childElement = insertPhysicalElement({
+            txn,
+            userLabel: "child element",
+            modelId: model.id,
+            categoryId: categoryB.id,
+            parentId: parentElement.id,
+          });
+          const grandchildElement = insertPhysicalElement({
+            txn,
+            userLabel: "grandchild element",
+            modelId: model.id,
+            categoryId: categoryA.id,
+            parentId: childElement.id,
+          });
+          return { rootSubject, model, categoryA, categoryB, parentElement, childElement, grandchildElement };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      using provider = createModelsTreeProvider({ imodelConnection });
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.model],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.categoryA],
+                supportsFiltering: true,
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.parentElement.className,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.parentElement],
+                        supportsFiltering: true,
+                        children: [
+                          NodeValidators.createForInstanceNode({
+                            instanceKeys: [keys.categoryB],
+                            supportsFiltering: true,
+                            children: [
+                              NodeValidators.createForClassGroupingNode({
+                                className: keys.childElement.className,
+                                children: [
+                                  NodeValidators.createForInstanceNode({
+                                    instanceKeys: [keys.childElement],
+                                    supportsFiltering: true,
+                                    children: [
+                                      NodeValidators.createForInstanceNode({
+                                        instanceKeys: [keys.categoryA],
+                                        supportsFiltering: true,
+                                        children: [
+                                          NodeValidators.createForClassGroupingNode({
+                                            className: keys.grandchildElement.className,
+                                            children: [
+                                              NodeValidators.createForInstanceNode({
+                                                instanceKeys: [keys.grandchildElement],
+                                                supportsFiltering: true,
+                                                children: false,
+                                              }),
+                                            ],
+                                          }),
+                                        ],
+                                      }),
+                                    ],
+                                  }),
+                                ],
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
       });
     });
   });

@@ -3,21 +3,31 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-// WARNING: This barrel file exports internal APIs only for use by `@itwin/presentation-backend` and `@itwin/presentation-frontend` packages.
+// WARNING: This barrel file exports internal APIs only for use by packages in `https://github.com/iTwin/viewer-components-react` monorepo.
 // They should not be used outside of these packages. These APIs may be broken or removed at any time without notice.
+
+export { toVoidPromise, collect } from "./tree-widget-react/shared/internal/Rxjs.js";
 
 export {
   ModelsTreeDefinition,
   defaultHierarchyConfiguration as defaultModelsTreeHierarchyConfiguration,
-} from "./tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
-export { ModelsTreeIdsCache } from "./tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
-export { createModelsTreeVisibilityHandler } from "./tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
+} from "./tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
+export { ModelsTreeIdsCache } from "./tree-widget-react/trees/models-tree/internal/ModelsTreeIdsCache.js";
+export { createModelsTreeVisibilityHandler } from "./tree-widget-react/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
+
 export {
   CategoriesTreeDefinition,
   defaultHierarchyConfiguration as defaultCategoriesTreeHierarchyConfiguration,
-} from "./tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
-export { CategoriesTreeIdsCache } from "./tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
-export { CategoriesVisibilityHandler } from "./tree-widget-react/components/trees/categories-tree/internal/CategoriesVisibilityHandler.js";
-export { toVoidPromise, collect } from "./tree-widget-react/components/trees/common/Rxjs.js";
-export { CategoriesTreeNode } from "./tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeNode.js";
-export { releaseMainThreadOnItemsCount } from "./tree-widget-react/components/trees/common/internal/Utils.js";
+} from "./tree-widget-react/trees/categories-tree/CategoriesTreeDefinition.js";
+export { CategoriesTreeIdsCache } from "./tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
+export { createCategoriesTreeVisibilityHandler } from "./tree-widget-react/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.js";
+
+export { ClassificationsTreeDefinition } from "./tree-widget-react/trees/classifications-tree/ClassificationsTreeDefinition.js";
+export { ClassificationsTreeIdsCache } from "./tree-widget-react/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
+export { releaseMainThreadOnItemsCount } from "./tree-widget-react/shared/internal/Rxjs.js";
+export { createClassificationsTreeVisibilityHandler } from "./tree-widget-react/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHandler.js";
+
+export { BaseIdsCache } from "./tree-widget-react/shared/internal/caches/BaseIdsCache.js";
+export { SharedTreeContextProvider } from "./tree-widget-react/shared/contexts/SharedTreeContext.js";
+
+export { SET_CHANGE_DEBOUNCE_TIME } from "./tree-widget-react/shared/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";

@@ -6,6 +6,8 @@
 import fs from "fs";
 import path from "path";
 import {
+  createCode,
+  importSchema,
   insertDefinitionContainer,
   insertPhysicalElement,
   insertPhysicalModelWithPartition,
@@ -14,9 +16,16 @@ import {
   insertSubCategory,
 } from "test-utilities";
 import { withEditTxn } from "@itwin/core-backend";
+import { IModel } from "@itwin/core-common";
 import { createIModel } from "./IModelUtilities.js";
 
-export const IMODEL_NAMES = ["50k 3D elements", "50k subcategories", "50k categories"] as const;
+export const IMODEL_NAMES = [
+  "50k 3D elements",
+  "50k subcategories",
+  "50k categories",
+  "50k classifications",
+  "50k 3D child elements with different categories",
+] as const;
 export type IModelName = (typeof IMODEL_NAMES)[number];
 export type IModelPathsMap = { [_ in IModelName]?: string };
 
@@ -63,7 +72,12 @@ export class Datasets {
     const localPath = path.join(folderPath, `${name}.bim`);
 
     if (force || !fs.existsSync(localPath)) {
-      await iModelFactory(name, localPath);
+      try {
+        await iModelFactory(name, localPath);
+      } catch (e) {
+        fs.unlinkSync(localPath);
+        throw e;
+      }
     }
 
     return path.resolve(localPath);
@@ -77,6 +91,10 @@ export class Datasets {
         return async (name: string, localPath: string) => this.createSubCategoryIModel(name, localPath, elementCount);
       case "50k 3D elements":
         return async (name: string, localPath: string) => this.create3dElementIModel(name, localPath, elementCount);
+      case "50k 3D child elements with different categories":
+        return async (name: string, localPath: string) => this.create3dChildElementsWithDifferentCategoriesIModel(name, localPath, elementCount);
+      case "50k classifications":
+        return async (name: string, localPath: string) => this.createClassificationsIModel(name, localPath, elementCount);
     }
   }
 
@@ -167,8 +185,8 @@ export class Datasets {
 
   /**
    * Create an iModel with `numElements` 3D elements all belonging to the same spatial category and physical model.
-   * The elements are set up in a hierarchical manner, with 1000 top level 3D elements, each having 1 child element, which has 1 child element,
-   * and so on until the depth of `numElements` / 1000 elements is reached.
+   * The elements are set up in a hierarchical manner, with 1000 top level 3D elements, each having at least 2 indirect child elements, and some direct child elements.
+   * The number of top level 3D elements + indirect child elements + direct child elements equals `numElements`.
    */
   private static async create3dElementIModel(name: string, localPath: string, numElements: number) {
     console.log(`${numElements} physical elements: Creating...`);
@@ -230,5 +248,185 @@ export class Datasets {
     );
 
     console.log(`${numElements} elements: Done.`);
+  }
+
+  /**
+   * Create an iModel the same hierarchy structure as `create3dElementIModel`,
+   * but where top level elements belong to one category, direct child elements belong to another category, and indirect child elements belong to a third category.
+   */
+  private static async create3dChildElementsWithDifferentCategoriesIModel(name: string, localPath: string, numElements: number) {
+    console.log(`${numElements} physical elements: Creating...`);
+    await createIModel(name, localPath, async (imodel) =>
+      withEditTxn(imodel, (txn) => {
+        const { id: physicalModelId } = insertPhysicalModelWithPartition({ txn, codeValue: "test physical model" });
+        const { id: categoryId } = insertSpatialCategory({ txn, codeValue: "test category" });
+        const { id: directChildCategory } = insertSpatialCategory({ txn, codeValue: "direct child category" });
+        const { id: indirectChildCategory } = insertSpatialCategory({ txn, codeValue: "indirect child category" });
+
+        const numberOfRootElements = 1000;
+        // Number of children each direct child should have
+        const numberOfIndirectChildren = 2;
+        // Number of children each root element should have
+        const numberOfDirectChildren = Math.floor(numElements / (numberOfRootElements * (numberOfIndirectChildren + 1)));
+        // Due to rounding not enough elements would be inserted, calculate how many more nodes we need to add
+        let numberOfMissingElements =
+          numElements -
+          numberOfRootElements -
+          numberOfRootElements * numberOfDirectChildren -
+          numberOfRootElements * numberOfDirectChildren * numberOfIndirectChildren;
+        for (let i = 0; i < numberOfRootElements; ++i) {
+          const rootElementId = insertPhysicalElement({
+            txn,
+            parentId: undefined,
+            modelId: physicalModelId,
+            categoryId,
+            userLabel: `root element${i}`,
+          }).id;
+          for (let j = 0; j < numberOfDirectChildren; ++j) {
+            const directChildId = insertPhysicalElement({
+              txn,
+              parentId: rootElementId,
+              modelId: physicalModelId,
+              categoryId: directChildCategory,
+              userLabel: `direct child ${i}-${j}`,
+            }).id;
+            for (let z = 0; z < numberOfIndirectChildren; ++z) {
+              insertPhysicalElement({
+                txn,
+                parentId: directChildId,
+                modelId: physicalModelId,
+                categoryId: indirectChildCategory,
+                userLabel: `indirect child ${i}-${j}-${z}`,
+              });
+            }
+            if (numberOfMissingElements > 0) {
+              insertPhysicalElement({
+                txn,
+                parentId: directChildId,
+                modelId: physicalModelId,
+                categoryId: indirectChildCategory,
+                userLabel: `indirect child ${i}-${j}-missing`,
+              });
+              --numberOfMissingElements;
+            }
+          }
+        }
+      }),
+    );
+    console.log(`${numElements} elements: Done.`);
+  }
+
+  /**
+   * Create an iModel with:
+   * - 1 `ClassificationSystem`, whose code = `name`,
+   * - 50 `ClassificationTable` elements as children for the `ClassificationSystem` all with a single sub-model,
+   * - `numElements / 50` `Classification` elements inside `ClassificationTable`'s sub-model with:
+   *  - 1 child `Classification`,
+   *  - 1 spatial category and 3d element,
+   *  - 1 drawing category and 2d element.
+   */
+  private static async createClassificationsIModel(name: string, localPath: string, numElements: number) {
+    console.log(`${numElements} classifications: Creating...`);
+    await createIModel(name, localPath, async (imodel) =>
+      withEditTxn(imodel, async (txn) => {
+        const schemaPath = import.meta.resolve("@bentley/classification-systems-schema/ClassificationSystems.ecschema.xml");
+        const schemaXml = fs.readFileSync(fs.realpathSync(new URL(schemaPath)), { encoding: "utf-8" });
+        await imodel.importSchemaStrings([schemaXml]);
+
+        // also import our custom schema for classification - category relationship
+
+        // cspell:disable
+        await importSchema(
+          {
+            imodel,
+            schemaName: "TestClassificationSchema",
+            schemaAlias: "tst",
+            schemaContentXml: `
+          <ECSchemaReference name="BisCore" version="01.00.16" alias="bis" />
+          <ECSchemaReference name="ClassificationSystems" version="01.00.04" alias="clsf" />
+          <ECRelationshipClass typeName="CategorySymbolizesClassification" modifier="None" strength="referencing">
+              <BaseClass>bis:ElementRefersToElements</BaseClass>
+              <Source multiplicity="(0..*)" roleLabel="symbolizes" polymorphic="true">
+                  <Class class="bis:Category" />
+              </Source>
+              <Target multiplicity="(0..*)" roleLabel="is symbolized by" polymorphic="true">
+                  <Class class="clsf:Classification"/>
+              </Target>
+          </ECRelationshipClass>
+        `,
+          },
+          // cspell:enable
+        );
+
+        const physicalModel = insertPhysicalModelWithPartition({ txn, codeValue: "physical model" });
+
+        const systemId = txn.insertElement({
+          classFullName: "ClassificationSystems.ClassificationSystem",
+          model: IModel.dictionaryId,
+          code: createCode({ imodel: txn.iModel, scopeId: IModel.dictionaryId, codeValue: name }),
+        });
+
+        const classificationTablesCount = 50;
+        for (let i = 0; i < classificationTablesCount; ++i) {
+          const tableId = txn.insertElement({
+            classFullName: "ClassificationSystems.ClassificationTable",
+            model: IModel.dictionaryId,
+            parent: {
+              relClassName: "ClassificationSystems.ClassificationSystemOwnsClassificationTable",
+              id: systemId,
+            },
+            code: createCode({ imodel: txn.iModel, scopeId: IModel.dictionaryId, codeValue: `Table ${i + 1}` }),
+          });
+          const tableModelId = txn.insertModel({
+            classFullName: "BisCore.DefinitionModel",
+            modeledElement: {
+              relClassName: "ClassificationSystems.DefinitionModelBreaksDownClassificationTable",
+              id: tableId,
+            },
+          });
+          for (let j = 0; j < numElements / classificationTablesCount / 2; ++j) {
+            const classificationId = txn.insertElement({
+              classFullName: "ClassificationSystems.Classification",
+              model: tableModelId,
+              code: createCode({ imodel: txn.iModel, scopeId: tableModelId, codeValue: `Classification ${j + 1}` }),
+            });
+
+            const childClassificationId = txn.insertElement({
+              classFullName: "ClassificationSystems.Classification",
+              model: tableModelId,
+              code: createCode({ imodel: txn.iModel, scopeId: tableModelId, codeValue: `Child classification ${j + 1}` }),
+              parent: {
+                relClassName: "ClassificationSystems.ClassificationOwnsSubClassifications",
+                id: classificationId,
+              },
+            });
+
+            const spatialCategory = insertSpatialCategory({
+              txn,
+              codeValue: `Spatial category ${j + 1}`,
+              modelId: tableModelId,
+            });
+            const physicalElement = insertPhysicalElement({
+              txn,
+              modelId: physicalModel.id,
+              categoryId: spatialCategory.id,
+              userLabel: `physical element ${i + 1} ${j + 1}`,
+            });
+            txn.insertRelationship({
+              classFullName: "ClassificationSystems.ElementHasClassifications",
+              sourceId: physicalElement.id,
+              targetId: childClassificationId,
+            });
+            txn.insertRelationship({
+              classFullName: "TestClassificationSchema.CategorySymbolizesClassification",
+              sourceId: spatialCategory.id,
+              targetId: childClassificationId,
+            });
+          }
+        }
+      }),
+    );
+
+    console.log(`${numElements} classifications: Done.`);
   }
 }

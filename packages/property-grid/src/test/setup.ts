@@ -13,6 +13,10 @@ let caughtLogsWhichFailTest = new Array<string>();
 
 beforeAll(() => {
   getGlobalThis().IS_REACT_ACT_ENVIRONMENT = true;
+  // happy-dom has no layout engine, so elements report 0 size. Provide non-zero dimensions
+  // so virtualized lists (`@tanstack/react-virtual`) compute a non-empty range and render rows.
+  Object.defineProperty(HTMLElement.prototype, "offsetHeight", { configurable: true, get: () => 600 });
+  Object.defineProperty(HTMLElement.prototype, "offsetWidth", { configurable: true, get: () => 400 });
   console.error = (message?: any, ...optionalParams: any[]) => {
     if (typeof message === "string") {
       const caughtMessage = logsWhichFailTest.find((log) => message.includes(log));

@@ -1,5 +1,20 @@
 # Change Log - @itwin/quantity-formatting-react
 
+## 0.2.0
+
+### Minor Changes
+
+- [#1828](https://github.com/iTwin/viewer-components-react/pull/1828): `unitsProvider` is now optional on `QuantityFormatPanel`, `FormatPanel`, and `FormatSample`. When omitted, the components use `IModelApp.quantityFormatter.unitsProvider` (the bundled BIS units unless the app replaces it) and update when `IModelApp.quantityFormatter.onUnitsProviderChanged` fires.
+- [#1828](https://github.com/iTwin/viewer-components-react/pull/1828): Add `@itwin/core-common` and `@itwin/ecschema-metadata` as peer dependencies, since public types already reference them. `QuantityFormatting.startup` now shares a single in-flight initialization, and reading `QuantityFormatting.localization` before startup throws a descriptive error.
+
+### Patch Changes
+
+- [#1827](https://github.com/iTwin/viewer-components-react/pull/1827): Composite unit editing only offers sub-units that divide the parent unit into a whole number of parts, so degree-minute-second angle and azimuth formats can be built with "Add sub-unit". The unit label input shows the default unit label as a placeholder when no custom label is set.
+- [#1827](https://github.com/iTwin/viewer-components-react/pull/1827): The decimal and thousands separators can no longer both be set to the same character while the thousands separator is enabled. Enabling it, or changing either separator while it is enabled, switches the other separator when they collide. Unset separators are compared using the formatter's locale defaults.
+- [#1827](https://github.com/iTwin/viewer-components-react/pull/1827): Format trait checkboxes such as "Show unit label" now recognize persisted traits regardless of casing (for example `ShowUnitLabel`), and toggling a trait removes every casing variant instead of leaving duplicates behind.
+- [#1827](https://github.com/iTwin/viewer-components-react/pull/1827): Switching a horizontal-direction format (for example `Units.HORIZONTAL_DIR_ARC_DEG`) to bearing or azimuth now uses horizontal-direction revolution and base units. Previously it used angle units, which the formatter cannot convert to, so formatting failed.
+- [#1827](https://github.com/iTwin/viewer-components-react/pull/1827): `FormatSelector` localizes its empty search message. Documented that `activeFormatSet` must be replaced with a new object when its formats change (for example after `FormatSetFormatsProvider.onFormatsChanged`); updating it in place leaves stale definitions in the list.
+
 <!-- This log was last generated on Tue, 28 Apr 2026 15:59:28 GMT and should not be manually modified. -->
 
 <!-- Start content -->

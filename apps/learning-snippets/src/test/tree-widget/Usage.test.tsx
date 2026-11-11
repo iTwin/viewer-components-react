@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
-/* eslint-disable unused-imports/no-unused-vars */
 
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 // __PUBLISH_EXTRACT_START__ TreeWidget.RegisterExampleImports
@@ -14,11 +13,10 @@ import { UiFramework } from "@itwin/appui-react";
 import { IModel } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 import { createStorage } from "@itwin/unified-selection";
-import { render, waitFor } from "@testing-library/react";
 import { insertPhysicalModelWithPartition, insertSubject } from "test-utilities";
 import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
-import { getSchemaContext, getTestViewer, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
+import { getTestViewer, render, TreeWidgetTestUtils, waitFor } from "./TestUtils.js";
 
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { Widget } from "@itwin/appui-react";
@@ -65,17 +63,23 @@ describe("Tree widget", () => {
           getWidgets: () =>
             [
               createTreeWidget({
+                // localization object for localizing widget components
+                localization: IModelApp.localization,
                 trees: [
                   // add a custom component
                   { id: "my-tree-id", startIcon: <svg />, getLabel: () => "My Custom Tree", render: () => <>This is my custom tree.</> },
                   // add the Models tree component delivered with the package
                   {
                     id: ModelsTreeComponent.id,
-                    getLabel: () => ModelsTreeComponent.getLabel(),
-                    render: (props) => (
+                    // display the widget header search box for this tree
+                    isSearchable: true,
+                    // use `ModelsTreeComponent.getLabel` to get the localized default label for models tree
+                    getLabel: ({ standardLabels }) => ModelsTreeComponent.getLabel({ standardLabels }),
+                    render: ({ treeLabel, searchText }) => (
                       <ModelsTreeComponent
-                        // see "Creating schema context" section for example implementation
-                        getSchemaContext={getSchemaContext}
+                        // label for the tree, used for accessibility purposes
+                        treeLabel={treeLabel}
+                        searchText={searchText}
                         // see "Creating unified selection storage" section for example implementation
                         selectionStorage={unifiedSelectionStorage}
                       />

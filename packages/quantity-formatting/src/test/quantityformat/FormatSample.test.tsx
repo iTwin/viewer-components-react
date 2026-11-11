@@ -2,19 +2,52 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import { describe, it, vi, expect } from "vitest";
-import * as React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, it, vi, expect } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { Logger } from "@itwin/core-bentley";
+import { BasicUnitsProvider } from "@itwin/core-quantity";
 import type { FormatDefinition } from "@itwin/core-quantity";
-import type { UnitsProvider } from "@itwin/core-quantity";
 import { FormatSample } from "../../components/quantityformat/FormatSample.js";
 
 describe("FormatSample", () => {
   const formatProps: FormatDefinition = { type: "decimal", precision: 4 };
-  const unitsProvider = {
-    findUnitByName: vi.fn().mockResolvedValue(undefined),
-    getUnitsByFamily: vi.fn().mockResolvedValue([]),
-  } as unknown as UnitsProvider;
+  const unitsProvider = new BasicUnitsProvider();
+
+  afterEach(() => vi.restoreAllMocks());
+
+  it.each([
+    ["Units.PERCENT_SLOPE", "Bearing"],
+    ["Units.PERCENT_SLOPE", "Azimuth"],
+    ["Units.COEFFICIENT", "Bearing"],
+    ["Units.COEFFICIENT", "Azimuth"],
+  ])("contains synchronous formatting errors for %s as %s", async (unitName, type) => {
+    const persistenceUnit = await unitsProvider.findUnitByName(unitName);
+    const logError = vi.spyOn(Logger, "logError").mockImplementation(() => {});
+    const invalidFormat: FormatDefinition = {
+      type, precision: 2, composite: { units: [{ name: unitName }] }, revolutionUnit: "Units.REVOLUTION",
+      ...(type === "Azimuth" ? { azimuthBaseUnit: "Units.ARC_DEG", azimuthBase: 0 } : {}),
+    };
+    const { rerender } = render(
+      <FormatSample formatProps={invalidFormat} unitsProvider={unitsProvider} persistenceUnit={persistenceUnit} initialMagnitude={1.25} />,
+    );
+
+    expect((await screen.findByRole("alert")).textContent).toBe("errors.invalidFormat");
+    expect(logError).toHaveBeenCalledWith("QuantityFormat", "Failed to evaluate the format sample", expect.any(Function));
+
+    rerender(<FormatSample formatProps={{ ...invalidFormat, type: "Decimal", revolutionUnit: undefined, azimuthBaseUnit: undefined }} unitsProvider={unitsProvider} persistenceUnit={persistenceUnit} initialMagnitude={1.25} />);
+    await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
+    expect(await screen.findByText("1.25")).toBeTruthy();
+  });
+
+  it("displays and logs errors from spec creation", async () => {
+    const provider = new BasicUnitsProvider();
+    const persistenceUnit = await provider.findUnitByName("Units.M");
+    vi.spyOn(provider, "getConversion").mockRejectedValue(new Error("conversion unavailable"));
+    const logError = vi.spyOn(Logger, "logError").mockImplementation(() => {});
+    render(<FormatSample formatProps={{ type: "Decimal", composite: { units: [{ name: "Units.M" }] } }} unitsProvider={provider} persistenceUnit={persistenceUnit} />);
+    expect((await screen.findByRole("alert")).textContent).toBe("errors.invalidFormat");
+    expect(logError).toHaveBeenCalledWith("QuantityFormat", "Failed to create the formatter for the format sample", expect.any(Function));
+  });
 
   describe("handleOnValueChange", () => {
     it("should reflect each change event's target value without accumulating stale state", () => {
@@ -61,6 +94,8 @@ describe("FormatSample", () => {
       render(<FormatSample formatProps={formatProps} unitsProvider={unitsProvider} />);
       const input = screen.getByRole("textbox");
 
+      input.focus(); // ToolAdmin suppresses Ctrl shortcuts unless an editable element has focus
+
       expect(fireEvent.keyDown(input, { key: "v", ctrlKey: true })).toBe(true);
     });
 
@@ -74,6 +109,8 @@ describe("FormatSample", () => {
     it("should pass through Ctrl+A (select-all)", () => {
       render(<FormatSample formatProps={formatProps} unitsProvider={unitsProvider} />);
       const input = screen.getByRole("textbox");
+
+      input.focus(); // ToolAdmin suppresses Ctrl shortcuts unless an editable element has focus
 
       expect(fireEvent.keyDown(input, { key: "a", ctrlKey: true })).toBe(true);
     });

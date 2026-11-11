@@ -84,12 +84,18 @@ This package provides six main React components for quantity formatting:
 
 The main component for configuring quantity formatting. It provides a complete user interface for setting up format properties and includes a live formatting preview.
 
+Bearing and Azimuth are available only for angular units (`Units.ANGLE` or `Units.HORIZONTAL_DIRECTION`). They are disabled while the unit is being resolved and for non-angular quantities such as slopes or coefficients. Preview errors are displayed in the editor rather than propagated to the host application.
+
+Apply validates the edited format and its unit conversions before calling `onFormatChange`, even when `showSample` is `false`. Invalid formats remain editable and display an error; they are not passed to the callback.
+
+Apply and Revert stay visible at the bottom of the nearest scrolling container while you scroll through the settings. Validation feedback stays with the action buttons.
+
 #### QuantityFormatPanel Properties
 
 ```typescript
 interface QuantityFormatPanelProps {
   formatDefinition: FormatDefinition; // Current format configuration
-  unitsProvider: UnitsProvider; // Provider for unit definitions
+  unitsProvider?: UnitsProvider; // Defaults to IModelApp.quantityFormatter.unitsProvider (bundled BIS units unless the app replaces it)
   onFormatChange: (formatProps: FormatDefinition) => void; // Callback when format changes
   initialMagnitude?: number; // Initial value for sample preview (default: 0)
   showSample?: boolean; // Whether to show the format sample (default: true)
@@ -144,7 +150,7 @@ A flexible component for editing format properties with customizable primary and
 ```typescript
 interface FormatPanelProps {
   formatDefinition: FormatDefinition; // Current format configuration
-  unitsProvider: UnitsProvider; // Provider for unit definitions
+  unitsProvider?: UnitsProvider; // Defaults to IModelApp.quantityFormatter.unitsProvider (bundled BIS units unless the app replaces it)
   onFormatChange: (formatProps: FormatDefinition) => void; // Callback when format changes
   persistenceUnit?: UnitProps; // Unit for persistence/storage
 }
@@ -202,7 +208,7 @@ A component that provides real-time preview of how values will be formatted usin
 ```typescript
 interface FormatSampleProps {
   formatProps: FormatDefinition; // Format configuration to preview
-  unitsProvider: UnitsProvider; // Provider for unit definitions
+  unitsProvider?: UnitsProvider; // Defaults to IModelApp.quantityFormatter.unitsProvider (bundled BIS units unless the app replaces it)
   persistenceUnit?: UnitProps; // Unit for the input value
   initialMagnitude?: number; // Initial value to display (default: 0)
 }
@@ -253,6 +259,8 @@ interface FormatSelectorProps {
   onListItemChange: (formatDefinition: FormatDefinition, key: string) => void; // Selection callback
 }
 ```
+
+Treat `activeFormatSet` as immutable. `FormatSetFormatsProvider` updates its format set in place, so after a format is added, updated, or removed, listen to `onFormatsChanged` and pass a new object, for example `{ ...formatSet, formats: { ...formatSet.formats } }`. Otherwise `FormatSelector` keeps showing and returning the old definitions.
 
 #### FormatSelector Usage
 

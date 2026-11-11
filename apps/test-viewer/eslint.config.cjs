@@ -13,7 +13,12 @@ module.exports = [
     ...iTwinPlugin.configs.uiConfig,
     rules: {
       ...iTwinPlugin.configs.uiConfig.rules,
-      "@itwin/no-internal": ["error"],
+      "@itwin/no-internal": [
+        "error",
+        {
+          tag: ["internal"],
+        },
+      ],
     },
   },
   {

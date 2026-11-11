@@ -4,27 +4,20 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { asyncScheduler, expand, filter, finalize, from, observeOn, of, tap } from "rxjs";
-import { BeDuration } from "@itwin/core-bentley";
-import { Schema, SchemaContext, SchemaJsonLocater } from "@itwin/ecschema-metadata";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 import { LOGGER } from "../util/Logging.js";
 
 import type { IModelDb } from "@itwin/core-backend";
-import type { SchemaKey, SchemaMatchType, SchemaPropsGetter } from "@itwin/ecschema-metadata";
-import type { HierarchyDefinition, HierarchyFilteringPath, HierarchyNode, HierarchyProvider } from "@itwin/presentation-hierarchies";
-import type { EC, ECClassHierarchyInspector, ECSchemaProvider, ECSqlQueryDef, ECSqlQueryExecutor, ECSqlQueryReaderOptions } from "@itwin/presentation-shared";
+import type { HierarchyDefinition, HierarchyNode, HierarchyProvider, HierarchySearchTree, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { ECSchemaProvider } from "@itwin/presentation-shared";
 import type { CategoriesTreeIdsCache, ModelsTreeIdsCache } from "@itwin/tree-widget-react/internal";
 
 interface ProviderOptionsBase {
   rowLimit?: number | "unbounded";
-  getHierarchyFactory(
-    imodelAccess: ECSchemaProvider & ECClassHierarchyInspector,
-    idsCache?: typeof ModelsTreeIdsCache | typeof CategoriesTreeIdsCache,
-  ): HierarchyDefinition;
-  filtering?: {
-    paths: HierarchyFilteringPath[];
+  getHierarchyFactory(imodelAccess: ECSchemaProvider, idsCache?: typeof ModelsTreeIdsCache | typeof CategoriesTreeIdsCache): HierarchyDefinition;
+  search?: {
+    paths: HierarchySearchTree[];
   };
   queryCacheSize?: number;
 }
@@ -45,17 +38,10 @@ function log(messageOrCallback: string | (() => string)) {
 
 const DEFAULT_ROW_LIMIT = 1000;
 
-export interface IModelAccess {
-  createQueryReader(
-    query: ECSqlQueryDef,
-    config?: ECSqlQueryReaderOptions & {
-      limit?: number | "unbounded";
-    },
-  ): ReturnType<ECSqlQueryExecutor["createQueryReader"]>;
-  classDerivesFrom(derivedClassFullName: string, candidateBaseClassFullName: string): Promise<boolean> | boolean;
-  getSchema(schemaName: string): Promise<EC.Schema | undefined>;
-  imodelKey: string;
-}
+export type IModelAccess = ECSchemaProvider &
+  LimitingECSqlQueryExecutor & {
+    imodelKey: string;
+  };
 
 export class StatelessHierarchyProvider implements Disposable {
   readonly #provider: HierarchyProvider & Disposable;
@@ -66,9 +52,7 @@ export class StatelessHierarchyProvider implements Disposable {
     this.#provider = this.createProvider();
   }
 
-  public async loadHierarchy(props?: { depth?: number }): Promise<number> {
-    const depth = props?.depth;
-
+  public async loadHierarchy(props?: { shouldExpand?: (node: HierarchyNode, index: number) => boolean }): Promise<number> {
     let nodeCount = 0;
     return new Promise<number>((resolve, reject) => {
       const nodesObservable = of<HierarchyNode | undefined>(undefined).pipe(
@@ -80,7 +64,7 @@ export class StatelessHierarchyProvider implements Disposable {
               log(`Got children for ${parentNodeLabel}`);
             }),
             tap(() => ++nodeCount),
-            filter((node) => node.children && (!depth || getNodeDepth(node) < depth)),
+            filter((node, index) => (props?.shouldExpand ? props.shouldExpand(node, index) : true)),
             observeOn(asyncScheduler),
           );
         }, 1),
@@ -96,13 +80,6 @@ export class StatelessHierarchyProvider implements Disposable {
     this.#provider[Symbol.dispose]();
   }
 
-  private static createECSchemaProvider(iModel: IModelDb) {
-    const schemas = new SchemaContext();
-    const locater = new AsyncSchemaJsonLocater((schemaName) => iModel.getSchemaProps(schemaName));
-    schemas.addLocater(locater);
-    return createECSchemaProvider(schemas);
-  }
-
   private createProvider() {
     const imodelAccess =
       "iModel" in this.#props ? StatelessHierarchyProvider.createIModelAccess(this.#props.iModel, this.#props.rowLimit) : this.#props.imodelAccess;
@@ -110,45 +87,18 @@ export class StatelessHierarchyProvider implements Disposable {
       imodelAccess,
       hierarchyDefinition: this.#props.getHierarchyFactory(imodelAccess),
       queryCacheSize: this.#props.queryCacheSize ?? 0,
-      filtering: this.#props.filtering,
+      search: this.#props.search,
     });
   }
 
   public static createIModelAccess(iModel: IModelDb, rowLimit?: number | "unbounded"): IModelAccess {
-    const schemaProvider = this.createECSchemaProvider(iModel);
+    const schemaProvider = createECSchemaProvider(iModel);
     const rowLimitToUse = rowLimit ?? DEFAULT_ROW_LIMIT;
     const imodelAccess = {
       imodelKey: iModel.key,
       ...schemaProvider,
-      ...createCachingECClassHierarchyInspector({ schemaProvider, cacheSize: 1000 }),
       ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), rowLimitToUse),
     };
     return imodelAccess;
-  }
-}
-
-function getNodeDepth(node: HierarchyNode): number {
-  return node.parentKeys.length + 1;
-}
-
-class AsyncSchemaJsonLocater extends SchemaJsonLocater {
-  #_getSchema: SchemaPropsGetter;
-  public constructor(getSchema: SchemaPropsGetter) {
-    super(getSchema);
-    this.#_getSchema = getSchema;
-  }
-  public override async getSchema<T extends Schema>(
-    schemaKey: Readonly<SchemaKey>,
-    _matchType: SchemaMatchType,
-    context: SchemaContext,
-  ): Promise<T | undefined> {
-    const schemaProps = this.#_getSchema(schemaKey.name);
-    if (!schemaProps) {
-      return undefined;
-    }
-
-    await BeDuration.wait(0);
-    const schema = await Schema.fromJson(schemaProps, context);
-    return schema as T;
   }
 }

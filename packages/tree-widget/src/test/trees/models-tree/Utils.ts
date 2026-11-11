@@ -4,48 +4,75 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { concatMap, EMPTY, expand, from, of, toArray } from "rxjs";
-import sinon from "sinon";
+import { vi } from "vitest";
 import { Id64 } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
-import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
+import { BaseIdsCache } from "../../../tree-widget-react/shared/internal/caches/BaseIdsCache.js";
+import {
+  CLASS_NAME_Element,
+  CLASS_NAME_GeometricElement3d,
+  CLASS_NAME_Model,
+  CLASS_NAME_SpatialCategory,
+  CLASS_NAME_Subject,
+} from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { mergeWithDefaults } from "../../../tree-widget-react/shared/internal/Utils.js";
+import { ModelsTreeIdsCache } from "../../../tree-widget-react/trees/models-tree/internal/ModelsTreeIdsCache.js";
+import { createModelsTreeVisibilityHandler } from "../../../tree-widget-react/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
+import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelAccess } from "../Common.js";
+import { createTreeWidgetTestingViewport } from "../TreeUtils.js";
 
-import type { Observable } from "rxjs";
-import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type {
   ClassGroupingNodeKey,
   GroupingHierarchyNode,
-  HierarchyFilteringPath,
-  HierarchyNode,
-  HierarchyNodeKey,
   HierarchyProvider,
+  HierarchySearchTree,
   NonGroupingHierarchyNode,
 } from "@itwin/presentation-hierarchies";
-import type { InstanceKey } from "@itwin/presentation-shared";
-import type { ChildrenTree } from "../../../tree-widget-react/components/trees/models-tree/Utils.js";
-
-type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
+import type { EC, InstanceKey } from "@itwin/presentation-shared";
+import type { ParentElementsPath } from "../../../tree-widget-react/shared/internal/Utils.js";
+import type {
+  ModelsTreeHierarchyConfiguration,
+  RequiredModelsTreeHierarchyConfiguration,
+} from "../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
+import type { IModelAccess } from "../Common.js";
 
 interface CreateModelsTreeProviderProps {
   imodelConnection: IModelConnection;
-  filteredNodePaths?: HierarchyFilteringPath[];
-  hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
+  searchPaths?: HierarchySearchTree[];
+  hierarchyConfig?: ModelsTreeHierarchyConfiguration;
   idsCache?: ModelsTreeIdsCache;
   imodelAccess?: ReturnType<typeof createIModelAccess>;
 }
 
 export function createModelsTreeProvider({
   imodelConnection,
-  filteredNodePaths,
+  searchPaths,
   hierarchyConfig,
   imodelAccess,
   idsCache,
 }: CreateModelsTreeProviderProps): HierarchyProvider & { dispose: () => void; [Symbol.dispose]: () => void } {
-  const config = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...hierarchyConfig };
+  const configOverrides: ModelsTreeHierarchyConfiguration = { subjects: { root: "exclude" }, ...hierarchyConfig };
+  const config = mergeWithDefaults({
+    defaults: defaultHierarchyConfiguration,
+    overrides: configOverrides,
+  });
   const createdImodelAccess = imodelAccess ?? createIModelAccess(imodelConnection);
-  const createdIdsCache = idsCache ?? new ModelsTreeIdsCache(createdImodelAccess, config);
+  const baseIdsCache = new BaseIdsCache({
+    queryExecutor: createdImodelAccess,
+    elementClassName: config.elements.baseClass,
+    type: "3d",
+    excludedElementClassNames: config.elements.excludedClasses,
+  });
+  const createdIdsCache =
+    idsCache ??
+    new ModelsTreeIdsCache({
+      queryExecutor: createdImodelAccess,
+      hierarchyConfig: config,
+      baseIdsCache,
+    });
   const provider = createIModelHierarchyProvider({
     imodelAccess: createdImodelAccess,
     hierarchyDefinition: new ModelsTreeDefinition({
@@ -53,22 +80,17 @@ export function createModelsTreeProvider({
       idsCache: createdIdsCache,
       hierarchyConfig: config,
     }),
-    ...(filteredNodePaths
-      ? { filtering: { paths: filteredNodePaths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } })) } }
-      : undefined),
+    ...(searchPaths ? { search: { paths: searchPaths } } : undefined),
   });
   const dispose = () => {
     provider[Symbol.dispose]();
-    if (!idsCache) {
-      createdIdsCache[Symbol.dispose]();
-    }
   };
   return {
     hierarchyChanged: provider.hierarchyChanged,
     getNodes: (props) => provider.getNodes(props),
     getNodeInstanceKeys: (props) => provider.getNodeInstanceKeys(props),
     setFormatter: (formatter) => provider.setFormatter(formatter),
-    setHierarchyFilter: (props) => provider.setHierarchyFilter(props),
+    setHierarchySearch: (props) => provider.setHierarchySearch(props),
     dispose,
     [Symbol.dispose]() {
       dispose();
@@ -81,51 +103,73 @@ interface IdsCacheMockProps {
   subjectModels?: Map<Id64String, Id64String[]>;
   modelCategories?: Map<Id64String, Id64Array>;
   categoryElements?: Map<Id64String, Id64Array>;
+  elementChildren?: Map<Id64String, Id64Array>;
 }
 
 export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCache {
-  return sinon.createStubInstance(ModelsTreeIdsCache, {
-    getChildSubjectIds: sinon.stub<[string[]], Observable<string[]>>().callsFake((subjectIds) => {
-      return from(subjectIds).pipe(
+  return {
+    getChildSubjectIds: vi.fn(({ parentSubjectIds }: { parentSubjectIds: Id64Arg; excludeIfOnlyExcludedClasses?: boolean }) => {
+      return from(Id64.iterable(parentSubjectIds)).pipe(
         concatMap((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         toArray(),
       );
     }),
-    getChildSubjectModelIds: sinon.stub(),
-    getSubjectModelIds: sinon.stub<[string[]], Observable<string[]>>().callsFake((subjectIds) => {
-      return from(subjectIds).pipe(
+    canHaveHiddenChildren: vi.fn(() => false),
+    getChildSubjectModelIds: vi.fn(),
+    getSubjectModelIds: vi.fn((subjectIds: Id64Arg) => {
+      return from(Id64.iterable(subjectIds)).pipe(
         expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         concatMap((id) => props?.subjectModels?.get(id) ?? EMPTY),
         toArray(),
       );
     }),
-    getModelCategories: sinon.stub<[Id64String], Observable<Id64Array>>().callsFake((modelId) => {
-      return of(props?.modelCategories?.get(modelId) ?? []);
+    getCategories: vi.fn(({ modelId }: { modelId: Id64String; includeOnlyIfCategoryOfTopMostElement?: boolean }) => {
+      return of(new Set(props?.modelCategories?.get(modelId) ?? []));
     }),
-    getChildrenTree: sinon.stub<[{ elementIds: Id64Arg }], Observable<ChildrenTree>>().callsFake(() => {
-      return of(new Map());
-    }),
-    getAllChildrenCount: sinon.stub<[{ elementIds: Id64Arg }], Observable<Map<Id64String, number>>>().callsFake(() => {
-      return of(new Map());
-    }),
-    getAllCategories: sinon.stub<[], Observable<Id64Set>>().callsFake(() => {
+    getAllCategoriesOfElements: vi.fn(() => {
       const result = new Set<Id64String>();
-      props?.modelCategories?.forEach((categories) => categories.forEach((category) => result.add(category)));
+      for (const categories of props?.modelCategories?.values() ?? []) {
+        categories.forEach((category) => {
+          result.add(category);
+        });
+      }
       return of(result);
     }),
-    getCategoryElementsCount: sinon.stub<[Id64String, Id64String], Observable<number>>().callsFake((_, categoryId) => {
-      return of(props?.categoryElements?.get(categoryId)?.length ?? 0);
+    getDescendantsCounts: vi.fn(({ categoryId, parentElementId }: { modelId: Id64String; categoryId?: Id64String; parentElementId?: Id64String }) => {
+      if (parentElementId) {
+        const children = props?.elementChildren?.get(parentElementId) ?? [];
+        if (children.length === 0) {
+          return of(categoryId ? [{ categoryId, count: 0 }] : []);
+        }
+        // When querying by parentElementId, return all children grouped under the parent's category
+        const parentCategory = [...(props?.categoryElements?.entries() ?? [])].find(([, elements]) => elements.includes(parentElementId))?.[0];
+        return of([{ categoryId: parentCategory ?? categoryId ?? "0x0", count: children.length }]);
+      }
+      if (categoryId) {
+        const count = props?.categoryElements?.get(categoryId)?.length ?? 0;
+        if (count === 0) {
+          return of([{ categoryId, count: 0 }]);
+        }
+        return of([{ categoryId, count }]);
+      }
+      return of([]);
     }),
-    hasSubModel: sinon.stub<[Id64String], Observable<boolean>>().callsFake(() => of(false)),
-    getCategoriesModeledElements: sinon.stub<[Id64String, Id64Arg], Observable<Id64Array>>().callsFake(() => of([])),
-  });
+    getChildElements: vi.fn(() => {
+      return of([]);
+    }),
+    categoryHasParentElements: vi.fn(() => of(false)),
+    getSubModelsUnderElement: vi.fn(() => of([])),
+    getSubModels: vi.fn(() => EMPTY),
+    hasSubModels: vi.fn(() => of(false)),
+    [Symbol.dispose]: vi.fn(),
+  } as unknown as ModelsTreeIdsCache;
 }
 
-export function createSubjectHierarchyNode(props?: { ids?: Id64Arg; parentKeys?: HierarchyNodeKey[] }): NonGroupingHierarchyNode {
+export function createSubjectHierarchyNode(props?: { ids?: Id64Arg; parentKeys?: InstanceKey[] }): NonGroupingHierarchyNode {
   const instanceKeys = new Array<InstanceKey>();
   for (const id of props?.ids ? Id64.iterable(props.ids) : []) {
-    instanceKeys.push({ className: "Bis:Subject", id });
+    instanceKeys.push({ className: CLASS_NAME_Subject, id });
   }
   return {
     key: {
@@ -134,23 +178,30 @@ export function createSubjectHierarchyNode(props?: { ids?: Id64Arg; parentKeys?:
     },
     children: false,
     label: "",
-    parentKeys: props?.parentKeys ?? [],
+    parentKeys: props?.parentKeys ? props.parentKeys.map((parentKey) => ({ type: "instances", instanceKeys: [parentKey] })) : [],
     extendedData: {
-      isSubject: true,
+      type: "subject",
     },
   };
 }
-export function createModelHierarchyNode(props?: { modelId?: Id64String; hasChildren?: boolean; parentKeys?: HierarchyNodeKey[] }): NonGroupingHierarchyNode {
+export function createModelHierarchyNode(props?: {
+  modelId?: Id64String;
+  hasChildren?: boolean;
+  parentKeys?: InstanceKey[];
+  search?: NonGroupingHierarchyNode["search"];
+  className?: EC.FullClassNameDotNotation;
+}): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:Model", id: props?.modelId ?? "" }],
+      instanceKeys: [{ className: props?.className ?? CLASS_NAME_Model, id: props?.modelId ?? "" }],
     },
     children: !!props?.hasChildren,
     label: "",
-    parentKeys: props?.parentKeys ?? [],
+    parentKeys: props?.parentKeys ? props.parentKeys.map((parentKey) => ({ type: "instances", instanceKeys: [parentKey] })) : [],
+    search: props?.search,
     extendedData: {
-      isModel: true,
+      type: "model",
       modelId: props?.modelId ?? "0x1",
     },
   };
@@ -160,30 +211,32 @@ export function createCategoryHierarchyNode({
   categoryId,
   hasChildren,
   parentKeys,
-  filtering,
+  search,
+  parentElementsPath,
 }: {
   modelId?: Id64String;
   categoryId?: Id64Arg;
   hasChildren?: boolean;
-  parentKeys?: HierarchyNodeKey[];
-  filtering?: HierarchyNode["filtering"];
+  parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
+  search?: NonGroupingHierarchyNode["search"];
+  parentElementsPath?: ParentElementsPath;
 }): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
       instanceKeys:
         typeof categoryId === "string"
-          ? [{ className: "bis:SpatialCategory", id: categoryId ?? "" }]
-          : [...(categoryId ?? [])].map((id) => ({ className: "bis:SpatialCategory", id })),
+          ? [{ className: CLASS_NAME_SpatialCategory, id: categoryId ?? "" }]
+          : [...(categoryId ?? [])].map((id) => ({ className: CLASS_NAME_SpatialCategory, id })),
     },
     children: !!hasChildren,
     label: "",
-    parentKeys: parentKeys ?? [],
-    filtering,
+    parentKeys: parentKeys ? parentKeys.map((parentKey) => ("type" in parentKey ? parentKey : { type: "instances", instanceKeys: [parentKey] })) : [],
+    search,
     extendedData: {
-      isCategory: true,
-      modelId: modelId ?? "0x1",
-      categoryId: categoryId ?? "0x2",
+      type: "category",
+      modelIds: [modelId ?? "0x1"],
+      parentElementsPath: parentElementsPath ?? [],
     },
   };
 }
@@ -192,23 +245,27 @@ export function createElementHierarchyNode(props: {
   categoryId: Id64String | undefined;
   hasChildren?: boolean;
   elementId?: Id64String;
-  parentKeys?: HierarchyNodeKey[];
-  filtering?: HierarchyNode["filtering"];
-  childrenCount?: number;
+  parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
+  search?: NonGroupingHierarchyNode["search"];
+  parentElementsPath?: ParentElementsPath;
+  className?: EC.FullClassNameDotNotation;
 }): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:GeometricalElement3d", id: props.elementId ?? "" }],
+      instanceKeys: [{ className: props.className ?? CLASS_NAME_GeometricElement3d, id: props.elementId ?? "" }],
     },
     children: !!props.hasChildren,
     label: "",
-    filtering: props.filtering,
-    parentKeys: props.parentKeys ?? [],
+    search: props.search,
+    parentKeys: props.parentKeys
+      ? props.parentKeys.map((parentKey) => ("type" in parentKey ? parentKey : { type: "instances", instanceKeys: [parentKey] }))
+      : [],
     extendedData: {
+      type: "element",
       modelId: props.modelId,
       categoryId: props.categoryId,
-      childrenCount: props.childrenCount !== undefined ? props.childrenCount : undefined,
+      parentElementsPath: props.parentElementsPath ?? [],
     },
   };
 }
@@ -220,12 +277,16 @@ export function createClassGroupingHierarchyNode({
   ...props
 }: {
   elements: Id64Array;
-  className?: string;
-  parentKeys?: HierarchyNodeKey[];
+  className?: EC.FullClassNameDotNotation;
+  parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   modelId: Id64String;
   categoryId: Id64String;
+  hasDirectNonSearchTargets?: boolean;
+  hasSearchTargetAncestor?: boolean;
+  parentElementsPath?: ParentElementsPath;
+  childrenWhichAreParents?: Set<Id64String>;
 }): GroupingHierarchyNode & { key: ClassGroupingNodeKey } {
-  const className = props.className ?? "Bis:Element";
+  const className = props.className ?? CLASS_NAME_Element;
   return {
     key: {
       type: "class-grouping",
@@ -234,7 +295,76 @@ export function createClassGroupingHierarchyNode({
     children: !!elements?.length,
     groupedInstanceKeys: elements ? elements.map((id) => ({ className, id })) : [],
     label: "",
-    parentKeys: parentKeys ?? [],
-    extendedData: { categoryId, modelId },
+    parentKeys: parentKeys ? parentKeys.map((parentKey) => ("type" in parentKey ? parentKey : { type: "instances", instanceKeys: [parentKey] })) : [],
+    extendedData: {
+      categoryId,
+      modelId,
+      parentElementsPath: props.parentElementsPath ?? [],
+      childrenWhichAreParents: props.childrenWhichAreParents ?? new Set(),
+      ...(props.hasDirectNonSearchTargets ? { hasDirectNonSearchTargets: props.hasDirectNonSearchTargets } : {}),
+      ...(props.hasSearchTargetAncestor ? { hasSearchTargetAncestor: props.hasSearchTargetAncestor } : {}),
+    },
   };
+}
+
+export function createAccessAndCache({
+  imodelConnection,
+  hierarchyConfig,
+}: {
+  imodelConnection: IModelConnection;
+  hierarchyConfig?: ModelsTreeHierarchyConfiguration;
+}) {
+  const imodelAccess = createIModelAccess(imodelConnection);
+  const mergedConfig = mergeWithDefaults({
+    defaults: defaultHierarchyConfiguration,
+    overrides: hierarchyConfig,
+  });
+  const baseIdsCache = new BaseIdsCache({
+    queryExecutor: imodelAccess,
+    elementClassName: mergedConfig.elements.baseClass,
+    type: "3d",
+    excludedElementClassNames: mergedConfig.elements.excludedClasses,
+  });
+  const idsCache = new ModelsTreeIdsCache({
+    queryExecutor: imodelAccess,
+    hierarchyConfig: mergedConfig,
+    baseIdsCache,
+  });
+  return { imodelAccess, idsCache };
+}
+
+export function createVisibilityTestData(props: {
+  imodelConnection: IModelConnection;
+  hierarchyConfig?: ModelsTreeHierarchyConfiguration;
+  visibleByDefault?: boolean;
+  imodelAccess: IModelAccess;
+  idsCache: ModelsTreeIdsCache;
+}) {
+  const { idsCache, imodelAccess, imodelConnection, hierarchyConfig, visibleByDefault } = props;
+  const hierarchyConfigWithDefaults = mergeWithDefaults({ defaults: defaultHierarchyConfiguration, overrides: hierarchyConfig });
+  const viewport = createTreeWidgetTestingViewport({ iModel: imodelConnection, viewType: "3d", visibleByDefault });
+  const handler = createModelsTreeVisibilityHandler({ viewport, imodelAccess, idsCache });
+  const provider = createProvider({ hierarchyConfig: hierarchyConfigWithDefaults, idsCache, imodelAccess });
+  return {
+    handler,
+    provider,
+    viewport,
+    [Symbol.dispose]() {
+      handler[Symbol.dispose]();
+      provider[Symbol.dispose]();
+    },
+  };
+}
+
+function createProvider(props: {
+  idsCache: ModelsTreeIdsCache;
+  imodelAccess: ReturnType<typeof createIModelAccess>;
+  hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
+  searchPaths?: HierarchySearchTree[];
+}) {
+  return createIModelHierarchyProvider({
+    hierarchyDefinition: new ModelsTreeDefinition(props),
+    imodelAccess: props.imodelAccess,
+    ...(props.searchPaths ? { search: { paths: props.searchPaths } } : undefined),
+  });
 }

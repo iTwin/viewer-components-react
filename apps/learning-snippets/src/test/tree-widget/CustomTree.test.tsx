@@ -7,18 +7,16 @@
 import type { ComponentPropsWithoutRef } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { Tree, TreeRenderer } from "@itwin/tree-widget-react";
-import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
-import { createBisInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
+import { createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 // __PUBLISH_EXTRACT_END__
 import { afterAll, beforeAll, describe, it, vi } from "vitest";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { createStorage } from "@itwin/unified-selection";
-import { cleanup, render, waitFor } from "@testing-library/react";
 import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "test-utilities";
 import { buildIModel } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
-import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
+import { cleanup, getTestViewer, mockGetBoundingClientRect, render, TreeWidgetTestUtils, waitFor } from "./TestUtils.js";
 import { withEditTxn } from "@itwin/core-backend";
 
 describe("Tree widget", () => {
@@ -54,23 +52,21 @@ describe("Tree widget", () => {
         const getHierarchyDefinition: TreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
           // create a hierarchy definition that defines what should be shown in the tree
           // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/learning/imodel/HierarchyDefinition.md
-          const labelsQueryFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: imodelAccess });
-          const nodesQueryFactory = createNodesQueryClauseFactory({ imodelAccess, instanceLabelSelectClauseFactory: labelsQueryFactory });
           return createPredicateBasedHierarchyDefinition({
-            classHierarchyInspector: imodelAccess,
+            imodelAccess,
             hierarchy: {
               // For root nodes, select all BisCore.GeometricModel3d instances
-              rootNodes: async () => [
+              rootNodes: async ({ createSelectClause }) => [
                 {
                   fullClassName: "BisCore.GeometricModel3d",
                   query: {
                     ecsql: `
                       SELECT
-                        ${await nodesQueryFactory.createSelectClause({
+                        ${await createSelectClause({
                           ecClassId: { selector: "this.ECClassId" },
                           ecInstanceId: { selector: "this.ECInstanceId" },
                           nodeLabel: {
-                            selector: await labelsQueryFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
+                            of: { classAlias: "this", className: "BisCore.GeometricModel3d" },
                           },
                         })}
                       FROM BisCore.GeometricModel3d this
@@ -93,9 +89,8 @@ describe("Tree widget", () => {
               treeName="MyTree"
               imodel={imodel}
               selectionStorage={unifiedSelectionStorage}
-              getSchemaContext={getSchemaContext}
               getHierarchyDefinition={getHierarchyDefinition}
-              treeRenderer={(props) => <TreeRenderer {...props} />}
+              treeRenderer={(props) => <TreeRenderer {...props} treeLabel="My tree" />}
             />
           );
         }

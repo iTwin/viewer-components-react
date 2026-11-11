@@ -10,6 +10,7 @@
     "noUnusedParameters": false,
     "rootDir": "./src",
     "lib": ["DOM", "ESNext"],
+    "jsx": "react-jsx",
     "outDir": "lib"
   },
   "include": ["src"]

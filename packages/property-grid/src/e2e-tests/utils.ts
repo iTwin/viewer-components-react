@@ -44,3 +44,8 @@ export async function takeScreenshot(page: Page, component: Locator) {
   assert(boundingBox);
   await expect(page).toHaveScreenshot({ clip: boundingBox });
 }
+
+export async function expandNode(page: Page, node: Locator) {
+  await node.focus();
+  await page.keyboard.press("ArrowRight");
+}

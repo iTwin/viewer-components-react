@@ -7,7 +7,7 @@ FROM mcr.microsoft.com/playwright:v1.56.1-noble
 ARG PACKAGE_NAME=""
 ARG TEST_VIEWER_DIST=""
 
-# Install pnpm
+# Setup corepack
 RUN corepack enable
 
 # Copy the local files to the container
@@ -23,7 +23,7 @@ COPY /packages/${PACKAGE_NAME} ./packages/${PACKAGE_NAME}
 WORKDIR /workspaces/viewer-components-react/packages/${PACKAGE_NAME}
 
 # Install dependencies
-RUN pnpm install --filter .
+RUN pnpm install
 RUN pnpm playwright install chromium
 
 # Set the entry point to run the tests

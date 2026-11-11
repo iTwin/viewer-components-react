@@ -6,7 +6,6 @@
  * @module QuantityFormat
  */
 
-import * as React from "react";
 import type { SelectOption } from "@itwin/itwinui-react";
 import { Select } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../../useTranslation.js";
