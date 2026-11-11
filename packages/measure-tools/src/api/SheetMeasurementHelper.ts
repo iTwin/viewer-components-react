@@ -766,7 +766,7 @@ export namespace SheetMeasurementsHelper {
     if (!viewport)
       return true;
     for (const drawing of DrawingDataCache.getInstance().getSheetDrawingDataForViewport(viewport)) {
-      if (drawing.type && forbiddenDrawingTypes.includes(drawing.type)) {
+      if (drawing.type !== undefined && forbiddenDrawingTypes.some((type) => type === Number(drawing.type))) {
         if (SheetMeasurementsHelper.checkIfInDrawing(point, Point2d.fromJSON(drawing.origin), Point2d.fromJSON(drawing.bBoxHigh))) {
           return false;
         }
