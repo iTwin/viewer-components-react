@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, from, lastValueFrom, mergeMap, toArray } from "rxjs";
+import { bufferCount, firstValueFrom, from, mergeMap, reduce } from "rxjs";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import {
   createBisInstanceLabelSelectClauseFactory,
@@ -62,8 +62,8 @@ export class InstanceLabelsProvider {
 
   /** Combines per-class selects with `UNION ALL`, with at most 500 selects per query. */
   async #queryLabels(idsByClass: Map<string, Id64String[]>): Promise<Map<string, Map<Id64String, string>>> {
-    const selects = await Promise.all(
-      [...idsByClass.keys()].map(async (fullClassName) => {
+    const labelsByClass = from(idsByClass.keys()).pipe(
+      mergeMap(async (fullClassName) => {
         const { schemaName, className } = parseFullClassName(fullClassName);
         const labelSelectClause = await this.#labelSelectClauseFactory.createSelectClause({ classAlias: "this", className: fullClassName });
         return {
@@ -75,8 +75,6 @@ export class InstanceLabelsProvider {
           bindings: [{ type: "idset", value: idsByClass.get(fullClassName) ?? [] } satisfies ECSqlBinding],
         };
       }),
-    );
-    const stream = from(selects).pipe(
       bufferCount(500),
       mergeMap(
         (batch) =>
@@ -92,18 +90,18 @@ export class InstanceLabelsProvider {
         2,
       ),
       mergeMap(async (row) => ({ className: row.className, id: row.id, label: await this.#formatLabel(row.label) })),
+      reduce((labels, { className, id, label }) => {
+        let classLabels = labels.get(className);
+        if (!classLabels) {
+          classLabels = new Map();
+          labels.set(className, classLabels);
+        }
+        classLabels.set(id, label);
+        return labels;
+      }, new Map<string, Map<Id64String, string>>()),
     );
 
-    const labelsByClass = new Map<string, Map<Id64String, string>>();
-    for (const { className, id, label } of await lastValueFrom(stream.pipe(toArray()))) {
-      let labels = labelsByClass.get(className);
-      if (!labels) {
-        labels = new Map();
-        labelsByClass.set(className, labels);
-      }
-      labels.set(id, label);
-    }
-    return labelsByClass;
+    return firstValueFrom(labelsByClass);
   }
 
   async #formatLabel(rawLabel: string | undefined): Promise<string> {
