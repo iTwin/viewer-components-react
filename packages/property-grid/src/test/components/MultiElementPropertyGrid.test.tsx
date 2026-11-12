@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { exhaustMap, from, map, Subject } from "rxjs";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
@@ -22,7 +23,6 @@ import {
   waitFor,
 } from "../TestUtils.js";
 
-import type { MockInstance } from "vitest";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { EventArgs } from "@itwin/presentation-shared";
@@ -35,14 +35,22 @@ describe("<MultiElementPropertyGrid />", () => {
   } as IModelConnection;
 
   let getDataStub: ReturnType<typeof vi.spyOn>;
-  let getLabelsStub: MockInstance<InstanceLabelsProvider["getLabelsPage"]>;
   const buildPage = async (keys: InstanceKey[]) => keys.map((instanceKey) => ({ instanceKey, label: buildLabel(instanceKey) }));
+  let getLabelsStub: ReturnType<typeof vi.fn<typeof buildPage>>;
   let selectionStorage: ReturnType<typeof stubSelectionStorage>;
   const getParentInstanceKeyStub = vi.fn<(key: InstanceKey) => Promise<InstanceKey | undefined>>();
 
   beforeEach(() => {
     getDataStub = vi.spyOn(PresentationPropertyDataProvider.prototype, "getData");
-    getLabelsStub = vi.spyOn(InstanceLabelsProvider.prototype, "getLabelsPage").mockImplementation(buildPage);
+    getLabelsStub = vi.fn(buildPage);
+    vi.spyOn(InstanceLabelsProvider.prototype, "createSession").mockImplementation((keys) => {
+      const loadRequests = new Subject<void>();
+      const pages = loadRequests.pipe(
+        exhaustMap(() => from(getLabelsStub(keys))),
+        map((page) => ({ page, hasMore: false })),
+      );
+      return { loadRequests, pages };
+    });
 
     vi.spyOn(PropertyGridManager, "translate").mockImplementation((key) => key);
 

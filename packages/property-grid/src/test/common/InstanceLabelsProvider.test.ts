@@ -24,12 +24,14 @@ import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { PresentationLabelsProvider } from "@itwin/presentation-components";
 import * as interop from "@itwin/presentation-core-interop";
 import * as shared from "@itwin/presentation-shared";
-import { InstanceLabelsProvider } from "../../property-grid-react/common/InstanceLabelsProvider.js";
+import { groupInstanceKeysByClass, InstanceLabelsProvider } from "../../property-grid-react/common/InstanceLabelsProvider.js";
+import { createResolvablePromise } from "../TestUtils.js";
 
 import type { EditTxn, IModelDb } from "@itwin/core-backend";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
+import type { LabeledInstanceKey } from "../../property-grid-react/common/InstanceLabelsProvider.js";
 
 vi.mock("@itwin/presentation-core-interop", async (importOriginal) => {
   const actual = await importOriginal<typeof interop>();
@@ -73,9 +75,50 @@ describe("InstanceLabelsProvider", () => {
     return keys as TKeys;
   }
 
+  function createTestSession(provider: InstanceLabelsProvider, keys: InstanceKey[], pageSize: number) {
+    const distinctKeys = [...groupInstanceKeysByClass(keys).values()].flatMap((classKeys) => [...classKeys.values()]);
+    const { loadRequests: requests, pages } = provider.createSession(distinctKeys, pageSize);
+    let hasMore = distinctKeys.length > 0;
+    let resolvePage: (page: LabeledInstanceKey[]) => void;
+    let rejectPage: (error: unknown) => void;
+    let pending: Promise<LabeledInstanceKey[]> | undefined;
+    const subscription = pages.subscribe({
+      next: (result) => {
+        hasMore = result.hasMore;
+        resolvePage(result.page);
+      },
+      error: (error: unknown) => rejectPage(error),
+    });
+    return {
+      get hasMore() {
+        return hasMore;
+      },
+      async loadNextPage() {
+        if (pending) {
+          return pending;
+        }
+        if (!hasMore) {
+          return [];
+        }
+        pending = new Promise<LabeledInstanceKey[]>((resolve, reject) => {
+          resolvePage = resolve;
+          rejectPage = reject;
+        }).finally(() => {
+          pending = undefined;
+          if (!hasMore) {
+            subscription.unsubscribe();
+            requests.complete();
+          }
+        });
+        requests.next();
+        return pending;
+      },
+    };
+  }
+
   /** Verifies that both the query-based provider and Presentation produce the `expected` labels for `keys`. */
   async function expectLabels(keys: InstanceKey[], expected: string[]) {
-    const page = await new InstanceLabelsProvider({ imodel }).getLabelsPage(keys, { offset: 0, limit: keys.length });
+    const page = await createTestSession(new InstanceLabelsProvider({ imodel }), keys, keys.length).loadNextPage();
     const queryLabels = keys.map(
       (key) =>
         page.find(
@@ -153,7 +196,7 @@ describe("InstanceLabelsProvider", () => {
     const keys = await buildIModel((txn) => ({ subject: insertSubject({ txn, codeValue: "subject" }) }));
     const missing = { className: "BisCore.Subject", id: "0xffff" };
 
-    const page = await new InstanceLabelsProvider({ imodel }).getLabelsPage([missing, keys.subject, missing], { offset: 0, limit: 100 });
+    const page = await createTestSession(new InstanceLabelsProvider({ imodel }), [missing, keys.subject, missing], 100).loadNextPage();
     expect(page).toEqual([{ instanceKey: keys.subject, label: "subject" }]);
   });
 
@@ -167,7 +210,7 @@ describe("InstanceLabelsProvider", () => {
     });
 
     const labelsById = new Map(keys.elements.map((key, index) => [key.id, `${index} ${idSuffix(key.id)}`]));
-    const page = await new InstanceLabelsProvider({ imodel }).getLabelsPage(keys.elements, { offset: 0, limit: 100 });
+    const page = await createTestSession(new InstanceLabelsProvider({ imodel }), keys.elements, 100).loadNextPage();
     expect(page).toHaveLength(100);
     for (const item of page) {
       expect(item.label).toBe(labelsById.get(item.instanceKey.id));
@@ -178,7 +221,7 @@ describe("InstanceLabelsProvider", () => {
     await buildIModel(() => ({}));
     const createQueryReader = vi.spyOn(imodel, "createQueryReader");
 
-    const page = await new InstanceLabelsProvider({ imodel }).getLabelsPage([], { offset: 0, limit: 100 });
+    const page = await createTestSession(new InstanceLabelsProvider({ imodel }), [], 100).loadNextPage();
     expect(page).toEqual([]);
     expect(createQueryReader).not.toHaveBeenCalled();
   });
@@ -190,10 +233,12 @@ describe("InstanceLabelsProvider", () => {
       tied: insertSubject({ txn, codeValue: "different-code", userLabel: "alpha" }),
       middle: insertSpatialCategory({ txn, codeValue: "Beta" }),
     }));
+    const createQueryReader = vi.spyOn(imodel, "createQueryReader");
     const provider = new InstanceLabelsProvider({ imodel });
     const selection = [keys.last, keys.middle, keys.tied, keys.first, keys.first, { className: "BisCore.Subject", id: "0xffff" }];
-    const first = await provider.getLabelsPage(selection, { offset: 0, limit: 2 });
-    const second = await provider.getLabelsPage(selection, { offset: 2, limit: 2 });
+    const session = createTestSession(provider, selection, 2);
+    const first = await session.loadNextPage();
+    const second = await session.loadNextPage();
     expect(first).toEqual([
       { instanceKey: keys.first, label: "alpha" },
       { instanceKey: keys.tied, label: "alpha" },
@@ -202,8 +247,178 @@ describe("InstanceLabelsProvider", () => {
       { instanceKey: keys.middle, label: "Beta" },
       { instanceKey: keys.last, label: "Zulu" },
     ]);
-    expect(await provider.getLabelsPage(selection, { offset: 4, limit: 2 })).toEqual([]);
-    expect(await provider.getLabelsPage([], { offset: 0, limit: 100 })).toEqual([]);
+    expect(await session.loadNextPage()).toEqual([]);
+    expect(session.hasMore).toBe(false);
+    expect(await session.loadNextPage()).toEqual([]);
+    expect(createQueryReader).toHaveBeenCalledTimes(3);
+    expect(await createTestSession(provider, [], 100).loadNextPage()).toEqual([]);
+  });
+
+  it("prepares each selection once and shares overlapping page requests", async () => {
+    await buildIModel(() => ({}));
+    const keys = Array.from({ length: 3 }, (_, index) => ({ className: "Test.Class", id: `0x${index + 1}` }));
+    const createSelectClause = vi.fn(async () => "NULL");
+    vi.mocked(shared.createBisInstanceLabelSelectClauseFactory).mockReturnValue({ createSelectClause });
+    const gate = createResolvablePromise<void>();
+    const createQueryReader = vi.fn<shared.ECSqlQueryExecutor["createQueryReader"]>().mockImplementation((query) => {
+      const offsetBinding = query.bindings?.at(-1);
+      if (!offsetBinding || offsetBinding.type !== "long" || typeof offsetBinding.value !== "number") {
+        throw new Error("Missing offset binding");
+      }
+      const offset = offsetBinding.value;
+      return (async function* () {
+        if (offset === 0) {
+          await gate.promise;
+        }
+        for (const key of keys.slice(offset, offset + 2)) {
+          yield { className: key.className, id: key.id, label: key.id };
+        }
+      })();
+    });
+    vi.mocked(interop.createECSqlQueryExecutor).mockReturnValue({ createQueryReader });
+
+    const provider = new InstanceLabelsProvider({ imodel });
+    const session = createTestSession(provider, keys, 2);
+    expect(session.hasMore).toBe(true);
+    const first = session.loadNextPage();
+    const overlapping = session.loadNextPage();
+    await vi.waitFor(() => expect(createQueryReader).toHaveBeenCalledTimes(1));
+    await gate.resolve();
+    expect(await first).toEqual(await overlapping);
+    expect(session.hasMore).toBe(true);
+    expect(await session.loadNextPage()).toEqual([{ instanceKey: keys[2], label: keys[2].id }]);
+    expect(session.hasMore).toBe(false);
+    expect(await session.loadNextPage()).toEqual([]);
+    expect(createQueryReader).toHaveBeenCalledTimes(2);
+    expect(createQueryReader.mock.calls.map(([query]) => query.bindings?.at(-1))).toEqual([
+      { type: "long", value: 0 },
+      { type: "long", value: 2 },
+    ]);
+    expect(createSelectClause).toHaveBeenCalledTimes(2);
+
+    const anotherSession = createTestSession(provider, keys, 2);
+    expect(await anotherSession.loadNextPage()).toEqual(await first);
+    expect(createSelectClause).toHaveBeenCalledTimes(4);
+  });
+
+  it("ignores overlapping stream requests and stops querying after the last page", async () => {
+    await buildIModel(() => ({}));
+    const keys = Array.from({ length: 3 }, (_, index) => ({ className: "Test.Class", id: `0x${index + 1}` }));
+    const createSelectClause = vi.fn(async () => "NULL");
+    vi.mocked(shared.createBisInstanceLabelSelectClauseFactory).mockReturnValue({ createSelectClause });
+    const gate = createResolvablePromise<void>();
+    const createQueryReader = vi.fn<shared.ECSqlQueryExecutor["createQueryReader"]>().mockImplementation((query) => {
+      const offsetBinding = query.bindings?.at(-1);
+      if (!offsetBinding || offsetBinding.type !== "long" || typeof offsetBinding.value !== "number") {
+        throw new Error("Missing offset binding");
+      }
+      const offset = offsetBinding.value;
+      return (async function* () {
+        if (offset === 0) {
+          await gate.promise;
+        }
+        for (const key of keys.slice(offset, offset + 2)) {
+          yield { className: key.className, id: key.id, label: key.id };
+        }
+      })();
+    });
+    vi.mocked(interop.createECSqlQueryExecutor).mockReturnValue({ createQueryReader });
+
+    const { loadRequests: requests, pages: pageStream } = new InstanceLabelsProvider({ imodel }).createSession(keys, 2);
+    const pages = vi.fn<(result: { page: LabeledInstanceKey[]; hasMore: boolean }) => void>();
+    const subscription = pageStream.subscribe(pages);
+    requests.next();
+    requests.next();
+    await vi.waitFor(() => expect(createQueryReader).toHaveBeenCalledOnce());
+    await gate.resolve();
+    await vi.waitFor(() => expect(pages).toHaveBeenCalledTimes(1));
+    expect(pages.mock.calls[0][0]).toEqual({
+      page: keys.slice(0, 2).map((instanceKey) => ({ instanceKey, label: instanceKey.id })),
+      hasMore: true,
+    });
+    requests.next();
+    await vi.waitFor(() => expect(pages).toHaveBeenCalledTimes(2));
+    expect(pages.mock.calls[1][0]).toEqual({ page: [{ instanceKey: keys[2], label: keys[2].id }], hasMore: false });
+    requests.next();
+    expect(createQueryReader).toHaveBeenCalledTimes(2);
+    expect(createSelectClause).toHaveBeenCalledTimes(2);
+    subscription.unsubscribe();
+    requests.complete();
+  });
+
+  it("does not deliver a page after the selection subscription is cancelled", async () => {
+    await buildIModel(() => ({}));
+    const key = { className: "Test.Class", id: "0x1" };
+    vi.mocked(shared.createBisInstanceLabelSelectClauseFactory).mockReturnValue({ createSelectClause: async () => "NULL" });
+    const gate = createResolvablePromise<void>();
+    const createQueryReader = vi.fn<shared.ECSqlQueryExecutor["createQueryReader"]>().mockImplementation(() =>
+      (async function* () {
+        await gate.promise;
+        yield { className: key.className, id: key.id, label: "label" };
+      })(),
+    );
+    vi.mocked(interop.createECSqlQueryExecutor).mockReturnValue({ createQueryReader });
+
+    const { loadRequests: requests, pages } = new InstanceLabelsProvider({ imodel }).createSession([key], 1);
+    const onPage = vi.fn();
+    const subscription = pages.subscribe(onPage);
+    requests.next();
+    await vi.waitFor(() => expect(createQueryReader).toHaveBeenCalledOnce());
+    subscription.unsubscribe();
+    await gate.resolve();
+    expect(onPage).not.toHaveBeenCalled();
+    requests.next();
+    expect(createQueryReader).toHaveBeenCalledOnce();
+    requests.complete();
+  });
+
+  it("propagates a query failure and ends the session", async () => {
+    await buildIModel(() => ({}));
+    const key = { className: "Test.Class", id: "0x1" };
+    vi.mocked(shared.createBisInstanceLabelSelectClauseFactory).mockReturnValue({ createSelectClause: async () => "NULL" });
+    const createQueryReader = vi
+      .fn<shared.ECSqlQueryExecutor["createQueryReader"]>()
+      .mockImplementationOnce(() => {
+        throw new Error("Query failed");
+      })
+      .mockImplementation(() =>
+        (async function* () {
+          yield { className: key.className, id: key.id, label: "label" };
+        })(),
+      );
+    vi.mocked(interop.createECSqlQueryExecutor).mockReturnValue({ createQueryReader });
+
+    const { loadRequests: requests, pages } = new InstanceLabelsProvider({ imodel }).createSession([key], 1);
+    const failure = new Promise<unknown>((resolve) => {
+      pages.subscribe({ error: resolve });
+    });
+    requests.next();
+    expect(await failure).toEqual(new Error("Query failed"));
+    requests.next();
+    expect(createQueryReader).toHaveBeenCalledOnce();
+  });
+
+  it("propagates a select clause failure and ends the session", async () => {
+    await buildIModel(() => ({}));
+    const key = { className: "Test.Class", id: "0x1" };
+    const createSelectClause = vi.fn().mockRejectedValueOnce(new Error("Select failed")).mockResolvedValue("NULL");
+    vi.mocked(shared.createBisInstanceLabelSelectClauseFactory).mockReturnValue({ createSelectClause });
+    const createQueryReader = vi.fn<shared.ECSqlQueryExecutor["createQueryReader"]>().mockImplementation(() =>
+      (async function* () {
+        yield { className: key.className, id: key.id, label: "label" };
+      })(),
+    );
+    vi.mocked(interop.createECSqlQueryExecutor).mockReturnValue({ createQueryReader });
+
+    const { loadRequests: requests, pages } = new InstanceLabelsProvider({ imodel }).createSession([key], 1);
+    const failure = new Promise<unknown>((resolve) => {
+      pages.subscribe({ error: resolve });
+    });
+    requests.next();
+    expect(await failure).toEqual(new Error("Select failed"));
+    expect(createQueryReader).not.toHaveBeenCalled();
+    requests.next();
+    expect(createSelectClause).toHaveBeenCalledTimes(2);
   });
 
   it("sorts and pages more than 500 classes in a real query", async () => {
@@ -236,9 +451,13 @@ describe("InstanceLabelsProvider", () => {
     });
     imodel = imodelConnection;
     const provider = new InstanceLabelsProvider({ imodel });
-    const first = await provider.getLabelsPage(keys, { offset: 0, limit: 100 });
+    const session = createTestSession(provider, keys, 100);
+    const first = await session.loadNextPage();
     expect(first.map(({ instanceKey }) => instanceKey)).toEqual(keys.toReversed().slice(0, 100));
-    const last = await provider.getLabelsPage(keys, { offset: 500, limit: 100 });
+    for (let i = 0; i < 4; ++i) {
+      await session.loadNextPage();
+    }
+    const last = await session.loadNextPage();
     expect(last).toEqual([{ instanceKey: keys[0], label: `0501 ${idSuffix(keys[0].id)}` }]);
   });
 
@@ -257,7 +476,7 @@ describe("InstanceLabelsProvider", () => {
     });
     vi.mocked(interop.createECSqlQueryExecutor).mockReturnValue({ createQueryReader });
 
-    const page = await new InstanceLabelsProvider({ imodel }).getLabelsPage(keys, { offset: 0, limit: 100 });
+    const page = await createTestSession(new InstanceLabelsProvider({ imodel }), keys, 100).loadNextPage();
 
     const expected = classCount === 500 ? { queryCount: 1, classesPerCte: [500] } : { queryCount: 1, classesPerCte: [500, 1] };
     expect(page).toEqual(keys.slice(0, 100).map((instanceKey) => ({ instanceKey, label: instanceKey.className })));

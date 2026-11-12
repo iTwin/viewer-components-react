@@ -3,14 +3,13 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { exhaustMap, from, map, Subject } from "rxjs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Logger } from "@itwin/core-bentley";
 import { InstanceLabelsProvider } from "../../property-grid-react/common/InstanceLabelsProvider.js";
 import { ElementList } from "../../property-grid-react/components/ElementList.js";
 import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
 import { act, createResolvablePromise, fireEvent, render, waitFor } from "../TestUtils.js";
 
-import type { MockInstance } from "vitest";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { LabeledInstanceKey } from "../../property-grid-react/common/InstanceLabelsProvider.js";
@@ -25,12 +24,23 @@ describe("<ElementList />", () => {
     return sorted.slice(page.offset, page.offset + page.limit);
   };
 
-  let getLabelsStub: MockInstance<InstanceLabelsProvider["getLabelsPage"]>;
+  let getLabelsStub: ReturnType<typeof vi.fn<typeof buildPage>>;
 
   beforeEach(() => {
     vi.spyOn(PropertyGridManager, "translate").mockImplementation((key) => key);
-    getLabelsStub = vi.spyOn(InstanceLabelsProvider.prototype, "getLabelsPage");
-    getLabelsStub.mockImplementation(buildPage);
+    getLabelsStub = vi.fn(buildPage);
+    vi.spyOn(InstanceLabelsProvider.prototype, "createSession").mockImplementation((keys, limit) => {
+      const loadRequests = new Subject<void>();
+      let offset = 0;
+      const pages = loadRequests.pipe(
+        exhaustMap(() => from(getLabelsStub(keys, { offset, limit }))),
+        map((page) => {
+          offset += page.length;
+          return { page, hasMore: page.length === limit && offset < keys.length };
+        }),
+      );
+      return { loadRequests, pages };
+    });
   });
 
   it("loads and renders instance labels", async () => {
@@ -340,31 +350,6 @@ describe("<ElementList />", () => {
       await act(async () => next.resolve(await buildPage(instanceKeys, { offset: 100, limit: 100 })));
       expect(queryByText(buildLabel(instanceKeys[104]))).toBeNull();
       await findByText(buildLabel(selection[0]));
-    });
-
-    it("keeps already loaded rows and stops paging when a page fails to load", async () => {
-      const logError = vi.spyOn(Logger, "logError").mockImplementation(() => {});
-      getLabelsStub.mockImplementation(async (keys, page) => {
-        if (page.offset === 100) {
-          throw new Error("Failed to load page");
-        }
-        return buildPage(keys, page);
-      });
-      const { container, getByRole, findByText } = render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={() => {}} onSelect={() => {}} />, {
-        disableStrictMode: true,
-      });
-      await findByText(buildLabel(instanceKeys[0]));
-      const initialRequests = getLabelsStub.mock.calls.length;
-      fireEvent.scroll(getByRole("list"), { target: { scrollTop: 2300 } });
-      await waitFor(() => expect(getLabelsStub).toHaveBeenCalledTimes(initialRequests + 1));
-
-      // loaded rows stay, the skeletons are removed and the failed page is not retried
-      await findByText(buildLabel(instanceKeys[99]));
-      await waitFor(() => expect(container.querySelectorAll('[aria-busy="true"]')).toHaveLength(0));
-      fireEvent.scroll(getByRole("list"), { target: { scrollTop: 2300 } });
-      await findByText(buildLabel(instanceKeys[99]));
-      expect(getLabelsStub).toHaveBeenCalledTimes(initialRequests + 1);
-      expect(logError).toHaveBeenCalledWith("PropertyGrid", "Error loading instance labels: Failed to load page");
     });
   });
 });

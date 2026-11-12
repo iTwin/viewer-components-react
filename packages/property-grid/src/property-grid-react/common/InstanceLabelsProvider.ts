@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concatMap, from, lastValueFrom, take, toArray } from "rxjs";
+import { concatMap, defer, EMPTY, exhaustMap, from, map, Subject, switchMap, take, toArray } from "rxjs";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import {
   createBisInstanceLabelSelectClauseFactory,
@@ -16,10 +16,11 @@ import {
   parseInstanceLabel,
 } from "@itwin/presentation-shared";
 
+import type { Observable } from "rxjs";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
-import type { ECSqlBinding, ECSqlQueryDef, ECSqlQueryExecutor, IInstanceLabelSelectClauseFactory, IPrimitiveValueFormatter } from "@itwin/presentation-shared";
+import type { ECSqlBinding, ECSqlQueryExecutor, IInstanceLabelSelectClauseFactory, IPrimitiveValueFormatter } from "@itwin/presentation-shared";
 
 const MAX_COMPOUND_SELECTS = 500;
 
@@ -30,6 +31,13 @@ export interface InstanceLabelsProviderProps {
 export interface LabeledInstanceKey {
   instanceKey: InstanceKey;
   label: string;
+}
+
+export interface InstanceLabelsSession {
+  /** Request a page after subscribing to `pages`. */
+  loadRequests: Subject<void>;
+  /** Page stream for a single subscriber. */
+  pages: Observable<{ page: LabeledInstanceKey[]; hasMore: boolean }>;
 }
 
 export function groupInstanceKeysByClass(instanceKeys: InstanceKey[]): Map<string, Map<Id64String, InstanceKey>> {
@@ -60,45 +68,72 @@ export class InstanceLabelsProvider {
     this.#valueFormatter = createDefaultValueFormatter();
   }
 
-  public async getLabelsPage(instanceKeys: InstanceKey[], page: { offset: number; limit: number }): Promise<LabeledInstanceKey[]> {
-    if (!Number.isInteger(page.offset) || page.offset < 0 || !Number.isInteger(page.limit) || page.limit < 1) {
-      throw new Error("Page offset must be a non-negative integer and limit must be a positive integer.");
-    }
-    if (instanceKeys.length === 0) {
-      return [];
-    }
-    const keysByClass = groupInstanceKeysByClass(instanceKeys);
-    const selects = await Promise.all(
-      [...keysByClass.keys()].map(async (fullClassName) => {
-        const { schemaName, className } = parseFullClassName(fullClassName);
-        const [label, sortLabel] = await Promise.all([
-          this.#labelSelectClauseFactory.createSelectClause({ classAlias: "this", className: fullClassName }),
-          this.#labelSelectClauseFactory.createSelectClause({
-            classAlias: "this",
-            className: fullClassName,
-            selectorsConcatenator: ECSql.createConcatenatedValueStringSelector,
-          }),
-        ]);
-        return `SELECT this.ECInstanceId AS id, '${fullClassName}' AS className, ${label} AS label, ${sortLabel} AS sortLabel
+  public createSession(distinctInstanceKeys: InstanceKey[], pageSize: number): InstanceLabelsSession {
+    const keysByClass = groupInstanceKeysByClass(distinctInstanceKeys);
+    const loadRequests = new Subject<void>();
+    const prepare = async () => {
+      const selects = await Promise.all(
+        [...keysByClass.keys()].map(async (fullClassName) => {
+          const { schemaName, className } = parseFullClassName(fullClassName);
+          const [label, sortLabel] = await Promise.all([
+            this.#labelSelectClauseFactory.createSelectClause({ classAlias: "this", className: fullClassName }),
+            this.#labelSelectClauseFactory.createSelectClause({
+              classAlias: "this",
+              className: fullClassName,
+              selectorsConcatenator: ECSql.createConcatenatedValueStringSelector,
+            }),
+          ]);
+          return `SELECT this.ECInstanceId AS id, '${fullClassName}' AS className, ${label} AS label, ${sortLabel} AS sortLabel
         FROM [${schemaName}].[${className}] AS this JOIN IdSet(?) AS ids ON ids.id = this.ECInstanceId`;
-      }),
-    );
-    const bindings: ECSqlBinding[] = [...keysByClass.values()].map((keys) => ({ type: "idset", value: [...keys.keys()] }));
-    const query = createSortedLabelsPageQuery(selects, bindings, page);
-    const reader = this.#queryExecutor.createQueryReader(query, { rowFormat: "ECSqlPropertyNames" });
-    return lastValueFrom(
-      from(reader).pipe(
-        take(page.limit),
-        concatMap(async (row): Promise<LabeledInstanceKey> => {
-          const instanceKey = keysByClass.get(row.className)?.get(row.id);
-          if (!instanceKey) {
-            throw new Error("Label query returned an instance outside the requested selection.");
-          }
-          return { instanceKey, label: await this.#formatLabel(row.label) };
         }),
-        toArray(),
-      ),
-    );
+      );
+      const bindings: ECSqlBinding[] = [...keysByClass.values()].map((keys) => ({ type: "idset", value: [...keys.keys()] }));
+      return createSortedLabelsPageQuery(selects, bindings);
+    };
+    const pages = defer(() => {
+      let offset = 0;
+      let hasMore = distinctInstanceKeys.length > 0;
+      let prepared: ReturnType<typeof prepare> | undefined;
+      return loadRequests.pipe(
+        exhaustMap(() => {
+          if (!hasMore) {
+            return EMPTY;
+          }
+          prepared ??= prepare();
+          return from(prepared).pipe(
+            switchMap((query) =>
+              defer(() =>
+                from(
+                  this.#queryExecutor.createQueryReader(
+                    {
+                      ...query,
+                      bindings: [...query.bindings, { type: "long", value: pageSize }, { type: "long", value: offset }],
+                    },
+                    { rowFormat: "ECSqlPropertyNames" },
+                  ),
+                ),
+              ).pipe(
+                take(pageSize),
+                concatMap(async (row): Promise<LabeledInstanceKey> => {
+                  const instanceKey = keysByClass.get(row.className)?.get(row.id);
+                  if (!instanceKey) {
+                    throw new Error("Label query returned an instance outside the requested selection.");
+                  }
+                  return { instanceKey, label: await this.#formatLabel(row.label) };
+                }),
+                toArray(),
+              ),
+            ),
+            map((page) => {
+              offset += page.length;
+              hasMore = page.length === pageSize && offset < distinctInstanceKeys.length;
+              return { page, hasMore };
+            }),
+          );
+        }),
+      );
+    });
+    return { loadRequests, pages };
   }
 
   async #formatLabel(rawLabel: string | undefined): Promise<string> {
@@ -106,12 +141,12 @@ export class InstanceLabelsProvider {
   }
 }
 
-function createSortedLabelsPageQuery(selects: string[], bindings: ECSqlBinding[], page: { offset: number; limit: number }): ECSqlQueryDef {
+function createSortedLabelsPageQuery(selects: string[], bindings: ECSqlBinding[]) {
   const { ctes, branches } = createBatchedLabelCtes(selects);
   return {
     ctes,
     ecsql: `SELECT id, className, label FROM (${branches.join(" UNION ALL ")}) ORDER BY LOWER(sortLabel), className, id LIMIT ? OFFSET ?`,
-    bindings: [...bindings, { type: "long", value: page.limit }, { type: "long", value: page.offset }],
+    bindings,
   };
 }
 

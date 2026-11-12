@@ -38,12 +38,12 @@ export interface ElementListProps {
 export function ElementList({ imodel, instanceKeys, onBack, onSelect, className }: ElementListProps) {
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const { rows, loadMore } = useInstanceLabels({ imodel, instanceKeys });
-
   React.useEffect(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;
     }
-  }, [instanceKeys]);
+    loadMore();
+  }, [imodel, instanceKeys, loadMore]);
 
   const title = `${PropertyGridManager.translate("element-list.title")} (${instanceKeys.length})`;
 

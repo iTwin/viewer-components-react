@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Logger } from "@itwin/core-bentley";
 import { groupInstanceKeysByClass, InstanceLabelsProvider } from "../common/InstanceLabelsProvider.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -25,59 +24,46 @@ interface UseInstanceLabelsResult {
 }
 
 /**
- * Loads labels for `instanceKeys` in sorted pages. The first page is loaded eagerly and subsequent ones on `loadMore`
- * requests. While a page is loading, `rows` includes placeholders for its expected results.
+ * Loads labels for `instanceKeys` in sorted pages on `loadMore` requests. While a page is loading,
+ * `rows` includes placeholders for its expected results.
  * @internal
  */
 export function useInstanceLabels({ imodel, instanceKeys }: { imodel: IModelConnection; instanceKeys: InstanceKey[] }): UseInstanceLabelsResult {
   const [rows, setRows] = useState<UseInstanceLabelsResult["rows"]>([]);
-  const loadNextPage = useRef<(() => Promise<void>) | undefined>(undefined);
+  const loadNextPage = useRef<(() => void) | undefined>(undefined);
   const labelsProvider = useMemo(() => new InstanceLabelsProvider({ imodel }), [imodel]);
-  const distinctKeys = useMemo(() => [...groupInstanceKeysByClass(instanceKeys).values()].flatMap((keys) => [...keys.values()]), [instanceKeys]);
+  const distinctInstanceKeys = useMemo(() => [...groupInstanceKeysByClass(instanceKeys).values()].flatMap((keys) => [...keys.values()]), [instanceKeys]);
+  const session = useMemo(() => labelsProvider.createSession(distinctInstanceKeys, PAGE_SIZE), [labelsProvider, distinctInstanceKeys]);
 
   useEffect(() => {
     let items: LabeledInstanceKey[] = [];
-    let hasMore = distinctKeys.length > 0;
+    let hasMore = distinctInstanceKeys.length > 0;
     let loading = false;
-    let disposed = false;
-
-    const loadPage = async () => {
-      if (disposed || loading || !hasMore) {
+    const subscription = session.pages.subscribe(({ page, hasMore: nextHasMore }) => {
+      items = [...items, ...page];
+      hasMore = nextHasMore;
+      loading = false;
+      setRows(items);
+    });
+    const loadPage = () => {
+      if (loading || !hasMore || subscription.closed) {
         return;
       }
       loading = true;
-      const placeholderCount = Math.min(PAGE_SIZE, distinctKeys.length - items.length);
+      const placeholderCount = Math.min(PAGE_SIZE, distinctInstanceKeys.length - items.length);
       setRows([...items, ...new Array<undefined>(placeholderCount).fill(undefined)]);
-      try {
-        const page = await labelsProvider.getLabelsPage(distinctKeys, { offset: items.length, limit: PAGE_SIZE });
-        if (disposed) {
-          return;
-        }
-        items = [...items, ...page];
-        hasMore = items.length < distinctKeys.length;
-      } catch (error) {
-        hasMore = false;
-        if (!disposed) {
-          Logger.logError("PropertyGrid", `Error loading instance labels: ${error instanceof Error ? error.message : String(error)}`);
-        }
-      } finally {
-        loading = false;
-        if (!disposed) {
-          setRows(items);
-        }
-      }
+      session.loadRequests.next();
     };
     loadNextPage.current = loadPage;
     setRows([]);
-    void loadPage();
 
     return () => {
-      disposed = true;
+      subscription.unsubscribe();
       loadNextPage.current = undefined;
     };
-  }, [labelsProvider, distinctKeys]);
+  }, [session, distinctInstanceKeys]);
 
-  const loadMore = useCallback(() => void loadNextPage.current?.(), []);
+  const loadMore = useCallback(() => loadNextPage.current?.(), []);
 
   return { rows, loadMore };
 }
