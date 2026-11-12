@@ -26,6 +26,12 @@ export namespace SheetMeasurementHelper {
 
   export type DrawingType = DrawingTypeEnum | SheetMeasurementsHelper.DrawingType;
 
+  /** Drawing type constraints. An empty list does not constrain that side of the filter. */
+  export interface DrawingTypeFilter {
+    included: readonly DrawingType[];
+    excluded: readonly DrawingType[];
+  }
+
   export interface SheetToWorldTransformProps {
     SVDOrigin?: XYZProps;
     SVDExtents?: XYZProps;
@@ -470,23 +476,64 @@ export namespace SheetMeasurementHelper {
     }
   }
 
-  export async function getSheetToolTipText(hit: HitDetail, allowedDrawingTypesList: SheetMeasurementHelper.DrawingType[], defaultToolTip:(hit: HitDetail) => Promise<HTMLElement | string>): Promise<string | HTMLElement> {
-    if (SheetMeasurementHelper.checkIfAllowedDrawingType(hit.viewport, hit.hitPoint, allowedDrawingTypesList)) {
+  function getIncompatibleDrawingTypesAtPoint(
+    viewport: ScreenViewport | undefined,
+    point: Point3d,
+    filter: DrawingTypeFilter
+  ): DrawingType[] {
+    if (!viewport)
+      return [];
+
+    const drawingTypesAtPoint: DrawingType[] = [];
+    let hasUntypedDrawingAtPoint = false;
+    for (const drawing of DrawingDataCache.getInstance().getSheetDrawingDataForViewport(viewport)) {
+      if (!SheetMeasurementHelper.checkIfInDrawing(point, Point2d.fromJSON(drawing.origin), Point2d.fromJSON(drawing.bBoxHigh)))
+        continue;
+
+      if (drawing.type === undefined)
+        hasUntypedDrawingAtPoint = true;
+      else
+        drawingTypesAtPoint.push(drawing.type);
+    }
+
+    const excludedDrawingTypes = [...new Set(drawingTypesAtPoint.filter((type) => filter.excluded.includes(type)))];
+    if (excludedDrawingTypes.length > 0)
+      return excludedDrawingTypes;
+
+    if (
+      filter.included.length === 0 ||
+      hasUntypedDrawingAtPoint ||
+      drawingTypesAtPoint.some((type) => filter.included.includes(type))
+    ) {
+      return [];
+    }
+
+    return [...new Set(drawingTypesAtPoint)];
+  }
+
+  export async function getSheetToolTipText(
+    hit: HitDetail,
+    filterOrForbiddenDrawingTypes: DrawingTypeFilter | DrawingType[],
+    defaultToolTip: (hit: HitDetail) => Promise<HTMLElement | string>
+  ): Promise<string | HTMLElement> {
+    const filter: DrawingTypeFilter = Array.isArray(filterOrForbiddenDrawingTypes)
+      ? { included: [], excluded: filterOrForbiddenDrawingTypes }
+      : filterOrForbiddenDrawingTypes;
+    const incompatibleDrawingTypes = getIncompatibleDrawingTypesAtPoint(hit.viewport, hit.hitPoint, filter);
+
+    if (incompatibleDrawingTypes.length === 0) {
       return defaultToolTip(hit);
     }
 
-    if (allowedDrawingTypesList.length < 1) {
-      return IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.NoAllowedDrawingTypes");;
-    }
-    if (allowedDrawingTypesList.length > 1){
-      let result = IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MoreMeasurementsInvalidHead", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[0])});
-      for (let i = 1; i < allowedDrawingTypesList.length - 1; i++) {
-        result = result + IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MoreMeasurementsInvalidMiddle", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[i])});
+    if (incompatibleDrawingTypes.length > 1){
+      let result = IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MoreMeasurementsInvalidHead", { drawingName: getNameFromDrawingType(incompatibleDrawingTypes[0])});
+      for (let i = 1; i < incompatibleDrawingTypes.length - 1; i++) {
+        result = result + IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MoreMeasurementsInvalidMiddle", { drawingName: getNameFromDrawingType(incompatibleDrawingTypes[i])});
       }
-      result = result + IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MoreMeasurementsInvalidLast", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[allowedDrawingTypesList.length - 1])});
+      result = result + IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MoreMeasurementsInvalidLast", { drawingName: getNameFromDrawingType(incompatibleDrawingTypes[incompatibleDrawingTypes.length - 1])});
       return result;
     }
-    return IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.OneMeasurementInvalid", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[0])});
+    return IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.OneMeasurementInvalid", { drawingName: getNameFromDrawingType(incompatibleDrawingTypes[0])});
   }
 
   export function getDrawingContourGraphic(context: DecorateContext, origin: Point2d, extents: Point2d): GraphicBuilder {
@@ -501,9 +548,43 @@ export namespace SheetMeasurementHelper {
   }
 
   /**
-   * Checks if the drawing pointed by the event is allowed according to the provided drawing types
-   * Will return true if no drawing detected
-   * @param ev
+   * Checks whether the drawing at the point satisfies the supplied type filter.
+   * Drawings without a known type and points outside drawings are not restricted.
+   * @param viewport
+   * @param point
+   * @param filter
+   * @returns
+   */
+  export function isCompatibleDrawingAtPoint(
+    viewport: ScreenViewport | undefined,
+    point: Point3d,
+    filter: DrawingTypeFilter
+  ): boolean {
+    return getIncompatibleDrawingTypesAtPoint(viewport, point, filter).length === 0;
+  }
+
+  /**
+   * Checks that the drawing pointed by the event is not a forbidden drawing type.
+   * Will return true if no drawing is detected at the point.
+   * @deprecated Use {@link SheetMeasurementHelper.isCompatibleDrawingAtPoint} instead.
+   */
+  export function checkIfNotForbiddenDrawingType(
+    viewport: ScreenViewport | undefined,
+    point: Point3d,
+    forbiddenDrawingTypes: DrawingType[]
+  ): boolean {
+    return SheetMeasurementHelper.isCompatibleDrawingAtPoint(viewport, point, {
+      included: [],
+      excluded: forbiddenDrawingTypes,
+    });
+  }
+
+  /**
+   * Checks if the drawing pointed by the event is allowed according to the provided drawing types.
+   * Will return false if no drawing is detected at the point.
+   * @deprecated Use {@link SheetMeasurementHelper.isCompatibleDrawingAtPoint} with an included filter instead.
+   * @param viewport
+   * @param point
    * @param allowedDrawingTypes
    * @returns
    */
@@ -711,10 +792,11 @@ export namespace SheetMeasurementsHelper {
   }
 
   /**
-   * @deprecated use SheetMeasurementHelper.checkIfAllowedDrawingType instead
-   * Checks if the drawing pointed by the event is allowed according to the provided drawing types
-   * Will return true if no drawing detected
-   * @param ev
+   * @deprecated use SheetMeasurementHelper.isCompatibleDrawingAtPoint with an included filter instead
+   * Checks if the drawing pointed by the event is allowed according to the provided drawing types.
+   * Will return false if no drawing is detected at the point.
+   * @param viewport
+   * @param point
    * @param allowedDrawingTypes
    * @returns
    */
@@ -732,6 +814,28 @@ export namespace SheetMeasurementsHelper {
     return false;
   }
 
+  /**
+   * @deprecated use SheetMeasurementHelper.isCompatibleDrawingAtPoint instead
+   * Checks that the drawing pointed by the event is not a forbidden drawing type.
+   * Will return true if no drawing is detected at the point.
+   * @param viewport
+   * @param point
+   * @param forbiddenDrawingTypes
+   * @returns
+   */
+  export function checkIfNotForbiddenDrawingType(viewport: ScreenViewport | undefined, point: Point3d, forbiddenDrawingTypes: DrawingType[]) {
+    if (!viewport)
+      return true;
+    for (const drawing of DrawingDataCache.getInstance().getSheetDrawingDataForViewport(viewport)) {
+      if (drawing.type !== undefined && forbiddenDrawingTypes.some((type) => type === Number(drawing.type))) {
+        if (SheetMeasurementsHelper.checkIfInDrawing(point, Point2d.fromJSON(drawing.origin), Point2d.fromJSON(drawing.bBoxHigh))) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   function getNameFromDrawingType(type: SheetMeasurementsHelper.DrawingType): string  {
     if (type === SheetMeasurementsHelper.DrawingType.CrossSection) {
       return IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MeasurementNames.CrossSection");
@@ -747,26 +851,23 @@ export namespace SheetMeasurementsHelper {
   /**
    * @deprecated use SheetMeasurementHelper.getSheetToolTipText instead
    * @param hit
-   * @param allowedDrawingTypesList
+   * @param forbiddenDrawingTypesList
    * @param defaultToolTip
    * @returns
    */
-  export async function getSheetToolTipText(hit: HitDetail, allowedDrawingTypesList: SheetMeasurementsHelper.DrawingType[], defaultToolTip:(hit: HitDetail) => Promise<HTMLElement | string>): Promise<string | HTMLElement> {
-    if (SheetMeasurementsHelper.checkIfAllowedDrawingType(hit.viewport, hit.hitPoint, allowedDrawingTypesList)) {
+  export async function getSheetToolTipText(hit: HitDetail, forbiddenDrawingTypesList: SheetMeasurementsHelper.DrawingType[], defaultToolTip:(hit: HitDetail) => Promise<HTMLElement | string>): Promise<string | HTMLElement> {
+    if (SheetMeasurementsHelper.checkIfNotForbiddenDrawingType(hit.viewport, hit.hitPoint, forbiddenDrawingTypesList)) {
       return defaultToolTip(hit);
     }
 
-    if (allowedDrawingTypesList.length < 1) {
-      return IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.NoAllowedDrawingTypes");;
-    }
-    if (allowedDrawingTypesList.length > 1){
-      let result = IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MoreMeasurementsInvalidHead", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[0])});
-      for (let i = 1; i < allowedDrawingTypesList.length - 1; i++) {
-        result = result + IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MoreMeasurementsInvalidMiddle", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[i])});
+    if (forbiddenDrawingTypesList.length > 1){
+      let result = IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MoreMeasurementsInvalidHead", { drawingName: getNameFromDrawingType(forbiddenDrawingTypesList[0])});
+      for (let i = 1; i < forbiddenDrawingTypesList.length - 1; i++) {
+        result = result + IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MoreMeasurementsInvalidMiddle", { drawingName: getNameFromDrawingType(forbiddenDrawingTypesList[i])});
       }
-      result = result + IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MoreMeasurementsInvalidLast", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[allowedDrawingTypesList.length - 1])});
+      result = result + IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MoreMeasurementsInvalidLast", { drawingName: getNameFromDrawingType(forbiddenDrawingTypesList[forbiddenDrawingTypesList.length - 1])});
       return result;
     }
-    return IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.OneMeasurementInvalid", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[0])});
+    return IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.OneMeasurementInvalid", { drawingName: getNameFromDrawingType(forbiddenDrawingTypesList[0])});
   }
 }
