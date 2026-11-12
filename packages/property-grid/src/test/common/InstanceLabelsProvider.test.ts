@@ -78,13 +78,12 @@ describe("InstanceLabelsProvider", () => {
     const page = await new InstanceLabelsProvider({ imodel }).getLabelsPage(keys, { offset: 0, limit: keys.length });
     const queryLabels = keys.map(
       (key) =>
-        page.items.find(
+        page.find(
           ({ instanceKey }) =>
             instanceKey.id === key.id && shared.normalizeFullClassName(instanceKey.className) === shared.normalizeFullClassName(key.className),
         )?.label ?? "",
     );
     expect(queryLabels).toEqual(expected);
-    expect(page.hasMore).toBe(false);
 
     const presentationKeys = keys.map((key) => ({ ...key, className: key.className.replace(".", ":") }));
     const presentationLabels = await new PresentationLabelsProvider({ imodel }).getLabels(presentationKeys);
@@ -155,7 +154,7 @@ describe("InstanceLabelsProvider", () => {
     const missing = { className: "BisCore.Subject", id: "0xffff" };
 
     const page = await new InstanceLabelsProvider({ imodel }).getLabelsPage([missing, keys.subject, missing], { offset: 0, limit: 100 });
-    expect(page).toEqual({ items: [{ instanceKey: keys.subject, label: "subject" }], hasMore: false });
+    expect(page).toEqual([{ instanceKey: keys.subject, label: "subject" }]);
   });
 
   it("pages a selection containing more than 1000 keys", async () => {
@@ -169,9 +168,8 @@ describe("InstanceLabelsProvider", () => {
 
     const labelsById = new Map(keys.elements.map((key, index) => [key.id, `${index} ${idSuffix(key.id)}`]));
     const page = await new InstanceLabelsProvider({ imodel }).getLabelsPage(keys.elements, { offset: 0, limit: 100 });
-    expect(page.items).toHaveLength(100);
-    expect(page.hasMore).toBe(true);
-    for (const item of page.items) {
+    expect(page).toHaveLength(100);
+    for (const item of page) {
       expect(item.label).toBe(labelsById.get(item.instanceKey.id));
     }
   });
@@ -181,7 +179,7 @@ describe("InstanceLabelsProvider", () => {
     const createQueryReader = vi.spyOn(imodel, "createQueryReader");
 
     const page = await new InstanceLabelsProvider({ imodel }).getLabelsPage([], { offset: 0, limit: 100 });
-    expect(page).toEqual({ items: [], hasMore: false });
+    expect(page).toEqual([]);
     expect(createQueryReader).not.toHaveBeenCalled();
   });
 
@@ -196,22 +194,16 @@ describe("InstanceLabelsProvider", () => {
     const selection = [keys.last, keys.middle, keys.tied, keys.first, keys.first, { className: "BisCore.Subject", id: "0xffff" }];
     const first = await provider.getLabelsPage(selection, { offset: 0, limit: 2 });
     const second = await provider.getLabelsPage(selection, { offset: 2, limit: 2 });
-    expect(first).toEqual({
-      items: [
-        { instanceKey: keys.first, label: "alpha" },
-        { instanceKey: keys.tied, label: "alpha" },
-      ],
-      hasMore: true,
-    });
-    expect(second).toEqual({
-      items: [
-        { instanceKey: keys.middle, label: "Beta" },
-        { instanceKey: keys.last, label: "Zulu" },
-      ],
-      hasMore: false,
-    });
-    expect(await provider.getLabelsPage(selection, { offset: 4, limit: 2 })).toEqual({ items: [], hasMore: false });
-    expect(await provider.getLabelsPage([], { offset: 0, limit: 100 })).toEqual({ items: [], hasMore: false });
+    expect(first).toEqual([
+      { instanceKey: keys.first, label: "alpha" },
+      { instanceKey: keys.tied, label: "alpha" },
+    ]);
+    expect(second).toEqual([
+      { instanceKey: keys.middle, label: "Beta" },
+      { instanceKey: keys.last, label: "Zulu" },
+    ]);
+    expect(await provider.getLabelsPage(selection, { offset: 4, limit: 2 })).toEqual([]);
+    expect(await provider.getLabelsPage([], { offset: 0, limit: 100 })).toEqual([]);
   });
 
   it("sorts and pages more than 500 classes in a real query", async () => {
@@ -245,10 +237,9 @@ describe("InstanceLabelsProvider", () => {
     imodel = imodelConnection;
     const provider = new InstanceLabelsProvider({ imodel });
     const first = await provider.getLabelsPage(keys, { offset: 0, limit: 100 });
-    expect(first.items.map(({ instanceKey }) => instanceKey)).toEqual(keys.toReversed().slice(0, 100));
-    expect(first.hasMore).toBe(true);
+    expect(first.map(({ instanceKey }) => instanceKey)).toEqual(keys.toReversed().slice(0, 100));
     const last = await provider.getLabelsPage(keys, { offset: 500, limit: 100 });
-    expect(last).toEqual({ items: [{ instanceKey: keys[0], label: `0501 ${idSuffix(keys[0].id)}` }], hasMore: false });
+    expect(last).toEqual([{ instanceKey: keys[0], label: `0501 ${idSuffix(keys[0].id)}` }]);
   });
 
   it.each([500, 501])("pages %i classes using CTE batches of at most 500 selects", async (classCount) => {
@@ -269,15 +260,15 @@ describe("InstanceLabelsProvider", () => {
     const page = await new InstanceLabelsProvider({ imodel }).getLabelsPage(keys, { offset: 0, limit: 100 });
 
     const expected = classCount === 500 ? { queryCount: 1, classesPerCte: [500] } : { queryCount: 1, classesPerCte: [500, 1] };
-    expect(page).toEqual({ items: keys.slice(0, 100).map((instanceKey) => ({ instanceKey, label: instanceKey.className })), hasMore: true });
+    expect(page).toEqual(keys.slice(0, 100).map((instanceKey) => ({ instanceKey, label: instanceKey.className })));
     expect(createQueryReader).toHaveBeenCalledTimes(expected.queryCount);
     createQueryReader.mock.calls.forEach(([query]) => {
       const classNames = (query.ctes ?? []).flatMap((cte) => [...cte.matchAll(/'([^']+)' AS className/g)].map((match) => match[1]));
       expect(classNames).toEqual(keys.map((key) => key.className));
       expect(query.ctes?.map((cte) => cte.split(" UNION ALL ").length)).toEqual(expected.classesPerCte);
-      expect(query.bindings).toEqual([...keys.map((key) => ({ type: "idset", value: [key.id] })), { type: "long", value: 101 }, { type: "long", value: 0 }]);
+      expect(query.bindings).toEqual([...keys.map((key) => ({ type: "idset", value: [key.id] })), { type: "long", value: 100 }, { type: "long", value: 0 }]);
     });
-    expect(rowsRead).toBe(101);
+    expect(rowsRead).toBe(100);
   });
 });
 

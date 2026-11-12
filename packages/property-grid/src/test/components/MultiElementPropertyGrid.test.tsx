@@ -36,7 +36,7 @@ describe("<MultiElementPropertyGrid />", () => {
 
   let getDataStub: ReturnType<typeof vi.spyOn>;
   let getLabelsStub: MockInstance<InstanceLabelsProvider["getLabelsPage"]>;
-  const buildPage = async (keys: InstanceKey[]) => ({ items: keys.map((instanceKey) => ({ instanceKey, label: buildLabel(instanceKey) })), hasMore: false });
+  const buildPage = async (keys: InstanceKey[]) => keys.map((instanceKey) => ({ instanceKey, label: buildLabel(instanceKey) }));
   let selectionStorage: ReturnType<typeof stubSelectionStorage>;
   const getParentInstanceKeyStub = vi.fn<(key: InstanceKey) => Promise<InstanceKey | undefined>>();
 

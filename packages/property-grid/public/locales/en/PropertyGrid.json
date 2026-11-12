@@ -5,8 +5,7 @@
   "generic-error-description": "An error occurred while loading properties.",
   "element-list": {
     "title": "Selected Elements",
-    "loading": "Loading...",
-    "load-more": "Load More"
+    "loading": "Loading..."
   },
   "header": {
     "navigateUp": "Navigate Up",
