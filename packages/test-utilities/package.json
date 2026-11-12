@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@itwin/presentation-shared": "^2.0.0",
-    "fast-xml-parser": "^5.7.0",
+    "fast-xml-parser": "^5.12.0",
     "sanitize-filename": "^1.6.4"
   },
   "devDependencies": {
