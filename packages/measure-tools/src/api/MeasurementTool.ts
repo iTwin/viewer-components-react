@@ -225,9 +225,16 @@ export abstract class MeasurementToolBase<
     return [];
   }
 
-  /** @deprecated Use {@link forbiddenDrawingTypes} instead. */
+  /** @deprecated Use {@link drawingTypeFilter} instead. */
   protected get allowedDrawingTypes(): SheetMeasurementHelper.DrawingType[] {
-    return this.forbiddenDrawingTypes;
+    return [];
+  }
+
+  protected get drawingTypeFilter(): SheetMeasurementHelper.DrawingTypeFilter {
+    return {
+      included: this.allowedDrawingTypes,
+      excluded: this.forbiddenDrawingTypes,
+    };
   }
 
   constructor(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true))  {
@@ -366,7 +373,7 @@ export abstract class MeasurementToolBase<
     if (!this._enableSheetMeasurements) {
       return defaultToolTip(hit);
     } else {
-      return SheetMeasurementHelper.getSheetToolTipText(hit, this.forbiddenDrawingTypes, defaultToolTip);
+      return SheetMeasurementHelper.getSheetToolTipText(hit, this.drawingTypeFilter, defaultToolTip);
     }
   }
 

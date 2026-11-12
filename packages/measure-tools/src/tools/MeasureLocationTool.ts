@@ -156,7 +156,7 @@ MeasureLocationToolModel
     if (!this._enableSheetMeasurements || !ev.viewport?.view.isSheetView())
       return true;
 
-    if (!SheetMeasurementHelper.checkIfNotForbiddenDrawingType(ev.viewport, ev.point, this.forbiddenDrawingTypes))
+    if (!SheetMeasurementHelper.isCompatibleDrawingAtPoint(ev.viewport, ev.point, this.drawingTypeFilter))
       return false;
 
     return true;
