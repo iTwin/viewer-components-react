@@ -99,7 +99,7 @@ export function ElementList({ imodel, instanceKeys, onBack, onSelect, className 
                   }
                 }}
               >
-                {dataItem ? dataItem.label : <Text isSkeleton>{PropertyGridManager.translate("element-list.loading")}</Text>}
+                {dataItem ? dataItem.label : <ElementLabelSkeleton />}
               </ListItem>
             );
           })}
@@ -107,4 +107,9 @@ export function ElementList({ imodel, instanceKeys, onBack, onSelect, className 
       </List>
     </div>
   );
+}
+
+function ElementLabelSkeleton() {
+  const [width] = React.useState(() => 20 + Math.floor(Math.random() * 20));
+  return <Text isSkeleton aria-hidden="true" style={{ width: `${width}ch`, maxWidth: "100%", height: "1em" }} />;
 }
