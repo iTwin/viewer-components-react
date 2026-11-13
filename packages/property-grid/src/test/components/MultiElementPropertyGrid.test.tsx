@@ -9,7 +9,6 @@ import { PresentationPropertyDataProvider } from "@itwin/presentation-components
 import { normalizeFullClassName } from "@itwin/presentation-shared";
 import { Selectables } from "@itwin/unified-selection";
 import { MultiElementPropertyGrid } from "../../property-grid-react/components/MultiElementPropertyGrid.js";
-import * as instanceLabels from "../../property-grid-react/hooks/UseInstanceLabels.js";
 import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
 import {
   act,
@@ -21,13 +20,23 @@ import {
   stubSelectionStorage,
   waitFor,
 } from "../TestUtils.js";
-import { createMockUseInstanceLabels } from "./MockInstanceLabels.js";
+import { stubInstanceLabelQueries } from "./StubInstanceLabelQueries.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
-import type { EventArgs } from "@itwin/presentation-shared";
+import type * as interop from "@itwin/presentation-core-interop";
+import type * as shared from "@itwin/presentation-shared";
 import type { SelectableInstanceKey } from "@itwin/unified-selection";
 import type * as UseTelemetryContextModule from "../../property-grid-react/hooks/UseTelemetryContext.js";
+
+vi.mock("@itwin/presentation-core-interop", async (importOriginal) => {
+  const actual = await importOriginal<typeof interop>();
+  return { ...actual, createECSqlQueryExecutor: vi.fn(actual.createECSqlQueryExecutor) };
+});
+vi.mock("@itwin/presentation-shared", async (importOriginal) => {
+  const actual = await importOriginal<typeof shared>();
+  return { ...actual, createBisInstanceLabelSelectClauseFactory: vi.fn(actual.createBisInstanceLabelSelectClauseFactory) };
+});
 
 describe("<MultiElementPropertyGrid />", () => {
   const imodel = {
@@ -35,15 +44,12 @@ describe("<MultiElementPropertyGrid />", () => {
   } as IModelConnection;
 
   let getDataStub: ReturnType<typeof vi.spyOn>;
-  const buildPage = async (keys: InstanceKey[]) => keys.map((instanceKey) => ({ instanceKey, label: buildLabel(instanceKey) }));
-  let getLabelsStub: ReturnType<typeof vi.fn<typeof buildPage>>;
   let selectionStorage: ReturnType<typeof stubSelectionStorage>;
   const getParentInstanceKeyStub = vi.fn<(key: InstanceKey) => Promise<InstanceKey | undefined>>();
 
   beforeEach(() => {
     getDataStub = vi.spyOn(PresentationPropertyDataProvider.prototype, "getData");
-    getLabelsStub = vi.fn(buildPage);
-    vi.spyOn(instanceLabels, "useInstanceLabels").mockImplementation(createMockUseInstanceLabels(async (keys) => getLabelsStub(keys)));
+    stubInstanceLabelQueries(async () => []);
 
     vi.spyOn(PropertyGridManager, "translate").mockImplementation((key) => key);
 
@@ -59,7 +65,7 @@ describe("<MultiElementPropertyGrid />", () => {
     selectionStorage.getSelection.mockReturnValue(Selectables.create(keys));
   }
 
-  function triggerSelectionChange(props: Pick<Partial<EventArgs<typeof selectionStorage.selectionChangeEvent>>, "source">) {
+  function triggerSelectionChange(props: Pick<Partial<shared.EventArgs<typeof selectionStorage.selectionChangeEvent>>, "source">) {
     selectionStorage.selectionChangeEvent.raiseEvent({
       imodelKey: imodel.key,
       iModelKey: imodel.key,
@@ -119,7 +125,6 @@ describe("<MultiElementPropertyGrid />", () => {
     const expectedLabels = instanceKeys.map(buildLabel);
 
     setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-    getLabelsStub.mockImplementation(buildPage);
 
     const { getByText, getByRole, user } = render(<MultiElementPropertyGrid {...getProps()} />);
 
@@ -141,7 +146,6 @@ describe("<MultiElementPropertyGrid />", () => {
     const expectedLabels = instanceKeys.map(buildLabel);
 
     setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-    getLabelsStub.mockImplementation(buildPage);
 
     const { getByText, getByRole, user } = render(<MultiElementPropertyGrid {...getProps()} />);
 
@@ -166,7 +170,6 @@ describe("<MultiElementPropertyGrid />", () => {
     const expectedLabels = instanceKeys.map(buildLabel);
 
     setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-    getLabelsStub.mockImplementation(buildPage);
 
     const { getByText, getByRole, container, user } = render(<MultiElementPropertyGrid {...getProps()} />);
 
@@ -207,7 +210,6 @@ describe("<MultiElementPropertyGrid />", () => {
     const expectedLabels = instanceKeys.map(buildLabel);
 
     setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-    getLabelsStub.mockImplementation(buildPage);
 
     const { getByText, getByRole, user, unmount } = render(<MultiElementPropertyGrid {...getProps()} />);
 
@@ -328,7 +330,6 @@ describe("<MultiElementPropertyGrid />", () => {
       const expectedLabels = instanceKeys.map(buildLabel);
 
       setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-      getLabelsStub.mockImplementation(buildPage);
 
       const { getByText, getByRole, user } = render(
         <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
@@ -356,7 +357,6 @@ describe("<MultiElementPropertyGrid />", () => {
       const expectedLabels = instanceKeys.map(buildLabel);
 
       setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-      getLabelsStub.mockImplementation(buildPage);
 
       const { getByText, getByRole, user } = render(
         <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
@@ -387,7 +387,6 @@ describe("<MultiElementPropertyGrid />", () => {
       const expectedLabels = instanceKeys.map(buildLabel);
 
       setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-      getLabelsStub.mockImplementation(buildPage);
 
       const { container, getByText, getByRole, user } = render(
         <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
@@ -437,6 +436,7 @@ describe("<MultiElementPropertyGrid />", () => {
   }
   const setupMultiInstanceData = (instances: InstanceData[]) => {
     setupSelection(instances.map((i) => i.key));
+    stubInstanceLabelQueries(async () => instances.map(({ key }) => ({ instanceKey: key, label: buildLabel(key) })));
 
     const value = instances.length > 1 ? "MultiInstances" : instances[0].value;
 
