@@ -101,3 +101,8 @@ export function releaseMainThreadOnItemsCount<T>(elementCount: number) {
 export function getOptimalBatchSize({ totalSize, maximumBatchSize }: { totalSize: number; maximumBatchSize: number }): number {
   return Math.ceil(totalSize / Math.ceil(totalSize / maximumBatchSize));
 }
+
+/** @internal */
+export function isBeSqliteInterruptError(error: unknown): boolean {
+  return typeof error === "object" && !!error && "name" in error && error.name === "BE_SQLITE_INTERRUPT";
+}
