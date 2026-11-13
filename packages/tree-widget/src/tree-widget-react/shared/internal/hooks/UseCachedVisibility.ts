@@ -9,7 +9,7 @@ import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies
 import { useSharedTreeContext } from "../../contexts/SharedTreeContext.js";
 import { HierarchyVisibilityOverrideHandler } from "../../UseHierarchyVisibility.js";
 import { BufferingViewport } from "../BufferingViewport.js";
-import { AlwaysAndNeverDrawnElementInfoCache } from "../caches/AlwaysAndNeverDrawnElementInfoCache.js";
+import { AlwaysAndNeverDrawnElementInfoProvider } from "../idsProviders/AlwaysAndNeverDrawnElementInfoProvider.js";
 import { toVoidPromise } from "../Rxjs.js";
 import { createVisibilityStatus } from "../Tooltip.js";
 import { createVisibilityChangeEventListener } from "../VisibilityChangeEventListener.js";
@@ -26,47 +26,49 @@ import type { TreeSpecificVisibilityHandler } from "../visibility/BaseVisibility
 import type { IVisibilityChangeEventListener } from "../VisibilityChangeEventListener.js";
 
 /** @internal */
-export interface CreateSearchResultsTreeProps<TCache> {
-  idsCache: TCache;
+export interface CreateSearchResultsTreeProps<TIdsProvider> {
+  idsProvider: TIdsProvider;
   imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom">;
   searchPaths: HierarchySearchTree[];
 }
 
 /** @internal */
-export interface CreateTreeSpecificVisibilityHandlerProps<TCache> {
-  info: AlwaysAndNeverDrawnElementInfoCache;
-  idsCache: TCache;
+export interface CreateTreeSpecificVisibilityHandlerProps<TIdsProvider> {
+  info: AlwaysAndNeverDrawnElementInfoProvider;
+  idsProvider: TIdsProvider;
   viewport: TreeWidgetViewport;
   overrideHandler: HierarchyVisibilityOverrideHandler;
 }
 
 /** @internal */
-export interface UseCachedVisibilityProps<TCache, TSearchTargets> {
+export interface UseCachedVisibilityProps<TIdsProvider, TSearchTargets> {
   componentId: GuidString;
   activeView: TreeWidgetViewport;
-  idsCache: TCache;
-  createSearchResultsTree: (props: CreateSearchResultsTreeProps<TCache>) => Promise<SearchResultsTree<TSearchTargets>>;
-  createTreeSpecificVisibilityHandler: (props: CreateTreeSpecificVisibilityHandlerProps<TCache>) => TreeSpecificVisibilityHandler<TSearchTargets> & Disposable;
+  idsProvider: TIdsProvider;
+  createSearchResultsTree: (props: CreateSearchResultsTreeProps<TIdsProvider>) => Promise<SearchResultsTree<TSearchTargets>>;
+  createTreeSpecificVisibilityHandler: (
+    props: CreateTreeSpecificVisibilityHandlerProps<TIdsProvider>,
+  ) => TreeSpecificVisibilityHandler<TSearchTargets> & Disposable;
 }
 
 /** @internal */
-export function useCachedVisibility<TCache, TSearchTargets>(props: UseCachedVisibilityProps<TCache, TSearchTargets>) {
+export function useCachedVisibility<TIdsProvider, TSearchTargets>(props: UseCachedVisibilityProps<TIdsProvider, TSearchTargets>) {
   const [searchPaths, setSearchPaths] = useState<HierarchySearchTree[] | undefined>(undefined);
-  const { activeView, idsCache, createSearchResultsTree, createTreeSpecificVisibilityHandler, componentId } = props;
+  const { activeView, idsProvider, createSearchResultsTree, createTreeSpecificVisibilityHandler, componentId } = props;
   const { cancelChangesInProgress } = useSharedTreeContext();
 
   const visibilityHandlerFactory = useMemo<VisibilityTreeProps["visibilityHandlerFactory"]>(
     () =>
       createVisibilityHandlerFactory({
         activeView,
-        idsCache,
+        idsProvider,
         createSearchResultsTree,
         createTreeSpecificVisibilityHandler,
         searchPaths,
         componentId,
         cancelChangesInProgress,
       }),
-    [activeView, idsCache, searchPaths, createSearchResultsTree, createTreeSpecificVisibilityHandler, componentId, cancelChangesInProgress],
+    [activeView, idsProvider, searchPaths, createSearchResultsTree, createTreeSpecificVisibilityHandler, componentId, cancelChangesInProgress],
   );
 
   return {
@@ -76,13 +78,13 @@ export function useCachedVisibility<TCache, TSearchTargets>(props: UseCachedVisi
   };
 }
 
-function createVisibilityHandlerFactory<TCache, TSearchTargets>(
-  props: UseCachedVisibilityProps<TCache, TSearchTargets> &
+function createVisibilityHandlerFactory<TIdsProvider, TSearchTargets>(
+  props: UseCachedVisibilityProps<TIdsProvider, TSearchTargets> &
     Pick<ReturnType<typeof useSharedTreeContext>, "cancelChangesInProgress"> & {
       searchPaths: HierarchySearchTree[] | undefined;
     },
 ): VisibilityTreeProps["visibilityHandlerFactory"] {
-  const { activeView, createSearchResultsTree, createTreeSpecificVisibilityHandler, idsCache, searchPaths, componentId, cancelChangesInProgress } = props;
+  const { activeView, createSearchResultsTree, createTreeSpecificVisibilityHandler, idsProvider, searchPaths, componentId, cancelChangesInProgress } = props;
   return ({ imodelAccess }) =>
     new HierarchyVisibilityHandlerImpl<TSearchTargets>({
       componentId,
@@ -90,14 +92,14 @@ function createVisibilityHandlerFactory<TCache, TSearchTargets>(
       cancelChangesInProgress,
       getSearchResultsTree: (): Promise<SearchResultsTree<TSearchTargets>> | undefined => {
         if (searchPaths) {
-          return createSearchResultsTree({ imodelAccess, searchPaths, idsCache });
+          return createSearchResultsTree({ imodelAccess, searchPaths, idsProvider });
         }
         return undefined;
       },
       getTreeSpecificVisibilityHandler: ({ info, overrideHandler, viewport }) =>
         createTreeSpecificVisibilityHandler({
           info,
-          idsCache,
+          idsProvider,
           viewport,
           overrideHandler,
         }),
@@ -108,7 +110,7 @@ function createVisibilityHandlerFactory<TCache, TSearchTargets>(
 export interface HierarchyVisibilityHandlerImplProps<TSearchTargets> {
   viewport: TreeWidgetViewport;
   getTreeSpecificVisibilityHandler: (props: {
-    info: AlwaysAndNeverDrawnElementInfoCache;
+    info: AlwaysAndNeverDrawnElementInfoProvider;
     overrideHandler: HierarchyVisibilityOverrideHandler;
     viewport: TreeWidgetViewport;
   }) => TreeSpecificVisibilityHandler<TSearchTargets> & Disposable;
@@ -128,7 +130,7 @@ export interface HierarchyVisibilityHandlerImplProps<TSearchTargets> {
 export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements HierarchyVisibilityHandler, Disposable {
   readonly #props: HierarchyVisibilityHandlerImplProps<TSearchTargets>;
   readonly #eventListener: IVisibilityChangeEventListener;
-  readonly #alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfoCache;
+  readonly #alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfoProvider;
   #overrideHandler: HierarchyVisibilityOverrideHandler;
   #changeRequest = new Subject<{ key: HierarchyNodeKey; depth: number }>();
   #searchResultsTree: Promise<SearchResultsTree<TSearchTargets>> | undefined;
@@ -145,7 +147,7 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
       },
     });
     this.#searchResultsTree = this.#props.getSearchResultsTree();
-    this.#alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfoCache({
+    this.#alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfoProvider({
       viewport: this.#props.viewport,
       componentId: props.componentId,
     });

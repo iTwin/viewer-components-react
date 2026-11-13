@@ -116,11 +116,11 @@ function CategoriesTreeComponentImpl({
   ...treeProps
 }: CategoriesTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
   const { buttonProps, onCategoriesFiltered } = useCategoriesTreeButtonProps({ viewport });
-  const { getBaseIdsCache } = useSharedTreeContext();
+  const { getSharedIdsProvider } = useSharedTreeContext();
   const viewType = viewport.viewType === "2d" ? "2d" : "3d";
   const isLoaded =
     buttonProps.categories.length > 0 ||
-    getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType }).elementModelCategoriesLoaded();
+    getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType }).elementModelCategoriesLoaded();
 
   const buttons: ReactNode = isLoaded
     ? headerButtons

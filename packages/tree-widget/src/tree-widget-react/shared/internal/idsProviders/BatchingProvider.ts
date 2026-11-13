@@ -53,7 +53,7 @@ class OneShotEvent<T extends (...args: any[]) => void> {
 }
 
 /** @internal */
-export interface BatchingCacheProps {
+export interface BatchingProviderProps {
   /** Number of items to buffer before executing a query. Defaults to 100. */
   bufferSize?: number;
   /** Time in ms to wait before firing the batch. Defaults to 20 ms. */
@@ -82,7 +82,7 @@ export interface BatchingCacheProps {
  *
  * @internal
  */
-export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
+export abstract class BatchingProvider<TRequest, TResult, TQueryData, TRow> {
   // When a new request is made via `get`:
   // - If the value is already cached, returns it immediately.
   // - If it's already in-flight (#requestedValues), subscribes to the same completion event.
@@ -96,7 +96,7 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
   #timerDelay: number;
   #releaseOnCount: number;
 
-  protected constructor(props?: BatchingCacheProps) {
+  protected constructor(props?: BatchingProviderProps) {
     this.#bufferSize = props?.bufferSize ?? 100;
     this.#timerDelay = props?.timerDelay ?? 20;
     this.#releaseOnCount = props?.releaseOnCount ?? 500;
@@ -108,7 +108,7 @@ export abstract class BatchingCache<TRequest, TResult, TQueryData, TRow> {
   /**
    * Return the portion of the request not already covered by the given set of values.
    * Returns `undefined` for `valuesNotInBatch` if the request is fully covered.
-   * For caches without partial requests, return `undefined` if covered, or the full request otherwise.
+   * For providers without partial requests, return `undefined` if covered, or the full request otherwise.
    */
   protected abstract getValuesNotInBatch(
     request: TRequest,

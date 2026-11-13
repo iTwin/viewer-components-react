@@ -5,7 +5,6 @@
 
 import { defer, EMPTY, expand, from, map, merge, mergeMap, of, reduce, shareReplay, tap } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
-import { BaseIdsCacheImpl } from "../../../shared/internal/caches/BaseIdsCache.js";
 import {
   CLASS_NAME_Classification,
   CLASS_NAME_ClassificationSystem,
@@ -16,28 +15,29 @@ import {
   CLASS_NAME_SpatialCategory,
 } from "../../../shared/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../../shared/internal/hooks/UseErrorState.js";
+import { SharedIdsProviderImpl } from "../../../shared/internal/idsProviders/SharedIdsProvider.js";
 import { fromWithRelease, toVoidPromise } from "../../../shared/internal/Rxjs.js";
 import { createWhereClause, getOrCreate } from "../../../shared/internal/Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { BaseIdsCacheImplProps } from "../../../shared/internal/caches/BaseIdsCache.js";
+import type { SharedIdsProviderImplProps } from "../../../shared/internal/idsProviders/SharedIdsProvider.js";
 import type { CategoryId, ClassificationId, ClassificationTableId, ElementId } from "../../../shared/internal/Types.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "../ClassificationsTreeDefinition.js";
 import type { ClassificationsTreeVisibilityHandlerConfiguration } from "../UseClassificationsTree.js";
 
 /**
- * Hierarchy config props needed for ids cache.
+ * Hierarchy config props needed for ids provider.
  * @internal
  */
-export type HierarchyConfigForClassificationsCache = Pick<ClassificationsTreeHierarchyConfiguration, "rootClassificationSystemCode" | "elements">;
+export type HierarchyConfigForClassificationsTreeIdsProvider = Pick<ClassificationsTreeHierarchyConfiguration, "rootClassificationSystemCode" | "elements">;
 
 /**
- * Visibility handler config props needed for ids cache.
+ * Visibility handler config props needed for ids provider.
  * @internal
  */
-export type VisibilityHandlerConfigForClassificationsCache = Pick<
+export type VisibilityHandlerConfigForClassificationsTreeIdsProvider = Pick<
   ClassificationsTreeVisibilityHandlerConfiguration,
   "classificationToCategoriesRelationshipSpecification"
 >;
@@ -48,14 +48,14 @@ interface ClassificationOrTableInfo {
   relatedCategories: CategoryId[];
 }
 
-interface ClassificationsTreeIdsCacheProps extends BaseIdsCacheImplProps {
+interface ClassificationsTreeIdsProviderProps extends SharedIdsProviderImplProps {
   queryExecutor: LimitingECSqlQueryExecutor;
-  hierarchyConfig: HierarchyConfigForClassificationsCache;
-  visibilityHandlerConfig?: VisibilityHandlerConfigForClassificationsCache;
+  hierarchyConfig: HierarchyConfigForClassificationsTreeIdsProvider;
+  visibilityHandlerConfig?: VisibilityHandlerConfigForClassificationsTreeIdsProvider;
 }
 
 /** @internal */
-export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
+export class ClassificationsTreeIdsProvider extends SharedIdsProviderImpl {
   #cachedData:
     | Observable<{
         classificationOrTableInfos: Map<ClassificationId | ClassificationTableId, ClassificationOrTableInfo>;
@@ -64,17 +64,17 @@ export class ClassificationsTreeIdsCache extends BaseIdsCacheImpl {
       }>
     | undefined;
   #filteredElementsData: Observable<Map<ElementId, { modelId: Id64String; categoryId: Id64String }>> | undefined;
-  #props: ClassificationsTreeIdsCacheProps;
+  #props: ClassificationsTreeIdsProviderProps;
   #componentId: GuidString;
   #componentName: string;
   #rowLimit = 7500;
   #cachedDataLoaded = false;
 
-  constructor(props: ClassificationsTreeIdsCacheProps) {
+  constructor(props: ClassificationsTreeIdsProviderProps) {
     super(props);
     this.#props = props;
     this.#componentId = Guid.createValue();
-    this.#componentName = "ClassificationsTreeIdsCache";
+    this.#componentName = "ClassificationsTreeIdsProvider";
   }
 
   public async preloadClassifications(): Promise<void> {

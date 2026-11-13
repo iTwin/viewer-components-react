@@ -7,11 +7,11 @@ import { describe, expect } from "vitest";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ModelsTreeNode, useModelsTree } from "@itwin/tree-widget-react";
 import {
-  BaseIdsCache,
+  SharedIdsProvider,
   createModelsTreeVisibilityHandler,
   defaultModelsTreeHierarchyConfiguration,
   ModelsTreeDefinition,
-  ModelsTreeIdsCache,
+  ModelsTreeIdsProvider,
   SharedTreeContextProvider,
 } from "@itwin/tree-widget-react/internal";
 import { act, renderHook } from "@testing-library/react";
@@ -143,19 +143,19 @@ describe("models tree", () => {
         viewport,
         ...testData,
       });
-      const baseIdsCache = new BaseIdsCache({
+      const sharedIdsProvider = new SharedIdsProvider({
         elementClassName: defaultModelsTreeHierarchyConfiguration.elements.baseClass,
         type: "3d",
         queryExecutor: imodelAccess,
       });
-      const idsCache = new ModelsTreeIdsCache({
+      const idsProvider = new ModelsTreeIdsProvider({
         queryExecutor: imodelAccess,
-        baseIdsCache,
+        sharedIdsProvider,
         hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
       });
-      const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
+      const handler = createModelsTreeVisibilityHandler({ idsProvider, viewport, imodelAccess });
       const provider = createIModelHierarchyProvider({
-        hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
+        hierarchyDefinition: new ModelsTreeDefinition({ idsProvider, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
         imodelAccess,
       });
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
@@ -241,19 +241,19 @@ describe("models tree", () => {
         viewport,
         ...hiddenTestData,
       });
-      const baseIdsCache = new BaseIdsCache({
+      const sharedIdsProvider = new SharedIdsProvider({
         elementClassName: defaultModelsTreeHierarchyConfiguration.elements.baseClass,
         type: "3d",
         queryExecutor: imodelAccess,
       });
-      const idsCache = new ModelsTreeIdsCache({
+      const idsProvider = new ModelsTreeIdsProvider({
         queryExecutor: imodelAccess,
-        baseIdsCache,
+        sharedIdsProvider,
         hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
       });
-      const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
+      const handler = createModelsTreeVisibilityHandler({ idsProvider, viewport, imodelAccess });
       const provider = createIModelHierarchyProvider({
-        hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
+        hierarchyDefinition: new ModelsTreeDefinition({ idsProvider, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
         imodelAccess,
       });
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
@@ -443,20 +443,20 @@ describe("models tree", () => {
             excludedClasses: excludedElementClassNames,
           },
         };
-        const baseIdsCache = new BaseIdsCache({
+        const sharedIdsProvider = new SharedIdsProvider({
           elementClassName: defaultModelsTreeHierarchyConfiguration.elements.baseClass,
           type: "3d",
           queryExecutor: imodelAccess,
           excludedElementClassNames,
         });
-        const idsCache = new ModelsTreeIdsCache({
+        const idsProvider = new ModelsTreeIdsProvider({
           queryExecutor: imodelAccess,
-          baseIdsCache,
+          sharedIdsProvider,
           hierarchyConfig,
         });
-        const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
+        const handler = createModelsTreeVisibilityHandler({ idsProvider, viewport, imodelAccess });
         const provider = createIModelHierarchyProvider({
-          hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig }),
+          hierarchyDefinition: new ModelsTreeDefinition({ idsProvider, imodelAccess, hierarchyConfig }),
           imodelAccess,
         });
 

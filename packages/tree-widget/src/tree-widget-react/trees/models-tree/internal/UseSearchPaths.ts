@@ -19,7 +19,7 @@ import type { GroupingHierarchyNode, InstancesNodeKey } from "@itwin/presentatio
 import type { ECSchemaProvider, InstanceKey } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../../../shared/components/VisibilityTree.js";
 import type { ClassGroupingHierarchyNode, ElementsGroupInfo, RequiredModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
-import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache.js";
+import type { ModelsTreeIdsProvider } from "./ModelsTreeIdsProvider.js";
 
 /** @internal */
 export type ModelsTreeSearchError = "tooManySearchMatches" | "tooManyInstancesFocused" | "unknownSearchError" | "unknownInstanceFocusError";
@@ -33,7 +33,7 @@ export function useSearchPaths({
   searchLimit,
   getSearchPaths,
   getSubTreePaths,
-  idsCache,
+  idsProvider,
   onModelsFiltered,
   onSearchPathsChanged,
   componentId,
@@ -57,7 +57,7 @@ export function useSearchPaths({
      */
     createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> }) => Promise<HierarchySearchTree[]>;
   }) => Promise<HierarchySearchTree[]>;
-  idsCache: ModelsTreeIdsCache;
+  idsProvider: ModelsTreeIdsProvider;
   onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
   onSearchPathsChanged: (paths: HierarchySearchTree[] | undefined) => void;
   componentId: GuidString;
@@ -98,7 +98,7 @@ export function useSearchPaths({
               ModelsTreeDefinition.createInstanceKeyPaths({
                 imodelAccess,
                 targetItems,
-                idsCache,
+                idsProvider,
                 hierarchyConfig,
                 limit: "unbounded",
                 abortSignal,
@@ -112,7 +112,7 @@ export function useSearchPaths({
         return [];
       }
     };
-  }, [idsCache, hierarchyConfig, getSubTreePaths, componentId]);
+  }, [idsProvider, hierarchyConfig, getSubTreePaths, componentId]);
 
   const getPaths = useMemo<VisibilityTreeProps["getSearchPaths"] | undefined>(() => {
     const handlePaths = async (searchPaths: HierarchySearchTree[] | undefined, classInspector: Pick<ECSchemaProvider, "classDerivesFrom">) => {
@@ -121,7 +121,7 @@ export function useSearchPaths({
         return;
       }
 
-      const modelIds = searchPaths ? await getModels(searchPaths, idsCache, classInspector) : undefined;
+      const modelIds = searchPaths ? await getModels(searchPaths, idsProvider, classInspector) : undefined;
       onModelsFiltered(modelIds);
     };
 
@@ -134,7 +134,7 @@ export function useSearchPaths({
               createHierarchySearchTree(
                 ModelsTreeDefinition.createInstanceKeyPaths({
                   imodelAccess,
-                  idsCache,
+                  idsProvider,
                   targetItems: focusedItems,
                   hierarchyConfig,
                   limit: searchLimit,
@@ -169,7 +169,7 @@ export function useSearchPaths({
                     ModelsTreeDefinition.createInstanceKeyPaths({
                       ...props,
                       imodelAccess,
-                      idsCache,
+                      idsProvider,
                       hierarchyConfig,
                       limit: searchLimit,
                       abortSignal,
@@ -205,7 +205,7 @@ export function useSearchPaths({
                 ModelsTreeDefinition.createInstanceKeyPaths({
                   imodelAccess,
                   label: searchText,
-                  idsCache,
+                  idsProvider,
                   hierarchyConfig,
                   limit: searchLimit,
                   abortSignal,
@@ -232,7 +232,7 @@ export function useSearchPaths({
     searchText,
     searchLimit,
     loadFocusedItems,
-    idsCache,
+    idsProvider,
     onFeatureUsed,
     getSearchPaths,
     hierarchyConfig,
@@ -249,7 +249,7 @@ export function useSearchPaths({
   };
 }
 
-async function getModels(trees: HierarchySearchTree[], idsCache: ModelsTreeIdsCache, classInspector: Pick<ECSchemaProvider, "classDerivesFrom">) {
+async function getModels(trees: HierarchySearchTree[], idsProvider: ModelsTreeIdsProvider, classInspector: Pick<ECSchemaProvider, "classDerivesFrom">) {
   const targetModelIds = new Set<Id64String>();
   const targetSubjectIds = new Set<Id64String>();
 
@@ -276,7 +276,7 @@ async function getModels(trees: HierarchySearchTree[], idsCache: ModelsTreeIdsCa
   }
   await Promise.all(trees.map(async (tree) => traverse(tree)));
 
-  const subjectModelIds = await firstValueFrom(idsCache.getSubjectModelIds(targetSubjectIds));
+  const subjectModelIds = await firstValueFrom(idsProvider.getSubjectModelIds(targetSubjectIds));
   return [...targetModelIds, ...subjectModelIds];
 }
 

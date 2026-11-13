@@ -24,7 +24,7 @@ import type {
   SearchResultsTreeNodeChildren,
   SearchResultsTreeRootNode,
 } from "../../../../shared/internal/visibility/BaseSearchResultsTree.js";
-import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
+import type { CategoriesTreeIdsProvider } from "../CategoriesTreeIdsProvider.js";
 
 /** @internal */
 export interface CategoriesTreeSearchTargets {
@@ -47,12 +47,12 @@ export async function createCategoriesSearchResultsTree(props: {
   categoryClassName: EC.FullClassNameDotNotation;
   categoryElementClassName: EC.FullClassNameDotNotation;
   categoryModelClassName: EC.FullClassNameDotNotation;
-  idsCache: CategoriesTreeIdsCache;
+  idsProvider: CategoriesTreeIdsProvider;
 }): Promise<SearchResultsTree<CategoriesTreeSearchTargets>> {
-  const { imodelAccess, searchPaths, categoryClassName, categoryElementClassName, categoryModelClassName, idsCache } = props;
+  const { imodelAccess, searchPaths, categoryClassName, categoryElementClassName, categoryModelClassName, idsProvider } = props;
   return createSearchResultsTree({
     searchResultsNodesHandler: new CategoriesTreeSearchResultsNodesHandler({
-      idsCache,
+      idsProvider,
       imodelAccess,
       categoryClassName,
       categoryElementClassName,
@@ -130,7 +130,7 @@ interface ProcessedNodes {
 }
 
 interface CategoriesTreeSearchResultsNodesHandlerProps {
-  idsCache: CategoriesTreeIdsCache;
+  idsProvider: CategoriesTreeIdsProvider;
   imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom">;
   categoryClassName: EC.FullClassNameDotNotation;
   categoryElementClassName: EC.FullClassNameDotNotation;
@@ -166,8 +166,8 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
         ? { searchResultsElementsModels: new Map<ElementId, ModelId>(), subModels: new Set<Id64String>() }
         : await firstValueFrom(
             forkJoin({
-              searchResultsElementsModels: this.#props.idsCache.getFilteredElementsModels(rawElementsArray.map((element) => element.id)),
-              subModels: this.#props.idsCache.getAllSubModels(),
+              searchResultsElementsModels: this.#props.idsProvider.getFilteredElementsModels(rawElementsArray.map((element) => element.id)),
+              subModels: this.#props.idsProvider.getAllSubModels(),
             }),
           );
     const getActualParentElementsPath =

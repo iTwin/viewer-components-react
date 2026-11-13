@@ -154,10 +154,10 @@ function ModelsTreeComponentImpl({
 }: ModelsTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
   const { buttonProps, onModelsFiltered } = useModelsTreeButtonProps({ imodel: iModel, viewport });
   const { enabled: instanceFocusEnabled, toggle: toggleInstanceFocus } = useFocusedInstancesContext();
-  const { getBaseIdsCache } = useSharedTreeContext();
+  const { getSharedIdsProvider } = useSharedTreeContext();
   const isLoaded =
     buttonProps.models.length > 0 ||
-    getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" }).elementModelCategoriesLoaded();
+    getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" }).elementModelCategoriesLoaded();
   const buttons: ReactNode = isLoaded
     ? headerButtons
       ? headerButtons.map((btn, index) => <Fragment key={index}>{btn(buttonProps)}</Fragment>)

@@ -7,7 +7,6 @@ import { concatMap, EMPTY, expand, from, of, toArray } from "rxjs";
 import { vi } from "vitest";
 import { Id64 } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { BaseIdsCache } from "../../../tree-widget-react/shared/internal/caches/BaseIdsCache.js";
 import {
   CLASS_NAME_Element,
   CLASS_NAME_GeometricElement3d,
@@ -15,8 +14,9 @@ import {
   CLASS_NAME_SpatialCategory,
   CLASS_NAME_Subject,
 } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { SharedIdsProvider } from "../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
 import { mergeWithDefaults } from "../../../tree-widget-react/shared/internal/Utils.js";
-import { ModelsTreeIdsCache } from "../../../tree-widget-react/trees/models-tree/internal/ModelsTreeIdsCache.js";
+import { ModelsTreeIdsProvider } from "../../../tree-widget-react/trees/models-tree/internal/ModelsTreeIdsProvider.js";
 import { createModelsTreeVisibilityHandler } from "../../../tree-widget-react/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelAccess } from "../Common.js";
@@ -43,7 +43,7 @@ interface CreateModelsTreeProviderProps {
   imodelConnection: IModelConnection;
   searchPaths?: HierarchySearchTree[];
   hierarchyConfig?: ModelsTreeHierarchyConfiguration;
-  idsCache?: ModelsTreeIdsCache;
+  idsProvider?: ModelsTreeIdsProvider;
   imodelAccess?: ReturnType<typeof createIModelAccess>;
 }
 
@@ -52,7 +52,7 @@ export function createModelsTreeProvider({
   searchPaths,
   hierarchyConfig,
   imodelAccess,
-  idsCache,
+  idsProvider,
 }: CreateModelsTreeProviderProps): HierarchyProvider & { dispose: () => void; [Symbol.dispose]: () => void } {
   const configOverrides: ModelsTreeHierarchyConfiguration = { subjects: { root: "exclude" }, ...hierarchyConfig };
   const config = mergeWithDefaults({
@@ -60,24 +60,24 @@ export function createModelsTreeProvider({
     overrides: configOverrides,
   });
   const createdImodelAccess = imodelAccess ?? createIModelAccess(imodelConnection);
-  const baseIdsCache = new BaseIdsCache({
+  const sharedIdsProvider = new SharedIdsProvider({
     queryExecutor: createdImodelAccess,
     elementClassName: config.elements.baseClass,
     type: "3d",
     excludedElementClassNames: config.elements.excludedClasses,
   });
-  const createdIdsCache =
-    idsCache ??
-    new ModelsTreeIdsCache({
+  const createdIdsProvider =
+    idsProvider ??
+    new ModelsTreeIdsProvider({
       queryExecutor: createdImodelAccess,
       hierarchyConfig: config,
-      baseIdsCache,
+      sharedIdsProvider,
     });
   const provider = createIModelHierarchyProvider({
     imodelAccess: createdImodelAccess,
     hierarchyDefinition: new ModelsTreeDefinition({
       imodelAccess: createdImodelAccess,
-      idsCache: createdIdsCache,
+      idsProvider: createdIdsProvider,
       hierarchyConfig: config,
     }),
     ...(searchPaths ? { search: { paths: searchPaths } } : undefined),
@@ -98,7 +98,7 @@ export function createModelsTreeProvider({
   };
 }
 
-interface IdsCacheMockProps {
+interface IdsProviderMockProps {
   subjectsHierarchy?: Map<Id64String, Id64String[]>;
   subjectModels?: Map<Id64String, Id64String[]>;
   modelCategories?: Map<Id64String, Id64Array>;
@@ -106,7 +106,7 @@ interface IdsCacheMockProps {
   elementChildren?: Map<Id64String, Id64Array>;
 }
 
-export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCache {
+export function createFakeIdsProvider(props?: IdsProviderMockProps): ModelsTreeIdsProvider {
   return {
     getChildSubjectIds: vi.fn(({ parentSubjectIds }: { parentSubjectIds: Id64Arg; excludeIfOnlyExcludedClasses?: boolean }) => {
       return from(Id64.iterable(parentSubjectIds)).pipe(
@@ -163,7 +163,7 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
     getSubModels: vi.fn(() => EMPTY),
     hasSubModels: vi.fn(() => of(false)),
     [Symbol.dispose]: vi.fn(),
-  } as unknown as ModelsTreeIdsCache;
+  } as unknown as ModelsTreeIdsProvider;
 }
 
 export function createSubjectHierarchyNode(props?: { ids?: Id64Arg; parentKeys?: InstanceKey[] }): NonGroupingHierarchyNode {
@@ -307,7 +307,7 @@ export function createClassGroupingHierarchyNode({
   };
 }
 
-export function createAccessAndCache({
+export function createAccessAndIdsProvider({
   imodelConnection,
   hierarchyConfig,
 }: {
@@ -319,18 +319,18 @@ export function createAccessAndCache({
     defaults: defaultHierarchyConfiguration,
     overrides: hierarchyConfig,
   });
-  const baseIdsCache = new BaseIdsCache({
+  const sharedIdsProvider = new SharedIdsProvider({
     queryExecutor: imodelAccess,
     elementClassName: mergedConfig.elements.baseClass,
     type: "3d",
     excludedElementClassNames: mergedConfig.elements.excludedClasses,
   });
-  const idsCache = new ModelsTreeIdsCache({
+  const idsProvider = new ModelsTreeIdsProvider({
     queryExecutor: imodelAccess,
     hierarchyConfig: mergedConfig,
-    baseIdsCache,
+    sharedIdsProvider,
   });
-  return { imodelAccess, idsCache };
+  return { imodelAccess, idsProvider };
 }
 
 export function createVisibilityTestData(props: {
@@ -338,13 +338,13 @@ export function createVisibilityTestData(props: {
   hierarchyConfig?: ModelsTreeHierarchyConfiguration;
   visibleByDefault?: boolean;
   imodelAccess: IModelAccess;
-  idsCache: ModelsTreeIdsCache;
+  idsProvider: ModelsTreeIdsProvider;
 }) {
-  const { idsCache, imodelAccess, imodelConnection, hierarchyConfig, visibleByDefault } = props;
+  const { idsProvider, imodelAccess, imodelConnection, hierarchyConfig, visibleByDefault } = props;
   const hierarchyConfigWithDefaults = mergeWithDefaults({ defaults: defaultHierarchyConfiguration, overrides: hierarchyConfig });
   const viewport = createTreeWidgetTestingViewport({ iModel: imodelConnection, viewType: "3d", visibleByDefault });
-  const handler = createModelsTreeVisibilityHandler({ viewport, imodelAccess, idsCache });
-  const provider = createProvider({ hierarchyConfig: hierarchyConfigWithDefaults, idsCache, imodelAccess });
+  const handler = createModelsTreeVisibilityHandler({ viewport, imodelAccess, idsProvider });
+  const provider = createProvider({ hierarchyConfig: hierarchyConfigWithDefaults, idsProvider, imodelAccess });
   return {
     handler,
     provider,
@@ -357,7 +357,7 @@ export function createVisibilityTestData(props: {
 }
 
 function createProvider(props: {
-  idsCache: ModelsTreeIdsCache;
+  idsProvider: ModelsTreeIdsProvider;
   imodelAccess: ReturnType<typeof createIModelAccess>;
   hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
   searchPaths?: HierarchySearchTree[];

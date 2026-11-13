@@ -12,7 +12,7 @@ import { buildIModel, insertGeometricModelWithPartition } from "../../IModelUtil
 import { initializeITwinJs, terminateITwinJs } from "../../Initialize.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 import {
-  createAccessAndCache,
+  createAccessAndIdsProvider,
   createClassificationsTreeProvider,
   importClassificationSchema,
   insertClassification,
@@ -61,13 +61,13 @@ describe("Classifications tree", () => {
       const { imodelConnection, ...keys } = buildIModelResult;
       const hierarchyConfig = { rootClassificationSystemCode };
       for (const preloadCache of [false, true]) {
-        const { imodelAccess, idsCache } = createAccessAndCache({ imodelConnection, hierarchyConfig });
+        const { imodelAccess, idsProvider } = createAccessAndIdsProvider({ imodelConnection, hierarchyConfig });
         if (preloadCache) {
-          await idsCache.preloadClassifications();
+          await idsProvider.preloadClassifications();
         }
         using provider = createIModelHierarchyProvider({
           imodelAccess,
-          hierarchyDefinition: new ClassificationsTreeDefinition({ imodelAccess, getIdsCache: () => idsCache, hierarchyConfig }),
+          hierarchyDefinition: new ClassificationsTreeDefinition({ imodelAccess, getIdsProvider: () => idsProvider, hierarchyConfig }),
         });
         await validateHierarchy({
           provider,

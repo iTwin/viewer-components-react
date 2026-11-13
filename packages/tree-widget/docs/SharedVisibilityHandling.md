@@ -130,11 +130,11 @@ flowchart TD
 
   A0 -- Yes --> RESULT_Empty
   A0 -- No --> A["Iterate through <span style='font-family: monospace;'>props.modelIds</span>"]
-  A0 -- No --> B["Get all sub-models nested under <span style='font-family: monospace;'>props.modelIds</span> from cache"]
+  A0 -- No --> B["Get all sub-models nested under <span style='font-family: monospace;'>props.modelIds</span> from ids provider"]
   B -- subModels --> B1["<span style='font-family: monospace;'><a href='#getmodelsvisibilitystatus'>getModelsVisibilityStatus</a>({ modelIds: subModels })</span>"]
   A -- modelId --> C{"<span style='font-family: monospace;'>viewport.viewsModel(modelId)</span>"}
   C -- No --> C1[hidden]
-  C -- Yes --> D["Get categories of top-most elements in <span style='font-family: monospace;'>modelId</span> from cache"]
+  C -- Yes --> D["Get categories of top-most elements in <span style='font-family: monospace;'>modelId</span> from ids provider"]
   D -- categoryIds --> E{"<span style='font-family: monospace;'>categoryIds.size > 0</span>"}
   E -- No --> E1[visible]
   E -- Yes --> F["For each category, call <span style='font-family: monospace;'><a href='#getcategoryvisibilityfromalwaysandneverdrawnelements'>getCategoryVisibilityFromAlwaysAndNeverDrawnElements</a></span> with an empty parent path"]
@@ -183,7 +183,7 @@ flowchart TD
     })</div>"/]
 
   A -- No --> C{"<span style='font-family: monospace;'>props.ignoreSubCategories === true</span>"}
-  C -- No --> C1["For each category, get sub-categories from cache"]
+  C -- No --> C1["For each category, get sub-categories from ids provider"]
   C1 --> C2["<span style='font-family: monospace;'><a href='#getsubcategoriesvisibilitystatus'>getSubCategoriesVisibilityStatus</a>({ categoryId, subCategoryIds })</span>"]
 
   A -- No --> D["Get non-sub-models whose top-most elements use each requested category"]
@@ -272,7 +272,7 @@ flowchart TD
   C0 -- No --> C2[hidden descendant status]
   C0 -- Yes --> C["For eligible element IDs, get descendant counts grouped by actual category"]
   C --> C1["<span style='font-family: monospace;'><a href='#grouped-descendant-visibility'>getVisibilityFromGroupedDescendants</a></span> using <span style='font-family: monospace;'>parentElementsPath</span>"]
-  B -- No --> D["Get sub-models under eligible element IDs from cache"]
+  B -- No --> D["Get sub-models under eligible element IDs from ids provider"]
   D -- subModels --> D1["<span style='font-family: monospace;'><a href='#getmodelsvisibilitystatus'>getModelsVisibilityStatus</a>({ modelIds: subModels })</span>"]
 
   B -- No --> A2["Own status contributes to the merge"]
@@ -428,7 +428,7 @@ flowchart TD
   RESULT_Done([Continue requested change])
 
   %% Start
-  TITLE(["<span style='font-family: monospace;'>removeAlwaysDrawnExclusive</span>"]) --> A["Get all categories used by elements from cache"]
+  TITLE(["<span style='font-family: monospace;'>removeAlwaysDrawnExclusive</span>"]) --> A["Get all categories used by elements from ids provider"]
 
   PROPS[\"
     <span style='font-family: monospace;'>props</span>
@@ -480,14 +480,14 @@ flowchart TD
   B --> C{"<span style='font-family: monospace;'>props.on === true</span>"}
 
   C -- No --> D["<span style='font-family: monospace;'>viewport.changeModelDisplay({ modelIds, display: false })</span>"]
-  D --> D1["Get all sub-models nested under <span style='font-family: monospace;'>modelIds</span> from cache"]
+  D --> D1["Get all sub-models nested under <span style='font-family: monospace;'>modelIds</span> from ids provider"]
   D1 -- subModels --> D2["<div style='text-align: left; font-family: monospace;'><a href='#changemodelsvisibilitystatus'>changeModelsVisibilityStatus</a>({
     <span style='padding-left: 2rem;'>modelIds: subModels, on: false</span>
     })</div>"]
   D2 --> RESULT_Done
 
   C -- Yes --> E["<span style='font-family: monospace;'>viewport.changeModelDisplay({ modelIds, display: true })</span>"]
-  E --> E1["For each model, get categories of top-most elements from cache"]
+  E --> E1["For each model, get categories of top-most elements from ids provider"]
   E1 -- "modelId, categoryIds" --> E2["<div style='text-align: left; font-family: monospace;'><a href='#changecategoriesvisibilitystatus'>changeCategoriesVisibilityStatus</a>({
     <span style='padding-left: 2rem;'>categoryIds, modelId,</span>
     <span style='padding-left: 2rem;'>parentElementsPath: [], on: true</span>
@@ -501,7 +501,7 @@ With `modelId`, this delegates to [changeCategoriesUnderModelVisibilityStatus](#
 
 The grouped model/category trees feed independent operations that clear per-model overrides, clear path-scoped always/never-drawn entries, and recursively change sub-models. When turning on, hidden related models are also prepared without exposing other categories. Descendants in different actual categories are reconciled only after model preparation completes and only when the model is visible. Enabling requested sub-categories is a separate operation that runs when turning on.
 
-During descendant reconciliation, categories whose defaults already match `on` have stale opposite-set entries removed. Descendants in categories whose defaults do not match `on` are fetched from `ChildElementsCache` and added to the forcing set.
+During descendant reconciliation, categories whose defaults already match `on` have stale opposite-set entries removed. Descendants in categories whose defaults do not match `on` are fetched from `ChildElementsProvider` and added to the forcing set.
 
 ```mermaid
 ---
@@ -649,11 +649,11 @@ flowchart TD
   B2 -- No --> H1["Element visibility branch complete"]
   B2 -- Yes --> C2["Use <span style='font-family: monospace;'><a href='#getvisiblemodelcategorydirectvisibilitystatus'>getVisibleModelCategoryDirectVisibilityStatus</a></span> to classify requested element IDs as matching or not matching <span style='font-family: monospace;'>on</span>"]
   C2 --> E["For eligible IDs, get descendant counts grouped by actual category"]
-  E --> E1["For matching categories, collect stale opposite-set IDs; for non-matching categories, fetch descendant IDs from cache"]
+  E --> E1["For matching categories, collect stale opposite-set IDs; for non-matching categories, fetch descendant IDs from ids provider"]
   E1 --> F2["<span style='font-family: monospace;'><a href='#queueelementsvisibilitychange'>queueElementsVisibilityChange</a>({ elementsMatchingDesiredState, elementsNotMatchingDesiredState, on })</span>"]
   F2 --> H1
 
-  D -- No --> G["In parallel, get sub-models under <span style='font-family: monospace;'>props.elementIds</span> from cache"]
+  D -- No --> G["In parallel, get sub-models under <span style='font-family: monospace;'>props.elementIds</span> from ids provider"]
   G -- subModels --> G1["When any are found, call <span style='font-family: monospace;'><a href='#changemodelsvisibilitystatus'>changeModelsVisibilityStatus</a>({ modelIds: subModels, on })</span>"]
   G1 --> H2["Sub-model visibility branch complete"]
   H1 --> I["Both merged branches complete"]

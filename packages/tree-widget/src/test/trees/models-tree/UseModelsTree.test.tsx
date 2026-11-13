@@ -56,7 +56,7 @@ describe("useModelsTree", () => {
     await terminateCore();
   });
 
-  it("preserves cache when search changes", async () => {
+  it("preserves ids providers when search changes", async () => {
     await using buildIModelResult = await buildIModel(async (imodel) =>
       withEditTxn(imodel, (txn) => {
         const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
@@ -107,9 +107,9 @@ describe("useModelsTree", () => {
       await waitFor(() => expect(viewport.iModel.createQueryReader).not.toHaveBeenCalled());
     } finally {
       // Unmount before test ends because:
-      // 1. test ends -> `using` disposes the imodel -> `onClose` fires -> caches are disposed.
-      // 2. React re-renders the still-mounted hook -> new caches are created.
-      // 3. afterEach unmounts too late - newly created caches are never disposed of.
+      // 1. test ends -> `using` disposes the imodel -> `onClose` fires -> ids providers are disposed.
+      // 2. React re-renders the still-mounted hook -> new ids providers are created.
+      // 3. afterEach unmounts too late - newly created ids providers are never disposed of.
       unmount();
     }
   });

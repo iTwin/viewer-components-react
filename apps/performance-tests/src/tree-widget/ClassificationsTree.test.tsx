@@ -7,9 +7,9 @@ import { describe, expect } from "vitest";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ClassificationsTreeNode, useClassificationsTree } from "@itwin/tree-widget-react";
 import {
-  BaseIdsCache,
+  SharedIdsProvider,
   ClassificationsTreeDefinition,
-  ClassificationsTreeIdsCache,
+  ClassificationsTreeIdsProvider,
   createClassificationsTreeVisibilityHandler,
   SharedTreeContextProvider,
 } from "@itwin/tree-widget-react/internal";
@@ -142,21 +142,21 @@ describe("classifications tree", () => {
           ...testData,
         });
         const hierarchyConfig = { rootClassificationSystemCode, elements: { excludedClasses: excludedElementClassNames } };
-        const baseIdsCache = new BaseIdsCache({
+        const sharedIdsProvider = new SharedIdsProvider({
           queryExecutor: imodelAccess,
           elementClassName: "BisCore.GeometricElement3d",
           type: "3d",
           excludedElementClassNames: hierarchyConfig.elements.excludedClasses,
         });
-        const idsCache = new ClassificationsTreeIdsCache({
+        const idsProvider = new ClassificationsTreeIdsProvider({
           queryExecutor: imodelAccess,
           hierarchyConfig,
-          baseIdsCache,
+          sharedIdsProvider,
         });
-        const handler = createClassificationsTreeVisibilityHandler({ imodelAccess, idsCache, viewport });
+        const handler = createClassificationsTreeVisibilityHandler({ imodelAccess, idsProvider, viewport });
         const provider = createIModelHierarchyProvider({
           hierarchyDefinition: new ClassificationsTreeDefinition({
-            getIdsCache: () => idsCache,
+            getIdsProvider: () => idsProvider,
             imodelAccess,
             hierarchyConfig,
           }),

@@ -13,14 +13,14 @@ import {
   insertSpatialCategory,
   insertSubModel,
 } from "test-utilities";
-import { BaseIdsCache } from "../../../../tree-widget-react/shared/internal/caches/BaseIdsCache.js";
 import {
   CLASS_NAME_DefinitionContainer,
   CLASS_NAME_Element,
   CLASS_NAME_SubCategory,
 } from "../../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { SharedIdsProvider } from "../../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
 import { getClassesByView } from "../../../../tree-widget-react/shared/internal/Utils.js";
-import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
+import { CategoriesTreeIdsProvider } from "../../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsProvider.js";
 import { TestSchema } from "../../../IModelUtils.js";
 import { validateHierarchyVisibility } from "../../../shared/VisibilityValidation.js";
 import { createIModelAccess } from "../../Common.js";
@@ -261,16 +261,16 @@ export async function validateCategoriesTreeHierarchyVisibility(props: Omit<Prop
   });
 }
 
-export function createAccessAndCache({ imodelConnection, viewType }: { imodelConnection: IModelConnection; viewType: "2d" | "3d" }): {
+export function createAccessAndIdsProvider({ imodelConnection, viewType }: { imodelConnection: IModelConnection; viewType: "2d" | "3d" }): {
   imodelAccess: IModelAccess;
-  idsCache: CategoriesTreeIdsCache;
+  idsProvider: CategoriesTreeIdsProvider;
 } {
   const imodelAccess = createIModelAccess(imodelConnection);
-  const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
-  const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
+  const sharedIdsProvider = new SharedIdsProvider({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+  const idsProvider = new CategoriesTreeIdsProvider({ queryExecutor: imodelAccess, type: viewType, sharedIdsProvider });
 
   return {
     imodelAccess,
-    idsCache,
+    idsProvider,
   };
 }

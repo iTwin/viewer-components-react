@@ -19,7 +19,7 @@ import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js
 import { useCachedVisibility } from "../../shared/internal/hooks/UseCachedVisibility.js";
 import { useGuid } from "../../shared/internal/hooks/UseGuid.js";
 import { mergeWithDefaults, stableStringify } from "../../shared/internal/Utils.js";
-import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
+import { ModelsTreeIdsProvider } from "./internal/ModelsTreeIdsProvider.js";
 import { useSearchPaths } from "./internal/UseSearchPaths.js";
 import { ModelsTreeVisibilityHandler } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
 import { createModelsSearchResultsTree } from "./internal/visibility/SearchResultsTree.js";
@@ -165,30 +165,30 @@ export function useModelsTree({
     [hierarchyConfigFingerprint],
   );
   const componentId = useGuid();
-  const idsCache = useModelsTreeIdsCache({
+  const idsProvider = useModelsTreeIdsProvider({
     imodel: activeView.iModel,
     hierarchyConfig: hierarchyConfiguration,
   });
 
-  const { visibilityHandlerFactory, onSearchPathsChanged } = useCachedVisibility<ModelsTreeIdsCache, ModelsTreeSearchTargets>({
+  const { visibilityHandlerFactory, onSearchPathsChanged } = useCachedVisibility<ModelsTreeIdsProvider, ModelsTreeSearchTargets>({
     activeView,
     createSearchResultsTree,
     createTreeSpecificVisibilityHandler: useCallback(
       (treeProps) => createTreeSpecificVisibilityHandler({ ...treeProps, overrides: visibilityHandlerOverrides }),
       [visibilityHandlerOverrides],
     ),
-    idsCache,
+    idsProvider,
     componentId,
   });
 
   const onNodeExpanded = useCallback(() => {
-    void idsCache.preloadElementModelCategories();
-    void idsCache.preloadModeledElements();
-  }, [idsCache]);
+    void idsProvider.preloadElementModelCategories();
+    void idsProvider.preloadModeledElements();
+  }, [idsProvider]);
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
-    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache, hierarchyConfig: hierarchyConfiguration, componentId }),
-    [idsCache, hierarchyConfiguration, componentId],
+    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsProvider, hierarchyConfig: hierarchyConfiguration, componentId }),
+    [idsProvider, hierarchyConfiguration, componentId],
   );
 
   const { getPaths, searchError, subTreeError } = useSearchPaths({
@@ -196,7 +196,7 @@ export function useModelsTree({
     searchText,
     searchLimit,
     getSearchPaths,
-    idsCache,
+    idsProvider,
     onSearchPathsChanged,
     onModelsFiltered,
     getSubTreePaths,
@@ -240,23 +240,23 @@ export function useModelsTree({
   };
 }
 
-async function createSearchResultsTree(props: CreateSearchResultsTreeProps<ModelsTreeIdsCache>): Promise<SearchResultsTree<ModelsTreeSearchTargets>> {
-  const { searchPaths, imodelAccess, idsCache } = props;
+async function createSearchResultsTree(props: CreateSearchResultsTreeProps<ModelsTreeIdsProvider>): Promise<SearchResultsTree<ModelsTreeSearchTargets>> {
+  const { searchPaths, imodelAccess, idsProvider } = props;
   return createModelsSearchResultsTree({
     imodelAccess,
     searchPaths,
-    idsCache,
+    idsProvider,
   });
 }
 
 function createTreeSpecificVisibilityHandler(
-  props: CreateTreeSpecificVisibilityHandlerProps<ModelsTreeIdsCache> & { overrides?: ModelsTreeVisibilityHandlerOverrides },
+  props: CreateTreeSpecificVisibilityHandlerProps<ModelsTreeIdsProvider> & { overrides?: ModelsTreeVisibilityHandlerOverrides },
 ) {
-  const { info, idsCache, overrideHandler, overrides, viewport } = props;
+  const { info, idsProvider, overrideHandler, overrides, viewport } = props;
   return new ModelsTreeVisibilityHandler({
     alwaysAndNeverDrawnElementInfo: info,
     overrideHandler,
-    idsCache,
+    idsProvider,
     viewport,
     overrides,
   });
@@ -308,35 +308,35 @@ function InstanceFocusError({ error }: { error: ModelsTreeSearchError }) {
   return <UnknownInstanceFocusError base={"modelsTree"} />;
 }
 
-function useModelsTreeIdsCache({
+function useModelsTreeIdsProvider({
   imodel,
   hierarchyConfig,
 }: {
   imodel: IModelConnection;
   hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
-}): ModelsTreeIdsCache {
-  const { getBaseIdsCache, getCache } = useSharedTreeContext();
-  const baseIdsCache = getBaseIdsCache({
+}): ModelsTreeIdsProvider {
+  const { getSharedIdsProvider, getIdsProvider } = useSharedTreeContext();
+  const sharedIdsProvider = getSharedIdsProvider({
     type: "3d",
     elementClassName: hierarchyConfig.elements.baseClass,
     excludedElementClassNames: hierarchyConfig.elements.excludedClasses,
     imodel,
   });
 
-  const modelsTreeIdsCache = getCache({
+  const modelsTreeIdsProvider = getIdsProvider({
     imodel,
-    createCache: () =>
-      new ModelsTreeIdsCache({
-        baseIdsCache,
+    createIdsProvider: () =>
+      new ModelsTreeIdsProvider({
+        sharedIdsProvider,
         hierarchyConfig,
         queryExecutor: createECSqlQueryExecutor(imodel),
       }),
-    cacheKey: `${hierarchyConfig.subjects.root}-${hierarchyConfig.models.withoutElements}-${hierarchyConfig.elements.baseClass}-${[
+    idsProviderKey: `${hierarchyConfig.subjects.root}-${hierarchyConfig.models.withoutElements}-${hierarchyConfig.elements.baseClass}-${[
       ...(hierarchyConfig.elements.excludedClasses ?? []),
     ]
       .sort()
-      .join(",")}-ModelsTreeIdsCache`,
+      .join(",")}-ModelsTreeIdsProvider`,
   });
 
-  return modelsTreeIdsCache;
+  return modelsTreeIdsProvider;
 }

@@ -18,7 +18,7 @@ import { TreeRenderer } from "../../shared/components/TreeRenderer.js";
 import { useGuid } from "../../shared/internal/hooks/UseGuid.js";
 import { IModelContentTreeComponent } from "./IModelContentTreeComponent.js";
 import { defaultHierarchyConfiguration, IModelContentTreeDefinition } from "./IModelContentTreeDefinition.js";
-import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.js";
+import { IModelContentTreeIdsProvider } from "./internal/IModelContentTreeIdsProvider.js";
 
 import type { TreeNode } from "@itwin/presentation-hierarchies-react";
 import type { TreeProps } from "../../shared/components/Tree.js";
@@ -55,7 +55,7 @@ export function IModelContentTree({
         ...defaultHierarchyConfiguration,
         ...hierarchyConfigProp,
       };
-      return new IModelContentTreeDefinition({ imodelAccess, idsCache: new IModelContentTreeIdsCache(imodelAccess, componentId), hierarchyConfig });
+      return new IModelContentTreeDefinition({ imodelAccess, idsProvider: new IModelContentTreeIdsProvider(imodelAccess, componentId), hierarchyConfig });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
     Object.values({ ...(hierarchyConfigProp ?? {}), componentId }),
