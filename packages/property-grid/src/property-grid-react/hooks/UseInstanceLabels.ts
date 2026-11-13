@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { concatMap, defer, EMPTY, exhaustMap, from, map, mergeMap, of, Subject, switchMap, take, tap, toArray } from "rxjs";
+import { concatMap, defer, EMPTY, exhaustMap, from, map, mergeMap, shareReplay, Subject, switchMap, take, toArray } from "rxjs";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import {
   createBisInstanceLabelSelectClauseFactory,
@@ -138,13 +138,13 @@ function createSession(imodel: IModelConnection, keysByClass: Map<string, Map<Id
   const pages = defer(() => {
     let offset = 0;
     let hasMore = total > 0;
-    let prepared: ReturnType<typeof createSortedLabelsPageQuery> | undefined;
+    const preparedQuery = prepare().pipe(shareReplay({ bufferSize: 1, refCount: true }));
     return loadRequests.pipe(
       exhaustMap(() => {
         if (!hasMore) {
           return EMPTY;
         }
-        return (prepared ? of(prepared) : prepare().pipe(tap((query) => (prepared = query)))).pipe(
+        return preparedQuery.pipe(
           switchMap((query) =>
             defer(() =>
               from(
