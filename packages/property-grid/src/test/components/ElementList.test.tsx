@@ -3,16 +3,16 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { exhaustMap, from, map, Subject } from "rxjs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { InstanceLabelsProvider } from "../../property-grid-react/common/InstanceLabelsProvider.js";
 import { ElementList } from "../../property-grid-react/components/ElementList.js";
+import * as instanceLabels from "../../property-grid-react/hooks/UseInstanceLabels.js";
 import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
 import { act, createResolvablePromise, fireEvent, render, waitFor } from "../TestUtils.js";
+import { createMockUseInstanceLabels } from "./MockInstanceLabels.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
-import type { LabeledInstanceKey } from "../../property-grid-react/common/InstanceLabelsProvider.js";
+import type { LabeledInstanceKey } from "./MockInstanceLabels.js";
 
 describe("<ElementList />", () => {
   const imodel = {} as IModelConnection;
@@ -29,18 +29,7 @@ describe("<ElementList />", () => {
   beforeEach(() => {
     vi.spyOn(PropertyGridManager, "translate").mockImplementation((key) => key);
     getLabelsStub = vi.fn(buildPage);
-    vi.spyOn(InstanceLabelsProvider.prototype, "createSession").mockImplementation((keys, limit) => {
-      const loadRequests = new Subject<void>();
-      let offset = 0;
-      const pages = loadRequests.pipe(
-        exhaustMap(() => from(getLabelsStub(keys, { offset, limit }))),
-        map((page) => {
-          offset += page.length;
-          return { page, hasMore: page.length === limit && offset < keys.length };
-        }),
-      );
-      return { loadRequests, pages };
-    });
+    vi.spyOn(instanceLabels, "useInstanceLabels").mockImplementation(createMockUseInstanceLabels(async (keys, page) => getLabelsStub(keys, page)));
   });
 
   it("loads and renders instance labels", async () => {

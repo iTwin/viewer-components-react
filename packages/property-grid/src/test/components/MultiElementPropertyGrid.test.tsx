@@ -3,14 +3,13 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { exhaustMap, from, map, Subject } from "rxjs";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import { normalizeFullClassName } from "@itwin/presentation-shared";
 import { Selectables } from "@itwin/unified-selection";
-import { InstanceLabelsProvider } from "../../property-grid-react/common/InstanceLabelsProvider.js";
 import { MultiElementPropertyGrid } from "../../property-grid-react/components/MultiElementPropertyGrid.js";
+import * as instanceLabels from "../../property-grid-react/hooks/UseInstanceLabels.js";
 import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
 import {
   act,
@@ -22,6 +21,7 @@ import {
   stubSelectionStorage,
   waitFor,
 } from "../TestUtils.js";
+import { createMockUseInstanceLabels } from "./MockInstanceLabels.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
@@ -43,14 +43,7 @@ describe("<MultiElementPropertyGrid />", () => {
   beforeEach(() => {
     getDataStub = vi.spyOn(PresentationPropertyDataProvider.prototype, "getData");
     getLabelsStub = vi.fn(buildPage);
-    vi.spyOn(InstanceLabelsProvider.prototype, "createSession").mockImplementation((keys) => {
-      const loadRequests = new Subject<void>();
-      const pages = loadRequests.pipe(
-        exhaustMap(() => from(getLabelsStub(keys))),
-        map((page) => ({ page, hasMore: false })),
-      );
-      return { loadRequests, pages };
-    });
+    vi.spyOn(instanceLabels, "useInstanceLabels").mockImplementation(createMockUseInstanceLabels(async (keys) => getLabelsStub(keys)));
 
     vi.spyOn(PropertyGridManager, "translate").mockImplementation((key) => key);
 
