@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Categories tree header buttons: fix an unhandled error, which could crash the app on React 19, when the viewport changed while categories were loading.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "lukasz.kokot@bentley.com",
+  "dependentChangeType": "patch"
+}

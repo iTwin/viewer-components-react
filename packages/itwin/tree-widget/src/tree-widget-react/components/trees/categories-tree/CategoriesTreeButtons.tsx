@@ -9,6 +9,7 @@ import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/
 import { IconButton } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport, showAllCategories } from "../common/CategoriesVisibilityUtils.js";
+import { isBeSqliteInterruptError } from "../common/internal/Utils.js";
 import { useGuid } from "../common/useGuid.js";
 
 import type { ReactElement } from "react";
@@ -126,6 +127,16 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
 const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
 function useCategories(viewport: Viewport, componentId: GuidString) {
-  const categoriesPromise = useMemo(async () => loadCategoriesFromViewport(viewport, componentId), [viewport, componentId]);
+  const categoriesPromise = useMemo(async () => {
+    try {
+      return await loadCategoriesFromViewport(viewport, componentId);
+    } catch (error) {
+      // Interrupted when a newer query with the same restart token replaces it; that query's result is used instead.
+      if (isBeSqliteInterruptError(error)) {
+        return EMPTY_CATEGORIES_ARRAY;
+      }
+      throw error;
+    }
+  }, [viewport, componentId]);
   return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;
 }
