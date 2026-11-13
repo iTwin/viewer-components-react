@@ -35,7 +35,7 @@ interface LabeledInstanceKey {
 
 interface InstanceLabelsSession {
   /** Request a page after subscribing to `pages`. */
-  loadRequests: Subject<void>;
+  loadMore: () => void;
   /** Page stream for a single subscriber. */
   pages: Observable<{ page: LabeledInstanceKey[]; hasMore: boolean }>;
 }
@@ -89,7 +89,7 @@ export function useInstanceLabels({ imodel, instanceKeys }: { imodel: IModelConn
       timer = trackTime(true, (elapsedTime) => onPerformanceMeasured("elements-list-load", elapsedTime));
       const placeholderCount = Math.min(PAGE_SIZE, total - items.length);
       setRows([...items, ...new Array<undefined>(placeholderCount).fill(undefined)]);
-      session.loadRequests.next();
+      session.loadMore();
     };
     loadNextPage.current = loadPage;
     setRows([]);
@@ -113,8 +113,10 @@ function createSession(imodel: IModelConnection, keysByClass: Map<string, Map<Id
   });
   const valueFormatter = createDefaultValueFormatter();
   const loadRequests = new Subject<void>();
-  const prepare = () =>
-    from(keysByClass).pipe(
+  const pages = defer(() => {
+    let offset = 0;
+    let hasMore = total > 0;
+    const preparedQuery = from(keysByClass).pipe(
       mergeMap(async ([fullClassName, keys], index) => {
         const { schemaName, className } = parseFullClassName(fullClassName);
         const [label, sortLabel] = await Promise.all([
@@ -134,11 +136,8 @@ function createSession(imodel: IModelConnection, keysByClass: Map<string, Map<Id
       }),
       toArray(),
       map((selects) => createSortedLabelsPageQuery(selects.sort((a, b) => a.index - b.index))),
+      shareReplay({ bufferSize: 1, refCount: true }),
     );
-  const pages = defer(() => {
-    let offset = 0;
-    let hasMore = total > 0;
-    const preparedQuery = prepare().pipe(shareReplay({ bufferSize: 1, refCount: true }));
     return loadRequests.pipe(
       exhaustMap(() => {
         if (!hasMore) {
@@ -177,7 +176,7 @@ function createSession(imodel: IModelConnection, keysByClass: Map<string, Map<Id
       }),
     );
   });
-  return { loadRequests, pages };
+  return { loadMore: () => loadRequests.next(), pages };
 }
 
 function createSortedLabelsPageQuery(selects: Array<{ ecsql: string; binding: ECSqlBinding }>) {
