@@ -14,7 +14,7 @@ import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies
 import type { EC } from "@itwin/presentation-shared";
 import type { CategoryId, ModelId } from "../Types.js";
 
-interface ElementModelCategoriesCacheProps {
+interface ElementModelCategoriesProviderProps {
   queryExecutor: LimitingECSqlQueryExecutor;
   componentId: GuidString;
   elementClassName: string;
@@ -38,7 +38,7 @@ interface CachedData {
 }
 
 /** @internal */
-export class ElementModelCategoriesCache {
+export class ElementModelCategoriesProvider {
   #queryExecutor: LimitingECSqlQueryExecutor;
   #componentId: GuidString;
   #componentName: string;
@@ -48,12 +48,12 @@ export class ElementModelCategoriesCache {
   #dataResolved = false;
   #subscriberBatches: Array<{ obs: Observable<CachedData>; subscriberCount: number }> = [];
 
-  constructor(props: ElementModelCategoriesCacheProps) {
+  constructor(props: ElementModelCategoriesProviderProps) {
     this.#queryExecutor = props.queryExecutor;
     this.#elementClassName = props.elementClassName;
     this.#excludedElementClassNames = props.excludedElementClassNames;
     this.#componentId = props.componentId;
-    this.#componentName = "ElementModelCategoriesCache";
+    this.#componentName = "ElementModelCategoriesProvider";
   }
 
   private queryElementModelCategories(): Observable<{

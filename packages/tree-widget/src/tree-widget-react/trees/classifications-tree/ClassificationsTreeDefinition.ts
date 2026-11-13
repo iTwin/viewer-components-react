@@ -57,13 +57,13 @@ import type {
 } from "@itwin/presentation-hierarchies";
 import type { EC, ECSchemaProvider, ECSqlQueryRow, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
 import type { ClassificationId, ClassificationTableId, ElementId } from "../../shared/internal/Types.js";
-import type { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
+import type { ClassificationsTreeIdsProvider } from "./internal/ClassificationsTreeIdsProvider.js";
 
 const MAX_SEARCH_INSTANCE_KEY_COUNT = 100;
 
 interface ClassificationsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & LimitingECSqlQueryExecutor & { imodelKey: string };
-  getIdsCache: (imodelKey: string) => ClassificationsTreeIdsCache;
+  getIdsProvider: (imodelKey: string) => ClassificationsTreeIdsProvider;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
 }
 
@@ -95,7 +95,7 @@ export interface ClassificationsTreeHierarchyConfiguration {
 interface ClassificationsTreeInstanceKeyPathsBaseProps {
   imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom"> & LimitingECSqlQueryExecutor;
   limit?: number | "unbounded";
-  idsCache: ClassificationsTreeIdsCache;
+  idsProvider: ClassificationsTreeIdsProvider;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
   componentId?: GuidString;
   abortSignal?: AbortSignal;
@@ -231,9 +231,15 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     if (!imodelKey) {
       return [];
     }
-    const cache = this.#props.getIdsCache(imodelKey);
-    const childClassificationsDefinition = cache.isDataLoaded
-      ? await this.#createCachedChildClassificationsQuery({ parentIds: classificationTableIds, cache, instanceFilter, createSelectClause, createFilterClauses })
+    const idsProvider = this.#props.getIdsProvider(imodelKey);
+    const childClassificationsDefinition = idsProvider.isDataLoaded
+      ? await this.#createCachedChildClassificationsQuery({
+          parentIds: classificationTableIds,
+          idsProvider,
+          instanceFilter,
+          createSelectClause,
+          createFilterClauses,
+        })
       : await this.#createUncachedChildClassificationsQuery({
           parentIds: classificationTableIds,
           parentType: "classification-table",
@@ -255,14 +261,20 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     if (!parentImodelKey) {
       return [];
     }
-    const cache = this.#props.getIdsCache(parentImodelKey);
+    const idsProvider = this.#props.getIdsProvider(parentImodelKey);
     const [elementsInstanceFilterClauses, childClassificationsDefinition] = await Promise.all([
       createFilterClauses({
         filter: instanceFilter,
         contentClass: { fullName: CLASS_NAME_GeometricElement3d, alias: "this" },
       }),
-      cache.isDataLoaded
-        ? this.#createCachedChildClassificationsQuery({ parentIds: parentClassificationIds, cache, instanceFilter, createSelectClause, createFilterClauses })
+      idsProvider.isDataLoaded
+        ? this.#createCachedChildClassificationsQuery({
+            parentIds: parentClassificationIds,
+            idsProvider,
+            instanceFilter,
+            createSelectClause,
+            createFilterClauses,
+          })
         : this.#createUncachedChildClassificationsQuery({
             parentIds: parentClassificationIds,
             parentType: "classification",
@@ -304,13 +316,13 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
   /** Returns `undefined` when cached data indicates that there are no child classifications. */
   async #createCachedChildClassificationsQuery({
     parentIds,
-    cache,
+    idsProvider,
     instanceFilter,
     createSelectClause,
     createFilterClauses,
   }: {
     parentIds: Id64Array;
-    cache: ClassificationsTreeIdsCache;
+    idsProvider: ClassificationsTreeIdsProvider;
     instanceFilter: DefineHierarchyLevelProps["instanceFilter"];
     createSelectClause: DefineHierarchyLevelProps["createSelectClause"];
     createFilterClauses: DefineHierarchyLevelProps["createFilterClauses"];
@@ -320,7 +332,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
         filter: instanceFilter,
         contentClass: { fullName: CLASS_NAME_Classification, alias: "this" },
       }),
-      getChildClassifications({ classificationOrTableIds: parentIds, cache }),
+      getChildClassifications({ classificationOrTableIds: parentIds, idsProvider }),
     ]);
     if (childClassifications.length === 0) {
       return undefined;
@@ -520,16 +532,16 @@ function getParentNodeIModelKey(instanceKey: InstancesNodeKey): string | undefin
 
 async function getChildClassifications({
   classificationOrTableIds,
-  cache,
+  idsProvider,
 }: {
   classificationOrTableIds: Id64Array;
-  cache: ClassificationsTreeIdsCache;
+  idsProvider: ClassificationsTreeIdsProvider;
 }): Promise<{ childClassifications: Id64Array; childClassificationsWithChildren: Id64Array }> {
   return firstValueFrom(
-    cache.getDirectChildClassifications(classificationOrTableIds).pipe(
+    idsProvider.getDirectChildClassifications(classificationOrTableIds).pipe(
       mergeMap((classifications) =>
         from(classifications).pipe(
-          mergeMap((classificationId) => forkJoin({ hasChildren: cache.hasChildren(classificationId), classificationId: of(classificationId) })),
+          mergeMap((classificationId) => forkJoin({ hasChildren: idsProvider.hasChildren(classificationId), classificationId: of(classificationId) })),
           mergeMap(({ classificationId, hasChildren }) => (hasChildren ? of(classificationId) : EMPTY)),
           toArray(),
           map((nonEmptyClassifications) => ({ childClassifications: classifications, childClassificationsWithChildren: nonEmptyClassifications })),
@@ -579,7 +591,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
         props.labelsFactory.createSelectClause({ classAlias: "this", className, selectorsConcatenator: ECSql.createConcatenatedValueStringSelector }),
       ),
     );
-    const classificationIds = await firstValueFrom(props.idsCache.getAllClassifications());
+    const classificationIds = await firstValueFrom(props.idsProvider.getAllClassifications());
     const ctes = [
       `
         ${CLASSIFICATION_TABLES_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
@@ -770,7 +782,7 @@ function createSearchPathsForDifferentTypes(
         },
       ),
       switchMap((ids) => {
-        const { idsCache, imodelAccess, componentId, componentName, limit } = props;
+        const { idsProvider, imodelAccess, componentId, componentName, limit } = props;
         const elementsLength = ids.elementIds.length;
         const totalSize = ids.classificationTableIds.length + ids.classificationIds.length + elementsLength;
         if (limit !== "unbounded" && totalSize > (limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT)) {
@@ -779,14 +791,14 @@ function createSearchPathsForDifferentTypes(
 
         return merge(
           from(ids.classificationTableIds).pipe(map((id) => ({ path: [{ id, className: CLASS_NAME_ClassificationTable }], target: id }))),
-          idsCache.getClassificationsPathObs(ids.classificationIds).pipe(map((path) => ({ path, target: path[path.length - 1].id }))),
+          idsProvider.getClassificationsPathObs(ids.classificationIds).pipe(map((path) => ({ path, target: path[path.length - 1].id }))),
           from(ids.elementIds).pipe(
             bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),
             releaseMainThreadOnItemsCount(1),
             mergeMap(
               (block, chunkIndex) =>
                 createGeometricElementInstanceKeyPaths({
-                  idsCache,
+                  idsProvider,
                   imodelAccess,
                   targetItems: block,
                   chunkIndex,
@@ -803,7 +815,7 @@ function createSearchPathsForDifferentTypes(
 }
 
 function createGeometricElementInstanceKeyPaths(props: {
-  idsCache: ClassificationsTreeIdsCache;
+  idsProvider: ClassificationsTreeIdsProvider;
   imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom"> & LimitingECSqlQueryExecutor;
   targetItems: Id64Array;
   componentId: GuidString;
@@ -811,7 +823,7 @@ function createGeometricElementInstanceKeyPaths(props: {
   chunkIndex: number;
   excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
 }): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String }> {
-  const { targetItems, imodelAccess, idsCache, componentId, componentName, chunkIndex, excludedElementClassNames } = props;
+  const { targetItems, imodelAccess, idsProvider, componentId, componentName, chunkIndex, excludedElementClassNames } = props;
   if (targetItems.length === 0) {
     return EMPTY;
   }
@@ -865,7 +877,7 @@ function createGeometricElementInstanceKeyPaths(props: {
     mergeMap(({ path, parentClassificationId }) => {
       const target = path[path.length - 1].id;
       if (parentClassificationId) {
-        return idsCache
+        return idsProvider
           .getClassificationsPathObs(parentClassificationId)
           .pipe(map((parentClassificationPath) => ({ path: parentClassificationPath.concat(path), target })));
       }

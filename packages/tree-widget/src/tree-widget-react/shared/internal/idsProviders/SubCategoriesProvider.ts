@@ -14,13 +14,13 @@ import type { GuidString } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { CategoryId, SubCategoryId } from "../Types.js";
 
-interface SubCategoriesCacheProps {
+interface SubCategoriesProviderProps {
   queryExecutor: LimitingECSqlQueryExecutor;
   componentId?: GuidString;
 }
 
 /** @internal */
-export class SubCategoriesCache {
+export class SubCategoriesProvider {
   #queryExecutor: LimitingECSqlQueryExecutor;
   #componentId: GuidString;
   #componentName: string;
@@ -29,10 +29,10 @@ export class SubCategoriesCache {
     | undefined;
   #rowLimit = 7500;
 
-  constructor(props: SubCategoriesCacheProps) {
+  constructor(props: SubCategoriesProviderProps) {
     this.#queryExecutor = props.queryExecutor;
     this.#componentId = props.componentId ?? Guid.createValue();
-    this.#componentName = "SubCategoriesCache";
+    this.#componentName = "SubCategoriesProvider";
   }
 
   private querySubCategories(): Observable<{ id: SubCategoryId; parentId: CategoryId }> {

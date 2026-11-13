@@ -20,7 +20,7 @@ import { hideAllCategories, invertAllCategories, showAll } from "../../shared/in
 
 import type { Observable } from "rxjs";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import type { BaseIdsCache } from "../../shared/internal/caches/BaseIdsCache.js";
+import type { SharedIdsProvider } from "../../shared/internal/idsProviders/SharedIdsProvider.js";
 import type { ModelId } from "../../shared/internal/Types.js";
 import type { CategoryInfosMap } from "../../shared/internal/VisibilityUtils.js";
 import type { TreeWidgetViewport } from "../../shared/TreeWidgetViewport.js";
@@ -96,9 +96,9 @@ export type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonP
 export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   const { categories, viewport, models } = props;
   const { onFeatureUsed } = useTelemetryContext();
-  const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContext();
+  const { cancelChangesInProgress, getSharedIdsProvider } = useSharedTreeContext();
   const viewType = viewport.viewType === "2d" ? "2d" : "3d";
-  const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
   const translate = useTranslation();
 
   const onClick = async () => {
@@ -107,7 +107,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
     cancelChangesInProgress.next();
     // wrap in try catch for getCategoryInfos call
     try {
-      const categoryInfos = await getCategoryInfos({ categoriesInfo: categories, baseIdsCache, cancel: cancelChangesInProgress });
+      const categoryInfos = await getCategoryInfos({ categoriesInfo: categories, sharedIdsProvider, cancel: cancelChangesInProgress });
       if (!categoryInfos) {
         return;
       }
@@ -130,9 +130,9 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
 export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
   const { categories, viewport } = props;
   const { onFeatureUsed } = useTelemetryContext();
-  const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContext();
+  const { cancelChangesInProgress, getSharedIdsProvider } = useSharedTreeContext();
   const viewType = viewport.viewType === "2d" ? "2d" : "3d";
-  const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
   const translate = useTranslation();
 
   const onClick = async () => {
@@ -141,7 +141,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
     cancelChangesInProgress.next();
     // wrap in try catch for getCategoryInfos call
     try {
-      const categoryInfos = await getCategoryInfos({ categoriesInfo: categories, baseIdsCache, cancel: cancelChangesInProgress });
+      const categoryInfos = await getCategoryInfos({ categoriesInfo: categories, sharedIdsProvider, cancel: cancelChangesInProgress });
       if (!categoryInfos) {
         return;
       }
@@ -162,9 +162,9 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
 export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   const { categories, viewport, models } = props;
   const { onFeatureUsed } = useTelemetryContext();
-  const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContext();
+  const { cancelChangesInProgress, getSharedIdsProvider } = useSharedTreeContext();
   const viewType = viewport.viewType === "2d" ? "2d" : "3d";
-  const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
   const translate = useTranslation();
 
   const onClick = async () => {
@@ -173,7 +173,7 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
     cancelChangesInProgress.next();
     // wrap in try catch for getCategoryInfos call
     try {
-      const categoryInfos = await getCategoryInfos({ categoriesInfo: categories, baseIdsCache, cancel: cancelChangesInProgress });
+      const categoryInfos = await getCategoryInfos({ categoriesInfo: categories, sharedIdsProvider, cancel: cancelChangesInProgress });
       if (!categoryInfos) {
         return;
       }
@@ -196,19 +196,19 @@ const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
 function useCategories(viewport: TreeWidgetViewport) {
   const setErrorState = useErrorState();
-  const { getBaseIdsCache } = useSharedTreeContext();
-  const baseIdsCache =
+  const { getSharedIdsProvider } = useSharedTreeContext();
+  const sharedIdsProvider =
     viewport.viewType !== "other"
-      ? getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewport.viewType).elementClass, type: viewport.viewType })
+      ? getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByView(viewport.viewType).elementClass, type: viewport.viewType })
       : undefined;
   // eslint-disable-next-line react-hooks/use-memo
   const categoriesPromise = useMemo(async () => {
     try {
-      if (baseIdsCache) {
+      if (sharedIdsProvider) {
         return await firstValueFrom(
-          baseIdsCache.getAllCategoriesOfElements().pipe(
+          sharedIdsProvider.getAllCategoriesOfElements().pipe(
             mergeAll(),
-            mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), subCategories: baseIdsCache.getSubCategories({ categoryId }) })),
+            mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), subCategories: sharedIdsProvider.getSubCategories({ categoryId }) })),
             toArray(),
           ),
         );
@@ -218,7 +218,7 @@ function useCategories(viewport: TreeWidgetViewport) {
       setErrorState(error);
       return [];
     }
-  }, [baseIdsCache, setErrorState]);
+  }, [sharedIdsProvider, setErrorState]);
   return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;
 }
 
@@ -226,16 +226,16 @@ function useAvailableModels(viewport: TreeWidgetViewport): Array<ModelId> {
   const [availableModels, setAvailableModels] = useState<Array<ModelId>>([]);
   const setErrorState = useErrorState();
   const imodel = viewport.iModel;
-  const { getBaseIdsCache } = useSharedTreeContext();
-  const baseIdsCache =
+  const { getSharedIdsProvider } = useSharedTreeContext();
+  const sharedIdsProvider =
     viewport.viewType !== "other"
-      ? getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewport.viewType).elementClass, type: viewport.viewType })
+      ? getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByView(viewport.viewType).elementClass, type: viewport.viewType })
       : undefined;
   useEffect(() => {
     const getModels = async () => {
       try {
-        if (baseIdsCache) {
-          const models = await firstValueFrom(baseIdsCache.getAllModels());
+        if (sharedIdsProvider) {
+          const models = await firstValueFrom(sharedIdsProvider.getAllModels());
           setAvailableModels(models);
         }
         return;
@@ -245,18 +245,18 @@ function useAvailableModels(viewport: TreeWidgetViewport): Array<ModelId> {
       }
     };
     void getModels();
-  }, [imodel, baseIdsCache, setErrorState]);
+  }, [imodel, sharedIdsProvider, setErrorState]);
 
   return availableModels;
 }
 
 async function getCategoryInfos({
   categoriesInfo,
-  baseIdsCache,
+  sharedIdsProvider,
   cancel,
 }: {
   categoriesInfo: CategoryInfo[];
-  baseIdsCache: BaseIdsCache;
+  sharedIdsProvider: SharedIdsProvider;
   cancel: Observable<void>;
 }): Promise<CategoryInfosMap | undefined> {
   return firstValueFrom(
@@ -265,7 +265,7 @@ async function getCategoryInfos({
         if (categoryInfo.subCategoryIds && categoryInfo.subCategoryIds.length > 0) {
           return of({ categoryId: categoryInfo.categoryId, subCategoryIds: categoryInfo.subCategoryIds });
         }
-        return baseIdsCache
+        return sharedIdsProvider
           .getSubCategories({ categoryId: categoryInfo.categoryId })
           .pipe(map((subCategoryIds) => ({ categoryId: categoryInfo.categoryId, subCategoryIds })));
       }),

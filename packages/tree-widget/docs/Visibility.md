@@ -21,7 +21,7 @@ flowchart TD
   SRT["Search-results tree<br/>resolves child search targets for non-target nodes"]
   HELPER["Tree-specific visibility helper<br/>(subjects, definition containers, classifications, ...)"]
   BASE["<span style='font-family: monospace;'>BaseVisibilityHelper</span><br/>shared model/category/element get &amp; change logic"]
-  CACHES[("<span style='font-family: monospace;'>BaseIdsCache</span> + tree-specific ids cache<br/><span style='font-family: monospace;'>AlwaysAndNeverDrawnElementInfoCache</span><br/><span style='font-family: monospace;'>DescendantsCountCache</span>, <span style='font-family: monospace;'>ChildElementsCache</span>")]
+  IDS_PROVIDERS[("<span style='font-family: monospace;'>SharedIdsProvider</span> + tree-specific ids provider<br/><span style='font-family: monospace;'>AlwaysAndNeverDrawnElementInfoProvider</span><br/><span style='font-family: monospace;'>DescendantsCountProvider</span>, <span style='font-family: monospace;'>ChildElementsProvider</span>")]
   BUF["<span style='font-family: monospace;'>BufferingViewport</span> (changes only)"]
   VP["<span style='font-family: monospace;'>TreeWidgetViewport</span>"]
 
@@ -30,7 +30,7 @@ flowchart TD
   HANDLER -- "uses when search paths are present" --> SRT
   HANDLER -- "uses to get / change visibilities" --> HELPER
   HELPER -- "extends" --> BASE
-  BASE -- "uses" --> CACHES
+  BASE -- "uses" --> IDS_PROVIDERS
   BASE -- "reads & writes" --> BUF
   BUF -- "committed on success,<br/>discarded on cancellation" --> VP
 ```
@@ -65,7 +65,7 @@ Every flowchart in these documents follows the same conventions:
   - Applies special handling when search paths are present, because filtered hierarchy nodes may omit children that still contribute to visibility.
 
 - [`BaseVisibilityHelper`](../src/tree-widget-react/shared/internal/visibility/BaseVisibilityHelper.ts) — shared get/change operations for visibility status based on element/model/category ids.
-  - Uses [`BaseIdsCache`](../src/tree-widget-react/shared/internal/caches/BaseIdsCache.ts) to retrieve information about nodes.
+  - Uses [`SharedIdsProvider`](../src/tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.ts) to retrieve information about nodes.
   - Examples: `getModelsVisibilityStatus()`, `getCategoriesVisibilityStatus()`, `changeModelsVisibilityStatus()`, `changeCategoriesVisibilityStatus()`.
 
 - Tree-specific visibility handlers [`CategoriesTreeVisibilityHandler`](../src/tree-widget-react/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.ts), [`ClassificationsTreeVisibilityHandler`](../src/tree-widget-react/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHandler.ts), [`ModelsTreeVisibilityHandler`](../src/tree-widget-react/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.ts):
@@ -82,23 +82,23 @@ Every flowchart in these documents follows the same conventions:
 - Search-results trees ([`BaseSearchResultsTree`](../src/tree-widget-react/shared/internal/visibility/BaseSearchResultsTree.ts) and tree-specific implementations: [Categories](../src/tree-widget-react/trees/categories-tree/internal/visibility/SearchResultsTree.ts), [Classifications](../src/tree-widget-react/trees/classifications-tree/internal/visibility/SearchResultsTree.ts), [Models](../src/tree-widget-react/trees/models-tree/internal/visibility/SearchResultsTree.ts)):
   - Help get/change visibility of nodes which are not search targets and don't have search-target ancestors (since these nodes might have some children missing). They allow retrieving child search targets for such nodes and then getting/changing visibility is done based on search targets instead.
 
-- Caching:
-  - [`BaseIdsCache`](../src/tree-widget-react/shared/internal/caches/BaseIdsCache.ts) - stores data that is relevant to models/categories/classifications trees (e.g. model <-> category relationship).
-    - This cache is composed of other caches ([`DescendantsCountCache`](../src/tree-widget-react/shared/internal/caches/DescendantsCountCache.ts), [`ChildElementsCache`](../src/tree-widget-react/shared/internal/caches/ChildElementsCache.ts), [`SubCategoriesCache`](../src/tree-widget-react/shared/internal/caches/SubCategoriesCache.ts), and others).
-    - Data stored in this cache is requested only once, because it does not change.
-  - Tree-specific id caches ([`CategoriesTreeIdsCache`](../src/tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsCache.ts), [`ClassificationsTreeIdsCache`](../src/tree-widget-react/trees/classifications-tree/internal/ClassificationsTreeIdsCache.ts), [`ModelsTreeIdsCache`](../src/tree-widget-react/trees/models-tree/internal/ModelsTreeIdsCache.ts)):
-    - Store various tree-specific relationships, (e.g. models tree ids cache stores element's model <-> subject relationship).
-    - Extend `BaseIdsCacheImpl` so each tree-specific cache can be used in [`BaseVisibilityHelper`](../src/tree-widget-react/shared/internal/visibility/BaseVisibilityHelper.ts).
+- Ids providers:
+  - [`SharedIdsProvider`](../src/tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.ts) - stores data that is relevant to models/categories/classifications trees (e.g. model <-> category relationship).
+    - This provider is composed of other providers ([`DescendantsCountProvider`](../src/tree-widget-react/shared/internal/idsProviders/DescendantsCountProvider.ts), [`ChildElementsProvider`](../src/tree-widget-react/shared/internal/idsProviders/ChildElementsProvider.ts), [`SubCategoriesProvider`](../src/tree-widget-react/shared/internal/idsProviders/SubCategoriesProvider.ts), and others).
+    - Data stored in this provider is requested only once, because it does not change.
+  - Tree-specific ids providers ([`CategoriesTreeIdsProvider`](../src/tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsProvider.ts), [`ClassificationsTreeIdsProvider`](../src/tree-widget-react/trees/classifications-tree/internal/ClassificationsTreeIdsProvider.ts), [`ModelsTreeIdsProvider`](../src/tree-widget-react/trees/models-tree/internal/ModelsTreeIdsProvider.ts)):
+    - Store various tree-specific relationships, (e.g. models tree ids provider stores element's model <-> subject relationship).
+    - Extend `SharedIdsProviderImpl` so each tree-specific ids provider can be used in [`BaseVisibilityHelper`](../src/tree-widget-react/shared/internal/visibility/BaseVisibilityHelper.ts).
 
-  - [`AlwaysAndNeverDrawnElementInfoCache`](../src/tree-widget-react/shared/internal/caches/AlwaysAndNeverDrawnElementInfoCache.ts) — caches extra data (like category) for always/never drawn elements.
+  - [`AlwaysAndNeverDrawnElementInfoProvider`](../src/tree-widget-react/shared/internal/idsProviders/AlwaysAndNeverDrawnElementInfoProvider.ts) — caches extra data (like category) for always/never drawn elements.
     - Always and never drawn caches are reset when always and never drawn sets change respectively.
     - Always and never drawn elements can be retrieved by model, actual category, and hierarchy path.
 
-  - [`DescendantsCountCache`](../src/tree-widget-react/shared/internal/caches/DescendantsCountCache.ts) — retrieves descendant counts grouped by each descendant's actual category.
+  - [`DescendantsCountProvider`](../src/tree-widget-react/shared/internal/idsProviders/DescendantsCountProvider.ts) — retrieves descendant counts grouped by each descendant's actual category.
     - Status requests use these counts with path-scoped always/never-drawn information. They do not load all descendant IDs.
     - Change requests use the grouped counts to decide which category groups already match the requested state.
 
-  - [`ChildElementsCache`](../src/tree-widget-react/shared/internal/caches/ChildElementsCache.ts) — cache for retrieving elements' children.
+  - [`ChildElementsProvider`](../src/tree-widget-react/shared/internal/idsProviders/ChildElementsProvider.ts) — provider for retrieving elements' children.
     - Used only during changes, for category and element/grouping operations whose descendants are in categories that do not already match the requested state.
     - It retrieves IDs only for those non-matching category groups so they can be added to `alwaysDrawn` or `neverDrawn`.
     - It is not used for status requests. A hierarchy branch may contain hundreds of thousands of descendants, so status is computed from grouped counts instead.

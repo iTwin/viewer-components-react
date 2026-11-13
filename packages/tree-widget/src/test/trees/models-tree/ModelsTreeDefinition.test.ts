@@ -23,7 +23,7 @@ import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { CLASS_NAME_Subject } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
 import { buildIModel, insertGeometricModelWithPartition, TestSchema } from "../../IModelUtils.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
-import { createAccessAndCache, createModelsTreeProvider } from "./Utils.js";
+import { createAccessAndIdsProvider, createModelsTreeProvider } from "./Utils.js";
 
 import type { InstanceKey } from "@itwin/presentation-shared";
 
@@ -273,14 +273,14 @@ describe("ModelsTreeDefinition", () => {
       );
       const { imodelConnection } = buildIModelResult;
       for (const preloadCache of [false, true]) {
-        const { imodelAccess, idsCache } = createAccessAndCache({ imodelConnection, hierarchyConfig: { subjects: { root: "exclude" } } });
+        const { imodelAccess, idsProvider } = createAccessAndIdsProvider({ imodelConnection, hierarchyConfig: { subjects: { root: "exclude" } } });
         if (preloadCache) {
-          await idsCache.preloadElementModelCategories();
-          await idsCache.preloadModeledElements();
+          await idsProvider.preloadElementModelCategories();
+          await idsProvider.preloadModeledElements();
         }
-        expect(idsCache.elementModelCategoriesLoaded()).toBe(preloadCache);
-        expect(idsCache.modeledElementsLoaded()).toBe(preloadCache);
-        using provider = createModelsTreeProvider({ imodelConnection, imodelAccess, idsCache });
+        expect(idsProvider.elementModelCategoriesLoaded()).toBe(preloadCache);
+        expect(idsProvider.modeledElementsLoaded()).toBe(preloadCache);
+        using provider = createModelsTreeProvider({ imodelConnection, imodelAccess, idsProvider });
         await validateHierarchy({
           provider,
           expect: [],

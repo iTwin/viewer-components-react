@@ -5,9 +5,9 @@
 
 import { defaultIfEmpty, defer, EMPTY, forkJoin, from, map, merge, mergeMap, of, reduce, shareReplay, tap, toArray } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
-import { BaseIdsCacheImpl } from "../../../shared/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../../shared/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../../shared/internal/hooks/UseErrorState.js";
+import { SharedIdsProviderImpl } from "../../../shared/internal/idsProviders/SharedIdsProvider.js";
 import { fromWithRelease, toVoidPromise } from "../../../shared/internal/Rxjs.js";
 import { createWhereClause, getClassesByView, getOrCreate } from "../../../shared/internal/Utils.js";
 
@@ -15,7 +15,7 @@ import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { EC } from "@itwin/presentation-shared";
-import type { BaseIdsCacheImplProps } from "../../../shared/internal/caches/BaseIdsCache.js";
+import type { SharedIdsProviderImplProps } from "../../../shared/internal/idsProviders/SharedIdsProvider.js";
 import type { CategoryId, DefinitionContainerId, ElementId, ModelId } from "../../../shared/internal/Types.js";
 
 interface DefinitionContainerInfo {
@@ -40,14 +40,14 @@ export interface CachedCategoryInfo {
   hasElementsFromNonExcludedClasses: boolean;
 }
 
-interface CategoriesTreeIdsCacheProps extends BaseIdsCacheImplProps {
+interface CategoriesTreeIdsProviderProps extends SharedIdsProviderImplProps {
   queryExecutor: LimitingECSqlQueryExecutor;
   type: "2d" | "3d";
   excludedElementClassNames?: ReadonlyArray<EC.FullClassNameDotNotation>;
 }
 
 /** @internal */
-export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
+export class CategoriesTreeIdsProvider extends SharedIdsProviderImpl {
   #definitionContainersInfo: Observable<Map<DefinitionContainerId, DefinitionContainerInfo>> | undefined;
   #cachedCategoryData:
     | Observable<{
@@ -66,14 +66,14 @@ export class CategoriesTreeIdsCache extends BaseIdsCacheImpl {
   #componentId: GuidString;
   #componentName: string;
 
-  constructor(props: CategoriesTreeIdsCacheProps) {
+  constructor(props: CategoriesTreeIdsProviderProps) {
     super(props);
     this.#queryExecutor = props.queryExecutor;
     const { categoryClass, elementClass } = getClassesByView(props.type);
     this.#categoryClass = categoryClass;
     this.#categoryElementClass = elementClass;
     this.#componentId = Guid.createValue();
-    this.#componentName = "CategoriesTreeIdsCache";
+    this.#componentName = "CategoriesTreeIdsProvider";
   }
 
   public async preloadDefinitionContainers(): Promise<void> {

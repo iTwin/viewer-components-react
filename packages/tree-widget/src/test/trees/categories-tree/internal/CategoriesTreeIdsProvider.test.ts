@@ -15,11 +15,11 @@ import { CLASS_NAME_DefinitionModel } from "../../../../tree-widget-react/shared
 import { collect } from "../../../../tree-widget-react/shared/internal/Rxjs.js";
 import { buildIModel } from "../../../IModelUtils.js";
 import { getDefaultSubCategoryId } from "../../TreeUtils.js";
-import { createAccessAndCache, getInsertFunctionByViewType } from "./Utils.js";
+import { createAccessAndIdsProvider, getInsertFunctionByViewType } from "./Utils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 
-describe("CategoriesTreeIdsCache", () => {
+describe("CategoriesTreeIdsProvider", () => {
   beforeAll(async () => {
     await initializeCore({
       backendProps: {
@@ -54,9 +54,9 @@ describe("CategoriesTreeIdsCache", () => {
 
       describe("getDirectChildDefinitionContainersAndCategories", () => {
         it("returns empty list for empty definition containers", async () => {
-          const { keys, idsCache } = datasets.withoutElements;
+          const { keys, idsProvider } = datasets.withoutElements;
           expect(
-            await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.emptyDefContainer.id] })),
+            await firstValueFrom(idsProvider.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.emptyDefContainer.id] })),
           ).toEqual({
             categories: [],
             definitionContainers: [],
@@ -64,9 +64,11 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns empty list when child definition container is empty", async () => {
-          const { keys, idsCache } = datasets.withoutElements;
+          const { keys, idsProvider } = datasets.withoutElements;
           expect(
-            await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.emptyParentDefContainer.id] })),
+            await firstValueFrom(
+              idsProvider.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.emptyParentDefContainer.id] }),
+            ),
           ).toEqual({
             categories: [],
             definitionContainers: [],
@@ -74,9 +76,9 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns child non empty definition container", async () => {
-          const { keys, idsCache } = datasets.withDefContainersAndCategories;
+          const { keys, idsProvider } = datasets.withDefContainersAndCategories;
           expect(
-            await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.parentDefContainer.id] })),
+            await firstValueFrom(idsProvider.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.parentDefContainer.id] })),
           ).toEqual({
             categories: [
               {
@@ -92,10 +94,10 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns child definition container when it has empty category and includeEmpty is true", async () => {
-          const { keys, idsCache } = datasets.withoutElements;
+          const { keys, idsProvider } = datasets.withoutElements;
           expect(
             await firstValueFrom(
-              idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.parentDefContainer.id], includeEmpty: true }),
+              idsProvider.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.parentDefContainer.id], includeEmpty: true }),
             ),
           ).toEqual({
             categories: [],
@@ -104,10 +106,10 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns empty when child definition container has empty category and includeEmpty is false", async () => {
-          const { keys, idsCache } = datasets.withoutElements;
+          const { keys, idsProvider } = datasets.withoutElements;
           expect(
             await firstValueFrom(
-              idsCache.getDirectChildDefinitionContainersAndCategories({
+              idsProvider.getDirectChildDefinitionContainersAndCategories({
                 parentDefinitionContainerIds: [keys.parentDefContainer.id],
                 includeEmpty: false,
               }),
@@ -119,9 +121,9 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns child categories when definition container contains categories", async () => {
-          const { keys, idsCache } = datasets.withDefContainersAndCategories;
+          const { keys, idsProvider } = datasets.withDefContainersAndCategories;
           expect(
-            await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.childDefContainer.id] })),
+            await firstValueFrom(idsProvider.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.childDefContainer.id] })),
           ).toEqual({
             categories: [
               {
@@ -137,10 +139,10 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns children without elements when includeEmpty is true", async () => {
-          const { keys, idsCache } = datasets.withoutElements;
+          const { keys, idsProvider } = datasets.withoutElements;
           expect(
             await firstValueFrom(
-              idsCache.getDirectChildDefinitionContainersAndCategories({
+              idsProvider.getDirectChildDefinitionContainersAndCategories({
                 parentDefinitionContainerIds: [keys.defContainerOfCategories.id],
                 includeEmpty: true,
               }),
@@ -160,10 +162,10 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns empty when no elements exist", async () => {
-          const { keys, idsCache } = datasets.withoutElements;
+          const { keys, idsProvider } = datasets.withoutElements;
           expect(
             await firstValueFrom(
-              idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.defContainerOfCategories.id] }),
+              idsProvider.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.defContainerOfCategories.id] }),
             ),
           ).toEqual({
             categories: [],
@@ -172,9 +174,9 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns only children which contain elements", async () => {
-          const { keys, idsCache } = datasets.withDefContainersAndCategories;
+          const { keys, idsProvider } = datasets.withDefContainersAndCategories;
           expect(
-            await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.parentDefContainer.id] })),
+            await firstValueFrom(idsProvider.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.parentDefContainer.id] })),
           ).toEqual({
             categories: [
               {
@@ -190,9 +192,9 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns children when definition container has parent", async () => {
-          const { keys, idsCache } = datasets.withDefContainersAndCategories;
+          const { keys, idsProvider } = datasets.withDefContainersAndCategories;
           expect(
-            await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.childDefContainer.id] })),
+            await firstValueFrom(idsProvider.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.childDefContainer.id] })),
           ).toEqual({
             categories: [
               {
@@ -210,13 +212,13 @@ describe("CategoriesTreeIdsCache", () => {
 
       describe("getAllContainedCategories", () => {
         it("returns empty list when definition container is empty", async () => {
-          const { keys, idsCache } = datasets.withoutElements;
-          expect(await collect(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.emptyDefContainer.id] }))).toEqual([]);
+          const { keys, idsProvider } = datasets.withoutElements;
+          expect(await collect(idsProvider.getAllContainedCategories({ definitionContainerIds: [keys.emptyDefContainer.id] }))).toEqual([]);
         });
 
         it("returns empty child categories", async () => {
-          const { keys, idsCache } = datasets.withoutElements;
-          expect(await collect(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.defContainerOfCategories.id] }))).toEqual([
+          const { keys, idsProvider } = datasets.withoutElements;
+          expect(await collect(idsProvider.getAllContainedCategories({ definitionContainerIds: [keys.defContainerOfCategories.id] }))).toEqual([
             {
               hasElements: false,
               id: keys.categoryOfDefContainer.id,
@@ -228,8 +230,8 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns direct and indirect child categories", async () => {
-          const { keys, idsCache } = datasets.withDefContainersAndCategories;
-          expect(await collect(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.parentDefContainer.id] }))).toEqual([
+          const { keys, idsProvider } = datasets.withDefContainersAndCategories;
+          expect(await collect(idsProvider.getAllContainedCategories({ definitionContainerIds: [keys.parentDefContainer.id] }))).toEqual([
             {
               hasElements: true,
               id: keys.categoryUnderChild.id,
@@ -248,8 +250,8 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns direct child categories", async () => {
-          const { keys, idsCache } = datasets.withDefContainersAndCategories;
-          expect(await collect(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.childDefContainer.id] }))).toEqual([
+          const { keys, idsProvider } = datasets.withDefContainersAndCategories;
+          expect(await collect(idsProvider.getAllContainedCategories({ definitionContainerIds: [keys.childDefContainer.id] }))).toEqual([
             {
               hasElements: true,
               id: keys.categoryUnderChild.id,
@@ -263,21 +265,21 @@ describe("CategoriesTreeIdsCache", () => {
 
       describe("getSubCategoriesSearchPaths", () => {
         it("returns empty list when subcategory doesn't exist", async () => {
-          const { idsCache } = datasets.withoutElements;
-          expect(await firstValueFrom(idsCache.getSubCategoriesSearchPaths({ subCategoryIds: "0x123" }))).toEqual([]);
+          const { idsProvider } = datasets.withoutElements;
+          expect(await firstValueFrom(idsProvider.getSubCategoriesSearchPaths({ subCategoryIds: "0x123" }))).toEqual([]);
         });
 
         it("returns path to existing subCategory", async () => {
-          const { keys, idsCache } = datasets.withoutDefContainers;
-          expect(await firstValueFrom(idsCache.getSubCategoriesSearchPaths({ subCategoryIds: keys.subCategory.id }))).toEqual([
+          const { keys, idsProvider } = datasets.withoutDefContainers;
+          expect(await firstValueFrom(idsProvider.getSubCategoriesSearchPaths({ subCategoryIds: keys.subCategory.id }))).toEqual([
             keys.categoryWithSubCategories,
             keys.subCategory,
           ]);
         });
 
         it("returns path to subCategory under definition container", async () => {
-          const { keys, idsCache } = datasets.withDefContainersAndCategories;
-          expect(await firstValueFrom(idsCache.getSubCategoriesSearchPaths({ subCategoryIds: keys.subCategory.id }))).toEqual([
+          const { keys, idsProvider } = datasets.withDefContainersAndCategories;
+          expect(await firstValueFrom(idsProvider.getSubCategoriesSearchPaths({ subCategoryIds: keys.subCategory.id }))).toEqual([
             keys.parentDefContainer,
             keys.categoryUnderParentWithSubCategories,
             keys.subCategory,
@@ -285,21 +287,21 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns empty list when subCategory does not have siblings", async () => {
-          const { keys, idsCache } = datasets.withDefContainersAndCategories;
+          const { keys, idsProvider } = datasets.withDefContainersAndCategories;
           const defaultSubCategory = getDefaultSubCategoryId(keys.categoryUnderChild.id);
-          expect(await firstValueFrom(idsCache.getSubCategoriesSearchPaths({ subCategoryIds: defaultSubCategory }))).toEqual([]);
+          expect(await firstValueFrom(idsProvider.getSubCategoriesSearchPaths({ subCategoryIds: defaultSubCategory }))).toEqual([]);
         });
       });
 
       describe("getSearchPathsUpToRootCategory", () => {
         it("returns empty list when category doesn't exist", async () => {
-          const { idsCache } = datasets.withDefContainersAndCategories;
-          expect(await collect(idsCache.getSearchPathsUpToRootCategory({ categoryId: "0x123" }))).toEqual([]);
+          const { idsProvider } = datasets.withDefContainersAndCategories;
+          expect(await collect(idsProvider.getSearchPathsUpToRootCategory({ categoryId: "0x123" }))).toEqual([]);
         });
 
         it("returns empty list when category does not have definition container", async () => {
-          const { keys, idsCache } = datasets.withoutDefContainers;
-          expect(await collect(idsCache.getSearchPathsUpToRootCategory({ categoryId: keys.category.id }))).toEqual([[]]);
+          const { keys, idsProvider } = datasets.withoutDefContainers;
+          expect(await collect(idsProvider.getSearchPathsUpToRootCategory({ categoryId: keys.category.id }))).toEqual([[]]);
         });
 
         it("returns up to category path when it exist under sub-model", async () => {
@@ -327,20 +329,22 @@ describe("CategoriesTreeIdsCache", () => {
             }),
           );
           const { imodelConnection, ...keys } = buildIModelResult;
-          const accessAndCache = createAccessAndCache({ imodelConnection, viewType });
-          expect(await collect(accessAndCache.idsCache.getSearchPathsUpToRootCategory({ categoryId: keys.category.id }))).toEqual([[keys.definitionContainer]]);
+          const accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection, viewType });
+          expect(await collect(accessAndIdsProvider.idsProvider.getSearchPathsUpToRootCategory({ categoryId: keys.category.id }))).toEqual([
+            [keys.definitionContainer],
+          ]);
         });
 
         it("returns path up to category it has definition container", async () => {
-          const { keys, idsCache } = datasets.withDefContainersAndCategories;
-          expect(await collect(idsCache.getSearchPathsUpToRootCategory({ categoryId: keys.categoryUnderParentWithSubCategories.id }))).toEqual([
+          const { keys, idsProvider } = datasets.withDefContainersAndCategories;
+          expect(await collect(idsProvider.getSearchPathsUpToRootCategory({ categoryId: keys.categoryUnderParentWithSubCategories.id }))).toEqual([
             [keys.parentDefContainer],
           ]);
         });
 
         it("returns path up to nested category", async () => {
-          const { keys, idsCache } = datasets.withDefContainersAndCategories;
-          expect(await collect(idsCache.getSearchPathsUpToRootCategory({ categoryId: keys.categoryUnderChild.id }))).toEqual([
+          const { keys, idsProvider } = datasets.withDefContainersAndCategories;
+          expect(await collect(idsProvider.getSearchPathsUpToRootCategory({ categoryId: keys.categoryUnderChild.id }))).toEqual([
             [keys.parentDefContainer, keys.childDefContainer],
           ]);
         });
@@ -348,20 +352,20 @@ describe("CategoriesTreeIdsCache", () => {
 
       describe("getDefinitionContainersSearchPaths", () => {
         it("returns empty list when definition container doesn't exist", async () => {
-          const { idsCache } = datasets.withDefContainersAndCategories;
-          expect(await firstValueFrom(idsCache.getDefinitionContainersSearchPaths({ definitionContainerIds: "0x123" }))).toEqual([]);
+          const { idsProvider } = datasets.withDefContainersAndCategories;
+          expect(await firstValueFrom(idsProvider.getDefinitionContainersSearchPaths({ definitionContainerIds: "0x123" }))).toEqual([]);
         });
 
         it("returns definition container it has elements", async () => {
-          const { keys, idsCache } = datasets.withDefContainersAndCategories;
-          expect(await firstValueFrom(idsCache.getDefinitionContainersSearchPaths({ definitionContainerIds: keys.parentDefContainer.id }))).toEqual([
+          const { keys, idsProvider } = datasets.withDefContainersAndCategories;
+          expect(await firstValueFrom(idsProvider.getDefinitionContainersSearchPaths({ definitionContainerIds: keys.parentDefContainer.id }))).toEqual([
             keys.parentDefContainer,
           ]);
         });
 
         it("returns path to definition container when it has parent", async () => {
-          const { keys, idsCache } = datasets.withDefContainersAndCategories;
-          expect(await firstValueFrom(idsCache.getDefinitionContainersSearchPaths({ definitionContainerIds: keys.childDefContainer.id }))).toEqual([
+          const { keys, idsProvider } = datasets.withDefContainersAndCategories;
+          expect(await firstValueFrom(idsProvider.getDefinitionContainersSearchPaths({ definitionContainerIds: keys.childDefContainer.id }))).toEqual([
             keys.parentDefContainer,
             keys.childDefContainer,
           ]);
@@ -376,18 +380,21 @@ describe("CategoriesTreeIdsCache", () => {
             }),
           );
           const { imodelConnection } = buildIModelResult;
-          const accessAndCache = createAccessAndCache({ imodelConnection, viewType });
-          expect(await firstValueFrom(accessAndCache.idsCache.getAllDefinitionContainersAndCategories())).toEqual({ categories: [], definitionContainers: [] });
+          const accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection, viewType });
+          expect(await firstValueFrom(accessAndIdsProvider.idsProvider.getAllDefinitionContainersAndCategories())).toEqual({
+            categories: [],
+            definitionContainers: [],
+          });
         });
 
         it("returns empty list when no elements exist", async () => {
-          const { idsCache } = datasets.withoutElements;
-          expect(await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories())).toEqual({ categories: [], definitionContainers: [] });
+          const { idsProvider } = datasets.withoutElements;
+          expect(await firstValueFrom(idsProvider.getAllDefinitionContainersAndCategories())).toEqual({ categories: [], definitionContainers: [] });
         });
 
         it("returns categories and definition containers when no elements exist and includeEmpty is set to true", async () => {
-          const { keys, idsCache } = datasets.withoutElements;
-          const result = await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories({ includeEmpty: true }));
+          const { keys, idsProvider } = datasets.withoutElements;
+          const result = await firstValueFrom(idsProvider.getAllDefinitionContainersAndCategories({ includeEmpty: true }));
           expect(result.categories).toHaveLength(2);
           expect(result.categories).toEqual(expect.arrayContaining([keys.categoryOfDefContainer.id, keys.emptyCategory.id]));
           expect(result.definitionContainers).toHaveLength(2);
@@ -395,8 +402,8 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns categories and definition containers which have elements", async () => {
-          const { keys, idsCache } = datasets.withDefContainersAndCategories;
-          const result = await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories());
+          const { keys, idsProvider } = datasets.withDefContainersAndCategories;
+          const result = await firstValueFrom(idsProvider.getAllDefinitionContainersAndCategories());
           expect(result.categories).toHaveLength(2);
           expect(result.categories).toEqual(expect.arrayContaining([keys.categoryUnderChild.id, keys.categoryUnderParentWithSubCategories.id]));
           expect(result.definitionContainers).toHaveLength(2);
@@ -404,8 +411,8 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns categories when no definition containers exist", async () => {
-          const { keys, idsCache } = datasets.withoutDefContainers;
-          const result = await firstValueFrom(idsCache.getAllDefinitionContainersAndCategories());
+          const { keys, idsProvider } = datasets.withoutDefContainers;
+          const result = await firstValueFrom(idsProvider.getAllDefinitionContainersAndCategories());
           expect(result.categories).toHaveLength(2);
           expect(result.categories).toEqual(expect.arrayContaining([keys.category.id, keys.categoryWithSubCategories.id]));
           expect(result.definitionContainers).toHaveLength(0);
@@ -420,24 +427,24 @@ describe("CategoriesTreeIdsCache", () => {
             }),
           );
           const { imodelConnection } = buildIModelResult;
-          const accessAndCache = createAccessAndCache({ imodelConnection, viewType });
-          expect(await firstValueFrom(accessAndCache.idsCache.getRootDefinitionContainersAndCategories())).toEqual({
+          const accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection, viewType });
+          expect(await firstValueFrom(accessAndIdsProvider.idsProvider.getRootDefinitionContainersAndCategories())).toEqual({
             categories: [],
             definitionContainers: [],
           });
         });
 
         it("returns empty list when no elements exist", async () => {
-          const { idsCache } = datasets.withoutElements;
-          expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).toEqual({
+          const { idsProvider } = datasets.withoutElements;
+          expect(await firstValueFrom(idsProvider.getRootDefinitionContainersAndCategories())).toEqual({
             categories: [],
             definitionContainers: [],
           });
         });
 
         it("returns root categories and definition containers when no elements exist and includeEmpty is set to true", async () => {
-          const { keys, idsCache } = datasets.withoutElements;
-          expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories({ includeEmpty: true }))).toEqual({
+          const { keys, idsProvider } = datasets.withoutElements;
+          expect(await firstValueFrom(idsProvider.getRootDefinitionContainersAndCategories({ includeEmpty: true }))).toEqual({
             categories: [
               {
                 id: keys.emptyCategory.id,
@@ -452,9 +459,9 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns root categories", async () => {
-          const { keys, idsCache } = datasets.withoutDefContainers;
+          const { keys, idsProvider } = datasets.withoutDefContainers;
 
-          const result = await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories());
+          const result = await firstValueFrom(idsProvider.getRootDefinitionContainersAndCategories());
           expect(result.categories).toHaveLength(2);
           expect(result.categories).toEqual(
             expect.arrayContaining([
@@ -472,8 +479,8 @@ describe("CategoriesTreeIdsCache", () => {
         });
 
         it("returns root definition containers", async () => {
-          const { keys, idsCache } = datasets.withDefContainersAndCategories;
-          expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories())).toEqual({
+          const { keys, idsProvider } = datasets.withDefContainersAndCategories;
+          expect(await firstValueFrom(idsProvider.getRootDefinitionContainersAndCategories())).toEqual({
             categories: [],
             definitionContainers: [keys.parentDefContainer.id],
           });
@@ -482,18 +489,18 @@ describe("CategoriesTreeIdsCache", () => {
 
       describe("getSubCategories", () => {
         it("returns empty list when category doesn't exist", async () => {
-          const { idsCache } = datasets.withDefContainersAndCategories;
-          expect(await firstValueFrom(idsCache.getSubCategories({ categoryId: "0x123" }))).toEqual([]);
+          const { idsProvider } = datasets.withDefContainersAndCategories;
+          expect(await firstValueFrom(idsProvider.getSubCategories({ categoryId: "0x123" }))).toEqual([]);
         });
 
         it("returns sub-category when category has one sub-category", async () => {
-          const { keys, idsCache } = datasets.withoutDefContainers;
-          expect(await firstValueFrom(idsCache.getSubCategories({ categoryId: keys.category.id }))).toEqual([getDefaultSubCategoryId(keys.category.id)]);
+          const { keys, idsProvider } = datasets.withoutDefContainers;
+          expect(await firstValueFrom(idsProvider.getSubCategories({ categoryId: keys.category.id }))).toEqual([getDefaultSubCategoryId(keys.category.id)]);
         });
 
         it("returns sub-categories when category has multiple sub-categories", async () => {
-          const { keys, idsCache } = datasets.withoutDefContainers;
-          const result = await firstValueFrom(idsCache.getSubCategories({ categoryId: keys.categoryWithSubCategories.id }));
+          const { keys, idsProvider } = datasets.withoutDefContainers;
+          const result = await firstValueFrom(idsProvider.getSubCategories({ categoryId: keys.categoryWithSubCategories.id }));
           expect(result.includes(keys.subCategory.id)).toBe(true);
           expect(result.length).toBe(2);
         });
@@ -536,7 +543,7 @@ async function createDatasets(viewType: "2d" | "3d") {
         }),
       );
       imodels.push(imodelConnection);
-      return { imodelConnection, keys, ...createAccessAndCache({ imodelConnection, viewType }) };
+      return { imodelConnection, keys, ...createAccessAndIdsProvider({ imodelConnection, viewType }) };
     })(),
     ["withoutDefContainers"]: await (async () => {
       const { imodelConnection, ...keys } = await buildIModel(async (imodel) =>
@@ -558,7 +565,7 @@ async function createDatasets(viewType: "2d" | "3d") {
         }),
       );
       imodels.push(imodelConnection);
-      return { imodelConnection, keys, ...createAccessAndCache({ imodelConnection, viewType }) };
+      return { imodelConnection, keys, ...createAccessAndIdsProvider({ imodelConnection, viewType }) };
     })(),
     ["withDefContainersAndCategories"]: await (async () => {
       const { imodelConnection, ...keys } = await buildIModel(async (imodel) =>
@@ -594,7 +601,7 @@ async function createDatasets(viewType: "2d" | "3d") {
         }),
       );
       imodels.push(imodelConnection);
-      return { imodelConnection, keys, ...createAccessAndCache({ imodelConnection, viewType }) };
+      return { imodelConnection, keys, ...createAccessAndIdsProvider({ imodelConnection, viewType }) };
     })(),
   };
 }

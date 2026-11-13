@@ -15,12 +15,12 @@ import type { BaseVisibilityHelperProps } from "../../../../shared/internal/visi
 import type { TreeWidgetViewport } from "../../../../shared/TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../../../../shared/UseHierarchyVisibility.js";
 import type { RequiredCategoriesTreeHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
-import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
+import type { CategoriesTreeIdsProvider } from "../CategoriesTreeIdsProvider.js";
 import type { ElementClassGroupingNodeProps } from "../CategoriesTreeNodeInternal.js";
 
 /** @internal */
 export type CategoriesTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
-  idsCache: CategoriesTreeIdsCache;
+  idsProvider: CategoriesTreeIdsProvider;
   hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
 };
 
@@ -31,13 +31,13 @@ export type CategoriesTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
  * @internal
  */
 export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
-  #idsCache: CategoriesTreeIdsCache;
+  #idsProvider: CategoriesTreeIdsProvider;
   #hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
   #viewport: TreeWidgetViewport;
   constructor(props: CategoriesTreeVisibilityHelperProps) {
     super(props);
     this.#viewport = props.viewport;
-    this.#idsCache = props.idsCache;
+    this.#idsProvider = props.idsProvider;
     this.#hierarchyConfig = props.hierarchyConfig;
   }
 
@@ -77,7 +77,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
           modelId,
           categoryId,
           parentElementsPath,
-          computeOnlyOwnStatus: this.#idsCache.canHaveHiddenChildren()
+          computeOnlyOwnStatus: this.#idsProvider.canHaveHiddenChildren()
             ? undefined
             : childrenWhichAreParents.size
               ? (elementId) => !childrenWhichAreParents.has(elementId)
@@ -142,7 +142,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
   private getGroupedContainedCategories(
     definitionContainerIds: Id64Arg,
   ): Observable<{ emptyCategories: Id64String[]; topMostElementCategories: Id64String[] }> {
-    return this.#idsCache.getAllContainedCategories({ definitionContainerIds }).pipe(
+    return this.#idsProvider.getAllContainedCategories({ definitionContainerIds }).pipe(
       reduce(
         (acc, { id, hasElements, isTopMostElementCategory }) => {
           if (isTopMostElementCategory) {
@@ -162,12 +162,12 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
   /** Turns on category and its' related models. Does not turn on other categories contained in those models.*/
   private enableCategoryWithoutEnablingOtherCategories({ categoryId }: { categoryId: Id64String }): Observable<void> {
     this.#viewport.changeCategoryDisplay({ categoryIds: categoryId, display: true });
-    return this.#idsCache.getModels({ categoryId }).pipe(
+    return this.#idsProvider.getModels({ categoryId }).pipe(
       mergeMap((modelId) => {
         this.#viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: categoryId, override: "none" });
         return this.#viewport.viewsModel(modelId)
           ? EMPTY
-          : this.#idsCache.getCategories({ modelId }).pipe(
+          : this.#idsProvider.getCategories({ modelId }).pipe(
               map((allModelCategories) => {
                 // Add 'Hide' override to categories that were hidden before model is turned on
                 for (const modelCategoryId of allModelCategories) {

@@ -23,7 +23,7 @@ import type {
   SearchResultsTreeNodeChildren,
   SearchResultsTreeRootNode,
 } from "../../../../shared/internal/visibility/BaseSearchResultsTree.js";
-import type { ClassificationsTreeIdsCache } from "../ClassificationsTreeIdsCache.js";
+import type { ClassificationsTreeIdsProvider } from "../ClassificationsTreeIdsProvider.js";
 
 /** @internal */
 export interface ClassificationsTreeSearchTargets {
@@ -42,11 +42,11 @@ export interface ClassificationsTreeSearchTargets {
 export async function createClassificationsSearchResultsTree(props: {
   imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom">;
   searchPaths: HierarchySearchTree[];
-  idsCache: ClassificationsTreeIdsCache;
+  idsProvider: ClassificationsTreeIdsProvider;
 }): Promise<SearchResultsTree<ClassificationsTreeSearchTargets>> {
-  const { imodelAccess, searchPaths, idsCache } = props;
+  const { imodelAccess, searchPaths, idsProvider } = props;
   return createSearchResultsTree({
-    searchResultsNodesHandler: new ClassificationsTreeSearchResultsNodesHandler({ idsCache, imodelAccess }),
+    searchResultsNodesHandler: new ClassificationsTreeSearchResultsNodesHandler({ idsProvider, imodelAccess }),
     searchPaths,
   });
 }
@@ -96,7 +96,7 @@ interface ProcessedNodes {
 }
 
 interface ClassificationsTreeSearchResultsNodesHandlerProps {
-  idsCache: ClassificationsTreeIdsCache;
+  idsProvider: ClassificationsTreeIdsProvider;
   imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom">;
 }
 
@@ -119,7 +119,7 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
     }
 
     const searchResultsElementsData = await firstValueFrom(
-      this.#props.idsCache.getFilteredElementsData({
+      this.#props.idsProvider.getFilteredElementsData({
         elementIds: rawElementsArray.map((element) => element.id),
       }),
     );

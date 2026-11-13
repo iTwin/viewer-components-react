@@ -17,7 +17,7 @@ import type { Observable } from "rxjs";
 import type { Id64Arg } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode, HierarchyNode, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { ECSchemaProvider } from "@itwin/presentation-shared";
-import type { AlwaysAndNeverDrawnElementInfoCache } from "../../../../shared/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
+import type { AlwaysAndNeverDrawnElementInfoProvider } from "../../../../shared/internal/idsProviders/AlwaysAndNeverDrawnElementInfoProvider.js";
 import type { SearchResultsTree } from "../../../../shared/internal/visibility/BaseSearchResultsTree.js";
 import type { BaseTreeVisibilityHandlerOverrides, TreeSpecificVisibilityHandler } from "../../../../shared/internal/visibility/BaseVisibilityHelper.js";
 import type { TreeWidgetViewport } from "../../../../shared/TreeWidgetViewport.js";
@@ -26,7 +26,7 @@ import type {
   HierarchyVisibilityOverrideHandler,
   VisibilityStatus,
 } from "../../../../shared/UseHierarchyVisibility.js";
-import type { ModelsTreeIdsCache } from "../ModelsTreeIdsCache.js";
+import type { ModelsTreeIdsProvider } from "../ModelsTreeIdsProvider.js";
 import type { ModelsTreeSearchTargets } from "./SearchResultsTree.js";
 
 /**
@@ -46,9 +46,9 @@ export interface ModelsTreeVisibilityHandlerOverrides extends BaseTreeVisibility
 
 /** @internal */
 export interface ModelsTreeVisibilityHandlerProps {
-  idsCache: ModelsTreeIdsCache;
+  idsProvider: ModelsTreeIdsProvider;
   viewport: TreeWidgetViewport;
-  alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfoCache;
+  alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfoProvider;
   overrideHandler: HierarchyVisibilityOverrideHandler;
   overrides?: ModelsTreeVisibilityHandlerOverrides;
 }
@@ -67,10 +67,10 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
     this.#props = constructorProps;
     this.#visibilityHelper = new ModelsTreeVisibilityHelper({
       viewport: this.#props.viewport,
-      idsCache: this.#props.idsCache,
+      idsProvider: this.#props.idsProvider,
       alwaysAndNeverDrawnElementInfo: this.#props.alwaysAndNeverDrawnElementInfo,
       overrideHandler: this.#props.overrideHandler,
-      baseIdsCache: this.#props.idsCache,
+      sharedIdsProvider: this.#props.idsProvider,
       overrides: this.#props.overrides,
     });
   }
@@ -193,7 +193,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       modelId: node.extendedData.modelId,
       categoryId: node.extendedData.categoryId,
       parentElementsPath: node.extendedData.parentElementsPath,
-      computeOnlyOwnStatus: this.#props.idsCache.canHaveHiddenChildren() || node.children ? undefined : true,
+      computeOnlyOwnStatus: this.#props.idsProvider.canHaveHiddenChildren() || node.children ? undefined : true,
     });
   }
 
@@ -330,7 +330,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
  */
 export function createModelsTreeVisibilityHandler(props: {
   viewport: TreeWidgetViewport;
-  idsCache: ModelsTreeIdsCache;
+  idsProvider: ModelsTreeIdsProvider;
   imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom">;
   overrides?: ModelsTreeVisibilityHandlerOverrides;
   searchPaths?: HierarchySearchTree[];
@@ -344,13 +344,13 @@ export function createModelsTreeVisibilityHandler(props: {
       return createModelsSearchResultsTree({
         searchPaths: props.searchPaths,
         imodelAccess: props.imodelAccess,
-        idsCache: props.idsCache,
+        idsProvider: props.idsProvider,
       });
     },
     getTreeSpecificVisibilityHandler: ({ info, overrideHandler, viewport }) => {
       return new ModelsTreeVisibilityHandler({
         alwaysAndNeverDrawnElementInfo: info,
-        idsCache: props.idsCache,
+        idsProvider: props.idsProvider,
         viewport,
         overrideHandler,
         overrides: props.overrides,

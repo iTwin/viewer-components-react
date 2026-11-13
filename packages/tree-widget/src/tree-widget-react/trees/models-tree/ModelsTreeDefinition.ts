@@ -61,7 +61,7 @@ import type {
 } from "@itwin/presentation-shared";
 import type { CategoryId } from "../../shared/internal/Types.js";
 import type { DeepRequired } from "../../shared/internal/Utils.js";
-import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
+import type { ModelsTreeIdsProvider } from "./internal/ModelsTreeIdsProvider.js";
 import type { CategoryNodeProps, ElementNodeProps } from "./internal/ModelsTreeNodeInternal.js";
 
 /** @beta */
@@ -157,7 +157,7 @@ export const defaultHierarchyConfiguration: RequiredModelsTreeHierarchyConfigura
 
 interface ModelsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & LimitingECSqlQueryExecutor;
-  idsCache: ModelsTreeIdsCache;
+  idsProvider: ModelsTreeIdsProvider;
   hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
   componentId?: GuidString;
 }
@@ -179,7 +179,7 @@ export interface ElementsGroupInfo {
 
 interface ModelsTreeInstanceKeyPathsBaseProps {
   imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom"> & LimitingECSqlQueryExecutor;
-  idsCache: ModelsTreeIdsCache;
+  idsProvider: ModelsTreeIdsProvider;
   hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
   limit?: number | "unbounded";
   abortSignal?: AbortSignal;
@@ -207,7 +207,7 @@ export namespace ModelsTreeInstanceKeyPathsProps {
 /** @internal */
 export class ModelsTreeDefinition implements HierarchyDefinition {
   #impl: HierarchyDefinition;
-  #idsCache: ModelsTreeIdsCache;
+  #idsProvider: ModelsTreeIdsProvider;
   #hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
   #queryExecutor: LimitingECSqlQueryExecutor;
   #isSupported?: Promise<boolean>;
@@ -249,7 +249,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       },
     });
     this.#componentId = props.componentId ?? Guid.createValue();
-    this.#idsCache = props.idsCache;
+    this.#idsProvider = props.idsProvider;
     this.#queryExecutor = props.imodelAccess;
   }
 
@@ -383,8 +383,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     const { childSubjectIds, childModelIds } = parentSubjectIds.length
       ? await firstValueFrom(
           forkJoin({
-            childSubjectIds: this.#idsCache.getChildSubjectIds(parentSubjectIds),
-            childModelIds: this.#idsCache.getChildSubjectModelIds(parentSubjectIds),
+            childSubjectIds: this.#idsProvider.getChildSubjectIds(parentSubjectIds),
+            childModelIds: this.#idsProvider.getChildSubjectModelIds(parentSubjectIds),
           }),
         )
       : { childSubjectIds: [IModel.rootSubjectId], childModelIds: [] };
@@ -432,7 +432,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           bindings: [
             {
               type: "idset",
-              value: await firstValueFrom(this.#idsCache.getParentSubjectIds()),
+              value: await firstValueFrom(this.#idsProvider.getParentSubjectIds()),
             },
             { type: "idset", value: childSubjectIds },
           ],
@@ -572,11 +572,13 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         filter: instanceFilter,
         contentClass: { fullName: this.#hierarchyConfig.elements.baseClass, alias: "this" },
       }),
-      this.#idsCache.modeledElementsLoaded() ? firstValueFrom(this.#idsCache.getAllSubModels({ excludeIfOnlyExcludedClasses: true })) : undefined,
-      this.#idsCache.elementModelCategoriesLoaded()
+      this.#idsProvider.modeledElementsLoaded() ? firstValueFrom(this.#idsProvider.getAllSubModels({ excludeIfOnlyExcludedClasses: true })) : undefined,
+      this.#idsProvider.elementModelCategoriesLoaded()
         ? firstValueFrom(
             from(modelIds).pipe(
-              mergeMap((modelId) => this.#idsCache.getCategories({ modelId, includeOnlyIfCategoryOfTopMostElement: true, excludeIfOnlyExcludedClasses: true })),
+              mergeMap((modelId) =>
+                this.#idsProvider.getCategories({ modelId, includeOnlyIfCategoryOfTopMostElement: true, excludeIfOnlyExcludedClasses: true }),
+              ),
               reduce((acc, modelCategories) => {
                 for (const categoryId of modelCategories) {
                   acc.add(categoryId);
@@ -786,7 +788,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         filter: instanceFilter,
         contentClass: { fullName: this.#hierarchyConfig.elements.baseClass, alias: "this" },
       }),
-      this.#idsCache.modeledElementsLoaded() ? firstValueFrom(this.#idsCache.getAllSubModels({ excludeIfOnlyExcludedClasses: true })) : undefined,
+      this.#idsProvider.modeledElementsLoaded() ? firstValueFrom(this.#idsProvider.getAllSubModels({ excludeIfOnlyExcludedClasses: true })) : undefined,
     ]);
     const parentIds = ParentElementsPath.getLastParentIds(parentNode.extendedData.parentElementsPath);
     const { selectClause, bindings } = await this.createElementNodeSelectClause({
@@ -849,7 +851,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         filter: instanceFilter,
         contentClass: { fullName: CLASS_NAME_SpatialCategory, alias: "this" },
       }),
-      this.#idsCache.modeledElementsLoaded() ? firstValueFrom(this.#idsCache.getAllSubModels({ excludeIfOnlyExcludedClasses: true })) : undefined,
+      this.#idsProvider.modeledElementsLoaded() ? firstValueFrom(this.#idsProvider.getAllSubModels({ excludeIfOnlyExcludedClasses: true })) : undefined,
     ]);
 
     const { selectClause, bindings } = await this.createElementNodeSelectClause({
@@ -955,7 +957,7 @@ const ELEMENT_CLASS_NAME_QUERY_ALIAS = "e";
 /** @internal */
 export function createGeometricElementInstanceKeyPaths(props: {
   queryExecutor: LimitingECSqlQueryExecutor;
-  idsCache: ModelsTreeIdsCache;
+  idsProvider: ModelsTreeIdsProvider;
   elementClassName: EC.FullClassNameDotNotation;
   targetItems: Array<Id64String | ElementsGroupInfo>;
   componentId: GuidString;
@@ -963,7 +965,7 @@ export function createGeometricElementInstanceKeyPaths(props: {
   chunkIndex: number;
   excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
 }): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String | ElementsGroupInfo }> {
-  const { targetItems, chunkIndex, componentId, componentName, elementClassName, idsCache, queryExecutor, excludedElementClassNames } = props;
+  const { targetItems, chunkIndex, componentId, componentName, elementClassName, idsProvider, queryExecutor, excludedElementClassNames } = props;
   const elementIds = targetItems.filter((info): info is Id64String => typeof info === "string");
   const groupInfos = targetItems.filter((info): info is ElementsGroupInfo => typeof info !== "string");
   const separator = ";";
@@ -977,7 +979,7 @@ export function createGeometricElementInstanceKeyPaths(props: {
       bindings.push({ type: "idset", value: parent.modelIds });
     }
   });
-  return props.idsCache.getAllSubModels().pipe(
+  return props.idsProvider.getAllSubModels().pipe(
     mergeMap(() => {
       const targetElementsInfoQuery =
         elementIds.length > 0
@@ -1070,7 +1072,7 @@ export function createGeometricElementInstanceKeyPaths(props: {
     releaseMainThreadOnItemsCount(300),
     map((row) => parseElementsQueryRow(row, groupInfos, separator, elementClassName)),
     mergeMap(({ elementHierarchyPath, groupingInfo }) =>
-      idsCache.createUpToModelInstanceKeyPaths(elementHierarchyPath[0].id).pipe(
+      idsProvider.createUpToModelInstanceKeyPaths(elementHierarchyPath[0].id).pipe(
         map((modelPath) => {
           const path = [...modelPath, ...elementHierarchyPath];
           return {
@@ -1094,7 +1096,7 @@ function parseElementsQueryRow(row: ECSqlQueryRow, groupInfos: ElementsGroupInfo
 /** @internal */
 export function createCategoriesSearchPaths(props: {
   queryExecutor: LimitingECSqlQueryExecutor;
-  idsCache: ModelsTreeIdsCache;
+  idsProvider: ModelsTreeIdsProvider;
   targetCategoryIds: Id64Array;
   componentId: GuidString;
   componentName: string;
@@ -1102,7 +1104,7 @@ export function createCategoriesSearchPaths(props: {
   excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
 }): Observable<{ path: HierarchyNodeIdentifiersPath; target: Id64String }> {
   const separator = ";";
-  const { targetCategoryIds, componentId, componentName, idsCache, queryExecutor, elementClassName, excludedElementClassNames } = props;
+  const { targetCategoryIds, componentId, componentName, idsProvider, queryExecutor, elementClassName, excludedElementClassNames } = props;
   if (targetCategoryIds.length === 0) {
     return EMPTY;
   }
@@ -1110,12 +1112,12 @@ export function createCategoriesSearchPaths(props: {
   return merge(
     fromWithRelease({ source: targetCategoryIds, releaseOnCount: 300 }).pipe(
       mergeMap((categoryId) =>
-        idsCache
+        idsProvider
           .getSearchPathsUpToRootCategory({ categoryId })
           .pipe(map((path) => ({ path: [...path, { id: categoryId, className: CLASS_NAME_SpatialCategory }], target: categoryId }))),
       ),
     ),
-    props.idsCache.getAllSubModels().pipe(
+    props.idsProvider.getAllSubModels().pipe(
       mergeMap((subModelIds) => {
         const ctes = [
           `CategoriesParentsHierarchy(ECInstanceId, ParentId, ModelId, CategoryId, Path) AS (
@@ -1211,7 +1213,7 @@ export function createCategoriesSearchPaths(props: {
         return parseQueriedPath({ queriedPathRaw: row[0], elementClassName, separator });
       }),
       mergeMap((categoryHierarchyPath) =>
-        idsCache.createUpToModelInstanceKeyPaths(categoryHierarchyPath[0].id).pipe(
+        idsProvider.createUpToModelInstanceKeyPaths(categoryHierarchyPath[0].id).pipe(
           map((pathUpToCategory) => {
             const path = [...pathUpToCategory, ...categoryHierarchyPath];
             return { path, target: categoryHierarchyPath[categoryHierarchyPath.length - 1].id };
@@ -1320,7 +1322,7 @@ function createSearchPathsForDifferentTypes(
         },
       ),
       switchMap((ids) => {
-        const { idsCache, imodelAccess, componentId, componentName, limit } = props;
+        const { idsProvider, imodelAccess, componentId, componentName, limit } = props;
         const elementsLength = ids.elementIds.length;
         const totalSize = ids.subjectIds.length + ids.modelIds.length + ids.categoryIds.length + elementsLength;
         if (limit !== "unbounded" && totalSize > (limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT)) {
@@ -1328,17 +1330,17 @@ function createSearchPathsForDifferentTypes(
         }
 
         return merge(
-          from(ids.subjectIds).pipe(mergeMap((id) => idsCache.createSubjectInstanceKeysPath(id).pipe(map((path) => ({ path, target: id }))))),
+          from(ids.subjectIds).pipe(mergeMap((id) => idsProvider.createSubjectInstanceKeysPath(id).pipe(map((path) => ({ path, target: id }))))),
           from(ids.modelIds).pipe(
             mergeMap((id) =>
-              idsCache
+              idsProvider
                 .createUpToModelInstanceKeyPaths(id)
                 .pipe(map((path) => ({ path: [...path, { className: CLASS_NAME_GeometricModel3d, id }], target: id }))),
             ),
           ),
           createCategoriesSearchPaths({
             targetCategoryIds: ids.categoryIds,
-            idsCache,
+            idsProvider,
             queryExecutor: imodelAccess,
             elementClassName: props.hierarchyConfig.elements.baseClass,
             componentId,
@@ -1352,7 +1354,7 @@ function createSearchPathsForDifferentTypes(
               (block, chunkIndex) =>
                 createGeometricElementInstanceKeyPaths({
                   queryExecutor: imodelAccess,
-                  idsCache,
+                  idsProvider,
                   elementClassName: props.hierarchyConfig.elements.baseClass,
                   targetItems: block,
                   componentId,

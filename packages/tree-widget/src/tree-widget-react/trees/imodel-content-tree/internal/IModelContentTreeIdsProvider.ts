@@ -30,7 +30,7 @@ interface ModelInfo {
 }
 
 /** @internal */
-export class IModelContentTreeIdsCache {
+export class IModelContentTreeIdsProvider {
   #subjectInfos: Promise<Map<SubjectId, SubjectInfo>> | undefined;
   #parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   #modelInfos: Promise<Map<ModelId, ModelInfo>> | undefined;
@@ -41,7 +41,7 @@ export class IModelContentTreeIdsCache {
   constructor(queryExecutor: LimitingECSqlQueryExecutor, componentId?: GuidString) {
     this.#queryExecutor = queryExecutor;
     this.#componentId = componentId ?? Guid.createValue();
-    this.#componentName = "IModelContentTreeIdsCache";
+    this.#componentName = "IModelContentTreeIdsProvider";
   }
 
   private async *querySubjects(): AsyncIterableIterator<{ id: SubjectId; parentId?: SubjectId; targetPartitionId?: ModelId; hideInHierarchy: boolean }> {

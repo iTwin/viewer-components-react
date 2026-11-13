@@ -12,13 +12,13 @@ import type { Observable } from "rxjs";
 import type { Id64Arg } from "@itwin/core-bentley";
 import type { BaseVisibilityHelperProps } from "../../../../shared/internal/visibility/BaseVisibilityHelper.js";
 import type { VisibilityStatus } from "../../../../shared/UseHierarchyVisibility.js";
-import type { ModelsTreeIdsCache } from "../ModelsTreeIdsCache.js";
+import type { ModelsTreeIdsProvider } from "../ModelsTreeIdsProvider.js";
 import type { ElementClassGroupingNodeProps } from "../ModelsTreeNodeInternal.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./ModelsTreeVisibilityHandler.js";
 
 /** @internal */
 export type ModelsTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
-  idsCache: ModelsTreeIdsCache;
+  idsProvider: ModelsTreeIdsProvider;
   overrides?: ModelsTreeVisibilityHandlerOverrides;
 };
 
@@ -44,7 +44,7 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
     const result = defer(() => {
       const { subjectIds } = props;
 
-      return this.#props.idsCache.getSubjectModelIds(subjectIds).pipe(
+      return this.#props.idsProvider.getSubjectModelIds(subjectIds).pipe(
         mergeMap((modelIds) => this.getModelsVisibilityStatus({ modelIds })),
         mergeVisibilityStatuses(),
         defaultIfEmpty(createVisibilityStatus("disabled")),
@@ -71,7 +71,7 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
       modelId,
       categoryId,
       parentElementsPath,
-      computeOnlyOwnStatus: this.#props.baseIdsCache.canHaveHiddenChildren()
+      computeOnlyOwnStatus: this.#props.sharedIdsProvider.canHaveHiddenChildren()
         ? undefined
         : childrenWhichAreParents.size === 0
           ? true
@@ -87,7 +87,7 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
   public changeSubjectsVisibilityStatus(props: { subjectIds: Id64Arg; on: boolean }): Observable<void> {
     const result = defer(() => {
       const { on, subjectIds } = props;
-      return this.#props.idsCache.getSubjectModelIds(subjectIds).pipe(mergeMap((modelIds) => this.changeModelsVisibilityStatus({ modelIds, on })));
+      return this.#props.idsProvider.getSubjectModelIds(subjectIds).pipe(mergeMap((modelIds) => this.changeModelsVisibilityStatus({ modelIds, on })));
     });
     return this.#props.overrideHandler
       ? this.#props.overrideHandler.createVisibilityHandlerResult({

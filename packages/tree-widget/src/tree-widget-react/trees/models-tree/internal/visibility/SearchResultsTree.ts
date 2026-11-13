@@ -24,7 +24,7 @@ import type {
   SearchResultsTreeNodeChildren,
   SearchResultsTreeRootNode,
 } from "../../../../shared/internal/visibility/BaseSearchResultsTree.js";
-import type { ModelsTreeIdsCache } from "../ModelsTreeIdsCache.js";
+import type { ModelsTreeIdsProvider } from "../ModelsTreeIdsProvider.js";
 
 /** @internal */
 export interface ModelsTreeSearchTargets {
@@ -44,11 +44,11 @@ export interface ModelsTreeSearchTargets {
 export async function createModelsSearchResultsTree(props: {
   imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom">;
   searchPaths: HierarchySearchTree[];
-  idsCache: ModelsTreeIdsCache;
+  idsProvider: ModelsTreeIdsProvider;
 }): Promise<SearchResultsTree<ModelsTreeSearchTargets>> {
   const { imodelAccess, searchPaths } = props;
   return createSearchResultsTree({
-    searchResultsNodesHandler: new ModelsTreeSearchResultsNodesHandler({ imodelAccess, idsCache: props.idsCache }),
+    searchResultsNodesHandler: new ModelsTreeSearchResultsNodesHandler({ imodelAccess, idsProvider: props.idsProvider }),
     searchPaths,
   });
 }
@@ -110,7 +110,7 @@ interface ProcessedNodes {
 
 interface ModelsTreeSearchResultsNodesHandlerProps {
   imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom">;
-  idsCache: ModelsTreeIdsCache;
+  idsProvider: ModelsTreeIdsProvider;
 }
 
 class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<ProcessedNodes, ModelsTreeSearchTargets, RawNode> {
@@ -137,7 +137,7 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<Proc
       }
     }
 
-    const subModels = rawElementsArray.length === 0 ? new Set<Id64String>() : await firstValueFrom(this.#props.idsCache.getAllSubModels());
+    const subModels = rawElementsArray.length === 0 ? new Set<Id64String>() : await firstValueFrom(this.#props.idsProvider.getAllSubModels());
     const getActualParentElementsPath =
       subModels.size > 0
         ? (potentialPath: ParentElementsPath): ParentElementsPath => {

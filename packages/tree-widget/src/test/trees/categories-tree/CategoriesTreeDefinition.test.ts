@@ -11,15 +11,15 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { BaseIdsCache } from "../../../tree-widget-react/shared/internal/caches/BaseIdsCache.js";
 import { CLASS_NAME_DefinitionModel } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { SharedIdsProvider } from "../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
 import { getClassesByView, mergeWithDefaults } from "../../../tree-widget-react/shared/internal/Utils.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "../../../tree-widget-react/trees/categories-tree/CategoriesTreeDefinition.js";
-import { CategoriesTreeIdsCache } from "../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
+import { CategoriesTreeIdsProvider } from "../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsProvider.js";
 import { buildIModel, insertGeometricModelWithPartition, TestSchema } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
-import { createAccessAndCache, getInsertFunctionByViewType } from "./internal/Utils.js";
+import { createAccessAndIdsProvider, getInsertFunctionByViewType } from "./internal/Utils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
@@ -80,19 +80,19 @@ describe("Categories tree", () => {
           );
           const { imodelConnection, ...keys } = buildIModelResult;
           for (const preloadCache of [false, true]) {
-            const { imodelAccess, idsCache } = createAccessAndCache({ imodelConnection, viewType });
+            const { imodelAccess, idsProvider } = createAccessAndIdsProvider({ imodelConnection, viewType });
             if (preloadCache) {
-              await idsCache.preloadElementModelCategories();
-              await idsCache.preloadDefinitionContainers();
+              await idsProvider.preloadElementModelCategories();
+              await idsProvider.preloadDefinitionContainers();
             }
-            expect(idsCache.elementModelCategoriesLoaded()).toBe(preloadCache);
-            expect(idsCache.isDataLoaded).toBe(preloadCache);
+            expect(idsProvider.elementModelCategoriesLoaded()).toBe(preloadCache);
+            expect(idsProvider.isDataLoaded).toBe(preloadCache);
             using provider = createIModelHierarchyProvider({
               imodelAccess,
               hierarchyDefinition: new CategoriesTreeDefinition({
                 imodelAccess,
                 viewType,
-                idsCache,
+                idsProvider,
                 hierarchyConfig: mergeWithDefaults({
                   defaults: defaultHierarchyConfiguration,
                   overrides: { elements: { nodes: "include" }, subCategories: { nodes: "exclude" } },
@@ -1498,11 +1498,15 @@ describe("Categories tree", () => {
           ].forEach(({ queryIdentifier, description }) => {
             it(`doesn't throw on ecsql query interrupt in ${description}`, async () => {
               const imodelAccess = createIModelAccess(imodelConnection);
-              const baseIdsCache = new BaseIdsCache({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
-              const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: viewType, baseIdsCache });
+              const sharedIdsProvider = new SharedIdsProvider({
+                queryExecutor: imodelAccess,
+                elementClassName: getClassesByView(viewType).elementClass,
+                type: viewType,
+              });
+              const idsProvider = new CategoriesTreeIdsProvider({ queryExecutor: imodelAccess, type: viewType, sharedIdsProvider });
               const iter = CategoriesTreeDefinition.createInstanceKeyPaths({
                 imodelAccess,
-                idsCache,
+                idsProvider,
                 viewType,
                 hierarchyConfig: {
                   subCategories: { nodes: "include" },
@@ -1540,16 +1544,16 @@ function createCategoryTreeProvider(
 ): HierarchyProvider & Disposable {
   const imodelAccess = createIModelAccess(imodelConnection);
   const excludedElementClassNames = hierarchyConfig?.elements?.nodes === "include" ? hierarchyConfig.elements.excludedClasses : undefined;
-  const baseIdsCache = new BaseIdsCache({
+  const sharedIdsProvider = new SharedIdsProvider({
     queryExecutor: imodelAccess,
     elementClassName: getClassesByView(viewType).elementClass,
     type: viewType,
     excludedElementClassNames,
   });
-  const idsCache = new CategoriesTreeIdsCache({
+  const idsProvider = new CategoriesTreeIdsProvider({
     queryExecutor: imodelAccess,
     type: viewType,
-    baseIdsCache,
+    sharedIdsProvider,
     excludedElementClassNames,
   });
   const hierarchyProvider = createIModelHierarchyProvider({
@@ -1557,7 +1561,7 @@ function createCategoryTreeProvider(
     hierarchyDefinition: new CategoriesTreeDefinition({
       imodelAccess,
       viewType,
-      idsCache,
+      idsProvider,
       hierarchyConfig: mergeWithDefaults({ defaults: defaultHierarchyConfiguration, overrides: hierarchyConfig }),
     }),
   });
