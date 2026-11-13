@@ -304,7 +304,7 @@ Components from this package allows consumers to track performance of specific f
 This can be achieved by passing `onPerformanceMeasured` function to `PropertyGridComponent` or `createPropertyGrid`. The function is invoked with feature id and time elapsed as the component is being used. List of tracked features:
 
 - `"properties-load"` - time it takes to load properties data after selection changes.
-- `"elements-list-load"` - time it takes to populate elements list when multiple elements are selected.
+- `"elements-list-load"` - time it takes to load each page of the elements list when multiple elements are selected.
 
 ### Usage tracking
 
