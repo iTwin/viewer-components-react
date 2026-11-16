@@ -132,7 +132,8 @@ describe("useInstanceLabels", () => {
     const pageCount = Math.ceil(classCount / 100);
     for (let page = 1; page <= pageCount; ++page) {
       act(() => result.current.loadMore());
-      await waitFor(() => expect(result.current.rows.map((row) => row?.instanceKey)).toEqual(sortedKeys.slice(0, page * 100)));
+      // Preparing labels for 500+ classes can exceed waitFor's default one-second timeout on CI.
+      await waitFor(() => expect(result.current.rows.map((row) => row?.instanceKey)).toEqual(sortedKeys.slice(0, page * 100)), { timeout: 2000 });
       expect(reader).toHaveBeenCalledTimes(page);
     }
     act(() => result.current.loadMore());
