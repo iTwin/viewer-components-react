@@ -4,7 +4,7 @@ name: Release packages (changeset)
 on:
   push:
     branches:
-      - master
+      - tree-widget/3.x
 
 env:
   NPM_CONFIG_PROVENANCE: true

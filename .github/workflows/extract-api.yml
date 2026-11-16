@@ -4,7 +4,7 @@ name: Extract API
 
 on:
   pull_request:
-    branches: [master]
+    branches: [tree-widget/3.x]
     paths:
       - packages/property-grid/**
       - packages/tree-widget/**
