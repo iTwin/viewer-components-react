@@ -86,7 +86,7 @@ export function useInstanceLabels({ imodel, instanceKeys }: { imodel: IModelConn
         return;
       }
       loading = true;
-      timer = trackTime(true, (elapsedTime) => onPerformanceMeasured("elements-list-load", elapsedTime));
+      timer = trackTime(true, (elapsedTime) => onPerformanceMeasured("elements-list-page-load", elapsedTime));
       const placeholderCount = Math.min(PAGE_SIZE, total - items.length);
       setRows([...items, ...new Array<undefined>(placeholderCount).fill(undefined)]);
       session.loadMore();

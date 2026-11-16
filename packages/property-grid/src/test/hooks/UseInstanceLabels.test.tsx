@@ -21,28 +21,15 @@ import { BisCodeSpec, Code, IModel, IModelReadRpcInterface } from "@itwin/core-c
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { PresentationLabelsProvider } from "@itwin/presentation-components";
-import * as interop from "@itwin/presentation-core-interop";
-import * as shared from "@itwin/presentation-shared";
 import { useInstanceLabels } from "../../property-grid-react/hooks/UseInstanceLabels.js";
 import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTelemetryContext.js";
-import { act, createResolvablePromise, renderHook, waitFor } from "../TestUtils.js";
+import { act, renderHook, waitFor } from "../TestUtils.js";
 
 import type { PropsWithChildren } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { InstanceKey } from "@itwin/presentation-common";
-
-vi.mock("@itwin/presentation-core-interop", async (importOriginal) => {
-  const actual = await importOriginal<typeof interop>();
-  return { ...actual, createECSqlQueryExecutor: vi.fn(actual.createECSqlQueryExecutor) };
-});
-vi.mock("@itwin/presentation-shared", async (importOriginal) => {
-  const actual = await importOriginal<typeof shared>();
-  return { ...actual, createBisInstanceLabelSelectClauseFactory: vi.fn(actual.createBisInstanceLabelSelectClauseFactory) };
-});
 
 describe("useInstanceLabels", () => {
-  let imodel: IModelConnection;
+  let imodel: IModelConnection | undefined;
 
   beforeAll(async () => {
     await initializeCore({ rpcs: [IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface] });
@@ -50,13 +37,12 @@ describe("useInstanceLabels", () => {
     ECSchemaRpcImpl.register();
   });
   afterEach(async () => {
-    vi.mocked(interop.createECSqlQueryExecutor).mockReset();
-    vi.mocked(shared.createBisInstanceLabelSelectClauseFactory).mockReset();
-    await imodel.close();
+    await imodel?.close();
+    imodel = undefined;
   });
   afterAll(async () => terminateCore());
 
-  it("matches presentation labels for elements, models and bracketed codes", async () => {
+  it("loads labels for elements, models and bracketed codes", async () => {
     const built = await buildIModel("use-instance-labels-kinds", async (db) =>
       withEditTxn(db, (txn) => {
         const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
@@ -80,13 +66,17 @@ describe("useInstanceLabels", () => {
     const { result } = renderHook(useInstanceLabels, { initialProps: { imodel, instanceKeys: keys }, disableStrictMode: true });
     act(() => result.current.loadMore());
     await waitFor(() => expect(result.current.rows.filter(Boolean)).toHaveLength(keys.length));
-    const expected = await new PresentationLabelsProvider({ imodel }).getLabels(keys.map((key) => ({ ...key, className: key.className.replace(".", ":") })));
+    const idSuffix = (id: string) => {
+      const value = BigInt(id);
+      return `[${(value >> 40n).toString(36)}-${(value & ((1n << 40n) - 1n)).toString(36)}]`.toUpperCase();
+    };
+    const expected = ["code", `user-label ${idSuffix(keys[1].id)}`, `Physical Object ${idSuffix(keys[2].id)}`, "[code]", "partition-label", "partition-label"];
     for (const [index, key] of keys.entries()) {
       expect(result.current.rows.find((row) => row?.instanceKey === key)?.label).toBe(expected[index]);
     }
   });
 
-  it("omits missing keys, stops on a short page and does not query an empty selection", async () => {
+  it("deduplicates keys, omits missing instances and stops on a short page", async () => {
     const built = await buildIModel("use-instance-labels-missing", async (db) =>
       withEditTxn(db, (txn) => ({ key: insertSubject({ txn, codeValue: "subject" }) })),
     );
@@ -94,21 +84,22 @@ describe("useInstanceLabels", () => {
     const missing = { className: "BisCore.Subject", id: "0xffff" };
     const reader = vi.spyOn(imodel, "createQueryReader");
     const { result, rerender } = renderHook(useInstanceLabels, {
-      initialProps: { imodel, instanceKeys: [missing, built.key, missing] },
+      initialProps: { imodel, instanceKeys: [missing, { ...built.key, className: "BisCore:Subject" }, built.key, missing] },
       disableStrictMode: true,
     });
     act(() => result.current.loadMore());
     await waitFor(() => expect(result.current.rows).toEqual([{ instanceKey: built.key, label: "subject" }]));
     act(() => result.current.loadMore());
+    expect(result.current.rows).toEqual([{ instanceKey: built.key, label: "subject" }]);
     expect(reader).toHaveBeenCalledOnce();
     rerender({ imodel, instanceKeys: [] });
     act(() => result.current.loadMore());
+    expect(result.current.rows).toEqual([]);
     expect(reader).toHaveBeenCalledOnce();
   });
 
-  it("queries more than 500 classes with global paging", async () => {
-    const classCount = 501;
-    const built = await buildIModel("use-instance-labels-many-classes", async (db) => {
+  it.each([500, 501])("loads globally sorted pages across %i classes", async (classCount) => {
+    const built = await buildIModel(`use-instance-labels-many-classes-${classCount}`, async (db) => {
       await importSchema({
         imodel: db,
         schemaName: "Paging",
@@ -135,15 +126,20 @@ describe("useInstanceLabels", () => {
       });
     });
     imodel = built.imodelConnection;
+    const reader = vi.spyOn(imodel, "createQueryReader");
+    const sortedKeys = built.keys.toReversed();
     const { result } = renderHook(useInstanceLabels, { initialProps: { imodel, instanceKeys: built.keys }, disableStrictMode: true });
-    for (let page = 1; page <= 6; ++page) {
+    const pageCount = Math.ceil(classCount / 100);
+    for (let page = 1; page <= pageCount; ++page) {
       act(() => result.current.loadMore());
-      await waitFor(() => expect(result.current.rows.filter(Boolean)).toHaveLength(Math.min(page * 100, classCount)));
+      await waitFor(() => expect(result.current.rows.map((row) => row?.instanceKey)).toEqual(sortedKeys.slice(0, page * 100)));
+      expect(reader).toHaveBeenCalledTimes(page);
     }
-    expect(result.current.rows.map((row) => row?.instanceKey)).toEqual(built.keys.toReversed());
+    act(() => result.current.loadMore());
+    expect(reader).toHaveBeenCalledTimes(pageCount);
   });
 
-  it("loads real labels in sorted pages and matches presentation labels", async () => {
+  it("loads real labels in sorted pages", async () => {
     const built = await buildIModel("use-instance-labels-real", async (db) =>
       withEditTxn(db, (txn) => ({
         keys: Array.from({ length: 105 }, (_, index) => insertSubject({ txn, codeValue: `subject-${String(104 - index).padStart(3, "0")}` })),
@@ -156,127 +152,67 @@ describe("useInstanceLabels", () => {
 
     act(() => result.current.loadMore());
     await waitFor(() => expect(result.current.rows.filter(Boolean)).toHaveLength(100));
-    const expected = await new PresentationLabelsProvider({ imodel }).getLabels(keys.map((key) => ({ ...key, className: key.className.replace(".", ":") })));
     act(() => result.current.loadMore());
     await waitFor(() => expect(result.current.rows.filter(Boolean)).toHaveLength(105));
-    expect(result.current.rows.map((row) => row?.label)).toEqual([...expected].sort((a, b) => a.localeCompare(b)));
+    expect(result.current.rows.map((row) => row?.label)).toEqual(Array.from({ length: 105 }, (_, index) => `subject-${String(index).padStart(3, "0")}`));
     expect(result.current.rows.map((row) => row?.instanceKey)).toEqual(keys.toReversed());
     act(() => result.current.loadMore());
     expect(reader).toHaveBeenCalledTimes(2);
   });
 
-  it.each([500, 501])("groups distinct keys and aligns bindings for %i classes", async (classCount) => {
-    const built = await buildIModel(`use-instance-labels-batches-${classCount}`, async () => ({}));
+  it("measures each completed page and ignores a selection superseded during preparation", async () => {
+    const built = await buildIModel("use-instance-labels-telemetry", async (db) =>
+      withEditTxn(db, (txn) => ({
+        keys: Array.from({ length: 102 }, (_, index) => insertSubject({ txn, codeValue: `subject-${String(index).padStart(3, "0")}` })),
+      })),
+    );
     imodel = built.imodelConnection;
-    const keys = Array.from({ length: classCount }, (_, index) => ({ className: `Test.Class${index}`, id: `0x${(index + 1).toString(16)}` }));
-    const firstClass = createResolvablePromise<void>();
-    const createSelectClause = vi.fn<shared.IInstanceLabelSelectClauseFactory["createSelectClause"]>().mockImplementation(async ({ className }) => {
-      if (className === keys[0].className) {
-        await firstClass.promise;
-      }
-      return "NULL";
-    });
-    vi.mocked(shared.createBisInstanceLabelSelectClauseFactory).mockReturnValue({ createSelectClause });
-    const createQueryReader = vi.fn<shared.ECSqlQueryExecutor["createQueryReader"]>().mockImplementation((query) => {
-      const offset = query.bindings?.at(-1)?.value;
-      if (typeof offset !== "number") {
-        throw new Error("Missing offset");
-      }
-      return (async function* () {
-        for (const key of keys.slice(offset, offset + 100)) {
-          yield { className: key.className, id: key.id, label: key.className };
-        }
-      })();
-    });
-    vi.mocked(interop.createECSqlQueryExecutor).mockReturnValue({ createQueryReader });
-    const selection = [...keys, { ...keys[0], className: "Test:Class0" }];
-    const { result } = renderHook(useInstanceLabels, { initialProps: { imodel, instanceKeys: selection }, disableStrictMode: true });
-    act(() => result.current.loadMore());
-    await waitFor(() => expect(createSelectClause).toHaveBeenCalledTimes(classCount * 2));
-    expect(createQueryReader).not.toHaveBeenCalled();
-    await act(async () => firstClass.resolve());
-    await waitFor(() => expect(result.current.rows.filter(Boolean)).toHaveLength(100));
-    act(() => result.current.loadMore());
-    await waitFor(() => expect(result.current.rows.filter(Boolean)).toHaveLength(200));
-    expect(createSelectClause).toHaveBeenCalledTimes(classCount * 2);
-    expect(createQueryReader).toHaveBeenCalledTimes(2);
-    const firstQuery = createQueryReader.mock.calls[0][0];
-    expect(firstQuery.ctes?.map((cte) => cte.split(" UNION ALL ").length)).toEqual(classCount === 500 ? [500] : [500, 1]);
-    expect(firstQuery.ctes?.flatMap((cte) => [...cte.matchAll(/'([^']+)' AS className/g)].map((match) => match[1]))).toEqual(keys.map((key) => key.className));
-    expect(firstQuery.bindings).toEqual([...keys.map((key) => ({ type: "idset", value: [key.id] })), { type: "long", value: 100 }, { type: "long", value: 0 }]);
-  });
-
-  it("measures each completed page and ignores an outdated selection", async () => {
-    const built = await buildIModel("use-instance-labels-telemetry", async () => ({}));
-    imodel = built.imodelConnection;
-    const keys = Array.from({ length: 101 }, (_, index) => ({ className: "Test.Class", id: `0x${(index + 1).toString(16)}` }));
-    const gate = createResolvablePromise<void>();
-    let first = true;
-    vi.mocked(shared.createBisInstanceLabelSelectClauseFactory).mockReturnValue({ createSelectClause: async () => "NULL" });
-    vi.mocked(interop.createECSqlQueryExecutor).mockReturnValue({
-      createQueryReader: (query) => {
-        const bindings = query.bindings;
-        const ids = bindings?.[0];
-        const offset = bindings?.at(-1);
-        if (!ids || ids.type !== "idset" || !ids.value || !offset || offset.type !== "long" || typeof offset.value !== "number") {
-          throw new Error("Invalid bindings");
-        }
-        const values = ids.value;
-        const start = offset.value;
-        const wait = first;
-        first = false;
-        return (async function* () {
-          if (wait) {
-            await gate.promise;
-          }
-          for (const id of values.slice(start, start + 100)) {
-            yield { className: "Test.Class", id, label: id };
-          }
-        })();
-      },
-    });
+    const reader = vi.spyOn(imodel, "createQueryReader");
     const measured = vi.fn();
     const wrapper = ({ children }: PropsWithChildren) => <TelemetryContextProvider onPerformanceMeasured={measured}>{children}</TelemetryContextProvider>;
-    const { result, rerender } = renderHook(useInstanceLabels, { initialProps: { imodel, instanceKeys: keys }, wrapper, disableStrictMode: true });
+    const { result, rerender } = renderHook(useInstanceLabels, {
+      initialProps: { imodel, instanceKeys: built.keys.slice(0, 1) },
+      wrapper,
+      disableStrictMode: true,
+    });
     act(() => result.current.loadMore());
-    await waitFor(() => expect(first).toBe(false));
-    const nextKeys: InstanceKey[] = keys.slice();
+    const nextKeys = built.keys.slice(1);
     rerender({ imodel, instanceKeys: nextKeys });
     act(() => result.current.loadMore());
-    await waitFor(() => expect(result.current.rows.filter(Boolean)).toHaveLength(100));
-    expect(measured).toHaveBeenCalledExactlyOnceWith("elements-list-load", expect.any(Number));
-    await act(async () => gate.resolve());
-    expect(measured).toHaveBeenCalledTimes(1);
+    const expectedRows = nextKeys.map((instanceKey, index) => ({ instanceKey, label: `subject-${String(index + 1).padStart(3, "0")}` }));
+    await waitFor(() => expect(result.current.rows).toEqual(expectedRows.slice(0, 100)));
+    expect(measured).toHaveBeenCalledExactlyOnceWith("elements-list-page-load", expect.any(Number));
+    expect(reader).toHaveBeenCalledOnce();
     act(() => result.current.loadMore());
-    await waitFor(() => expect(result.current.rows.filter(Boolean)).toHaveLength(101));
+    await waitFor(() => expect(result.current.rows).toEqual(expectedRows));
     expect(measured).toHaveBeenCalledTimes(2);
-    expect(measured).toHaveBeenLastCalledWith("elements-list-load", expect.any(Number));
+    expect(measured).toHaveBeenLastCalledWith("elements-list-page-load", expect.any(Number));
+    expect(reader).toHaveBeenCalledTimes(2);
+    act(() => result.current.loadMore());
+    expect(measured).toHaveBeenCalledTimes(2);
+    expect(reader).toHaveBeenCalledTimes(2);
   });
 
   it("ignores overlapping loads and stops after exactly one full page", async () => {
-    const built = await buildIModel("use-instance-labels-overlap", async () => ({}));
-    imodel = built.imodelConnection;
-    const keys = Array.from({ length: 100 }, (_, index) => ({ className: "Test.Class", id: `0x${(index + 1).toString(16)}` }));
-    const gate = createResolvablePromise<void>();
-    vi.mocked(shared.createBisInstanceLabelSelectClauseFactory).mockReturnValue({ createSelectClause: async () => "NULL" });
-    const createQueryReader = vi.fn<shared.ECSqlQueryExecutor["createQueryReader"]>().mockImplementation(() =>
-      (async function* () {
-        await gate.promise;
-        for (const key of keys) {
-          yield { className: key.className, id: key.id, label: key.id };
-        }
-      })(),
+    const built = await buildIModel("use-instance-labels-overlap", async (db) =>
+      withEditTxn(db, (txn) => ({
+        keys: Array.from({ length: 100 }, (_, index) => insertSubject({ txn, codeValue: `subject-${String(index).padStart(3, "0")}` })),
+      })),
     );
-    vi.mocked(interop.createECSqlQueryExecutor).mockReturnValue({ createQueryReader });
+    imodel = built.imodelConnection;
+    const keys = built.keys;
+    const reader = vi.spyOn(imodel, "createQueryReader");
     const { result } = renderHook(useInstanceLabels, { initialProps: { imodel, instanceKeys: keys }, disableStrictMode: true });
     act(() => {
       result.current.loadMore();
       result.current.loadMore();
     });
-    await waitFor(() => expect(createQueryReader).toHaveBeenCalledOnce());
-    await act(async () => gate.resolve());
-    await waitFor(() => expect(result.current.rows.filter(Boolean)).toHaveLength(100));
+    expect(result.current.rows).toEqual(new Array(100).fill(undefined));
+    const expectedRows = keys.map((instanceKey, index) => ({ instanceKey, label: `subject-${String(index).padStart(3, "0")}` }));
+    await waitFor(() => expect(result.current.rows).toEqual(expectedRows));
+    expect(reader).toHaveBeenCalledOnce();
     act(() => result.current.loadMore());
-    expect(createQueryReader).toHaveBeenCalledOnce();
+    expect(result.current.rows).toEqual(expectedRows);
+    expect(reader).toHaveBeenCalledOnce();
   });
 });

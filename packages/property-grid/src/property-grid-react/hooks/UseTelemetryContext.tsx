@@ -9,9 +9,11 @@ import type { PropsWithChildren } from "react";
 
 /**
  * Features that are tracked for performance.
+ *
+ * `elements-list-load` is no longer emitted. Use `elements-list-page-load` instead.
  * @public
  */
-export type PerformanceTrackedFeatures = "properties-load" | "elements-list-load";
+export type PerformanceTrackedFeatures = "properties-load" | "elements-list-load" | "elements-list-page-load";
 
 /**
  * Features that are tracked for usage.
