@@ -13,7 +13,7 @@
 const fs = require("fs");
 const { execFileSync } = require("child_process");
 
-const base = process.argv.slice(2).find((argument) => argument !== "--") ?? "origin/master";
+const base = process.argv.slice(2).find((argument) => argument !== "--") ?? "origin/tree-widget/3.x";
 const changedFiles = new Set([...getChangedPackageFiles(`${base}...HEAD`), ...getChangedPackageFiles("HEAD")]);
 
 const errors = [];
