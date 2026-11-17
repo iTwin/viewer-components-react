@@ -287,7 +287,11 @@ export function createSharedIdsProvider(props: SharedIdsProviderProps): SharedId
               return;
             }
             try {
-              await toVoidPromise(getElementModelCategories());
+              // Also prepare data derived from models data, so that it isn't loaded on first visibility change.
+              await Promise.all([
+                toVoidPromise(getCategoriesOfElementsInfo()),
+                toVoidPromise(categoriesContainingParentElementsProvider.getCategoriesContainingParentElements()),
+              ]);
             } catch {}
           },
           getCategoryTopMostElementModels,

@@ -38,12 +38,13 @@ export class CategoriesContainingParentElementsProvider {
 
   private queryCategoriesContainingParentElements(): Observable<CategoryId> {
     return defer(() => {
+      // Child elements are read from `BisCore.Element` and filtered by class, so that their geometry rows aren't loaded.
       const query = `
         SELECT DISTINCT p.Category.Id categoryId
-        FROM ${this.#elementClassName} ce
+        FROM ${CLASS_NAMES.Element} ce
         JOIN ${this.#elementClassName} p ON p.ECInstanceId = ce.Parent.Id
         JOIN ${CLASS_NAMES.Model} m ON m.ECInstanceId = p.Model.Id
-        WHERE m.IsPrivate = false AND m.IsTemplate = false
+        WHERE ce.ECClassId IS (${this.#elementClassName}) AND m.IsPrivate = false AND m.IsTemplate = false
       `;
       return this.#queryExecutor.createQueryReader(
         { ecsql: query },
@@ -59,7 +60,8 @@ export class CategoriesContainingParentElementsProvider {
     );
   }
 
-  private getCategoriesContainingParentElements(): Observable<Set<CategoryId>> {
+  /** Returns categories that contain elements, which have child elements. */
+  public getCategoriesContainingParentElements(): Observable<Set<CategoryId>> {
     this.#categoriesContainingParentElements ??= this.queryCategoriesContainingParentElements().pipe(
       reduce((acc, categoryId) => acc.add(categoryId), new Set<CategoryId>()),
       shareReplay(),

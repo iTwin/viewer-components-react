@@ -123,5 +123,24 @@ describe("SharedIdsProvider", () => {
       expect(await firstValueFrom(provider.categories.hasParentElements({ categoryId: keys.categoryWithoutParentElements.id }))).toBe(false);
       expect(await firstValueFrom(provider.categories.hasParentElements({ categoryId: keys.categoryWithParentElementsInNonVisibleModels.id }))).toBe(false);
     });
+
+    it("preloads data required to determine whether category contains parent elements", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const parentElement = insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id });
+          insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
+          return { category };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      const provider = createProvider(imodelConnection);
+      await provider.models.preloadData();
+
+      const querySpy = vi.spyOn(imodelConnection, "createQueryReader");
+      expect(await firstValueFrom(provider.categories.hasParentElements({ categoryId: keys.category.id }))).toBe(true);
+      expect(querySpy).not.toHaveBeenCalled();
+    });
   });
 });
