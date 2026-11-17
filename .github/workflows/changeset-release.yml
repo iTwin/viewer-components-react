@@ -43,7 +43,7 @@ jobs:
         uses: changesets/action@63a615b9cd06ba9a3e6d13796c7fbcb080a60a0b
         with:
           publish: pnpm release
-          title: Release packages
+          title: Release packages (3.x)
           commit: Release packages
           commitMode: github-api
         env:

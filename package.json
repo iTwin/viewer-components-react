@@ -18,7 +18,7 @@
     "changeset": "node scripts/create-changeset.js",
     "cspell": "cspell .",
     "check-inline-styles": "node scripts/check-inline-styles.js",
-    "release": "pnpm build && changeset publish",
+    "release": "pnpm build && changeset publish --tag previous",
     "format": "oxfmt --check",
     "format:fix": "oxfmt",
     "gather-docs": "node ./scripts/gatherDocs.js",
