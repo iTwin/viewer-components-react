@@ -20,30 +20,30 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { DescendantsCountCache } from "../../../tree-widget-react/shared/internal/caches/DescendantsCountCache.js";
 import { CLASS_NAME_GeometricElement3d } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { DescendantsCountProvider } from "../../../tree-widget-react/shared/internal/idsProviders/DescendantsCountProvider.js";
 import { buildIModel } from "../../IModelUtils.js";
 import { createFakeViewport } from "../../trees/Common.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 
-function createCache(imodel: IModelConnection) {
-  return new DescendantsCountCache({
+function createProvider(imodel: IModelConnection) {
+  return new DescendantsCountProvider({
     queryExecutor: createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(imodel), 1000),
     componentId: "test",
     elementClassName: CLASS_NAME_GeometricElement3d,
   });
 }
 
-function createFakeCache(viewport: ReturnType<typeof createFakeViewport>) {
-  return new DescendantsCountCache({
+function createFakeProvider(viewport: ReturnType<typeof createFakeViewport>) {
+  return new DescendantsCountProvider({
     queryExecutor: createECSqlQueryExecutor(viewport.iModel),
     componentId: "test",
     elementClassName: CLASS_NAME_GeometricElement3d,
   });
 }
 
-describe("DescendantsCountCache", () => {
+describe("DescendantsCountProvider", () => {
   describe("batching and caching", () => {
     beforeEach(() => {
       vi.useFakeTimers();
@@ -55,19 +55,22 @@ describe("DescendantsCountCache", () => {
 
     it("returns default count for category with no results", async () => {
       using vp = createFakeViewport();
-      const cache = createFakeCache(vp);
+      const provider = createFakeProvider(vp);
 
-      const [result] = await Promise.all([firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" })), vi.advanceTimersByTimeAsync(20)]);
+      const [result] = await Promise.all([
+        firstValueFrom(provider.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" })),
+        vi.advanceTimersByTimeAsync(20),
+      ]);
       expect(result).toEqual([{ categoryId: "0x2", count: 0 }]);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
     });
 
     it("returns empty array for element request with no results", async () => {
       using vp = createFakeViewport();
-      const cache = createFakeCache(vp);
+      const provider = createFakeProvider(vp);
 
       const [result] = await Promise.all([
-        firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", parentElementId: "0x10" })),
+        firstValueFrom(provider.getDescendantsCounts({ modelId: "0x1", parentElementId: "0x10" })),
         vi.advanceTimersByTimeAsync(20),
       ]);
       expect(result).toEqual([]);
@@ -78,10 +81,10 @@ describe("DescendantsCountCache", () => {
       using vp = createFakeViewport({
         queryHandler: () => [{ modelId: "0x1", reqParent: null, reqCategory: "0x2", ownCategory: "0x2", cnt: 3 }],
       });
-      const cache = createFakeCache(vp);
+      const provider = createFakeProvider(vp);
 
-      const promise1 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
-      const promise2 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x3" }));
+      const promise1 = firstValueFrom(provider.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
+      const promise2 = firstValueFrom(provider.getDescendantsCounts({ modelId: "0x1", categoryId: "0x3" }));
       const [result1, result2] = await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(20)]);
       expect(result1).toEqual([{ categoryId: "0x2", count: 3 }]);
       expect(result2).toEqual([{ categoryId: "0x3", count: 0 }]);
@@ -90,32 +93,32 @@ describe("DescendantsCountCache", () => {
 
     it("batches multiple category requests into single query", async () => {
       using vp = createFakeViewport();
-      const cache = createFakeCache(vp);
+      const provider = createFakeProvider(vp);
 
-      const promise1 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
-      const promise2 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x3" }));
+      const promise1 = firstValueFrom(provider.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
+      const promise2 = firstValueFrom(provider.getDescendantsCounts({ modelId: "0x1", categoryId: "0x3" }));
       await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(20)]);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
     });
 
     it("batches requests which are less than 20 ms apart", async () => {
       using vp = createFakeViewport();
-      const cache = createFakeCache(vp);
+      const provider = createFakeProvider(vp);
 
-      const promise1 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
+      const promise1 = firstValueFrom(provider.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
       await vi.advanceTimersByTimeAsync(19);
-      const promise2 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x3" }));
+      const promise2 = firstValueFrom(provider.getDescendantsCounts({ modelId: "0x1", categoryId: "0x3" }));
       await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(2)]);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
     });
 
     it("does not batch requests which are more than 20 ms apart", async () => {
       using vp = createFakeViewport();
-      const cache = createFakeCache(vp);
+      const provider = createFakeProvider(vp);
 
-      const promise1 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
+      const promise1 = firstValueFrom(provider.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
       await vi.advanceTimersByTimeAsync(21);
-      const promise2 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x3" }));
+      const promise2 = firstValueFrom(provider.getDescendantsCounts({ modelId: "0x1", categoryId: "0x3" }));
       await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(20)]);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
     });
@@ -127,20 +130,23 @@ describe("DescendantsCountCache", () => {
           { modelId: "0x1", reqParent: "0x10", reqCategory: null, ownCategory: "0x3", cnt: 5 },
         ],
       });
-      const cache = createFakeCache(vp);
+      const provider = createFakeProvider(vp);
 
-      const promise1 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
-      const promise2 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", parentElementId: "0x10" }));
+      const promise1 = firstValueFrom(provider.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
+      const promise2 = firstValueFrom(provider.getDescendantsCounts({ modelId: "0x1", parentElementId: "0x10" }));
       await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(20)]);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
     });
 
     it("caches empty values", async () => {
       using vp = createFakeViewport();
-      const cache = createFakeCache(vp);
+      const provider = createFakeProvider(vp);
 
-      const [result1] = await Promise.all([firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" })), vi.advanceTimersByTimeAsync(20)]);
-      const result2 = await firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
+      const [result1] = await Promise.all([
+        firstValueFrom(provider.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" })),
+        vi.advanceTimersByTimeAsync(20),
+      ]);
+      const result2 = await firstValueFrom(provider.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
       expect(result1).toEqual([{ categoryId: "0x2", count: 0 }]);
       expect(result2).toEqual([{ categoryId: "0x2", count: 0 }]);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
@@ -150,10 +156,13 @@ describe("DescendantsCountCache", () => {
       using vp = createFakeViewport({
         queryHandler: () => [{ modelId: "0x1", reqParent: null, reqCategory: "0x2", ownCategory: "0x2", cnt: 2 }],
       });
-      const cache = createFakeCache(vp);
+      const provider = createFakeProvider(vp);
 
-      const [result1] = await Promise.all([firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" })), vi.advanceTimersByTimeAsync(20)]);
-      const result2 = await firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
+      const [result1] = await Promise.all([
+        firstValueFrom(provider.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" })),
+        vi.advanceTimersByTimeAsync(20),
+      ]);
+      const result2 = await firstValueFrom(provider.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
       expect(result1).toEqual([{ categoryId: "0x2", count: 2 }]);
       expect(result2).toEqual([{ categoryId: "0x2", count: 2 }]);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
@@ -163,13 +172,13 @@ describe("DescendantsCountCache", () => {
       using vp = createFakeViewport({
         queryHandler: () => [{ modelId: "0x1", reqParent: "0x10", reqCategory: null, ownCategory: "0x2", cnt: 3 }],
       });
-      const cache = createFakeCache(vp);
+      const provider = createFakeProvider(vp);
 
       const [result1] = await Promise.all([
-        firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", parentElementId: "0x10" })),
+        firstValueFrom(provider.getDescendantsCounts({ modelId: "0x1", parentElementId: "0x10" })),
         vi.advanceTimersByTimeAsync(20),
       ]);
-      const result2 = await firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", parentElementId: "0x10" }));
+      const result2 = await firstValueFrom(provider.getDescendantsCounts({ modelId: "0x1", parentElementId: "0x10" }));
       expect(result1).toEqual([{ categoryId: "0x2", count: 3 }]);
       expect(result2).toEqual([{ categoryId: "0x2", count: 3 }]);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
@@ -177,10 +186,10 @@ describe("DescendantsCountCache", () => {
 
     it("executes single query if 100 where clauses are generated", async () => {
       using vp = createFakeViewport();
-      const cache = createFakeCache(vp);
+      const provider = createFakeProvider(vp);
       const promises = new Array<Promise<unknown>>();
       for (let i = 1; i <= 100; ++i) {
-        promises.push(firstValueFrom(cache.getDescendantsCounts({ modelId: `0x1`, categoryId: "0x1000", parentElementId: `0x${i + 1}` })));
+        promises.push(firstValueFrom(provider.getDescendantsCounts({ modelId: `0x1`, categoryId: "0x1000", parentElementId: `0x${i + 1}` })));
       }
       await Promise.all([...promises, vi.advanceTimersByTimeAsync(20)]);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
@@ -188,10 +197,10 @@ describe("DescendantsCountCache", () => {
 
     it("executes separate queries if > 100 where clauses are generated", async () => {
       using vp = createFakeViewport();
-      const cache = createFakeCache(vp);
+      const provider = createFakeProvider(vp);
       const promises = new Array<Promise<unknown>>();
       for (let i = 1; i <= 101; ++i) {
-        promises.push(firstValueFrom(cache.getDescendantsCounts({ modelId: `0x1`, categoryId: "0x1000", parentElementId: `0x${i + 1}` })));
+        promises.push(firstValueFrom(provider.getDescendantsCounts({ modelId: `0x1`, categoryId: "0x1000", parentElementId: `0x${i + 1}` })));
       }
       await Promise.all([...promises, vi.advanceTimersByTimeAsync(20)]);
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
@@ -203,22 +212,22 @@ describe("DescendantsCountCache", () => {
       // A request for { model1, catB } is treated as "covered" by this batch (model1 and catB both appear), but if
       // model1 has no root elements in catB, the query returns no row for that pair and a default entry must still be created.
       let crossProductResultPromise: Promise<Array<{ categoryId: string; count: number }>> | undefined;
-      const requestHolder: { cache?: DescendantsCountCache } = {};
+      const requestHolder: { provider?: DescendantsCountProvider } = {};
       using vp = createFakeViewport({
         queryHandler: () => {
           // Request { model1: "0x1", catB: "0x4" } while the batch query is in-flight.
-          crossProductResultPromise = firstValueFrom(requestHolder.cache!.getDescendantsCounts({ modelId: "0x1", categoryId: "0x4" }));
+          crossProductResultPromise = firstValueFrom(requestHolder.provider!.getDescendantsCounts({ modelId: "0x1", categoryId: "0x4" }));
           return [
             { modelId: "0x1", reqParent: null, reqCategory: "0x2", ownCategory: "0x2", cnt: 1 },
             { modelId: "0x3", reqParent: null, reqCategory: "0x4", ownCategory: "0x4", cnt: 1 },
           ];
         },
       });
-      const cache = createFakeCache(vp);
-      requestHolder.cache = cache;
+      const provider = createFakeProvider(vp);
+      requestHolder.provider = provider;
 
-      const promise1 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
-      const promise2 = firstValueFrom(cache.getDescendantsCounts({ modelId: "0x3", categoryId: "0x4" }));
+      const promise1 = firstValueFrom(provider.getDescendantsCounts({ modelId: "0x1", categoryId: "0x2" }));
+      const promise2 = firstValueFrom(provider.getDescendantsCounts({ modelId: "0x3", categoryId: "0x4" }));
       await Promise.all([promise1, promise2, vi.advanceTimersByTimeAsync(20)]);
 
       expect(crossProductResultPromise).toBeDefined();
@@ -261,13 +270,13 @@ describe("DescendantsCountCache", () => {
           }),
         );
         const { imodelConnection, ...keys } = buildIModelResult;
-        const cache = createCache(imodelConnection);
+        const provider = createProvider(imodelConnection);
 
-        const incorrectModelResult = await firstValueFrom(cache.getDescendantsCounts({ modelId: "0x123", categoryId: keys.category.id }));
+        const incorrectModelResult = await firstValueFrom(provider.getDescendantsCounts({ modelId: "0x123", categoryId: keys.category.id }));
         expect(incorrectModelResult).toEqual([{ categoryId: keys.category.id, count: 0 }]);
-        const incorrectCategoryResult = await firstValueFrom(cache.getDescendantsCounts({ modelId: keys.model.id, categoryId: "0x123" }));
+        const incorrectCategoryResult = await firstValueFrom(provider.getDescendantsCounts({ modelId: keys.model.id, categoryId: "0x123" }));
         expect(incorrectCategoryResult).toEqual([{ categoryId: "0x123", count: 0 }]);
-        const result = await firstValueFrom(cache.getDescendantsCounts({ modelId: keys.model.id, categoryId: keys.category.id }));
+        const result = await firstValueFrom(provider.getDescendantsCounts({ modelId: keys.model.id, categoryId: keys.category.id }));
         expect(result).toEqual([{ categoryId: keys.category.id, count: 2 }]);
       });
 
@@ -283,9 +292,9 @@ describe("DescendantsCountCache", () => {
           }),
         );
         const { imodelConnection, ...keys } = buildIModelResult;
-        const cache = createCache(imodelConnection);
+        const provider = createProvider(imodelConnection);
 
-        const result = await firstValueFrom(cache.getDescendantsCounts({ modelId: keys.model.id, categoryId: keys.categoryB.id }));
+        const result = await firstValueFrom(provider.getDescendantsCounts({ modelId: keys.model.id, categoryId: keys.categoryB.id }));
         expect(result).toEqual([{ categoryId: keys.categoryB.id, count: 0 }]);
       });
 
@@ -307,9 +316,9 @@ describe("DescendantsCountCache", () => {
           }),
         );
         const { imodelConnection, ...keys } = buildIModelResult;
-        const cache = createCache(imodelConnection);
+        const provider = createProvider(imodelConnection);
 
-        const result = await firstValueFrom(cache.getDescendantsCounts({ modelId: keys.model.id, categoryId: keys.catA.id }));
+        const result = await firstValueFrom(provider.getDescendantsCounts({ modelId: keys.model.id, categoryId: keys.catA.id }));
         expect(result).toEqual(
           expect.arrayContaining([
             { categoryId: keys.catA.id, count: 3 },
@@ -332,10 +341,14 @@ describe("DescendantsCountCache", () => {
           }),
         );
         const { imodelConnection, ...keys } = buildIModelResult;
-        const cache = createCache(imodelConnection);
+        const provider = createProvider(imodelConnection);
 
-        const resultCatB = await firstValueFrom(cache.getDescendantsCounts({ modelId: keys.model.id, categoryId: keys.catB.id, parentElementId: keys.el1.id }));
-        const resultCatA = await firstValueFrom(cache.getDescendantsCounts({ modelId: keys.model.id, categoryId: keys.catA.id, parentElementId: keys.el1.id }));
+        const resultCatB = await firstValueFrom(
+          provider.getDescendantsCounts({ modelId: keys.model.id, categoryId: keys.catB.id, parentElementId: keys.el1.id }),
+        );
+        const resultCatA = await firstValueFrom(
+          provider.getDescendantsCounts({ modelId: keys.model.id, categoryId: keys.catA.id, parentElementId: keys.el1.id }),
+        );
         expect(resultCatB).toEqual(
           expect.arrayContaining([
             { categoryId: keys.catB.id, count: 1 },
@@ -358,9 +371,9 @@ describe("DescendantsCountCache", () => {
           }),
         );
         const { imodelConnection, ...keys } = buildIModelResult;
-        const cache = createCache(imodelConnection);
+        const provider = createProvider(imodelConnection);
 
-        const result = await firstValueFrom(cache.getDescendantsCounts({ modelId: keys.model.id, parentElementId: keys.el.id }));
+        const result = await firstValueFrom(provider.getDescendantsCounts({ modelId: keys.model.id, parentElementId: keys.el.id }));
         expect(result).toEqual([]);
       });
 
@@ -381,9 +394,9 @@ describe("DescendantsCountCache", () => {
           }),
         );
         const { imodelConnection, ...keys } = buildIModelResult;
-        const cache = createCache(imodelConnection);
+        const provider = createProvider(imodelConnection);
 
-        const result = await firstValueFrom(cache.getDescendantsCounts({ modelId: keys.model.id, parentElementId: keys.el1.id }));
+        const result = await firstValueFrom(provider.getDescendantsCounts({ modelId: keys.model.id, parentElementId: keys.el1.id }));
         expect(result).toEqual(
           expect.arrayContaining([
             { categoryId: keys.catA.id, count: 1 },
@@ -409,9 +422,9 @@ describe("DescendantsCountCache", () => {
           }),
         );
         const { imodelConnection, ...keys } = buildIModelResult;
-        const cache = createCache(imodelConnection);
+        const provider = createProvider(imodelConnection);
 
-        const result = await firstValueFrom(cache.getDescendantsCounts({ modelId: keys.model.id, parentElementId: keys.el1.id }));
+        const result = await firstValueFrom(provider.getDescendantsCounts({ modelId: keys.model.id, parentElementId: keys.el1.id }));
         expect(result).toEqual(
           expect.arrayContaining([
             { categoryId: keys.catA.id, count: 1 },
@@ -435,12 +448,12 @@ describe("DescendantsCountCache", () => {
           }),
         );
         const { imodelConnection, ...keys } = buildIModelResult;
-        const cache = createCache(imodelConnection);
+        const provider = createProvider(imodelConnection);
 
         // Request both element counts and a specific category count for the same parent simultaneously
         const [elementResult, categoryResult] = await Promise.all([
-          firstValueFrom(cache.getDescendantsCounts({ modelId: keys.model.id, parentElementId: keys.el1.id })),
-          firstValueFrom(cache.getDescendantsCounts({ modelId: keys.model.id, categoryId: keys.catA.id, parentElementId: keys.el1.id })),
+          firstValueFrom(provider.getDescendantsCounts({ modelId: keys.model.id, parentElementId: keys.el1.id })),
+          firstValueFrom(provider.getDescendantsCounts({ modelId: keys.model.id, categoryId: keys.catA.id, parentElementId: keys.el1.id })),
         ]);
 
         expect(elementResult).toEqual(

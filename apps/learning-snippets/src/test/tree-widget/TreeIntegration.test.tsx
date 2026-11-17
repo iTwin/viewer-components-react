@@ -116,7 +116,7 @@ describe("Tree widget", () => {
         await waitFor(() => getByText("Custom viewport model"));
       });
 
-      it("shares tree caches between multiple trees", async () => {
+      it("shares tree ids providers between multiple trees", async () => {
         const { imodelConnection } = await buildIModel(async (imodel) =>
           withEditTxn(imodel, (txn) => {
             const model = insertPhysicalModelWithPartition({ txn, codeValue: "Shared context model" });

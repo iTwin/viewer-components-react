@@ -36,7 +36,7 @@ flowchart TD
   RESULT_Categories[/topMostContainedCategories/]
 
   %% Start
-  TITLE(["<span style='font-family: monospace;'>getTopMostContainedCategories</span>"]) --> A["Get all categories used by top-most elements from cache"]
+  TITLE(["<span style='font-family: monospace;'>getTopMostContainedCategories</span>"]) --> A["Get all categories used by top-most elements from ids provider"]
   TITLE --> B["Get categories contained by <span style='font-family: monospace;'>classificationOrTableIds</span>, including categories of nested classifications"]
 
   PROPS[\"

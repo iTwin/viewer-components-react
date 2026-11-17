@@ -7,22 +7,22 @@ import { firstValueFrom } from "rxjs";
 import { describe, expect, it, vi } from "vitest";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { BaseIdsCache } from "../../../../tree-widget-react/shared/internal/caches/BaseIdsCache.js";
-import { ModelsTreeIdsCache } from "../../../../tree-widget-react/trees/models-tree/internal/ModelsTreeIdsCache.js";
+import { SharedIdsProvider } from "../../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
+import { ModelsTreeIdsProvider } from "../../../../tree-widget-react/trees/models-tree/internal/ModelsTreeIdsProvider.js";
 import { defaultHierarchyConfiguration } from "../../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelMock } from "../../Common.js";
 
-describe("ModelsTreeIdsCache", () => {
-  function createIdsCache(queryHandler: (query: string) => any[]) {
+describe("ModelsTreeIdsProvider", () => {
+  function createIdsProvider(queryHandler: (query: string) => any[]) {
     const iModel = createIModelMock({ queryHandler });
     const queryExecutor = createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded");
-    const baseIdsCache = new BaseIdsCache({ queryExecutor, elementClassName: defaultHierarchyConfiguration.elements.baseClass, type: "3d" });
-    const idsCache = new ModelsTreeIdsCache({
+    const sharedIdsProvider = new SharedIdsProvider({ queryExecutor, elementClassName: defaultHierarchyConfiguration.elements.baseClass, type: "3d" });
+    const idsProvider = new ModelsTreeIdsProvider({
       queryExecutor,
-      baseIdsCache,
+      sharedIdsProvider,
       hierarchyConfig: defaultHierarchyConfiguration,
     });
-    return idsCache;
+    return idsProvider;
   }
 
   it("caches category element count", async () => {
@@ -35,10 +35,10 @@ describe("ModelsTreeIdsCache", () => {
       }
       throw new Error(`Unexpected query: ${query}`);
     });
-    const cache = createIdsCache(stub);
-    await expect(firstValueFrom(cache.getDescendantsCounts({ modelId, categoryId }))).resolves.toEqual([{ categoryId, count: elementCount }]);
+    const idsProvider = createIdsProvider(stub);
+    await expect(firstValueFrom(idsProvider.getDescendantsCounts({ modelId, categoryId }))).resolves.toEqual([{ categoryId, count: elementCount }]);
     expect(stub).toHaveBeenCalledOnce();
-    await expect(firstValueFrom(cache.getDescendantsCounts({ modelId, categoryId }))).resolves.toEqual([{ categoryId, count: elementCount }]);
+    await expect(firstValueFrom(idsProvider.getDescendantsCounts({ modelId, categoryId }))).resolves.toEqual([{ categoryId, count: elementCount }]);
     expect(stub).toHaveBeenCalledOnce();
   });
 
@@ -57,9 +57,9 @@ describe("ModelsTreeIdsCache", () => {
       }
       throw new Error(`Unexpected query: ${query}`);
     });
-    const cache = createIdsCache(stub);
-    const obs1 = cache.getDescendantsCounts({ modelId, categoryId });
-    const obs2 = cache.getDescendantsCounts({ modelId, categoryId: categoryId2 });
+    const idsProvider = createIdsProvider(stub);
+    const obs1 = idsProvider.getDescendantsCounts({ modelId, categoryId });
+    const obs2 = idsProvider.getDescendantsCounts({ modelId, categoryId: categoryId2 });
     const [count1, count2] = await Promise.all([firstValueFrom(obs1), firstValueFrom(obs2)]);
     expect(count1).toEqual([
       {

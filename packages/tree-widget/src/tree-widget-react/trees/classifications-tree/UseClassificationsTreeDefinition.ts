@@ -9,7 +9,7 @@ import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js
 import { useTelemetryContext } from "../../shared/contexts/TelemetryContext.js";
 import { createIModelAccess } from "../../shared/internal/hooks/UseIModelAccess.js";
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
-import { getClassificationsTreeIdsCache } from "./UseClassificationsTree.js";
+import { getClassificationsTreeIdsProvider } from "./UseClassificationsTree.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { createIModelHierarchyProvider, HierarchyDefinition } from "@itwin/presentation-hierarchies";
@@ -83,33 +83,33 @@ export function useClassificationsTreeDefinitionInternal(
   props: UseClassificationsTreeDefinitionProps & { visibilityHandlerConfig?: ClassificationsTreeVisibilityHandlerConfiguration },
 ): UseClassificationsTreeDefinitionResult {
   const { imodels, hierarchyConfig, search, onSearchPathsChanged, visibilityHandlerConfig } = props;
-  const { getBaseIdsCache, getCache } = useSharedTreeContext();
+  const { getSharedIdsProvider, getIdsProvider } = useSharedTreeContext();
   const { onFeatureUsed } = useTelemetryContext();
 
-  const imodelsWithCaches = useMemo(() => {
+  const imodelsWithIdsProviders = useMemo(() => {
     return imodels.map((imodel) => {
       return {
         imodelAccess: createIModelAccess({ imodel, hierarchyLevelSizeLimit: 1000 }),
-        cache: getClassificationsTreeIdsCache({
-          getBaseIdsCache,
-          getCache,
+        idsProvider: getClassificationsTreeIdsProvider({
+          getSharedIdsProvider,
+          getIdsProvider,
           imodel,
           hierarchyConfig,
           visibilityHandlerConfig,
         }),
       };
     });
-  }, [imodels, getBaseIdsCache, getCache, hierarchyConfig, visibilityHandlerConfig]);
+  }, [imodels, getSharedIdsProvider, getIdsProvider, hierarchyConfig, visibilityHandlerConfig]);
 
   const getHierarchyDefinition = useCallback(
     (definitionProps: { imodelAccess: IModelAccess }) => {
       return new ClassificationsTreeDefinition({
         imodelAccess: definitionProps.imodelAccess,
-        getIdsCache: (imodelKey: string) => imodelsWithCaches.find(({ imodelAccess }) => imodelAccess.imodelKey === imodelKey)!.cache,
+        getIdsProvider: (imodelKey: string) => imodelsWithIdsProviders.find(({ imodelAccess }) => imodelAccess.imodelKey === imodelKey)!.idsProvider,
         hierarchyConfig,
       });
     },
-    [hierarchyConfig, imodelsWithCaches],
+    [hierarchyConfig, imodelsWithIdsProviders],
   );
 
   const searchTerm = search ? ("searchText" in search ? search.searchText : search.targetItems) : undefined;
@@ -130,10 +130,10 @@ export function useClassificationsTreeDefinitionInternal(
       onFeatureUsed({ featureId: "search", reportInteraction: true });
       const builder = HierarchySearchTree.createBuilder();
       await Promise.all(
-        imodelsWithCaches.map(async ({ imodelAccess, cache }) => {
+        imodelsWithIdsProviders.map(async ({ imodelAccess, idsProvider }) => {
           const iter = ClassificationsTreeDefinition.createInstanceKeyPaths({
             hierarchyConfig,
-            idsCache: cache,
+            idsProvider,
             imodelAccess,
             abortSignal,
             limit: searchLimit,
@@ -148,7 +148,7 @@ export function useClassificationsTreeDefinitionInternal(
       onSearchPathsChanged?.(joinedTrees);
       return joinedTrees;
     };
-  }, [searchTerm, searchLimit, onFeatureUsed, imodelsWithCaches, onSearchPathsChanged, hierarchyConfig]);
+  }, [searchTerm, searchLimit, onFeatureUsed, imodelsWithIdsProviders, onSearchPathsChanged, hierarchyConfig]);
 
   return {
     getHierarchyDefinition,

@@ -12,7 +12,7 @@ import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { ElementId, ModelId } from "../Types.js";
 
-interface ModeledElementsCacheProps {
+interface SubModeledElementsProviderProps {
   queryExecutor: LimitingECSqlQueryExecutor;
   componentId: GuidString;
   elementClassName: string;
@@ -28,7 +28,7 @@ interface QueriedRow {
 }
 
 /** @internal */
-export class ModeledElementsCache {
+export class SubModeledElementsProvider {
   #queryExecutor: LimitingECSqlQueryExecutor;
   #componentId: GuidString;
   #componentName: string;
@@ -43,11 +43,11 @@ export class ModeledElementsCache {
       }>
     | undefined;
 
-  constructor(props: ModeledElementsCacheProps) {
+  constructor(props: SubModeledElementsProviderProps) {
     this.#queryExecutor = props.queryExecutor;
     this.#componentId = props.componentId;
     this.#elementClassName = props.elementClassName;
-    this.#componentName = "ModeledElementsCache";
+    this.#componentName = "SubModeledElementsProvider";
     this.#nonEmptyModelIds = props.nonEmptyModelIds;
   }
 

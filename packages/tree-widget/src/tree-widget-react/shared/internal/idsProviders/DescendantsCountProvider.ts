@@ -6,7 +6,7 @@
 import { defer, EMPTY, from, map, merge, of } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
 import { getOrCreate } from "../Utils.js";
-import { BatchingCache } from "./BatchingCache.js";
+import { BatchingProvider } from "./BatchingProvider.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString } from "@itwin/core-bentley";
@@ -44,12 +44,12 @@ interface Row {
 }
 
 /**
- * Cache used to store count of descendants grouped by category.
+ * Provider used to retrieve count of descendants grouped by category.
  *
- * Cache makes requests in batches of 20ms.
+ * Provider makes requests in batches of 20ms.
  * @internal
  */
-export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest, DescendantsCountResult, WhereClause, Row> {
+export class DescendantsCountProvider extends BatchingProvider<DescendantsCountRequest, DescendantsCountResult, WhereClause, Row> {
   #cachedValues = new Map<ModelId, Map<ElementId | undefined, Map<CategoryId | undefined, DescendantsCountResult>>>();
   #queryExecutor: LimitingECSqlQueryExecutor;
   #elementClassName: string;
@@ -61,7 +61,7 @@ export class DescendantsCountCache extends BatchingCache<DescendantsCountRequest
     this.#componentId = props.componentId;
     this.#queryExecutor = props.queryExecutor;
     this.#elementClassName = props.elementClassName;
-    this.#componentName = "DescendantsCountCache";
+    this.#componentName = "DescendantsCountProvider";
   }
 
   protected getCachedValue(request: DescendantsCountRequest): DescendantsCountResult | undefined {

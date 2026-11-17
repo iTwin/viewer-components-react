@@ -9,21 +9,21 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { withEditTxn } from "@itwin/core-backend";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { ElementModelCategoriesCache } from "../../../tree-widget-react/shared/internal/caches/ElementModelCategoriesCache.js";
 import { CLASS_NAME_GeometricElement3d } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { ElementModelCategoriesProvider } from "../../../tree-widget-react/shared/internal/idsProviders/ElementModelCategoriesProvider.js";
 import { buildIModel, insertGeometricModelWithPartition } from "../../IModelUtils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 
-function createCache(imodel: IModelConnection) {
-  return new ElementModelCategoriesCache({
+function createProvider(imodel: IModelConnection) {
+  return new ElementModelCategoriesProvider({
     queryExecutor: createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(imodel), 1000),
     componentId: "test",
     elementClassName: CLASS_NAME_GeometricElement3d,
   });
 }
 
-describe("ElementModelCategoriesCache", () => {
+describe("ElementModelCategoriesProvider", () => {
   beforeAll(async () => {
     await initializeCore();
   });
@@ -46,9 +46,9 @@ describe("ElementModelCategoriesCache", () => {
       }),
     );
     const { imodelConnection, ...keys } = buildIModelResult;
-    const cache = createCache(imodelConnection);
+    const provider = createProvider(imodelConnection);
 
-    const result = await firstValueFrom(cache.getCachedData());
+    const result = await firstValueFrom(provider.getCachedData());
 
     expect([...result.modelsCategoriesInfo.keys()]).toEqual([keys.model.id]);
     expect(result.categoryModelsInfo.get(keys.category.id)).toEqual([

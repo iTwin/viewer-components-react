@@ -8,18 +8,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CompressedId64Set } from "@itwin/core-bentley";
 import {
   ALWAYS_NEVER_BUFFER_THRESHOLD,
-  AlwaysAndNeverDrawnElementInfoCache,
+  AlwaysAndNeverDrawnElementInfoProvider,
   SET_CHANGE_DEBOUNCE_TIME,
-} from "../../../tree-widget-react/shared/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
+} from "../../../tree-widget-react/shared/internal/idsProviders/AlwaysAndNeverDrawnElementInfoProvider.js";
 import { createResolvablePromise } from "../../TestUtils.js";
 import { createFakeViewport } from "../../trees/Common.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { QueryBinder } from "@itwin/core-common";
-import type { ElementPathSegment } from "../../../tree-widget-react/shared/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
+import type { ElementPathSegment } from "../../../tree-widget-react/shared/internal/idsProviders/AlwaysAndNeverDrawnElementInfoProvider.js";
 import type { TreeWidgetViewport } from "../../../tree-widget-react/shared/TreeWidgetViewport.js";
 
-describe("AlwaysAndNeverDrawnElementInfoCache", () => {
+describe("AlwaysAndNeverDrawnElementInfoProvider", () => {
   beforeEach(() => {
     // Use fake timers to reliably advance time in tests
     vi.useFakeTimers();
@@ -30,7 +30,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
   });
 
   function getElements(
-    info: AlwaysAndNeverDrawnElementInfoCache,
+    info: AlwaysAndNeverDrawnElementInfoProvider,
     props: { setType: "always" | "never"; modelId: Id64String; elementCategoryPath: ElementPathSegment[] },
   ) {
     const parentPath = props.elementCategoryPath.slice(0, -1);
@@ -45,7 +45,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       using vp = createFakeViewport();
       const event = setType === "always" ? vp.onAlwaysDrawnChanged : vp.onNeverDrawnChanged;
       (() => {
-        using _ = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+        using _ = new AlwaysAndNeverDrawnElementInfoProvider({ viewport: vp });
         expect(event.numberOfListeners).toBe(1);
       })();
       expect(event.numberOfListeners).toBe(0);
@@ -58,7 +58,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
         [`${setType}Drawn`]: new Set(),
       });
 
-      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      using info = new AlwaysAndNeverDrawnElementInfoProvider({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(result).toEqual(new Map());
@@ -72,7 +72,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
         [`${setType}Drawn`]: undefined,
       });
 
-      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      using info = new AlwaysAndNeverDrawnElementInfoProvider({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(result).toEqual(new Map());
@@ -87,7 +87,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       using vp = createFakeViewport({
         [`${setType}Drawn`]: set,
       });
-      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      using info = new AlwaysAndNeverDrawnElementInfoProvider({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(result).toEqual(new Map());
@@ -109,7 +109,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
         [`${setType}Drawn`]: set,
         queryHandler,
       });
-      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      using info = new AlwaysAndNeverDrawnElementInfoProvider({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       const expectedResult = new Map([[categoryId, [nonTransientElementId]]]);
@@ -131,7 +131,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
         queryHandler,
       });
 
-      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      using info = new AlwaysAndNeverDrawnElementInfoProvider({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       const expectedResult = new Map([[categoryId, [elementId]]]);
@@ -152,7 +152,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
         queryHandler,
       });
 
-      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      using info = new AlwaysAndNeverDrawnElementInfoProvider({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       const expectedResult = new Map([[categoryId, [elementId]]]);
@@ -177,7 +177,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
         queryHandler,
       });
 
-      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      using info = new AlwaysAndNeverDrawnElementInfoProvider({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       const expectedResult = new Map([[categoryId, [elementId]]]);
@@ -200,7 +200,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
         [`${setType}Drawn`]: set,
       });
 
-      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      using info = new AlwaysAndNeverDrawnElementInfoProvider({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       await firstValueFrom(getElements(info, { setType, modelId: "0x2", elementCategoryPath: [] }));
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
@@ -226,7 +226,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
         queryHandler,
       });
 
-      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      using info = new AlwaysAndNeverDrawnElementInfoProvider({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result1 = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(result1).toEqual(new Map([[categoryId, [elementId]]]));
@@ -260,7 +260,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
         queryHandler,
       });
 
-      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      using info = new AlwaysAndNeverDrawnElementInfoProvider({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result1 = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       const expectedResult = new Map([[categoryId, [elementId]]]);
@@ -286,7 +286,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
         [`${setType}Drawn`]: set,
         queryHandler,
       });
-      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      using info = new AlwaysAndNeverDrawnElementInfoProvider({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result1 = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       const expectedResult = new Map([[categoryId, [elementId]]]);
@@ -310,7 +310,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       vi.useRealTimers();
 
       const modelId = "0x1";
-      // Always drawn cache makes multiple queries if number of elements in always/never drawn set is above a threshold,
+      // Always drawn provider makes multiple queries if number of elements in always/never drawn set is above a threshold,
       const set = new Set(
         Array(ALWAYS_NEVER_BUFFER_THRESHOLD + 1)
           .fill(0)
@@ -320,7 +320,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       using vp = createFakeViewport({
         [`${setType}Drawn`]: set,
       });
-      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      using info = new AlwaysAndNeverDrawnElementInfoProvider({ viewport: vp });
       await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       // First time the set is just above the threshold, so there should be 2 queries
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
@@ -363,11 +363,11 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
           }),
       });
 
-      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      using info = new AlwaysAndNeverDrawnElementInfoProvider({ viewport: vp });
       const firstPromise = firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       await queryStartedPromise.promise;
       // Before making the changes make sure that the first query has started,
-      // Since cache is executing two queries at the same time, 2 queries should have been started by now
+      // Since provider is executing two queries at the same time, 2 queries should have been started by now
       // In total 3 queries should be executed to process the initial set
       // Since first query is paused, expect that the third one is not called
       expect(vp.iModel.createQueryReader).toHaveBeenCalledTimes(2);
@@ -427,7 +427,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
           }),
       });
 
-      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      using info = new AlwaysAndNeverDrawnElementInfoProvider({ viewport: vp });
       const resultPromise = firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       await queryStartedPromise.promise;
       // At first there should have been 2 queries started,
@@ -483,7 +483,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
           }),
       });
 
-      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      using info = new AlwaysAndNeverDrawnElementInfoProvider({ viewport: vp });
       await queryStartedPromise.promise;
       info.suppressChangeEvents();
       // Request is made when suppress is active, so changes to always/never drawn set should not affect the result
@@ -511,7 +511,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
       using vp = createFakeViewport({
         [`${setType}Drawn`]: set,
       });
-      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport: vp });
+      using info = new AlwaysAndNeverDrawnElementInfoProvider({ viewport: vp });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       await firstValueFrom(getElements(info, { setType, modelId: "0x2", elementCategoryPath: [] }));
       expect(vp.iModel.createQueryReader).toHaveBeenCalledOnce();
@@ -534,7 +534,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
         [`${setType}Drawn`]: new Set(["0x30"]),
         queryHandler,
       });
-      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport });
+      using info = new AlwaysAndNeverDrawnElementInfoProvider({ viewport });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [] }));
       expect(result).toEqual(new Map());
@@ -556,7 +556,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
         [`${setType}Drawn`]: new Set([elementId]),
         queryHandler,
       });
-      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport });
+      using info = new AlwaysAndNeverDrawnElementInfoProvider({ viewport });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [{ categoryIds: categoryId }] }));
       expect(result).toEqual(new Map([[categoryId, [elementId]]]));
@@ -574,7 +574,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
         [`${setType}Drawn`]: new Set([elementId, childElementId]),
         queryHandler,
       });
-      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport });
+      using info = new AlwaysAndNeverDrawnElementInfoProvider({ viewport });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(
         getElements(info, {
@@ -597,7 +597,7 @@ describe("AlwaysAndNeverDrawnElementInfoCache", () => {
         [`${setType}Drawn`]: new Set([elementId]),
         queryHandler,
       });
-      using info = new AlwaysAndNeverDrawnElementInfoCache({ viewport });
+      using info = new AlwaysAndNeverDrawnElementInfoProvider({ viewport });
       await vi.advanceTimersByTimeAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(getElements(info, { setType, modelId, elementCategoryPath: [{ categoryIds: categoryId }] }));
       expect(result).toEqual(new Map());

@@ -24,7 +24,7 @@ import type { ReactElement } from "react";
 import type { Observable } from "rxjs";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { BaseIdsCache } from "../../shared/internal/caches/BaseIdsCache.js";
+import type { SharedIdsProvider } from "../../shared/internal/idsProviders/SharedIdsProvider.js";
 import type { CategoryInfosMap } from "../../shared/internal/VisibilityUtils.js";
 import type { TreeWidgetViewport } from "../../shared/TreeWidgetViewport.js";
 import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
@@ -85,14 +85,14 @@ export function useModelsTreeButtonProps({ imodel, viewport }: { imodel: IModelC
 
 function useAvailableModels(imodel: IModelConnection): ModelInfo[] {
   const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
-  const { getBaseIdsCache } = useSharedTreeContext();
-  const baseIdsCache = getBaseIdsCache({ imodel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
+  const { getSharedIdsProvider } = useSharedTreeContext();
+  const sharedIdsProvider = getSharedIdsProvider({ imodel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
   useEffect(() => {
     const getModels = async () => {
       try {
         const [allModels, planProjectionModels] = await Promise.all([
-          firstValueFrom(baseIdsCache.getAllModels()),
-          firstValueFrom(baseIdsCache.getPlanProjectionModels()),
+          firstValueFrom(sharedIdsProvider.getAllModels()),
+          firstValueFrom(sharedIdsProvider.getPlanProjectionModels()),
         ]);
         setAvailableModels(allModels.map((id) => ({ id, isPlanProjection: planProjectionModels.has(id) })));
       } catch {
@@ -100,7 +100,7 @@ function useAvailableModels(imodel: IModelConnection): ModelInfo[] {
       }
     };
     void getModels();
-  }, [baseIdsCache]);
+  }, [sharedIdsProvider]);
 
   return availableModels;
 }
@@ -115,8 +115,8 @@ export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) =>
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   const { models, viewport } = props;
   const { onFeatureUsed } = useTelemetryContext();
-  const { getBaseIdsCache, cancelChangesInProgress } = useSharedTreeContext();
-  const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
+  const { getSharedIdsProvider, cancelChangesInProgress } = useSharedTreeContext();
+  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
   const translate = useTranslation();
 
   const onClick = async () => {
@@ -125,7 +125,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
     cancelChangesInProgress.next();
     // wrap in try catch for getCategoryInfos call
     try {
-      const categoryInfos = await getCategoryInfos({ baseIdsCache, cancel: cancelChangesInProgress });
+      const categoryInfos = await getCategoryInfos({ sharedIdsProvider, cancel: cancelChangesInProgress });
       if (!categoryInfos) {
         return;
       }
@@ -170,8 +170,8 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
 export function InvertButton(props: ModelsTreeHeaderButtonProps) {
   const { models, viewport } = props;
   const { onFeatureUsed } = useTelemetryContext();
-  const { cancelChangesInProgress, getBaseIdsCache } = useSharedTreeContext();
-  const baseIdsCache = getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
+  const { cancelChangesInProgress, getSharedIdsProvider } = useSharedTreeContext();
+  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
   const translate = useTranslation();
   const onClick = async () => {
     // cspell:disable-next-line
@@ -179,7 +179,7 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
     cancelChangesInProgress.next();
     // wrap in try catch for getCategoryInfos call
     try {
-      const categoryInfos = await getCategoryInfos({ baseIdsCache, cancel: cancelChangesInProgress });
+      const categoryInfos = await getCategoryInfos({ sharedIdsProvider, cancel: cancelChangesInProgress });
       if (!categoryInfos) {
         return;
       }
@@ -281,11 +281,17 @@ export function ToggleInstancesFocusButton(props?: { disabled?: boolean }) {
   );
 }
 
-async function getCategoryInfos({ baseIdsCache, cancel }: { baseIdsCache: BaseIdsCache; cancel: Observable<void> }): Promise<CategoryInfosMap | undefined> {
+async function getCategoryInfos({
+  sharedIdsProvider,
+  cancel,
+}: {
+  sharedIdsProvider: SharedIdsProvider;
+  cancel: Observable<void>;
+}): Promise<CategoryInfosMap | undefined> {
   return firstValueFrom(
-    baseIdsCache.getAllCategoriesOfElements().pipe(
+    sharedIdsProvider.getAllCategoriesOfElements().pipe(
       mergeAll(),
-      mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), subCategories: baseIdsCache.getSubCategories({ categoryId }) })),
+      mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), subCategories: sharedIdsProvider.getSubCategories({ categoryId }) })),
       reduce((acc: CategoryInfosMap, { categoryId, subCategories }) => {
         acc.set(categoryId, subCategories);
         return acc;

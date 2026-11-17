@@ -12,11 +12,11 @@ import type { Id64Arg } from "@itwin/core-bentley";
 import type { CategoryId } from "../../../../shared/internal/Types.js";
 import type { BaseVisibilityHelperProps } from "../../../../shared/internal/visibility/BaseVisibilityHelper.js";
 import type { VisibilityStatus } from "../../../../shared/UseHierarchyVisibility.js";
-import type { ClassificationsTreeIdsCache } from "../ClassificationsTreeIdsCache.js";
+import type { ClassificationsTreeIdsProvider } from "../ClassificationsTreeIdsProvider.js";
 
 /** @internal */
 export type ClassificationsTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
-  idsCache: ClassificationsTreeIdsCache;
+  idsProvider: ClassificationsTreeIdsProvider;
 };
 
 /**
@@ -104,9 +104,9 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
 
   /** Gets top most element categories contained in the given classification tables or classifications. */
   private getTopMostContainedCategories(classificationOrTableIds: Id64Arg): Observable<CategoryId[]> {
-    return this.#props.idsCache.getAllCategoriesOfElements({ onlyTopMostElementCategories: true }).pipe(
+    return this.#props.idsProvider.getAllCategoriesOfElements({ onlyTopMostElementCategories: true }).pipe(
       mergeMap((topMostCategories) => {
-        return this.#props.idsCache.getAllContainedCategories(classificationOrTableIds).pipe(filter((categoryId) => topMostCategories.has(categoryId)));
+        return this.#props.idsProvider.getAllContainedCategories(classificationOrTableIds).pipe(filter((categoryId) => topMostCategories.has(categoryId)));
       }),
       toArray(),
     );

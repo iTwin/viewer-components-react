@@ -19,7 +19,7 @@ import { buildIModel } from "../../../IModelUtils.js";
 import { TestUtils } from "../../../TestUtils.js";
 import { createTreeWidgetTestingViewport, getDefaultSubCategoryId } from "../../TreeUtils.js";
 import {
-  createAccessAndCache,
+  createAccessAndIdsProvider,
   createCategoryHierarchyNode,
   createDefinitionContainerHierarchyNode,
   createElementHierarchyNode,
@@ -35,7 +35,7 @@ import type {
   CategoriesTreeHierarchyConfiguration,
   RequiredCategoriesTreeHierarchyConfiguration,
 } from "../../../../tree-widget-react/trees/categories-tree/CategoriesTreeDefinition.js";
-import type { CategoriesTreeIdsCache } from "../../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
+import type { CategoriesTreeIdsProvider } from "../../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsProvider.js";
 import type { createIModelAccess, IModelAccess } from "../../Common.js";
 
 describe("CategoriesTreeVisibilityHandler", () => {
@@ -65,7 +65,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
     const { insertCategory, insertElement, insertElementsModel, insertElementsSubModel, insertModeledElement } = getInsertFunctionByViewType(viewType);
 
     function createProvider(props: {
-      idsCache: CategoriesTreeIdsCache;
+      idsProvider: CategoriesTreeIdsProvider;
       imodelAccess: ReturnType<typeof createIModelAccess>;
       searchPaths?: HierarchySearchTree[];
       hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
@@ -84,7 +84,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           searchPaths,
           visibleByDefault,
           subCategoriesOfCategories,
-          idsCache,
+          idsProvider,
           imodelAccess,
         }: {
           searchPaths: HierarchySearchTree[];
@@ -93,7 +93,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           imodelConnection: IModelConnection;
           hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
           imodelAccess: IModelAccess;
-          idsCache: CategoriesTreeIdsCache;
+          idsProvider: CategoriesTreeIdsProvider;
         }) {
           const hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration = mergeWithDefaults({
             defaults: defaultHierarchyConfiguration,
@@ -109,21 +109,21 @@ describe("CategoriesTreeVisibilityHandler", () => {
             subCategoriesOfCategories,
           });
           const visibilityHandlerWithSearchPaths = createCategoriesTreeVisibilityHandler({
-            idsCache,
+            idsProvider,
             searchPaths,
             imodelAccess,
             viewport,
             hierarchyConfig,
           });
           const defaultVisibilityHandler = createCategoriesTreeVisibilityHandler({
-            idsCache,
+            idsProvider,
             imodelAccess,
             viewport,
             hierarchyConfig,
           });
-          const defaultProvider = createProvider({ idsCache, imodelAccess, hierarchyConfig });
+          const defaultProvider = createProvider({ idsProvider, imodelAccess, hierarchyConfig });
           const providerWithSearchPaths = createProvider({
-            idsCache,
+            idsProvider,
             imodelAccess,
             searchPaths,
             hierarchyConfig,
@@ -165,7 +165,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               categories: { withoutElements: "include" },
             },
           });
-          const accessAndCache = createAccessAndCache({ imodelConnection, viewType });
+          const accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection, viewType });
           const viewport = createTreeWidgetTestingViewport({
             iModel: imodelConnection,
             viewType,
@@ -178,16 +178,16 @@ describe("CategoriesTreeVisibilityHandler", () => {
             ],
           });
           using visibilityHandlerWithoutSearchPaths = createCategoriesTreeVisibilityHandler({
-            idsCache: accessAndCache.idsCache,
+            idsProvider: accessAndIdsProvider.idsProvider,
             searchPaths: undefined,
-            imodelAccess: accessAndCache.imodelAccess,
+            imodelAccess: accessAndIdsProvider.imodelAccess,
             viewport,
             hierarchyConfig,
           });
 
           using providerWithSearchPaths = createProvider({
-            idsCache: accessAndCache.idsCache,
-            imodelAccess: accessAndCache.imodelAccess,
+            idsProvider: accessAndIdsProvider.idsProvider,
+            imodelAccess: accessAndIdsProvider.imodelAccess,
             searchPaths: [{ identifier: keys.category, children: [{ identifier: keys.subCategory }] }],
             hierarchyConfig,
           });
@@ -206,7 +206,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         describe("category with sub-categories hierarchy", () => {
           let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
           let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
-          let accessAndCache: ReturnType<typeof createAccessAndCache>;
+          let accessAndIdsProvider: ReturnType<typeof createAccessAndIdsProvider>;
           async function createIModel() {
             return buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
@@ -241,7 +241,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
           beforeAll(async () => {
             createIModelResult = await createIModel();
-            accessAndCache = createAccessAndCache({ imodelConnection: createIModelResult.imodelConnection, viewType });
+            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, viewType });
           });
 
           beforeEach(async function () {
@@ -256,8 +256,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
                   subCategories: [createIModelResult.siblingSubCategory.id, createIModelResult.defaultSiblingSubCategory.id],
                 },
               ],
-              imodelAccess: accessAndCache.imodelAccess,
-              idsCache: accessAndCache.idsCache,
+              imodelAccess: accessAndIdsProvider.imodelAccess,
+              idsProvider: accessAndIdsProvider.idsProvider,
             });
           });
 
@@ -356,7 +356,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         describe("category with child elements hierarchy", () => {
           let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
           let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
-          let accessAndCache: ReturnType<typeof createAccessAndCache>;
+          let accessAndIdsProvider: ReturnType<typeof createAccessAndIdsProvider>;
           async function createIModel() {
             return buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
@@ -399,7 +399,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
           beforeAll(async () => {
             createIModelResult = await createIModel();
-            accessAndCache = createAccessAndCache({ imodelConnection: createIModelResult.imodelConnection, viewType });
+            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, viewType });
           });
 
           beforeEach(async function () {
@@ -411,8 +411,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 { categoryId: createIModelResult.category.id, subCategories: createIModelResult.defaultSubCategory.id },
                 { categoryId: createIModelResult.siblingCategory.id, subCategories: createIModelResult.defaultSiblingSubCategory.id },
               ],
-              idsCache: accessAndCache.idsCache,
-              imodelAccess: accessAndCache.imodelAccess,
+              idsProvider: accessAndIdsProvider.idsProvider,
+              imodelAccess: accessAndIdsProvider.imodelAccess,
             });
             visibilityTestData.viewport.setNeverDrawn({
               elementIds: new Set([
@@ -742,7 +742,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         describe("category with elements which are search targets and have search target ancestor", () => {
           let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
           let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
-          let accessAndCache: ReturnType<typeof createAccessAndCache>;
+          let accessAndIdsProvider: ReturnType<typeof createAccessAndIdsProvider>;
           async function createIModel() {
             return buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
@@ -780,7 +780,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
           beforeAll(async () => {
             createIModelResult = await createIModel();
-            accessAndCache = createAccessAndCache({ imodelConnection: createIModelResult.imodelConnection, viewType });
+            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, viewType });
           });
 
           beforeEach(async function () {
@@ -789,8 +789,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
               searchPaths: createIModelResult.searchPaths,
               visibleByDefault: false,
               subCategoriesOfCategories: [{ categoryId: createIModelResult.category.id, subCategories: createIModelResult.defaultSubCategory.id }],
-              imodelAccess: accessAndCache.imodelAccess,
-              idsCache: accessAndCache.idsCache,
+              imodelAccess: accessAndIdsProvider.imodelAccess,
+              idsProvider: accessAndIdsProvider.idsProvider,
             });
             visibilityTestData.viewport.setNeverDrawn({
               elementIds: new Set([
@@ -1009,7 +1009,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         describe("category with intermediate categories hierarchy", () => {
           let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
           let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
-          let accessAndCache: ReturnType<typeof createAccessAndCache>;
+          let accessAndIdsProvider: ReturnType<typeof createAccessAndIdsProvider>;
           async function createIModel() {
             return buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
@@ -1052,7 +1052,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
           beforeAll(async () => {
             createIModelResult = await createIModel();
-            accessAndCache = createAccessAndCache({ imodelConnection: createIModelResult.imodelConnection, viewType });
+            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, viewType });
           });
 
           beforeEach(async function () {
@@ -1064,8 +1064,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 { categoryId: createIModelResult.categoryA.id, subCategories: createIModelResult.defaultSubCategoryA.id },
                 { categoryId: createIModelResult.categoryB.id, subCategories: createIModelResult.defaultSubCategoryB.id },
               ],
-              imodelAccess: accessAndCache.imodelAccess,
-              idsCache: accessAndCache.idsCache,
+              imodelAccess: accessAndIdsProvider.imodelAccess,
+              idsProvider: accessAndIdsProvider.idsProvider,
             });
             visibilityTestData.viewport.setNeverDrawn({
               elementIds: new Set([
@@ -1279,7 +1279,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         describe("category with intermediate categories under sub-model hierarchy", () => {
           let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
           let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
-          let accessAndCache: ReturnType<typeof createAccessAndCache>;
+          let accessAndIdsProvider: ReturnType<typeof createAccessAndIdsProvider>;
           async function createIModel() {
             return buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
@@ -1326,7 +1326,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
           beforeAll(async () => {
             createIModelResult = await createIModel();
-            accessAndCache = createAccessAndCache({ imodelConnection: createIModelResult.imodelConnection, viewType });
+            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, viewType });
           });
 
           beforeEach(async function () {
@@ -1338,8 +1338,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 { categoryId: createIModelResult.categoryA.id, subCategories: createIModelResult.defaultSubCategoryA.id },
                 { categoryId: createIModelResult.categoryB.id, subCategories: createIModelResult.defaultSubCategoryB.id },
               ],
-              imodelAccess: accessAndCache.imodelAccess,
-              idsCache: accessAndCache.idsCache,
+              imodelAccess: accessAndIdsProvider.imodelAccess,
+              idsProvider: accessAndIdsProvider.idsProvider,
             });
             visibilityTestData.viewport.setNeverDrawn({
               elementIds: new Set([createIModelResult.modeledElement.id, createIModelResult.subModelElement1.id, createIModelResult.subModelElement2.id]),
@@ -1500,7 +1500,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         describe("category with modeled elements hierarchy", () => {
           let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
           let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
-          let accessAndCache: ReturnType<typeof createAccessAndCache>;
+          let accessAndIdsProvider: ReturnType<typeof createAccessAndIdsProvider>;
           async function createIModel() {
             return buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
@@ -1569,7 +1569,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
           beforeAll(async () => {
             createIModelResult = await createIModel();
-            accessAndCache = createAccessAndCache({ imodelConnection: createIModelResult.imodelConnection, viewType });
+            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, viewType });
           });
 
           beforeEach(async function () {
@@ -1586,8 +1586,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 },
                 { categoryId: createIModelResult.siblingCategory.id, subCategories: createIModelResult.defaultSiblingSubCategory.id },
               ],
-              imodelAccess: accessAndCache.imodelAccess,
-              idsCache: accessAndCache.idsCache,
+              imodelAccess: accessAndIdsProvider.imodelAccess,
+              idsProvider: accessAndIdsProvider.idsProvider,
             });
           });
 
@@ -1879,7 +1879,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         describe("category under definition container hierarchy", () => {
           let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
           let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
-          let accessAndCache: ReturnType<typeof createAccessAndCache>;
+          let accessAndIdsProvider: ReturnType<typeof createAccessAndIdsProvider>;
           async function createIModel() {
             return buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
@@ -1913,7 +1913,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
           beforeAll(async () => {
             createIModelResult = await createIModel();
-            accessAndCache = createAccessAndCache({ imodelConnection: createIModelResult.imodelConnection, viewType });
+            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, viewType });
           });
 
           beforeEach(async function () {
@@ -1925,8 +1925,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 { categoryId: createIModelResult.category.id, subCategories: [createIModelResult.subCategory.id, createIModelResult.defaultSubCategory.id] },
                 { categoryId: createIModelResult.siblingCategory.id, subCategories: createIModelResult.defaultSiblingSubCategory.id },
               ],
-              imodelAccess: accessAndCache.imodelAccess,
-              idsCache: accessAndCache.idsCache,
+              imodelAccess: accessAndIdsProvider.imodelAccess,
+              idsProvider: accessAndIdsProvider.idsProvider,
             });
           });
 

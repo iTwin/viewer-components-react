@@ -35,7 +35,7 @@ import { validateHierarchyVisibility } from "../../../shared/VisibilityValidatio
 import { TestUtils } from "../../../TestUtils.js";
 import { createTreeWidgetTestingViewport } from "../../TreeUtils.js";
 import {
-  createAccessAndCache,
+  createAccessAndIdsProvider,
   createCategoryHierarchyNode,
   createClassGroupingHierarchyNode,
   createElementHierarchyNode,
@@ -47,7 +47,7 @@ import { validateNodeVisibility } from "./VisibilityValidation.js";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { Props } from "@itwin/presentation-shared";
-import type { ModelsTreeIdsCache } from "../../../../tree-widget-react/trees/models-tree/internal/ModelsTreeIdsCache.js";
+import type { ModelsTreeIdsProvider } from "../../../../tree-widget-react/trees/models-tree/internal/ModelsTreeIdsProvider.js";
 import type { RequiredModelsTreeHierarchyConfiguration } from "../../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
 import type { createIModelAccess, IModelAccess } from "../../Common.js";
 
@@ -87,7 +87,7 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     function createProvider(props: {
-      idsCache: ModelsTreeIdsCache;
+      idsProvider: ModelsTreeIdsProvider;
       imodelAccess: ReturnType<typeof createIModelAccess>;
       hierarchyConfig: RequiredModelsTreeHierarchyConfiguration;
       searchPaths?: HierarchySearchTree[];
@@ -102,19 +102,19 @@ describe("ModelsTreeVisibilityHandler", () => {
       imodelConnection,
       searchPaths,
       imodelAccess,
-      idsCache,
+      idsProvider,
     }: {
       imodelConnection: IModelConnection;
       searchPaths: HierarchySearchTree[];
       imodelAccess: IModelAccess;
-      idsCache: ModelsTreeIdsCache;
+      idsProvider: ModelsTreeIdsProvider;
     }) {
       const hierarchyConfig = mergeWithDefaults({ defaults: defaultHierarchyConfiguration, overrides: { subjects: { root: "exclude" } } });
       const viewport = createTreeWidgetTestingViewport({ iModel: imodelConnection, viewType: "3d", visibleByDefault: undefined });
-      const visibilityHandlerWithSearchPaths = createModelsTreeVisibilityHandler({ idsCache, imodelAccess, searchPaths, viewport });
-      const defaultVisibilityHandler = createModelsTreeVisibilityHandler({ idsCache, imodelAccess, viewport });
-      const defaultProvider = createProvider({ idsCache, imodelAccess, hierarchyConfig });
-      const providerWithSearchPaths = createProvider({ idsCache, imodelAccess, hierarchyConfig, searchPaths });
+      const visibilityHandlerWithSearchPaths = createModelsTreeVisibilityHandler({ idsProvider, imodelAccess, searchPaths, viewport });
+      const defaultVisibilityHandler = createModelsTreeVisibilityHandler({ idsProvider, imodelAccess, viewport });
+      const defaultProvider = createProvider({ idsProvider, imodelAccess, hierarchyConfig });
+      const providerWithSearchPaths = createProvider({ idsProvider, imodelAccess, hierarchyConfig, searchPaths });
       return {
         defaultVisibilityHandler,
         defaultProvider,
@@ -132,8 +132,8 @@ describe("ModelsTreeVisibilityHandler", () => {
 
     describe("single path to element", () => {
       it("showing category changes visibility for nodes in search paths", async () => {
-        const { imodelConnection, searchPaths, keys, imodelAccess, idsCache } = datasets.simple;
-        using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, searchPaths, imodelAccess, idsCache });
+        const { imodelConnection, searchPaths, keys, imodelAccess, idsProvider } = datasets.simple;
+        using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, searchPaths, imodelAccess, idsProvider });
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
 
         viewport.setNeverDrawn({ elementIds: new Set([keys.parentElement.id, keys.searchTargetChildElement.id, keys.childElement.id]) });
@@ -173,8 +173,8 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       it("showing element changes visibility for nodes in search paths", async () => {
-        const { imodelConnection, searchPaths, keys, imodelAccess, idsCache } = datasets.simple;
-        using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, searchPaths, imodelAccess, idsCache });
+        const { imodelConnection, searchPaths, keys, imodelAccess, idsProvider } = datasets.simple;
+        using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, searchPaths, imodelAccess, idsProvider });
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const node = createElementHierarchyNode({
           elementId: keys.parentElement.id,
@@ -209,8 +209,8 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       it("showing class grouping node changes visibility for nodes in search paths", async () => {
-        const { imodelConnection, searchPaths, keys, imodelAccess, idsCache } = datasets.simple;
-        using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, searchPaths, imodelAccess, idsCache });
+        const { imodelConnection, searchPaths, keys, imodelAccess, idsProvider } = datasets.simple;
+        using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, searchPaths, imodelAccess, idsProvider });
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const node = createClassGroupingHierarchyNode({
           elements: [keys.parentElement.id],
@@ -245,8 +245,8 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       it("hiding category changes visibility for nodes in search paths", async () => {
-        const { imodelConnection, searchPaths, keys, imodelAccess, idsCache } = datasets.simple;
-        using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, searchPaths, imodelAccess, idsCache });
+        const { imodelConnection, searchPaths, keys, imodelAccess, idsProvider } = datasets.simple;
+        using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, searchPaths, imodelAccess, idsProvider });
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         viewport.changeModelDisplay({ modelIds: keys.model.id, display: true });
         viewport.setAlwaysDrawn({ elementIds: new Set([keys.parentElement.id, keys.searchTargetChildElement.id, keys.childElement.id]) });
@@ -286,8 +286,8 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       it("hiding element changes visibility for nodes in search paths", async () => {
-        const { imodelConnection, searchPaths, keys, imodelAccess, idsCache } = datasets.simple;
-        using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, searchPaths, imodelAccess, idsCache });
+        const { imodelConnection, searchPaths, keys, imodelAccess, idsProvider } = datasets.simple;
+        using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, searchPaths, imodelAccess, idsProvider });
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
 
         viewport.changeModelDisplay({ modelIds: keys.model.id, display: true });
@@ -329,8 +329,8 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       it("hiding class grouping node changes visibility for nodes in search paths", async () => {
-        const { imodelConnection, searchPaths, keys, imodelAccess, idsCache } = datasets.simple;
-        using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, searchPaths, imodelAccess, idsCache });
+        const { imodelConnection, searchPaths, keys, imodelAccess, idsProvider } = datasets.simple;
+        using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, searchPaths, imodelAccess, idsProvider });
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
 
         viewport.changeModelDisplay({ modelIds: keys.model.id, display: true });
@@ -394,7 +394,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         using visibilityTestData = createFilteredVisibilityTestData({
           imodelConnection,
           searchPaths,
-          ...createAccessAndCache({ imodelConnection, hierarchyConfig: { subjects: { root: "exclude" } } }),
+          ...createAccessAndIdsProvider({ imodelConnection, hierarchyConfig: { subjects: { root: "exclude" } } }),
         });
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const node = createModelHierarchyNode({
@@ -432,8 +432,8 @@ describe("ModelsTreeVisibilityHandler", () => {
 
     describe("path to elements in different categories", () => {
       it("showing model node changes visibility for nodes in search paths", async () => {
-        const { imodelConnection, searchPaths, keys, imodelAccess, idsCache } = datasets.differentCategories;
-        using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, searchPaths, imodelAccess, idsCache });
+        const { imodelConnection, searchPaths, keys, imodelAccess, idsProvider } = datasets.differentCategories;
+        using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, searchPaths, imodelAccess, idsProvider });
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
 
         const node = createModelHierarchyNode({
@@ -478,8 +478,8 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       it("showing category node changes visibility for related nodes in search paths", async () => {
-        const { imodelConnection, searchPaths, keys, imodelAccess, idsCache } = datasets.differentCategories;
-        using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, searchPaths, imodelAccess, idsCache });
+        const { imodelConnection, searchPaths, keys, imodelAccess, idsProvider } = datasets.differentCategories;
+        using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, searchPaths, imodelAccess, idsProvider });
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
 
         const node = createCategoryHierarchyNode({
@@ -537,8 +537,8 @@ describe("ModelsTreeVisibilityHandler", () => {
 
     describe("multiple paths to a category and element under it", () => {
       it("showing model node changes visibility for related nodes in search paths", async () => {
-        const { imodelConnection, searchPaths, keys, imodelAccess, idsCache } = datasets.multiplePaths;
-        using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, searchPaths, imodelAccess, idsCache });
+        const { imodelConnection, searchPaths, keys, imodelAccess, idsProvider } = datasets.multiplePaths;
+        using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, searchPaths, imodelAccess, idsProvider });
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
 
         const node = createSubjectHierarchyNode({ ids: keys.parentSubject.id });
@@ -560,8 +560,8 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       it("showing category node changes visibility for related nodes in search paths", async () => {
-        const { imodelConnection, searchPaths, keys, imodelAccess, idsCache } = datasets.multiplePaths;
-        using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, searchPaths, imodelAccess, idsCache });
+        const { imodelConnection, searchPaths, keys, imodelAccess, idsProvider } = datasets.multiplePaths;
+        using visibilityTestData = createFilteredVisibilityTestData({ imodelConnection, searchPaths, imodelAccess, idsProvider });
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
 
         const node = createCategoryHierarchyNode({
@@ -660,7 +660,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       using visibilityTestData = createFilteredVisibilityTestData({
         imodelConnection,
         searchPaths,
-        ...createAccessAndCache({ imodelConnection, hierarchyConfig: { subjects: { root: "exclude" } } }),
+        ...createAccessAndIdsProvider({ imodelConnection, hierarchyConfig: { subjects: { root: "exclude" } } }),
       });
       const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
 
@@ -701,11 +701,11 @@ describe("ModelsTreeVisibilityHandler", () => {
     describe("path with intermediate categories", () => {
       let visibilityTestData: ReturnType<typeof createFilteredVisibilityTestData>;
       beforeEach(() => {
-        const { imodelConnection, searchPaths, idsCache, imodelAccess, keys } = datasets.intermediateCategories;
+        const { imodelConnection, searchPaths, idsProvider, imodelAccess, keys } = datasets.intermediateCategories;
         visibilityTestData = createFilteredVisibilityTestData({
           imodelConnection,
           searchPaths,
-          idsCache,
+          idsProvider,
           imodelAccess,
         });
         visibilityTestData.viewport.setNeverDrawn({
@@ -860,11 +860,11 @@ describe("ModelsTreeVisibilityHandler", () => {
       let visibilityTestData: ReturnType<typeof createFilteredVisibilityTestData>;
 
       beforeEach(() => {
-        const { idsCache, imodelAccess, imodelConnection, keys, searchPaths } = datasets.subModelIntermediateCategories;
+        const { idsProvider, imodelAccess, imodelConnection, keys, searchPaths } = datasets.subModelIntermediateCategories;
         visibilityTestData = createFilteredVisibilityTestData({
           imodelConnection,
           searchPaths,
-          idsCache,
+          idsProvider,
           imodelAccess,
         });
         visibilityTestData.viewport.setNeverDrawn({
@@ -1060,7 +1060,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         using visibilityTestData = createFilteredVisibilityTestData({
           imodelConnection: buildIModelResult.imodelConnection,
           searchPaths: buildIModelResult.searchPaths,
-          ...createAccessAndCache({ imodelConnection: buildIModelResult.imodelConnection, hierarchyConfig: { subjects: { root: "exclude" } } }),
+          ...createAccessAndIdsProvider({ imodelConnection: buildIModelResult.imodelConnection, hierarchyConfig: { subjects: { root: "exclude" } } }),
         });
         const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
         const keys = buildIModelResult;
@@ -1154,7 +1154,7 @@ async function createDatasets() {
           },
         ],
         keys,
-        ...createAccessAndCache({ imodelConnection, hierarchyConfig: { subjects: { root: "exclude" } } }),
+        ...createAccessAndIdsProvider({ imodelConnection, hierarchyConfig: { subjects: { root: "exclude" } } }),
       };
     })(),
     ["differentCategories"]: await (async () => {
@@ -1198,7 +1198,7 @@ async function createDatasets() {
         imodelConnection,
         searchPaths: searchPathsBuilder.getTree(),
         keys,
-        ...createAccessAndCache({ imodelConnection, hierarchyConfig: { subjects: { root: "exclude" } } }),
+        ...createAccessAndIdsProvider({ imodelConnection, hierarchyConfig: { subjects: { root: "exclude" } } }),
       };
     })(),
     ["multiplePaths"]: await (async () => {
@@ -1242,7 +1242,7 @@ async function createDatasets() {
         imodelConnection,
         searchPaths: searchPathsBuilder.getTree(),
         keys,
-        ...createAccessAndCache({ imodelConnection, hierarchyConfig: { subjects: { root: "exclude" } } }),
+        ...createAccessAndIdsProvider({ imodelConnection, hierarchyConfig: { subjects: { root: "exclude" } } }),
       };
     })(),
     ["intermediateCategories"]: await (async () => {
@@ -1280,7 +1280,7 @@ async function createDatasets() {
           },
         ],
         keys,
-        ...createAccessAndCache({ imodelConnection, hierarchyConfig: { subjects: { root: "exclude" } } }),
+        ...createAccessAndIdsProvider({ imodelConnection, hierarchyConfig: { subjects: { root: "exclude" } } }),
       };
     })(),
     ["subModelIntermediateCategories"]: await (async () => {
@@ -1330,7 +1330,7 @@ async function createDatasets() {
           },
         ],
         keys,
-        ...createAccessAndCache({ imodelConnection, hierarchyConfig: { subjects: { root: "exclude" } } }),
+        ...createAccessAndIdsProvider({ imodelConnection, hierarchyConfig: { subjects: { root: "exclude" } } }),
       };
     })(),
   };

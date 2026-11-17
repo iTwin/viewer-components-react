@@ -6,7 +6,6 @@
 import { defer, filter, forkJoin, map, mergeMap, of, reduce, shareReplay } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
-import { BaseIdsCacheImpl } from "../../../shared/internal/caches/BaseIdsCache.js";
 import {
   CLASS_NAME_Element,
   CLASS_NAME_GeometricModel3d,
@@ -14,24 +13,25 @@ import {
   CLASS_NAME_Subject,
 } from "../../../shared/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../../shared/internal/hooks/UseErrorState.js";
+import { SharedIdsProviderImpl } from "../../../shared/internal/idsProviders/SharedIdsProvider.js";
 import { createWhereClause, getOrCreate } from "../../../shared/internal/Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
-import type { BaseIdsCacheImplProps } from "../../../shared/internal/caches/BaseIdsCache.js";
+import type { SharedIdsProviderImplProps } from "../../../shared/internal/idsProviders/SharedIdsProvider.js";
 import type { ModelId, SubjectId } from "../../../shared/internal/Types.js";
 import type { RequiredModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
 
 /**
- * Hierarchy config props needed for ids cache.
+ * Hierarchy config props needed for ids provider.
  */
-type HierarchyConfigForModelsCache = Pick<RequiredModelsTreeHierarchyConfiguration, "elements" | "subjects" | "models">;
+type HierarchyConfigForModelsTreeIdsProvider = Pick<RequiredModelsTreeHierarchyConfiguration, "elements" | "subjects" | "models">;
 
-interface ModelsTreeIdsCacheProps extends BaseIdsCacheImplProps {
+interface ModelsTreeIdsProviderProps extends SharedIdsProviderImplProps {
   queryExecutor: LimitingECSqlQueryExecutor;
-  hierarchyConfig: HierarchyConfigForModelsCache;
+  hierarchyConfig: HierarchyConfigForModelsTreeIdsProvider;
 }
 
 interface SubjectInfo {
@@ -42,22 +42,22 @@ interface SubjectInfo {
 }
 
 /** @internal */
-export class ModelsTreeIdsCache extends BaseIdsCacheImpl {
+export class ModelsTreeIdsProvider extends SharedIdsProviderImpl {
   #subjectInfos: Observable<Map<SubjectId, SubjectInfo>> | undefined;
   #upToModelInstanceKeyPaths: Map<ModelId, Observable<HierarchyNodeIdentifiersPath>> = new Map();
   #parentSubjectIds: Observable<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   #queryExecutor: LimitingECSqlQueryExecutor;
-  #hierarchyConfig: HierarchyConfigForModelsCache;
+  #hierarchyConfig: HierarchyConfigForModelsTreeIdsProvider;
   #componentId: GuidString;
   #componentName: string;
 
-  constructor(props: ModelsTreeIdsCacheProps) {
+  constructor(props: ModelsTreeIdsProviderProps) {
     super(props);
     this.#queryExecutor = props.queryExecutor;
     this.#hierarchyConfig = props.hierarchyConfig;
 
     this.#componentId = Guid.createValue();
-    this.#componentName = "ModelsTreeIdsCache";
+    this.#componentName = "ModelsTreeIdsProvider";
   }
 
   private querySubjects(): Observable<{ id: SubjectId; parentId?: SubjectId; targetPartitionId?: ModelId; hideInHierarchy: boolean }> {
