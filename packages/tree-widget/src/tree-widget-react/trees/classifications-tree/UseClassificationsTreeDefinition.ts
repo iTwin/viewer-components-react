@@ -9,7 +9,7 @@ import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js
 import { useTelemetryContext } from "../../shared/contexts/TelemetryContext.js";
 import { createIModelAccess } from "../../shared/internal/hooks/UseIModelAccess.js";
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
-import { getClassificationsTreeIdsProvider } from "./UseClassificationsTree.js";
+import { getClassificationsTreeIdsProviders } from "./UseClassificationsTree.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { createIModelHierarchyProvider, HierarchyDefinition } from "@itwin/presentation-hierarchies";
@@ -90,13 +90,13 @@ export function useClassificationsTreeDefinitionInternal(
     return imodels.map((imodel) => {
       return {
         imodelAccess: createIModelAccess({ imodel, hierarchyLevelSizeLimit: 1000 }),
-        idsProvider: getClassificationsTreeIdsProvider({
+        idsProvider: getClassificationsTreeIdsProviders({
           getSharedIdsProvider,
           getIdsProvider,
           imodel,
           hierarchyConfig,
           visibilityHandlerConfig,
-        }),
+        }).idsProvider,
       };
     });
   }, [imodels, getSharedIdsProvider, getIdsProvider, hierarchyConfig, visibilityHandlerConfig]);
@@ -105,7 +105,7 @@ export function useClassificationsTreeDefinitionInternal(
     (definitionProps: { imodelAccess: IModelAccess }) => {
       return new ClassificationsTreeDefinition({
         imodelAccess: definitionProps.imodelAccess,
-        getIdsProvider: (imodelKey: string) => imodelsWithIdsProviders.find(({ imodelAccess }) => imodelAccess.imodelKey === imodelKey)!.idsProvider,
+        idsProvider: imodelsWithIdsProviders.find(({ imodelAccess }) => imodelAccess.imodelKey === definitionProps.imodelAccess.imodelKey)!.idsProvider,
         hierarchyConfig,
       });
     },

@@ -11,15 +11,15 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { CLASS_NAME_DefinitionModel } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
-import { SharedIdsProvider } from "../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
-import { getClassesByView, mergeWithDefaults } from "../../../tree-widget-react/shared/internal/Utils.js";
+import { CLASS_NAMES } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { createSharedIdsProvider } from "../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
+import { getClassesByPerspective, mergeWithDefaults } from "../../../tree-widget-react/shared/internal/Utils.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "../../../tree-widget-react/trees/categories-tree/CategoriesTreeDefinition.js";
-import { CategoriesTreeIdsProvider } from "../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsProvider.js";
+import { createCategoriesTreeIdsProvider } from "../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsProvider.js";
 import { buildIModel, insertGeometricModelWithPartition, TestSchema } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
-import { createAccessAndIdsProvider, getInsertFunctionByViewType } from "./internal/Utils.js";
+import { createAccessAndIdsProvider, getInsertFunctionByPerspective } from "./internal/Utils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
@@ -48,9 +48,10 @@ describe("Categories tree", () => {
       await terminateCore();
     });
 
-    ["2d" as const, "3d" as const].forEach((viewType) => {
-      describe(`${viewType} view`, () => {
-        const { insertCategory, insertElement, insertElementsModel, insertElementsSubModel, insertModeledElement } = getInsertFunctionByViewType(viewType);
+    ["2d" as const, "3d" as const].forEach((perspective) => {
+      describe(`${perspective} perspective`, () => {
+        const { insertCategory, insertElement, insertElementsModel, insertElementsSubModel, insertModeledElement } =
+          getInsertFunctionByPerspective(perspective);
         it("excludes private and template model content with and without preloaded caches", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
@@ -58,21 +59,21 @@ describe("Categories tree", () => {
               const category = insertCategory({ txn, codeValue: "shared category" });
               const element = insertElement({ txn, modelId: model.id, categoryId: category.id });
 
-              const templateModel = insertGeometricModelWithPartition({ txn, codeValue: "template model", viewType, isTemplate: true });
+              const templateModel = insertGeometricModelWithPartition({ txn, codeValue: "template model", perspective, isTemplate: true });
               insertElement({ txn, modelId: templateModel.id, categoryId: category.id });
               const templateModelCategory = insertCategory({ txn, codeValue: "template model category" });
               insertElement({ txn, modelId: templateModel.id, categoryId: templateModelCategory.id });
               const templateModelContainer = insertDefinitionContainer({ txn, codeValue: "template model container" });
-              const templateDefinitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: templateModelContainer.id });
+              const templateDefinitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: templateModelContainer.id });
               const templateContainedCategory = insertCategory({ txn, codeValue: "contained category", modelId: templateDefinitionModel.id });
               insertElement({ txn, modelId: templateModel.id, categoryId: templateContainedCategory.id });
 
-              const privateModel = insertGeometricModelWithPartition({ txn, codeValue: "private model", viewType, isPrivate: true });
+              const privateModel = insertGeometricModelWithPartition({ txn, codeValue: "private model", perspective, isPrivate: true });
               insertElement({ txn, modelId: privateModel.id, categoryId: category.id });
               const privateModelCategory = insertCategory({ txn, codeValue: "private model category" });
               insertElement({ txn, modelId: privateModel.id, categoryId: privateModelCategory.id });
               const privateModelContainer = insertDefinitionContainer({ txn, codeValue: "private model container" });
-              const privateDefinitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: privateModelContainer.id });
+              const privateDefinitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: privateModelContainer.id });
               const privateContainedCategory = insertCategory({ txn, codeValue: "contained category", modelId: privateDefinitionModel.id });
               insertElement({ txn, modelId: privateModel.id, categoryId: privateContainedCategory.id });
               return { category, element };
@@ -80,18 +81,18 @@ describe("Categories tree", () => {
           );
           const { imodelConnection, ...keys } = buildIModelResult;
           for (const preloadCache of [false, true]) {
-            const { imodelAccess, idsProvider } = createAccessAndIdsProvider({ imodelConnection, viewType });
+            const { imodelAccess, idsProvider, sharedIdsProvider } = createAccessAndIdsProvider({ imodelConnection, perspective });
             if (preloadCache) {
-              await idsProvider.preloadElementModelCategories();
+              await sharedIdsProvider.models.preloadData();
               await idsProvider.preloadDefinitionContainers();
             }
-            expect(idsProvider.elementModelCategoriesLoaded()).toBe(preloadCache);
-            expect(idsProvider.isDataLoaded).toBe(preloadCache);
+            expect(sharedIdsProvider.models.state === "loaded").toBe(preloadCache);
+            expect(idsProvider.state === "loaded").toBe(preloadCache);
             using provider = createIModelHierarchyProvider({
               imodelAccess,
               hierarchyDefinition: new CategoriesTreeDefinition({
                 imodelAccess,
-                viewType,
+                perspective,
                 idsProvider,
                 hierarchyConfig: mergeWithDefaults({
                   defaults: defaultHierarchyConfiguration,
@@ -108,7 +109,7 @@ describe("Categories tree", () => {
                   children: [
                     NodeValidators.createForClassGroupingNode({
                       className: keys.element.className,
-                      label: viewType === "3d" ? "Physical Object" : "Drawing Graphic",
+                      label: perspective === "3d" ? "Physical Object" : "Drawing Graphic",
                       children: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.element], supportsFiltering: true, children: false })],
                     }),
                   ],
@@ -134,7 +135,7 @@ describe("Categories tree", () => {
           );
 
           const { imodelConnection, ...keys } = buildIModelResult;
-          using provider = createCategoryTreeProvider(imodelConnection, viewType);
+          using provider = createCategoryTreeProvider(imodelConnection, perspective);
 
           await validateHierarchy({
             provider,
@@ -153,7 +154,7 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-              insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
 
               const category = insertCategory({ txn, codeValue: "cat" });
 
@@ -164,7 +165,7 @@ describe("Categories tree", () => {
           );
 
           const { imodelConnection, ...keys } = buildIModelResult;
-          using provider = createCategoryTreeProvider(imodelConnection, viewType);
+          using provider = createCategoryTreeProvider(imodelConnection, perspective);
 
           await validateHierarchy({
             provider,
@@ -183,14 +184,14 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
               const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "child dc", modelId: definitionModel.id });
-              insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+              insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainerChild.id });
             }),
           );
 
           const { imodelConnection } = buildIModelResult;
-          using provider = createCategoryTreeProvider(imodelConnection, viewType);
+          using provider = createCategoryTreeProvider(imodelConnection, perspective);
 
           await validateHierarchy({
             provider,
@@ -203,7 +204,7 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
 
               const category = insertCategory({ txn, codeValue: "cat", modelId: definitionModel.id, isPrivate: true });
 
@@ -212,7 +213,7 @@ describe("Categories tree", () => {
           );
 
           const { imodelConnection } = buildIModelResult;
-          using provider = createCategoryTreeProvider(imodelConnection, viewType);
+          using provider = createCategoryTreeProvider(imodelConnection, perspective);
 
           await validateHierarchy({
             provider,
@@ -225,7 +226,7 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
 
               insertCategory({ txn, codeValue: "cat1", modelId: definitionModel.id });
               const category = insertCategory({ txn, codeValue: "cat" });
@@ -236,7 +237,7 @@ describe("Categories tree", () => {
           );
 
           const { imodelConnection, ...keys } = buildIModelResult;
-          using provider = createCategoryTreeProvider(imodelConnection, viewType);
+          using provider = createCategoryTreeProvider(imodelConnection, perspective);
 
           await validateHierarchy({
             provider,
@@ -255,7 +256,7 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
 
               const emptyCategory = insertCategory({ txn, codeValue: "cat1", modelId: definitionModel.id });
               const category = insertCategory({ txn, codeValue: "cat" });
@@ -266,7 +267,7 @@ describe("Categories tree", () => {
           );
 
           const { imodelConnection, ...keys } = buildIModelResult;
-          using provider = createCategoryTreeProvider(imodelConnection, viewType, { categories: { withoutElements: "include" } });
+          using provider = createCategoryTreeProvider(imodelConnection, perspective, { categories: { withoutElements: "include" } });
 
           await validateHierarchy({
             provider,
@@ -295,7 +296,7 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc", isPrivate: true });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
 
               const category = insertCategory({ txn, codeValue: "cat", modelId: definitionModel.id });
 
@@ -304,7 +305,7 @@ describe("Categories tree", () => {
           );
 
           const { imodelConnection } = buildIModelResult;
-          using provider = createCategoryTreeProvider(imodelConnection, viewType);
+          using provider = createCategoryTreeProvider(imodelConnection, perspective);
 
           await validateHierarchy({
             provider,
@@ -317,14 +318,14 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
               const definitionContainerChild = insertDefinitionContainer({
                 txn,
                 codeValue: "child dc",
                 isPrivate: true,
                 modelId: definitionModel.id,
               });
-              const definitionModelChild = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+              const definitionModelChild = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainerChild.id });
 
               const category = insertCategory({ txn, codeValue: "cat", modelId: definitionModelChild.id });
 
@@ -333,7 +334,7 @@ describe("Categories tree", () => {
           );
 
           const { imodelConnection } = buildIModelResult;
-          using provider = createCategoryTreeProvider(imodelConnection, viewType);
+          using provider = createCategoryTreeProvider(imodelConnection, perspective);
 
           await validateHierarchy({
             provider,
@@ -346,7 +347,7 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
 
               const category = insertCategory({ txn, codeValue: "cat", modelId: definitionModel.id });
 
@@ -357,7 +358,7 @@ describe("Categories tree", () => {
           );
 
           const { imodelConnection, ...keys } = buildIModelResult;
-          using provider = createCategoryTreeProvider(imodelConnection, viewType);
+          using provider = createCategoryTreeProvider(imodelConnection, perspective);
 
           await validateHierarchy({
             provider,
@@ -382,7 +383,7 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
               const category1 = insertCategory({ txn, codeValue: "cat1", modelId: definitionModel.id });
               const category2 = insertCategory({ txn, codeValue: "cat2", modelId: definitionModel.id });
 
@@ -395,7 +396,7 @@ describe("Categories tree", () => {
           );
 
           const { imodelConnection, ...keys } = buildIModelResult;
-          using provider = createCategoryTreeProvider(imodelConnection, viewType);
+          using provider = createCategoryTreeProvider(imodelConnection, perspective);
 
           await validateHierarchy({
             provider,
@@ -423,11 +424,11 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const rootDefinitionContainer = insertDefinitionContainer({ txn, codeValue: "root dc" });
-              const rootDefinitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: rootDefinitionContainer.id });
+              const rootDefinitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: rootDefinitionContainer.id });
               const definitionContainer1 = insertDefinitionContainer({ txn, codeValue: "dc1", modelId: rootDefinitionModel.id });
               const definitionContainer2 = insertDefinitionContainer({ txn, codeValue: "dc2", modelId: rootDefinitionModel.id });
-              const definitionModel1 = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer1.id });
-              const definitionModel2 = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer2.id });
+              const definitionModel1 = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer1.id });
+              const definitionModel2 = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer2.id });
               const category1 = insertCategory({ txn, codeValue: "cat1", modelId: definitionModel1.id });
               const category2 = insertCategory({ txn, codeValue: "cat2", modelId: definitionModel2.id });
 
@@ -439,7 +440,7 @@ describe("Categories tree", () => {
           );
 
           const { imodelConnection, ...keys } = buildIModelResult;
-          using provider = createCategoryTreeProvider(imodelConnection, viewType);
+          using provider = createCategoryTreeProvider(imodelConnection, perspective);
 
           await validateHierarchy({
             provider,
@@ -466,7 +467,7 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
 
               const category = insertCategory({ txn, codeValue: "cat", modelId: definitionModel.id });
 
@@ -477,7 +478,7 @@ describe("Categories tree", () => {
           );
 
           const { imodelConnection, ...keys } = buildIModelResult;
-          using provider = createCategoryTreeProvider(imodelConnection, viewType, { elements: { nodes: "include" } });
+          using provider = createCategoryTreeProvider(imodelConnection, perspective, { elements: { nodes: "include" } });
 
           await validateHierarchy({
             provider,
@@ -512,7 +513,7 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
 
               const category = insertCategory({ txn, codeValue: "cat", modelId: definitionModel.id });
 
@@ -524,7 +525,7 @@ describe("Categories tree", () => {
           );
 
           const { imodelConnection, ...keys } = buildIModelResult;
-          using provider = createCategoryTreeProvider(imodelConnection, viewType, { elements: { nodes: "include" } });
+          using provider = createCategoryTreeProvider(imodelConnection, perspective, { elements: { nodes: "include" } });
 
           await validateHierarchy({
             provider,
@@ -567,7 +568,7 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
 
               const category = insertCategory({ txn, codeValue: "cat", modelId: definitionModel.id });
 
@@ -579,7 +580,7 @@ describe("Categories tree", () => {
           );
 
           const { imodelConnection, ...keys } = buildIModelResult;
-          using provider = createCategoryTreeProvider(imodelConnection, viewType, { elements: { nodes: "include" }, subCategories: { nodes: "exclude" } });
+          using provider = createCategoryTreeProvider(imodelConnection, perspective, { elements: { nodes: "include" }, subCategories: { nodes: "exclude" } });
 
           await validateHierarchy({
             provider,
@@ -614,9 +615,9 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
               const definitionContainerChild = insertDefinitionContainer({ txn, codeValue: "child dc", modelId: definitionModel.id });
-              const definitionModelChild = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+              const definitionModelChild = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainerChild.id });
 
               const category = insertCategory({ txn, codeValue: "cat", modelId: definitionModelChild.id });
 
@@ -627,7 +628,7 @@ describe("Categories tree", () => {
           );
 
           const { imodelConnection, ...keys } = buildIModelResult;
-          using provider = createCategoryTreeProvider(imodelConnection, viewType);
+          using provider = createCategoryTreeProvider(imodelConnection, perspective);
 
           await validateHierarchy({
             provider,
@@ -658,7 +659,7 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
 
               const category = insertCategory({ txn, codeValue: "cat" });
               const childCategory = insertCategory({ txn, codeValue: "ScChild", modelId: definitionModel.id });
@@ -671,7 +672,7 @@ describe("Categories tree", () => {
           );
 
           const { imodelConnection, ...keys } = buildIModelResult;
-          using provider = createCategoryTreeProvider(imodelConnection, viewType);
+          using provider = createCategoryTreeProvider(imodelConnection, perspective);
 
           await validateHierarchy({
             provider,
@@ -712,7 +713,7 @@ describe("Categories tree", () => {
           );
 
           const { imodelConnection, ...keys } = buildIModelResult;
-          using provider = createCategoryTreeProvider(imodelConnection, viewType);
+          using provider = createCategoryTreeProvider(imodelConnection, perspective);
 
           await validateHierarchy({
             provider,
@@ -754,7 +755,7 @@ describe("Categories tree", () => {
             );
 
             const { imodelConnection, ...keys } = buildIModelResult;
-            using provider = createCategoryTreeProvider(imodelConnection, viewType, { elements: { nodes: "include" } });
+            using provider = createCategoryTreeProvider(imodelConnection, perspective, { elements: { nodes: "include" } });
 
             await validateHierarchy({
               provider,
@@ -806,7 +807,7 @@ describe("Categories tree", () => {
             );
 
             const { imodelConnection, ...keys } = buildIModelResult;
-            using provider = createCategoryTreeProvider(imodelConnection, viewType, { elements: { nodes: "include" } });
+            using provider = createCategoryTreeProvider(imodelConnection, perspective, { elements: { nodes: "include" } });
 
             await validateHierarchy({
               provider,
@@ -869,7 +870,7 @@ describe("Categories tree", () => {
             );
 
             const { imodelConnection, ...keys } = buildIModelResult;
-            using provider = createCategoryTreeProvider(imodelConnection, viewType, { elements: { nodes: "include" } });
+            using provider = createCategoryTreeProvider(imodelConnection, perspective, { elements: { nodes: "include" } });
 
             await validateHierarchy({
               provider,
@@ -926,7 +927,7 @@ describe("Categories tree", () => {
             );
 
             const { imodelConnection, ...keys } = buildIModelResult;
-            using provider = createCategoryTreeProvider(imodelConnection, viewType, { elements: { nodes: "include" } });
+            using provider = createCategoryTreeProvider(imodelConnection, perspective, { elements: { nodes: "include" } });
 
             await validateHierarchy({
               provider,
@@ -994,7 +995,7 @@ describe("Categories tree", () => {
             );
 
             const { imodelConnection, ...keys } = buildIModelResult;
-            using provider = createCategoryTreeProvider(imodelConnection, viewType, { elements: { nodes: "include" } });
+            using provider = createCategoryTreeProvider(imodelConnection, perspective, { elements: { nodes: "include" } });
 
             await validateHierarchy({
               provider,
@@ -1053,9 +1054,9 @@ describe("Categories tree", () => {
         });
 
         describe("elements.excludedClasses", () => {
-          const elementClassName: EC.FullClassNameDotNotation = viewType === "3d" ? "Generic.PhysicalObject" : "BisCore.DrawingGraphic";
-          const modeledElementClassName: EC.FullClassNameDotNotation = `${TestSchema.Name}.${viewType === "3d" ? TestSchema.ModeledElement3dClassName : TestSchema.ModeledElement2dClassName}`;
-          const unrelatedElementClassName: EC.FullClassNameDotNotation = viewType === "3d" ? "BisCore.GeometricElement2d" : "BisCore.GeometricElement3d";
+          const elementClassName: EC.FullClassNameDotNotation = perspective === "3d" ? "Generic.PhysicalObject" : "BisCore.DrawingGraphic";
+          const modeledElementClassName: EC.FullClassNameDotNotation = `${TestSchema.Name}.${perspective === "3d" ? TestSchema.ModeledElement3dClassName : TestSchema.ModeledElement2dClassName}`;
+          const unrelatedElementClassName: EC.FullClassNameDotNotation = perspective === "3d" ? "BisCore.GeometricElement2d" : "BisCore.GeometricElement3d";
           const subModeledElementBaseClassName: EC.FullClassNameDotNotation = "BisCore.ISubModeledElement";
           it("does not filter out elements when they don't belong to any of the excluded classes", async () => {
             await using buildIModelResult = await buildIModel(async (imodel) =>
@@ -1068,7 +1069,7 @@ describe("Categories tree", () => {
             );
 
             const { imodelConnection, ...keys } = buildIModelResult;
-            using provider = createCategoryTreeProvider(imodelConnection, viewType, {
+            using provider = createCategoryTreeProvider(imodelConnection, perspective, {
               elements: { nodes: "include", excludedClasses: [unrelatedElementClassName] },
             });
 
@@ -1110,7 +1111,7 @@ describe("Categories tree", () => {
               );
 
               const { imodelConnection, ...keys } = buildIModelResult;
-              using provider = createCategoryTreeProvider(imodelConnection, viewType, {
+              using provider = createCategoryTreeProvider(imodelConnection, perspective, {
                 elements: { nodes: "include", excludedClasses: [modeledElementClassName] },
               });
 
@@ -1151,7 +1152,7 @@ describe("Categories tree", () => {
               );
 
               const { imodelConnection, ...keys } = buildIModelResult;
-              using provider = createCategoryTreeProvider(imodelConnection, viewType, {
+              using provider = createCategoryTreeProvider(imodelConnection, perspective, {
                 elements: { nodes: "include", excludedClasses: [subModeledElementBaseClassName] },
               });
 
@@ -1180,7 +1181,7 @@ describe("Categories tree", () => {
               await using buildIModelResult = await buildIModel(async (imodel) =>
                 withEditTxn(imodel, (txn) => {
                   const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-                  const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+                  const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
                   const elementsModel = insertElementsModel({ txn, codeValue: "m" });
                   const category = insertCategory({ txn, codeValue: "cat", modelId: definitionModel.id });
                   insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
@@ -1189,7 +1190,7 @@ describe("Categories tree", () => {
               );
 
               const { imodelConnection, ...keys } = buildIModelResult;
-              using provider = createCategoryTreeProvider(imodelConnection, viewType, {
+              using provider = createCategoryTreeProvider(imodelConnection, perspective, {
                 elements: { nodes: "include", excludedClasses: [elementClassName] },
               });
 
@@ -1230,7 +1231,7 @@ describe("Categories tree", () => {
               );
 
               const { imodelConnection, ...keys } = buildIModelResult;
-              using provider = createCategoryTreeProvider(imodelConnection, viewType, {
+              using provider = createCategoryTreeProvider(imodelConnection, perspective, {
                 elements: { nodes: "include", excludedClasses: [modeledElementClassName] },
               });
 
@@ -1286,7 +1287,7 @@ describe("Categories tree", () => {
               );
 
               const { imodelConnection, ...keys } = buildIModelResult;
-              using provider = createCategoryTreeProvider(imodelConnection, viewType, {
+              using provider = createCategoryTreeProvider(imodelConnection, perspective, {
                 elements: { nodes: "include", excludedClasses: [modeledElementClassName] },
               });
 
@@ -1358,7 +1359,7 @@ describe("Categories tree", () => {
               );
 
               const { imodelConnection, ...keys } = buildIModelResult;
-              using provider = createCategoryTreeProvider(imodelConnection, viewType, {
+              using provider = createCategoryTreeProvider(imodelConnection, perspective, {
                 elements: { nodes: "include", excludedClasses: [elementClassName] },
               });
 
@@ -1418,7 +1419,7 @@ describe("Categories tree", () => {
               );
 
               const { imodelConnection, ...keys } = buildIModelResult;
-              using provider = createCategoryTreeProvider(imodelConnection, viewType, {
+              using provider = createCategoryTreeProvider(imodelConnection, perspective, {
                 elements: { nodes: "include", excludedClasses: [elementClassName] },
               });
 
@@ -1498,16 +1499,12 @@ describe("Categories tree", () => {
           ].forEach(({ queryIdentifier, description }) => {
             it(`doesn't throw on ecsql query interrupt in ${description}`, async () => {
               const imodelAccess = createIModelAccess(imodelConnection);
-              const sharedIdsProvider = new SharedIdsProvider({
-                queryExecutor: imodelAccess,
-                elementClassName: getClassesByView(viewType).elementClass,
-                type: viewType,
-              });
-              const idsProvider = new CategoriesTreeIdsProvider({ queryExecutor: imodelAccess, type: viewType, sharedIdsProvider });
+              const sharedIdsProvider = createSharedIdsProvider({ imodelAccess, elementClassName: getClassesByPerspective(perspective).elementClass });
+              const idsProvider = createCategoriesTreeIdsProvider({ imodelAccess, perspective, sharedIdsProvider });
               const iter = CategoriesTreeDefinition.createInstanceKeyPaths({
                 imodelAccess,
                 idsProvider,
-                viewType,
+                perspective,
                 hierarchyConfig: {
                   subCategories: { nodes: "include" },
                   categories: { withoutElements: "include" },
@@ -1539,28 +1536,22 @@ describe("Categories tree", () => {
 
 function createCategoryTreeProvider(
   imodelConnection: IModelConnection,
-  viewType: "2d" | "3d",
+  perspective: "2d" | "3d",
   hierarchyConfig?: CategoriesTreeHierarchyConfiguration,
 ): HierarchyProvider & Disposable {
   const imodelAccess = createIModelAccess(imodelConnection);
   const excludedElementClassNames = hierarchyConfig?.elements?.nodes === "include" ? hierarchyConfig.elements.excludedClasses : undefined;
-  const sharedIdsProvider = new SharedIdsProvider({
-    queryExecutor: imodelAccess,
-    elementClassName: getClassesByView(viewType).elementClass,
-    type: viewType,
+  const sharedIdsProvider = createSharedIdsProvider({
+    imodelAccess,
+    elementClassName: getClassesByPerspective(perspective).elementClass,
     excludedElementClassNames,
   });
-  const idsProvider = new CategoriesTreeIdsProvider({
-    queryExecutor: imodelAccess,
-    type: viewType,
-    sharedIdsProvider,
-    excludedElementClassNames,
-  });
+  const idsProvider = createCategoriesTreeIdsProvider({ imodelAccess, perspective, sharedIdsProvider });
   const hierarchyProvider = createIModelHierarchyProvider({
     imodelAccess,
     hierarchyDefinition: new CategoriesTreeDefinition({
       imodelAccess,
-      viewType,
+      perspective,
       idsProvider,
       hierarchyConfig: mergeWithDefaults({ defaults: defaultHierarchyConfiguration, overrides: hierarchyConfig }),
     }),

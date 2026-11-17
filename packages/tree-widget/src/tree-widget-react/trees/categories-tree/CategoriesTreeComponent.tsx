@@ -9,7 +9,7 @@ import { Skeleton } from "@mui/material";
 import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
 import { TelemetryContextProvider } from "../../shared/contexts/TelemetryContext.js";
 import { useActiveTreeWidgetViewport } from "../../shared/internal/hooks/UseActiveTreeWidgetViewport.js";
-import { getClassesByView } from "../../shared/internal/Utils.js";
+import { getClassesByPerspective } from "../../shared/internal/Utils.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { CategoriesTree } from "./CategoriesTree.js";
 import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonProps } from "./CategoriesTreeButtons.js";
@@ -117,10 +117,10 @@ function CategoriesTreeComponentImpl({
 }: CategoriesTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
   const { buttonProps, onCategoriesFiltered } = useCategoriesTreeButtonProps({ viewport });
   const { getSharedIdsProvider } = useSharedTreeContext();
-  const viewType = viewport.viewType === "2d" ? "2d" : "3d";
+  const perspective = viewport.viewType === "2d" ? "2d" : "3d";
   const isLoaded =
     buttonProps.categories.length > 0 ||
-    getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType }).elementModelCategoriesLoaded();
+    getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByPerspective(perspective).elementClass }).models.state === "loaded";
 
   const buttons: ReactNode = isLoaded
     ? headerButtons

@@ -27,7 +27,7 @@ import {
   toArray,
 } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
-import { fromWithRelease, releaseMainThreadOnItemsCount, subscribeAll } from "../Rxjs.js";
+import { fromWithRelease, releaseMainThreadOnItemsCount, subscribeAll, toObservable } from "../Rxjs.js";
 import { createVisibilityStatus } from "../Tooltip.js";
 import { countInSet, getId64Spreadable, getOrCreate, ParentElementsPath, setDifference } from "../Utils.js";
 import { changeElementStateNoChildrenOperator, getCategoryVisibilityFromAlwaysAndNeverDrawnElementsImpl, mergeVisibilityStatuses } from "../VisibilityUtils.js";
@@ -42,7 +42,7 @@ import type {
   AlwaysAndNeverDrawnElementsAccessor,
   ElementPathSegment,
 } from "../idsProviders/AlwaysAndNeverDrawnElementInfoProvider.js";
-import type { SharedIdsProviderImpl } from "../idsProviders/SharedIdsProvider.js";
+import type { SharedIdsProvider } from "../idsProviders/SharedIdsProvider.js";
 import type { NonPartialVisibilityStatus } from "../Tooltip.js";
 import type { CategoryId, ElementId, ModelId } from "../Types.js";
 
@@ -86,7 +86,7 @@ export interface BaseVisibilityHelperProps {
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfoProvider;
   overrideHandler?: HierarchyVisibilityOverrideHandler;
   overrides?: BaseTreeVisibilityHandlerOverrides;
-  sharedIdsProvider: SharedIdsProviderImpl;
+  sharedIdsProvider: SharedIdsProvider;
 }
 
 type SetType = "always" | "never";
@@ -140,10 +140,10 @@ export class BaseVisibilityHelper implements Disposable {
    * - Clears never drawn list;
    * - Removes all per-model category overrides. */
   public removeAlwaysDrawnExclusive(): Observable<void> {
-    return from(this.#props.sharedIdsProvider.getAllCategoriesOfElements()).pipe(
+    return toObservable(this.#props.sharedIdsProvider.categories.getAllCategoriesOfElements()).pipe(
       map((categories) => {
         if (categories.size) {
-          this.#props.viewport.changeCategoryDisplay({ categoryIds: categories, display: false, enableAllSubCategories: false });
+          this.#props.viewport.changeCategoryDisplay({ categoryIds: [...categories], display: false, enableAllSubCategories: false });
         }
         this.#props.viewport.clearNeverDrawn();
         this.#props.viewport.clearPerModelCategoryOverrides();
@@ -167,7 +167,7 @@ export class BaseVisibilityHelper implements Disposable {
       }
       const { modelIds } = props;
       return merge(
-        this.#props.sharedIdsProvider.getSubModels({ modelIds: Id64.toIdSet(modelIds) }).pipe(
+        this.#props.sharedIdsProvider.subModeledElements.getSubModels({ modelIds: Id64.toIdSet(modelIds) }).pipe(
           toArray(),
           mergeMap((subModels) => this.getModelsVisibilityStatus({ modelIds: subModels })),
         ),
@@ -179,7 +179,7 @@ export class BaseVisibilityHelper implements Disposable {
             }
             // For visible models we need to check all categories.
             // Only need to take top-most categories, they take into account all descendants.
-            return this.#props.sharedIdsProvider.getCategories({ modelId, includeOnlyIfCategoryOfTopMostElement: true }).pipe(
+            return this.#props.sharedIdsProvider.categories.getCategoriesOfElements({ modelId, includeOnlyIfCategoryOfTopMostElement: true }).pipe(
               mergeMap((categories) => {
                 if (categories.size === 0) {
                   return EMPTY;
@@ -273,7 +273,7 @@ export class BaseVisibilityHelper implements Disposable {
         ? EMPTY
         : fromWithRelease({ source: categoryIds, releaseOnCount: 100 }).pipe(
             mergeMap((categoryId) =>
-              this.#props.sharedIdsProvider
+              this.#props.sharedIdsProvider.subCategories
                 .getSubCategories({ categoryId })
                 .pipe(mergeMap((subCategoryIds) => this.getSubCategoriesVisibilityStatus({ categoryId, subCategoryIds }))),
             ),
@@ -281,21 +281,19 @@ export class BaseVisibilityHelper implements Disposable {
 
       const categoryModelsObservable = fromWithRelease({ source: categoryIds, releaseOnCount: 100 }).pipe(
         mergeMap((categoryId) =>
-          this.#props.sharedIdsProvider
-            .getModels({ categoryId, excludeSubModels: true, includeOnlyTopMostElementCategory: true })
-            .pipe(map((modelId) => ({ modelId, categoryId }))),
+          this.#props.sharedIdsProvider.models.getCategoryTopMostElementModels({ categoryId }).pipe(map((modelId) => ({ modelId, categoryId }))),
         ),
         shareReplay({ refCount: true }),
       );
 
       const categorySubModelsVisibilityStatus = categoryModelsObservable.pipe(
         mergeMap(({ modelId, categoryId }) =>
-          this.#props.sharedIdsProvider.hasSubModels({ modelId }).pipe(
+          this.#props.sharedIdsProvider.subModeledElements.hasSubModels({ modelId }).pipe(
             mergeMap((hasSubModels) => {
               if (!hasSubModels) {
                 return EMPTY;
               }
-              return this.#props.sharedIdsProvider.getSubModels({
+              return this.#props.sharedIdsProvider.subModeledElements.getSubModels({
                 modelIds: new Set([modelId]),
                 categoryIds: new Set([categoryId]),
                 parentElementsPath: [],
@@ -384,10 +382,12 @@ export class BaseVisibilityHelper implements Disposable {
         )
       : of(createVisibilityStatus("hidden"));
 
-    const subModelsVisibilityStatus = this.#props.sharedIdsProvider.getSubModels({ modelIds: new Set([modelId]), categoryIds, parentElementsPath }).pipe(
-      toArray(),
-      mergeMap((subModels) => this.getModelsVisibilityStatus({ modelIds: subModels })),
-    );
+    const subModelsVisibilityStatus = this.#props.sharedIdsProvider.subModeledElements
+      .getSubModels({ modelIds: new Set([modelId]), categoryIds, parentElementsPath })
+      .pipe(
+        toArray(),
+        mergeMap((subModels) => this.getModelsVisibilityStatus({ modelIds: subModels })),
+      );
 
     return merge(modelVisibilityStatus, subModelsVisibilityStatus).pipe(mergeVisibilityStatuses());
   }
@@ -435,13 +435,13 @@ export class BaseVisibilityHelper implements Disposable {
         return elementsOwnStatus;
       }
 
-      const subModelsVisibilityStatus = this.#props.sharedIdsProvider.hasSubModels({ modelId }).pipe(
+      const subModelsVisibilityStatus = this.#props.sharedIdsProvider.subModeledElements.hasSubModels({ modelId }).pipe(
         mergeMap((hasSubModels) => {
           if (!hasSubModels) {
             return EMPTY;
           }
           return fromWithRelease({ source: elementIds, releaseOnCount: 100 }).pipe(
-            mergeMap((elementId) => (computeOnlyOwnStatus?.(elementId) ? EMPTY : this.#props.sharedIdsProvider.getSubModels({ elementId }))),
+            mergeMap((elementId) => (computeOnlyOwnStatus?.(elementId) ? EMPTY : this.#props.sharedIdsProvider.subModeledElements.getSubModels({ elementId }))),
             toArray(),
             mergeMap((subModelsUnderElement) => this.getModelsVisibilityStatus({ modelIds: subModelsUnderElement })),
           );
@@ -507,7 +507,7 @@ export class BaseVisibilityHelper implements Disposable {
     }
     const descendantsCounts = fromWithRelease({ source: elementIds, releaseOnCount: 500 }).pipe(
       mergeMap((elementId) =>
-        props.computeOnlyOwnStatus?.(elementId) ? EMPTY : this.#props.sharedIdsProvider.getDescendantsCounts({ parentElementId: elementId, modelId }),
+        props.computeOnlyOwnStatus?.(elementId) ? EMPTY : this.#props.sharedIdsProvider.elements.getDescendantsCounts({ parentElementId: elementId, modelId }),
       ),
     );
     return this.getVisibilityFromGroupedDescendants({
@@ -529,7 +529,7 @@ export class BaseVisibilityHelper implements Disposable {
     parentElementsPath: ParentElementsPath;
     getElementsAccessor: ElementsAccessor;
   }): Observable<VisibilityStatus> {
-    return this.#props.sharedIdsProvider.categoryHasParentElements({ categoryId: props.categoryId }).pipe(
+    return this.#props.sharedIdsProvider.categories.hasParentElements({ categoryId: props.categoryId }).pipe(
       mergeMap((hasParentElements) => {
         if (!hasParentElements) {
           const categoryVisibility = this.getVisibleModelCategoryDirectVisibilityStatus({ modelId: props.modelId, categoryId: props.categoryId });
@@ -544,7 +544,7 @@ export class BaseVisibilityHelper implements Disposable {
         const parentElementIds = props.parentElementsPath.length > 0 ? props.parentElementsPath[props.parentElementsPath.length - 1].elementIds : [undefined];
         const descendantsCountsObs = from(parentElementIds).pipe(
           mergeMap((parentElementId) =>
-            this.#props.sharedIdsProvider.getDescendantsCounts({ modelId: props.modelId, categoryId: props.categoryId, parentElementId }),
+            this.#props.sharedIdsProvider.elements.getDescendantsCounts({ modelId: props.modelId, categoryId: props.categoryId, parentElementId }),
           ),
           reduce((acc, counts) => {
             for (const { categoryId, count } of counts) {
@@ -660,7 +660,7 @@ export class BaseVisibilityHelper implements Disposable {
       this.#props.viewport.clearPerModelCategoryOverrides({ modelIds });
       if (!on) {
         this.#props.viewport.changeModelDisplay({ modelIds, display: false });
-        return this.#props.sharedIdsProvider.getSubModels({ modelIds: Id64.toIdSet(modelIds) }).pipe(
+        return this.#props.sharedIdsProvider.subModeledElements.getSubModels({ modelIds: Id64.toIdSet(modelIds) }).pipe(
           toArray(),
           mergeMap((subModels) => this.changeModelsVisibilityStatus({ modelIds: subModels, on })),
         );
@@ -670,7 +670,7 @@ export class BaseVisibilityHelper implements Disposable {
       return from(Id64.iterable(modelIds)).pipe(
         mergeMap((modelId) =>
           forkJoin({
-            categoryIds: this.#props.sharedIdsProvider.getCategories({ modelId, includeOnlyIfCategoryOfTopMostElement: true }),
+            categoryIds: this.#props.sharedIdsProvider.categories.getCategoriesOfElements({ modelId, includeOnlyIfCategoryOfTopMostElement: true }),
             modelId: of(modelId),
           }),
         ),
@@ -695,7 +695,7 @@ export class BaseVisibilityHelper implements Disposable {
     categoriesToNotOverride?: Id64Set;
   }): Observable<void> {
     return forkJoin({
-      allModelCategories: this.#props.sharedIdsProvider.getCategories({ modelId }),
+      allModelCategories: this.#props.sharedIdsProvider.categories.getCategoriesOfElements({ modelId }),
       modelAlwaysDrawnElements: this.#alwaysAndNeverDrawnElements
         .getAlwaysAndNeverDrawnElementsAccessor({ modelId, setType: "always", elementCategoryPath: [] })
         .pipe(map(({ getAlwaysOrNeverDrawnElements }) => getAlwaysOrNeverDrawnElements())),
@@ -767,9 +767,7 @@ export class BaseVisibilityHelper implements Disposable {
 
       const categoryModelsObs = fromWithRelease({ source: categoryIds, releaseOnCount: 500 }).pipe(
         mergeMap((categoryId) =>
-          this.#props.sharedIdsProvider
-            .getModels({ categoryId, excludeSubModels: true, includeOnlyTopMostElementCategory: true })
-            .pipe(map((modelId) => ({ modelId, categoryId }))),
+          this.#props.sharedIdsProvider.models.getCategoryTopMostElementModels({ categoryId }).pipe(map((modelId) => ({ modelId, categoryId }))),
         ),
         reduce((acc, { modelId, categoryId }) => {
           const entry = getOrCreate({ map: acc, key: modelId, createFunc: () => new Set<CategoryId>() });
@@ -782,13 +780,21 @@ export class BaseVisibilityHelper implements Disposable {
 
       const changeSubModelsObs = categoryModelsObs.pipe(
         mergeMap(([modelId, modelCategories]) =>
-          forkJoin({ modelId: of(modelId), modelCategories: of(modelCategories), hasSubModels: this.#props.sharedIdsProvider.hasSubModels({ modelId }) }),
+          forkJoin({
+            modelId: of(modelId),
+            modelCategories: of(modelCategories),
+            hasSubModels: this.#props.sharedIdsProvider.subModeledElements.hasSubModels({ modelId }),
+          }),
         ),
         mergeMap(({ modelId, modelCategories, hasSubModels }) => {
           if (!hasSubModels) {
             return EMPTY;
           }
-          return this.#props.sharedIdsProvider.getSubModels({ modelIds: new Set([modelId]), categoryIds: modelCategories, parentElementsPath: [] });
+          return this.#props.sharedIdsProvider.subModeledElements.getSubModels({
+            modelIds: new Set([modelId]),
+            categoryIds: modelCategories,
+            parentElementsPath: [],
+          });
         }),
         toArray(),
         mergeMap((subModels) => this.changeModelsVisibilityStatus({ modelIds: subModels, on })),
@@ -844,7 +850,7 @@ export class BaseVisibilityHelper implements Disposable {
 
       const changeSubCategoriesObs = on
         ? fromWithRelease({ source: categoryIds, releaseOnCount: 200 }).pipe(
-            mergeMap((categoryId) => this.#props.sharedIdsProvider.getSubCategories({ categoryId })),
+            mergeMap((categoryId) => this.#props.sharedIdsProvider.subCategories.getSubCategories({ categoryId })),
             mergeAll(),
             releaseMainThreadOnItemsCount(200),
             map((subCategoryId) => {
@@ -958,12 +964,16 @@ export class BaseVisibilityHelper implements Disposable {
         }),
       );
 
-    const changeSubModelsObs = this.#props.sharedIdsProvider.hasSubModels({ modelId }).pipe(
+    const changeSubModelsObs = this.#props.sharedIdsProvider.subModeledElements.hasSubModels({ modelId }).pipe(
       mergeMap((hasSubModels) => {
         if (!hasSubModels) {
           return EMPTY;
         }
-        return this.#props.sharedIdsProvider.getSubModels({ categoryIds: Id64.toIdSet(categoryIds), modelIds: new Set([modelId]), parentElementsPath });
+        return this.#props.sharedIdsProvider.subModeledElements.getSubModels({
+          categoryIds: Id64.toIdSet(categoryIds),
+          modelIds: new Set([modelId]),
+          parentElementsPath,
+        });
       }),
       toArray(),
       mergeMap((subModels) => this.changeModelsVisibilityStatus({ modelIds: subModels, on })),
@@ -1056,14 +1066,14 @@ export class BaseVisibilityHelper implements Disposable {
             );
           }),
         ),
-        this.#props.sharedIdsProvider.hasSubModels({ modelId }).pipe(
+        this.#props.sharedIdsProvider.subModeledElements.hasSubModels({ modelId }).pipe(
           mergeMap((hasSubModels) => {
             if (!hasSubModels) {
               return EMPTY;
             }
             return fromWithRelease({ source: elementIds, releaseOnCount: 100 });
           }),
-          mergeMap((elementId) => this.#props.sharedIdsProvider.getSubModels({ elementId })),
+          mergeMap((elementId) => this.#props.sharedIdsProvider.subModeledElements.getSubModels({ elementId })),
           toArray(),
           mergeMap((subModelsUnderElement) => {
             if (subModelsUnderElement.length > 0) {
@@ -1097,7 +1107,7 @@ export class BaseVisibilityHelper implements Disposable {
       getObservable: (elementId) =>
         props.ignoreDescendants?.(elementId)
           ? of([])
-          : this.#props.sharedIdsProvider.getDescendantsCounts({ parentElementId: elementId, modelId: props.modelId }),
+          : this.#props.sharedIdsProvider.elements.getDescendantsCounts({ parentElementId: elementId, modelId: props.modelId }),
     });
     return this.collectDescendantElementsToChange({
       source,
@@ -1120,12 +1130,12 @@ export class BaseVisibilityHelper implements Disposable {
     const source = subscribeAll({
       ids: props.categoryIds,
       getObservable: (categoryId) =>
-        this.#props.sharedIdsProvider.categoryHasParentElements({ categoryId }).pipe(
+        this.#props.sharedIdsProvider.categories.hasParentElements({ categoryId }).pipe(
           mergeMap((hasParentElements) => {
             if (!hasParentElements) {
               return of([]);
             }
-            return this.#props.sharedIdsProvider.getDescendantsCounts({ modelId: props.modelId, categoryId });
+            return this.#props.sharedIdsProvider.elements.getDescendantsCounts({ modelId: props.modelId, categoryId });
           }),
         ),
     });
@@ -1203,7 +1213,7 @@ export class BaseVisibilityHelper implements Disposable {
               : of(new Set<Id64String>()),
           notMatchingDesiredState: from(sourceWithNonMatchingCategories).pipe(
             mergeMap(({ sourceId, categoryIds }) =>
-              this.#props.sharedIdsProvider.getChildElements({
+              this.#props.sharedIdsProvider.elements.getChildElements({
                 modelId,
                 childCategoryIds: categoryIds,
                 ...getChildElementsScope(sourceId),

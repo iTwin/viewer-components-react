@@ -20,7 +20,7 @@ import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { CLASS_NAME_GeometricElement2d, CLASS_NAME_Subject } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { CLASS_NAMES } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
 import { buildIModel, TestSchema } from "../../IModelUtils.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 import { createModelsTreeProvider } from "./Utils.js";
@@ -52,7 +52,7 @@ describe("ModelsTreeDefinition", () => {
     it("includes models without elements when `models.withoutElements` is set to 'include'", async () => {
       await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
-          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const rootSubject: InstanceKey = { className: CLASS_NAMES.Subject, id: IModel.rootSubjectId };
           const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
           const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
           return { rootSubject, model };
@@ -75,7 +75,7 @@ describe("ModelsTreeDefinition", () => {
     it("does not group elements when `elements.classGrouping` is set to `disable`", async () => {
       await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
         withEditTxn(imodel, (txn) => {
-          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const rootSubject: InstanceKey = { className: CLASS_NAMES.Subject, id: IModel.rootSubjectId };
           const childSubject = insertSubject({ txn, codeValue: "child subject", parentId: rootSubject.id });
           const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: childSubject.id });
           const category = insertSpatialCategory({ txn, codeValue: "category" });
@@ -151,7 +151,7 @@ describe("ModelsTreeDefinition", () => {
     it("displays element count for grouping nodes when `elements.classGrouping` is set to `enable-with-counts`", async () => {
       await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
         withEditTxn(imodel, (txn) => {
-          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const rootSubject: InstanceKey = { className: CLASS_NAMES.Subject, id: IModel.rootSubjectId };
           const childSubject = insertSubject({ txn, codeValue: "child subject", parentId: rootSubject.id });
           const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: childSubject.id });
           const category = insertSpatialCategory({ txn, codeValue: "category" });
@@ -263,7 +263,7 @@ describe("ModelsTreeDefinition", () => {
     it("uses custom element class specification", async () => {
       await using buildIModelResult = await buildIModel(async (imodel, testSchema) =>
         withEditTxn(imodel, (txn) => {
-          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const rootSubject: InstanceKey = { className: CLASS_NAMES.Subject, id: IModel.rootSubjectId };
           const model = insertPhysicalModelWithPartition({ txn, codeValue: `model`, partitionParentId: rootSubject.id });
           const category = insertSpatialCategory({ txn, codeValue: "category" });
           const parentElement1 = insertPhysicalElement({
@@ -381,14 +381,14 @@ describe("ModelsTreeDefinition", () => {
     it("returns empty hierarchy when the iModel doesn't have any elements of `elements.baseClass` class", async () => {
       await using buildIModelResult = await buildIModel(async (imodel) =>
         withEditTxn(imodel, (txn) => {
-          const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+          const rootSubject: InstanceKey = { className: CLASS_NAMES.Subject, id: IModel.rootSubjectId };
           const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
           const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
           return { rootSubject, model };
         }),
       );
       const { imodelConnection } = buildIModelResult;
-      using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { elements: { baseClass: CLASS_NAME_GeometricElement2d } } });
+      using provider = createModelsTreeProvider({ imodelConnection, hierarchyConfig: { elements: { baseClass: CLASS_NAMES.GeometricElement2d } } });
       await validateHierarchy({
         provider,
         expect: [],
@@ -628,7 +628,7 @@ describe("ModelsTreeDefinition", () => {
             provider,
             expect: [
               NodeValidators.createForInstanceNode({
-                instanceKeys: [{ className: CLASS_NAME_Subject, id: IModel.rootSubjectId }],
+                instanceKeys: [{ className: CLASS_NAMES.Subject, id: IModel.rootSubjectId }],
                 supportsFiltering: true,
                 children: [
                   NodeValidators.createForInstanceNode({
@@ -699,7 +699,7 @@ describe("ModelsTreeDefinition", () => {
             provider,
             expect: [
               NodeValidators.createForInstanceNode({
-                instanceKeys: [{ className: CLASS_NAME_Subject, id: IModel.rootSubjectId }],
+                instanceKeys: [{ className: CLASS_NAMES.Subject, id: IModel.rootSubjectId }],
                 supportsFiltering: true,
                 children: [
                   NodeValidators.createForInstanceNode({

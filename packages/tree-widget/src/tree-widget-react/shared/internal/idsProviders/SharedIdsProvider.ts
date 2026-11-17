@@ -3,127 +3,169 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { EMPTY, filter, forkJoin, from, identity, map, mergeMap, of, reduce, shareReplay, tap } from "rxjs";
+import { EMPTY, forkJoin, from, map, mergeMap, of, reduce } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
-import { fromWithRelease, toVoidPromise } from "../Rxjs.js";
-import { ChildrenTree, getOrCreate } from "../Utils.js";
+import { createSharedIdsProvider as createTreeDefinitionsSharedIdsProvider } from "@itwin/presentation-tree-definitions";
+import { fromWithRelease, toObservable, toVoidPromise } from "../Rxjs.js";
+import { ChildrenTree, extendObject, getOrCreate } from "../Utils.js";
+import { CategoriesContainingParentElementsProvider } from "./CategoriesContainingParentElementsProvider.js";
 import { ChildElementsProvider } from "./ChildElementsProvider.js";
 import { DescendantsCountProvider } from "./DescendantsCountProvider.js";
-import { ElementModelCategoriesProvider } from "./ElementModelCategoriesProvider.js";
-import { SubCategoriesProvider } from "./SubCategoriesProvider.js";
-import { SubModeledElementsProvider } from "./SubModeledElementsProvider.js";
+import { loadSubModeledElements } from "./SubModeledElementsProvider.js";
 
 import type { Observable } from "rxjs";
-import type { GuidString, Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { EC, Props } from "@itwin/presentation-shared";
+import type { EC, ECSchemaProvider, Props, Subscribable } from "@itwin/presentation-shared";
+import type { SharedIdsProvider as TreeDefinitionsSharedIdsProvider } from "@itwin/presentation-tree-definitions";
 import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../Types.js";
 import type { ParentElementsPath } from "../Utils.js";
+import type { SubModeledElementsData } from "./SubModeledElementsProvider.js";
 
-/** @internal */
-export interface SharedIdsProviderProps {
-  queryExecutor: LimitingECSqlQueryExecutor;
-  elementClassName: EC.FullClassNameDotNotation;
-  type: "2d" | "3d";
-  excludedElementClassNames?: ReadonlyArray<EC.FullClassNameDotNotation>;
+type ElementModelCategoriesData = ReturnType<TreeDefinitionsSharedIdsProvider["models"]["getData"]> extends Subscribable<infer TData> ? TData : never;
+
+interface ModelCategories {
+  allCategories: Set<CategoryId>;
+  categoriesOfTopMostElements: Set<CategoryId>;
+}
+
+interface CategoriesOfElementsInfo {
+  modelCategories: Map<ModelId, ModelCategories>;
+  allCategoriesOfTopMostElements: Set<CategoryId>;
 }
 
 /** @internal */
-export class SharedIdsProvider {
-  #queryExecutor: LimitingECSqlQueryExecutor;
-  #componentId: GuidString;
-  readonly #descendantsCountProvider: DescendantsCountProvider;
-  readonly #childElementsProvider: ChildElementsProvider;
-  readonly #subCategoriesProvider: SubCategoriesProvider;
-  #elementClassName: EC.FullClassNameDotNotation;
-  #subModeledElementsProvider: Observable<SubModeledElementsProvider> | undefined;
-  #modeledElementsLoaded = false;
-  readonly #elementModelCategoriesProvider: ElementModelCategoriesProvider;
-  #categoryModelsInfoWithoutSubModels:
-    | Observable<
-        Map<
-          CategoryId,
-          {
-            id: ModelId;
-            categoryIsOfTopMostElement: boolean;
-            hasNonExcludedTopMostElements: boolean;
-          }[]
-        >
-      >
-    | undefined;
-  #subModelsWithNonExcludedElements: Observable<Set<ModelId>> | undefined;
-  #canHaveHiddenChildren: boolean;
+export interface SharedIdsProviderProps {
+  imodelAccess: ECSchemaProvider & LimitingECSqlQueryExecutor;
+  elementClassName: EC.FullClassNameDotNotation;
+  excludedElementClassNames?: ReadonlyArray<EC.FullClassNameDotNotation>;
+}
 
-  constructor(props: SharedIdsProviderProps) {
-    this.#queryExecutor = props.queryExecutor;
-    this.#elementClassName = props.elementClassName;
-    this.#componentId = Guid.createValue();
-    this.#descendantsCountProvider = new DescendantsCountProvider({
-      elementClassName: props.elementClassName,
-      componentId: this.#componentId,
-      queryExecutor: this.#queryExecutor,
-    });
-    this.#childElementsProvider = new ChildElementsProvider({
-      queryExecutor: this.#queryExecutor,
-      elementClassName: props.elementClassName,
-      componentId: this.#componentId,
-    });
-    this.#subCategoriesProvider = new SubCategoriesProvider({
-      queryExecutor: this.#queryExecutor,
-      componentId: this.#componentId,
-    });
-    this.#elementModelCategoriesProvider = new ElementModelCategoriesProvider({
-      queryExecutor: this.#queryExecutor,
-      componentId: this.#componentId,
-      elementClassName: props.elementClassName,
-      excludedElementClassNames: props.excludedElementClassNames,
-    });
-    this.#canHaveHiddenChildren = !!props.excludedElementClassNames?.length;
-  }
+type TreeDefinitionsSharedIdsProviderBase = TreeDefinitionsSharedIdsProvider<ElementModelCategoriesData, SubModeledElementsData>;
 
-  private getModeledElementsInfo(): ReturnType<SubModeledElementsProvider["getModeledElementsInfo"]> {
-    this.#subModeledElementsProvider ??= this.getAllModels().pipe(
-      map(
-        (allModels) =>
-          new SubModeledElementsProvider({
-            queryExecutor: this.#queryExecutor,
-            componentId: this.#componentId,
-            elementClassName: this.#elementClassName,
-            nonEmptyModelIds: allModels,
-          }),
-      ),
-      shareReplay(),
-    );
-    return this.#subModeledElementsProvider.pipe(
-      mergeMap((subModeledElementsProvider) => subModeledElementsProvider.getModeledElementsInfo()),
-      tap(() => {
-        this.#modeledElementsLoaded = true;
+/**
+ * Provides model, category, sub-category and element IDs shared by tree specific ids providers and visibility handlers.
+ *
+ * Extends `@itwin/presentation-tree-definitions` shared ids provider with additional data required by tree widget.
+ * @internal
+ */
+export interface SharedIdsProvider extends TreeDefinitionsSharedIdsProviderBase {
+  readonly models: TreeDefinitionsSharedIdsProviderBase["models"] & {
+    /** Starts loading model and category data, if it's not loaded yet. */
+    preloadData(): Promise<void>;
+    /** Emits a stream of models (excluding sub-models) that contain top-most elements of the specified category. */
+    getCategoryTopMostElementModels(props: { categoryId: Id64String }): Observable<ModelId>;
+  };
+  readonly subModeledElements: TreeDefinitionsSharedIdsProviderBase["subModeledElements"] & {
+    /** Starts loading sub-modeled elements data, if it's not loaded yet. */
+    preloadData(): Promise<void>;
+    /** Returns whether the specified model contains sub-modeled elements. */
+    hasSubModels(props: { modelId: Id64String }): Observable<boolean>;
+    /** Returns sub-models of the specified element, models and/or categories. */
+    getSubModels(
+      props:
+        | { elementId: Id64String }
+        | { modelIds: Id64Set; categoryIds?: undefined }
+        | { categoryIds: Id64Set; modelIds?: undefined }
+        | { modelIds: Id64Set; categoryIds: Id64Set; parentElementsPath: ParentElementsPath },
+    ): Observable<Id64String>;
+  };
+  readonly categories: TreeDefinitionsSharedIdsProviderBase["categories"] & {
+    /** Returns categories of elements in the specified model, including categories of elements of excluded classes. */
+    getCategoriesOfElements(props: { modelId: Id64String; includeOnlyIfCategoryOfTopMostElement?: boolean }): Observable<Id64Set>;
+    /** Returns whether the specified category contains elements that have child elements. */
+    hasParentElements(props: { categoryId: Id64String }): Observable<boolean>;
+    /** Returns categories of top-most elements, including categories of elements of excluded classes. */
+    getAllCategoriesOfTopMostElements(): Observable<ReadonlySet<CategoryId>>;
+  };
+  readonly subCategories: TreeDefinitionsSharedIdsProviderBase["subCategories"] & {
+    /** Returns sub-categories of the specified category. */
+    getSubCategories(props: { categoryId: Id64String }): Observable<Array<SubCategoryId>>;
+  };
+  /** Element lookups. */
+  readonly elements: {
+    /** Returns whether elements may have children that are of excluded classes. */
+    canHaveHiddenChildren(): boolean;
+    getDescendantsCounts(props: Props<DescendantsCountProvider["getDescendantsCounts"]>): ReturnType<DescendantsCountProvider["getDescendantsCounts"]>;
+    getChildElements(props: Props<ChildElementsProvider["getChildElements"]>): ReturnType<ChildElementsProvider["getChildElements"]>;
+  };
+}
+
+/**
+ * Creates `SharedIdsProvider`. Data is loaded, cached and tracked by `@itwin/presentation-tree-definitions` shared ids provider.
+ * @internal
+ */
+export function createSharedIdsProvider(props: SharedIdsProviderProps): SharedIdsProvider {
+  const { imodelAccess, elementClassName, excludedElementClassNames } = props;
+  const componentId = Guid.createValue();
+  const descendantsCountProvider = new DescendantsCountProvider({ elementClassName, componentId, queryExecutor: imodelAccess });
+  const childElementsProvider = new ChildElementsProvider({ elementClassName, componentId, queryExecutor: imodelAccess });
+  const categoriesContainingParentElementsProvider = new CategoriesContainingParentElementsProvider({
+    elementClassName,
+    componentId,
+    queryExecutor: imodelAccess,
+  });
+
+  const treeDefinitionsSharedIdsProvider: TreeDefinitionsSharedIdsProviderBase = createTreeDefinitionsSharedIdsProvider({
+    imodelAccess,
+    elementClassName,
+    excludedElementClassNames,
+    loadDataOverrides: {
+      loadSubModeledElements: () =>
+        loadSubModeledElements({
+          queryExecutor: imodelAccess,
+          componentId,
+          elementClassName,
+          getNonEmptyModelIds: () => toObservable(treeDefinitionsSharedIdsProvider.models.getAllModels()),
+        }),
+    },
+  });
+  const { models, subModeledElements, categories, subCategories } = treeDefinitionsSharedIdsProvider;
+
+  const getElementModelCategories = () => toObservable(models.getData());
+  const getModeledElementsInfo = () => toObservable(subModeledElements.getData());
+
+  // Keyed by data object, so that subscribers still go through (batched) `models.getData()`, but the mapping is computed only once.
+  const categoriesOfElementsInfoCache = new WeakMap<ElementModelCategoriesData, CategoriesOfElementsInfo>();
+  function getCategoriesOfElementsInfo(): Observable<CategoriesOfElementsInfo> {
+    return getElementModelCategories().pipe(
+      map((data) => {
+        let categoriesOfElementsInfo = categoriesOfElementsInfoCache.get(data);
+        if (!categoriesOfElementsInfo) {
+          categoriesOfElementsInfo = createCategoriesOfElementsInfo(data.categoryModelsInfo);
+          categoriesOfElementsInfoCache.set(data, categoriesOfElementsInfo);
+        }
+        return categoriesOfElementsInfo;
       }),
     );
   }
 
-  // Implement methods using each provider
-
-  public async preloadModeledElements(): Promise<void> {
-    if (this.#subModeledElementsProvider !== undefined) {
-      return;
-    }
-    try {
-      await toVoidPromise(this.getModeledElementsInfo());
-    } catch {}
+  function getCategoriesOfElements({
+    modelId,
+    includeOnlyIfCategoryOfTopMostElement,
+  }: {
+    modelId: Id64String;
+    includeOnlyIfCategoryOfTopMostElement?: boolean;
+  }): Observable<Id64Set> {
+    return getCategoriesOfElementsInfo().pipe(
+      map(({ modelCategories }) => {
+        const entry = modelCategories.get(modelId);
+        return (includeOnlyIfCategoryOfTopMostElement ? entry?.categoriesOfTopMostElements : entry?.allCategories) ?? new Set();
+      }),
+    );
   }
 
-  public async preloadElementModelCategories(): Promise<void> {
-    if (this.#elementModelCategoriesProvider.cachedDataDefined()) {
-      return;
-    }
-    try {
-      await toVoidPromise(this.#elementModelCategoriesProvider.getCachedData());
-    } catch {}
+  function getCategoryTopMostElementModels({ categoryId }: { categoryId: Id64String }): Observable<ModelId> {
+    return toObservable(subModeledElements.getAllSubModeledElements()).pipe(
+      mergeMap((excludedSubModels) => toObservable(models.getModels({ categoryId, excludedSubModels, includeOnlyTopMostElementCategory: true }))),
+    );
   }
 
-  // SubModeledElementsProvider methods
-  public getCategoryModeledElements({
+  function hasSubModels({ modelId }: { modelId: Id64String }): Observable<boolean> {
+    return getModeledElementsInfo().pipe(map(({ subModelsTree }) => subModelsTree.has(modelId)));
+  }
+
+  function getCategoryModeledElements({
     modelIds,
     categoryIds,
     parentElementsPath,
@@ -132,7 +174,7 @@ export class SharedIdsProvider {
     categoryIds: Id64Set;
     parentElementsPath: ParentElementsPath;
   }): Observable<Id64String> {
-    return this.getModeledElementsInfo().pipe(
+    return getModeledElementsInfo().pipe(
       mergeMap(({ subModelsTree }) => {
         const accumulator = new Array<ElementId>();
         const childrenTreeAsArray = new Array<Set<ElementId | CategoryId | ModelId>>();
@@ -166,73 +208,35 @@ export class SharedIdsProvider {
     );
   }
 
-  public hasSubModels({ modelId }: { modelId: Id64String }): Observable<boolean> {
-    return this.getModeledElementsInfo().pipe(map(({ subModelsTree }) => subModelsTree.has(modelId)));
-  }
-
-  public getAllSubModels(props?: { excludeIfOnlyExcludedClasses?: boolean }): Observable<Id64Set> {
-    if (!props?.excludeIfOnlyExcludedClasses) {
-      return this.getModeledElementsInfo().pipe(map(({ allSubModels }) => allSubModels));
-    }
-    this.#subModelsWithNonExcludedElements ??= this.getModeledElementsInfo().pipe(
-      mergeMap(({ allSubModels }) => {
-        if (allSubModels.size === 0) {
-          return of(allSubModels);
-        }
-        return this.#elementModelCategoriesProvider.getCachedData().pipe(
-          map(({ modelsCategoriesInfo }) => {
-            const result = new Set<ElementId>();
-            for (const subModelId of allSubModels) {
-              const modelInfo = modelsCategoriesInfo.get(subModelId);
-              if (modelInfo && modelInfo.nonExcludedCategories.size > 0) {
-                result.add(subModelId);
-              }
-            }
-            return result;
-          }),
-        );
-      }),
-      shareReplay(),
-    );
-    return this.#subModelsWithNonExcludedElements;
-  }
-
-  public getSubModels(
-    props:
-      | { elementId: Id64String }
-      | { modelIds: Id64Set; categoryIds?: undefined }
-      | { categoryIds: Id64Set; modelIds?: undefined }
-      | { modelIds: Id64Set; categoryIds: Id64Set; parentElementsPath: ParentElementsPath },
-  ): Observable<Id64String> {
-    if ("elementId" in props) {
-      return this.getModeledElementsInfo().pipe(
+  function getSubModels(functionProps: Parameters<SharedIdsProvider["subModeledElements"]["getSubModels"]>[0]): Observable<Id64String> {
+    if ("elementId" in functionProps) {
+      return getModeledElementsInfo().pipe(
         mergeMap(({ allSubModels, childSubModels }) => {
-          if (allSubModels.has(props.elementId)) {
+          if (allSubModels.has(functionProps.elementId)) {
             // If element is a sub-model, it can not be a parent.
-            return of(props.elementId);
+            return of(functionProps.elementId);
           }
-          // Convert sub-models set into array.
           // When element does not contain sub-model, return empty array.
-          return childSubModels.get(props.elementId) ?? EMPTY;
+          return childSubModels.get(functionProps.elementId) ?? EMPTY;
         }),
       );
     }
-    if (props.modelIds) {
-      if (props.categoryIds) {
-        return this.getCategoryModeledElements({
-          modelIds: props.modelIds,
-          categoryIds: props.categoryIds,
-          parentElementsPath: props.parentElementsPath,
+    if (functionProps.modelIds) {
+      if (functionProps.categoryIds) {
+        return getCategoryModeledElements({
+          modelIds: functionProps.modelIds,
+          categoryIds: functionProps.categoryIds,
+          parentElementsPath: functionProps.parentElementsPath,
         });
       }
-      return from(props.modelIds).pipe(
+      return from(functionProps.modelIds).pipe(
         mergeMap((modelId) =>
-          this.hasSubModels({ modelId }).pipe(
+          hasSubModels({ modelId }).pipe(
             mergeMap((hasModeledElements) => {
               if (!hasModeledElements) {
                 return of([]);
               }
-              return this.getCategories({ modelId });
+              return getCategoriesOfElements({ modelId });
             }),
           ),
         ),
@@ -246,15 +250,15 @@ export class SharedIdsProvider {
           if (categoryIds.size === 0) {
             return EMPTY;
           }
-          return this.getCategoryModeledElements({ modelIds: props.modelIds, categoryIds, parentElementsPath: [] });
+          return getCategoryModeledElements({ modelIds: functionProps.modelIds, categoryIds, parentElementsPath: [] });
         }),
       );
     }
 
-    return fromWithRelease({ source: props.categoryIds, releaseOnCount: 100 }).pipe(
+    return fromWithRelease({ source: functionProps.categoryIds, releaseOnCount: 100 }).pipe(
       mergeMap((categoryId) =>
-        this.getModels({ categoryId, excludeSubModels: true, includeOnlyTopMostElementCategory: true }).pipe(
-          mergeMap((modelId) => forkJoin({ hasModeledElements: this.hasSubModels({ modelId }), modelId: of(modelId) })),
+        getCategoryTopMostElementModels({ categoryId }).pipe(
+          mergeMap((modelId) => forkJoin({ hasModeledElements: hasSubModels({ modelId }), modelId: of(modelId) })),
           reduce((acc, { hasModeledElements, modelId }) => {
             if (hasModeledElements) {
               acc.add(modelId);
@@ -265,279 +269,87 @@ export class SharedIdsProvider {
             if (modelIds.size === 0) {
               return EMPTY;
             }
-            return this.getCategoryModeledElements({ modelIds, categoryIds: new Set([categoryId]), parentElementsPath: [] });
+            return getCategoryModeledElements({ modelIds, categoryIds: new Set([categoryId]), parentElementsPath: [] });
           }),
         ),
       ),
     );
   }
 
-  // ElementModelCategoriesProvider methods
-
-  public elementModelCategoriesLoaded(): boolean {
-    return this.#elementModelCategoriesProvider.cachedDataLoaded();
-  }
-
-  public modeledElementsLoaded(): boolean {
-    return this.#modeledElementsLoaded;
-  }
-
-  public getAllModels(): Observable<Array<ModelId>> {
-    return this.#elementModelCategoriesProvider.getCachedData().pipe(map(({ modelsCategoriesInfo }) => [...modelsCategoriesInfo.keys()]));
-  }
-
-  public getPlanProjectionModels(): Observable<Id64Set> {
-    return this.#elementModelCategoriesProvider.getCachedData().pipe(
-      map(({ modelsCategoriesInfo }) => {
-        const result = new Set<ModelId>();
-        for (const [modelId, modelInfo] of modelsCategoriesInfo) {
-          if (modelInfo.isPlanProjectionModel) {
-            result.add(modelId);
-          }
-        }
-        return result;
+  return extendObject({
+    base: treeDefinitionsSharedIdsProvider,
+    extension: {
+      models: extendObject({
+        base: models,
+        extension: {
+          preloadData: async () => {
+            if (models.state !== "not-requested") {
+              return;
+            }
+            try {
+              await toVoidPromise(getElementModelCategories());
+            } catch {}
+          },
+          getCategoryTopMostElementModels,
+        },
       }),
-    );
-  }
-
-  public getCategories({
-    modelId,
-    includeOnlyIfCategoryOfTopMostElement,
-    excludeIfOnlyExcludedClasses,
-  }: {
-    modelId: Id64String;
-    includeOnlyIfCategoryOfTopMostElement?: boolean;
-    excludeIfOnlyExcludedClasses?: boolean;
-  }): Observable<Id64Set> {
-    return this.#elementModelCategoriesProvider.getCachedData().pipe(
-      map(({ modelsCategoriesInfo }) => {
-        const modelInfo = modelsCategoriesInfo.get(modelId);
-        if (excludeIfOnlyExcludedClasses) {
-          return (includeOnlyIfCategoryOfTopMostElement ? modelInfo?.categoriesOfTopMostNonExcludedElements : modelInfo?.nonExcludedCategories) ?? new Set();
-        }
-        return (includeOnlyIfCategoryOfTopMostElement ? modelInfo?.categoriesOfTopMostElements : modelInfo?.allCategories) ?? new Set();
+      subModeledElements: extendObject({
+        base: subModeledElements,
+        extension: {
+          preloadData: async () => {
+            if (subModeledElements.state !== "not-requested") {
+              return;
+            }
+            try {
+              await toVoidPromise(getModeledElementsInfo());
+            } catch {}
+          },
+          hasSubModels,
+          getSubModels,
+        },
       }),
-    );
-  }
+      categories: extendObject({
+        base: categories,
+        extension: {
+          getCategoriesOfElements,
+          getAllCategoriesOfTopMostElements: () =>
+            getCategoriesOfElementsInfo().pipe(map(({ allCategoriesOfTopMostElements }) => allCategoriesOfTopMostElements)),
+          hasParentElements: ({ categoryId }: { categoryId: Id64String }) =>
+            categoriesContainingParentElementsProvider.categoryHasParentElements({ categoryId }),
+        },
+      }),
+      subCategories: extendObject({
+        base: subCategories,
+        extension: {
+          getSubCategories: ({ categoryId }: { categoryId: Id64String }) =>
+            toObservable(subCategories.getData()).pipe(map(({ categorySubCategories }) => categorySubCategories.get(categoryId) ?? [])),
+        },
+      }),
+      elements: {
+        canHaveHiddenChildren: () => !!excludedElementClassNames?.length,
+        getDescendantsCounts: (descendantsCountProps: Props<DescendantsCountProvider["getDescendantsCounts"]>) =>
+          descendantsCountProvider.getDescendantsCounts(descendantsCountProps),
+        getChildElements: (childElementsProps: Props<ChildElementsProvider["getChildElements"]>) => childElementsProvider.getChildElements(childElementsProps),
+      },
+    },
+  });
+}
 
-  public getModelsContainingNonExcludedElements(): Observable<Id64Set> {
-    return this.#elementModelCategoriesProvider
-      .getCachedData()
-      .pipe(map(({ modelsContainingTopMostNonExcludedElements }) => modelsContainingTopMostNonExcludedElements));
-  }
-
-  public getCategoriesContainingNonExcludedElements(): Observable<Id64Set> {
-    return this.#elementModelCategoriesProvider
-      .getCachedData()
-      .pipe(map(({ categoriesContainingNonExcludedElements }) => categoriesContainingNonExcludedElements));
-  }
-
-  public getAllCategoriesOfElements(props?: { onlyTopMostElementCategories?: boolean }): Observable<Id64Set> {
-    return this.#elementModelCategoriesProvider
-      .getCachedData()
-      .pipe(map(({ allCategories, allTopMostElementCategories }) => (props?.onlyTopMostElementCategories ? allTopMostElementCategories : allCategories)));
-  }
-
-  private getCategoryModelsInfoWithoutSubModels(): Observable<
-    Map<CategoryId, { id: ModelId; categoryIsOfTopMostElement: boolean; hasNonExcludedTopMostElements: boolean }[]>
-  > {
-    this.#categoryModelsInfoWithoutSubModels ??= this.getAllSubModels().pipe(
-      mergeMap((allSubModels) =>
-        allSubModels.size === 0
-          ? this.#elementModelCategoriesProvider.getCachedData().pipe(map(({ categoryModelsInfo }) => categoryModelsInfo))
-          : this.#elementModelCategoriesProvider.getCachedData().pipe(
-              mergeMap(({ categoryModelsInfo }) => categoryModelsInfo.entries()),
-              reduce((acc, [key, modelInfos]) => {
-                const newModelInfos = modelInfos.filter(({ id }) => !allSubModels.has(id));
-                if (newModelInfos.length > 0) {
-                  acc.set(key, newModelInfos);
-                }
-                return acc;
-              }, new Map<CategoryId, { id: ModelId; categoryIsOfTopMostElement: boolean; hasNonExcludedTopMostElements: boolean }[]>()),
-            ),
-      ),
-      shareReplay(),
-    );
-    return this.#categoryModelsInfoWithoutSubModels;
-  }
-
-  public getModels({
-    categoryId,
-    excludeSubModels,
-    includeOnlyTopMostElementCategory,
-    excludeIfOnlyExcludedClasses,
-  }: {
-    categoryId: Id64String;
-    excludeSubModels?: boolean;
-    includeOnlyTopMostElementCategory?: boolean;
-    excludeIfOnlyExcludedClasses?: boolean;
-  }): Observable<ModelId> {
-    let getCategoryModelsInfo = () => this.#elementModelCategoriesProvider.getCachedData().pipe(map(({ categoryModelsInfo }) => categoryModelsInfo));
-
-    if (excludeSubModels) {
-      getCategoryModelsInfo = () => this.getCategoryModelsInfoWithoutSubModels();
+function createCategoriesOfElementsInfo(categoryModelsInfo: ElementModelCategoriesData["categoryModelsInfo"]): CategoriesOfElementsInfo {
+  const result: CategoriesOfElementsInfo = { modelCategories: new Map(), allCategoriesOfTopMostElements: new Set() };
+  for (const [categoryId, categoryModels] of categoryModelsInfo) {
+    for (const { id: modelId, categoryIsOfTopMostElement } of categoryModels) {
+      const entry = getOrCreate({
+        map: result.modelCategories,
+        key: modelId,
+        createFunc: (): ModelCategories => ({ allCategories: new Set(), categoriesOfTopMostElements: new Set() }),
+      });
+      entry.allCategories.add(categoryId);
+      if (categoryIsOfTopMostElement) {
+        entry.categoriesOfTopMostElements.add(categoryId);
+        result.allCategoriesOfTopMostElements.add(categoryId);
+      }
     }
-    return getCategoryModelsInfo().pipe(
-      mergeMap((categoryModelsInfo) => {
-        const categoryModels = categoryModelsInfo.get(categoryId);
-        if (!categoryModels) {
-          return EMPTY;
-        }
-        return from(categoryModels);
-      }),
-      includeOnlyTopMostElementCategory ? filter(({ categoryIsOfTopMostElement }) => categoryIsOfTopMostElement) : identity,
-      excludeIfOnlyExcludedClasses ? filter(({ hasNonExcludedTopMostElements }) => hasNonExcludedTopMostElements) : identity,
-      map(({ id }) => id),
-    );
   }
-
-  public categoryHasParentElements({ categoryId }: { categoryId: Id64String }): Observable<boolean> {
-    return this.#elementModelCategoriesProvider.getCachedData().pipe(map(({ categoriesWithParentElements }) => categoriesWithParentElements.has(categoryId)));
-  }
-
-  // DescendantsCountProvider methods
-
-  public getDescendantsCounts(props: Props<DescendantsCountProvider["getDescendantsCounts"]>): ReturnType<DescendantsCountProvider["getDescendantsCounts"]> {
-    return this.#descendantsCountProvider.getDescendantsCounts(props);
-  }
-
-  // ChildElementsProvider methods
-
-  public getChildElements(props: Props<ChildElementsProvider["getChildElements"]>): ReturnType<ChildElementsProvider["getChildElements"]> {
-    return this.#childElementsProvider.getChildElements(props);
-  }
-
-  // SubCategoriesProvider methods
-  public getSubCategories(props: { categoryId: Id64String }): Observable<Array<SubCategoryId>> {
-    return this.#subCategoriesProvider.getSubCategoriesInfo().pipe(map(({ categorySubCategories }) => categorySubCategories.get(props.categoryId) ?? []));
-  }
-
-  public getCategorySubCategoriesMap(): Observable<Map<CategoryId, SubCategoryId[]>> {
-    return this.#subCategoriesProvider.getSubCategoriesInfo().pipe(map(({ categorySubCategories }) => categorySubCategories));
-  }
-
-  public getSubCategoryCategories({
-    subCategoryIds,
-    checkForSubCategoriesSize,
-  }: {
-    subCategoryIds: Id64Arg;
-    checkForSubCategoriesSize: boolean;
-  }): Observable<Map<CategoryId, SubCategoryId[]>> {
-    return this.#subCategoriesProvider.getSubCategoriesInfo().pipe(
-      mergeMap(({ subCategoryCategories, categorySubCategories }) =>
-        fromWithRelease({ source: subCategoryIds, releaseOnCount: 500 }).pipe(
-          reduce((acc, subCategoryId) => {
-            const categoryId = subCategoryCategories.get(subCategoryId);
-            if (!checkForSubCategoriesSize || categoryId === undefined) {
-              return acc;
-            }
-            const subCategories = categorySubCategories.get(categoryId);
-            if (!subCategories || subCategories.length <= 1) {
-              return acc;
-            }
-            const entry = getOrCreate({ map: acc, key: categoryId, createFunc: () => new Array<SubCategoryId>() });
-            entry.push(subCategoryId);
-            return acc;
-          }, new Map<CategoryId, SubCategoryId[]>()),
-        ),
-      ),
-    );
-  }
-
-  public canHaveHiddenChildren(): boolean {
-    return this.#canHaveHiddenChildren;
-  }
-}
-
-/** @internal */
-export interface SharedIdsProviderImplProps {
-  sharedIdsProvider: SharedIdsProvider;
-}
-
-/** @internal */
-export class SharedIdsProviderImpl {
-  #sharedIdsProvider: SharedIdsProvider;
-  constructor(props: SharedIdsProviderImplProps) {
-    this.#sharedIdsProvider = props.sharedIdsProvider;
-  }
-
-  // Implement ISharedIdsProvider by re-exporting SharedIdsProvider methods
-
-  public async preloadModeledElements(): ReturnType<SharedIdsProvider["preloadModeledElements"]> {
-    return this.#sharedIdsProvider.preloadModeledElements();
-  }
-
-  public async preloadElementModelCategories(): ReturnType<SharedIdsProvider["preloadElementModelCategories"]> {
-    return this.#sharedIdsProvider.preloadElementModelCategories();
-  }
-
-  public getChildElements(props: Props<SharedIdsProvider["getChildElements"]>): ReturnType<SharedIdsProvider["getChildElements"]> {
-    return this.#sharedIdsProvider.getChildElements(props);
-  }
-
-  public elementModelCategoriesLoaded(): ReturnType<SharedIdsProvider["elementModelCategoriesLoaded"]> {
-    return this.#sharedIdsProvider.elementModelCategoriesLoaded();
-  }
-
-  public modeledElementsLoaded(): ReturnType<SharedIdsProvider["modeledElementsLoaded"]> {
-    return this.#sharedIdsProvider.modeledElementsLoaded();
-  }
-
-  public getSubCategories(props: Props<SharedIdsProvider["getSubCategories"]>): ReturnType<SharedIdsProvider["getSubCategories"]> {
-    return this.#sharedIdsProvider.getSubCategories(props);
-  }
-
-  public getSubCategoryCategories(props: Props<SharedIdsProvider["getSubCategoryCategories"]>): ReturnType<SharedIdsProvider["getSubCategoryCategories"]> {
-    return this.#sharedIdsProvider.getSubCategoryCategories(props);
-  }
-
-  public getSubModels(props: Props<SharedIdsProvider["getSubModels"]>): ReturnType<SharedIdsProvider["getSubModels"]> {
-    return this.#sharedIdsProvider.getSubModels(props);
-  }
-
-  public getAllSubModels(props?: Props<SharedIdsProvider["getAllSubModels"]>): ReturnType<SharedIdsProvider["getAllSubModels"]> {
-    return this.#sharedIdsProvider.getAllSubModels(props);
-  }
-
-  public getModelsContainingNonExcludedElements(): ReturnType<SharedIdsProvider["getModelsContainingNonExcludedElements"]> {
-    return this.#sharedIdsProvider.getModelsContainingNonExcludedElements();
-  }
-
-  public getCategoriesContainingNonExcludedElements(): ReturnType<SharedIdsProvider["getCategoriesContainingNonExcludedElements"]> {
-    return this.#sharedIdsProvider.getCategoriesContainingNonExcludedElements();
-  }
-
-  public hasSubModels(props: Props<SharedIdsProvider["hasSubModels"]>): ReturnType<SharedIdsProvider["hasSubModels"]> {
-    return this.#sharedIdsProvider.hasSubModels(props);
-  }
-
-  public getDescendantsCounts(props: Props<SharedIdsProvider["getDescendantsCounts"]>): ReturnType<SharedIdsProvider["getDescendantsCounts"]> {
-    return this.#sharedIdsProvider.getDescendantsCounts(props);
-  }
-
-  public getCategories(props: Props<SharedIdsProvider["getCategories"]>): ReturnType<SharedIdsProvider["getCategories"]> {
-    return this.#sharedIdsProvider.getCategories(props);
-  }
-
-  public getModels(props: Props<SharedIdsProvider["getModels"]>): ReturnType<SharedIdsProvider["getModels"]> {
-    return this.#sharedIdsProvider.getModels(props);
-  }
-
-  public categoryHasParentElements(props: Props<SharedIdsProvider["categoryHasParentElements"]>): ReturnType<SharedIdsProvider["categoryHasParentElements"]> {
-    return this.#sharedIdsProvider.categoryHasParentElements(props);
-  }
-
-  public getAllCategoriesOfElements(
-    props?: Props<SharedIdsProvider["getAllCategoriesOfElements"]>,
-  ): ReturnType<SharedIdsProvider["getAllCategoriesOfElements"]> {
-    return this.#sharedIdsProvider.getAllCategoriesOfElements(props);
-  }
-
-  public canHaveHiddenChildren(): ReturnType<SharedIdsProvider["canHaveHiddenChildren"]> {
-    return this.#sharedIdsProvider.canHaveHiddenChildren();
-  }
-
-  public getCategorySubCategoriesMap(): ReturnType<SharedIdsProvider["getCategorySubCategoriesMap"]> {
-    return this.#sharedIdsProvider.getCategorySubCategoriesMap();
-  }
+  return result;
 }

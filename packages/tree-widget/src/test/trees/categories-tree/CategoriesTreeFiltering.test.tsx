@@ -14,12 +14,14 @@ import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { act, renderHook } from "@testing-library/react";
 import { TooManySearchMatches } from "../../../tree-widget-react/shared/components/EmptyTree.js";
 import { SharedTreeContextProvider } from "../../../tree-widget-react/shared/contexts/SharedTreeContext.js";
-import { CLASS_NAME_DefinitionModel } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
-import { getClassesByView } from "../../../tree-widget-react/shared/internal/Utils.js";
+import { CLASS_NAMES } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { getClassesByPerspective } from "../../../tree-widget-react/shared/internal/Utils.js";
+import { SearchLimitExceededError } from "../../../tree-widget-react/shared/TreeErrors.js";
+import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "../../../tree-widget-react/trees/categories-tree/CategoriesTreeDefinition.js";
 import { useCategoriesTree } from "../../../tree-widget-react/trees/categories-tree/UseCategoriesTree.js";
 import { buildIModel } from "../../IModelUtils.js";
-import { createFakeViewport, createIModelAccess } from "../Common.js";
-import { getInsertFunctionByViewType } from "./internal/Utils.js";
+import { collect, createFakeViewport, createIModelAccess } from "../Common.js";
+import { createAccessAndIdsProvider, getInsertFunctionByPerspective } from "./internal/Utils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { EC, InstanceKey, Props } from "@itwin/presentation-shared";
@@ -55,7 +57,7 @@ describe("Categories tree", () => {
       let keys: { category: InstanceKey; elements: InstanceKey[] };
 
       beforeAll(async () => {
-        const { insertCategory, insertElement, insertElementsModel } = getInsertFunctionByViewType("3d");
+        const { insertCategory, insertElement, insertElementsModel } = getInsertFunctionByPerspective("3d");
         const setupResult = await buildIModel(async (imodel) =>
           withEditTxn(imodel, (txn) => {
             const model = insertElementsModel({ txn, codeValue: "model" });
@@ -84,7 +86,7 @@ describe("Categories tree", () => {
         using hook = renderUseCategoriesTreeHook({
           imodelConnection,
           hierarchyConfig: { elements: { nodes: "include" } },
-          viewType: "3d",
+          perspective: "3d",
           searchText: "matching element",
           searchLimit: limit,
         });
@@ -97,7 +99,7 @@ describe("Categories tree", () => {
                   identifier: keys.category,
                   options: { autoExpand: true },
                   children: keys.elements.map((element) => ({
-                    identifier: { ...element, className: getClassesByView("3d").elementClass },
+                    identifier: { ...element, className: getClassesByPerspective("3d").elementClass },
                     options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
                   })),
                 },
@@ -107,18 +109,35 @@ describe("Categories tree", () => {
           expect(hook.result.current.treeProps.emptyTreeContent).toMatchObject({ type: TooManySearchMatches, props: { base: "categoriesTree" } });
         }
       });
+
+      it("rejects with tree widget's `SearchLimitExceededError` when label search exceeds the limit", async () => {
+        const { imodelAccess, idsProvider } = createAccessAndIdsProvider({ imodelConnection, perspective: "3d" });
+        const result = collect(
+          CategoriesTreeDefinition.createInstanceKeyPaths({
+            imodelAccess,
+            idsProvider,
+            perspective: "3d",
+            hierarchyConfig: { ...defaultHierarchyConfiguration, elements: { nodes: "include", excludedClasses: [] } },
+            label: "matching element",
+            limit: 2,
+          }),
+        );
+        await expect(result).rejects.toBeInstanceOf(SearchLimitExceededError);
+        await expect(result).rejects.toHaveProperty("limit", 2);
+      });
     });
 
-    ["2d" as const, "3d" as const].forEach((viewType) => {
-      describe(`${viewType} view`, () => {
-        const { insertCategory, insertElement, insertElementsModel, insertElementsSubModel, insertModeledElement } = getInsertFunctionByViewType(viewType);
+    ["2d" as const, "3d" as const].forEach((perspective) => {
+      describe(`${perspective} perspective`, () => {
+        const { insertCategory, insertElement, insertElementsModel, insertElementsSubModel, insertModeledElement } =
+          getInsertFunctionByPerspective(perspective);
 
         it("finds definition container by label", async () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc", userLabel: "Test" });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
               const category = insertCategory({ txn, codeValue: "cat", modelId: definitionModel.id });
               insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
 
@@ -130,7 +149,7 @@ describe("Categories tree", () => {
           using hook = renderUseCategoriesTreeHook({
             imodelConnection,
             searchText: "Test",
-            viewType,
+            perspective,
           });
           expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
             { identifier: keys.definitionContainer, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
@@ -141,7 +160,7 @@ describe("Categories tree", () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc", userLabel: "Test" });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
               insertCategory({ txn, codeValue: "cat", modelId: definitionModel.id });
               return { definitionContainer };
             }),
@@ -151,7 +170,7 @@ describe("Categories tree", () => {
           using hook = renderUseCategoriesTreeHook({
             imodelConnection,
             searchText: "Test",
-            viewType,
+            perspective,
           });
           expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual(
             [],
@@ -162,7 +181,7 @@ describe("Categories tree", () => {
           await using buildIModelResult = await buildIModel(async (imodel) =>
             withEditTxn(imodel, (txn) => {
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc", userLabel: "Test" });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
               insertCategory({ txn, codeValue: "cat", modelId: definitionModel.id });
               return { definitionContainer };
             }),
@@ -173,7 +192,7 @@ describe("Categories tree", () => {
             imodelConnection,
             hierarchyConfig: { categories: { withoutElements: "include" } },
             searchText: "Test",
-            viewType,
+            perspective,
           });
           expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
             { identifier: keys.definitionContainer, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
@@ -185,7 +204,7 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc", userLabel: "Test" });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
               const category = insertCategory({ txn, codeValue: "cat", modelId: definitionModel.id });
               insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
               return { definitionContainer };
@@ -197,7 +216,7 @@ describe("Categories tree", () => {
           using hook = renderUseCategoriesTreeHook({
             imodelConnection,
             searchText: "Test",
-            viewType,
+            perspective,
           });
 
           const abortController1 = new AbortController();
@@ -220,14 +239,14 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
               const definitionContainerChild = insertDefinitionContainer({
                 txn,
                 codeValue: "DefinitionContainerChild",
                 userLabel: "Test",
                 modelId: definitionModel.id,
               });
-              const definitionModelChild = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+              const definitionModelChild = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainerChild.id });
               const category = insertCategory({ txn, codeValue: "cat", modelId: definitionModelChild.id });
               insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
 
@@ -239,7 +258,7 @@ describe("Categories tree", () => {
           using hook = renderUseCategoriesTreeHook({
             imodelConnection,
             searchText: "Test",
-            viewType,
+            perspective,
           });
           expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
             {
@@ -255,7 +274,7 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc", userLabel: "Test" });
-              insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
               const category = insertCategory({ txn, codeValue: "cat" });
               insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
             }),
@@ -265,7 +284,7 @@ describe("Categories tree", () => {
           using hook = renderUseCategoriesTreeHook({
             imodelConnection,
             searchText: "Test",
-            viewType,
+            perspective,
           });
           expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual(
             [],
@@ -277,7 +296,7 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
               const category = insertCategory({ txn, codeValue: "cat", userLabel: "Test", modelId: definitionModel.id });
               insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
 
@@ -289,7 +308,7 @@ describe("Categories tree", () => {
           using hook = renderUseCategoriesTreeHook({
             imodelConnection,
             searchText: "Test",
-            viewType,
+            perspective,
           });
           expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
             {
@@ -305,7 +324,7 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
               const category = insertCategory({ txn, codeValue: "cat", modelId: definitionModel.id });
               insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
               const subCategory1 = insertSubCategory({ txn, codeValue: "SubCategory1", parentCategoryId: category.id, modelId: definitionModel.id });
@@ -318,7 +337,7 @@ describe("Categories tree", () => {
           using hook = renderUseCategoriesTreeHook({
             imodelConnection,
             searchText: "SubCategory1",
-            viewType,
+            perspective,
           });
           expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
             {
@@ -355,7 +374,7 @@ describe("Categories tree", () => {
           using hook = renderUseCategoriesTreeHook({
             imodelConnection,
             searchText: "_",
-            viewType,
+            perspective,
           });
           expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
             { identifier: keys.category1, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
@@ -364,7 +383,7 @@ describe("Categories tree", () => {
           hook.rerender({
             imodelConnection,
             searchText: "%",
-            viewType,
+            perspective,
           });
           expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
             { identifier: keys.category2, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
@@ -391,7 +410,7 @@ describe("Categories tree", () => {
           using hook = renderUseCategoriesTreeHook({
             imodelConnection,
             searchText: "_",
-            viewType,
+            perspective,
           });
           expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
             {
@@ -404,7 +423,7 @@ describe("Categories tree", () => {
           hook.rerender({
             imodelConnection,
             searchText: "%",
-            viewType,
+            perspective,
           });
           expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
             {
@@ -432,7 +451,7 @@ describe("Categories tree", () => {
           using hook = renderUseCategoriesTreeHook({
             imodelConnection,
             searchText: "Test",
-            viewType,
+            perspective,
           });
 
           expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
@@ -442,7 +461,7 @@ describe("Categories tree", () => {
           hook.rerender({
             imodelConnection,
             searchText: "cat",
-            viewType,
+            perspective,
           });
           expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual(
             [],
@@ -470,7 +489,7 @@ describe("Categories tree", () => {
           using hook = renderUseCategoriesTreeHook({
             imodelConnection,
             searchText: "Test",
-            viewType,
+            perspective,
           });
 
           expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
@@ -480,7 +499,7 @@ describe("Categories tree", () => {
           hook.rerender({
             imodelConnection,
             searchText: "SubCategory1",
-            viewType,
+            perspective,
           });
           expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
             {
@@ -493,7 +512,7 @@ describe("Categories tree", () => {
           hook.rerender({
             imodelConnection,
             searchText: "SubCategory2",
-            viewType,
+            perspective,
           });
           expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
             {
@@ -509,7 +528,7 @@ describe("Categories tree", () => {
             withEditTxn(imodel, (txn) => {
               const elementsModel = insertElementsModel({ txn, codeValue: "m" });
               const definitionContainer = insertDefinitionContainer({ txn, codeValue: "TestDefinitionContainer" });
-              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+              const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
               const category = insertCategory({ txn, codeValue: "cat", modelId: definitionModel.id });
               const element = insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
 
@@ -525,7 +544,7 @@ describe("Categories tree", () => {
             imodelConnection,
             hierarchyConfig: { elements: { nodes: "include" } },
             searchText: `[${briefcaseId}-${localId}]`,
-            viewType,
+            perspective,
           });
           expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
             {
@@ -537,7 +556,7 @@ describe("Categories tree", () => {
                   options: { autoExpand: true },
                   children: [
                     {
-                      identifier: { ...keys.element, className: getClassesByView(viewType).elementClass },
+                      identifier: { ...keys.element, className: getClassesByPerspective(perspective).elementClass },
                       options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
                     },
                   ],
@@ -549,7 +568,7 @@ describe("Categories tree", () => {
 
         describe("intermediate categories", () => {
           const showElementsConfig = { elements: { nodes: "include" as const } };
-          const { elementClass, modelClass } = getClassesByView(viewType);
+          const { elementClass, modelClass } = getClassesByPerspective(perspective);
           it("finds child element with different category than parent (intermediate category in path)", async () => {
             await using buildIModelResult = await buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
@@ -573,7 +592,7 @@ describe("Categories tree", () => {
               imodelConnection,
               hierarchyConfig: showElementsConfig,
               searchText: "child",
-              viewType,
+              perspective,
             });
             expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
               {
@@ -623,7 +642,7 @@ describe("Categories tree", () => {
               imodelConnection,
               hierarchyConfig: showElementsConfig,
               searchText: "child",
-              viewType,
+              perspective,
             });
             expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
               {
@@ -668,7 +687,7 @@ describe("Categories tree", () => {
               imodelConnection,
               hierarchyConfig: showElementsConfig,
               searchText: "catB",
-              viewType,
+              perspective,
             });
             const paths = await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }));
             // Should find the category as an intermediate category path (under parentElement)
@@ -719,7 +738,7 @@ describe("Categories tree", () => {
               imodelConnection,
               hierarchyConfig: showElementsConfig,
               searchText: "modeling element",
-              viewType,
+              perspective,
             });
             expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
               {
@@ -780,7 +799,7 @@ describe("Categories tree", () => {
               imodelConnection,
               hierarchyConfig: showElementsConfig,
               searchText: "modeling element",
-              viewType,
+              perspective,
             });
             expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
               {
@@ -836,7 +855,7 @@ describe("Categories tree", () => {
               imodelConnection,
               hierarchyConfig: showElementsConfig,
               searchText: "catB",
-              viewType,
+              perspective,
             });
             const paths = await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }));
             expect(paths).toEqual([
@@ -871,7 +890,7 @@ describe("Categories tree", () => {
               withEditTxn(imodel, (txn) => {
                 const elementsModel = insertElementsModel({ txn, codeValue: "m" });
                 const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc", userLabel: "TestDC" });
-                const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+                const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
                 const categoryWithElements = insertCategory({ txn, codeValue: "CategoryWithElements", modelId: definitionModel.id });
                 const categoryWithoutElements = insertCategory({ txn, codeValue: "CategoryWithoutElements", modelId: definitionModel.id });
                 insertElement({ txn, modelId: elementsModel.id, categoryId: categoryWithElements.id });
@@ -891,7 +910,7 @@ describe("Categories tree", () => {
               imodelConnection,
               hierarchyConfig: { categories: { withoutElements: "include" } },
               searchText: "TestDC",
-              viewType,
+              perspective,
               onCategoriesFiltered,
             });
             await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }));
@@ -905,7 +924,7 @@ describe("Categories tree", () => {
               imodelConnection,
               hierarchyConfig: { categories: { withoutElements: "exclude" } },
               searchText: "TestDC",
-              viewType,
+              perspective,
               onCategoriesFiltered,
             });
             await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }));
@@ -917,7 +936,7 @@ describe("Categories tree", () => {
 
         describe("elements.excludedClasses", () => {
           const showElementsConfig = { elements: { nodes: "include" as const } };
-          const elementClassName: EC.FullClassNameDotNotation = viewType === "3d" ? "Generic.PhysicalObject" : "BisCore.DrawingGraphic";
+          const elementClassName: EC.FullClassNameDotNotation = perspective === "3d" ? "Generic.PhysicalObject" : "BisCore.DrawingGraphic";
           const subModeledElementBaseClassName: EC.FullClassNameDotNotation = "BisCore.ISubModeledElement";
 
           it("excludes elements of excluded classes from search paths", async () => {
@@ -934,7 +953,7 @@ describe("Categories tree", () => {
               imodelConnection,
               hierarchyConfig: { elements: { ...showElementsConfig.elements, excludedClasses: [elementClassName] } },
               searchText: "matching",
-              viewType,
+              perspective,
             });
             expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual(
               [],
@@ -955,7 +974,7 @@ describe("Categories tree", () => {
               imodelConnection,
               hierarchyConfig: { elements: { ...showElementsConfig.elements, excludedClasses: [subModeledElementBaseClassName] } },
               searchText: "matching",
-              viewType,
+              perspective,
             });
             expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual(
               [],
@@ -979,7 +998,7 @@ describe("Categories tree", () => {
                 Props<typeof useCategoriesTree>["hierarchyConfig"]
               >,
               searchText: "matching",
-              viewType,
+              perspective,
             });
             expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
               { identifier: keys.excludedCategory, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
@@ -1007,7 +1026,7 @@ describe("Categories tree", () => {
               imodelConnection,
               hierarchyConfig: { elements: { ...showElementsConfig.elements, excludedClasses: [elementClassName] } },
               searchText: "matching",
-              viewType,
+              perspective,
             });
             expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual(
               [],
@@ -1035,7 +1054,7 @@ describe("Categories tree", () => {
               imodelConnection,
               hierarchyConfig: { elements: { ...showElementsConfig.elements, excludedClasses: [subModeledElementBaseClassName] } },
               searchText: "matching",
-              viewType,
+              perspective,
             });
             expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual(
               [],
@@ -1062,7 +1081,7 @@ describe("Categories tree", () => {
                 Props<typeof useCategoriesTree>["hierarchyConfig"]
               >,
               searchText: "matching",
-              viewType,
+              perspective,
             });
             expect(await act(async () => hook.result.current.treeProps.getSearchPaths?.({ imodelAccess, abortSignal: new AbortController().signal }))).toEqual([
               { identifier: keys.excludedCategory, options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } } },
@@ -1075,10 +1094,10 @@ describe("Categories tree", () => {
 });
 
 function renderUseCategoriesTreeHook(
-  props: Omit<Props<typeof useCategoriesTree>, "activeView"> & { imodelConnection: IModelConnection; viewType: "2d" | "3d" },
+  props: Omit<Props<typeof useCategoriesTree>, "activeView"> & { imodelConnection: IModelConnection; perspective: "2d" | "3d" },
 ) {
   const result = renderHook(
-    (hookProps) => useCategoriesTree({ activeView: createFakeViewport({ iModel: props.imodelConnection, viewType: props.viewType }), ...hookProps }),
+    (hookProps) => useCategoriesTree({ activeView: createFakeViewport({ iModel: props.imodelConnection, viewType: props.perspective }), ...hookProps }),
     {
       initialProps: props,
       wrapper: ({ children }) => <SharedTreeContextProvider>{children}</SharedTreeContextProvider>,

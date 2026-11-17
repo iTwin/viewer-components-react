@@ -18,8 +18,14 @@ import type { TreeWidgetTestingViewport } from "./TreeUtils.js";
 type QueryHandler = (query: string, params?: QueryBinder, config?: QueryOptions) => any[] | Promise<any[]>;
 type GetCategoryInfo = IModelConnection["categories"]["getCategoryInfo"];
 
-export function createIModelMock(props: { queryHandler?: QueryHandler; getCategoryInfo?: GetCategoryInfo }) {
+export function createIModelMock(props: {
+  queryHandler?: QueryHandler;
+  getCategoryInfo?: GetCategoryInfo;
+  /** iModel whose schemas should be used by the mock. */
+  schemaSource?: Pick<IModelConnection, "getSchemaView">;
+}) {
   return {
+    ...(props.schemaSource ? { getSchemaView: props.schemaSource.getSchemaView.bind(props.schemaSource) } : {}),
     isBriefcaseConnection: vi.fn(() => false),
     createQueryReader: vi.fn(async function* (query: string, params?: QueryBinder, config?: QueryOptions): AsyncIterableIterator<any> {
       const result = (await props.queryHandler?.(query, params, config)) ?? [];
@@ -40,6 +46,7 @@ export function createFakeViewport(
     alwaysDrawn?: Set<string>;
     queryHandler?: QueryHandler;
     getCategoryInfo?: GetCategoryInfo;
+    schemaSource?: Pick<IModelConnection, "getSchemaView">;
   },
 ): TreeWidgetTestingViewport & Disposable {
   let alwaysDrawn = props?.alwaysDrawn;
@@ -93,7 +100,8 @@ export function createFakeViewport(
         onNeverDrawnChanged.raiseEvent(result);
       }
     }),
-    iModel: props?.iModel ?? createIModelMock({ queryHandler: props?.queryHandler, getCategoryInfo: props?.getCategoryInfo }),
+    iModel:
+      props?.iModel ?? createIModelMock({ queryHandler: props?.queryHandler, getCategoryInfo: props?.getCategoryInfo, schemaSource: props?.schemaSource }),
     renderFrame: vi.fn(),
     [Symbol.dispose]() {
       this.iModel.onClose.raiseEvent(this.iModel);

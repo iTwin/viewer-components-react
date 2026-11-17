@@ -13,14 +13,10 @@ import {
   insertSpatialCategory,
   insertSubModel,
 } from "test-utilities";
-import {
-  CLASS_NAME_DefinitionContainer,
-  CLASS_NAME_Element,
-  CLASS_NAME_SubCategory,
-} from "../../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
-import { SharedIdsProvider } from "../../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
-import { getClassesByView } from "../../../../tree-widget-react/shared/internal/Utils.js";
-import { CategoriesTreeIdsProvider } from "../../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsProvider.js";
+import { CLASS_NAMES } from "../../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { createSharedIdsProvider } from "../../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
+import { getClassesByPerspective } from "../../../../tree-widget-react/shared/internal/Utils.js";
+import { createCategoriesTreeIdsProvider } from "../../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsProvider.js";
 import { TestSchema } from "../../../IModelUtils.js";
 import { validateHierarchyVisibility } from "../../../shared/VisibilityValidation.js";
 import { createIModelAccess } from "../../Common.js";
@@ -31,8 +27,10 @@ import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ClassGroupingNodeKey, GroupingHierarchyNode, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { EC, InstanceKey, Props } from "@itwin/presentation-shared";
+import type { SharedIdsProvider } from "../../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
 import type { ElementId, ModelId } from "../../../../tree-widget-react/shared/internal/Types.js";
 import type { ParentElementsPath } from "../../../../tree-widget-react/shared/internal/Utils.js";
+import type { CategoriesTreeIdsProvider } from "../../../../tree-widget-react/trees/categories-tree/internal/CategoriesTreeIdsProvider.js";
 import type { IModelAccess } from "../../Common.js";
 import type { TreeWidgetTestingViewport } from "../../TreeUtils.js";
 
@@ -40,14 +38,14 @@ import type { TreeWidgetTestingViewport } from "../../TreeUtils.js";
 export function createCategoryHierarchyNode(props: {
   id: Id64String;
   hasChildren?: boolean;
-  viewType?: "2d" | "3d";
+  perspective?: "2d" | "3d";
   parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   search?: NonGroupingHierarchyNode["search"];
   modelIds?: Id64Array;
   hasSubCategories?: boolean;
   parentElementsPath?: ParentElementsPath;
 }): NonGroupingHierarchyNode {
-  const { categoryClass } = getClassesByView(props.viewType ?? "3d");
+  const { categoryClass } = getClassesByPerspective(props.perspective ?? "3d");
   return {
     key: {
       type: "instances",
@@ -78,7 +76,7 @@ export function createSubCategoryHierarchyNode(props: {
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: CLASS_NAME_SubCategory, id: props.id }],
+      instanceKeys: [{ className: CLASS_NAMES.SubCategory, id: props.id }],
     },
     children: false,
     label: "",
@@ -103,7 +101,7 @@ export function createClassGroupingHierarchyNode({
   hasDirectNonSearchTargets?: boolean;
   hasSearchTargetAncestor?: boolean;
 }): GroupingHierarchyNode & { key: ClassGroupingNodeKey } {
-  const className = props.className ?? CLASS_NAME_Element;
+  const className = props.className ?? CLASS_NAMES.Element;
   return {
     key: {
       type: "class-grouping",
@@ -135,7 +133,7 @@ export function createDefinitionContainerHierarchyNode(props: {
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: CLASS_NAME_DefinitionContainer, id: props.id }],
+      instanceKeys: [{ className: CLASS_NAMES.DefinitionContainer, id: props.id }],
     },
     children: true,
     label: "",
@@ -153,12 +151,12 @@ export function createElementHierarchyNode(props: {
   categoryId: Id64String | undefined;
   hasChildren?: boolean;
   elementId: Id64String;
-  viewType?: "2d" | "3d";
+  perspective?: "2d" | "3d";
   parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   parentElementsPath?: ParentElementsPath;
   search?: NonGroupingHierarchyNode["search"];
 }): NonGroupingHierarchyNode {
-  const { elementClass } = getClassesByView(props.viewType ?? "3d");
+  const { elementClass } = getClassesByPerspective(props.perspective ?? "3d");
   return {
     key: {
       type: "instances",
@@ -180,8 +178,8 @@ export function createElementHierarchyNode(props: {
 }
 
 /** @internal */
-export function createModelHierarchyNode(props: { id: Id64String; hasChildren?: boolean; viewType?: "2d" | "3d" }): NonGroupingHierarchyNode {
-  const { modelClass } = getClassesByView(props.viewType ?? "3d");
+export function createModelHierarchyNode(props: { id: Id64String; hasChildren?: boolean; perspective?: "2d" | "3d" }): NonGroupingHierarchyNode {
+  const { modelClass } = getClassesByPerspective(props.perspective ?? "3d");
   return {
     key: {
       type: "instances",
@@ -197,12 +195,12 @@ export function createModelHierarchyNode(props: { id: Id64String; hasChildren?: 
   };
 }
 
-export function getInsertFunctionByViewType(viewType: "2d" | "3d") {
-  const insertCategory = viewType === "3d" ? insertSpatialCategory : insertDrawingCategory;
-  const insertElement = viewType === "3d" ? insertPhysicalElement : insertDrawingGraphic;
-  const insertElementsModel = viewType === "3d" ? insertPhysicalModelWithPartition : insertDrawingModelWithPartition;
+export function getInsertFunctionByPerspective(perspective: "2d" | "3d") {
+  const insertCategory = perspective === "3d" ? insertSpatialCategory : insertDrawingCategory;
+  const insertElement = perspective === "3d" ? insertPhysicalElement : insertDrawingGraphic;
+  const insertElementsModel = perspective === "3d" ? insertPhysicalModelWithPartition : insertDrawingModelWithPartition;
   const insertElementsSubModel =
-    viewType === "3d"
+    perspective === "3d"
       ? insertPhysicalSubModel
       : (props: { txn: EditTxn; modeledElementId: string }) =>
           insertSubModel({
@@ -212,7 +210,7 @@ export function getInsertFunctionByViewType(viewType: "2d" | "3d") {
   const insertModeledElement = (props: { txn: EditTxn; modelId: Id64String; categoryId: Id64String; parentId?: ElementId; userLabel?: string }) =>
     insertElement({
       ...props,
-      classFullName: `${TestSchema.Name}.${viewType === "3d" ? TestSchema.ModeledElement3dClassName : TestSchema.ModeledElement2dClassName}`,
+      classFullName: `${TestSchema.Name}.${perspective === "3d" ? TestSchema.ModeledElement3dClassName : TestSchema.ModeledElement2dClassName}`,
     });
   return { insertCategory, insertElement, insertElementsModel, insertElementsSubModel, insertModeledElement };
 }
@@ -261,16 +259,30 @@ export async function validateCategoriesTreeHierarchyVisibility(props: Omit<Prop
   });
 }
 
-export function createAccessAndIdsProvider({ imodelConnection, viewType }: { imodelConnection: IModelConnection; viewType: "2d" | "3d" }): {
+export function createAccessAndIdsProvider({
+  imodelConnection,
+  perspective,
+  excludedElementClassNames,
+}: {
+  imodelConnection: IModelConnection;
+  perspective: "2d" | "3d";
+  excludedElementClassNames?: EC.FullClassNameDotNotation[];
+}): {
   imodelAccess: IModelAccess;
   idsProvider: CategoriesTreeIdsProvider;
+  sharedIdsProvider: SharedIdsProvider;
 } {
   const imodelAccess = createIModelAccess(imodelConnection);
-  const sharedIdsProvider = new SharedIdsProvider({ queryExecutor: imodelAccess, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
-  const idsProvider = new CategoriesTreeIdsProvider({ queryExecutor: imodelAccess, type: viewType, sharedIdsProvider });
+  const sharedIdsProvider = createSharedIdsProvider({
+    imodelAccess,
+    elementClassName: getClassesByPerspective(perspective).elementClass,
+    excludedElementClassNames,
+  });
+  const idsProvider = createCategoriesTreeIdsProvider({ imodelAccess, perspective, sharedIdsProvider });
 
   return {
     imodelAccess,
     idsProvider,
+    sharedIdsProvider,
   };
 }

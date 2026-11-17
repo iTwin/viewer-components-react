@@ -17,6 +17,7 @@ import type { Observable } from "rxjs";
 import type { HierarchyNode, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { ECSchemaProvider } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfoProvider } from "../../../../shared/internal/idsProviders/AlwaysAndNeverDrawnElementInfoProvider.js";
+import type { SharedIdsProvider } from "../../../../shared/internal/idsProviders/SharedIdsProvider.js";
 import type { SearchResultsTree } from "../../../../shared/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeSpecificVisibilityHandler } from "../../../../shared/internal/visibility/BaseVisibilityHelper.js";
 import type { TreeWidgetViewport } from "../../../../shared/TreeWidgetViewport.js";
@@ -27,6 +28,7 @@ import type { ClassificationsTreeSearchTargets } from "./SearchResultsTree.js";
 /** @internal */
 export interface ClassificationsTreeVisibilityHandlerProps {
   idsProvider: ClassificationsTreeIdsProvider;
+  sharedIdsProvider: SharedIdsProvider;
   viewport: TreeWidgetViewport;
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfoProvider;
 }
@@ -47,7 +49,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       viewport: this.#props.viewport,
       idsProvider: this.#props.idsProvider,
       alwaysAndNeverDrawnElementInfo: this.#props.alwaysAndNeverDrawnElementInfo,
-      sharedIdsProvider: this.#props.idsProvider,
+      sharedIdsProvider: this.#props.sharedIdsProvider,
     });
   }
 
@@ -133,7 +135,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       modelId: node.extendedData.modelId,
       categoryId: node.extendedData.categoryId,
       parentElementsPath: node.extendedData.parentElementsPath,
-      computeOnlyOwnStatus: this.#props.idsProvider.canHaveHiddenChildren() || node.children ? undefined : true,
+      computeOnlyOwnStatus: this.#props.sharedIdsProvider.elements.canHaveHiddenChildren() || node.children ? undefined : true,
     });
   }
 
@@ -234,6 +236,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
 export function createClassificationsTreeVisibilityHandler(props: {
   viewport: TreeWidgetViewport;
   idsProvider: ClassificationsTreeIdsProvider;
+  sharedIdsProvider: SharedIdsProvider;
   imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom">;
   searchPaths?: HierarchySearchTree[];
 }) {
@@ -253,6 +256,7 @@ export function createClassificationsTreeVisibilityHandler(props: {
       return new ClassificationsTreeVisibilityHandler({
         alwaysAndNeverDrawnElementInfo: info,
         idsProvider: props.idsProvider,
+        sharedIdsProvider: props.sharedIdsProvider,
         viewport,
       });
     },

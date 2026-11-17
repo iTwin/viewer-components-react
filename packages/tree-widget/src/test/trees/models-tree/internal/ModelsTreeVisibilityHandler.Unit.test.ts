@@ -5,12 +5,12 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { CompressedId64Set, Id64 } from "@itwin/core-bentley";
-import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
+import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { SharedIdsProvider } from "../../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
+import { createSharedIdsProvider } from "../../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
 import { createVisibilityStatus } from "../../../../tree-widget-react/shared/internal/Tooltip.js";
 import { mergeWithDefaults } from "../../../../tree-widget-react/shared/internal/Utils.js";
-import { ModelsTreeIdsProvider } from "../../../../tree-widget-react/trees/models-tree/internal/ModelsTreeIdsProvider.js";
+import { createModelsTreeIdsProvider } from "../../../../tree-widget-react/trees/models-tree/internal/ModelsTreeIdsProvider.js";
 import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration } from "../../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
 import { createFakeViewport } from "../../Common.js";
@@ -41,18 +41,17 @@ interface VisibilityOverrides {
 describe("ModelsTreeVisibilityHandler", () => {
   function createIdsProvider(iModel: IModelConnection, hierarchyConfig?: ModelsTreeHierarchyConfiguration) {
     const resolvedHierarchyConfig = mergeWithDefaults({ defaults: defaultHierarchyConfiguration, overrides: hierarchyConfig });
-    const queryExecutor = createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded");
-    const sharedIdsProvider = new SharedIdsProvider({
-      queryExecutor,
+    const imodelAccess = { ...createECSchemaProvider(iModel), ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded") };
+    const sharedIdsProvider = createSharedIdsProvider({
+      imodelAccess,
       elementClassName: resolvedHierarchyConfig.elements.baseClass,
-      type: "3d",
     });
-    const idsProvider = new ModelsTreeIdsProvider({
-      queryExecutor,
+    const idsProvider = createModelsTreeIdsProvider({
+      imodelAccess,
       hierarchyConfig: resolvedHierarchyConfig,
       sharedIdsProvider,
     });
-    return idsProvider;
+    return { idsProvider, sharedIdsProvider };
   }
   describe("#unit", () => {
     function createFakeIModelAccess(): Pick<ECSchemaProvider, "classDerivesFrom"> {
@@ -61,7 +60,8 @@ describe("ModelsTreeVisibilityHandler", () => {
       };
     }
 
-    function createHandler(props?: { overrides?: VisibilityOverrides; idsProvider?: ModelsTreeIdsProvider; viewport?: TreeWidgetViewport }) {
+    function createHandler(props?: { overrides?: VisibilityOverrides; idsProvider?: ReturnType<typeof createFakeIdsProvider>; viewport?: TreeWidgetViewport }) {
+      const idsProvider = props?.idsProvider ?? createFakeIdsProvider();
       const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
         getModelsVisibilityStatus:
           props?.overrides?.models &&
@@ -118,7 +118,8 @@ describe("ModelsTreeVisibilityHandler", () => {
       const handler = createModelsTreeVisibilityHandler({
         viewport: props?.viewport ?? createFakeViewport(),
         overrides,
-        idsProvider: props?.idsProvider ?? createFakeIdsProvider(),
+        idsProvider,
+        sharedIdsProvider: idsProvider,
         imodelAccess: createFakeIModelAccess(),
       });
       return {
@@ -134,10 +135,10 @@ describe("ModelsTreeVisibilityHandler", () => {
       it("can call original implementation", async () => {
         let useOriginalImplFlag = false;
         using viewport = createFakeViewport();
-        const idsProvider = createIdsProvider(viewport.iModel);
+        const idsProviders = createIdsProvider(viewport.iModel);
         using handler = createModelsTreeVisibilityHandler({
           viewport,
-          idsProvider,
+          ...idsProviders,
           overrides: {
             getElementsVisibilityStatus: async ({ originalImplementation }) => {
               return useOriginalImplFlag ? originalImplementation() : createVisibilityStatus("hidden");
@@ -161,10 +162,10 @@ describe("ModelsTreeVisibilityHandler", () => {
             getSubjectsVisibilityStatus: vi.fn().mockResolvedValue(createVisibilityStatus("visible")),
           };
           using viewport = createFakeViewport();
-          const idsProvider = createIdsProvider(viewport.iModel);
+          const idsProviders = createIdsProvider(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
-            idsProvider,
+            ...idsProviders,
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -604,10 +605,10 @@ describe("ModelsTreeVisibilityHandler", () => {
             getCategoriesVisibilityStatus: vi.fn().mockResolvedValue(createVisibilityStatus("visible")),
           };
           using viewport = createFakeViewport();
-          const idsProvider = createIdsProvider(viewport.iModel);
+          const idsProviders = createIdsProvider(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
-            idsProvider,
+            ...idsProviders,
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -868,10 +869,10 @@ describe("ModelsTreeVisibilityHandler", () => {
             getElementsVisibilityStatus: vi.fn().mockResolvedValue(createVisibilityStatus("visible")),
           };
           using viewport = createFakeViewport();
-          const idsProvider = createIdsProvider(viewport.iModel);
+          const idsProviders = createIdsProvider(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
-            idsProvider,
+            ...idsProviders,
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -997,10 +998,10 @@ describe("ModelsTreeVisibilityHandler", () => {
             getElementGroupingNodeVisibilityStatus: vi.fn().mockResolvedValue(createVisibilityStatus("visible")),
           };
           using viewport = createFakeViewport();
-          const idsProvider = createIdsProvider(viewport.iModel);
+          const idsProviders = createIdsProvider(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
-            idsProvider,
+            ...idsProviders,
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -1173,10 +1174,10 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeSubjectsVisibilityStatus: vi.fn().mockResolvedValue(undefined),
           };
           using viewport = createFakeViewport();
-          const idsProvider = createIdsProvider(viewport.iModel);
+          const idsProviders = createIdsProvider(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
-            idsProvider,
+            ...idsProviders,
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -1356,10 +1357,10 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeCategoriesVisibilityStatus: vi.fn().mockResolvedValue(undefined),
           };
           using viewport = createFakeViewport();
-          const idsProvider = createIdsProvider(viewport.iModel);
+          const idsProviders = createIdsProvider(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
-            idsProvider,
+            ...idsProviders,
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -1439,10 +1440,10 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeElementsVisibilityStatus: vi.fn().mockResolvedValue(undefined),
           };
           using viewport = createFakeViewport();
-          const idsProvider = createIdsProvider(viewport.iModel);
+          const idsProviders = createIdsProvider(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
-            idsProvider,
+            ...idsProviders,
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -1595,10 +1596,10 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeElementGroupingNodeVisibilityStatus: vi.fn().mockResolvedValue(undefined),
           };
           using viewport = createFakeViewport();
-          const idsProvider = createIdsProvider(viewport.iModel);
+          const idsProviders = createIdsProvider(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
-            idsProvider,
+            ...idsProviders,
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });

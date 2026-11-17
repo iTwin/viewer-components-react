@@ -8,7 +8,7 @@ import { assert, Guid } from "@itwin/core-bentley";
 import { HierarchyVisibilityHandlerImpl } from "../../../../shared/internal/hooks/UseCachedVisibility.js";
 import { fromWithRelease } from "../../../../shared/internal/Rxjs.js";
 import { createVisibilityStatus } from "../../../../shared/internal/Tooltip.js";
-import { getClassesByView } from "../../../../shared/internal/Utils.js";
+import { getClassesByPerspective } from "../../../../shared/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../../shared/internal/VisibilityUtils.js";
 import { CategoriesTreeNodeInternal } from "../CategoriesTreeNodeInternal.js";
 import { CategoriesTreeVisibilityHelper } from "./CategoriesTreeVisibilityHelper.js";
@@ -18,6 +18,7 @@ import type { Observable } from "rxjs";
 import type { HierarchyNode, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { ECSchemaProvider } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfoProvider } from "../../../../shared/internal/idsProviders/AlwaysAndNeverDrawnElementInfoProvider.js";
+import type { SharedIdsProvider } from "../../../../shared/internal/idsProviders/SharedIdsProvider.js";
 import type { SearchResultsTree } from "../../../../shared/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeSpecificVisibilityHandler } from "../../../../shared/internal/visibility/BaseVisibilityHelper.js";
 import type { TreeWidgetViewport } from "../../../../shared/TreeWidgetViewport.js";
@@ -29,6 +30,7 @@ import type { CategoriesTreeSearchTargets } from "./SearchResultsTree.js";
 /** @internal */
 export interface CategoriesTreeVisibilityHandlerProps {
   idsProvider: CategoriesTreeIdsProvider;
+  sharedIdsProvider: SharedIdsProvider;
   viewport: TreeWidgetViewport;
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfoProvider;
   hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
@@ -49,7 +51,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       viewport: this.#props.viewport,
       idsProvider: this.#props.idsProvider,
       alwaysAndNeverDrawnElementInfo: this.#props.alwaysAndNeverDrawnElementInfo,
-      sharedIdsProvider: constructorProps.idsProvider,
+      sharedIdsProvider: constructorProps.sharedIdsProvider,
       hierarchyConfig: constructorProps.hierarchyConfig,
     });
   }
@@ -174,7 +176,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       modelId: node.extendedData.modelId,
       categoryId: node.extendedData.categoryId,
       parentElementsPath: node.extendedData.parentElementsPath,
-      computeOnlyOwnStatus: this.#props.idsProvider.canHaveHiddenChildren() || node.children ? undefined : true,
+      computeOnlyOwnStatus: this.#props.sharedIdsProvider.elements.canHaveHiddenChildren() || node.children ? undefined : true,
     });
   }
 
@@ -320,18 +322,19 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
 export function createCategoriesTreeVisibilityHandler(props: {
   viewport: TreeWidgetViewport;
   idsProvider: CategoriesTreeIdsProvider;
+  sharedIdsProvider: SharedIdsProvider;
   imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom">;
   searchPaths?: HierarchySearchTree[];
   hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
 }) {
-  const { idsProvider, imodelAccess, searchPaths, hierarchyConfig } = props;
+  const { idsProvider, sharedIdsProvider, imodelAccess, searchPaths, hierarchyConfig } = props;
   return new HierarchyVisibilityHandlerImpl<CategoriesTreeSearchTargets>({
     cancelChangesInProgress: new Subject<void>(),
     getSearchResultsTree: (): undefined | Promise<SearchResultsTree<CategoriesTreeSearchTargets>> => {
       if (!searchPaths) {
         return undefined;
       }
-      const { categoryClass, elementClass, modelClass } = getClassesByView(props.viewport.viewType === "2d" ? "2d" : "3d");
+      const { categoryClass, elementClass, modelClass } = getClassesByPerspective(props.viewport.viewType === "2d" ? "2d" : "3d");
       return createCategoriesSearchResultsTree({
         idsProvider,
         searchPaths,
@@ -345,6 +348,7 @@ export function createCategoriesTreeVisibilityHandler(props: {
       return new CategoriesTreeVisibilityHandler({
         alwaysAndNeverDrawnElementInfo: info,
         idsProvider,
+        sharedIdsProvider,
         viewport,
         hierarchyConfig,
       });

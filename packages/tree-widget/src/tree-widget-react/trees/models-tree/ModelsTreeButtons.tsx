@@ -17,7 +17,8 @@ import { useFocusedInstancesContext } from "../../shared/contexts/FocusedInstanc
 import { useTranslation } from "../../shared/contexts/LocalizationContext.js";
 import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
 import { useTelemetryContext } from "../../shared/contexts/TelemetryContext.js";
-import { getClassesByView } from "../../shared/internal/Utils.js";
+import { toObservable } from "../../shared/internal/Rxjs.js";
+import { getClassesByPerspective } from "../../shared/internal/Utils.js";
 import { invertAllModels, showAll } from "../../shared/internal/VisibilityUtils.js";
 
 import type { ReactElement } from "react";
@@ -86,15 +87,15 @@ export function useModelsTreeButtonProps({ imodel, viewport }: { imodel: IModelC
 function useAvailableModels(imodel: IModelConnection): ModelInfo[] {
   const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
   const { getSharedIdsProvider } = useSharedTreeContext();
-  const sharedIdsProvider = getSharedIdsProvider({ imodel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
+  const sharedIdsProvider = getSharedIdsProvider({ imodel, elementClassName: getClassesByPerspective("3d").elementClass });
   useEffect(() => {
     const getModels = async () => {
       try {
         const [allModels, planProjectionModels] = await Promise.all([
-          firstValueFrom(sharedIdsProvider.getAllModels()),
-          firstValueFrom(sharedIdsProvider.getPlanProjectionModels()),
+          firstValueFrom(toObservable(sharedIdsProvider.models.getAllModels())),
+          firstValueFrom(toObservable(sharedIdsProvider.models.getPlanProjectionModels())),
         ]);
-        setAvailableModels(allModels.map((id) => ({ id, isPlanProjection: planProjectionModels.has(id) })));
+        setAvailableModels([...allModels].map((id) => ({ id, isPlanProjection: planProjectionModels.has(id) })));
       } catch {
         setAvailableModels([]);
       }
@@ -116,7 +117,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   const { models, viewport } = props;
   const { onFeatureUsed } = useTelemetryContext();
   const { getSharedIdsProvider, cancelChangesInProgress } = useSharedTreeContext();
-  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
+  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByPerspective("3d").elementClass });
   const translate = useTranslation();
 
   const onClick = async () => {
@@ -171,7 +172,7 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
   const { models, viewport } = props;
   const { onFeatureUsed } = useTelemetryContext();
   const { cancelChangesInProgress, getSharedIdsProvider } = useSharedTreeContext();
-  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
+  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByPerspective("3d").elementClass });
   const translate = useTranslation();
   const onClick = async () => {
     // cspell:disable-next-line
@@ -289,9 +290,9 @@ async function getCategoryInfos({
   cancel: Observable<void>;
 }): Promise<CategoryInfosMap | undefined> {
   return firstValueFrom(
-    sharedIdsProvider.getAllCategoriesOfElements().pipe(
+    toObservable(sharedIdsProvider.categories.getAllCategoriesOfElements()).pipe(
       mergeAll(),
-      mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), subCategories: sharedIdsProvider.getSubCategories({ categoryId }) })),
+      mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), subCategories: sharedIdsProvider.subCategories.getSubCategories({ categoryId }) })),
       reduce((acc: CategoryInfosMap, { categoryId, subCategories }) => {
         acc.set(categoryId, subCategories);
         return acc;

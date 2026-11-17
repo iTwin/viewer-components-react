@@ -11,11 +11,10 @@ import { LOGGER } from "../util/Logging.js";
 import type { IModelDb } from "@itwin/core-backend";
 import type { HierarchyDefinition, HierarchyNode, HierarchyProvider, HierarchySearchTree, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { ECSchemaProvider } from "@itwin/presentation-shared";
-import type { CategoriesTreeIdsProvider, ModelsTreeIdsProvider } from "@itwin/tree-widget-react/internal";
 
 interface ProviderOptionsBase {
   rowLimit?: number | "unbounded";
-  getHierarchyFactory(imodelAccess: ECSchemaProvider, idsProvider?: typeof ModelsTreeIdsProvider | typeof CategoriesTreeIdsProvider): HierarchyDefinition;
+  getHierarchyFactory(imodelAccess: ECSchemaProvider): HierarchyDefinition;
   search?: {
     paths: HierarchySearchTree[];
   };

@@ -3,27 +3,20 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, expand, from, map, merge, mergeMap, of, reduce, shareReplay, tap } from "rxjs";
+import { defer, EMPTY, forkJoin, from, map, merge, mergeMap, of, reduce, shareReplay } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
-import {
-  CLASS_NAME_Classification,
-  CLASS_NAME_ClassificationSystem,
-  CLASS_NAME_ClassificationTable,
-  CLASS_NAME_ElementHasClassifications,
-  CLASS_NAME_GeometricElement3d,
-  CLASS_NAME_Model,
-  CLASS_NAME_SpatialCategory,
-} from "../../../shared/internal/ClassNameDefinitions.js";
+import { createClassificationsTreeIdsProvider as createTreeDefinitionsClassificationsTreeIdsProvider } from "@itwin/presentation-tree-definitions";
+import { CLASS_NAMES } from "../../../shared/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../../shared/internal/hooks/UseErrorState.js";
-import { SharedIdsProviderImpl } from "../../../shared/internal/idsProviders/SharedIdsProvider.js";
-import { fromWithRelease, toVoidPromise } from "../../../shared/internal/Rxjs.js";
-import { createWhereClause, getOrCreate } from "../../../shared/internal/Utils.js";
+import { toObservable, toVoidPromise } from "../../../shared/internal/Rxjs.js";
+import { createWhereClause, extendObject, getOrCreate } from "../../../shared/internal/Utils.js";
 
 import type { Observable } from "rxjs";
-import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
-import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { SharedIdsProviderImplProps } from "../../../shared/internal/idsProviders/SharedIdsProvider.js";
-import type { CategoryId, ClassificationId, ClassificationTableId, ElementId } from "../../../shared/internal/Types.js";
+import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
+import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { ECSchemaProvider } from "@itwin/presentation-shared";
+import type { ClassificationsTreeIdsProvider as TreeDefinitionsClassificationsTreeIdsProvider } from "@itwin/presentation-tree-definitions";
+import type { CategoryId, ClassificationId, ElementId } from "../../../shared/internal/Types.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "../ClassificationsTreeDefinition.js";
 import type { ClassificationsTreeVisibilityHandlerConfiguration } from "../UseClassificationsTree.js";
 
@@ -42,336 +35,158 @@ export type VisibilityHandlerConfigForClassificationsTreeIdsProvider = Pick<
   "classificationToCategoriesRelationshipSpecification"
 >;
 
-interface ClassificationOrTableInfo {
-  parentClassificationOrTableId: ClassificationId | ClassificationTableId | undefined;
-  childClassificationIds: ClassificationId[];
-  relatedCategories: CategoryId[];
+/**
+ * Provides classification table and classification IDs and search paths for classifications tree hierarchy, as well as
+ * additional data required by tree widget.
+ * @internal
+ */
+export interface ClassificationsTreeIdsProvider extends TreeDefinitionsClassificationsTreeIdsProvider {
+  /** Starts loading classifications data, if it's not loaded yet. */
+  preloadClassifications(): Promise<void>;
+  /** Returns categories related to the given classifications, classification tables and their child classifications. */
+  getAllContainedCategories(classificationOrTableIds: Id64Arg): Observable<CategoryId>;
+  /** Returns models and categories of the given filtered elements. The result is cached until `clearFilteredElementsData` is called. */
+  getFilteredElementsData(props: { elementIds: Id64Array }): Observable<Map<ElementId, { categoryId: Id64String; modelId: Id64String }>>;
+  /** Clears cache of `getFilteredElementsData`. */
+  clearFilteredElementsData(): void;
 }
 
-interface ClassificationsTreeIdsProviderProps extends SharedIdsProviderImplProps {
-  queryExecutor: LimitingECSqlQueryExecutor;
+/**
+ * Creates classifications tree ids provider.
+ * @internal
+ */
+export function createClassificationsTreeIdsProvider(props: {
+  imodelAccess: ECSchemaProvider & LimitingECSqlQueryExecutor;
   hierarchyConfig: HierarchyConfigForClassificationsTreeIdsProvider;
   visibilityHandlerConfig?: VisibilityHandlerConfigForClassificationsTreeIdsProvider;
-}
+}): ClassificationsTreeIdsProvider {
+  const { imodelAccess, hierarchyConfig, visibilityHandlerConfig } = props;
+  const treeDefinitionsIdsProvider = createTreeDefinitionsClassificationsTreeIdsProvider({
+    imodelAccess,
+    hierarchyConfig: { rootClassificationSystemCode: hierarchyConfig.rootClassificationSystemCode },
+  });
+  const componentId = Guid.createValue();
+  const componentName = "ClassificationsTreeIdsProvider";
+  let cachedClassificationCategories: Observable<Map<ClassificationId, CategoryId[]>> | undefined;
+  let filteredElementsData: Observable<Map<ElementId, { categoryId: Id64String; modelId: Id64String }>> | undefined;
 
-/** @internal */
-export class ClassificationsTreeIdsProvider extends SharedIdsProviderImpl {
-  #cachedData:
-    | Observable<{
-        classificationOrTableInfos: Map<ClassificationId | ClassificationTableId, ClassificationOrTableInfo>;
-        classificationsWithChildren: Set<ClassificationId>;
-        classificationsWithNonExcludedChildren: Set<ClassificationId>;
-      }>
-    | undefined;
-  #filteredElementsData: Observable<Map<ElementId, { modelId: Id64String; categoryId: Id64String }>> | undefined;
-  #props: ClassificationsTreeIdsProviderProps;
-  #componentId: GuidString;
-  #componentName: string;
-  #rowLimit = 7500;
-  #cachedDataLoaded = false;
-
-  constructor(props: ClassificationsTreeIdsProviderProps) {
-    super(props);
-    this.#props = props;
-    this.#componentId = Guid.createValue();
-    this.#componentName = "ClassificationsTreeIdsProvider";
-  }
-
-  public async preloadClassifications(): Promise<void> {
-    if (this.#cachedData !== undefined) {
-      return;
-    }
-    try {
-      await toVoidPromise(this.getCachedData());
-    } catch {}
-  }
-
-  private queryClassifications(): Observable<
-    {
-      id: Id64String;
-      relatedCategories: CategoryId[];
-    } & ({ tableId: ClassificationTableId; parentId: undefined } | { tableId: undefined; parentId: ClassificationId })
-  > {
-    const getQueryReader = (lastClassificationId?: ClassificationId) => {
-      const CLASSIFICATIONS_CTE = "Classifications";
-      const ctes = [
-        `
-          ${CLASSIFICATIONS_CTE}(ClassificationId, ClassificationTableId, ParentClassificationId) AS (
-            SELECT
-              cl.ECInstanceId,
-              ct.ECInstanceId,
-              NULL
-            FROM ${CLASS_NAME_Classification} cl
-            JOIN ${CLASS_NAME_ClassificationTable} ct ON ct.ECInstanceId = cl.Model.Id
-            JOIN ${CLASS_NAME_ClassificationSystem} cs ON cs.ECInstanceId = ct.Parent.Id
-            ${createWhereClause({
-              conditions: [
-                `cs.CodeValue = '${this.#props.hierarchyConfig.rootClassificationSystemCode}'`,
-                "NOT ct.IsPrivate",
-                "NOT cl.IsPrivate",
-                "cl.Parent.Id IS NULL",
-              ],
-            })}
-
-            UNION ALL
-
-            SELECT
-              cl.ECInstanceId,
-              NULL,
-              cl.Parent.Id
-            FROM
-              ${CLASSIFICATIONS_CTE} cte
-              JOIN ${CLASS_NAME_Classification} cl ON cl.Parent.Id = cte.ClassificationId
-            WHERE
-              NOT cl.IsPrivate
-          )
-        `,
-      ];
-      let categoriesOfClassificationSelector: string;
-      if (this.#props.visibilityHandlerConfig?.classificationToCategoriesRelationshipSpecification) {
-        const relationship = this.#props.visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.fullClassName;
+  // By default, classification is related to categories of top-most elements classified by it. This can be overridden
+  // with `classificationToCategoriesRelationshipSpecification`.
+  function queryClassificationCategories(): Observable<{ classificationId: ClassificationId; categoryId: CategoryId }> {
+    return defer(() => {
+      const relationshipSpecification = visibilityHandlerConfig?.classificationToCategoriesRelationshipSpecification;
+      let ecsql: string;
+      if (relationshipSpecification) {
         const { categoryAccessor, classificationAccessor } =
-          this.#props.visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.source === "classification"
+          relationshipSpecification.source === "classification"
             ? { classificationAccessor: "SourceECInstanceId", categoryAccessor: "TargetECInstanceId" }
             : { classificationAccessor: "TargetECInstanceId", categoryAccessor: "SourceECInstanceId" };
-        categoriesOfClassificationSelector = `
-          SELECT group_concat(IdToHex(cat.ECInstanceId))
-          FROM ${CLASS_NAME_SpatialCategory} cat
-          JOIN ${relationship} rel ON rel.${categoryAccessor} = cat.ECInstanceId
-          ${createWhereClause({ conditions: ["NOT cat.IsPrivate", `rel.${classificationAccessor} = cl.ClassificationId`] })}
-          GROUP BY rel.${classificationAccessor}
+        ecsql = `
+          SELECT DISTINCT rel.${classificationAccessor} classificationId, cat.ECInstanceId categoryId
+          FROM ${CLASS_NAMES.SpatialCategory} cat
+          JOIN ${relationshipSpecification.fullClassName} rel ON rel.${categoryAccessor} = cat.ECInstanceId
+          WHERE NOT cat.IsPrivate
         `;
       } else {
-        categoriesOfClassificationSelector = `
-          SELECT group_concat(IdToHex(cat.ECInstanceId))
-          FROM ${CLASS_NAME_GeometricElement3d} e
-          JOIN ${CLASS_NAME_Model} m ON m.ECInstanceId = e.Model.Id
-          JOIN ${CLASS_NAME_SpatialCategory} cat ON cat.ECInstanceId = e.Category.Id
-          JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = e.ECInstanceId
-          ${createWhereClause({
-            conditions: ["e.Parent.Id IS NULL", "NOT cat.IsPrivate", "NOT m.IsPrivate", "NOT m.IsTemplate", "ehc.TargetECInstanceId = cl.ClassificationId"],
-          })}
-          GROUP BY ehc.TargetECInstanceId
+        ecsql = `
+          SELECT DISTINCT ehc.TargetECInstanceId classificationId, cat.ECInstanceId categoryId
+          FROM ${CLASS_NAMES.GeometricElement3d} e
+          JOIN ${CLASS_NAMES.Model} m ON m.ECInstanceId = e.Model.Id
+          JOIN ${CLASS_NAMES.SpatialCategory} cat ON cat.ECInstanceId = e.Category.Id
+          JOIN ${CLASS_NAMES.ElementHasClassifications} ehc ON ehc.SourceECInstanceId = e.ECInstanceId
+          ${createWhereClause({ conditions: ["e.Parent.Id IS NULL", "NOT cat.IsPrivate", "NOT m.IsPrivate", "NOT m.IsTemplate"] })}
         `;
       }
-      const ecsql = `
-        SELECT
-          cl.ClassificationId id,
-          cl.ClassificationTableId tableId,
-          cl.ParentClassificationId parentId,
-          (${categoriesOfClassificationSelector}) relatedCategories
-        FROM ${CLASSIFICATIONS_CTE} cl
-        ${createWhereClause({ conditions: [lastClassificationId !== undefined && `cl.ClassificationId > ${lastClassificationId}`] })}
-        ORDER BY cl.ClassificationId
-        LIMIT ${this.#rowLimit}
-      `;
-      return this.#props.queryExecutor.createQueryReader(
-        { ctes, ecsql },
-        {
-          rowFormat: "ECSqlPropertyNames",
-          limit: "unbounded",
-          restartToken: `${this.#componentName}/${this.#componentId}/classifications/${lastClassificationId ?? "0"}`,
-        },
+      return imodelAccess.createQueryReader(
+        { ecsql },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${componentName}/${componentId}/classification-categories` },
       );
-    };
-    return defer(() => getQueryReader()).pipe(
-      // Note: if the total row count is an exact multiple of `#rowLimit`, an extra request that returns
-      // 0 rows will be sent. This is acceptable to keep the implementation simple.
-      expand((row, idx) => {
-        if (idx % this.#rowLimit === this.#rowLimit - 1) {
-          return getQueryReader(row.id);
-        }
-        return EMPTY;
-      }),
+    }).pipe(
       catchBeSQLiteInterrupts,
-      map((row) => {
-        const relatedCategories = row.relatedCategories ? (row.relatedCategories as string).split(",") : [];
-        return {
-          id: row.id,
-          tableId: row.tableId,
-          parentId: row.parentId,
-          relatedCategories,
-        };
-      }),
+      map((row) => ({ classificationId: row.classificationId, categoryId: row.categoryId })),
     );
   }
 
-  private getCachedData() {
-    this.#cachedData ??= this.getCategoriesContainingNonExcludedElements().pipe(
-      mergeMap((categoriesContainingNonExcludedElements) =>
-        this.queryClassifications().pipe(
-          reduce(
-            (acc, { id, tableId, parentId, relatedCategories }) => {
-              if (parentId !== undefined) {
-                acc.classificationsWithChildren.add(parentId);
-                acc.classificationsWithNonExcludedChildren.add(parentId);
-              }
-              if (relatedCategories.length > 0) {
-                acc.classificationsWithChildren.add(id);
-                if (relatedCategories.some((categoryId) => categoriesContainingNonExcludedElements.has(categoryId))) {
-                  acc.classificationsWithNonExcludedChildren.add(id);
-                }
-              }
-              const tableOrParentId = tableId ?? parentId;
-              const parentInfo = getOrCreate({
-                map: acc.classificationOrTableInfos,
-                key: tableOrParentId,
-                createFunc: () => ({ childClassificationIds: [], relatedCategories: [], parentClassificationOrTableId: undefined }),
-              });
-              parentInfo.childClassificationIds.push(id);
-              const classificationEntry = getOrCreate({
-                map: acc.classificationOrTableInfos,
-                key: id,
-                createFunc: () => ({ childClassificationIds: [], relatedCategories, parentClassificationOrTableId: tableOrParentId }),
-              });
-              classificationEntry.parentClassificationOrTableId = tableOrParentId;
-              return acc;
-            },
-            {
-              classificationOrTableInfos: new Map<ClassificationId | ClassificationTableId, ClassificationOrTableInfo>(),
-              classificationsWithChildren: new Set<ClassificationId>(),
-              classificationsWithNonExcludedChildren: new Set<ClassificationId>(),
-            },
-          ),
-        ),
-      ),
-      tap(() => {
-        this.#cachedDataLoaded = true;
-      }),
+  function getClassificationCategories(): Observable<Map<ClassificationId, CategoryId[]>> {
+    cachedClassificationCategories ??= queryClassificationCategories().pipe(
+      reduce((acc, { classificationId, categoryId }) => {
+        getOrCreate({ map: acc, key: classificationId, createFunc: () => new Array<CategoryId>() }).push(categoryId);
+        return acc;
+      }, new Map<ClassificationId, CategoryId[]>()),
       shareReplay(),
     );
-    return this.#cachedData;
+    return cachedClassificationCategories;
   }
 
-  public get isDataLoaded(): boolean {
-    return this.#cachedDataLoaded;
-  }
-
-  public hasChildren(classificationId: ClassificationId): Observable<boolean> {
-    return this.getCachedData().pipe(map(({ classificationsWithNonExcludedChildren }) => classificationsWithNonExcludedChildren.has(classificationId)));
-  }
-
-  public getAllContainedCategories(classificationOrTableIds: Id64Arg): Observable<CategoryId> {
+  function getAllContainedCategories(classificationOrTableIds: Id64Arg): Observable<CategoryId> {
     if (Id64.sizeOf(classificationOrTableIds) === 0) {
       return EMPTY;
     }
-    return this.getCachedData().pipe(
-      mergeMap(({ classificationOrTableInfos }) =>
-        from(Id64.iterable(classificationOrTableIds)).pipe(
-          mergeMap((classificationOrTableId) => {
-            const classificationInfo = classificationOrTableInfos.get(classificationOrTableId);
-            if (classificationInfo === undefined) {
-              return EMPTY;
-            }
-            return merge(from(classificationInfo.relatedCategories), this.getAllContainedCategories(classificationInfo.childClassificationIds));
-          }),
+    return forkJoin({
+      classificationCategories: getClassificationCategories(),
+      childClassifications: toObservable(treeDefinitionsIdsProvider.getDirectChildClassifications(classificationOrTableIds)),
+    }).pipe(
+      mergeMap(({ classificationCategories, childClassifications }) =>
+        merge(
+          from(Id64.iterable(classificationOrTableIds)).pipe(mergeMap((id) => classificationCategories.get(id) ?? EMPTY)),
+          childClassifications.length > 0 ? getAllContainedCategories(childClassifications.map(({ id }) => id)) : EMPTY,
         ),
       ),
     );
   }
 
-  public getDirectChildClassifications(classificationOrTableIds: Id64Arg): Observable<ClassificationId[]> {
-    const result = new Array<ClassificationId>();
-    if (Id64.sizeOf(classificationOrTableIds) === 0) {
-      return of(result);
-    }
-    return this.getCachedData().pipe(
-      mergeMap(({ classificationOrTableInfos }) =>
-        from(Id64.iterable(classificationOrTableIds)).pipe(
-          reduce((acc, classificationOrTableId) => {
-            const classificationInfo = classificationOrTableInfos.get(classificationOrTableId);
-            if (classificationInfo !== undefined) {
-              classificationInfo.childClassificationIds.forEach((id) => acc.push(id));
-            }
-            return acc;
-          }, result),
-        ),
-      ),
-    );
-  }
-
-  public getClassificationsPathObs(classificationIds: Id64Arg): Observable<HierarchyNodeIdentifiersPath> {
-    return this.getCachedData().pipe(
-      mergeMap(({ classificationOrTableInfos }) =>
-        fromWithRelease({ source: classificationIds, releaseOnCount: 200 }).pipe(
-          map((classificationId) => {
-            const path: HierarchyNodeIdentifiersPath = [{ id: classificationId, className: CLASS_NAME_Classification }];
-            let parentId = classificationOrTableInfos.get(classificationId)?.parentClassificationOrTableId;
-            while (parentId !== undefined) {
-              const parentIdOfParent = classificationOrTableInfos.get(parentId)?.parentClassificationOrTableId;
-              if (parentIdOfParent) {
-                path.push({ className: CLASS_NAME_Classification, id: parentId });
-              } else {
-                path.push({ className: CLASS_NAME_ClassificationTable, id: parentId });
-              }
-              parentId = parentIdOfParent;
-            }
-            return path.reverse();
-          }),
-        ),
-      ),
-    );
-  }
-
-  public getAllClassifications(): Observable<ClassificationId[]> {
-    return this.getCachedData().pipe(map(({ classificationOrTableInfos }) => [...classificationOrTableInfos.keys()]));
-  }
-
-  private queryFilteredElementsData({ elementIds }: { elementIds: Id64Array }): Observable<{
-    modelId: Id64String;
-    id: ElementId;
-    categoryId: Id64String;
-  }> {
+  function queryFilteredElementsData(elementIds: Id64Array): Observable<{ modelId: Id64String; id: ElementId; categoryId: Id64String }> {
     return defer(() => {
       const query = `
         SELECT
           this.Model.Id modelId,
           this.Category.Id categoryId,
           this.ECInstanceId id
-        FROM ${CLASS_NAME_GeometricElement3d} this
+        FROM ${CLASS_NAMES.GeometricElement3d} this
         JOIN IdSet(?) elementIdSet ON ECInstanceId = elementIdSet.id
       `;
-      return this.#props.queryExecutor.createQueryReader(
-        {
-          ecsql: query,
-          bindings: [{ type: "idset", value: elementIds }],
-        },
+      return imodelAccess.createQueryReader(
+        { ecsql: query, bindings: [{ type: "idset", value: elementIds }] },
         {
           rowFormat: "ECSqlPropertyNames",
           limit: "unbounded",
-          restartToken: `${this.#componentName}/${this.#componentId}/filtered-elements/${Guid.createValue()}`,
+          restartToken: `${componentName}/${componentId}/filtered-elements/${Guid.createValue()}`,
         },
       );
     }).pipe(
       catchBeSQLiteInterrupts,
-      map((row) => {
-        return {
-          modelId: row.modelId,
-          id: row.id,
-          categoryId: row.categoryId,
-        };
-      }),
+      map((row) => ({ modelId: row.modelId, id: row.id, categoryId: row.categoryId })),
     );
   }
 
-  public getFilteredElementsData({ elementIds }: { elementIds: Id64Array }): Observable<Map<ElementId, { categoryId: Id64String; modelId: Id64String }>> {
-    const result = new Map<ElementId, { categoryId: Id64String; modelId: Id64String }>();
-    if (Id64.sizeOf(elementIds) === 0) {
-      return of(result);
-    }
-    this.#filteredElementsData ??= this.queryFilteredElementsData({
-      elementIds,
-    }).pipe(
-      reduce((acc, { modelId, id, categoryId }) => {
-        acc.set(id, { modelId, categoryId });
-        return acc;
-      }, result),
-      shareReplay(),
-    );
-    return this.#filteredElementsData;
-  }
-
-  public clearFilteredElementsData() {
-    this.#filteredElementsData = undefined;
-  }
+  return extendObject({
+    base: treeDefinitionsIdsProvider,
+    extension: {
+      preloadClassifications: async () => {
+        if (treeDefinitionsIdsProvider.state !== "not-requested") {
+          return;
+        }
+        try {
+          await toVoidPromise(toObservable(treeDefinitionsIdsProvider.getAllClassifications()));
+        } catch {}
+      },
+      getAllContainedCategories,
+      getFilteredElementsData: ({ elementIds }: { elementIds: Id64Array }) => {
+        if (Id64.sizeOf(elementIds) === 0) {
+          return of(new Map());
+        }
+        filteredElementsData ??= queryFilteredElementsData(elementIds).pipe(
+          reduce(
+            (acc, { modelId, id, categoryId }) => acc.set(id, { modelId, categoryId }),
+            new Map<ElementId, { categoryId: Id64String; modelId: Id64String }>(),
+          ),
+          shareReplay(),
+        );
+        return filteredElementsData;
+      },
+      clearFilteredElementsData: () => {
+        filteredElementsData = undefined;
+      },
+    },
+  });
 }

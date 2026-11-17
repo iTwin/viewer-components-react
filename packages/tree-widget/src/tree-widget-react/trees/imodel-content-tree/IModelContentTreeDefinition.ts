@@ -5,18 +5,8 @@
 
 import { IModel } from "@itwin/core-common";
 import { createPredicateBasedHierarchyDefinition, ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
-import {
-  CLASS_NAME_DrawingCategory,
-  CLASS_NAME_Element,
-  CLASS_NAME_GeometricModel2d,
-  CLASS_NAME_GeometricModel3d,
-  CLASS_NAME_InformationPartitionElement,
-  CLASS_NAME_ISubModeledElement,
-  CLASS_NAME_Model,
-  CLASS_NAME_SpatialCategory,
-  CLASS_NAME_Subject,
-} from "../../shared/internal/ClassNameDefinitions.js";
-import { createIdsSelector, createWhereClause, getClassesByView, parseIdsSelectorResult } from "../../shared/internal/Utils.js";
+import { CLASS_NAMES } from "../../shared/internal/ClassNameDefinitions.js";
+import { createIdsSelector, createWhereClause, getClassesByPerspective, parseIdsSelectorResult } from "../../shared/internal/Utils.js";
 
 import type {
   DefineGenericNodeChildHierarchyLevelProps,
@@ -66,35 +56,35 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
           this.createSubjectChildrenQuery({ ...requestProps, parentNodeInstanceIds: this.#hierarchyConfig.hideRootSubject ? [IModel.rootSubjectId] : [] }),
         childNodes: [
           {
-            parentInstancesNodePredicate: CLASS_NAME_Subject,
+            parentInstancesNodePredicate: CLASS_NAMES.Subject,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createSubjectChildrenQuery(requestProps),
           },
           {
-            parentInstancesNodePredicate: CLASS_NAME_ISubModeledElement,
+            parentInstancesNodePredicate: CLASS_NAMES.ISubModeledElement,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createISubModeledElementChildrenQuery(requestProps),
           },
           {
-            parentInstancesNodePredicate: CLASS_NAME_GeometricModel3d,
+            parentInstancesNodePredicate: CLASS_NAMES.GeometricModel3d,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) =>
               this.createGeometricModelChildrenQuery({ ...requestProps, viewType: "3d" }),
           },
           {
-            parentInstancesNodePredicate: CLASS_NAME_GeometricModel2d,
+            parentInstancesNodePredicate: CLASS_NAMES.GeometricModel2d,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) =>
               this.createGeometricModelChildrenQuery({ ...requestProps, viewType: "2d" }),
           },
           {
-            parentInstancesNodePredicate: CLASS_NAME_SpatialCategory,
+            parentInstancesNodePredicate: CLASS_NAMES.SpatialCategory,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) =>
               this.createCategoryChildrenQuery({ ...requestProps, viewType: "3d" }),
           },
           {
-            parentInstancesNodePredicate: CLASS_NAME_DrawingCategory,
+            parentInstancesNodePredicate: CLASS_NAMES.DrawingCategory,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) =>
               this.createCategoryChildrenQuery({ ...requestProps, viewType: "2d" }),
           },
           {
-            parentInstancesNodePredicate: CLASS_NAME_Model,
+            parentInstancesNodePredicate: CLASS_NAMES.Model,
             onlyIfNotHandled: true,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createModelChildrenQuery(requestProps),
           },
@@ -111,7 +101,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
             definitions: async (requestProps: DefineGenericNodeChildHierarchyLevelProps) => this.createGroupInformationElementMemberElementsQuery(requestProps),
           },
           {
-            parentInstancesNodePredicate: CLASS_NAME_Element,
+            parentInstancesNodePredicate: CLASS_NAMES.Element,
             onlyIfNotHandled: true,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createElementChildrenQuery(requestProps),
           },
@@ -144,11 +134,11 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
     const [subjectFilterClauses, modelFilterClauses] = await Promise.all([
       createFilterClauses({
         filter: instanceFilter,
-        contentClass: { fullName: CLASS_NAME_Subject, alias: "this" },
+        contentClass: { fullName: CLASS_NAMES.Subject, alias: "this" },
       }),
       createFilterClauses({
         filter: instanceFilter,
-        contentClass: { fullName: CLASS_NAME_Model, alias: "this" },
+        contentClass: { fullName: CLASS_NAMES.Model, alias: "this" },
       }),
     ]);
     const [childSubjectIds, childModelIds] = parentSubjectIds.length
@@ -157,7 +147,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
     const defs = new Array<HierarchyNodesDefinition>();
     childSubjectIds.length &&
       defs.push({
-        fullClassName: CLASS_NAME_Subject,
+        fullClassName: CLASS_NAMES.Subject,
         query: {
           ecsql: `
             SELECT
@@ -167,7 +157,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 nodeLabel: {
                   of: {
                     classAlias: "this",
-                    className: CLASS_NAME_Subject,
+                    className: CLASS_NAMES.Subject,
                   },
                 },
                 hasChildren: {
@@ -201,7 +191,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
       });
     childModelIds.length &&
       defs.push({
-        fullClassName: CLASS_NAME_Model,
+        fullClassName: CLASS_NAMES.Model,
         query: {
           ecsql: `
             SELECT
@@ -211,7 +201,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 nodeLabel: {
                   of: {
                     classAlias: "partition",
-                    className: CLASS_NAME_InformationPartitionElement,
+                    className: CLASS_NAMES.InformationPartitionElement,
                   },
                 },
                 hideNodeInHierarchy: { selector: "model.IsHidden" },
@@ -231,12 +221,12 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 END IsHidden,
                 m.ECInstanceId ECInstanceId,
                 m.ECClassId ECClassId
-              FROM ${CLASS_NAME_Model} m
+              FROM ${CLASS_NAMES.Model} m
               JOIN IdSet(?) childModelIdSet ON childModelIdSet.id = m.ECInstanceId
-              JOIN ${CLASS_NAME_InformationPartitionElement} p ON p.ECInstanceId = m.ModeledElement.Id
+              JOIN ${CLASS_NAMES.InformationPartitionElement} p ON p.ECInstanceId = m.ModeledElement.Id
             ) model
             JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = model.ECInstanceId
-            JOIN ${CLASS_NAME_InformationPartitionElement} [partition] ON [partition].ECInstanceId = this.ModeledElement.Id
+            JOIN ${CLASS_NAMES.InformationPartitionElement} [partition] ON [partition].ECInstanceId = this.ModeledElement.Id
             ${modelFilterClauses.joins}
 
             ${createWhereClause({ conditions: [modelFilterClauses.where && `model.IsHidden OR ${modelFilterClauses.where}`] })}
@@ -255,7 +245,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
     // hidden - the filter will get applied on the child hierarchy levels
     return [
       {
-        fullClassName: CLASS_NAME_Model,
+        fullClassName: CLASS_NAMES.Model,
         query: {
           ecsql: `
             SELECT
@@ -265,7 +255,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 nodeLabel: "", // doesn't matter - the node is always hidden
                 hideNodeInHierarchy: true,
               })}
-            FROM ${CLASS_NAME_Model} this
+            FROM ${CLASS_NAMES.Model} this
             JOIN IdSet(?) elementIdSet ON elementIdSet.id = this.ModeledElement.Id
             WHERE NOT this.IsPrivate
           `,
@@ -284,7 +274,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
   }: DefineInstanceNodeChildHierarchyLevelProps & { viewType: "2d" | "3d" }): Promise<HierarchyLevelDefinition> {
     const childCategoryIds = await this.#idsProvider.getModelCategoryIds(modelIds);
 
-    const { categoryClass } = getClassesByView(viewType);
+    const { categoryClass } = getClassesByPerspective(viewType);
     const categoryFilterClauses = await createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: categoryClass, alias: "this" },
@@ -367,7 +357,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
       return this.createElementChildrenQuery(props);
     }
 
-    const { elementClass, modelClass } = getClassesByView(viewType);
+    const { elementClass, modelClass } = getClassesByPerspective(viewType);
     return Promise.all(
       getElementsSelectProps({ modelClass, elementClass }).map(async ({ selectProps, whereClause }) => {
         const instanceFilterClauses = await createFilterClauses({
@@ -639,8 +629,8 @@ function getElementsSelectProps(props?: {
   modelClass?: EC.FullClassNameDotNotation;
   elementClass?: "BisCore.GeometricElement3d" | "BisCore.GeometricElement2d";
 }) {
-  const modelClassFullName: EC.FullClassNameDotNotation = props?.modelClass ?? CLASS_NAME_Model;
-  const elementClassFullName: EC.FullClassNameDotNotation = props?.elementClass ?? CLASS_NAME_Element;
+  const modelClassFullName: EC.FullClassNameDotNotation = props?.modelClass ?? CLASS_NAMES.Model;
+  const elementClassFullName: EC.FullClassNameDotNotation = props?.elementClass ?? CLASS_NAMES.Element;
   const result = [
     {
       classFullName: elementClassFullName,
@@ -675,7 +665,7 @@ function getElementsSelectProps(props?: {
             IFNULL((
               SELECT 1
               FROM (
-                SELECT Parent.Id ParentId FROM ${CLASS_NAME_Element}
+                SELECT Parent.Id ParentId FROM ${CLASS_NAMES.Element}
                 UNION ALL
                 SELECT SourceECInstanceId ParentId FROM BisCore.ElementGroupsMembers
               )
