@@ -66,7 +66,8 @@ export function useInstanceLabels({ imodel, instanceKeys }: { imodel: IModelConn
   const { onPerformanceMeasured } = useTelemetryContext();
   const keysByClass = useMemo(() => groupInstanceKeysByClass(instanceKeys), [instanceKeys]);
   const total = useMemo(() => [...keysByClass.values()].reduce((count, keys) => count + keys.size, 0), [keysByClass]);
-  const session = useMemo(() => createSession(imodel, keysByClass, total), [imodel, keysByClass, total]);
+  const labelQueryServices = useMemo(() => createLabelQueryServices(imodel), [imodel]);
+  const session = useMemo(() => createSession(labelQueryServices, keysByClass, total), [labelQueryServices, keysByClass, total]);
 
   useEffect(() => {
     let items: LabeledInstanceKey[] = [];
@@ -105,13 +106,22 @@ export function useInstanceLabels({ imodel, instanceKeys }: { imodel: IModelConn
   return { rows, loadMore };
 }
 
-function createSession(imodel: IModelConnection, keysByClass: Map<string, Map<Id64String, InstanceKey>>, total: number): InstanceLabelsSession {
+function createLabelQueryServices(imodel: IModelConnection) {
   const schemaProvider = createECSchemaProvider(imodel.schemaContext);
-  const queryExecutor = createECSqlQueryExecutor(imodel);
-  const labelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({
-    classHierarchyInspector: createCachingECClassHierarchyInspector({ schemaProvider, cacheSize: 100 }),
-  });
-  const valueFormatter = createDefaultValueFormatter();
+  return {
+    queryExecutor: createECSqlQueryExecutor(imodel),
+    labelSelectClauseFactory: createBisInstanceLabelSelectClauseFactory({
+      classHierarchyInspector: createCachingECClassHierarchyInspector({ schemaProvider, cacheSize: 100 }),
+    }),
+    valueFormatter: createDefaultValueFormatter(),
+  };
+}
+
+function createSession(
+  { queryExecutor, labelSelectClauseFactory, valueFormatter }: ReturnType<typeof createLabelQueryServices>,
+  keysByClass: Map<string, Map<Id64String, InstanceKey>>,
+  total: number,
+): InstanceLabelsSession {
   const loadRequests = new Subject<void>();
   const pages = defer(() => {
     let offset = 0;

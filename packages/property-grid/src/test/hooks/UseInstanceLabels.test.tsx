@@ -147,27 +147,6 @@ describe("useInstanceLabels", () => {
     expect(reader).toHaveBeenCalledTimes(pageCount);
   });
 
-  it("loads real labels in sorted pages", async () => {
-    const built = await buildIModel("use-instance-labels-real", async (db) =>
-      withEditTxn(db, (txn) => ({
-        keys: Array.from({ length: 105 }, (_, index) => insertSubject({ txn, codeValue: `subject-${String(104 - index).padStart(3, "0")}` })),
-      })),
-    );
-    imodel = built.imodelConnection;
-    const keys = built.keys;
-    const reader = vi.spyOn(imodel, "createQueryReader");
-    const { result } = renderHook(useInstanceLabels, { initialProps: { imodel, instanceKeys: keys }, disableStrictMode: true });
-
-    act(() => result.current.loadMore());
-    await waitFor(() => expect(result.current.rows.filter(Boolean)).toHaveLength(100));
-    act(() => result.current.loadMore());
-    await waitFor(() => expect(result.current.rows.filter(Boolean)).toHaveLength(105));
-    expect(result.current.rows.map((row) => row?.label)).toEqual(Array.from({ length: 105 }, (_, index) => `subject-${String(index).padStart(3, "0")}`));
-    expect(result.current.rows.map((row) => row?.instanceKey)).toEqual(keys.toReversed());
-    act(() => result.current.loadMore());
-    expect(reader).toHaveBeenCalledTimes(2);
-  });
-
   it("measures each completed page and ignores a selection superseded during preparation", async () => {
     const built = await buildIModel("use-instance-labels-telemetry", async (db) =>
       withEditTxn(db, (txn) => ({

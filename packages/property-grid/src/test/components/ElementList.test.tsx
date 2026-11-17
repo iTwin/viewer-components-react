@@ -16,6 +16,8 @@ import type * as interop from "@itwin/presentation-core-interop";
 import type * as shared from "@itwin/presentation-shared";
 import type { LabeledInstanceKey } from "./StubInstanceLabelQueries.js";
 
+const FIRST_PAGE = { offset: 0, limit: 100 };
+
 vi.mock("@itwin/presentation-core-interop", async (importOriginal) => {
   const actual = await importOriginal<typeof interop>();
   return { ...actual, createECSqlQueryExecutor: vi.fn(actual.createECSqlQueryExecutor) };
@@ -44,23 +46,7 @@ describe("<ElementList />", () => {
     createQueryReader = stubInstanceLabelQueries(getLabelsStub);
   });
 
-  it("loads and renders instance labels", async () => {
-    const instanceKeys = Array(5)
-      .fill(0)
-      .map((_, i) => ({ id: `0x${i + 1}`, className: "TestSchema.TestClass" }));
-    const expectedLabels = instanceKeys.map(buildLabel);
-    getLabelsStub.mockResolvedValue(await buildPage(instanceKeys, { offset: 0, limit: 100 }));
-
-    const { getByText } = render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={() => {}} onSelect={() => {}} />);
-
-    for (const expected of expectedLabels) {
-      await waitFor(() => getByText(expected));
-    }
-
-    expect(getLabelsStub).toHaveBeenCalledWith({ offset: 0, limit: 100 });
-  });
-
-  it("loads and orders elements by labels", async () => {
+  it("renders elements in the order returned by the query", async () => {
     const instanceKeys = [
       { id: "0x0", className: "TestSchema.B_Second" },
       { id: "0x0", className: "TestSchema.A_First" },
@@ -68,7 +54,7 @@ describe("<ElementList />", () => {
     ];
 
     const expectedLabels = instanceKeys.map(buildLabel).sort();
-    getLabelsStub.mockResolvedValue(await buildPage(instanceKeys, { offset: 0, limit: 100 }));
+    getLabelsStub.mockResolvedValue(await buildPage(instanceKeys, FIRST_PAGE));
 
     const { findAllByRole } = render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={() => {}} onSelect={() => {}} />);
 
@@ -76,6 +62,8 @@ describe("<ElementList />", () => {
     listItems.forEach((item, index) => {
       expect(item.textContent).toBe(expectedLabels[index]);
     });
+    expect(getLabelsStub).toHaveBeenCalledWith(FIRST_PAGE);
+    expect(createQueryReader.mock.calls[0][0].ecsql).toContain("ORDER BY LOWER(sortLabel), className, id");
   });
 
   it("does not overwrite current labels with an outdated load", async () => {
@@ -107,7 +95,7 @@ describe("<ElementList />", () => {
 
   it("clears loaded rows when the selection becomes empty without querying", async () => {
     const instanceKeys = [{ id: "0x1", className: "Schema:Class" }];
-    getLabelsStub.mockResolvedValue(await buildPage(instanceKeys, { offset: 0, limit: 100 }));
+    getLabelsStub.mockResolvedValue(await buildPage(instanceKeys, FIRST_PAGE));
     const { findByText, rerender, queryAllByRole } = render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={() => {}} onSelect={() => {}} />);
     await findByText(buildLabel(instanceKeys[0]));
     getLabelsStub.mockClear();
@@ -124,7 +112,7 @@ describe("<ElementList />", () => {
       .map((_, i) => ({ id: `0x${i + 1}`, className: "TestSchema.TestClass" }));
     const expectedLabels = instanceKeys.map(buildLabel);
     const onSelectSpy = vi.fn();
-    getLabelsStub.mockResolvedValue(await buildPage(instanceKeys, { offset: 0, limit: 100 }));
+    getLabelsStub.mockResolvedValue(await buildPage(instanceKeys, FIRST_PAGE));
 
     const { getByText, user } = render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={() => {}} onSelect={onSelectSpy} />);
 
@@ -142,7 +130,7 @@ describe("<ElementList />", () => {
       .map((_, i) => ({ id: `0x${i + 1}`, className: "TestSchema.TestClass" }));
     const expectedLabels = instanceKeys.map(buildLabel);
     const onBackSpy = vi.fn();
-    getLabelsStub.mockResolvedValue(await buildPage(instanceKeys, { offset: 0, limit: 100 }));
+    getLabelsStub.mockResolvedValue(await buildPage(instanceKeys, FIRST_PAGE));
 
     const { getByText, getByRole, user } = render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={onBackSpy} onSelect={() => {}} />);
 
@@ -171,27 +159,26 @@ describe("<ElementList />", () => {
         disableStrictMode: true,
       });
       await findByText(buildLabel(instanceKeys[0]));
-      const initialRequests = getLabelsStub.mock.calls.length;
-      expect(getLabelsStub.mock.calls.every(([page]) => page.offset === 0)).toBe(true);
-      expect(getLabelsStub).toHaveBeenLastCalledWith({ offset: 0, limit: 100 });
+      expect(getLabelsStub).toHaveBeenCalledOnce();
+      expect(getLabelsStub.mock.calls[0][0]).toEqual(FIRST_PAGE);
       // while idle, the list only contains the loaded rows
       expect(container.querySelectorAll('[aria-busy="true"]')).toHaveLength(0);
 
       // scrolling that stays away from the end must not request the next page
       fireEvent.scroll(getByRole("list"), { target: { scrollTop: 1500 } });
       await findByText(buildLabel(instanceKeys[60]));
-      expect(getLabelsStub).toHaveBeenCalledTimes(initialRequests);
+      expect(getLabelsStub).toHaveBeenCalledOnce();
 
       // reaching the end of the loaded rows requests the next page and appends skeletons for it
       fireEvent.scroll(getByRole("list"), { target: { scrollTop: 2300 } });
-      await waitFor(() => expect(getLabelsStub).toHaveBeenCalledTimes(initialRequests + 1));
+      await waitFor(() => expect(getLabelsStub).toHaveBeenCalledTimes(2));
       expect(getLabelsStub).toHaveBeenLastCalledWith({ offset: 100, limit: 100 });
       await waitFor(() => expect(container.querySelectorAll('[aria-busy="true"]')).toHaveLength(5));
 
       await act(async () => next.resolve(await buildPage(instanceKeys, { offset: 100, limit: 100 })));
       await findByText(buildLabel(instanceKeys[104]));
       expect(container.querySelectorAll('[aria-busy="true"]')).toHaveLength(0);
-      expect(getLabelsStub).toHaveBeenCalledTimes(initialRequests + 1);
+      expect(getLabelsStub).toHaveBeenCalledTimes(2);
     });
 
     it("shows skeletons while the first page loads", async () => {
@@ -202,7 +189,7 @@ describe("<ElementList />", () => {
       });
       await waitFor(() => expect(container.querySelectorAll('[aria-busy="true"]').length).toBeGreaterThan(0));
 
-      await act(async () => first.resolve(await buildPage(instanceKeys, { offset: 0, limit: 100 })));
+      await act(async () => first.resolve(await buildPage(instanceKeys, FIRST_PAGE)));
       await findByText(buildLabel(instanceKeys[0]));
       expect(container.querySelectorAll('[aria-busy="true"]')).toHaveLength(0);
     });
@@ -245,28 +232,25 @@ describe("<ElementList />", () => {
     });
 
     it("deduplicates equivalent class names before paging, but keeps keys from different classes", async () => {
-      const keys = instanceKeys.slice(0, 99);
-      const otherClass = { ...keys[0], className: "TestSchema.OtherClass" };
-      const duplicate = { ...keys[0], className: "TestSchema:TestClass" };
-      const selection = [...keys, otherClass, duplicate];
-      getLabelsStub.mockImplementation(async (page) => buildPage([...keys, otherClass], page));
-      const { getByRole, findByText } = render(<ElementList imodel={imodel} instanceKeys={selection} onBack={() => {}} onSelect={() => {}} />, {
+      const key = instanceKeys[0];
+      const otherClass = { ...key, className: "TestSchema.OtherClass" };
+      const duplicate = { ...key, className: "TestSchema:TestClass" };
+      const selection = [key, otherClass, duplicate];
+      getLabelsStub.mockImplementation(async (page) => buildPage([duplicate, otherClass], page));
+      const { findByText, findAllByRole } = render(<ElementList imodel={imodel} instanceKeys={selection} onBack={() => {}} onSelect={() => {}} />, {
         disableStrictMode: true,
       });
 
       await findByText(buildLabel(duplicate));
+      await findByText(buildLabel(otherClass));
+      expect(await findAllByRole("listitem")).toHaveLength(2);
       expect(createQueryReader.mock.calls[0][0].bindings).toEqual([
-        { type: "idset", value: keys.map((key) => key.id) },
+        { type: "idset", value: [key.id] },
         { type: "idset", value: [otherClass.id] },
         { type: "long", value: 100 },
         { type: "long", value: 0 },
       ]);
-
-      const initialRequests = getLabelsStub.mock.calls.length;
-      fireEvent.scroll(getByRole("list"), { target: { scrollTop: 2300 } });
-      await findByText(buildLabel(keys[98]));
-      expect(getLabelsStub).toHaveBeenCalledTimes(initialRequests);
-      expect(getLabelsStub.mock.calls.every(([page]) => page.offset === 0)).toBe(true);
+      expect(getLabelsStub).toHaveBeenCalledOnce();
     });
 
     it.each([0, 5, 100])("stops paging when only %i of the selected keys have results", async (resultCount) => {
@@ -358,7 +342,7 @@ describe("<ElementList />", () => {
       rerender(<ElementList imodel={imodel} instanceKeys={selection} onBack={() => {}} onSelect={() => {}} />);
       await findByText(buildLabel(selection[0]));
       expect(getByRole("list").scrollTop).toBe(0);
-      expect(getLabelsStub).toHaveBeenLastCalledWith({ offset: 0, limit: 100 });
+      expect(getLabelsStub).toHaveBeenLastCalledWith(FIRST_PAGE);
       await act(async () => next.resolve(await buildPage(instanceKeys, { offset: 100, limit: 100 })));
       expect(queryByText(buildLabel(instanceKeys[104]))).toBeNull();
       await findByText(buildLabel(selection[0]));
