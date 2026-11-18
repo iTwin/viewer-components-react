@@ -4,16 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import categorySvg from "@stratakit/icons/bis-category-3d.svg";
 import { EmptyTreeContent, NoSearchMatches, SearchUnknownError, TooManySearchMatches } from "../../shared/components/EmptyTree.js";
 import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
 import { useCachedVisibility } from "../../shared/internal/hooks/UseCachedVisibility.js";
 import { useGuid } from "../../shared/internal/hooks/UseGuid.js";
-import { getClassesByView, mergeWithDefaults, stableStringify } from "../../shared/internal/Utils.js";
+import { createIModelAccess } from "../../shared/internal/hooks/UseIModelAccess.js";
+import { getClassesByPerspective, mergeWithDefaults, stableStringify } from "../../shared/internal/Utils.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIcon } from "./CategoriesTreeIcon.js";
-import { CategoriesTreeIdsProvider } from "./internal/CategoriesTreeIdsProvider.js";
+import { createCategoriesTreeIdsProvider } from "./internal/CategoriesTreeIdsProvider.js";
 import { useSearchPaths } from "./internal/UseSearchPaths.js";
 import { CategoriesTreeVisibilityHandler } from "./internal/visibility/CategoriesTreeVisibilityHandler.js";
 import { createCategoriesSearchResultsTree } from "./internal/visibility/SearchResultsTree.js";
@@ -25,10 +25,12 @@ import type { EC } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../../shared/components/VisibilityTree.js";
 import type { ExtendedVisibilityTreeRendererProps } from "../../shared/components/VisibilityTreeRenderer.js";
 import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../../shared/internal/hooks/UseCachedVisibility.js";
+import type { SharedIdsProvider } from "../../shared/internal/idsProviders/SharedIdsProvider.js";
 import type { SearchResultsTree } from "../../shared/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../../shared/TreeWidgetViewport.js";
 import type { CategoryInfo } from "./CategoriesTreeButtons.js";
 import type { CategoriesTreeHierarchyConfiguration, RequiredCategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
+import type { CategoriesTreeIdsProvider } from "./internal/CategoriesTreeIdsProvider.js";
 import type { CategoriesTreeSearchError } from "./internal/UseSearchPaths.js";
 import type { CategoriesTreeSearchTargets } from "./internal/visibility/SearchResultsTree.js";
 
@@ -84,26 +86,27 @@ export function useCategoriesTree({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [hierarchyConfigFingerprint],
   );
-  const [viewType, setViewType] = useState<"2d" | "3d">(activeView.viewType === "2d" ? "2d" : "3d");
+  const [perspective, setPerspective] = useState<"2d" | "3d">(activeView.viewType === "2d" ? "2d" : "3d");
   const componentId = useGuid();
 
   // Listen for view type changes
   useEffect(() => {
     return activeView.onDisplayStyleChanged.addListener(() => {
-      setViewType(activeView.viewType === "2d" ? "2d" : "3d");
+      setPerspective(activeView.viewType === "2d" ? "2d" : "3d");
     });
   }, [activeView]);
 
-  const idsProvider = useCategoriesTreeIdsProvider({
+  const idsProviders = useCategoriesTreeIdsProviders({
     imodel: activeView.iModel,
-    activeViewType: viewType,
+    perspective,
     excludedElementClassNames: hierarchyConfiguration.elements.nodes === "include" ? hierarchyConfiguration.elements.excludedClasses : undefined,
   });
+  const { idsProvider, sharedIdsProvider } = idsProviders;
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useCategoriesCachedVisibility({
     activeView,
-    viewType,
-    idsProvider,
+    perspective,
+    idsProviders,
     componentId,
     hierarchyConfig: hierarchyConfiguration,
   });
@@ -111,20 +114,20 @@ export function useCategoriesTree({
   const onNodeExpanded = useCallback(() => {
     void idsProvider.preloadDefinitionContainers();
     if (hierarchyConfiguration.elements.nodes === "include") {
-      void idsProvider.preloadElementModelCategories();
+      void sharedIdsProvider.models.preloadData();
     }
-  }, [idsProvider, hierarchyConfiguration]);
+  }, [idsProvider, sharedIdsProvider, hierarchyConfiguration]);
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     (props) => {
       return new CategoriesTreeDefinition({
         ...props,
-        viewType,
+        perspective,
         idsProvider,
         hierarchyConfig: hierarchyConfiguration,
       });
     },
-    [viewType, idsProvider, hierarchyConfiguration],
+    [perspective, idsProvider, hierarchyConfiguration],
   );
 
   const { getPaths, searchError } = useSearchPaths({
@@ -133,7 +136,7 @@ export function useCategoriesTree({
     searchLimit,
     idsProvider,
     onSearchPathsChanged,
-    viewType,
+    perspective,
     onCategoriesFiltered,
     componentId,
   });
@@ -176,21 +179,26 @@ function getEmptyTreeContentComponent(searchText?: string, error?: CategoriesTre
   return <EmptyTreeContent icon={categorySvg} />;
 }
 
+interface CategoriesTreeIdsProviders {
+  idsProvider: CategoriesTreeIdsProvider;
+  sharedIdsProvider: SharedIdsProvider;
+}
+
 function useCategoriesCachedVisibility(props: {
   activeView: TreeWidgetViewport;
-  idsProvider: CategoriesTreeIdsProvider;
-  viewType: "2d" | "3d";
+  idsProviders: CategoriesTreeIdsProviders;
+  perspective: "2d" | "3d";
   componentId: GuidString;
   hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
 }) {
-  const { activeView, idsProvider, viewType, componentId, hierarchyConfig } = props;
-  const { visibilityHandlerFactory, searchPaths, onSearchPathsChanged } = useCachedVisibility<CategoriesTreeIdsProvider, CategoriesTreeSearchTargets>({
+  const { activeView, idsProviders, perspective, componentId, hierarchyConfig } = props;
+  const { visibilityHandlerFactory, searchPaths, onSearchPathsChanged } = useCachedVisibility<CategoriesTreeIdsProviders, CategoriesTreeSearchTargets>({
     activeView,
-    idsProvider,
+    idsProvider: idsProviders,
     createSearchResultsTree: useCallback(
-      async (filteredTreeProps: CreateSearchResultsTreeProps<CategoriesTreeIdsProvider>) =>
-        createSearchResultsTree({ ...filteredTreeProps, viewClasses: getClassesByView(viewType) }),
-      [viewType],
+      async (filteredTreeProps: CreateSearchResultsTreeProps<CategoriesTreeIdsProviders>) =>
+        createSearchResultsTree({ ...filteredTreeProps, viewClasses: getClassesByPerspective(perspective) }),
+      [perspective],
     ),
     createTreeSpecificVisibilityHandler: useCallback(
       (specificProps) => createTreeSpecificVisibilityHandler({ ...specificProps, hierarchyConfig }),
@@ -200,8 +208,8 @@ function useCategoriesCachedVisibility(props: {
   });
 
   useEffect(() => {
-    idsProvider.clearFilteredElementsModels();
-  }, [searchPaths, idsProvider]);
+    idsProviders.idsProvider.clearFilteredElementsModels();
+  }, [searchPaths, idsProviders]);
 
   return {
     visibilityHandlerFactory,
@@ -210,55 +218,61 @@ function useCategoriesCachedVisibility(props: {
 }
 
 function createTreeSpecificVisibilityHandler(
-  props: CreateTreeSpecificVisibilityHandlerProps<CategoriesTreeIdsProvider> & {
+  props: CreateTreeSpecificVisibilityHandlerProps<CategoriesTreeIdsProviders> & {
     hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
   },
 ) {
   const { info, idsProvider, viewport, hierarchyConfig } = props;
   return new CategoriesTreeVisibilityHandler({
     alwaysAndNeverDrawnElementInfo: info,
-    idsProvider,
+    idsProvider: idsProvider.idsProvider,
+    sharedIdsProvider: idsProvider.sharedIdsProvider,
     viewport,
     hierarchyConfig,
   });
 }
 
 async function createSearchResultsTree(
-  props: CreateSearchResultsTreeProps<CategoriesTreeIdsProvider> & { viewClasses: ReturnType<typeof getClassesByView> },
+  props: CreateSearchResultsTreeProps<CategoriesTreeIdsProviders> & { viewClasses: ReturnType<typeof getClassesByPerspective> },
 ): Promise<SearchResultsTree<CategoriesTreeSearchTargets>> {
   const { searchPaths, imodelAccess, idsProvider, viewClasses } = props;
   return createCategoriesSearchResultsTree({
     imodelAccess,
     searchPaths,
-    idsProvider,
+    idsProvider: idsProvider.idsProvider,
     categoryClassName: viewClasses.categoryClass,
     categoryElementClassName: viewClasses.elementClass,
     categoryModelClassName: viewClasses.modelClass,
   });
 }
 
-function useCategoriesTreeIdsProvider({
+function useCategoriesTreeIdsProviders({
   imodel,
-  activeViewType,
+  perspective,
   excludedElementClassNames,
 }: {
   imodel: IModelConnection;
-  activeViewType: "2d" | "3d";
+  perspective: "2d" | "3d";
   excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
-}): CategoriesTreeIdsProvider {
+}): CategoriesTreeIdsProviders {
   const { getSharedIdsProvider, getIdsProvider } = useSharedTreeContext();
 
   const sharedIdsProvider = getSharedIdsProvider({
-    type: activeViewType,
-    elementClassName: getClassesByView(activeViewType).elementClass,
+    elementClassName: getClassesByPerspective(perspective).elementClass,
     excludedElementClassNames,
     imodel,
   });
   const categoriesTreeIdsProvider = getIdsProvider({
     imodel,
-    createIdsProvider: () =>
-      new CategoriesTreeIdsProvider({ sharedIdsProvider, type: activeViewType, queryExecutor: createECSqlQueryExecutor(imodel), excludedElementClassNames }),
-    idsProviderKey: `${activeViewType}-${[...(excludedElementClassNames ?? [])].sort().join(",")}-CategoriesTreeIdsProvider`,
+    createIdsProvider: (): CategoriesTreeIdsProviders => ({
+      idsProvider: createCategoriesTreeIdsProvider({
+        imodelAccess: createIModelAccess({ imodel, hierarchyLevelSizeLimit: "unbounded" }),
+        perspective,
+        sharedIdsProvider,
+      }),
+      sharedIdsProvider,
+    }),
+    idsProviderKey: `${perspective}-${[...(excludedElementClassNames ?? [])].sort().join(",")}-CategoriesTreeIdsProvider`,
   });
   return categoriesTreeIdsProvider;
 }

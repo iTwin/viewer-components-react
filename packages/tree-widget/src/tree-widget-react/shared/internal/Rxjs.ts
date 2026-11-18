@@ -9,6 +9,15 @@ import { getOptimalBatchSize } from "./Utils.js";
 
 import type { ObservableInput, OperatorFunction, Subscription } from "rxjs";
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
+import type { Subscribable } from "@itwin/presentation-shared";
+
+/**
+ * Converts a `Subscribable` into an RxJS `Observable`.
+ * @internal
+ */
+export function toObservable<T>(source: Subscribable<T>): Observable<T> {
+  return source instanceof Observable ? source : new Observable<T>((subscriber) => source.subscribe(subscriber));
+}
 
 /**
  * Applies reduce function and "returns" early if the predicate returns `false` for the accumulator.

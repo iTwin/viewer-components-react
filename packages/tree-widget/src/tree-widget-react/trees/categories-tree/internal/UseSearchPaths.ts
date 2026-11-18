@@ -8,9 +8,9 @@ import { filter, firstValueFrom, identity, tap } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { HierarchyNodeIdentifier, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import { useTelemetryContext } from "../../../shared/contexts/TelemetryContext.js";
-import { CLASS_NAME_DefinitionContainer, CLASS_NAME_SubCategory } from "../../../shared/internal/ClassNameDefinitions.js";
+import { CLASS_NAMES } from "../../../shared/internal/ClassNameDefinitions.js";
 import { toVoidPromise } from "../../../shared/internal/Rxjs.js";
-import { getClassesByView, getOrCreate } from "../../../shared/internal/Utils.js";
+import { getClassesByPerspective, getOrCreate } from "../../../shared/internal/Utils.js";
 import { SearchLimitExceededError } from "../../../shared/TreeErrors.js";
 import { CategoriesTreeDefinition } from "../CategoriesTreeDefinition.js";
 
@@ -29,14 +29,14 @@ export type CategoriesTreeSearchError = "tooManySearchMatches" | "unknownSearchE
 export function useSearchPaths({
   searchText,
   searchLimit,
-  viewType,
+  perspective,
   hierarchyConfig,
   idsProvider,
   onCategoriesFiltered,
   onSearchPathsChanged,
   componentId,
 }: {
-  viewType: "2d" | "3d";
+  perspective: "2d" | "3d";
   searchText?: string;
   searchLimit?: number | "unbounded";
   hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
@@ -76,7 +76,7 @@ export function useSearchPaths({
           imodelAccess,
           abortSignal,
           label: searchText,
-          viewType,
+          perspective,
           idsProvider,
           hierarchyConfig,
           componentId,
@@ -88,7 +88,7 @@ export function useSearchPaths({
         }
         const paths = builder.getTree();
         onSearchPathsChanged(paths);
-        const { elementClass, modelClass } = getClassesByView(viewType);
+        const { elementClass, modelClass } = getClassesByPerspective(perspective);
         onCategoriesFiltered?.(
           await getCategoriesFromPaths({ trees: paths, idsProvider, elementClassName: elementClass, modelsClassName: modelClass, hierarchyConfig }),
         );
@@ -103,7 +103,7 @@ export function useSearchPaths({
         return [];
       }
     };
-  }, [onCategoriesFiltered, searchText, searchLimit, onSearchPathsChanged, onFeatureUsed, viewType, idsProvider, hierarchyConfig, componentId]);
+  }, [onCategoriesFiltered, searchText, searchLimit, onSearchPathsChanged, onFeatureUsed, perspective, idsProvider, hierarchyConfig, componentId]);
 
   return {
     getPaths: getSearchPaths,
@@ -146,7 +146,7 @@ async function getCategoriesFromPaths(props: {
       return;
     }
 
-    if (identifier.className === CLASS_NAME_DefinitionContainer) {
+    if (identifier.className === CLASS_NAMES.DefinitionContainer) {
       await toVoidPromise(
         idsProvider.getAllContainedCategories({ definitionContainerIds: identifier.id }).pipe(
           hierarchyConfig.categories.withoutElements === "include" ? identity : filter(({ hasElements }) => hasElements),
@@ -160,14 +160,14 @@ async function getCategoriesFromPaths(props: {
       return;
     }
 
-    if (identifier.className === CLASS_NAME_SubCategory) {
+    if (identifier.className === CLASS_NAMES.SubCategory) {
       assert(!!parent);
       const entry = getOrCreate({ map: categories, key: parent.id, createFunc: () => new Array<SubCategoryId>() });
       entry.push(identifier.id);
       return;
     }
 
-    // identifier represents a CLASS_NAME_Category
+    // identifier represents a CLASS_NAMES.Category
     if (!categories.has(identifier.id)) {
       categories.set(identifier.id, []);
     }

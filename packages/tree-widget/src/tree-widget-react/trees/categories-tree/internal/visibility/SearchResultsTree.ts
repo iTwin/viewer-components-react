@@ -5,7 +5,8 @@
 
 import { firstValueFrom, forkJoin } from "rxjs";
 import { assert } from "@itwin/core-bentley";
-import { CLASS_NAME_SubCategory } from "../../../../shared/internal/ClassNameDefinitions.js";
+import { CLASS_NAMES } from "../../../../shared/internal/ClassNameDefinitions.js";
+import { toObservable } from "../../../../shared/internal/Rxjs.js";
 import { getOrCreate, ParentElementsPath } from "../../../../shared/internal/Utils.js";
 import {
   createSearchResultsTree,
@@ -167,7 +168,7 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
         : await firstValueFrom(
             forkJoin({
               searchResultsElementsModels: this.#props.idsProvider.getFilteredElementsModels(rawElementsArray.map((element) => element.id)),
-              subModels: this.#props.idsProvider.getAllSubModels(),
+              subModels: toObservable(this.#props.idsProvider.subModeledElements.getAllSubModeledElements()),
             }),
           );
     const getActualParentElementsPath =
@@ -430,7 +431,7 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
   }
 
   public async getType(className: EC.FullClassNameDotNotation): Promise<RawNode["type"]> {
-    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_SubCategory)) {
+    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAMES.SubCategory)) {
       return "subCategory";
     }
     if (await this.#props.imodelAccess.classDerivesFrom(className, this.#props.categoryElementClassName)) {

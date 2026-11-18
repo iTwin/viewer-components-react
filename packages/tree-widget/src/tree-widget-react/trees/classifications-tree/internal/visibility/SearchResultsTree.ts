@@ -5,7 +5,7 @@
 
 import { firstValueFrom } from "rxjs";
 import { assert } from "@itwin/core-bentley";
-import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable } from "../../../../shared/internal/ClassNameDefinitions.js";
+import { CLASS_NAMES } from "../../../../shared/internal/ClassNameDefinitions.js";
 import { ParentElementsPath } from "../../../../shared/internal/Utils.js";
 import {
   createSearchResultsTree,
@@ -252,10 +252,10 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
   }
 
   public async getType(className: EC.FullClassNameDotNotation): Promise<RawNode["type"]> {
-    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_ClassificationTable)) {
+    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAMES.ClassificationTable)) {
       return "classificationTable";
     }
-    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Classification)) {
+    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAMES.Classification)) {
       return "classification";
     }
     return "element";

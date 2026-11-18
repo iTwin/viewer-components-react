@@ -8,10 +8,10 @@ import { createRequire } from "node:module";
 import { createCode, importSchema, insertDefinitionSubModel } from "test-utilities";
 import { Code, IModel } from "@itwin/core-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { CLASS_NAME_GeometricElement3d } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
-import { SharedIdsProvider } from "../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
+import { CLASS_NAMES } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { createSharedIdsProvider } from "../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
 import { ClassificationsTreeDefinition } from "../../../tree-widget-react/trees/classifications-tree/ClassificationsTreeDefinition.js";
-import { ClassificationsTreeIdsProvider } from "../../../tree-widget-react/trees/classifications-tree/internal/ClassificationsTreeIdsProvider.js";
+import { createClassificationsTreeIdsProvider } from "../../../tree-widget-react/trees/classifications-tree/internal/ClassificationsTreeIdsProvider.js";
 import { createIModelAccess } from "../Common.js";
 
 import type { EditTxn, IModelDb } from "@itwin/core-backend";
@@ -32,7 +32,7 @@ export function createClassificationsTreeProvider(
     imodelAccess,
     hierarchyDefinition: new ClassificationsTreeDefinition({
       imodelAccess,
-      getIdsProvider: () => idsProvider,
+      idsProvider,
       hierarchyConfig,
     }),
   });
@@ -181,17 +181,15 @@ export function createAccessAndIdsProvider({
   visibilityHandlerConfig?: ClassificationsTreeVisibilityHandlerConfiguration;
 }) {
   const imodelAccess = createIModelAccess(imodelConnection);
-  const sharedIdsProvider = new SharedIdsProvider({
-    queryExecutor: imodelAccess,
-    elementClassName: CLASS_NAME_GeometricElement3d,
-    type: "3d",
+  const sharedIdsProvider = createSharedIdsProvider({
+    imodelAccess,
+    elementClassName: CLASS_NAMES.GeometricElement3d,
     excludedElementClassNames: hierarchyConfig.elements?.excludedClasses,
   });
-  const idsProvider = new ClassificationsTreeIdsProvider({
-    queryExecutor: imodelAccess,
+  const idsProvider = createClassificationsTreeIdsProvider({
+    imodelAccess,
     hierarchyConfig,
-    sharedIdsProvider,
     visibilityHandlerConfig,
   });
-  return { imodelAccess, idsProvider };
+  return { imodelAccess, idsProvider, sharedIdsProvider };
 }

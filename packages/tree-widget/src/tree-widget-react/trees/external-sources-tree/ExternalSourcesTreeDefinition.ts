@@ -6,7 +6,7 @@
 import { Guid } from "@itwin/core-bentley";
 import { createPredicateBasedHierarchyDefinition, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
-import { CLASS_NAME_GeometricElement } from "../../shared/internal/ClassNameDefinitions.js";
+import { CLASS_NAMES } from "../../shared/internal/ClassNameDefinitions.js";
 import { createWhereClause } from "../../shared/internal/Utils.js";
 
 import type { GuidString } from "@itwin/core-bentley";
@@ -252,11 +252,11 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
     const sourceIds: string[] = parentNode.extendedData?.sourceIds;
     const instanceFilterClauses = await createFilterClauses({
       filter: instanceFilter,
-      contentClass: { fullName: CLASS_NAME_GeometricElement, alias: "this" },
+      contentClass: { fullName: CLASS_NAMES.GeometricElement, alias: "this" },
     });
     return [
       {
-        fullClassName: CLASS_NAME_GeometricElement,
+        fullClassName: CLASS_NAMES.GeometricElement,
         query: {
           ecsql: `
             SELECT
@@ -266,7 +266,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                 nodeLabel: {
                   of: {
                     classAlias: "this",
-                    className: CLASS_NAME_GeometricElement,
+                    className: CLASS_NAMES.GeometricElement,
                   },
                 },
                 extendedData: {

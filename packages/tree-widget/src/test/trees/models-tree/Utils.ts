@@ -7,16 +7,10 @@ import { concatMap, EMPTY, expand, from, of, toArray } from "rxjs";
 import { vi } from "vitest";
 import { Id64 } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import {
-  CLASS_NAME_Element,
-  CLASS_NAME_GeometricElement3d,
-  CLASS_NAME_Model,
-  CLASS_NAME_SpatialCategory,
-  CLASS_NAME_Subject,
-} from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
-import { SharedIdsProvider } from "../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
+import { CLASS_NAMES } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { createSharedIdsProvider } from "../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
 import { mergeWithDefaults } from "../../../tree-widget-react/shared/internal/Utils.js";
-import { ModelsTreeIdsProvider } from "../../../tree-widget-react/trees/models-tree/internal/ModelsTreeIdsProvider.js";
+import { createModelsTreeIdsProvider } from "../../../tree-widget-react/trees/models-tree/internal/ModelsTreeIdsProvider.js";
 import { createModelsTreeVisibilityHandler } from "../../../tree-widget-react/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelAccess } from "../Common.js";
@@ -32,7 +26,9 @@ import type {
   NonGroupingHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import type { EC, InstanceKey } from "@itwin/presentation-shared";
+import type { SharedIdsProvider } from "../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
 import type { ParentElementsPath } from "../../../tree-widget-react/shared/internal/Utils.js";
+import type { ModelsTreeIdsProvider } from "../../../tree-widget-react/trees/models-tree/internal/ModelsTreeIdsProvider.js";
 import type {
   ModelsTreeHierarchyConfiguration,
   RequiredModelsTreeHierarchyConfiguration,
@@ -60,16 +56,15 @@ export function createModelsTreeProvider({
     overrides: configOverrides,
   });
   const createdImodelAccess = imodelAccess ?? createIModelAccess(imodelConnection);
-  const sharedIdsProvider = new SharedIdsProvider({
-    queryExecutor: createdImodelAccess,
+  const sharedIdsProvider = createSharedIdsProvider({
+    imodelAccess: createdImodelAccess,
     elementClassName: config.elements.baseClass,
-    type: "3d",
     excludedElementClassNames: config.elements.excludedClasses,
   });
   const createdIdsProvider =
     idsProvider ??
-    new ModelsTreeIdsProvider({
-      queryExecutor: createdImodelAccess,
+    createModelsTreeIdsProvider({
+      imodelAccess: createdImodelAccess,
       hierarchyConfig: config,
       sharedIdsProvider,
     });
@@ -106,17 +101,21 @@ interface IdsProviderMockProps {
   elementChildren?: Map<Id64String, Id64Array>;
 }
 
-export function createFakeIdsProvider(props?: IdsProviderMockProps): ModelsTreeIdsProvider {
+/** Creates a fake that can be used both as models tree ids provider and as shared ids provider. */
+export function createFakeIdsProvider(props?: IdsProviderMockProps): ModelsTreeIdsProvider & SharedIdsProvider {
   return {
-    getChildSubjectIds: vi.fn(({ parentSubjectIds }: { parentSubjectIds: Id64Arg; excludeIfOnlyExcludedClasses?: boolean }) => {
+    getChildSubjectIds: vi.fn((parentSubjectIds: Id64Arg) => {
       return from(Id64.iterable(parentSubjectIds)).pipe(
         concatMap((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
-        expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         toArray(),
       );
     }),
-    canHaveHiddenChildren: vi.fn(() => false),
-    getChildSubjectModelIds: vi.fn(),
+    getChildSubjectModelIds: vi.fn((parentSubjectIds: Id64Arg) => {
+      return from(Id64.iterable(parentSubjectIds)).pipe(
+        concatMap((id) => props?.subjectModels?.get(id) ?? EMPTY),
+        toArray(),
+      );
+    }),
     getSubjectModelIds: vi.fn((subjectIds: Id64Arg) => {
       return from(Id64.iterable(subjectIds)).pipe(
         expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
@@ -124,52 +123,58 @@ export function createFakeIdsProvider(props?: IdsProviderMockProps): ModelsTreeI
         toArray(),
       );
     }),
-    getCategories: vi.fn(({ modelId }: { modelId: Id64String; includeOnlyIfCategoryOfTopMostElement?: boolean }) => {
-      return of(new Set(props?.modelCategories?.get(modelId) ?? []));
-    }),
-    getAllCategoriesOfElements: vi.fn(() => {
-      const result = new Set<Id64String>();
-      for (const categories of props?.modelCategories?.values() ?? []) {
-        categories.forEach((category) => {
-          result.add(category);
-        });
-      }
-      return of(result);
-    }),
-    getDescendantsCounts: vi.fn(({ categoryId, parentElementId }: { modelId: Id64String; categoryId?: Id64String; parentElementId?: Id64String }) => {
-      if (parentElementId) {
-        const children = props?.elementChildren?.get(parentElementId) ?? [];
-        if (children.length === 0) {
-          return of(categoryId ? [{ categoryId, count: 0 }] : []);
+    categories: {
+      getCategoriesOfElements: vi.fn(({ modelId }: { modelId: Id64String; includeOnlyIfCategoryOfTopMostElement?: boolean }) => {
+        return of(new Set(props?.modelCategories?.get(modelId) ?? []));
+      }),
+      getAllCategoriesOfElements: vi.fn(() => {
+        const result = new Set<Id64String>();
+        for (const categories of props?.modelCategories?.values() ?? []) {
+          categories.forEach((category) => {
+            result.add(category);
+          });
         }
-        // When querying by parentElementId, return all children grouped under the parent's category
-        const parentCategory = [...(props?.categoryElements?.entries() ?? [])].find(([, elements]) => elements.includes(parentElementId))?.[0];
-        return of([{ categoryId: parentCategory ?? categoryId ?? "0x0", count: children.length }]);
-      }
-      if (categoryId) {
-        const count = props?.categoryElements?.get(categoryId)?.length ?? 0;
-        if (count === 0) {
-          return of([{ categoryId, count: 0 }]);
+        return of(result);
+      }),
+      hasParentElements: vi.fn(() => of(false)),
+    },
+    subModeledElements: {
+      getSubModels: vi.fn(() => EMPTY),
+      hasSubModels: vi.fn(() => of(false)),
+    },
+    elements: {
+      canHaveHiddenChildren: vi.fn(() => false),
+      getDescendantsCounts: vi.fn(({ categoryId, parentElementId }: { modelId: Id64String; categoryId?: Id64String; parentElementId?: Id64String }) => {
+        if (parentElementId) {
+          const children = props?.elementChildren?.get(parentElementId) ?? [];
+          if (children.length === 0) {
+            return of(categoryId ? [{ categoryId, count: 0 }] : []);
+          }
+          // When querying by parentElementId, return all children grouped under the parent's category
+          const parentCategory = [...(props?.categoryElements?.entries() ?? [])].find(([, elements]) => elements.includes(parentElementId))?.[0];
+          return of([{ categoryId: parentCategory ?? categoryId ?? "0x0", count: children.length }]);
         }
-        return of([{ categoryId, count }]);
-      }
-      return of([]);
-    }),
-    getChildElements: vi.fn(() => {
-      return of([]);
-    }),
-    categoryHasParentElements: vi.fn(() => of(false)),
-    getSubModelsUnderElement: vi.fn(() => of([])),
-    getSubModels: vi.fn(() => EMPTY),
-    hasSubModels: vi.fn(() => of(false)),
+        if (categoryId) {
+          const count = props?.categoryElements?.get(categoryId)?.length ?? 0;
+          if (count === 0) {
+            return of([{ categoryId, count: 0 }]);
+          }
+          return of([{ categoryId, count }]);
+        }
+        return of([]);
+      }),
+      getChildElements: vi.fn(() => {
+        return of([]);
+      }),
+    },
     [Symbol.dispose]: vi.fn(),
-  } as unknown as ModelsTreeIdsProvider;
+  } as unknown as ModelsTreeIdsProvider & SharedIdsProvider;
 }
 
 export function createSubjectHierarchyNode(props?: { ids?: Id64Arg; parentKeys?: InstanceKey[] }): NonGroupingHierarchyNode {
   const instanceKeys = new Array<InstanceKey>();
   for (const id of props?.ids ? Id64.iterable(props.ids) : []) {
-    instanceKeys.push({ className: CLASS_NAME_Subject, id });
+    instanceKeys.push({ className: CLASS_NAMES.Subject, id });
   }
   return {
     key: {
@@ -194,7 +199,7 @@ export function createModelHierarchyNode(props?: {
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: props?.className ?? CLASS_NAME_Model, id: props?.modelId ?? "" }],
+      instanceKeys: [{ className: props?.className ?? CLASS_NAMES.Model, id: props?.modelId ?? "" }],
     },
     children: !!props?.hasChildren,
     label: "",
@@ -226,8 +231,8 @@ export function createCategoryHierarchyNode({
       type: "instances",
       instanceKeys:
         typeof categoryId === "string"
-          ? [{ className: CLASS_NAME_SpatialCategory, id: categoryId ?? "" }]
-          : [...(categoryId ?? [])].map((id) => ({ className: CLASS_NAME_SpatialCategory, id })),
+          ? [{ className: CLASS_NAMES.SpatialCategory, id: categoryId ?? "" }]
+          : [...(categoryId ?? [])].map((id) => ({ className: CLASS_NAMES.SpatialCategory, id })),
     },
     children: !!hasChildren,
     label: "",
@@ -253,7 +258,7 @@ export function createElementHierarchyNode(props: {
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: props.className ?? CLASS_NAME_GeometricElement3d, id: props.elementId ?? "" }],
+      instanceKeys: [{ className: props.className ?? CLASS_NAMES.GeometricElement3d, id: props.elementId ?? "" }],
     },
     children: !!props.hasChildren,
     label: "",
@@ -286,7 +291,7 @@ export function createClassGroupingHierarchyNode({
   parentElementsPath?: ParentElementsPath;
   childrenWhichAreParents?: Set<Id64String>;
 }): GroupingHierarchyNode & { key: ClassGroupingNodeKey } {
-  const className = props.className ?? CLASS_NAME_Element;
+  const className = props.className ?? CLASS_NAMES.Element;
   return {
     key: {
       type: "class-grouping",
@@ -319,18 +324,17 @@ export function createAccessAndIdsProvider({
     defaults: defaultHierarchyConfiguration,
     overrides: hierarchyConfig,
   });
-  const sharedIdsProvider = new SharedIdsProvider({
-    queryExecutor: imodelAccess,
+  const sharedIdsProvider = createSharedIdsProvider({
+    imodelAccess,
     elementClassName: mergedConfig.elements.baseClass,
-    type: "3d",
     excludedElementClassNames: mergedConfig.elements.excludedClasses,
   });
-  const idsProvider = new ModelsTreeIdsProvider({
-    queryExecutor: imodelAccess,
+  const idsProvider = createModelsTreeIdsProvider({
+    imodelAccess,
     hierarchyConfig: mergedConfig,
     sharedIdsProvider,
   });
-  return { imodelAccess, idsProvider };
+  return { imodelAccess, idsProvider, sharedIdsProvider };
 }
 
 export function createVisibilityTestData(props: {
@@ -339,11 +343,12 @@ export function createVisibilityTestData(props: {
   visibleByDefault?: boolean;
   imodelAccess: IModelAccess;
   idsProvider: ModelsTreeIdsProvider;
+  sharedIdsProvider: SharedIdsProvider;
 }) {
-  const { idsProvider, imodelAccess, imodelConnection, hierarchyConfig, visibleByDefault } = props;
+  const { idsProvider, sharedIdsProvider, imodelAccess, imodelConnection, hierarchyConfig, visibleByDefault } = props;
   const hierarchyConfigWithDefaults = mergeWithDefaults({ defaults: defaultHierarchyConfiguration, overrides: hierarchyConfig });
   const viewport = createTreeWidgetTestingViewport({ iModel: imodelConnection, viewType: "3d", visibleByDefault });
-  const handler = createModelsTreeVisibilityHandler({ viewport, imodelAccess, idsProvider });
+  const handler = createModelsTreeVisibilityHandler({ viewport, imodelAccess, idsProvider, sharedIdsProvider });
   const provider = createProvider({ hierarchyConfig: hierarchyConfigWithDefaults, idsProvider, imodelAccess });
   return {
     handler,

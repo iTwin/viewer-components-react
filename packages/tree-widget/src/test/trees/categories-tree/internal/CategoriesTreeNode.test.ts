@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { describe, expect, it } from "vitest";
-import { CLASS_NAME_GeometricElement3d } from "../../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { CLASS_NAMES } from "../../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
 import { CategoriesTreeNode } from "../../../../tree-widget-react/trees/categories-tree/CategoriesTreeNode.js";
 
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
@@ -27,7 +27,7 @@ describe("CategoriesTreeNode", () => {
   const classGroupingNode: HierarchyNode = {
     key: {
       type: "class-grouping",
-      className: CLASS_NAME_GeometricElement3d,
+      className: CLASS_NAMES.GeometricElement3d,
     },
     parentKeys: [],
     label: "",

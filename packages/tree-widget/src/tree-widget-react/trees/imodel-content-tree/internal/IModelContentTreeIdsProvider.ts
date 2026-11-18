@@ -4,13 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { assert, Guid } from "@itwin/core-bentley";
-import {
-  CLASS_NAME_GeometricElement2d,
-  CLASS_NAME_GeometricElement3d,
-  CLASS_NAME_InformationPartitionElement,
-  CLASS_NAME_Model,
-  CLASS_NAME_Subject,
-} from "../../../shared/internal/ClassNameDefinitions.js";
+import { CLASS_NAMES } from "../../../shared/internal/ClassNameDefinitions.js";
 import { isBeSqliteInterruptError } from "../../../shared/internal/hooks/UseErrorState.js";
 import { createWhereClause, getOrCreate } from "../../../shared/internal/Utils.js";
 
@@ -52,7 +46,7 @@ export class IModelContentTreeIdsProvider {
           s.Parent.Id parentId,
           (
             SELECT m.ECInstanceId
-            FROM ${CLASS_NAME_Model} m
+            FROM ${CLASS_NAMES.Model} m
             ${createWhereClause({ conditions: ["m.ECInstanceId = HexToId(json_extract(s.JsonProperties, '$.Subject.Model.TargetPartition'))", "NOT m.IsPrivate"] })}
           ) targetPartitionId,
           CASE
@@ -62,7 +56,7 @@ export class IModelContentTreeIdsProvider {
             ) THEN 1
             ELSE 0
           END hideInHierarchy
-        FROM ${CLASS_NAME_Subject} s
+        FROM ${CLASS_NAMES.Subject} s
       `;
       for await (const row of this.#queryExecutor.createQueryReader(
         { ecsql: subjectsQuery },
@@ -81,8 +75,8 @@ export class IModelContentTreeIdsProvider {
     try {
       const modelsQuery = `
         SELECT p.ECInstanceId id, p.Parent.Id parentId
-        FROM ${CLASS_NAME_InformationPartitionElement} p
-        INNER JOIN ${CLASS_NAME_Model} m ON m.ModeledElement.Id = p.ECInstanceId
+        FROM ${CLASS_NAMES.InformationPartitionElement} p
+        INNER JOIN ${CLASS_NAMES.Model} m ON m.ModeledElement.Id = p.ECInstanceId
         WHERE NOT m.IsPrivate
       `;
       for await (const row of this.#queryExecutor.createQueryReader(
@@ -228,12 +222,12 @@ export class IModelContentTreeIdsProvider {
     try {
       const query = `
         SELECT Model.Id modelId, Category.Id categoryId
-        FROM ${CLASS_NAME_GeometricElement3d}
+        FROM ${CLASS_NAMES.GeometricElement3d}
         WHERE Parent.Id IS NULL
         GROUP BY Model.Id, Category.Id
         UNION ALL
         SELECT Model.Id modelId, Category.Id categoryId
-        FROM ${CLASS_NAME_GeometricElement2d}
+        FROM ${CLASS_NAMES.GeometricElement2d}
         WHERE Parent.Id IS NULL
         GROUP BY Model.Id, Category.Id
       `;

@@ -5,19 +5,21 @@
 
 import { createContext, useCallback, useContext, useState } from "react";
 import { Subject } from "rxjs";
-import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { useIdsProvider } from "../internal/hooks/UseIdsProvider.js";
-import { SharedIdsProvider } from "../internal/idsProviders/SharedIdsProvider.js";
+import { createIModelAccess } from "../internal/hooks/UseIModelAccess.js";
+import { createSharedIdsProvider } from "../internal/idsProviders/SharedIdsProvider.js";
 
 import type { PropsWithChildren } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { GetIdsProviderProps } from "../internal/hooks/UseIdsProvider.js";
-import type { SharedIdsProviderProps } from "../internal/idsProviders/SharedIdsProvider.js";
+import type { SharedIdsProvider, SharedIdsProviderProps } from "../internal/idsProviders/SharedIdsProvider.js";
+
+type GetSharedIdsProviderProps = Omit<SharedIdsProviderProps, "imodelAccess"> & { imodel: IModelConnection };
 
 /** @internal */
 interface SharedTreeContext {
   getIdsProvider: <TIdsProvider extends object = {}>(props: GetIdsProviderProps<TIdsProvider>) => TIdsProvider;
-  getSharedIdsProvider: (props: Omit<SharedIdsProviderProps, "queryExecutor"> & { imodel: IModelConnection }) => SharedIdsProvider;
+  getSharedIdsProvider: (props: GetSharedIdsProviderProps) => SharedIdsProvider;
   cancelChangesInProgress: Subject<void>;
 }
 
@@ -37,11 +39,16 @@ export function SharedTreeContextProvider({ children }: PropsWithChildren) {
   const { getIdsProvider } = useIdsProvider();
   const [cancelChangesInProgress] = useState(() => new Subject<void>());
   const getSharedIdsProvider = useCallback(
-    ({ elementClassName, type, imodel, excludedElementClassNames }: Omit<SharedIdsProviderProps, "queryExecutor"> & { imodel: IModelConnection }) => {
+    ({ elementClassName, imodel, excludedElementClassNames }: GetSharedIdsProviderProps) => {
       return getIdsProvider({
         imodel,
-        idsProviderKey: `${type}-${elementClassName}-${[...(excludedElementClassNames ?? [])].sort().join(",")}-SharedIdsProvider`,
-        createIdsProvider: () => new SharedIdsProvider({ elementClassName, type, excludedElementClassNames, queryExecutor: createECSqlQueryExecutor(imodel) }),
+        idsProviderKey: `${elementClassName}-${[...(excludedElementClassNames ?? [])].sort().join(",")}-SharedIdsProvider`,
+        createIdsProvider: () =>
+          createSharedIdsProvider({
+            elementClassName,
+            excludedElementClassNames,
+            imodelAccess: createIModelAccess({ imodel, hierarchyLevelSizeLimit: "unbounded" }),
+          }),
       });
     },
     [getIdsProvider],

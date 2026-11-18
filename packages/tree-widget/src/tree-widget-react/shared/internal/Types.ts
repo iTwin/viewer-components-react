@@ -18,13 +18,7 @@ export type CategoryId = Id64String;
 export type SubCategoryId = Id64String;
 
 /** @internal */
-export type DefinitionContainerId = Id64String;
-
-/** @internal */
 export type ElementId = Id64String;
 
 /** @internal */
 export type ClassificationId = Id64String;
-
-/** @internal */
-export type ClassificationTableId = Id64String;

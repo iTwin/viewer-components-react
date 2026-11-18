@@ -40,17 +40,17 @@ export namespace TestSchema {
 export function insertGeometricModelWithPartition({
   txn,
   codeValue,
-  viewType = "3d",
+  perspective = "3d",
   partitionParentId = IModel.rootSubjectId,
   ...modelFlags
 }: {
   txn: EditTxn;
   codeValue: string;
-  viewType?: "2d" | "3d";
+  perspective?: "2d" | "3d";
   partitionParentId?: Id64String;
 } & Pick<ModelProps, "isPrivate" | "isTemplate">) {
-  const insertPartition = viewType === "3d" ? insertPhysicalPartition : insertDrawingPartition;
-  const insertModel = viewType === "3d" ? insertPhysicalSubModel : insertDrawingSubModel;
+  const insertPartition = perspective === "3d" ? insertPhysicalPartition : insertDrawingPartition;
+  const insertModel = perspective === "3d" ? insertPhysicalSubModel : insertDrawingSubModel;
   const partition = insertPartition({ txn, codeValue, parentId: partitionParentId });
   return insertModel({ txn, modeledElementId: partition.id, ...modelFlags });
 }

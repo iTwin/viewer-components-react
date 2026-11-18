@@ -67,7 +67,7 @@ describe("Classifications tree", () => {
         }
         using provider = createIModelHierarchyProvider({
           imodelAccess,
-          hierarchyDefinition: new ClassificationsTreeDefinition({ imodelAccess, getIdsProvider: () => idsProvider, hierarchyConfig }),
+          hierarchyDefinition: new ClassificationsTreeDefinition({ imodelAccess, idsProvider, hierarchyConfig }),
         });
         await validateHierarchy({
           provider,

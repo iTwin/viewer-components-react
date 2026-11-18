@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { bufferCount, concat, concatMap, delay, EMPTY, from, map, merge, mergeMap, reduce, toArray } from "rxjs";
+import { toObservable } from "../../../../shared/internal/Rxjs.js";
 import { createVisibilityStatus } from "../../../../shared/internal/Tooltip.js";
 import { getOptimalBatchSize } from "../../../../shared/internal/Utils.js";
 import { BaseVisibilityHelper } from "../../../../shared/internal/visibility/BaseVisibilityHelper.js";
@@ -11,6 +12,7 @@ import { mergeVisibilityStatuses } from "../../../../shared/internal/VisibilityU
 
 import type { Observable } from "rxjs";
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
+import type { SharedIdsProvider } from "../../../../shared/internal/idsProviders/SharedIdsProvider.js";
 import type { BaseVisibilityHelperProps } from "../../../../shared/internal/visibility/BaseVisibilityHelper.js";
 import type { TreeWidgetViewport } from "../../../../shared/TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../../../../shared/UseHierarchyVisibility.js";
@@ -32,12 +34,14 @@ export type CategoriesTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
  */
 export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
   #idsProvider: CategoriesTreeIdsProvider;
+  #sharedIdsProvider: SharedIdsProvider;
   #hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
   #viewport: TreeWidgetViewport;
   constructor(props: CategoriesTreeVisibilityHelperProps) {
     super(props);
     this.#viewport = props.viewport;
     this.#idsProvider = props.idsProvider;
+    this.#sharedIdsProvider = props.sharedIdsProvider;
     this.#hierarchyConfig = props.hierarchyConfig;
   }
 
@@ -77,7 +81,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
           modelId,
           categoryId,
           parentElementsPath,
-          computeOnlyOwnStatus: this.#idsProvider.canHaveHiddenChildren()
+          computeOnlyOwnStatus: this.#sharedIdsProvider.elements.canHaveHiddenChildren()
             ? undefined
             : childrenWhichAreParents.size
               ? (elementId) => !childrenWhichAreParents.has(elementId)
@@ -162,12 +166,12 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
   /** Turns on category and its' related models. Does not turn on other categories contained in those models.*/
   private enableCategoryWithoutEnablingOtherCategories({ categoryId }: { categoryId: Id64String }): Observable<void> {
     this.#viewport.changeCategoryDisplay({ categoryIds: categoryId, display: true });
-    return this.#idsProvider.getModels({ categoryId }).pipe(
+    return toObservable(this.#sharedIdsProvider.models.getModels({ categoryId })).pipe(
       mergeMap((modelId) => {
         this.#viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: categoryId, override: "none" });
         return this.#viewport.viewsModel(modelId)
           ? EMPTY
-          : this.#idsProvider.getCategories({ modelId }).pipe(
+          : this.#sharedIdsProvider.categories.getCategoriesOfElements({ modelId }).pipe(
               map((allModelCategories) => {
                 // Add 'Hide' override to categories that were hidden before model is turned on
                 for (const modelCategoryId of allModelCategories) {

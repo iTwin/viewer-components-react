@@ -11,8 +11,8 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { CLASS_NAME_DefinitionModel, CLASS_NAME_SubCategory } from "../../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
-import { getClassesByView, mergeWithDefaults } from "../../../../tree-widget-react/shared/internal/Utils.js";
+import { CLASS_NAMES } from "../../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { getClassesByPerspective, mergeWithDefaults } from "../../../../tree-widget-react/shared/internal/Utils.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "../../../../tree-widget-react/trees/categories-tree/CategoriesTreeDefinition.js";
 import { createCategoriesTreeVisibilityHandler } from "../../../../tree-widget-react/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.js";
 import { buildIModel } from "../../../IModelUtils.js";
@@ -24,13 +24,14 @@ import {
   createDefinitionContainerHierarchyNode,
   createElementHierarchyNode,
   createSubCategoryHierarchyNode,
-  getInsertFunctionByViewType,
+  getInsertFunctionByPerspective,
   validateCategoriesTreeHierarchyVisibility,
 } from "./Utils.js";
 
 import type { Id64Arg } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
+import type { SharedIdsProvider } from "../../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
 import type {
   CategoriesTreeHierarchyConfiguration,
   RequiredCategoriesTreeHierarchyConfiguration,
@@ -61,8 +62,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
     TestUtils.terminate();
   });
 
-  ["2d" as const, "3d" as const].forEach((viewType) => {
-    const { insertCategory, insertElement, insertElementsModel, insertElementsSubModel, insertModeledElement } = getInsertFunctionByViewType(viewType);
+  ["2d" as const, "3d" as const].forEach((perspective) => {
+    const { insertCategory, insertElement, insertElementsModel, insertElementsSubModel, insertModeledElement } = getInsertFunctionByPerspective(perspective);
 
     function createProvider(props: {
       idsProvider: CategoriesTreeIdsProvider;
@@ -71,13 +72,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
       hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
     }) {
       return createIModelHierarchyProvider({
-        hierarchyDefinition: new CategoriesTreeDefinition({ ...props, viewType }),
+        hierarchyDefinition: new CategoriesTreeDefinition({ ...props, perspective }),
         imodelAccess: props.imodelAccess,
         ...(props.searchPaths ? { search: { paths: props.searchPaths } } : undefined),
       });
     }
 
-    describe(`${viewType} view`, () => {
+    describe(`${perspective} perspective`, () => {
       describe("search nodes", () => {
         async function createFilteredVisibilityTestData({
           imodelConnection,
@@ -85,6 +86,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           visibleByDefault,
           subCategoriesOfCategories,
           idsProvider,
+          sharedIdsProvider,
           imodelAccess,
         }: {
           searchPaths: HierarchySearchTree[];
@@ -94,6 +96,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
           imodelAccess: IModelAccess;
           idsProvider: CategoriesTreeIdsProvider;
+          sharedIdsProvider: SharedIdsProvider;
         }) {
           const hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration = mergeWithDefaults({
             defaults: defaultHierarchyConfiguration,
@@ -104,12 +107,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
           const viewport = createTreeWidgetTestingViewport({
             iModel: imodelConnection,
-            viewType,
+            viewType: perspective,
             visibleByDefault,
             subCategoriesOfCategories,
           });
           const visibilityHandlerWithSearchPaths = createCategoriesTreeVisibilityHandler({
             idsProvider,
+            sharedIdsProvider,
             searchPaths,
             imodelAccess,
             viewport,
@@ -117,6 +121,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
           const defaultVisibilityHandler = createCategoriesTreeVisibilityHandler({
             idsProvider,
+            sharedIdsProvider,
             imodelAccess,
             viewport,
             hierarchyConfig,
@@ -165,10 +170,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
               categories: { withoutElements: "include" },
             },
           });
-          const accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection, viewType });
+          const accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection, perspective });
           const viewport = createTreeWidgetTestingViewport({
             iModel: imodelConnection,
-            viewType,
+            viewType: perspective,
             visibleByDefault: true,
             subCategoriesOfCategories: [
               {
@@ -179,6 +184,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
           using visibilityHandlerWithoutSearchPaths = createCategoriesTreeVisibilityHandler({
             idsProvider: accessAndIdsProvider.idsProvider,
+            sharedIdsProvider: accessAndIdsProvider.sharedIdsProvider,
             searchPaths: undefined,
             imodelAccess: accessAndIdsProvider.imodelAccess,
             viewport,
@@ -211,7 +217,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             return buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
                 const category = insertCategory({ txn, codeValue: "cat" });
-                const defaultSubCategory = { id: getDefaultSubCategoryId(category.id), className: CLASS_NAME_SubCategory };
+                const defaultSubCategory = { id: getDefaultSubCategoryId(category.id), className: CLASS_NAMES.SubCategory };
                 const subCategory = insertSubCategory({
                   txn,
                   parentCategoryId: category.id,
@@ -219,7 +225,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 });
 
                 const siblingCategory = insertCategory({ txn, codeValue: "sibling cat" });
-                const defaultSiblingSubCategory = { id: getDefaultSubCategoryId(siblingCategory.id), className: CLASS_NAME_SubCategory };
+                const defaultSiblingSubCategory = { id: getDefaultSubCategoryId(siblingCategory.id), className: CLASS_NAMES.SubCategory };
                 const siblingSubCategory = insertSubCategory({
                   txn,
                   parentCategoryId: siblingCategory.id,
@@ -241,7 +247,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
           beforeAll(async () => {
             createIModelResult = await createIModel();
-            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, viewType });
+            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, perspective });
           });
 
           beforeEach(async function () {
@@ -258,6 +264,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               ],
               imodelAccess: accessAndIdsProvider.imodelAccess,
               idsProvider: accessAndIdsProvider.idsProvider,
+              sharedIdsProvider: accessAndIdsProvider.sharedIdsProvider,
             });
           });
 
@@ -363,7 +370,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 const elementsModel = insertElementsModel({ txn, codeValue: "m" });
 
                 const category = insertCategory({ txn, codeValue: "cat" });
-                const defaultSubCategory = { id: getDefaultSubCategoryId(category.id), className: CLASS_NAME_SubCategory };
+                const defaultSubCategory = { id: getDefaultSubCategoryId(category.id), className: CLASS_NAMES.SubCategory };
                 const parentElement1 = insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
                 const parentElement2 = insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
                 const element = insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
@@ -372,7 +379,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 const childElement21 = insertElement({ txn, modelId: elementsModel.id, categoryId: category.id, parentId: parentElement2.id });
 
                 const siblingCategory = insertCategory({ txn, codeValue: "sibling cat" });
-                const defaultSiblingSubCategory = { id: getDefaultSubCategoryId(siblingCategory.id), className: CLASS_NAME_SubCategory };
+                const defaultSiblingSubCategory = { id: getDefaultSubCategoryId(siblingCategory.id), className: CLASS_NAMES.SubCategory };
                 const siblingElement = insertElement({ txn, modelId: elementsModel.id, categoryId: siblingCategory.id });
 
                 return {
@@ -399,7 +406,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
           beforeAll(async () => {
             createIModelResult = await createIModel();
-            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, viewType });
+            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, perspective });
           });
 
           beforeEach(async function () {
@@ -412,6 +419,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 { categoryId: createIModelResult.siblingCategory.id, subCategories: createIModelResult.defaultSiblingSubCategory.id },
               ],
               idsProvider: accessAndIdsProvider.idsProvider,
+              sharedIdsProvider: accessAndIdsProvider.sharedIdsProvider,
               imodelAccess: accessAndIdsProvider.imodelAccess,
             });
             visibilityTestData.viewport.setNeverDrawn({
@@ -749,7 +757,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 const elementsModel = insertElementsModel({ txn, codeValue: "m" });
 
                 const category = insertCategory({ txn, codeValue: "cat" });
-                const defaultSubCategory = { id: getDefaultSubCategoryId(category.id), className: CLASS_NAME_SubCategory };
+                const defaultSubCategory = { id: getDefaultSubCategoryId(category.id), className: CLASS_NAMES.SubCategory };
                 const element = insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
                 const parentElement = insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
                 const childElement = insertElement({ txn, modelId: elementsModel.id, categoryId: category.id, parentId: parentElement.id });
@@ -780,7 +788,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
           beforeAll(async () => {
             createIModelResult = await createIModel();
-            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, viewType });
+            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, perspective });
           });
 
           beforeEach(async function () {
@@ -791,6 +799,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               subCategoriesOfCategories: [{ categoryId: createIModelResult.category.id, subCategories: createIModelResult.defaultSubCategory.id }],
               imodelAccess: accessAndIdsProvider.imodelAccess,
               idsProvider: accessAndIdsProvider.idsProvider,
+              sharedIdsProvider: accessAndIdsProvider.sharedIdsProvider,
             });
             visibilityTestData.viewport.setNeverDrawn({
               elementIds: new Set([
@@ -864,7 +873,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             await visibilityHandlerWithSearchPaths.changeVisibility(
               createElementHierarchyNode({
                 elementId: parentElement.id,
-                parentKeys: [category, { type: "class-grouping", className: getClassesByView(viewType).elementClass }],
+                parentKeys: [category, { type: "class-grouping", className: getClassesByPerspective(perspective).elementClass }],
                 modelId: elementsModel.id,
                 categoryId: category.id,
                 search: { isSearchTarget: true, childrenTargetPaths: [{ identifier: childElement, children: [{ identifier: childOfChild1 }] }] },
@@ -911,9 +920,9 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 elementId: childElement.id,
                 parentKeys: [
                   category,
-                  { type: "class-grouping", className: getClassesByView(viewType).elementClass },
+                  { type: "class-grouping", className: getClassesByPerspective(perspective).elementClass },
                   parentElement,
-                  { type: "class-grouping", className: getClassesByView(viewType).elementClass },
+                  { type: "class-grouping", className: getClassesByPerspective(perspective).elementClass },
                 ],
                 modelId: elementsModel.id,
                 categoryId: category.id,
@@ -961,11 +970,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 elementId: childOfChild1.id,
                 parentKeys: [
                   category,
-                  { type: "class-grouping", className: getClassesByView(viewType).elementClass },
+                  { type: "class-grouping", className: getClassesByPerspective(perspective).elementClass },
                   parentElement,
-                  { type: "class-grouping", className: getClassesByView(viewType).elementClass },
+                  { type: "class-grouping", className: getClassesByPerspective(perspective).elementClass },
                   childElement,
-                  { type: "class-grouping", className: getClassesByView(viewType).elementClass },
+                  { type: "class-grouping", className: getClassesByPerspective(perspective).elementClass },
                 ],
                 modelId: elementsModel.id,
                 categoryId: category.id,
@@ -1016,9 +1025,9 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 const elementsModel = insertElementsModel({ txn, codeValue: "m" });
 
                 const categoryA = insertCategory({ txn, codeValue: "catA" });
-                const defaultSubCategoryA = { id: getDefaultSubCategoryId(categoryA.id), className: CLASS_NAME_SubCategory };
+                const defaultSubCategoryA = { id: getDefaultSubCategoryId(categoryA.id), className: CLASS_NAMES.SubCategory };
                 const categoryB = insertCategory({ txn, codeValue: "catB" });
-                const defaultSubCategoryB = { id: getDefaultSubCategoryId(categoryB.id), className: CLASS_NAME_SubCategory };
+                const defaultSubCategoryB = { id: getDefaultSubCategoryId(categoryB.id), className: CLASS_NAMES.SubCategory };
                 const parentElement = insertElement({ txn, modelId: elementsModel.id, categoryId: categoryA.id });
                 const childElement1 = insertElement({ txn, modelId: elementsModel.id, categoryId: categoryB.id, parentId: parentElement.id });
                 const childElement2 = insertElement({ txn, modelId: elementsModel.id, categoryId: categoryB.id, parentId: parentElement.id });
@@ -1052,7 +1061,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
           beforeAll(async () => {
             createIModelResult = await createIModel();
-            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, viewType });
+            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, perspective });
           });
 
           beforeEach(async function () {
@@ -1066,6 +1075,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               ],
               imodelAccess: accessAndIdsProvider.imodelAccess,
               idsProvider: accessAndIdsProvider.idsProvider,
+              sharedIdsProvider: accessAndIdsProvider.sharedIdsProvider,
             });
             visibilityTestData.viewport.setNeverDrawn({
               elementIds: new Set([
@@ -1286,9 +1296,9 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 const elementsModel = insertElementsModel({ txn, codeValue: "m" });
 
                 const categoryA = insertCategory({ txn, codeValue: "catA" });
-                const defaultSubCategoryA = { id: getDefaultSubCategoryId(categoryA.id), className: CLASS_NAME_SubCategory };
+                const defaultSubCategoryA = { id: getDefaultSubCategoryId(categoryA.id), className: CLASS_NAMES.SubCategory };
                 const categoryB = insertCategory({ txn, codeValue: "catB" });
-                const defaultSubCategoryB = { id: getDefaultSubCategoryId(categoryB.id), className: CLASS_NAME_SubCategory };
+                const defaultSubCategoryB = { id: getDefaultSubCategoryId(categoryB.id), className: CLASS_NAMES.SubCategory };
                 const modeledElement = insertModeledElement({
                   txn,
                   modelId: elementsModel.id,
@@ -1326,7 +1336,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
           beforeAll(async () => {
             createIModelResult = await createIModel();
-            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, viewType });
+            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, perspective });
           });
 
           beforeEach(async function () {
@@ -1340,6 +1350,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               ],
               imodelAccess: accessAndIdsProvider.imodelAccess,
               idsProvider: accessAndIdsProvider.idsProvider,
+              sharedIdsProvider: accessAndIdsProvider.sharedIdsProvider,
             });
             visibilityTestData.viewport.setNeverDrawn({
               elementIds: new Set([createIModelResult.modeledElement.id, createIModelResult.subModelElement1.id, createIModelResult.subModelElement2.id]),
@@ -1507,7 +1518,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 const elementsModel = insertElementsModel({ txn, codeValue: "m" });
 
                 const category = insertCategory({ txn, codeValue: "cat" });
-                const defaultSubCategory = { id: getDefaultSubCategoryId(category.id), className: CLASS_NAME_SubCategory };
+                const defaultSubCategory = { id: getDefaultSubCategoryId(category.id), className: CLASS_NAMES.SubCategory };
                 const element = insertElement({ txn, modelId: elementsModel.id, categoryId: category.id });
                 const modeledElement = insertModeledElement({
                   txn,
@@ -1519,7 +1530,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 const subModelCategory = insertCategory({ txn, codeValue: "subModel cat" });
                 const subModelElement = insertElement({ txn, userLabel: "subModel el", modelId: subModel.id, categoryId: subModelCategory.id });
                 const subModelElement2 = insertElement({ txn, userLabel: "subModel el 2", modelId: subModel.id, categoryId: subModelCategory.id });
-                const defaultSubCategoryOfSubModelCategory = { id: getDefaultSubCategoryId(subModelCategory.id), className: CLASS_NAME_SubCategory };
+                const defaultSubCategoryOfSubModelCategory = { id: getDefaultSubCategoryId(subModelCategory.id), className: CLASS_NAMES.SubCategory };
 
                 const otherSubModelCategory = insertCategory({ txn, codeValue: "other subModel cat" });
                 const otherSubModelElement = insertElement({
@@ -1528,11 +1539,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
                   modelId: subModel.id,
                   categoryId: otherSubModelCategory.id,
                 });
-                const defaultSubCategoryOfOtherSubModelCategory = { id: getDefaultSubCategoryId(otherSubModelCategory.id), className: CLASS_NAME_SubCategory };
+                const defaultSubCategoryOfOtherSubModelCategory = { id: getDefaultSubCategoryId(otherSubModelCategory.id), className: CLASS_NAMES.SubCategory };
 
                 const siblingCategory = insertCategory({ txn, codeValue: "sibling cat" });
                 const siblingElement = insertElement({ txn, modelId: elementsModel.id, categoryId: siblingCategory.id });
-                const defaultSiblingSubCategory = { id: getDefaultSubCategoryId(siblingCategory.id), className: CLASS_NAME_SubCategory };
+                const defaultSiblingSubCategory = { id: getDefaultSubCategoryId(siblingCategory.id), className: CLASS_NAMES.SubCategory };
 
                 return {
                   category,
@@ -1569,7 +1580,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
           beforeAll(async () => {
             createIModelResult = await createIModel();
-            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, viewType });
+            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, perspective });
           });
 
           beforeEach(async function () {
@@ -1588,6 +1599,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               ],
               imodelAccess: accessAndIdsProvider.imodelAccess,
               idsProvider: accessAndIdsProvider.idsProvider,
+              sharedIdsProvider: accessAndIdsProvider.sharedIdsProvider,
             });
           });
 
@@ -1884,10 +1896,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
             return buildIModel(async (imodel) =>
               withEditTxn(imodel, (txn) => {
                 const definitionContainer = insertDefinitionContainer({ txn, codeValue: "dc" });
-                const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainer.id });
+                const definitionModel = insertSubModel({ txn, classFullName: CLASS_NAMES.DefinitionModel, modeledElementId: definitionContainer.id });
 
                 const category = insertCategory({ txn, codeValue: "cat", modelId: definitionModel.id });
-                const defaultSubCategory = { id: getDefaultSubCategoryId(category.id), className: CLASS_NAME_SubCategory };
+                const defaultSubCategory = { id: getDefaultSubCategoryId(category.id), className: CLASS_NAMES.SubCategory };
                 const subCategory = insertSubCategory({
                   txn,
                   parentCategoryId: category.id,
@@ -1896,7 +1908,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 });
 
                 const siblingCategory = insertCategory({ txn, codeValue: "sibling cat", modelId: definitionModel.id });
-                const defaultSiblingSubCategory = { id: getDefaultSubCategoryId(siblingCategory.id), className: CLASS_NAME_SubCategory };
+                const defaultSiblingSubCategory = { id: getDefaultSubCategoryId(siblingCategory.id), className: CLASS_NAMES.SubCategory };
 
                 return {
                   definitionContainer,
@@ -1913,7 +1925,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
           beforeAll(async () => {
             createIModelResult = await createIModel();
-            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, viewType });
+            accessAndIdsProvider = createAccessAndIdsProvider({ imodelConnection: createIModelResult.imodelConnection, perspective });
           });
 
           beforeEach(async function () {
@@ -1927,6 +1939,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               ],
               imodelAccess: accessAndIdsProvider.imodelAccess,
               idsProvider: accessAndIdsProvider.idsProvider,
+              sharedIdsProvider: accessAndIdsProvider.sharedIdsProvider,
             });
           });
 

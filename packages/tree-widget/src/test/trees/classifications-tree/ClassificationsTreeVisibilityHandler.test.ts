@@ -7,7 +7,7 @@ import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialC
 import { afterAll, beforeAll, describe, it } from "vitest";
 import { withEditTxn } from "@itwin/core-backend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { CLASS_NAME_GeometricElement3d } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { CLASS_NAMES } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
 import { ClassificationsTreeDefinition } from "../../../tree-widget-react/trees/classifications-tree/ClassificationsTreeDefinition.js";
 import { createClassificationsTreeVisibilityHandler } from "../../../tree-widget-react/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHandler.js";
 import { buildIModel } from "../../IModelUtils.js";
@@ -31,6 +31,7 @@ import { validateNodeVisibility } from "./VisibilityValidation.js";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { Props } from "@itwin/presentation-shared";
+import type { SharedIdsProvider } from "../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "../../../tree-widget-react/trees/classifications-tree/ClassificationsTreeDefinition.js";
 import type { ClassificationsTreeIdsProvider } from "../../../tree-widget-react/trees/classifications-tree/internal/ClassificationsTreeIdsProvider.js";
 import type { ClassificationsTreeVisibilityHandlerConfiguration } from "../../../tree-widget-react/trees/classifications-tree/UseClassificationsTree.js";
@@ -62,7 +63,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     return createIModelHierarchyProvider({
       hierarchyDefinition: new ClassificationsTreeDefinition({
         ...props,
-        getIdsProvider: () => idsProvider,
+        idsProvider,
         hierarchyConfig: { rootClassificationSystemCode, ...props.hierarchyConfig },
       }),
       imodelAccess: props.imodelAccess,
@@ -75,6 +76,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     visibleByDefault,
     hierarchyConfig,
     idsProvider,
+    sharedIdsProvider,
     imodelAccess,
   }: {
     imodelConnection: IModelConnection;
@@ -82,13 +84,14 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     hierarchyConfig?: Partial<ClassificationsTreeHierarchyConfiguration>;
     imodelAccess: IModelAccess;
     idsProvider: ClassificationsTreeIdsProvider;
+    sharedIdsProvider: SharedIdsProvider;
   }) {
     const viewport = createTreeWidgetTestingViewport({
       iModel: imodelConnection,
       visibleByDefault,
       viewType: "3d",
     });
-    const handler = createClassificationsTreeVisibilityHandler({ imodelAccess, idsProvider, viewport });
+    const handler = createClassificationsTreeVisibilityHandler({ imodelAccess, idsProvider, sharedIdsProvider, viewport });
     const provider = createProvider({ idsProvider, imodelAccess, hierarchyConfig });
     return {
       handler,
@@ -104,11 +107,15 @@ describe("ClassificationsTreeVisibilityHandler", () => {
   describe("custom classification -> category relationship", () => {
     it("does not turn on categories from custom classification -> category relationship when `visibilityHandlerConfig` is not provided", async () => {
       const { imodelConnection, keys } = datasets.customRelationship;
-      const { idsProvider, imodelAccess } = createAccessAndIdsProvider({ imodelConnection, hierarchyConfig: { rootClassificationSystemCode } });
+      const { idsProvider, sharedIdsProvider, imodelAccess } = createAccessAndIdsProvider({
+        imodelConnection,
+        hierarchyConfig: { rootClassificationSystemCode },
+      });
       using visibilityTestData = await createVisibilityTestData({
         imodelConnection,
         imodelAccess,
         idsProvider,
+        sharedIdsProvider,
       });
       const { handler, provider, viewport } = visibilityTestData;
 
@@ -138,12 +145,13 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
 
     it("turns on categories from custom classification -> category relationship", async () => {
-      const { imodelConnection, imodelAccess, idsProvider, keys } = datasets.customRelationship;
+      const { imodelConnection, imodelAccess, idsProvider, sharedIdsProvider, keys } = datasets.customRelationship;
 
       using visibilityTestData = await createVisibilityTestData({
         imodelConnection,
         imodelAccess,
         idsProvider,
+        sharedIdsProvider,
       });
       const { handler, provider, viewport } = visibilityTestData;
 
@@ -173,11 +181,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
 
     it("classification visibility takes into account categories from custom classification -> category relationship", async () => {
-      const { imodelConnection, imodelAccess, idsProvider, keys } = datasets.customRelationship;
+      const { imodelConnection, imodelAccess, idsProvider, sharedIdsProvider, keys } = datasets.customRelationship;
 
       using visibilityTestData = await createVisibilityTestData({
         imodelConnection,
         idsProvider,
+        sharedIdsProvider,
         imodelAccess,
       });
       const { handler, provider, viewport } = visibilityTestData;
@@ -222,10 +231,11 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
   describe("enabling visibility", () => {
     it("by default everything is hidden in 3d view with 3d elements' hierarchy", async () => {
-      const { idsProvider, imodelAccess, imodelConnection } = datasets.simple;
+      const { idsProvider, sharedIdsProvider, imodelAccess, imodelConnection } = datasets.simple;
       using visibilityTestData = await createVisibilityTestData({
         imodelConnection,
         idsProvider,
+        sharedIdsProvider,
         imodelAccess,
       });
       const { handler, provider, viewport } = visibilityTestData;
@@ -240,11 +250,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
     describe("classification table", () => {
       it("showing classification table makes contained elements under it visible", async () => {
-        const { idsProvider, imodelAccess, imodelConnection, keys } = datasets.simple;
+        const { idsProvider, sharedIdsProvider, imodelAccess, imodelConnection, keys } = datasets.simple;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
           idsProvider,
+          sharedIdsProvider,
           imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -261,11 +272,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
     describe("classification", () => {
       it("showing classification makes all ancestors and contained elements under it visible", async () => {
-        const { idsProvider, imodelAccess, imodelConnection, keys } = datasets.simple;
+        const { idsProvider, sharedIdsProvider, imodelAccess, imodelConnection, keys } = datasets.simple;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
           idsProvider,
+          sharedIdsProvider,
           imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -280,11 +292,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       });
 
       it("showing classification makes all ancestors partially visible, and contained elements under it visible", async () => {
-        const { imodelConnection, idsProvider, imodelAccess, keys } = datasets.multipleClassifications;
+        const { imodelConnection, idsProvider, sharedIdsProvider, imodelAccess, keys } = datasets.multipleClassifications;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
           idsProvider,
+          sharedIdsProvider,
           imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -311,11 +324,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
     describe("geometric element", () => {
       it("showing geometric element makes ancestors partially visible, and the element visible", async () => {
-        const { imodelConnection, idsProvider, imodelAccess, keys } = datasets.multipleClassifications;
+        const { imodelConnection, idsProvider, sharedIdsProvider, imodelAccess, keys } = datasets.multipleClassifications;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
           idsProvider,
+          sharedIdsProvider,
           imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -345,11 +359,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
     describe("element with different category than parent", () => {
       it("showing child element with different category makes it visible and parent partially visible", async () => {
-        const { imodelConnection, keys, idsProvider, imodelAccess } = datasets.childrenOfDifferentCategories;
+        const { imodelConnection, keys, idsProvider, sharedIdsProvider, imodelAccess } = datasets.childrenOfDifferentCategories;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
           idsProvider,
+          sharedIdsProvider,
           imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -378,11 +393,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       });
 
       it("showing parent element makes children with different category visible", async () => {
-        const { imodelConnection, keys, idsProvider, imodelAccess } = datasets.childrenOfDifferentCategories;
+        const { imodelConnection, keys, idsProvider, sharedIdsProvider, imodelAccess } = datasets.childrenOfDifferentCategories;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
           idsProvider,
+          sharedIdsProvider,
           imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -413,11 +429,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
   describe("disabling visibility", () => {
     it("by default everything is visible in 3d view with 3d elements' hierarchy", async () => {
-      const { imodelConnection, imodelAccess, idsProvider } = datasets.simple;
+      const { imodelConnection, imodelAccess, idsProvider, sharedIdsProvider } = datasets.simple;
       using visibilityTestData = await createVisibilityTestData({
         imodelConnection,
         visibleByDefault: true,
         idsProvider,
+        sharedIdsProvider,
         imodelAccess,
       });
       const { handler, provider, viewport } = visibilityTestData;
@@ -432,11 +449,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
     describe("classification table", () => {
       it("hiding classification table makes contained elements under it hidden", async () => {
-        const { imodelConnection, keys, idsProvider, imodelAccess } = datasets.simple;
+        const { imodelConnection, keys, idsProvider, sharedIdsProvider, imodelAccess } = datasets.simple;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
           idsProvider,
+          sharedIdsProvider,
           imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -453,12 +471,13 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
     describe("classification", () => {
       it("hiding classification makes all ancestors partially visible, and contained elements under it hidden", async () => {
-        const { imodelConnection, keys, idsProvider, imodelAccess } = datasets.multipleClassifications;
+        const { imodelConnection, keys, idsProvider, sharedIdsProvider, imodelAccess } = datasets.multipleClassifications;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
           visibleByDefault: true,
           idsProvider,
+          sharedIdsProvider,
           imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -485,12 +504,13 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
     describe("geometric element", () => {
       it("hiding geometric element makes ancestors partially visible, element and its children hidden", async () => {
-        const { imodelConnection, keys, idsProvider, imodelAccess } = datasets.multipleClassifications;
+        const { imodelConnection, keys, idsProvider, sharedIdsProvider, imodelAccess } = datasets.multipleClassifications;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
           visibleByDefault: true,
           idsProvider,
+          sharedIdsProvider,
           imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -520,12 +540,13 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
     describe("element with different category than parent", () => {
       it("hiding child element with different category makes it hidden and parent partially visible", async () => {
-        const { imodelConnection, keys, idsProvider, imodelAccess } = datasets.childrenOfDifferentCategories;
+        const { imodelConnection, keys, idsProvider, sharedIdsProvider, imodelAccess } = datasets.childrenOfDifferentCategories;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
           visibleByDefault: true,
           idsProvider,
+          sharedIdsProvider,
           imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -554,12 +575,13 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       });
 
       it("hiding parent element makes children with different category hidden", async () => {
-        const { imodelConnection, keys, idsProvider, imodelAccess } = datasets.childrenOfDifferentCategories;
+        const { imodelConnection, keys, idsProvider, sharedIdsProvider, imodelAccess } = datasets.childrenOfDifferentCategories;
 
         using visibilityTestData = await createVisibilityTestData({
           imodelConnection,
           visibleByDefault: true,
           idsProvider,
+          sharedIdsProvider,
           imodelAccess,
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -674,10 +696,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       visibleByDefault,
       imodelAccess,
       idsProvider,
+      sharedIdsProvider,
     }: {
       imodelConnection: IModelConnection;
       imodelAccess: IModelAccess;
       idsProvider: ClassificationsTreeIdsProvider;
+      sharedIdsProvider: SharedIdsProvider;
       searchPaths: HierarchySearchTree[];
       visibleByDefault?: boolean;
     }) {
@@ -686,8 +710,14 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         viewType: "3d",
         visibleByDefault,
       });
-      const visibilityHandlerWithSearchPaths = createClassificationsTreeVisibilityHandler({ idsProvider, searchPaths, imodelAccess, viewport });
-      const defaultVisibilityHandler = createClassificationsTreeVisibilityHandler({ idsProvider, imodelAccess, viewport });
+      const visibilityHandlerWithSearchPaths = createClassificationsTreeVisibilityHandler({
+        idsProvider,
+        sharedIdsProvider,
+        searchPaths,
+        imodelAccess,
+        viewport,
+      });
+      const defaultVisibilityHandler = createClassificationsTreeVisibilityHandler({ idsProvider, sharedIdsProvider, imodelAccess, viewport });
       const defaultProvider = createProvider({ idsProvider, imodelAccess });
       const providerWithSearchPaths = createProvider({ idsProvider, imodelAccess, searchPaths });
       return {
@@ -712,6 +742,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         searchPaths,
         imodelAccess: accessAndIdsProvider.imodelAccess,
         idsProvider: accessAndIdsProvider.idsProvider,
+        sharedIdsProvider: accessAndIdsProvider.sharedIdsProvider,
       });
       const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
 
@@ -760,6 +791,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         searchPaths,
         imodelAccess: accessAndIdsProvider.imodelAccess,
         idsProvider: accessAndIdsProvider.idsProvider,
+        sharedIdsProvider: accessAndIdsProvider.sharedIdsProvider,
       });
       const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
 
@@ -810,6 +842,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         imodelConnection,
         searchPaths,
         idsProvider: accessAndIdsProvider.idsProvider,
+        sharedIdsProvider: accessAndIdsProvider.sharedIdsProvider,
         imodelAccess: accessAndIdsProvider.imodelAccess,
       });
       const { visibilityHandlerWithSearchPaths, defaultVisibilityHandler, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
@@ -855,6 +888,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         imodelConnection,
         searchPaths,
         idsProvider: accessAndIdsProvider.idsProvider,
+        sharedIdsProvider: accessAndIdsProvider.sharedIdsProvider,
         imodelAccess: accessAndIdsProvider.imodelAccess,
       });
       const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
@@ -901,13 +935,14 @@ describe("ClassificationsTreeVisibilityHandler", () => {
   });
 
   it("element of an excluded class still participates in visibility", async () => {
-    const { imodelConnection, idsProvider, imodelAccess, keys } = datasets.simple;
+    const { imodelConnection, idsProvider, sharedIdsProvider, imodelAccess, keys } = datasets.simple;
     using visibilityTestData = await createVisibilityTestData({
       imodelConnection,
       hierarchyConfig: {
-        elements: { excludedClasses: [CLASS_NAME_GeometricElement3d] },
+        elements: { excludedClasses: [CLASS_NAMES.GeometricElement3d] },
       },
       idsProvider,
+      sharedIdsProvider,
       imodelAccess,
     });
     const { handler, viewport, provider } = visibilityTestData;
@@ -943,14 +978,15 @@ describe("ClassificationsTreeVisibilityHandler", () => {
   });
 
   it("child element of an excluded class still participates in visibility", async () => {
-    const { imodelConnection, idsProvider, imodelAccess, keys } = datasets.simple;
+    const { imodelConnection, idsProvider, sharedIdsProvider, imodelAccess, keys } = datasets.simple;
 
     using visibilityTestData = await createVisibilityTestData({
       imodelConnection,
       hierarchyConfig: {
-        elements: { excludedClasses: [CLASS_NAME_GeometricElement3d] },
+        elements: { excludedClasses: [CLASS_NAMES.GeometricElement3d] },
       },
       idsProvider,
+      sharedIdsProvider,
       imodelAccess,
     });
     const { handler, viewport, provider } = visibilityTestData;

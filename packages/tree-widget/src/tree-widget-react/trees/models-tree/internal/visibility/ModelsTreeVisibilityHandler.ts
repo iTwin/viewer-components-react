@@ -18,6 +18,7 @@ import type { Id64Arg } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode, HierarchyNode, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { ECSchemaProvider } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfoProvider } from "../../../../shared/internal/idsProviders/AlwaysAndNeverDrawnElementInfoProvider.js";
+import type { SharedIdsProvider } from "../../../../shared/internal/idsProviders/SharedIdsProvider.js";
 import type { SearchResultsTree } from "../../../../shared/internal/visibility/BaseSearchResultsTree.js";
 import type { BaseTreeVisibilityHandlerOverrides, TreeSpecificVisibilityHandler } from "../../../../shared/internal/visibility/BaseVisibilityHelper.js";
 import type { TreeWidgetViewport } from "../../../../shared/TreeWidgetViewport.js";
@@ -47,6 +48,7 @@ export interface ModelsTreeVisibilityHandlerOverrides extends BaseTreeVisibility
 /** @internal */
 export interface ModelsTreeVisibilityHandlerProps {
   idsProvider: ModelsTreeIdsProvider;
+  sharedIdsProvider: SharedIdsProvider;
   viewport: TreeWidgetViewport;
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfoProvider;
   overrideHandler: HierarchyVisibilityOverrideHandler;
@@ -70,7 +72,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       idsProvider: this.#props.idsProvider,
       alwaysAndNeverDrawnElementInfo: this.#props.alwaysAndNeverDrawnElementInfo,
       overrideHandler: this.#props.overrideHandler,
-      sharedIdsProvider: this.#props.idsProvider,
+      sharedIdsProvider: this.#props.sharedIdsProvider,
       overrides: this.#props.overrides,
     });
   }
@@ -193,7 +195,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       modelId: node.extendedData.modelId,
       categoryId: node.extendedData.categoryId,
       parentElementsPath: node.extendedData.parentElementsPath,
-      computeOnlyOwnStatus: this.#props.idsProvider.canHaveHiddenChildren() || node.children ? undefined : true,
+      computeOnlyOwnStatus: this.#props.sharedIdsProvider.elements.canHaveHiddenChildren() || node.children ? undefined : true,
     });
   }
 
@@ -331,6 +333,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
 export function createModelsTreeVisibilityHandler(props: {
   viewport: TreeWidgetViewport;
   idsProvider: ModelsTreeIdsProvider;
+  sharedIdsProvider: SharedIdsProvider;
   imodelAccess: Pick<ECSchemaProvider, "classDerivesFrom">;
   overrides?: ModelsTreeVisibilityHandlerOverrides;
   searchPaths?: HierarchySearchTree[];
@@ -351,6 +354,7 @@ export function createModelsTreeVisibilityHandler(props: {
       return new ModelsTreeVisibilityHandler({
         alwaysAndNeverDrawnElementInfo: info,
         idsProvider: props.idsProvider,
+        sharedIdsProvider: props.sharedIdsProvider,
         viewport,
         overrideHandler,
         overrides: props.overrides,

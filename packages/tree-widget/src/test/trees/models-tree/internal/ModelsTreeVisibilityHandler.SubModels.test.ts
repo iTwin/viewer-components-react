@@ -20,7 +20,7 @@ import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { CLASS_NAME_Subject } from "../../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { CLASS_NAMES } from "../../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
 import { buildIModel, TestSchema } from "../../../IModelUtils.js";
 import { validateHierarchyVisibility } from "../../../shared/VisibilityValidation.js";
 import { TestUtils } from "../../../TestUtils.js";
@@ -104,7 +104,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         createIModel: async function createIModel(): Promise<{ imodelConnection: IModelConnection } & IModelWithSubModelIds> {
           return buildIModel(async (imodel, testSchema) =>
             withEditTxn(imodel, (txn) => {
-              const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+              const rootSubject: InstanceKey = { className: CLASS_NAMES.Subject, id: IModel.rootSubjectId };
               const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
               const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
               const category = insertSpatialCategory({ txn, codeValue: "category" });
@@ -275,7 +275,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         createIModel: async function createIModel(): Promise<{ imodelConnection: IModelConnection } & IModelWithSubModelIds> {
           return buildIModel(async (imodel, testSchema) =>
             withEditTxn(imodel, (txn) => {
-              const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+              const rootSubject: InstanceKey = { className: CLASS_NAMES.Subject, id: IModel.rootSubjectId };
               const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
               const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
               const category = insertSpatialCategory({ txn, codeValue: "category" });
@@ -353,7 +353,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         createIModel: async function createIModel(): Promise<{ imodelConnection: IModelConnection } & IModelWithSubModelIds> {
           return buildIModel(async (imodel, testSchema) =>
             withEditTxn(imodel, (txn) => {
-              const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
+              const rootSubject: InstanceKey = { className: CLASS_NAMES.Subject, id: IModel.rootSubjectId };
               const partition = insertPhysicalPartition({ txn, codeValue: "model", parentId: rootSubject.id });
               const model = insertPhysicalSubModel({ txn, modeledElementId: partition.id });
               const category = insertSpatialCategory({ txn, codeValue: "category" });
@@ -474,8 +474,8 @@ describe("ModelsTreeVisibilityHandler", () => {
 
     describe("intermediate categories", () => {
       it("showing intermediate category under sub-model makes its elements visible", async () => {
-        const { imodelConnection, idsProvider, imodelAccess, keys } = datasets.subModelIntermediateCategories;
-        using visibilityTestData = createVisibilityTestData({ imodelConnection, idsProvider, imodelAccess, hierarchyConfig });
+        const { imodelConnection, idsProvider, sharedIdsProvider, imodelAccess, keys } = datasets.subModelIntermediateCategories;
+        using visibilityTestData = createVisibilityTestData({ imodelConnection, idsProvider, sharedIdsProvider, imodelAccess, hierarchyConfig });
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(
@@ -503,8 +503,8 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       it("showing element under intermediate category in sub-model makes it visible", async () => {
-        const { imodelConnection, idsProvider, imodelAccess, keys } = datasets.subModelIntermediateCategories;
-        using visibilityTestData = createVisibilityTestData({ imodelConnection, idsProvider, imodelAccess, hierarchyConfig });
+        const { imodelConnection, idsProvider, sharedIdsProvider, imodelAccess, keys } = datasets.subModelIntermediateCategories;
+        using visibilityTestData = createVisibilityTestData({ imodelConnection, idsProvider, sharedIdsProvider, imodelAccess, hierarchyConfig });
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(
@@ -532,8 +532,15 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       it("hiding intermediate category under sub-model makes its elements hidden", async () => {
-        const { imodelConnection, idsProvider, imodelAccess, keys } = datasets.subModelIntermediateCategories;
-        using visibilityTestData = createVisibilityTestData({ imodelConnection, idsProvider, imodelAccess, hierarchyConfig, visibleByDefault: true });
+        const { imodelConnection, idsProvider, sharedIdsProvider, imodelAccess, keys } = datasets.subModelIntermediateCategories;
+        using visibilityTestData = createVisibilityTestData({
+          imodelConnection,
+          idsProvider,
+          sharedIdsProvider,
+          imodelAccess,
+          hierarchyConfig,
+          visibleByDefault: true,
+        });
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(
@@ -599,7 +606,7 @@ async function createDatasets() {
         }),
       );
       imodels.push(imodelConnection);
-      return { imodelConnection, keys, ...createAccessAndIdsProvider({ imodelConnection }) };
+      return { imodelConnection, keys, ...createAccessAndIdsProvider({ imodelConnection, hierarchyConfig: { subjects: { root: "exclude" } } }) };
     })(),
   };
 }
