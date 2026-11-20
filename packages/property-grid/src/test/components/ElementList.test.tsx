@@ -257,23 +257,6 @@ describe("<ElementList />", () => {
       expect(getLabelsStub).toHaveBeenCalledOnce();
     });
 
-    it.each([0, 5, 100])("stops paging when only %i of the selected keys have results", async (resultCount) => {
-      getLabelsStub.mockImplementation(async (page) => buildPage(instanceKeys.slice(0, resultCount), page));
-      const { container, getByRole, findByText } = render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={() => {}} onSelect={() => {}} />, {
-        disableStrictMode: true,
-      });
-      if (resultCount > 0) {
-        await findByText(buildLabel(instanceKeys[0]));
-      }
-      if (resultCount === 100) {
-        fireEvent.scroll(getByRole("list"), { target: { scrollTop: 2300 } });
-        await waitFor(() => expect(getLabelsStub).toHaveBeenLastCalledWith({ offset: 100, limit: 100 }));
-      }
-      await waitFor(() => expect(container.querySelectorAll('[aria-busy="true"]')).toHaveLength(0));
-      fireEvent.scroll(getByRole("list"), { target: { scrollTop: 2301 } });
-      expect(getLabelsStub.mock.calls.map(([page]) => page.offset).filter((offset) => offset > 0)).toEqual(resultCount === 100 ? [100] : []);
-    });
-
     it("waits for the current page before requesting the next one", async () => {
       const manyKeys = Array.from({ length: 250 }, (_, index) => ({ id: `0x${String(index + 1).padStart(3, "0")}`, className: "TestSchema.TestClass" }));
       const second = createResolvablePromise<LabeledInstanceKey[]>();

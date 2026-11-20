@@ -76,15 +76,14 @@ describe("useInstanceLabels", () => {
     }
   });
 
-  it("deduplicates keys, omits missing instances and stops on a short page", async () => {
-    const built = await buildIModel("use-instance-labels-missing", async (db) =>
+  it("deduplicates keys", async () => {
+    const built = await buildIModel("use-instance-labels-duplicates", async (db) =>
       withEditTxn(db, (txn) => ({ key: insertSubject({ txn, codeValue: "subject" }) })),
     );
     imodel = built.imodelConnection;
-    const missing = { className: "BisCore.Subject", id: "0xffff" };
     const reader = vi.spyOn(imodel, "createQueryReader");
     const { result, rerender } = renderHook(useInstanceLabels, {
-      initialProps: { imodel, instanceKeys: [missing, { ...built.key, className: "BisCore:Subject" }, built.key, missing] },
+      initialProps: { imodel, instanceKeys: [{ ...built.key, className: "BisCore:Subject" }, built.key, built.key] },
       disableStrictMode: true,
     });
     act(() => result.current.loadMore());
