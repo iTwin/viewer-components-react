@@ -206,7 +206,7 @@ function useCategories(viewport: TreeWidgetViewport) {
     try {
       if (baseIdsCache) {
         return await firstValueFrom(
-          baseIdsCache.getAllCategoriesOfElements().pipe(
+          baseIdsCache.getAllCategoriesOfViewType().pipe(
             mergeAll(),
             mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), subCategories: baseIdsCache.getSubCategories({ categoryId }) })),
             toArray(),
@@ -235,8 +235,8 @@ function useAvailableModels(viewport: TreeWidgetViewport): Array<ModelId> {
     const getModels = async () => {
       try {
         if (baseIdsCache) {
-          const models = await firstValueFrom(baseIdsCache.getAllModels());
-          setAvailableModels(models);
+          const models = await firstValueFrom(baseIdsCache.getAllModelsOfViewType());
+          setAvailableModels(models.map(({ id }) => id));
         }
         return;
       } catch (error) {

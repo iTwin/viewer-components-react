@@ -11,6 +11,7 @@ import { ChildElementsCache } from "./ChildElementsCache.js";
 import { DescendantsCountCache } from "./DescendantsCountCache.js";
 import { ElementModelCategoriesCache } from "./ElementModelCategoriesCache.js";
 import { ModeledElementsCache } from "./ModeledElementsCache.js";
+import { ModelsAndCategoriesCache } from "./ModelsAndCategoriesCache.js";
 import { SubCategoriesCache } from "./SubCategoriesCache.js";
 
 import type { Observable } from "rxjs";
@@ -19,6 +20,7 @@ import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies
 import type { EC, Props } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../Types.js";
 import type { ParentElementsPath } from "../Utils.js";
+import type { ModelInfo } from "./ModelsAndCategoriesCache.js";
 
 /** @internal */
 export interface BaseIdsCacheProps {
@@ -39,6 +41,7 @@ export class BaseIdsCache {
   #modeledElementsCache: Observable<ModeledElementsCache> | undefined;
   #modeledElementsLoaded = false;
   readonly #elementModelCategoriesCache: ElementModelCategoriesCache;
+  readonly #modelsAndCategoriesCache: ModelsAndCategoriesCache;
   #categoryModelsInfoWithoutSubModels:
     | Observable<
         Map<
@@ -77,6 +80,11 @@ export class BaseIdsCache {
       componentId: this.#componentId,
       elementClassName: props.elementClassName,
       excludedElementClassNames: props.excludedElementClassNames,
+    });
+    this.#modelsAndCategoriesCache = new ModelsAndCategoriesCache({
+      queryExecutor: this.#queryExecutor,
+      componentId: this.#componentId,
+      type: props.type,
     });
     this.#canHaveHiddenChildren = !!props.excludedElementClassNames?.length;
   }
@@ -286,20 +294,6 @@ export class BaseIdsCache {
     return this.#elementModelCategoriesCache.getCachedData().pipe(map(({ modelsCategoriesInfo }) => [...modelsCategoriesInfo.keys()]));
   }
 
-  public getPlanProjectionModels(): Observable<Id64Set> {
-    return this.#elementModelCategoriesCache.getCachedData().pipe(
-      map(({ modelsCategoriesInfo }) => {
-        const result = new Set<ModelId>();
-        for (const [modelId, modelInfo] of modelsCategoriesInfo) {
-          if (modelInfo.isPlanProjectionModel) {
-            result.add(modelId);
-          }
-        }
-        return result;
-      }),
-    );
-  }
-
   public getCategories({
     modelId,
     includeOnlyIfCategoryOfTopMostElement,
@@ -393,6 +387,42 @@ export class BaseIdsCache {
 
   public categoryHasParentElements({ categoryId }: { categoryId: Id64String }): Observable<boolean> {
     return this.#elementModelCategoriesCache.getCachedData().pipe(map(({ categoriesWithParentElements }) => categoriesWithParentElements.has(categoryId)));
+  }
+
+  // ModelsAndCategoriesCache methods
+
+  /**
+   * Returns non-private and non-template models of the cache's view type (`2d` or `3d`).
+   *
+   * When element model categories are loaded (see `elementModelCategoriesLoaded`), returns only models that contain elements.
+   * Otherwise, returns all models (regardless of whether they contain elements) using a cheap query, without triggering
+   * loading of element model categories.
+   */
+  public getAllModelsOfViewType(): Observable<Array<ModelInfo>> {
+    if (this.#elementModelCategoriesCache.cachedDataLoaded()) {
+      return this.#elementModelCategoriesCache
+        .getCachedData()
+        .pipe(
+          map(({ modelsCategoriesInfo }) =>
+            [...modelsCategoriesInfo].map(([id, { isPlanProjectionModel }]) => ({ id, isPlanProjection: isPlanProjectionModel })),
+          ),
+        );
+    }
+    return this.#modelsAndCategoriesCache.getAllModelsOfViewType();
+  }
+
+  /**
+   * Returns categories of the cache's view type (`2d` or `3d`).
+   *
+   * When element model categories are loaded (see `elementModelCategoriesLoaded`), returns only categories that contain elements.
+   * Otherwise, returns all categories (regardless of whether they contain elements) using a cheap query, without triggering
+   * loading of element model categories.
+   */
+  public getAllCategoriesOfViewType(): Observable<Id64Set> {
+    if (this.#elementModelCategoriesCache.cachedDataLoaded()) {
+      return this.getAllCategoriesOfElements();
+    }
+    return this.#modelsAndCategoriesCache.getAllCategoriesOfViewType();
   }
 
   // DescendantsCountCache methods

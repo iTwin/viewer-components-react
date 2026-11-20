@@ -90,11 +90,7 @@ function useAvailableModels(imodel: IModelConnection): ModelInfo[] {
   useEffect(() => {
     const getModels = async () => {
       try {
-        const [allModels, planProjectionModels] = await Promise.all([
-          firstValueFrom(baseIdsCache.getAllModels()),
-          firstValueFrom(baseIdsCache.getPlanProjectionModels()),
-        ]);
-        setAvailableModels(allModels.map((id) => ({ id, isPlanProjection: planProjectionModels.has(id) })));
+        setAvailableModels(await firstValueFrom(baseIdsCache.getAllModelsOfViewType()));
       } catch {
         setAvailableModels([]);
       }
@@ -283,7 +279,7 @@ export function ToggleInstancesFocusButton(props?: { disabled?: boolean }) {
 
 async function getCategoryInfos({ baseIdsCache, cancel }: { baseIdsCache: BaseIdsCache; cancel: Observable<void> }): Promise<CategoryInfosMap | undefined> {
   return firstValueFrom(
-    baseIdsCache.getAllCategoriesOfElements().pipe(
+    baseIdsCache.getAllCategoriesOfViewType().pipe(
       mergeAll(),
       mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), subCategories: baseIdsCache.getSubCategories({ categoryId }) })),
       reduce((acc: CategoryInfosMap, { categoryId, subCategories }) => {
