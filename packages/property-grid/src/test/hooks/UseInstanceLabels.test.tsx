@@ -98,7 +98,8 @@ describe("useInstanceLabels", () => {
     expect(reader).toHaveBeenCalledOnce();
   });
 
-  it.each([500, 501])("loads globally sorted pages across %i classes", async (classCount) => {
+  it("loads globally sorted pages across 501 classes", async () => {
+    const classCount = 501;
     const built = await buildIModel(`use-instance-labels-many-classes-${classCount}`, async (db) => {
       await importSchema({
         imodel: db,
@@ -128,19 +129,11 @@ describe("useInstanceLabels", () => {
     imodel = built.imodelConnection;
     const reader = vi.spyOn(imodel, "createQueryReader");
     const sortedKeys = built.keys.toReversed();
-    const pageLoaded = vi.fn<() => void>();
-    const wrapper = ({ children }: PropsWithChildren) => <TelemetryContextProvider onPerformanceMeasured={pageLoaded}>{children}</TelemetryContextProvider>;
-    const { result } = renderHook(useInstanceLabels, { initialProps: { imodel, instanceKeys: built.keys }, wrapper, disableStrictMode: true });
+    const { result } = renderHook(useInstanceLabels, { initialProps: { imodel, instanceKeys: built.keys }, disableStrictMode: true });
     const pageCount = Math.ceil(classCount / 100);
     for (let page = 1; page <= pageCount; ++page) {
-      await act(async () => {
-        // Wait for page completion rather than imposing a machine-dependent waitFor timeout.
-        // act flushes the rows update before the assertions below.
-        const completed = new Promise<void>((resolve) => pageLoaded.mockImplementationOnce(resolve));
-        result.current.loadMore();
-        await completed;
-      });
-      expect(result.current.rows.map((row) => row?.instanceKey)).toEqual(sortedKeys.slice(0, page * 100));
+      act(() => result.current.loadMore());
+      await waitFor(() => expect(result.current.rows.map((row) => row?.instanceKey)).toEqual(sortedKeys.slice(0, page * 100)));
       expect(reader).toHaveBeenCalledTimes(page);
     }
     act(() => result.current.loadMore());

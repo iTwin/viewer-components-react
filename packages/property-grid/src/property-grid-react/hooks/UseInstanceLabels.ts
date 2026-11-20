@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { concatMap, defer, EMPTY, exhaustMap, from, map, mergeMap, shareReplay, Subject, switchMap, take, toArray } from "rxjs";
+import { concatMap, defer, EMPTY, exhaustMap, from, map, shareReplay, Subject, switchMap, take, toArray } from "rxjs";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import {
   createBisInstanceLabelSelectClauseFactory,
@@ -17,15 +17,14 @@ import {
   parseInstanceLabel,
 } from "@itwin/presentation-shared";
 import { trackTime } from "../common/TimeTracker.js";
+import { groupClassesByCommonBase } from "./InstanceLabelClassGroups.js";
 import { useTelemetryContext } from "./UseTelemetryContext.js";
 
 import type { Observable } from "rxjs";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { InstanceKey } from "@itwin/presentation-common";
-import type { ECSqlBinding } from "@itwin/presentation-shared";
+import type { ECSqlBinding, InstanceKey } from "@itwin/presentation-shared";
 
-const MAX_COMPOUND_SELECTS = 500;
 const PAGE_SIZE = 100;
 
 interface LabeledInstanceKey {
@@ -37,7 +36,7 @@ interface InstanceLabelsSession {
   /** Request a page after subscribing to `pages`. */
   loadMore: () => void;
   /** Page stream for a single subscriber. */
-  pages: Observable<{ page: LabeledInstanceKey[]; hasMore: boolean }>;
+  pages: Observable<{ page: LabeledInstanceKey[]; hasMore: boolean; total: number }>;
 }
 
 function groupInstanceKeysByClass(instanceKeys: InstanceKey[]): Map<string, Map<Id64String, InstanceKey>> {
@@ -65,20 +64,23 @@ export function useInstanceLabels({ imodel, instanceKeys }: { imodel: IModelConn
   const loadNextPage = useRef<(() => void) | undefined>(undefined);
   const { onPerformanceMeasured } = useTelemetryContext();
   const keysByClass = useMemo(() => groupInstanceKeysByClass(instanceKeys), [instanceKeys]);
-  const total = useMemo(() => [...keysByClass.values()].reduce((count, keys) => count + keys.size, 0), [keysByClass]);
+  const initialKeyCount = useMemo(() => [...keysByClass.values()].reduce((count, keys) => count + keys.size, 0), [keysByClass]);
   const labelQueryServices = useMemo(() => createLabelQueryServices(imodel), [imodel]);
-  const session = useMemo(() => createSession(labelQueryServices, keysByClass, total), [labelQueryServices, keysByClass, total]);
+  const session = useMemo(() => createSession(labelQueryServices, keysByClass), [labelQueryServices, keysByClass]);
 
   useEffect(() => {
     let items: LabeledInstanceKey[] = [];
+    let total = initialKeyCount;
     let hasMore = total > 0;
     let loading = false;
     let timer: ReturnType<typeof trackTime> | undefined;
-    const subscription = session.pages.subscribe(({ page, hasMore: nextHasMore }) => {
+    const subscription = session.pages.subscribe(({ page, hasMore: nextHasMore, total: groupedTotal }) => {
       timer?.finish();
       timer = undefined;
       items = [...items, ...page];
       hasMore = nextHasMore;
+      // reduce total ammount if some instances are dublicates under two different classes (base and derived)
+      total = groupedTotal;
       loading = false;
       setRows(items);
     });
@@ -100,7 +102,7 @@ export function useInstanceLabels({ imodel, instanceKeys }: { imodel: IModelConn
       subscription.unsubscribe();
       loadNextPage.current = undefined;
     };
-  }, [session, total, onPerformanceMeasured]);
+  }, [session, initialKeyCount, onPerformanceMeasured]);
 
   const loadMore = useCallback(() => loadNextPage.current?.(), []);
   return { rows, loadMore };
@@ -108,53 +110,74 @@ export function useInstanceLabels({ imodel, instanceKeys }: { imodel: IModelConn
 
 function createLabelQueryServices(imodel: IModelConnection) {
   const schemaProvider = createECSchemaProvider(imodel.schemaContext);
+  const classHierarchyInspector = createCachingECClassHierarchyInspector({ schemaProvider, cacheSize: 100 });
   return {
     queryExecutor: createECSqlQueryExecutor(imodel),
-    labelSelectClauseFactory: createBisInstanceLabelSelectClauseFactory({
-      classHierarchyInspector: createCachingECClassHierarchyInspector({ schemaProvider, cacheSize: 100 }),
-    }),
+    labelSelectClauseFactory: createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector }),
+    classHierarchyInspector,
     valueFormatter: createDefaultValueFormatter(),
   };
 }
 
 function createSession(
-  { queryExecutor, labelSelectClauseFactory, valueFormatter }: ReturnType<typeof createLabelQueryServices>,
+  { queryExecutor, labelSelectClauseFactory, classHierarchyInspector, valueFormatter }: ReturnType<typeof createLabelQueryServices>,
   keysByClass: Map<string, Map<Id64String, InstanceKey>>,
-  total: number,
 ): InstanceLabelsSession {
   const loadRequests = new Subject<void>();
   const pages = defer(() => {
     let offset = 0;
-    let hasMore = total > 0;
-    const preparedQuery = from(keysByClass).pipe(
-      mergeMap(async ([fullClassName, keys], index) => {
-        const { schemaName, className } = parseFullClassName(fullClassName);
-        const [label, sortLabel] = await Promise.all([
-          labelSelectClauseFactory.createSelectClause({ classAlias: "this", className: fullClassName }),
-          labelSelectClauseFactory.createSelectClause({
-            classAlias: "this",
-            className: fullClassName,
-            selectorsConcatenator: ECSql.createConcatenatedValueStringSelector,
-          }),
-        ]);
-        return {
-          index,
-          ecsql: `SELECT this.ECInstanceId AS id, '${fullClassName}' AS className, ${label} AS label, ${sortLabel} AS sortLabel
+    let hasMore = keysByClass.size > 0;
+    const preparedQuery = defer(async () => {
+      const groups =
+        keysByClass.size === 1
+          ? [...keysByClass.keys()].map((baseClass) => ({ baseClass, classNames: [baseClass] }))
+          : await groupClassesByCommonBase(classHierarchyInspector, [...keysByClass.keys()]);
+      const groupSelects = await Promise.all(
+        groups.map(async ({ baseClass: groupBaseClass, classNames }) => {
+          const baseClass = classNames.length === 1 ? classNames[0] : groupBaseClass;
+          const { schemaName, className } = parseFullClassName(baseClass);
+          const keys = new Map<Id64String, InstanceKey>();
+          for (const name of classNames) {
+            const classKeys = keysByClass.get(name);
+            if (!classKeys) {
+              throw new Error(`Missing selected keys for class "${name}".`);
+            }
+            for (const [id, key] of classKeys) {
+              if (!keys.has(id)) {
+                keys.set(id, key);
+              }
+            }
+          }
+          const [label, sortLabel] = await Promise.all([
+            labelSelectClauseFactory.createSelectClause({ classAlias: "this", className: baseClass }),
+            labelSelectClauseFactory.createSelectClause({
+              classAlias: "this",
+              className: baseClass,
+              selectorsConcatenator: ECSql.createConcatenatedValueStringSelector,
+            }),
+          ]);
+          return {
+            groupBaseClass,
+            keys,
+            ecsql: `SELECT this.ECInstanceId AS id, '${groupBaseClass}' AS className, ${label} AS label, ${sortLabel} AS sortLabel
         FROM [${schemaName}].[${className}] AS this JOIN IdSet(?) AS ids ON ids.id = this.ECInstanceId`,
-          binding: { type: "idset", value: [...keys.keys()] } satisfies ECSqlBinding,
-        };
-      }),
-      toArray(),
-      map((selects) => createSortedLabelsPageQuery(selects.sort((a, b) => a.index - b.index))),
-      shareReplay({ bufferSize: 1, refCount: true }),
-    );
+            bindings: [{ type: "idset", value: [...keys.keys()] } satisfies ECSqlBinding],
+          };
+        }),
+      );
+      return {
+        query: createSortedLabelsPageQuery(groupSelects),
+        keysByGroup: new Map(groupSelects.map(({ groupBaseClass, keys }) => [groupBaseClass, keys])),
+        total: groupSelects.reduce((count, { keys }) => count + keys.size, 0),
+      };
+    }).pipe(shareReplay({ bufferSize: 1, refCount: true }));
     return loadRequests.pipe(
       exhaustMap(() => {
         if (!hasMore) {
           return EMPTY;
         }
         return preparedQuery.pipe(
-          switchMap((query) =>
+          switchMap(({ query, keysByGroup, total }) =>
             defer(() =>
               from(
                 queryExecutor.createQueryReader(
@@ -168,20 +191,20 @@ function createSession(
             ).pipe(
               take(PAGE_SIZE),
               concatMap(async (row): Promise<LabeledInstanceKey> => {
-                const instanceKey = keysByClass.get(row.className)?.get(row.id);
+                const instanceKey = keysByGroup.get(row.className)?.get(row.id);
                 if (!instanceKey) {
                   throw new Error("Label query returned an instance outside the requested selection.");
                 }
                 return { instanceKey, label: await formatConcatenatedValue({ value: parseInstanceLabel(row.label), valueFormatter }) };
               }),
               toArray(),
+              map((page) => {
+                offset += page.length;
+                hasMore = page.length === PAGE_SIZE && offset < total;
+                return { page, hasMore, total };
+              }),
             ),
           ),
-          map((page) => {
-            offset += page.length;
-            hasMore = page.length === PAGE_SIZE && offset < total;
-            return { page, hasMore };
-          }),
         );
       }),
     );
@@ -189,28 +212,9 @@ function createSession(
   return { loadMore: () => loadRequests.next(), pages };
 }
 
-function createSortedLabelsPageQuery(selects: Array<{ ecsql: string; binding: ECSqlBinding }>) {
-  const { ctes, branches } = createBatchedLabelCtes(selects.map(({ ecsql }) => ecsql));
+function createSortedLabelsPageQuery(selects: Array<{ ecsql: string; bindings: ECSqlBinding[] }>) {
   return {
-    ctes,
-    ecsql: `SELECT id, className, label FROM (${branches.join(" UNION ALL ")}) ORDER BY LOWER(sortLabel), className, id LIMIT ? OFFSET ?`,
-    bindings: selects.map(({ binding }) => binding),
+    ecsql: `SELECT id, className, label FROM (${selects.map(({ ecsql }) => ecsql).join(" UNION ALL ")}) ORDER BY LOWER(sortLabel), className, id LIMIT ? OFFSET ?`,
+    bindings: selects.flatMap(({ bindings }) => bindings),
   };
-}
-
-function createBatchedLabelCtes(selects: string[]): { ctes: string[]; branches: string[] } {
-  const ctes: string[] = [];
-  let branches = selects;
-  // SQLite limits each compound SELECT to 500 branches. Build CTE levels until the final
-  // UNION ALL also fits that limit, so sorting and pagination apply to the entire selection.
-  for (let level = 0; level === 0 || branches.length > MAX_COMPOUND_SELECTS; ++level) {
-    const batched: string[] = [];
-    for (let offset = 0; offset < branches.length; offset += MAX_COMPOUND_SELECTS) {
-      const name = `labels_${level}_${batched.length}`;
-      ctes.push(`${name}(id, className, label, sortLabel) AS (${branches.slice(offset, offset + MAX_COMPOUND_SELECTS).join(" UNION ALL ")})`);
-      batched.push(`SELECT id, className, label, sortLabel FROM ${name}`);
-    }
-    branches = batched;
-  }
-  return { ctes, branches };
 }

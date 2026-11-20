@@ -24,7 +24,11 @@ vi.mock("@itwin/presentation-core-interop", async (importOriginal) => {
 });
 vi.mock("@itwin/presentation-shared", async (importOriginal) => {
   const actual = await importOriginal<typeof shared>();
-  return { ...actual, createBisInstanceLabelSelectClauseFactory: vi.fn(actual.createBisInstanceLabelSelectClauseFactory) };
+  return {
+    ...actual,
+    createBisInstanceLabelSelectClauseFactory: vi.fn(actual.createBisInstanceLabelSelectClauseFactory),
+    createCachingECClassHierarchyInspector: () => ({ classDerivesFrom: async () => false }),
+  };
 });
 
 describe("<ElementList />", () => {
