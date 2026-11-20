@@ -221,12 +221,12 @@ function LoadingTree() {
     <SelectableTree
       buttons={
         <>
-          <Skeleton variant={"rounded"} width={28} height={28} />
-          <Skeleton variant={"rounded"} width={28} height={28} />
-          <Skeleton variant={"rounded"} width={28} height={28} />
-          <Skeleton variant={"rounded"} width={28} height={28} />
-          <Skeleton variant={"rounded"} width={28} height={28} />
-          <Skeleton variant={"rounded"} width={28} height={28} />
+          <Skeleton variant={"rounded"} width={24} height={24} />
+          <Skeleton variant={"rounded"} width={24} height={24} />
+          <Skeleton variant={"rounded"} width={24} height={24} />
+          <Skeleton variant={"rounded"} width={24} height={24} />
+          <Skeleton variant={"rounded"} width={24} height={24} />
+          <Skeleton variant={"rounded"} width={24} height={24} />
         </>
       }
     >
