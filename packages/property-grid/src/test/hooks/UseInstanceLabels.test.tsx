@@ -72,7 +72,7 @@ describe("useInstanceLabels", () => {
     };
     const expected = ["code", `user-label ${idSuffix(keys[1].id)}`, `Physical Object ${idSuffix(keys[2].id)}`, "[code]", "partition-label", "partition-label"];
     for (const [index, key] of keys.entries()) {
-      expect(result.current.rows.find((row) => row?.instanceKey === key)?.label).toBe(expected[index]);
+      expect(result.current.rows.find((row) => row?.instanceKey.className === key.className && row.instanceKey.id === key.id)?.label).toBe(expected[index]);
     }
   });
 

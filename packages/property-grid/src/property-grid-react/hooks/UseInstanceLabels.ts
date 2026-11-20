@@ -20,7 +20,6 @@ import { trackTime } from "../common/TimeTracker.js";
 import { useTelemetryContext } from "./UseTelemetryContext.js";
 
 import type { Observable } from "rxjs";
-import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ECClassHierarchyInspector, ECSqlBinding, InstanceKey } from "@itwin/presentation-shared";
 
@@ -35,21 +34,7 @@ interface InstanceLabelsSession {
   /** Request a page after subscribing to `pages`. */
   loadMore: () => void;
   /** Page stream for a single subscriber. */
-  pages: Observable<{ page: LabeledInstanceKey[]; hasMore: boolean; total: number }>;
-}
-
-function groupInstanceKeysByClass(instanceKeys: InstanceKey[]): Map<string, Map<Id64String, InstanceKey>> {
-  const keysByClass = new Map<string, Map<Id64String, InstanceKey>>();
-  for (const key of instanceKeys) {
-    const className = normalizeFullClassName(key.className);
-    let keys = keysByClass.get(className);
-    if (!keys) {
-      keys = new Map();
-      keysByClass.set(className, keys);
-    }
-    keys.set(key.id, key);
-  }
-  return keysByClass;
+  pages: Observable<{ page: LabeledInstanceKey[]; hasMore: boolean }>;
 }
 
 interface UseInstanceLabelsResult {
@@ -62,24 +47,20 @@ export function useInstanceLabels({ imodel, instanceKeys }: { imodel: IModelConn
   const [rows, setRows] = useState<UseInstanceLabelsResult["rows"]>([]);
   const loadNextPage = useRef<(() => void) | undefined>(undefined);
   const { onPerformanceMeasured } = useTelemetryContext();
-  const keysByClass = useMemo(() => groupInstanceKeysByClass(instanceKeys), [instanceKeys]);
-  const initialKeyCount = useMemo(() => [...keysByClass.values()].reduce((count, keys) => count + keys.size, 0), [keysByClass]);
   const labelQueryServices = useMemo(() => createLabelQueryServices(imodel), [imodel]);
-  const session = useMemo(() => createSession(labelQueryServices, keysByClass), [labelQueryServices, keysByClass]);
+  const session = useMemo(() => createSession(labelQueryServices, instanceKeys), [labelQueryServices, instanceKeys]);
 
   useEffect(() => {
     let items: LabeledInstanceKey[] = [];
-    let total = initialKeyCount;
+    const total = instanceKeys.length;
     let hasMore = total > 0;
     let loading = false;
     let timer: ReturnType<typeof trackTime> | undefined;
-    const subscription = session.pages.subscribe(({ page, hasMore: nextHasMore, total: groupedTotal }) => {
+    const subscription = session.pages.subscribe(({ page, hasMore: nextHasMore }) => {
       timer?.finish();
       timer = undefined;
       items = [...items, ...page];
       hasMore = nextHasMore;
-      // reduce total amount if some instances are duplicates under two different classes (base and derived)
-      total = groupedTotal;
       loading = false;
       setRows(items);
     });
@@ -101,7 +82,7 @@ export function useInstanceLabels({ imodel, instanceKeys }: { imodel: IModelConn
       subscription.unsubscribe();
       loadNextPage.current = undefined;
     };
-  }, [session, initialKeyCount, onPerformanceMeasured]);
+  }, [session, instanceKeys.length, onPerformanceMeasured]);
 
   const loadMore = useCallback(() => loadNextPage.current?.(), []);
   return { rows, loadMore };
@@ -120,33 +101,20 @@ function createLabelQueryServices(imodel: IModelConnection) {
 
 function createSession(
   { queryExecutor, labelSelectClauseFactory, classHierarchyInspector, valueFormatter }: ReturnType<typeof createLabelQueryServices>,
-  keysByClass: Map<string, Map<Id64String, InstanceKey>>,
+  instanceKeys: InstanceKey[],
 ): InstanceLabelsSession {
   const loadRequests = new Subject<void>();
   const pages = defer(() => {
     let offset = 0;
-    let hasMore = keysByClass.size > 0;
+    let hasMore = instanceKeys.length > 0;
     const preparedQuery = defer(async () => {
-      const groups =
-        keysByClass.size === 1
-          ? [...keysByClass.keys()].map((baseClass) => ({ baseClass, classNames: [baseClass] }))
-          : await groupClassesByCommonBase(classHierarchyInspector, [...keysByClass.keys()]);
+      const classNames = [...new Set(instanceKeys.map((key) => normalizeFullClassName(key.className)))];
+      const groups = classNames.length === 1 ? [{ baseClass: classNames[0], classNames }] : await groupClassesByCommonBase(classHierarchyInspector, classNames);
       const groupSelects = await Promise.all(
-        groups.map(async ({ baseClass: groupBaseClass, classNames }) => {
-          const baseClass = classNames.length === 1 ? classNames[0] : groupBaseClass;
+        groups.map(async ({ baseClass, classNames: groupClassNames }) => {
           const { schemaName, className } = parseFullClassName(baseClass);
-          const keys = new Map<Id64String, InstanceKey>();
-          for (const name of classNames) {
-            const classKeys = keysByClass.get(name);
-            if (!classKeys) {
-              throw new Error(`Missing selected keys for class "${name}".`);
-            }
-            for (const [id, key] of classKeys) {
-              if (!keys.has(id)) {
-                keys.set(id, key);
-              }
-            }
-          }
+          const groupClasses = new Set(groupClassNames);
+          const ids = [...new Set(instanceKeys.filter((key) => groupClasses.has(normalizeFullClassName(key.className))).map((key) => key.id))];
           const [label, sortLabel] = await Promise.all([
             labelSelectClauseFactory.createSelectClause({ classAlias: "this", className: baseClass }),
             labelSelectClauseFactory.createSelectClause({
@@ -156,19 +124,14 @@ function createSession(
             }),
           ]);
           return {
-            groupBaseClass,
-            keys,
-            ecsql: `SELECT this.ECInstanceId AS id, '${groupBaseClass}' AS className, ${label} AS label, ${sortLabel} AS sortLabel
+            ids,
+            ecsql: `SELECT this.ECInstanceId AS id, ec_classname(this.ECClassId, 's.c') AS className, ${label} AS label, ${sortLabel} AS sortLabel
         FROM [${schemaName}].[${className}] AS this JOIN IdSet(?) AS ids ON ids.id = this.ECInstanceId`,
-            bindings: [{ type: "idset", value: [...keys.keys()] } satisfies ECSqlBinding],
+            bindings: [{ type: "idset", value: ids } satisfies ECSqlBinding],
           };
         }),
       );
-      return {
-        query: createSortedLabelsPageQuery(groupSelects),
-        keysByGroup: new Map(groupSelects.map(({ groupBaseClass, keys }) => [groupBaseClass, keys])),
-        total: groupSelects.reduce((count, { keys }) => count + keys.size, 0),
-      };
+      return { query: createSortedLabelsPageQuery(groupSelects), total: groupSelects.reduce((count, { ids }) => count + ids.length, 0) };
     }).pipe(shareReplay({ bufferSize: 1, refCount: true }));
     return loadRequests.pipe(
       exhaustMap(() => {
@@ -176,7 +139,7 @@ function createSession(
           return EMPTY;
         }
         return preparedQuery.pipe(
-          switchMap(({ query, keysByGroup, total }) =>
+          switchMap(({ query, total }) =>
             defer(() =>
               from(
                 queryExecutor.createQueryReader(
@@ -189,18 +152,15 @@ function createSession(
               ),
             ).pipe(
               take(PAGE_SIZE),
-              concatMap(async (row): Promise<LabeledInstanceKey> => {
-                const instanceKey = keysByGroup.get(row.className)?.get(row.id);
-                if (!instanceKey) {
-                  throw new Error("Label query returned an instance outside the requested selection.");
-                }
-                return { instanceKey, label: await formatConcatenatedValue({ value: parseInstanceLabel(row.label), valueFormatter }) };
-              }),
+              concatMap(async (row): Promise<LabeledInstanceKey> => ({
+                instanceKey: { className: row.className, id: row.id },
+                label: await formatConcatenatedValue({ value: parseInstanceLabel(row.label), valueFormatter }),
+              })),
               toArray(),
               map((page) => {
                 offset += page.length;
-                hasMore = page.length === PAGE_SIZE && offset < total;
-                return { page, hasMore, total };
+                hasMore = offset < total;
+                return { page, hasMore };
               }),
             ),
           ),
