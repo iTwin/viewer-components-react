@@ -35,7 +35,12 @@ vi.mock("@itwin/presentation-core-interop", async (importOriginal) => {
 });
 vi.mock("@itwin/presentation-shared", async (importOriginal) => {
   const actual = await importOriginal<typeof shared>();
-  return { ...actual, createBisInstanceLabelSelectClauseFactory: vi.fn(actual.createBisInstanceLabelSelectClauseFactory) };
+  return {
+    ...actual,
+    createBisInstanceLabelSelectClauseFactory: vi.fn(actual.createBisInstanceLabelSelectClauseFactory),
+    // the stub iModel has no schemas, so treat all classes as unrelated
+    createCachingECClassHierarchyInspector: () => ({ classDerivesFrom: async () => false }),
+  };
 });
 
 describe("<MultiElementPropertyGrid />", () => {

@@ -20,6 +20,7 @@ import { trackTime } from "../common/TimeTracker.js";
 import { useTelemetryContext } from "./UseTelemetryContext.js";
 
 import type { Observable } from "rxjs";
+import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ECClassHierarchyInspector, ECSqlBinding, InstanceKey } from "@itwin/presentation-shared";
 
@@ -108,13 +109,10 @@ function createSession(
     let offset = 0;
     let hasMore = instanceKeys.length > 0;
     const preparedQuery = defer(async () => {
-      const classNames = [...new Set(instanceKeys.map((key) => normalizeFullClassName(key.className)))];
-      const groups = classNames.length === 1 ? [{ baseClass: classNames[0], classNames }] : await groupClassesByCommonBase(classHierarchyInspector, classNames);
+      const idsByBaseClass = await groupInstanceIdsByCommonBase(classHierarchyInspector, instanceKeys);
       const groupSelects = await Promise.all(
-        groups.map(async ({ baseClass, classNames: groupClassNames }) => {
+        [...idsByBaseClass].map(async ([baseClass, ids]) => {
           const { schemaName, className } = parseFullClassName(baseClass);
-          const groupClasses = new Set(groupClassNames);
-          const ids = [...new Set(instanceKeys.filter((key) => groupClasses.has(normalizeFullClassName(key.className))).map((key) => key.id))];
           const [label, sortLabel] = await Promise.all([
             labelSelectClauseFactory.createSelectClause({ classAlias: "this", className: baseClass }),
             labelSelectClauseFactory.createSelectClause({
@@ -124,14 +122,13 @@ function createSession(
             }),
           ]);
           return {
-            ids,
             ecsql: `SELECT this.ECInstanceId AS id, ec_classname(this.ECClassId, 's.c') AS className, ${label} AS label, ${sortLabel} AS sortLabel
         FROM [${schemaName}].[${className}] AS this JOIN IdSet(?) AS ids ON ids.id = this.ECInstanceId`,
-            bindings: [{ type: "idset", value: ids } satisfies ECSqlBinding],
+            bindings: [{ type: "idset", value: [...ids] } satisfies ECSqlBinding],
           };
         }),
       );
-      return { query: createSortedLabelsPageQuery(groupSelects), total: groupSelects.reduce((count, { ids }) => count + ids.length, 0) };
+      return { query: createSortedLabelsPageQuery(groupSelects), total: [...idsByBaseClass.values()].reduce((count, ids) => count + ids.size, 0) };
     }).pipe(shareReplay({ bufferSize: 1, refCount: true }));
     return loadRequests.pipe(
       exhaustMap(() => {
@@ -171,25 +168,20 @@ function createSession(
   return { loadMore: () => loadRequests.next(), pages };
 }
 
-async function groupClassesByCommonBase(classHierarchyInspector: ECClassHierarchyInspector, classNames: string[]) {
-  const classesWithBases = await Promise.all(
-    classNames.map(async (className) => {
-      for (const baseClass of ["BisCore.Element", "BisCore.Model"]) {
-        const result = classHierarchyInspector.classDerivesFrom(className, baseClass);
-        if (result instanceof Promise ? await result : result) {
-          return { className, baseClass };
-        }
+async function groupInstanceIdsByCommonBase(classHierarchyInspector: ECClassHierarchyInspector, instanceKeys: InstanceKey[]) {
+  const idsByBaseClass = new Map<string, Set<Id64String>>();
+  for (const key of instanceKeys) {
+    let className = normalizeFullClassName(key.className);
+    for (const baseClass of ["BisCore.Element", "BisCore.Model"]) {
+      const result = classHierarchyInspector.classDerivesFrom(className, baseClass);
+      if (result instanceof Promise ? await result : result) {
+        className = baseClass;
+        break;
       }
-      return { className, baseClass: className };
-    }),
-  );
-  const groups = new Map<string, string[]>();
-  for (const { className, baseClass } of classesWithBases) {
-    const group = groups.get(baseClass) ?? [];
-    group.push(className);
-    groups.set(baseClass, group);
+    }
+    idsByBaseClass.set(className, (idsByBaseClass.get(className) ?? new Set<Id64String>()).add(key.id));
   }
-  return [...groups].map(([baseClass, names]) => ({ baseClass, classNames: names }));
+  return idsByBaseClass;
 }
 
 function createSortedLabelsPageQuery(selects: Array<{ ecsql: string; bindings: ECSqlBinding[] }>) {
