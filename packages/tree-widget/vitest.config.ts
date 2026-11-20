@@ -63,8 +63,8 @@ export default defineConfig({
             expect: {
               toMatchScreenshot: {
                 comparatorName: "pixelmatch",
-                /* Any pixel differing by more than 5% (YIQ color distance) fails; tolerates only subtle antialiasing noise. */
-                comparatorOptions: { threshold: 0.05 },
+                /* Any pixel differing by more than 2% (YIQ color distance) fails; tolerates only subtle antialiasing noise. */
+                comparatorOptions: { threshold: 0.02 },
               },
             },
           },
