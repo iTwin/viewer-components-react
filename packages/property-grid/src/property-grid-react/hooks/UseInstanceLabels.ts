@@ -79,7 +79,7 @@ export function useInstanceLabels({ imodel, instanceKeys }: { imodel: IModelConn
       timer = undefined;
       items = [...items, ...page];
       hasMore = nextHasMore;
-      // reduce total ammount if some instances are dublicates under two different classes (base and derived)
+      // reduce total amount if some instances are duplicates under two different classes (base and derived)
       total = groupedTotal;
       loading = false;
       setRows(items);
