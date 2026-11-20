@@ -17,13 +17,12 @@ import {
   parseInstanceLabel,
 } from "@itwin/presentation-shared";
 import { trackTime } from "../common/TimeTracker.js";
-import { groupClassesByCommonBase } from "./InstanceLabelClassGroups.js";
 import { useTelemetryContext } from "./UseTelemetryContext.js";
 
 import type { Observable } from "rxjs";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { ECSqlBinding, InstanceKey } from "@itwin/presentation-shared";
+import type { ECClassHierarchyInspector, ECSqlBinding, InstanceKey } from "@itwin/presentation-shared";
 
 const PAGE_SIZE = 100;
 
@@ -210,6 +209,27 @@ function createSession(
     );
   });
   return { loadMore: () => loadRequests.next(), pages };
+}
+
+async function groupClassesByCommonBase(classHierarchyInspector: ECClassHierarchyInspector, classNames: string[]) {
+  const classesWithBases = await Promise.all(
+    classNames.map(async (className) => {
+      for (const baseClass of ["BisCore.Element", "BisCore.Model"]) {
+        const result = classHierarchyInspector.classDerivesFrom(className, baseClass);
+        if (result instanceof Promise ? await result : result) {
+          return { className, baseClass };
+        }
+      }
+      return { className, baseClass: className };
+    }),
+  );
+  const groups = new Map<string, string[]>();
+  for (const { className, baseClass } of classesWithBases) {
+    const group = groups.get(baseClass) ?? [];
+    group.push(className);
+    groups.set(baseClass, group);
+  }
+  return [...groups].map(([baseClass, names]) => ({ baseClass, classNames: names }));
 }
 
 function createSortedLabelsPageQuery(selects: Array<{ ecsql: string; bindings: ECSqlBinding[] }>) {
