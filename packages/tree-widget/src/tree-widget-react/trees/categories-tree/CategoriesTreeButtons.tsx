@@ -3,9 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { defaultIfEmpty, firstValueFrom, forkJoin, from, map, mergeAll, mergeMap, of, reduce, takeUntil, toArray } from "rxjs";
-import { useAsyncValue } from "@itwin/components-react";
 import { IconButton } from "@mui/material";
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
 import visibilityInvertSvg from "@stratakit/icons/visibility-invert.svg";
@@ -70,11 +69,21 @@ export function useCategoriesTreeButtonProps({ viewport }: { viewport: TreeWidge
   buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport" | "models">;
   onCategoriesFiltered: (props: { categories: CategoryInfo[] | undefined; models?: Id64Array }) => void;
 } {
+  const { buttonProps, onCategoriesFiltered } = useCategoriesTreeButtonPropsInternal({ viewport });
+  return { buttonProps, onCategoriesFiltered };
+}
+
+/**
+ * Same as `useCategoriesTreeButtonProps`, but additionally returns whether available categories and models have been loaded.
+ * @internal
+ */
+export function useCategoriesTreeButtonPropsInternal({ viewport }: { viewport: TreeWidgetViewport }): ReturnType<typeof useCategoriesTreeButtonProps> & {
+  isLoaded: boolean;
+} {
   const [filteredCategories, setFilteredCategories] = useState<CategoryInfo[] | undefined>();
   const [filteredModels, setFilteredModels] = useState<Id64Array | undefined>();
 
-  const categories = useCategories(viewport);
-  const models = useAvailableModels(viewport);
+  const { categories, models, isLoaded } = useCategoriesAndModels(viewport);
 
   return {
     buttonProps: {
@@ -86,6 +95,7 @@ export function useCategoriesTreeButtonProps({ viewport }: { viewport: TreeWidge
       setFilteredCategories(props.categories);
       setFilteredModels(props.models);
     }, []),
+    isLoaded,
   };
 }
 
@@ -192,62 +202,55 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   );
 }
 
-const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
-
-function useCategories(viewport: TreeWidgetViewport) {
-  const setErrorState = useErrorState();
-  const { getBaseIdsCache } = useSharedTreeContext();
-  const baseIdsCache =
-    viewport.viewType !== "other"
-      ? getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewport.viewType).elementClass, type: viewport.viewType })
-      : undefined;
-  // eslint-disable-next-line react-hooks/use-memo
-  const categoriesPromise = useMemo(async () => {
-    try {
-      if (baseIdsCache) {
-        return await firstValueFrom(
-          baseIdsCache.getAllCategoriesOfElements().pipe(
-            mergeAll(),
-            mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), subCategories: baseIdsCache.getSubCategories({ categoryId }) })),
-            toArray(),
-          ),
-        );
-      }
-      return [];
-    } catch (error) {
-      setErrorState(error);
-      return [];
-    }
-  }, [baseIdsCache, setErrorState]);
-  return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;
+interface CategoriesAndModels {
+  categories: CategoryInfo[];
+  models: Array<ModelId>;
+  isLoaded: boolean;
 }
 
-function useAvailableModels(viewport: TreeWidgetViewport): Array<ModelId> {
-  const [availableModels, setAvailableModels] = useState<Array<ModelId>>([]);
+const EMPTY_CATEGORIES_AND_MODELS: CategoriesAndModels = { categories: [], models: [], isLoaded: true };
+
+/** Loads categories and models together, so that buttons never get categories without models they're in. */
+function useCategoriesAndModels(viewport: TreeWidgetViewport): CategoriesAndModels {
+  const [categoriesAndModels, setCategoriesAndModels] = useState<CategoriesAndModels>({ categories: [], models: [], isLoaded: false });
   const setErrorState = useErrorState();
-  const imodel = viewport.iModel;
   const { getBaseIdsCache } = useSharedTreeContext();
   const baseIdsCache =
     viewport.viewType !== "other"
       ? getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewport.viewType).elementClass, type: viewport.viewType })
       : undefined;
   useEffect(() => {
-    const getModels = async () => {
+    if (!baseIdsCache) {
+      return;
+    }
+    let disposed = false;
+    const load = async () => {
       try {
-        if (baseIdsCache) {
-          const models = await firstValueFrom(baseIdsCache.getAllModels());
-          setAvailableModels(models);
-        }
-        return;
+        const result = await firstValueFrom(
+          forkJoin({
+            categories: baseIdsCache.getAllCategoriesOfViewType().pipe(
+              mergeAll(),
+              mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), subCategories: baseIdsCache.getSubCategories({ categoryId }) })),
+              toArray(),
+            ),
+            models: baseIdsCache.getAllModelsOfViewType().pipe(map((models) => models.map(({ id }) => id))),
+          }),
+        );
+        !disposed && setCategoriesAndModels({ ...result, isLoaded: true });
       } catch (error) {
-        setErrorState(error);
-        setAvailableModels([]);
+        if (!disposed) {
+          setErrorState(error);
+          setCategoriesAndModels(EMPTY_CATEGORIES_AND_MODELS);
+        }
       }
     };
-    void getModels();
-  }, [imodel, baseIdsCache, setErrorState]);
+    void load();
+    return () => {
+      disposed = true;
+    };
+  }, [baseIdsCache, setErrorState]);
 
-  return availableModels;
+  return baseIdsCache ? categoriesAndModels : EMPTY_CATEGORIES_AND_MODELS;
 }
 
 async function getCategoryInfos({

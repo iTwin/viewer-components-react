@@ -6,13 +6,11 @@
 import { Fragment } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Skeleton } from "@mui/material";
-import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
 import { TelemetryContextProvider } from "../../shared/contexts/TelemetryContext.js";
 import { useActiveTreeWidgetViewport } from "../../shared/internal/hooks/UseActiveTreeWidgetViewport.js";
-import { getClassesByView } from "../../shared/internal/Utils.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { CategoriesTree } from "./CategoriesTree.js";
-import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonProps } from "./CategoriesTreeButtons.js";
+import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonPropsInternal } from "./CategoriesTreeButtons.js";
 
 import type { JSX, ReactNode } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -115,12 +113,7 @@ function CategoriesTreeComponentImpl({
   treeLabel,
   ...treeProps
 }: CategoriesTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
-  const { buttonProps, onCategoriesFiltered } = useCategoriesTreeButtonProps({ viewport });
-  const { getBaseIdsCache } = useSharedTreeContext();
-  const viewType = viewport.viewType === "2d" ? "2d" : "3d";
-  const isLoaded =
-    buttonProps.categories.length > 0 ||
-    getBaseIdsCache({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType }).elementModelCategoriesLoaded();
+  const { buttonProps, onCategoriesFiltered, isLoaded } = useCategoriesTreeButtonPropsInternal({ viewport });
 
   const buttons: ReactNode = isLoaded
     ? headerButtons
