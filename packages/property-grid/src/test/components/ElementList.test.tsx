@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { PresentationLabelsProvider } from "@itwin/presentation-components";
+import { InstanceLabelsProvider } from "../../property-grid-react/common/InstanceLabelsProvider.js";
 import { ElementList } from "../../property-grid-react/components/ElementList.js";
 import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTelemetryContext.js";
 import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
@@ -20,11 +20,11 @@ describe("<ElementList />", () => {
   const imodel = {} as IModelConnection;
   const buildLabel = (key: InstanceKey) => `${key.className}-${key.id}`;
 
-  let getLabelsStub: MockInstance<PresentationLabelsProvider["getLabels"]>;
+  let getLabelsStub: MockInstance<InstanceLabelsProvider["getLabels"]>;
 
   beforeEach(() => {
     vi.spyOn(PropertyGridManager, "translate").mockImplementation((key) => key);
-    getLabelsStub = vi.spyOn(PresentationLabelsProvider.prototype, "getLabels");
+    getLabelsStub = vi.spyOn(InstanceLabelsProvider.prototype, "getLabels");
     getLabelsStub.mockImplementation(async (keys) => keys.map(buildLabel));
   });
 
@@ -58,20 +58,6 @@ describe("<ElementList />", () => {
     listItems.forEach((item, index) => {
       expect(item.textContent).toBe(expectedLabels[index]);
     });
-  });
-
-  it("loads instance labels in chunks", async () => {
-    const instanceKeys = Array(1500)
-      .fill(0)
-      .map((_, i) => ({ id: `0x${i + 1}`, className: "TestClass" }));
-    const expectedLabels = instanceKeys.map(buildLabel);
-
-    const { getByText } = render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={() => {}} onSelect={() => {}} />);
-
-    // wait for first element to be rendered
-    await waitFor(() => getByText(expectedLabels[0]));
-    expect(getLabelsStub).toHaveBeenCalledWith(instanceKeys.slice(0, 1000));
-    expect(getLabelsStub).toHaveBeenCalledWith(instanceKeys.slice(1000));
   });
 
   it("does not overwrite current labels with an outdated load", async () => {

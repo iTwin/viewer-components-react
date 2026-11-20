@@ -28,8 +28,9 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "npm run -s build:lib && npm run -s copy:assets",
+    "build": "npm run -s link:deps && npm run -s build:lib && npm run -s copy:assets",
     "build:lib": "tsc -p tsconfig.lib.json",
+    "link:deps": "node ./scripts/linkWorkspaceDeps.cjs",
     "copy:assets": "npm run -s copy:public && npm run -s copy:styles",
     "copy:public": "cpx \"./public/**/*\" ./lib/public",
     "copy:styles": "cpx \"./src/**/*.scss\" ./lib",
@@ -71,13 +72,15 @@
     "@itwin/unified-selection": "^1.7.4",
     "@tanstack/react-virtual": "^3.13.12",
     "classnames": "^2.5.1",
-    "react-error-boundary": "^6.1.1"
+    "react-error-boundary": "^6.1.1",
+    "rxjs": "^7.8.2"
   },
   "devDependencies": {
     "@itwin/appui-abstract": "^5.11.2",
     "@itwin/appui-react": "^5.33.0",
     "@itwin/build-tools": "^5.11.2",
     "@itwin/components-react": "^5.33.0",
+    "@itwin/core-backend": "^5.11.2",
     "@itwin/core-bentley": "^5.11.2",
     "@itwin/core-common": "^5.11.2",
     "@itwin/core-frontend": "^5.11.2",
@@ -89,10 +92,12 @@
     "@itwin/core-react": "^5.33.0",
     "@itwin/ecschema-metadata": "^5.11.2",
     "@itwin/ecschema-rpcinterface-common": "^5.11.2",
+    "@itwin/ecschema-rpcinterface-impl": "^5.11.2",
     "@itwin/eslint-plugin": "^6.1.0",
     "@itwin/imodel-components-react": "^5.33.0",
     "@itwin/itwinui-react": "^3.22.0",
     "@itwin/oidc-signin-tool": "^5.1.3",
+    "@itwin/presentation-backend": "^5.11.2",
     "@itwin/presentation-common": "^5.11.2",
     "@itwin/presentation-components": "^6.0.0",
     "@itwin/presentation-frontend": "^5.11.2",
@@ -127,6 +132,7 @@
     "sass-embedded": "^1.100.0",
     "stylelint": "^17.12.0",
     "stylelint-config-standard-scss": "^17.0.0",
+    "test-utilities": "workspace:*",
     "typescript": "npm:@typescript/typescript6@~6.0.2",
     "vite": "^8.0.14",
     "vitest": "^4.1.7",
