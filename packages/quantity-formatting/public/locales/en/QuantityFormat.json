@@ -9,6 +9,10 @@
     "bearing": "Bearing",
     "azimuth": "Azimuth",
     "ratio": "Ratio",
+    "errors": {
+      "invalidFormat": "Unable to format this value. Check the format settings and units.",
+      "unitLookup": "Unable to load the format unit. Check the unit name and units provider."
+    },
     "labels": {
       "active": "Active",
       "compositeSpacer": "Composite spacer",
@@ -17,6 +21,7 @@
       "precision": "Precision",
       "type": "Format type",
       "formatTypeSublabel": "Select the format for which you would like to display measurements",
+      "directionFormatsRequireAngles": "Bearing and azimuth formats require angular units.",
       "appendUnitLabel": "Show unit label",
       "labelSeparator": "Label separator",
       "signOptionLabel": "Sign option",

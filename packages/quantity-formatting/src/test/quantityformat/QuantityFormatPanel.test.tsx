@@ -2,252 +2,154 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { Logger } from "@itwin/core-bentley";
-import { userEvent } from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Mock } from "vitest";
-import type { FormatDefinition, UnitsProvider, UnitProps } from "@itwin/core-quantity";
+import { BasicUnitsProvider } from "@itwin/core-quantity";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import type { FormatDefinition, UnitConversionProps } from "@itwin/core-quantity";
 import { QuantityFormatPanel } from "../../components/quantityformat/QuantityFormatPanel.js";
 
-// Mock the useTranslation hook
-vi.mock("../../useTranslation.js", () => ({
-  useTranslation: () => ({
-    translate: (key: string) => {
-      const translations: Record<string, string> = {
-        "QuantityFormat:labels.apply": "Apply",
-        "QuantityFormat:labels.revert": "Revert",
-      };
-      return translations[key] || key;
-    },
-  }),
-}));
-
-// Mock the child components
-vi.mock("../../components/quantityformat/FormatPanel.js", () => ({
-  FormatPanel: ({ formatProps, onFormatChange }: any) => (
-    <div data-testid="format-panel">
-      <button
-        data-testid="trigger-format-change"
-        onClick={() => onFormatChange({ ...formatProps, precision: 5 })}
-      >
-        Change Format
-      </button>
-    </div>
-  ),
-}));
-
-vi.mock("../../components/quantityformat/FormatSample.js", () => ({
-  FormatSample: () => <div data-testid="format-sample">Format Sample</div>,
-}));
+afterEach(() => vi.restoreAllMocks());
 
 describe("QuantityFormatPanel", () => {
-  let mockUnitsProvider: UnitsProvider;
-  let mockFormatDefinition: FormatDefinition;
-  let mockOnFormatChange: Mock<(formatProps: FormatDefinition) => void>;
-  let user: ReturnType<typeof userEvent.setup>;
+  const definition: FormatDefinition = {
+    type: "Decimal",
+    precision: 2,
+    composite: { units: [{ name: "Units.M" }] },
+  };
 
-  beforeEach(() => {
-    // Set up user-event
-    user = userEvent.setup();
+  function precisionSelector() {
+    const row = screen.getByText("labels.precision").parentElement;
+    if (!row) throw new Error("Missing precision row");
+    return within(row).getByRole("combobox");
+  }
 
-    mockUnitsProvider = {
-      findUnitByName: vi.fn().mockResolvedValue({
-        name: "Units.M",
-        label: "m",
-      } as UnitProps),
-    } as any;
+  function changePrecision(precision: "three" | "five" = "five") {
+    fireEvent.click(precisionSelector());
+    fireEvent.click(screen.getByRole("option", { name: `decimal_precision.${precision}` }));
+  }
 
-    mockFormatDefinition = {
-      type: "Decimal",
-      precision: 2,
-      composite: {
-        units: [{ name: "Units.M", label: "m" }],
-      },
-    } as FormatDefinition;
+  it("only applies validated edits after Apply is clicked", async () => {
+    const onFormatChange = vi.fn();
+    render(<QuantityFormatPanel formatDefinition={definition} unitsProvider={new BasicUnitsProvider()} onFormatChange={onFormatChange} />);
+    const apply = screen.getByRole("button", { name: "labels.apply" });
+    expect(apply.getAttribute("aria-disabled")).toBe("true");
 
-    mockOnFormatChange = vi.fn();
+    changePrecision();
+    expect(apply.getAttribute("aria-disabled")).not.toBe("true");
+    expect(onFormatChange).not.toHaveBeenCalled();
+    fireEvent.click(apply);
+
+    await waitFor(() => expect(onFormatChange).toHaveBeenCalledExactlyOnceWith({ ...definition, precision: 5 }));
+    expect(apply.getAttribute("aria-disabled")).toBe("true");
   });
 
-  it("should render with Apply button disabled initially", async () => {
-    render(
-      <QuantityFormatPanel
-        formatDefinition={mockFormatDefinition}
-        unitsProvider={mockUnitsProvider}
-        onFormatChange={mockOnFormatChange}
-      />
-    );
+  it("reverts edits without notifying the parent", () => {
+    const onFormatChange = vi.fn();
+    render(<QuantityFormatPanel formatDefinition={definition} unitsProvider={new BasicUnitsProvider()} onFormatChange={onFormatChange} />);
+    changePrecision();
+    fireEvent.click(screen.getByRole("button", { name: "labels.revert" }));
 
-    const applyButton = screen.getByRole("button", { name: "Apply" });
-    expect(applyButton.getAttribute("aria-disabled")).toEqual("true");
+    expect(screen.getByRole("button", { name: "labels.apply" }).getAttribute("aria-disabled")).toBe("true");
+    expect(precisionSelector().textContent).toContain("decimal_precision.two");
+    expect(onFormatChange).not.toHaveBeenCalled();
   });
 
-  it("should enable Apply button when format is changed", async () => {
-    render(
-      <QuantityFormatPanel
-        formatDefinition={mockFormatDefinition}
-        unitsProvider={mockUnitsProvider}
-        onFormatChange={mockOnFormatChange}
-      />
-    );
+  it("discards edits when a different format is selected", () => {
+    const unitsProvider = new BasicUnitsProvider();
+    const onFormatChange = vi.fn();
+    const { rerender } = render(<QuantityFormatPanel formatDefinition={definition} unitsProvider={unitsProvider} onFormatChange={onFormatChange} />);
+    changePrecision();
+    rerender(<QuantityFormatPanel formatDefinition={{ ...definition, precision: 3 }} unitsProvider={unitsProvider} onFormatChange={onFormatChange} />);
 
-    const applyButton = screen.getByRole("button", { name: "Apply" });
-    const triggerChangeButton = screen.getByTestId("trigger-format-change");
-
-    // Initially disabled
-    expect(applyButton.getAttribute("aria-disabled")).toEqual("true");
-
-    // Trigger format change
-    await user.click(triggerChangeButton);
-    // Should be enabled after change
-    expect(applyButton.getAttribute("aria-disabled")).toBeNull();
+    expect(screen.getByRole("button", { name: "labels.apply" }).getAttribute("aria-disabled")).toBe("true");
+    expect(precisionSelector().textContent).toContain("decimal_precision.three");
+    expect(onFormatChange).not.toHaveBeenCalled();
   });
 
-  it("should call onFormatChange only when Apply button is clicked", async () => {
-    render(
-      <QuantityFormatPanel
-        formatDefinition={mockFormatDefinition}
-        unitsProvider={mockUnitsProvider}
-        onFormatChange={mockOnFormatChange}
-      />
-    );
-
-    const applyButton = screen.getByRole("button", { name: "Apply" });
-    const triggerChangeButton = screen.getByTestId("trigger-format-change");
-
-    // Trigger format change - should not call parent onFormatChange yet
-    await user.click(triggerChangeButton);
-
-    expect(mockOnFormatChange).not.toHaveBeenCalled();
-
-    // Click Apply button - should call parent onFormatChange
-    await user.click(applyButton);
-
-    expect(mockOnFormatChange).toHaveBeenCalledTimes(1);
-    expect(mockOnFormatChange).toHaveBeenCalledWith(
-      expect.objectContaining({
-        precision: 5,
-      })
-    );
+  it.each([true, false])("respects showSample=%s", (showSample) => {
+    render(<QuantityFormatPanel formatDefinition={definition} unitsProvider={new BasicUnitsProvider()} onFormatChange={vi.fn()} showSample={showSample} />);
+    expect(screen.queryByLabelText("labels.samplePreview") !== null).toBe(showSample);
   });
 
-  it("should disable Apply button after Apply is clicked", async () => {
-    render(
-      <QuantityFormatPanel
-        formatDefinition={mockFormatDefinition}
-        unitsProvider={mockUnitsProvider}
-        onFormatChange={mockOnFormatChange}
-      />
-    );
+  it.each([
+    ["Units.PERCENT_SLOPE", "Bearing"],
+    ["Units.PERCENT_SLOPE", "Azimuth"],
+    ["Units.COEFFICIENT", "Bearing"],
+    ["Units.COEFFICIENT", "Azimuth"],
+  ])("rejects applying %s as %s even with the sample hidden", async (unitName, type) => {
+    const onFormatChange = vi.fn();
+    const logError = vi.spyOn(Logger, "logError").mockImplementation(() => {});
+    const invalidFormat: FormatDefinition = {
+      type, precision: 2, composite: { units: [{ name: unitName }] }, revolutionUnit: "Units.REVOLUTION",
+      ...(type === "Azimuth" ? { azimuthBaseUnit: "Units.ARC_DEG", azimuthBase: 0 } : {}),
+    };
+    render(<QuantityFormatPanel formatDefinition={invalidFormat} unitsProvider={new BasicUnitsProvider()} onFormatChange={onFormatChange} showSample={false} />);
+    changePrecision();
+    fireEvent.click(screen.getByRole("button", { name: "labels.apply" }));
 
-    const applyButton = screen.getByRole("button", { name: "Apply" });
-    const triggerChangeButton = screen.getByTestId("trigger-format-change");
+    expect((await screen.findByRole("alert")).textContent).toBe("errors.invalidFormat");
+    expect(onFormatChange).not.toHaveBeenCalled();
+    expect(logError).toHaveBeenCalledWith("QuantityFormat", "Failed to validate the edited format", expect.any(Function));
 
-    // Trigger format change and apply
-    await user.click(triggerChangeButton);
-    await user.click(applyButton);
-
-    // Apply button should be disabled again
-    expect(applyButton.getAttribute("aria-disabled")).toEqual("true");
+    fireEvent.click(screen.getByRole("button", { name: "labels.revert" }));
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(screen.getByRole("button", { name: "labels.apply" }).getAttribute("aria-disabled")).toBe("true");
   });
 
-  it("should disable Apply button and reset changes when Clear is clicked", async () => {
-    render(
-      <QuantityFormatPanel
-        formatDefinition={mockFormatDefinition}
-        unitsProvider={mockUnitsProvider}
-        onFormatChange={mockOnFormatChange}
-      />
-    );
-
-    const applyButton = screen.getByRole("button", { name: "Apply" });
-    const revertButton = screen.getByRole("button", { name: "Revert" });
-    const triggerChangeButton = screen.getByTestId("trigger-format-change");
-
-    // Trigger format change
-    await user.click(triggerChangeButton);
-    expect(applyButton.getAttribute("aria-disabled")).toBeNull();
-
-    // Click Revert button
-    await user.click(revertButton);
-
-    // Apply button should be disabled and onFormatChange should not be called
-    expect(applyButton.getAttribute("aria-disabled")).toEqual("true");
-    expect(mockOnFormatChange).not.toHaveBeenCalled();
+  it.each([
+    ["Units.ARC_DEG", "Bearing", "Units.REVOLUTION", "Units.ARC_DEG"],
+    ["Units.ARC_DEG", "Azimuth", "Units.REVOLUTION", "Units.ARC_DEG"],
+    ["Units.HORIZONTAL_DIR_ARC_DEG", "Bearing", "Units.HORIZONTAL_DIR_REVOLUTION", "Units.HORIZONTAL_DIR_ARC_DEG"],
+    ["Units.HORIZONTAL_DIR_ARC_DEG", "Azimuth", "Units.HORIZONTAL_DIR_REVOLUTION", "Units.HORIZONTAL_DIR_ARC_DEG"],
+  ])("still applies valid %s %s formats", async (unitName, type, revolutionUnit, azimuthBaseUnit) => {
+    const validFormat: FormatDefinition = {
+      type, precision: 2, composite: { units: [{ name: unitName }] }, revolutionUnit,
+      ...(type === "Azimuth" ? { azimuthBaseUnit, azimuthBase: 0 } : {}),
+    };
+    const onFormatChange = vi.fn();
+    render(<QuantityFormatPanel formatDefinition={validFormat} unitsProvider={new BasicUnitsProvider()} onFormatChange={onFormatChange} showSample={false} />);
+    changePrecision();
+    fireEvent.click(screen.getByRole("button", { name: "labels.apply" }));
+    await waitFor(() => expect(onFormatChange).toHaveBeenCalledExactlyOnceWith({ ...validFormat, precision: 5 }));
+    expect(screen.queryByRole("alert")).toBeNull();
   });
 
-  it("should reset Apply button state when formatDefinition prop changes", async () => {
-    const { rerender } = render(
-      <QuantityFormatPanel
-        formatDefinition={mockFormatDefinition}
-        unitsProvider={mockUnitsProvider}
-        onFormatChange={mockOnFormatChange}
-      />
-    );
-
-    const applyButton = screen.getByRole("button", { name: "Apply" });
-    const triggerChangeButton = screen.getByTestId("trigger-format-change");
-
-    // Trigger format change
-    await user.click(triggerChangeButton);
-    expect(applyButton.getAttribute("aria-disabled")).toBeNull();
-
-    // Switching to another format discards the pending edit
-    rerender(
-      <QuantityFormatPanel
-        formatDefinition={{ ...mockFormatDefinition, precision: 4 }}
-        unitsProvider={mockUnitsProvider}
-        onFormatChange={mockOnFormatChange}
-      />
-    );
-
-    expect(applyButton.getAttribute("aria-disabled")).toEqual("true");
-    expect(mockOnFormatChange).not.toHaveBeenCalled();
+  it("preserves unitless numeric formats", async () => {
+    const onFormatChange = vi.fn();
+    render(<QuantityFormatPanel formatDefinition={{ type: "Decimal", precision: 2 }} unitsProvider={new BasicUnitsProvider()} onFormatChange={onFormatChange} />);
+    changePrecision();
+    fireEvent.click(screen.getByRole("button", { name: "labels.apply" }));
+    await waitFor(() => expect(onFormatChange).toHaveBeenCalledExactlyOnceWith({ type: "Decimal", precision: 5 }));
   });
 
-  it("should not show sample when showSample is false", () => {
-    render(
-      <QuantityFormatPanel
-        formatDefinition={mockFormatDefinition}
-        unitsProvider={mockUnitsProvider}
-        onFormatChange={mockOnFormatChange}
-        showSample={false}
-      />
-    );
+  it("does not apply an edit that changed while validation was pending", async () => {
+    const unitsProvider = new BasicUnitsProvider();
+    const onFormatChange = vi.fn();
+    render(<QuantityFormatPanel formatDefinition={definition} unitsProvider={unitsProvider} onFormatChange={onFormatChange} showSample={false} />);
+    changePrecision();
+    let resolveConversion!: (conversion: UnitConversionProps) => void;
+    const pending = new Promise<UnitConversionProps>((resolve) => { resolveConversion = resolve; });
+    const conversion = vi.spyOn(unitsProvider, "getConversion").mockImplementationOnce(async () => pending);
+    const apply = screen.getByRole("button", { name: "labels.apply" });
+    fireEvent.click(apply);
+    await waitFor(() => expect(conversion).toHaveBeenCalled());
+    expect(apply.getAttribute("aria-disabled")).toBe("true");
+    fireEvent.click(apply);
 
-    expect(screen.queryByTestId("format-sample")).toBeNull();
-  });
+    changePrecision("three");
+    await act(async () => { resolveConversion({ factor: 1, offset: 0 }); await pending; });
+    expect(onFormatChange).not.toHaveBeenCalled();
 
-  it("should show sample when showSample is true or undefined", () => {
-    render(
-      <QuantityFormatPanel
-        formatDefinition={mockFormatDefinition}
-        unitsProvider={mockUnitsProvider}
-        onFormatChange={mockOnFormatChange}
-        showSample={true}
-      />
-    );
-
-    expect(screen.getByTestId("format-sample")).toBeDefined();
-  });
-
-  it("does not reload the persistence unit for edits that keep the same unit", async () => {
-    render(<QuantityFormatPanel formatDefinition={mockFormatDefinition} unitsProvider={mockUnitsProvider} onFormatChange={mockOnFormatChange} />);
-    await waitFor(() => expect(mockUnitsProvider.findUnitByName).toHaveBeenCalledTimes(1));
-
-    await user.click(screen.getByTestId("trigger-format-change"));
-
-    expect(mockUnitsProvider.findUnitByName).toHaveBeenCalledTimes(1);
+    fireEvent.click(apply);
+    await waitFor(() => expect(onFormatChange).toHaveBeenCalledExactlyOnceWith({ ...definition, precision: 3 }));
   });
 
   it("logs when the persistence unit cannot be loaded", async () => {
+    const unitsProvider = new BasicUnitsProvider();
+    vi.spyOn(unitsProvider, "findUnitByName").mockRejectedValue(new Error("unknown unit"));
     const logError = vi.spyOn(Logger, "logError").mockImplementation(() => {});
-    vi.mocked(mockUnitsProvider.findUnitByName).mockRejectedValueOnce(new Error("unknown unit"));
-
-    render(<QuantityFormatPanel formatDefinition={mockFormatDefinition} unitsProvider={mockUnitsProvider} onFormatChange={mockOnFormatChange} />);
-
+    render(<QuantityFormatPanel formatDefinition={definition} unitsProvider={unitsProvider} onFormatChange={vi.fn()} showSample={false} />);
     await waitFor(() => expect(logError).toHaveBeenCalledWith("QuantityFormat", "Failed to load the persistence unit", expect.any(Function)));
-    logError.mockRestore();
   });
 });
