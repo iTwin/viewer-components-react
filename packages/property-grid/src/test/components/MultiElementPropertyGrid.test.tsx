@@ -5,9 +5,10 @@
 
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
-import { PresentationLabelsProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";
+import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import { normalizeFullClassName } from "@itwin/presentation-shared";
 import { Selectables } from "@itwin/unified-selection";
+import { InstanceLabelsProvider } from "../../property-grid-react/common/InstanceLabelsProvider.js";
 import { MultiElementPropertyGrid } from "../../property-grid-react/components/MultiElementPropertyGrid.js";
 import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
 import {
@@ -40,7 +41,7 @@ describe("<MultiElementPropertyGrid />", () => {
 
   beforeEach(() => {
     getDataStub = vi.spyOn(PresentationPropertyDataProvider.prototype, "getData");
-    getLabelsStub = vi.spyOn(PresentationLabelsProvider.prototype, "getLabels");
+    getLabelsStub = vi.spyOn(InstanceLabelsProvider.prototype, "getLabels").mockImplementation(async (keys) => keys.map(buildLabel));
 
     vi.spyOn(PropertyGridManager, "translate").mockImplementation((key) => key);
 
