@@ -108,7 +108,7 @@ export type MultiElementPropertyGridProps = OmitOverUnion<PropertyGridProps, "he
 export const NullValueSettingContext: typeof EmptyValuesSettingContext;
 
 // @public
-export type PerformanceTrackedFeatures = "properties-load" | "elements-list-load";
+export type PerformanceTrackedFeatures = "properties-load" | "elements-list-load" | "elements-list-page-load";
 
 // @public
 export interface PreferencesStorage {
