@@ -1,5 +1,13 @@
 # Change Log - @itwin/property-grid-react
 
+## 2.1.0
+
+### Minor Changes
+
+- [#1867](https://github.com/iTwin/viewer-components-react/pull/1867): Load selected elements in sorted pages of 100. Scrolling near the end of the list appends skeleton placeholders and loads the next page, instead of loading every label up front.
+
+  The `elements-list-page-load` performance event is emitted for each page. The `elements-list-load` event is no longer emitted.
+
 ## 2.0.2
 
 ### Patch Changes
