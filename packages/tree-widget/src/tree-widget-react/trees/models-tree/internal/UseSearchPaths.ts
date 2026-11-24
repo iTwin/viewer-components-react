@@ -8,7 +8,7 @@ import { firstValueFrom } from "rxjs";
 import { HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey, HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import { useFocusedInstancesContext } from "../../../shared/contexts/FocusedInstancesContext.js";
 import { useTelemetryContext } from "../../../shared/contexts/TelemetryContext.js";
-import { CLASS_NAME_GeometricModel3d, CLASS_NAME_Subject } from "../../../shared/internal/ClassNameDefinitions.js";
+import { CLASS_NAMES } from "../../../shared/internal/ClassNameDefinitions.js";
 import { SearchLimitExceededError } from "../../../shared/TreeErrors.js";
 import { joinHierarchySearchTrees } from "../../../shared/Utils.js";
 import { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
@@ -260,13 +260,13 @@ async function getModels(trees: HierarchySearchTree[], idsProvider: ModelsTreeId
     }
 
     // If this is a leaf subject node, collect it
-    if (!node.children && identifier.className === CLASS_NAME_Subject) {
+    if (!node.children && identifier.className === CLASS_NAMES.Subject) {
       targetSubjectIds.add(identifier.id);
       return;
     }
 
     // Collect model ids
-    if (await classInspector.classDerivesFrom(identifier.className, CLASS_NAME_GeometricModel3d)) {
+    if (await classInspector.classDerivesFrom(identifier.className, CLASS_NAMES.GeometricModel3d)) {
       targetModelIds.add(identifier.id);
     }
 

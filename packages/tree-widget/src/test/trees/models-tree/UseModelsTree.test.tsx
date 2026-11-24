@@ -68,7 +68,7 @@ describe("useModelsTree", () => {
     );
     const { imodelConnection, ...keys } = buildIModelResult;
     const queryHandler = vi.fn(() => []);
-    using viewport = createFakeViewport({ queryHandler });
+    using viewport = createFakeViewport({ queryHandler, schemaSource: imodelConnection });
     const imodelAccess = createIModelAccess(imodelConnection);
     const {
       result: renderHookResult,

@@ -9,11 +9,7 @@ import { withEditTxn } from "@itwin/core-backend";
 import { Id64 } from "@itwin/core-bentley";
 import { act, renderHook } from "@testing-library/react";
 import { SharedTreeContextProvider } from "../../../tree-widget-react/shared/contexts/SharedTreeContext.js";
-import {
-  CLASS_NAME_Classification,
-  CLASS_NAME_ClassificationTable,
-  CLASS_NAME_GeometricElement3d,
-} from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { CLASS_NAMES } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
 import { SearchLimitExceededError } from "../../../tree-widget-react/shared/TreeErrors.js";
 import { useClassificationsTreeDefinition } from "../../../tree-widget-react/trees/classifications-tree/UseClassificationsTreeDefinition.js";
 import { buildIModel, insertGeometricModelWithPartition } from "../../IModelUtils.js";
@@ -85,15 +81,15 @@ describe("Classifications tree", () => {
         });
         expect.soft(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
           {
-            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            identifier: { id: keys.table.id, className: CLASS_NAMES.ClassificationTable },
             options: { autoExpand: true },
             children: [
               {
-                identifier: { id: keys.classification.id, className: CLASS_NAME_Classification },
+                identifier: { id: keys.classification.id, className: CLASS_NAMES.Classification },
                 options: { autoExpand: true },
                 children: [
                   {
-                    identifier: { id: keys.element.id, className: CLASS_NAME_GeometricElement3d },
+                    identifier: { id: keys.element.id, className: CLASS_NAMES.GeometricElement3d },
                     options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
                   },
                 ],
@@ -154,14 +150,14 @@ describe("Classifications tree", () => {
 
         expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
           {
-            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            identifier: { id: keys.table.id, className: CLASS_NAMES.ClassificationTable },
             options: { autoExpand: true },
             children: [
               {
-                identifier: { id: keys.classification.id, className: CLASS_NAME_Classification },
+                identifier: { id: keys.classification.id, className: CLASS_NAMES.Classification },
                 options: { autoExpand: true },
                 children: keys.elements.map((element) => ({
-                  identifier: { id: element.id, className: CLASS_NAME_GeometricElement3d },
+                  identifier: { id: element.id, className: CLASS_NAMES.GeometricElement3d },
                   options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
                 })),
               },
@@ -201,7 +197,7 @@ describe("Classifications tree", () => {
         });
         expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
           {
-            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            identifier: { id: keys.table.id, className: CLASS_NAMES.ClassificationTable },
             options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
           },
         ]);
@@ -236,11 +232,11 @@ describe("Classifications tree", () => {
         });
         expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
           {
-            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            identifier: { id: keys.table.id, className: CLASS_NAMES.ClassificationTable },
             options: { autoExpand: true },
             children: [
               {
-                identifier: { id: keys.classification.id, className: CLASS_NAME_Classification },
+                identifier: { id: keys.classification.id, className: CLASS_NAMES.Classification },
                 options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
               },
             ],
@@ -278,15 +274,15 @@ describe("Classifications tree", () => {
         });
         expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
           {
-            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            identifier: { id: keys.table.id, className: CLASS_NAMES.ClassificationTable },
             options: { autoExpand: true },
             children: [
               {
-                identifier: { id: keys.classification.id, className: CLASS_NAME_Classification },
+                identifier: { id: keys.classification.id, className: CLASS_NAMES.Classification },
                 options: { autoExpand: true },
                 children: [
                   {
-                    identifier: { id: keys.element.id, className: CLASS_NAME_GeometricElement3d },
+                    identifier: { id: keys.element.id, className: CLASS_NAMES.GeometricElement3d },
                     options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
                   },
                 ],
@@ -333,19 +329,19 @@ describe("Classifications tree", () => {
         });
         expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
           {
-            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            identifier: { id: keys.table.id, className: CLASS_NAMES.ClassificationTable },
             options: { autoExpand: true },
             children: [
               {
-                identifier: { id: keys.classification.id, className: CLASS_NAME_Classification },
+                identifier: { id: keys.classification.id, className: CLASS_NAMES.Classification },
                 options: { autoExpand: true },
                 children: [
                   {
-                    identifier: { id: keys.parentElement.id, className: CLASS_NAME_GeometricElement3d },
+                    identifier: { id: keys.parentElement.id, className: CLASS_NAMES.GeometricElement3d },
                     options: { autoExpand: true },
                     children: [
                       {
-                        identifier: { id: keys.childElement.id, className: CLASS_NAME_GeometricElement3d },
+                        identifier: { id: keys.childElement.id, className: CLASS_NAMES.GeometricElement3d },
                         options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
                       },
                     ],
@@ -448,11 +444,11 @@ describe("Classifications tree", () => {
         });
         expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
           {
-            identifier: { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
+            identifier: { id: keys.table.id, className: CLASS_NAMES.ClassificationTable },
             options: { autoExpand: true },
             children: [
               {
-                identifier: { id: keys.classification.id, className: CLASS_NAME_Classification },
+                identifier: { id: keys.classification.id, className: CLASS_NAMES.Classification },
                 options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
               },
             ],
@@ -579,7 +575,7 @@ describe("Classifications tree", () => {
         });
         expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
           {
-            identifier: { id: keys.table2.id, className: CLASS_NAME_ClassificationTable },
+            identifier: { id: keys.table2.id, className: CLASS_NAMES.ClassificationTable },
             options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
           },
         ]);
@@ -626,11 +622,11 @@ describe("Classifications tree", () => {
         });
         expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
           {
-            identifier: { id: keys.table2.id, className: CLASS_NAME_ClassificationTable },
+            identifier: { id: keys.table2.id, className: CLASS_NAMES.ClassificationTable },
             options: { autoExpand: true },
             children: [
               {
-                identifier: { id: keys.classification2.id, className: CLASS_NAME_Classification },
+                identifier: { id: keys.classification2.id, className: CLASS_NAMES.Classification },
                 options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
               },
             ],
@@ -679,15 +675,15 @@ describe("Classifications tree", () => {
         });
         expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
           {
-            identifier: { id: keys.table2.id, className: CLASS_NAME_ClassificationTable },
+            identifier: { id: keys.table2.id, className: CLASS_NAMES.ClassificationTable },
             options: { autoExpand: true },
             children: [
               {
-                identifier: { id: keys.classification2.id, className: CLASS_NAME_Classification },
+                identifier: { id: keys.classification2.id, className: CLASS_NAMES.Classification },
                 options: { autoExpand: true },
                 children: [
                   {
-                    identifier: { id: keys.element2.id, className: CLASS_NAME_GeometricElement3d },
+                    identifier: { id: keys.element2.id, className: CLASS_NAMES.GeometricElement3d },
                     options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
                   },
                 ],
@@ -747,19 +743,19 @@ describe("Classifications tree", () => {
         });
         expect(await act(async () => hook.result.current.getSearchPaths?.({ abortSignal: new AbortController().signal }))).toEqual([
           {
-            identifier: { id: keys.table2.id, className: CLASS_NAME_ClassificationTable },
+            identifier: { id: keys.table2.id, className: CLASS_NAMES.ClassificationTable },
             options: { autoExpand: true },
             children: [
               {
-                identifier: { id: keys.classification2.id, className: CLASS_NAME_Classification },
+                identifier: { id: keys.classification2.id, className: CLASS_NAMES.Classification },
                 options: { autoExpand: true },
                 children: [
                   {
-                    identifier: { id: keys.element2.id, className: CLASS_NAME_GeometricElement3d },
+                    identifier: { id: keys.element2.id, className: CLASS_NAMES.GeometricElement3d },
                     options: { autoExpand: true },
                     children: [
                       {
-                        identifier: { id: keys.childElement.id, className: CLASS_NAME_GeometricElement3d },
+                        identifier: { id: keys.childElement.id, className: CLASS_NAMES.GeometricElement3d },
                         options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
                       },
                     ],
@@ -811,7 +807,7 @@ describe("Classifications tree", () => {
                 options: { autoExpand: true },
                 children: [
                   {
-                    identifier: { ...keys.element, className: CLASS_NAME_GeometricElement3d },
+                    identifier: { ...keys.element, className: CLASS_NAMES.GeometricElement3d },
                     options: { autoExpand: { groupingLevel: Number.MAX_SAFE_INTEGER } },
                   },
                 ],

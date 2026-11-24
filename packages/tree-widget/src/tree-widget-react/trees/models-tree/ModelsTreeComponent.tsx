@@ -10,7 +10,7 @@ import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../
 import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
 import { TelemetryContextProvider } from "../../shared/contexts/TelemetryContext.js";
 import { useActiveTreeWidgetViewport } from "../../shared/internal/hooks/UseActiveTreeWidgetViewport.js";
-import { getClassesByView } from "../../shared/internal/Utils.js";
+import { getClassesByPerspective } from "../../shared/internal/Utils.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { ModelsTree } from "./ModelsTree.js";
 import {
@@ -157,7 +157,7 @@ function ModelsTreeComponentImpl({
   const { getSharedIdsProvider } = useSharedTreeContext();
   const isLoaded =
     buttonProps.models.length > 0 ||
-    getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByView("3d").elementClass, type: "3d" }).elementModelCategoriesLoaded();
+    getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByPerspective("3d").elementClass }).models.state === "loaded";
   const buttons: ReactNode = isLoaded
     ? headerButtons
       ? headerButtons.map((btn, index) => <Fragment key={index}>{btn(buttonProps)}</Fragment>)

@@ -5,7 +5,8 @@
 
 import { firstValueFrom } from "rxjs";
 import { assert } from "@itwin/core-bentley";
-import { CLASS_NAME_Category, CLASS_NAME_Model, CLASS_NAME_Subject } from "../../../../shared/internal/ClassNameDefinitions.js";
+import { CLASS_NAMES } from "../../../../shared/internal/ClassNameDefinitions.js";
+import { toObservable } from "../../../../shared/internal/Rxjs.js";
 import { getOrCreate, ParentElementsPath } from "../../../../shared/internal/Utils.js";
 import {
   createSearchResultsTree,
@@ -17,6 +18,7 @@ import {
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchySearchTree } from "@itwin/presentation-hierarchies";
 import type { EC, ECSchemaProvider } from "@itwin/presentation-shared";
+import type { ModelsTreeIdsProvider } from "@itwin/presentation-tree-definitions";
 import type { CategoryId, ElementId } from "../../../../shared/internal/Types.js";
 import type {
   BaseSearchResultsTreeNode,
@@ -24,7 +26,6 @@ import type {
   SearchResultsTreeNodeChildren,
   SearchResultsTreeRootNode,
 } from "../../../../shared/internal/visibility/BaseSearchResultsTree.js";
-import type { ModelsTreeIdsProvider } from "../ModelsTreeIdsProvider.js";
 
 /** @internal */
 export interface ModelsTreeSearchTargets {
@@ -137,7 +138,10 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<Proc
       }
     }
 
-    const subModels = rawElementsArray.length === 0 ? new Set<Id64String>() : await firstValueFrom(this.#props.idsProvider.getAllSubModels());
+    const subModels =
+      rawElementsArray.length === 0
+        ? new Set<Id64String>()
+        : await firstValueFrom(toObservable(this.#props.idsProvider.subModeledElements.getAllSubModeledElements()));
     const getActualParentElementsPath =
       subModels.size > 0
         ? (potentialPath: ParentElementsPath): ParentElementsPath => {
@@ -375,13 +379,13 @@ class ModelsTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<Proc
   }
 
   public async getType(className: EC.FullClassNameDotNotation): Promise<Node["type"]> {
-    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Subject)) {
+    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAMES.Subject)) {
       return "subject";
     }
-    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Model)) {
+    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAMES.Model)) {
       return "model";
     }
-    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Category)) {
+    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAMES.Category)) {
       return "category";
     }
     return "element";

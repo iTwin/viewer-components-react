@@ -32,7 +32,7 @@ import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { catchBeSQLiteInterrupts } from "../hooks/UseErrorState.js";
 import { releaseMainThreadOnItemsCount } from "../Rxjs.js";
-import { ChildrenTree, getClassesByView, getOptimalBatchSize, getOrCreate } from "../Utils.js";
+import { ChildrenTree, getClassesByPerspective, getOptimalBatchSize, getOrCreate } from "../Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
@@ -161,7 +161,9 @@ export class AlwaysAndNeverDrawnElementInfoProvider implements Disposable {
     this.#subscriptions = [this.#alwaysDrawn.upToDateCacheEntryValue.subscribe(), this.#neverDrawn.upToDateCacheEntryValue.subscribe()];
     this.#componentId = props.componentId ?? Guid.createValue();
     this.#componentName = "AlwaysAndNeverDrawnElementInfo";
-    this.#elementClassName = props.elementClassName ? props.elementClassName : getClassesByView(this.#viewport.viewType === "2d" ? "2d" : "3d").elementClass;
+    this.#elementClassName = props.elementClassName
+      ? props.elementClassName
+      : getClassesByPerspective(this.#viewport.viewType === "2d" ? "2d" : "3d").elementClass;
   }
 
   public suppressChangeEvents() {

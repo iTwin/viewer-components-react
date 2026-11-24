@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { CLASS_NAMES } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
@@ -22,7 +22,7 @@ export function createClassificationTableHierarchyNode({
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: CLASS_NAME_ClassificationTable, id }],
+      instanceKeys: [{ className: CLASS_NAMES.ClassificationTable, id }],
     },
     label: "",
     parentKeys: [],
@@ -48,7 +48,7 @@ export function createClassificationHierarchyNode({
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: CLASS_NAME_Classification, id }],
+      instanceKeys: [{ className: CLASS_NAMES.Classification, id }],
     },
     label: "",
     parentKeys: parentKeys ? parentKeys.map((key) => ({ type: "instances", instanceKeys: [key] })) : [],

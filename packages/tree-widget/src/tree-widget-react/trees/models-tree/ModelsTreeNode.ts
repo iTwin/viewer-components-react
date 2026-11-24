@@ -3,10 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { ModelsTreeNode as TreeDefinitionsModelsTreeNode } from "@itwin/presentation-tree-definitions";
 
 import type { Id64String } from "@itwin/core-bentley";
-import type { ClassGroupingNodeKey, GroupingHierarchyNode, InstancesNodeKey, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { ClassGroupingNodeKey, GroupingHierarchyNode, HierarchyNode, InstancesNodeKey, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 
 /**
  * Contains utility functions for working with Models Tree nodes.
@@ -15,11 +15,11 @@ import type { ClassGroupingNodeKey, GroupingHierarchyNode, InstancesNodeKey, Non
 export namespace ModelsTreeNode {
   /** Checks if the given node represents a `BisCore.Subject` element. */
   export const isSubjectNode = (node: Pick<HierarchyNode, "extendedData">): node is NonGroupingHierarchyNode & { key: InstancesNodeKey } =>
-    node.extendedData?.type === "subject";
+    TreeDefinitionsModelsTreeNode.isSubjectNode(node);
 
   /** Checks if the given node represents a `BisCore.Model`. */
   export const isModelNode = (node: Pick<HierarchyNode, "extendedData">): node is NonGroupingHierarchyNode & { key: InstancesNodeKey } =>
-    node.extendedData?.type === "model";
+    TreeDefinitionsModelsTreeNode.isModelNode(node);
 
   /**
    * Checks if the given node represents a `BisCore.Category` element.
@@ -33,7 +33,7 @@ export namespace ModelsTreeNode {
     extendedData: {
       modelIds: Id64String[];
     };
-  } => node.extendedData?.type === "category";
+  } => TreeDefinitionsModelsTreeNode.isCategoryNode(node);
 
   /**
    * Checks if the given node represents a `BisCore.GeometricElement` element.
@@ -49,7 +49,7 @@ export namespace ModelsTreeNode {
       modelId: Id64String;
       categoryId: Id64String;
     };
-  } => node.extendedData?.type === "element";
+  } => TreeDefinitionsModelsTreeNode.isElementNode(node);
 
   /**
    * Checks if the given node is a class grouping node of `BisCore.GeometricElement` nodes.
@@ -65,25 +65,9 @@ export namespace ModelsTreeNode {
       modelId: Id64String;
       categoryId: Id64String;
     };
-  } => HierarchyNode.isClassGroupingNode(node);
+  } => TreeDefinitionsModelsTreeNode.isElementClassGroupingNode(node);
 
   /** Returns type of the node. */
-  export const getType = (node: HierarchyNode): "subject" | "model" | "category" | "element" | "elements-class-group" | undefined => {
-    if (HierarchyNodeKey.isClassGrouping(node.key)) {
-      return "elements-class-group";
-    }
-    if (isSubjectNode(node)) {
-      return "subject";
-    }
-    if (isModelNode(node)) {
-      return "model";
-    }
-    if (isCategoryNode(node)) {
-      return "category";
-    }
-    if (isElementNode(node)) {
-      return "element";
-    }
-    return undefined;
-  };
+  export const getType = (node: HierarchyNode): "subject" | "model" | "category" | "element" | "elements-class-group" | undefined =>
+    TreeDefinitionsModelsTreeNode.getType(node);
 }

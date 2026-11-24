@@ -15,7 +15,8 @@ import { useTranslation } from "../../shared/contexts/LocalizationContext.js";
 import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
 import { useTelemetryContext } from "../../shared/contexts/TelemetryContext.js";
 import { useErrorState } from "../../shared/internal/hooks/UseErrorState.js";
-import { getClassesByView } from "../../shared/internal/Utils.js";
+import { toObservable } from "../../shared/internal/Rxjs.js";
+import { getClassesByPerspective } from "../../shared/internal/Utils.js";
 import { hideAllCategories, invertAllCategories, showAll } from "../../shared/internal/VisibilityUtils.js";
 
 import type { Observable } from "rxjs";
@@ -97,8 +98,8 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   const { categories, viewport, models } = props;
   const { onFeatureUsed } = useTelemetryContext();
   const { cancelChangesInProgress, getSharedIdsProvider } = useSharedTreeContext();
-  const viewType = viewport.viewType === "2d" ? "2d" : "3d";
-  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+  const perspective = viewport.viewType === "2d" ? "2d" : "3d";
+  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByPerspective(perspective).elementClass });
   const translate = useTranslation();
 
   const onClick = async () => {
@@ -131,8 +132,8 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
   const { categories, viewport } = props;
   const { onFeatureUsed } = useTelemetryContext();
   const { cancelChangesInProgress, getSharedIdsProvider } = useSharedTreeContext();
-  const viewType = viewport.viewType === "2d" ? "2d" : "3d";
-  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+  const perspective = viewport.viewType === "2d" ? "2d" : "3d";
+  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByPerspective(perspective).elementClass });
   const translate = useTranslation();
 
   const onClick = async () => {
@@ -163,8 +164,8 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   const { categories, viewport, models } = props;
   const { onFeatureUsed } = useTelemetryContext();
   const { cancelChangesInProgress, getSharedIdsProvider } = useSharedTreeContext();
-  const viewType = viewport.viewType === "2d" ? "2d" : "3d";
-  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByView(viewType).elementClass, type: viewType });
+  const perspective = viewport.viewType === "2d" ? "2d" : "3d";
+  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByPerspective(perspective).elementClass });
   const translate = useTranslation();
 
   const onClick = async () => {
@@ -199,16 +200,19 @@ function useCategories(viewport: TreeWidgetViewport) {
   const { getSharedIdsProvider } = useSharedTreeContext();
   const sharedIdsProvider =
     viewport.viewType !== "other"
-      ? getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByView(viewport.viewType).elementClass, type: viewport.viewType })
+      ? getSharedIdsProvider({
+          imodel: viewport.iModel,
+          elementClassName: getClassesByPerspective(viewport.viewType).elementClass,
+        })
       : undefined;
   // eslint-disable-next-line react-hooks/use-memo
   const categoriesPromise = useMemo(async () => {
     try {
       if (sharedIdsProvider) {
         return await firstValueFrom(
-          sharedIdsProvider.getAllCategoriesOfElements().pipe(
+          toObservable(sharedIdsProvider.categories.getAllCategoriesOfElements()).pipe(
             mergeAll(),
-            mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), subCategories: sharedIdsProvider.getSubCategories({ categoryId }) })),
+            mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), subCategories: sharedIdsProvider.subCategories.getSubCategories({ categoryId }) })),
             toArray(),
           ),
         );
@@ -229,14 +233,17 @@ function useAvailableModels(viewport: TreeWidgetViewport): Array<ModelId> {
   const { getSharedIdsProvider } = useSharedTreeContext();
   const sharedIdsProvider =
     viewport.viewType !== "other"
-      ? getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByView(viewport.viewType).elementClass, type: viewport.viewType })
+      ? getSharedIdsProvider({
+          imodel: viewport.iModel,
+          elementClassName: getClassesByPerspective(viewport.viewType).elementClass,
+        })
       : undefined;
   useEffect(() => {
     const getModels = async () => {
       try {
         if (sharedIdsProvider) {
-          const models = await firstValueFrom(sharedIdsProvider.getAllModels());
-          setAvailableModels(models);
+          const models = await firstValueFrom(toObservable(sharedIdsProvider.models.getAllModels()));
+          setAvailableModels([...models]);
         }
         return;
       } catch (error) {
@@ -265,7 +272,7 @@ async function getCategoryInfos({
         if (categoryInfo.subCategoryIds && categoryInfo.subCategoryIds.length > 0) {
           return of({ categoryId: categoryInfo.categoryId, subCategoryIds: categoryInfo.subCategoryIds });
         }
-        return sharedIdsProvider
+        return sharedIdsProvider.subCategories
           .getSubCategories({ categoryId: categoryInfo.categoryId })
           .pipe(map((subCategoryIds) => ({ categoryId: categoryInfo.categoryId, subCategoryIds })));
       }),

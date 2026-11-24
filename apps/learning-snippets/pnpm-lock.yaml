@@ -534,11 +534,20 @@ packages:
   '@itwin/core-bentley@5.14.3':
     resolution: {integrity: sha512-jsO+lIz+TcJkHSZjtTlOdjIYudvUvvTxzdm5bV1IPUveSFhvbPJLqT3JjuOQmRCIspIv/m2VJTWRGfEgRJtVow==}
 
+  '@itwin/core-bentley@5.15.1':
+    resolution: {integrity: sha512-q0tg5t9MQOpQ6DGQQvwVZCxp6udmzRjdB3ZGkXl3Mi0FzojAMqAtH3kAdnDQL1VMZLT51vOeSp+/BZX2QdC9uw==}
+
   '@itwin/core-common@5.14.3':
     resolution: {integrity: sha512-sPz7EAI6WO0bUpuEGBVLKHB9ApPlHCg7MVXLViBBDotOGA8IIG9kyeCdpThnSdS+9hR25J6Yehxi5vMPYPG69A==}
     peerDependencies:
       '@itwin/core-bentley': 5.14.3
       '@itwin/core-geometry': 5.14.3
+
+  '@itwin/core-common@5.15.1':
+    resolution: {integrity: sha512-ZwBEpJdQ3OQypjnpp2FTyofB0s6CXCwACsyVpuQOwNHtSwyUDJdylHyAl/h8WTGreQXv4AZTPE3cB/05zoa0zA==}
+    peerDependencies:
+      '@itwin/core-bentley': 5.15.1
+      '@itwin/core-geometry': 5.15.1
 
   '@itwin/core-frontend@5.14.3':
     resolution: {integrity: sha512-1wK3K7Ere2QCJAob3h2yYz1se2XXxB8NyIoYBWX4DP7TkeL2VRnnIul9CXE0y0PCaLnPhOMCIn/BhUUvv4dFwg==}
@@ -554,6 +563,9 @@ packages:
 
   '@itwin/core-geometry@5.14.3':
     resolution: {integrity: sha512-iSJD+vYcZBTfxlAIOgWFJ1mlRTUs1//s129zCvyEQe93ykfrhb1ma3f67kihmTp96orclE1mv1hACJwPGMhtBQ==}
+
+  '@itwin/core-geometry@5.15.1':
+    resolution: {integrity: sha512-b3a7zINtu+29SXlCH5T65fN+28oewgEkRE6Iq4OEMbclKOXzBZShb8JGSVl2awXe6pNAWr2dy4xc0v7B0p7cXQ==}
 
   '@itwin/core-i18n@5.14.3':
     resolution: {integrity: sha512-hrjy58Le779dFtev3wS9CbLYMnsqm+wD0i2BPTwyN8tUk/a86qSUZCBCPm/gdiC/VCTzbjGUP1hTH8L+GDFQCA==}
@@ -758,11 +770,20 @@ packages:
   '@itwin/presentation-hierarchies@2.0.0':
     resolution: {integrity: sha512-Lj3sdILn6OX1fi3aB68m3esID6DTAuJ9AQH9ynZI0+SyQ7RTcYQK073w9MLBWryIeKxif/S4mrg/0wsZV/kSSA==}
 
+  '@itwin/presentation-hierarchies@2.1.0':
+    resolution: {integrity: sha512-PF6k6CCeeZsptOuGEPmRyR8JPiKxYpX5q+kiZ0RDXsBAeM53j3fvPEp32HwI9P1LbD6nRJCSCtxXDk+Ucg6dhw==}
+
   '@itwin/presentation-shared@1.2.23':
     resolution: {integrity: sha512-xzzmUBNBziZi30L6MdSS4IjU3RHorJMPBsWrnOhVC9iTFm+qT/ikwmYMVEjFGZCgYwuF2AVwMlzMwmezMt+ouQ==}
 
   '@itwin/presentation-shared@2.0.0':
     resolution: {integrity: sha512-TF1T7xo7460M9BmC62qgWXMidUVTBBW6uSh1lM8R8LqJT1h22bra5Jo8N0j68iNiOF2iROidTKQ7e8y9uxtZSA==}
+
+  '@itwin/presentation-shared@2.2.0':
+    resolution: {integrity: sha512-0GLlT62QKGN0BlKbzVyummwnA3XnhBCzeoCfuOqx8VJs7kxztP374tRVyAPESv5zjIVRuehKbyOh/V9g9/GBMg==}
+
+  '@itwin/presentation-tree-definitions@0.3.1':
+    resolution: {integrity: sha512-a0cdKgxj9XuTvUsFLuALDpk4P+RrTtGmk3fqTFNLPa8lxs8kZy1D/vcV0kSkNTHnmiDazMJoKDSlQXUkFxOVSw==}
 
   '@itwin/property-grid-react@file:../../packages/property-grid':
     resolution: {directory: ../../packages/property-grid, type: directory}
@@ -963,6 +984,9 @@ packages:
 
   '@nodable/entities@3.0.0':
     resolution: {integrity: sha512-8L9xFeTYKhm49xfIypoe2W5wV1m/3Z58kT+7kR9A8OyFxcPduI4VmxaUMQyKYrRjUoLLSXv6EKKID5Tvj9cUVw==}
+
+  '@nodable/entities@3.1.0':
+    resolution: {integrity: sha512-LsS/DjHr+uDM647Gru/cA8+J3a3HfhttwCKLyuoyN7yXTFCxKBtSgMQBvrW9yNPa2/zDRUNuGPaH5QUFoa4arQ==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -2246,8 +2270,15 @@ packages:
   fast-xml-builder@1.3.0:
     resolution: {integrity: sha512-F74cZEdCvuw9P41GAC3rod4X04jjWGM1JPEv/GWSqFTWLsdyMSBMBMlm9Hk3GLBgLBbdBNY8yee0pQh2RBVESQ==}
 
+  fast-xml-builder@1.3.2:
+    resolution: {integrity: sha512-OX91VSlShLPDgRZV7tk/YQ4l8tT75QziF5Ixg8g4PFbCVPjuTWwN+yQfAxLJ0dufJpprdOd6HlM74Jhd39TcBQ==}
+
   fast-xml-parser@5.10.1:
     resolution: {integrity: sha512-IEMIf7298kXuZSRFoGfMYrl7is8LpavODgbNz1cwIudv7KwVFnuU+UsMporfq6PD6aXSlawZlARiA3UywCTfMw==}
+    hasBin: true
+
+  fast-xml-parser@5.12.1:
+    resolution: {integrity: sha512-wR8dO/fx+z8C5exuem1e7BKOWvjsuzvjS/tvA/Xu3Z1zQqJGcXrPzXbcAiaMgp2KjreEROcTkmnnisrcmJ2hYQ==}
     hasBin: true
 
   fastq@1.20.1:
@@ -2630,6 +2661,9 @@ packages:
 
   is-unsafe@2.0.0:
     resolution: {integrity: sha512-2LdV822R+wmI86unXA93WCFpL6g+av8ynWk0nrHyJqGop5VoocYsSLFgN8jrfalT6iGeLNM4KXuVSsULP53kEA==}
+
+  is-unsafe@2.0.3:
+    resolution: {integrity: sha512-ZBllczCCO267vgdFb6Tq3pv+LhHaCiGMdr+ZsuL+OopruAg7S+3ZDs1vD0RPC0uSrkjzbraxaGjtX1YBxjPeFQ==}
 
   is-weakmap@2.0.2:
     resolution: {integrity: sha512-K5pXYOm9wqY1RgjpL3YTkF39tni1XajUIkawTLUo9EZEVUFga5gSQJF8nNS7ZwJQ02y+1YCNYcMh+HIf1ZqE+w==}
@@ -3477,6 +3511,9 @@ packages:
 
   strnum@2.4.1:
     resolution: {integrity: sha512-M9eUSMT2dCB2cTNPG7UYj6KuK7RJR2SN2+yCV/fTW3xzTCS6EaGZ5pSMgDIjB7r8zSfTGk+dvvn9rTjpVS9Mwg==}
+
+  strnum@2.5.1:
+    resolution: {integrity: sha512-UM4nTLWzQiDBseVxUGxN0wJzIk0UU89Qi7pKXz9qISo+lhviJikTuikBsK/oFRlpvYHvSdz0TVoLyQ+sEpYwxA==}
 
   stylis@4.2.0:
     resolution: {integrity: sha512-Orov6g6BB1sDfYgzWfTHDOxamtX1bE/zo104Dh9e6fqJ3PooipYyfJ0pUmrZO2wAvO8YbEyeFrkV91XTsGMSrw==}
@@ -4428,10 +4465,26 @@ snapshots:
 
   '@itwin/core-bentley@5.14.3': {}
 
+  '@itwin/core-bentley@5.15.1': {}
+
   '@itwin/core-common@5.14.3(@itwin/core-bentley@5.14.3)(@itwin/core-geometry@5.14.3)':
     dependencies:
       '@itwin/core-bentley': 5.14.3
       '@itwin/core-geometry': 5.14.3
+      flatbuffers: 1.12.0
+      js-base64: 3.9.1
+
+  '@itwin/core-common@5.15.1(@itwin/core-bentley@5.15.1)(@itwin/core-geometry@5.14.3)':
+    dependencies:
+      '@itwin/core-bentley': 5.15.1
+      '@itwin/core-geometry': 5.14.3
+      flatbuffers: 1.12.0
+      js-base64: 3.9.1
+
+  '@itwin/core-common@5.15.1(@itwin/core-bentley@5.15.1)(@itwin/core-geometry@5.15.1)':
+    dependencies:
+      '@itwin/core-bentley': 5.15.1
+      '@itwin/core-geometry': 5.15.1
       flatbuffers: 1.12.0
       js-base64: 3.9.1
 
@@ -4457,6 +4510,11 @@ snapshots:
   '@itwin/core-geometry@5.14.3':
     dependencies:
       '@itwin/core-bentley': 5.14.3
+      flatbuffers: 1.12.0
+
+  '@itwin/core-geometry@5.15.1':
+    dependencies:
+      '@itwin/core-bentley': 5.15.1
       flatbuffers: 1.12.0
 
   '@itwin/core-i18n@5.14.3(@itwin/core-bentley@5.14.3)':
@@ -4705,6 +4763,15 @@ snapshots:
       natural-compare-lite: 1.4.1
       rxjs: 7.8.2
 
+  '@itwin/presentation-hierarchies@2.1.0':
+    dependencies:
+      '@itwin/core-bentley': 5.15.1
+      '@itwin/core-common': 5.15.1(@itwin/core-bentley@5.15.1)(@itwin/core-geometry@5.15.1)
+      '@itwin/core-geometry': 5.15.1
+      '@itwin/presentation-shared': 2.2.0
+      natural-compare-lite: 1.4.1
+      rxjs: 7.8.2
+
   '@itwin/presentation-shared@1.2.23':
     dependencies:
       '@itwin/core-bentley': 5.14.3
@@ -4713,6 +4780,21 @@ snapshots:
     dependencies:
       '@itwin/core-bentley': 5.14.3
       rxjs: 7.8.2
+
+  '@itwin/presentation-shared@2.2.0':
+    dependencies:
+      '@itwin/core-bentley': 5.15.1
+      rxjs: 7.8.2
+
+  '@itwin/presentation-tree-definitions@0.3.1(@itwin/core-geometry@5.14.3)':
+    dependencies:
+      '@itwin/core-bentley': 5.15.1
+      '@itwin/core-common': 5.15.1(@itwin/core-bentley@5.15.1)(@itwin/core-geometry@5.14.3)
+      '@itwin/presentation-hierarchies': 2.1.0
+      '@itwin/presentation-shared': 2.2.0
+      rxjs: 7.8.2
+    transitivePeerDependencies:
+      - '@itwin/core-geometry'
 
   '@itwin/property-grid-react@file:../../packages/property-grid(f0bf56397c419b65f01e6ba47e561d48)':
     dependencies:
@@ -4766,9 +4848,10 @@ snapshots:
       '@itwin/presentation-components': 6.0.1(4393d83f2c18f4540f1cf22e800e4e60)
       '@itwin/presentation-core-interop': 2.0.0(@itwin/core-bentley@5.14.3)(@itwin/core-common@5.14.3(@itwin/core-bentley@5.14.3)(@itwin/core-geometry@5.14.3))(@itwin/core-geometry@5.14.3)(@itwin/core-quantity@5.14.3(@itwin/core-bentley@5.14.3))(@itwin/ecschema-metadata@5.14.3(@itwin/core-bentley@5.14.3)(@itwin/core-quantity@5.14.3(@itwin/core-bentley@5.14.3)))
       '@itwin/presentation-frontend': 5.14.3(3bd165e0f8bb986d3dfb06e16855e380)
-      '@itwin/presentation-hierarchies': 2.0.0
+      '@itwin/presentation-hierarchies': 2.1.0
       '@itwin/presentation-hierarchies-react': 2.0.0(b7cfd6ac74a06770c430c9f7827f84e9)
-      '@itwin/presentation-shared': 2.0.0
+      '@itwin/presentation-shared': 2.2.0
+      '@itwin/presentation-tree-definitions': 0.3.1(@itwin/core-geometry@5.14.3)
       '@itwin/unified-selection': 2.0.0
       '@mui/material': 9.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@mui/utils': 9.5.0(@types/react@18.3.31)(react@18.3.1)
@@ -4988,6 +5071,8 @@ snapshots:
     optional: true
 
   '@nodable/entities@3.0.0': {}
+
+  '@nodable/entities@3.1.0': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -6362,6 +6447,11 @@ snapshots:
       path-expression-matcher: 1.6.2
       xml-naming: 0.3.0
 
+  fast-xml-builder@1.3.2:
+    dependencies:
+      path-expression-matcher: 1.6.2
+      xml-naming: 0.3.0
+
   fast-xml-parser@5.10.1:
     dependencies:
       '@nodable/entities': 3.0.0
@@ -6369,6 +6459,15 @@ snapshots:
       is-unsafe: 2.0.0
       path-expression-matcher: 1.6.2
       strnum: 2.4.1
+      xml-naming: 0.3.0
+
+  fast-xml-parser@5.12.1:
+    dependencies:
+      '@nodable/entities': 3.1.0
+      fast-xml-builder: 1.3.2
+      is-unsafe: 2.0.3
+      path-expression-matcher: 1.6.2
+      strnum: 2.5.1
       xml-naming: 0.3.0
 
   fastq@1.20.1:
@@ -6776,6 +6875,8 @@ snapshots:
   is-unicode-supported@0.1.0: {}
 
   is-unsafe@2.0.0: {}
+
+  is-unsafe@2.0.3: {}
 
   is-weakmap@2.0.2: {}
 
@@ -7646,6 +7747,10 @@ snapshots:
     dependencies:
       anynum: 1.0.1
 
+  strnum@2.5.1:
+    dependencies:
+      anynum: 1.0.1
+
   stylis@4.2.0: {}
 
   subarg@1.0.0:
@@ -7674,7 +7779,7 @@ snapshots:
       '@itwin/presentation-common': 5.14.3(@itwin/core-bentley@5.14.3)(@itwin/core-common@5.14.3(@itwin/core-bentley@5.14.3)(@itwin/core-geometry@5.14.3))(@itwin/core-quantity@5.14.3(@itwin/core-bentley@5.14.3))(@itwin/ecschema-metadata@5.14.3(@itwin/core-bentley@5.14.3)(@itwin/core-quantity@5.14.3(@itwin/core-bentley@5.14.3)))
       '@itwin/presentation-frontend': 5.14.3(3bd165e0f8bb986d3dfb06e16855e380)
       '@itwin/presentation-shared': 2.0.0
-      fast-xml-parser: 5.10.1
+      fast-xml-parser: 5.12.1
       sanitize-filename: 1.6.4
 
   tiny-inflate@1.0.3: {}

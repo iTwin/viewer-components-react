@@ -4,18 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import iconBisCategory3d from "@stratakit/icons/bis-category-3d.svg";
 import { EmptyTreeContent, NoSearchMatches, SearchUnknownError, TooManySearchMatches } from "../../shared/components/EmptyTree.js";
 import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
 import { useTelemetryContext } from "../../shared/contexts/TelemetryContext.js";
 import { useCachedVisibility } from "../../shared/internal/hooks/UseCachedVisibility.js";
 import { useGuid } from "../../shared/internal/hooks/UseGuid.js";
-import { getClassesByView, stableStringify } from "../../shared/internal/Utils.js";
+import { createIModelAccess } from "../../shared/internal/hooks/UseIModelAccess.js";
+import { getClassesByPerspective, stableStringify } from "../../shared/internal/Utils.js";
 import { SearchLimitExceededError } from "../../shared/TreeErrors.js";
 import { ClassificationsTreeComponent } from "./ClassificationsTreeComponent.js";
 import { ClassificationsTreeIcon } from "./ClassificationsTreeIcon.js";
-import { ClassificationsTreeIdsProvider } from "./internal/ClassificationsTreeIdsProvider.js";
+import { createClassificationsTreeIdsProvider } from "./internal/ClassificationsTreeIdsProvider.js";
 import { ClassificationsTreeVisibilityHandler } from "./internal/visibility/ClassificationsTreeVisibilityHandler.js";
 import { createClassificationsSearchResultsTree } from "./internal/visibility/SearchResultsTree.js";
 import { useClassificationsTreeDefinitionInternal } from "./UseClassificationsTreeDefinition.js";
@@ -28,11 +28,13 @@ import type { EC } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../../shared/components/VisibilityTree.js";
 import type { ExtendedVisibilityTreeRendererProps } from "../../shared/components/VisibilityTreeRenderer.js";
 import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../../shared/internal/hooks/UseCachedVisibility.js";
+import type { SharedIdsProvider } from "../../shared/internal/idsProviders/SharedIdsProvider.js";
 import type { SearchResultsTree } from "../../shared/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../../shared/TreeWidgetViewport.js";
 import type { FunctionProps } from "../../shared/Utils.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
 import type {
+  ClassificationsTreeIdsProvider,
   HierarchyConfigForClassificationsTreeIdsProvider,
   VisibilityHandlerConfigForClassificationsTreeIdsProvider,
 } from "./internal/ClassificationsTreeIdsProvider.js";
@@ -129,17 +131,18 @@ export function useClassificationsTree({
   );
   const componentId = useGuid();
 
-  const idsProvider = getClassificationsTreeIdsProvider({
+  const idsProviders = getClassificationsTreeIdsProviders({
     getIdsProvider,
     getSharedIdsProvider,
     imodel: activeView.iModel,
     hierarchyConfig,
     visibilityHandlerConfig,
   });
+  const { idsProvider } = idsProviders;
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useClassificationsCachedVisibility({
     activeView,
-    idsProvider,
+    idsProviders,
     componentId,
   });
 
@@ -217,21 +220,27 @@ function getEmptyTreeContentComponent(searchText?: string, error?: Classificatio
   return <EmptyTreeContent icon={iconBisCategory3d} />;
 }
 
-function useClassificationsCachedVisibility(props: { activeView: TreeWidgetViewport; idsProvider: ClassificationsTreeIdsProvider; componentId: GuidString }) {
-  const { activeView, idsProvider, componentId } = props;
-  const { visibilityHandlerFactory, searchPaths, onSearchPathsChanged } = useCachedVisibility<ClassificationsTreeIdsProvider, ClassificationsTreeSearchTargets>(
-    {
-      activeView,
-      idsProvider,
-      createSearchResultsTree,
-      createTreeSpecificVisibilityHandler,
-      componentId,
-    },
-  );
+interface ClassificationsTreeIdsProviders {
+  idsProvider: ClassificationsTreeIdsProvider;
+  sharedIdsProvider: SharedIdsProvider;
+}
+
+function useClassificationsCachedVisibility(props: { activeView: TreeWidgetViewport; idsProviders: ClassificationsTreeIdsProviders; componentId: GuidString }) {
+  const { activeView, idsProviders, componentId } = props;
+  const { visibilityHandlerFactory, searchPaths, onSearchPathsChanged } = useCachedVisibility<
+    ClassificationsTreeIdsProviders,
+    ClassificationsTreeSearchTargets
+  >({
+    activeView,
+    idsProvider: idsProviders,
+    createSearchResultsTree,
+    createTreeSpecificVisibilityHandler,
+    componentId,
+  });
 
   useEffect(() => {
-    idsProvider.clearFilteredElementsData();
-  }, [searchPaths, idsProvider]);
+    idsProviders.idsProvider.clearFilteredElementsData();
+  }, [searchPaths, idsProviders]);
 
   return {
     visibilityHandlerFactory,
@@ -240,27 +249,28 @@ function useClassificationsCachedVisibility(props: { activeView: TreeWidgetViewp
 }
 
 async function createSearchResultsTree(
-  props: CreateSearchResultsTreeProps<ClassificationsTreeIdsProvider>,
+  props: CreateSearchResultsTreeProps<ClassificationsTreeIdsProviders>,
 ): Promise<SearchResultsTree<ClassificationsTreeSearchTargets>> {
   const { searchPaths, idsProvider, imodelAccess } = props;
   return createClassificationsSearchResultsTree({
-    idsProvider,
+    idsProvider: idsProvider.idsProvider,
     searchPaths,
     imodelAccess,
   });
 }
 
-function createTreeSpecificVisibilityHandler(props: CreateTreeSpecificVisibilityHandlerProps<ClassificationsTreeIdsProvider>) {
+function createTreeSpecificVisibilityHandler(props: CreateTreeSpecificVisibilityHandlerProps<ClassificationsTreeIdsProviders>) {
   const { info, idsProvider, viewport } = props;
   return new ClassificationsTreeVisibilityHandler({
     alwaysAndNeverDrawnElementInfo: info,
-    idsProvider,
+    idsProvider: idsProvider.idsProvider,
+    sharedIdsProvider: idsProvider.sharedIdsProvider,
     viewport,
   });
 }
 
 /** @internal */
-export function getClassificationsTreeIdsProvider({
+export function getClassificationsTreeIdsProviders({
   getSharedIdsProvider,
   getIdsProvider,
   imodel,
@@ -272,7 +282,7 @@ export function getClassificationsTreeIdsProvider({
   imodel: IModelConnection;
   hierarchyConfig: HierarchyConfigForClassificationsTreeIdsProvider;
   visibilityHandlerConfig?: VisibilityHandlerConfigForClassificationsTreeIdsProvider;
-}) {
+}): ClassificationsTreeIdsProviders {
   const hierarchyConfigKey = `${hierarchyConfig.rootClassificationSystemCode}-${[...(hierarchyConfig.elements?.excludedClasses ?? [])].sort().join(",")}`;
   const visibilityHandlerConfigKey = visibilityHandlerConfig?.classificationToCategoriesRelationshipSpecification
     ? `${visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.fullClassName};${visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.source}`
@@ -280,18 +290,18 @@ export function getClassificationsTreeIdsProvider({
   const idsProviderKey = `${hierarchyConfigKey}-${visibilityHandlerConfigKey}-ClassificationsTreeIdsProvider`;
   return getIdsProvider({
     imodel,
-    createIdsProvider: () =>
-      new ClassificationsTreeIdsProvider({
-        sharedIdsProvider: getSharedIdsProvider({
-          type: "3d",
-          elementClassName: getClassesByView("3d").elementClass,
-          excludedElementClassNames: hierarchyConfig.elements?.excludedClasses,
-          imodel,
-        }),
+    createIdsProvider: (): ClassificationsTreeIdsProviders => ({
+      idsProvider: createClassificationsTreeIdsProvider({
+        imodelAccess: createIModelAccess({ imodel, hierarchyLevelSizeLimit: "unbounded" }),
         hierarchyConfig,
-        queryExecutor: createECSqlQueryExecutor(imodel),
         visibilityHandlerConfig,
       }),
+      sharedIdsProvider: getSharedIdsProvider({
+        elementClassName: getClassesByPerspective("3d").elementClass,
+        excludedElementClassNames: hierarchyConfig.elements?.excludedClasses,
+        imodel,
+      }),
+    }),
     idsProviderKey,
   });
 }

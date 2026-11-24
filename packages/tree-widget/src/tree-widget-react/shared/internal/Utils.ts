@@ -4,18 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { assert, Id64 } from "@itwin/core-bentley";
-import { ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
-import {
-  CLASS_NAME_DrawingCategory,
-  CLASS_NAME_GeometricElement2d,
-  CLASS_NAME_GeometricElement3d,
-  CLASS_NAME_GeometricModel2d,
-  CLASS_NAME_GeometricModel3d,
-  CLASS_NAME_SpatialCategory,
-} from "./ClassNameDefinitions.js";
+import { CLASS_NAMES } from "./ClassNameDefinitions.js";
 
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { EC } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId } from "./Types.js";
 
 /** @internal */
@@ -31,18 +22,6 @@ export function setDifference<T>(lhs: ReadonlySet<T>, rhs: ReadonlySet<T>): Set<
     result = new Set(lhs);
     for (const x of rhs) {
       result.delete(x);
-    }
-  }
-  return result;
-}
-
-/** @internal */
-export function setIntersection<T>(lhs: ReadonlySet<T>, rhs: ReadonlySet<T>): Set<T> {
-  const result = new Set<T>();
-  const { smallerSet, largerSet } = lhs.size < rhs.size ? { smallerSet: lhs, largerSet: rhs } : { smallerSet: rhs, largerSet: lhs };
-  for (const x of smallerSet) {
-    if (largerSet.has(x)) {
-      result.add(x);
     }
   }
   return result;
@@ -84,24 +63,6 @@ export function createIdsSelector(ids: Id64Array): string {
   return `json_array(${slices.map((sliceIds) => `json_array(${sliceIds.map((id) => `'${id}'`).join(",")})`).join(",")})`;
 }
 
-/**
- * Builds an ECSQL fragment that excludes the given classes via `<alias>.ECClassId IS NOT (...)`.
- * Returns an empty string when no classes are provided.
- * @internal
- */
-export function createExcludedClassesClause({
-  alias,
-  excludedClassNames,
-}: {
-  alias: string;
-  excludedClassNames: ReadonlyArray<EC.FullClassNameDotNotation> | undefined;
-}): string {
-  if (!excludedClassNames || excludedClassNames.length === 0) {
-    return "";
-  }
-  return `${alias}.ECClassId IS NOT (${excludedClassNames.join(", ")})`;
-}
-
 /** @internal */
 export function createWhereClause({ conditions }: { conditions: Array<string | undefined | false> }): string {
   const filteredConditions = conditions.filter((condition): condition is string => !!condition);
@@ -123,10 +84,10 @@ export function parseIdsSelectorResult(selectorResult: any): Id64Array {
 }
 
 /** @internal */
-export function getClassesByView(viewType: "2d" | "3d") {
-  return viewType === "2d"
-    ? ({ categoryClass: CLASS_NAME_DrawingCategory, elementClass: CLASS_NAME_GeometricElement2d, modelClass: CLASS_NAME_GeometricModel2d } as const)
-    : ({ categoryClass: CLASS_NAME_SpatialCategory, elementClass: CLASS_NAME_GeometricElement3d, modelClass: CLASS_NAME_GeometricModel3d } as const);
+export function getClassesByPerspective(perspective: "2d" | "3d") {
+  return perspective === "2d"
+    ? ({ categoryClass: CLASS_NAMES.DrawingCategory, elementClass: CLASS_NAMES.GeometricElement2d, modelClass: CLASS_NAMES.GeometricModel2d } as const)
+    : ({ categoryClass: CLASS_NAMES.SpatialCategory, elementClass: CLASS_NAMES.GeometricElement3d, modelClass: CLASS_NAMES.GeometricModel3d } as const);
 }
 
 /** @internal */
@@ -194,32 +155,6 @@ export namespace ChildrenTree {
   }
 }
 
-/** @internal */
-export function groupingNodeDataFromChildren(children: ProcessedHierarchyNode[]):
-  | {
-      hasSearchTargetAncestor: true;
-      hasDirectNonSearchTargets: undefined;
-    }
-  | {
-      hasSearchTargetAncestor: false;
-      hasDirectNonSearchTargets: boolean;
-    } {
-  if (children.length > 0) {
-    assert(!ProcessedHierarchyNode.isGroupingNode(children[0]), "Expected only non-grouping nodes as children");
-    if (children[0].search?.hasSearchTargetAncestor) {
-      return { hasSearchTargetAncestor: true, hasDirectNonSearchTargets: undefined };
-    }
-  }
-  for (const child of children) {
-    assert(!ProcessedHierarchyNode.isGroupingNode(child), "Expected only non-grouping nodes as children");
-    if (child.search && !child.search.isSearchTarget) {
-      return { hasSearchTargetAncestor: false, hasDirectNonSearchTargets: true };
-    }
-  }
-
-  return { hasSearchTargetAncestor: false, hasDirectNonSearchTargets: false };
-}
-
 /**
  * Path describing a chain of parent elements, where each segment is one category + its elements.
  *
@@ -262,6 +197,27 @@ export function getOrCreate<TKey, TValue>({ map, key, createFunc }: { map: Map<T
     map.set(key, entry);
   }
   return entry;
+}
+
+/**
+ * Creates an object with all own properties of `base` and `extension`, with `extension` taking precedence.
+ *
+ * Unlike object spread, property descriptors are copied, so getters (e.g. `state` of ids providers) stay live
+ * instead of being evaluated once.
+ * @internal
+ */
+export function extendObject<TBase extends object, TExtension extends object>({
+  base,
+  extension,
+}: {
+  base: TBase;
+  extension: TExtension;
+}): Omit<TBase, keyof TExtension> & TExtension {
+  return Object.defineProperties({}, { ...Object.getOwnPropertyDescriptors(base), ...Object.getOwnPropertyDescriptors(extension) }) as Omit<
+    TBase,
+    keyof TExtension
+  > &
+    TExtension;
 }
 
 /** @internal */

@@ -4,75 +4,66 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { firstValueFrom } from "rxjs";
-import { describe, expect, it, vi } from "vitest";
-import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { SharedIdsProvider } from "../../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
-import { ModelsTreeIdsProvider } from "../../../../tree-widget-react/trees/models-tree/internal/ModelsTreeIdsProvider.js";
-import { defaultHierarchyConfiguration } from "../../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
-import { createIModelMock } from "../../Common.js";
+import { initializeCore, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubject, terminateCore } from "test-utilities";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { withEditTxn } from "@itwin/core-backend";
+import { IModel } from "@itwin/core-common";
+import { buildIModel } from "../../../IModelUtils.js";
+import { createAccessAndIdsProvider } from "../Utils.js";
 
 describe("ModelsTreeIdsProvider", () => {
-  function createIdsProvider(queryHandler: (query: string) => any[]) {
-    const iModel = createIModelMock({ queryHandler });
-    const queryExecutor = createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded");
-    const sharedIdsProvider = new SharedIdsProvider({ queryExecutor, elementClassName: defaultHierarchyConfiguration.elements.baseClass, type: "3d" });
-    const idsProvider = new ModelsTreeIdsProvider({
-      queryExecutor,
-      sharedIdsProvider,
-      hierarchyConfig: defaultHierarchyConfiguration,
-    });
-    return idsProvider;
-  }
-
-  it("caches category element count", async () => {
-    const modelId = "0x1";
-    const categoryId = "0x2";
-    const elementCount = 3;
-    const stub = vi.fn((query: string) => {
-      if (query.includes("Descendants")) {
-        return [{ modelId, reqParent: null, reqCategory: categoryId, ownCategory: categoryId, cnt: elementCount }];
-      }
-      throw new Error(`Unexpected query: ${query}`);
-    });
-    const idsProvider = createIdsProvider(stub);
-    await expect(firstValueFrom(idsProvider.getDescendantsCounts({ modelId, categoryId }))).resolves.toEqual([{ categoryId, count: elementCount }]);
-    expect(stub).toHaveBeenCalledOnce();
-    await expect(firstValueFrom(idsProvider.getDescendantsCounts({ modelId, categoryId }))).resolves.toEqual([{ categoryId, count: elementCount }]);
-    expect(stub).toHaveBeenCalledOnce();
+  beforeAll(async () => {
+    await initializeCore();
   });
 
-  it("runs only one query when multiple requests are made", async () => {
-    const modelId = "0x1";
-    const categoryId = "0x2";
-    const categoryId2 = "0x3";
-    const elementCount1 = 3;
-    const elementCount2 = 4;
-    const stub = vi.fn((query: string) => {
-      if (query.includes("Descendants")) {
-        return [
-          { modelId, reqParent: null, reqCategory: categoryId, ownCategory: categoryId, cnt: elementCount1 },
-          { modelId, reqParent: null, reqCategory: categoryId2, ownCategory: categoryId2, cnt: elementCount2 },
-        ];
-      }
-      throw new Error(`Unexpected query: ${query}`);
+  afterAll(async () => {
+    await terminateCore();
+  });
+
+  describe("getSubjectModelIds", () => {
+    it("returns models of the given subjects and all their descendant subjects, including hidden ones", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const parentSubject = insertSubject({ txn, codeValue: "parent subject", parentId: IModel.rootSubjectId });
+          const hiddenSubject = insertSubject({
+            txn,
+            codeValue: "hidden subject",
+            parentId: parentSubject.id,
+            jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } },
+          });
+          const childSubject = insertSubject({ txn, codeValue: "child subject", parentId: hiddenSubject.id });
+          const grandChildSubject = insertSubject({ txn, codeValue: "grand child subject", parentId: childSubject.id });
+          const otherSubject = insertSubject({ txn, codeValue: "other subject", parentId: IModel.rootSubjectId });
+          const [parentSubjectModel, hiddenSubjectModel, childSubjectModel, grandChildSubjectModel] = [
+            parentSubject,
+            hiddenSubject,
+            childSubject,
+            grandChildSubject,
+            otherSubject,
+          ].map((subject, index) => {
+            const model = insertPhysicalModelWithPartition({ txn, codeValue: `model ${index}`, partitionParentId: subject.id });
+            insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id });
+            return model;
+          });
+          return { parentSubject, childSubject, parentSubjectModel, hiddenSubjectModel, childSubjectModel, grandChildSubjectModel };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      const { idsProvider } = createAccessAndIdsProvider({ imodelConnection });
+
+      expect(new Set(await firstValueFrom(idsProvider.getSubjectModelIds(keys.parentSubject.id)))).toEqual(
+        new Set([keys.parentSubjectModel.id, keys.hiddenSubjectModel.id, keys.childSubjectModel.id, keys.grandChildSubjectModel.id]),
+      );
+      expect(new Set(await firstValueFrom(idsProvider.getSubjectModelIds(keys.childSubject.id)))).toEqual(
+        new Set([keys.childSubjectModel.id, keys.grandChildSubjectModel.id]),
+      );
     });
-    const idsProvider = createIdsProvider(stub);
-    const obs1 = idsProvider.getDescendantsCounts({ modelId, categoryId });
-    const obs2 = idsProvider.getDescendantsCounts({ modelId, categoryId: categoryId2 });
-    const [count1, count2] = await Promise.all([firstValueFrom(obs1), firstValueFrom(obs2)]);
-    expect(count1).toEqual([
-      {
-        categoryId,
-        count: elementCount1,
-      },
-    ]);
-    expect(count2).toEqual([
-      {
-        categoryId: categoryId2,
-        count: elementCount2,
-      },
-    ]);
-    expect(stub).toHaveBeenCalledOnce();
+
+    it("returns empty list for unknown subject", async () => {
+      await using buildIModelResult = await buildIModel(async () => ({}));
+      const { idsProvider } = createAccessAndIdsProvider({ imodelConnection: buildIModelResult.imodelConnection });
+      expect(await firstValueFrom(idsProvider.getSubjectModelIds("0x123"))).toEqual([]);
+    });
   });
 });

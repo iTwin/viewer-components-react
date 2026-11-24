@@ -71,7 +71,7 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
       modelId,
       categoryId,
       parentElementsPath,
-      computeOnlyOwnStatus: this.#props.sharedIdsProvider.canHaveHiddenChildren()
+      computeOnlyOwnStatus: this.#props.sharedIdsProvider.elements.canHaveHiddenChildren()
         ? undefined
         : childrenWhichAreParents.size === 0
           ? true

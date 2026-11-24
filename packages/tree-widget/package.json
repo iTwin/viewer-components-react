@@ -71,9 +71,10 @@
   },
   "dependencies": {
     "@itwin/presentation-core-interop": "^2.0.0",
-    "@itwin/presentation-hierarchies": "^2.0.0",
+    "@itwin/presentation-hierarchies": "^2.1.0",
     "@itwin/presentation-hierarchies-react": "^2.0.0",
-    "@itwin/presentation-shared": "^2.0.0",
+    "@itwin/presentation-shared": "^2.2.0",
+    "@itwin/presentation-tree-definitions": "^0.3.2",
     "@itwin/unified-selection": "^2.0.0",
     "@mui/utils": "^9.5.0",
     "@stratakit/structures": "^0.6.2",

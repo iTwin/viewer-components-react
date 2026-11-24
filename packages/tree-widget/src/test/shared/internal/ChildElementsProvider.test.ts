@@ -21,7 +21,7 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { CLASS_NAME_GeometricElement3d } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
+import { CLASS_NAMES } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
 import { ChildElementsProvider } from "../../../tree-widget-react/shared/internal/idsProviders/ChildElementsProvider.js";
 import { buildIModel } from "../../IModelUtils.js";
 import { createFakeViewport } from "../../trees/Common.js";
@@ -32,7 +32,7 @@ function createProvider(imodel: IModelConnection) {
   return new ChildElementsProvider({
     queryExecutor: createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(imodel), 1000),
     componentId: "test",
-    elementClassName: CLASS_NAME_GeometricElement3d,
+    elementClassName: CLASS_NAMES.GeometricElement3d,
   });
 }
 
@@ -40,7 +40,7 @@ function createFakeProvider(viewport: ReturnType<typeof createFakeViewport>) {
   return new ChildElementsProvider({
     queryExecutor: createECSqlQueryExecutor(viewport.iModel),
     componentId: "test",
-    elementClassName: CLASS_NAME_GeometricElement3d,
+    elementClassName: CLASS_NAMES.GeometricElement3d,
   });
 }
 

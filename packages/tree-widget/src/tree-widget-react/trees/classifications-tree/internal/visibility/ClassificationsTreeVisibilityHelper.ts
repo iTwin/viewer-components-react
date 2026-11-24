@@ -104,7 +104,7 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
 
   /** Gets top most element categories contained in the given classification tables or classifications. */
   private getTopMostContainedCategories(classificationOrTableIds: Id64Arg): Observable<CategoryId[]> {
-    return this.#props.idsProvider.getAllCategoriesOfElements({ onlyTopMostElementCategories: true }).pipe(
+    return this.#props.sharedIdsProvider.categories.getAllCategoriesOfTopMostElements().pipe(
       mergeMap((topMostCategories) => {
         return this.#props.idsProvider.getAllContainedCategories(classificationOrTableIds).pipe(filter((categoryId) => topMostCategories.has(categoryId)));
       }),
