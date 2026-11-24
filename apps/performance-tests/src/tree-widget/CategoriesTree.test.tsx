@@ -8,9 +8,9 @@ import { assert } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { useCategoriesTree } from "@itwin/tree-widget-react";
 import {
-  BaseIdsCache,
+  SharedIdsProvider,
   CategoriesTreeDefinition,
-  CategoriesTreeIdsCache,
+  CategoriesTreeIdsProvider,
   createCategoriesTreeVisibilityHandler,
   defaultCategoriesTreeHierarchyConfiguration,
   SharedTreeContextProvider,
@@ -129,12 +129,17 @@ describe("categories tree", () => {
         viewport,
         ...testData,
       });
-      const baseIdsCache = new BaseIdsCache({ elementClassName: "BisCore.GeometricElement3d", type: "3d", queryExecutor: imodelAccess });
-      const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-      const handler = createCategoriesTreeVisibilityHandler({ imodelAccess, idsCache, viewport, hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration });
+      const sharedIdsProvider = new SharedIdsProvider({ elementClassName: "BisCore.GeometricElement3d", type: "3d", queryExecutor: imodelAccess });
+      const idsProvider = new CategoriesTreeIdsProvider({ queryExecutor: imodelAccess, type: "3d", sharedIdsProvider });
+      const handler = createCategoriesTreeVisibilityHandler({
+        imodelAccess,
+        idsProvider,
+        viewport,
+        hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration,
+      });
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new CategoriesTreeDefinition({
-          idsCache,
+          idsProvider,
           imodelAccess,
           viewType: "3d",
           hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration,
@@ -237,17 +242,17 @@ describe("categories tree", () => {
             excludedClasses: excludedElementClassNames,
           },
         };
-        const baseIdsCache = new BaseIdsCache({
+        const sharedIdsProvider = new SharedIdsProvider({
           elementClassName: "BisCore.GeometricElement3d",
           type: "3d",
           queryExecutor: imodelAccess,
           excludedElementClassNames: hierarchyConfig.elements.nodes === "include" ? hierarchyConfig.elements.excludedClasses : [],
         });
-        const idsCache = new CategoriesTreeIdsCache({ queryExecutor: imodelAccess, type: "3d", baseIdsCache });
-        const handler = createCategoriesTreeVisibilityHandler({ imodelAccess, idsCache, viewport, hierarchyConfig });
+        const idsProvider = new CategoriesTreeIdsProvider({ queryExecutor: imodelAccess, type: "3d", sharedIdsProvider });
+        const handler = createCategoriesTreeVisibilityHandler({ imodelAccess, idsProvider, viewport, hierarchyConfig });
         const provider = createIModelHierarchyProvider({
           hierarchyDefinition: new CategoriesTreeDefinition({
-            idsCache,
+            idsProvider,
             imodelAccess,
             viewType: "3d",
             hierarchyConfig,

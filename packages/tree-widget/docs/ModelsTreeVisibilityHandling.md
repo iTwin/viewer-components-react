@@ -25,7 +25,7 @@ Models tree visibility is available only for 3D viewports. In other viewport typ
 
 ### getSubjectsVisibilityStatus
 
-The cache returns models related to the requested subjects, including models beneath nested child subjects. Their statuses are resolved by [getModelsVisibilityStatus](./SharedVisibilityHandling.md#getmodelsvisibilitystatus) and merged. A subject with no related models is `disabled`.
+The ids provider returns models related to the requested subjects, including models beneath nested child subjects. Their statuses are resolved by [getModelsVisibilityStatus](./SharedVisibilityHandling.md#getmodelsvisibilitystatus) and merged. A subject with no related models is `disabled`.
 
 ```mermaid
 ---
@@ -40,7 +40,7 @@ flowchart TD
   RESULT_Disabled[/disabled/]
 
   %% Start
-  TITLE(["<span style='font-family: monospace;'>getSubjectsVisibilityStatus</span>"]) --> A["Get models under <span style='font-family: monospace;'>props.subjectIds</span> from cache, including models of nested child subjects"]
+  TITLE(["<span style='font-family: monospace;'>getSubjectsVisibilityStatus</span>"]) --> A["Get models under <span style='font-family: monospace;'>props.subjectIds</span> from ids provider, including models of nested child subjects"]
 
   PROPS[\"
     <span style='font-family: monospace;'>props</span>
@@ -105,7 +105,7 @@ flowchart TD
   RESULT_Done([Done])
 
   %% Start
-  TITLE(["<span style='font-family: monospace;'>changeSubjectsVisibilityStatus</span>"]) --> A["Get models under <span style='font-family: monospace;'>props.subjectIds</span> from cache, including models of nested child subjects"]
+  TITLE(["<span style='font-family: monospace;'>changeSubjectsVisibilityStatus</span>"]) --> A["Get models under <span style='font-family: monospace;'>props.subjectIds</span> from ids provider, including models of nested child subjects"]
 
   PROPS[\"
     <span style='font-family: monospace;'>props</span>

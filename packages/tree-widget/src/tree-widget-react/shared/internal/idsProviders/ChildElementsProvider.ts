@@ -6,7 +6,7 @@
 import { defer, EMPTY, from, map, mergeMap, of } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
 import { getOrCreate } from "../Utils.js";
-import { BatchingCache } from "./BatchingCache.js";
+import { BatchingProvider } from "./BatchingProvider.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
@@ -31,7 +31,7 @@ interface ChildElementsElementRequest extends ChildElementsBaseRequest {
 
 type ChildElementsRequest = ChildElementsCategoryRequest | ChildElementsElementRequest;
 
-interface ChildElementsCacheProps {
+interface ChildElementsProviderProps {
   queryExecutor: LimitingECSqlQueryExecutor;
   elementClassName: string;
   componentId: GuidString;
@@ -53,25 +53,25 @@ interface Row {
 }
 
 /**
- * Cache for retrieving descendant element IDs grouped by category.
+ * Provider for retrieving descendant element IDs grouped by category.
  *
- * Cache makes requests in batches of 20ms.
+ * Provider makes requests in batches of 20ms.
  * Uses incremental caching per childCategoryId: only queries child categories not yet cached/batched.
  * @internal
  */
-export class ChildElementsCache extends BatchingCache<ChildElementsRequest, Id64Array, WhereClause, Row> {
+export class ChildElementsProvider extends BatchingProvider<ChildElementsRequest, Id64Array, WhereClause, Row> {
   #cachedValues = new Map<ModelId, Map<ElementId | undefined, Map<CategoryId | undefined, Map<CategoryId, Id64Array>>>>();
   #queryExecutor: LimitingECSqlQueryExecutor;
   #elementClassName: string;
   #componentId: GuidString;
   #componentName: string;
 
-  public constructor(props: ChildElementsCacheProps) {
+  public constructor(props: ChildElementsProviderProps) {
     super();
     this.#queryExecutor = props.queryExecutor;
     this.#elementClassName = props.elementClassName;
     this.#componentId = props.componentId;
-    this.#componentName = "ChildElementsCache";
+    this.#componentName = "ChildElementsProvider";
   }
 
   protected getCachedValue(request: ChildElementsRequest): Id64Array | undefined {

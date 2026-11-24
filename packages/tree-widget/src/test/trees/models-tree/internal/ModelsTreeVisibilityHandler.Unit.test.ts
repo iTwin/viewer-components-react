@@ -7,10 +7,10 @@ import { describe, expect, it, vi } from "vitest";
 import { CompressedId64Set, Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { BaseIdsCache } from "../../../../tree-widget-react/shared/internal/caches/BaseIdsCache.js";
+import { SharedIdsProvider } from "../../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
 import { createVisibilityStatus } from "../../../../tree-widget-react/shared/internal/Tooltip.js";
 import { mergeWithDefaults } from "../../../../tree-widget-react/shared/internal/Utils.js";
-import { ModelsTreeIdsCache } from "../../../../tree-widget-react/trees/models-tree/internal/ModelsTreeIdsCache.js";
+import { ModelsTreeIdsProvider } from "../../../../tree-widget-react/trees/models-tree/internal/ModelsTreeIdsProvider.js";
 import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration } from "../../../../tree-widget-react/trees/models-tree/ModelsTreeDefinition.js";
 import { createFakeViewport } from "../../Common.js";
@@ -18,7 +18,7 @@ import {
   createCategoryHierarchyNode,
   createClassGroupingHierarchyNode,
   createElementHierarchyNode,
-  createFakeIdsCache,
+  createFakeIdsProvider,
   createModelHierarchyNode,
   createSubjectHierarchyNode,
 } from "../Utils.js";
@@ -39,20 +39,20 @@ interface VisibilityOverrides {
 }
 
 describe("ModelsTreeVisibilityHandler", () => {
-  function createIdsCache(iModel: IModelConnection, hierarchyConfig?: ModelsTreeHierarchyConfiguration) {
+  function createIdsProvider(iModel: IModelConnection, hierarchyConfig?: ModelsTreeHierarchyConfiguration) {
     const resolvedHierarchyConfig = mergeWithDefaults({ defaults: defaultHierarchyConfiguration, overrides: hierarchyConfig });
     const queryExecutor = createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded");
-    const baseIdsCache = new BaseIdsCache({
+    const sharedIdsProvider = new SharedIdsProvider({
       queryExecutor,
       elementClassName: resolvedHierarchyConfig.elements.baseClass,
       type: "3d",
     });
-    const idsCache = new ModelsTreeIdsCache({
+    const idsProvider = new ModelsTreeIdsProvider({
       queryExecutor,
       hierarchyConfig: resolvedHierarchyConfig,
-      baseIdsCache,
+      sharedIdsProvider,
     });
-    return idsCache;
+    return idsProvider;
   }
   describe("#unit", () => {
     function createFakeIModelAccess(): Pick<ECSchemaProvider, "classDerivesFrom"> {
@@ -61,7 +61,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       };
     }
 
-    function createHandler(props?: { overrides?: VisibilityOverrides; idsCache?: ModelsTreeIdsCache; viewport?: TreeWidgetViewport }) {
+    function createHandler(props?: { overrides?: VisibilityOverrides; idsProvider?: ModelsTreeIdsProvider; viewport?: TreeWidgetViewport }) {
       const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
         getModelsVisibilityStatus:
           props?.overrides?.models &&
@@ -118,7 +118,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       const handler = createModelsTreeVisibilityHandler({
         viewport: props?.viewport ?? createFakeViewport(),
         overrides,
-        idsCache: props?.idsCache ?? createFakeIdsCache(),
+        idsProvider: props?.idsProvider ?? createFakeIdsProvider(),
         imodelAccess: createFakeIModelAccess(),
       });
       return {
@@ -134,10 +134,10 @@ describe("ModelsTreeVisibilityHandler", () => {
       it("can call original implementation", async () => {
         let useOriginalImplFlag = false;
         using viewport = createFakeViewport();
-        const idsCache = createIdsCache(viewport.iModel);
+        const idsProvider = createIdsProvider(viewport.iModel);
         using handler = createModelsTreeVisibilityHandler({
           viewport,
-          idsCache,
+          idsProvider,
           overrides: {
             getElementsVisibilityStatus: async ({ originalImplementation }) => {
               return useOriginalImplFlag ? originalImplementation() : createVisibilityStatus("hidden");
@@ -161,10 +161,10 @@ describe("ModelsTreeVisibilityHandler", () => {
             getSubjectsVisibilityStatus: vi.fn().mockResolvedValue(createVisibilityStatus("visible")),
           };
           using viewport = createFakeViewport();
-          const idsCache = createIdsCache(viewport.iModel);
+          const idsProvider = createIdsProvider(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
-            idsCache,
+            idsProvider,
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -186,10 +186,10 @@ describe("ModelsTreeVisibilityHandler", () => {
         it("is visible when subject contains no models", async () => {
           const subjectIds = ["0x1", "0x2"];
           const node = createSubjectHierarchyNode({ ids: subjectIds });
-          const idsCache = createFakeIdsCache({
+          const idsProvider = createFakeIdsProvider({
             subjectsHierarchy: new Map([["0x0", subjectIds]]),
           });
-          using handlerResult = createHandler({ idsCache });
+          using handlerResult = createHandler({ idsProvider });
           const { handler } = handlerResult;
           const result = await handler.getVisibilityStatus(node);
           expect(result).toMatchObject({ state: "visible" });
@@ -198,7 +198,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         it("is visible when all models are displayed", async () => {
           const subjectIds = ["0x1", "0x2"];
           const node = createSubjectHierarchyNode({ ids: subjectIds });
-          const idsCache = createFakeIdsCache({
+          const idsProvider = createFakeIdsProvider({
             subjectsHierarchy: new Map([["0x0", subjectIds]]),
             subjectModels: new Map([
               [subjectIds[0], ["0x3"]],
@@ -206,7 +206,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             ]),
           });
           using handlerResult = createHandler({
-            idsCache,
+            idsProvider,
             overrides: {
               models: new Map([
                 ["0x3", "visible"],
@@ -222,7 +222,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         it("is hidden when all models are hidden", async () => {
           const subjectIds = ["0x1", "0x2"];
           const node = createSubjectHierarchyNode({ ids: subjectIds });
-          const idsCache = createFakeIdsCache({
+          const idsProvider = createFakeIdsProvider({
             subjectsHierarchy: new Map([["0x0", subjectIds]]),
             subjectModels: new Map([
               [subjectIds[0], ["0x3"]],
@@ -230,7 +230,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             ]),
           });
           using handlerResult = createHandler({
-            idsCache,
+            idsProvider,
             overrides: {
               models: new Map([
                 ["0x3", "hidden"],
@@ -246,7 +246,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         it("is partially visible when at least one model is displayed and at least one model is hidden", async () => {
           const subjectIds = ["0x1", "0x2"];
           const node = createSubjectHierarchyNode({ ids: subjectIds });
-          const idsCache = createFakeIdsCache({
+          const idsProvider = createFakeIdsProvider({
             subjectsHierarchy: new Map([["0x0", subjectIds]]),
             subjectModels: new Map([
               [subjectIds[0], ["0x3"]],
@@ -254,7 +254,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             ]),
           });
           using handlerResult = createHandler({
-            idsCache,
+            idsProvider,
             overrides: {
               models: new Map([
                 ["0x3", "visible"],
@@ -293,10 +293,10 @@ describe("ModelsTreeVisibilityHandler", () => {
             const modelId = "0x1";
             const categories = ["0x10", "0x20"];
             const node = createModelHierarchyNode({ modelId });
-            const idsCache = createFakeIdsCache({
+            const idsProvider = createFakeIdsProvider({
               modelCategories: new Map([[modelId, categories]]),
             });
-            using handlerResult = createHandler({ idsCache });
+            using handlerResult = createHandler({ idsProvider });
             const { handler } = handlerResult;
             const result = await handler.getVisibilityStatus(node);
             expect(result).toMatchObject({ state: "visible" });
@@ -311,12 +311,12 @@ describe("ModelsTreeVisibilityHandler", () => {
               ["0x10", ["0x100", "0x200"]],
               ["0x20", ["0x300", "0x400"]],
             ]);
-            const idsCache = createFakeIdsCache({
+            const idsProvider = createFakeIdsProvider({
               modelCategories,
               categoryElements,
             });
             using handlerResult = createHandler({
-              idsCache,
+              idsProvider,
               viewport: createFakeViewport({
                 isAlwaysDrawnExclusive: true,
                 alwaysDrawn: new Set([...categoryElements.values()].flat()),
@@ -335,7 +335,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const modelId = "0x1";
             const categories = ["0x10", "0x20"];
             const node = createModelHierarchyNode({ modelId });
-            const idsCache = createFakeIdsCache({
+            const idsProvider = createFakeIdsProvider({
               modelCategories: new Map([[modelId, categories]]),
               categoryElements: new Map([
                 ["0x10", ["0x100", "0x200"]],
@@ -343,7 +343,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               ]),
             });
             using handlerResult = createHandler({
-              idsCache,
+              idsProvider,
               viewport: createFakeViewport({
                 alwaysDrawn: new Set(),
               }),
@@ -357,7 +357,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const modelId = "0x1";
             const categories = ["0x10", "0x20"];
             const node = createModelHierarchyNode({ modelId });
-            const idsCache = createFakeIdsCache({
+            const idsProvider = createFakeIdsProvider({
               modelCategories: new Map([[modelId, categories]]),
               categoryElements: new Map([
                 ["0x10", ["0x100", "0x200"]],
@@ -365,7 +365,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               ]),
             });
             using handlerResult = createHandler({
-              idsCache,
+              idsProvider,
               viewport: createFakeViewport({
                 alwaysDrawn: new Set(["0xfff"]),
                 neverDrawn: new Set(["0xeee"]),
@@ -395,11 +395,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             const modelId = "0x1";
             const categories = ["0x10", "0x20"];
             const node = createModelHierarchyNode({ modelId });
-            const idsCache = createFakeIdsCache({
+            const idsProvider = createFakeIdsProvider({
               modelCategories: new Map([[modelId, categories]]),
             });
             using handlerResult = createHandler({
-              idsCache,
+              idsProvider,
               viewport: createFakeViewport({
                 viewsCategory: vi.fn(() => false),
               }),
@@ -417,12 +417,12 @@ describe("ModelsTreeVisibilityHandler", () => {
               ["0x10", ["0x100", "0x200"]],
               ["0x20", ["0x300", "0x400"]],
             ]);
-            const idsCache = createFakeIdsCache({
+            const idsProvider = createFakeIdsProvider({
               modelCategories,
               categoryElements,
             });
             using handlerResult = createHandler({
-              idsCache,
+              idsProvider,
               viewport: createFakeViewport({
                 neverDrawn: new Set([...categoryElements.values()].flat()),
                 queryHandler: () =>
@@ -444,12 +444,12 @@ describe("ModelsTreeVisibilityHandler", () => {
               ["0x10", ["0x100", "0x200"]],
               ["0x20", ["0x300", "0x400"]],
             ]);
-            const idsCache = createFakeIdsCache({
+            const idsProvider = createFakeIdsProvider({
               modelCategories,
               categoryElements,
             });
             using handlerResult = createHandler({
-              idsCache,
+              idsProvider,
               viewport: createFakeViewport({
                 alwaysDrawn: new Set(["0xffff"]),
                 isAlwaysDrawnExclusive: true,
@@ -468,12 +468,12 @@ describe("ModelsTreeVisibilityHandler", () => {
               ["0x10", ["0x100", "0x200"]],
               ["0x20", ["0x300", "0x400"]],
             ]);
-            const idsCache = createFakeIdsCache({
+            const idsProvider = createFakeIdsProvider({
               modelCategories,
               categoryElements,
             });
             using handlerResult = createHandler({
-              idsCache,
+              idsProvider,
               viewport: createFakeViewport({
                 isAlwaysDrawnExclusive: true,
               }),
@@ -487,7 +487,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const modelId = "0x1";
             const categories = ["0x10", "0x20"];
             const node = createModelHierarchyNode({ modelId });
-            const idsCache = createFakeIdsCache({
+            const idsProvider = createFakeIdsProvider({
               modelCategories: new Map([[modelId, categories]]),
               categoryElements: new Map([
                 ["0x10", ["0x100", "0x200"]],
@@ -495,7 +495,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               ]),
             });
             using handlerResult = createHandler({
-              idsCache,
+              idsProvider,
               viewport: createFakeViewport({
                 viewsCategory: vi.fn(() => false),
                 alwaysDrawn: new Set(["0xfff"]),
@@ -513,11 +513,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             const modelId = "0x1";
             const categories = ["0x10", "0x20"];
             const node = createModelHierarchyNode({ modelId });
-            const idsCache = createFakeIdsCache({
+            const idsProvider = createFakeIdsProvider({
               modelCategories: new Map([[modelId, categories]]),
             });
             using handlerResult = createHandler({
-              idsCache,
+              idsProvider,
               viewport: createFakeViewport({
                 viewsCategory: vi.fn((id) => id === categories[0]),
               }),
@@ -530,7 +530,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           it("when some of the elements are in never drawn list", async () => {
             const modelId = "0x1";
             const node = createModelHierarchyNode({ modelId });
-            const idsCache = createFakeIdsCache({
+            const idsProvider = createFakeIdsProvider({
               modelCategories: new Map([[modelId, ["0x10", "0x20"]]]),
               categoryElements: new Map([
                 ["0x10", ["0x100", "0x200"]],
@@ -538,7 +538,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               ]),
             });
             using handlerResult = createHandler({
-              idsCache,
+              idsProvider,
               viewport: createFakeViewport({
                 neverDrawn: new Set(["0x100"]),
                 queryHandler: () => [{ categoryElementPath: "0x10;0x100", modelId }],
@@ -552,7 +552,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           it("when some of the elements are not in the exclusive always drawn list", async () => {
             const modelId = "0x1";
             const node = createModelHierarchyNode({ modelId });
-            const idsCache = createFakeIdsCache({
+            const idsProvider = createFakeIdsProvider({
               modelCategories: new Map([[modelId, ["0x10", "0x20"]]]),
               categoryElements: new Map([
                 ["0x10", ["0x100", "0x200"]],
@@ -560,7 +560,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               ]),
             });
             using handlerResult = createHandler({
-              idsCache,
+              idsProvider,
               viewport: createFakeViewport({
                 isAlwaysDrawnExclusive: true,
                 alwaysDrawn: new Set(["0x100"]),
@@ -576,7 +576,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const modelId = "0x1";
             const categories = ["0x10", "0x20"];
             const node = createModelHierarchyNode({ modelId });
-            const idsCache = createFakeIdsCache({
+            const idsProvider = createFakeIdsProvider({
               modelCategories: new Map([[modelId, categories]]),
               categoryElements: new Map([
                 ["0x10", ["0x100", "0x200"]],
@@ -584,7 +584,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               ]),
             });
             using handlerResult = createHandler({
-              idsCache,
+              idsProvider,
               viewport: createFakeViewport({
                 viewsCategory: vi.fn((id) => id === categories[0]),
                 alwaysDrawn: new Set(["0xfff"]),
@@ -604,10 +604,10 @@ describe("ModelsTreeVisibilityHandler", () => {
             getCategoriesVisibilityStatus: vi.fn().mockResolvedValue(createVisibilityStatus("visible")),
           };
           using viewport = createFakeViewport();
-          const idsCache = createIdsCache(viewport.iModel);
+          const idsProvider = createIdsProvider(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
-            idsCache,
+            idsProvider,
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -623,7 +623,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const elements = ["0x2", "0x3"];
             const node = createCategoryHierarchyNode({ modelId: "0x1", categoryId });
             using handlerResult = createHandler({
-              idsCache: createFakeIdsCache({
+              idsProvider: createFakeIdsProvider({
                 categoryElements: new Map([[categoryId, elements]]),
               }),
               viewport: createFakeViewport({
@@ -641,7 +641,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const elements = ["0x2", "0x3"];
             const node = createCategoryHierarchyNode({ modelId, categoryId });
             using handlerResult = createHandler({
-              idsCache: createFakeIdsCache({
+              idsProvider: createFakeIdsProvider({
                 categoryElements: new Map([[categoryId, elements]]),
               }),
               viewport: createFakeViewport({
@@ -661,7 +661,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const elements = ["0x2", "0x3"];
             const node = createCategoryHierarchyNode({ modelId, categoryId });
             using handlerResult = createHandler({
-              idsCache: createFakeIdsCache({
+              idsProvider: createFakeIdsProvider({
                 categoryElements: new Map([[categoryId, elements]]),
               }),
               viewport: createFakeViewport({
@@ -678,7 +678,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const elements = ["0x2", "0x3"];
             const node = createCategoryHierarchyNode({ modelId: "0x1", categoryId });
             using handlerResult = createHandler({
-              idsCache: createFakeIdsCache({
+              idsProvider: createFakeIdsProvider({
                 categoryElements: new Map([[categoryId, elements]]),
               }),
               viewport: createFakeViewport({
@@ -695,7 +695,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const elements = ["0x2", "0x3"];
             const node = createCategoryHierarchyNode({ modelId: "0x1", categoryId });
             using handlerResult = createHandler({
-              idsCache: createFakeIdsCache({
+              idsProvider: createFakeIdsProvider({
                 categoryElements: new Map([[categoryId, elements]]),
               }),
               viewport: createFakeViewport({
@@ -716,7 +716,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const elements = ["0x2", "0x3"];
             const node = createCategoryHierarchyNode({ modelId, categoryId });
             using handlerResult = createHandler({
-              idsCache: createFakeIdsCache({
+              idsProvider: createFakeIdsProvider({
                 modelCategories: new Map([[modelId, [categoryId]]]),
                 categoryElements: new Map([[categoryId, elements]]),
               }),
@@ -737,7 +737,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const elements = ["0x2", "0x3"];
             const node = createCategoryHierarchyNode({ modelId, categoryId });
             using handlerResult = createHandler({
-              idsCache: createFakeIdsCache({
+              idsProvider: createFakeIdsProvider({
                 categoryElements: new Map([[categoryId, elements]]),
               }),
               viewport: createFakeViewport({
@@ -755,7 +755,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const elements = ["0x2", "0x3"];
             const node = createCategoryHierarchyNode({ modelId, categoryId });
             using handlerResult = createHandler({
-              idsCache: createFakeIdsCache({
+              idsProvider: createFakeIdsProvider({
                 categoryElements: new Map([[categoryId, elements]]),
               }),
               viewport: createFakeViewport({
@@ -778,7 +778,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const elements = ["0x2", "0x3"];
             const node = createCategoryHierarchyNode({ modelId, categoryId });
             using handlerResult = createHandler({
-              idsCache: createFakeIdsCache({
+              idsProvider: createFakeIdsProvider({
                 modelCategories: new Map([[modelId, [categoryId]]]),
                 categoryElements: new Map([[categoryId, elements]]),
               }),
@@ -799,7 +799,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const elements = ["0x2", "0x3"];
             const node = createCategoryHierarchyNode({ modelId, categoryId });
             using handlerResult = createHandler({
-              idsCache: createFakeIdsCache({
+              idsProvider: createFakeIdsProvider({
                 modelCategories: new Map([[modelId, [categoryId]]]),
                 categoryElements: new Map([[categoryId, elements]]),
               }),
@@ -820,7 +820,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const elements = ["0x2", "0x3"];
             const node = createCategoryHierarchyNode({ modelId, categoryId });
             using handlerResult = createHandler({
-              idsCache: createFakeIdsCache({
+              idsProvider: createFakeIdsProvider({
                 modelCategories: new Map([[modelId, [categoryId]]]),
                 categoryElements: new Map([[categoryId, elements]]),
               }),
@@ -841,7 +841,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const elements = ["0x2", "0x3"];
             const node = createCategoryHierarchyNode({ modelId, categoryId });
             using handlerResult = createHandler({
-              idsCache: createFakeIdsCache({
+              idsProvider: createFakeIdsProvider({
                 modelCategories: new Map([[modelId, [categoryId]]]),
                 categoryElements: new Map([[categoryId, elements]]),
               }),
@@ -868,10 +868,10 @@ describe("ModelsTreeVisibilityHandler", () => {
             getElementsVisibilityStatus: vi.fn().mockResolvedValue(createVisibilityStatus("visible")),
           };
           using viewport = createFakeViewport();
-          const idsCache = createIdsCache(viewport.iModel);
+          const idsProvider = createIdsProvider(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
-            idsCache,
+            idsProvider,
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -997,10 +997,10 @@ describe("ModelsTreeVisibilityHandler", () => {
             getElementGroupingNodeVisibilityStatus: vi.fn().mockResolvedValue(createVisibilityStatus("visible")),
           };
           using viewport = createFakeViewport();
-          const idsCache = createIdsCache(viewport.iModel);
+          const idsProvider = createIdsProvider(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
-            idsCache,
+            idsProvider,
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -1024,7 +1024,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             elements: elementIds,
           });
           using handlerResult = createHandler({
-            idsCache: createFakeIdsCache({
+            idsProvider: createFakeIdsProvider({
               modelCategories: new Map([[modelId, [categoryId]]]),
               categoryElements: new Map([[categoryId, elementIds]]),
             }),
@@ -1045,7 +1045,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             elements: elementIds,
           });
           using handlerResult = createHandler({
-            idsCache: createFakeIdsCache({
+            idsProvider: createFakeIdsProvider({
               modelCategories: new Map([[modelId, [categoryId]]]),
               categoryElements: new Map([[categoryId, elementIds]]),
             }),
@@ -1066,7 +1066,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             elements: elementIds,
           });
           using handlerResult = createHandler({
-            idsCache: createFakeIdsCache({
+            idsProvider: createFakeIdsProvider({
               modelCategories: new Map([[modelId, [categoryId]]]),
               categoryElements: new Map([[categoryId, elementIds]]),
             }),
@@ -1088,7 +1088,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             elements: elementIds,
           });
           using handlerResult = createHandler({
-            idsCache: createFakeIdsCache({
+            idsProvider: createFakeIdsProvider({
               modelCategories: new Map([[modelId, [categoryId]]]),
               categoryElements: new Map([[categoryId, elementIds]]),
             }),
@@ -1106,7 +1106,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             elements: elementIds,
           });
           using handlerResult = createHandler({
-            idsCache: createFakeIdsCache({
+            idsProvider: createFakeIdsProvider({
               modelCategories: new Map([[modelId, [categoryId]]]),
               categoryElements: new Map([[categoryId, elementIds]]),
             }),
@@ -1127,7 +1127,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             elements: elementIds,
           });
           using handlerResult = createHandler({
-            idsCache: createFakeIdsCache({
+            idsProvider: createFakeIdsProvider({
               modelCategories: new Map([[modelId, [categoryId]]]),
               categoryElements: new Map([[categoryId, elementIds]]),
             }),
@@ -1153,7 +1153,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport: createFakeViewport({
                 viewsCategory: vi.fn(() => categoryOn),
               }),
-              idsCache: createFakeIdsCache({
+              idsProvider: createFakeIdsProvider({
                 modelCategories: new Map([[modelId, [categoryId]]]),
                 categoryElements: new Map([[categoryId, elementIds]]),
               }),
@@ -1173,10 +1173,10 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeSubjectsVisibilityStatus: vi.fn().mockResolvedValue(undefined),
           };
           using viewport = createFakeViewport();
-          const idsCache = createIdsCache(viewport.iModel);
+          const idsProvider = createIdsProvider(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
-            idsCache,
+            idsProvider,
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -1195,7 +1195,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const node = createSubjectHierarchyNode({ ids: subjectIds });
             using viewport = createFakeViewport();
             using handlerResult = createHandler({
-              idsCache: createFakeIdsCache({
+              idsProvider: createFakeIdsProvider({
                 subjectModels: new Map(subjectIds.map((id, idx) => [id, modelIds[idx]])),
               }),
               viewport,
@@ -1218,7 +1218,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             ];
             const node = createSubjectHierarchyNode({ ids: subjectIds });
             using handlerResult = createHandler({
-              idsCache: createFakeIdsCache({
+              idsProvider: createFakeIdsProvider({
                 subjectModels: new Map(subjectIds.map((id, idx) => [id, modelIds[idx]])),
               }),
             });
@@ -1253,7 +1253,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             });
             using handlerResult = createHandler({
               viewport,
-              idsCache: createFakeIdsCache({
+              idsProvider: createFakeIdsProvider({
                 modelCategories: new Map([[modelId, ["0x10", "0x20"]]]),
                 categoryElements: new Map([
                   ["0x10", ["0x100", "0x200"]],
@@ -1302,7 +1302,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               }),
             });
 
-            const idsCache = createFakeIdsCache({
+            const idsProvider = createFakeIdsProvider({
               modelCategories: new Map([
                 [modelId, [categoryId]],
                 [otherModelId, [otherCategoryId]],
@@ -1312,7 +1312,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 [otherCategoryId, [otherAlwaysDrawnElement, otherNeverDrawnElement]],
               ]),
             });
-            using handlerResult = createHandler({ viewport, idsCache });
+            using handlerResult = createHandler({ viewport, idsProvider });
             const { handler } = handlerResult;
             await handler.changeVisibility(node, true);
             expect(viewport.alwaysDrawn).toEqual(new Set([otherAlwaysDrawnElement]));
@@ -1326,7 +1326,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             using viewport = createFakeViewport();
             using handlerResult = createHandler({
               viewport,
-              idsCache: createFakeIdsCache({
+              idsProvider: createFakeIdsProvider({
                 modelCategories: new Map([[modelId, categoryIds]]),
               }),
             });
@@ -1356,10 +1356,10 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeCategoriesVisibilityStatus: vi.fn().mockResolvedValue(undefined),
           };
           using viewport = createFakeViewport();
-          const idsCache = createIdsCache(viewport.iModel);
+          const idsProvider = createIdsProvider(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
-            idsCache,
+            idsProvider,
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -1439,10 +1439,10 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeElementsVisibilityStatus: vi.fn().mockResolvedValue(undefined),
           };
           using viewport = createFakeViewport();
-          const idsCache = createIdsCache(viewport.iModel);
+          const idsProvider = createIdsProvider(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
-            idsCache,
+            idsProvider,
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -1509,7 +1509,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               overrides: {
                 models: new Map([[modelId, "hidden"]]),
               },
-              idsCache: createFakeIdsCache({ modelCategories: new Map([[modelId, [categoryId]]]) }),
+              idsProvider: createFakeIdsProvider({ modelCategories: new Map([[modelId, [categoryId]]]) }),
             });
             const { handler } = handlerResult;
             await handler.changeVisibility(node, true);
@@ -1568,7 +1568,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               isAlwaysDrawnExclusive: true,
               viewsModel: vi.fn(() => true),
             });
-            using handlerResult = createHandler({ viewport, idsCache: createFakeIdsCache({ modelCategories: new Map([[modelId, [categoryId]]]) }) });
+            using handlerResult = createHandler({ viewport, idsProvider: createFakeIdsProvider({ modelCategories: new Map([[modelId, [categoryId]]]) }) });
             const { handler } = handlerResult;
             await handler.changeVisibility(node, false);
             expect(viewport.alwaysDrawn?.size ?? 0).toBe(0);
@@ -1595,10 +1595,10 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeElementGroupingNodeVisibilityStatus: vi.fn().mockResolvedValue(undefined),
           };
           using viewport = createFakeViewport();
-          const idsCache = createIdsCache(viewport.iModel);
+          const idsProvider = createIdsProvider(viewport.iModel);
           using handler = createModelsTreeVisibilityHandler({
             viewport,
-            idsCache,
+            idsProvider,
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -1630,7 +1630,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               categoryId,
               elements,
             });
-            const idsCache = createFakeIdsCache({
+            const idsProvider = createFakeIdsProvider({
               modelCategories: new Map([[modelId, [categoryId]]]),
               categoryElements: new Map([[categoryId, elements]]),
             });
@@ -1638,7 +1638,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewsModel: vi.fn(() => true),
               viewsCategory: vi.fn(() => !on),
             });
-            using handlerResult = createHandler({ idsCache, viewport });
+            using handlerResult = createHandler({ idsProvider, viewport });
             const { handler } = handlerResult;
 
             await handler.changeVisibility(node, on);

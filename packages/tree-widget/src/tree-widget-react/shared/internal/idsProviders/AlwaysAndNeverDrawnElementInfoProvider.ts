@@ -106,7 +106,7 @@ export interface AlwaysAndNeverDrawnElementsAccessor {
   getAlwaysOrNeverDrawnElements: (segment?: ElementPathSegment) => GetAlwaysOrNeverDrawnElementsResult;
 }
 
-interface AlwaysAndNeverDrawnElementInfoCacheProps {
+interface AlwaysAndNeverDrawnElementInfoProviderProps {
   viewport: TreeWidgetViewport;
   elementClassName?: string;
   componentId?: GuidString;
@@ -118,7 +118,7 @@ interface LatestCacheEntry {
 }
 
 /** @internal */
-export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
+export class AlwaysAndNeverDrawnElementInfoProvider implements Disposable {
   #subscriptions: Subscription[];
   #alwaysDrawn: {
     upToDateCacheEntryValue: Observable<CachedNodesMap>;
@@ -137,7 +137,7 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
   #suppressors: Observable<number>;
   #suppress = new Subject<boolean>();
 
-  constructor(props: AlwaysAndNeverDrawnElementInfoCacheProps) {
+  constructor(props: AlwaysAndNeverDrawnElementInfoProviderProps) {
     this.#viewport = props.viewport;
     const partialLatestAlwaysDrawnCacheEntry = { isUsed: false, invalidateValue: new Subject<void>() };
     // Entry value is created only for typescript types, it will be thrown away when createUpToDateCacheEntryValue is called

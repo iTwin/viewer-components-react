@@ -26,7 +26,7 @@ Categories tree visibility is available for 2D and 3D viewports. For other viewp
 
 ### getDefinitionContainersVisibilityStatus
 
-The cache recursively returns categories contained by the requested definition containers. The helper keeps two groups:
+The ids provider recursively returns categories contained by the requested definition containers. The helper keeps two groups:
 
 - Categories of top-most elements use [getCategoriesVisibilityStatus](./SharedVisibilityHandling.md#getcategoriesvisibilitystatus), which includes their descendant element trees.
 - Empty categories use category-selector state directly, but only when the hierarchy configuration includes categories without elements.
@@ -202,7 +202,7 @@ flowchart TD
     <span style='display: block; text-align: left; font-family: monospace;'>- categoryId: Id64String</span>
   "\]
 
-  A --> B["Get models related to <span style='font-family: monospace;'>categoryId</span> from cache"]
+  A --> B["Get models related to <span style='font-family: monospace;'>categoryId</span> from ids provider"]
   B -- "for each modelId" --> SUB
 
   subgraph SUB["Per related model"]
@@ -211,7 +211,7 @@ flowchart TD
     <span style='padding-left: 2rem;'>override: 'none'</span>
     })</div>"] --> D{"<span style='font-family: monospace;'>viewport.viewsModel(modelId)</span>"}
     D -- Yes --> D1["Model already visible — nothing to collect"]
-    D -- No --> E["Get all categories for <span style='font-family: monospace;'>modelId</span> from cache"]
+    D -- No --> E["Get all categories for <span style='font-family: monospace;'>modelId</span> from ids provider"]
     E --> F["For every category except <span style='font-family: monospace;'>categoryId</span>, set per-model override to <span style='font-family: monospace;'>'hide'</span>"]
     F --> G["Collect <span style='font-family: monospace;'>modelId</span> into <span style='font-family: monospace;'>hiddenModels</span>"]
   end

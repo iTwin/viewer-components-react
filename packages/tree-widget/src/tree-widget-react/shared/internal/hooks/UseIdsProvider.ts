@@ -9,33 +9,33 @@ import { registerTxnListeners } from "@itwin/presentation-core-interop";
 import type { IModelConnection } from "@itwin/core-frontend";
 
 type IModelKey = string;
-type CacheKey = string;
+type IdsProviderKey = string;
 
 /** @internal */
-export interface GetCacheProps<TCache> {
-  createCache: () => TCache;
-  cacheKey: CacheKey;
+export interface GetIdsProviderProps<TIdsProvider> {
+  createIdsProvider: () => TIdsProvider;
+  idsProviderKey: IdsProviderKey;
   imodel: IModelConnection;
 }
 
 /** @internal */
-export function useIdsCache(): {
-  getCache: <TCache extends object = {}>(createCacheProps: GetCacheProps<TCache>) => TCache;
+export function useIdsProvider(): {
+  getIdsProvider: <TIdsProvider extends object = {}>(props: GetIdsProviderProps<TIdsProvider>) => TIdsProvider;
 } {
-  const state = useRef<Record<IModelKey, Record<CacheKey, object>>>({});
+  const state = useRef<Record<IModelKey, Record<IdsProviderKey, object>>>({});
   const [forceRerender, setForceRerender] = useState({});
-  const getCache = useCallback(
-    <TCache extends object = {}>({ createCache, cacheKey, imodel }: GetCacheProps<TCache>) => {
-      const imodelCaches = state.current[imodel.key];
-      if (imodelCaches && imodelCaches[cacheKey]) {
-        return imodelCaches[cacheKey] as TCache;
+  const getIdsProvider = useCallback(
+    <TIdsProvider extends object = {}>({ createIdsProvider, idsProviderKey, imodel }: GetIdsProviderProps<TIdsProvider>) => {
+      const imodelIdsProviders = state.current[imodel.key];
+      if (imodelIdsProviders && imodelIdsProviders[idsProviderKey]) {
+        return imodelIdsProviders[idsProviderKey] as TIdsProvider;
       }
 
-      // Create the cache before adding event listeners, to avoid race conditions
-      const cache = createCache();
-      state.current = { ...state.current, [imodel.key]: { ...state.current[imodel.key], [cacheKey]: cache } };
+      // Create the ids provider before adding event listeners, to avoid race conditions
+      const idsProvider = createIdsProvider();
+      state.current = { ...state.current, [imodel.key]: { ...state.current[imodel.key], [idsProviderKey]: idsProvider } };
 
-      if (!imodelCaches) {
+      if (!imodelIdsProviders) {
         let listener: undefined | (() => void);
         if (imodel.isBriefcaseConnection()) {
           listener = registerTxnListeners(imodel.txns, () => {
@@ -49,13 +49,13 @@ export function useIdsCache(): {
           setForceRerender({});
         });
       }
-      return cache;
+      return idsProvider;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [forceRerender],
   );
 
   return {
-    getCache,
+    getIdsProvider,
   };
 }

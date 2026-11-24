@@ -15,7 +15,7 @@ import { getClassesByView, stableStringify } from "../../shared/internal/Utils.j
 import { SearchLimitExceededError } from "../../shared/TreeErrors.js";
 import { ClassificationsTreeComponent } from "./ClassificationsTreeComponent.js";
 import { ClassificationsTreeIcon } from "./ClassificationsTreeIcon.js";
-import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
+import { ClassificationsTreeIdsProvider } from "./internal/ClassificationsTreeIdsProvider.js";
 import { ClassificationsTreeVisibilityHandler } from "./internal/visibility/ClassificationsTreeVisibilityHandler.js";
 import { createClassificationsSearchResultsTree } from "./internal/visibility/SearchResultsTree.js";
 import { useClassificationsTreeDefinitionInternal } from "./UseClassificationsTreeDefinition.js";
@@ -32,7 +32,10 @@ import type { SearchResultsTree } from "../../shared/internal/visibility/BaseSea
 import type { TreeWidgetViewport } from "../../shared/TreeWidgetViewport.js";
 import type { FunctionProps } from "../../shared/Utils.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
-import type { HierarchyConfigForClassificationsCache, VisibilityHandlerConfigForClassificationsCache } from "./internal/ClassificationsTreeIdsCache.js";
+import type {
+  HierarchyConfigForClassificationsTreeIdsProvider,
+  VisibilityHandlerConfigForClassificationsTreeIdsProvider,
+} from "./internal/ClassificationsTreeIdsProvider.js";
 import type { ClassificationsTreeSearchTargets } from "./internal/visibility/SearchResultsTree.js";
 
 /**
@@ -114,7 +117,7 @@ export function useClassificationsTree({
   visibilityHandlerConfig,
   ...rest
 }: UseClassificationsTreeProps): UseClassificationsTreeResult {
-  const { getBaseIdsCache, getCache } = useSharedTreeContext();
+  const { getSharedIdsProvider, getIdsProvider } = useSharedTreeContext();
   const { onFeatureUsed } = useTelemetryContext();
 
   const [searchError, setSearchError] = useState<ClassificationsTreeSearchError | undefined>();
@@ -126,9 +129,9 @@ export function useClassificationsTree({
   );
   const componentId = useGuid();
 
-  const idsCache = getClassificationsTreeIdsCache({
-    getCache,
-    getBaseIdsCache,
+  const idsProvider = getClassificationsTreeIdsProvider({
+    getIdsProvider,
+    getSharedIdsProvider,
     imodel: activeView.iModel,
     hierarchyConfig,
     visibilityHandlerConfig,
@@ -136,7 +139,7 @@ export function useClassificationsTree({
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useClassificationsCachedVisibility({
     activeView,
-    idsCache,
+    idsProvider,
     componentId,
   });
 
@@ -174,8 +177,8 @@ export function useClassificationsTree({
   }, [searchText, getSearchPaths, onFeatureUsed]);
 
   const onNodeExpanded = useCallback(() => {
-    void idsCache.preloadClassifications();
-  }, [idsCache]);
+    void idsProvider.preloadClassifications();
+  }, [idsProvider]);
 
   return {
     treeProps: {
@@ -214,19 +217,21 @@ function getEmptyTreeContentComponent(searchText?: string, error?: Classificatio
   return <EmptyTreeContent icon={iconBisCategory3d} />;
 }
 
-function useClassificationsCachedVisibility(props: { activeView: TreeWidgetViewport; idsCache: ClassificationsTreeIdsCache; componentId: GuidString }) {
-  const { activeView, idsCache, componentId } = props;
-  const { visibilityHandlerFactory, searchPaths, onSearchPathsChanged } = useCachedVisibility<ClassificationsTreeIdsCache, ClassificationsTreeSearchTargets>({
-    activeView,
-    idsCache,
-    createSearchResultsTree,
-    createTreeSpecificVisibilityHandler,
-    componentId,
-  });
+function useClassificationsCachedVisibility(props: { activeView: TreeWidgetViewport; idsProvider: ClassificationsTreeIdsProvider; componentId: GuidString }) {
+  const { activeView, idsProvider, componentId } = props;
+  const { visibilityHandlerFactory, searchPaths, onSearchPathsChanged } = useCachedVisibility<ClassificationsTreeIdsProvider, ClassificationsTreeSearchTargets>(
+    {
+      activeView,
+      idsProvider,
+      createSearchResultsTree,
+      createTreeSpecificVisibilityHandler,
+      componentId,
+    },
+  );
 
   useEffect(() => {
-    idsCache.clearFilteredElementsData();
-  }, [searchPaths, idsCache]);
+    idsProvider.clearFilteredElementsData();
+  }, [searchPaths, idsProvider]);
 
   return {
     visibilityHandlerFactory,
@@ -235,49 +240,49 @@ function useClassificationsCachedVisibility(props: { activeView: TreeWidgetViewp
 }
 
 async function createSearchResultsTree(
-  props: CreateSearchResultsTreeProps<ClassificationsTreeIdsCache>,
+  props: CreateSearchResultsTreeProps<ClassificationsTreeIdsProvider>,
 ): Promise<SearchResultsTree<ClassificationsTreeSearchTargets>> {
-  const { searchPaths, idsCache, imodelAccess } = props;
+  const { searchPaths, idsProvider, imodelAccess } = props;
   return createClassificationsSearchResultsTree({
-    idsCache,
+    idsProvider,
     searchPaths,
     imodelAccess,
   });
 }
 
-function createTreeSpecificVisibilityHandler(props: CreateTreeSpecificVisibilityHandlerProps<ClassificationsTreeIdsCache>) {
-  const { info, idsCache, viewport } = props;
+function createTreeSpecificVisibilityHandler(props: CreateTreeSpecificVisibilityHandlerProps<ClassificationsTreeIdsProvider>) {
+  const { info, idsProvider, viewport } = props;
   return new ClassificationsTreeVisibilityHandler({
     alwaysAndNeverDrawnElementInfo: info,
-    idsCache,
+    idsProvider,
     viewport,
   });
 }
 
 /** @internal */
-export function getClassificationsTreeIdsCache({
-  getBaseIdsCache,
-  getCache,
+export function getClassificationsTreeIdsProvider({
+  getSharedIdsProvider,
+  getIdsProvider,
   imodel,
   hierarchyConfig,
   visibilityHandlerConfig,
 }: {
-  getCache: ReturnType<typeof useSharedTreeContext>["getCache"];
-  getBaseIdsCache: ReturnType<typeof useSharedTreeContext>["getBaseIdsCache"];
+  getIdsProvider: ReturnType<typeof useSharedTreeContext>["getIdsProvider"];
+  getSharedIdsProvider: ReturnType<typeof useSharedTreeContext>["getSharedIdsProvider"];
   imodel: IModelConnection;
-  hierarchyConfig: HierarchyConfigForClassificationsCache;
-  visibilityHandlerConfig?: VisibilityHandlerConfigForClassificationsCache;
+  hierarchyConfig: HierarchyConfigForClassificationsTreeIdsProvider;
+  visibilityHandlerConfig?: VisibilityHandlerConfigForClassificationsTreeIdsProvider;
 }) {
   const hierarchyConfigKey = `${hierarchyConfig.rootClassificationSystemCode}-${[...(hierarchyConfig.elements?.excludedClasses ?? [])].sort().join(",")}`;
   const visibilityHandlerConfigKey = visibilityHandlerConfig?.classificationToCategoriesRelationshipSpecification
     ? `${visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.fullClassName};${visibilityHandlerConfig.classificationToCategoriesRelationshipSpecification.source}`
     : "default";
-  const cacheKey = `${hierarchyConfigKey}-${visibilityHandlerConfigKey}-ClassificationsTreeIdsCache`;
-  return getCache({
+  const idsProviderKey = `${hierarchyConfigKey}-${visibilityHandlerConfigKey}-ClassificationsTreeIdsProvider`;
+  return getIdsProvider({
     imodel,
-    createCache: () =>
-      new ClassificationsTreeIdsCache({
-        baseIdsCache: getBaseIdsCache({
+    createIdsProvider: () =>
+      new ClassificationsTreeIdsProvider({
+        sharedIdsProvider: getSharedIdsProvider({
           type: "3d",
           elementClassName: getClassesByView("3d").elementClass,
           excludedElementClassNames: hierarchyConfig.elements?.excludedClasses,
@@ -287,6 +292,6 @@ export function getClassificationsTreeIdsCache({
         queryExecutor: createECSqlQueryExecutor(imodel),
         visibilityHandlerConfig,
       }),
-    cacheKey,
+    idsProviderKey,
   });
 }

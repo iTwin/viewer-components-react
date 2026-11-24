@@ -13,7 +13,7 @@ import { useGuid } from "../../shared/internal/hooks/UseGuid.js";
 import { getClassesByView, mergeWithDefaults, stableStringify } from "../../shared/internal/Utils.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIcon } from "./CategoriesTreeIcon.js";
-import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
+import { CategoriesTreeIdsProvider } from "./internal/CategoriesTreeIdsProvider.js";
 import { useSearchPaths } from "./internal/UseSearchPaths.js";
 import { CategoriesTreeVisibilityHandler } from "./internal/visibility/CategoriesTreeVisibilityHandler.js";
 import { createCategoriesSearchResultsTree } from "./internal/visibility/SearchResultsTree.js";
@@ -94,7 +94,7 @@ export function useCategoriesTree({
     });
   }, [activeView]);
 
-  const idsCache = useCategoriesTreeIdsCache({
+  const idsProvider = useCategoriesTreeIdsProvider({
     imodel: activeView.iModel,
     activeViewType: viewType,
     excludedElementClassNames: hierarchyConfiguration.elements.nodes === "include" ? hierarchyConfiguration.elements.excludedClasses : undefined,
@@ -103,35 +103,35 @@ export function useCategoriesTree({
   const { visibilityHandlerFactory, onSearchPathsChanged } = useCategoriesCachedVisibility({
     activeView,
     viewType,
-    idsCache,
+    idsProvider,
     componentId,
     hierarchyConfig: hierarchyConfiguration,
   });
 
   const onNodeExpanded = useCallback(() => {
-    void idsCache.preloadDefinitionContainers();
+    void idsProvider.preloadDefinitionContainers();
     if (hierarchyConfiguration.elements.nodes === "include") {
-      void idsCache.preloadElementModelCategories();
+      void idsProvider.preloadElementModelCategories();
     }
-  }, [idsCache, hierarchyConfiguration]);
+  }, [idsProvider, hierarchyConfiguration]);
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     (props) => {
       return new CategoriesTreeDefinition({
         ...props,
         viewType,
-        idsCache,
+        idsProvider,
         hierarchyConfig: hierarchyConfiguration,
       });
     },
-    [viewType, idsCache, hierarchyConfiguration],
+    [viewType, idsProvider, hierarchyConfiguration],
   );
 
   const { getPaths, searchError } = useSearchPaths({
     hierarchyConfig: hierarchyConfiguration,
     searchText,
     searchLimit,
-    idsCache,
+    idsProvider,
     onSearchPathsChanged,
     viewType,
     onCategoriesFiltered,
@@ -178,17 +178,17 @@ function getEmptyTreeContentComponent(searchText?: string, error?: CategoriesTre
 
 function useCategoriesCachedVisibility(props: {
   activeView: TreeWidgetViewport;
-  idsCache: CategoriesTreeIdsCache;
+  idsProvider: CategoriesTreeIdsProvider;
   viewType: "2d" | "3d";
   componentId: GuidString;
   hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
 }) {
-  const { activeView, idsCache, viewType, componentId, hierarchyConfig } = props;
-  const { visibilityHandlerFactory, searchPaths, onSearchPathsChanged } = useCachedVisibility<CategoriesTreeIdsCache, CategoriesTreeSearchTargets>({
+  const { activeView, idsProvider, viewType, componentId, hierarchyConfig } = props;
+  const { visibilityHandlerFactory, searchPaths, onSearchPathsChanged } = useCachedVisibility<CategoriesTreeIdsProvider, CategoriesTreeSearchTargets>({
     activeView,
-    idsCache,
+    idsProvider,
     createSearchResultsTree: useCallback(
-      async (filteredTreeProps: CreateSearchResultsTreeProps<CategoriesTreeIdsCache>) =>
+      async (filteredTreeProps: CreateSearchResultsTreeProps<CategoriesTreeIdsProvider>) =>
         createSearchResultsTree({ ...filteredTreeProps, viewClasses: getClassesByView(viewType) }),
       [viewType],
     ),
@@ -200,8 +200,8 @@ function useCategoriesCachedVisibility(props: {
   });
 
   useEffect(() => {
-    idsCache.clearFilteredElementsModels();
-  }, [searchPaths, idsCache]);
+    idsProvider.clearFilteredElementsModels();
+  }, [searchPaths, idsProvider]);
 
   return {
     visibilityHandlerFactory,
@@ -210,34 +210,34 @@ function useCategoriesCachedVisibility(props: {
 }
 
 function createTreeSpecificVisibilityHandler(
-  props: CreateTreeSpecificVisibilityHandlerProps<CategoriesTreeIdsCache> & {
+  props: CreateTreeSpecificVisibilityHandlerProps<CategoriesTreeIdsProvider> & {
     hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
   },
 ) {
-  const { info, idsCache, viewport, hierarchyConfig } = props;
+  const { info, idsProvider, viewport, hierarchyConfig } = props;
   return new CategoriesTreeVisibilityHandler({
     alwaysAndNeverDrawnElementInfo: info,
-    idsCache,
+    idsProvider,
     viewport,
     hierarchyConfig,
   });
 }
 
 async function createSearchResultsTree(
-  props: CreateSearchResultsTreeProps<CategoriesTreeIdsCache> & { viewClasses: ReturnType<typeof getClassesByView> },
+  props: CreateSearchResultsTreeProps<CategoriesTreeIdsProvider> & { viewClasses: ReturnType<typeof getClassesByView> },
 ): Promise<SearchResultsTree<CategoriesTreeSearchTargets>> {
-  const { searchPaths, imodelAccess, idsCache, viewClasses } = props;
+  const { searchPaths, imodelAccess, idsProvider, viewClasses } = props;
   return createCategoriesSearchResultsTree({
     imodelAccess,
     searchPaths,
-    idsCache,
+    idsProvider,
     categoryClassName: viewClasses.categoryClass,
     categoryElementClassName: viewClasses.elementClass,
     categoryModelClassName: viewClasses.modelClass,
   });
 }
 
-function useCategoriesTreeIdsCache({
+function useCategoriesTreeIdsProvider({
   imodel,
   activeViewType,
   excludedElementClassNames,
@@ -245,20 +245,20 @@ function useCategoriesTreeIdsCache({
   imodel: IModelConnection;
   activeViewType: "2d" | "3d";
   excludedElementClassNames?: Array<EC.FullClassNameDotNotation>;
-}): CategoriesTreeIdsCache {
-  const { getBaseIdsCache, getCache } = useSharedTreeContext();
+}): CategoriesTreeIdsProvider {
+  const { getSharedIdsProvider, getIdsProvider } = useSharedTreeContext();
 
-  const baseIdsCache = getBaseIdsCache({
+  const sharedIdsProvider = getSharedIdsProvider({
     type: activeViewType,
     elementClassName: getClassesByView(activeViewType).elementClass,
     excludedElementClassNames,
     imodel,
   });
-  const categoriesTreeIdsCache = getCache({
+  const categoriesTreeIdsProvider = getIdsProvider({
     imodel,
-    createCache: () =>
-      new CategoriesTreeIdsCache({ baseIdsCache, type: activeViewType, queryExecutor: createECSqlQueryExecutor(imodel), excludedElementClassNames }),
-    cacheKey: `${activeViewType}-${[...(excludedElementClassNames ?? [])].sort().join(",")}-CategoriesTreeIdsCache`,
+    createIdsProvider: () =>
+      new CategoriesTreeIdsProvider({ sharedIdsProvider, type: activeViewType, queryExecutor: createECSqlQueryExecutor(imodel), excludedElementClassNames }),
+    idsProviderKey: `${activeViewType}-${[...(excludedElementClassNames ?? [])].sort().join(",")}-CategoriesTreeIdsProvider`,
   });
-  return categoriesTreeIdsCache;
+  return categoriesTreeIdsProvider;
 }

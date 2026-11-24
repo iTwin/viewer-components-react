@@ -28,7 +28,7 @@ import type {
   NodePostProcessor,
 } from "@itwin/presentation-hierarchies";
 import type { EC, ECSchemaProvider } from "@itwin/presentation-shared";
-import type { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.js";
+import type { IModelContentTreeIdsProvider } from "./internal/IModelContentTreeIdsProvider.js";
 
 /**
  * Defines hierarchy configuration supported by `IModelContentTree`.
@@ -46,18 +46,18 @@ export const defaultHierarchyConfiguration: IModelContentTreeHierarchyConfigurat
 
 interface IModelContentTreeDefinitionProps {
   imodelAccess: ECSchemaProvider;
-  idsCache: IModelContentTreeIdsCache;
+  idsProvider: IModelContentTreeIdsProvider;
   hierarchyConfig: IModelContentTreeHierarchyConfiguration;
 }
 
 /** @internal */
 export class IModelContentTreeDefinition implements HierarchyDefinition {
   #impl: HierarchyDefinition;
-  #idsCache: IModelContentTreeIdsCache;
+  #idsProvider: IModelContentTreeIdsProvider;
   #hierarchyConfig: IModelContentTreeHierarchyConfiguration;
 
   public constructor(props: IModelContentTreeDefinitionProps) {
-    this.#idsCache = props.idsCache;
+    this.#idsProvider = props.idsProvider;
     this.#hierarchyConfig = props.hierarchyConfig;
     this.#impl = createPredicateBasedHierarchyDefinition({
       imodelAccess: props.imodelAccess,
@@ -152,7 +152,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
       }),
     ]);
     const [childSubjectIds, childModelIds] = parentSubjectIds.length
-      ? await Promise.all([this.#idsCache.getChildSubjectIds(parentSubjectIds), this.#idsCache.getChildSubjectModelIds(parentSubjectIds)])
+      ? await Promise.all([this.#idsProvider.getChildSubjectIds(parentSubjectIds), this.#idsProvider.getChildSubjectModelIds(parentSubjectIds)])
       : [[IModel.rootSubjectId], []];
     const defs = new Array<HierarchyNodesDefinition>();
     childSubjectIds.length &&
@@ -194,7 +194,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
             ${createWhereClause({ conditions: [subjectFilterClauses.where] })}
           `,
           bindings: [
-            { type: "idset", value: await this.#idsCache.getParentSubjectIds() },
+            { type: "idset", value: await this.#idsProvider.getParentSubjectIds() },
             { type: "idset", value: childSubjectIds },
           ],
         },
@@ -282,7 +282,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
     createSelectClause,
     createFilterClauses,
   }: DefineInstanceNodeChildHierarchyLevelProps & { viewType: "2d" | "3d" }): Promise<HierarchyLevelDefinition> {
-    const childCategoryIds = await this.#idsCache.getModelCategoryIds(modelIds);
+    const childCategoryIds = await this.#idsProvider.getModelCategoryIds(modelIds);
 
     const { categoryClass } = getClassesByView(viewType);
     const categoryFilterClauses = await createFilterClauses({

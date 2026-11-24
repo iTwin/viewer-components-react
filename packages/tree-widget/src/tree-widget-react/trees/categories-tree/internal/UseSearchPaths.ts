@@ -20,7 +20,7 @@ import type { VisibilityTreeProps } from "../../../shared/components/VisibilityT
 import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../../shared/internal/Types.js";
 import type { CategoryInfo } from "../CategoriesTreeButtons.js";
 import type { RequiredCategoriesTreeHierarchyConfiguration } from "../CategoriesTreeDefinition.js";
-import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
+import type { CategoriesTreeIdsProvider } from "./CategoriesTreeIdsProvider.js";
 
 /** @internal */
 export type CategoriesTreeSearchError = "tooManySearchMatches" | "unknownSearchError";
@@ -31,7 +31,7 @@ export function useSearchPaths({
   searchLimit,
   viewType,
   hierarchyConfig,
-  idsCache,
+  idsProvider,
   onCategoriesFiltered,
   onSearchPathsChanged,
   componentId,
@@ -40,7 +40,7 @@ export function useSearchPaths({
   searchText?: string;
   searchLimit?: number | "unbounded";
   hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
-  idsCache: CategoriesTreeIdsCache;
+  idsProvider: CategoriesTreeIdsProvider;
   onCategoriesFiltered?: (categories: { categories: CategoryInfo[] | undefined; models?: Array<ModelId> }) => void;
   onSearchPathsChanged: (paths: HierarchySearchTree[] | undefined) => void;
   componentId: GuidString;
@@ -77,7 +77,7 @@ export function useSearchPaths({
           abortSignal,
           label: searchText,
           viewType,
-          idsCache,
+          idsProvider,
           hierarchyConfig,
           componentId,
           limit: searchLimit,
@@ -90,7 +90,7 @@ export function useSearchPaths({
         onSearchPathsChanged(paths);
         const { elementClass, modelClass } = getClassesByView(viewType);
         onCategoriesFiltered?.(
-          await getCategoriesFromPaths({ trees: paths, idsCache, elementClassName: elementClass, modelsClassName: modelClass, hierarchyConfig }),
+          await getCategoriesFromPaths({ trees: paths, idsProvider, elementClassName: elementClass, modelsClassName: modelClass, hierarchyConfig }),
         );
         return paths;
       } catch (e) {
@@ -103,7 +103,7 @@ export function useSearchPaths({
         return [];
       }
     };
-  }, [onCategoriesFiltered, searchText, searchLimit, onSearchPathsChanged, onFeatureUsed, viewType, idsCache, hierarchyConfig, componentId]);
+  }, [onCategoriesFiltered, searchText, searchLimit, onSearchPathsChanged, onFeatureUsed, viewType, idsProvider, hierarchyConfig, componentId]);
 
   return {
     getPaths: getSearchPaths,
@@ -113,12 +113,12 @@ export function useSearchPaths({
 
 async function getCategoriesFromPaths(props: {
   trees: HierarchySearchTree[] | undefined;
-  idsCache: CategoriesTreeIdsCache;
+  idsProvider: CategoriesTreeIdsProvider;
   elementClassName: string;
   modelsClassName: string;
   hierarchyConfig: RequiredCategoriesTreeHierarchyConfiguration;
 }): Promise<{ categories: CategoryInfo[] | undefined; models?: Array<ModelId> }> {
-  const { trees, idsCache, elementClassName, modelsClassName, hierarchyConfig } = props;
+  const { trees, idsProvider, elementClassName, modelsClassName, hierarchyConfig } = props;
   if (!trees) {
     return { categories: undefined };
   }
@@ -148,7 +148,7 @@ async function getCategoriesFromPaths(props: {
 
     if (identifier.className === CLASS_NAME_DefinitionContainer) {
       await toVoidPromise(
-        idsCache.getAllContainedCategories({ definitionContainerIds: identifier.id }).pipe(
+        idsProvider.getAllContainedCategories({ definitionContainerIds: identifier.id }).pipe(
           hierarchyConfig.categories.withoutElements === "include" ? identity : filter(({ hasElements }) => hasElements),
           tap(({ id }) => {
             if (!categories.has(id)) {
@@ -187,7 +187,7 @@ async function getCategoriesFromPaths(props: {
 
   await Promise.all(trees.map(async (tree) => traverse(tree, undefined)));
 
-  const rootElementModelMap = await firstValueFrom(idsCache.getFilteredElementsModels([...rootFilteredElementIds]));
+  const rootElementModelMap = await firstValueFrom(idsProvider.getFilteredElementsModels([...rootFilteredElementIds]));
   const models = [...subModelIds, ...new Set(rootElementModelMap.values())];
   return {
     categories: [...categories.entries()].map(([categoryId, subCategoryIds]) => ({

@@ -6,18 +6,18 @@
 import { createContext, useCallback, useContext, useState } from "react";
 import { Subject } from "rxjs";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { BaseIdsCache } from "../internal/caches/BaseIdsCache.js";
-import { useIdsCache } from "../internal/hooks/UseIdsCache.js";
+import { useIdsProvider } from "../internal/hooks/UseIdsProvider.js";
+import { SharedIdsProvider } from "../internal/idsProviders/SharedIdsProvider.js";
 
 import type { PropsWithChildren } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { BaseIdsCacheProps } from "../internal/caches/BaseIdsCache.js";
-import type { GetCacheProps } from "../internal/hooks/UseIdsCache.js";
+import type { GetIdsProviderProps } from "../internal/hooks/UseIdsProvider.js";
+import type { SharedIdsProviderProps } from "../internal/idsProviders/SharedIdsProvider.js";
 
 /** @internal */
 interface SharedTreeContext {
-  getCache: <TCache extends object = {}>(props: GetCacheProps<TCache>) => TCache;
-  getBaseIdsCache: (props: Omit<BaseIdsCacheProps, "queryExecutor"> & { imodel: IModelConnection }) => BaseIdsCache;
+  getIdsProvider: <TIdsProvider extends object = {}>(props: GetIdsProviderProps<TIdsProvider>) => TIdsProvider;
+  getSharedIdsProvider: (props: Omit<SharedIdsProviderProps, "queryExecutor"> & { imodel: IModelConnection }) => SharedIdsProvider;
   cancelChangesInProgress: Subject<void>;
 }
 
@@ -34,17 +34,17 @@ export function useSharedTreeContext(): SharedTreeContext {
 
 /** @internal */
 export function SharedTreeContextProvider({ children }: PropsWithChildren) {
-  const { getCache } = useIdsCache();
+  const { getIdsProvider } = useIdsProvider();
   const [cancelChangesInProgress] = useState(() => new Subject<void>());
-  const getBaseIdsCache = useCallback(
-    ({ elementClassName, type, imodel, excludedElementClassNames }: Omit<BaseIdsCacheProps, "queryExecutor"> & { imodel: IModelConnection }) => {
-      return getCache({
+  const getSharedIdsProvider = useCallback(
+    ({ elementClassName, type, imodel, excludedElementClassNames }: Omit<SharedIdsProviderProps, "queryExecutor"> & { imodel: IModelConnection }) => {
+      return getIdsProvider({
         imodel,
-        cacheKey: `${type}-${elementClassName}-${[...(excludedElementClassNames ?? [])].sort().join(",")}-BaseIdsCache`,
-        createCache: () => new BaseIdsCache({ elementClassName, type, excludedElementClassNames, queryExecutor: createECSqlQueryExecutor(imodel) }),
+        idsProviderKey: `${type}-${elementClassName}-${[...(excludedElementClassNames ?? [])].sort().join(",")}-SharedIdsProvider`,
+        createIdsProvider: () => new SharedIdsProvider({ elementClassName, type, excludedElementClassNames, queryExecutor: createECSqlQueryExecutor(imodel) }),
       });
     },
-    [getCache],
+    [getIdsProvider],
   );
-  return <sharedTreeContext.Provider value={{ getCache, getBaseIdsCache, cancelChangesInProgress }}>{children}</sharedTreeContext.Provider>;
+  return <sharedTreeContext.Provider value={{ getIdsProvider, getSharedIdsProvider, cancelChangesInProgress }}>{children}</sharedTreeContext.Provider>;
 }
