@@ -87,8 +87,13 @@ export function WidgetHeader({ defaultSelectedContentId, trees, onSelect, onSear
 function LoadingHeader() {
   return (
     <div className="tw-content-header">
-      <Skeleton variant={"rounded"} className={"tw-content-header-selector"} height={24} />
-      <Skeleton variant={"rounded"} width={24} height={24} style={{ flexShrink: 0 }} />
+      <Skeleton variant={"rounded"} className={"tw-content-header-selector"} height={"var(--stratakit-size-control-field-height-small)"} />
+      <Skeleton
+        variant={"rounded"}
+        width={"var(--stratakit-size-control-field-height-small)"}
+        height={"var(--stratakit-size-control-field-height-small)"}
+        style={{ flexShrink: 0 }}
+      />
     </div>
   );
 }

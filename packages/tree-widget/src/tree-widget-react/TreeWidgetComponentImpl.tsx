@@ -221,12 +221,14 @@ function LoadingTree() {
     <SelectableTree
       buttons={
         <>
-          <Skeleton variant={"rounded"} width={24} height={24} />
-          <Skeleton variant={"rounded"} width={24} height={24} />
-          <Skeleton variant={"rounded"} width={24} height={24} />
-          <Skeleton variant={"rounded"} width={24} height={24} />
-          <Skeleton variant={"rounded"} width={24} height={24} />
-          <Skeleton variant={"rounded"} width={24} height={24} />
+          {Array.from({ length: 6 }, (_, index) => (
+            <Skeleton
+              variant={"rounded"}
+              width={"var(--stratakit-size-control-field-height-small)"}
+              height={"var(--stratakit-size-control-field-height-small)"}
+              key={index}
+            />
+          ))}
         </>
       }
     >

@@ -130,7 +130,14 @@ function CategoriesTreeComponentImpl({
           <HideAllButton {...buttonProps} key="hide-all-btn" />,
           <InvertAllButton {...buttonProps} key="invert-all-btn" />,
         ]
-    : Array.from({ length: headerButtons?.length ?? 3 }, (_, index) => <Skeleton variant={"rounded"} width={24} height={24} key={index} />);
+    : Array.from({ length: headerButtons?.length ?? 3 }, (_, index) => (
+        <Skeleton
+          variant={"rounded"}
+          width={"var(--stratakit-size-control-field-height-small)"}
+          height={"var(--stratakit-size-control-field-height-small)"}
+          key={index}
+        />
+      ));
 
   return (
     <SelectableTree buttons={buttons}>

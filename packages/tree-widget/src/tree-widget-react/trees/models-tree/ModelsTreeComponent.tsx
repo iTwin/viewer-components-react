@@ -169,7 +169,14 @@ function ModelsTreeComponentImpl({
           <View3DButton {...buttonProps} key="view-3d-btn" />,
           <ToggleInstancesFocusButton disabled={searchText !== undefined} key="toggle-instances-focus-btn" />,
         ]
-    : Array.from({ length: headerButtons?.length ?? 6 }, (_, index) => <Skeleton variant={"rounded"} width={24} height={24} key={index} />);
+    : Array.from({ length: headerButtons?.length ?? 6 }, (_, index) => (
+        <Skeleton
+          variant={"rounded"}
+          width={"var(--stratakit-size-control-field-height-small)"}
+          height={"var(--stratakit-size-control-field-height-small)"}
+          key={index}
+        />
+      ));
 
   useEffect(() => {
     if (instanceFocusEnabled && searchText !== undefined) {
