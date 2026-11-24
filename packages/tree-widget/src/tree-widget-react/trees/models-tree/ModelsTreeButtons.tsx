@@ -63,6 +63,9 @@ export interface ModelsTreeHeaderButtonProps extends TreeToolbarButtonProps {
  *   <ModelsTree {...treeProps} onModelsFiltered={onModelsFiltered} />
  * </TreeWithHeader>
  * ```
+ *
+ * Returned `isLoaded` tells whether available models have been loaded. Until then, `buttonProps.models` is empty.
+ *
  * **Note:** Requires `TreeWidgetContextProvider` to be present in components tree above.
  *
  * @public
@@ -70,9 +73,10 @@ export interface ModelsTreeHeaderButtonProps extends TreeToolbarButtonProps {
 export function useModelsTreeButtonProps({ imodel, viewport }: { imodel: IModelConnection; viewport: TreeWidgetViewport }): {
   buttonProps: Pick<ModelsTreeHeaderButtonProps, "models" | "viewport">;
   onModelsFiltered: (models: Id64String[] | undefined) => void;
+  isLoaded: boolean;
 } {
   const [filteredModels, setFilteredModels] = useState<Id64String[] | undefined>();
-  const models = useAvailableModels(imodel);
+  const { models, isLoaded } = useAvailableModels(imodel);
   const availableModels = useMemo(() => (!filteredModels ? models : models.filter((model) => filteredModels.includes(model.id))), [models, filteredModels]);
   return {
     buttonProps: {
@@ -80,23 +84,20 @@ export function useModelsTreeButtonProps({ imodel, viewport }: { imodel: IModelC
       viewport,
     },
     onModelsFiltered: setFilteredModels,
+    isLoaded,
   };
 }
 
-function useAvailableModels(imodel: IModelConnection): ModelInfo[] {
-  const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
+function useAvailableModels(imodel: IModelConnection): { models: ModelInfo[]; isLoaded: boolean } {
+  const [availableModels, setAvailableModels] = useState<{ models: ModelInfo[]; isLoaded: boolean }>({ models: [], isLoaded: false });
   const { getBaseIdsCache } = useSharedTreeContext();
   const baseIdsCache = getBaseIdsCache({ imodel, elementClassName: getClassesByView("3d").elementClass, type: "3d" });
   useEffect(() => {
     const getModels = async () => {
       try {
-        const [allModels, planProjectionModels] = await Promise.all([
-          firstValueFrom(baseIdsCache.getAllModels()),
-          firstValueFrom(baseIdsCache.getPlanProjectionModels()),
-        ]);
-        setAvailableModels(allModels.map((id) => ({ id, isPlanProjection: planProjectionModels.has(id) })));
+        setAvailableModels({ models: await firstValueFrom(baseIdsCache.getAllModelsOfViewType()), isLoaded: true });
       } catch {
-        setAvailableModels([]);
+        setAvailableModels({ models: [], isLoaded: true });
       }
     };
     void getModels();
@@ -283,7 +284,7 @@ export function ToggleInstancesFocusButton(props?: { disabled?: boolean }) {
 
 async function getCategoryInfos({ baseIdsCache, cancel }: { baseIdsCache: BaseIdsCache; cancel: Observable<void> }): Promise<CategoryInfosMap | undefined> {
   return firstValueFrom(
-    baseIdsCache.getAllCategoriesOfElements().pipe(
+    baseIdsCache.getAllCategoriesOfViewType().pipe(
       mergeAll(),
       mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), subCategories: baseIdsCache.getSubCategories({ categoryId }) })),
       reduce((acc: CategoryInfosMap, { categoryId, subCategories }) => {
