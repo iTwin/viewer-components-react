@@ -62,22 +62,14 @@ export interface CategoriesTreeHeaderButtonProps extends TreeToolbarButtonProps 
  * </TreeWithHeader>
  * ```
  *
+ * Returned `isLoaded` tells whether available categories and models have been loaded. Until then, `buttonProps.categories` and `buttonProps.models` are empty.
+ *
  * **Note:** Requires `TreeWidgetContextProvider` to be present in components tree above.
  * @public
  */
 export function useCategoriesTreeButtonProps({ viewport }: { viewport: TreeWidgetViewport }): {
   buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport" | "models">;
   onCategoriesFiltered: (props: { categories: CategoryInfo[] | undefined; models?: Id64Array }) => void;
-} {
-  const { buttonProps, onCategoriesFiltered } = useCategoriesTreeButtonPropsInternal({ viewport });
-  return { buttonProps, onCategoriesFiltered };
-}
-
-/**
- * Same as `useCategoriesTreeButtonProps`, but additionally returns whether available categories and models have been loaded.
- * @internal
- */
-export function useCategoriesTreeButtonPropsInternal({ viewport }: { viewport: TreeWidgetViewport }): ReturnType<typeof useCategoriesTreeButtonProps> & {
   isLoaded: boolean;
 } {
   const [filteredCategories, setFilteredCategories] = useState<CategoryInfo[] | undefined>();

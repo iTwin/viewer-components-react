@@ -16,7 +16,7 @@ import {
   InvertButton,
   ShowAllButton,
   ToggleInstancesFocusButton,
-  useModelsTreeButtonPropsInternal,
+  useModelsTreeButtonProps,
   View2DButton,
   View3DButton,
 } from "./ModelsTreeButtons.js";
@@ -150,7 +150,7 @@ function ModelsTreeComponentImpl({
   treeLabel,
   ...treeProps
 }: ModelsTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
-  const { buttonProps, onModelsFiltered, isLoaded } = useModelsTreeButtonPropsInternal({ imodel: iModel, viewport });
+  const { buttonProps, onModelsFiltered, isLoaded } = useModelsTreeButtonProps({ imodel: iModel, viewport });
   const { enabled: instanceFocusEnabled, toggle: toggleInstanceFocus } = useFocusedInstancesContext();
   const buttons: ReactNode = isLoaded
     ? headerButtons

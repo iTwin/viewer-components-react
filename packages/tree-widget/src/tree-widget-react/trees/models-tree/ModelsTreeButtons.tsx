@@ -63,6 +63,9 @@ export interface ModelsTreeHeaderButtonProps extends TreeToolbarButtonProps {
  *   <ModelsTree {...treeProps} onModelsFiltered={onModelsFiltered} />
  * </TreeWithHeader>
  * ```
+ *
+ * Returned `isLoaded` tells whether available models have been loaded. Until then, `buttonProps.models` is empty.
+ *
  * **Note:** Requires `TreeWidgetContextProvider` to be present in components tree above.
  *
  * @public
@@ -70,22 +73,8 @@ export interface ModelsTreeHeaderButtonProps extends TreeToolbarButtonProps {
 export function useModelsTreeButtonProps({ imodel, viewport }: { imodel: IModelConnection; viewport: TreeWidgetViewport }): {
   buttonProps: Pick<ModelsTreeHeaderButtonProps, "models" | "viewport">;
   onModelsFiltered: (models: Id64String[] | undefined) => void;
+  isLoaded: boolean;
 } {
-  const { buttonProps, onModelsFiltered } = useModelsTreeButtonPropsInternal({ imodel, viewport });
-  return { buttonProps, onModelsFiltered };
-}
-
-/**
- * Same as `useModelsTreeButtonProps`, but additionally returns whether available models have been loaded.
- * @internal
- */
-export function useModelsTreeButtonPropsInternal({
-  imodel,
-  viewport,
-}: {
-  imodel: IModelConnection;
-  viewport: TreeWidgetViewport;
-}): ReturnType<typeof useModelsTreeButtonProps> & { isLoaded: boolean } {
   const [filteredModels, setFilteredModels] = useState<Id64String[] | undefined>();
   const { models, isLoaded } = useAvailableModels(imodel);
   const availableModels = useMemo(() => (!filteredModels ? models : models.filter((model) => filteredModels.includes(model.id))), [models, filteredModels]);

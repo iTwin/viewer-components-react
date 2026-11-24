@@ -10,7 +10,7 @@ import { TelemetryContextProvider } from "../../shared/contexts/TelemetryContext
 import { useActiveTreeWidgetViewport } from "../../shared/internal/hooks/UseActiveTreeWidgetViewport.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { CategoriesTree } from "./CategoriesTree.js";
-import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonPropsInternal } from "./CategoriesTreeButtons.js";
+import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonProps } from "./CategoriesTreeButtons.js";
 
 import type { JSX, ReactNode } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -113,7 +113,7 @@ function CategoriesTreeComponentImpl({
   treeLabel,
   ...treeProps
 }: CategoriesTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
-  const { buttonProps, onCategoriesFiltered, isLoaded } = useCategoriesTreeButtonPropsInternal({ viewport });
+  const { buttonProps, onCategoriesFiltered, isLoaded } = useCategoriesTreeButtonProps({ viewport });
 
   const buttons: ReactNode = isLoaded
     ? headerButtons
