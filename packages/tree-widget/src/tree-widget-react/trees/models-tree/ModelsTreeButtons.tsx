@@ -17,7 +17,6 @@ import { useFocusedInstancesContext } from "../../shared/contexts/FocusedInstanc
 import { useTranslation } from "../../shared/contexts/LocalizationContext.js";
 import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
 import { useTelemetryContext } from "../../shared/contexts/TelemetryContext.js";
-import { toObservable } from "../../shared/internal/Rxjs.js";
 import { getClassesByPerspective } from "../../shared/internal/Utils.js";
 import { invertAllModels, showAll } from "../../shared/internal/VisibilityUtils.js";
 
@@ -64,6 +63,9 @@ export interface ModelsTreeHeaderButtonProps extends TreeToolbarButtonProps {
  *   <ModelsTree {...treeProps} onModelsFiltered={onModelsFiltered} />
  * </TreeWithHeader>
  * ```
+ *
+ * Returned `isLoaded` tells whether available models have been loaded. Until then, `buttonProps.models` is empty.
+ *
  * **Note:** Requires `TreeWidgetContextProvider` to be present in components tree above.
  *
  * @public
@@ -71,9 +73,10 @@ export interface ModelsTreeHeaderButtonProps extends TreeToolbarButtonProps {
 export function useModelsTreeButtonProps({ imodel, viewport }: { imodel: IModelConnection; viewport: TreeWidgetViewport }): {
   buttonProps: Pick<ModelsTreeHeaderButtonProps, "models" | "viewport">;
   onModelsFiltered: (models: Id64String[] | undefined) => void;
+  isLoaded: boolean;
 } {
   const [filteredModels, setFilteredModels] = useState<Id64String[] | undefined>();
-  const models = useAvailableModels(imodel);
+  const { models, isLoaded } = useAvailableModels(imodel);
   const availableModels = useMemo(() => (!filteredModels ? models : models.filter((model) => filteredModels.includes(model.id))), [models, filteredModels]);
   return {
     buttonProps: {
@@ -81,23 +84,20 @@ export function useModelsTreeButtonProps({ imodel, viewport }: { imodel: IModelC
       viewport,
     },
     onModelsFiltered: setFilteredModels,
+    isLoaded,
   };
 }
 
-function useAvailableModels(imodel: IModelConnection): ModelInfo[] {
-  const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
+function useAvailableModels(imodel: IModelConnection): { models: ModelInfo[]; isLoaded: boolean } {
+  const [availableModels, setAvailableModels] = useState<{ models: ModelInfo[]; isLoaded: boolean }>({ models: [], isLoaded: false });
   const { getSharedIdsProvider } = useSharedTreeContext();
-  const sharedIdsProvider = getSharedIdsProvider({ imodel, elementClassName: getClassesByPerspective("3d").elementClass });
+  const sharedIdsProvider = getSharedIdsProvider({ imodel, elementClassName: getClassesByPerspective("3d").elementClass, perspective: "3d" });
   useEffect(() => {
     const getModels = async () => {
       try {
-        const [allModels, planProjectionModels] = await Promise.all([
-          firstValueFrom(toObservable(sharedIdsProvider.models.getAllModels())),
-          firstValueFrom(toObservable(sharedIdsProvider.models.getPlanProjectionModels())),
-        ]);
-        setAvailableModels([...allModels].map((id) => ({ id, isPlanProjection: planProjectionModels.has(id) })));
+        setAvailableModels({ models: await firstValueFrom(sharedIdsProvider.models.getAllModelsOfPerspective()), isLoaded: true });
       } catch {
-        setAvailableModels([]);
+        setAvailableModels({ models: [], isLoaded: true });
       }
     };
     void getModels();
@@ -117,7 +117,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   const { models, viewport } = props;
   const { onFeatureUsed } = useTelemetryContext();
   const { getSharedIdsProvider, cancelChangesInProgress } = useSharedTreeContext();
-  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByPerspective("3d").elementClass });
+  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByPerspective("3d").elementClass, perspective: "3d" });
   const translate = useTranslation();
 
   const onClick = async () => {
@@ -172,7 +172,7 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
   const { models, viewport } = props;
   const { onFeatureUsed } = useTelemetryContext();
   const { cancelChangesInProgress, getSharedIdsProvider } = useSharedTreeContext();
-  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByPerspective("3d").elementClass });
+  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByPerspective("3d").elementClass, perspective: "3d" });
   const translate = useTranslation();
   const onClick = async () => {
     // cspell:disable-next-line
@@ -290,7 +290,7 @@ async function getCategoryInfos({
   cancel: Observable<void>;
 }): Promise<CategoryInfosMap | undefined> {
   return firstValueFrom(
-    toObservable(sharedIdsProvider.categories.getAllCategoriesOfElements()).pipe(
+    sharedIdsProvider.categories.getAllCategoriesOfPerspective().pipe(
       mergeAll(),
       mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), subCategories: sharedIdsProvider.subCategories.getSubCategories({ categoryId }) })),
       reduce((acc: CategoryInfosMap, { categoryId, subCategories }) => {

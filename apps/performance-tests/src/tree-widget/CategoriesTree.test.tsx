@@ -129,7 +129,7 @@ describe("categories tree", () => {
         viewport,
         ...testData,
       });
-      const sharedIdsProvider = createSharedIdsProvider({ elementClassName: "BisCore.GeometricElement3d", imodelAccess });
+      const sharedIdsProvider = createSharedIdsProvider({ elementClassName: "BisCore.GeometricElement3d", imodelAccess, perspective: "3d" });
       const idsProvider = createCategoriesTreeIdsProvider({ imodelAccess, perspective: "3d", sharedIdsProvider });
       const handler = createCategoriesTreeVisibilityHandler({
         imodelAccess,
@@ -247,6 +247,7 @@ describe("categories tree", () => {
           elementClassName: "BisCore.GeometricElement3d",
           imodelAccess,
           excludedElementClassNames: hierarchyConfig.elements.nodes === "include" ? hierarchyConfig.elements.excludedClasses : [],
+          perspective: "3d",
         });
         const idsProvider = createCategoriesTreeIdsProvider({ imodelAccess, perspective: "3d", sharedIdsProvider });
         const handler = createCategoriesTreeVisibilityHandler({ imodelAccess, idsProvider, sharedIdsProvider, viewport, hierarchyConfig });

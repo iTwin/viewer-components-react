@@ -6,10 +6,8 @@
 import { Fragment } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Skeleton } from "@mui/material";
-import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
 import { TelemetryContextProvider } from "../../shared/contexts/TelemetryContext.js";
 import { useActiveTreeWidgetViewport } from "../../shared/internal/hooks/UseActiveTreeWidgetViewport.js";
-import { getClassesByPerspective } from "../../shared/internal/Utils.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { CategoriesTree } from "./CategoriesTree.js";
 import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonProps } from "./CategoriesTreeButtons.js";
@@ -115,12 +113,7 @@ function CategoriesTreeComponentImpl({
   treeLabel,
   ...treeProps
 }: CategoriesTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
-  const { buttonProps, onCategoriesFiltered } = useCategoriesTreeButtonProps({ viewport });
-  const { getSharedIdsProvider } = useSharedTreeContext();
-  const perspective = viewport.viewType === "2d" ? "2d" : "3d";
-  const isLoaded =
-    buttonProps.categories.length > 0 ||
-    getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByPerspective(perspective).elementClass }).models.state === "loaded";
+  const { buttonProps, onCategoriesFiltered, isLoaded } = useCategoriesTreeButtonProps({ viewport });
 
   const buttons: ReactNode = isLoaded
     ? headerButtons
@@ -130,7 +123,14 @@ function CategoriesTreeComponentImpl({
           <HideAllButton {...buttonProps} key="hide-all-btn" />,
           <InvertAllButton {...buttonProps} key="invert-all-btn" />,
         ]
-    : Array.from({ length: headerButtons?.length ?? 3 }, (_, index) => <Skeleton variant={"rounded"} width={24} height={24} key={index} />);
+    : Array.from({ length: headerButtons?.length ?? 3 }, (_, index) => (
+        <Skeleton
+          variant={"rounded"}
+          width={"var(--stratakit-size-control-field-height-small)"}
+          height={"var(--stratakit-size-control-field-height-small)"}
+          key={index}
+        />
+      ));
 
   return (
     <SelectableTree buttons={buttons}>

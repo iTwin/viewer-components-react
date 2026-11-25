@@ -277,6 +277,7 @@ export function createAccessAndIdsProvider({
     imodelAccess,
     elementClassName: getClassesByPerspective(perspective).elementClass,
     excludedElementClassNames,
+    perspective,
   });
   const idsProvider = createCategoriesTreeIdsProvider({ imodelAccess, perspective, sharedIdsProvider });
 

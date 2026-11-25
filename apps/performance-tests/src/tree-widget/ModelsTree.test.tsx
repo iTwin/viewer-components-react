@@ -146,6 +146,7 @@ describe("models tree", () => {
       const sharedIdsProvider = createSharedIdsProvider({
         elementClassName: defaultModelsTreeHierarchyConfiguration.elements.baseClass,
         imodelAccess,
+        perspective: "3d",
       });
       const idsProvider = createModelsTreeIdsProvider({
         imodelAccess,
@@ -243,6 +244,7 @@ describe("models tree", () => {
       const sharedIdsProvider = createSharedIdsProvider({
         elementClassName: defaultModelsTreeHierarchyConfiguration.elements.baseClass,
         imodelAccess,
+        perspective: "3d",
       });
       const idsProvider = createModelsTreeIdsProvider({
         imodelAccess,
@@ -445,6 +447,7 @@ describe("models tree", () => {
           elementClassName: defaultModelsTreeHierarchyConfiguration.elements.baseClass,
           imodelAccess,
           excludedElementClassNames,
+          perspective: "3d",
         });
         const idsProvider = createModelsTreeIdsProvider({
           imodelAccess,

@@ -328,6 +328,7 @@ function useModelsTreeIdsProviders({
   const sharedIdsProvider = getSharedIdsProvider({
     elementClassName: hierarchyConfig.elements.baseClass,
     excludedElementClassNames: hierarchyConfig.elements.excludedClasses,
+    perspective: "3d",
     imodel,
   });
 

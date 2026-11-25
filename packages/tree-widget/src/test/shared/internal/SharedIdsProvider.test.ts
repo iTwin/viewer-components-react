@@ -4,9 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { firstValueFrom } from "rxjs";
-import { initializeCore, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, terminateCore } from "test-utilities";
+import {
+  initializeCore,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
+  insertPhysicalPartition,
+  insertPhysicalSubModel,
+  insertSpatialCategory,
+  terminateCore,
+} from "test-utilities";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { withEditTxn } from "@itwin/core-backend";
+import { IModel } from "@itwin/core-common";
 import { CLASS_NAMES } from "../../../tree-widget-react/shared/internal/ClassNameDefinitions.js";
 import { createSharedIdsProvider } from "../../../tree-widget-react/shared/internal/idsProviders/SharedIdsProvider.js";
 import { toObservable } from "../../../tree-widget-react/shared/internal/Rxjs.js";
@@ -16,7 +25,7 @@ import { createIModelAccess, createIModelMock } from "../../trees/Common.js";
 import type { IModelConnection } from "@itwin/core-frontend";
 
 function createProvider(imodel: IModelConnection) {
-  return createSharedIdsProvider({ imodelAccess: createIModelAccess(imodel), elementClassName: CLASS_NAMES.GeometricElement3d });
+  return createSharedIdsProvider({ imodelAccess: createIModelAccess(imodel), elementClassName: CLASS_NAMES.GeometricElement3d, perspective: "3d" });
 }
 
 describe("SharedIdsProvider", () => {
@@ -122,6 +131,48 @@ describe("SharedIdsProvider", () => {
       expect(await firstValueFrom(provider.categories.hasParentElements({ categoryId: keys.categoryWithParentElements.id }))).toBe(true);
       expect(await firstValueFrom(provider.categories.hasParentElements({ categoryId: keys.categoryWithoutParentElements.id }))).toBe(false);
       expect(await firstValueFrom(provider.categories.hasParentElements({ categoryId: keys.categoryWithParentElementsInNonVisibleModels.id }))).toBe(false);
+    });
+
+    it("returns all models and categories of perspective until model data is loaded, then only ones with elements", async () => {
+      await using buildIModelResult = await buildIModel(async (imodel) =>
+        withEditTxn(imodel, (txn) => {
+          const model = insertPhysicalModelWithPartition({ txn, codeValue: "model" });
+          const planProjectionPartition = insertPhysicalPartition({ txn, codeValue: "plan projection", parentId: IModel.rootSubjectId });
+          const planProjectionModel = insertPhysicalSubModel({ txn, modeledElementId: planProjectionPartition.id, isPlanProjection: true });
+          const emptyModel = insertPhysicalModelWithPartition({ txn, codeValue: "empty model" });
+          const category = insertSpatialCategory({ txn, codeValue: "category" });
+          const emptyCategory = insertSpatialCategory({ txn, codeValue: "empty category" });
+          insertPhysicalElement({ txn, modelId: model.id, categoryId: category.id });
+          insertPhysicalElement({ txn, modelId: planProjectionModel.id, categoryId: category.id });
+          return { model, planProjectionModel, emptyModel, category, emptyCategory };
+        }),
+      );
+      const { imodelConnection, ...keys } = buildIModelResult;
+      const provider = createProvider(imodelConnection);
+
+      const fallbackModels = await firstValueFrom(provider.models.getAllModelsOfPerspective());
+      expect(fallbackModels).toHaveLength(3);
+      expect(fallbackModels).toEqual(
+        expect.arrayContaining([
+          { id: keys.model.id, isPlanProjection: false },
+          { id: keys.planProjectionModel.id, isPlanProjection: true },
+          { id: keys.emptyModel.id, isPlanProjection: false },
+        ]),
+      );
+      expect([...(await firstValueFrom(provider.categories.getAllCategoriesOfPerspective()))].sort()).toEqual([keys.category.id, keys.emptyCategory.id].sort());
+      expect(provider.models.state).toBe("not-requested");
+
+      await provider.models.preloadData();
+
+      const loadedModels = await firstValueFrom(provider.models.getAllModelsOfPerspective());
+      expect(loadedModels).toHaveLength(2);
+      expect(loadedModels).toEqual(
+        expect.arrayContaining([
+          { id: keys.model.id, isPlanProjection: false },
+          { id: keys.planProjectionModel.id, isPlanProjection: true },
+        ]),
+      );
+      expect([...(await firstValueFrom(provider.categories.getAllCategoriesOfPerspective()))]).toEqual([keys.category.id]);
     });
 
     it("preloads data required to determine whether category contains parent elements", async () => {

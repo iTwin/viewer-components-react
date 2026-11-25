@@ -146,6 +146,7 @@ describe("classifications tree", () => {
           imodelAccess,
           elementClassName: "BisCore.GeometricElement3d",
           excludedElementClassNames: hierarchyConfig.elements.excludedClasses,
+          perspective: "3d",
         });
         const idsProvider = createClassificationsTreeIdsProvider({ imodelAccess, hierarchyConfig });
         const handler = createClassificationsTreeVisibilityHandler({ imodelAccess, idsProvider, sharedIdsProvider, viewport });

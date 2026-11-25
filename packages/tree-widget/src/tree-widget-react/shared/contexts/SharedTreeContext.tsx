@@ -39,14 +39,15 @@ export function SharedTreeContextProvider({ children }: PropsWithChildren) {
   const { getIdsProvider } = useIdsProvider();
   const [cancelChangesInProgress] = useState(() => new Subject<void>());
   const getSharedIdsProvider = useCallback(
-    ({ elementClassName, imodel, excludedElementClassNames }: GetSharedIdsProviderProps) => {
+    ({ elementClassName, imodel, excludedElementClassNames, perspective }: GetSharedIdsProviderProps) => {
       return getIdsProvider({
         imodel,
-        idsProviderKey: `${elementClassName}-${[...(excludedElementClassNames ?? [])].sort().join(",")}-SharedIdsProvider`,
+        idsProviderKey: `${perspective}-${elementClassName}-${[...(excludedElementClassNames ?? [])].sort().join(",")}-SharedIdsProvider`,
         createIdsProvider: () =>
           createSharedIdsProvider({
             elementClassName,
             excludedElementClassNames,
+            perspective,
             imodelAccess: createIModelAccess({ imodel, hierarchyLevelSizeLimit: "unbounded" }),
           }),
       });

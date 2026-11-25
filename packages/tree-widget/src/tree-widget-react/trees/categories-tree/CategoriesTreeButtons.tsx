@@ -3,9 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { defaultIfEmpty, firstValueFrom, forkJoin, from, map, mergeAll, mergeMap, of, reduce, takeUntil, toArray } from "rxjs";
-import { useAsyncValue } from "@itwin/components-react";
 import { IconButton } from "@mui/material";
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
 import visibilityInvertSvg from "@stratakit/icons/visibility-invert.svg";
@@ -15,7 +14,6 @@ import { useTranslation } from "../../shared/contexts/LocalizationContext.js";
 import { useSharedTreeContext } from "../../shared/contexts/SharedTreeContext.js";
 import { useTelemetryContext } from "../../shared/contexts/TelemetryContext.js";
 import { useErrorState } from "../../shared/internal/hooks/UseErrorState.js";
-import { toObservable } from "../../shared/internal/Rxjs.js";
 import { getClassesByPerspective } from "../../shared/internal/Utils.js";
 import { hideAllCategories, invertAllCategories, showAll } from "../../shared/internal/VisibilityUtils.js";
 
@@ -64,18 +62,20 @@ export interface CategoriesTreeHeaderButtonProps extends TreeToolbarButtonProps 
  * </TreeWithHeader>
  * ```
  *
+ * Returned `isLoaded` tells whether available categories and models have been loaded. Until then, `buttonProps.categories` and `buttonProps.models` are empty.
+ *
  * **Note:** Requires `TreeWidgetContextProvider` to be present in components tree above.
  * @public
  */
 export function useCategoriesTreeButtonProps({ viewport }: { viewport: TreeWidgetViewport }): {
   buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport" | "models">;
   onCategoriesFiltered: (props: { categories: CategoryInfo[] | undefined; models?: Id64Array }) => void;
+  isLoaded: boolean;
 } {
   const [filteredCategories, setFilteredCategories] = useState<CategoryInfo[] | undefined>();
   const [filteredModels, setFilteredModels] = useState<Id64Array | undefined>();
 
-  const categories = useCategories(viewport);
-  const models = useAvailableModels(viewport);
+  const { categories, models, isLoaded } = useCategoriesAndModels(viewport);
 
   return {
     buttonProps: {
@@ -87,6 +87,7 @@ export function useCategoriesTreeButtonProps({ viewport }: { viewport: TreeWidge
       setFilteredCategories(props.categories);
       setFilteredModels(props.models);
     }, []),
+    isLoaded,
   };
 }
 
@@ -99,7 +100,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   const { onFeatureUsed } = useTelemetryContext();
   const { cancelChangesInProgress, getSharedIdsProvider } = useSharedTreeContext();
   const perspective = viewport.viewType === "2d" ? "2d" : "3d";
-  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByPerspective(perspective).elementClass });
+  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByPerspective(perspective).elementClass, perspective });
   const translate = useTranslation();
 
   const onClick = async () => {
@@ -133,7 +134,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
   const { onFeatureUsed } = useTelemetryContext();
   const { cancelChangesInProgress, getSharedIdsProvider } = useSharedTreeContext();
   const perspective = viewport.viewType === "2d" ? "2d" : "3d";
-  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByPerspective(perspective).elementClass });
+  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByPerspective(perspective).elementClass, perspective });
   const translate = useTranslation();
 
   const onClick = async () => {
@@ -165,7 +166,7 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   const { onFeatureUsed } = useTelemetryContext();
   const { cancelChangesInProgress, getSharedIdsProvider } = useSharedTreeContext();
   const perspective = viewport.viewType === "2d" ? "2d" : "3d";
-  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByPerspective(perspective).elementClass });
+  const sharedIdsProvider = getSharedIdsProvider({ imodel: viewport.iModel, elementClassName: getClassesByPerspective(perspective).elementClass, perspective });
   const translate = useTranslation();
 
   const onClick = async () => {
@@ -193,68 +194,61 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   );
 }
 
-const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
-
-function useCategories(viewport: TreeWidgetViewport) {
-  const setErrorState = useErrorState();
-  const { getSharedIdsProvider } = useSharedTreeContext();
-  const sharedIdsProvider =
-    viewport.viewType !== "other"
-      ? getSharedIdsProvider({
-          imodel: viewport.iModel,
-          elementClassName: getClassesByPerspective(viewport.viewType).elementClass,
-        })
-      : undefined;
-  // eslint-disable-next-line react-hooks/use-memo
-  const categoriesPromise = useMemo(async () => {
-    try {
-      if (sharedIdsProvider) {
-        return await firstValueFrom(
-          toObservable(sharedIdsProvider.categories.getAllCategoriesOfElements()).pipe(
-            mergeAll(),
-            mergeMap((categoryId) => forkJoin({ categoryId: of(categoryId), subCategories: sharedIdsProvider.subCategories.getSubCategories({ categoryId }) })),
-            toArray(),
-          ),
-        );
-      }
-      return [];
-    } catch (error) {
-      setErrorState(error);
-      return [];
-    }
-  }, [sharedIdsProvider, setErrorState]);
-  return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;
+interface CategoriesAndModels {
+  categories: CategoryInfo[];
+  models: Array<ModelId>;
+  isLoaded: boolean;
 }
 
-function useAvailableModels(viewport: TreeWidgetViewport): Array<ModelId> {
-  const [availableModels, setAvailableModels] = useState<Array<ModelId>>([]);
+const EMPTY_CATEGORIES_AND_MODELS: CategoriesAndModels = { categories: [], models: [], isLoaded: true };
+
+/** Loads categories and models together, so that buttons never get categories without models they're in. */
+function useCategoriesAndModels(viewport: TreeWidgetViewport): CategoriesAndModels {
+  const [categoriesAndModels, setCategoriesAndModels] = useState<CategoriesAndModels>({ categories: [], models: [], isLoaded: false });
   const setErrorState = useErrorState();
-  const imodel = viewport.iModel;
   const { getSharedIdsProvider } = useSharedTreeContext();
   const sharedIdsProvider =
     viewport.viewType !== "other"
       ? getSharedIdsProvider({
           imodel: viewport.iModel,
+          perspective: viewport.viewType,
           elementClassName: getClassesByPerspective(viewport.viewType).elementClass,
         })
       : undefined;
   useEffect(() => {
-    const getModels = async () => {
+    if (!sharedIdsProvider) {
+      return;
+    }
+    let disposed = false;
+    const load = async () => {
       try {
-        if (sharedIdsProvider) {
-          const models = await firstValueFrom(toObservable(sharedIdsProvider.models.getAllModels()));
-          setAvailableModels([...models]);
-        }
-        return;
+        const result = await firstValueFrom(
+          forkJoin({
+            categories: sharedIdsProvider.categories.getAllCategoriesOfPerspective().pipe(
+              mergeAll(),
+              mergeMap((categoryId) =>
+                forkJoin({ categoryId: of(categoryId), subCategories: sharedIdsProvider.subCategories.getSubCategories({ categoryId }) }),
+              ),
+              toArray(),
+            ),
+            models: sharedIdsProvider.models.getAllModelsOfPerspective().pipe(map((models) => models.map(({ id }) => id))),
+          }),
+        );
+        !disposed && setCategoriesAndModels({ ...result, isLoaded: true });
       } catch (error) {
-        setErrorState(error);
-        setAvailableModels([]);
+        if (!disposed) {
+          setErrorState(error);
+          setCategoriesAndModels(EMPTY_CATEGORIES_AND_MODELS);
+        }
       }
     };
-    void getModels();
-  }, [imodel, sharedIdsProvider, setErrorState]);
+    void load();
+    return () => {
+      disposed = true;
+    };
+  }, [sharedIdsProvider, setErrorState]);
 
-  return availableModels;
+  return sharedIdsProvider ? categoriesAndModels : EMPTY_CATEGORIES_AND_MODELS;
 }
 
 async function getCategoryInfos({

@@ -11,6 +11,7 @@ import { ChildrenTree, extendObject, getOrCreate } from "../Utils.js";
 import { CategoriesContainingParentElementsProvider } from "./CategoriesContainingParentElementsProvider.js";
 import { ChildElementsProvider } from "./ChildElementsProvider.js";
 import { DescendantsCountProvider } from "./DescendantsCountProvider.js";
+import { ModelsAndCategoriesProvider } from "./ModelsAndCategoriesProvider.js";
 import { loadSubModeledElements } from "./SubModeledElementsProvider.js";
 
 import type { Observable } from "rxjs";
@@ -20,6 +21,7 @@ import type { EC, ECSchemaProvider, Props, Subscribable } from "@itwin/presentat
 import type { SharedIdsProvider as TreeDefinitionsSharedIdsProvider } from "@itwin/presentation-tree-definitions";
 import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../Types.js";
 import type { ParentElementsPath } from "../Utils.js";
+import type { ModelInfo } from "./ModelsAndCategoriesProvider.js";
 import type { SubModeledElementsData } from "./SubModeledElementsProvider.js";
 
 type ElementModelCategoriesData = ReturnType<TreeDefinitionsSharedIdsProvider["models"]["getData"]> extends Subscribable<infer TData> ? TData : never;
@@ -39,6 +41,8 @@ export interface SharedIdsProviderProps {
   imodelAccess: ECSchemaProvider & LimitingECSqlQueryExecutor;
   elementClassName: EC.FullClassNameDotNotation;
   excludedElementClassNames?: ReadonlyArray<EC.FullClassNameDotNotation>;
+  /** Perspective of models and categories returned by `models.getAllModelsOfPerspective` and `categories.getAllCategoriesOfPerspective`. */
+  perspective: "2d" | "3d";
 }
 
 type TreeDefinitionsSharedIdsProviderBase = TreeDefinitionsSharedIdsProvider<ElementModelCategoriesData, SubModeledElementsData>;
@@ -55,6 +59,13 @@ export interface SharedIdsProvider extends TreeDefinitionsSharedIdsProviderBase 
     preloadData(): Promise<void>;
     /** Emits a stream of models (excluding sub-models) that contain top-most elements of the specified category. */
     getCategoryTopMostElementModels(props: { categoryId: Id64String }): Observable<ModelId>;
+    /**
+     * Returns non-private and non-template models of the provider's perspective (`2d` or `3d`).
+     *
+     * When model data is loaded, returns only models that contain elements. Otherwise, returns all models (including ones
+     * without elements) using a cheap query that doesn't trigger loading model data.
+     */
+    getAllModelsOfPerspective(): Observable<Array<ModelInfo>>;
   };
   readonly subModeledElements: TreeDefinitionsSharedIdsProviderBase["subModeledElements"] & {
     /** Starts loading sub-modeled elements data, if it's not loaded yet. */
@@ -77,6 +88,13 @@ export interface SharedIdsProvider extends TreeDefinitionsSharedIdsProviderBase 
     hasParentElements(props: { categoryId: Id64String }): Observable<boolean>;
     /** Returns categories of top-most elements, including categories of elements of excluded classes. */
     getAllCategoriesOfTopMostElements(): Observable<ReadonlySet<CategoryId>>;
+    /**
+     * Returns categories of the provider's perspective (`2d` or `3d`).
+     *
+     * When category data is loaded, returns only categories that contain elements. Otherwise, returns all categories (including
+     * ones without elements) using a cheap query that doesn't trigger loading category data.
+     */
+    getAllCategoriesOfPerspective(): Observable<ReadonlySet<CategoryId>>;
   };
   readonly subCategories: TreeDefinitionsSharedIdsProviderBase["subCategories"] & {
     /** Returns sub-categories of the specified category. */
@@ -96,10 +114,11 @@ export interface SharedIdsProvider extends TreeDefinitionsSharedIdsProviderBase 
  * @internal
  */
 export function createSharedIdsProvider(props: SharedIdsProviderProps): SharedIdsProvider {
-  const { imodelAccess, elementClassName, excludedElementClassNames } = props;
+  const { imodelAccess, elementClassName, excludedElementClassNames, perspective } = props;
   const componentId = Guid.createValue();
   const descendantsCountProvider = new DescendantsCountProvider({ elementClassName, componentId, queryExecutor: imodelAccess });
   const childElementsProvider = new ChildElementsProvider({ elementClassName, componentId, queryExecutor: imodelAccess });
+  const modelsAndCategoriesProvider = new ModelsAndCategoriesProvider({ componentId, queryExecutor: imodelAccess, perspective });
   const categoriesContainingParentElementsProvider = new CategoriesContainingParentElementsProvider({
     elementClassName,
     componentId,
@@ -295,6 +314,15 @@ export function createSharedIdsProvider(props: SharedIdsProviderProps): SharedId
             } catch {}
           },
           getCategoryTopMostElementModels,
+          getAllModelsOfPerspective: (): Observable<Array<ModelInfo>> => {
+            if (models.state !== "loaded") {
+              return modelsAndCategoriesProvider.getAllModels();
+            }
+            return forkJoin({
+              allModels: toObservable(models.getAllModels()),
+              planProjectionModels: toObservable(models.getPlanProjectionModels()),
+            }).pipe(map(({ allModels, planProjectionModels }) => [...allModels].map((id) => ({ id, isPlanProjection: planProjectionModels.has(id) }))));
+          },
         },
       }),
       subModeledElements: extendObject({
@@ -320,6 +348,12 @@ export function createSharedIdsProvider(props: SharedIdsProviderProps): SharedId
             getCategoriesOfElementsInfo().pipe(map(({ allCategoriesOfTopMostElements }) => allCategoriesOfTopMostElements)),
           hasParentElements: ({ categoryId }: { categoryId: Id64String }) =>
             categoriesContainingParentElementsProvider.categoryHasParentElements({ categoryId }),
+          getAllCategoriesOfPerspective: (): Observable<ReadonlySet<CategoryId>> => {
+            if (categories.state !== "loaded") {
+              return modelsAndCategoriesProvider.getAllCategories();
+            }
+            return toObservable(categories.getAllCategoriesOfElements());
+          },
         },
       }),
       subCategories: extendObject({

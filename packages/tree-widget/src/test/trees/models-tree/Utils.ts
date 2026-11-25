@@ -60,6 +60,7 @@ export function createModelsTreeProvider({
     imodelAccess: createdImodelAccess,
     elementClassName: config.elements.baseClass,
     excludedElementClassNames: config.elements.excludedClasses,
+    perspective: "3d",
   });
   const createdIdsProvider =
     idsProvider ??
@@ -328,6 +329,7 @@ export function createAccessAndIdsProvider({
     imodelAccess,
     elementClassName: mergedConfig.elements.baseClass,
     excludedElementClassNames: mergedConfig.elements.excludedClasses,
+    perspective: "3d",
   });
   const idsProvider = createModelsTreeIdsProvider({
     imodelAccess,

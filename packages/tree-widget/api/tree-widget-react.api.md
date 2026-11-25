@@ -766,6 +766,7 @@ export function useCategoriesTreeButtonProps(input: {
         categories: CategoryInfo[] | undefined;
         models?: Id64Array;
     }) => void;
+    isLoaded: boolean;
 };
 
 // @beta (undocumented)
@@ -864,6 +865,7 @@ export function useModelsTreeButtonProps(input: {
 }): {
     buttonProps: Pick<ModelsTreeHeaderButtonProps, "models" | "viewport">;
     onModelsFiltered: (models: Id64String[] | undefined) => void;
+    isLoaded: boolean;
 };
 
 // @beta (undocumented)

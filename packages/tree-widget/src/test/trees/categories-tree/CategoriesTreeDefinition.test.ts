@@ -1499,7 +1499,11 @@ describe("Categories tree", () => {
           ].forEach(({ queryIdentifier, description }) => {
             it(`doesn't throw on ecsql query interrupt in ${description}`, async () => {
               const imodelAccess = createIModelAccess(imodelConnection);
-              const sharedIdsProvider = createSharedIdsProvider({ imodelAccess, elementClassName: getClassesByPerspective(perspective).elementClass });
+              const sharedIdsProvider = createSharedIdsProvider({
+                imodelAccess,
+                elementClassName: getClassesByPerspective(perspective).elementClass,
+                perspective,
+              });
               const idsProvider = createCategoriesTreeIdsProvider({ imodelAccess, perspective, sharedIdsProvider });
               const iter = CategoriesTreeDefinition.createInstanceKeyPaths({
                 imodelAccess,
@@ -1545,6 +1549,7 @@ function createCategoryTreeProvider(
     imodelAccess,
     elementClassName: getClassesByPerspective(perspective).elementClass,
     excludedElementClassNames,
+    perspective,
   });
   const idsProvider = createCategoriesTreeIdsProvider({ imodelAccess, perspective, sharedIdsProvider });
   const hierarchyProvider = createIModelHierarchyProvider({

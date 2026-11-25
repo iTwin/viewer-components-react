@@ -299,6 +299,7 @@ export function getClassificationsTreeIdsProviders({
       sharedIdsProvider: getSharedIdsProvider({
         elementClassName: getClassesByPerspective("3d").elementClass,
         excludedElementClassNames: hierarchyConfig.elements?.excludedClasses,
+        perspective: "3d",
         imodel,
       }),
     }),

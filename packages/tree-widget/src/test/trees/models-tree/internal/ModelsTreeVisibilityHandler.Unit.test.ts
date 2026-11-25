@@ -45,6 +45,7 @@ describe("ModelsTreeVisibilityHandler", () => {
     const sharedIdsProvider = createSharedIdsProvider({
       imodelAccess,
       elementClassName: resolvedHierarchyConfig.elements.baseClass,
+      perspective: "3d",
     });
     const idsProvider = createModelsTreeIdsProvider({
       imodelAccess,

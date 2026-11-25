@@ -260,6 +260,7 @@ function useCategoriesTreeIdsProviders({
   const sharedIdsProvider = getSharedIdsProvider({
     elementClassName: getClassesByPerspective(perspective).elementClass,
     excludedElementClassNames,
+    perspective,
     imodel,
   });
   const categoriesTreeIdsProvider = getIdsProvider({

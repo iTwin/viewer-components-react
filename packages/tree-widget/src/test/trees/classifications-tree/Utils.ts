@@ -185,6 +185,7 @@ export function createAccessAndIdsProvider({
     imodelAccess,
     elementClassName: CLASS_NAMES.GeometricElement3d,
     excludedElementClassNames: hierarchyConfig.elements?.excludedClasses,
+    perspective: "3d",
   });
   const idsProvider = createClassificationsTreeIdsProvider({
     imodelAccess,
