@@ -40,7 +40,7 @@
     "test": "mocha \"./lib/cjs/test/**/*.test.js\""
   },
   "dependencies": {
-    "i18next": "^10.2.2"
+    "i18next": "^26.3.4"
   },
   "devDependencies": {
     "@itwin/appui-abstract": "^5.0.0",
