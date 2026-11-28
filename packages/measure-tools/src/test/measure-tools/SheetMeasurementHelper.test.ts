@@ -45,6 +45,7 @@ function stubPickedDrawingId(modelId?: string) {
 
 function stubDrawingCache(drawings: SheetMeasurementHelper.DrawingTypeData[], profileDrawingHasTransform = true) {
   vi.spyOn(DrawingDataCache, "getInstance").mockReturnValue({
+    getSheetDrawingDataForViewport: () => drawings,
     querySheetDrawingData: async () => drawings,
     querySpatialInfo: async (_imodel: IModelConnection, drawing: SheetMeasurementHelper.DrawingTypeData) => {
       const isProfileWithTransform = drawing.id === profileDrawing.id && profileDrawingHasTransform;
@@ -156,6 +157,76 @@ describe("SheetMeasurementHelper.getDrawingMetadata", () => {
 
     assert.strictEqual(metadata?.drawingId, profileDrawing.id);
     assert.isUndefined(metadata?.sheetToProfileTransform);
+  });
+});
+
+describe("SheetMeasurementHelper.isCompatibleDrawingAtPoint", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("applies included and excluded drawing type constraints", () => {
+    const viewport = {} as ScreenViewport;
+    const point = Point3d.create(0.5, 0.5);
+    stubDrawingCache([planDrawing]);
+
+    assert.isTrue(SheetMeasurementHelper.isCompatibleDrawingAtPoint(viewport, point, {
+      included: [],
+      excluded: [],
+    }));
+    assert.isTrue(SheetMeasurementHelper.isCompatibleDrawingAtPoint(viewport, point, {
+      included: [SheetMeasurementHelper.DrawingTypeEnum.Plan],
+      excluded: [],
+    }));
+    assert.isFalse(SheetMeasurementHelper.isCompatibleDrawingAtPoint(viewport, point, {
+      included: [SheetMeasurementHelper.DrawingTypeEnum.ProfileOrElevation],
+      excluded: [],
+    }));
+    assert.isFalse(SheetMeasurementHelper.isCompatibleDrawingAtPoint(viewport, point, {
+      included: [],
+      excluded: [SheetMeasurementHelper.DrawingTypeEnum.Plan],
+    }));
+    assert.isTrue(SheetMeasurementHelper.isCompatibleDrawingAtPoint(viewport, Point3d.create(5, 5), {
+      included: [SheetMeasurementHelper.DrawingTypeEnum.ProfileOrElevation],
+      excluded: [],
+    }));
+
+    stubDrawingCache([{ ...planDrawing, type: undefined }]);
+    assert.isTrue(SheetMeasurementHelper.isCompatibleDrawingAtPoint(viewport, point, {
+      included: [SheetMeasurementHelper.DrawingTypeEnum.ProfileOrElevation],
+      excluded: [],
+    }));
+  });
+
+  it("preserves the deprecated allow-list helper semantics", () => {
+    const viewport = {} as ScreenViewport;
+    stubDrawingCache([planDrawing]);
+
+    assert.isTrue(SheetMeasurementHelper.checkIfAllowedDrawingType(
+      viewport,
+      Point3d.create(0.5, 0.5),
+      [SheetMeasurementHelper.DrawingTypeEnum.Plan]
+    ));
+    assert.isFalse(SheetMeasurementHelper.checkIfAllowedDrawingType(
+      viewport,
+      Point3d.create(0.5, 0.5),
+      []
+    ));
+  });
+
+  it("allows a matching included type when drawings overlap", () => {
+    const viewport = {} as ScreenViewport;
+    const overlappingPlan = { ...planDrawing, bBoxLow: { x: 0, y: 0 } };
+    stubDrawingCache([overlappingPlan, profileDrawing]);
+
+    assert.isTrue(SheetMeasurementHelper.isCompatibleDrawingAtPoint(viewport, pointInsideBothDrawings, {
+      included: [SheetMeasurementHelper.DrawingTypeEnum.ProfileOrElevation],
+      excluded: [],
+    }));
+    assert.isFalse(SheetMeasurementHelper.isCompatibleDrawingAtPoint(viewport, pointInsideBothDrawings, {
+      included: [SheetMeasurementHelper.DrawingTypeEnum.Plan],
+      excluded: [SheetMeasurementHelper.DrawingTypeEnum.ProfileOrElevation],
+    }));
   });
 });
 
