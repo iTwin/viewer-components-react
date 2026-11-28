@@ -25,7 +25,10 @@ vi.mock("@dnd-kit/react", async () => {
 
   return {
     DragDropProvider: (props: any) => {
-      dndKitMock.dragDropProviderProps = props;
+      // React DEV calls components without props to build component stacks for warnings; ignore those calls.
+      if (props) {
+        dndKitMock.dragDropProviderProps = props;
+      }
       return React.createElement("div", { "data-testid": "drag-drop-provider" }, props.children);
     },
     useDroppable: () => ({
@@ -106,8 +109,7 @@ describe("MapLayerManager drag and drop", () => {
     } as any;
   }
 
-  // TODO re-enable with https://github.com/iTwin/viewer-components-react/issues/1796
-  it.skip("restores the drag-start layer order when the pointer leaves all droppables", async () => {
+  it("restores the drag-start layer order when the pointer leaves all droppables", async () => {
     await renderMapLayerManager(["Background"], ["Overlay"]);
 
     const draggedId = `${backgroundMapLayersId}:Background`;
